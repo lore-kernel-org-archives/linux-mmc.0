@@ -1,86 +1,70 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [RFC PATCH v2 4/4] mmc: dw_mmc-rockchip: disable biu clk and genpd
- if possible
-Date: Fri, 07 Oct 2016 13:15:55 +0900
-Message-ID: <b9180674-648a-d2d1-0221-cec90b73adab@samsung.com>
-References: <1475225317-2815-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20160930084711epcas1p39c48a870457a6f9985574963ae683354@epcas1p3.samsung.com>
- <1475225317-2815-5-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-reply-to: <1475225317-2815-5-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci: put together into one condition checking
+Date: Fri, 07 Oct 2016 14:08:43 +0900
+Message-ID: <1475816923-24532-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:60925 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751627AbcJGFIv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2016 01:08:51 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OEN01JE4VMODQ20@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 07 Oct 2016 14:08:48 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 09/30/2016 05:48 PM, Shawn Lin wrote:
-> We could disable biu clk and power-off genpd if gpio
-> card detect available.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> ---
-> 
->  drivers/mmc/host/dw_mmc-rockchip.c | 18 +++++++++++++++++-
->  1 file changed, 17 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 3ad041c..e7b3b6d 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -13,6 +13,7 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/dw_mmc.h>
->  #include <linux/of_address.h>
-> +#include <linux/mmc/slot-gpio.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/slab.h>
->  
-> @@ -366,14 +367,29 @@ static int dw_mci_rockchip_remove(struct platform_device *pdev)
->  static int dw_mci_rockchip_runtime_suspend(struct device *dev)
->  {
->  	struct dw_mci *host = dev_get_drvdata(dev);
-> +	int ret;
->  
-> -	return dw_mci_runtime_suspend(host);
-> +	ret = dw_mci_runtime_suspend(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (mmc_can_gpio_cd(host->slot[0]->mmc)) {
+value of ios->timing is not related with SDCHI v3.0.
+If Controller version is v3.0, SDHCI_QUIRK_NO_HISPD_BIT is meaningless.
+To prevent the setting wrong bit moves into one codntion checking.
+(e.g sdhci-s3c doesn't use SDHCI_CTRL_HISPD bit, instead using this bit as
+ other purpose.)
 
-Can use cur_slot instead of slot[0]? And doesn't need to check "host->slot[]" or "host->cur_slot"?
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/sdhci.c | 19 ++++++++-----------
+ 1 file changed, 8 insertions(+), 11 deletions(-)
 
-Best Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4805566..f854c66 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1619,7 +1619,14 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 
+ 	if ((ios->timing == MMC_TIMING_SD_HS ||
+-	     ios->timing == MMC_TIMING_MMC_HS)
++	     ios->timing == MMC_TIMING_MMC_HS ||
++	     ios->timing == MMC_TIMING_MMC_HS400 ||
++	     ios->timing == MMC_TIMING_MMC_HS200 ||
++	     ios->timing == MMC_TIMING_MMC_DDR52 ||
++	     ios->timing == MMC_TIMING_UHS_SDR50 ||
++	     ios->timing == MMC_TIMING_UHS_SDR104 ||
++	     ios->timing == MMC_TIMING_UHS_DDR50 ||
++	     ios->timing == MMC_TIMING_UHS_SDR25)
+ 	    && !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+ 		ctrl |= SDHCI_CTRL_HISPD;
+ 	else
+@@ -1628,16 +1635,6 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (host->version >= SDHCI_SPEC_300) {
+ 		u16 clk, ctrl_2;
+ 
+-		/* In case of UHS-I modes, set High Speed Enable */
+-		if ((ios->timing == MMC_TIMING_MMC_HS400) ||
+-		    (ios->timing == MMC_TIMING_MMC_HS200) ||
+-		    (ios->timing == MMC_TIMING_MMC_DDR52) ||
+-		    (ios->timing == MMC_TIMING_UHS_SDR50) ||
+-		    (ios->timing == MMC_TIMING_UHS_SDR104) ||
+-		    (ios->timing == MMC_TIMING_UHS_DDR50) ||
+-		    (ios->timing == MMC_TIMING_UHS_SDR25))
+-			ctrl |= SDHCI_CTRL_HISPD;
+-
+ 		if (!host->preset_enabled) {
+ 			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 			/*
+-- 
+1.9.1
 
-> +		clk_disable_unprepare(host->biu_clk);
-> +		pm_runtime_put(dev);
-> +	}
-> +
-> +	return 0;
->  }
->  
->  static int dw_mci_rockchip_runtime_resume(struct device *dev)
->  {
->  	struct dw_mci *host = dev_get_drvdata(dev);
->  
-> +	if (mmc_can_gpio_cd(host->slot[0]->mmc)) {
-> +		pm_runtime_get_sync(dev);
-> +		clk_prepare_enable(host->biu_clk);
-> +	}
-> +
->  	return dw_mci_runtime_resume(host);
->  }
->  #endif /* CONFIG_PM */
-> 
