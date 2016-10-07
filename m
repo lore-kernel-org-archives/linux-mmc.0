@@ -1,113 +1,135 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [RFC PATCH v2 1/4] mmc: dw_mmc: add runtime PM callback
-Date: Fri, 7 Oct 2016 17:19:48 +0800
-Message-ID: <90e9ac7c-9ced-1655-5310-78ee190c51cf@rock-chips.com>
-References: <1475225317-2815-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20160930084627epcas1p182ccca03bf63d4cd072e061ca5800510@epcas1p1.samsung.com>
- <1475225317-2815-2-git-send-email-shawn.lin@rock-chips.com>
- <2dd84d82-a14b-7d5e-80f0-89e6c0b1aaae@samsung.com>
+From: Ravikumar <a0131654@ti.com>
+Subject: Re: Enabling MMC BKOPs in kernel based on host caps
+Date: Fri, 7 Oct 2016 19:35:52 +0530
+Message-ID: <29d94a8f-935e-b313-a562-dc15909b78d1@ti.com>
+References: <1475491384-15818-1-git-send-email-rk@ti.com>
+ <74289549-5576-c4fc-5270-8820c8654bc5@rock-chips.com>
+ <dfcdad0d-0780-0641-cb0a-46557334fa16@ti.com>
+ <4B194B80-8DE7-4296-914E-00FC1C0A4D66@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <2dd84d82-a14b-7d5e-80f0-89e6c0b1aaae-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([198.47.19.12]:47053 "EHLO arroyo.ext.ti.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755194AbcJGOFH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 7 Oct 2016 10:05:07 -0400
+In-Reply-To: <4B194B80-8DE7-4296-914E-00FC1C0A4D66@sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-5ZyoIDIwMTYvMTAvNyAxMjoxMiwgSmFlaG9vbiBDaHVuZyDlhpnpgZM6Cj4gSGkgU2hhd24sCj4K
-PiBPbiAwOS8zMC8yMDE2IDA1OjQ4IFBNLCBTaGF3biBMaW4gd3JvdGU6Cj4+IFRoaXMgcGF0Y2gg
-YWRkIGR3X21jaV9ydW50aW1lX3N1c3BlbmQvcmVzdW1lIGludGVyZmFjZXMKPj4gYW5kIGV4cG9z
-ZSBpdCB0byBkd19tY2kgdmFyaWFudCBkcml2ZXIgdG8gc3VwcG9ydCBydW50aW1lCj4+IFBNLgo+
-Pgo+PiBTaWduZWQtb2ZmLWJ5OiBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4K
-Pj4KPj4gLS0tCj4+Cj4+ICBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jIHwgNjAgKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0KPj4gIGRyaXZlcnMvbW1jL2hv
-c3QvZHdfbW1jLmggfCAgNCArKystCj4+ICAyIGZpbGVzIGNoYW5nZWQsIDYxIGluc2VydGlvbnMo
-KyksIDMgZGVsZXRpb25zKC0pCj4+Cj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2R3
-X21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYwo+PiBpbmRleCA0ZmNiYzQwLi41NGI4
-NjBlIDEwMDY0NAo+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jCj4+ICsrKyBiL2Ry
-aXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMKPj4gQEAgLTMyNjYsNyArMzI2Niw3IEBAIEVYUE9SVF9T
-WU1CT0woZHdfbWNpX3JlbW92ZSk7Cj4+Cj4+Cj4+Cj4+IC0jaWZkZWYgQ09ORklHX1BNX1NMRUVQ
-Cj4+ICsjaWZkZWYgQ09ORklHX1BNCj4+ICAvKgo+PiAgICogVE9ETzogd2Ugc2hvdWxkIHByb2Jh
-Ymx5IGRpc2FibGUgdGhlIGNsb2NrIHRvIHRoZSBjYXJkIGluIHRoZSBzdXNwZW5kIHBhdGguCj4+
-ICAgKi8KPj4gQEAgLTMzMjQsNyArMzMyNCw2MyBAQCBpbnQgZHdfbWNpX3Jlc3VtZShzdHJ1Y3Qg
-ZHdfbWNpICpob3N0KQo+PiAgCXJldHVybiAwOwo+PiAgfQo+PiAgRVhQT1JUX1NZTUJPTChkd19t
-Y2lfcmVzdW1lKTsKPj4gLSNlbmRpZiAvKiBDT05GSUdfUE1fU0xFRVAgKi8KPj4gKwo+PiAraW50
-IGR3X21jaV9ydW50aW1lX3N1c3BlbmQoc3RydWN0IGR3X21jaSAqaG9zdCkKPj4gK3sKPj4gKwlw
-cmludGsoImR3X21jaV9ydW50aW1lX3N1c3BlbmRcbiIpOwo+Cj4gTWF5YmUgSSB0aGluayB5b3Ug
-d2lsbCByZW1vdmUgdGhpcy4uaWYgeW91IHNlbmQgdGhlIHBhdGNoLCBub3QgUkZDLgoKeWVwLCBp
-dCBqdXN0IGZvciBtZSB0byBwcmludCBpbmZvIGZvciB0ZXN0aW5nIHRoZSBycG0gZ292ZXJuZXIu
-Ckkgd2lsbCByZW1vdmUgdGhpcyB3aGVuIHNlbmRpbmcgbm9uLVJGQyBvbmUuCgo+Cj4+ICsKPj4g
-KwlpZiAoaG9zdC0+dXNlX2RtYSAmJiBob3N0LT5kbWFfb3BzLT5leGl0KQo+PiArCQlob3N0LT5k
-bWFfb3BzLT5leGl0KGhvc3QpOwo+Cj4gQ2FuIGp1c3QgY2FsbCBkd19tY2lfc3VzcGVuZCgpCgpJ
-ZiB3ZSBkZXBsb3kgcnBtIHByb3Blcmx5LCB3ZSBkb24ndCBuZWVkIHN5c3RlbSBQTSBhdCBhbGwu
-LgoKVG8gYmUgZnJhbmssIEkgd2FzIHdhbm5hIHJlbW92ZSBkd19tY2lfc3VzcGVuZC9yZXN1bWUg
-cGFpcnMsCmFuZCBvbmx5IGxlYXZlIHRoZSBydW50aW1lIHBhaXJzIGhlcmUuIEFzIHlvdSBjb3Vs
-ZCBzZWUgdGhhdApydW50aW1lIFBNIGFuZCBzeXN0ZW0gUE0gZG9lcyB0aGUgc2FtZSB0aGluZywg
-c28gcGVyc29uYWxseQpJIHJlYWxpemUgd2Ugc2hvdWxkIGhlbHAgZHdfbW1jIHZhcmlhbnQgZHJp
-dmVycyBtaWdyYXRlIHRvIHVzZQpydW50aW1lIFBNLiBUaGF0IGlzIHdoYXQgSSBkaWQgZm9yIGR3
-X21tYy1yb2NrY2hpcC4gSWYgd2UgYXJlCm5vdCBzdXJlIHNob3VsZCB3ZSBlbmFibGUgcnBtIGZv
-ciBpLmUuLCBleHlub3MsIG9yIGszLCB3ZSBkb24ndAphZGQgcG1fcnVudGltZV8qIGZvciB0aGVt
-IGZvciB0aGUgZmlyc3Qgc3RlcCBhbmQgbGVhdmUgaXQgdG8KdGhlIG93bmVycy91c2VycyB0byBt
-YWtlIHRoZSBkZWNpc2lvbi4gVGhlIGZvbGxvd2luZyBjb2RlIHNob3VsZApiZSBlbm91Z2ggdG8g
-aGVscCB3ZSBhY2hpZXZlIHRoZSBmaXJzdCBzdGVwLgoKc3RhdGljIGNvbnN0IHN0cnVjdCBkZXZf
-cG1fb3BzIGR3X21jaV9YWFhYWFhfZGV2X3BtX29wcyA9IHsKCVNFVF9TWVNURU1fU0xFRVBfUE1f
-T1BTKHBtX3J1bnRpbWVfZm9yY2Vfc3VzcGVuZCwKCQkJCXBtX3J1bnRpbWVfZm9yY2VfcmVzdW1l
-KQoJU0VUX1JVTlRJTUVfUE1fT1BTKGR3X21jaV9ydW50aW1lX3N1c3BlbmQsCgkJCSAgIGR3X21j
-aV9ydW50aW1lX3Jlc3VtZSwKCQkJICAgTlVMTCkKfTsKCklmIHRoZXJlIGFyZSBzb21lIHNwZWNp
-YWwgb3BzIGZvciBzeXN0ZW0gUE0gbGlrZSBleHlub3MsIHdlIGNvdWxkIHdyYXAKbmV3IGR3X21j
-aV9leHlub3NfcnVudGltZV9yZXN1bWUgdGhlcmUuLgoKVGhlIHNhbWUgZm9yIGR3X21jaV9yZXN1
-bWUuCgpXaGF0J3MgeW91ciBvcGluaW9uPyAgU2VlbXMgVWxmIHdhcyB0b28gYnVzeSB0byBtYWtl
-IGNvbW1lbnRzCmhlcmUuIEJ1dCBJIGJlbGlldmUgaXQgaXMgaW4gdGhlIHJpZ2h0IGRpcmVjdGlv
-bi4KCgo+Cj4+ICsKPj4gKwljbGtfZGlzYWJsZV91bnByZXBhcmUoaG9zdC0+Y2l1X2Nsayk7Cj4+
-ICsKPj4gKwlyZXR1cm4gMDsKPj4gK30KPj4gK0VYUE9SVF9TWU1CT0woZHdfbWNpX3J1bnRpbWVf
-c3VzcGVuZCk7Cj4+ICsKPj4gK2ludCBkd19tY2lfcnVudGltZV9yZXN1bWUoc3RydWN0IGR3X21j
-aSAqaG9zdCkKPj4gK3sKPj4gKwlpbnQgcmV0ID0gMDsKPj4gKwlpbnQgaTsKPgo+IENhbiBtYWtl
-IG9uZSBsaW5lLgo+Cj4+ICsKPj4gKwlwcmludGsoImR3X21jaV9ydW50aW1lX3Jlc3VtZVxuIik7
-Cj4+ICsKPj4gKwlyZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+Y2l1X2Nsayk7Cj4+ICsJ
-aWYgKHJldCkKPj4gKwkJcmV0dXJuIHJldDsKPj4gKwo+PiArCWlmIChob3N0LT51c2VfZG1hICYm
-IGhvc3QtPmRtYV9vcHMtPmluaXQpCj4+ICsJCWhvc3QtPmRtYV9vcHMtPmluaXQoaG9zdCk7Cj4+
-ICsKPj4gKwltY2lfd3JpdGVsKGhvc3QsIEZJRk9USCwgaG9zdC0+Zmlmb3RoX3ZhbCk7Cj4+ICsJ
-aG9zdC0+cHJldl9ibGtzeiA9IDA7Cj4+ICsKPj4gKwltY2lfd3JpdGVsKGhvc3QsIFRNT1VULCAw
-eEZGRkZGRkZGKTsKPj4gKwltY2lfd3JpdGVsKGhvc3QsIFJJTlRTVFMsIDB4RkZGRkZGRkYpOwo+
-PiArCW1jaV93cml0ZWwoaG9zdCwgSU5UTUFTSywgU0RNTUNfSU5UX0NNRF9ET05FIHwKPj4gKwkJ
-CQkgIFNETU1DX0lOVF9EQVRBX09WRVIgfAo+PiArCQkJCSAgU0RNTUNfSU5UX1RYRFIgfCBTRE1N
-Q19JTlRfUlhEUiB8Cj4+ICsJCQkJICBEV19NQ0lfRVJST1JfRkxBR1MpOwo+PiArCW1jaV93cml0
-ZWwoaG9zdCwgQ1RSTCwgU0RNTUNfQ1RSTF9JTlRfRU5BQkxFKTsKPj4gKwo+PiArCWZvciAoaSA9
-IDA7IGkgPCBob3N0LT5udW1fc2xvdHM7IGkrKykgewo+PiArCQlzdHJ1Y3QgZHdfbWNpX3Nsb3Qg
-KnNsb3QgPSBob3N0LT5zbG90W2ldOwo+PiArCj4+ICsJCWlmICghc2xvdCkKPj4gKwkJCWNvbnRp
-bnVlOwo+PiArCj4+ICsJCWlmIChzbG90LT5tbWMtPnBtX2ZsYWdzICYgTU1DX1BNX0tFRVBfUE9X
-RVIpIHsKPj4gKwkJCWR3X21jaV9zZXRfaW9zKHNsb3QtPm1tYywgJnNsb3QtPm1tYy0+aW9zKTsK
-Pj4gKwkJCWR3X21jaV9zZXR1cF9idXMoc2xvdCwgdHJ1ZSk7Cj4+ICsJCX0KPj4gKwl9Cj4+ICsK
-Pj4gKwlkd19tY2lfZW5hYmxlX2NkKGhvc3QpOwo+Cj4gU29tZSBwYXJ0IG9mIHRoaXMgZnVuY3Rp
-b24gY2FuIGJlIHJldXNlZCB3aXRoIGNvZGVzIGluIGR3X21jaV9yZXN1bWUoKS4KPgo+IEJlc3Qg
-UmVnYXJkcywKPiBKYWVob29uIENodW5nCj4KPj4gKwo+PiArCXJldHVybiByZXQ7Cj4+ICt9Cj4+
-ICtFWFBPUlRfU1lNQk9MKGR3X21jaV9ydW50aW1lX3Jlc3VtZSk7Cj4+ICsjZW5kaWYgLyogQ09O
-RklHX1BNICovCj4+Cj4+ICBzdGF0aWMgaW50IF9faW5pdCBkd19tY2lfaW5pdCh2b2lkKQo+PiAg
-ewo+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuaCBiL2RyaXZlcnMvbW1j
-L2hvc3QvZHdfbW1jLmgKPj4gaW5kZXggZThjZDJkZS4uYmFhNzI2MSAxMDA2NDQKPj4gLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuaAo+PiArKysgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21t
-Yy5oCj4+IEBAIC0yMzQsOSArMjM0LDExIEBACj4+Cj4+ICBleHRlcm4gaW50IGR3X21jaV9wcm9i
-ZShzdHJ1Y3QgZHdfbWNpICpob3N0KTsKPj4gIGV4dGVybiB2b2lkIGR3X21jaV9yZW1vdmUoc3Ry
-dWN0IGR3X21jaSAqaG9zdCk7Cj4+IC0jaWZkZWYgQ09ORklHX1BNX1NMRUVQCj4+ICsjaWZkZWYg
-Q09ORklHX1BNCj4+ICBleHRlcm4gaW50IGR3X21jaV9zdXNwZW5kKHN0cnVjdCBkd19tY2kgKmhv
-c3QpOwo+PiAgZXh0ZXJuIGludCBkd19tY2lfcmVzdW1lKHN0cnVjdCBkd19tY2kgKmhvc3QpOwo+
-PiArZXh0ZXJuIGludCBkd19tY2lfcnVudGltZV9zdXNwZW5kKHN0cnVjdCBkd19tY2kgKmhvc3Qp
-Owo+PiArZXh0ZXJuIGludCBkd19tY2lfcnVudGltZV9yZXN1bWUoc3RydWN0IGR3X21jaSAqaG9z
-dCk7Cj4+ICAjZW5kaWYKPj4KPj4gIC8qKgo+Pgo+Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbgo+IHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
-dG1sCj4KCgotLSAKQmVzdCBSZWdhcmRzClNoYXduIExpbgoKCl9fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApM
-aW51eC1yb2NrY2hpcEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
-b3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtcm9ja2NoaXAK
+Hi Alex,
+
+
+On Thursday 06 October 2016 03:39 AM, Alex Lemberg wrote:
+> Hi Ravikumar,
+>
+> The reason for enabling Auto/Manual BKOPS is understandable.
+> Personally I don’t think that user space should play with a storage device
+> BKOPS settings, it should be a matter of storage device and a driver decision.
+> But as Shown mentioned, there is a discussion on this topic.
+> Also, recently I have submitted a patch for letting device more time
+> to complete its BKOPS on runtime Suspend:
+> http://www.spinics.net/lists/linux-mmc/msg38952.html
+>
+> Thanks,
+> Alex
+Thanks for sharing this information.
+
+I totally agree with you, it should be the driver who makes the decision.
+
+I'm still wondering why there's a concern even after adding a platform 
+level check.
+
+Should the code to enable BKOPS be wrapped inside a CONFIG_ENABLE_BKOPS
+in order to give the individual an option to change the default behavior?
+
+Thanks and Regards,
+RK
+>
+> On 10/5/16, 1:55 PM, "Ravikumar" <a0131654@ti.com> wrote:
+>
+>> Hi Shawn,
+>>
+>>
+>> On Wednesday 05 October 2016 03:07 PM, Shawn Lin wrote:
+>>> Hi Ravikumar,
+>>>
+>>> + Alex,
+>>>
+>>> 在 2016/10/3 18:43, Ravikumar Kattekola 写道:
+>>>> Hi all,
+>>>>      I’ve seen an eMMC failure due to pending background operations on
+>>>> a certain OMAP device since bkops enable bit was not set.
+>>>> Further investigation showed me that someone already posted patch to
+>>>> enable Background operations in kernel  based on a host capability
+>>>> check (Caps2 & BK_OPS_EN)
+>>>> but was turned down quoting that it should be enabled from user space
+>>>> using mmc-utils.
+>>>>
+>>>> Enabling this would add one additional check for exception event in
+>>>> the response R1 or R1B (only on hosts that explicitly set BK_OPS_EN
+>>>> in caps2).
+>>>> But not enabling this could lead to a system failure especially when
+>>>> the Filesystem is on eMMC and the card stops responding due to
+>>>> pending critical bkops.
+>>>>
+>>>> I would like to ask for expert opinion on ‘why is it a bad idea to
+>>>> enable bkops in kernel?’
+>>> Some discussion about the similar topic could be found here:
+>>> https://patchwork.kernel.org/patch/9157121/
+>>>
+>>>
+>>>> It’s a one time programmable bit but if it helps in keeping system
+>>>> functional why not do it?
+>>> Actually BKOPS_EN is not OTP bit.. Quoted from Ulf "I don't have any
+>>> issue to allow all non-OTP registers bits to be written." So I guess
+>>> you could do this, although it needs more discussion there.
+>> In the spec for 4.5, jesd84_B45 it does say not whether the ENABLE bit
+>> is OTP.
+>> But in 5.1 spec, jesd84-b51, it says MANUAL_EN is R/W which means OTP
+>> and readable.
+>> As I read form mmc-utils -help
+>> "        mmc bkops enable <device>
+>>                  Enable the eMMC BKOPS feature on <device>.
+>>                  NOTE!  This is a one-time programmable (unreversible)
+>> change "
+>>> But it's persistent EXT_CSD register and we get used to control it from
+>>> userspace, which is the policy we have been sticking to when writing to
+>>> persistent EXT_CSD registers. I guess that is nothing about "right and
+>>> wrong", just a rule for us in case someone wants to set the persistent
+>>> bit in kernel but setting other persistent bits from user-space, which
+>>> is prone to mess up the mmc core. Or, someone will sent mail to the list
+>>> asking "why is it a good idea to enable bkops in kernel" ? :)
+>> So there's no functional problem/reason that stops us from enabling
+>> BKOPS (Manual) in
+>> kernel except for consistency with other persistent registers.
+>> Since not enabling BKOPS could lead to a functional failure /
+>> non-responsive system
+>> at a later point of time I guess this could be exempted.
+>> what do you think?
+>>
+>> As user I would choose functional safety and reliability over performance.
+>> Hence it would make sense to have the bkops (at least manual) be enabled
+>> by default,
+>> especially in Automotive applications.
+>>
+>>>> I haven’t measured the performance impact but I don’t see a reason
+>>>> for major drop because the frequency of critical bkops events would
+>>>> be less.
+>>>>
+>>>> Regards,
+>>>> RK
+>>>> -- 
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>> Thanks for your response.
+>>
+>> Regards,
+>> RK
+>>
+
