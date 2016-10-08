@@ -1,123 +1,93 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v12, 0/8] Fix eSDHC host version register bug
-Date: Sat, 8 Oct 2016 03:28:01 +0000
-Message-ID: <DB6PR0401MB2536F6224B12A62D0A0FBCBAF8D90@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1474441040-11946-1-git-send-email-yangbo.lu@nxp.com>
+From: Ziji Hu <huziji@marvell.com>
+Subject: Re: [PATCH 2/10] mmc: sdhci: Export
+ sdhci_start_signal_voltage_switch() in sdhci.c
+Date: Sat, 8 Oct 2016 14:26:37 +0800
+Message-ID: <0de88699-7cbb-a057-fd8a-83de37445623@marvell.com>
+References: <cover.990e3503c30c18ecf50dd48bce3d52811f03ca22.1475853198.git-series.gregory.clement@free-electrons.com>
+ <9a660a813af58ad7c108fd06289513302426c9fb.1475853198.git-series.gregory.clement@free-electrons.com>
+ <9bfe6e9a-c06e-481a-b5ea-af58820093bf@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-clk-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-clk-owner@vger.kernel.org
-To: "Y.B. Lu" <yangbo.lu@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Scott Wood <oss@buserror.net>, Arnd Bergmann <arnd@arndb.de>
-Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>
+Content-Type: text/plain; charset="gbk"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <9bfe6e9a-c06e-481a-b5ea-af58820093bf@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, Yu Cao <yuca>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Uffe, Arnd and Scott,
+Hi Shawn,
 
-Any comments on this latest patcheset?
-Could we consider to merge it if no any other changes needed?
-:)
+On 2016/10/8 10:40, Shawn Lin wrote:
+> Hi,
+> 
+> ÔÚ 2016/10/7 23:22, Gregory CLEMENT Ð´µÀ:
+>> From: Ziji Hu <huziji@marvell.com>
+>>
+>> Export sdhci_start_signal_voltage_switch() from sdhci.c.
+>> Thus vendor sdhci driver can implement its own signal voltage
+>> switch routine.
+>>
+> 
+> You can overwtite this callback within your driver itself.
+> That is what other sdhci variant drivers did, so patch 1-3 are
+> unnecessary.
 
+    Thanks a lot for your reply.
 
-Thanks.
+    Our SDHC driver just requests some pre- and post- operations besides common standard SDHC functions.
+    Overwriting those common functions costs too much.
+
+    Thank you.
 
 Best regards,
-Yangbo Lu
+Hu Ziji
 
-> -----Original Message-----
-> From: Y.B. Lu
-> Sent: Monday, September 26, 2016 11:15 AM
-> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Scott Wood; Arnd
-> Bergmann
-> Cc: linuxppc-dev@lists.ozlabs.org; devicetree@vger.kernel.org; linux-arm-
-> kernel@lists.infradead.org; linux-kernel@vger.kernel.org; linux-
-> clk@vger.kernel.org; linux-i2c@vger.kernel.org; iommu@lists.linux-
-> foundation.org; netdev@vger.kernel.org; Mark Rutland; Rob Herring;
-> Russell King; Jochen Friedrich; Joerg Roedel; Claudiu Manoil; Bhupesh
-> Sharma; Qiang Zhao; Kumar Gala; Santosh Shilimkar; Leo Li; X.B. Xie; M.H.
-> Lian
-> Subject: RE: [v12, 0/8] Fix eSDHC host version register bug
->=20
-> Any comments about this version patchset ?
->=20
-> :)
->=20
->=20
-> > -----Original Message-----
-> > From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
-> > Sent: Wednesday, September 21, 2016 2:57 PM
-> > To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Scott Wood;
-> > Arnd Bergmann
-> > Cc: linuxppc-dev@lists.ozlabs.org; devicetree@vger.kernel.org;
-> > linux-arm- kernel@lists.infradead.org; linux-kernel@vger.kernel.org;
-> > linux- clk@vger.kernel.org; linux-i2c@vger.kernel.org;
-> > iommu@lists.linux- foundation.org; netdev@vger.kernel.org; Mark
-> > Rutland; Rob Herring; Russell King; Jochen Friedrich; Joerg Roedel;
-> > Claudiu Manoil; Bhupesh Sharma; Qiang Zhao; Kumar Gala; Santosh
-> Shilimkar; Leo Li; X.B. Xie; M.H.
-> > Lian; Y.B. Lu
-> > Subject: [v12, 0/8] Fix eSDHC host version register bug
-> >
-> > This patchset is used to fix a host version register bug in the T4240-
-> > R1.0-R2.0 eSDHC controller. To match the SoC version and revision, 10
-> > previous version patchsets had tried many methods but all of them were
-> > rejected by reviewers.
-> > Such as
-> > 	- dts compatible method
-> > 	- syscon method
-> > 	- ifdef PPC method
-> > 	- GUTS driver getting SVR method
-> > Anrd suggested a soc_device_match method in v10, and this is the only
-> > available method left now. This v11 patchset introduces the
-> > soc_device_match interface in soc driver.
-> >
-> > The first six patches of Yangbo are to add the GUTS driver. This is
-> > used to register a soc device which contain soc version and revision
-> > information.
-> > The other two patches introduce the soc_device_match method in soc
-> > driver and apply it on esdhc driver to fix this bug.
-> >
-> > Arnd Bergmann (1):
-> >   base: soc: introduce soc_device_match() interface
-> >
-> > Yangbo Lu (7):
-> >   dt: bindings: update Freescale DCFG compatible
-> >   ARM64: dts: ls2080a: add device configuration node
-> >   dt: bindings: move guts devicetree doc out of powerpc directory
-> >   powerpc/fsl: move mpc85xx.h to include/linux/fsl
-> >   soc: fsl: add GUTS driver for QorIQ platforms
-> >   MAINTAINERS: add entry for Freescale SoC drivers
-> >   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-> >
-> >  Documentation/devicetree/bindings/arm/fsl.txt      |   6 +-
-> >  .../bindings/{powerpc =3D> soc}/fsl/guts.txt         |   3 +
-> >  MAINTAINERS                                        |  11 +-
-> >  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
-> >  arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
-> >  arch/powerpc/sysdev/fsl_pci.c                      |   2 +-
-> >  drivers/base/Kconfig                               |   1 +
-> >  drivers/base/soc.c                                 |  66 ++++++
-> >  drivers/clk/clk-qoriq.c                            |   3 +-
-> >  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
-> >  drivers/iommu/fsl_pamu.c                           |   3 +-
-> >  drivers/mmc/host/Kconfig                           |   1 +
-> >  drivers/mmc/host/sdhci-of-esdhc.c                  |  20 ++
-> >  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
-> >  drivers/soc/Kconfig                                |   2 +-
-> >  drivers/soc/fsl/Kconfig                            |  19 ++
-> >  drivers/soc/fsl/Makefile                           |   1 +
-> >  drivers/soc/fsl/guts.c                             | 257
-> > +++++++++++++++++++++
-> >  include/linux/fsl/guts.h                           | 125 ++++++----
-> >  .../asm/mpc85xx.h =3D> include/linux/fsl/svr.h       |   4 +-
-> >  include/linux/sys_soc.h                            |   3 +
-> >  21 files changed, 478 insertions(+), 61 deletions(-)  rename
-> > Documentation/devicetree/bindings/{powerpc =3D> soc}/fsl/guts.txt (91%)
-> > create mode 100644 drivers/soc/fsl/Kconfig  create mode 100644
-> > drivers/soc/fsl/guts.c  rename arch/powerpc/include/asm/mpc85xx.h =3D>
-> > include/linux/fsl/svr.h (97%)
-> >
-> > --
-> > 2.1.0.27.g96db324
-
+> 
+>> Signed-off-by: Hu Ziji <huziji@marvell.com>
+>> Reviewed-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 5 +++--
+>>  drivers/mmc/host/sdhci.h | 2 ++
+>>  2 files changed, 5 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index d4bb818c52d5..2250ea22231f 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1828,8 +1828,8 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>>      spin_unlock_irqrestore(&host->lock, flags);
+>>  }
+>>
+>> -static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>> -                         struct mmc_ios *ios)
+>> +int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>> +                      struct mmc_ios *ios)
+>>  {
+>>      struct sdhci_host *host = mmc_priv(mmc);
+>>      u16 ctrl;
+>> @@ -1921,6 +1921,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>          return 0;
+>>      }
+>>  }
+>> +EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
+>>
+>>  static int sdhci_card_busy(struct mmc_host *mmc)
+>>  {
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 21dc80b8ae3d..c38ab65b9a97 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -687,6 +687,8 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+>>  void sdhci_reset(struct sdhci_host *host, u8 mask);
+>>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+>>  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+>> +int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>> +                      struct mmc_ios *ios);
+>>
+>>  #ifdef CONFIG_PM
+>>  extern int sdhci_suspend_host(struct sdhci_host *host);
+>>
+> 
+> 
