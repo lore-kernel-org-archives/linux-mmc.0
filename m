@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 5/9] mmc: dw_mmc-k3: deploay runtime PM facilities
-Date: Sun,  9 Oct 2016 21:49:06 +0800
-Message-ID: <1476020951-31292-5-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 8/9] mmc: dw_mmc-pltfm: deploay runtime PM facilities
+Date: Sun,  9 Oct 2016 21:51:00 +0800
+Message-ID: <1476021060-31436-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476020951-31292-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -29,79 +29,61 @@ if we enable it.
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc-k3.c | 37 ++++++++++++++++---------------------
- 1 file changed, 16 insertions(+), 21 deletions(-)
+ drivers/mmc/host/dw_mmc-pltfm.c | 26 +++++++++++++++-----------
+ 1 file changed, 15 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 6247894..99b859d 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -15,6 +15,7 @@
- #include <linux/module.h>
- #include <linux/of_address.h>
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index c0bb0c7..214e593 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -16,6 +16,7 @@
+ #include <linux/io.h>
+ #include <linux/irq.h>
  #include <linux/platform_device.h>
 +#include <linux/pm_runtime.h>
- #include <linux/regmap.h>
- #include <linux/regulator/consumer.h>
- 
-@@ -162,35 +163,29 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
- 	return dw_mci_pltfm_register(pdev, drv_data);
+ #include <linux/slab.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+@@ -57,26 +58,29 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
  }
+ EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
  
 -#ifdef CONFIG_PM_SLEEP
--static int dw_mci_k3_suspend(struct device *dev)
+-/*
+- * TODO: we should probably disable the clock to the card in the suspend path.
+- */
+-static int dw_mci_pltfm_suspend(struct device *dev)
 +#ifdef CONFIG_PM
-+static int dw_mci_k3_runtime_suspend(struct device *dev)
++static int dw_mci_pltfm_runtime_suspend(struct device *dev)
  {
  	struct dw_mci *host = dev_get_drvdata(dev);
--	int ret;
--
--	ret = dw_mci_suspend(host);
--	if (!ret)
--		clk_disable_unprepare(host->ciu_clk);
  
--	return ret;
+-	return dw_mci_suspend(host);
 +	return dw_mci_runtime_suspend(host);
  }
  
--static int dw_mci_k3_resume(struct device *dev)
-+static int dw_mci_k3_runtime_resume(struct device *dev)
+-static int dw_mci_pltfm_resume(struct device *dev)
++static int dw_mci_pltfm_runtime_resume(struct device *dev)
  {
  	struct dw_mci *host = dev_get_drvdata(dev);
--	int ret;
  
--	ret = clk_prepare_enable(host->ciu_clk);
--	if (ret) {
--		dev_err(host->dev, "failed to enable ciu clock\n");
--		return ret;
--	}
--
 -	return dw_mci_resume(host);
 +	return dw_mci_runtime_resume(host);
  }
 -#endif /* CONFIG_PM_SLEEP */
 -
--static SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
+-SIMPLE_DEV_PM_OPS(dw_mci_pltfm_pmops, dw_mci_pltfm_suspend, dw_mci_pltfm_resume);
 +#endif /* CONFIG_PM */
 +
-+static const struct dev_pm_ops dw_mci_k3_dev_pm_ops = {
++const struct dev_pm_ops dw_mci_pltfm_pmops = {
 +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
 +				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_k3_runtime_suspend,
-+			   dw_mci_k3_runtime_resume,
++	SET_RUNTIME_PM_OPS(dw_mci_pltfm_runtime_suspend,
++			   dw_mci_pltfm_runtime_resume,
 +			   NULL)
 +};
+ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
  
- static struct platform_driver dw_mci_k3_pltfm_driver = {
- 	.probe		= dw_mci_k3_probe,
-@@ -198,7 +193,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
- 	.driver		= {
- 		.name		= "dwmmc_k3",
- 		.of_match_table	= dw_mci_k3_match,
--		.pm		= &dw_mci_k3_pmops,
-+		.pm		= &dw_mci_k3_dev_pm_ops,
- 	},
- };
- 
+ static const struct of_device_id dw_mci_pltfm_match[] = {
 -- 
 2.3.7
