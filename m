@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 7/9] mmc: dw_mmc-pci: deploay runtime PM facilities
-Date: Sun,  9 Oct 2016 21:50:52 +0800
-Message-ID: <1476021052-31395-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 9/9] mmc: dw_mmc: remove system PM callback
+Date: Sun,  9 Oct 2016 21:51:11 +0800
+Message-ID: <1476021071-31477-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476020951-31292-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,77 +21,100 @@ To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hans
 Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Let's migrate it to use runtime PM and remove the system
-PM callback from this driver. With this patch, it could
-handle system PM properly and could also use runtime PM
-if we enable it.
+Now there are no variant drivers using dw_mci_suspend
+and dw_mci_resume, so let's remove it.
 
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc-pci.c | 25 ++++++++++++++++---------
- 1 file changed, 16 insertions(+), 9 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 44 ++++++++------------------------------------
+ drivers/mmc/host/dw_mmc.h |  2 --
+ 2 files changed, 8 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-index 4c69fbd..61789b1 100644
---- a/drivers/mmc/host/dw_mmc-pci.c
-+++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -14,6 +14,7 @@
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/pci.h>
-+#include <linux/pm_runtime.h>
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-@@ -79,25 +80,31 @@ static void dw_mci_pci_remove(struct pci_dev *pdev)
- 	dw_mci_remove(host);
- }
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c5ef263..46a14c5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3267,26 +3267,24 @@ EXPORT_SYMBOL(dw_mci_remove);
  
--#ifdef CONFIG_PM_SLEEP
--static int dw_mci_pci_suspend(struct device *dev)
-+#ifdef CONFIG_PM
-+static int dw_mci_pci_runtime_suspend(struct device *dev)
+ 
+ #ifdef CONFIG_PM
+-/*
+- * TODO: we should probably disable the clock to the card in the suspend path.
+- */
+-int dw_mci_suspend(struct dw_mci *host)
++int dw_mci_runtime_suspend(struct dw_mci *host)
  {
- 	struct pci_dev *pdev = to_pci_dev(dev);
- 	struct dw_mci *host = pci_get_drvdata(pdev);
+ 	if (host->use_dma && host->dma_ops->exit)
+ 		host->dma_ops->exit(host);
  
--	return dw_mci_suspend(host);
-+	return dw_mci_runtime_suspend(host);
- }
- 
--static int dw_mci_pci_resume(struct device *dev)
-+static int dw_mci_pci_runtime_resume(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
- 	struct dw_mci *host = pci_get_drvdata(pdev);
- 
--	return dw_mci_resume(host);
-+	return dw_mci_runtime_resume(host);
- }
--#endif /* CONFIG_PM_SLEEP */
--
--static SIMPLE_DEV_PM_OPS(dw_mci_pci_pmops, dw_mci_pci_suspend, dw_mci_pci_resume);
-+#endif /* CONFIG_PM */
++	clk_disable_unprepare(host->ciu_clk);
 +
-+static const struct dev_pm_ops dw_mci_pci_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_pci_runtime_suspend,
-+			   dw_mci_pci_runtime_resume,
-+			   NULL)
-+};
+ 	return 0;
+ }
+-EXPORT_SYMBOL(dw_mci_suspend);
++EXPORT_SYMBOL(dw_mci_runtime_suspend);
  
- static const struct pci_device_id dw_mci_pci_id[] = {
- 	{ PCI_DEVICE(SYNOPSYS_DW_MCI_VENDOR_ID, SYNOPSYS_DW_MCI_DEVICE_ID) },
-@@ -111,7 +118,7 @@ static struct pci_driver dw_mci_pci_driver = {
- 	.probe		= dw_mci_pci_probe,
- 	.remove		= dw_mci_pci_remove,
- 	.driver		=	{
--		.pm =   &dw_mci_pci_pmops
-+		.pm =   &dw_mci_pci_dev_pm_ops,
- 	},
- };
+-int dw_mci_resume(struct dw_mci *host)
++int dw_mci_runtime_resume(struct dw_mci *host)
+ {
+-	int i, ret;
++	int i, ret = 0;
  
+-	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+-		ret = -ENODEV;
++	ret = clk_prepare_enable(host->ciu_clk);
++	if (ret)
+ 		return ret;
+-	}
+ 
+ 	if (host->use_dma && host->dma_ops->init)
+ 		host->dma_ops->init(host);
+@@ -3323,32 +3321,6 @@ int dw_mci_resume(struct dw_mci *host)
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL(dw_mci_resume);
+-
+-int dw_mci_runtime_suspend(struct dw_mci *host)
+-{
+-	int err = 0;
+-
+-	err = dw_mci_suspend(host);
+-	if (err)
+-		return err;
+-
+-	clk_disable_unprepare(host->ciu_clk);
+-
+-	return err;
+-}
+-EXPORT_SYMBOL(dw_mci_runtime_suspend);
+-
+-int dw_mci_runtime_resume(struct dw_mci *host)
+-{
+-	int ret = 0;
+-
+-	ret = clk_prepare_enable(host->ciu_clk);
+-	if (ret)
+-		return ret;
+-
+-	return dw_mci_resume(host);
+-}
+ EXPORT_SYMBOL(dw_mci_runtime_resume);
+ #endif /* CONFIG_PM */
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index baa7261..b642dbb 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -235,8 +235,6 @@
+ extern int dw_mci_probe(struct dw_mci *host);
+ extern void dw_mci_remove(struct dw_mci *host);
+ #ifdef CONFIG_PM
+-extern int dw_mci_suspend(struct dw_mci *host);
+-extern int dw_mci_resume(struct dw_mci *host);
+ extern int dw_mci_runtime_suspend(struct dw_mci *host);
+ extern int dw_mci_runtime_resume(struct dw_mci *host);
+ #endif
 -- 
 2.3.7
