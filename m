@@ -1,116 +1,68 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RESEND PATCH 9/9] mmc: dw_mmc: remove system PM callback
-Date: Sun,  9 Oct 2016 22:02:01 +0800
-Message-ID: <1476021721-923-5-git-send-email-shawn.lin@rock-chips.com>
-References: <1476021506-869-1-git-send-email-shawn.lin@rock-chips.com>
- <1476021721-923-1-git-send-email-shawn.lin@rock-chips.com>
+From: Alexander Kurz <akurz@blala.de>
+Subject: [PATCH] ARM: dts: imx50: imx50-esdhc use imx53-esdhc
+Date: Sun,  9 Oct 2016 18:34:50 +0200
+Message-ID: <1476030890-18274-1-git-send-email-akurz@blala.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:49894 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751488AbcJIN6A (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Oct 2016 09:58:00 -0400
-In-Reply-To: <1476021721-923-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from vs81.iboxed.net ([185.82.85.146]:44749 "EHLO vs81.iboxed.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752039AbcJIQuW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 9 Oct 2016 12:50:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Shawn Guo <shawnguo@kernel.org>
+Cc: Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Lucas Stach <l.stach@pengutronix.de>, linux-mmc@vger.kernel.org, Alexander Kurz <akurz@blala.de>
 
-Now there are no variant drivers using dw_mci_suspend
-and dw_mci_resume, so let's remove it.
+According to the reference manuals, both imx50/imx53 SOC seem to share
+the same eSDHC controller, especially the section on "Multi-block Read"
+mentioned in commit 361b8482026c ("mmc: sdhci-esdhc-imx: fix multiblock
+reads on i.MX53") is identical for both SOC.
+Hence, let imx50 use imx53-esdhc.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Alexander Kurz <akurz@blala.de>
 ---
+ arch/arm/boot/dts/imx50.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
- drivers/mmc/host/dw_mmc.c | 44 ++++++++------------------------------------
- drivers/mmc/host/dw_mmc.h |  2 --
- 2 files changed, 8 insertions(+), 38 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c5ef263..46a14c5 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3267,26 +3267,24 @@ EXPORT_SYMBOL(dw_mci_remove);
+diff --git a/arch/arm/boot/dts/imx50.dtsi b/arch/arm/boot/dts/imx50.dtsi
+index e245713..769eac7 100644
+--- a/arch/arm/boot/dts/imx50.dtsi
++++ b/arch/arm/boot/dts/imx50.dtsi
+@@ -99,7 +99,7 @@
+ 				ranges;
  
+ 				esdhc1: esdhc@50004000 {
+-					compatible = "fsl,imx50-esdhc";
++					compatible = "fsl,imx50-esdhc", "fsl,imx53-esdhc";
+ 					reg = <0x50004000 0x4000>;
+ 					interrupts = <1>;
+ 					clocks = <&clks IMX5_CLK_ESDHC1_IPG_GATE>,
+@@ -111,7 +111,7 @@
+ 				};
  
- #ifdef CONFIG_PM
--/*
-- * TODO: we should probably disable the clock to the card in the suspend path.
-- */
--int dw_mci_suspend(struct dw_mci *host)
-+int dw_mci_runtime_suspend(struct dw_mci *host)
- {
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
+ 				esdhc2: esdhc@50008000 {
+-					compatible = "fsl,imx50-esdhc";
++					compatible = "fsl,imx50-esdhc", "fsl,imx53-esdhc";
+ 					reg = <0x50008000 0x4000>;
+ 					interrupts = <2>;
+ 					clocks = <&clks IMX5_CLK_ESDHC2_IPG_GATE>,
+@@ -160,7 +160,7 @@
+ 				};
  
-+	clk_disable_unprepare(host->ciu_clk);
-+
- 	return 0;
- }
--EXPORT_SYMBOL(dw_mci_suspend);
-+EXPORT_SYMBOL(dw_mci_runtime_suspend);
+ 				esdhc3: esdhc@50020000 {
+-					compatible = "fsl,imx50-esdhc";
++					compatible = "fsl,imx50-esdhc", "fsl,imx53-esdhc";
+ 					reg = <0x50020000 0x4000>;
+ 					interrupts = <3>;
+ 					clocks = <&clks IMX5_CLK_ESDHC3_IPG_GATE>,
+@@ -172,7 +172,7 @@
+ 				};
  
--int dw_mci_resume(struct dw_mci *host)
-+int dw_mci_runtime_resume(struct dw_mci *host)
- {
--	int i, ret;
-+	int i, ret = 0;
- 
--	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
--		ret = -ENODEV;
-+	ret = clk_prepare_enable(host->ciu_clk);
-+	if (ret)
- 		return ret;
--	}
- 
- 	if (host->use_dma && host->dma_ops->init)
- 		host->dma_ops->init(host);
-@@ -3323,32 +3321,6 @@ int dw_mci_resume(struct dw_mci *host)
- 
- 	return 0;
- }
--EXPORT_SYMBOL(dw_mci_resume);
--
--int dw_mci_runtime_suspend(struct dw_mci *host)
--{
--	int err = 0;
--
--	err = dw_mci_suspend(host);
--	if (err)
--		return err;
--
--	clk_disable_unprepare(host->ciu_clk);
--
--	return err;
--}
--EXPORT_SYMBOL(dw_mci_runtime_suspend);
--
--int dw_mci_runtime_resume(struct dw_mci *host)
--{
--	int ret = 0;
--
--	ret = clk_prepare_enable(host->ciu_clk);
--	if (ret)
--		return ret;
--
--	return dw_mci_resume(host);
--}
- EXPORT_SYMBOL(dw_mci_runtime_resume);
- #endif /* CONFIG_PM */
- 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index baa7261..b642dbb 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -235,8 +235,6 @@
- extern int dw_mci_probe(struct dw_mci *host);
- extern void dw_mci_remove(struct dw_mci *host);
- #ifdef CONFIG_PM
--extern int dw_mci_suspend(struct dw_mci *host);
--extern int dw_mci_resume(struct dw_mci *host);
- extern int dw_mci_runtime_suspend(struct dw_mci *host);
- extern int dw_mci_runtime_resume(struct dw_mci *host);
- #endif
+ 				esdhc4: esdhc@50024000 {
+-					compatible = "fsl,imx50-esdhc";
++					compatible = "fsl,imx50-esdhc", "fsl,imx53-esdhc";
+ 					reg = <0x50024000 0x4000>;
+ 					interrupts = <4>;
+ 					clocks = <&clks IMX5_CLK_ESDHC4_IPG_GATE>,
 -- 
-2.3.7
-
+2.1.4
 
