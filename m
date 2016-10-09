@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 8/9] mmc: dw_mmc-pltfm: deploay runtime PM facilities
-Date: Sun,  9 Oct 2016 21:51:00 +0800
-Message-ID: <1476021060-31436-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 6/9] mmc: dw_mmc-exynos: deploay runtime PM facilities
+Date: Sun,  9 Oct 2016 21:50:44 +0800
+Message-ID: <1476021044-31354-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476020951-31292-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -29,32 +29,29 @@ if we enable it.
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc-pltfm.c | 26 +++++++++++++++-----------
- 1 file changed, 15 insertions(+), 11 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index c0bb0c7..214e593 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -16,6 +16,7 @@
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 7ab3d74..189fd38 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -17,6 +17,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
 +#include <linux/pm_runtime.h>
  #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-@@ -57,26 +58,29 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 
+ #include "dw_mmc.h"
+@@ -161,20 +162,20 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
+ 		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->cur_slot->flags);
  }
- EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
  
 -#ifdef CONFIG_PM_SLEEP
--/*
-- * TODO: we should probably disable the clock to the card in the suspend path.
-- */
--static int dw_mci_pltfm_suspend(struct device *dev)
+-static int dw_mci_exynos_suspend(struct device *dev)
 +#ifdef CONFIG_PM
-+static int dw_mci_pltfm_runtime_suspend(struct device *dev)
++static int dw_mci_exynos_runtime_suspend(struct device *dev)
  {
  	struct dw_mci *host = dev_get_drvdata(dev);
  
@@ -62,28 +59,41 @@ index c0bb0c7..214e593 100644
 +	return dw_mci_runtime_suspend(host);
  }
  
--static int dw_mci_pltfm_resume(struct device *dev)
-+static int dw_mci_pltfm_runtime_resume(struct device *dev)
+-static int dw_mci_exynos_resume(struct device *dev)
++static int dw_mci_exynos_runtime_resume(struct device *dev)
  {
  	struct dw_mci *host = dev_get_drvdata(dev);
  
+ 	dw_mci_exynos_config_smu(host);
 -	return dw_mci_resume(host);
 +	return dw_mci_runtime_resume(host);
  }
+ 
+ /**
+@@ -211,10 +212,8 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
+ 	return 0;
+ }
+ #else
+-#define dw_mci_exynos_suspend		NULL
+-#define dw_mci_exynos_resume		NULL
+ #define dw_mci_exynos_resume_noirq	NULL
 -#endif /* CONFIG_PM_SLEEP */
--
--SIMPLE_DEV_PM_OPS(dw_mci_pltfm_pmops, dw_mci_pltfm_suspend, dw_mci_pltfm_resume);
 +#endif /* CONFIG_PM */
-+
-+const struct dev_pm_ops dw_mci_pltfm_pmops = {
+ 
+ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+ {
+@@ -531,7 +530,11 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
+ }
+ 
+ static const struct dev_pm_ops dw_mci_exynos_pmops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
 +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
 +				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_pltfm_runtime_suspend,
-+			   dw_mci_pltfm_runtime_resume,
++	SET_RUNTIME_PM_OPS(dw_mci_exynos_runtime_suspend,
++			   dw_mci_exynos_runtime_resume,
 +			   NULL)
-+};
- EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- 
- static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	.resume_noirq = dw_mci_exynos_resume_noirq,
+ 	.thaw_noirq = dw_mci_exynos_resume_noirq,
+ 	.restore_noirq = dw_mci_exynos_resume_noirq,
 -- 
 2.3.7
