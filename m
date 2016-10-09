@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 6/9] mmc: dw_mmc-exynos: deploay runtime PM facilities
-Date: Sun,  9 Oct 2016 21:50:44 +0800
-Message-ID: <1476021044-31354-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 7/9] mmc: dw_mmc-pci: deploay runtime PM facilities
+Date: Sun,  9 Oct 2016 21:50:52 +0800
+Message-ID: <1476021052-31395-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476020951-31292-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -29,71 +29,69 @@ if we enable it.
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc-exynos.c | 21 ++++++++++++---------
- 1 file changed, 12 insertions(+), 9 deletions(-)
+ drivers/mmc/host/dw_mmc-pci.c | 25 ++++++++++++++++---------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 7ab3d74..189fd38 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -17,6 +17,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/of.h>
- #include <linux/of_gpio.h>
+diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
+index 4c69fbd..61789b1 100644
+--- a/drivers/mmc/host/dw_mmc-pci.c
++++ b/drivers/mmc/host/dw_mmc-pci.c
+@@ -14,6 +14,7 @@
+ #include <linux/io.h>
+ #include <linux/irq.h>
+ #include <linux/pci.h>
 +#include <linux/pm_runtime.h>
  #include <linux/slab.h>
- 
- #include "dw_mmc.h"
-@@ -161,20 +162,20 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
- 		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->cur_slot->flags);
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+@@ -79,25 +80,31 @@ static void dw_mci_pci_remove(struct pci_dev *pdev)
+ 	dw_mci_remove(host);
  }
  
 -#ifdef CONFIG_PM_SLEEP
--static int dw_mci_exynos_suspend(struct device *dev)
+-static int dw_mci_pci_suspend(struct device *dev)
 +#ifdef CONFIG_PM
-+static int dw_mci_exynos_runtime_suspend(struct device *dev)
++static int dw_mci_pci_runtime_suspend(struct device *dev)
  {
- 	struct dw_mci *host = dev_get_drvdata(dev);
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+ 	struct dw_mci *host = pci_get_drvdata(pdev);
  
 -	return dw_mci_suspend(host);
 +	return dw_mci_runtime_suspend(host);
  }
  
--static int dw_mci_exynos_resume(struct device *dev)
-+static int dw_mci_exynos_runtime_resume(struct device *dev)
+-static int dw_mci_pci_resume(struct device *dev)
++static int dw_mci_pci_runtime_resume(struct device *dev)
  {
- 	struct dw_mci *host = dev_get_drvdata(dev);
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+ 	struct dw_mci *host = pci_get_drvdata(pdev);
  
- 	dw_mci_exynos_config_smu(host);
 -	return dw_mci_resume(host);
 +	return dw_mci_runtime_resume(host);
  }
- 
- /**
-@@ -211,10 +212,8 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
- 	return 0;
- }
- #else
--#define dw_mci_exynos_suspend		NULL
--#define dw_mci_exynos_resume		NULL
- #define dw_mci_exynos_resume_noirq	NULL
 -#endif /* CONFIG_PM_SLEEP */
+-
+-static SIMPLE_DEV_PM_OPS(dw_mci_pci_pmops, dw_mci_pci_suspend, dw_mci_pci_resume);
 +#endif /* CONFIG_PM */
- 
- static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
- {
-@@ -531,7 +530,11 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
- }
- 
- static const struct dev_pm_ops dw_mci_exynos_pmops = {
--	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
++
++static const struct dev_pm_ops dw_mci_pci_dev_pm_ops = {
 +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
 +				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_exynos_runtime_suspend,
-+			   dw_mci_exynos_runtime_resume,
++	SET_RUNTIME_PM_OPS(dw_mci_pci_runtime_suspend,
++			   dw_mci_pci_runtime_resume,
 +			   NULL)
- 	.resume_noirq = dw_mci_exynos_resume_noirq,
- 	.thaw_noirq = dw_mci_exynos_resume_noirq,
- 	.restore_noirq = dw_mci_exynos_resume_noirq,
++};
+ 
+ static const struct pci_device_id dw_mci_pci_id[] = {
+ 	{ PCI_DEVICE(SYNOPSYS_DW_MCI_VENDOR_ID, SYNOPSYS_DW_MCI_DEVICE_ID) },
+@@ -111,7 +118,7 @@ static struct pci_driver dw_mci_pci_driver = {
+ 	.probe		= dw_mci_pci_probe,
+ 	.remove		= dw_mci_pci_remove,
+ 	.driver		=	{
+-		.pm =   &dw_mci_pci_pmops
++		.pm =   &dw_mci_pci_dev_pm_ops,
+ 	},
+ };
+ 
 -- 
 2.3.7
