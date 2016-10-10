@@ -1,75 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core, annotate cmd_hdr as __le32
-Date: Mon, 10 Oct 2016 14:38:27 +0200
-Message-ID: <CAPDyKFrwTKVPj4=FfhSO4aJXw6UxsBQZ17nHdXoK4GBn8gNQDg@mail.gmail.com>
-References: <20161003085828.15913-1-jslaby@suse.cz>
+Subject: Re: [PATCH 0/4] mmc: sdhci: Minor fixes
+Date: Mon, 10 Oct 2016 14:38:33 +0200
+Message-ID: <CAPDyKFoVECA96-8rEJe9fqaGaLCC9Jy_obtHuTRP1XKDpGba7w@mail.gmail.com>
+References: <1475658684-32312-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161003085828.15913-1-jslaby@suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:32823 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751917AbcJJMqF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2016 08:46:05 -0400
+Received: by mail-qk0-f171.google.com with SMTP id n189so108591694qke.0
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Oct 2016 05:46:04 -0700 (PDT)
+In-Reply-To: <1475658684-32312-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-+ stable
+On 5 October 2016 at 11:11, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Hi
+>
+> Here are a couple of minor fixes.  While it would be good to have them in
+> 4.9 or a 4.9-rc, they are not urgent.
+>
+>
+> Adrian Hunter (4):
+>       mmc: sdhci: Fix SDHCI_QUIRK2_STOP_WITH_TC
+>       mmc: sdhci: Rename sdhci_set_power() to sdhci_set_power_noreg()
+>       mmc: sdhci-pci: Let devices define their own sdhci_ops
+>       mmc: sdhci-pci: Fix bus power failing to enable for some Intel controllers
+>
+>  drivers/mmc/host/sdhci-pci-core.c | 54 ++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci-pci.h      |  2 ++
+>  drivers/mmc/host/sdhci-pxav3.c    |  2 +-
+>  drivers/mmc/host/sdhci.c          | 40 ++++++++++++++---------------
+>  drivers/mmc/host/sdhci.h          |  2 ++
+>  5 files changed, 77 insertions(+), 23 deletions(-)
+>
+>
+> Regards
+> Adrian
 
-On 3 October 2016 at 10:58, Jiri Slaby <jslaby@suse.cz> wrote:
-> Commit f68381a70b (mmc: block: fix packed command header endianness)
-> correctly fixed endianness handling of packed_cmd_hdr in
-> mmc_blk_packed_hdr_wrq_prep.
->
-> But now, sparse complains about incorrect types:
-> drivers/mmc/card/block.c:1613:27: sparse: incorrect type in assignment (different base types)
-> drivers/mmc/card/block.c:1613:27:    expected unsigned int [unsigned] [usertype] <noident>
-> drivers/mmc/card/block.c:1613:27:    got restricted __le32 [usertype] <noident>
-> ...
->
-> So annotate cmd_hdr properly using __le32 to make everyone happy.
->
-> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-
-Checkpatch reported an error regarding the changelog, I fixed it up so
-no worries! I decided to also added a fixes and stable tag.
 
 Thanks, applied for fixes!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/card/block.c | 2 +-
->  drivers/mmc/card/queue.h | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c3335112e68c..9b71414526e7 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1786,7 +1786,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
->         struct mmc_blk_data *md = mq->data;
->         struct mmc_packed *packed = mqrq->packed;
->         bool do_rel_wr, do_data_tag;
-> -       u32 *packed_cmd_hdr;
-> +       __le32 *packed_cmd_hdr;
->         u8 hdr_blocks;
->         u8 i = 1;
->
-> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-> index 3c15a75bae86..342f1e3f301e 100644
-> --- a/drivers/mmc/card/queue.h
-> +++ b/drivers/mmc/card/queue.h
-> @@ -31,7 +31,7 @@ enum mmc_packed_type {
->
->  struct mmc_packed {
->         struct list_head        list;
-> -       u32                     cmd_hdr[1024];
-> +       __le32                  cmd_hdr[1024];
->         unsigned int            blocks;
->         u8                      nr_entries;
->         u8                      retries;
-> --
-> 2.10.0
->
