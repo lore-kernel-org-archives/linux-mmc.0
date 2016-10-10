@@ -1,286 +1,304 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v5 10/12] mmc: sdhci-msm: Add HS400 platform support
-Date: Mon, 10 Oct 2016 20:56:26 +0530
-Message-ID: <6fa22493-f382-604a-5f60-f51c3d66442b@codeaurora.org>
+From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v5 11/12] mmc: sdhci-msm: Add calibration tuning for
+ CDCLP533 circuit
+Date: Mon, 10 Oct 2016 21:12:14 +0530
+Message-ID: <6993d3a2-7961-2507-60d2-153c14e0bc17@codeaurora.org>
 References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
- <1475678440-3525-11-git-send-email-riteshh@codeaurora.org>
- <0596e37d-0d8d-0f8e-8884-4404e2979593@intel.com>
+ <1475678440-3525-12-git-send-email-riteshh@codeaurora.org>
+ <183c2e6a-179b-b042-aef9-d1e5cb90b17d@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:37444 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752538AbcJJP0u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2016 11:26:50 -0400
-In-Reply-To: <0596e37d-0d8d-0f8e-8884-4404e2979593@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <183c2e6a-179b-b042-aef9-d1e5cb90b17d-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
+Cc: david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com
-Cc: david.brown@linaro.org, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, sboyd@codeaurora.org, bjorn.andersson@linaro.org, pramod.gurav@linaro.org
 
 Hi Adrian,
 
-Thanks for the complete review.
-
-
-On 10/10/2016 5:38 PM, Adrian Hunter wrote:
+On 10/10/2016 6:19 PM, Adrian Hunter wrote:
 > On 05/10/16 17:40, Ritesh Harjani wrote:
->> From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>> From: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 >>
->> The following msm platform specific changes are added to support HS400.
->> - Allow tuning for HS400 mode.
->> - Configure HS400 timing mode using the VENDOR_SPECIFIC_FUNC register.
+>> In HS400 mode a new RCLK is introduced on the interface for read data
+>> transfers. The eMMC5.0 device transmits the read data to the host with
+>> respect to rising and falling edges of RCLK. In order to ensure correct
+>> operation of read data transfers in HS400 mode, the incoming RX data
+>> needs to be sampled by delayed version of RCLK.
 >>
->> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> The CDCLP533 delay circuit shifts the RCLK by T/4. It needs to be
+>> initialized, configured and enabled once during HS400 mode switch and
+>> when operational voltage/clock is changed.
+>>
+>> Signed-off-by: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>> Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 >> ---
->>  drivers/mmc/host/sdhci-msm.c | 124 +++++++++++++++++++++++++++++++++++++++----
->>  1 file changed, 113 insertions(+), 11 deletions(-)
+>>  drivers/mmc/host/sdhci-msm.c | 178 +++++++++++++++++++++++++++++++++++++++++++
+>>  1 file changed, 178 insertions(+)
 >>
 >> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index eb1a9e3..612fa82 100644
+>> index 612fa82..dbf80a9c 100644
 >> --- a/drivers/mmc/host/sdhci-msm.c
 >> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -31,6 +31,7 @@
->>  #define HC_MODE_EN		0x1
->>  #define CORE_POWER		0x0
->>  #define CORE_SW_RST		BIT(7)
->> +#define FF_CLK_SW_RST_DIS	BIT(13)
+>> @@ -57,6 +57,7 @@
+>>  #define CORE_DLL_PDN		BIT(29)
+>>  #define CORE_DLL_RST		BIT(30)
+>>  #define CORE_DLL_CONFIG		0x100
+>> +#define CORE_CMD_DAT_TRACK_SEL	BIT(0)
+>>  #define CORE_DLL_STATUS		0x108
 >>
->>  #define CORE_PWRCTL_STATUS	0xdc
->>  #define CORE_PWRCTL_MASK	0xe0
->> @@ -64,11 +65,18 @@
+>>  #define CORE_DLL_CONFIG_2	0x1b4
+>> @@ -72,8 +73,36 @@
+>>  #define CORE_HC_SELECT_IN_HS400	(6 << 19)
+>>  #define CORE_HC_SELECT_IN_MASK	(7 << 19)
 >>
->>  #define CORE_VENDOR_SPEC	0x10c
->>  #define CORE_CLK_PWRSAVE	BIT(1)
->> +#define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
->> +#define CORE_HC_MCLK_SEL_HS400	(3 << 8)
->> +#define CORE_HC_MCLK_SEL_MASK	(3 << 8)
->> +#define CORE_HC_SELECT_IN_EN	(1 << 18)
->> +#define CORE_HC_SELECT_IN_HS400	(6 << 19)
->> +#define CORE_HC_SELECT_IN_MASK	(7 << 19)
->>
+>> +#define CORE_CSR_CDC_CTLR_CFG0		0x130
+>> +#define CORE_SW_TRIG_FULL_CALIB		BIT(16)
+>> +#define CORE_HW_AUTOCAL_ENA		BIT(17)
+>> +
+>> +#define CORE_CSR_CDC_CTLR_CFG1		0x134
+>> +#define CORE_CSR_CDC_CAL_TIMER_CFG0	0x138
+>> +#define CORE_TIMER_ENA			BIT(16)
+>> +
+>> +#define CORE_CSR_CDC_CAL_TIMER_CFG1	0x13C
+>> +#define CORE_CSR_CDC_REFCOUNT_CFG	0x140
+>> +#define CORE_CSR_CDC_COARSE_CAL_CFG	0x144
+>> +#define CORE_CDC_OFFSET_CFG		0x14C
+>> +#define CORE_CSR_CDC_DELAY_CFG		0x150
+>> +#define CORE_CDC_SLAVE_DDA_CFG		0x160
+>> +#define CORE_CSR_CDC_STATUS0		0x164
+>> +#define CORE_CALIBRATION_DONE		BIT(0)
+>> +
+>> +#define CORE_CDC_ERROR_CODE_MASK	0x7000000
+>> +
+>> +#define CORE_CSR_CDC_GEN_CFG		0x178
+>> +#define CORE_CDC_SWITCH_BYPASS_OFF	BIT(0)
+>> +#define CORE_CDC_SWITCH_RC_EN		BIT(1)
+>> +
+>> +#define CORE_DDR_200_CFG		0x184
+>> +#define CORE_CDC_T4_DLY_SEL		BIT(0)
+>> +#define CORE_START_CDC_TRAFFIC		BIT(6)
+>> +
 >>  #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
 >>
+>> +#define INVALID_TUNING_PHASE	-1
 >>  #define TCXO_FREQ		19200000
 >>  #define SDHCI_MSM_MIN_CLOCK	400000
->> +#define CORE_FREQ_100MHZ	(100 * 1000 * 1000)
->>
->>  #define CDR_SELEXT_SHIFT	20
->>  #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
->> @@ -87,6 +95,8 @@ struct sdhci_msm_host {
->>  	u32 clk_rate;
->>  	struct mmc_host *mmc;
+>>  #define CORE_FREQ_100MHZ	(100 * 1000 * 1000)
+>> @@ -97,6 +126,7 @@ struct sdhci_msm_host {
 >>  	bool use_14lpp_dll_reset;
->> +	bool tuning_done;
->> +	bool calibration_done;
+>>  	bool tuning_done;
+>>  	bool calibration_done;
+>> +	u8 saved_tuning_phase;
 >>  };
 >>
 >>  /* Platform specific tuning */
->> @@ -175,8 +185,8 @@ out:
->>   * Find out the greatest range of consecuitive selected
->>   * DLL clock output phases that can be used as sampling
->>   * setting for SD3.0 UHS-I card read operation (in SDR104
->> - * timing mode) or for eMMC4.5 card read operation (in HS200
->> - * timing mode).
->> + * timing mode) or for eMMC4.5 card read operation (in
->> + * HS400/HS200 timing mode).
->>   * Select the 3/4 of the range and configure the DLL with the
->>   * selected DLL clock output phase.
->>   */
->> @@ -428,9 +438,10 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->>  	 * Tuning is required for SDR104, HS200 and HS400 cards and
->>  	 * if clock frequency is greater than 100MHz in these modes.
->>  	 */
->> -	if (host->clock <= 100 * 1000 * 1000 ||
->> -	    !((ios.timing == MMC_TIMING_MMC_HS200) ||
->> -	      (ios.timing == MMC_TIMING_UHS_SDR104)))
->> +	if (host->clock <= CORE_FREQ_100MHZ ||
->> +		!((ios.timing == MMC_TIMING_MMC_HS400) ||
->> +		(ios.timing == MMC_TIMING_MMC_HS200) ||
->> +		(ios.timing == MMC_TIMING_UHS_SDR104)))
->
-> Don't need () around ios.timing == MMC_TIMING_MMC_HS400 etc
-Sure. Done.
-
->
->>  		return 0;
+>> @@ -426,6 +456,136 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+>>  	return 0;
+>>  }
 >>
->>  retry:
->> @@ -488,7 +499,10 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
->>  					unsigned int uhs)
->>  {
->>  	struct mmc_host *mmc = host->mmc;
+>> +static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>> +{
 >> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 >> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>  	u16 ctrl_2;
->> +	u32 config;
->>
->>  	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>  	/* Select Bus Speed Mode for host */
->> @@ -503,6 +517,7 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
->>  	case MMC_TIMING_UHS_SDR50:
->>  		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
->>  		break;
->> +	case MMC_TIMING_MMC_HS400:
->>  	case MMC_TIMING_MMC_HS200:
->>  	case MMC_TIMING_UHS_SDR104:
->>  		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->> @@ -519,11 +534,33 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
->>  	 * provide feedback clock, the mode selection can be any value less
->>  	 * than 3'b011 in bits [2:0] of HOST CONTROL2 register.
->>  	 */
->> -	if (host->clock <= 100000000 &&
->> -	    (uhs == MMC_TIMING_MMC_HS400 ||
->> -	     uhs == MMC_TIMING_MMC_HS200 ||
->> -	     uhs == MMC_TIMING_UHS_SDR104))
->> -		ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
->> +	if (host->clock <= CORE_FREQ_100MHZ) {
->> +		if ((uhs == MMC_TIMING_MMC_HS400) ||
->> +			(uhs == MMC_TIMING_MMC_HS200) ||
->> +			(uhs == MMC_TIMING_UHS_SDR104))
->> +			ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
->> +		/*
->> +		 * Make sure DLL is disabled when not required
->> +		 *
->> +		 * Write 1 to DLL_RST bit of DLL_CONFIG register
->> +		 */
->> +		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
->> +		config |= CORE_DLL_RST;
->> +		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+>> +	u32 wait_cnt, config;
+>> +	int ret;
 >> +
->> +		/* Write 1 to DLL_PDN bit of DLL_CONFIG register */
->> +		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
->> +		config |= CORE_DLL_PDN;
->> +		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+>> +	pr_debug("%s: Enter %s\n", mmc_hostname(host->mmc), __func__);
 >> +
->> +		wmb(); /* drain writebuffer */
->
-> Memory barrier could use more explanation.
-Ok.
-
->
+>> +	/*
+>> +	 * Retuning in HS400 (DDR mode) will fail, just reset the
+>> +	 * tuning block and restore the saved tuning phase.
+>> +	 */
+>> +	ret = msm_init_cm_dll(host);
+>> +	if (ret)
+>> +		goto out;
 >> +
->> +		/*
->> +		 * The DLL needs to be restored and CDCLP533 recalibrated
->> +		 * when the clock frequency is set back to 400MHz.
->> +		 */
->> +		msm_host->calibration_done = false;
+>> +	/* Set the selected phase in delay line hw block */
+>> +	ret = msm_config_cm_dll_phase(host, msm_host->saved_tuning_phase);
+>> +	if (ret)
+>> +		goto out;
+>> +
+>> +	/* Write 1 to CMD_DAT_TRACK_SEL field in DLL_CONFIG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
+>> +	config |= CORE_CMD_DAT_TRACK_SEL;
+>> +	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+>> +
+>> +	/* Write 0 to CDC_T4_DLY_SEL field in VENDOR_SPEC_DDR200_CFG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>> +	config &= ~CORE_CDC_T4_DLY_SEL;
+>> +	writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>> +
+>> +	/* Write 0 to CDC_SWITCH_BYPASS_OFF field in CORE_CSR_CDC_GEN_CFG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>> +	config &= ~CORE_CDC_SWITCH_BYPASS_OFF;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>> +
+>> +	/* Write 1 to CDC_SWITCH_RC_EN field in CORE_CSR_CDC_GEN_CFG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>> +	config |= CORE_CDC_SWITCH_RC_EN;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>> +
+>> +	/* Write 0 to START_CDC_TRAFFIC field in CORE_DDR200_CFG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>> +	config &= ~CORE_START_CDC_TRAFFIC;
+>> +	writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>> +
+>> +	/*
+>> +	 * Perform CDC Register Initialization Sequence
+>> +	 *
+>> +	 * CORE_CSR_CDC_CTLR_CFG0	0x11800EC
+>> +	 * CORE_CSR_CDC_CTLR_CFG1	0x3011111
+>> +	 * CORE_CSR_CDC_CAL_TIMER_CFG0	0x1201000
+>> +	 * CORE_CSR_CDC_CAL_TIMER_CFG1	0x4
+>> +	 * CORE_CSR_CDC_REFCOUNT_CFG	0xCB732020
+>> +	 * CORE_CSR_CDC_COARSE_CAL_CFG	0xB19
+>> +	 * CORE_CSR_CDC_DELAY_CFG	0x3AC
+>> +	 * CORE_CDC_OFFSET_CFG		0x0
+>> +	 * CORE_CDC_SLAVE_DDA_CFG	0x16334
+>> +	 */
+>> +
+>> +	writel_relaxed(0x11800EC, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +	writel_relaxed(0x3011111, host->ioaddr + CORE_CSR_CDC_CTLR_CFG1);
+>> +	writel_relaxed(0x1201000, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>> +	writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
+>> +	writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
+>> +	writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
+>> +	writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
+>> +	writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
+>> +	writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
+>> +
+>> +	/* CDC HW Calibration */
+>> +
+>> +	/* Write 1 to SW_TRIG_FULL_CALIB field in CORE_CSR_CDC_CTLR_CFG0 */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +	config |= CORE_SW_TRIG_FULL_CALIB;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +
+>> +	/* Write 0 to SW_TRIG_FULL_CALIB field in CORE_CSR_CDC_CTLR_CFG0 */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +	config &= ~CORE_SW_TRIG_FULL_CALIB;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +
+>> +	/* Write 1 to HW_AUTOCAL_ENA field in CORE_CSR_CDC_CTLR_CFG0 */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +	config |= CORE_HW_AUTOCAL_ENA;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>> +
+>> +	/* Write 1 to TIMER_ENA field in CORE_CSR_CDC_CAL_TIMER_CFG0 */
+>> +	config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>> +	config |= CORE_TIMER_ENA;
+>> +	writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>> +
+>> +	wmb(); /* drain writebuffer */
+>> +
+>> +	/* Poll on CALIBRATION_DONE field in CORE_CSR_CDC_STATUS0 to be 1 */
+>> +	wait_cnt = 50;
+>> +	while (!(readl_relaxed(host->ioaddr + CORE_CSR_CDC_STATUS0)
+>> +			& CORE_CALIBRATION_DONE)) {
+>> +		/* max. wait for 50us sec for CALIBRATION_DONE bit to be set */
+>> +		if (--wait_cnt == 0) {
+>> +			pr_err("%s: %s: CDC Calibration was not completed\n",
+>> +				mmc_hostname(host->mmc), __func__);
+>> +			ret = -ETIMEDOUT;
+>> +			goto out;
+>> +		}
+>> +		/* wait for 1us before polling again */
+>> +		udelay(1);
 >> +	}
+>> +
+>> +	/* Verify CDC_ERROR_CODE field in CORE_CSR_CDC_STATUS0 is 0 */
+>> +	ret = readl_relaxed(host->ioaddr + CORE_CSR_CDC_STATUS0)
+>> +			& CORE_CDC_ERROR_CODE_MASK;
+>> +	if (ret) {
+>> +		pr_err("%s: %s: CDC Error Code %d\n",
+>> +			mmc_hostname(host->mmc), __func__, ret);
+>> +		ret = -EINVAL;
+>> +		goto out;
+>> +	}
+>> +
+>> +	/* Write 1 to START_CDC_TRAFFIC field in CORE_DDR200_CFG */
+>> +	config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>> +	config |= CORE_START_CDC_TRAFFIC;
+>> +	writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>> +out:
+>> +	pr_debug("%s: Exit %s, ret:%d\n", mmc_hostname(host->mmc),
+>> +			__func__, ret);
+>> +	return ret;
+>> +}
+>> +
+>>  static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>>  {
+>>  	int tuning_seq_cnt = 3;
+>> @@ -433,6 +593,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>>  	int rc;
+>>  	struct mmc_host *mmc = host->mmc;
+>>  	struct mmc_ios ios = host->mmc->ios;
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
 >>
+>>  	/*
+>>  	 * Tuning is required for SDR104, HS200 and HS400 cards and
+>> @@ -457,6 +619,7 @@ retry:
+>>  		if (rc)
+>>  			return rc;
+>>
+>> +		msm_host->saved_tuning_phase = phase;
+>>  		rc = mmc_send_tuning(mmc, opcode, NULL);
+>>  		if (!rc) {
+>>  			/* Tuning is successful at this tuning point */
+>> @@ -492,6 +655,8 @@ retry:
+>>  		rc = -EIO;
+>>  	}
+>>
+>> +	if (!rc)
+>> +		msm_host->tuning_done = true;
+>>  	return rc;
+>>  }
+>>
+>> @@ -565,6 +730,17 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
 >>  	dev_dbg(mmc_dev(mmc), "%s: clock=%u uhs=%u ctrl_2=0x%x\n",
 >>  		mmc_hostname(host->mmc), host->clock, uhs, ctrl_2);
->> @@ -670,7 +707,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>  	struct mmc_ios curr_ios = host->mmc->ios;
->> -	u32 msm_clock;
->> +	u32 msm_clock, config;
->>  	int rc;
->>
->>  	if (!clock)
->> @@ -691,6 +728,66 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>  	}
->>  	msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
->>
->> +	/*
->> +	 * In general all timing modes are controlled via UHS mode select in
->> +	 * Host Control2 register. eMMC specific HS200/HS400 doesn't have
->> +	 * their respective modes defined here, hence we use these values.
->> +	 *
->> +	 * HS200 - SDR104 (Since they both are equivalent in functionality)
->> +	 * HS400 - This involves multiple configurations
->> +	 *		Initially SDR104 - when tuning is required as HS200
->> +	 *		Then when switching to DDR @ 400MHz (HS400) we use
->> +	 *		the vendor specific HC_SELECT_IN to control the mode.
->> +	 *
->> +	 * In addition to controlling the modes we also need to select the
->> +	 * correct input clock for DLL depending on the mode.
->> +	 *
->> +	 * HS400 - divided clock (free running MCLK/2)
->> +	 * All other modes - default (free running MCLK)
->> +	 */
->> +	if (curr_ios.timing == MMC_TIMING_MMC_HS400) {
->> +		/* Select the divided clock (free running MCLK/2) */
->> +		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
->> +		config &= ~CORE_HC_MCLK_SEL_MASK;
->> +		config |= CORE_HC_MCLK_SEL_HS400;
+>>  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 >> +
->> +		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
->> +		/*
->> +		 * Select HS400 mode using the HC_SELECT_IN from VENDOR SPEC
->> +		 * register
->> +		 */
->> +		if (msm_host->tuning_done && !msm_host->calibration_done) {
->
->
-> In this patch, tuning_done and calibration_done are never true.  Is that
-> intended?
-Select HS400 which is done below should happen only after the tuning is 
-performed. Hence the check of that variable above.
-We set tuning_done = true in the next patch.
-
-Please let me know if any concerns.
-
-Similarly calibration_done is also getting set to true in the next patch.
-
->
->
->> +			/*
->> +			 * Write 0x6 to HC_SELECT_IN and 1 to HC_SELECT_IN_EN
->> +			 * field in VENDOR_SPEC_FUNC
->> +			 */
->> +			config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
->> +			config |= CORE_HC_SELECT_IN_HS400;
->> +			config |= CORE_HC_SELECT_IN_EN;
->> +			writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
->> +		}
->> +	} else {
->> +		/* Select the default clock (free running MCLK) */
->> +		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
->> +		config &= ~CORE_HC_MCLK_SEL_MASK;
->> +		config |= CORE_HC_MCLK_SEL_DFLT;
->> +		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+>> +	spin_unlock_irq(&host->lock);
 >> +
->> +		/*
->> +		 * Disable HC_SELECT_IN to be able to use the UHS mode select
->> +		 * configuration from Host Control2 register for all other
->> +		 * modes.
->> +		 *
->> +		 * Write 0 to HC_SELECT_IN and HC_SELECT_IN_EN field
->> +		 * in VENDOR_SPEC_FUNC
->> +		 */
->> +		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
->> +		config &= ~CORE_HC_SELECT_IN_EN;
->> +		config &= ~CORE_HC_SELECT_IN_MASK;
->> +		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
->> +	}
->> +	wmb(); /* drain writebuffer */
+>> +	/* CDCLP533 HW calibration is only required for HS400 mode*/
+>> +	if (host->clock > CORE_FREQ_100MHZ &&
+>> +	   msm_host->tuning_done && !msm_host->calibration_done &&
+>> +	   (mmc->ios.timing == MMC_TIMING_MMC_HS400))
+>> +		if (!sdhci_msm_cdclp533_calibration(host))
+>> +			msm_host->calibration_done = true;
+>> +
+>> +	spin_lock_irq(&host->lock);
+>>  }
+>>
+>>  static void sdhci_msm_voltage_switch(struct sdhci_host *host)
+>> @@ -907,6 +1083,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>
+>>  	sdhci_msm_populate_dt(&pdev->dev, msm_host);
+>>
+>> +	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
 >
-> Memory barrier could use more explanation.
-Ok. Sure.
+> There is never a check for INVALID_TUNING_PHASE which begs the question: why
+> have it?
+phase value can be between 0x0 to 0xf. So during probe 
+saved_tuning_phase is getting initialized with -1 value.
+
+Let me know if any concern, we can remove it as well.
+But wont it look incorrect if we initialize it with some valid phase 
+value before even tuning is completed?
 
 >
 >> +
->>  	if ((msm_clock != msm_host->clk_rate) && msm_host->clk_table) {
->>  		rc = clk_set_rate(msm_host->clk, msm_clock);
->>  		if (rc) {
->> @@ -876,6 +973,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>  	/* Set HC_MODE_EN bit in HC_MODE register */
->>  	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
->>
->> +	/* Set FF_CLK_SW_RST_DIS bit in HC_MODE register */
->> +	config = readl_relaxed(msm_host->core_mem + CORE_HC_MODE);
->> +	config |= FF_CLK_SW_RST_DIS;
->> +	writel_relaxed(config, msm_host->core_mem + CORE_HC_MODE);
->> +
->>  	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
->>  	dev_dbg(&pdev->dev, "Host Version: 0x%x Vendor Version 0x%x\n",
->>  		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+>>  	/* Setup SDCC bus voter clock. */
+>>  	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>>  	if (!IS_ERR(msm_host->bus_clk)) {
 >>
 >
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
