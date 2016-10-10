@@ -1,45 +1,34 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 3/3] mmc: sdhci-of-arasan: add
- sdhci_arasan_voltage_switch for arasan,5.1
-Date: Mon, 10 Oct 2016 14:38:16 +0200
-Message-ID: <CAPDyKFr4HGkbgOvtyVTUQH90N6SUmirRR-s--2vKPQdg1sEmQg@mail.gmail.com>
-References: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
- <1475216340-15344-3-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: block: add missing header dependencies
+Date: Mon, 10 Oct 2016 14:37:55 +0200
+Message-ID: <CAPDyKFpTB-YM3J3dB7Us0Q_AF2fojm369eZmHw7M2v1ZiWJu2Q@mail.gmail.com>
+References: <1475199459-4775-1-git-send-email-baoyou.xie@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1475216340-15344-3-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1475199459-4775-1-git-send-email-baoyou.xie@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Baoyou Xie <baoyou.xie@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, tang.qiang007@zte.com.cn, xie.baoyou@zte.com.cn, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, han.fei@zte.com.cn, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 September 2016 at 08:19, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> Per the vendor's requirement, we shouldn't do any setting for
-> 1.8V Signaling Enable, otherwise the interaction/behaviour between
-> phy and controller will be undefined. Mostly it works fine if we do
-> that, but we still see failures. Anyway, let's fix it to meet the
-> vendor's requirement. The error log looks like:
+On 30 September 2016 at 03:37, Baoyou Xie <baoyou.xie@linaro.org> wrote:
+> We get 1 warning when building kernel with W=1:
+> drivers/mmc/card/block.c:2147:5: warning: no previous prototype for 'mmc_blk_issue_rq' [-Wmissing-prototypes]
 >
->  [   93.405085] mmc1: unexpected status 0x800900 after switch
->  [   93.408474] mmc1: switch to bus width 1 failed
->  [   93.408482] mmc1: mmc_select_hs200 failed, error -110
->  [   93.408492] mmc1: error -110 during resume (card was removed?)
->  [   93.408705] PM: resume of devices complete after 213.453 msecs
+> In fact, this function is declared in drivers/mmc/card/block.h,
+> so this patch adds missing header dependencies.
 >
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->
-> Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Signed-off-by: Baoyou Xie <baoyou.xie@linaro.org>
 
 Thanks, applied for fixes!
 
@@ -47,62 +36,21 @@ Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/card/block.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> Changes in v3:
-> - add tag from Adrian and Doug
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c333511..0f2cc9f2 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -46,6 +46,7 @@
+>  #include <asm/uaccess.h>
 >
-> Changes in v2: None
+>  #include "queue.h"
+> +#include "block.h"
 >
->  drivers/mmc/host/sdhci-of-arasan.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index da8e40a..1573a8d 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -265,6 +265,28 @@ void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
->         }
->  }
->
-> +static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
-> +                                      struct mmc_ios *ios)
-> +{
-> +       switch (ios->signal_voltage) {
-> +       case MMC_SIGNAL_VOLTAGE_180:
-> +               /*
-> +                * Plese don't switch to 1V8 as arasan,5.1 doesn't
-> +                * actually refer to this setting to indicate the
-> +                * signal voltage and the state machine will be broken
-> +                * actually if we force to enable 1V8. That's something
-> +                * like broken quirk but we could work around here.
-> +                */
-> +               return 0;
-> +       case MMC_SIGNAL_VOLTAGE_330:
-> +       case MMC_SIGNAL_VOLTAGE_120:
-> +               /* We don't support 3V3 and 1V2 */
-> +               break;
-> +       }
-> +
-> +       return -EINVAL;
-> +}
-> +
->  static struct sdhci_ops sdhci_arasan_ops = {
->         .set_clock = sdhci_arasan_set_clock,
->         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> @@ -661,6 +683,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->
->                 host->mmc_host_ops.hs400_enhanced_strobe =
->                                         sdhci_arasan_hs400_enhanced_strobe;
-> +               host->mmc_host_ops.start_signal_voltage_switch =
-> +                                       sdhci_arasan_voltage_switch;
->         }
->
->         ret = sdhci_add_host(host);
+>  MODULE_ALIAS("mmc:block");
+>  #ifdef MODULE_PARAM_PREFIX
 > --
-> 2.3.7
+> 2.7.4
 >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
