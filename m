@@ -1,39 +1,38 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] mmc: core: switch to 1V8 or 1V2 for hs400es mode
-Date: Mon, 10 Oct 2016 14:38:01 +0200
-Message-ID: <CAPDyKFrRGee=g4Nc5Cyb1d1O7Gux3DG4GX=Q-izr+kbz5M+YEw@mail.gmail.com>
-References: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core, annotate cmd_hdr as __le32
+Date: Mon, 10 Oct 2016 14:38:27 +0200
+Message-ID: <CAPDyKFrwTKVPj4=FfhSO4aJXw6UxsBQZ17nHdXoK4GBn8gNQDg@mail.gmail.com>
+References: <20161003085828.15913-1-jslaby@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1475216340-15344-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "# 4.0+" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20161003085828.15913-1-jslaby@suse.cz>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jiri Slaby <jslaby@suse.cz>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 September 2016 at 08:18, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> When introducing hs400es, I didn't notice that we haven't
-> switched voltage to 1V2 or 1V8 for it. That happens to work
-> as the first controller claiming to support hs400es, arasan(5.1),
-> which is designed to only support 1V8. So the voltage is fixed to 1V8.
-> But it actually is wrong, and will not fit for other host controllers.
-> Let's fix it.
++ stable
+
+On 3 October 2016 at 10:58, Jiri Slaby <jslaby@suse.cz> wrote:
+> Commit f68381a70b (mmc: block: fix packed command header endianness)
+> correctly fixed endianness handling of packed_cmd_hdr in
+> mmc_blk_packed_hdr_wrq_prep.
 >
-> Fixes: commit 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> But now, sparse complains about incorrect types:
+> drivers/mmc/card/block.c:1613:27: sparse: incorrect type in assignment (different base types)
+> drivers/mmc/card/block.c:1613:27:    expected unsigned int [unsigned] [usertype] <noident>
+> drivers/mmc/card/block.c:1613:27:    got restricted __le32 [usertype] <noident>
+> ...
 >
-> Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> So annotate cmd_hdr properly using __le32 to make everyone happy.
+>
+> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+
+Checkpatch reported an error regarding the changelog, I fixed it up so
+no worries! I decided to also added a fixes and stable tag.
 
 Thanks, applied for fixes!
 
@@ -41,42 +40,36 @@ Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/card/block.c | 2 +-
+>  drivers/mmc/card/queue.h | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 >
-> Changes in v3:
-> - add Doug's tag
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c3335112e68c..9b71414526e7 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1786,7 +1786,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+>         struct mmc_blk_data *md = mq->data;
+>         struct mmc_packed *packed = mqrq->packed;
+>         bool do_rel_wr, do_data_tag;
+> -       u32 *packed_cmd_hdr;
+> +       __le32 *packed_cmd_hdr;
+>         u8 hdr_blocks;
+>         u8 i = 1;
 >
-> Changes in v2:
-> - fix copy-paste error, mea culpa
+> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> index 3c15a75bae86..342f1e3f301e 100644
+> --- a/drivers/mmc/card/queue.h
+> +++ b/drivers/mmc/card/queue.h
+> @@ -31,7 +31,7 @@ enum mmc_packed_type {
 >
->  drivers/mmc/core/mmc.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3486bc7..f4ed5ac 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1263,6 +1263,16 @@ static int mmc_select_hs400es(struct mmc_card *card)
->                 goto out_err;
->         }
->
-> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_2V)
-> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
-> +
-> +       if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_8V)
-> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-> +
-> +       /* If fails try again during next card power cycle */
-> +       if (err)
-> +               goto out_err;
-> +
->         err = mmc_select_bus_width(card);
->         if (err < 0)
->                 goto out_err;
+>  struct mmc_packed {
+>         struct list_head        list;
+> -       u32                     cmd_hdr[1024];
+> +       __le32                  cmd_hdr[1024];
+>         unsigned int            blocks;
+>         u8                      nr_entries;
+>         u8                      retries;
 > --
-> 2.3.7
+> 2.10.0
 >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
