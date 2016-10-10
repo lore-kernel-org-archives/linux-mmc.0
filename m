@@ -1,76 +1,84 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v5 03/12] mmc: sdhci-msm: add pltfm_data support to get
- clk-rates from DT
-Date: Mon, 10 Oct 2016 21:37:52 +0530
-Message-ID: <1a7f9c09-70a6-da2a-ca84-78a0331e3b4d@codeaurora.org>
-References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
- <1475678440-3525-4-git-send-email-riteshh@codeaurora.org>
- <20161010125738.GA26940@rob-hp-laptop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20161010125738.GA26940@rob-hp-laptop>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, david.brown@linaro.org, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, sboyd@codeaurora.org, bjorn.andersson@linaro.org, pramod.gurav@linaro.org
+From: Aaron Brice <aaron.brice@datasoft.com>
+Subject: [PATCH v2] sdhci-esdhc-imx: Correct two register accesses
+Date: Mon, 10 Oct 2016 11:39:52 -0700
+Message-ID: <1476124792-18441-1-git-send-email-aaron.brice@datasoft.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from p3plsmtpa11-04.prod.phx3.secureserver.net ([68.178.252.105]:57420
+        "EHLO p3plsmtpa11-04.prod.phx3.secureserver.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750708AbcJJSka (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2016 14:40:30 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dave Russell <david.russell@datasoft.com>
 
-Hi Rob,
+ - The DMA error interrupt bit is in a different position as
+   compared to the sdhci standard.  This is accounted for in
+   many cases, but not handled in the case of clearing the
+   INT_STATUS register by writing a 1 to that location.
+ - The HOST_CONTROL register is very different as compared to
+   the sdhci standard.  This is accounted for in the write
+   case, but not when read back out (which it is in the sdhci
+   code).
 
-Thanks for review.
+Signed-off-by: Dave Russell <david.russell@datasoft.com>
+Signed-off-by: Aaron Brice <aaron.brice@datasoft.com>
+Acked-by: Dong Aisheng <aisheng.dong@nxp.com>
+---
+v1 -> v2:
+- rename long_val to val
 
-On 10/10/2016 6:27 PM, Rob Herring wrote:
-> On Wed, Oct 05, 2016 at 08:10:31PM +0530, Ritesh Harjani wrote:
->> This adds support for sdhc-msm controllers to get supported
->> clk-rates from DT. sdhci-msm would need it's own set_clock
->> ops to be implemented. For this, supported clk-rates needs
->> to be populated in sdhci_msm_pltfm_data.
->>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> ---
->>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
->>  drivers/mmc/host/sdhci-msm.c                       | 48 ++++++++++++++++++++++
->>  2 files changed, 49 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index 485483a..6a83b38 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -17,6 +17,7 @@ Required properties:
->>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
->>  	"core"	- SDC MMC clock (MCLK) (required)
->>  	"bus"	- SDCC bus voter clock (optional)
->> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
->
-> Why can't some combination of assigned-clock-rates and querying the
-> clock provider for rates be used here?
- From what I understood, assigned-clock-rates would only work for 
-setting some default clock rates for certain clocks by calling
-of_clk_set_defaults.
+ drivers/mmc/host/sdhci-esdhc-imx.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
 
-Whereas the requirement here is -
-That since SDHC msm directly controls the clk(core clock) at source, 
-it's sdhci-msm driver needs to know the supported clk-rates by the 
-underlying platform to configure the nearest floor value supported on 
-this platform (when the request arrives from the core layer to switch 
-the clock).
-
-Hence the table of clk-rates is provided for sdhci-msm.
-
->
-> Minimally this would need unit suffix and either be made common or have
-> a vendor prefix.
-Sure will this work in that case - "qcom-clk-rates"
-
->
-> Rob
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 1f54fd8..7123ef9 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -346,7 +346,8 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+ 	u32 data;
+ 
+-	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
++	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE ||
++			reg == SDHCI_INT_STATUS)) {
+ 		if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
+ 			/*
+ 			 * Clear and then set D3CD bit to avoid missing the
+@@ -555,6 +556,25 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 	esdhc_clrset_le(host, 0xffff, val, reg);
+ }
+ 
++static u8 esdhc_readb_le(struct sdhci_host *host, int reg)
++{
++	u8 ret;
++	u32 val;
++
++	switch (reg) {
++	case SDHCI_HOST_CONTROL:
++		val = readl(host->ioaddr + reg);
++
++		ret = val & SDHCI_CTRL_LED;
++		ret |= (val >> 5) & SDHCI_CTRL_DMA_MASK;
++		ret |= (val & ESDHC_CTRL_4BITBUS);
++		ret |= (val & ESDHC_CTRL_8BITBUS) << 3;
++		return ret;
++	}
++
++	return readb(host->ioaddr + reg);
++}
++
+ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -947,6 +967,7 @@ static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl_le,
+ 	.read_w = esdhc_readw_le,
++	.read_b = esdhc_readb_le,
+ 	.write_l = esdhc_writel_le,
+ 	.write_w = esdhc_writew_le,
+ 	.write_b = esdhc_writeb_le,
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.7.4
+
