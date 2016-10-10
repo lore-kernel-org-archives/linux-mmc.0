@@ -1,56 +1,77 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: block: add missing header dependencies
-Date: Mon, 10 Oct 2016 14:37:55 +0200
-Message-ID: <CAPDyKFpTB-YM3J3dB7Us0Q_AF2fojm369eZmHw7M2v1ZiWJu2Q@mail.gmail.com>
-References: <1475199459-4775-1-git-send-email-baoyou.xie@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/3] mmc: core: changes frequency to hs_max_dtr when
+ selecting hs400es
+Date: Mon, 10 Oct 2016 14:38:08 +0200
+Message-ID: <CAPDyKFrEdgVruJ7aVa6bpaaT3osS78cRO4uVqzLkMZ1FyuMpBQ@mail.gmail.com>
+References: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
+ <1475216340-15344-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1475199459-4775-1-git-send-email-baoyou.xie@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Baoyou Xie <baoyou.xie@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, tang.qiang007@zte.com.cn, xie.baoyou@zte.com.cn, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, han.fei@zte.com.cn, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1475216340-15344-2-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 September 2016 at 03:37, Baoyou Xie <baoyou.xie@linaro.org> wrote:
-> We get 1 warning when building kernel with W=1:
-> drivers/mmc/card/block.c:2147:5: warning: no previous prototype for 'mmc_blk_issue_rq' [-Wmissing-prototypes]
+On 30 September 2016 at 08:18, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+> Per JESD84-B51 P49, Host need to change frequency to <=52MHz
+> after setting HS_TIMING to 0x1, and host may changes frequency
+> to <= 200MHz after setting HS_TIMING to 0x3. That means the card
+> expects the clock rate to increase from the current used f_init
+> (which is less than 400KHz, but still being less than 52MHz) to
+> 52MHz, otherwise we find some eMMC devices significantly report
+> failure when sending status.
 >
-> In fact, this function is declared in drivers/mmc/card/block.h,
-> so this patch adds missing header dependencies.
+> Reported-by: Xiao Yao <xiaoyao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 >
-> Signed-off-by: Baoyou Xie <baoyou.xie@linaro.org>
+> Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
 Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/card/block.c | 1 +
->  1 file changed, 1 insertion(+)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c333511..0f2cc9f2 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -46,6 +46,7 @@
->  #include <asm/uaccess.h>
+> Changes in v3:
+> - add Doug's tag and fix the wrong page index of spec
 >
->  #include "queue.h"
-> +#include "block.h"
+> Changes in v2:
+> - improve the changelog
 >
->  MODULE_ALIAS("mmc:block");
->  #ifdef MODULE_PARAM_PREFIX
+>  drivers/mmc/core/mmc.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f4ed5ac..39fc5b2 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1282,6 +1282,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>         if (err)
+>                 goto out_err;
+>
+> +       mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> +
+>         err = mmc_switch_status(card);
+>         if (err)
+>                 goto out_err;
 > --
-> 2.7.4
+> 2.3.7
 >
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
