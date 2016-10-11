@@ -1,250 +1,319 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 5/10] dt: bindings: Add bindings for Marvell Xenon SD
- Host Controller
-Date: Mon, 10 Oct 2016 16:34:17 -0500
-Message-ID: <20161010213417.GA11795@rob-hp-laptop>
-References: <cover.990e3503c30c18ecf50dd48bce3d52811f03ca22.1475853198.git-series.gregory.clement@free-electrons.com>
- <fc0ca2b3140287cbccf5c176a12b7dce25d06a47.1475853198.git-series.gregory.clement@free-electrons.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v5 11/12] mmc: sdhci-msm: Add calibration tuning for
+ CDCLP533 circuit
+Date: Tue, 11 Oct 2016 09:39:14 +0300
+Message-ID: <5554e165-4ace-1409-b544-d1cd0a090acf@intel.com>
+References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
+ <1475678440-3525-12-git-send-email-riteshh@codeaurora.org>
+ <183c2e6a-179b-b042-aef9-d1e5cb90b17d@intel.com>
+ <6993d3a2-7961-2507-60d2-153c14e0bc17@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <fc0ca2b3140287cbccf5c176a12b7dce25d06a47.1475853198.git-series.gregory.clement@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Ziji Hu <huziji@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6993d3a2-7961-2507-60d2-153c14e0bc17-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 07, 2016 at 05:22:51PM +0200, Gregory CLEMENT wrote:
-> From: Ziji Hu <huziji@marvell.com>
+On 10/10/16 18:42, Ritesh Harjani wrote:
+> Hi Adrian,
 > 
-> Marvell Xenon SDHC can support eMMC/SD/SDIO.
-> Add Xenon-specific properties.
-> Also add properties for Xenon PHY setting.
+> On 10/10/2016 6:19 PM, Adrian Hunter wrote:
+>> On 05/10/16 17:40, Ritesh Harjani wrote:
+>>> From: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>>
+>>> In HS400 mode a new RCLK is introduced on the interface for read data
+>>> transfers. The eMMC5.0 device transmits the read data to the host with
+>>> respect to rising and falling edges of RCLK. In order to ensure correct
+>>> operation of read data transfers in HS400 mode, the incoming RX data
+>>> needs to be sampled by delayed version of RCLK.
+>>>
+>>> The CDCLP533 delay circuit shifts the RCLK by T/4. It needs to be
+>>> initialized, configured and enabled once during HS400 mode switch and
+>>> when operational voltage/clock is changed.
+>>>
+>>> Signed-off-by: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>> Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci-msm.c | 178
+>>> +++++++++++++++++++++++++++++++++++++++++++
+>>>  1 file changed, 178 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>> index 612fa82..dbf80a9c 100644
+>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>> @@ -57,6 +57,7 @@
+>>>  #define CORE_DLL_PDN        BIT(29)
+>>>  #define CORE_DLL_RST        BIT(30)
+>>>  #define CORE_DLL_CONFIG        0x100
+>>> +#define CORE_CMD_DAT_TRACK_SEL    BIT(0)
+>>>  #define CORE_DLL_STATUS        0x108
+>>>
+>>>  #define CORE_DLL_CONFIG_2    0x1b4
+>>> @@ -72,8 +73,36 @@
+>>>  #define CORE_HC_SELECT_IN_HS400    (6 << 19)
+>>>  #define CORE_HC_SELECT_IN_MASK    (7 << 19)
+>>>
+>>> +#define CORE_CSR_CDC_CTLR_CFG0        0x130
+>>> +#define CORE_SW_TRIG_FULL_CALIB        BIT(16)
+>>> +#define CORE_HW_AUTOCAL_ENA        BIT(17)
+>>> +
+>>> +#define CORE_CSR_CDC_CTLR_CFG1        0x134
+>>> +#define CORE_CSR_CDC_CAL_TIMER_CFG0    0x138
+>>> +#define CORE_TIMER_ENA            BIT(16)
+>>> +
+>>> +#define CORE_CSR_CDC_CAL_TIMER_CFG1    0x13C
+>>> +#define CORE_CSR_CDC_REFCOUNT_CFG    0x140
+>>> +#define CORE_CSR_CDC_COARSE_CAL_CFG    0x144
+>>> +#define CORE_CDC_OFFSET_CFG        0x14C
+>>> +#define CORE_CSR_CDC_DELAY_CFG        0x150
+>>> +#define CORE_CDC_SLAVE_DDA_CFG        0x160
+>>> +#define CORE_CSR_CDC_STATUS0        0x164
+>>> +#define CORE_CALIBRATION_DONE        BIT(0)
+>>> +
+>>> +#define CORE_CDC_ERROR_CODE_MASK    0x7000000
+>>> +
+>>> +#define CORE_CSR_CDC_GEN_CFG        0x178
+>>> +#define CORE_CDC_SWITCH_BYPASS_OFF    BIT(0)
+>>> +#define CORE_CDC_SWITCH_RC_EN        BIT(1)
+>>> +
+>>> +#define CORE_DDR_200_CFG        0x184
+>>> +#define CORE_CDC_T4_DLY_SEL        BIT(0)
+>>> +#define CORE_START_CDC_TRAFFIC        BIT(6)
+>>> +
+>>>  #define CORE_VENDOR_SPEC_CAPABILITIES0    0x11c
+>>>
+>>> +#define INVALID_TUNING_PHASE    -1
+>>>  #define TCXO_FREQ        19200000
+>>>  #define SDHCI_MSM_MIN_CLOCK    400000
+>>>  #define CORE_FREQ_100MHZ    (100 * 1000 * 1000)
+>>> @@ -97,6 +126,7 @@ struct sdhci_msm_host {
+>>>      bool use_14lpp_dll_reset;
+>>>      bool tuning_done;
+>>>      bool calibration_done;
+>>> +    u8 saved_tuning_phase;
+>>>  };
+>>>
+>>>  /* Platform specific tuning */
+>>> @@ -426,6 +456,136 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+>>>      return 0;
+>>>  }
+>>>
+>>> +static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>>> +{
+>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>> +    u32 wait_cnt, config;
+>>> +    int ret;
+>>> +
+>>> +    pr_debug("%s: Enter %s\n", mmc_hostname(host->mmc), __func__);
+>>> +
+>>> +    /*
+>>> +     * Retuning in HS400 (DDR mode) will fail, just reset the
+>>> +     * tuning block and restore the saved tuning phase.
+>>> +     */
+>>> +    ret = msm_init_cm_dll(host);
+>>> +    if (ret)
+>>> +        goto out;
+>>> +
+>>> +    /* Set the selected phase in delay line hw block */
+>>> +    ret = msm_config_cm_dll_phase(host, msm_host->saved_tuning_phase);
+>>> +    if (ret)
+>>> +        goto out;
+>>> +
+>>> +    /* Write 1 to CMD_DAT_TRACK_SEL field in DLL_CONFIG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
+>>> +    config |= CORE_CMD_DAT_TRACK_SEL;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+>>> +
+>>> +    /* Write 0 to CDC_T4_DLY_SEL field in VENDOR_SPEC_DDR200_CFG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>>> +    config &= ~CORE_CDC_T4_DLY_SEL;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>>> +
+>>> +    /* Write 0 to CDC_SWITCH_BYPASS_OFF field in CORE_CSR_CDC_GEN_CFG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>>> +    config &= ~CORE_CDC_SWITCH_BYPASS_OFF;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>>> +
+>>> +    /* Write 1 to CDC_SWITCH_RC_EN field in CORE_CSR_CDC_GEN_CFG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>>> +    config |= CORE_CDC_SWITCH_RC_EN;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_GEN_CFG);
+>>> +
+>>> +    /* Write 0 to START_CDC_TRAFFIC field in CORE_DDR200_CFG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>>> +    config &= ~CORE_START_CDC_TRAFFIC;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>>> +
+>>> +    /*
+>>> +     * Perform CDC Register Initialization Sequence
+>>> +     *
+>>> +     * CORE_CSR_CDC_CTLR_CFG0    0x11800EC
+>>> +     * CORE_CSR_CDC_CTLR_CFG1    0x3011111
+>>> +     * CORE_CSR_CDC_CAL_TIMER_CFG0    0x1201000
+>>> +     * CORE_CSR_CDC_CAL_TIMER_CFG1    0x4
+>>> +     * CORE_CSR_CDC_REFCOUNT_CFG    0xCB732020
+>>> +     * CORE_CSR_CDC_COARSE_CAL_CFG    0xB19
+>>> +     * CORE_CSR_CDC_DELAY_CFG    0x3AC
+>>> +     * CORE_CDC_OFFSET_CFG        0x0
+>>> +     * CORE_CDC_SLAVE_DDA_CFG    0x16334
+>>> +     */
+>>> +
+>>> +    writel_relaxed(0x11800EC, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +    writel_relaxed(0x3011111, host->ioaddr + CORE_CSR_CDC_CTLR_CFG1);
+>>> +    writel_relaxed(0x1201000, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>>> +    writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
+>>> +    writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
+>>> +    writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
+>>> +    writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
+>>> +    writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
+>>> +    writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
+>>> +
+>>> +    /* CDC HW Calibration */
+>>> +
+>>> +    /* Write 1 to SW_TRIG_FULL_CALIB field in CORE_CSR_CDC_CTLR_CFG0 */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +    config |= CORE_SW_TRIG_FULL_CALIB;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +
+>>> +    /* Write 0 to SW_TRIG_FULL_CALIB field in CORE_CSR_CDC_CTLR_CFG0 */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +    config &= ~CORE_SW_TRIG_FULL_CALIB;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +
+>>> +    /* Write 1 to HW_AUTOCAL_ENA field in CORE_CSR_CDC_CTLR_CFG0 */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +    config |= CORE_HW_AUTOCAL_ENA;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>>> +
+>>> +    /* Write 1 to TIMER_ENA field in CORE_CSR_CDC_CAL_TIMER_CFG0 */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>>> +    config |= CORE_TIMER_ENA;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG0);
+>>> +
+>>> +    wmb(); /* drain writebuffer */
+>>> +
+>>> +    /* Poll on CALIBRATION_DONE field in CORE_CSR_CDC_STATUS0 to be 1 */
+>>> +    wait_cnt = 50;
+>>> +    while (!(readl_relaxed(host->ioaddr + CORE_CSR_CDC_STATUS0)
+>>> +            & CORE_CALIBRATION_DONE)) {
+>>> +        /* max. wait for 50us sec for CALIBRATION_DONE bit to be set */
+>>> +        if (--wait_cnt == 0) {
+>>> +            pr_err("%s: %s: CDC Calibration was not completed\n",
+>>> +                mmc_hostname(host->mmc), __func__);
+>>> +            ret = -ETIMEDOUT;
+>>> +            goto out;
+>>> +        }
+>>> +        /* wait for 1us before polling again */
+>>> +        udelay(1);
+>>> +    }
+>>> +
+>>> +    /* Verify CDC_ERROR_CODE field in CORE_CSR_CDC_STATUS0 is 0 */
+>>> +    ret = readl_relaxed(host->ioaddr + CORE_CSR_CDC_STATUS0)
+>>> +            & CORE_CDC_ERROR_CODE_MASK;
+>>> +    if (ret) {
+>>> +        pr_err("%s: %s: CDC Error Code %d\n",
+>>> +            mmc_hostname(host->mmc), __func__, ret);
+>>> +        ret = -EINVAL;
+>>> +        goto out;
+>>> +    }
+>>> +
+>>> +    /* Write 1 to START_CDC_TRAFFIC field in CORE_DDR200_CFG */
+>>> +    config = readl_relaxed(host->ioaddr + CORE_DDR_200_CFG);
+>>> +    config |= CORE_START_CDC_TRAFFIC;
+>>> +    writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>>> +out:
+>>> +    pr_debug("%s: Exit %s, ret:%d\n", mmc_hostname(host->mmc),
+>>> +            __func__, ret);
+>>> +    return ret;
+>>> +}
+>>> +
+>>>  static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>>>  {
+>>>      int tuning_seq_cnt = 3;
+>>> @@ -433,6 +593,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host
+>>> *host, u32 opcode)
+>>>      int rc;
+>>>      struct mmc_host *mmc = host->mmc;
+>>>      struct mmc_ios ios = host->mmc->ios;
+>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>>
+>>>      /*
+>>>       * Tuning is required for SDR104, HS200 and HS400 cards and
+>>> @@ -457,6 +619,7 @@ retry:
+>>>          if (rc)
+>>>              return rc;
+>>>
+>>> +        msm_host->saved_tuning_phase = phase;
+>>>          rc = mmc_send_tuning(mmc, opcode, NULL);
+>>>          if (!rc) {
+>>>              /* Tuning is successful at this tuning point */
+>>> @@ -492,6 +655,8 @@ retry:
+>>>          rc = -EIO;
+>>>      }
+>>>
+>>> +    if (!rc)
+>>> +        msm_host->tuning_done = true;
+>>>      return rc;
+>>>  }
+>>>
+>>> @@ -565,6 +730,17 @@ static void sdhci_msm_set_uhs_signaling(struct
+>>> sdhci_host *host,
+>>>      dev_dbg(mmc_dev(mmc), "%s: clock=%u uhs=%u ctrl_2=0x%x\n",
+>>>          mmc_hostname(host->mmc), host->clock, uhs, ctrl_2);
+>>>      sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+>>> +
+>>> +    spin_unlock_irq(&host->lock);
+>>> +
+>>> +    /* CDCLP533 HW calibration is only required for HS400 mode*/
+>>> +    if (host->clock > CORE_FREQ_100MHZ &&
+>>> +       msm_host->tuning_done && !msm_host->calibration_done &&
+>>> +       (mmc->ios.timing == MMC_TIMING_MMC_HS400))
+>>> +        if (!sdhci_msm_cdclp533_calibration(host))
+>>> +            msm_host->calibration_done = true;
+>>> +
+>>> +    spin_lock_irq(&host->lock);
+>>>  }
+>>>
+>>>  static void sdhci_msm_voltage_switch(struct sdhci_host *host)
+>>> @@ -907,6 +1083,8 @@ static int sdhci_msm_probe(struct platform_device
+>>> *pdev)
+>>>
+>>>      sdhci_msm_populate_dt(&pdev->dev, msm_host);
+>>>
+>>> +    msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+>>
+>> There is never a check for INVALID_TUNING_PHASE which begs the question: why
+>> have it?
+> phase value can be between 0x0 to 0xf. So during probe saved_tuning_phase is
+> getting initialized with -1 value.
 > 
-> Signed-off-by: Hu Ziji <huziji@marvell.com>
-> Reviewed-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
-> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
-> ---
->  Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt | 164 +++++++-
->  MAINTAINERS                                                   |   1 +-
->  2 files changed, 165 insertions(+), 0 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt
+> Let me know if any concern, we can remove it as well.
+> But wont it look incorrect if we initialize it with some valid phase value
+> before even tuning is completed?
+
+INVALID_TUNING_PHASE is fine, I would just expect it be checked e.g. in
+msm_config_cm_dll_phase
+
+	if (phase > 0xf)
+		return -EINVAL;
+
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt b/Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt
-> new file mode 100644
-> index 000000000000..8b25ad28ebbd
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt
-> @@ -0,0 +1,164 @@
-> +Marvell's Xenon SDHCI Controller device tree bindings
-> +This file documents differences between the core mmc properties
-> +described by mmc.txt and the properties used by the Xenon implementation.
-> +
-> +A single Xenon IP can support multiple slots.
-> +Each slot acts as an independent SDHC. It owns independent resources, such
-> +as register sets clock and PHY.
+>>
+>>> +
+>>>      /* Setup SDCC bus voter clock. */
+>>>      msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>>>      if (!IS_ERR(msm_host->bus_clk)) {
+>>>
+>>
+> 
 
-Is the phy really part of the same block?
-
-> +Each slot should have an independent device tree node.
-> +
-> +Required Properties:
-> +- compatible: should be "marvell,sdhci-xenon" or "marvell,armada-3700-sdhci".
-
-Perhaps some consistent ordering (w/ -sdhci on the end).
-
-> +
-> +- Input Clock Name
-
-Your formatting of properties is a bit strange. Please restructure like 
-most bindings so the property names are before all the description.
-
-> +  Some SOCs require additional clock for AXI bus.
-
-Those SoCs should have a specific compatible string and you need to 
-define which compatible strings have 2 clocks vs. 1 clock.
-
-> +  The input clock for Xenon IP core should be named as "core".
-> +  The optional AXI clock should be named as "axi".
-> +  - clocks = <&core_clk>, <&axi_clock>;
-> +  - clock-names = "core", "axi";
-> +
-> +- Register Set Size
-
-Is this a property name?
-
-> +  Different Xenon SDHC release has different register set size.
-> +  The specific size should also refer to the SOC implementation.
-> +
-> +Optional Properties:
-> +- Slot Index
-> +  A single Xenon IP can support multiple slots.
-> +  During initialization, each slot should set corresponding setting bit in
-> +  some Xenon-specific registers. The corresponding bit is determined by
-> +  this property.
-> +  - xenon,slotno = <slot_index>;
-
-Slots should probably be represented as child nodes with the reg 
-property being the slot number.
-
-Also, xenon is not a vendor prefix.
-
-> +  If this property is not provided, Xenon IP should contain only one slot
-> +  and the slot index will be 0x0 by default.
-> +
-> +- PHY Type
-
-You're going to need to come of with a common binding for this.
-
-> +  Xenon support mutilple types of PHYs.
-> +  To select eMMC 5.1 PHY, set:
-> +  - xenon,phy-type = "emmc 5.1 phy"
-> +  eMMC 5.1 PHY is the default choice if this property is not provided.
-> +  To select eMMC 5.0 PHY, set:
-> +  - xenon,phy-type = "emmc 5.0 phy"
-> +  To select SDH PHY, set:
-> +  - xenon,phy-type = "sdh phy"
-> +  Please note that eMMC PHY is a general PHY for eMMC/SD/SDIO, other than for
-> +  eMMC only.
-> +
-> +- Customized eMMC PHY Parameters
-> +  Some boards require different values of some specific eMMC PHY parameters.
-> +  Some SOCs also require specific workaround to set eMMC PHY.
-> +  These properties enable diverse boards to customize the eMMC PHY.
-> +  The supported eMMC PHY parameters are listed in below. All those properties
-> +  are only available for eMMC PHY 5.1 and eMMC PHY 5.0.
-> +  ZNR
-> +  valid range = [0:0x1F].
-> +  ZNR is set as 0xF by default if this property is not provided.
-> +  - xenon,phy-znr = <value>;
-> +
-> +  ZPR
-> +  valid range = [0:0x1F].
-> +  ZPR is set as 0xF by default if this property is not provided.
-> +  - xenon,phy-zpr = <value>;
-
-marvell is the vendor prefix.
-
-> +
-> +  Number of successful tuning times
-> +  Set the number of required consecutive successful sampling points used to
-> +  identify a valid sampling window, in tuning process.
-> +  Valid range = [1:7]. Set as 0x4 by default if this property is not provided.
-> +  - xenon,phy-nr-tun-times = <nr_times>;
-> +
-> +  Divider for TUN_STEP
-> +  Set the divider for calculating TUN_STEP.
-> +  Set as 64 by default if this property is not provided.
-> +  - xenon,phy-tun-step-divider = <divider>;
-> +
-> +  Force PHY into slow mode.
-> +  Only available when bus frequency lower than 50MHz in SDR mde.
-> +  Disabled by default. Please do not enable it unless it is necessary.
-> +  - xenon,phy-slow-mode;
-> +
-> +- Mask Conflict Error Report
-> +  Disable Conflict Error alert on some SOC. Disabled by default.
-> +  xenon,mask-conflict-err;
-> +
-> +- Re-tuning Counter
-> +  Xenon SDHC SOC usually doesn't provide re-tuning counter in
-> +  Capabilities Register 3 Bit[11:8].
-> +  This property provides the re-tuning counter.
-> +  xenon,tuning-count = <count>;
-> +  If this property is not set, default re-tuning counter will
-> +  be set as 0x9 in driver.
-> +
-> +- SOC PHY PAD Voltage Control register
-> +  Some SOCs have SOC PHY PAD Voltage Control register outside Xenon IP.
-> +  This register sets SOC PHY PAD Voltage to keep aligh with Vccq.
-> +  Two properties provide information of this control register.
-> +  These two properties are only valid when "marvell,armada-3700-sdhci"
-> +  is selected. Both of them must be provided when "marvell,armada-3700-sdhci"
-> +  is selected.
-> +  - xenon,pad-type
-> +    Two types: "sd" and "fixed-1-8v".
-> +    If "sd" is slected, SOC PHY PAD is set as 3.3V at the beginning and is
-> +    switched to 1.8V when SD in UHS-I.
-> +    If "fixed-1-8v" is slected, SOC PHY PAD is fixed 1.8V, such as for eMMC.
-
-You should be able to existing, common properties for i/o voltage 
-capabilities/constraints.
-
-> +  - reg
-> +    Physical address and size of SOC PHY PAD register.
-> +    Append after Xenon SDHC register space, as a second register field.
-> +
-> +  Please follow the examples with compatible "marvell,armada-3700-sdhci"
-> +  in below.
-> +
-> +Example:
-> +- For eMMC slot:
-> +
-> +	sdhci@aa0000 {
-> +		compatible = "marvell,sdhci-xenon";
-> +		reg = <0xaa0000 0x1000>;
-> +		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
-> +		clocks = <&emmcclk>;
-> +		clock-names = "core";
-> +		xenon,slotno = <0>;
-> +		xenon,phy-type = "emmc 5.1 phy";
-> +		bus-width = <8>;
-> +		tuning-count = <11>;
-> +	};
-> +
-> +- For SD/SDIO slot:
-> +
-> +	sdhci@ab0000 {
-> +		compatible = "marvell,sdhci-xenon";
-> +		reg = <0xab0000 0x1000>;
-> +		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
-> +		vqmmc-supply = <&sd_regulator>;
-> +		clocks = <&sdclk>;
-> +		clock-names = "core";
-> +		bus-width = <4>;
-> +		tuning-count = <9>;
-> +	};
-> +
-> +- For eMMC slot with compatible "marvell,armada-3700-sdhci":
-> +
-> +	sdhci@aa0000 {
-> +		compatible = "marvell,armada-3700-sdhci";
-> +		reg = <0xaa0000 0x1000>,
-> +		      <phy_addr 0x4>;
-> +		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
-> +		clocks = <&emmcclk>;
-> +		clock-names = "core";
-> +		bus-width = <8>;
-> +
-> +		xenon,pad-type = "fixed-1-8v";
-> +	};
-> +
-> +- For SD/SDIO slot with compatible "marvell,armada-3700-sdhci":
-> +
-> +	sdhci@ab0000 {
-> +		compatible = "marvell,armada-3700-sdhci";
-> +		reg = <0xab0000 0x1000>,
-> +		      <phy_addr 0x4>;
-> +		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
-> +		vqmmc-supply = <&sd_regulator>;
-> +		clocks = <&sdclk>;
-> +		clock-names = "core";
-> +		bus-width = <4>;
-> +
-> +		xenon,pad-type = "sd";
-> +	};
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 89adcd57aa25..4aa0eac9bfc7 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -7582,6 +7582,7 @@ MARVELL XENON MMC/SD/SDIO HOST CONTROLLER DRIVER
->  M:	Ziji Hu <huziji@marvell.com>
->  L:	linux-mmc@vger.kernel.org
->  S:	Supported
-> +F:	Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt
->  
->  MATROX FRAMEBUFFER DRIVER
->  L:	linux-fbdev@vger.kernel.org
-> -- 
-> git-series 0.8.10
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
