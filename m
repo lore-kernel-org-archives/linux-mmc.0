@@ -1,89 +1,33 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v5 03/12] mmc: sdhci-msm: add pltfm_data support to get
- clk-rates from DT
-Date: Tue, 11 Oct 2016 07:31:33 -0500
-Message-ID: <CAL_JsqJbkDX3yAf6EGOcZiN=Fk-cz-7VeQxPK7_YOMyN7Pg0zA@mail.gmail.com>
-References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
- <1475678440-3525-4-git-send-email-riteshh@codeaurora.org> <20161010125738.GA26940@rob-hp-laptop>
- <1a7f9c09-70a6-da2a-ca84-78a0331e3b4d@codeaurora.org> <CAL_JsqKfBjR9sTqzOMdM-ifDJiL_2RNrjAn3cvezvisLqZu-Wg@mail.gmail.com>
- <9db96ae7-9a5e-1494-2371-e5b346a08155@codeaurora.org>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: Enabling MMC BKOPs in kernel based on host caps
+Date: Tue, 11 Oct 2016 09:58:15 +0000
+Message-ID: <AAF8FF3A-FEDF-4A49-B15D-B923DFC1A485@sandisk.com>
+References: <1475491384-15818-1-git-send-email-rk@ti.com>
+ <74289549-5576-c4fc-5270-8820c8654bc5@rock-chips.com>
+ <dfcdad0d-0780-0641-cb0a-46557334fa16@ti.com>
+ <4B194B80-8DE7-4296-914E-00FC1C0A4D66@sandisk.com>
+ <29d94a8f-935e-b313-a562-dc15909b78d1@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <9db96ae7-9a5e-1494-2371-e5b346a08155@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, David Brown <david.brown@linaro.org>, Andy Gross <andy.gross@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Stephen Boyd <sboyd@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, pramod.gurav@linaro.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam02on0062.outbound.protection.outlook.com ([104.47.36.62]:45737
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751547AbcJKMgr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 11 Oct 2016 08:36:47 -0400
+In-Reply-To: <29d94a8f-935e-b313-a562-dc15909b78d1@ti.com>
+Content-Language: en-US
+Content-ID: <101AFA4F00FC2B42A629B1D71FE39000@namprd02.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ravikumar <a0131654@ti.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, Oct 11, 2016 at 4:06 AM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
-> Hi Rob
->
->
-> On 10/11/2016 12:59 AM, Rob Herring wrote:
->>
->> On Mon, Oct 10, 2016 at 11:07 AM, Ritesh Harjani <riteshh@codeaurora.org>
->> wrote:
->>>
->>> Hi Rob,
->>>
->>> Thanks for review.
->>>
->>> On 10/10/2016 6:27 PM, Rob Herring wrote:
->>>>
->>>>
->>>> On Wed, Oct 05, 2016 at 08:10:31PM +0530, Ritesh Harjani wrote:
->>>>>
->>>>>
->>>>> This adds support for sdhc-msm controllers to get supported
->>>>> clk-rates from DT. sdhci-msm would need it's own set_clock
->>>>> ops to be implemented. For this, supported clk-rates needs
->>>>> to be populated in sdhci_msm_pltfm_data.
->>>>>
->>>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->>>>> ---
->>>>>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
->>>>>  drivers/mmc/host/sdhci-msm.c                       | 48
->>>>> ++++++++++++++++++++++
->>>>>  2 files changed, 49 insertions(+)
->>>>>
->>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>> b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>> index 485483a..6a83b38 100644
->>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>> @@ -17,6 +17,7 @@ Required properties:
->>>>>         "iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock)
->>>>> (required)
->>>>>         "core"  - SDC MMC clock (MCLK) (required)
->>>>>         "bus"   - SDCC bus voter clock (optional)
->>>>> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units
->>>>> -
->>>>> Hz.
->>>>
->>>>
->>>>
->>>> Why can't some combination of assigned-clock-rates and querying the
->>>> clock provider for rates be used here?
->>>
->>>
->>> From what I understood, assigned-clock-rates would only work for setting
->>> some default clock rates for certain clocks by calling
->>> of_clk_set_defaults.
->>>
->>> Whereas the requirement here is -
->>> That since SDHC msm directly controls the clk(core clock) at source, it's
->>> sdhci-msm driver needs to know the supported clk-rates by the underlying
->>> platform to configure the nearest floor value supported on this platform
->>> (when the request arrives from the core layer to switch the clock).
->>
->>
->> Why does clk_round_rate not work for you? That will round down to the
->> nearest frequency supported.
->
-> clk_round_rate will round off to nearest supported "ceil" frequency.
-> But we require nearest rounded off "floor" frequency.
-
-Then fix the clk framework to do what you want. This doesn't need to be in DT.
-
-Rob
+SGkgUmF2aWt1bWFyLA0KDQpb4oCmXQ0KDQo+U2hvdWxkIHRoZSBjb2RlIHRvIGVuYWJsZSBCS09Q
+UyBiZSB3cmFwcGVkIGluc2lkZSBhIENPTkZJR19FTkFCTEVfQktPUFMNCj5pbiBvcmRlciB0byBn
+aXZlIHRoZSBpbmRpdmlkdWFsIGFuIG9wdGlvbiB0byBjaGFuZ2UgdGhlIGRlZmF1bHQgYmVoYXZp
+b3I/DQoNCkluIGNhc2UgYm90aCBzdG9yYWdlIGRldmljZSBhbmQgdGhlIGRyaXZlciBkZWNpZGUg
+dG8gZW5hYmxlIEJLT1BTIA0KYmFzZWQgb24gaW50ZXJuYWwgc3RhdHVzLCBwYXJhbXMgYW5kIHJl
+Z2lzdGVycywgSSBkb27igJl0IHRoaW5rIHRoZSB1c2VyIHNob3VsZCANCmhhdmUgc3VjaCBhbiBv
+cHRpb24gaW4gY29uZmlnPw0KQnV0IGFueXdheSwgSSB3b3VsZCBsZXQgVWxmIGFuZCBTaGF3biB0
+byBjb21tZW50IG9uIHRoaXMuDQoNClRoYW5rcywNCkFsZXgNCg0KW+KApl0NCg0KDQo=
