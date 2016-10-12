@@ -1,101 +1,104 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/9] mmc: dw_mmc: add runtime PM callback
-Date: Wed, 12 Oct 2016 10:50:35 +0800
-Message-ID: <1476240643-5701-2-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 2/9] mmc: dw_mmc-rockchip: add runtime PM support
+Date: Wed, 12 Oct 2016 10:50:36 +0800
+Message-ID: <1476240643-5701-3-git-send-email-shawn.lin@rock-chips.com>
 References: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.136]:48894 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.134]:54155 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751171AbcJLCpT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2016 22:45:19 -0400
+        with ESMTP id S1751171AbcJLCp4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2016 22:45:56 -0400
 In-Reply-To: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-This patch add dw_mci_runtime_suspend/resume interfaces
-and expose it to dw_mci variant driver to support runtime
-PM.
+This patch adds runtime PM support for dw_mmc-rockchip.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 ---
 
 Changes in v2:
-- use struct device as argument for runtime callback
+- use dw_mci_runtime_* directly
 
- drivers/mmc/host/dw_mmc.c | 32 ++++++++++++++++++++++++++++++--
- drivers/mmc/host/dw_mmc.h |  4 +++-
- 2 files changed, 33 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc-rockchip.c | 41 +++++++++++++++++++++++++++++++++++---
+ 1 file changed, 38 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4fcbc40..67fa088 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3266,7 +3266,7 @@ EXPORT_SYMBOL(dw_mci_remove);
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 25eae35..0a05ad3 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -13,6 +13,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/dw_mmc.h>
+ #include <linux/of_address.h>
++#include <linux/pm_runtime.h>
+ #include <linux/slab.h>
  
- 
- 
--#ifdef CONFIG_PM_SLEEP
-+#ifdef CONFIG_PM
- /*
-  * TODO: we should probably disable the clock to the card in the suspend path.
-  */
-@@ -3324,7 +3324,35 @@ int dw_mci_resume(struct dw_mci *host)
- 	return 0;
- }
- EXPORT_SYMBOL(dw_mci_resume);
--#endif /* CONFIG_PM_SLEEP */
-+
-+int dw_mci_runtime_suspend(struct device *dev)
-+{
-+	int err = 0;
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	err = dw_mci_suspend(host);
-+	if (err)
-+		return err;
-+
-+	clk_disable_unprepare(host->ciu_clk);
-+
-+	return err;
-+}
-+EXPORT_SYMBOL(dw_mci_runtime_suspend);
-+
-+int dw_mci_runtime_resume(struct device *dev)
-+{
-+	int ret = 0;
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	ret = clk_prepare_enable(host->ciu_clk);
-+	if (ret)
-+		return ret;
-+
-+	return dw_mci_resume(host);
-+}
-+EXPORT_SYMBOL(dw_mci_runtime_resume);
-+#endif /* CONFIG_PM */
- 
- static int __init dw_mci_init(void)
+ #include "dw_mmc.h"
+@@ -325,6 +326,7 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
  {
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index e8cd2de..d14a391 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -234,9 +234,11 @@
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
++	int ret;
  
- extern int dw_mci_probe(struct dw_mci *host);
- extern void dw_mci_remove(struct dw_mci *host);
--#ifdef CONFIG_PM_SLEEP
-+#ifdef CONFIG_PM
- extern int dw_mci_suspend(struct dw_mci *host);
- extern int dw_mci_resume(struct dw_mci *host);
-+extern int dw_mci_runtime_suspend(struct device *device);
-+extern int dw_mci_runtime_resume(struct device *device);
- #endif
+ 	if (!pdev->dev.of_node)
+ 		return -ENODEV;
+@@ -332,16 +334,49 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
+ 	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
+ 	drv_data = match->data;
  
- /**
+-	return dw_mci_pltfm_register(pdev, drv_data);
++	pm_runtime_get_noresume(&pdev->dev);
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++
++	ret = dw_mci_pltfm_register(pdev, drv_data);
++	if (ret) {
++		pm_runtime_disable(&pdev->dev);
++		pm_runtime_set_suspended(&pdev->dev);
++		pm_runtime_put_noidle(&pdev->dev);
++		return ret;
++	}
++
++	pm_runtime_put_autosuspend(&pdev->dev);
++
++	return 0;
+ }
+ 
++static int dw_mci_rockchip_remove(struct platform_device *pdev)
++{
++	pm_runtime_get_sync(&pdev->dev);
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
++
++	return dw_mci_pltfm_remove(pdev);
++}
++
++static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
++	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
++			   dw_mci_runtime_resume,
++			   NULL)
++};
++
+ static struct platform_driver dw_mci_rockchip_pltfm_driver = {
+ 	.probe		= dw_mci_rockchip_probe,
+-	.remove		= dw_mci_pltfm_remove,
++	.remove		= dw_mci_rockchip_remove,
+ 	.driver		= {
+ 		.name		= "dwmmc_rockchip",
+ 		.of_match_table	= dw_mci_rockchip_match,
+-		.pm		= &dw_mci_pltfm_pmops,
++		.pm		= &dw_mci_rockchip_dev_pm_ops,
+ 	},
+ };
+ 
 -- 
 2.3.7
 
