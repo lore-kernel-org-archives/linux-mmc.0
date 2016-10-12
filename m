@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 5/9] mmc: dw_mmc-k3: deploy runtime PM facilities
-Date: Wed, 12 Oct 2016 10:54:40 +0800
-Message-ID: <1476240880-5761-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 6/9] mmc: dw_mmc-exynos: deploy runtime PM facilities
+Date: Wed, 12 Oct 2016 10:55:55 +0800
+Message-ID: <1476240955-5808-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -31,74 +31,71 @@ Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
 Changes in v2:
-- use dw_mci_runtime_* directly
+- minor fix since I change the argument for dw_mci_runtime_*
 
- drivers/mmc/host/dw_mmc-k3.c | 39 +++++++++------------------------------
- 1 file changed, 9 insertions(+), 30 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c | 24 ++++++++++--------------
+ 1 file changed, 10 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 6247894..9821e6b 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -15,6 +15,7 @@
- #include <linux/module.h>
- #include <linux/of_address.h>
- #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 7ab3d74..e2439a1 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -17,6 +17,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
 +#include <linux/pm_runtime.h>
- #include <linux/regmap.h>
- #include <linux/regulator/consumer.h>
+ #include <linux/slab.h>
  
-@@ -162,35 +163,13 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
- 	return dw_mci_pltfm_register(pdev, drv_data);
+ #include "dw_mmc.h"
+@@ -161,20 +162,13 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
+ 		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->cur_slot->flags);
  }
  
 -#ifdef CONFIG_PM_SLEEP
--static int dw_mci_k3_suspend(struct device *dev)
+-static int dw_mci_exynos_suspend(struct device *dev)
 -{
 -	struct dw_mci *host = dev_get_drvdata(dev);
--	int ret;
 -
--	ret = dw_mci_suspend(host);
--	if (!ret)
--		clk_disable_unprepare(host->ciu_clk);
--
--	return ret;
+-	return dw_mci_suspend(host);
 -}
 -
--static int dw_mci_k3_resume(struct device *dev)
--{
--	struct dw_mci *host = dev_get_drvdata(dev);
--	int ret;
--
--	ret = clk_prepare_enable(host->ciu_clk);
--	if (ret) {
--		dev_err(host->dev, "failed to enable ciu clock\n");
--		return ret;
--	}
--
+-static int dw_mci_exynos_resume(struct device *dev)
++#ifdef CONFIG_PM
++static int dw_mci_exynos_runtime_resume(struct device *dev)
+ {
+ 	struct dw_mci *host = dev_get_drvdata(dev);
+ 
+ 	dw_mci_exynos_config_smu(host);
 -	return dw_mci_resume(host);
--}
++	return dw_mci_runtime_resume(dev);
+ }
+ 
+ /**
+@@ -211,10 +205,8 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
+ 	return 0;
+ }
+ #else
+-#define dw_mci_exynos_suspend		NULL
+-#define dw_mci_exynos_resume		NULL
+ #define dw_mci_exynos_resume_noirq	NULL
 -#endif /* CONFIG_PM_SLEEP */
--
--static SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
-+static const struct dev_pm_ops dw_mci_k3_dev_pm_ops = {
++#endif /* CONFIG_PM */
+ 
+ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+ {
+@@ -531,7 +523,11 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
+ }
+ 
+ static const struct dev_pm_ops dw_mci_exynos_pmops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
 +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
 +				pm_runtime_force_resume)
 +	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
-+			   dw_mci_runtime_resume,
++			   dw_mci_exynos_runtime_resume,
 +			   NULL)
-+};
- 
- static struct platform_driver dw_mci_k3_pltfm_driver = {
- 	.probe		= dw_mci_k3_probe,
-@@ -198,7 +177,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
- 	.driver		= {
- 		.name		= "dwmmc_k3",
- 		.of_match_table	= dw_mci_k3_match,
--		.pm		= &dw_mci_k3_pmops,
-+		.pm		= &dw_mci_k3_dev_pm_ops,
- 	},
- };
- 
+ 	.resume_noirq = dw_mci_exynos_resume_noirq,
+ 	.thaw_noirq = dw_mci_exynos_resume_noirq,
+ 	.restore_noirq = dw_mci_exynos_resume_noirq,
 -- 
 2.3.7
