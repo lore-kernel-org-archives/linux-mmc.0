@@ -1,75 +1,104 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 4/9] mmc: dw_mmc: disable biu clk if possible
-Date: Wed, 12 Oct 2016 10:50:38 +0800
-Message-ID: <1476240643-5701-5-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v2 5/9] mmc: dw_mmc-k3: deploy runtime PM facilities
+Date: Wed, 12 Oct 2016 10:54:40 +0800
+Message-ID: <1476240880-5761-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.136]:50366 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751171AbcJLCqj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2016 22:46:39 -0400
-In-Reply-To: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1476240643-5701-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-We could disable biu clk if gpio card detect available,
-or it is a non-removable device.
+Let's migrate it to use runtime PM and remove the system
+PM callback from this driver. With this patch, it could
+handle system PM properly and could also use runtime PM
+if we enable it.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+
 ---
 
-Changes in v2: None
+Changes in v2:
+- use dw_mci_runtime_* directly
 
- drivers/mmc/host/dw_mmc-rockchip.c |  1 +
- drivers/mmc/host/dw_mmc.c          | 13 +++++++++++++
- 2 files changed, 14 insertions(+)
+ drivers/mmc/host/dw_mmc-k3.c | 39 +++++++++------------------------------
+ 1 file changed, 9 insertions(+), 30 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 0a05ad3..9a46e46 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -13,6 +13,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/dw_mmc.h>
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 6247894..9821e6b 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
  #include <linux/of_address.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/pm_runtime.h>
- #include <linux/slab.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/regmap.h>
+ #include <linux/regulator/consumer.h>
  
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 67fa088..297b6c2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3336,6 +3336,11 @@ int dw_mci_runtime_suspend(struct device *dev)
- 
- 	clk_disable_unprepare(host->ciu_clk);
- 
-+	if (host->cur_slot &&
-+	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
-+	     !mmc_card_is_removable(host->cur_slot->mmc)))
-+		clk_disable_unprepare(host->biu_clk);
-+
- 	return err;
+@@ -162,35 +163,13 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
+ 	return dw_mci_pltfm_register(pdev, drv_data);
  }
- EXPORT_SYMBOL(dw_mci_runtime_suspend);
-@@ -3345,6 +3350,14 @@ int dw_mci_runtime_resume(struct device *dev)
- 	int ret = 0;
- 	struct dw_mci *host = dev_get_drvdata(dev);
  
-+	if (host->cur_slot &&
-+	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
-+	     !mmc_card_is_removable(host->cur_slot->mmc))) {
-+		ret = clk_prepare_enable(host->biu_clk);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	ret = clk_prepare_enable(host->ciu_clk);
- 	if (ret)
- 		return ret;
+-#ifdef CONFIG_PM_SLEEP
+-static int dw_mci_k3_suspend(struct device *dev)
+-{
+-	struct dw_mci *host = dev_get_drvdata(dev);
+-	int ret;
+-
+-	ret = dw_mci_suspend(host);
+-	if (!ret)
+-		clk_disable_unprepare(host->ciu_clk);
+-
+-	return ret;
+-}
+-
+-static int dw_mci_k3_resume(struct device *dev)
+-{
+-	struct dw_mci *host = dev_get_drvdata(dev);
+-	int ret;
+-
+-	ret = clk_prepare_enable(host->ciu_clk);
+-	if (ret) {
+-		dev_err(host->dev, "failed to enable ciu clock\n");
+-		return ret;
+-	}
+-
+-	return dw_mci_resume(host);
+-}
+-#endif /* CONFIG_PM_SLEEP */
+-
+-static SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
++static const struct dev_pm_ops dw_mci_k3_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
++	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
++			   dw_mci_runtime_resume,
++			   NULL)
++};
+ 
+ static struct platform_driver dw_mci_k3_pltfm_driver = {
+ 	.probe		= dw_mci_k3_probe,
+@@ -198,7 +177,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
+ 	.driver		= {
+ 		.name		= "dwmmc_k3",
+ 		.of_match_table	= dw_mci_k3_match,
+-		.pm		= &dw_mci_k3_pmops,
++		.pm		= &dw_mci_k3_dev_pm_ops,
+ 	},
+ };
+ 
 -- 
 2.3.7
-
-
