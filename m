@@ -1,93 +1,41 @@
-From: Scott Branden <scott.branden@broadcom.com>
-Subject: [PATCH 2/2] mmc: sdhci-iproc: support standard byte register accesses
-Date: Wed, 12 Oct 2016 11:35:52 -0700
-Message-ID: <1476297352-7812-3-git-send-email-scott.branden@broadcom.com>
-References: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>, Srinath Mannam <srinath.mannam@broadcom.com>
+From: Zach Brown <zach.brown@ni.com>
+Subject: [RFC v2 0/2] Add device tree property and driver behavior for supporting sdhci configurations with broken highspeed.
+Date: Wed, 12 Oct 2016 13:40:54 -0500
+Message-ID: <1476297656-7019-1-git-send-email-zach.brown@ni.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from skprod2.natinst.com ([130.164.80.23]:58623 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933991AbcJLSlF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Oct 2016 14:41:05 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-Add bytewise register accesses support for newer versions of IPROC
-SDHCI controllers.
-Previous sdhci-iproc versions of SDIO controllers
-(such as Raspberry Pi and Cygnus) only allowed for 32-bit register
-accesses.
+Some board configurations can not support sd highspeed mode due to the distance
+between the card slot and the controller. The card and controller report that
+they are capable of highspeed however, so we need a mechanism for specifying
+that the setup is incapable of supporting highspeed mode.
 
-Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
-Signed-off-by: Scott Branden <scott.branden@broadcom.com>
----
- drivers/mmc/host/sdhci-iproc.c | 35 +++++++++++++++++++++++++++++++++--
- 1 file changed, 33 insertions(+), 2 deletions(-)
+The first patch adds documentation about a new devicetree property
+sd-broken-highspeed.
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 7262466..d7046d6 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -143,6 +143,14 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
- }
- 
- static const struct sdhci_ops sdhci_iproc_ops = {
-+	.set_clock = sdhci_set_clock,
-+	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.set_bus_width = sdhci_set_bus_width,
-+	.reset = sdhci_reset,
-+	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+};
-+
-+static const struct sdhci_ops sdhci_iproc_32only_ops = {
- 	.read_l = sdhci_iproc_readl,
- 	.read_w = sdhci_iproc_readw,
- 	.read_b = sdhci_iproc_readb,
-@@ -156,6 +164,28 @@ static const struct sdhci_ops sdhci_iproc_ops = {
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
-+	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
-+	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
-+	.ops = &sdhci_iproc_32only_ops,
-+};
-+
-+static const struct sdhci_iproc_data iproc_cygnus_data = {
-+	.pdata = &sdhci_iproc_cygnus_pltfm_data,
-+	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-+			& SDHCI_MAX_BLOCK_MASK) |
-+		SDHCI_CAN_VDD_330 |
-+		SDHCI_CAN_VDD_180 |
-+		SDHCI_CAN_DO_SUSPEND |
-+		SDHCI_CAN_DO_HISPD |
-+		SDHCI_CAN_DO_ADMA2 |
-+		SDHCI_CAN_DO_SDMA,
-+	.caps1 = SDHCI_DRIVER_TYPE_C |
-+		 SDHCI_DRIVER_TYPE_D |
-+		 SDHCI_SUPPORT_DDR50,
-+	.mmc_caps = MMC_CAP_1_8V_DDR,
-+};
-+
- static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
- 	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
-@@ -182,7 +212,7 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_MISSING_CAPS,
--	.ops = &sdhci_iproc_ops,
-+	.ops = &sdhci_iproc_32only_ops,
- };
- 
- static const struct sdhci_iproc_data bcm2835_data = {
-@@ -194,7 +224,8 @@ static const struct sdhci_iproc_data bcm2835_data = {
- 
- static const struct of_device_id sdhci_iproc_of_match[] = {
- 	{ .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
--	{ .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_data },
-+	{ .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_cygnus_data},
-+	{ .compatible = "brcm,sdhci-iproc", .data = &iproc_data },
- 	{ }
- };
- MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
--- 
-2.5.0
+The second patch keeps the sd controller and card from going into highspeed
+mode when the property is set.
+
+v2:
+ * changed sd-broken-highspeed to broken-highspeed
+ * Removed new quirk, instead read of property when would've checked quirk
+
+Zach Brown (2):
+  sdhci: Add device tree property broken-highspeed
+  sdhci: Prevent SD from doing high-speed timing when broken-highspeed
+    property is set
+
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ drivers/mmc/host/sdhci.c                      | 4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+--
+2.7.4
+
