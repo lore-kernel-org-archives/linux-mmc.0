@@ -1,41 +1,45 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [RFC v2 0/2] Add device tree property and driver behavior for supporting sdhci configurations with broken highspeed.
-Date: Wed, 12 Oct 2016 13:40:54 -0500
-Message-ID: <1476297656-7019-1-git-send-email-zach.brown@ni.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod2.natinst.com ([130.164.80.23]:58623 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933991AbcJLSlF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 12 Oct 2016 14:41:05 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Subject: [RFC v2 1/2] sdhci: Add device tree property broken-highspeed
+Date: Wed, 12 Oct 2016 13:40:55 -0500
+Message-ID: <1476297656-7019-2-git-send-email-zach.brown@ni.com>
+References: <1476297656-7019-1-git-send-email-zach.brown@ni.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1476297656-7019-1-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zach.brown-acOepvfBmUk@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-Some board configurations can not support sd highspeed mode due to the distance
-between the card slot and the controller. The card and controller report that
-they are capable of highspeed however, so we need a mechanism for specifying
-that the setup is incapable of supporting highspeed mode.
+Certain board configurations can make highspeed malfuction due to timing
+issues. In these cases a way is needed to force the controller and card
+into standard speed even if they otherwise appear to be capable of
+highspeed.
 
-The first patch adds documentation about a new devicetree property
-sd-broken-highspeed.
+The broken-highspeed property will let the sdhci driver know that
+highspeed will not work.
 
-The second patch keeps the sd controller and card from going into highspeed
-mode when the property is set.
-
-v2:
- * changed sd-broken-highspeed to broken-highspeed
- * Removed new quirk, instead read of property when would've checked quirk
-
-Zach Brown (2):
-  sdhci: Add device tree property broken-highspeed
-  sdhci: Prevent SD from doing high-speed timing when broken-highspeed
-    property is set
-
+Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+---
  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- drivers/mmc/host/sdhci.c                      | 4 +++-
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ 1 file changed, 2 insertions(+)
 
---
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 8a37782..a2b298c 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -52,6 +52,8 @@ Optional properties:
+ - no-sdio: controller is limited to send sdio cmd during initialization
+ - no-sd: controller is limited to send sd cmd during initialization
+ - no-mmc: controller is limited to send mmc cmd during initialization
++- broken-highspeed: Highspeed is broken, even if the controller and card
++  themselves claim they support highspeed.
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+-- 
 2.7.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
