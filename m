@@ -1,71 +1,101 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 0/9] Init runtime PM support for dw_mmc
-Date: Wed, 12 Oct 2016 10:50:34 +0800
-Message-ID: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 1/9] mmc: dw_mmc: add runtime PM callback
+Date: Wed, 12 Oct 2016 10:50:35 +0800
+Message-ID: <1476240643-5701-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:40058 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.136]:48894 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751171AbcJLCor (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2016 22:44:47 -0400
+        with ESMTP id S1751171AbcJLCpT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2016 22:45:19 -0400
+In-Reply-To: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
+This patch add dw_mci_runtime_suspend/resume interfaces
+and expose it to dw_mci variant driver to support runtime
+PM.
 
-Hi Jaehoon and Ulf,
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-   This patch is gonna support runtime PM for dw_mmc.
-It could support to disable ciu_clk by default and disable
-biu_clk if the devices are non-removeable, or removeable
-with gpio-base card detect.
-
-   Then I remove the system PM since the runtime PM actually
-does the same thing as it. So I help migrate the dw_mmc variant
-drivers to use runtime PM pairs and pm_runtime_force_*. Note
-that I only enable runtime PM for dw_mmc-rockchip as I will
-leave the decision to the owners of the corresponding drivers.
-I just tested it on my RK3288 platform with linux-next to make
-the runtime PM and system PM work fine for my emmc, sd card and
-sdio. But I don't have hardware to help test other variant drivers.
-But in theory it should work fine as I mentioned that the runtime
-PM does the same thing as system PM except for disabling ciu_clk
-aggressively which should not be related to the variant hosts.
-
-   As you could see that I just extend the slot-gpio a bit, so the
-ideal way is Ulf could pick them up with Jaehoon's ack. :)
-
+---
 
 Changes in v2:
 - use struct device as argument for runtime callback
-- use dw_mci_runtime_* directly
-- use dw_mci_runtime_* directly
-- minor fix since I change the argument for dw_mci_runtime_*
-- use dw_mci_runtime_* directly
-- use dw_mci_runtime_* directly
 
-Shawn Lin (9):
-  mmc: dw_mmc: add runtime PM callback
-  mmc: dw_mmc-rockchip: add runtime PM support
-  mmc: core: expose the capability of gpio card detect
-  mmc: dw_mmc: disable biu clk if possible
-  mmc: dw_mmc-k3: deploy runtime PM facilities
-  mmc: dw_mmc-exynos: deploy runtime PM facilities
-  mmc: dw_mmc-pci: deploy runtime PM facilities
-  mmc: dw_mmc-pltfm: deploy runtime PM facilities
-  mmc: dw_mmc: remove system PM callback
+ drivers/mmc/host/dw_mmc.c | 32 ++++++++++++++++++++++++++++++--
+ drivers/mmc/host/dw_mmc.h |  4 +++-
+ 2 files changed, 33 insertions(+), 3 deletions(-)
 
- drivers/mmc/core/slot-gpio.c       |  8 +++++++
- drivers/mmc/host/dw_mmc-exynos.c   | 24 +++++++++-----------
- drivers/mmc/host/dw_mmc-k3.c       | 39 ++++++++------------------------
- drivers/mmc/host/dw_mmc-pci.c      | 29 ++++++++----------------
- drivers/mmc/host/dw_mmc-pltfm.c    | 28 +++++++----------------
- drivers/mmc/host/dw_mmc-rockchip.c | 42 +++++++++++++++++++++++++++++++---
- drivers/mmc/host/dw_mmc.c          | 46 +++++++++++++++++++++++++-------------
- drivers/mmc/host/dw_mmc.h          |  6 ++---
- include/linux/mmc/slot-gpio.h      |  1 +
- 9 files changed, 117 insertions(+), 106 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 4fcbc40..67fa088 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3266,7 +3266,7 @@ EXPORT_SYMBOL(dw_mci_remove);
+ 
+ 
+ 
+-#ifdef CONFIG_PM_SLEEP
++#ifdef CONFIG_PM
+ /*
+  * TODO: we should probably disable the clock to the card in the suspend path.
+  */
+@@ -3324,7 +3324,35 @@ int dw_mci_resume(struct dw_mci *host)
+ 	return 0;
+ }
+ EXPORT_SYMBOL(dw_mci_resume);
+-#endif /* CONFIG_PM_SLEEP */
++
++int dw_mci_runtime_suspend(struct device *dev)
++{
++	int err = 0;
++	struct dw_mci *host = dev_get_drvdata(dev);
++
++	err = dw_mci_suspend(host);
++	if (err)
++		return err;
++
++	clk_disable_unprepare(host->ciu_clk);
++
++	return err;
++}
++EXPORT_SYMBOL(dw_mci_runtime_suspend);
++
++int dw_mci_runtime_resume(struct device *dev)
++{
++	int ret = 0;
++	struct dw_mci *host = dev_get_drvdata(dev);
++
++	ret = clk_prepare_enable(host->ciu_clk);
++	if (ret)
++		return ret;
++
++	return dw_mci_resume(host);
++}
++EXPORT_SYMBOL(dw_mci_runtime_resume);
++#endif /* CONFIG_PM */
+ 
+ static int __init dw_mci_init(void)
+ {
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index e8cd2de..d14a391 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -234,9 +234,11 @@
+ 
+ extern int dw_mci_probe(struct dw_mci *host);
+ extern void dw_mci_remove(struct dw_mci *host);
+-#ifdef CONFIG_PM_SLEEP
++#ifdef CONFIG_PM
+ extern int dw_mci_suspend(struct dw_mci *host);
+ extern int dw_mci_resume(struct dw_mci *host);
++extern int dw_mci_runtime_suspend(struct device *device);
++extern int dw_mci_runtime_resume(struct device *device);
+ #endif
+ 
+ /**
 -- 
 2.3.7
 
