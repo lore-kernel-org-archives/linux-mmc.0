@@ -1,68 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
 Subject: Re: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
-Date: Thu, 13 Oct 2016 09:36:05 +0200
-Message-ID: <CAPDyKFoAxiYWYOYZeYByXOwbK_k0Mgq_LCCqp3t2NJJmV4p1kQ@mail.gmail.com>
-References: <1472706726-893-1-git-send-email-alex.lemberg@sandisk.com>
+Date: Thu, 13 Oct 2016 16:30:26 +0800
+Message-ID: <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
+ <1472739890-3384-2-git-send-email-alex.lemberg@sandisk.com>
+ <cc6129e7-5250-8c2e-73e0-1134e2a7146d@rock-chips.com>
+ <2D82096E-231C-43BA-801D-381F8191F26C@sandisk.com>
+ <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:34296 "EHLO
-        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751061AbcJMIGP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 04:06:15 -0400
-Received: by mail-qk0-f170.google.com with SMTP id f128so70440119qkb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2016 01:05:21 -0700 (PDT)
-In-Reply-To: <1472706726-893-1-git-send-email-alex.lemberg@sandisk.com>
+Received: from lucky1.263xmail.com ([211.157.147.135]:37699 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752514AbcJMImI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 04:42:08 -0400
+In-Reply-To: <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "alex.lemberg" <alex.lemberg@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Avi Shchislowski <avi.shchislowski@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-On 1 September 2016 at 07:12, alex.lemberg <alex.lemberg@sandisk.com> wrote:
-> Add MMC_AUTOSUSPEND_DELAY_MS define
+在 2016/10/13 15:36, Ulf Hansson 写道:
+> On 4 September 2016 at 15:30, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+>> Hi Shawn,
+>>
+>> On 9/2/16, 10:39 AM, "Shawn Lin" <shawn.lin@rock-chips.com> wrote:
+>>
+>>> Hi
+>>>
+>>> On 2016/9/1 22:24, alex lemberg wrote:
+>>>> Add MMC_AUTOSUSPEND_DELAY_MS define
+>>>
+>>> I'm thinking should we expose it to userspace
+>>> via sysfs, since I don't know why it should be 3ms, not 4ms, 5ms, etc.
+>>
+>> Agree, we can consider exposing it to the user space.
+>> The exposure to the user space is less critical to the current
+>> patchset, but we can do it as a “follow-up change” once its approved.
 >
-> Signed-off-by: alex.lemberg <alex.lemberg@sandisk.com>
-> ---
->  drivers/mmc/card/block.c | 3 ++-
->  include/linux/mmc/host.h | 2 ++
->  2 files changed, 4 insertions(+), 1 deletion(-)
+> No need for that, is already available for user-space. :-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 48a5dd7..f4386ed 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2610,7 +2610,8 @@ static int mmc_blk_probe(struct mmc_card *card)
->                         goto out;
->         }
+> Each device with runtime PM autosuspend enabled, allows userspace to
+> change the delay via the "autosuspend_delay_ms" sysfs file.
+
+Indeed， I just check it when enabling runtime PM for dw_mmc and could
+able to change the value of autosuspend_delay_ms.
+
+Thanks for sharing this.
+
 >
-> -       pm_runtime_set_autosuspend_delay(&card->dev, 3000);
-> +       pm_runtime_set_autosuspend_delay(&card->dev,
-> +               MMC_RUNTIME_SUSPEND_DELAY_MS);
->         pm_runtime_use_autosuspend(&card->dev);
->
->         /*
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index aa4bfbf..8cb8218 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -22,6 +22,8 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/pm.h>
->
-> +#define MMC_RUNTIME_SUSPEND_DELAY_MS   3000
-> +
->  struct mmc_ios {
->         unsigned int    clock;                  /* clock rate */
->         unsigned short  vdd;
+> Kind regards
+> Uffe
 > --
-> 1.9.1
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 
-Actually, I don't mind having hardcoded values like this one directly
-in the code. Especially since it's used only at one single place and
-because it's not a magic number.
 
-Although, if really feel strong about this, I can apply it.
+-- 
+Best Regards
+Shawn Lin
 
-Kind regards
-Uffe
