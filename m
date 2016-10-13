@@ -1,65 +1,49 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
-Date: Thu, 13 Oct 2016 16:30:26 +0800
-Message-ID: <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
-References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
- <1472739890-3384-2-git-send-email-alex.lemberg@sandisk.com>
- <cc6129e7-5250-8c2e-73e0-1134e2a7146d@rock-chips.com>
- <2D82096E-231C-43BA-801D-381F8191F26C@sandisk.com>
- <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 1/6] mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when unused
+Date: Thu, 13 Oct 2016 13:37:35 +0200
+Message-ID: <1476358660-8338-2-git-send-email-ulf.hansson@linaro.org>
+References: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:37699 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752514AbcJMImI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 04:42:08 -0400
-In-Reply-To: <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:33435 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754315AbcJMLia (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 07:38:30 -0400
+Received: by mail-lf0-f45.google.com with SMTP id x79so135043890lff.0
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2016 04:37:55 -0700 (PDT)
+In-Reply-To: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ritesh Raj Sarraf <rrs@researchut.com>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, USB list <linux-usb@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>, stable@vger.kernel.org
 
-在 2016/10/13 15:36, Ulf Hansson 写道:
-> On 4 September 2016 at 15:30, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
->> Hi Shawn,
->>
->> On 9/2/16, 10:39 AM, "Shawn Lin" <shawn.lin@rock-chips.com> wrote:
->>
->>> Hi
->>>
->>> On 2016/9/1 22:24, alex lemberg wrote:
->>>> Add MMC_AUTOSUSPEND_DELAY_MS define
->>>
->>> I'm thinking should we expose it to userspace
->>> via sysfs, since I don't know why it should be 3ms, not 4ms, 5ms, etc.
->>
->> Agree, we can consider exposing it to the user space.
->> The exposure to the user space is less critical to the current
->> patchset, but we can do it as a “follow-up change” once its approved.
->
-> No need for that, is already available for user-space. :-)
->
-> Each device with runtime PM autosuspend enabled, allows userspace to
-> change the delay via the "autosuspend_delay_ms" sysfs file.
+The rtsx_usb_sdmmc driver may bail out in its ->set_ios() callback when no
+SD card is inserted. This is wrong, as it could cause the device to remain
+runtime resumed when it's unused. Fix this behaviour.
 
-Indeed， I just check it when enabling runtime PM for dw_mmc and could
-able to change the value of autosuspend_delay_ms.
+Tested-by: Ritesh Raj Sarraf <rrs@researchut.com>
+Cc: <stable@vger.kernel.org>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
-Thanks for sharing this.
-
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 4106295..e0b8590 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -1138,11 +1138,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	dev_dbg(sdmmc_dev(host), "%s\n", __func__);
+ 	mutex_lock(&ucr->dev_mutex);
+ 
+-	if (rtsx_usb_card_exclusive_check(ucr, RTSX_USB_SD_CARD)) {
+-		mutex_unlock(&ucr->dev_mutex);
+-		return;
+-	}
+-
+ 	sd_set_power_mode(host, ios->power_mode);
+ 	sd_set_bus_width(host, ios->bus_width);
+ 	sd_set_timing(host, ios->timing, &host->ddr_mode);
 -- 
-Best Regards
-Shawn Lin
+1.9.1
 
