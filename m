@@ -1,52 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 3/6] memstick: rtsx_usb_ms: Runtime resume the device when polling for cards
-Date: Thu, 13 Oct 2016 13:37:37 +0200
-Message-ID: <1476358660-8338-4-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 4/6] memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
+Date: Thu, 13 Oct 2016 13:37:38 +0200
+Message-ID: <1476358660-8338-5-git-send-email-ulf.hansson@linaro.org>
 References: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
-Sender: stable-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Ritesh Raj Sarraf <rrs@researchut.com>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, USB list <linux-usb@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Alan Stern <stern@rowland.harvard.edu>
-
 Accesses to the rtsx usb device, which is the parent of the rtsx memstick
-device, must not be done unless it's runtime resumed.
+device, must not be done unless it's runtime resumed. This is currently not
+the case and it could trigger various errors.
 
-Therefore when the rtsx_usb_ms driver polls for inserted memstick cards,
-let's add pm_runtime_get|put*() to make sure accesses is done when the
-rtsx usb device is runtime resumed.
+Fix this by properly deal with runtime PM in this regards. This means
+making sure the device is runtime resumed, when serving requests via the
+->request() callback or changing settings via the ->set_param() callbacks.
 
-Reported-by: Ritesh Raj Sarraf <rrs@researchut.com>
-Tested-by: Ritesh Raj Sarraf <rrs@researchut.com>
-Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
 Cc: <stable@vger.kernel.org>
+Cc: Ritesh Raj Sarraf <rrs@researchut.com>
+Cc: Alan Stern <stern@rowland.harvard.edu>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/memstick/host/rtsx_usb_ms.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/memstick/host/rtsx_usb_ms.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-index d34bc35..1b99489 100644
+index 1b99489..2e3cf01 100644
 --- a/drivers/memstick/host/rtsx_usb_ms.c
 +++ b/drivers/memstick/host/rtsx_usb_ms.c
-@@ -681,6 +681,7 @@ static int rtsx_usb_detect_ms_card(void *__host)
- 	int err;
+@@ -524,6 +524,7 @@ static void rtsx_usb_ms_handle_req(struct work_struct *work)
+ 	int rc;
  
- 	for (;;) {
+ 	if (!host->req) {
 +		pm_runtime_get_sync(ms_dev(host));
- 		mutex_lock(&ucr->dev_mutex);
- 
- 		/* Check pending MS card changes */
-@@ -703,6 +704,7 @@ static int rtsx_usb_detect_ms_card(void *__host)
- 		}
- 
- poll_again:
+ 		do {
+ 			rc = memstick_next_req(msh, &host->req);
+ 			dev_dbg(ms_dev(host), "next req %d\n", rc);
+@@ -544,6 +545,7 @@ static void rtsx_usb_ms_handle_req(struct work_struct *work)
+ 						host->req->error);
+ 			}
+ 		} while (!rc);
 +		pm_runtime_put(ms_dev(host));
- 		if (host->eject)
- 			break;
+ 	}
  
+ }
+@@ -570,6 +572,7 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
+ 	dev_dbg(ms_dev(host), "%s: param = %d, value = %d\n",
+ 			__func__, param, value);
+ 
++	pm_runtime_get_sync(ms_dev(host));
+ 	mutex_lock(&ucr->dev_mutex);
+ 
+ 	err = rtsx_usb_card_exclusive_check(ucr, RTSX_USB_MS_CARD);
+@@ -635,6 +638,7 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
+ 	}
+ out:
+ 	mutex_unlock(&ucr->dev_mutex);
++	pm_runtime_put(ms_dev(host));
+ 
+ 	/* power-on delay */
+ 	if (param == MEMSTICK_POWER && value == MEMSTICK_POWER_ON)
 -- 
 1.9.1
