@@ -1,99 +1,140 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] sdhci-esdhc-imx: Correct two register accesses
-Date: Thu, 13 Oct 2016 09:01:29 +0200
-Message-ID: <CAPDyKFpxi0yLSjdSFQSJarBssFyBZ0JDQ518ACLtpfUB3Wp1wA@mail.gmail.com>
-References: <1476124792-18441-1-git-send-email-aaron.brice@datasoft.com>
+Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Thu, 13 Oct 2016 09:36:23 +0200
+Message-ID: <CAPDyKFpmbwNvx+00h=Aq-UAb9OLDtxrwr7N408L2pokxX+zgug@mail.gmail.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com> <1472739890-3384-4-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:35197 "EHLO
-        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750976AbcJMHCE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 03:02:04 -0400
-Received: by mail-lf0-f43.google.com with SMTP id l131so84989823lfl.2
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2016 00:01:32 -0700 (PDT)
-In-Reply-To: <1476124792-18441-1-git-send-email-aaron.brice@datasoft.com>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:35240 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751195AbcJMHiN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2016 03:38:13 -0400
+Received: by mail-qk0-f171.google.com with SMTP id z190so72073705qkc.2
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2016 00:36:25 -0700 (PDT)
+In-Reply-To: <1472739890-3384-4-git-send-email-alex.lemberg@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Brice <aaron.brice@datasoft.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Dave Russell <david.russell@datasoft.com>
+To: alex lemberg <alex.lemberg@sandisk.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-On 10 October 2016 at 20:39, Aaron Brice <aaron.brice@datasoft.com> wrote:
+On 1 September 2016 at 16:24, alex lemberg <alex.lemberg@sandisk.com> wrote:
+> Rescheduling Suspend in case of BKOPS Level >= 1
+> in order to let eMMC device to complete its internal GC.
+> Applicable for Runtime Suspend Only.
 >
->  - The DMA error interrupt bit is in a different position as
->    compared to the sdhci standard.  This is accounted for in
->    many cases, but not handled in the case of clearing the
->    INT_STATUS register by writing a 1 to that location.
->  - The HOST_CONTROL register is very different as compared to
->    the sdhci standard.  This is accounted for in the write
->    case, but not when read back out (which it is in the sdhci
->    code).
->
-> Signed-off-by: Dave Russell <david.russell@datasoft.com>
-> Signed-off-by: Aaron Brice <aaron.brice@datasoft.com>
-> Acked-by: Dong Aisheng <aisheng.dong@nxp.com>
+> Signed-off-by: alex lemberg <alex.lemberg@sandisk.com>
 > ---
+>  drivers/mmc/core/mmc.c  | 30 +++++++++++++++++++++++-------
+>  include/linux/mmc/mmc.h |  1 +
+>  2 files changed, 24 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index e2e987f..c4c6326 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1904,7 +1904,8 @@ static void mmc_detect(struct mmc_host *host)
+>         }
+>  }
+>
+> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +       bool is_runtime_pm)
+>  {
+>         int err = 0;
+>         unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+> @@ -1918,10 +1919,25 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>         if (mmc_card_suspended(host->card))
+>                 goto out;
+>
+> -       if (mmc_card_doing_bkops(host->card)) {
+> -               err = mmc_stop_bkops(host->card);
+> -               if (err)
+> +       if (mmc_card_doing_bkops(host->card) ||
+> +               host->card->ext_csd.auto_bkops_en) {
+> +               err = mmc_read_bkops_status(host->card);
+> +               if (err) {
+> +                       pr_err("%s: error %d reading BKOPS Status\n",
+> +                               mmc_hostname(host), err);
+> +                       goto out;
+> +               }
 
-Thanks, applied for fixes!
+I would appreciate some simple comment of what you want to do here below.
+
+> +               if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
+> +                               EXT_CSD_BKOPS_LEVEL_1) {
+> +                       pm_schedule_suspend(&host->card->dev,
+> +                               MMC_RUNTIME_SUSPEND_DELAY_MS);
+>                         goto out;
+
+If I understand correctly, you would like to abort the runtime suspend
+and allow the background operations to complete. That seems
+reasonable, although in such case you need to return -EBUSY from this
+function.
+Moreover, perhaps we should discuss at what BKOPS_LEVEL* we should
+allow to abort.
+
+> +               }
+> +               if (mmc_card_doing_bkops(host->card)) {
+> +                       err = mmc_stop_bkops(host->card);
+> +                       if (err)
+> +                               goto out;
+> +               }
+>         }
+>
+>         err = mmc_flush_cache(host->card);
+> @@ -1952,7 +1968,7 @@ static int mmc_suspend(struct mmc_host *host)
+>  {
+>         int err;
+>
+> -       err = _mmc_suspend(host, true);
+> +       err = _mmc_suspend(host, true, false);
+>         if (!err) {
+>                 pm_runtime_disable(&host->card->dev);
+>                 pm_runtime_set_suspended(&host->card->dev);
+> @@ -2002,7 +2018,7 @@ static int mmc_shutdown(struct mmc_host *host)
+>                 err = _mmc_resume(host);
+>
+>         if (!err)
+> -               err = _mmc_suspend(host, false);
+> +               err = _mmc_suspend(host, false, false);
+>
+>         return err;
+>  }
+> @@ -2026,7 +2042,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+>         if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+>                 return 0;
+>
+> -       err = _mmc_suspend(host, true);
+> +       err = _mmc_suspend(host, true, true);
+>         if (err)
+>                 pr_err("%s: error %d doing aggressive suspend\n",
+>                         mmc_hostname(host), err);
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 0fe3908..0f08d5c 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -430,6 +430,7 @@ struct _mmc_csd {
+>  /*
+>   * BKOPS status level
+>   */
+> +#define EXT_CSD_BKOPS_LEVEL_1          0x1
+>  #define EXT_CSD_BKOPS_LEVEL_2          0x2
+>
+>  /*
+> --
+> 1.9.1
+>
+
+Another idea I had, was to actually make use of that we know the card
+will be inactive. So instead of checking if there is an ongoing BKOPS
+(mmc_card_doing_bkops()), in case of the manual BKOPS, we could
+potentially check the needed BKOPS LEVEL and schedule a BKOPS to
+start. In other words, do manual BKOPS when the card is idle.
+
+Of course, one need to be able to interrupt/cancel the BKOPS if there
+is a new request that needs to be managed. I am not sure how we can
+achieve that, but I hope you get the idea.
 
 Kind regards
 Uffe
-
->
-> v1 -> v2:
-> - rename long_val to val
->
->  drivers/mmc/host/sdhci-esdhc-imx.c | 23 ++++++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 1f54fd8..7123ef9 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -346,7 +346,8 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
->         struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
->         u32 data;
->
-> -       if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
-> +       if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE ||
-> +                       reg == SDHCI_INT_STATUS)) {
->                 if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
->                         /*
->                          * Clear and then set D3CD bit to avoid missing the
-> @@ -555,6 +556,25 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->         esdhc_clrset_le(host, 0xffff, val, reg);
->  }
->
-> +static u8 esdhc_readb_le(struct sdhci_host *host, int reg)
-> +{
-> +       u8 ret;
-> +       u32 val;
-> +
-> +       switch (reg) {
-> +       case SDHCI_HOST_CONTROL:
-> +               val = readl(host->ioaddr + reg);
-> +
-> +               ret = val & SDHCI_CTRL_LED;
-> +               ret |= (val >> 5) & SDHCI_CTRL_DMA_MASK;
-> +               ret |= (val & ESDHC_CTRL_4BITBUS);
-> +               ret |= (val & ESDHC_CTRL_8BITBUS) << 3;
-> +               return ret;
-> +       }
-> +
-> +       return readb(host->ioaddr + reg);
-> +}
-> +
->  static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -947,6 +967,7 @@ static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->  static struct sdhci_ops sdhci_esdhc_ops = {
->         .read_l = esdhc_readl_le,
->         .read_w = esdhc_readw_le,
-> +       .read_b = esdhc_readb_le,
->         .write_l = esdhc_writel_le,
->         .write_w = esdhc_writew_le,
->         .write_b = esdhc_writeb_le,
-> --
-> 2.7.4
->
