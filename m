@@ -1,74 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 0/6] mmc/memstick: rtsx_usb: Fix runtime PM issues
-Date: Thu, 13 Oct 2016 13:37:34 +0200
-Message-ID: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 2/6] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
+Date: Thu, 13 Oct 2016 13:37:36 +0200
+Message-ID: <1476358660-8338-3-git-send-email-ulf.hansson@linaro.org>
+References: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ritesh Raj Sarraf <rrs@researchut.com>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, USB list <linux-usb@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
+Cc: Ritesh Raj Sarraf <rrs@researchut.com>, Alan Stern <stern@rowland.harvard.edu>, Oliver Neukum <oneukum@suse.com>, USB list <linux-usb@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The rtsx_usb_sdmmc (mmc/sd) and rtsx_usb_ms (memstick) devices are interfacing
-an rtsx_usb device (managed by an mfd driver) while communicating with the
-cards. The mmc/sd and memstick devices are children of the usb device.
+Accesses of the rtsx sdmmc's parent device, which is the rtsx usb device,
+must be done when it's runtime resumed. Currently this isn't case when
+changing the led, so let's fix this by adding a pm_runtime_get_sync() and
+a pm_runtime_put() around those operations.
 
-Issues has been reported [1] for rtsx, which have been investigated, discussed,
-fixed, tested, etc, particularly when using mmc/sd cards. During the
-investigation, some changes was proposed and tested successfully. In this
-series I have picked up these changes and created some proper patches with
-change-logs.
+Reported-by: Ritesh Raj Sarraf <rrs@researchut.com>
+Tested-by: Ritesh Raj Sarraf <rrs@researchut.com>
+Cc: <stable@vger.kernel.org>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-It turned out that most of the problems was related to the runtime PM
-deployment in the memstick and the mmc/sd driver, which are fixed in this
-series.
-
-A couple of more issues were also discussed [2], which needs to be fixed as
-well. Although they are out of scope for this series, so we will have to look
-into those at a later point. Here's a brief summary of these leftovers:
-
-*)
-It seems reasonable to turn off autosuspend for usb devices and instead rely on
-the usb device's children to deal with autosuspend. The reason is simply that
-the children has better knowledge of when using autosuspend makes sense.
-
-**)
-Polling card detect mode is used both for mmc/sd and memstick. Because of the
-lack of synchronization between the polling attempts for these subsystems, the
-usb device may be powered on for unnecessary long intervals, thus we are
-wasting power.
-
-Besides the above changes, I folded in a change in the mmc core which improves
-the behaviour for mmc hosts using MMC_CAP2_NO_PRESCAN_POWERUP, which is the
-case for the rtsx_usb_sdmmc driver.  This change should improve the boot time
-with ~100ms per rtsx_usb_sdmmc device.
-
-Finally, as I couldn't find an active maintainer for the memstick
-subsystem/driver and because the author of the drivers can be reached, I
-volunteer to take this all through my mmc tree. Please tell me if that is
-problem to any of you.
-
-[1]
-https://www.spinics.net/lists/linux-usb/msg146998.html
-[2]
-https://www.spinics.net/lists/linux-mmc/msg39235.html
-
-
-Alan Stern (1):
-  memstick: rtsx_usb_ms: Runtime resume the device when polling for
-    cards
-
-Ulf Hansson (5):
-  mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when
-    unused
-  mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
-  memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
-  mmc: rtsx_usb_sdmmc: Enable runtime PM autosuspend
-  mmc: core: Don't power off the card when starting the host
-
- drivers/memstick/host/rtsx_usb_ms.c |  6 ++++++
- drivers/mmc/core/core.c             |  9 ++++-----
- drivers/mmc/host/rtsx_usb_sdmmc.c   | 10 +++++-----
- 3 files changed, 15 insertions(+), 10 deletions(-)
-
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index e0b8590..6e9c0f8 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -1309,6 +1309,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
+ 		container_of(work, struct rtsx_usb_sdmmc, led_work);
+ 	struct rtsx_ucr *ucr = host->ucr;
+ 
++	pm_runtime_get_sync(sdmmc_dev(host));
+ 	mutex_lock(&ucr->dev_mutex);
+ 
+ 	if (host->led.brightness == LED_OFF)
+@@ -1317,6 +1318,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
+ 		rtsx_usb_turn_on_led(ucr);
+ 
+ 	mutex_unlock(&ucr->dev_mutex);
++	pm_runtime_put(sdmmc_dev(host));
+ }
+ #endif
+ 
 -- 
 1.9.1
