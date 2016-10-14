@@ -1,67 +1,64 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: Detected aborted journal error in Kernel 3.12
-Date: Fri, 14 Oct 2016 04:12:00 -0700
-Message-ID: <20161014111200.vjpnwlvtdfjfrgee@atomide.com>
-References: <CAFvPE2qruGv6hdGCkuagq9hHEgsmncBPfqD6ftpRLcY6tou9Bw@mail.gmail.com>
- <20160917154123.mfkkhptwvrzavs7y@atomide.com>
- <CAFvPE2ph+bGBkgvjPQfYzn3xwdXrTSXVEBHMo_CEDcdiR6-ekQ@mail.gmail.com>
- <20160919181541.45ahl6ktojawwtui@atomide.com>
- <CAALWOA_RHBW8gYq=HncNgw8k2yKipieRgmCaNyz=kvLF4RSAwg@mail.gmail.com>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v3 0/3] mmc: sh_mobile_sdhi: Add r7s72100 support
+Date: Fri, 14 Oct 2016 13:14:22 +0000
+Message-ID: <SG2PR06MB1165883EDC27C3C7994121EF8ADF0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:44199 "EHLO muru.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751582AbcJNLME (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Oct 2016 07:12:04 -0400
-Content-Disposition: inline
-In-Reply-To: <CAALWOA_RHBW8gYq=HncNgw8k2yKipieRgmCaNyz=kvLF4RSAwg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160912141507.6837-1-chris.brandt@renesas.com>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Matthijs van Duin <matthijsvanduin@gmail.com>
-Cc: Ankur Tank <ankurtank.linux@gmail.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-* Matthijs van Duin <matthijsvanduin@gmail.com> [161013 13:25]:
-> It would indeed be very useful to have a reproducible case on an
-> uptodate kernel, but it is definitely not specific to his hardware.
-> Someone on the beagleboard forum also hit this issue, but sporadically:
-> 
-> https://groups.google.com/d/msg/beagleboard/5ZwTUQwGSx4/r15mENdfAwAJ
-> 
-> I'll quote my reply to it:
-> 
-> On 4 October 2016 at 21:00, Matthijs van Duin <matthijsvanduin@gmail.com> wrote:
-> > I've also run into this once during an apt-get upgrade, leaving the system
-> > in a pretty hosed state. I managed to recover it but it required a lot of
-> > effort. Although evidently rare, this is clearly a very serious issue.
-> >
-> > The direct cause is edma_prep_slave_sg() failing to allocate memory for the
-> > struct edma_desc. I don't know whether the kernel is genuinely out of memory
-> > or if it simply cannot free it up immediately (the allocation is done with
-> > GPF_ATOMIC), and whether this is because it is filled with a backlog of
-> > writes or whether a leak of some sort is going on.
-> >
-> > Instead of deferring until memory is available, or even just proceeding
-> > without DMA, the omap_hsmmc driver immediately fails the request with an
-> > error, thus pretty much guaranteeing loss of data or even filesystem
-> > corruption. I personally think this is completely unacceptable behaviour of
-> > a block driver.
+Hello.
 
-Yes I can see that being a problem. The fact that omap_hsmmc does
-not fail back to PIO mode is just strange. We've had the omap1
-drivers/mmc/host/omap.c work with and without DMA no problem,
-no idea why this would not be required also for omap_hsmmc too.
+What ever happened to this series of patches?
 
-> > I've been meaning to persue this matter on the linux-mmc and/or linux-omap
-> > lists, but since it was a single isolated incident and I have lots of other
-> > stuff to do I haven't been able to find the time and motivation yet.
-> 
-> If Ankur has a reproducible case then I think it's time to get
-> motivated. Ankur, can you please try 4.7 or 4.8 ?
+They didn't seem too outrageous, but they never got applied.
 
-Yes please. And also let's set up a new bug in bugzilla.kernel.org
-for this.
+Thank you.
 
-Regards,
+Chris
 
-Tony
+
+
+On 9/12/2016, Chris Brandt wrote:
+> To: Ulf Hansson <ulf.hansson@linaro.org>; Wolfram Sang <wsa+renesas@sang-
+> engineering.com>; Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>;
+> Geert Uytterhoeven <geert@linux-m68k.org>
+> Cc: Simon Horman <horms+renesas@verge.net.au>; linux-mmc@vger.kernel.org;
+> linux-renesas-soc@vger.kernel.org; Chris Brandt <Chris.Brandt@renesas.com=
+>
+> Subject: [PATCH v3 0/3] mmc: sh_mobile_sdhi: Add r7s72100 support
+>=20
+> For the most part, the SDHI controller in the RZ/A1 (r7s72100) is the sam=
+e
+> as other Renesas SoC...except for the fact that the data port register wa=
+s
+> widened to 32-bits and the 16-bit accesses in the current tmio driver
+> aren't going to cut it.
+>=20
+> Also, the tmio driver allows you to pass in what voltages you support via
+> the ocr_mask. For the RZ/A1, it's just simple 3.3v.
+> So, I added the ability to pass that when using DT.
+>=20
+> Chris Brandt (3):
+>   mmc: sh_mobile_sdhi: add ocr_mask option
+>   mmc: tmio-mmc: add support for 32bit data port
+>   mmc: sh_mobile_sdhi: Add r7s72100 support
+>=20
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+>  drivers/mmc/host/sh_mobile_sdhi.c                  |  9 +++++++
+>  drivers/mmc/host/tmio_mmc.h                        | 12 +++++++++
+>  drivers/mmc/host/tmio_mmc_pio.c                    | 30
+> ++++++++++++++++++++++
+>  include/linux/mfd/tmio.h                           |  5 ++++
+>  5 files changed, 57 insertions(+)
+>=20
+> --
+> 2.9.2
+>=20
