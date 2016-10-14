@@ -1,110 +1,89 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Fri, 14 Oct 2016 13:18:56 +0000
-Message-ID: <SG2PR06MB11656EAD9F036EC0FFEDFF7F8ADF0@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20160912141507.6837-1-chris.brandt@renesas.com>
- <20160912141507.6837-3-chris.brandt@renesas.com>
- <CAPDyKFoeRggX-YMy2L+o6CBtwa46rT2YyJiXdPK_c3a1R1Nvgg@mail.gmail.com>
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long to
+ avoid unexpeted error
+Date: Fri, 14 Oct 2016 09:53:01 +0000
+Message-ID: <AM4PR0401MB2324BA6265407D6A4FE3F30190DF0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+References: <1473750418-23111-1-git-send-email-haibo.chen@nxp.com>
+ <3603c63f-f007-12cc-677b-f39924628335@intel.com>
+ <cd546cd4-e64f-1b86-1cae-08b89dabc410@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoeRggX-YMy2L+o6CBtwa46rT2YyJiXdPK_c3a1R1Nvgg@mail.gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db5eur01on0080.outbound.protection.outlook.com ([104.47.2.80]:9498
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932193AbcJNN0O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Oct 2016 09:26:14 -0400
+In-Reply-To: <cd546cd4-e64f-1b86-1cae-08b89dabc410@intel.com>
 Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee@kernel.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-T24gOS8yMi8yMDE2LCBVbGYgSGFuc3NvbiB3cm90ZToNCj4gVG86IENocmlzIEJyYW5kdCA8Q2hy
-aXMuQnJhbmR0QHJlbmVzYXMuY29tPg0KPiBDYzogV29sZnJhbSBTYW5nIDx3c2ErcmVuZXNhc0Bz
-YW5nLWVuZ2luZWVyaW5nLmNvbT47IFNlcmdlaSBTaHR5bHlvdg0KPiA8c2VyZ2VpLnNodHlseW92
-QGNvZ2VudGVtYmVkZGVkLmNvbT47IEdlZXJ0IFV5dHRlcmhvZXZlbiA8Z2VlcnRAbGludXgtDQo+
-IG02OGsub3JnPjsgU2ltb24gSG9ybWFuIDxob3JtcytyZW5lc2FzQHZlcmdlLm5ldC5hdT47IGxp
-bnV4LW1tYyA8bGludXgtDQo+IG1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBMaW51eC1SZW5lc2FzIDxs
-aW51eC1yZW5lc2FzLXNvY0B2Z2VyLmtlcm5lbC5vcmc+Ow0KPiBMZWUgSm9uZXMgPGxlZUBrZXJu
-ZWwub3JnPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzIDIvM10gbW1jOiB0bWlvLW1tYzogYWRk
-IHN1cHBvcnQgZm9yIDMyYml0IGRhdGEgcG9ydA0KPiANCj4gKyBMZWUNCj4gDQo+IE9uIDEyIFNl
-cHRlbWJlciAyMDE2IGF0IDE2OjE1LCBDaHJpcyBCcmFuZHQgPGNocmlzLmJyYW5kdEByZW5lc2Fz
-LmNvbT4NCj4gd3JvdGU6DQo+ID4gRm9yIHRoZSByN3M3MjEwMCBTT0MsIHRoZSBEQVRBX1BPUlQg
-cmVnaXN0ZXIgd2FzIGNoYW5nZWQgdG8gMzItYml0cyB3aWRlLg0KPiA+IFRoZXJlZm9yZSBhIG5l
-dyBmbGFnIGhhcyBiZWVuIGNyZWF0ZWQgdGhhdCB3aWxsIGFsbG93IDMyLWJpdA0KPiA+IHJlYWRz
-L3dyaXRlcyB0byB0aGUgREFUQV9QT1JUIHJlZ2lzdGVyIGluc3RlYWQgb2YgMTYtYml0IChiZWNh
-dXNlDQo+ID4gMTYtYml0cyBhY2Nlc3NlcyBhcmUgbm90IHN1cHBvcnRlZCkuDQo+ID4NCj4gPiBT
-aWduZWQtb2ZmLWJ5OiBDaHJpcyBCcmFuZHQgPGNocmlzLmJyYW5kdEByZW5lc2FzLmNvbT4NCj4g
-PiAtLS0NCj4gPiB2MzoNCj4gPiAqIGNoYW5nZWQgbG9vcHMgdG8gbWVtY3B5DQo+ID4gdjI6DQo+
-ID4gKiBjaGFuZ2VkICdkYXRhICogMHhGRicgdG8gJ2RhdGEgJiAweEZGJw0KPiA+ICogYWRkZWQg
-J2NvbnN0JyBmb3Igc2RfY3RybF93cml0ZTMyX3JlcA0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21t
-Yy9ob3N0L3RtaW9fbW1jLmggICAgIHwgMTIgKysrKysrKysrKysrDQo+ID4gIGRyaXZlcnMvbW1j
-L2hvc3QvdG1pb19tbWNfcGlvLmMgfCAzMCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysN
-Cj4gPiAgaW5jbHVkZS9saW51eC9tZmQvdG1pby5oICAgICAgICB8ICA1ICsrKysrDQo+IA0KPiBU
-aGlzIGhlYWRlciBmaWxlIG5lZWRzIHRvIGJlIHNwbGl0IHVwLiBUaGUgbW1jIHNwZWNpZmljIGJp
-dHMsIHNob3VsZCBiZQ0KPiBtb3ZlZCB0byBhIGxvY2FsIGhlYWRlciBmaWxlIHVuZGVyIGRyaXZl
-ci9tbWMvaG9zdC8qLg0KPiANCj4gU3VyZSwgd2UgZG9uJ3QgbmVlZCB0byBkbyB0aGF0IGFzIHBh
-cnQgb2YgJHN1YmplY3QgcGF0Y2gsIGJ1dCB0aGVuIEkgbmVlZA0KPiBhbiBhY2sgZnJvbSBMZWUg
-Sm9uZXMsIHRoZSBtZmQgbWFpbnRhaW5lci4gSSBoYXZlIGFkZGVkIGhpbSBvbiBjYy4NCg0KDQpJ
-cyB0aGlzIHN0aWxsIHdhaXRpbmcgb24gYW4gQUNLIGZyb20gTGVlIEpvbmVzIGJlY2F1c2UgaXQg
-dG91Y2hlcyB0aGUgdG1pby5oIGZpbGUgdW5kZXIgaW5jbHVkZS9saW51eC9tZmQvID8NCg0KDQoN
-Cg0KDQogDQo+ID4gIDMgZmlsZXMgY2hhbmdlZCwgNDcgaW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4g
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWMuaCBiL2RyaXZlcnMvbW1jL2hv
-c3QvdG1pb19tbWMuaA0KPiA+IGluZGV4IGVjYjk5ZmMuLmE5OWU2MzQgMTAwNjQ0DQo+ID4gLS0t
-IGEvZHJpdmVycy9tbWMvaG9zdC90bWlvX21tYy5oDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9z
-dC90bWlvX21tYy5oDQo+ID4gQEAgLTIzNyw2ICsyMzcsMTIgQEAgc3RhdGljIGlubGluZSB1MzIN
-Cj4gc2RfY3RybF9yZWFkMTZfYW5kXzE2X2FzXzMyKHN0cnVjdCB0bWlvX21tY19ob3N0ICpob3N0
-LCBpbnQgYWQNCj4gPiAgICAgICAgICAgICAgICByZWFkdyhob3N0LT5jdGwgKyAoKGFkZHIgKyAy
-KSA8PCBob3N0LT5idXNfc2hpZnQpKSA8PA0KPiA+IDE2OyAgfQ0KPiA+DQo+ID4gK3N0YXRpYyBp
-bmxpbmUgdm9pZCBzZF9jdHJsX3JlYWQzMl9yZXAoc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhvc3Qs
-IGludA0KPiBhZGRyLA0KPiA+ICsgICAgICAgICAgICAgICB1MzIgKmJ1ZiwgaW50IGNvdW50KQ0K
-PiA+ICt7DQo+ID4gKyAgICAgICByZWFkc2woaG9zdC0+Y3RsICsgKGFkZHIgPDwgaG9zdC0+YnVz
-X3NoaWZ0KSwgYnVmLCBjb3VudCk7IH0NCj4gPiArDQo+ID4gIHN0YXRpYyBpbmxpbmUgdm9pZCBz
-ZF9jdHJsX3dyaXRlMTYoc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhvc3QsIGludA0KPiA+IGFkZHIs
-IHUxNiB2YWwpICB7DQo+ID4gICAgICAgICAvKiBJZiB0aGVyZSBpcyBhIGhvb2sgYW5kIGl0IHJl
-dHVybnMgbm9uLXplcm8gdGhlbiB0aGVyZSBAQA0KPiA+IC0yNTksNCArMjY1LDEwIEBAIHN0YXRp
-YyBpbmxpbmUgdm9pZCBzZF9jdHJsX3dyaXRlMzJfYXNfMTZfYW5kXzE2KHN0cnVjdA0KPiB0bWlv
-X21tY19ob3N0ICpob3N0LCBpbnQNCj4gPiAgICAgICAgIHdyaXRldyh2YWwgPj4gMTYsIGhvc3Qt
-PmN0bCArICgoYWRkciArIDIpIDw8DQo+ID4gaG9zdC0+YnVzX3NoaWZ0KSk7ICB9DQo+ID4NCj4g
-PiArc3RhdGljIGlubGluZSB2b2lkIHNkX2N0cmxfd3JpdGUzMl9yZXAoc3RydWN0IHRtaW9fbW1j
-X2hvc3QgKmhvc3QsIGludA0KPiBhZGRyLA0KPiA+ICsgICAgICAgICAgICAgICBjb25zdCB1MzIg
-KmJ1ZiwgaW50IGNvdW50KSB7DQo+ID4gKyAgICAgICB3cml0ZXNsKGhvc3QtPmN0bCArIChhZGRy
-IDw8IGhvc3QtPmJ1c19zaGlmdCksIGJ1ZiwgY291bnQpOyB9DQo+ID4gKw0KPiA+ICAjZW5kaWYN
-Cj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC90bWlvX21tY19waW8uYw0KPiA+IGIv
-ZHJpdmVycy9tbWMvaG9zdC90bWlvX21tY19waW8uYyBpbmRleCAwMTdhNGRjLi41OWZhYzdkIDEw
-MDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWNfcGlvLmMNCj4gPiArKysg
-Yi9kcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jX3Bpby5jDQo+ID4gQEAgLTQ0Myw2ICs0NDMsMzYg
-QEAgc3RhdGljIHZvaWQgdG1pb19tbWNfdHJhbnNmZXJfZGF0YShzdHJ1Y3QNCj4gdG1pb19tbWNf
-aG9zdCAqaG9zdCwNCj4gPiAgICAgICAgIC8qDQo+ID4gICAgICAgICAgKiBUcmFuc2ZlciB0aGUg
-ZGF0YQ0KPiA+ICAgICAgICAgICovDQo+ID4gKyAgICAgICBpZiAoaG9zdC0+cGRhdGEtPmZsYWdz
-ICYgVE1JT19NTUNfMzJCSVRfREFUQV9QT1JUKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHU4IGRh
-dGFbNF0gPSB7IH07DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBpZiAoaXNfcmVhZCkNCj4g
-PiArICAgICAgICAgICAgICAgICAgICAgICBzZF9jdHJsX3JlYWQzMl9yZXAoaG9zdCwgQ1RMX1NE
-X0RBVEFfUE9SVCwgKHUzMg0KPiAqKWJ1ZiwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgY291bnQgPj4gMik7DQo+ID4gKyAgICAgICAgICAgICAgIGVsc2UN
-Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICBzZF9jdHJsX3dyaXRlMzJfcmVwKGhvc3QsIENU
-TF9TRF9EQVRBX1BPUlQsICh1MzINCj4gKilidWYsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBjb3VudCA+PiAyKTsNCj4gPiArDQo+ID4gKyAgICAgICAg
-ICAgICAgIC8qIGlmIGNvdW50IHdhcyBtdWx0aXBsZSBvZiA0ICovDQo+ID4gKyAgICAgICAgICAg
-ICAgIGlmICghKGNvdW50ICYgMHgzKSkNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXR1
-cm47DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBidWY4ID0gKHU4ICopKGJ1ZiArIChjb3Vu
-dCA+PiAyKSk7DQo+ID4gKyAgICAgICAgICAgICAgIGNvdW50ICU9IDQ7DQo+ID4gKw0KPiA+ICsg
-ICAgICAgICAgICAgICBpZiAoaXNfcmVhZCkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IHNkX2N0cmxfcmVhZDMyX3JlcChob3N0LCBDVExfU0RfREFUQV9QT1JULA0KPiA+ICsgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAodTMyICopZGF0YSwgMSk7DQo+ID4g
-KyAgICAgICAgICAgICAgICAgICAgICAgbWVtY3B5KGJ1ZjgsIGRhdGEsIGNvdW50KTsNCj4gPiAr
-ICAgICAgICAgICAgICAgfSBlbHNlIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBtZW1j
-cHkoZGF0YSwgYnVmOCwgY291bnQpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHNkX2N0
-cmxfd3JpdGUzMl9yZXAoaG9zdCwgQ1RMX1NEX0RBVEFfUE9SVCwNCj4gPiArICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICh1MzIgKilkYXRhLCAxKTsNCj4gPiArICAg
-ICAgICAgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgICAgICAgICAgcmV0dXJuOw0KPiA+ICsg
-ICAgICAgfQ0KPiA+ICsNCj4gPiAgICAgICAgIGlmIChpc19yZWFkKQ0KPiA+ICAgICAgICAgICAg
-ICAgICBzZF9jdHJsX3JlYWQxNl9yZXAoaG9zdCwgQ1RMX1NEX0RBVEFfUE9SVCwgYnVmLCBjb3Vu
-dCA+Pg0KPiAxKTsNCj4gPiAgICAgICAgIGVsc2UNCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9s
-aW51eC9tZmQvdG1pby5oIGIvaW5jbHVkZS9saW51eC9tZmQvdG1pby5oIGluZGV4DQo+ID4gM2I5
-NWRjNy4uMGRiY2I3ZSAxMDA2NDQNCj4gPiAtLS0gYS9pbmNsdWRlL2xpbnV4L21mZC90bWlvLmgN
-Cj4gPiArKysgYi9pbmNsdWRlL2xpbnV4L21mZC90bWlvLmgNCj4gPiBAQCAtMTAwLDYgKzEwMCwx
-MSBAQA0KPiA+ICAjZGVmaW5lIFRNSU9fTU1DX1NESU9fU1RBVFVTX1FVSVJLICAgICAoMSA8PCA4
-KQ0KPiA+DQo+ID4gIC8qDQo+ID4gKyAqIFNvbWUgY29udHJvbGxlcnMgaGF2ZSBhIDMyLWJpdCB3
-aWRlIGRhdGEgcG9ydCByZWdpc3RlciAgKi8NCj4gPiArI2RlZmluZSBUTUlPX01NQ18zMkJJVF9E
-QVRBX1BPUlQgICAgICAgKDEgPDwgOSkNCj4gPiArDQo+ID4gKy8qDQo+ID4gICAqIFNvbWUgY29u
-dHJvbGxlcnMgYWxsb3dzIHRvIHNldCBTRHggYWN0dWFsIGNsb2NrDQo+ID4gICAqLw0KPiA+ICAj
-ZGVmaW5lIFRNSU9fTU1DX0NMS19BQ1RVQUwgICAgICAgICAgICAoMSA8PCAxMCkNCj4gPiAtLQ0K
-PiA+IDIuOS4yDQo+ID4NCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Adrian Hunter
+> Sent: Friday, October 14, 2016 5:12 PM
+> To: Bough Chen <haibo.chen@nxp.com>; ulf.hansson@linaro.org
+> Cc: linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long =
+to
+> avoid unexpeted error
+>=20
+> On 13/09/16 11:36, Adrian Hunter wrote:
+> > On 13/09/16 10:06, Haibo Chen wrote:
+> >> Potentially overflowing expression 1000000 * data->timeout_clks with
+> >> type unsigned int is evaluated using 32-bit arithmetic, and then used
+> >> in a context that expects an expression of type unsigned long long.
+> >>
+> >> To avoid overflow, cast 1000000U to type unsigned long long.
+> >> Special thanks to coverity <http://www.coverity.com>
+> >
+> > Let's leave out the web link - it is enough to say it was found with Co=
+verity.
+> >
+> >>
+> >> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+>=20
+> Do you plan to re-submit this?
+>=20
+
+Yes, I will re-submit this soon.=20
+
+> >
+> > Needs a fixes tag and cc stable.
+> >
+> >> ---
+> >>  drivers/mmc/host/sdhci.c | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >> index 4805566..0e9f495 100644
+> >> --- a/drivers/mmc/host/sdhci.c
+> >> +++ b/drivers/mmc/host/sdhci.c
+> >> @@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *ho=
+st,
+> struct mmc_command *cmd)
+> >>  			 * host->clock is in Hz.  target_timeout is in us.
+> >>  			 * Hence, us =3D 1000000 * cycles / Hz.  Round up.
+> >>  			 */
+> >> -			val =3D 1000000 * data->timeout_clks;
+> >> +			val =3D (unsigned long long)1000000 * data->timeout_clks;
+> >
+> > Please use 1000000ULL instead of a cast.
+> >
+> >>  			if (do_div(val, host->clock))
+> >>  				target_timeout++;
+> >>  			target_timeout +=3D val;
+> >>
+> >
+> >
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
+he
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
