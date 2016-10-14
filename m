@@ -1,64 +1,67 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long to
- avoid unexpeted error
-Date: Fri, 14 Oct 2016 12:12:27 +0300
-Message-ID: <cd546cd4-e64f-1b86-1cae-08b89dabc410@intel.com>
-References: <1473750418-23111-1-git-send-email-haibo.chen@nxp.com>
- <3603c63f-f007-12cc-677b-f39924628335@intel.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: Detected aborted journal error in Kernel 3.12
+Date: Fri, 14 Oct 2016 04:12:00 -0700
+Message-ID: <20161014111200.vjpnwlvtdfjfrgee@atomide.com>
+References: <CAFvPE2qruGv6hdGCkuagq9hHEgsmncBPfqD6ftpRLcY6tou9Bw@mail.gmail.com>
+ <20160917154123.mfkkhptwvrzavs7y@atomide.com>
+ <CAFvPE2ph+bGBkgvjPQfYzn3xwdXrTSXVEBHMo_CEDcdiR6-ekQ@mail.gmail.com>
+ <20160919181541.45ahl6ktojawwtui@atomide.com>
+ <CAALWOA_RHBW8gYq=HncNgw8k2yKipieRgmCaNyz=kvLF4RSAwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:22548 "EHLO mga05.intel.com"
+Received: from muru.com ([72.249.23.125]:44199 "EHLO muru.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751195AbcJNJRR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Oct 2016 05:17:17 -0400
-In-Reply-To: <3603c63f-f007-12cc-677b-f39924628335@intel.com>
+        id S1751582AbcJNLME (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Oct 2016 07:12:04 -0400
+Content-Disposition: inline
+In-Reply-To: <CAALWOA_RHBW8gYq=HncNgw8k2yKipieRgmCaNyz=kvLF4RSAwg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
+To: Matthijs van Duin <matthijsvanduin@gmail.com>
+Cc: Ankur Tank <ankurtank.linux@gmail.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 13/09/16 11:36, Adrian Hunter wrote:
-> On 13/09/16 10:06, Haibo Chen wrote:
->> Potentially overflowing expression 1000000 * data->timeout_clks with
->> type unsigned int is evaluated using 32-bit arithmetic, and then used
->> in a context that expects an expression of type unsigned long long.
->>
->> To avoid overflow, cast 1000000U to type unsigned long long.
->> Special thanks to coverity <http://www.coverity.com>
+* Matthijs van Duin <matthijsvanduin@gmail.com> [161013 13:25]:
+> It would indeed be very useful to have a reproducible case on an
+> uptodate kernel, but it is definitely not specific to his hardware.
+> Someone on the beagleboard forum also hit this issue, but sporadically:
 > 
-> Let's leave out the web link - it is enough to say it was found with Coverity.
+> https://groups.google.com/d/msg/beagleboard/5ZwTUQwGSx4/r15mENdfAwAJ
 > 
->>
->> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> I'll quote my reply to it:
+> 
+> On 4 October 2016 at 21:00, Matthijs van Duin <matthijsvanduin@gmail.com> wrote:
+> > I've also run into this once during an apt-get upgrade, leaving the system
+> > in a pretty hosed state. I managed to recover it but it required a lot of
+> > effort. Although evidently rare, this is clearly a very serious issue.
+> >
+> > The direct cause is edma_prep_slave_sg() failing to allocate memory for the
+> > struct edma_desc. I don't know whether the kernel is genuinely out of memory
+> > or if it simply cannot free it up immediately (the allocation is done with
+> > GPF_ATOMIC), and whether this is because it is filled with a backlog of
+> > writes or whether a leak of some sort is going on.
+> >
+> > Instead of deferring until memory is available, or even just proceeding
+> > without DMA, the omap_hsmmc driver immediately fails the request with an
+> > error, thus pretty much guaranteeing loss of data or even filesystem
+> > corruption. I personally think this is completely unacceptable behaviour of
+> > a block driver.
 
-Do you plan to re-submit this?
+Yes I can see that being a problem. The fact that omap_hsmmc does
+not fail back to PIO mode is just strange. We've had the omap1
+drivers/mmc/host/omap.c work with and without DMA no problem,
+no idea why this would not be required also for omap_hsmmc too.
 
+> > I've been meaning to persue this matter on the linux-mmc and/or linux-omap
+> > lists, but since it was a single isolated incident and I have lots of other
+> > stuff to do I haven't been able to find the time and motivation yet.
 > 
-> Needs a fixes tag and cc stable.
-> 
->> ---
->>  drivers/mmc/host/sdhci.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 4805566..0e9f495 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->>  			 * host->clock is in Hz.  target_timeout is in us.
->>  			 * Hence, us = 1000000 * cycles / Hz.  Round up.
->>  			 */
->> -			val = 1000000 * data->timeout_clks;
->> +			val = (unsigned long long)1000000 * data->timeout_clks;
-> 
-> Please use 1000000ULL instead of a cast.
-> 
->>  			if (do_div(val, host->clock))
->>  				target_timeout++;
->>  			target_timeout += val;
->>
-> 
-> 
+> If Ankur has a reproducible case then I think it's time to get
+> motivated. Ankur, can you please try 4.7 or 4.8 ?
 
+Yes please. And also let's set up a new bug in bugzilla.kernel.org
+for this.
+
+Regards,
+
+Tony
