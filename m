@@ -1,52 +1,41 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci: cast unsigned int to unsigned long long to
- avoid unexpeted error
-Date: Mon, 17 Oct 2016 15:49:17 +0200
-Message-ID: <CAPDyKFr3KrwDKUmuiHyzt7Jyve4is=e-tbGn+NufTcZdvibjXQ@mail.gmail.com>
-References: <1476692317-26845-1-git-send-email-haibo.chen@nxp.com>
+Subject: Re: [PATCH 0/2] mmc: sdhci-iproc: Add byte register access support
+Date: Mon, 17 Oct 2016 15:49:29 +0200
+Message-ID: <CAPDyKFpsTNKCC3dTJUipRVhALh2=4YJ5k6Ofp9TUu0RjKO6FaA@mail.gmail.com>
+References: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1476692317-26845-1-git-send-email-haibo.chen@nxp.com>
-Sender: stable-owner@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, "# 4.0+" <stable@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:32978 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757959AbcJQNtc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2016 09:49:32 -0400
+Received: by mail-yw0-f175.google.com with SMTP id t192so116240481ywf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2016 06:49:31 -0700 (PDT)
+In-Reply-To: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Branden <scott.branden@broadcom.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 17 October 2016 at 10:18, Haibo Chen <haibo.chen@nxp.com> wrote:
-> Potentially overflowing expression 1000000 * data->timeout_clks with
-> type unsigned int is evaluated using 32-bit arithmetic, and then used
-> in a context that expects an expression of type unsigned long long.
+On 12 October 2016 at 20:35, Scott Branden <scott.branden@broadcom.com> wrote:
+> Add brcm,sdhci-iproc compat string and code for support of newer versions of
+> sdhci-iproc controller that allow byte-wise register accesses.
 >
-> To avoid overflow, cast 1000000U to type unsigned long long.
-> Special thanks to Coverity.
+> Scott Branden (2):
+>   mmc: sdhci-iproc: Add brcm,sdhci-iproc compat string in bindings
+>     document
+>   mmc: sdhci-iproc: support standard byte register accesses
 >
-> Fixes: 7f05538af71c ("mmc: sdhci: fix data timeout (part 2)")
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Cc: stable@vger.kernel.org # v3.15+
+>  .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  1 +
+>  drivers/mmc/host/sdhci-iproc.c                     | 35 ++++++++++++++++++++--
+>  2 files changed, 34 insertions(+), 2 deletions(-)
+>
+> --
+> 2.5.0
+>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 223a91e..71654b9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->                          * host->clock is in Hz.  target_timeout is in us.
->                          * Hence, us = 1000000 * cycles / Hz.  Round up.
->                          */
-> -                       val = 1000000 * data->timeout_clks;
-> +                       val = 1000000ULL * data->timeout_clks;
->                         if (do_div(val, host->clock))
->                                 target_timeout++;
->                         target_timeout += val;
-> --
-> 1.9.1
->
