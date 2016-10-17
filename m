@@ -1,33 +1,66 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: support standard byte register
- accesses
-Date: Mon, 17 Oct 2016 09:36:33 +0300
-Message-ID: <7505a7f0-a781-8677-047d-7598def231e8@intel.com>
-References: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
- <1476297352-7812-3-git-send-email-scott.branden@broadcom.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC v2 2/2] sdhci: Prevent SD from doing high-speed timing when
+ broken-highspeed property is set
+Date: Mon, 17 Oct 2016 09:56:19 +0300
+Message-ID: <58380ee1-15d0-9eb6-fe89-f1bb9ec24af2@intel.com>
+References: <1476297656-7019-1-git-send-email-zach.brown@ni.com>
+ <1476297656-7019-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476297352-7812-3-git-send-email-scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga07.intel.com ([134.134.136.100]:29356 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750752AbcJQHBU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 17 Oct 2016 03:01:20 -0400
+In-Reply-To: <1476297656-7019-3-git-send-email-zach.brown@ni.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 12/10/16 21:35, Scott Branden wrote:
-> Add bytewise register accesses support for newer versions of IPROC
-> SDHCI controllers.
-> Previous sdhci-iproc versions of SDIO controllers
-> (such as Raspberry Pi and Cygnus) only allowed for 32-bit register
-> accesses.
+On 12/10/16 21:40, Zach Brown wrote:
+> When the broken-highspeed property is set the sdhci driver will not
+> go into highspeed mode even if the controller and card appear to
+> otherwise support highspeed mode.
 > 
-> Signed-off-by: Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-> Signed-off-by: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+> This is useful in cases where the controller and card support highspeed,
+> but the board configuration or some other issue make highspeed
+> impossible. For example, we send the SDIO lines through a fpga so we
+> need the data to change on the falling edge of the clock or there will
+> be issues with hold time.
+> 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
 
-Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Assuming the DT property is accepted:
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  drivers/mmc/host/sdhci.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4805566..17e6c50 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -22,6 +22,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/of.h>
+>  
+>  #include <linux/leds.h>
+>  
+> @@ -3274,7 +3275,8 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
+>  		mmc->caps &= ~MMC_CAP_CMD23;
+>  
+> -	if (host->caps & SDHCI_CAN_DO_HISPD)
+> +	if ((host->caps & SDHCI_CAN_DO_HISPD) &&
+> +	    !(of_property_read_bool(mmc_dev(mmc)->of_node, "broken-highspeed")))
+>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+>  
+>  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> 
+
