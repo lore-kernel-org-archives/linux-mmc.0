@@ -1,42 +1,59 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Regression after "do not use CMD13 to get status after speed mode switch"
-Date: Mon, 17 Oct 2016 16:32:43 +0200
-Message-ID: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Mon, 17 Oct 2016 17:15:50 +0200
+Message-ID: <20161017151550.GA1415@katana>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
+ <20160912141507.6837-3-chris.brandt@renesas.com>
+ <CAPDyKFoeRggX-YMy2L+o6CBtwa46rT2YyJiXdPK_c3a1R1Nvgg@mail.gmail.com>
+ <SG2PR06MB11656EAD9F036EC0FFEDFF7F8ADF0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <CAPDyKFrXYQPEfh8YMAFb4+0dr=WMyo8D-VCjd9KY5hpPxTv7PQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:32840 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933583AbcJQOcq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2016 10:32:46 -0400
-Received: by mail-qt0-f170.google.com with SMTP id s49so121272002qta.0
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2016 07:32:46 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="ew6BAiZeqk4r7MaW"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrXYQPEfh8YMAFb4+0dr=WMyo8D-VCjd9KY5hpPxTv7PQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Brandt <Chris.Brandt@renesas.com>, Lee Jones <lee@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-Hi Chaotian,
 
-my Dragonboard 8060 has a regression on detecting the eMMC after
-bisecting it down to this patch (which is sadly already in v4.8):
+--ew6BAiZeqk4r7MaW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-commit 08573eaf1a70104f83fdbee9b84e5be03480e9ed
-Author: Chaotian Jing <chaotian.jing@mediatek.com>
-Date:   Thu May 19 16:47:41 2016 +0800
-mmc: mmc: do not use CMD13 to get status after speed mode switch
 
-Before this patch the eMMC is detected and all partitions enumerated
-immediately, but after the patch it doesn't come up at all, except
-sometimes, when it appears minutes (!) after boot, all of a sudden.
+> > Is this still waiting on an ACK from Lee Jones because it touches the t=
+mio.h file under include/linux/mfd/ ?
+> >
+>=20
+> Yes, but more important is Wolfram's ack as he maintains
+> drivers/mmc/host/tmio_mmc*
 
-Do you have any ideas on what can be wrong?
+Sorry, LinuxCon and ELC Europe kept me very busy. Will do this week.
 
-This is the Qualcomm MMCI variant whid does *not* support
-busydetection in hardware.
 
-I will continue looking at it but would be happy for any hints on how to
-solve it, currently I cannot mount root off the eMMC because of this.
+--ew6BAiZeqk4r7MaW
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Yours,
-Linus Walleij
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYBOsmAAoJEBQN5MwUoCm21csP/064+gQwNViz/MEA+GpTbI1X
+7lla4Nm99hptzd86cUabJvxpdquzU/zmU3AGinMvUPcMS2/TptFlW5RgnqOY8cAc
+4tY+24ACluqAWwEq3AwRHbNlS8Qu9+4sQbLkJ+3AMAdIlf+IjyQd5TndyC0e+dEL
+JoAEERNhlc7G+s3oV0BiMZvDSL7Pm/s18g4Pv7k0Qb9i/MORCCzOd2tubZxG0Sws
+JAAV6LTuN2dnl1SK32/MEfP9NXs9TJFiJIl3aeKLK/1Tfb1Cb7yikFRTb9lJC4DH
+TS+ZJXq2iklGnG/em85xSQtB1kepVpbw5vg2RvWT/RT3+bChnn1VqJ8KuUVw6QFe
+LAZecr7jwSbI05b1FMqD2z2hXUxr9m0BQPmZ/XOuXUh5A2K++PzyX5AvTWtJbYia
+N41UCRvu0rjYr3KY7Ei1uPlHmVo8nNNGbuPF7/LncOsOBYzWIcdkcvQ+gZmIGiV9
+UO6QdCuX/54liLjrOVS+1l4ICcQ15Mu9cGbEvMaXlU1Knr4e+VTE4cJvogwnKL6N
+wDNq+Lz+G2KOjeXswS0fLsGv3bKba1mpQNDOTGyLT4G30O+ClVHKSCpp9eLnmpKy
+cN0ohabqt1zimzhScU4h1de8k+QpxQc59hIAa0d3CmkytyTxhTc81YaCm0c9SHjY
+u1vWRj4cCu+C4xLLh+e1
+=HYBZ
+-----END PGP SIGNATURE-----
+
+--ew6BAiZeqk4r7MaW--
