@@ -1,11 +1,13 @@
 From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: [PATCH 1/2] mmc: mediatek: Fix module autoload
-Date: Mon, 17 Oct 2016 13:13:44 -0300
-Message-ID: <1476720825-30442-1-git-send-email-javier@osg.samsung.com>
+Subject: [PATCH 2/2] mmc: sdhci-of-at91: Fix module autoload
+Date: Mon, 17 Oct 2016 13:13:45 -0300
+Message-ID: <1476720825-30442-2-git-send-email-javier@osg.samsung.com>
+References: <1476720825-30442-1-git-send-email-javier@osg.samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1476720825-30442-1-git-send-email-javier@osg.samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Douglas Anderson <dianders@chromium.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Matthias Brugger <matthias.bgg@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Javier Martinez Canillas <javier@osg.samsung.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
 If the driver is built as a module, autoload won't work because the module
@@ -16,32 +18,32 @@ Export the module alias information using the MODULE_DEVICE_TABLE() macro.
 
 Before this patch:
 
-$ modinfo drivers/mmc/host/mtk-sd.ko | grep alias
+$ modinfo drivers/mmc/host/sdhci-of-at91.ko | grep alias
 $
 
 After this patch:
 
-$ modinfo drivers/mmc/host/mtk-sd.ko | grep alias
-alias:          of:N*T*Cmediatek,mt8135-mmcC*
-alias:          of:N*T*Cmediatek,mt8135-mmc
+$ modinfo drivers/mmc/host/sdhci-of-at91.ko | grep alias
+alias:          of:N*T*Catmel,sama5d2-sdhciC*
+alias:          of:N*T*Catmel,sama5d2-sdhci
 
 Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
 
- drivers/mmc/host/mtk-sd.c | 1 +
+ drivers/mmc/host/sdhci-of-at91.c | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 84e9afcb5c09..86af0b199a54 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1713,6 +1713,7 @@ static const struct of_device_id msdc_of_ids[] = {
- 	{   .compatible = "mediatek,mt8135-mmc", },
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index a9b7fc06c434..2f9ad213377a 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -100,6 +100,7 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ 	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
  	{}
  };
-+MODULE_DEVICE_TABLE(of, msdc_of_ids);
++MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
  
- static struct platform_driver mt_msdc_driver = {
- 	.probe = msdc_drv_probe,
+ #ifdef CONFIG_PM
+ static int sdhci_at91_runtime_suspend(struct device *dev)
 -- 
 2.7.4
