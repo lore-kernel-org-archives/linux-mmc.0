@@ -1,47 +1,39 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: [PATCH v2] mmc: sdhci: cast unsigned int to unsigned long long to avoid unexpeted error
-Date: Mon, 17 Oct 2016 16:18:37 +0800
-Message-ID: <1476692317-26845-1-git-send-email-haibo.chen@nxp.com>
+From: Stephen Rothwell <sfr@canb.auug.org.au>
+Subject: Re: linux-next: Moving mmc tree to kernel.org
+Date: Tue, 18 Oct 2016 09:09:44 +1100
+Message-ID: <20161018090944.7cdc0439@canb.auug.org.au>
+References: <CAPDyKFqCvZKzr5fnnKgxc1=3iU+BhhkDkHFv_a01bdxWyAnrHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0075.outbound.protection.outlook.com ([104.47.2.75]:44704
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S934797AbcJQVr1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 17 Oct 2016 17:47:27 -0400
+Received: from ozlabs.org ([103.22.144.67]:33953 "EHLO ozlabs.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933751AbcJQWJr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 17 Oct 2016 18:09:47 -0400
+In-Reply-To: <CAPDyKFqCvZKzr5fnnKgxc1=3iU+BhhkDkHFv_a01bdxWyAnrHg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, rmk+kernel@arm.linux.org.uk
-Cc: stable@vger.kernel.org, linux-mmc@vger.kernel.org, haibo.chen@nxp.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Potentially overflowing expression 1000000 * data->timeout_clks with
-type unsigned int is evaluated using 32-bit arithmetic, and then used
-in a context that expects an expression of type unsigned long long.
+Hi Ulf,
 
-To avoid overflow, cast 1000000U to type unsigned long long.
-Special thanks to Coverity.
+On Mon, 17 Oct 2016 14:51:45 +0200 Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> I have moved my mmc tree from linaro.org to kernel.org and I would
+> appreciate if you could switch to pull my next branch for linux-next
+> from there instead.
+> 
+> Old tree:
+> git://git.linaro.org/people/ulf.hansson/mmc.git next
+> 
+> New tree
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
 
-Fixes: 7f05538af71c ("mmc: sdhci: fix data timeout (part 2)")
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-Cc: stable@vger.kernel.org # v3.15+
----
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Moved from today, thanks.  I also renamed the tree from mmc-uh to just
+plain mmc.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 223a91e..71654b9 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 			 * host->clock is in Hz.  target_timeout is in us.
- 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
- 			 */
--			val = 1000000 * data->timeout_clks;
-+			val = 1000000ULL * data->timeout_clks;
- 			if (do_div(val, host->clock))
- 				target_timeout++;
- 			target_timeout += val;
 -- 
-1.9.1
-
+Cheers,
+Stephen Rothwell
