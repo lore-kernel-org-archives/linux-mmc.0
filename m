@@ -1,66 +1,176 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC v2 2/2] sdhci: Prevent SD from doing high-speed timing when
- broken-highspeed property is set
-Date: Mon, 17 Oct 2016 09:56:19 +0300
-Message-ID: <58380ee1-15d0-9eb6-fe89-f1bb9ec24af2@intel.com>
-References: <1476297656-7019-1-git-send-email-zach.brown@ni.com>
- <1476297656-7019-3-git-send-email-zach.brown@ni.com>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC
+Date: Mon, 17 Oct 2016 10:55:26 +0300
+Message-ID: <63e2bacf-6ad9-5e20-2c49-e77eb362ccfc@intel.com>
+References: <cover.990e3503c30c18ecf50dd48bce3d52811f03ca22.1475853198.git-series.gregory.clement@free-electrons.com>
+ <e08ffb085d02a784b28456ac47fa4dc6540a9139.1475853198.git-series.gregory.clement@free-electrons.com>
+ <bfe30317-bb3b-b3dc-e9df-87b6ba100307@intel.com>
+ <bcf4abca-9f2e-6d1b-6690-d672766e18cb@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:29356 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750752AbcJQHBU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 17 Oct 2016 03:01:20 -0400
-In-Reply-To: <1476297656-7019-3-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <bcf4abca-9f2e-6d1b-6690-d672766e18cb@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ziji Hu <huziji@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, Yu Cao <yucao@ma>
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
-Cc: robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 12/10/16 21:40, Zach Brown wrote:
-> When the broken-highspeed property is set the sdhci driver will not
-> go into highspeed mode even if the controller and card appear to
-> otherwise support highspeed mode.
+On 12/10/16 15:17, Ziji Hu wrote:
+> Hi Adrian,
 > 
-> This is useful in cases where the controller and card support highspeed,
-> but the board configuration or some other issue make highspeed
-> impossible. For example, we send the SDIO lines through a fpga so we
-> need the data to change on the falling edge of the clock or there will
-> be issues with hold time.
+> On 2016/10/11 20:39, Adrian Hunter wrote:
+>> On 07/10/16 18:22, Gregory CLEMENT wrote:
+>>> From: Ziji Hu <huziji@marvell.com>
+>>>
+>>> Marvell Xenon eMMC/SD/SDIO Host Controller contains PHY.
+>>> Three types of PHYs are supported.
+>>>
+>>> Add support to multiple types of PHYs init and configuration.
+>>> Add register definitions of PHYs.
+>>>
+>>> Signed-off-by: Hu Ziji <huziji@marvell.com>
+>>> Reviewed-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>>> ---
+>>>  MAINTAINERS                        |    1 +-
+>>>  drivers/mmc/host/Makefile          |    2 +-
+>>>  drivers/mmc/host/sdhci-xenon-phy.c | 1141 +++++++++++++++++++++++++++++-
+>>>  drivers/mmc/host/sdhci-xenon-phy.h |  157 ++++-
+>>>  drivers/mmc/host/sdhci-xenon.c     |    4 +-
+>>>  drivers/mmc/host/sdhci-xenon.h     |   17 +-
+>>>  6 files changed, 1321 insertions(+), 1 deletion(-)
+>>>  create mode 100644 drivers/mmc/host/sdhci-xenon-phy.c
+>>>  create mode 100644 drivers/mmc/host/sdhci-xenon-phy.h
+>>>
+>>> diff --git a/MAINTAINERS b/MAINTAINERS
+>>> index 859420e5dfd3..b5673c2ee5f2 100644
+>>> --- a/MAINTAINERS
+>>> +++ b/MAINTAINERS
+>>> @@ -7583,6 +7583,7 @@ M:	Ziji Hu <huziji@marvell.com>
+>>>  L:	linux-mmc@vger.kernel.org
+>>>  S:	Supported
+>>>  F:	drivers/mmc/host/sdhci-xenon.*
+>>> +F:	drivers/mmc/host/sdhci-xenon-phy.*
+>>>  F:	Documentation/devicetree/bindings/mmc/marvell,sdhci-xenon.txt
+>>>  
+>>>  MATROX FRAMEBUFFER DRIVER
+>>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>>> index 75eaf743486c..4f2854556ff7 100644
+>>> --- a/drivers/mmc/host/Makefile
+>>> +++ b/drivers/mmc/host/Makefile
+>>> @@ -82,4 +82,4 @@ ifeq ($(CONFIG_CB710_DEBUG),y)
+>>>  endif
+>>>  
+>>>  obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
+>>> -sdhci-xenon-driver-y		+= sdhci-xenon.o
+>>> +sdhci-xenon-driver-y		+= sdhci-xenon.o sdhci-xenon-phy.o
+>>> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+>>> new file mode 100644
+>>> index 000000000000..4eb8fea1bec9
+>>> --- /dev/null
+>>> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+>>
+>> <SNIP>
+>>
+>>> +static int __xenon_emmc_delay_adj_test(struct mmc_card *card)
+>>> +{
+>>> +	int err;
+>>> +	u8 *ext_csd = NULL;
+>>> +
+>>> +	err = mmc_get_ext_csd(card, &ext_csd);
+>>> +	kfree(ext_csd);
+>>> +
+>>> +	return err;
+>>> +}
+>>> +
+>>> +static int __xenon_sdio_delay_adj_test(struct mmc_card *card)
+>>> +{
+>>> +	struct mmc_command cmd = {0};
+>>> +	int err;
+>>> +
+>>> +	cmd.opcode = SD_IO_RW_DIRECT;
+>>> +	cmd.flags = MMC_RSP_R5 | MMC_CMD_AC;
+>>> +
+>>> +	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>>> +	if (err)
+>>> +		return err;
+>>> +
+>>> +	if (cmd.resp[0] & R5_ERROR)
+>>> +		return -EIO;
+>>> +	if (cmd.resp[0] & R5_FUNCTION_NUMBER)
+>>> +		return -EINVAL;
+>>> +	if (cmd.resp[0] & R5_OUT_OF_RANGE)
+>>> +		return -ERANGE;
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int __xenon_sd_delay_adj_test(struct mmc_card *card)
+>>> +{
+>>> +	struct mmc_command cmd = {0};
+>>> +	int err;
+>>> +
+>>> +	cmd.opcode = MMC_SEND_STATUS;
+>>> +	cmd.arg = card->rca << 16;
+>>> +	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+>>> +
+>>> +	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>>> +	return err;
+>>> +}
+>>> +
+>>> +static int xenon_delay_adj_test(struct mmc_card *card)
+>>> +{
+>>> +	WARN_ON(!card);
+>>> +	WARN_ON(!card->host);
+>>> +
+>>> +	if (mmc_card_mmc(card))
+>>> +		return __xenon_emmc_delay_adj_test(card);
+>>> +	else if (mmc_card_sd(card))
+>>> +		return __xenon_sd_delay_adj_test(card);
+>>> +	else if (mmc_card_sdio(card))
+>>> +		return __xenon_sdio_delay_adj_test(card);
+>>> +	else
+>>> +		return -EINVAL;
+>>> +}
+>>
+>> So you are issuing commands from the ->set_ios() callback.  I would want to
+>> get Ulf's OK for that before going further.
+>>
+> 	Yes, you are correct.
+> 	In some speed mode, Xenon SDHC has to send a series of transfers to search for a perfect sampling point in PHY delay line.
+> 	It is like tuning process.
 > 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
+>> One thing: you will need to ensure you don't trigger get HS400 re-tuning
+>> because it will call back into ->set_ios().
+>>
+> 	Could you please make the term "HS400 re-tuning" more detailed?
+> 	In current MMC driver, "HS400 re-tuning" will go back to HS200, execute HS200 tuning and come back to HS400.
+> 	I'm sure our Xenon SDHC will not execute it.
 
-Assuming the DT property is accepted:
+Currently, re-tuning is automatically enabled whenever tuning is executed,
+and then re-tuning will be done periodically or after CRC errors.  The
+function to disable re-tuning mmc_retune_disable() is not exported, however
+if you have you are determining the sampling point your own way, you could
+simply not implement ->execute_tuning() and then there would be no tuning
+and no re-tuning.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 4805566..17e6c50 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -22,6 +22,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/of.h>
->  
->  #include <linux/leds.h>
->  
-> @@ -3274,7 +3275,8 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
->  		mmc->caps &= ~MMC_CAP_CMD23;
->  
-> -	if (host->caps & SDHCI_CAN_DO_HISPD)
-> +	if ((host->caps & SDHCI_CAN_DO_HISPD) &&
-> +	    !(of_property_read_bool(mmc_dev(mmc)->of_node, "broken-highspeed")))
->  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->  
->  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> 	However, in coming eMMC 5.2, there is a real HS400 re-tuning, in which tuning can be directly executed in HS400 mode.
+> 	Our Xenon SDHC will neither trigger this HS400 re-tuning.
+> 	But since so far there is no such feature in MMC driver, I cannot give you a 100% guarantee now.
 > 
-
+>> And you have the problem that you need to get a reference to the card before
+>> the card device has been added.  As I wrote in response to the previous
+>> patch, you should get Ulf's help with that too.
+>>
+> 	Sure.
+> 	I will get card_candidate solved at first.
+> 	Thank you again for your review and help.
+> 
+> 	Thank you.
+> 
+> Best regards,
+> Hu Ziji
+>>
+> 
