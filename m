@@ -1,78 +1,90 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: put together into one condition checking
-Date: Mon, 17 Oct 2016 15:49:37 +0200
-Message-ID: <CAPDyKFo_15YOJ_kcJ7J_1Xmumaz8XiDFCu05XntbQ_rr-+32Ow@mail.gmail.com>
-References: <1475816923-24532-1-git-send-email-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 0/6] mmc/memstick: rtsx_usb: Fix runtime PM issues
+Date: Mon, 17 Oct 2016 15:49:55 +0200
+Message-ID: <CAPDyKFpzq2wRfh_5x119ouP-e8EAaibsSvM36msxm7oepxRoDQ@mail.gmail.com>
+References: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:33993 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758050AbcJQNtj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2016 09:49:39 -0400
-Received: by mail-yw0-f179.google.com with SMTP id w3so115355640ywg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2016 06:49:39 -0700 (PDT)
-In-Reply-To: <1475816923-24532-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1476358660-8338-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Oliver Neukum <oneukum-IBi9RG/b67k@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 7 October 2016 at 07:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> value of ios->timing is not related with SDCHI v3.0.
-> If Controller version is v3.0, SDHCI_QUIRK_NO_HISPD_BIT is meaningless.
-> To prevent the setting wrong bit moves into one codntion checking.
-> (e.g sdhci-s3c doesn't use SDHCI_CTRL_HISPD bit, instead using this bit as
->  other purpose.)
+On 13 October 2016 at 13:37, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> The rtsx_usb_sdmmc (mmc/sd) and rtsx_usb_ms (memstick) devices are interfacing
+> an rtsx_usb device (managed by an mfd driver) while communicating with the
+> cards. The mmc/sd and memstick devices are children of the usb device.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c | 19 ++++++++-----------
->  1 file changed, 8 insertions(+), 11 deletions(-)
+> Issues has been reported [1] for rtsx, which have been investigated, discussed,
+> fixed, tested, etc, particularly when using mmc/sd cards. During the
+> investigation, some changes was proposed and tested successfully. In this
+> series I have picked up these changes and created some proper patches with
+> change-logs.
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 4805566..f854c66 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1619,7 +1619,14 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> It turned out that most of the problems was related to the runtime PM
+> deployment in the memstick and the mmc/sd driver, which are fixed in this
+> series.
 >
->         if ((ios->timing == MMC_TIMING_SD_HS ||
-> -            ios->timing == MMC_TIMING_MMC_HS)
-> +            ios->timing == MMC_TIMING_MMC_HS ||
-> +            ios->timing == MMC_TIMING_MMC_HS400 ||
-> +            ios->timing == MMC_TIMING_MMC_HS200 ||
-> +            ios->timing == MMC_TIMING_MMC_DDR52 ||
-> +            ios->timing == MMC_TIMING_UHS_SDR50 ||
-> +            ios->timing == MMC_TIMING_UHS_SDR104 ||
-> +            ios->timing == MMC_TIMING_UHS_DDR50 ||
-> +            ios->timing == MMC_TIMING_UHS_SDR25)
->             && !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
->                 ctrl |= SDHCI_CTRL_HISPD;
->         else
-> @@ -1628,16 +1635,6 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         if (host->version >= SDHCI_SPEC_300) {
->                 u16 clk, ctrl_2;
+> A couple of more issues were also discussed [2], which needs to be fixed as
+> well. Although they are out of scope for this series, so we will have to look
+> into those at a later point. Here's a brief summary of these leftovers:
 >
-> -               /* In case of UHS-I modes, set High Speed Enable */
-> -               if ((ios->timing == MMC_TIMING_MMC_HS400) ||
-> -                   (ios->timing == MMC_TIMING_MMC_HS200) ||
-> -                   (ios->timing == MMC_TIMING_MMC_DDR52) ||
-> -                   (ios->timing == MMC_TIMING_UHS_SDR50) ||
-> -                   (ios->timing == MMC_TIMING_UHS_SDR104) ||
-> -                   (ios->timing == MMC_TIMING_UHS_DDR50) ||
-> -                   (ios->timing == MMC_TIMING_UHS_SDR25))
-> -                       ctrl |= SDHCI_CTRL_HISPD;
-> -
->                 if (!host->preset_enabled) {
->                         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->                         /*
+> *)
+> It seems reasonable to turn off autosuspend for usb devices and instead rely on
+> the usb device's children to deal with autosuspend. The reason is simply that
+> the children has better knowledge of when using autosuspend makes sense.
+>
+> **)
+> Polling card detect mode is used both for mmc/sd and memstick. Because of the
+> lack of synchronization between the polling attempts for these subsystems, the
+> usb device may be powered on for unnecessary long intervals, thus we are
+> wasting power.
+>
+> Besides the above changes, I folded in a change in the mmc core which improves
+> the behaviour for mmc hosts using MMC_CAP2_NO_PRESCAN_POWERUP, which is the
+> case for the rtsx_usb_sdmmc driver.  This change should improve the boot time
+> with ~100ms per rtsx_usb_sdmmc device.
+>
+> Finally, as I couldn't find an active maintainer for the memstick
+> subsystem/driver and because the author of the drivers can be reached, I
+> volunteer to take this all through my mmc tree. Please tell me if that is
+> problem to any of you.
+>
+> [1]
+> https://www.spinics.net/lists/linux-usb/msg146998.html
+> [2]
+> https://www.spinics.net/lists/linux-mmc/msg39235.html
+>
+>
+> Alan Stern (1):
+>   memstick: rtsx_usb_ms: Runtime resume the device when polling for
+>     cards
+>
+> Ulf Hansson (5):
+>   mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when
+>     unused
+>   mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
+>   memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
+>   mmc: rtsx_usb_sdmmc: Enable runtime PM autosuspend
+>   mmc: core: Don't power off the card when starting the host
+>
+>  drivers/memstick/host/rtsx_usb_ms.c |  6 ++++++
+>  drivers/mmc/core/core.c             |  9 ++++-----
+>  drivers/mmc/host/rtsx_usb_sdmmc.c   | 10 +++++-----
+>  3 files changed, 15 insertions(+), 10 deletions(-)
+>
 > --
 > 1.9.1
 >
+
+Patch 1->4 applied for fixes. Holding patch 5->6 for a while, as they
+are intended for next!
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
