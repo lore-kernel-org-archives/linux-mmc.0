@@ -1,90 +1,42 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/6] mmc/memstick: rtsx_usb: Fix runtime PM issues
-Date: Mon, 17 Oct 2016 15:49:55 +0200
-Message-ID: <CAPDyKFpzq2wRfh_5x119ouP-e8EAaibsSvM36msxm7oepxRoDQ@mail.gmail.com>
-References: <1476358660-8338-1-git-send-email-ulf.hansson@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Regression after "do not use CMD13 to get status after speed mode switch"
+Date: Mon, 17 Oct 2016 16:32:43 +0200
+Message-ID: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476358660-8338-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Oliver Neukum <oneukum-IBi9RG/b67k@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:32840 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933583AbcJQOcq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2016 10:32:46 -0400
+Received: by mail-qt0-f170.google.com with SMTP id s49so121272002qta.0
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2016 07:32:46 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-On 13 October 2016 at 13:37, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> The rtsx_usb_sdmmc (mmc/sd) and rtsx_usb_ms (memstick) devices are interfacing
-> an rtsx_usb device (managed by an mfd driver) while communicating with the
-> cards. The mmc/sd and memstick devices are children of the usb device.
->
-> Issues has been reported [1] for rtsx, which have been investigated, discussed,
-> fixed, tested, etc, particularly when using mmc/sd cards. During the
-> investigation, some changes was proposed and tested successfully. In this
-> series I have picked up these changes and created some proper patches with
-> change-logs.
->
-> It turned out that most of the problems was related to the runtime PM
-> deployment in the memstick and the mmc/sd driver, which are fixed in this
-> series.
->
-> A couple of more issues were also discussed [2], which needs to be fixed as
-> well. Although they are out of scope for this series, so we will have to look
-> into those at a later point. Here's a brief summary of these leftovers:
->
-> *)
-> It seems reasonable to turn off autosuspend for usb devices and instead rely on
-> the usb device's children to deal with autosuspend. The reason is simply that
-> the children has better knowledge of when using autosuspend makes sense.
->
-> **)
-> Polling card detect mode is used both for mmc/sd and memstick. Because of the
-> lack of synchronization between the polling attempts for these subsystems, the
-> usb device may be powered on for unnecessary long intervals, thus we are
-> wasting power.
->
-> Besides the above changes, I folded in a change in the mmc core which improves
-> the behaviour for mmc hosts using MMC_CAP2_NO_PRESCAN_POWERUP, which is the
-> case for the rtsx_usb_sdmmc driver.  This change should improve the boot time
-> with ~100ms per rtsx_usb_sdmmc device.
->
-> Finally, as I couldn't find an active maintainer for the memstick
-> subsystem/driver and because the author of the drivers can be reached, I
-> volunteer to take this all through my mmc tree. Please tell me if that is
-> problem to any of you.
->
-> [1]
-> https://www.spinics.net/lists/linux-usb/msg146998.html
-> [2]
-> https://www.spinics.net/lists/linux-mmc/msg39235.html
->
->
-> Alan Stern (1):
->   memstick: rtsx_usb_ms: Runtime resume the device when polling for
->     cards
->
-> Ulf Hansson (5):
->   mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when
->     unused
->   mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
->   memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
->   mmc: rtsx_usb_sdmmc: Enable runtime PM autosuspend
->   mmc: core: Don't power off the card when starting the host
->
->  drivers/memstick/host/rtsx_usb_ms.c |  6 ++++++
->  drivers/mmc/core/core.c             |  9 ++++-----
->  drivers/mmc/host/rtsx_usb_sdmmc.c   | 10 +++++-----
->  3 files changed, 15 insertions(+), 10 deletions(-)
->
-> --
-> 1.9.1
->
+Hi Chaotian,
 
-Patch 1->4 applied for fixes. Holding patch 5->6 for a while, as they
-are intended for next!
+my Dragonboard 8060 has a regression on detecting the eMMC after
+bisecting it down to this patch (which is sadly already in v4.8):
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+commit 08573eaf1a70104f83fdbee9b84e5be03480e9ed
+Author: Chaotian Jing <chaotian.jing@mediatek.com>
+Date:   Thu May 19 16:47:41 2016 +0800
+mmc: mmc: do not use CMD13 to get status after speed mode switch
+
+Before this patch the eMMC is detected and all partitions enumerated
+immediately, but after the patch it doesn't come up at all, except
+sometimes, when it appears minutes (!) after boot, all of a sudden.
+
+Do you have any ideas on what can be wrong?
+
+This is the Qualcomm MMCI variant whid does *not* support
+busydetection in hardware.
+
+I will continue looking at it but would be happy for any hints on how to
+solve it, currently I cannot mount root off the eMMC because of this.
+
+Yours,
+Linus Walleij
