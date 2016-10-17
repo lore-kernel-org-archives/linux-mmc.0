@@ -1,89 +1,33 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long to
- avoid unexpeted error
-Date: Fri, 14 Oct 2016 09:53:01 +0000
-Message-ID: <AM4PR0401MB2324BA6265407D6A4FE3F30190DF0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1473750418-23111-1-git-send-email-haibo.chen@nxp.com>
- <3603c63f-f007-12cc-677b-f39924628335@intel.com>
- <cd546cd4-e64f-1b86-1cae-08b89dabc410@intel.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: support standard byte register
+ accesses
+Date: Mon, 17 Oct 2016 09:36:33 +0300
+Message-ID: <7505a7f0-a781-8677-047d-7598def231e8@intel.com>
+References: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
+ <1476297352-7812-3-git-send-email-scott.branden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0080.outbound.protection.outlook.com ([104.47.2.80]:9498
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932193AbcJNN0O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Oct 2016 09:26:14 -0400
-In-Reply-To: <cd546cd4-e64f-1b86-1cae-08b89dabc410@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1476297352-7812-3-git-send-email-scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+On 12/10/16 21:35, Scott Branden wrote:
+> Add bytewise register accesses support for newer versions of IPROC
+> SDHCI controllers.
+> Previous sdhci-iproc versions of SDIO controllers
+> (such as Raspberry Pi and Cygnus) only allowed for 32-bit register
+> accesses.
+> 
+> Signed-off-by: Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+> Signed-off-by: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Adrian Hunter
-> Sent: Friday, October 14, 2016 5:12 PM
-> To: Bough Chen <haibo.chen@nxp.com>; ulf.hansson@linaro.org
-> Cc: linux-mmc@vger.kernel.org
-> Subject: Re: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long =
-to
-> avoid unexpeted error
->=20
-> On 13/09/16 11:36, Adrian Hunter wrote:
-> > On 13/09/16 10:06, Haibo Chen wrote:
-> >> Potentially overflowing expression 1000000 * data->timeout_clks with
-> >> type unsigned int is evaluated using 32-bit arithmetic, and then used
-> >> in a context that expects an expression of type unsigned long long.
-> >>
-> >> To avoid overflow, cast 1000000U to type unsigned long long.
-> >> Special thanks to coverity <http://www.coverity.com>
-> >
-> > Let's leave out the web link - it is enough to say it was found with Co=
-verity.
-> >
-> >>
-> >> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
->=20
-> Do you plan to re-submit this?
->=20
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Yes, I will re-submit this soon.=20
-
-> >
-> > Needs a fixes tag and cc stable.
-> >
-> >> ---
-> >>  drivers/mmc/host/sdhci.c | 2 +-
-> >>  1 file changed, 1 insertion(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >> index 4805566..0e9f495 100644
-> >> --- a/drivers/mmc/host/sdhci.c
-> >> +++ b/drivers/mmc/host/sdhci.c
-> >> @@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *ho=
-st,
-> struct mmc_command *cmd)
-> >>  			 * host->clock is in Hz.  target_timeout is in us.
-> >>  			 * Hence, us =3D 1000000 * cycles / Hz.  Round up.
-> >>  			 */
-> >> -			val =3D 1000000 * data->timeout_clks;
-> >> +			val =3D (unsigned long long)1000000 * data->timeout_clks;
-> >
-> > Please use 1000000ULL instead of a cast.
-> >
-> >>  			if (do_div(val, host->clock))
-> >>  				target_timeout++;
-> >>  			target_timeout +=3D val;
-> >>
-> >
-> >
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
-he
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
