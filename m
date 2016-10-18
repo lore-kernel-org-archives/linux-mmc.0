@@ -1,158 +1,51 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2 0/9] Init runtime PM support for dw_mmc
-Date: Tue, 18 Oct 2016 15:26:31 +0200
-Message-ID: <6835953.765HGVcz2e@diego>
-References: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com> <CAPDyKFopNgWh=+0RNFwJc+aaFPXGuJMAac5rPtfOawvLwSbN+g@mail.gmail.com> <5be33ac5-7b5e-4b53-67bf-1c38822832ea@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: Regression after "do not use CMD13 to get status after speed mode
+ switch"
+Date: Tue, 18 Oct 2016 16:23:39 +0300
+Message-ID: <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+ <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:33736 "EHLO gloria.sntech.de"
+Received: from mga01.intel.com ([192.55.52.88]:43333 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752865AbcJRN0r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 18 Oct 2016 09:26:47 -0400
-In-Reply-To: <5be33ac5-7b5e-4b53-67bf-1c38822832ea@rock-chips.com>
+        id S1760970AbcJRN2b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Oct 2016 09:28:31 -0400
+In-Reply-To: <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-Am Dienstag, 18. Oktober 2016, 19:35:31 schrieb Shawn Lin:
-> 在 2016/10/18 16:46, Ulf Hansson 写道:
-> > + Heiko
-> > 
-> > On 12 October 2016 at 04:50, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> >> Hi Jaehoon and Ulf,
-> >> 
-> >>    This patch is gonna support runtime PM for dw_mmc.
-> >> 
-> >> It could support to disable ciu_clk by default and disable
-> >> biu_clk if the devices are non-removeable, or removeable
-> >> with gpio-base card detect.
-> >> 
-> >>    Then I remove the system PM since the runtime PM actually
-> >> 
-> >> does the same thing as it. So I help migrate the dw_mmc variant
-> >> drivers to use runtime PM pairs and pm_runtime_force_*. Note
-> >> that I only enable runtime PM for dw_mmc-rockchip as I will
-> >> leave the decision to the owners of the corresponding drivers.
-> >> I just tested it on my RK3288 platform with linux-next to make
-> >> the runtime PM and system PM work fine for my emmc, sd card and
-> >> sdio. But I don't have hardware to help test other variant drivers.
-> >> But in theory it should work fine as I mentioned that the runtime
-> >> PM does the same thing as system PM except for disabling ciu_clk
-> >> aggressively which should not be related to the variant hosts.
-> >> 
-> >>    As you could see that I just extend the slot-gpio a bit, so the
-> >> 
-> >> ideal way is Ulf could pick them up with Jaehoon's ack. :)
-> > 
-> > The mmc core change looks fine to me, so I will wait for a pull
-> > request from Jaehoon.
-> > 
-> >> Changes in v2:
-> >> - use struct device as argument for runtime callback
-> >> - use dw_mci_runtime_* directly
-> >> - use dw_mci_runtime_* directly
-> >> - minor fix since I change the argument for dw_mci_runtime_*
-> >> - use dw_mci_runtime_* directly
-> >> - use dw_mci_runtime_* directly
-> >> 
-> >> Shawn Lin (9):
-> >>   mmc: dw_mmc: add runtime PM callback
-> >>   mmc: dw_mmc-rockchip: add runtime PM support
-> >>   mmc: core: expose the capability of gpio card detect
-> >>   mmc: dw_mmc: disable biu clk if possible
-> >>   mmc: dw_mmc-k3: deploy runtime PM facilities
-> >>   mmc: dw_mmc-exynos: deploy runtime PM facilities
-> >>   mmc: dw_mmc-pci: deploy runtime PM facilities
-> >>   mmc: dw_mmc-pltfm: deploy runtime PM facilities
-> >>   mmc: dw_mmc: remove system PM callback
-> >>  
-> >>  drivers/mmc/core/slot-gpio.c       |  8 +++++++
-> >>  drivers/mmc/host/dw_mmc-exynos.c   | 24 +++++++++-----------
-> >>  drivers/mmc/host/dw_mmc-k3.c       | 39 ++++++++------------------------
-> >>  drivers/mmc/host/dw_mmc-pci.c      | 29 ++++++++----------------
-> >>  drivers/mmc/host/dw_mmc-pltfm.c    | 28 +++++++----------------
-> >>  drivers/mmc/host/dw_mmc-rockchip.c | 42
-> >>  +++++++++++++++++++++++++++++++---
-> >>  drivers/mmc/host/dw_mmc.c          | 46
-> >>  +++++++++++++++++++++++++------------- drivers/mmc/host/dw_mmc.h       
-> >>    |  6 ++---
-> >>  include/linux/mmc/slot-gpio.h      |  1 +
-> >>  9 files changed, 117 insertions(+), 106 deletions(-)
-> > 
-> > Overall these changes looks good to me, so I am ready to accept the PR
-> > from Jaehoon!!
-> > 
-> > 
-> > Although, highly related to this patchset, I am worried that there is
-> > a misunderstanding on how MMC_PM_KEEP_POWER (DT binding
-> > "keep-power-in-suspend") is being used for dw_mmc. Perhaps I am wrong,
-> > but I would appreciate if you could elaborate a bit for my
-> > understanding.
-> > 
-> > First, this cap is solely intended to be used for controllers which
-> > may have SDIO cards attached, as it indicates those cards may be
-> > configured to be powered on while the system enters suspend state. By
-> > looking at some DTS files, for example
-> > arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts which uses it
-> > for an eMMC slot, this is clearly being abused.
+On 18/10/16 11:36, Linus Walleij wrote:
+> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
 > 
-> Indeed. In general, it should be copy-paste issues as folks maybe write
-> their dts referring to the exist dts there. So yes, I will do some
-> cleanup work for them in prevent of further spread of abused code.
+>> Before this patch the eMMC is detected and all partitions enumerated
+>> immediately, but after the patch it doesn't come up at all, except
+>> sometimes, when it appears minutes (!) after boot, all of a sudden.
+> 
+> FYI this is what it looks like when it eventually happens:
+> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+> p14 p15 p16 p17 p18 p19 p20 p21 >
+> 
+> So after 627 seconds, a bit hard for users to wait this long for their
+> root filesystem.
 
-late to the party, but a copy-paste mistake were my thoughts as well.
-Thanks Shawn for providing the patch cleaning that up.
+If the driver does not support busy detection and the eMMC card provides
+zero as the cmd6 generic timeout (which it may especially as cmd6 generic
+timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
+waiting 10 minutes i.e.
 
+#define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
 
-Heiko
-
-
-> > Anyway, the wrong DT configurations might not be a big deal, as in
-> > dw_mci_resume(), it's not the capabilities bit that is checked but the
-> > corresponding "pm_flag". This flag is set via calling
-> > sdio_set_host_pm_flags(), but as that doesn't happen for an eMMC card
-> > we should be fine, right!?
-> > 
-> > Now, what also do puzzles me, is exactly that piece of code in
-> > dw_mci_resume() that is being executed *when* the pm_flag contains
-> > MMC_PM_KEEP_POWER:
-> > if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
-> > 
-> >      dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-> >      dw_mci_setup_bus(slot, true);
-> > 
-> > }
-> > 
-> > So, in the system resume path, the above do makes sense as you need to
-> > restore the registers etc for the dw_mmc controller to enable it to
-> > operate the SDIO card. Such as bus width, clocks, etc.
-> > 
-> > Although, I would expect something similar would be needed in the new
-> > runtime resume path as well. And in particular also for eMMC/SD cards,
-> > as you need to restore the dw_mmc registers to be able to operate the
-> > card again. Don't you?
-> 
-> yes, we do.
-> 
-> > So in the end, perhaps you should *always* call dw_mci_set_ios() and
-> > dw_mci_setup_bus() in dw_mci_resume() instead of conditionally check
-> > for MMC_PM_KEEP_POWER? Or maybe only a subset of those functions?
-> 
-> Thanks for noticing this.
-> 
-> Personally, I realize there is no need to check MMC_PM_KEEP_POWER but
-> it could be highly related to the cost of S-2-R, I guess. I just checked
-> sdhci and saw the similar cases you mentioned at the first glance.
-> Maybe I'm wrong but I need more time to investigate this issue later.
-> 
-> There are still some on-going cleanup work for dw_mmc listed on my TODO
-> list, including bugfix, legacy/redundant code etc.. So I will check this
-> one either. Maybe Jaehoon could also do some stree test on enxyos
-> platforms. :)
-> 
-> > Kind regards
-> > Uffe
+So removal of CMD13 polling for HS mode (as per commit
+08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
+combinations of eMMC cards and host drivers.
 
