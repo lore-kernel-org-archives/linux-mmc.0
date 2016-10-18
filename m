@@ -1,84 +1,90 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: Re: [RFC 1/2] sdhci: Add device tree property sd-broken-highspeed
-Date: Mon, 17 Oct 2016 16:49:05 -0500
-Message-ID: <20161017214904.GA3445@zach-desktop>
-References: <1474660869-15532-1-git-send-email-zach.brown@ni.com>
- <1474660869-15532-2-git-send-email-zach.brown@ni.com>
- <CAPDyKFogDKM86XKo1iQE1KU5HpEic23FD5YQGF9QjSFYBDJn4Q@mail.gmail.com>
- <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg@mail.gmail.com>
- <CAPDyKFqw7mcvW=HTnZ9AoDFEk4TTBsecphaYxMGrEneDoKOevw@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 0/9] Init runtime PM support for dw_mmc
+Date: Tue, 18 Oct 2016 09:24:31 +0900
+Message-ID: <488999ee-acf5-47bd-3ebd-707899224749@samsung.com>
+References: <CGME20161012024453epcas1p1bdc2c6bd18d864b5535bd2b067b491af@epcas1p1.samsung.com>
+ <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0095.outbound.protection.outlook.com ([104.47.36.95]:27662
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1759407AbcJQWWY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 17 Oct 2016 18:22:24 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqw7mcvW=HTnZ9AoDFEk4TTBsecphaYxMGrEneDoKOevw@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:41045 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753763AbcJRAYe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2016 20:24:34 -0400
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OF702AS1VSSHK70@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 18 Oct 2016 09:24:31 +0900 (KST)
+In-reply-to: <1476240643-5701-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Rutland <mark.rutland@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org
 
-On Thu, Oct 06, 2016 at 10:03:56AM +0200, Ulf Hansson wrote:
-> On 5 October 2016 at 22:03, Rob Herring <robh+dt@kernel.org> wrote:
-> > On Wed, Oct 5, 2016 at 1:33 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >> On 23 September 2016 at 22:01, Zach Brown <zach.brown@ni.com> wrote:
-> >>> Certain board configurations can make highspeed malfunction due to
-> >>> timing issues. In these cases a way is needed to force the controller
-> >>> and card into standard speed even if they otherwise appear to be capable
-> >>> of highspeed.
-> >>>
-> >>> The sd-broken-highspeed property will let the sdhci driver know that
-> >>> highspeed will not work.
-> >>>
-> >>> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> >>> ---
-> >>>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
-> >>>  1 file changed, 2 insertions(+)
-> >>>
-> >>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> >>> index 8a37782..59332ea 100644
-> >>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> >>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> >>> @@ -52,6 +52,8 @@ Optional properties:
-> >>>  - no-sdio: controller is limited to send sdio cmd during initialization
-> >>>  - no-sd: controller is limited to send sd cmd during initialization
-> >>>  - no-mmc: controller is limited to send mmc cmd during initialization
-> >>> +- sd-broken-highspeed: Highspeed is broken, even if the controller and card
-> >>> +  themselves claim they support highspeed.
-> >>
-> >> Regarding a broken card, that is managed via the card quirks and not in DT.
-> >>
-> >> If this is about a controller limitation, we already have the option
-> >> to describe what it supports, so we don't need an option to tell what
-> >> it *not* supports.
-> >>
-> >> For example "cap-sd-highspeed" tells whether the controller supports
-> >> SD high-speed, please use that instead.
-> >
-> > If a controller has a capability register and it lies (perhaps the
-> > board has limitations that the SoC does not), then you may need to
-> > disable a feature.
->
-> I understand, although the SDHCI capabilities register is broken for
-> most SDHCI variants. In principle, we would more or less have to add a
-> *-broken binding for each bit in that register. I don't like that!
->
-> Maybe a better option is to add a "sdhci-cap-broken" or perhaps
-> "sdhci-cap-speed-modes-broken", which tells the driver to not rely on
-> the capabilities register and instead find out what *is* supported by
-> looking at the other mmc generic DT bindings.
->
-> What do you think of that?
->
-> Kind regards
-> Uffe
+Hi Shawn,
 
-"sdhci-cap-broken" seems too aggressive. There might only be one capability
-that the register incorrectly advertises.
+On 10/12/2016 11:50 AM, Shawn Lin wrote:
+> Hi Jaehoon and Ulf,
+> 
+>    This patch is gonna support runtime PM for dw_mmc.
+> It could support to disable ciu_clk by default and disable
+> biu_clk if the devices are non-removeable, or removeable
+> with gpio-base card detect.
+> 
+>    Then I remove the system PM since the runtime PM actually
+> does the same thing as it. So I help migrate the dw_mmc variant
+> drivers to use runtime PM pairs and pm_runtime_force_*. Note
+> that I only enable runtime PM for dw_mmc-rockchip as I will
+> leave the decision to the owners of the corresponding drivers.
+> I just tested it on my RK3288 platform with linux-next to make
+> the runtime PM and system PM work fine for my emmc, sd card and
+> sdio. But I don't have hardware to help test other variant drivers.
+> But in theory it should work fine as I mentioned that the runtime
+> PM does the same thing as system PM except for disabling ciu_clk
+> aggressively which should not be related to the variant hosts.
+> 
+>    As you could see that I just extend the slot-gpio a bit, so the
+> ideal way is Ulf could pick them up with Jaehoon's ack. :)
 
-"sdhci-cap-speed-modes-broken" makes more sense and I will re-create this patch
-set using that idea.
+I have tested with my boards..it's working fine..I will apply on this if there is no special issue.
+
+Thanks!
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> 
+> Changes in v2:
+> - use struct device as argument for runtime callback
+> - use dw_mci_runtime_* directly
+> - use dw_mci_runtime_* directly
+> - minor fix since I change the argument for dw_mci_runtime_*
+> - use dw_mci_runtime_* directly
+> - use dw_mci_runtime_* directly
+> 
+> Shawn Lin (9):
+>   mmc: dw_mmc: add runtime PM callback
+>   mmc: dw_mmc-rockchip: add runtime PM support
+>   mmc: core: expose the capability of gpio card detect
+>   mmc: dw_mmc: disable biu clk if possible
+>   mmc: dw_mmc-k3: deploy runtime PM facilities
+>   mmc: dw_mmc-exynos: deploy runtime PM facilities
+>   mmc: dw_mmc-pci: deploy runtime PM facilities
+>   mmc: dw_mmc-pltfm: deploy runtime PM facilities
+>   mmc: dw_mmc: remove system PM callback
+> 
+>  drivers/mmc/core/slot-gpio.c       |  8 +++++++
+>  drivers/mmc/host/dw_mmc-exynos.c   | 24 +++++++++-----------
+>  drivers/mmc/host/dw_mmc-k3.c       | 39 ++++++++------------------------
+>  drivers/mmc/host/dw_mmc-pci.c      | 29 ++++++++----------------
+>  drivers/mmc/host/dw_mmc-pltfm.c    | 28 +++++++----------------
+>  drivers/mmc/host/dw_mmc-rockchip.c | 42 +++++++++++++++++++++++++++++++---
+>  drivers/mmc/host/dw_mmc.c          | 46 +++++++++++++++++++++++++-------------
+>  drivers/mmc/host/dw_mmc.h          |  6 ++---
+>  include/linux/mmc/slot-gpio.h      |  1 +
+>  9 files changed, 117 insertions(+), 106 deletions(-)
+> 
+
