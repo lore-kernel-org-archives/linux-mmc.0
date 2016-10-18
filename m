@@ -1,13 +1,13 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH 3/8] mmc: core: remove BUG_ONs from mmc
-Date: Tue, 18 Oct 2016 20:04:04 +0800
-Message-ID: <1476792244-6390-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 1/8] mmc: core: remove BUG_ONs from sdio
+Date: Tue, 18 Oct 2016 20:03:49 +0800
+Message-ID: <1476792229-6306-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1476792192-6265-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:57483 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:51634 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757966AbcJRL6V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 07:58:21 -0400
+        with ESMTP id S1752128AbcJRL6H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 07:58:07 -0400
 In-Reply-To: <1476792192-6265-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -20,19 +20,31 @@ handling for that. So this patch is gonna discard these meaningless
 BUG_ONs and deploy error handling if needed.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 ---
 
- drivers/mmc/core/mmc.c     | 24 ++++++++++++++----------
- drivers/mmc/core/mmc_ops.c | 20 ++++++--------------
- 2 files changed, 20 insertions(+), 24 deletions(-)
+ drivers/mmc/core/sdio.c     | 26 ++++++++++++++------------
+ drivers/mmc/core/sdio_cis.c |  3 ++-
+ drivers/mmc/core/sdio_irq.c | 12 +++++++-----
+ 3 files changed, 23 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 39fc5b2..8f63b59 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1477,7 +1477,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	u32 cid[4];
- 	u32 rocr;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index bd44ba8..80883c6 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -63,7 +63,8 @@ static int sdio_init_func(struct mmc_card *card, unsigned int fn)
+ 	int ret;
+ 	struct sdio_func *func;
+ 
+-	BUG_ON(fn > SDIO_MAX_FUNCS);
++	if (WARN_ON(fn > SDIO_MAX_FUNCS))
++		return -EINVAL;
+ 
+ 	func = sdio_alloc_func(card);
+ 	if (IS_ERR(func))
+@@ -555,7 +556,9 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	u32 rocr = 0;
+ 	u32 ocr_card = ocr;
  
 -	BUG_ON(!host);
 +	if (!host)
@@ -40,54 +52,53 @@ index 39fc5b2..8f63b59 100644
 +
  	WARN_ON(!host->claimed);
  
- 	/* Set correct bus mode for MMC before attempting init */
-@@ -1867,8 +1869,8 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
-  */
- static void mmc_remove(struct mmc_host *host)
+ 	/* to query card if 1.8V signalling is supported */
+@@ -791,8 +794,8 @@ static void mmc_sdio_remove(struct mmc_host *host)
  {
+ 	int i;
+ 
 -	BUG_ON(!host);
 -	BUG_ON(!host->card);
 +	if (!host)
 +		return;
  
- 	mmc_remove_card(host->card);
- 	host->card = NULL;
-@@ -1889,8 +1891,8 @@ static void mmc_detect(struct mmc_host *host)
+ 	for (i = 0;i < host->card->sdio_funcs;i++) {
+ 		if (host->card->sdio_func[i]) {
+@@ -820,8 +823,8 @@ static void mmc_sdio_detect(struct mmc_host *host)
  {
  	int err;
  
 -	BUG_ON(!host);
 -	BUG_ON(!host->card);
 +	if (WARN_ON(!host))
-+		return;
++		goto out;
  
- 	mmc_get_card(host->card);
- 
-@@ -1917,8 +1919,8 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
- 					EXT_CSD_POWER_OFF_LONG;
- 
--	BUG_ON(!host);
--	BUG_ON(!host->card);
-+	if (WARN_ON(!host))
-+		return -EINVAL;
- 
- 	mmc_claim_host(host);
- 
-@@ -1976,8 +1978,8 @@ static int _mmc_resume(struct mmc_host *host)
+ 	/* Make sure card is powered before detecting it */
+ 	if (host->caps & MMC_CAP_POWER_OFF_CARD) {
+@@ -916,8 +919,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
  {
  	int err = 0;
  
 -	BUG_ON(!host);
 -	BUG_ON(!host->card);
-+	if (WARN_ON(!host))
++	if (!host)
 +		return -EINVAL;
  
+ 	/* Basic card reinitialization. */
+ 	mmc_claim_host(host);
+@@ -970,9 +973,6 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+ {
+ 	int ret;
+ 
+-	BUG_ON(!host);
+-	BUG_ON(!host->card);
+-
  	mmc_claim_host(host);
  
-@@ -2111,7 +2113,9 @@ int mmc_attach_mmc(struct mmc_host *host)
- 	int err;
+ 	/*
+@@ -1063,7 +1063,9 @@ int mmc_attach_sdio(struct mmc_host *host)
  	u32 ocr, rocr;
+ 	struct mmc_card *card;
  
 -	BUG_ON(!host);
 +	if (!host)
@@ -95,80 +106,58 @@ index 39fc5b2..8f63b59 100644
 +
  	WARN_ON(!host->claimed);
  
- 	/* Set correct bus mode for MMC before attempting attach */
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index ad6e979..ceb41eb 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -60,9 +60,6 @@ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
- 	int err;
- 	struct mmc_command cmd = {0};
+ 	err = mmc_send_io_op_cond(host, 0, &ocr);
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index dcb3dee..f8c3728 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -262,7 +262,8 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+ 	else
+ 		prev = &card->tuples;
  
--	BUG_ON(!card);
--	BUG_ON(!card->host);
--
- 	cmd.opcode = MMC_SEND_STATUS;
- 	if (!mmc_host_is_spi(card->host))
- 		cmd.arg = card->rca << 16;
-@@ -92,7 +89,8 @@ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
- {
- 	struct mmc_command cmd = {0};
- 
--	BUG_ON(!host);
-+	if (!host)
+-	BUG_ON(*prev);
++	if (*prev)
 +		return -EINVAL;
  
- 	cmd.opcode = MMC_SELECT_CARD;
+ 	do {
+ 		unsigned char tpl_code, tpl_link;
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 91bbbfb..f1faf9a 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -214,7 +214,9 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 	struct mmc_host *host = card->host;
  
-@@ -109,7 +107,6 @@ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
+ 	WARN_ON(!host->claimed);
+-	BUG_ON(host->sdio_irqs < 1);
++
++	if (host->sdio_irqs < 1)
++		return -EINVAL;
  
- int mmc_select_card(struct mmc_card *card)
- {
--	BUG_ON(!card);
+ 	if (!--host->sdio_irqs) {
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+@@ -261,8 +263,8 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
+ 	int ret;
+ 	unsigned char reg;
  
- 	return _mmc_select_card(card->host, card);
- }
-@@ -181,8 +178,6 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 	struct mmc_command cmd = {0};
- 	int i, err = 0;
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return -EINVAL;
  
--	BUG_ON(!host);
--
- 	cmd.opcode = MMC_SEND_OP_COND;
- 	cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
-@@ -221,8 +216,8 @@ int mmc_all_send_cid(struct mmc_host *host, u32 *cid)
- 	int err;
- 	struct mmc_command cmd = {0};
+ 	pr_debug("SDIO: Enabling IRQ for %s...\n", sdio_func_id(func));
  
--	BUG_ON(!host);
--	BUG_ON(!cid);
-+	if (!cid)
-+		return -ENOMEM;
+@@ -304,8 +306,8 @@ int sdio_release_irq(struct sdio_func *func)
+ 	int ret;
+ 	unsigned char reg;
  
- 	cmd.opcode = MMC_ALL_SEND_CID;
- 	cmd.arg = 0;
-@@ -241,9 +236,6 @@ int mmc_set_relative_addr(struct mmc_card *card)
- {
- 	struct mmc_command cmd = {0};
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return -EINVAL;
  
--	BUG_ON(!card);
--	BUG_ON(!card->host);
--
- 	cmd.opcode = MMC_SET_RELATIVE_ADDR;
- 	cmd.arg = card->rca << 16;
- 	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-@@ -257,8 +249,8 @@ mmc_send_cxd_native(struct mmc_host *host, u32 arg, u32 *cxd, int opcode)
- 	int err;
- 	struct mmc_command cmd = {0};
+ 	pr_debug("SDIO: Disabling IRQ for %s...\n", sdio_func_id(func));
  
--	BUG_ON(!host);
--	BUG_ON(!cxd);
-+	if (!cxd)
-+		return -ENOMEM;
- 
- 	cmd.opcode = opcode;
- 	cmd.arg = arg;
 -- 
 2.3.7
 
