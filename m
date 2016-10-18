@@ -1,63 +1,40 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] MAINTAINERS: mmc: Move the mmc tree to kernel.org
-Date: Tue, 18 Oct 2016 09:17:42 +0200
-Message-ID: <CAPDyKFoUp70sP8LQWy7cKvoEU6dOw_72Ag5ciezd4Z6XCLnC1A@mail.gmail.com>
-References: <1476708880-5333-1-git-send-email-ulf.hansson@linaro.org> <e4cfb009-07a3-972c-d93c-d777c5da3899@rock-chips.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: Regression after "do not use CMD13 to get status after speed mode switch"
+Date: Tue, 18 Oct 2016 10:36:51 +0200
+Message-ID: <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:32896 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751963AbcJRHRp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 03:17:45 -0400
-Received: by mail-qk0-f174.google.com with SMTP id n189so274639780qke.0
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2016 00:17:45 -0700 (PDT)
-In-Reply-To: <e4cfb009-07a3-972c-d93c-d777c5da3899@rock-chips.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34434 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752206AbcJRIgw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 04:36:52 -0400
+Received: by mail-qk0-f169.google.com with SMTP id f128so266380685qkb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2016 01:36:52 -0700 (PDT)
+In-Reply-To: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-On 18 October 2016 at 05:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi Ulf,
->
-> On 2016/10/17 20:54, Ulf Hansson wrote:
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  MAINTAINERS | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/MAINTAINERS b/MAINTAINERS
->> index a009e00..e685724 100644
->> --- a/MAINTAINERS
->> +++ b/MAINTAINERS
->> @@ -8164,7 +8164,7 @@ F:        include/linux/mfd/
->>  MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
->>  M:     Ulf Hansson <ulf.hansson@linaro.org>
->>  L:     linux-mmc@vger.kernel.org
->> -T:     git git://git.linaro.org/people/ulf.hansson/mmc.git
->> +T:     git git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
->
->
-> I cannot clone this tree, and I have tried some of my servers, although.
->
-> remote: Total 5031043 (delta 4225582), reused 5030965 (delta 4225531)
-> Resolving deltas: 100% (4225582/4225582), done.
-> Checking connectivity... done.
-> warning: remote HEAD refers to nonexistent ref, unable to checkout.
+On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
 
-The reason for the error message was the default HEAD pointed to a
-non-existent "master" branch.
-As I can't change the default HEAD (because kernel.org's gitolite
-server configurations don't allow it), I decided to publish a master
-branch. That should resolve the problem, sorry for inconvenience!
+> Before this patch the eMMC is detected and all partitions enumerated
+> immediately, but after the patch it doesn't come up at all, except
+> sometimes, when it appears minutes (!) after boot, all of a sudden.
 
-BTW. In case your aren't familiar with using remote branches in git;
-those are really convenient as you don't need to do a complete new
-clone.
-git remote add mmc http://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
-git remote update
+FYI this is what it looks like when it eventually happens:
+root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+[  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+[  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+[  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+[  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+[  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+p14 p15 p16 p17 p18 p19 p20 p21 >
 
-Kind regards
-Uffe
+So after 627 seconds, a bit hard for users to wait this long for their
+root filesystem.
+
+Yours,
+Linus Walleij
