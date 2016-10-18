@@ -1,69 +1,97 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Check regulator pointer
-Date: Tue, 18 Oct 2016 11:03:02 +0200
-Message-ID: <CAPDyKFquN_f1ZKW3G6ZsTnnGJa-7N4R4-RpF=E4PN+7OTrxhZg@mail.gmail.com>
-References: <20161018084343.680-1-maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled while
+ doing suspend
+Date: Tue, 18 Oct 2016 11:18:17 +0200
+Message-ID: <CAPDyKFpwEKjyd02oj20_fQkLEPaAniAHZTo6AYJDdqzsdSWH2g@mail.gmail.com>
+References: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:34150 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758328AbcJRJDE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 05:03:04 -0400
-Received: by mail-qk0-f173.google.com with SMTP id f128so267497228qkb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2016 02:03:03 -0700 (PDT)
-In-Reply-To: <20161018084343.680-1-maxime.ripard@free-electrons.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:32879 "EHLO
+        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752845AbcJRJST (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 05:18:19 -0400
+Received: by mail-qk0-f175.google.com with SMTP id n189so279926430qke.0
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2016 02:18:19 -0700 (PDT)
+In-Reply-To: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <dongas86@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aisheng Dong <aisheng.dong@nxp.com>
 
-On 18 October 2016 at 10:43, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> mmc_regulator_get_supply might silently fail if the regulators are not
-> found, which is the right thing to do since both these regulators are
-> optional.
+On 18 October 2016 at 09:39, Haibo Chen <haibo.chen@nxp.com> wrote:
+> When suspend usdhc, it will access usdhc register. So usdhc clock
+> should be enabled, otherwise the access usdhc register will return
+> error or cause system hung.
 >
-> However, the drivers then have no way to know whether or not they should
-> proceed and call mmc_regulator_set_ocr. And since this function doesn't
+> Take this into consideration, if system enable a usdhc and do not
+> connect any SD/SDIO/MMC card, after system boot up, this usdhc
+> will do runtime suspend, and close all usdhc clock. At this time,
+> if suspend the system, due to no card persent, usdhc runtime resume
+> will not be called. So usdhc clock still closed, then in suspend,
+> once access usdhc register, system hung or bus error return.
+>
+> This patch make sure usdhc clock always enabled while doing usdhc
+> suspend.
 
-Host drivers should check "if (!IS_ERR(mmc->supply.vmmc))" before
-invoking mmc_regulator_set_ocr(). I wasn't aware that some didn't.
+Yes, and since the clocks are kept enabled during system suspend that
+means wasting power, doesn't it!?
 
-My point is, that in some cases the regulator is optional, then a host
-driver need to take other actions to power on/off the card. So, I am
-wondering whether adding these checks in mmc_regulator_set_ocr() is a
-bit unnecessary, as the host drivers are already checking the
-IS_ERR().
+May I propose another solution. Currently you deal only with clock
+gating/ungating during runtime suspend/resume. I am wondering whether
+you could extend those operations to be similar to what is needed
+during system suspend/resume?
 
-> check for the validity of the regulator pointer, it leads to a null pointer
-> dereference. Add such a check to make sure everything works fine.
->
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  drivers/mmc/core/core.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 2553d903a82b..1d3ea5e1aa37 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1474,6 +1474,12 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->         int                     result = 0;
->         int                     min_uV, max_uV;
->
-> +       if (!supply)
-> +               return -EINVAL;
-> +
-> +       if (IS_ERR(supply))
-> +               return PTR_ERR(supply);
-> +
->         if (vdd_bit) {
->                 mmc_ocrbitnum_to_vdd(vdd_bit, &min_uV, &max_uV);
->
-> --
-> 2.9.3
->
+If that is possible, you can instead deploy the runtime PM centric
+approach and get system suspend/resume for free. All you would have to
+do is to assign the system PM callbacks to
+pm_runtime_force_suspend|resume(). In that way, the above problem
+would be solved and you don't need to keep the clocks enabled during
+system suspend/resume.
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 13 ++++++++++++-
+>  1 file changed, 12 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 7123ef9..1df3846 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1322,17 +1322,28 @@ static int sdhci_esdhc_suspend(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>
+> +#ifdef CONFIG_PM
+> +       pm_runtime_get_sync(host->mmc->parent);
+> +#endif
+> +
+>         return sdhci_suspend_host(host);
+>  }
+>
+>  static int sdhci_esdhc_resume(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> +       int ret;
+>
+>         /* re-initialize hw state in case it's lost in low power mode */
+>         sdhci_esdhc_imx_hwinit(host);
+> +       ret = sdhci_resume_host(host);
+>
+> -       return sdhci_resume_host(host);
+> +#ifdef CONFIG_PM
+> +       pm_runtime_mark_last_busy(host->mmc->parent);
+> +       pm_runtime_put_autosuspend(host->mmc->parent);
+> +#endif
+> +
+> +       return ret;
+>  }
+>  #endif
+>
+> --
+> 1.9.1
+>
