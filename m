@@ -1,40 +1,73 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH 0/2] Add device tree property and quirk for supporting sdhci
-Date: Tue, 18 Oct 2016 10:37:04 -0500
-Message-ID: <1476805026-677-1-git-send-email-zach.brown@ni.com>
+From: Haibo Chen <haibo.chen@nxp.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled while doing suspend
+Date: Tue, 18 Oct 2016 15:39:00 +0800
+Message-ID: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod3.natinst.com ([130.164.80.24]:34802 "EHLO ni.com"
+Received: from mail-db5eur01on0055.outbound.protection.outlook.com ([104.47.2.55]:2803
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S936603AbcJRPhV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 18 Oct 2016 11:37:21 -0400
+        id S1030371AbcJRQIB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Oct 2016 12:08:01 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, dongas86@gmail.com
+Cc: linux-mmc@vger.kernel.org, aisheng.dong@nxp.com, haibo.chen@nxp.com
 
-Some board configurations can not support sd highspeed mode due to the distance
-between the card slot and the controller. The card and controller report that
-they are capable of highspeed however, so we need a mechanism for specifying
-that the setup is incapable of supporting highspeed mode.
+When suspend usdhc, it will access usdhc register. So usdhc clock
+should be enabled, otherwise the access usdhc register will return
+error or cause system hung.
 
-The first patch adds documentation about a new devicetree property
-broken-highspeed.
+Take this into consideration, if system enable a usdhc and do not
+connect any SD/SDIO/MMC card, after system boot up, this usdhc
+will do runtime suspend, and close all usdhc clock. At this time,
+if suspend the system, due to no card persent, usdhc runtime resume
+will not be called. So usdhc clock still closed, then in suspend,
+once access usdhc register, system hung or bus error return.
 
-The second patch keeps the sd controller and card from going into highspeed
-mode when the property is set.
+This patch make sure usdhc clock always enabled while doing usdhc
+suspend.
 
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
-Zach Brown (2):
-  sdhci: Add device tree property broken-highspeed
-  sdhci: Prevent SD from doing high-speed timing when broken-highspeed
-    property is set
-
- Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- drivers/mmc/host/sdhci.c                      | 4 +++-
- 2 files changed, 5 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 7123ef9..1df3846 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1322,17 +1322,28 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 
++#ifdef CONFIG_PM
++	pm_runtime_get_sync(host->mmc->parent);
++#endif
++
+ 	return sdhci_suspend_host(host);
+ }
+ 
+ static int sdhci_esdhc_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret;
+ 
+ 	/* re-initialize hw state in case it's lost in low power mode */
+ 	sdhci_esdhc_imx_hwinit(host);
++	ret = sdhci_resume_host(host);
+ 
+-	return sdhci_resume_host(host);
++#ifdef CONFIG_PM
++	pm_runtime_mark_last_busy(host->mmc->parent);
++	pm_runtime_put_autosuspend(host->mmc->parent);
++#endif
++
++	return ret;
+ }
+ #endif
+ 
 -- 
-2.7.4
+1.9.1
 
