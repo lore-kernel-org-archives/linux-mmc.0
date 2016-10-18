@@ -1,58 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Check regulator pointer
-Date: Tue, 18 Oct 2016 12:28:36 +0200
-Message-ID: <CAPDyKFov8_xoyLPYhq+YqKSt+b=TozL3mM2rTZacNLieQKD+LQ@mail.gmail.com>
-References: <20161018084343.680-1-maxime.ripard@free-electrons.com>
- <CAPDyKFquN_f1ZKW3G6ZsTnnGJa-7N4R4-RpF=E4PN+7OTrxhZg@mail.gmail.com> <20161018094704.ohubpg4j3jhc7cay@lukather>
+From: Jeremy Kim <jh4u.kim@samsung.com>
+Subject: [PATCH] mmc: block: Change MMC_IOC_MAX_BYTES
+Date: Tue, 18 Oct 2016 19:39:27 +0900
+Message-ID: <0bb501d2292b$e6a43760$b3eca620$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f179.google.com ([209.85.216.179]:35844 "EHLO
-        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757953AbcJRK2i (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 06:28:38 -0400
-Received: by mail-qt0-f179.google.com with SMTP id m5so146232346qtb.3
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2016 03:28:38 -0700 (PDT)
-In-Reply-To: <20161018094704.ohubpg4j3jhc7cay@lukather>
+Received: from mailout4.samsung.com ([203.254.224.34]:49923 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759308AbcJRKja (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 06:39:30 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OF8005BRO9N9A80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 18 Oct 2016 19:39:28 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: jh4u.kim@samsung.com
 
-On 18 October 2016 at 11:47, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> Hi,
->
-> On Tue, Oct 18, 2016 at 11:03:02AM +0200, Ulf Hansson wrote:
->> On 18 October 2016 at 10:43, Maxime Ripard
->> <maxime.ripard@free-electrons.com> wrote:
->> > mmc_regulator_get_supply might silently fail if the regulators are not
->> > found, which is the right thing to do since both these regulators are
->> > optional.
->> >
->> > However, the drivers then have no way to know whether or not they should
->> > proceed and call mmc_regulator_set_ocr. And since this function doesn't
->>
->> Host drivers should check "if (!IS_ERR(mmc->supply.vmmc))" before
->> invoking mmc_regulator_set_ocr(). I wasn't aware that some didn't.
->
-> Ok, so the sunxi one definitely doesn't:
-> http://lxr.free-electrons.com/source/drivers/mmc/host/sunxi-mmc.c#L735
->
->> My point is, that in some cases the regulator is optional, then a host
->> driver need to take other actions to power on/off the card.
->
-> What are those actions? Just power up the card through some other
-> mean, or is it more tied to the MMC protocol?
 
-Through some other way, which is managed by the internal logic of the
-mmc controller.
+It is used for limitation of buffer size during IOCTL such as FFU. However,
+eMMC FW size is bigger than (512L*256).
+(For instance, currently, Samsung eMMC FW size is over 300KB.)
+So, it needs to increase to execute FFU.
 
->
-> Also, I'm wondering if VMMC is actually optional at all. In all cases
-> I can think of, it would be represented as a regulator anyway.
 
-Yes, you are right. For most cases, but not all.
+Signed-off-by: Jeonghan Kim <jh4u.kim@samsung.com>
+---
+ ioctl.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Kind regards
-Uffe
+diff --git a/ioctl.h b/ioctl.h
+index 7e385b8..700a551 100644
+--- a/ioctl.h
++++ b/ioctl.h
+@@ -69,6 +69,6 @@ struct mmc_ioc_multi_cmd {
+  * is enforced per ioctl call.  For larger data transfers, use the normal
+  * block device operations.
+  */
+-#define MMC_IOC_MAX_BYTES  (512L * 256)
++#define MMC_IOC_MAX_BYTES  (512L * 1024)
+ #define MMC_IOC_MAX_CMDS    255
+ #endif /* LINUX_MMC_IOCTL_H */
+--
+1.9.1
+
