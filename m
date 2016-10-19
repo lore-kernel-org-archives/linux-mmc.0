@@ -1,60 +1,124 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: Regression after "do not use CMD13 to get status after speed mode
- switch"
-Date: Tue, 18 Oct 2016 18:03:52 -0700
-Message-ID: <d222f9f5-873f-fcd4-01f9-64085d2084e9@codeaurora.org>
-References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
- <5f261465-9cc6-4403-5e1b-23df1b347dcb@codeaurora.org>
+From: "Y.B. Lu" <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [v12, 0/8] Fix eSDHC host version register bug
+Date: Wed, 19 Oct 2016 02:40:53 +0000
+Message-ID: <AM5PR0401MB2529907DE940AC310FC8C0B2F8D20@AM5PR0401MB2529.eurprd04.prod.outlook.com>
+References: <1474441040-11946-1-git-send-email-yangbo.lu@nxp.com>
+	<CAPDyKFoit0sTPpfi2=AHcdZsDwOJxbBX68O-1jBFL=5JN0m6_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:38382 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932945AbcJSBDy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2016 21:03:54 -0400
-In-Reply-To: <5f261465-9cc6-4403-5e1b-23df1b347dcb@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <CAPDyKFoit0sTPpfi2=AHcdZsDwOJxbBX68O-1jBFL=5JN0m6_w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd
+	Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "X.B. Xie" <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "M.H. Lian" <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Kumar
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Andy Gross <andy.gross@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>
 
-On 10/17/2016 09:06 PM, Ritesh Harjani wrote:
-> Hi Linus,
->
-> Recently for the same patch below was submitted for Qcom sdhci-msm
-> driver.
->
-> https://patchwork.kernel.org/patch/9237679/
->
-> You mentioned yours is mmci driver.
-> See if it provides any hints.
->
+> -----Original Message-----
+> From: Ulf Hansson [mailto:ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org]
+> Sent: Tuesday, October 18, 2016 6:48 PM
+> To: Y.B. Lu
+> Cc: linux-mmc; Scott Wood; Arnd Bergmann; linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org;
+> devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-
+> kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-clk; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Mark Rutland;
+> Rob Herring; Russell King; Jochen Friedrich; Joerg Roedel; Claudiu Manoil;
+> Bhupesh Sharma; Qiang Zhao; Kumar Gala; Santosh Shilimkar; Leo Li; X.B.
+> Xie; M.H. Lian
+> Subject: Re: [v12, 0/8] Fix eSDHC host version register bug
+> 
+> On 21 September 2016 at 08:57, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org> wrote:
+> > This patchset is used to fix a host version register bug in the
+> > T4240-R1.0-R2.0 eSDHC controller. To match the SoC version and
+> > revision, 10 previous version patchsets had tried many methods but all
+> of them were rejected by reviewers.
+> > Such as
+> >         - dts compatible method
+> >         - syscon method
+> >         - ifdef PPC method
+> >         - GUTS driver getting SVR method Anrd suggested a
+> > soc_device_match method in v10, and this is the only available method
+> > left now. This v11 patchset introduces the soc_device_match interface
+> > in soc driver.
+> >
+> > The first six patches of Yangbo are to add the GUTS driver. This is
+> > used to register a soc device which contain soc version and revision
+> information.
+> > The other two patches introduce the soc_device_match method in soc
+> > driver and apply it on esdhc driver to fix this bug.
+> >
+> > Arnd Bergmann (1):
+> >   base: soc: introduce soc_device_match() interface
+> >
+> > Yangbo Lu (7):
+> >   dt: bindings: update Freescale DCFG compatible
+> >   ARM64: dts: ls2080a: add device configuration node
+> >   dt: bindings: move guts devicetree doc out of powerpc directory
+> >   powerpc/fsl: move mpc85xx.h to include/linux/fsl
+> >   soc: fsl: add GUTS driver for QorIQ platforms
+> >   MAINTAINERS: add entry for Freescale SoC drivers
+> >   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+> >
+> >  Documentation/devicetree/bindings/arm/fsl.txt      |   6 +-
+> >  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+> >  MAINTAINERS                                        |  11 +-
+> >  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+> >  arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+> >  arch/powerpc/sysdev/fsl_pci.c                      |   2 +-
+> >  drivers/base/Kconfig                               |   1 +
+> >  drivers/base/soc.c                                 |  66 ++++++
+> >  drivers/clk/clk-qoriq.c                            |   3 +-
+> >  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+> >  drivers/iommu/fsl_pamu.c                           |   3 +-
+> >  drivers/mmc/host/Kconfig                           |   1 +
+> >  drivers/mmc/host/sdhci-of-esdhc.c                  |  20 ++
+> >  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+> >  drivers/soc/Kconfig                                |   2 +-
+> >  drivers/soc/fsl/Kconfig                            |  19 ++
+> >  drivers/soc/fsl/Makefile                           |   1 +
+> >  drivers/soc/fsl/guts.c                             | 257
+> +++++++++++++++++++++
+> >  include/linux/fsl/guts.h                           | 125 ++++++----
+> >  .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+> >  include/linux/sys_soc.h                            |   3 +
+> >  21 files changed, 478 insertions(+), 61 deletions(-)  rename
+> > Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+> > create mode 100644 drivers/soc/fsl/Kconfig  create mode 100644
+> > drivers/soc/fsl/guts.c  rename arch/powerpc/include/asm/mpc85xx.h =>
+> > include/linux/fsl/svr.h (97%)
+> >
+> > --
+> > 2.1.0.27.g96db324
+> >
+> 
+> This looks good to me! I am not sure which tree you want this to be
+> picked up through, but unless no other volunteers I can take it through
+> my mmc tree.
+> 
+> Although, before considering to apply, I need an ack from Scott/Arnd for
+> the guts driver in patch 5/8 and I need an ack from Greg for patch 7/8,
+> where the soc_device_match() interface is added (seems like you didn't
+> add him on cc/to).
+> 
 
-I still see an mmc1 error on apq8074 dragonboard, but I don't see the
-long 10 minute timeout. Maybe this is a different problem?
+[Lu Yangbo-B47093] Thanks a lot for your clarifying, Uffe.
+This patchset was based on mmc tree, and needed your picking up.
+But I think it needs to be rebased now since I saw qbman driver was in drivers/soc/fsl/ now.
+I will do that after collecting others' ACKs or comments.
 
-[    5.440702] mmc1: card never left busy state
-[    5.440729] mmc1: error -110 whilst initialising SD card
-[    5.546527] mmc1: Reset 0x1 never completed.
-[    5.546548] sdhci: =========== REGISTER DUMP (mmc1)===========
-[    5.549854] sdhci: Sys addr: 0x00000000 | Version:  0x00003802
-[    5.555497] sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
-[    5.561310] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-[    5.567127] sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
-[    5.572944] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
-[    5.578759] sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
-[    5.584575] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
-[    5.590391] sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
-[    5.596207] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-[    5.602023] sdhci: Caps:     0x2329c8b2 | Caps_1:   0x00008007
-[    5.607838] sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
-[    5.613653] sdhci: Host ctl2: 0x00000000
-[    5.619468] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
-[    5.623549] sdhci: ===========================================
+Hi Scott and Arnd,
+Could I get your ACTs if there're no other changes needed?
+Thanks a lot.
 
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
-
+> Kind regards
+> Uffe
