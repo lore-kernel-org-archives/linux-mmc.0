@@ -1,66 +1,47 @@
-From: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v5 2/2] Documentation: DT: MMC: meson-gx: new bindings doc
-Date: Wed, 19 Oct 2016 09:12:05 -0700
-Message-ID: <20161019161205.28565-2-khilman@baylibre.com>
-References: <20161019161205.28565-1-khilman@baylibre.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v4] MMC: meson: initial support for GX platforms
+Date: Wed, 19 Oct 2016 09:12:37 -0700
+Message-ID: <7hvawo8gi2.fsf@baylibre.com>
+References: <20161018195605.21145-1-khilman@baylibre.com>
+        <CAPDyKFps2QYq9N1erqDdCnmXJyUT60HLQDe8+gR7A571-F8NLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161019161205.28565-1-khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f174.google.com ([209.85.192.174]:36677 "EHLO
+        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941272AbcJSQMj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2016 12:12:39 -0400
+Received: by mail-pf0-f174.google.com with SMTP id e6so18526071pfk.3
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2016 09:12:38 -0700 (PDT)
+In-Reply-To: <CAPDyKFps2QYq9N1erqDdCnmXJyUT60HLQDe8+gR7A571-F8NLg@mail.gmail.com>
+        (Ulf Hansson's message of "Wed, 19 Oct 2016 09:19:43 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Signed-off-by: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
----
- .../devicetree/bindings/mmc/amlogic,meson-gx.txt   | 33 ++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-new file mode 100644
-index 000000000000..a2fa9a1c26ae
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-@@ -0,0 +1,33 @@
-+Amlogic SD / eMMC controller for S905/GXBB family SoCs
-+
-+The MMC 5.1 compliant host controller on Amlogic provides the
-+interface for SD, eMMC and SDIO devices.
-+
-+This file documents the properties in addition to those available in
-+the MMC core bindings, documented by mmc.txt.
-+
-+Required properties:
-+- compatible : contains one of:
-+  - "amlogic,meson-gx-mmc"
-+  - "amlogic,meson-gxbb-mmc"
-+  - "amlogic,meson-gxl-mmc"
-+  - "amlogic,meson-gxm-mmc"
-+- clocks     : A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
-+- clock-names: Should contain the following:
-+	"core" - Main peripheral bus clock
-+	"clkin0" - Parent clock of internal mux
-+	"clkin1" - Other parent clock of internal mux
-+  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
-+  clock rate requested by the MMC core.
-+
-+Example:
-+
-+	sd_emmc_a: mmc@70000 {
-+        	compatible = "amlogic,meson-gxbb-mmc";
-+		reg = <0x0 0x70000 0x0 0x2000>;
-+                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
-+		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
-+		clock-names = "core", "clkin0", "clkin1";
-+		pinctrl-0 = <&emmc_pins>;
-+	};
-+
--- 
-2.9.3
+> On 18 October 2016 at 21:56, Kevin Hilman <khilman@baylibre.com> wrote:
+>> Initial support for the SD/eMMC controller in the Amlogic S905/GX*
+>> family of SoCs.
+>>
+>> Signed-off-by: Kevin Hilman <khilman@baylibre.com>
+>> ---
+>> Changes from v3:
+>> - better handling of clock error paths
+>> - rename to meson-gx to reflect support for newer SoCs
+>> - has now been tested with SDIO
+>>
+>>  .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt |  33 +
+>
+> Just realize this. You should split the DT doc into a separate patch,
+> such the DT maintainers can ack it.
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+OK, I separated out the binding and sent a v5.
+
+> Otherwise this looks good to me!
+
+Thanks for the review!
+
+Kevin
