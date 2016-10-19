@@ -1,118 +1,160 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC 2/2] mmc: sdhci: Ignore capability register when it comes to
- speeds and use DT binding instead when sdhci-cap-speed-modes-broken is set.
-Date: Wed, 19 Oct 2016 09:10:39 +0200
-Message-ID: <CAPDyKFrusfEcxWwM1ehXEAfoyK7UFihL30VQHc2bdEyZgzTu3g@mail.gmail.com>
-References: <1476824736-9337-1-git-send-email-zach.brown@ni.com> <1476824736-9337-3-git-send-email-zach.brown@ni.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Wed, 19 Oct 2016 09:14:35 +0200
+Message-ID: <CAPDyKFq6w+aqdMzyeTYp_qbiyqGzoiAaNabzgp56zQXBa=Ny7g@mail.gmail.com>
+References: <20161018101624.27946-1-pramod.gurav@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1476824736-9337-3-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20161018101624.27946-1-pramod.gurav@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Harjani Ritesh <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 18 October 2016 at 23:05, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
-> When the sdhci-cap-speed-modes-broken DT property is set, the driver
-> will ignore the bits of the capability registers that correspond to
-> speed modes and will read the of properties of the device to determine
-> which speeds are supported.
+On 18 October 2016 at 12:16, Pramod Gurav <pramod.gurav@linaro.org> wrote:
+> Provides runtime PM callbacks to enable and disable clock resources
+> when idle. Also support system PM callbacks to be called during system
+> suspend and resume.
+>
+> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
 
-To me this seems like a great idea. Yeah, I proposed it so I guess
-that's why. :-)
-
-Anyway, it's Adrian call to decide how he want to go with this. He
-might consider the other option [1] to be better.
-
-Some more comments below.
-
->
-> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci.c | 31 +++++++++++++++++++++++++++++++
->  1 file changed, 31 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1e25b01..100649a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -22,6 +22,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/of.h>
->
->  #include <linux/leds.h>
->
-> @@ -3020,6 +3021,32 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
->  }
->  EXPORT_SYMBOL_GPL(__sdhci_read_caps);
->
-> +void sdhci_get_speed_caps_from_of(struct sdhci_host *host)
-> +{
-> +       struct mmc_host *mmc = host->mmc;
-> +
-> +       host->caps &= ~SDHCI_CAN_DO_HISPD;
-> +
-> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "cap-sd-highspeed"))
-> +               host->caps |= SDHCI_CAN_DO_HISPD;
-> +
-> +       if (host->version < SDHCI_SPEC_300)
-> +               return;
-> +
-> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
-> +                        SDHCI_SUPPORT_DDR50);
-> +
-> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-sdr50"))
-> +               host->caps1 |= SDHCI_SUPPORT_SDR50;
-> +
-> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-sdr104"))
-> +               host->caps1 |= SDHCI_SUPPORT_SDR104;
-> +
-> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-ddr50"))
-> +               host->caps1 |= SDHCI_SUPPORT_DDR50;
-> +
-
-I don't think you need a separate OF parsing function. Instead the
-SDHCI variant drivers may call mmc_of_parse() to parse the generic mmc
-OF properties and then read the SDHCI caps registers (in some way or
-the other).
-
-As reading the SDHCI caps registers is done in __sdhci_read_caps(),
-you could instead check for the OF property
-"sdhci-cap-speed-modes-broken" in there,  and if it's set, clear the
-related bits. I think that's all you need.
-
-Note, the above code considers only SD speed modes, I assume we should
-include eMMC speed modes to be broken as well!?
-
-> +}
-> +
->  int sdhci_setup_host(struct sdhci_host *host)
->  {
->         struct mmc_host *mmc;
-> @@ -3046,6 +3073,10 @@ int sdhci_setup_host(struct sdhci_host *host)
->                 return ret;
->
->         sdhci_read_caps(host);
-> +       if (of_property_read_bool(mmc_dev(mmc)->of_node,
-> +                                 "sdhci-cap-speed-modes-broken"))
-> +               sdhci_get_speed_caps_from_of(host);
-> +
->
->         override_timeout_clk = host->timeout_clk;
->
-> --
-> 2.7.4
->
+Looks good to me. I hold it for a while to allow people to test/ack.
 
 Kind regards
 Uffe
 
-[1]
-http://www.spinics.net/lists/devicetree/msg146401.html
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ---
+>
+> Tested on DB410C.
+>
+> Changes in v4:
+> - Remove calls to sdhci_runtime_resume_host/sdhci_runtime_suspend_host
+>   from runtime callbacks as sdhc msm controller is capable of restoring
+>   it's register values after clocks are disabled and re-enabled.
+>
+> Changes in v3:
+> - Added CONFIG_PM around runtime pm function.
+> - Replaced msm suspend/resume with generic function directly
+> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
+>
+> Changes in v2:
+> - Moved pm_rutime enabling before adding host
+> - Handled pm_rutime in remove
+> - Changed runtime handling with reference from sdhci-of-at91.c
+>
+>  drivers/mmc/host/sdhci-msm.c | 66 +++++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 65 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 8ef44a2a..33ec809 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/of_device.h>
+>  #include <linux/delay.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>
+>  #include "sdhci-pltfm.h"
+> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                 goto clk_disable;
+>         }
+>
+> +       pm_runtime_get_noresume(&pdev->dev);
+> +       pm_runtime_set_active(&pdev->dev);
+> +       pm_runtime_enable(&pdev->dev);
+> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> +       pm_runtime_use_autosuspend(&pdev->dev);
+> +
+>         ret = sdhci_add_host(host);
+>         if (ret)
+> -               goto clk_disable;
+> +               goto pm_runtime_disable;
+> +
+> +       platform_set_drvdata(pdev, host);
+> +
+> +       pm_runtime_put_autosuspend(&pdev->dev);
+>
+>         return 0;
+>
+> +pm_runtime_disable:
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_set_suspended(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+>  clk_disable:
+>         clk_disable_unprepare(msm_host->clk);
+>  pclk_disable:
+> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>                     0xffffffff);
+>
+>         sdhci_remove_host(host, dead);
+> +
+> +       pm_runtime_get_sync(&pdev->dev);
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+> +
+>         clk_disable_unprepare(msm_host->clk);
+>         clk_disable_unprepare(msm_host->pclk);
+>         if (!IS_ERR(msm_host->bus_clk))
+> @@ -693,12 +713,56 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>         return 0;
+>  }
+>
+> +#ifdef CONFIG_PM
+> +static int sdhci_msm_runtime_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +
+> +       clk_disable_unprepare(msm_host->clk);
+> +       clk_disable_unprepare(msm_host->pclk);
+> +
+> +       return 0;
+> +}
+> +
+> +static int sdhci_msm_runtime_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       ret = clk_prepare_enable(msm_host->clk);
+> +       if (ret) {
+> +               dev_err(dev, "clk_enable failed: %d\n", ret);
+> +               return ret;
+> +       }
+> +       ret = clk_prepare_enable(msm_host->pclk);
+> +       if (ret) {
+> +               dev_err(dev, "clk_enable failed: %d\n", ret);
+> +               clk_disable_unprepare(msm_host->clk);
+> +               return ret;
+> +       }
+> +
+> +       return 0;
+> +}
+> +#endif
+> +
+> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> +                                       pm_runtime_force_resume)
+> +       SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
+> +                               NULL)
+> +};
+> +
+>  static struct platform_driver sdhci_msm_driver = {
+>         .probe = sdhci_msm_probe,
+>         .remove = sdhci_msm_remove,
+>         .driver = {
+>                    .name = "sdhci_msm",
+>                    .of_match_table = sdhci_msm_dt_match,
+> +                  .pm = &sdhci_msm_pm_ops,
+>         },
+>  };
+>
+> --
+> 2.9.3
+>
