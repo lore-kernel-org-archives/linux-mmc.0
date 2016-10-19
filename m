@@ -1,160 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Wed, 19 Oct 2016 09:14:35 +0200
-Message-ID: <CAPDyKFq6w+aqdMzyeTYp_qbiyqGzoiAaNabzgp56zQXBa=Ny7g@mail.gmail.com>
-References: <20161018101624.27946-1-pramod.gurav@linaro.org>
+From: Jeremy Kim <jh4u.kim@samsung.com>
+Subject: [PATCH] mmc: block: Change MMC_IOC_MAX_BYTES
+Date: Wed, 19 Oct 2016 20:31:46 +0900
+Message-ID: <0d4301d229fc$607a9770$216fc650$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20161018101624.27946-1-pramod.gurav@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Harjani Ritesh <riteshh@codeaurora.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:51023 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S943473AbcJSPmJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2016 11:42:09 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OFA0138SLCUX770@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 19 Oct 2016 20:31:47 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-On 18 October 2016 at 12:16, Pramod Gurav <pramod.gurav@linaro.org> wrote:
-> Provides runtime PM callbacks to enable and disable clock resources
-> when idle. Also support system PM callbacks to be called during system
-> suspend and resume.
->
-> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
+>From 27d46f5697434542ad9cafbc6a9630dc14915f91 Mon Sep 17 00:00:00 2001
+From: Jeonghan Kim <jh4u.kim@samsung.com>
+Date: Wed, 19 Oct 2016 19:48:02 +0900
+Subject: [PATCH] mmc: block: Change MMC_IOC_MAX_BYTES
 
-Looks good to me. I hold it for a while to allow people to test/ack.
+It is used for limitation of buffer size during IOCTL such as FFU.
+However, eMMC FW size is bigger than (512L*256).
+(For instance, currently, Samsung eMMC FW size is over 300KB.)
+So, it needs to increase to execute FFU.
 
-Kind regards
-Uffe
+Signed-off-by: Jeonghan Kim <jh4u.kim@samsung.com>
+---
+ include/uapi/linux/mmc/ioctl.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> ---
->
-> Tested on DB410C.
->
-> Changes in v4:
-> - Remove calls to sdhci_runtime_resume_host/sdhci_runtime_suspend_host
->   from runtime callbacks as sdhc msm controller is capable of restoring
->   it's register values after clocks are disabled and re-enabled.
->
-> Changes in v3:
-> - Added CONFIG_PM around runtime pm function.
-> - Replaced msm suspend/resume with generic function directly
-> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
->
-> Changes in v2:
-> - Moved pm_rutime enabling before adding host
-> - Handled pm_rutime in remove
-> - Changed runtime handling with reference from sdhci-of-at91.c
->
->  drivers/mmc/host/sdhci-msm.c | 66 +++++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 65 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 8ef44a2a..33ec809 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -18,6 +18,7 @@
->  #include <linux/of_device.h>
->  #include <linux/delay.h>
->  #include <linux/mmc/mmc.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/slab.h>
->
->  #include "sdhci-pltfm.h"
-> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->                 goto clk_disable;
->         }
->
-> +       pm_runtime_get_noresume(&pdev->dev);
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
-> -               goto clk_disable;
-> +               goto pm_runtime_disable;
-> +
-> +       platform_set_drvdata(pdev, host);
-> +
-> +       pm_runtime_put_autosuspend(&pdev->dev);
->
->         return 0;
->
-> +pm_runtime_disable:
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_set_suspended(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
->  clk_disable:
->         clk_disable_unprepare(msm_host->clk);
->  pclk_disable:
-> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->                     0xffffffff);
->
->         sdhci_remove_host(host, dead);
-> +
-> +       pm_runtime_get_sync(&pdev->dev);
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         clk_disable_unprepare(msm_host->clk);
->         clk_disable_unprepare(msm_host->pclk);
->         if (!IS_ERR(msm_host->bus_clk))
-> @@ -693,12 +713,56 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->         return 0;
->  }
->
-> +#ifdef CONFIG_PM
-> +static int sdhci_msm_runtime_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +       clk_disable_unprepare(msm_host->clk);
-> +       clk_disable_unprepare(msm_host->pclk);
-> +
-> +       return 0;
-> +}
-> +
-> +static int sdhci_msm_runtime_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(msm_host->clk);
-> +       if (ret) {
-> +               dev_err(dev, "clk_enable failed: %d\n", ret);
-> +               return ret;
-> +       }
-> +       ret = clk_prepare_enable(msm_host->pclk);
-> +       if (ret) {
-> +               dev_err(dev, "clk_enable failed: %d\n", ret);
-> +               clk_disable_unprepare(msm_host->clk);
-> +               return ret;
-> +       }
-> +
-> +       return 0;
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +                                       pm_runtime_force_resume)
-> +       SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-> +                               NULL)
-> +};
-> +
->  static struct platform_driver sdhci_msm_driver = {
->         .probe = sdhci_msm_probe,
->         .remove = sdhci_msm_remove,
->         .driver = {
->                    .name = "sdhci_msm",
->                    .of_match_table = sdhci_msm_dt_match,
-> +                  .pm = &sdhci_msm_pm_ops,
->         },
->  };
->
-> --
-> 2.9.3
->
+diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
+index 7e385b8..700a551 100644
+--- a/include/uapi/linux/mmc/ioctl.h
++++ b/include/uapi/linux/mmc/ioctl.h
+@@ -69,6 +69,6 @@ struct mmc_ioc_multi_cmd {
+  * is enforced per ioctl call.  For larger data transfers, use the normal
+  * block device operations.
+  */
+-#define MMC_IOC_MAX_BYTES  (512L * 256)
++#define MMC_IOC_MAX_BYTES  (512L * 1024)
+ #define MMC_IOC_MAX_CMDS    255
+ #endif /* LINUX_MMC_IOCTL_H */
+--
+1.9.1
+
+
