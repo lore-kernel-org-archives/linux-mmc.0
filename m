@@ -1,75 +1,118 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2] mmc: sunxi: Prevent against null dereference for vmmc
-Date: Wed, 19 Oct 2016 15:33:04 +0200
-Message-ID: <20161019133304.22915-1-maxime.ripard@free-electrons.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC 2/2] mmc: sdhci: Ignore capability register when it comes to
+ speeds and use DT binding instead when sdhci-cap-speed-modes-broken is set.
+Date: Wed, 19 Oct 2016 09:10:39 +0200
+Message-ID: <CAPDyKFrusfEcxWwM1ehXEAfoyK7UFihL30VQHc2bdEyZgzTu3g@mail.gmail.com>
+References: <1476824736-9337-1-git-send-email-zach.brown@ni.com> <1476824736-9337-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1476824736-9337-3-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-VMMC is an optional regulator, which means that mmc_regulator_get_supply
-will only return an error in case of a deferred probe, but not when the
-regulator is not set in the DT.
+On 18 October 2016 at 23:05, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
+> When the sdhci-cap-speed-modes-broken DT property is set, the driver
+> will ignore the bits of the capability registers that correspond to
+> speed modes and will read the of properties of the device to determine
+> which speeds are supported.
 
-However, the sunxi driver assumes that VMMC is always there, and doesn't
-check the value of the regulator pointer before using it, which obviously
-leads to a (close to) null pointer dereference.
+To me this seems like a great idea. Yeah, I proposed it so I guess
+that's why. :-)
 
-Add proper checks to prevent that.
+Anyway, it's Adrian call to decide how he want to go with this. He
+might consider the other option [1] to be better.
 
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Some more comments below.
 
----
-Changes from v1:
-  - remove redundant error message
----
- drivers/mmc/host/sunxi-mmc.c | 15 ++++++++++-----
- 1 file changed, 10 insertions(+), 5 deletions(-)
+>
+> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 31 +++++++++++++++++++++++++++++++
+>  1 file changed, 31 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1e25b01..100649a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -22,6 +22,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/of.h>
+>
+>  #include <linux/leds.h>
+>
+> @@ -3020,6 +3021,32 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>  }
+>  EXPORT_SYMBOL_GPL(__sdhci_read_caps);
+>
+> +void sdhci_get_speed_caps_from_of(struct sdhci_host *host)
+> +{
+> +       struct mmc_host *mmc = host->mmc;
+> +
+> +       host->caps &= ~SDHCI_CAN_DO_HISPD;
+> +
+> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "cap-sd-highspeed"))
+> +               host->caps |= SDHCI_CAN_DO_HISPD;
+> +
+> +       if (host->version < SDHCI_SPEC_300)
+> +               return;
+> +
+> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+> +                        SDHCI_SUPPORT_DDR50);
+> +
+> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-sdr50"))
+> +               host->caps1 |= SDHCI_SUPPORT_SDR50;
+> +
+> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-sdr104"))
+> +               host->caps1 |= SDHCI_SUPPORT_SDR104;
+> +
+> +       if (of_property_read_bool(mmc_dev(mmc)->of_node, "sd-uhs-ddr50"))
+> +               host->caps1 |= SDHCI_SUPPORT_DDR50;
+> +
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index c0a5c676d0e8..b1d1303389a7 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -822,10 +822,13 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 
- 	case MMC_POWER_UP:
--		host->ferror = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
--						     ios->vdd);
--		if (host->ferror)
--			return;
-+		if (!IS_ERR(mmc->supply.vmmc)) {
-+			host->ferror = mmc_regulator_set_ocr(mmc,
-+							     mmc->supply.vmmc,
-+							     ios->vdd);
-+			if (host->ferror)
-+				return;
-+		}
- 
- 		if (!IS_ERR(mmc->supply.vqmmc)) {
- 			host->ferror = regulator_enable(mmc->supply.vqmmc);
-@@ -847,7 +850,9 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_POWER_OFF:
- 		dev_dbg(mmc_dev(mmc), "power off!\n");
- 		sunxi_mmc_reset_host(host);
--		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
- 		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled)
- 			regulator_disable(mmc->supply.vqmmc);
- 		host->vqmmc_enabled = false;
--- 
-2.9.3
+I don't think you need a separate OF parsing function. Instead the
+SDHCI variant drivers may call mmc_of_parse() to parse the generic mmc
+OF properties and then read the SDHCI caps registers (in some way or
+the other).
+
+As reading the SDHCI caps registers is done in __sdhci_read_caps(),
+you could instead check for the OF property
+"sdhci-cap-speed-modes-broken" in there,  and if it's set, clear the
+related bits. I think that's all you need.
+
+Note, the above code considers only SD speed modes, I assume we should
+include eMMC speed modes to be broken as well!?
+
+> +}
+> +
+>  int sdhci_setup_host(struct sdhci_host *host)
+>  {
+>         struct mmc_host *mmc;
+> @@ -3046,6 +3073,10 @@ int sdhci_setup_host(struct sdhci_host *host)
+>                 return ret;
+>
+>         sdhci_read_caps(host);
+> +       if (of_property_read_bool(mmc_dev(mmc)->of_node,
+> +                                 "sdhci-cap-speed-modes-broken"))
+> +               sdhci_get_speed_caps_from_of(host);
+> +
+>
+>         override_timeout_clk = host->timeout_clk;
+>
+> --
+> 2.7.4
+>
+
+Kind regards
+Uffe
+
+[1]
+http://www.spinics.net/lists/devicetree/msg146401.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
