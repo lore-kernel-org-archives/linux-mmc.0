@@ -1,66 +1,37 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: Regression after "do not use CMD13 to get status after speed mode
- switch"
-Date: Thu, 20 Oct 2016 16:17:15 +0100
-Message-ID: <bb6c1f05-d81c-4284-5831-c9d49bf038f3@linaro.org>
-References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Thu, 20 Oct 2016 19:46:22 +0000
+Message-ID: <SG2PR06MB1165B756B67D1D101E91A7B38AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
+ <20160912141507.6837-3-chris.brandt@renesas.com>
+ <20161020132852.GB4177@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relmlor2.renesas.com ([210.160.252.172]:12782 "EHLO
+        relmlie1.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753865AbcJTTq0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 15:46:26 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-Hi Linus,
-
-On 17/10/16 15:32, Linus Walleij wrote:
-> Hi Chaotian,
->
-> my Dragonboard 8060 has a regression on detecting the eMMC after
-> bisecting it down to this patch (which is sadly already in v4.8):
->
-> commit 08573eaf1a70104f83fdbee9b84e5be03480e9ed
-> Author: Chaotian Jing <chaotian.jing@mediatek.com>
-> Date:   Thu May 19 16:47:41 2016 +0800
-> mmc: mmc: do not use CMD13 to get status after speed mode switch
->
-> Before this patch the eMMC is detected and all partitions enumerated
-> immediately, but after the patch it doesn't come up at all, except
-> sometimes, when it appears minutes (!) after boot, all of a sudden.
->
-> Do you have any ideas on what can be wrong?
-
-I remember hitting timeout issue with new version of eMMC on SD600c-eval 
-board, this patch/hack fixed it for me.
-
-https://git.linaro.org/people/srinivas.kandagatla/linux.git/commitdiff/e42d7427b9ce77174eef079be0e04e22bdb8fd07?hp=3e4bf0b78405694fd1ab4371c73e80932be21e3a
-
-
-Also one more important thing was to do with regulator mode too. 
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=93b8e6fda11757a20df21f3fc18e12789841f173
-
-Can you give it a try.. If it works I can clean it up and send it for 
-review.
-
-Thanks,
-srini
-
->
-> This is the Qualcomm MMCI variant whid does *not* support
-> busydetection in hardware.
->
-> I will continue looking at it but would be happy for any hints on how to
-> solve it, currently I cannot mount root off the eMMC because of this.
-
-
->
-> Yours,
-> Linus Walleij
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+SGVsbG8gV29sZnJhbSwNCg0KPiA+ID4gKwkJLyogaWYgY291bnQgd2FzIG11bHRpcGxlIG9mIDQg
+Ki8NCj4gPiA+ICsJCWlmICghKGNvdW50ICYgMHgzKSkNCj4gPiA+ICsJCQlyZXR1cm47DQo+ID4g
+PiArCQlidWY4ID0gKHU4ICopKGJ1ZiArIChjb3VudCA+PiAyKSk7DQo+ID4gPiArCQljb3VudCAl
+PSA0Ow0KPiA+DQo+ID4gVG8gc2tpcCB0aGUgc2FtZSBvcGVyYXRpb24gZG9uZSBvbiAnY291bnQn
+IHR3aWNlLCBtYXliZT8NCj4gPg0KPiA+IAkJYnVmOCA9ICh1OCAqKShidWYgKyAoY291bnQgPj4g
+MikpOw0KPiA+IAkJY291bnQgJj0gMzsNCj4gPg0KPiA+IAkJaWYgKCFjb3VudCkNCj4gPiAJCQly
+ZXR1cm47DQo+IA0KPiANCj4gVGhhdCBsb29rcyBsaWtlIGl0IHNob3VsZCB3b3JrLg0KPiBJIGNh
+biB0cnkgaXQgb3V0IGFuZCBzZWUgaWYgdGhlcmUgaXMgc29tZXRoaW5nIHdlIGFyZSBtaXNzaW5n
+Lg0KDQpTZWVtcyB0byB3b3JrIGZpbmUuIEFsdGhvdWdoIEkgYWRtaXQgdGhhdCBiZWNhdXNlIHRo
+ZSBkcml2ZXIgaXMgbW9zdGx5IGJlaW5nIHVzZWQgYXMgYSBibG9jayBkZXZpY2UgKFNEIGNhcmQp
+LCBhbGwgdGhlIGRhdGEgcmVxdWVzdHMgYXJlIGFuIGV2ZW4gbXVsdGlwbGUgb2YgNCAoSSBwdXQg
+YSBwcmludGsgYWZ0ZXIgImlmICghY291bnQpIHJldHVybjsiICkuIE5vdCBzdXJlIGlmIHRoYXQg
+d2lsbCBiZSB0aGUgY2FzZSB3aGVuIEkgdGVzdCBTRElPIGRldmljZXMsIGJ1dCBJJ2xsIGZpbmQg
+b3V0IG9uY2UgSSBzdGFydCBwb3J0aW5nIFNESU8gZGV2aWNlIGRyaXZlcnMgdG8gNC45Ky4NCg0K
+DQpJJ2xsIHN1Ym1pdCBhIHY0IG9mIHRoaXMgcGF0Y2ggc2VyaWVzIHRvbW9ycm93Lg0KDQpUaGFu
+ayB5b3UuDQoNCkNocmlzDQoNCg==
