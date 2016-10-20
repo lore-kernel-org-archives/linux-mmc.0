@@ -1,60 +1,175 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Thu, 20 Oct 2016 14:35:26 +0000
-Message-ID: <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20160912141507.6837-1-chris.brandt@renesas.com>
- <20160912141507.6837-3-chris.brandt@renesas.com>
- <20161020132852.GB4177@katana>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v4] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Thu, 20 Oct 2016 20:20:16 +0530
+Message-ID: <d7801576-e2b3-13a3-df8d-e203a628a445@codeaurora.org>
+References: <20161018101624.27946-1-pramod.gurav@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor2.renesas.com ([210.160.252.172]:19766 "EHLO
-        relmlie1.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1753924AbcJTOfc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 10:35:32 -0400
-In-Reply-To: <20161020132852.GB4177@katana>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20161018101624.27946-1-pramod.gurav@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@linaro.org>, ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-T24gMTAvMjAvMjAxNiwgV29sZnJhbSBTYW5nIHdyb3RlOg0KPiBTYWRseSwgSSBkb24ndCBoYXZl
-IFNESEkgZG9jdW1lbnRhdGlvbiBmb3IgdGhpcyBTb0MuDQoNCkluIHRoZSBjdXJyZW50IGhhcmR3
-YXJlIG1hbnVhbCBvbiByZW5lc2FzLmNvbSwgdGhlIFNIREkgc2VjdGlvbiBpcyBub3QgaW5jbHVk
-ZWQuDQpIb3dldmVyLCBmb3IgdmVyc2lvbiAzLjAgdGhhdCB3aWxsIGJlIHBvc3RlZCBzaG9ydGx5
-LCBpdCB3aWxsIHN0YXJ0IHRvIGluY2x1ZGUgdGhlIFNESEkgc2VjdGlvbi4NCg0KDQo+ICogRG9l
-cyBpdCBoYXZlIGEgdmVyc2lvbiByZWdpc3RlciAoQ1RMX1ZFUlNJT04pPyBJZiBzbywgd2hhdCBk
-b2VzIGl0DQo+ICAgc2F5Pw0KDQoweDgyMEINCg0KDQo+ICogRG9lcyBpdCBoYXZlIFNEX0JVRjAg
-d2lkdGggc2V0dGluZyAobmFtZWQgZWl0aGVyIEVYVF9BQ0Mgb3IgSE9TVF9NT0RFLA0KPiAgIHNv
-IGZhciBhbHdheXMgY29tZXMgYWZ0ZXIgdGhlIHZlcnNpb24gcmVnaXN0ZXIpPyBJZiBzbywgd2hh
-dCBpcyBpdHMNCj4gICBsYXlvdXQ/DQoNClRoZXJlIGlzIGEgIkVYVF9TV0FQIiByZWdpc3Rlci4g
-SXQgaXMgdGhlIG9ubHkgdGhpbmcgYWZ0ZXIgVkVSU0lPTi4NCiAgIFZFUlNJT04gPSAweEU4MDRF
-MEUyDQogIEVYVF9TV0FQID0gMHhFODA0RTBGMA0KDQpIZXJlIGFyZSB0aGUgYml0cyBpbiB0aGF0
-IHJlZ2lzdGVyOg0KDQpETUFTRSAoYml0IDgpDQoJRE1BIFRyYW5zZmVyIFNpemUgU2VsZWN0DQoJ
-U2VsZWN0cyB0aGUgdHJhbnNmZXIgdW5pdCBmb3IgU0RfQlVGIHJlYWQvd3JpdGUgRE1BIHRyYW5z
-ZmVyLiBTZXQgdGhpcyBiaXQNCglpbiBjb21iaW5hdGlvbiB3aXRoIHRoZSB0cmFuc2ZlciBzaXpl
-IHNldCBpbiB0aGUgRE1BIENoYW5uZWwNCglDb25maWd1cmF0aW9uIHJlZ2lzdGVyLg0KCTA6IDQt
-Ynl0ZSAobG9uZ3dvcmQpIHVuaXQNCgkxOiA2NC1ieXRlIChsb25nd29yZCDvgrQgMTYpIHVuaXQN
-Cg0KU0RCUlNXQVAgKGJpdCA3KQ0KCVNEX0JVRjAgU3dhcCBSZWFkKjENCglXaGVuIHJlYWRpbmcg
-ZnJvbSBTRF9CVUYwLCBkYXRhIHN0b3JlZCBpbiBTRF9CVUYwIGNhbiBiZSByZXBsYWNlZA0KCWFu
-ZCB0aGVuIHJlYWQuKjINCgkwOiBUaGUgY3VycmVudCBkYXRhIGlzIHJlYWQgd2l0aG91dCByZXBs
-YWNlbWVudC4NCgkxOiBEYXRhIHJlcGxhY2VtZW50IGZvciByZWFkaW5nIHByb2NlZWRzIGluIGJ5
-dGVzDQoNClNEQldTV0FQIChiaXQgNikNCglTRF9CVUYwIFN3YXAgV3JpdGUqMQ0KCVdoZW4gd3Jp
-dGluZyB0byBTRF9CVUYwLCBkYXRhIHRvIGJlIHdyaXR0ZW4gY2FuIGJlIHJlcGxhY2VkIGFuZCB0
-aGVuDQoJc3RvcmVkIGluIFNEX0JVRjAuKjINCgkwOiBUaGUgY3VycmVudCBkYXRhIGlzIHdyaXR0
-ZW4gd2l0aG91dCByZXBsYWNlbWVudC4NCgkxOiBEYXRhIHJlcGxhY2VtZW50IGZvciB3cml0aW5n
-IHByb2NlZWRzIGluIGJ5dGVzLg0KDQoNCj4gKiBEb2VzIGl0IHN1cHBvcnQgRE1BPw0KWWVzLg0K
-DQoNCj4gSXMgaXQgY29tcGF0aWJsZSB0byB0aGUgY3VycmVudCBpbXBsZW1lbnRhdGlvbj8NCg0K
-SSBkb24ndCBrbm93IHlldC4gVGhlIGN1cnJlbnQgQlNQIGlzIG9uIDMuMTQgYW5kIGl0IHVzZXMg
-RE1BLCBidXQgSSdtIG5vdCBzdXJlIHdoYXQncyBnb2luZyB0byBoYXBwZW4gYXMgSSBzdGFydCBt
-b3ZpbmcgdGhpbmdzIHRvIDQuOSsuDQoNCg0KDQoNCj4gPiArCQkvKiBpZiBjb3VudCB3YXMgbXVs
-dGlwbGUgb2YgNCAqLw0KPiA+ICsJCWlmICghKGNvdW50ICYgMHgzKSkNCj4gPiArCQkJcmV0dXJu
-Ow0KPiA+ICsJCWJ1ZjggPSAodTggKikoYnVmICsgKGNvdW50ID4+IDIpKTsNCj4gPiArCQljb3Vu
-dCAlPSA0Ow0KPiANCj4gVG8gc2tpcCB0aGUgc2FtZSBvcGVyYXRpb24gZG9uZSBvbiAnY291bnQn
-IHR3aWNlLCBtYXliZT8NCj4gDQo+IAkJYnVmOCA9ICh1OCAqKShidWYgKyAoY291bnQgPj4gMikp
-Ow0KPiAJCWNvdW50ICY9IDM7DQo+IA0KPiAJCWlmICghY291bnQpDQo+IAkJCXJldHVybjsNCg0K
-DQpUaGF0IGxvb2tzIGxpa2UgaXQgc2hvdWxkIHdvcmsuDQpJIGNhbiB0cnkgaXQgb3V0IGFuZCBz
-ZWUgaWYgdGhlcmUgaXMgc29tZXRoaW5nIHdlIGFyZSBtaXNzaW5nLg0KDQoNClRoYW5rcw0KDQpD
-aHJpcw0KDQo=
+Hi Pramod,
+
+Thanks for this patch. Few minor comments.
+
+I have tested your patch on db410c and 8996 based internal platform and 
+it works fine.
+
+
+On 10/18/2016 3:46 PM, Pramod Gurav wrote:
+> Provides runtime PM callbacks to enable and disable clock resources
+> when idle. Also support system PM callbacks to be called during system
+> suspend and resume.
+>
+> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
+> ---
+>
+> Tested on DB410C.
+>
+> Changes in v4:
+> - Remove calls to sdhci_runtime_resume_host/sdhci_runtime_suspend_host
+>   from runtime callbacks as sdhc msm controller is capable of restoring
+>   it's register values after clocks are disabled and re-enabled.
+>
+> Changes in v3:
+> - Added CONFIG_PM around runtime pm function.
+> - Replaced msm suspend/resume with generic function directly
+> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
+>
+> Changes in v2:
+> - Moved pm_rutime enabling before adding host
+> - Handled pm_rutime in remove
+> - Changed runtime handling with reference from sdhci-of-at91.c
+>
+>  drivers/mmc/host/sdhci-msm.c | 66 +++++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 65 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 8ef44a2a..33ec809 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/of_device.h>
+>  #include <linux/delay.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>
+>  #include "sdhci-pltfm.h"
+> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  		goto clk_disable;
+>  	}
+>
+> +	pm_runtime_get_noresume(&pdev->dev);
+> +	pm_runtime_set_active(&pdev->dev);
+> +	pm_runtime_enable(&pdev->dev);
+> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+Use a macro MSM_MMC_AUTOSUSPEND_DELAY_MS instead of using 50 directly here.
+
+> +	pm_runtime_use_autosuspend(&pdev->dev);
+> +
+>  	ret = sdhci_add_host(host);
+>  	if (ret)
+> -		goto clk_disable;
+> +		goto pm_runtime_disable;
+> +
+> +	platform_set_drvdata(pdev, host);
+No need to set platform_set_drvdata here. sdhci_pltfm_init will do it 
+anyways.
+
+> +
+pm_runtime_mark_last_busy(&pdev->dev) can be added here.
+> +	pm_runtime_put_autosuspend(&pdev->dev);
+>
+>  	return 0;
+>
+> +pm_runtime_disable:
+> +	pm_runtime_disable(&pdev->dev);
+> +	pm_runtime_set_suspended(&pdev->dev);
+> +	pm_runtime_put_noidle(&pdev->dev);
+>  clk_disable:
+>  	clk_disable_unprepare(msm_host->clk);
+>  pclk_disable:
+> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>  		    0xffffffff);
+>
+>  	sdhci_remove_host(host, dead);
+> +
+> +	pm_runtime_get_sync(&pdev->dev);
+> +	pm_runtime_disable(&pdev->dev);
+> +	pm_runtime_put_noidle(&pdev->dev);
+> +
+>  	clk_disable_unprepare(msm_host->clk);
+>  	clk_disable_unprepare(msm_host->pclk);
+>  	if (!IS_ERR(msm_host->bus_clk))
+> @@ -693,12 +713,56 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>
+> +#ifdef CONFIG_PM
+> +static int sdhci_msm_runtime_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	clk_disable_unprepare(msm_host->clk);
+> +	clk_disable_unprepare(msm_host->pclk);
+> +
+> +	return 0;
+> +}
+> +
+> +static int sdhci_msm_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret;
+> +
+> +	ret = clk_prepare_enable(msm_host->clk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+dev_err(dev, "clk enable failed for core_clk: %d\n", ret);
+
+> +		return ret;
+> +	}
+> +	ret = clk_prepare_enable(msm_host->pclk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+dev_err(dev, "clk enable failed for iface_clk: %d\n", ret);
+
+> +		clk_disable_unprepare(msm_host->clk);
+> +		return ret;
+> +	}
+> +
+> +	return 0;
+> +}
+> +#endif
+> +
+> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> +					pm_runtime_force_resume)
+> +	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
+> +				NULL)
+> +};
+> +
+>  static struct platform_driver sdhci_msm_driver = {
+>  	.probe = sdhci_msm_probe,
+>  	.remove = sdhci_msm_remove,
+>  	.driver = {
+>  		   .name = "sdhci_msm",
+>  		   .of_match_table = sdhci_msm_dt_match,
+> +		   .pm = &sdhci_msm_pm_ops,
+>  	},
+>  };
+>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
