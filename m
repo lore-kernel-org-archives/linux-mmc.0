@@ -1,97 +1,60 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Thu, 20 Oct 2016 15:28:53 +0200
-Message-ID: <20161020132852.GB4177@katana>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Thu, 20 Oct 2016 14:35:26 +0000
+Message-ID: <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
 References: <20160912141507.6837-1-chris.brandt@renesas.com>
  <20160912141507.6837-3-chris.brandt@renesas.com>
+ <20161020132852.GB4177@katana>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="cmJC7u66zC7hs+87"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:58459 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933643AbcJTN3D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Oct 2016 09:29:03 -0400
-Content-Disposition: inline
-In-Reply-To: <20160912141507.6837-3-chris.brandt@renesas.com>
+Received: from relmlor2.renesas.com ([210.160.252.172]:19766 "EHLO
+        relmlie1.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753924AbcJTOfc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 10:35:32 -0400
+In-Reply-To: <20161020132852.GB4177@katana>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-
---cmJC7u66zC7hs+87
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, Sep 12, 2016 at 10:15:06AM -0400, Chris Brandt wrote:
-> For the r7s72100 SOC, the DATA_PORT register was changed to 32-bits wide.
-> Therefore a new flag has been created that will allow 32-bit reads/writes
-> to the DATA_PORT register instead of 16-bit (because 16-bits accesses are
-> not supported).
->=20
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> ---
-> v3:
-> * changed loops to memcpy
-> v2:
-> * changed 'data * 0xFF' to 'data & 0xFF'
-> * added 'const' for sd_ctrl_write32_rep
-
-Sadly, I don't have SDHI documentation for this SoC.
-
-* Does it have a version register (CTL_VERSION)? If so, what does it
-  say?
-* Does it have SD_BUF0 width setting (named either EXT_ACC or HOST_MODE,
-  so far always comes after the version register)? If so, what is its
-  layout?
-
-Unrelated to this patch but nice to know:
-
-* Does it support DMA? Is it compatible to the current implementation?
-
-That being asked, R-Car SoCs can have SDBUF0 32-bit wide as well (Gen3
-even 64-bit). So far, this is only used for DMA, though.
-
-Thanks,
-
-   Wolfram
-
-> +		/* if count was multiple of 4 */
-> +		if (!(count & 0x3))
-> +			return;
-> +		buf8 =3D (u8 *)(buf + (count >> 2));
-> +		count %=3D 4;
-
-To skip the same operation done on 'count' twice, maybe?
-
-		buf8 =3D (u8 *)(buf + (count >> 2));
-		count &=3D 3;
-
-		if (!count)
-			return;
-
-
---cmJC7u66zC7hs+87
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYCMaUAAoJEBQN5MwUoCm2UIQQAKtuj+1jHRcqKFXAeALkK0U+
-tXKUVAVOAfPT0/HaxcR7LeR1UxRnHCcdEZxjZArLrN9MGraUH7+XSsG7efbDDunN
-xZYlkdeXJ3lsfV7XVPkhI+cajC7lrfNUOfqo6pO4EqOdmYQEd6wRD+2ITVwcUB1u
-Wif/GPSl4wld2e5Rh3XbLm1JlDRZHOMVF+CxbactqenV+1vbQbLaft6WR7jiFZ/u
-IWvrPE5Mif7U+hsI1/HJ/3lZXk6QXgrpPGOdAh4rrkmaJg9BdLAS27spYGXHUPxF
-sG82ByXm88jzCYcW6EJP968xo/vOacWljmKVbZhqo3bjDTySHJoCmGzEdJrqcCKQ
-3v9FbQdZCYdpmUkSh2QZLeaXTjqy5v3fHUEaWWqSuaYIM0H/cmYi15GSC9quB2+X
-ruzF63xRrt9fEelBzbB1gzbcskRNIRo+9Os+H82kUCN9lFBYdGWj4FoNBJsH58NX
-Wf55aRmps1+siXHyso1LPPJWxTGVli5NUiG/MIgr3OpJwJLpK8dKuVegxPX05Ebj
-oOSvafyrdbGMhO0Bv7xnc6aYygqITAF0ltqI6UFu6THnmTuYblUWskfALvVMrGwu
-Sni7LOXGztn4sS1+R7JFr3Q8lQq5TIHbnTCwgWOO/ONZufZpEyX1mdiEMahzUu+A
-LHR28X99oh5XDKHe+n53
-=EK4X
------END PGP SIGNATURE-----
-
---cmJC7u66zC7hs+87--
+T24gMTAvMjAvMjAxNiwgV29sZnJhbSBTYW5nIHdyb3RlOg0KPiBTYWRseSwgSSBkb24ndCBoYXZl
+IFNESEkgZG9jdW1lbnRhdGlvbiBmb3IgdGhpcyBTb0MuDQoNCkluIHRoZSBjdXJyZW50IGhhcmR3
+YXJlIG1hbnVhbCBvbiByZW5lc2FzLmNvbSwgdGhlIFNIREkgc2VjdGlvbiBpcyBub3QgaW5jbHVk
+ZWQuDQpIb3dldmVyLCBmb3IgdmVyc2lvbiAzLjAgdGhhdCB3aWxsIGJlIHBvc3RlZCBzaG9ydGx5
+LCBpdCB3aWxsIHN0YXJ0IHRvIGluY2x1ZGUgdGhlIFNESEkgc2VjdGlvbi4NCg0KDQo+ICogRG9l
+cyBpdCBoYXZlIGEgdmVyc2lvbiByZWdpc3RlciAoQ1RMX1ZFUlNJT04pPyBJZiBzbywgd2hhdCBk
+b2VzIGl0DQo+ICAgc2F5Pw0KDQoweDgyMEINCg0KDQo+ICogRG9lcyBpdCBoYXZlIFNEX0JVRjAg
+d2lkdGggc2V0dGluZyAobmFtZWQgZWl0aGVyIEVYVF9BQ0Mgb3IgSE9TVF9NT0RFLA0KPiAgIHNv
+IGZhciBhbHdheXMgY29tZXMgYWZ0ZXIgdGhlIHZlcnNpb24gcmVnaXN0ZXIpPyBJZiBzbywgd2hh
+dCBpcyBpdHMNCj4gICBsYXlvdXQ/DQoNClRoZXJlIGlzIGEgIkVYVF9TV0FQIiByZWdpc3Rlci4g
+SXQgaXMgdGhlIG9ubHkgdGhpbmcgYWZ0ZXIgVkVSU0lPTi4NCiAgIFZFUlNJT04gPSAweEU4MDRF
+MEUyDQogIEVYVF9TV0FQID0gMHhFODA0RTBGMA0KDQpIZXJlIGFyZSB0aGUgYml0cyBpbiB0aGF0
+IHJlZ2lzdGVyOg0KDQpETUFTRSAoYml0IDgpDQoJRE1BIFRyYW5zZmVyIFNpemUgU2VsZWN0DQoJ
+U2VsZWN0cyB0aGUgdHJhbnNmZXIgdW5pdCBmb3IgU0RfQlVGIHJlYWQvd3JpdGUgRE1BIHRyYW5z
+ZmVyLiBTZXQgdGhpcyBiaXQNCglpbiBjb21iaW5hdGlvbiB3aXRoIHRoZSB0cmFuc2ZlciBzaXpl
+IHNldCBpbiB0aGUgRE1BIENoYW5uZWwNCglDb25maWd1cmF0aW9uIHJlZ2lzdGVyLg0KCTA6IDQt
+Ynl0ZSAobG9uZ3dvcmQpIHVuaXQNCgkxOiA2NC1ieXRlIChsb25nd29yZCDvgrQgMTYpIHVuaXQN
+Cg0KU0RCUlNXQVAgKGJpdCA3KQ0KCVNEX0JVRjAgU3dhcCBSZWFkKjENCglXaGVuIHJlYWRpbmcg
+ZnJvbSBTRF9CVUYwLCBkYXRhIHN0b3JlZCBpbiBTRF9CVUYwIGNhbiBiZSByZXBsYWNlZA0KCWFu
+ZCB0aGVuIHJlYWQuKjINCgkwOiBUaGUgY3VycmVudCBkYXRhIGlzIHJlYWQgd2l0aG91dCByZXBs
+YWNlbWVudC4NCgkxOiBEYXRhIHJlcGxhY2VtZW50IGZvciByZWFkaW5nIHByb2NlZWRzIGluIGJ5
+dGVzDQoNClNEQldTV0FQIChiaXQgNikNCglTRF9CVUYwIFN3YXAgV3JpdGUqMQ0KCVdoZW4gd3Jp
+dGluZyB0byBTRF9CVUYwLCBkYXRhIHRvIGJlIHdyaXR0ZW4gY2FuIGJlIHJlcGxhY2VkIGFuZCB0
+aGVuDQoJc3RvcmVkIGluIFNEX0JVRjAuKjINCgkwOiBUaGUgY3VycmVudCBkYXRhIGlzIHdyaXR0
+ZW4gd2l0aG91dCByZXBsYWNlbWVudC4NCgkxOiBEYXRhIHJlcGxhY2VtZW50IGZvciB3cml0aW5n
+IHByb2NlZWRzIGluIGJ5dGVzLg0KDQoNCj4gKiBEb2VzIGl0IHN1cHBvcnQgRE1BPw0KWWVzLg0K
+DQoNCj4gSXMgaXQgY29tcGF0aWJsZSB0byB0aGUgY3VycmVudCBpbXBsZW1lbnRhdGlvbj8NCg0K
+SSBkb24ndCBrbm93IHlldC4gVGhlIGN1cnJlbnQgQlNQIGlzIG9uIDMuMTQgYW5kIGl0IHVzZXMg
+RE1BLCBidXQgSSdtIG5vdCBzdXJlIHdoYXQncyBnb2luZyB0byBoYXBwZW4gYXMgSSBzdGFydCBt
+b3ZpbmcgdGhpbmdzIHRvIDQuOSsuDQoNCg0KDQoNCj4gPiArCQkvKiBpZiBjb3VudCB3YXMgbXVs
+dGlwbGUgb2YgNCAqLw0KPiA+ICsJCWlmICghKGNvdW50ICYgMHgzKSkNCj4gPiArCQkJcmV0dXJu
+Ow0KPiA+ICsJCWJ1ZjggPSAodTggKikoYnVmICsgKGNvdW50ID4+IDIpKTsNCj4gPiArCQljb3Vu
+dCAlPSA0Ow0KPiANCj4gVG8gc2tpcCB0aGUgc2FtZSBvcGVyYXRpb24gZG9uZSBvbiAnY291bnQn
+IHR3aWNlLCBtYXliZT8NCj4gDQo+IAkJYnVmOCA9ICh1OCAqKShidWYgKyAoY291bnQgPj4gMikp
+Ow0KPiAJCWNvdW50ICY9IDM7DQo+IA0KPiAJCWlmICghY291bnQpDQo+IAkJCXJldHVybjsNCg0K
+DQpUaGF0IGxvb2tzIGxpa2UgaXQgc2hvdWxkIHdvcmsuDQpJIGNhbiB0cnkgaXQgb3V0IGFuZCBz
+ZWUgaWYgdGhlcmUgaXMgc29tZXRoaW5nIHdlIGFyZSBtaXNzaW5nLg0KDQoNClRoYW5rcw0KDQpD
+aHJpcw0KDQo=
