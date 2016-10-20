@@ -1,119 +1,130 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.9 rc2
-Date: Thu, 20 Oct 2016 12:33:24 +0200
-Message-ID: <CAPDyKFqGsbkwayk-PcAhcx+=EopCAHFfokQLJXDp+wX49ZOPkw@mail.gmail.com>
+Subject: Re: Regression after "do not use CMD13 to get status after speed mode switch"
+Date: Thu, 20 Oct 2016 13:00:00 +0200
+Message-ID: <CAPDyKFrTLZpx6is6GeqEh5=iwQGuOVnjSvWS_Ps0zEPCiTJO8Q@mail.gmail.com>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+ <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
+ <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com> <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
+ <1476930167.11050.4.camel@mhfsdcap03> <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+ <6335fe87-9b52-4334-d045-be4b6702bcea@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:34744 "EHLO
-        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755999AbcJTKd0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 06:33:26 -0400
-Received: by mail-qk0-f169.google.com with SMTP id f128so81887011qkb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2016 03:33:26 -0700 (PDT)
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:36512 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754114AbcJTLAD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 07:00:03 -0400
+Received: by mail-qt0-f181.google.com with SMTP id m5so47989052qtb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2016 04:00:02 -0700 (PDT)
+In-Reply-To: <6335fe87-9b52-4334-d045-be4b6702bcea@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Alan Stern <stern@rowland.harvard.edu>, Ritesh Raj Sarraf <rrs@researchut.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-Hi Linus,
+On 20 October 2016 at 09:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 20/10/16 10:06, Ulf Hansson wrote:
+>> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+>>> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
+>>>> Adrian, Linus,
+>>>>
+>>>> Thanks for looking into this and reporting!
+>>>>
+>>>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 18/10/16 11:36, Linus Walleij wrote:
+>>>>>> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+>>>>>>
+>>>>>>> Before this patch the eMMC is detected and all partitions enumerated
+>>>>>>> immediately, but after the patch it doesn't come up at all, except
+>>>>>>> sometimes, when it appears minutes (!) after boot, all of a sudden.
+>>>>>>
+>>>>>> FYI this is what it looks like when it eventually happens:
+>>>>>> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+>>>>>> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+>>>>>> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+>>>>>> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+>>>>>> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+>>>>>> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+>>>>>> p14 p15 p16 p17 p18 p19 p20 p21 >
+>>>>>>
+>>>>>> So after 627 seconds, a bit hard for users to wait this long for their
+>>>>>> root filesystem.
+>>>>>
+>>>>> If the driver does not support busy detection and the eMMC card provides
+>>>>> zero as the cmd6 generic timeout (which it may especially as cmd6 generic
+>>>>> timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
+>>>>> waiting 10 minutes i.e.
+>>>>>
+>>>>> #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
+>>>>
+>>>> Urgh! Yes, I have verified that this is exactly what happens.
+>>>>
+>>>>>
+>>>>> So removal of CMD13 polling for HS mode (as per commit
+>>>>> 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
+>>>>> combinations of eMMC cards and host drivers.
+>>>>
+>>>> I was looking in the __mmc_switch() function, it's just a pain to walk
+>>>> trough it :-) So first out I decided to clean it up and factor out the
+>>>> polling parts. I will post the patches first out tomorrow morning,
+>>>> running some final test right now.
+>>>>
+>>>> Although, that of course doesn't solve our problem. As I see it we
+>>>> only have a few options here.
+>>>>
+>>>> 1) In case when cmd6 generic timeout isn't available, let's assign
+>>>> another empirically selected value.
+>>>> 2) Use a specific timeout when switching to HS mode.
+>>>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
+>>>> with CMD13 for switching to HS mode - unless it causes issues for some
+>>>> cards/drivers combination?
+>>>>
+>>>> BTW, I already tried 2) and it indeed solves the problem, although
+>>>> depending on the selected timeout, it might delay the card detection
+>>>> to process.
+>>>>
+>>>> Thoughts?
+>>>
+>>> I just have a try of switching to HS mode with Hynix EMMC, the first
+>>> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
+>>> that CMD13 cannot indicate current card status in this case.
+>>
+>> Thanks for sharing that. Okay, so clearly we have some cards that
+>> don't supports polling with CMD13 when switching to HS mode.
+>> One could of course add quirks for these kind of cards and do a fixed
+>> delay for them, but then to find out which these cards are is going to
+>> be hard.
+>>
+>> It seems like we are left with using a fixed delay. Any ideas of what
+>> such delay should be? And should we have one specific for switch to
+>> the various speed modes and a different one that overrides the CMD6
+>> generic timout, when it doesn't exist?
+>
+> We have supported polling for a long time, so presumably the broken cards
+> are newer ones.  What about using busy detection if that is available,
 
-Here are some mmc fixes intended for v4.9 rc2. They are based on a
-commit during the merge window and has been tested a while on top of
-v4.9-rc1, via my next branch.
+Using HW busy detection, already takes highest precedence.
 
-This time I have also included a few changes for a memstick driver
-which has a corresponding mmc driver. They use the same USB device as
-parent, hence both needs to play nice with runtime PM, which they
-didn't.
+Although we can improve the behaviour a bit. When
+MMC_CAP_WAIT_WHILE_BUSY isn't available but when ->card_busy() is, as
+in a submitted patch [1].
 
-Unfortunate, the memstick driver didn't have a maintainer, so I
-couldn't receive an ack of the changes for it.
+> otherwise using polling if the card does not support HS200, otherwise using
 
-More details can as usual be found in the signed tag. Please pull this in!
+Maybe we should first investigate the behaviour for some old cards!?
+
+Perhaps it's more or less by "accident" that the cards has been
+working and maybe that's because the delay needed is really small?
+
+> the cmd6 generic timeout unless it is zero, and finally falling back to an
+> arbitrary waiting time.
+>
+
+If I understand correct, you suggest we move back to allow polling for
+older cards, but only when switching to high-speed mode, right?
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 24532f768121b07b16178ffb40442ece43365cbd:
-
-  Merge branch 'for-4.9/block-smp' of git://git.kernel.dk/linux-block
-(2016-10-09 17:32:20 -0700)
-
-are available in the git repository at:
-
-
-  http://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.9-rc1
-
-for you to fetch changes up to 82bb095ee9dcd9380b6ab608b5fa9f64e65f3a3b:
-
-  MAINTAINERS: mmc: Move the mmc tree to kernel.org (2016-10-17 15:46:05 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Update MAINTAINERS as the mmc tree moved to kernel.org
- - A few fixes for HS400es mode
- - A few other minor fixes
-
-MMC host:
- - sdhci: Fix an issue when dealing with stop commands
- - sdhci-pci: Fix a bus power failure issue
- - sdhci-esdhc-imx: Correct two register accesses
- - sdhci-of-arasan: Fix the 1.8V I/O signal switch behaviour
- - rtsx_usb_sdmmc: Fix runtime PM issues
-
-Other: (Because of no maintainer)
- - memstick: rtsx_usb_ms: Fix runtime PM issues
-
-----------------------------------------------------------------
-Aaron Brice (1):
-      mmc: sdhci-esdhc-imx: Correct two register accesses
-
-Adrian Hunter (4):
-      mmc: sdhci: Fix SDHCI_QUIRK2_STOP_WITH_TC
-      mmc: sdhci: Rename sdhci_set_power() to sdhci_set_power_noreg()
-      mmc: sdhci-pci: Let devices define their own sdhci_ops
-      mmc: sdhci-pci: Fix bus power failing to enable for some Intel controllers
-
-Alan Stern (1):
-      memstick: rtsx_usb_ms: Runtime resume the device when polling for cards
-
-Baoyou Xie (1):
-      mmc: block: add missing header dependencies
-
-Haibo Chen (1):
-      mmc: sdhci: cast unsigned int to unsigned long long to avoid
-unexpeted error
-
-Jiri Slaby (1):
-      mmc: core: Annotate cmd_hdr as __le32
-
-Shawn Lin (3):
-      mmc: core: switch to 1V8 or 1V2 for hs400es mode
-      mmc: core: changes frequency to hs_max_dtr when selecting hs400es
-      mmc: sdhci-of-arasan: add sdhci_arasan_voltage_switch for arasan, 5.1
-
-Ulf Hansson (4):
-      mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when unused
-      mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
-      memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
-      MAINTAINERS: mmc: Move the mmc tree to kernel.org
-
-Wei Yongjun (1):
-      mmc: sdhci-of-arasan: Fix non static symbol warning
-
- MAINTAINERS                         |  2 +-
- drivers/memstick/host/rtsx_usb_ms.c |  6 +++++
- drivers/mmc/card/block.c            |  3 ++-
- drivers/mmc/card/queue.h            |  2 +-
- drivers/mmc/core/mmc.c              | 12 +++++++++
- drivers/mmc/host/rtsx_usb_sdmmc.c   |  7 ++---
- drivers/mmc/host/sdhci-esdhc-imx.c  | 23 +++++++++++++++-
- drivers/mmc/host/sdhci-of-arasan.c  | 26 +++++++++++++++++-
- drivers/mmc/host/sdhci-pci-core.c   | 54 ++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-pci.h        |  2 ++
- drivers/mmc/host/sdhci-pxav3.c      |  2 +-
- drivers/mmc/host/sdhci.c            | 42 ++++++++++++++---------------
- drivers/mmc/host/sdhci.h            |  2 ++
- 13 files changed, 149 insertions(+), 34 deletions(-)
+[1]
+https://patchwork.kernel.org/patch/9386229/
