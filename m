@@ -1,125 +1,119 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled while
- doing suspend
-Date: Thu, 20 Oct 2016 10:21:46 +0000
-Message-ID: <AM4PR0401MB23247C544FE16359ACE6847C90D50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
- <CAPDyKFpwEKjyd02oj20_fQkLEPaAniAHZTo6AYJDdqzsdSWH2g@mail.gmail.com>
- <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.9 rc2
+Date: Thu, 20 Oct 2016 12:33:24 +0200
+Message-ID: <CAPDyKFqGsbkwayk-PcAhcx+=EopCAHFfokQLJXDp+wX49ZOPkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0066.outbound.protection.outlook.com ([104.47.2.66]:35268
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751039AbcJTKVt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Oct 2016 06:21:49 -0400
-In-Reply-To: <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34744 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755999AbcJTKd0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 06:33:26 -0400
+Received: by mail-qk0-f169.google.com with SMTP id f128so81887011qkb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2016 03:33:26 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "A.S. Dong" <aisheng.dong@nxp.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Alan Stern <stern@rowland.harvard.edu>, Ritesh Raj Sarraf <rrs@researchut.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogRG9uZyBBaXNoZW5nIFtt
-YWlsdG86ZG9uZ2FzODZAZ21haWwuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIE9jdG9iZXIgMTks
-IDIwMTYgNToxOCBQTQ0KPiBUbzogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+
-DQo+IENjOiBCb3VnaCBDaGVuIDxoYWliby5jaGVuQG54cC5jb20+OyBBZHJpYW4gSHVudGVyDQo+
-IDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IGxpbnV4LW1tYyA8bGludXgtbW1jQHZnZXIua2Vy
-bmVsLm9yZz47IEEuUy4NCj4gRG9uZyA8YWlzaGVuZy5kb25nQG54cC5jb20+DQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0hdIG1tYzogc2RoY2ktZXNkaGMtaW14OiBtYWtlIHN1cmUgdXNkaGMgY2xvY2sg
-ZW5hYmxlZA0KPiB3aGlsZSBkb2luZyBzdXNwZW5kDQo+IA0KPiBIaSBVbGYsDQo+IA0KPiBPbiBU
-dWUsIE9jdCAxOCwgMjAxNiBhdCA1OjE4IFBNLCBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGlu
-YXJvLm9yZz4gd3JvdGU6DQo+ID4gT24gMTggT2N0b2JlciAyMDE2IGF0IDA5OjM5LCBIYWlibyBD
-aGVuIDxoYWliby5jaGVuQG54cC5jb20+IHdyb3RlOg0KPiA+PiBXaGVuIHN1c3BlbmQgdXNkaGMs
-IGl0IHdpbGwgYWNjZXNzIHVzZGhjIHJlZ2lzdGVyLiBTbyB1c2RoYyBjbG9jaw0KPiA+PiBzaG91
-bGQgYmUgZW5hYmxlZCwgb3RoZXJ3aXNlIHRoZSBhY2Nlc3MgdXNkaGMgcmVnaXN0ZXIgd2lsbCBy
-ZXR1cm4NCj4gPj4gZXJyb3Igb3IgY2F1c2Ugc3lzdGVtIGh1bmcuDQo+ID4+DQo+ID4+IFRha2Ug
-dGhpcyBpbnRvIGNvbnNpZGVyYXRpb24sIGlmIHN5c3RlbSBlbmFibGUgYSB1c2RoYyBhbmQgZG8g
-bm90DQo+ID4+IGNvbm5lY3QgYW55IFNEL1NESU8vTU1DIGNhcmQsIGFmdGVyIHN5c3RlbSBib290
-IHVwLCB0aGlzIHVzZGhjIHdpbGwNCj4gPj4gZG8gcnVudGltZSBzdXNwZW5kLCBhbmQgY2xvc2Ug
-YWxsIHVzZGhjIGNsb2NrLiBBdCB0aGlzIHRpbWUsIGlmDQo+ID4+IHN1c3BlbmQgdGhlIHN5c3Rl
-bSwgZHVlIHRvIG5vIGNhcmQgcGVyc2VudCwgdXNkaGMgcnVudGltZSByZXN1bWUgd2lsbA0KPiA+
-PiBub3QgYmUgY2FsbGVkLiBTbyB1c2RoYyBjbG9jayBzdGlsbCBjbG9zZWQsIHRoZW4gaW4gc3Vz
-cGVuZCwgb25jZQ0KPiA+PiBhY2Nlc3MgdXNkaGMgcmVnaXN0ZXIsIHN5c3RlbSBodW5nIG9yIGJ1
-cyBlcnJvciByZXR1cm4uDQo+ID4+DQo+ID4+IFRoaXMgcGF0Y2ggbWFrZSBzdXJlIHVzZGhjIGNs
-b2NrIGFsd2F5cyBlbmFibGVkIHdoaWxlIGRvaW5nIHVzZGhjDQo+ID4+IHN1c3BlbmQuDQo+ID4N
-Cj4gPiBZZXMsIGFuZCBzaW5jZSB0aGUgY2xvY2tzIGFyZSBrZXB0IGVuYWJsZWQgZHVyaW5nIHN5
-c3RlbSBzdXNwZW5kIHRoYXQNCj4gPiBtZWFucyB3YXN0aW5nIHBvd2VyLCBkb2Vzbid0IGl0IT8N
-Cj4gPg0KPiANCj4gSU1YIFNvQ3Mgd2lsbCBkaXNhYmxlIGFsbCBtb2R1bGVzIGNsb2NrcyBpbiBz
-eXN0ZW0gc3RvcCBtb2RlIGF1dG9tYXRpY2FsbHkgYnkNCj4gaGFyZHdhcmUgZXZlbiBpdCdzIGVu
-YWJsZWQgYmVmb3JlIENDR1IgdmFsdWUgQ2xvY2sgQWN0aXZpdHkgRGVzY3JpcHRpb246DQo+IDAw
-IGNsb2NrIGlzIG9mZiBkdXJpbmcgYWxsIG1vZGVzLiBzdG9wIGVudGVyIGhhcmR3YXJlIGhhbmRz
-aGFrZSBpcyBkaXNhYmxlZC4NCj4gMDEgY2xvY2sgaXMgb24gaW4gcnVuIG1vZGUsIGJ1dCBvZmYg
-aW4gd2FpdCBhbmQgc3RvcCBtb2Rlcw0KPiAxMCBOb3QgYXBwbGljYWJsZSAoUmVzZXJ2ZWQpLg0K
-PiAxMSBjbG9jayBpcyBvbiBkdXJpbmcgYWxsIG1vZGVzLCBleGNlcHQgc3RvcCBtb2RlLg0KPiAN
-Cj4gQWx0aG91Z2ggSFcgd2lsbCBnYXRlIG9mZiBpdCBhdXRvbWF0aWNhbGx5LCBidXQgaSB0aGlu
-ayBpdCdzIHN0aWxsIGdvb2QgdG8gYWxpZ24gdGhlDQo+IHN0YXRlIGJldHdlZW4gU1cgYW5kIEhX
-Lg0KPg0KIA0KQWdyZWUNCg0KPiA+IE1heSBJIHByb3Bvc2UgYW5vdGhlciBzb2x1dGlvbi4gQ3Vy
-cmVudGx5IHlvdSBkZWFsIG9ubHkgd2l0aCBjbG9jaw0KPiA+IGdhdGluZy91bmdhdGluZyBkdXJp
-bmcgcnVudGltZSBzdXNwZW5kL3Jlc3VtZS4gSSBhbSB3b25kZXJpbmcgd2hldGhlcg0KPiA+IHlv
-dSBjb3VsZCBleHRlbmQgdGhvc2Ugb3BlcmF0aW9ucyB0byBiZSBzaW1pbGFyIHRvIHdoYXQgaXMg
-bmVlZGVkDQo+ID4gZHVyaW5nIHN5c3RlbSBzdXNwZW5kL3Jlc3VtZT8NCj4gPg0KPiANCj4gSU1Y
-IGRyaXZlciBhcmUgY2FsbGluZyBzZGhjaV9ydW50aW1lX3N1c3BlbmRfaG9zdCgpIGFuZA0KPiBz
-ZGhjaV9zdXNwZW5kX2hvc3QoKSBmb3IgcnVudGltZQ0KPiBzdXNwZW5kIGFuZCBzeXN0ZW0gc2xl
-ZXAgY2FzZSByZXNwZWN0aXZlbHkuDQo+IFRob3NlIHR3byBBUElzIGRlZmluaXRpb25zIGFyZSBk
-aWZmZXJlbnQuDQo+IGUuZy4gc2RoY2lfc3VzcGVuZF9ob3N0IHdpbGwgZGlzYWJsZSBjYXJkIGRl
-dGVjdGlvbiBhbmQgZW5hYmxlIHdha2V1cCBpZiBhbnkNCj4gd2hpbGUNCj4gc2RoY2lfcnVudGlt
-ZV9zdXNwZW5kX2hvc3QoKSBub3QuDQo+IA0KPiBJdCBtYXkgbm90IGJlIHN1aXRhYmxlIHRvIGV4
-dGVuZCBydW50aW1lIG9wZXJhdGlvbnMgdG8gYmUgc2ltaWxhciBhcyBzbGVlcCBwbQ0KPiBvcGVy
-YXRpb25zIGlmIHVzaW5nIGNvbW1vbiBzZGhjaSBzdXNwZW5kIGZ1bmN0aW9uLCB1bmxlc3Mgd2Ug
-aW1wbGVtZW50DQo+IHRvdG9hbGx5IElNWCBzcGVjaWZpYyBQTS9SdW50aW1lIFBNIGZ1bmN0aW9u
-Lg0KPiANCj4gDQo+IEFub3RoZXIgb3B0aW9uIG1heSBiZSBsaWtlIHdoYXQgb21hcF9oc21tYyBk
-b2VzOg0KPiANCj4gU29tZXRoaW5nIGxpa2U6DQo+IA0KPiBpbnQgc2RoY2lfZXNkaGNfc3VzcGVu
-ZChzdHJ1Y3QgZGV2aWNlICpkZXYpIHsNCj4gICAgICAgICBwbV9ydW50aW1lX2dldF9zeW5jKGhv
-c3QtPmRldik7DQo+ICAgICAgICAgcmV0ID0gc2RoY2lfcGx0Zm1fc3VzcGVuZChkZXYpOw0KPiAg
-ICAgICAgIHBtX3J1bnRpbWVfcHV0X3N5bmMoaG9zdC0+ZGV2KTsNCj4gDQo+ICAgICAgICAgcmV0
-dXJuIHJldDsNCj4gfQ0KPiANCg0KSSB0aGluayB0aGlzIG1ldGhvZCBzdGlsbCBoYXMgdGhlIHNh
-bWUgaXNzdWUuDQpBY2NvcmRpbmcgdG8gdGhlIC9Eb2N1bWVudGF0aW9uL3Bvd2VyL3J1bnRpbWVf
-cG0udHh0DQoNCjM3MCAgIGludCBwbV9ydW50aW1lX2dldF9zeW5jKHN0cnVjdCBkZXZpY2UgKmRl
-dik7DQozNzEgICAgIC0gaW5jcmVtZW50IHRoZSBkZXZpY2UncyB1c2FnZSBjb3VudGVyLCBydW4g
-cG1fcnVudGltZV9yZXN1bWUoZGV2KSBhbmQNCjM3MiAgICAgICByZXR1cm4gaXRzIHJlc3VsdA0K
-DQozODUgICBpbnQgcG1fcnVudGltZV9wdXRfc3luYyhzdHJ1Y3QgZGV2aWNlICpkZXYpOw0KMzg2
-ICAgICAtIGRlY3JlbWVudCB0aGUgZGV2aWNlJ3MgdXNhZ2UgY291bnRlcjsgaWYgdGhlIHJlc3Vs
-dCBpcyAwIHRoZW4gcnVuDQozODcgICAgICAgcG1fcnVudGltZV9pZGxlKGRldikgYW5kIHJldHVy
-biBpdHMgcmVzdWx0DQoNCnBtX3J1bnRpbWVfcHV0X3N5bmMoKSB3aWxsIG5vdCBjYWxsIHBtX3J1
-bnRpbWVfc3VzcGVuZCgpLCBzbyBjbG9jayBzdGlsbCBlbmFibGVkLCB0aGUgc2FtZSBpc3N1ZS4N
-Cg0KPiBpbnQgc2RoY2lfZXNkaGNfcmVzdW1lKHN0cnVjdCBkZXZpY2UgKmRldikgew0KPiAgICAg
-ICAgIHBtX3J1bnRpbWVfZ2V0X3N5bmMoaG9zdC0+ZGV2KTsNCj4gDQo+ICAgICAgICAgLi4uDQo+
-ICAgICAgICAgcmV0ID0gc2RoY2lfcGx0Zm1fcmVzdW1lKGRldik7DQo+IA0KPiAgICAgICAgIHBt
-X3J1bnRpbWVfbWFya19sYXN0X2J1c3koaG9zdC0+ZGV2KTsNCj4gICAgICAgICBwbV9ydW50aW1l
-X3B1dF9hdXRvc3VzcGVuZChob3N0LT5kZXYpOw0KPiANCj4gICAgICAgICByZXR1cm4gcmV0Ow0K
-PiB9DQo+IA0KPiBEb2VzIHRoYXQgc2VlbSBvaz8NCj4gDQo+ID4gSWYgdGhhdCBpcyBwb3NzaWJs
-ZSwgeW91IGNhbiBpbnN0ZWFkIGRlcGxveSB0aGUgcnVudGltZSBQTSBjZW50cmljDQo+ID4gYXBw
-cm9hY2ggYW5kIGdldCBzeXN0ZW0gc3VzcGVuZC9yZXN1bWUgZm9yIGZyZWUuIEFsbCB5b3Ugd291
-bGQgaGF2ZSB0bw0KPiA+IGRvIGlzIHRvIGFzc2lnbiB0aGUgc3lzdGVtIFBNIGNhbGxiYWNrcyB0
-bw0KPiA+IHBtX3J1bnRpbWVfZm9yY2Vfc3VzcGVuZHxyZXN1bWUoKS4gSW4gdGhhdCB3YXksIHRo
-ZSBhYm92ZSBwcm9ibGVtDQo+ID4gd291bGQgYmUgc29sdmVkIGFuZCB5b3UgZG9uJ3QgbmVlZCB0
-byBrZWVwIHRoZSBjbG9ja3MgZW5hYmxlZCBkdXJpbmcNCj4gPiBzeXN0ZW0gc3VzcGVuZC9yZXN1
-bWUuDQo+ID4NCj4gPiBLaW5kIHJlZ2FyZHMNCj4gPiBVZmZlDQo+ID4NCj4gDQo+IFJlZ2FyZHMN
-Cj4gRG9uZyBBaXNoZW5nDQo+IA0KPiA+Pg0KPiA+PiBTaWduZWQtb2ZmLWJ5OiBIYWlibyBDaGVu
-IDxoYWliby5jaGVuQG54cC5jb20+DQo+ID4+IC0tLQ0KPiA+PiAgZHJpdmVycy9tbWMvaG9zdC9z
-ZGhjaS1lc2RoYy1pbXguYyB8IDEzICsrKysrKysrKysrKy0NCj4gPj4gIDEgZmlsZSBjaGFuZ2Vk
-LCAxMiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQo+ID4+DQo+ID4+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+ID4+IGIvZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS1lc2RoYy1pbXguYw0KPiA+PiBpbmRleCA3MTIzZWY5Li4xZGYzODQ2IDEwMDY0
-NA0KPiA+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+ID4+ICsr
-KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMNCj4gPj4gQEAgLTEzMjIsMTcg
-KzEzMjIsMjggQEAgc3RhdGljIGludCBzZGhjaV9lc2RoY19zdXNwZW5kKHN0cnVjdCBkZXZpY2UN
-Cj4gPj4gKmRldikgIHsNCj4gPj4gICAgICAgICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IGRl
-dl9nZXRfZHJ2ZGF0YShkZXYpOw0KPiA+Pg0KPiA+PiArI2lmZGVmIENPTkZJR19QTQ0KPiA+PiAr
-ICAgICAgIHBtX3J1bnRpbWVfZ2V0X3N5bmMoaG9zdC0+bW1jLT5wYXJlbnQpOw0KPiA+PiArI2Vu
-ZGlmDQo+ID4+ICsNCj4gPj4gICAgICAgICByZXR1cm4gc2RoY2lfc3VzcGVuZF9ob3N0KGhvc3Qp
-OyAgfQ0KPiA+Pg0KPiA+PiAgc3RhdGljIGludCBzZGhjaV9lc2RoY19yZXN1bWUoc3RydWN0IGRl
-dmljZSAqZGV2KSAgew0KPiA+PiAgICAgICAgIHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0gZGV2
-X2dldF9kcnZkYXRhKGRldik7DQo+ID4+ICsgICAgICAgaW50IHJldDsNCj4gPj4NCj4gPj4gICAg
-ICAgICAvKiByZS1pbml0aWFsaXplIGh3IHN0YXRlIGluIGNhc2UgaXQncyBsb3N0IGluIGxvdyBw
-b3dlciBtb2RlICovDQo+ID4+ICAgICAgICAgc2RoY2lfZXNkaGNfaW14X2h3aW5pdChob3N0KTsN
-Cj4gPj4gKyAgICAgICByZXQgPSBzZGhjaV9yZXN1bWVfaG9zdChob3N0KTsNCj4gPj4NCj4gPj4g
-LSAgICAgICByZXR1cm4gc2RoY2lfcmVzdW1lX2hvc3QoaG9zdCk7DQo+ID4+ICsjaWZkZWYgQ09O
-RklHX1BNDQo+ID4+ICsgICAgICAgcG1fcnVudGltZV9tYXJrX2xhc3RfYnVzeShob3N0LT5tbWMt
-PnBhcmVudCk7DQo+ID4+ICsgICAgICAgcG1fcnVudGltZV9wdXRfYXV0b3N1c3BlbmQoaG9zdC0+
-bW1jLT5wYXJlbnQpOw0KPiA+PiArI2VuZGlmDQo+ID4+ICsNCj4gPj4gKyAgICAgICByZXR1cm4g
-cmV0Ow0KPiA+PiAgfQ0KPiA+PiAgI2VuZGlmDQo+ID4+DQo+ID4+IC0tDQo+ID4+IDEuOS4xDQo+
-ID4+DQo=
+Hi Linus,
+
+Here are some mmc fixes intended for v4.9 rc2. They are based on a
+commit during the merge window and has been tested a while on top of
+v4.9-rc1, via my next branch.
+
+This time I have also included a few changes for a memstick driver
+which has a corresponding mmc driver. They use the same USB device as
+parent, hence both needs to play nice with runtime PM, which they
+didn't.
+
+Unfortunate, the memstick driver didn't have a maintainer, so I
+couldn't receive an ack of the changes for it.
+
+More details can as usual be found in the signed tag. Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 24532f768121b07b16178ffb40442ece43365cbd:
+
+  Merge branch 'for-4.9/block-smp' of git://git.kernel.dk/linux-block
+(2016-10-09 17:32:20 -0700)
+
+are available in the git repository at:
+
+
+  http://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.9-rc1
+
+for you to fetch changes up to 82bb095ee9dcd9380b6ab608b5fa9f64e65f3a3b:
+
+  MAINTAINERS: mmc: Move the mmc tree to kernel.org (2016-10-17 15:46:05 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Update MAINTAINERS as the mmc tree moved to kernel.org
+ - A few fixes for HS400es mode
+ - A few other minor fixes
+
+MMC host:
+ - sdhci: Fix an issue when dealing with stop commands
+ - sdhci-pci: Fix a bus power failure issue
+ - sdhci-esdhc-imx: Correct two register accesses
+ - sdhci-of-arasan: Fix the 1.8V I/O signal switch behaviour
+ - rtsx_usb_sdmmc: Fix runtime PM issues
+
+Other: (Because of no maintainer)
+ - memstick: rtsx_usb_ms: Fix runtime PM issues
+
+----------------------------------------------------------------
+Aaron Brice (1):
+      mmc: sdhci-esdhc-imx: Correct two register accesses
+
+Adrian Hunter (4):
+      mmc: sdhci: Fix SDHCI_QUIRK2_STOP_WITH_TC
+      mmc: sdhci: Rename sdhci_set_power() to sdhci_set_power_noreg()
+      mmc: sdhci-pci: Let devices define their own sdhci_ops
+      mmc: sdhci-pci: Fix bus power failing to enable for some Intel controllers
+
+Alan Stern (1):
+      memstick: rtsx_usb_ms: Runtime resume the device when polling for cards
+
+Baoyou Xie (1):
+      mmc: block: add missing header dependencies
+
+Haibo Chen (1):
+      mmc: sdhci: cast unsigned int to unsigned long long to avoid
+unexpeted error
+
+Jiri Slaby (1):
+      mmc: core: Annotate cmd_hdr as __le32
+
+Shawn Lin (3):
+      mmc: core: switch to 1V8 or 1V2 for hs400es mode
+      mmc: core: changes frequency to hs_max_dtr when selecting hs400es
+      mmc: sdhci-of-arasan: add sdhci_arasan_voltage_switch for arasan, 5.1
+
+Ulf Hansson (4):
+      mmc: rtsx_usb_sdmmc: Avoid keeping the device runtime resumed when unused
+      mmc: rtsx_usb_sdmmc: Handle runtime PM while changing the led
+      memstick: rtsx_usb_ms: Manage runtime PM when accessing the device
+      MAINTAINERS: mmc: Move the mmc tree to kernel.org
+
+Wei Yongjun (1):
+      mmc: sdhci-of-arasan: Fix non static symbol warning
+
+ MAINTAINERS                         |  2 +-
+ drivers/memstick/host/rtsx_usb_ms.c |  6 +++++
+ drivers/mmc/card/block.c            |  3 ++-
+ drivers/mmc/card/queue.h            |  2 +-
+ drivers/mmc/core/mmc.c              | 12 +++++++++
+ drivers/mmc/host/rtsx_usb_sdmmc.c   |  7 ++---
+ drivers/mmc/host/sdhci-esdhc-imx.c  | 23 +++++++++++++++-
+ drivers/mmc/host/sdhci-of-arasan.c  | 26 +++++++++++++++++-
+ drivers/mmc/host/sdhci-pci-core.c   | 54 ++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci-pci.h        |  2 ++
+ drivers/mmc/host/sdhci-pxav3.c      |  2 +-
+ drivers/mmc/host/sdhci.c            | 42 ++++++++++++++---------------
+ drivers/mmc/host/sdhci.h            |  2 ++
+ 13 files changed, 149 insertions(+), 34 deletions(-)
