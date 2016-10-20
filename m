@@ -1,108 +1,163 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: Regression after "do not use CMD13 to get status after speed mode
- switch"
-Date: Thu, 20 Oct 2016 10:19:19 +0300
-Message-ID: <6335fe87-9b52-4334-d045-be4b6702bcea@intel.com>
-References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
- <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
- <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com>
- <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
- <1476930167.11050.4.camel@mhfsdcap03>
- <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 3/4] mmc: core: Factor out code related to polling in __mmc_switch()
+Date: Thu, 20 Oct 2016 10:19:38 +0200
+Message-ID: <1476951579-26125-4-git-send-email-ulf.hansson@linaro.org>
+References: <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:57736 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932499AbcJTHYL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Oct 2016 03:24:11 -0400
-In-Reply-To: <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:35417 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753429AbcJTIUA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2016 04:20:00 -0400
+Received: by mail-lf0-f47.google.com with SMTP id l131so67873866lfl.2
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2016 01:19:59 -0700 (PDT)
+In-Reply-To: <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-On 20/10/16 10:06, Ulf Hansson wrote:
-> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
->>> Adrian, Linus,
->>>
->>> Thanks for looking into this and reporting!
->>>
->>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 18/10/16 11:36, Linus Walleij wrote:
->>>>> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
->>>>>
->>>>>> Before this patch the eMMC is detected and all partitions enumerated
->>>>>> immediately, but after the patch it doesn't come up at all, except
->>>>>> sometimes, when it appears minutes (!) after boot, all of a sudden.
->>>>>
->>>>> FYI this is what it looks like when it eventually happens:
->>>>> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
->>>>> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
->>>>> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
->>>>> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
->>>>> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
->>>>> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
->>>>> p14 p15 p16 p17 p18 p19 p20 p21 >
->>>>>
->>>>> So after 627 seconds, a bit hard for users to wait this long for their
->>>>> root filesystem.
->>>>
->>>> If the driver does not support busy detection and the eMMC card provides
->>>> zero as the cmd6 generic timeout (which it may especially as cmd6 generic
->>>> timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
->>>> waiting 10 minutes i.e.
->>>>
->>>> #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
->>>
->>> Urgh! Yes, I have verified that this is exactly what happens.
->>>
->>>>
->>>> So removal of CMD13 polling for HS mode (as per commit
->>>> 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
->>>> combinations of eMMC cards and host drivers.
->>>
->>> I was looking in the __mmc_switch() function, it's just a pain to walk
->>> trough it :-) So first out I decided to clean it up and factor out the
->>> polling parts. I will post the patches first out tomorrow morning,
->>> running some final test right now.
->>>
->>> Although, that of course doesn't solve our problem. As I see it we
->>> only have a few options here.
->>>
->>> 1) In case when cmd6 generic timeout isn't available, let's assign
->>> another empirically selected value.
->>> 2) Use a specific timeout when switching to HS mode.
->>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
->>> with CMD13 for switching to HS mode - unless it causes issues for some
->>> cards/drivers combination?
->>>
->>> BTW, I already tried 2) and it indeed solves the problem, although
->>> depending on the selected timeout, it might delay the card detection
->>> to process.
->>>
->>> Thoughts?
->>
->> I just have a try of switching to HS mode with Hynix EMMC, the first
->> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
->> that CMD13 cannot indicate current card status in this case.
-> 
-> Thanks for sharing that. Okay, so clearly we have some cards that
-> don't supports polling with CMD13 when switching to HS mode.
-> One could of course add quirks for these kind of cards and do a fixed
-> delay for them, but then to find out which these cards are is going to
-> be hard.
-> 
-> It seems like we are left with using a fixed delay. Any ideas of what
-> such delay should be? And should we have one specific for switch to
-> the various speed modes and a different one that overrides the CMD6
-> generic timout, when it doesn't exist?
+In yet another step of cleaning up __mmc_switch(), let's factor out the
+code that deals with card busy polling.
 
-We have supported polling for a long time, so presumably the broken cards
-are newer ones.  What about using busy detection if that is available,
-otherwise using polling if the card does not support HS200, otherwise using
-the cmd6 generic timeout unless it is zero, and finally falling back to an
-arbitrary waiting time.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/mmc_ops.c | 108 +++++++++++++++++++++++++--------------------
+ 1 file changed, 59 insertions(+), 49 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 5a77af7..a84a880 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -468,6 +468,63 @@ int mmc_switch_status(struct mmc_card *card)
+ 	return mmc_switch_status_error(card->host, status);
+ }
+ 
++static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
++			bool send_status, bool ignore_crc)
++{
++	struct mmc_host *host = card->host;
++	int err;
++	unsigned long timeout;
++	u32 status = 0;
++	bool expired = false;
++	bool busy = false;
++
++	/* We have an unspecified cmd timeout, use the fallback value. */
++	if (!timeout_ms)
++		timeout_ms = MMC_OPS_TIMEOUT_MS;
++
++	/*
++	 * In cases when not allowed to poll by using CMD13 or because we aren't
++	 * capable of polling by using ->card_busy(), then rely on waiting the
++	 * stated timeout to be sufficient.
++	 */
++	if (!send_status && !host->ops->card_busy) {
++		mmc_delay(timeout_ms);
++		return 0;
++	}
++
++	timeout = jiffies + msecs_to_jiffies(timeout_ms) + 1;
++	do {
++		/*
++		 * Due to the possibility of being preempted after
++		 * sending the status command, check the expiration
++		 * time first.
++		 */
++		expired = time_after(jiffies, timeout);
++		if (send_status) {
++			err = __mmc_send_status(card, &status, ignore_crc);
++			if (err)
++				return err;
++		}
++		if (host->ops->card_busy) {
++			if (!host->ops->card_busy(host))
++				break;
++			busy = true;
++		}
++
++		/* Timeout if the device never leaves the program state. */
++		if (expired &&
++		    (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy)) {
++			pr_err("%s: Card stuck in programming state! %s\n",
++				mmc_hostname(host), __func__);
++			return -ETIMEDOUT;
++		}
++	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy);
++
++	err = mmc_switch_status_error(host, status);
++
++	return err;
++}
++
+ /**
+  *	__mmc_switch - modify EXT_CSD register
+  *	@card: the MMC card associated with the data transfer
+@@ -489,11 +546,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	struct mmc_host *host = card->host;
+ 	int err;
+ 	struct mmc_command cmd = {0};
+-	unsigned long timeout;
+-	u32 status = 0;
+ 	bool use_r1b_resp = use_busy_signal;
+-	bool expired = false;
+-	bool busy = false;
+ 
+ 	mmc_retune_hold(host);
+ 
+@@ -543,51 +596,8 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		goto out;
+ 	}
+ 
+-	/* We have an unspecified cmd timeout, use the fallback value. */
+-	if (!timeout_ms)
+-		timeout_ms = MMC_OPS_TIMEOUT_MS;
+-
+-	/*
+-	 * In cases when not allowed to poll by using CMD13 or because we aren't
+-	 * capable of polling by using ->card_busy(), then rely on waiting the
+-	 * stated timeout to be sufficient.
+-	 */
+-	if (!send_status && !host->ops->card_busy) {
+-		mmc_delay(timeout_ms);
+-		goto out;
+-	}
+-
+-	/* Let's poll to find out when the command is completed. */
+-	timeout = jiffies + msecs_to_jiffies(timeout_ms) + 1;
+-	do {
+-		/*
+-		 * Due to the possibility of being preempted after
+-		 * sending the status command, check the expiration
+-		 * time first.
+-		 */
+-		expired = time_after(jiffies, timeout);
+-		if (send_status) {
+-			err = __mmc_send_status(card, &status, ignore_crc);
+-			if (err)
+-				goto out;
+-		}
+-		if (host->ops->card_busy) {
+-			if (!host->ops->card_busy(host))
+-				break;
+-			busy = true;
+-		}
+-
+-		/* Timeout if the device never leaves the program state. */
+-		if (expired &&
+-		    (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy)) {
+-			pr_err("%s: Card stuck in programming state! %s\n",
+-				mmc_hostname(host), __func__);
+-			err = -ETIMEDOUT;
+-			goto out;
+-		}
+-	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy);
+-
+-	err = mmc_switch_status_error(host, status);
++	/* Let's try to poll to find out when the command is completed. */
++	err = mmc_poll_for_busy(card, timeout_ms, send_status, ignore_crc);
+ out:
+ 	mmc_retune_release(host);
+ 
+-- 
+1.9.1
 
