@@ -1,175 +1,66 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v4] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Thu, 20 Oct 2016 20:20:16 +0530
-Message-ID: <d7801576-e2b3-13a3-df8d-e203a628a445@codeaurora.org>
-References: <20161018101624.27946-1-pramod.gurav@linaro.org>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: Regression after "do not use CMD13 to get status after speed mode
+ switch"
+Date: Thu, 20 Oct 2016 16:17:15 +0100
+Message-ID: <bb6c1f05-d81c-4284-5831-c9d49bf038f3@linaro.org>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161018101624.27946-1-pramod.gurav@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@linaro.org>, ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Pramod,
+Hi Linus,
 
-Thanks for this patch. Few minor comments.
+On 17/10/16 15:32, Linus Walleij wrote:
+> Hi Chaotian,
+>
+> my Dragonboard 8060 has a regression on detecting the eMMC after
+> bisecting it down to this patch (which is sadly already in v4.8):
+>
+> commit 08573eaf1a70104f83fdbee9b84e5be03480e9ed
+> Author: Chaotian Jing <chaotian.jing@mediatek.com>
+> Date:   Thu May 19 16:47:41 2016 +0800
+> mmc: mmc: do not use CMD13 to get status after speed mode switch
+>
+> Before this patch the eMMC is detected and all partitions enumerated
+> immediately, but after the patch it doesn't come up at all, except
+> sometimes, when it appears minutes (!) after boot, all of a sudden.
+>
+> Do you have any ideas on what can be wrong?
 
-I have tested your patch on db410c and 8996 based internal platform and 
-it works fine.
+I remember hitting timeout issue with new version of eMMC on SD600c-eval 
+board, this patch/hack fixed it for me.
+
+https://git.linaro.org/people/srinivas.kandagatla/linux.git/commitdiff/e42d7427b9ce77174eef079be0e04e22bdb8fd07?hp=3e4bf0b78405694fd1ab4371c73e80932be21e3a
 
 
-On 10/18/2016 3:46 PM, Pramod Gurav wrote:
-> Provides runtime PM callbacks to enable and disable clock resources
-> when idle. Also support system PM callbacks to be called during system
-> suspend and resume.
->
-> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
-> ---
->
-> Tested on DB410C.
->
-> Changes in v4:
-> - Remove calls to sdhci_runtime_resume_host/sdhci_runtime_suspend_host
->   from runtime callbacks as sdhc msm controller is capable of restoring
->   it's register values after clocks are disabled and re-enabled.
->
-> Changes in v3:
-> - Added CONFIG_PM around runtime pm function.
-> - Replaced msm suspend/resume with generic function directly
-> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
->
-> Changes in v2:
-> - Moved pm_rutime enabling before adding host
-> - Handled pm_rutime in remove
-> - Changed runtime handling with reference from sdhci-of-at91.c
->
->  drivers/mmc/host/sdhci-msm.c | 66 +++++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 65 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 8ef44a2a..33ec809 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -18,6 +18,7 @@
->  #include <linux/of_device.h>
->  #include <linux/delay.h>
->  #include <linux/mmc/mmc.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/slab.h>
->
->  #include "sdhci-pltfm.h"
-> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  		goto clk_disable;
->  	}
->
-> +	pm_runtime_get_noresume(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-Use a macro MSM_MMC_AUTOSUSPEND_DELAY_MS instead of using 50 directly here.
+Also one more important thing was to do with regulator mode too. 
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=93b8e6fda11757a20df21f3fc18e12789841f173
 
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +
->  	ret = sdhci_add_host(host);
->  	if (ret)
-> -		goto clk_disable;
-> +		goto pm_runtime_disable;
-> +
-> +	platform_set_drvdata(pdev, host);
-No need to set platform_set_drvdata here. sdhci_pltfm_init will do it 
-anyways.
+Can you give it a try.. If it works I can clean it up and send it for 
+review.
 
-> +
-pm_runtime_mark_last_busy(&pdev->dev) can be added here.
-> +	pm_runtime_put_autosuspend(&pdev->dev);
->
->  	return 0;
->
-> +pm_runtime_disable:
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_set_suspended(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
->  clk_disable:
->  	clk_disable_unprepare(msm_host->clk);
->  pclk_disable:
-> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->  		    0xffffffff);
->
->  	sdhci_remove_host(host, dead);
-> +
-> +	pm_runtime_get_sync(&pdev->dev);
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
-> +
->  	clk_disable_unprepare(msm_host->clk);
->  	clk_disable_unprepare(msm_host->pclk);
->  	if (!IS_ERR(msm_host->bus_clk))
-> @@ -693,12 +713,56 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->  	return 0;
->  }
->
-> +#ifdef CONFIG_PM
-> +static int sdhci_msm_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	clk_disable_unprepare(msm_host->clk);
-> +	clk_disable_unprepare(msm_host->pclk);
-> +
-> +	return 0;
-> +}
-> +
-> +static int sdhci_msm_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(msm_host->clk);
-> +	if (ret) {
-> +		dev_err(dev, "clk_enable failed: %d\n", ret);
-dev_err(dev, "clk enable failed for core_clk: %d\n", ret);
+Thanks,
+srini
 
-> +		return ret;
-> +	}
-> +	ret = clk_prepare_enable(msm_host->pclk);
-> +	if (ret) {
-> +		dev_err(dev, "clk_enable failed: %d\n", ret);
-dev_err(dev, "clk enable failed for iface_clk: %d\n", ret);
-
-> +		clk_disable_unprepare(msm_host->clk);
-> +		return ret;
-> +	}
-> +
-> +	return 0;
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +					pm_runtime_force_resume)
-> +	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-> +				NULL)
-> +};
-> +
->  static struct platform_driver sdhci_msm_driver = {
->  	.probe = sdhci_msm_probe,
->  	.remove = sdhci_msm_remove,
->  	.driver = {
->  		   .name = "sdhci_msm",
->  		   .of_match_table = sdhci_msm_dt_match,
-> +		   .pm = &sdhci_msm_pm_ops,
->  	},
->  };
 >
+> This is the Qualcomm MMCI variant whid does *not* support
+> busydetection in hardware.
 >
+> I will continue looking at it but would be happy for any hints on how to
+> solve it, currently I cannot mount root off the eMMC because of this.
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+
+>
+> Yours,
+> Linus Walleij
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
