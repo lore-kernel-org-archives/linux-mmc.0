@@ -1,141 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled while
- doing suspend
-Date: Fri, 21 Oct 2016 09:42:27 +0200
-Message-ID: <CAPDyKFqig1Ta1yBBF33VOfosR384wwnBWGzJt8VoobUgbBSR8g@mail.gmail.com>
-References: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
- <CAPDyKFpwEKjyd02oj20_fQkLEPaAniAHZTo6AYJDdqzsdSWH2g@mail.gmail.com> <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 0/4] mmc: core: Clean-up and improve polling code in
+ __mmc_switch()
+Date: Fri, 21 Oct 2016 16:49:13 +0900
+Message-ID: <1ba11108-0804-950d-5410-646b53c798e8@samsung.com>
+References: <CGME20161020082027epcas1p47e0913622727117286f7ad026259eb2b@epcas1p4.samsung.com>
+ <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:33922 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753283AbcJUHmd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 03:42:33 -0400
-Received: by mail-lf0-f49.google.com with SMTP id b81so125332439lfe.1
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2016 00:42:32 -0700 (PDT)
-In-Reply-To: <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:53786 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751839AbcJUHtQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 03:49:16 -0400
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OFE00JOT0E1OR30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 21 Oct 2016 16:49:13 +0900 (KST)
+In-reply-to: <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aisheng Dong <aisheng.dong@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-On 19 October 2016 at 11:18, Dong Aisheng <dongas86@gmail.com> wrote:
-> Hi Ulf,
->
-> On Tue, Oct 18, 2016 at 5:18 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 18 October 2016 at 09:39, Haibo Chen <haibo.chen@nxp.com> wrote:
->>> When suspend usdhc, it will access usdhc register. So usdhc clock
->>> should be enabled, otherwise the access usdhc register will return
->>> error or cause system hung.
->>>
->>> Take this into consideration, if system enable a usdhc and do not
->>> connect any SD/SDIO/MMC card, after system boot up, this usdhc
->>> will do runtime suspend, and close all usdhc clock. At this time,
->>> if suspend the system, due to no card persent, usdhc runtime resume
->>> will not be called. So usdhc clock still closed, then in suspend,
->>> once access usdhc register, system hung or bus error return.
->>>
->>> This patch make sure usdhc clock always enabled while doing usdhc
->>> suspend.
->>
->> Yes, and since the clocks are kept enabled during system suspend that
->> means wasting power, doesn't it!?
->>
->
-> IMX SoCs will disable all modules clocks in system stop mode
-> automatically by hardware
-> even it's enabled before
-> CCGR value Clock Activity Description:
-> 00 clock is off during all modes. stop enter hardware handshake is disabled.
-> 01 clock is on in run mode, but off in wait and stop modes
-> 10 Not applicable (Reserved).
-> 11 clock is on during all modes, except stop mode.
->
-> Although HW will gate off it automatically, but i think it's still
-> good to align the state between
-> SW and HW.
+On 10/20/2016 05:19 PM, Ulf Hansson wrote:
+> The code in __mmc_switch() is rather messy and hard to follow/understand. This
+> series starts out by cleaning-up and re-factoring that code. In the final patch
+> I intend to improve the behaviour regarding the polling method, which is being
+> used to know when the card stops signal busy.
 
-Yes, indeed!
+Looks good to me.
 
->
->> May I propose another solution. Currently you deal only with clock
->> gating/ungating during runtime suspend/resume. I am wondering whether
->> you could extend those operations to be similar to what is needed
->> during system suspend/resume?
->>
->
-> IMX driver are calling sdhci_runtime_suspend_host() and
-> sdhci_suspend_host() for runtime
-> suspend and system sleep case respectively.
-> Those two APIs definitions are different.
-> e.g. sdhci_suspend_host will disable card detection and enable wakeup
-> if any while
-> sdhci_runtime_suspend_host() not.
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Yes, and that is weird and most likely wrong!
+(Tested on Exynos Series)
 
->
-> It may not be suitable to extend runtime operations to be similar as
-> sleep pm operations
+Best Regards,
+Jaehoon Chung
 
-I have several times by know had kind of similar discussions, but for
-different sdhci variants. I believe we are papering over a PM issue in
-sdhci, instead of actually trying to solve the real problem and in a
-generic fashion.
+> 
+> Ulf Hansson (4):
+>   mmc: core: Make mmc_switch_status() available for mmc core
+>   mmc: core: Clarify code which deals with polling in __mmc_switch()
+>   mmc: core: Factor out code related to polling in __mmc_switch()
+>   mmc: core: Don't use ->card_busy() and CMD13 in combination when
+>     polling
+> 
+>  drivers/mmc/core/mmc.c     |  13 -----
+>  drivers/mmc/core/mmc_ops.c | 138 +++++++++++++++++++++++++--------------------
+>  drivers/mmc/core/mmc_ops.h |   2 +-
+>  3 files changed, 79 insertions(+), 74 deletions(-)
+> 
 
-As a first step, why not try to combine sdhci_suspend_host() and
-sdhci_runtime_suspend_host() into one function, and vice verse for the
-resume functions.
-
-Then sdhci variants can decide how they want to use them.
-Particularly, those that uses runtime PM, should benefit from using
-the runtime PM centric approach and thus get system PM suspend/resume
-for "free".
-
-> if using common sdhci suspend function, unless we implement totoally
-> IMX specific
-> PM/Runtime PM function.
->
->
-> Another option may be like what omap_hsmmc does:
->
-> Something like:
->
-> int sdhci_esdhc_suspend(struct device *dev)
-> {
->         pm_runtime_get_sync(host->dev);
->         ret = sdhci_pltfm_suspend(dev);
->         pm_runtime_put_sync(host->dev);
->
->         return ret;
-> }
->
-> int sdhci_esdhc_resume(struct device *dev)
-> {
->         pm_runtime_get_sync(host->dev);
->
->         ...
->         ret = sdhci_pltfm_resume(dev);
->
->         pm_runtime_mark_last_busy(host->dev);
->         pm_runtime_put_autosuspend(host->dev);
->
->         return ret;
-> }
->
-> Does that seem ok?
-
-No, this doesn't work!
-
-People that aren't into runtime PM, believes that the
-pm_runtime_put*() in these paths means that the device enters runtime
-suspend state. That's not the case.
-
-Instead the device will remain runtime resumed while the system enters
-suspend. Is that really what you want?
-
-[...]
-
-Kind regards
-Uffe
