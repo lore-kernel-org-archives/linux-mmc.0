@@ -1,35 +1,43 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Change MMC_IOC_MAX_BYTES
-Date: Fri, 21 Oct 2016 10:21:42 +0200
-Message-ID: <CAPDyKFrZcH3pAHuQStGrfFosA5uscKWT3k6D11muhC_FPrTY8A@mail.gmail.com>
-References: <0d4301d229fc$607a9770$216fc650$@samsung.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: Fix module autoload
+Date: Fri, 21 Oct 2016 10:21:51 +0200
+Message-ID: <CAPDyKFoFTV96V-OSdQ40QNZvXVNaKVFACzP6DXW-1U6t4BdbGw@mail.gmail.com>
+References: <1476720825-30442-1-git-send-email-javier@osg.samsung.com> <1476720825-30442-2-git-send-email-javier@osg.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:35970 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754228AbcJUIVp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 04:21:45 -0400
-Received: by mail-lf0-f48.google.com with SMTP id b75so130769968lfg.3
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2016 01:21:44 -0700 (PDT)
-In-Reply-To: <0d4301d229fc$607a9770$216fc650$@samsung.com>
+Received: from mail-qt0-f172.google.com ([209.85.216.172]:34044 "EHLO
+        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754112AbcJUIVx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 04:21:53 -0400
+Received: by mail-qt0-f172.google.com with SMTP id q7so77755662qtq.1
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2016 01:21:52 -0700 (PDT)
+In-Reply-To: <1476720825-30442-2-git-send-email-javier@osg.samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremy Kim <jh4u.kim@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 19 October 2016 at 13:31, Jeremy Kim <jh4u.kim@samsung.com> wrote:
-> From 27d46f5697434542ad9cafbc6a9630dc14915f91 Mon Sep 17 00:00:00 2001
-> From: Jeonghan Kim <jh4u.kim@samsung.com>
-> Date: Wed, 19 Oct 2016 19:48:02 +0900
-> Subject: [PATCH] mmc: block: Change MMC_IOC_MAX_BYTES
+On 17 October 2016 at 18:13, Javier Martinez Canillas
+<javier@osg.samsung.com> wrote:
+> If the driver is built as a module, autoload won't work because the module
+> alias information is not filled. So user-space can't match the registered
+> device with the corresponding module.
 >
-> It is used for limitation of buffer size during IOCTL such as FFU.
-> However, eMMC FW size is bigger than (512L*256).
-> (For instance, currently, Samsung eMMC FW size is over 300KB.)
-> So, it needs to increase to execute FFU.
+> Export the module alias information using the MODULE_DEVICE_TABLE() macro.
 >
-> Signed-off-by: Jeonghan Kim <jh4u.kim@samsung.com>
+> Before this patch:
+>
+> $ modinfo drivers/mmc/host/sdhci-of-at91.ko | grep alias
+> $
+>
+> After this patch:
+>
+> $ modinfo drivers/mmc/host/sdhci-of-at91.ko | grep alias
+> alias:          of:N*T*Catmel,sama5d2-sdhciC*
+> alias:          of:N*T*Catmel,sama5d2-sdhci
+>
+> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
 
 Thanks, applied for next!
 
@@ -37,22 +45,22 @@ Kind regards
 Uffe
 
 > ---
->  include/uapi/linux/mmc/ioctl.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
-> index 7e385b8..700a551 100644
-> --- a/include/uapi/linux/mmc/ioctl.h
-> +++ b/include/uapi/linux/mmc/ioctl.h
-> @@ -69,6 +69,6 @@ struct mmc_ioc_multi_cmd {
->   * is enforced per ioctl call.  For larger data transfers, use the normal
->   * block device operations.
->   */
-> -#define MMC_IOC_MAX_BYTES  (512L * 256)
-> +#define MMC_IOC_MAX_BYTES  (512L * 1024)
->  #define MMC_IOC_MAX_CMDS    255
->  #endif /* LINUX_MMC_IOCTL_H */
+>  drivers/mmc/host/sdhci-of-at91.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index a9b7fc06c434..2f9ad213377a 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -100,6 +100,7 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+>         { .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
+>         {}
+>  };
+> +MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+>
+>  #ifdef CONFIG_PM
+>  static int sdhci_at91_runtime_suspend(struct device *dev)
 > --
-> 1.9.1
->
+> 2.7.4
 >
