@@ -1,41 +1,68 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [RFC v2 0/2] Ignore capability registers when it comes to speeds and use DT binding instead.
-Date: Fri, 21 Oct 2016 16:35:13 -0500
-Message-ID: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Fri, 21 Oct 2016 23:56:39 +0200
+Message-ID: <20161021215639.GB1450@katana>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
+ <20160912141507.6837-3-chris.brandt@renesas.com>
+ <20161020132852.GB4177@katana>
+ <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <20161020231245.GB2199@katana>
+ <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="uQr8t48UFsdbeI+V"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The first patch add documentation about a new devicetree property
-sdhci-cap-speed-modes-broken.
 
-The second patch makes the sdhci use the DT binding instead of the caps
-register for determining which speed modes are supported by the controller.
+--uQr8t48UFsdbeI+V
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This RFC is an alternative to another patch[1] set I sent up.
 
-[1]
-https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1251944.html
+> For the VERSION register, the low byte is the version of the IP, but
+> the upper byte is a number that the design group that made the part
 
-v2:
- * Removed separate OF parsing function, relying on mmc_of_parse to be called
-   before read_caps
- * Moved check of sdhci-cap-speed-modes-broken into sdhci_read_caps.
- * Added SDHCI_SUPPORT_HS400 to list of bits to clear in sdhci cap1, not sure
-   that's all of the them now, but I think so.
+I know. It is just that I haven't seen this one "in the wild" so far.
 
-Zach Brown (2):
-  mmc: sdhci: Add device tree property sdhci-cap-speed-modes-broken
-  mmc: sdhci: Ignore capability register when it comes to speeds and use
-    DT     binding instead when sdhci-cap-speed-modes-broken is set.
+> > This SWAP register exists on R-Car as well. Out of curiosity, what is t=
+he
+> > register value of 0xE804E0E4?
+>=20
+> 0xE804E0E4 =3D 0x0001
+>=20
+> So...something is there!
 
- Documentation/devicetree/bindings/mmc/mmc.txt |  3 +++
- drivers/mmc/host/sdhci.c                      | 10 ++++++++++
- 2 files changed, 13 insertions(+)
+I am quite convinced there is this BUSWIDTH register. If you are
+interested, try setting this to 0 and see if it works without the 32 bit
+register patches.
 
---
-2.7.4
+
+--uQr8t48UFsdbeI+V
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYCo8WAAoJEBQN5MwUoCm2wKoP/ip8Ye4fbRIFOaUChGtwUFMU
+KVWtAg2Y9U27YNtuZnVTutSZXnspaleWVYAp+YsDb/yEL+aXqIHB5bdiR4ALcxUI
+cmHJcOP24APF4NgL8YpcAm6OKUmzvBJDInNki7YOpGXXrvQ4IWV/EnnpG4FFE3RM
+d76ORctFW1bwHiAnhBJ4St4pq0GYOTJN9LTKy7XB2RjRZiej2MzIipmduDyF+zqJ
+/BZpvTrX+Ekq3f3RoH50QIXBp0B2FiLE6jUPgDXy+LnbgnjaJqJ/1C66Gf+PNQKS
+tWumbUWGvhwKRNOZzg8mu1znu0b7KTi03TwLvp6W1gfos1yxZ70ecxHBaRiBwOYx
+Y6BB07sOk9dH8SseO5DoJoY3Qu2DppocB04w7sVkyus03QIxfVMK2Zo6721INesX
+7sgFm7drA7QdEeA0eVuhrJb5o2GkMQQ25KEPxw5w6YI1oQJcWO1jv0zMzJqVvWbJ
+9Y9YaNhDGSGmH+wUDEUnalzTB0qkMtULGMzfvUVjwH4zVh4msXNHqbvGwtOcZhmz
+Uyb3YG+XJ18H0G8vzffdsFlMZKUox+yw15ffunvJ5ZAbN38Ay24SXWuMtPF9KQA1
+I/ucYE4q3b40CE0B9bAqVhF6vZxkivhkShIQsEU8/MylbSe2ICdp+oBd0jctKZiZ
+fsizRoZz+cnRuL9HXAyb
+=oVOr
+-----END PGP SIGNATURE-----
+
+--uQr8t48UFsdbeI+V--
