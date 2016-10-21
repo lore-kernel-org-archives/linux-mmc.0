@@ -1,51 +1,62 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Fri, 21 Oct 2016 13:43:05 +0000
-Message-ID: <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20160912141507.6837-1-chris.brandt@renesas.com>
- <20160912141507.6837-3-chris.brandt@renesas.com>
- <20161020132852.GB4177@katana>
- <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <20161020231245.GB2199@katana>
+From: Zach Brown <zach.brown@ni.com>
+Subject: [RFC v2 2/2] mmc: sdhci: Ignore capability register when it comes to speeds and use DT binding instead when sdhci-cap-speed-modes-broken is set.
+Date: Fri, 21 Oct 2016 16:35:15 -0500
+Message-ID: <1477085715-30213-3-git-send-email-zach.brown@ni.com>
+References: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:15918 "EHLO
-        relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1755455AbcJUNnQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 09:43:16 -0400
-In-Reply-To: <20161020231245.GB2199@katana>
-Content-Language: en-US
+Received: from skprod2.natinst.com ([130.164.80.23]:59408 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S934257AbcJUVfX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 Oct 2016 17:35:23 -0400
+In-Reply-To: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-> > > * Does it have a version register (CTL_VERSION)? If so, what does it
-> > >   say?
-> >
-> > 0x820B
->=20
-> Okay, this is a version I have not seen before.
+When the sdhci-cap-speed-modes-broken DT property is set, the driver
+will ignore the bits of the capability registers that correspond to
+speed modes.
 
-The SDHI IP came from the SH7269 (SH-2A device).
+Signed-off-by: Zach Brown <zach.brown@ni.com>
+---
+ drivers/mmc/host/sdhci.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-For the VERSION register, the low byte is the version of the IP, but the up=
-per byte is a number that the design group that made the part gives it any =
-time they make a change. So, since this IP was from a SH2A team, the number=
-ing might look different than what the SH4A or R-Car teams have used in the=
- past.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1e25b01..59c62d3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -22,6 +22,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
++#include <linux/of.h>
+ 
+ #include <linux/leds.h>
+ 
+@@ -3013,10 +3014,19 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+ 
+ 	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
+ 
++	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
++				  "sdhci-cap-speed-modes-broken"))
++		host->caps &= ~SDHCI_CAN_DO_HISPD;
++
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return;
+ 
+ 	host->caps1 = caps1 ? *caps1 : sdhci_readl(host, SDHCI_CAPABILITIES_1);
++
++	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
++				  "sdhci-cap-speed-modes-broken"))
++		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
++				 SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_HS400);
+ }
+ EXPORT_SYMBOL_GPL(__sdhci_read_caps);
+ 
+-- 
+2.7.4
 
-
-
-> This SWAP register exists on R-Car as well. Out of curiosity, what is the
-> register value of 0xE804E0E4?
-
-0xE804E0E4 =3D 0x0001
-
-So...something is there!
-
-
-
-Chris
