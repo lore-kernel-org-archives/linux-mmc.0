@@ -1,195 +1,97 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled
- while doing suspend
-Date: Sat, 22 Oct 2016 09:07:47 +0800
-Message-ID: <20161022010747.GB15754@b29396-OptiPlex-7040>
-References: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
- <CAPDyKFpwEKjyd02oj20_fQkLEPaAniAHZTo6AYJDdqzsdSWH2g@mail.gmail.com>
- <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
- <AM4PR0401MB23247C544FE16359ACE6847C90D50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 4/4] mmc: core: Don't use ->card_busy() and CMD13 in
+ combination when polling
+Date: Fri, 21 Oct 2016 12:19:23 +0300
+Message-ID: <e9e44d6e-f2a6-13f0-4938-3fa1757b40e8@intel.com>
+References: <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
+ <1476951579-26125-5-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:35397 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932187AbcJUJIo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 05:08:44 -0400
-Received: by mail-pf0-f196.google.com with SMTP id s8so8102456pfj.2
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2016 02:08:44 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <AM4PR0401MB23247C544FE16359ACE6847C90D50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+Received: from mga02.intel.com ([134.134.136.20]:57591 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933826AbcJUJYQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 Oct 2016 05:24:16 -0400
+In-Reply-To: <1476951579-26125-5-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "A.S. Dong" <aisheng.dong@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-On Thu, Oct 20, 2016 at 10:21:46AM +0000, Bough Chen wrote:
+On 20/10/16 11:19, Ulf Hansson wrote:
+> When polling for busy after sending a MMC_SWITCH command, both the optional
+> ->card_busy() callback and CMD13 are being used in conjunction.
 > 
+> This doesn't make sense. Instead it's more reasonable to rely solely on the
+> ->card_busy() callback when it exists. Let's change that and instead use
+> the CMD13 as a fall-back. In this way we avoid sending CMD13, unless it's
+> really needed.
 > 
-> > -----Original Message-----
-> > From: Dong Aisheng [mailto:dongas86@gmail.com]
-> > Sent: Wednesday, October 19, 2016 5:18 PM
-> > To: Ulf Hansson <ulf.hansson@linaro.org>
-> > Cc: Bough Chen <haibo.chen@nxp.com>; Adrian Hunter
-> > <adrian.hunter@intel.com>; linux-mmc <linux-mmc@vger.kernel.org>; A.S.
-> > Dong <aisheng.dong@nxp.com>
-> > Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled
-> > while doing suspend
-> > 
-> > Hi Ulf,
-> > 
-> > On Tue, Oct 18, 2016 at 5:18 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > > On 18 October 2016 at 09:39, Haibo Chen <haibo.chen@nxp.com> wrote:
-> > >> When suspend usdhc, it will access usdhc register. So usdhc clock
-> > >> should be enabled, otherwise the access usdhc register will return
-> > >> error or cause system hung.
-> > >>
-> > >> Take this into consideration, if system enable a usdhc and do not
-> > >> connect any SD/SDIO/MMC card, after system boot up, this usdhc will
-> > >> do runtime suspend, and close all usdhc clock. At this time, if
-> > >> suspend the system, due to no card persent, usdhc runtime resume will
-> > >> not be called. So usdhc clock still closed, then in suspend, once
-> > >> access usdhc register, system hung or bus error return.
-> > >>
-> > >> This patch make sure usdhc clock always enabled while doing usdhc
-> > >> suspend.
-> > >
-> > > Yes, and since the clocks are kept enabled during system suspend that
-> > > means wasting power, doesn't it!?
-> > >
-> > 
-> > IMX SoCs will disable all modules clocks in system stop mode automatically by
-> > hardware even it's enabled before CCGR value Clock Activity Description:
-> > 00 clock is off during all modes. stop enter hardware handshake is disabled.
-> > 01 clock is on in run mode, but off in wait and stop modes
-> > 10 Not applicable (Reserved).
-> > 11 clock is on during all modes, except stop mode.
-> > 
-> > Although HW will gate off it automatically, but i think it's still good to align the
-> > state between SW and HW.
-> >
+> Within this context, let's also take the opportunity to make some
+> additional clean-ups and clarifications to the related code.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++----------------
+>  1 file changed, 14 insertions(+), 16 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index a84a880..481bbdb 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -495,34 +495,32 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>  	timeout = jiffies + msecs_to_jiffies(timeout_ms) + 1;
+>  	do {
+>  		/*
+> -		 * Due to the possibility of being preempted after
+> -		 * sending the status command, check the expiration
+> -		 * time first.
+> +		 * Due to the possibility of being preempted while polling,
+> +		 * check the expiration time first.
+>  		 */
+>  		expired = time_after(jiffies, timeout);
+> -		if (send_status) {
+> +
+> +		if (host->ops->card_busy) {
+> +			busy = host->ops->card_busy(host);
+
+I didn't really have time to look at these patches, sorry :-(.  But this
+loop looks like it could use a cond_resched()
+
+> +		} else {
+>  			err = __mmc_send_status(card, &status, ignore_crc);
+>  			if (err)
+>  				return err;
+> -		}
+> -		if (host->ops->card_busy) {
+> -			if (!host->ops->card_busy(host))
+> -				break;
+> -			busy = true;
+> +			busy = R1_CURRENT_STATE(status) == R1_STATE_PRG;
+>  		}
 >  
-> Agree
-> 
-> > > May I propose another solution. Currently you deal only with clock
-> > > gating/ungating during runtime suspend/resume. I am wondering whether
-> > > you could extend those operations to be similar to what is needed
-> > > during system suspend/resume?
-> > >
-> > 
-> > IMX driver are calling sdhci_runtime_suspend_host() and
-> > sdhci_suspend_host() for runtime
-> > suspend and system sleep case respectively.
-> > Those two APIs definitions are different.
-> > e.g. sdhci_suspend_host will disable card detection and enable wakeup if any
-> > while
-> > sdhci_runtime_suspend_host() not.
-> > 
-> > It may not be suitable to extend runtime operations to be similar as sleep pm
-> > operations if using common sdhci suspend function, unless we implement
-> > totoally IMX specific PM/Runtime PM function.
-> > 
-> > 
-> > Another option may be like what omap_hsmmc does:
-> > 
-> > Something like:
-> > 
-> > int sdhci_esdhc_suspend(struct device *dev) {
-> >         pm_runtime_get_sync(host->dev);
-> >         ret = sdhci_pltfm_suspend(dev);
-> >         pm_runtime_put_sync(host->dev);
-> > 
-> >         return ret;
-> > }
-> > 
-> 
-> I think this method still has the same issue.
-> According to the /Documentation/power/runtime_pm.txt
-> 
-> 370   int pm_runtime_get_sync(struct device *dev);
-> 371     - increment the device's usage counter, run pm_runtime_resume(dev) and
-> 372       return its result
-> 
-> 385   int pm_runtime_put_sync(struct device *dev);
-> 386     - decrement the device's usage counter; if the result is 0 then run
-> 387       pm_runtime_idle(dev) and return its result
-> 
-> pm_runtime_put_sync() will not call pm_runtime_suspend(), so clock still enabled, the same issue.
+> -		/* Timeout if the device never leaves the program state. */
+> -		if (expired &&
+> -		    (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy)) {
+> -			pr_err("%s: Card stuck in programming state! %s\n",
+> +		/* Timeout if the device still remains busy. */
+> +		if (expired && busy) {
+> +			pr_err("%s: Card stuck being busy! %s\n",
+>  				mmc_hostname(host), __func__);
+>  			return -ETIMEDOUT;
+>  		}
+> -	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG || busy);
+> +	} while (busy);
+>  
+> -	err = mmc_switch_status_error(host, status);
+> +	if (host->ops->card_busy && send_status)
+> +		return mmc_switch_status(card);
+>  
+> -	return err;
+> +	return mmc_switch_status_error(host, status);
+>  }
+>  
+>  /**
 > 
 
-Yes, you're right.
-Device may be already in runtime resumed state before.
-
-Regards
-Dong Aisheng
-
-> > int sdhci_esdhc_resume(struct device *dev) {
-> >         pm_runtime_get_sync(host->dev);
-> > 
-> >         ...
-> >         ret = sdhci_pltfm_resume(dev);
-> > 
-> >         pm_runtime_mark_last_busy(host->dev);
-> >         pm_runtime_put_autosuspend(host->dev);
-> > 
-> >         return ret;
-> > }
-> > 
-> > Does that seem ok?
-> > 
-> > > If that is possible, you can instead deploy the runtime PM centric
-> > > approach and get system suspend/resume for free. All you would have to
-> > > do is to assign the system PM callbacks to
-> > > pm_runtime_force_suspend|resume(). In that way, the above problem
-> > > would be solved and you don't need to keep the clocks enabled during
-> > > system suspend/resume.
-> > >
-> > > Kind regards
-> > > Uffe
-> > >
-> > 
-> > Regards
-> > Dong Aisheng
-> > 
-> > >>
-> > >> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> > >> ---
-> > >>  drivers/mmc/host/sdhci-esdhc-imx.c | 13 ++++++++++++-
-> > >>  1 file changed, 12 insertions(+), 1 deletion(-)
-> > >>
-> > >> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > >> b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > >> index 7123ef9..1df3846 100644
-> > >> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > >> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > >> @@ -1322,17 +1322,28 @@ static int sdhci_esdhc_suspend(struct device
-> > >> *dev)  {
-> > >>         struct sdhci_host *host = dev_get_drvdata(dev);
-> > >>
-> > >> +#ifdef CONFIG_PM
-> > >> +       pm_runtime_get_sync(host->mmc->parent);
-> > >> +#endif
-> > >> +
-> > >>         return sdhci_suspend_host(host);  }
-> > >>
-> > >>  static int sdhci_esdhc_resume(struct device *dev)  {
-> > >>         struct sdhci_host *host = dev_get_drvdata(dev);
-> > >> +       int ret;
-> > >>
-> > >>         /* re-initialize hw state in case it's lost in low power mode */
-> > >>         sdhci_esdhc_imx_hwinit(host);
-> > >> +       ret = sdhci_resume_host(host);
-> > >>
-> > >> -       return sdhci_resume_host(host);
-> > >> +#ifdef CONFIG_PM
-> > >> +       pm_runtime_mark_last_busy(host->mmc->parent);
-> > >> +       pm_runtime_put_autosuspend(host->mmc->parent);
-> > >> +#endif
-> > >> +
-> > >> +       return ret;
-> > >>  }
-> > >>  #endif
-> > >>
-> > >> --
-> > >> 1.9.1
-> > >>
