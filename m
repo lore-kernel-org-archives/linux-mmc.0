@@ -1,68 +1,128 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Fri, 21 Oct 2016 23:56:39 +0200
-Message-ID: <20161021215639.GB1450@katana>
-References: <20160912141507.6837-1-chris.brandt@renesas.com>
- <20160912141507.6837-3-chris.brandt@renesas.com>
- <20161020132852.GB4177@katana>
- <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <20161020231245.GB2199@katana>
- <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
+From: Natalia Portillo <claunia@claunia.com>
+Subject: Help: Reading CID and CSD from MMC/SD card
+Date: Sat, 22 Oct 2016 21:47:53 +0100
+Message-ID: <bf47432d-6db5-0114-fb65-57568dde1fa7@claunia.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="uQr8t48UFsdbeI+V"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Chris Brandt <Chris.Brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 110.red-2-139-146.staticip.rima-tde.net ([2.139.146.110]:44132
+        "EHLO mail.claunia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756006AbcJVUxY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2016 16:53:24 -0400
+Received: from [172.26.2.1] (zeus.claunia.com [172.26.2.1])
+        by mail.claunia.com (Postfix) with ESMTPSA id 1AE8214C8EFF8
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2016 21:47:54 +0100 (WEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+
+Hi all,
+
+Sorry if this mailing list is not the correct place to ask for help but
+I've been unable to find another place.
+
+I'm trying to read CID and CSD from MMC/SD cards using ioctl (reading
+from /sys is not a solution for me).
+
+>From what I've seen I should send a CMD7 to move card to standby, then
+CMD9/10 and then CMD7 to move card to transition state.
+
+While first command seems to work, next ones get error -110, and the
+card stays standby until physical ejection/reset.
+
+After several tries I have not found the cause of this problem.
+
+I have pasted snippet of code I'm using at the end of this email.
+
+Test machine is QEMU with kernel 3.16.36-1+deb8u1, amd64 and QEMU's
+virtual SDHCI-PCI device.
+
+Regards,
+Natalia Portillo
 
 
---uQr8t48UFsdbeI+V
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+
+--------------- CODE FOLLOWS -----------------------------
 
 
-> For the VERSION register, the low byte is the version of the IP, but
-> the upper byte is a number that the design group that made the part
+#include <linux/ioctl.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <linux/mmc/ioctl.h>
+#include <string.h>
+#include <sys/ioctl.h>
 
-I know. It is just that I haven't seen this one "in the wild" so far.
+#define MMC_RSP_PRESENT (1 << 0)
+#define MMC_RSP_CRC (1 << 2)
+#define MMC_RSP_OPCODE (1 << 4)
+#define MMC_RSP_R1 (MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
 
-> > This SWAP register exists on R-Car as well. Out of curiosity, what is t=
-he
-> > register value of 0xE804E0E4?
->=20
-> 0xE804E0E4 =3D 0x0001
->=20
-> So...something is there!
+int main(int argc, char *argv)
+{
+    int fd, fw;
+    void *buffer;
+    int address = 0;
+    int ret = 0;
+    struct mmc_ioc_cmd idata;
 
-I am quite convinced there is this BUSWIDTH register. If you are
-interested, try setting this to 0 and see if it works without the 32 bit
-register patches.
+    fw = open("cid.bin", O_CREAT | O_RDWR);
+    fd = open("/dev/mmcblk0", O_RDONLY);
+
+    if(fd < 0)
+    {
+        perror("file open");
+        return fd;
+    }
+
+    buffer = malloc(16);
+    memset(&idata, 0, sizeof(idata));
+    memset(buffer, 0, 16);
+
+// Set standby
+    idata.opcode = 7;
+    idata.arg = 0;
+    idata.flags = 0x15;
+    idata.blksz = 0;
+    idata.blocks = 0;
+    mmc_ioc_cmd_set_data(idata, buffer);
+    ret = ioctl(fd, MMC_IOC_CMD, &idata);
+
+// Read CID
+    idata.write_flag = 0;
+    idata.opcode = 9;
+    idata.arg = (1 << 16);
+    idata.flags = 7;
+    idata.blksz = 0;
+    idata.blocks = 0;
 
 
---uQr8t48UFsdbeI+V
-Content-Type: application/pgp-signature; name="signature.asc"
+    mmc_ioc_cmd_set_data(idata, buffer);
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+    ret = ioctl(fd, MMC_IOC_CMD, &idata);
 
-iQIcBAEBAgAGBQJYCo8WAAoJEBQN5MwUoCm2wKoP/ip8Ye4fbRIFOaUChGtwUFMU
-KVWtAg2Y9U27YNtuZnVTutSZXnspaleWVYAp+YsDb/yEL+aXqIHB5bdiR4ALcxUI
-cmHJcOP24APF4NgL8YpcAm6OKUmzvBJDInNki7YOpGXXrvQ4IWV/EnnpG4FFE3RM
-d76ORctFW1bwHiAnhBJ4St4pq0GYOTJN9LTKy7XB2RjRZiej2MzIipmduDyF+zqJ
-/BZpvTrX+Ekq3f3RoH50QIXBp0B2FiLE6jUPgDXy+LnbgnjaJqJ/1C66Gf+PNQKS
-tWumbUWGvhwKRNOZzg8mu1znu0b7KTi03TwLvp6W1gfos1yxZ70ecxHBaRiBwOYx
-Y6BB07sOk9dH8SseO5DoJoY3Qu2DppocB04w7sVkyus03QIxfVMK2Zo6721INesX
-7sgFm7drA7QdEeA0eVuhrJb5o2GkMQQ25KEPxw5w6YI1oQJcWO1jv0zMzJqVvWbJ
-9Y9YaNhDGSGmH+wUDEUnalzTB0qkMtULGMzfvUVjwH4zVh4msXNHqbvGwtOcZhmz
-Uyb3YG+XJ18H0G8vzffdsFlMZKUox+yw15ffunvJ5ZAbN38Ay24SXWuMtPF9KQA1
-I/ucYE4q3b40CE0B9bAqVhF6vZxkivhkShIQsEU8/MylbSe2ICdp+oBd0jctKZiZ
-fsizRoZz+cnRuL9HXAyb
-=oVOr
------END PGP SIGNATURE-----
+    printf("response[0] = %d\n", idata.response[0]);
 
---uQr8t48UFsdbeI+V--
+    printf("ret = %d\n", ret);
+
+    if(ret)
+        perror("ioctl");
+
+// Set transition
+    idata.opcode = 7;
+    idata.arg = (1 << 16);
+    idata.flags = MMC_RSP_R1;
+    idata.blksz = 0;
+    idata.blocks = 0;
+    mmc_ioc_cmd_set_data(idata, buffer);
+    ret = ioctl(fd, MMC_IOC_CMD, &idata);
+
+    write(fw, buffer, 16);
+    free(buffer);
+    close(fd);
+    close(fw);
+    return ret;
+}
