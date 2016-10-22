@@ -1,60 +1,157 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: mediatek: Fix module autoload
-Date: Fri, 21 Oct 2016 10:22:28 +0200
-Message-ID: <CAPDyKFpNPdcQnWs59MiVGnv5FMYjfgR9F4OCiCWhnmkh7EcyCA@mail.gmail.com>
-References: <1476720825-30442-1-git-send-email-javier@osg.samsung.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: make sure usdhc clock enabled
+ while doing suspend
+Date: Sat, 22 Oct 2016 09:06:50 +0800
+Message-ID: <20161022010650.GA15754@b29396-OptiPlex-7040>
+References: <1476776340-23718-1-git-send-email-haibo.chen@nxp.com>
+ <CAPDyKFpwEKjyd02oj20_fQkLEPaAniAHZTo6AYJDdqzsdSWH2g@mail.gmail.com>
+ <CAA+hA=SOk4K6QrQ4T_FCTpuZs1tKfpTA=wHnhvFX7A=30qsLsA@mail.gmail.com>
+ <CAPDyKFqig1Ta1yBBF33VOfosR384wwnBWGzJt8VoobUgbBSR8g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1476720825-30442-1-git-send-email-javier@osg.samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@osg.samsung.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Douglas Anderson <dianders@chromium.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Matthias Brugger <matthias.bgg@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:33879 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932275AbcJUJHw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2016 05:07:52 -0400
+Received: by mail-pf0-f194.google.com with SMTP id 128so8114766pfz.1
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2016 02:07:51 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqig1Ta1yBBF33VOfosR384wwnBWGzJt8VoobUgbBSR8g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aisheng Dong <aisheng.dong@nxp.com>
 
-On 17 October 2016 at 18:13, Javier Martinez Canillas
-<javier@osg.samsung.com> wrote:
-> If the driver is built as a module, autoload won't work because the module
-> alias information is not filled. So user-space can't match the registered
-> device with the corresponding module.
->
-> Export the module alias information using the MODULE_DEVICE_TABLE() macro.
->
-> Before this patch:
->
-> $ modinfo drivers/mmc/host/mtk-sd.ko | grep alias
-> $
->
-> After this patch:
->
-> $ modinfo drivers/mmc/host/mtk-sd.ko | grep alias
-> alias:          of:N*T*Cmediatek,mt8135-mmcC*
-> alias:          of:N*T*Cmediatek,mt8135-mmc
->
-> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
+On Fri, Oct 21, 2016 at 09:42:27AM +0200, Ulf Hansson wrote:
+> On 19 October 2016 at 11:18, Dong Aisheng <dongas86@gmail.com> wrote:
+> > Hi Ulf,
+> >
+> > On Tue, Oct 18, 2016 at 5:18 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >> On 18 October 2016 at 09:39, Haibo Chen <haibo.chen@nxp.com> wrote:
+> >>> When suspend usdhc, it will access usdhc register. So usdhc clock
+> >>> should be enabled, otherwise the access usdhc register will return
+> >>> error or cause system hung.
+> >>>
+> >>> Take this into consideration, if system enable a usdhc and do not
+> >>> connect any SD/SDIO/MMC card, after system boot up, this usdhc
+> >>> will do runtime suspend, and close all usdhc clock. At this time,
+> >>> if suspend the system, due to no card persent, usdhc runtime resume
+> >>> will not be called. So usdhc clock still closed, then in suspend,
+> >>> once access usdhc register, system hung or bus error return.
+> >>>
+> >>> This patch make sure usdhc clock always enabled while doing usdhc
+> >>> suspend.
+> >>
+> >> Yes, and since the clocks are kept enabled during system suspend that
+> >> means wasting power, doesn't it!?
+> >>
+> >
+> > IMX SoCs will disable all modules clocks in system stop mode
+> > automatically by hardware
+> > even it's enabled before
+> > CCGR value Clock Activity Description:
+> > 00 clock is off during all modes. stop enter hardware handshake is disabled.
+> > 01 clock is on in run mode, but off in wait and stop modes
+> > 10 Not applicable (Reserved).
+> > 11 clock is on during all modes, except stop mode.
+> >
+> > Although HW will gate off it automatically, but i think it's still
+> > good to align the state between
+> > SW and HW.
+> 
+> Yes, indeed!
+> 
+> >
+> >> May I propose another solution. Currently you deal only with clock
+> >> gating/ungating during runtime suspend/resume. I am wondering whether
+> >> you could extend those operations to be similar to what is needed
+> >> during system suspend/resume?
+> >>
+> >
+> > IMX driver are calling sdhci_runtime_suspend_host() and
+> > sdhci_suspend_host() for runtime
+> > suspend and system sleep case respectively.
+> > Those two APIs definitions are different.
+> > e.g. sdhci_suspend_host will disable card detection and enable wakeup
+> > if any while
+> > sdhci_runtime_suspend_host() not.
+> 
+> Yes, and that is weird and most likely wrong!
+> 
+> >
+> > It may not be suitable to extend runtime operations to be similar as
+> > sleep pm operations
+> 
+> I have several times by know had kind of similar discussions, but for
+> different sdhci variants. I believe we are papering over a PM issue in
+> sdhci, instead of actually trying to solve the real problem and in a
+> generic fashion.
+> 
+> As a first step, why not try to combine sdhci_suspend_host() and
+> sdhci_runtime_suspend_host() into one function, and vice verse for the
+> resume functions.
+> 
 
-Thanks, applied for next!
+Yes, that's a reasonable way.
+We may need double check whether we can combine them into one function
+since they're defined for different purpose currently.
 
-Kind regards
-Uffe
+> Then sdhci variants can decide how they want to use them.
+> Particularly, those that uses runtime PM, should benefit from using
+> the runtime PM centric approach and thus get system PM suspend/resume
+> for "free".
+> 
+> > if using common sdhci suspend function, unless we implement totoally
+> > IMX specific
+> > PM/Runtime PM function.
+> >
+> >
+> > Another option may be like what omap_hsmmc does:
+> >
+> > Something like:
+> >
+> > int sdhci_esdhc_suspend(struct device *dev)
+> > {
+> >         pm_runtime_get_sync(host->dev);
+> >         ret = sdhci_pltfm_suspend(dev);
+> >         pm_runtime_put_sync(host->dev);
+> >
+> >         return ret;
+> > }
+> >
+> > int sdhci_esdhc_resume(struct device *dev)
+> > {
+> >         pm_runtime_get_sync(host->dev);
+> >
+> >         ...
+> >         ret = sdhci_pltfm_resume(dev);
+> >
+> >         pm_runtime_mark_last_busy(host->dev);
+> >         pm_runtime_put_autosuspend(host->dev);
+> >
+> >         return ret;
+> > }
+> >
+> > Does that seem ok?
+> 
+> No, this doesn't work!
+> 
+> People that aren't into runtime PM, believes that the
+> pm_runtime_put*() in these paths means that the device enters runtime
+> suspend state. That's not the case.
+> 
+> Instead the device will remain runtime resumed while the system enters
+> suspend. Is that really what you want?
 
-> ---
->
->  drivers/mmc/host/mtk-sd.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 84e9afcb5c09..86af0b199a54 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1713,6 +1713,7 @@ static const struct of_device_id msdc_of_ids[] = {
->         {   .compatible = "mediatek,mt8135-mmc", },
->         {}
->  };
-> +MODULE_DEVICE_TABLE(of, msdc_of_ids);
->
->  static struct platform_driver mt_msdc_driver = {
->         .probe = msdc_drv_probe,
-> --
-> 2.7.4
->
+Yes, it's true.
+Thanks for spotting it.
+
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+
+Regards
+Dong Aisheng
