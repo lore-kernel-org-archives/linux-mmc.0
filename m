@@ -1,128 +1,63 @@
-From: Natalia Portillo <claunia@claunia.com>
-Subject: Help: Reading CID and CSD from MMC/SD card
-Date: Sat, 22 Oct 2016 21:47:53 +0100
-Message-ID: <bf47432d-6db5-0114-fb65-57568dde1fa7@claunia.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update dw-mmc controller
+Date: Mon, 24 Oct 2016 07:52:07 +0900
+Message-ID: <010f8179-56e4-88d2-1a6f-1c477a1d3f4a@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 110.red-2-139-146.staticip.rima-tde.net ([2.139.146.110]:44132
-        "EHLO mail.claunia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756006AbcJVUxY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2016 16:53:24 -0400
-Received: from [172.26.2.1] (zeus.claunia.com [172.26.2.1])
-        by mail.claunia.com (Postfix) with ESMTPSA id 1AE8214C8EFF8
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2016 21:47:54 +0100 (WEST)
+Received: from mailout1.samsung.com ([203.254.224.24]:34294 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754205AbcJWWwJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Oct 2016 18:52:09 -0400
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OFI00IT0VITDRB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 24 Oct 2016 07:52:07 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi all,
+Dear Ulf,
 
-Sorry if this mailing list is not the correct place to ask for help but
-I've been unable to find another place.
+Could you pull these patches into your mmc-next?
 
-I'm trying to read CID and CSD from MMC/SD cards using ioctl (reading
-from /sys is not a solution for me).
+The following changes since commit 2a688788ba1dd1dc905c24bf5b617aefdff4a68b:
 
->From what I've seen I should send a CMD7 to move card to standby, then
-CMD9/10 and then CMD7 to move card to transition state.
+  mmc: core: Don't use ->card_busy() and CMD13 in combination when polling (2016-10-21 10:18:07 +0200)
 
-While first command seems to work, next ones get error -110, and the
-card stays standby until physical ejection/reset.
+are available in the git repository at:
 
-After several tries I have not found the cause of this problem.
+  https://github.com/jh80chung/dw-mmc.git for-ulf
 
-I have pasted snippet of code I'm using at the end of this email.
+for you to fetch changes up to 0a9bd53611e862d2a5e2f68513b2677b13b7b379:
 
-Test machine is QEMU with kernel 3.16.36-1+deb8u1, amd64 and QEMU's
-virtual SDHCI-PCI device.
+  mmc: dw_mmc: remove system PM callback (2016-10-24 07:13:07 +0900)
 
-Regards,
-Natalia Portillo
+----------------------------------------------------------------
+Shawn Lin (9):
+      mmc: dw_mmc: add runtime PM callback
+      mmc: dw_mmc-rockchip: add runtime PM support
+      mmc: core: expose the capability of gpio card detect
+      mmc: dw_mmc: disable biu clk if possible
+      mmc: dw_mmc-k3: deploy runtime PM facilities
+      mmc: dw_mmc-exynos: deploy runtime PM facilities
+      mmc: dw_mmc-pci: deploy runtime PM facilities
+      mmc: dw_mmc-pltfm: deploy runtime PM facilities
+      mmc: dw_mmc: remove system PM callback
 
+ drivers/mmc/core/slot-gpio.c       |  8 +++++++
+ drivers/mmc/host/dw_mmc-exynos.c   | 24 +++++++++-----------
+ drivers/mmc/host/dw_mmc-k3.c       | 39 ++++++++------------------------
+ drivers/mmc/host/dw_mmc-pci.c      | 29 ++++++++----------------
+ drivers/mmc/host/dw_mmc-pltfm.c    | 28 +++++++----------------
+ drivers/mmc/host/dw_mmc-rockchip.c | 42 +++++++++++++++++++++++++++++++---
+ drivers/mmc/host/dw_mmc.c          | 46 +++++++++++++++++++++++++-------------
+ drivers/mmc/host/dw_mmc.h          |  6 ++---
+ include/linux/mmc/slot-gpio.h      |  1 +
+ 9 files changed, 117 insertions(+), 106 deletions(-)
 
-
---------------- CODE FOLLOWS -----------------------------
-
-
-#include <linux/ioctl.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <linux/mmc/ioctl.h>
-#include <string.h>
-#include <sys/ioctl.h>
-
-#define MMC_RSP_PRESENT (1 << 0)
-#define MMC_RSP_CRC (1 << 2)
-#define MMC_RSP_OPCODE (1 << 4)
-#define MMC_RSP_R1 (MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
-
-int main(int argc, char *argv)
-{
-    int fd, fw;
-    void *buffer;
-    int address = 0;
-    int ret = 0;
-    struct mmc_ioc_cmd idata;
-
-    fw = open("cid.bin", O_CREAT | O_RDWR);
-    fd = open("/dev/mmcblk0", O_RDONLY);
-
-    if(fd < 0)
-    {
-        perror("file open");
-        return fd;
-    }
-
-    buffer = malloc(16);
-    memset(&idata, 0, sizeof(idata));
-    memset(buffer, 0, 16);
-
-// Set standby
-    idata.opcode = 7;
-    idata.arg = 0;
-    idata.flags = 0x15;
-    idata.blksz = 0;
-    idata.blocks = 0;
-    mmc_ioc_cmd_set_data(idata, buffer);
-    ret = ioctl(fd, MMC_IOC_CMD, &idata);
-
-// Read CID
-    idata.write_flag = 0;
-    idata.opcode = 9;
-    idata.arg = (1 << 16);
-    idata.flags = 7;
-    idata.blksz = 0;
-    idata.blocks = 0;
-
-
-    mmc_ioc_cmd_set_data(idata, buffer);
-
-    ret = ioctl(fd, MMC_IOC_CMD, &idata);
-
-    printf("response[0] = %d\n", idata.response[0]);
-
-    printf("ret = %d\n", ret);
-
-    if(ret)
-        perror("ioctl");
-
-// Set transition
-    idata.opcode = 7;
-    idata.arg = (1 << 16);
-    idata.flags = MMC_RSP_R1;
-    idata.blksz = 0;
-    idata.blocks = 0;
-    mmc_ioc_cmd_set_data(idata, buffer);
-    ret = ioctl(fd, MMC_IOC_CMD, &idata);
-
-    write(fw, buffer, 16);
-    free(buffer);
-    close(fd);
-    close(fw);
-    return ret;
-}
+Best Regards,
+Jaehoon Chung
