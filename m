@@ -1,91 +1,103 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 11/25] mmc: mmc_test: Disable Command Queue while mmc_test is used
-Date: Mon, 24 Oct 2016 11:37:26 +0300
-Message-ID: <1477298260-5064-12-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 08/25] mmc: queue: Allocate queue of size qdepth
+Date: Mon, 24 Oct 2016 11:37:23 +0300
+Message-ID: <1477298260-5064-9-git-send-email-adrian.hunter@intel.com>
 References: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:33721 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935974AbcJXInT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 Oct 2016 04:43:19 -0400
+        id S936089AbcJXInG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Oct 2016 04:43:06 -0400
 In-Reply-To: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Normal read and write commands may not be used while the command queue is
-enabled. Disable the Command Queue when mmc_test is probed and re-enable it
-when it is removed.
+Now that the queue resources are allocated according to the size of the
+queue, it is possible to allocate the queue to be an arbitrary size.
+
+A side-effect is that deallocation of 'packed' resources must be done
+before deallocation of the queue.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/mmc_test.c | 13 +++++++++++++
- drivers/mmc/core/mmc.c      |  7 +++++++
- include/linux/mmc/card.h    |  1 +
- 3 files changed, 21 insertions(+)
+ drivers/mmc/card/block.c |  2 +-
+ drivers/mmc/card/queue.c | 11 ++++++++++-
+ drivers/mmc/card/queue.h |  2 +-
+ 3 files changed, 12 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 5a8dc5a76e0d..7dee9e5a8cfb 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
- 	if (ret)
- 		return ret;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 485fba5ab6c0..85c9f14a2c53 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2421,9 +2421,9 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		 * from being accepted.
+ 		 */
+ 		card = md->queue.card;
+-		mmc_cleanup_queue(&md->queue);
+ 		if (md->flags & MMC_BLK_PACKED_CMD)
+ 			mmc_packed_clean(&md->queue);
++		mmc_cleanup_queue(&md->queue);
+ 		if (md->disk->flags & GENHD_FL_UP) {
+ 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+ 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 000274523446..8d35948acec2 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -275,7 +275,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	struct mmc_host *host = card->host;
+ 	u64 limit = BLK_BOUNCE_HIGH;
+ 	bool bounce = false;
+-	int ret;
++	int ret = -ENOMEM;
  
-+	if (card->ext_csd.cmdq_en) {
-+		mmc_claim_host(card->host);
-+		ret = mmc_cmdq_disable(card);
-+		mmc_release_host(card->host);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	dev_info(&card->dev, "Card claimed for testing.\n");
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+ 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+@@ -286,6 +286,10 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		return -ENOMEM;
  
- 	return 0;
-@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	mq->qdepth = 2;
++	mq->mqrq = kcalloc(mq->qdepth, sizeof(struct mmc_queue_req),
++			   GFP_KERNEL);
++	if (!mq->mqrq)
++		goto blk_cleanup;
+ 	mq->mqrq_cur = &mq->mqrq[0];
+ 	mq->mqrq_prev = &mq->mqrq[1];
+ 	mq->queue->queuedata = mq;
+@@ -350,6 +354,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
  
- static void mmc_test_remove(struct mmc_card *card)
- {
-+	if (card->reenable_cmdq) {
-+		mmc_claim_host(card->host);
-+		mmc_cmdq_enable(card);
-+		mmc_release_host(card->host);
-+	}
- 	mmc_test_free_result(card);
- 	mmc_test_free_dbgfs_file(card);
+  cleanup_queue:
+ 	mmc_queue_reqs_free_bufs(mq);
++	kfree(mq->mqrq);
++	mq->mqrq = NULL;
++blk_cleanup:
+ 	blk_cleanup_queue(mq->queue);
+ 	return ret;
  }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6fb46ad7fc67..8b4b86fcd05a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1751,6 +1751,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
+@@ -372,6 +379,8 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	spin_unlock_irqrestore(q->queue_lock, flags);
  
- 	/*
-+	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
-+	 * disabled for a time, so a flag is needed to indicate to re-enable the
-+	 * Command Queue.
-+	 */
-+	card->reenable_cmdq = card->ext_csd.cmdq_en;
-+
-+	/*
- 	 * The mandatory minimum values are defined for packed command.
- 	 * read: 5, write: 3
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index e7c49d074443..757d3f3e4ae6 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -285,6 +285,7 @@ struct mmc_card {
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ 	mmc_queue_reqs_free_bufs(mq);
++	kfree(mq->mqrq);
++	mq->mqrq = NULL;
  
-+	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+ 	mq->card = NULL;
+ }
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index e99eecc1032b..299553c15d01 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -60,7 +60,7 @@ struct mmc_queue {
+ 	bool			asleep;
+ 	void			*data;
+ 	struct request_queue	*queue;
+-	struct mmc_queue_req	mqrq[2];
++	struct mmc_queue_req	*mqrq;
+ 	struct mmc_queue_req	*mqrq_cur;
+ 	struct mmc_queue_req	*mqrq_prev;
+ 	int			qdepth;
 -- 
 1.9.1
 
