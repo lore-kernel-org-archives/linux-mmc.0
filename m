@@ -1,90 +1,202 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 02/25] mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
-Date: Mon, 24 Oct 2016 11:37:17 +0300
-Message-ID: <1477298260-5064-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 01/25] mmc: queue: Fix queue thread wake-up
+Date: Mon, 24 Oct 2016 11:37:16 +0300
+Message-ID: <1477298260-5064-2-git-send-email-adrian.hunter@intel.com>
 References: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:33721 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:13682 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935241AbcJXImn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 Oct 2016 04:42:43 -0400
+        id S934212AbcJXImk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Oct 2016 04:42:40 -0400
 In-Reply-To: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-In preparation for supporting a queue of requests, factor out
-mmc_queue_alloc_bounce_bufs().
+The only time the driver sleeps expecting to be woken upon the arrival of
+a new request, is when the dispatch queue is empty. The only time that it
+is known whether the dispatch queue is empty is after NULL is returned
+from blk_fetch_request() while under the queue lock.
+
+Recognizing those facts, simplify the synchronization between the queue
+thread and the request function. A couple of flags tell the request
+function what to do, and the queue lock and barriers associated with
+wake-ups ensure synchronization.
+
+The result is simpler and allows the removal of the context_info lock.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 45 +++++++++++++++++++++++++++------------------
- 1 file changed, 27 insertions(+), 18 deletions(-)
+ drivers/mmc/card/block.c |  7 -------
+ drivers/mmc/card/queue.c | 35 +++++++++++++++++++++--------------
+ drivers/mmc/card/queue.h |  1 +
+ drivers/mmc/core/core.c  |  6 ------
+ include/linux/mmc/host.h |  2 --
+ 5 files changed, 22 insertions(+), 29 deletions(-)
 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 709a872ed484..485fba5ab6c0 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2150,8 +2150,6 @@ int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	int ret;
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+-	struct mmc_host *host = card->host;
+-	unsigned long flags;
+ 	bool req_is_special = mmc_req_is_special(req);
+ 
+ 	if (req && !mq->mqrq_prev->req)
+@@ -2184,11 +2182,6 @@ int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		ret = mmc_blk_issue_flush(mq, req);
+ 	} else {
+-		if (!req && host->areq) {
+-			spin_lock_irqsave(&host->context_info.lock, flags);
+-			host->context_info.is_waiting_last_req = true;
+-			spin_unlock_irqrestore(&host->context_info.lock, flags);
+-		}
+ 		ret = mmc_blk_issue_rw_rq(mq, req);
+ 	}
+ 
 diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index af352b0410e1..f625dcd5db32 100644
+index 8037f73a109a..af352b0410e1 100644
 --- a/drivers/mmc/card/queue.c
 +++ b/drivers/mmc/card/queue.c
-@@ -186,6 +186,31 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 		queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+@@ -53,6 +53,7 @@ static int mmc_queue_thread(void *d)
+ {
+ 	struct mmc_queue *mq = d;
+ 	struct request_queue *q = mq->queue;
++	struct mmc_context_info *cntx = &mq->card->host->context_info;
+ 
+ 	current->flags |= PF_MEMALLOC;
+ 
+@@ -63,6 +64,19 @@ static int mmc_queue_thread(void *d)
+ 		spin_lock_irq(q->queue_lock);
+ 		set_current_state(TASK_INTERRUPTIBLE);
+ 		req = blk_fetch_request(q);
++		mq->asleep = false;
++		cntx->is_waiting_last_req = false;
++		cntx->is_new_req = false;
++		if (!req) {
++			/*
++			 * Dispatch queue is empty so set flags for
++			 * mmc_request_fn() to wake us up.
++			 */
++			if (mq->mqrq_prev->req)
++				cntx->is_waiting_last_req = true;
++			else
++				mq->asleep = true;
++		}
+ 		mq->mqrq_cur->req = req;
+ 		spin_unlock_irq(q->queue_lock);
+ 
+@@ -115,7 +129,6 @@ static void mmc_request_fn(struct request_queue *q)
+ {
+ 	struct mmc_queue *mq = q->queuedata;
+ 	struct request *req;
+-	unsigned long flags;
+ 	struct mmc_context_info *cntx;
+ 
+ 	if (!mq) {
+@@ -127,19 +140,13 @@ static void mmc_request_fn(struct request_queue *q)
+ 	}
+ 
+ 	cntx = &mq->card->host->context_info;
+-	if (!mq->mqrq_cur->req && mq->mqrq_prev->req) {
+-		/*
+-		 * New MMC request arrived when MMC thread may be
+-		 * blocked on the previous request to be complete
+-		 * with no current request fetched
+-		 */
+-		spin_lock_irqsave(&cntx->lock, flags);
+-		if (cntx->is_waiting_last_req) {
+-			cntx->is_new_req = true;
+-			wake_up_interruptible(&cntx->wait);
+-		}
+-		spin_unlock_irqrestore(&cntx->lock, flags);
+-	} else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
++
++	if (cntx->is_waiting_last_req) {
++		cntx->is_new_req = true;
++		wake_up_interruptible(&cntx->wait);
++	}
++
++	if (mq->asleep)
+ 		wake_up_process(mq->thread);
  }
  
-+static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
-+					unsigned int bouncesz)
-+{
-+	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
-+	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
-+
-+	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-+	if (!mqrq_cur->bounce_buf) {
-+		pr_warn("%s: unable to allocate bounce cur buffer\n",
-+			mmc_card_name(mq->card));
-+		return false;
-+	}
-+
-+	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-+	if (!mqrq_prev->bounce_buf) {
-+		pr_warn("%s: unable to allocate bounce prev buffer\n",
-+			mmc_card_name(mq->card));
-+		kfree(mqrq_cur->bounce_buf);
-+		mqrq_cur->bounce_buf = NULL;
-+		return false;
-+	}
-+
-+	return true;
-+}
-+
- /**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-@@ -235,24 +260,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		if (bouncesz > (host->max_blk_count * 512))
- 			bouncesz = host->max_blk_count * 512;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 342f1e3f301e..73d70c5cee40 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -57,6 +57,7 @@ struct mmc_queue {
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
++	bool			asleep;
+ 	void			*data;
+ 	struct request_queue	*queue;
+ 	struct mmc_queue_req	mqrq[2];
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 2553d903a82b..36b727feecac 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -504,18 +504,14 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 	struct mmc_command *cmd;
+ 	struct mmc_context_info *context_info = &host->context_info;
+ 	int err;
+-	unsigned long flags;
  
--		if (bouncesz > 512) {
--			mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
--			if (!mqrq_cur->bounce_buf) {
--				pr_warn("%s: unable to allocate bounce cur buffer\n",
--					mmc_card_name(card));
--			} else {
--				mqrq_prev->bounce_buf =
--						kmalloc(bouncesz, GFP_KERNEL);
--				if (!mqrq_prev->bounce_buf) {
--					pr_warn("%s: unable to allocate bounce prev buffer\n",
--						mmc_card_name(card));
--					kfree(mqrq_cur->bounce_buf);
--					mqrq_cur->bounce_buf = NULL;
--				}
--			}
--		}
--
--		if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
-+		if (bouncesz > 512 &&
-+		    mmc_queue_alloc_bounce_bufs(mq, bouncesz)) {
- 			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
- 			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
- 			blk_queue_max_segments(mq->queue, bouncesz / 512);
+ 	while (1) {
+ 		wait_event_interruptible(context_info->wait,
+ 				(context_info->is_done_rcv ||
+ 				 context_info->is_new_req));
+-		spin_lock_irqsave(&context_info->lock, flags);
+ 		context_info->is_waiting_last_req = false;
+-		spin_unlock_irqrestore(&context_info->lock, flags);
+ 		if (context_info->is_done_rcv) {
+ 			context_info->is_done_rcv = false;
+-			context_info->is_new_req = false;
+ 			cmd = mrq->cmd;
+ 
+ 			if (!cmd->error || !cmd->retries ||
+@@ -534,7 +530,6 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 				continue; /* wait for done/new event again */
+ 			}
+ 		} else if (context_info->is_new_req) {
+-			context_info->is_new_req = false;
+ 			if (!next_req)
+ 				return MMC_BLK_NEW_REQUEST;
+ 		}
+@@ -3019,7 +3014,6 @@ void mmc_unregister_pm_notifier(struct mmc_host *host)
+  */
+ void mmc_init_context_info(struct mmc_host *host)
+ {
+-	spin_lock_init(&host->context_info.lock);
+ 	host->context_info.is_new_req = false;
+ 	host->context_info.is_done_rcv = false;
+ 	host->context_info.is_waiting_last_req = false;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 0b2439441cc8..3386e10480f7 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -198,14 +198,12 @@ struct mmc_slot {
+  * @is_new_req		wake up reason was new request
+  * @is_waiting_last_req	mmc context waiting for single running request
+  * @wait		wait queue
+- * @lock		lock to protect data fields
+  */
+ struct mmc_context_info {
+ 	bool			is_done_rcv;
+ 	bool			is_new_req;
+ 	bool			is_waiting_last_req;
+ 	wait_queue_head_t	wait;
+-	spinlock_t		lock;
+ };
+ 
+ struct regulator;
 -- 
 1.9.1
 
