@@ -1,76 +1,38 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: [PATCH 4/5] mmc: dw: Add fifo address override property
-Date: Mon, 24 Oct 2016 17:11:55 +0800
-Message-ID: <1477300316-1420-5-git-send-email-jun.nie@linaro.org>
-References: <1477300316-1420-1-git-send-email-jun.nie@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f172.google.com ([209.85.192.172]:33038 "EHLO
-        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934500AbcJXJMa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2016 05:12:30 -0400
-Received: by mail-pf0-f172.google.com with SMTP id 128so95652053pfz.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2016 02:12:30 -0700 (PDT)
-In-Reply-To: <1477300316-1420-1-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v3 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Mon, 24 Oct 2016 13:06:38 +0200
+Message-ID: <CAMuHMdU3q5PTXumWgizK1RG1nK6X6nCq1ySZ6z0DCH0uy+ZB2Q@mail.gmail.com>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
+ <20160912141507.6837-3-chris.brandt@renesas.com> <20161020132852.GB4177@katana>
+ <SG2PR06MB11652EB5B1A40583636F8FB28AD50@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <20161020231245.GB2199@katana> <SG2PR06MB1165F5878C8417068E7364628AD40@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <20161021215639.GB1450@katana>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20161021215639.GB1450@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Chris Brandt <Chris.Brandt@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: shawn.guo@linaro.org, xie.baoyou@zte.com.cn
-Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-The FIFO address of version 0x210A conflict with assumption that
-0x100(version < 0x240A) and 0x200(version >= 0x240A) in some dw mmc
-implementation. So this property serves as a workaround to set fifo
-address with value provided by DT node.
+Hi Wolfram,
 
-Signed-off-by: Jun Nie <jun.nie@linaro.org>
----
- drivers/mmc/host/dw_mmc.c  | 6 ++++++
- include/linux/mmc/dw_mmc.h | 2 ++
- 2 files changed, 8 insertions(+)
+On Fri, Oct 21, 2016 at 11:56 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+>> For the VERSION register, the low byte is the version of the IP, but
+>> the upper byte is a number that the design group that made the part
+>
+> I know. It is just that I haven't seen this one "in the wild" so far.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1c9ee36..9dcd6da 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2955,6 +2955,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 
- 	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
- 
-+	of_property_read_u32(np, "fifo-addr-override",
-+			     &host->fifo_addr_override);
-+
- 	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
- 		pdata->bus_hz = clock_frequency;
- 
-@@ -3163,6 +3166,9 @@ int dw_mci_probe(struct dw_mci *host)
- 	else
- 		host->fifo_reg = host->regs + DATA_240A_OFFSET;
- 
-+	if (host->fifo_addr_override)
-+		host->fifo_reg = host->regs + host->fifo_addr_override;
-+
- 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
- 	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
- 			       host->irq_flags, "dw-mci", host);
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index f5af2bd..4866ef5 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -107,6 +107,7 @@ struct dw_mci_dma_slave {
-  * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-  * @fifo_depth: depth of FIFO.
-+ * @fifo_addr_override: override fifo reg offset with this value.
-  * @data_shift: log2 of FIFO item size.
-  * @part_buf_start: Start index in part_buf.
-  * @part_buf_count: Bytes of partial data in part_buf.
-@@ -154,6 +155,7 @@ struct dw_mci {
- 	spinlock_t		irq_lock;
- 	void __iomem		*regs;
- 	void __iomem		*fifo_reg;
-+	u32			fifo_addr_override;
- 
- 	struct scatterlist	*sg;
- 	struct sg_mapping_iter	sg_miter;
--- 
-1.9.1
+I think you can also see it on your tamed Genmai ;-)
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
