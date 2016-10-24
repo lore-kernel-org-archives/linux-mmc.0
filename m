@@ -1,63 +1,73 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] Update dw-mmc controller
-Date: Mon, 24 Oct 2016 07:52:07 +0900
-Message-ID: <010f8179-56e4-88d2-1a6f-1c477a1d3f4a@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC v2 2/2] mmc: sdhci: Ignore capability register when it comes
+ to speeds and use DT binding instead when sdhci-cap-speed-modes-broken is
+ set.
+Date: Mon, 24 Oct 2016 10:34:46 +0300
+Message-ID: <d4547457-036a-dbb7-ddb8-b839e04949b7@intel.com>
+References: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
+ <1477085715-30213-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:34294 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754205AbcJWWwJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Oct 2016 18:52:09 -0400
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OFI00IT0VITDRB0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 24 Oct 2016 07:52:07 +0900 (KST)
+Received: from mga09.intel.com ([134.134.136.24]:10893 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932235AbcJXHjj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Oct 2016 03:39:39 -0400
+In-Reply-To: <1477085715-30213-3-git-send-email-zach.brown@ni.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Dear Ulf,
+On 22/10/16 00:35, Zach Brown wrote:
+> When the sdhci-cap-speed-modes-broken DT property is set, the driver
+> will ignore the bits of the capability registers that correspond to
+> speed modes.
+> 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1e25b01..59c62d3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -22,6 +22,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/of.h>
+>  
+>  #include <linux/leds.h>
+>  
+> @@ -3013,10 +3014,19 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>  
+>  	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
+>  
+> +	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
+> +				  "sdhci-cap-speed-modes-broken"))
 
-Could you pull these patches into your mmc-next?
+It rather begs the question: if you are going to do something sdhci
+specific, why not just read the whole of the caps register from DT?
 
-The following changes since commit 2a688788ba1dd1dc905c24bf5b617aefdff4a68b:
+> +		host->caps &= ~SDHCI_CAN_DO_HISPD;
+> +
+>  	if (host->version < SDHCI_SPEC_300)
+>  		return;
+>  
+>  	host->caps1 = caps1 ? *caps1 : sdhci_readl(host, SDHCI_CAPABILITIES_1);
+> +
+> +	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
+> +				  "sdhci-cap-speed-modes-broken"))
 
-  mmc: core: Don't use ->card_busy() and CMD13 in combination when polling (2016-10-21 10:18:07 +0200)
+Why read it twice?
 
-are available in the git repository at:
+> +		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+> +				 SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_HS400);
+>  }
+>  EXPORT_SYMBOL_GPL(__sdhci_read_caps);
+>  
+> 
 
-  https://github.com/jh80chung/dw-mmc.git for-ulf
-
-for you to fetch changes up to 0a9bd53611e862d2a5e2f68513b2677b13b7b379:
-
-  mmc: dw_mmc: remove system PM callback (2016-10-24 07:13:07 +0900)
-
-----------------------------------------------------------------
-Shawn Lin (9):
-      mmc: dw_mmc: add runtime PM callback
-      mmc: dw_mmc-rockchip: add runtime PM support
-      mmc: core: expose the capability of gpio card detect
-      mmc: dw_mmc: disable biu clk if possible
-      mmc: dw_mmc-k3: deploy runtime PM facilities
-      mmc: dw_mmc-exynos: deploy runtime PM facilities
-      mmc: dw_mmc-pci: deploy runtime PM facilities
-      mmc: dw_mmc-pltfm: deploy runtime PM facilities
-      mmc: dw_mmc: remove system PM callback
-
- drivers/mmc/core/slot-gpio.c       |  8 +++++++
- drivers/mmc/host/dw_mmc-exynos.c   | 24 +++++++++-----------
- drivers/mmc/host/dw_mmc-k3.c       | 39 ++++++++------------------------
- drivers/mmc/host/dw_mmc-pci.c      | 29 ++++++++----------------
- drivers/mmc/host/dw_mmc-pltfm.c    | 28 +++++++----------------
- drivers/mmc/host/dw_mmc-rockchip.c | 42 +++++++++++++++++++++++++++++++---
- drivers/mmc/host/dw_mmc.c          | 46 +++++++++++++++++++++++++-------------
- drivers/mmc/host/dw_mmc.h          |  6 ++---
- include/linux/mmc/slot-gpio.h      |  1 +
- 9 files changed, 117 insertions(+), 106 deletions(-)
-
-Best Regards,
-Jaehoon Chung
