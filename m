@@ -1,40 +1,154 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: Regression after "do not use CMD13 to get status after speed mode switch"
-Date: Mon, 24 Oct 2016 16:23:53 +0200
-Message-ID: <CACRpkdYQPrDg3EJkKJ0YebjDjoojV0n_L+fsjnNDZBYk4tmibA@mail.gmail.com>
-References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
- <bb6c1f05-d81c-4284-5831-c9d49bf038f3@linaro.org>
+From: Robin Murphy <robin.murphy@arm.com>
+Subject: Re: [PATCH 1/3] mmc: mmci: clean up header defines
+Date: Mon, 24 Oct 2016 16:33:53 +0100
+Message-ID: <51235848-4aae-30e0-6e36-fe984921b749@arm.com>
+References: <1477318886-24851-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <bb6c1f05-d81c-4284-5831-c9d49bf038f3@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from foss.arm.com ([217.140.101.70]:55298 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S935002AbcJXPd4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Oct 2016 11:33:56 -0400
+In-Reply-To: <1477318886-24851-1-git-send-email-linus.walleij@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Thu, Oct 20, 2016 at 5:17 PM, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
+Hi Linus,
 
-> I remember hitting timeout issue with new version of eMMC on SD600c-eval
-> board, this patch/hack fixed it for me.
->
-> https://git.linaro.org/people/srinivas.kandagatla/linux.git/commitdiff/e42d7427b9ce77174eef079be0e04e22bdb8fd07?hp=3e4bf0b78405694fd1ab4371c73e80932be21e3a
+One tiny nit which stands out from a cleanup perspective...
 
-This doesn't work for me, sadly. I reworked the patch to use the same
-codeflow as the Ux500/ST variant and posted my patches, but still no
-luck (hope it helps though, and just wanted to illustrate how I think the
-final patch should look).
+On 24/10/16 15:21, Linus Walleij wrote:
+> There was some confusion in the CPSM (Command Path State Machine)
+> and DPSM (Data Path State Machine) regarding the naming of the
+> registers, clarify the meaning of this acronym so the naming is
+> understandable, and consistently use BIT() to define these fields.
+> 
+> Include new definitions for a few bits found in a patch from
+> Srinivas Kandagatla.
+> 
+> Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c |  2 +-
+>  drivers/mmc/host/mmci.h | 69 +++++++++++++++++++++++++++----------------------
+>  2 files changed, 39 insertions(+), 32 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index df990bb8c873..79b135752d3d 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -210,7 +210,7 @@ static struct variant_data variant_qcom = {
+>  				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
+>  	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+>  	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
+> -	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
+> +	.data_cmd_enable	= MCI_CPSM_QCOM_DATCMD,
+>  	.blksz_datactrl4	= true,
+>  	.datalength_bits	= 24,
+>  	.pwrreg_powerup		= MCI_PWR_UP,
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index a1f5e4f49e2a..8952285196cd 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -51,25 +51,27 @@
+>  #define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
+>  
+>  #define MMCIARGUMENT		0x008
+> -#define MMCICOMMAND		0x00c
+> -#define MCI_CPSM_RESPONSE	(1 << 6)
+> -#define MCI_CPSM_LONGRSP	(1 << 7)
+> -#define MCI_CPSM_INTERRUPT	(1 << 8)
+> -#define MCI_CPSM_PENDING	(1 << 9)
+> -#define MCI_CPSM_ENABLE		(1 << 10)
+> -/* Argument flag extenstions in the ST Micro versions */
+> -#define MCI_ST_SDIO_SUSP	(1 << 11)
+> -#define MCI_ST_ENCMD_COMPL	(1 << 12)
+> -#define MCI_ST_NIEN		(1 << 13)
+> -#define MCI_ST_CE_ATACMD	(1 << 14)
+>  
+> -/* Modified on Qualcomm Integrations */
+> -#define MCI_QCOM_CSPM_DATCMD		BIT(12)
+> -#define MCI_QCOM_CSPM_MCIABORT		BIT(13)
+> -#define MCI_QCOM_CSPM_CCSENABLE		BIT(14)
+> -#define MCI_QCOM_CSPM_CCSDISABLE	BIT(15)
+> -#define MCI_QCOM_CSPM_AUTO_CMD19	BIT(16)
+> -#define MCI_QCOM_CSPM_AUTO_CMD21	BIT(21)
+> +/* The command register controls the Command Path State Machine (CPSM) */
+> +#define MMCICOMMAND		0x00c
+> +#define MCI_CPSM_RESPONSE	BIT(6)
+> +#define MCI_CPSM_LONGRSP	BIT(7)
+> +#define MCI_CPSM_INTERRUPT	BIT(8)
+> +#define MCI_CPSM_PENDING	BIT(9)
+> +#define MCI_CPSM_ENABLE		BIT(10)
+> +/* Command register flag extenstions in the ST Micro versions */
+> +#define MCI_CPSM_ST_SDIO_SUSP		BIT(11)
+> +#define MCI_CPSM_ST_ENCMD_COMPL		BIT(12)
+> +#define MCI_CPSM_ST_NIEN		BIT(13)
+> +#define MCI_CPSM_ST_CE_ATACMD		BIT(14)
+> +/* Command register flag extensions in the Qualcomm versions */
+> +#define MCI_CPSM_QCOM_PROGENA		BIT(11)
+> +#define MCI_CPSM_QCOM_DATCMD		BIT(12)
+> +#define MCI_CPSM_QCOM_MCIABORT		BIT(13)
+> +#define MCI_CPSM_QCOM_CCSENABLE		BIT(14)
+> +#define MCI_CPSM_QCOM_CCSDISABLE	BIT(15)
+> +#define MCI_CPSM_QCOM_AUTO_CMD19	BIT(16)
+> +#define MCI_CPSM_QCOM_AUTO_CMD21	BIT(21)
 
-Are you sure the MMCI derivates on the APQ8060 and MSM8660 has this
-extra "PROGDONE" bit? (I guess you have the SoC reference manual for
-these, I don't...)
+These definitions take the format of MCI_register_{vendor_}field...
 
-> Also one more important thing was to do with regulator mode too.
-> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=93b8e6fda11757a20df21f3fc18e12789841f173
+>  #define MMCIRESPCMD		0x010
+>  #define MMCIRESPONSE0		0x014
+> @@ -78,22 +80,27 @@
+>  #define MMCIRESPONSE3		0x020
+>  #define MMCIDATATIMER		0x024
+>  #define MMCIDATALENGTH		0x028
+> +
+> +/* The data control register controls the Data Path State Machine (DPSM) */
+>  #define MMCIDATACTRL		0x02c
+> -#define MCI_DPSM_ENABLE		(1 << 0)
+> -#define MCI_DPSM_DIRECTION	(1 << 1)
+> -#define MCI_DPSM_MODE		(1 << 2)
+> -#define MCI_DPSM_DMAENABLE	(1 << 3)
+> -#define MCI_DPSM_BLOCKSIZE	(1 << 4)
+> +#define MCI_DPSM_ENABLE		BIT(0)
+> +#define MCI_DPSM_DIRECTION	BIT(1)
+> +#define MCI_DPSM_MODE		BIT(2)
+> +#define MCI_DPSM_DMAENABLE	BIT(3)
+> +#define MCI_DPSM_BLOCKSIZE	BIT(4)
+>  /* Control register extensions in the ST Micro U300 and Ux500 versions */
+> -#define MCI_ST_DPSM_RWSTART	(1 << 8)
+> -#define MCI_ST_DPSM_RWSTOP	(1 << 9)
+> -#define MCI_ST_DPSM_RWMOD	(1 << 10)
+> -#define MCI_ST_DPSM_SDIOEN	(1 << 11)
+> +#define MCI_ST_DPSM_RWSTART	BIT(8)
+> +#define MCI_ST_DPSM_RWSTOP	BIT(9)
+> +#define MCI_ST_DPSM_RWMOD	BIT(10)
+> +#define MCI_ST_DPSM_SDIOEN	BIT(11)
+>  /* Control register extensions in the ST Micro Ux500 versions */
+> -#define MCI_ST_DPSM_DMAREQCTL	(1 << 12)
+> -#define MCI_ST_DPSM_DBOOTMODEEN	(1 << 13)
+> -#define MCI_ST_DPSM_BUSYMODE	(1 << 14)
+> -#define MCI_ST_DPSM_DDRMODE	(1 << 15)
+> +#define MCI_ST_DPSM_DMAREQCTL	BIT(12)
+> +#define MCI_ST_DPSM_DBOOTMODEEN	BIT(13)
+> +#define MCI_ST_DPSM_BUSYMODE	BIT(14)
+> +#define MCI_ST_DPSM_DDRMODE	BIT(15)
+> +/* Control register extensions in the Qualcomm versions */
+> +#define MCI_QCOM_DPSM_DATA_PEND	BIT(17)
+> +#define MCI_QCOM_DPSM_RX_DATA_PEND BIT(20)
 
-Since my rootfs does come up after the 20 minute timeout I do not thing
-power surges are the cause. This problem seems SD600c-specific.
+...but these retain the previous MCI_{vendor_}register_field format - it
+seems like a needless inconsistency, but if there is some good reason
+then fair enough (I only have the vaguest familiarity with this IP/driver).
 
-Yours,
-Linus Walleij
+Robin.
+
+>  
+>  #define MMCIDATACNT		0x030
+>  #define MMCISTATUS		0x034
+> 
+
