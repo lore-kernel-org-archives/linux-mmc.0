@@ -1,13 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 05/25] mmc: queue: Factor out mmc_queue_reqs_free_bufs()
-Date: Mon, 24 Oct 2016 11:37:20 +0300
-Message-ID: <1477298260-5064-6-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 02/25] mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
+Date: Mon, 24 Oct 2016 11:37:17 +0300
+Message-ID: <1477298260-5064-3-git-send-email-adrian.hunter@intel.com>
 References: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:33721 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935974AbcJXImz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 Oct 2016 04:42:55 -0400
+        id S935241AbcJXImn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 Oct 2016 04:42:43 -0400
 In-Reply-To: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -15,129 +15,76 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
 In preparation for supporting a queue of requests, factor out
-mmc_queue_reqs_free_bufs().
+mmc_queue_alloc_bounce_bufs().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 65 +++++++++++++++++++-----------------------------
- 1 file changed, 26 insertions(+), 39 deletions(-)
+ drivers/mmc/card/queue.c | 45 +++++++++++++++++++++++++++------------------
+ 1 file changed, 27 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 1d07472e6efe..11909728ab32 100644
+index af352b0410e1..f625dcd5db32 100644
 --- a/drivers/mmc/card/queue.c
 +++ b/drivers/mmc/card/queue.c
-@@ -250,6 +250,27 @@ static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
- 	return ret;
+@@ -186,6 +186,31 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
  }
  
-+static void mmc_queue_reqs_free_bufs(struct mmc_queue *mq)
++static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
++					unsigned int bouncesz)
 +{
 +	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
 +	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
 +
-+	kfree(mqrq_cur->bounce_sg);
-+	mqrq_cur->bounce_sg = NULL;
-+	kfree(mqrq_prev->bounce_sg);
-+	mqrq_prev->bounce_sg = NULL;
++	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_cur->bounce_buf) {
++		pr_warn("%s: unable to allocate bounce cur buffer\n",
++			mmc_card_name(mq->card));
++		return false;
++	}
 +
-+	kfree(mqrq_cur->sg);
-+	mqrq_cur->sg = NULL;
-+	kfree(mqrq_cur->bounce_buf);
-+	mqrq_cur->bounce_buf = NULL;
++	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_prev->bounce_buf) {
++		pr_warn("%s: unable to allocate bounce prev buffer\n",
++			mmc_card_name(mq->card));
++		kfree(mqrq_cur->bounce_buf);
++		mqrq_cur->bounce_buf = NULL;
++		return false;
++	}
 +
-+	kfree(mqrq_prev->sg);
-+	mqrq_prev->sg = NULL;
-+	kfree(mqrq_prev->bounce_buf);
-+	mqrq_prev->bounce_buf = NULL;
++	return true;
 +}
 +
  /**
   * mmc_init_queue - initialise a queue structure.
   * @mq: mmc queue
-@@ -266,8 +287,6 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	u64 limit = BLK_BOUNCE_HIGH;
- 	bool bounce = false;
- 	int ret;
--	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
--	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+@@ -235,24 +260,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		if (bouncesz > (host->max_blk_count * 512))
+ 			bouncesz = host->max_blk_count * 512;
  
- 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
- 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
-@@ -277,8 +296,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (!mq->queue)
- 		return -ENOMEM;
- 
--	mq->mqrq_cur = mqrq_cur;
--	mq->mqrq_prev = mqrq_prev;
-+	mq->mqrq_cur = &mq->mqrq[0];
-+	mq->mqrq_prev = &mq->mqrq[1];
- 	mq->queue->queuedata = mq;
- 
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
-@@ -334,27 +353,13 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 
- 	if (IS_ERR(mq->thread)) {
- 		ret = PTR_ERR(mq->thread);
--		goto free_bounce_sg;
-+		goto cleanup_queue;
- 	}
- 
- 	return 0;
-- free_bounce_sg:
--	kfree(mqrq_cur->bounce_sg);
--	mqrq_cur->bounce_sg = NULL;
--	kfree(mqrq_prev->bounce_sg);
--	mqrq_prev->bounce_sg = NULL;
- 
-  cleanup_queue:
--	kfree(mqrq_cur->sg);
--	mqrq_cur->sg = NULL;
--	kfree(mqrq_cur->bounce_buf);
--	mqrq_cur->bounce_buf = NULL;
+-		if (bouncesz > 512) {
+-			mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-			if (!mqrq_cur->bounce_buf) {
+-				pr_warn("%s: unable to allocate bounce cur buffer\n",
+-					mmc_card_name(card));
+-			} else {
+-				mqrq_prev->bounce_buf =
+-						kmalloc(bouncesz, GFP_KERNEL);
+-				if (!mqrq_prev->bounce_buf) {
+-					pr_warn("%s: unable to allocate bounce prev buffer\n",
+-						mmc_card_name(card));
+-					kfree(mqrq_cur->bounce_buf);
+-					mqrq_cur->bounce_buf = NULL;
+-				}
+-			}
+-		}
 -
--	kfree(mqrq_prev->sg);
--	mqrq_prev->sg = NULL;
--	kfree(mqrq_prev->bounce_buf);
--	mqrq_prev->bounce_buf = NULL;
--
-+	mmc_queue_reqs_free_bufs(mq);
- 	blk_cleanup_queue(mq->queue);
- 	return ret;
- }
-@@ -363,8 +368,6 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- {
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
--	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
--	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
- 
- 	/* Make sure the queue isn't suspended, as that will deadlock */
- 	mmc_queue_resume(mq);
-@@ -378,23 +381,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	blk_start_queue(q);
- 	spin_unlock_irqrestore(q->queue_lock, flags);
- 
--	kfree(mqrq_cur->bounce_sg);
--	mqrq_cur->bounce_sg = NULL;
--
--	kfree(mqrq_cur->sg);
--	mqrq_cur->sg = NULL;
--
--	kfree(mqrq_cur->bounce_buf);
--	mqrq_cur->bounce_buf = NULL;
--
--	kfree(mqrq_prev->bounce_sg);
--	mqrq_prev->bounce_sg = NULL;
--
--	kfree(mqrq_prev->sg);
--	mqrq_prev->sg = NULL;
--
--	kfree(mqrq_prev->bounce_buf);
--	mqrq_prev->bounce_buf = NULL;
-+	mmc_queue_reqs_free_bufs(mq);
- 
- 	mq->card = NULL;
- }
+-		if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
++		if (bouncesz > 512 &&
++		    mmc_queue_alloc_bounce_bufs(mq, bouncesz)) {
+ 			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
+ 			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
+ 			blk_queue_max_segments(mq->queue, bouncesz / 512);
 -- 
 1.9.1
 
