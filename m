@@ -1,7 +1,7 @@
 From: Zach Brown <zach.brown@ni.com>
-Subject: [RFC 2/2] mmc: sdhci: Use sdhci-caps-mask and sdhci-caps to change the caps read during __sdhci_read_caps
-Date: Tue, 25 Oct 2016 14:58:58 -0500
-Message-ID: <1477425538-3315-3-git-send-email-zach.brown@ni.com>
+Subject: [RFC 1/2] mmc: sdhci: dt: Add device tree properties sdhci-caps and sdhci-caps-mask
+Date: Tue, 25 Oct 2016 14:58:57 -0500
+Message-ID: <1477425538-3315-2-git-send-email-zach.brown@ni.com>
 References: <1477425538-3315-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,81 +12,37 @@ To: ulf.hansson@linaro.org
 Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 List-Id: linux-mmc@vger.kernel.org
 
-The sdhci capabilities registers can be incorrect. The sdhci-caps-mask
-and sdhci-caps dt properties specify which bits of the registers are
-incorrect and what their values should be. This patch makes the sdhci
-driver use those properties to correct the caps during
-__sdhci_read_caps.
+On some systems the sdhci capabilty registers are incorrect for one
+reason or another.
 
-During __sdhci_read_caps
-Use the sdhci-caps-mask property to turn off the incorrect bits of the
-sdhci registers after reading them.
-Use the sdhci-caps to turn on bits after using sdhci-caps-mask to turn
-off the incorrect ones.
+The sdhci-caps-mask property specifies which bits in the registers
+are incorrect and should be turned off before using sdhci-caps to turn
+on bits.
+
+The sdhci-caps property specifies which bits should be turned on.
 
 Signed-off-by: Zach Brown <zach.brown@ni.com>
 ---
- drivers/mmc/host/sdhci.c | 24 ++++++++++++++++++++++--
- 1 file changed, 22 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/mmc/mmc.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1e25b01..d5feae4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -22,6 +22,7 @@
- #include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-+#include <linux/of.h>
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 8a37782..1415aa0 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -52,6 +52,13 @@ Optional properties:
+ - no-sdio: controller is limited to send sdio cmd during initialization
+ - no-sd: controller is limited to send sd cmd during initialization
+ - no-mmc: controller is limited to send mmc cmd during initialization
++- sdhci-caps-mask: The sdhci capabilities registers are incorrect. This 64bit
++  property corresponds to the bits in the sdhci capabilty registers. If the bit
++  is on in the mask then the bit is incorrect in the registers and should be
++  turned off.
++- sdhci-caps: The sdhci capabilities registers are incorrect. This 64bit
++  property corresponds to the bits in the sdhci capability registers. If the
++  bit is on in the property then the bit should be on in the reigsters.
  
- #include <linux/leds.h>
- 
-@@ -2991,6 +2992,8 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
- void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
- {
- 	u16 v;
-+	u64 dt_caps_mask = 0;
-+	u64 dt_caps = 0;
- 
- 	if (host->read_caps)
- 		return;
-@@ -3005,18 +3008,35 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
- 
- 	sdhci_do_reset(host, SDHCI_RESET_ALL);
- 
-+	of_property_read_u64(mmc_dev(host->mmc)->of_node,
-+			     "sdhci-caps-mask", &dt_caps_mask);
-+	of_property_read_u64(mmc_dev(host->mmc)->of_node,
-+			     "sdhci-caps", &dt_caps);
-+
- 	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
- 	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
- 
- 	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
- 		return;
- 
--	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (caps)
-+		host->caps = *caps;
-+	else {
-+		host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+		host->caps &= ~lower_32_bits(dt_caps_mask);
-+		host->caps |= lower_32_bits(dt_caps);
-+	}
- 
- 	if (host->version < SDHCI_SPEC_300)
- 		return;
- 
--	host->caps1 = caps1 ? *caps1 : sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+	if (caps1)
-+		host->caps1 = *caps1;
-+	else {
-+		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+		host->caps1 &= ~upper_32_bits(dt_caps_mask);
-+		host->caps1 |= upper_32_bits(dt_caps);
-+	}
- }
- EXPORT_SYMBOL_GPL(__sdhci_read_caps);
- 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
 -- 
 2.7.4
