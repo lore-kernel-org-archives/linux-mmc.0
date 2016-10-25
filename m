@@ -1,93 +1,71 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 4/4] mmc: core: Don't use ->card_busy() and CMD13 in
- combination when polling
-Date: Tue, 25 Oct 2016 13:58:35 +0300
-Message-ID: <1f507a74-430a-fe57-601d-660d2a609567@intel.com>
-References: <1476951579-26125-1-git-send-email-ulf.hansson@linaro.org>
- <1476951579-26125-5-git-send-email-ulf.hansson@linaro.org>
- <e9e44d6e-f2a6-13f0-4938-3fa1757b40e8@intel.com>
- <CAPDyKFoMzDvjOvZmuNp7eKz3rx1-sSzhXO2oLAcVj9MHBfZdkQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC v2 2/2] mmc: sdhci: Ignore capability register when it comes
+ to speeds and use DT binding instead when sdhci-cap-speed-modes-broken is
+ set.
+Date: Tue, 25 Oct 2016 14:30:25 +0300
+Message-ID: <d65f018e-b20e-9e87-fc07-eb2fb4b5079e@intel.com>
+References: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
+ <1477085715-30213-3-git-send-email-zach.brown@ni.com>
+ <d4547457-036a-dbb7-ddb8-b839e04949b7@intel.com>
+ <20161024154820.GA16144@zach-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:45471 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965640AbcJYLD2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Oct 2016 07:03:28 -0400
-In-Reply-To: <CAPDyKFoMzDvjOvZmuNp7eKz3rx1-sSzhXO2oLAcVj9MHBfZdkQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20161024154820.GA16144@zach-desktop>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-On 25/10/16 11:45, Ulf Hansson wrote:
-> On 21 October 2016 at 11:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 20/10/16 11:19, Ulf Hansson wrote:
->>> When polling for busy after sending a MMC_SWITCH command, both the optional
->>> ->card_busy() callback and CMD13 are being used in conjunction.
+On 24/10/16 18:48, Zach Brown wrote:
+> On Mon, Oct 24, 2016 at 10:34:46AM +0300, Adrian Hunter wrote:
+>> On 22/10/16 00:35, Zach Brown wrote:
+>>> When the sdhci-cap-speed-modes-broken DT property is set, the driver
+>>> will ignore the bits of the capability registers that correspond to
+>>> speed modes.
 >>>
->>> This doesn't make sense. Instead it's more reasonable to rely solely on the
->>> ->card_busy() callback when it exists. Let's change that and instead use
->>> the CMD13 as a fall-back. In this way we avoid sending CMD13, unless it's
->>> really needed.
->>>
->>> Within this context, let's also take the opportunity to make some
->>> additional clean-ups and clarifications to the related code.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
 >>> ---
->>>  drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++----------------
->>>  1 file changed, 14 insertions(+), 16 deletions(-)
+>>>  drivers/mmc/host/sdhci.c | 10 ++++++++++
+>>>  1 file changed, 10 insertions(+)
 >>>
->>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->>> index a84a880..481bbdb 100644
->>> --- a/drivers/mmc/core/mmc_ops.c
->>> +++ b/drivers/mmc/core/mmc_ops.c
->>> @@ -495,34 +495,32 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
->>>       timeout = jiffies + msecs_to_jiffies(timeout_ms) + 1;
->>>       do {
->>>               /*
->>> -              * Due to the possibility of being preempted after
->>> -              * sending the status command, check the expiration
->>> -              * time first.
->>> +              * Due to the possibility of being preempted while polling,
->>> +              * check the expiration time first.
->>>                */
->>>               expired = time_after(jiffies, timeout);
->>> -             if (send_status) {
->>> +
->>> +             if (host->ops->card_busy) {
->>> +                     busy = host->ops->card_busy(host);
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 1e25b01..59c62d3 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -22,6 +22,7 @@
+>>>  #include <linux/scatterlist.h>
+>>>  #include <linux/regulator/consumer.h>
+>>>  #include <linux/pm_runtime.h>
+>>> +#include <linux/of.h>
+>>>
+>>>  #include <linux/leds.h>
+>>>
+>>> @@ -3013,10 +3014,19 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
+>>>
+>>>  	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
+>>>
+>>> +	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
+>>> +				  "sdhci-cap-speed-modes-broken"))
 >>
->> I didn't really have time to look at these patches, sorry :-(.  But this
->> loop looks like it could use a cond_resched()
+>> It rather begs the question: if you are going to do something sdhci
+>> specific, why not just read the whole of the caps register from DT?
+>>
 > 
-> Yes, something like that is definitely needed! Although, I suggest we
-> do that improvement on top of this change, if you are fine with that
-> approach?
+> Throwing out the whole of the caps register seems like overkill. Also
 
-Sure
+What about 2 values: one for the 64-bit caps register and one for a 64-bit
+mask of bits to override.  That way you can select which bits to override
+and what to override them to.
 
-> 
-> The reason is that I am also pondering over, whether it could make
-> sense to poll with a dynamically increased interval. At least when
-> using ->card_busy().
-> Let's say by starting at 1 us interval, then at each poll attempt we
-> double the interval time. We would then rather use a combination of
-> udelay(), usleep_range() and msleep() to accomplish what you propose.
-> Does that make sense to you?
+> there are some things set by the caps that are not available in the DT.
+> For example, SDHCI_CAN_64BIT is set by the cap register and is used in
+> sdhci_setup_host to set host->flags SDHCI_USE_64_BIT_DMA.
 
-That potentially doubles the operation time.  It might be nicer to limit the
-worst case e.g. sleep 1/8th of the total time spent looping
+Not sure what you mean.
 
-s64 sleep_us;
-ktime_t start_time = ktime_get();
-do {
-	...
-	sleep_us = ktime_us_delta(ktime_get(), start_time) >> 3;
-	sleep_us = sleep_us ? : 1;
-	...
-} while(busy);
-
-
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
