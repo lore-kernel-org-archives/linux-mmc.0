@@ -1,42 +1,65 @@
-From: Wei Yongjun <weiyj.lk@gmail.com>
-Subject: [PATCH -next] mmc: sdhci-msm: Fix error return code in sdhci_msm_probe()
-Date: Wed, 26 Oct 2016 15:04:41 +0000
-Message-ID: <1477494281-24246-1-git-send-email-weiyj.lk@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:35832 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753997AbcJZPEv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2016 11:04:51 -0400
-Received: by mail-pf0-f195.google.com with SMTP id s8so22998094pfj.2
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2016 08:04:51 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sylwester Nawrocki <s.nawrocki@samsung.com>
+Subject: [PATCH v2] mmc: s3cmci: Use DMA slave map rather than exported DMA
+ filter
+Date: Wed, 26 Oct 2016 18:30:53 +0200
+Message-ID: <1477499453-22549-1-git-send-email-s.nawrocki@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-samsung-soc@vger.kernel.org
+Cc: sam.van.den.berge@telenet.be, arnd@arndb.de, linux-mmc@vger.kernel.org, b.zolnierkie@samsung.com, Sylwester Nawrocki <s.nawrocki@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>
-Cc: Wei Yongjun <weiyongjun1@huawei.com>, linux-mmc@vger.kernel.org
 
-From: Wei Yongjun <weiyongjun1@huawei.com>
+Support for DMA slave map has been added to the s3c24xx-dma
+controller in commit 34681d84a0f7cc22ded1413dc79eef8a2f23d9c3
+"dmaengine: s3c24xx: Add dma_slave_map for s3c2440 devices"
+This patch converts the s3cmci driver to also use it, so we can
+eventually get rid of the exported filter function once all
+related DMA clients are updated.
 
-Fix to return a negative error code from the platform_get_irq_byname()
-error handling case instead of 0, as done elsewhere in this function.
-
-Fixes: ad81d3871004 ("mmc: sdhci-msm: Add support for UHS cards")
-Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+Signed-off-by: Sylwester Nawrocki <s.nawrocki@samsung.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
+Changes since v1:
+ - dma_request_chan() used instead of dma_request_slave_channel()
+   for better error handling.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 795f16f..b78d72f 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -649,6 +649,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	if (msm_host->pwr_irq < 0) {
- 		dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
- 			msm_host->pwr_irq);
-+		ret = msm_host->pwr_irq;
- 		goto clk_disable;
+ drivers/mmc/host/s3cmci.c | 15 ++++-----------
+ 1 file changed, 4 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index c531dee..932a4b1 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -28,7 +28,6 @@
+ #include <mach/dma.h>
+ #include <mach/gpio-samsung.h>
+
+-#include <linux/platform_data/dma-s3c24xx.h>
+ #include <linux/platform_data/mmc-s3cmci.h>
+
+ #include "s3cmci.h"
+@@ -1682,19 +1681,13 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 		gpio_direction_input(host->pdata->gpio_wprotect);
  	}
 
+-	/* depending on the dma state, get a dma channel to use. */
++	/* Depending on the dma state, get a DMA channel to use. */
+
+ 	if (s3cmci_host_usedma(host)) {
+-		dma_cap_mask_t mask;
+-
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-
+-		host->dma = dma_request_slave_channel_compat(mask,
+-			s3c24xx_dma_filter, (void *)DMACH_SDI, &pdev->dev, "rx-tx");
+-		if (!host->dma) {
++		host->dma = dma_request_chan(&pdev->dev, "rx-tx");
++		ret = PTR_ERR_OR_ZERO(host->dma);
++		if (ret) {
+ 			dev_err(&pdev->dev, "cannot get DMA channel.\n");
+-			ret = -EBUSY;
+ 			goto probe_free_gpio_wp;
+ 		}
+ 	}
+--
+1.9.1
