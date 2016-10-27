@@ -1,138 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Regression after "do not use CMD13 to get status after speed mode switch"
-Date: Thu, 27 Oct 2016 12:04:09 +0200
-Message-ID: <CAPDyKFpQn+Es6RwiYp319B1KcUduQ_fa2ou6V_2TrQhEsgV4Jw@mail.gmail.com>
-References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
- <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
- <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com> <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
- <1476930167.11050.4.camel@mhfsdcap03> <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: s3cmci: Use DMA slave map rather than exported
+ DMA filter
+Date: Thu, 27 Oct 2016 09:47:20 +0200
+Message-ID: <CAPDyKFr-m8thnPLpoyn_67AMcCs_fGYHZzc3Te-hpYOn1R7sRQ@mail.gmail.com>
+References: <1477499453-22549-1-git-send-email-s.nawrocki@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35083 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936594AbcJ0OUm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 10:20:42 -0400
-Received: by mail-wm0-f53.google.com with SMTP id e69so37937683wmg.0
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2016 07:19:24 -0700 (PDT)
-In-Reply-To: <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:32815 "EHLO
+        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935819AbcJ0Opx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 10:45:53 -0400
+Received: by mail-lf0-f42.google.com with SMTP id x79so33683136lff.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2016 07:45:52 -0700 (PDT)
+In-Reply-To: <1477499453-22549-1-git-send-email-s.nawrocki@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
+To: Sylwester Nawrocki <s.nawrocki@samsung.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, sam.van.den.berge@telenet.be, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-On 20 October 2016 at 09:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
->>> Adrian, Linus,
->>>
->>> Thanks for looking into this and reporting!
->>>
->>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> > On 18/10/16 11:36, Linus Walleij wrote:
->>> >> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
->>> >>
->>> >>> Before this patch the eMMC is detected and all partitions enumerated
->>> >>> immediately, but after the patch it doesn't come up at all, except
->>> >>> sometimes, when it appears minutes (!) after boot, all of a sudden.
->>> >>
->>> >> FYI this is what it looks like when it eventually happens:
->>> >> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
->>> >> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
->>> >> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
->>> >> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
->>> >> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
->>> >> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
->>> >> p14 p15 p16 p17 p18 p19 p20 p21 >
->>> >>
->>> >> So after 627 seconds, a bit hard for users to wait this long for their
->>> >> root filesystem.
->>> >
->>> > If the driver does not support busy detection and the eMMC card provides
->>> > zero as the cmd6 generic timeout (which it may especially as cmd6 generic
->>> > timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
->>> > waiting 10 minutes i.e.
->>> >
->>> > #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
->>>
->>> Urgh! Yes, I have verified that this is exactly what happens.
->>>
->>> >
->>> > So removal of CMD13 polling for HS mode (as per commit
->>> > 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
->>> > combinations of eMMC cards and host drivers.
->>>
->>> I was looking in the __mmc_switch() function, it's just a pain to walk
->>> trough it :-) So first out I decided to clean it up and factor out the
->>> polling parts. I will post the patches first out tomorrow morning,
->>> running some final test right now.
->>>
->>> Although, that of course doesn't solve our problem. As I see it we
->>> only have a few options here.
->>>
->>> 1) In case when cmd6 generic timeout isn't available, let's assign
->>> another empirically selected value.
->>> 2) Use a specific timeout when switching to HS mode.
->>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
->>> with CMD13 for switching to HS mode - unless it causes issues for some
->>> cards/drivers combination?
->>>
->>> BTW, I already tried 2) and it indeed solves the problem, although
->>> depending on the selected timeout, it might delay the card detection
->>> to process.
->>>
->>> Thoughts?
->>
->> I just have a try of switching to HS mode with Hynix EMMC, the first
->> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
->> that CMD13 cannot indicate current card status in this case.
+On 26 October 2016 at 18:30, Sylwester Nawrocki <s.nawrocki@samsung.com> wrote:
+> Support for DMA slave map has been added to the s3c24xx-dma
+> controller in commit 34681d84a0f7cc22ded1413dc79eef8a2f23d9c3
+> "dmaengine: s3c24xx: Add dma_slave_map for s3c2440 devices"
+> This patch converts the s3cmci driver to also use it, so we can
+> eventually get rid of the exported filter function once all
+> related DMA clients are updated.
 >
-> Thanks for sharing that. Okay, so clearly we have some cards that
-> don't supports polling with CMD13 when switching to HS mode.
-> One could of course add quirks for these kind of cards and do a fixed
-> delay for them, but then to find out which these cards are is going to
-> be hard.
->
-> It seems like we are left with using a fixed delay. Any ideas of what
-> such delay should be? And should we have one specific for switch to
-> the various speed modes and a different one that overrides the CMD6
-> generic timout, when it doesn't exist?
->
+> Signed-off-by: Sylwester Nawrocki <s.nawrocki@samsung.com>
 
-Replying to my own earlier response, as I believe the problem could
-also be related to another old commit, see below.
-
-commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
-Author: Seungwon Jeon <tgih.jun@samsung.com>
-Date:   Wed Sep 4 21:21:05 2013 +0900
-
-    mmc: add ignorance case for CMD13 CRC error
-
-    While speed mode is changed, CMD13 cannot be guaranteed.
-    According to the spec., it is not recommended to use CMD13
-    to check the busy completion of the timing change.
-    If CMD13 is used in this case, CRC error must be ignored.
-
-    Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-    Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-    Signed-off-by: Chris Ball <cjb@laptop.org>
-
-
-The intent with this commit was not really correct. We don't want to
-ignore CRC errors, but instead we should *re-try* sending CMD13 once
-we get a CRC error.
-
-Unfortunate since this commit, instead we tell the host driver to
-*ignore* CRC errors and instead reads the status and returns 0
-(indicating success). In the mmc core, in __mmc_switch(), it will thus
-parse the status reply, even for a reply that might have been received
-with a CRC error. Not good!
-
-I am wondering whether this actually is the main problem to why we
-think polling isn't working for some cases. And perhaps that was the
-original problem Chaotian was trying to solve?
-
-Thoughts?
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+> Changes since v1:
+>  - dma_request_chan() used instead of dma_request_slave_channel()
+>    for better error handling.
+>
+>  drivers/mmc/host/s3cmci.c | 15 ++++-----------
+>  1 file changed, 4 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+> index c531dee..932a4b1 100644
+> --- a/drivers/mmc/host/s3cmci.c
+> +++ b/drivers/mmc/host/s3cmci.c
+> @@ -28,7 +28,6 @@
+>  #include <mach/dma.h>
+>  #include <mach/gpio-samsung.h>
+>
+> -#include <linux/platform_data/dma-s3c24xx.h>
+>  #include <linux/platform_data/mmc-s3cmci.h>
+>
+>  #include "s3cmci.h"
+> @@ -1682,19 +1681,13 @@ static int s3cmci_probe(struct platform_device *pdev)
+>                 gpio_direction_input(host->pdata->gpio_wprotect);
+>         }
+>
+> -       /* depending on the dma state, get a dma channel to use. */
+> +       /* Depending on the dma state, get a DMA channel to use. */
+>
+>         if (s3cmci_host_usedma(host)) {
+> -               dma_cap_mask_t mask;
+> -
+> -               dma_cap_zero(mask);
+> -               dma_cap_set(DMA_SLAVE, mask);
+> -
+> -               host->dma = dma_request_slave_channel_compat(mask,
+> -                       s3c24xx_dma_filter, (void *)DMACH_SDI, &pdev->dev, "rx-tx");
+> -               if (!host->dma) {
+> +               host->dma = dma_request_chan(&pdev->dev, "rx-tx");
+> +               ret = PTR_ERR_OR_ZERO(host->dma);
+> +               if (ret) {
+>                         dev_err(&pdev->dev, "cannot get DMA channel.\n");
+> -                       ret = -EBUSY;
+>                         goto probe_free_gpio_wp;
+>                 }
+>         }
+> --
+> 1.9.1
+>
