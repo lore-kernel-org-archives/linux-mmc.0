@@ -1,74 +1,120 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: Re: [RFC v2 2/2] mmc: sdhci: Ignore capability register when it
- comes to speeds and use DT binding instead when sdhci-cap-speed-modes-broken
- is set.
-Date: Wed, 26 Oct 2016 17:28:12 -0500
-Message-ID: <20161026222811.GA24391@zach-desktop>
-References: <1477085715-30213-1-git-send-email-zach.brown@ni.com>
- <1477085715-30213-3-git-send-email-zach.brown@ni.com>
- <d4547457-036a-dbb7-ddb8-b839e04949b7@intel.com>
- <20161024154820.GA16144@zach-desktop>
- <d65f018e-b20e-9e87-fc07-eb2fb4b5079e@intel.com>
+From: "Y.B. Lu" <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [v12, 5/8] soc: fsl: add GUTS driver for QorIQ platforms
+Date: Thu, 27 Oct 2016 04:34:06 +0000
+Message-ID: <DB6PR0401MB25362658D117DF4D7B92FD48F8AA0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <1474441040-11946-1-git-send-email-yangbo.lu@nxp.com>
+	<1474441040-11946-6-git-send-email-yangbo.lu@nxp.com>
+	<1477501566.6812.9.camel@buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <d65f018e-b20e-9e87-fc07-eb2fb4b5079e@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1477501566.6812.9.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, "X.B. Xie" <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "M.H. Lian" <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>"linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <l>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Oct 25, 2016 at 02:30:25PM +0300, Adrian Hunter wrote:
-> On 24/10/16 18:48, Zach Brown wrote:
-> > On Mon, Oct 24, 2016 at 10:34:46AM +0300, Adrian Hunter wrote:
-> >> On 22/10/16 00:35, Zach Brown wrote:
-> >>> When the sdhci-cap-speed-modes-broken DT property is set, the driver
-> >>> will ignore the bits of the capability registers that correspond to
-> >>> speed modes.
-> >>>
-> >>> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> >>> ---
-> >>>  drivers/mmc/host/sdhci.c | 10 ++++++++++
-> >>>  1 file changed, 10 insertions(+)
-> >>>
-> >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >>> index 1e25b01..59c62d3 100644
-> >>> --- a/drivers/mmc/host/sdhci.c
-> >>> +++ b/drivers/mmc/host/sdhci.c
-> >>> @@ -22,6 +22,7 @@
-> >>>  #include <linux/scatterlist.h>
-> >>>  #include <linux/regulator/consumer.h>
-> >>>  #include <linux/pm_runtime.h>
-> >>> +#include <linux/of.h>
-> >>>
-> >>>  #include <linux/leds.h>
-> >>>
-> >>> @@ -3013,10 +3014,19 @@ void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
-> >>>
-> >>>  	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
-> >>>
-> >>> +	if (of_property_read_bool(mmc_dev(host->mmc)->of_node,
-> >>> +				  "sdhci-cap-speed-modes-broken"))
-> >>
-> >> It rather begs the question: if you are going to do something sdhci
-> >> specific, why not just read the whole of the caps register from DT?
-> >>
-> > 
-> > Throwing out the whole of the caps register seems like overkill. Also
-> 
-> What about 2 values: one for the 64-bit caps register and one for a 64-bit
-> mask of bits to override.  That way you can select which bits to override
-> and what to override them to.
-> 
-
-I like this idea. I sent a RFC of it. 
-
-> > there are some things set by the caps that are not available in the DT.
-> > For example, SDHCI_CAN_64BIT is set by the cap register and is used in
-> > sdhci_setup_host to set host->flags SDHCI_USE_64_BIT_DMA.
-> 
-> Not sure what you mean.
-> 
-
-Your suggestion addresses my concern. So it's not an issue. 
+SGkgU2NvdHQsDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTY290
+dCBXb29kIFttYWlsdG86b3NzQGJ1c2Vycm9yLm5ldF0NCj4gU2VudDogVGh1cnNkYXksIE9jdG9i
+ZXIgMjcsIDIwMTYgMTowNiBBTQ0KPiBUbzogWS5CLiBMdTsgbGludXgtbW1jQHZnZXIua2VybmVs
+Lm9yZzsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgQXJuZA0KPiBCZXJnbWFubg0KPiBDYzogbGlu
+dXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGRldmljZXRyZWVAdmdlci5rZXJuZWwub3JnOyBs
+aW51eC1hcm0tDQo+IGtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBsaW51eC1rZXJuZWxAdmdl
+ci5rZXJuZWwub3JnOyBsaW51eC0NCj4gY2xrQHZnZXIua2VybmVsLm9yZzsgbGludXgtaTJjQHZn
+ZXIua2VybmVsLm9yZzsgaW9tbXVAbGlzdHMubGludXgtDQo+IGZvdW5kYXRpb24ub3JnOyBuZXRk
+ZXZAdmdlci5rZXJuZWwub3JnOyBNYXJrIFJ1dGxhbmQ7IFJvYiBIZXJyaW5nOw0KPiBSdXNzZWxs
+IEtpbmc7IEpvY2hlbiBGcmllZHJpY2g7IEpvZXJnIFJvZWRlbDsgQ2xhdWRpdSBNYW5vaWw7IEJo
+dXBlc2gNCj4gU2hhcm1hOyBRaWFuZyBaaGFvOyBLdW1hciBHYWxhOyBTYW50b3NoIFNoaWxpbWth
+cjsgTGVvIExpOyBYLkIuIFhpZTsgTS5ILg0KPiBMaWFuDQo+IFN1YmplY3Q6IFJlOiBbdjEyLCA1
+LzhdIHNvYzogZnNsOiBhZGQgR1VUUyBkcml2ZXIgZm9yIFFvcklRIHBsYXRmb3Jtcw0KPiANCj4g
+T24gV2VkLCAyMDE2LTA5LTIxIGF0IDE0OjU3ICswODAwLCBZYW5nYm8gTHUgd3JvdGU6DQo+ID4g
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvc29jL2ZzbC9LY29uZmlnIGIvZHJpdmVycy9zb2MvZnNsL0tj
+b25maWcgbmV3DQo+ID4gZmlsZSBtb2RlIDEwMDY0NCBpbmRleCAwMDAwMDAwLi5iOTk3NjRjDQo+
+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL2RyaXZlcnMvc29jL2ZzbC9LY29uZmlnDQo+ID4g
+QEAgLTAsMCArMSwxOSBAQA0KPiA+ICsjDQo+ID4gKyMgRnJlZXNjYWxlIFNPQyBkcml2ZXJzDQo+
+ID4gKyMNCj4gPiArDQo+ID4gK3NvdXJjZSAiZHJpdmVycy9zb2MvZnNsL3FlL0tjb25maWciDQo+
+ID4gKw0KPiA+ICtjb25maWcgRlNMX0dVVFMNCj4gPiArCWJvb2wgIkZyZWVzY2FsZSBRb3JJUSBH
+VVRTIGRyaXZlciINCj4gPiArCXNlbGVjdCBTT0NfQlVTDQo+ID4gKwloZWxwDQo+ID4gKwnCoMKg
+VGhlIGdsb2JhbCB1dGlsaXRpZXMgYmxvY2sgY29udHJvbHMgcG93ZXIgbWFuYWdlbWVudCwgSS9P
+IGRldmljZQ0KPiA+ICsJwqDCoGVuYWJsaW5nLCBwb3dlci1vbnJlc2V0KFBPUikgY29uZmlndXJh
+dGlvbiBtb25pdG9yaW5nLCBhbHRlcm5hdGUNCj4gPiArCcKgwqBmdW5jdGlvbiBzZWxlY3Rpb24g
+Zm9yIG11bHRpcGxleGVkIHNpZ25hbHMsYW5kIGNsb2NrIGNvbnRyb2wuDQo+ID4gKwnCoMKgVGhp
+cyBkcml2ZXIgaXMgdG8gbWFuYWdlIGFuZCBhY2Nlc3MgZ2xvYmFsIHV0aWxpdGllcyBibG9jay4N
+Cj4gPiArCcKgwqBJbml0aWFsbHkgb25seSByZWFkaW5nIFNWUiBhbmQgcmVnaXN0ZXJpbmcgc29j
+IGRldmljZSBhcmUNCj4gPiBzdXBwb3J0ZWQuDQo+ID4gKwnCoMKgT3RoZXIgZ3V0cyBhY2Nlc3Nl
+cywgc3VjaCBhcyByZWFkaW5nIFJDVywgc2hvdWxkIGV2ZW50dWFsbHkgYmUNCj4gPiBtb3ZlZA0K
+PiA+ICsJwqDCoGludG8gdGhpcyBkcml2ZXIgYXMgd2VsbC4NCj4gPiArDQo+ID4gKwnCoMKgSWYg
+eW91IHdhbnQgR1VUUyBkcml2ZXIgc3VwcG9ydCwgeW91IHNob3VsZCBzYXkgWSBoZXJlLg0KPiAN
+Cj4gVGhpcyBpcyB1c2VyLWVuYWJsYWJsZSB3aXRob3V0IGRlcGVuZGVuY2llcywgd2hpY2ggbWVh
+bnMgaXQgd2lsbCBicmVhaw0KPiBzb21lIHJhbmRjb25maWdzLiDCoElmIHRoaXMgaXMgdG8gYmUg
+ZW5hYmxlZCB2aWEgc2VsZWN0IHRoZW4gcmVtb3ZlIHRoZQ0KPiB0ZXh0IGFmdGVyICJib29sIi4N
+Cg0KW0x1IFlhbmdiby1CNDcwOTNdIFdpbGwgZW5hYmxlIGl0IHZpYSBzZWxlY3QgYW5kIHJlbW92
+ZSB0ZXh0IGFmdGVyICdib29sJy4NCiANCj4gDQo+ID4gKy8qIFNvQyBkaWUgYXR0cmlidXRlIGRl
+ZmluaXRpb24gZm9yIFFvcklRIHBsYXRmb3JtICovIHN0YXRpYyBjb25zdA0KPiA+ICtzdHJ1Y3Qg
+ZnNsX3NvY19kaWVfYXR0ciBmc2xfc29jX2RpZVtdID0geyAjaWZkZWYgQ09ORklHX1BQQw0KPiA+
+ICsJLyoNCj4gPiArCcKgKiBQb3dlciBBcmNoaXRlY3R1cmUtYmFzZWQgU29DcyBUIFNlcmllcw0K
+PiA+ICsJwqAqLw0KPiA+ICsNCj4gPiArCS8qIERpZTogVDQyNDAsIFNvQzogVDQyNDAvVDQxNjAv
+VDQwODAgKi8NCj4gPiArCXsgLmRpZQkJPSAiVDQyNDAiLA0KPiA+ICsJwqDCoC5zdnIJCT0gMHg4
+MjQwMDAwMCwNCj4gPiArCcKgwqAubWFzawkJPSAweGZmZjAwMDAwLA0KPiA+ICsJfSwNCj4gPiAr
+CS8qIERpZTogVDEwNDAsIFNvQzogVDEwNDAvVDEwMjAvVDEwNDIvVDEwMjIgKi8NCj4gPiArCXsg
+LmRpZQkJPSAiVDEwNDAiLA0KPiA+ICsJwqDCoC5zdnIJCT0gMHg4NTIwMDAwMCwNCj4gPiArCcKg
+wqAubWFzawkJPSAweGZmZjAwMDAwLA0KPiA+ICsJfSwNCj4gPiArCS8qIERpZTogVDIwODAsIFNv
+QzogVDIwODAvVDIwODEgKi8NCj4gPiArCXsgLmRpZQkJPSAiVDIwODAiLA0KPiA+ICsJwqDCoC5z
+dnIJCT0gMHg4NTMwMDAwMCwNCj4gPiArCcKgwqAubWFzawkJPSAweGZmZjAwMDAwLA0KPiA+ICsJ
+fSwNCj4gPiArCS8qIERpZTogVDEwMjQsIFNvQzogVDEwMjQvVDEwMTQvVDEwMjMvVDEwMTMgKi8N
+Cj4gPiArCXsgLmRpZQkJPSAiVDEwMjQiLA0KPiA+ICsJwqDCoC5zdnIJCT0gMHg4NTQwMDAwMCwN
+Cj4gPiArCcKgwqAubWFzawkJPSAweGZmZjAwMDAwLA0KPiA+ICsJfSwNCj4gPiArI2VuZGlmIC8q
+IENPTkZJR19QUEMgKi8NCj4gPiArI2lmIGRlZmluZWQoQ09ORklHX0FSQ0hfTVhDKSB8fCBkZWZp
+bmVkKENPTkZJR19BUkNIX0xBWUVSU0NBUEUpDQo+IA0KPiBXaWxsIHRoaXMgZHJpdmVyIGV2ZXIg
+YmUgcHJvYmVkIG9uIE1YQz8gwqBXaHkgZG8gd2UgbmVlZCB0aGVzZSBpZmRlZnMgYXQNCj4gYWxs
+Pw0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gV2lsbCByZW1vdmUgdGhlbS4gSW4gdGhlIHByZXZpb3Vz
+IHZlcnNpb24sIHdlIHVzZSB0b28gbWFueSBtZW1iZXJzIGZvciBzb2MgZGVmaW5pdGlvbiwgc28g
+SSBhZGQgI2lmZGVmIGZvciBBUkNILiANCkNPTkZJR19BUkNIX01YQyB3YXMgZm9yIGxzMTAyMWEu
+DQoNCj4gDQo+IA0KPiA+ICsJLyoNCj4gPiArCcKgKiBBUk0tYmFzZWQgU29DcyBMUyBTZXJpZXMN
+Cj4gPiArCcKgKi8NCj4gPiArDQo+ID4gKwkvKiBEaWU6IExTMTA0M0EsIFNvQzogTFMxMDQzQS9M
+UzEwMjNBICovDQo+ID4gKwl7IC5kaWUJCT0gIkxTMTA0M0EiLA0KPiA+ICsJwqDCoC5zdnIJCT0g
+MHg4NzkyMDAwMCwNCj4gPiArCcKgwqAubWFzawkJPSAweGZmZmYwMDAwLA0KPiA+ICsJfSwNCj4g
+PiArCS8qIERpZTogTFMyMDgwQSwgU29DOiBMUzIwODBBL0xTMjA0MEEvTFMyMDg1QSAqLw0KPiA+
+ICsJeyAuZGllCQk9ICJMUzIwODBBIiwNCj4gPiArCcKgwqAuc3ZyCQk9IDB4ODcwMTAwMDAsDQo+
+ID4gKwnCoMKgLm1hc2sJCT0gMHhmZjNmMDAwMCwNCj4gPiArCX0sDQo+ID4gKwkvKiBEaWU6IExT
+MTA4OEEsIFNvQzogTFMxMDg4QS9MUzEwNDhBL0xTMTA4NEEvTFMxMDQ0QSAqLw0KPiA+ICsJeyAu
+ZGllCQk9ICJMUzEwODhBIiwNCj4gPiArCcKgwqAuc3ZyCQk9IDB4ODcwMzAwMDAsDQo+ID4gKwnC
+oMKgLm1hc2sJCT0gMHhmZjNmMDAwMCwNCj4gPiArCX0sDQo+ID4gKwkvKiBEaWU6IExTMTAxMkEs
+IFNvQzogTFMxMDEyQSAqLw0KPiA+ICsJeyAuZGllCQk9ICJMUzEwMTJBIiwNCj4gPiArCcKgwqAu
+c3ZyCQk9IDB4ODcwNDAwMDAsDQo+ID4gKwnCoMKgLm1hc2sJCT0gMHhmZmZmMDAwMCwNCj4gPiAr
+CX0sDQo+ID4gKwkvKiBEaWU6IExTMTA0NkEsIFNvQzogTFMxMDQ2QS9MUzEwMjZBICovDQo+ID4g
+Kwl7IC5kaWUJCT0gIkxTMTA0NkEiLA0KPiA+ICsJwqDCoC5zdnIJCT0gMHg4NzA3MDAwMCwNCj4g
+PiArCcKgwqAubWFzawkJPSAweGZmZmYwMDAwLA0KPiA+ICsJfSwNCj4gPiArCS8qIERpZTogTFMy
+MDg4QSwgU29DOiBMUzIwODhBL0xTMjA0OEEvTFMyMDg0QS9MUzIwNDRBICovDQo+ID4gKwl7IC5k
+aWUJCT0gIkxTMjA4OEEiLA0KPiA+ICsJwqDCoC5zdnIJCT0gMHg4NzA5MDAwMCwNCj4gPiArCcKg
+wqAubWFzawkJPSAweGZmM2YwMDAwLA0KPiA+ICsJfSwNCj4gPiArCS8qIERpZTogTFMxMDIxQSwg
+U29DOiBMUzEwMjFBL0xTMTAyMEEvTFMxMDIyQQ0KPiA+ICsJwqAqIE5vdGU6IFB1dCB0aGlzIGRp
+ZSBhdCB0aGUgZW5kIGluIGNhdXNlIG9mIGluY29ycmVjdA0KPiA+IGlkZW50aWZpY2F0aW9uDQo+
+ID4gKwnCoCovDQo+ID4gKwl7IC5kaWUJCT0gIkxTMTAyMUEiLA0KPiA+ICsJwqDCoC5zdnIJCT0g
+MHg4NzAwMDAwMCwNCj4gPiArCcKgwqAubWFzawkJPSAweGZmZjAwMDAwLA0KPiA+ICsJfSwNCj4g
+PiArI2VuZGlmIC8qIENPTkZJR19BUkNIX01YQyB8fCBDT05GSUdfQVJDSF9MQVlFUlNDQVBFICov
+DQo+IA0KPiBJbnN0ZWFkIG9mIHJlbHlpbmcgb24gb3JkZXJpbmcsIGFkZCBtb3JlIGJpdHMgdG8g
+dGhlIG1hc2sgc28gdGhhdCB0aGVyZSdzDQo+IG5vIG92ZXJsYXAuIMKgSSB0aGluayAweGZmZjcw
+MDAwIHdvdWxkIHdvcmsuDQoNCltMdSBZYW5nYm8tQjQ3MDkzXSBPaywgV2lsbCBkbyB0aGF0LiBU
+aGVuIHdlIGFkZCAzIGJpdHMgb2YgJ1ZhcmlvdXMgUGVyc29uYWxpdGllcycgZmllbGQgZm9yIGxz
+MTAyMWEgZGllIGlkZW50aWZpY2F0aW9uLg0KDQo+IA0KPiA+ICtvdXQ6DQo+ID4gKwlrZnJlZShz
+b2NfZGV2X2F0dHIubWFjaGluZSk7DQo+ID4gKwlrZnJlZShzb2NfZGV2X2F0dHIuZmFtaWx5KTsN
+Cj4gPiArCWtmcmVlKHNvY19kZXZfYXR0ci5zb2NfaWQpOw0KPiA+ICsJa2ZyZWUoc29jX2Rldl9h
+dHRyLnJldmlzaW9uKTsNCj4gPiArCWlvdW5tYXAoZ3V0cy0+cmVncyk7DQo+ID4gK291dF9mcmVl
+Og0KPiA+ICsJa2ZyZWUoZ3V0cyk7DQo+ID4gKwlyZXR1cm4gcmV0Ow0KPiA+ICt9DQo+IA0KPiBQ
+bGVhc2UgdXNlIGRldm0uDQoNCltMdSBZYW5nYm8tQjQ3MDkzXSBTb3JyeSBmb3IgZm9yZ2V0dGlu
+ZyB0aGlzLiBXaWxsIGRvIHRoYXQgYW5kIHNlbmQgb3V0IHRoZSBuZXcgdmVyc2lvbiBzb29uLg0K
+VGhhbmtzIGZvciB5b3VyIGNvbW1lbnRzLg0KDQo+IA0KPiAtU2NvdHQNCg0KX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KaW9tbXUgbWFpbGluZyBsaXN0Cmlv
+bW11QGxpc3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0dHBzOi8vbGlzdHMubGludXhmb3VuZGF0
+aW9uLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2lvbW11
