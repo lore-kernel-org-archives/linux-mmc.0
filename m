@@ -1,81 +1,138 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 0/8] Attempt to clean up BUG_ONs for mmc-tree
-Date: Thu, 27 Oct 2016 10:19:20 +0200
-Message-ID: <CAPDyKFpARgjvxAaYDNTSSGL9gFJT6YBj1cRM9JSHGOF9sFuYbw@mail.gmail.com>
-References: <1476792192-6265-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: Regression after "do not use CMD13 to get status after speed mode switch"
+Date: Thu, 27 Oct 2016 12:04:09 +0200
+Message-ID: <CAPDyKFpQn+Es6RwiYp319B1KcUduQ_fa2ou6V_2TrQhEsgV4Jw@mail.gmail.com>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+ <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
+ <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com> <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
+ <1476930167.11050.4.camel@mhfsdcap03> <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:37905 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754953AbcJ0N66 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 09:58:58 -0400
-Received: by mail-wm0-f49.google.com with SMTP id n67so44403620wme.1
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2016 06:58:56 -0700 (PDT)
-In-Reply-To: <1476792192-6265-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:35083 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936594AbcJ0OUm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 10:20:42 -0400
+Received: by mail-wm0-f53.google.com with SMTP id e69so37937683wmg.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2016 07:19:24 -0700 (PDT)
+In-Reply-To: <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-On 18 October 2016 at 14:03, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On 20 October 2016 at 09:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+>> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
+>>> Adrian, Linus,
+>>>
+>>> Thanks for looking into this and reporting!
+>>>
+>>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> > On 18/10/16 11:36, Linus Walleij wrote:
+>>> >> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+>>> >>
+>>> >>> Before this patch the eMMC is detected and all partitions enumerated
+>>> >>> immediately, but after the patch it doesn't come up at all, except
+>>> >>> sometimes, when it appears minutes (!) after boot, all of a sudden.
+>>> >>
+>>> >> FYI this is what it looks like when it eventually happens:
+>>> >> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+>>> >> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+>>> >> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+>>> >> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+>>> >> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+>>> >> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+>>> >> p14 p15 p16 p17 p18 p19 p20 p21 >
+>>> >>
+>>> >> So after 627 seconds, a bit hard for users to wait this long for their
+>>> >> root filesystem.
+>>> >
+>>> > If the driver does not support busy detection and the eMMC card provides
+>>> > zero as the cmd6 generic timeout (which it may especially as cmd6 generic
+>>> > timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
+>>> > waiting 10 minutes i.e.
+>>> >
+>>> > #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
+>>>
+>>> Urgh! Yes, I have verified that this is exactly what happens.
+>>>
+>>> >
+>>> > So removal of CMD13 polling for HS mode (as per commit
+>>> > 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
+>>> > combinations of eMMC cards and host drivers.
+>>>
+>>> I was looking in the __mmc_switch() function, it's just a pain to walk
+>>> trough it :-) So first out I decided to clean it up and factor out the
+>>> polling parts. I will post the patches first out tomorrow morning,
+>>> running some final test right now.
+>>>
+>>> Although, that of course doesn't solve our problem. As I see it we
+>>> only have a few options here.
+>>>
+>>> 1) In case when cmd6 generic timeout isn't available, let's assign
+>>> another empirically selected value.
+>>> 2) Use a specific timeout when switching to HS mode.
+>>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
+>>> with CMD13 for switching to HS mode - unless it causes issues for some
+>>> cards/drivers combination?
+>>>
+>>> BTW, I already tried 2) and it indeed solves the problem, although
+>>> depending on the selected timeout, it might delay the card detection
+>>> to process.
+>>>
+>>> Thoughts?
+>>
+>> I just have a try of switching to HS mode with Hynix EMMC, the first
+>> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
+>> that CMD13 cannot indicate current card status in this case.
 >
-> We have already removed some BUG_ONs recently[0][1], however there
-> are still many pointless BUG_ONs for mmc core. So this patchset is
-> going on removing these BUG_ONs from drivers/mmc/core/* and drivers/mmc/card/*.
-> It is also possible for us to remove it from drivers/mmc/host/* in the future.
+> Thanks for sharing that. Okay, so clearly we have some cards that
+> don't supports polling with CMD13 when switching to HS mode.
+> One could of course add quirks for these kind of cards and do a fixed
+> delay for them, but then to find out which these cards are is going to
+> be hard.
 >
-> No functional changes intented in theory, except for adding some error
-> handle, but I held it for a while in order to test it fully and decided
-> to send it after the merge window of 4.9.
+> It seems like we are left with using a fixed delay. Any ideas of what
+> such delay should be? And should we have one specific for switch to
+> the various speed modes and a different one that overrides the CMD6
+> generic timout, when it doesn't exist?
 >
-> Please review and comment. :)
 
-I have reviewed patch 1, patch 2 and patch 3. I think you can follow a
-pattern for my review comment, which means the similar comments are
-applicable the rest of series as well. Please have a look to see what
-you think and perhaps re-spin this.
+Replying to my own earlier response, as I believe the problem could
+also be related to another old commit, see below.
 
-Thanks for working on this clean-up!
+commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
+Author: Seungwon Jeon <tgih.jun@samsung.com>
+Date:   Wed Sep 4 21:21:05 2013 +0900
+
+    mmc: add ignorance case for CMD13 CRC error
+
+    While speed mode is changed, CMD13 cannot be guaranteed.
+    According to the spec., it is not recommended to use CMD13
+    to check the busy completion of the timing change.
+    If CMD13 is used in this case, CRC error must be ignored.
+
+    Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+    Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+    Signed-off-by: Chris Ball <cjb@laptop.org>
+
+
+The intent with this commit was not really correct. We don't want to
+ignore CRC errors, but instead we should *re-try* sending CMD13 once
+we get a CRC error.
+
+Unfortunate since this commit, instead we tell the host driver to
+*ignore* CRC errors and instead reads the status and returns 0
+(indicating success). In the mmc core, in __mmc_switch(), it will thus
+parse the status reply, even for a reply that might have been received
+with a CRC error. Not good!
+
+I am wondering whether this actually is the main problem to why we
+think polling isn't working for some cases. And perhaps that was the
+original problem Chaotian was trying to solve?
+
+Thoughts?
 
 Kind regards
 Uffe
-
->
-> [0]: https://patchwork.kernel.org/patch/9300739/
-> [1]: https://patchwork.kernel.org/patch/9300741/
->
->
->
-> Shawn Lin (8):
->   mmc: core: remove BUG_ONs from sdio
->   mmc: debugfs: remove BUG_ON from mmc_ext_csd_open
->   mmc: core: remove BUG_ONs from mmc
->   mmc: core: remove BUG_ONs from sd
->   mmc: core: remove BUG_ONs from core.c
->   mmc: sdio_uart: remove meaningless BUG_ON
->   mmc: queue: remove BUG_ON for bounce_sg
->   mmc: mmc_test: remove BUG_ONs and deploy error handling
->
->  drivers/mmc/card/mmc_test.c  | 12 ++++++++----
->  drivers/mmc/card/queue.c     |  2 --
->  drivers/mmc/card/sdio_uart.c |  2 --
->  drivers/mmc/core/core.c      | 40 ++++++++++++++--------------------------
->  drivers/mmc/core/debugfs.c   |  6 +++++-
->  drivers/mmc/core/mmc.c       | 24 ++++++++++++++----------
->  drivers/mmc/core/mmc_ops.c   | 20 ++++++--------------
->  drivers/mmc/core/sd.c        | 20 +++++++++-----------
->  drivers/mmc/core/sd_ops.c    | 30 ++++++++++--------------------
->  drivers/mmc/core/sdio.c      | 26 ++++++++++++++------------
->  drivers/mmc/core/sdio_cis.c  |  3 ++-
->  drivers/mmc/core/sdio_irq.c  | 12 +++++++-----
->  12 files changed, 89 insertions(+), 108 deletions(-)
->
-> --
-> 2.3.7
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
