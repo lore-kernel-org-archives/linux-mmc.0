@@ -1,39 +1,63 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH 1/2] mmc: mxs: Initialize the spinlock prior to using it
-Date: Thu, 27 Oct 2016 21:56:54 +0200
-Message-ID: <dc072f0b-fa8b-0bab-f8f7-eab1376a424e@denx.de>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH 2/2] mmc: mxs: Use the spinlock irq variants
+Date: Fri, 28 Oct 2016 10:23:10 +0800
+Message-ID: <20161028102310.5190d3c7@xhacker>
 References: <1477594672-31611-1-git-send-email-festevam@gmail.com>
- <15d2f274-f1a2-d657-59d0-863be475eae8@denx.de>
- <CAOMZO5A7CS-Q8FJmkJw3xy9SsF_9mLR=r77j8Kk5=5bPaWgV4A@mail.gmail.com>
+        <1477594672-31611-2-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:36151 "EHLO
-        mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933171AbcJ0T5B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 15:57:01 -0400
-In-Reply-To: <CAOMZO5A7CS-Q8FJmkJw3xy9SsF_9mLR=r77j8Kk5=5bPaWgV4A@mail.gmail.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:39820 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S938630AbcJ1C1v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2016 22:27:51 -0400
+In-Reply-To: <1477594672-31611-2-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Fabio Estevam <festevam@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <fabio.estevam@nxp.com>
+Cc: ulf.hansson@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, stefan.wahren@i2se.com, marex@denx.de, Fabio Estevam <fabio.estevam@nxp.com>
 
-On 10/27/2016 09:17 PM, Fabio Estevam wrote:
-> Hi Marek,
-> 
-> On Thu, Oct 27, 2016 at 5:06 PM, Marek Vasut <marex@denx.de> wrote:
-> 
->> Nice, thanks.
->>
->> Could you also check whether you can disable and clear interrupts in the
->> probe routine ? I think that might make sense too.
-> 
-> Yes, that's a good idea. I will look into that after Ulf applies this
-> series. Thanks
-> 
-Cool, thanks!
+On Thu, 27 Oct 2016 16:57:52 -0200 Fabio Estevam wrote:
 
--- 
-Best regards,
-Marek Vasut
+> From: Fabio Estevam <fabio.estevam@nxp.com>
+> 
+> Inside an interrupt handler we should use the spin_lock_irqsave()/
+> spin_unlock_irqrestore() variants, so fix it accordingly.
+
+hmm, in interrupt handler the irq is disabled, so IMHO there's no need to
+use irqsave/irqrestore spinlock variants.
+
+Thanks,
+Jisheng
+
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
+> ---
+>  drivers/mmc/host/mxs-mmc.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 44ecebd..14b7548 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -189,15 +189,16 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void *dev_id)
+>  	struct mmc_command *cmd = host->cmd;
+>  	struct mmc_data *data = host->data;
+>  	struct mxs_ssp *ssp = &host->ssp;
+> +	unsigned long flags;
+>  	u32 stat;
+>  
+> -	spin_lock(&host->lock);
+> +	spin_lock_irqsave(&host->lock, flags);
+>  
+>  	stat = readl(ssp->base + HW_SSP_CTRL1(ssp));
+>  	writel(stat & MXS_MMC_IRQ_BITS,
+>  	       ssp->base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_CLR);
+>  
+> -	spin_unlock(&host->lock);
+> +	spin_unlock_irqrestore(&host->lock, flags);
+>  
+>  	if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
+>  		mmc_signal_sdio_irq(host->mmc);
+
