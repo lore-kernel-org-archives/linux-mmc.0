@@ -1,101 +1,79 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 5/5] mmc: dw: Add fifo watermark quirk
-Date: Fri, 28 Oct 2016 14:30:13 +0900
-Message-ID: <739e77cb-c873-569c-a812-24fa752b41b0@samsung.com>
-References: <1477622229-32060-1-git-send-email-jun.nie@linaro.org>
- <CGME20161028024043epcas1p219cba1c30aa9eb8a4d149b799565fba5@epcas1p2.samsung.com>
- <1477622229-32060-6-git-send-email-jun.nie@linaro.org>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: [v14, 0/8] Fix eSDHC host version register bug
+Date: Fri, 28 Oct 2016 13:45:13 +0800
+Message-ID: <1477633521-7391-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:60676 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750807AbcJ1FaR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2016 01:30:17 -0400
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OFQ00FB1SMDBX60@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 28 Oct 2016 14:30:13 +0900 (KST)
-In-reply-to: <1477622229-32060-6-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Minghuan Lian <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jun Nie <jun.nie@linaro.org>, shawn.guo@linaro.org, xie.baoyou@zte.com.cn
-Cc: ulf.hansson@linaro.org, jason.liu@linaro.org, linux-mmc@vger.kernel.org
 
-On 10/28/2016 11:37 AM, Jun Nie wrote:
-> Data done irq is expected if data length is less than
-> watermark in PIO mode. But fifo watermark is requested
-> to be aligned with data length in some SoC so that TX/RX
-> irq can be generated with data done irq. Add the
-> watermark quirk to mark this requirement and force
-> fifo watermark setting accordingly.
-> 
-> Signed-off-by: Jun Nie <jun.nie@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  | 11 +++++++++--
->  include/linux/mmc/dw_mmc.h |  2 ++
->  2 files changed, 11 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 24ae05b6..e0f49cc 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1111,11 +1111,15 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
->  		mci_writel(host, CTRL, temp);
->  
->  		/*
-> -		 * Use the initial fifoth_val for PIO mode.
-> +		 * Use the initial fifoth_val for PIO mode. If wm_quirk
-> +		 * is set, we set watermark same as data size.
->  		 * If next issued data may be transfered by DMA mode,
->  		 * prev_blksz should be invalidated.
->  		 */
-> -		mci_writel(host, FIFOTH, host->fifoth_val);
-> +		if (host->wm_quirk)
-> +			dw_mci_adjust_fifoth(host, data);
-> +		else
-> +			mci_writel(host, FIFOTH, host->fifoth_val);
->  		host->prev_blksz = 0;
->  	} else {
->  		/*
-> @@ -2957,6 +2961,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  
->  	of_property_read_u32(np, "fifo-addr", &host->fifo_addr_override);
->  
-> +	if (of_get_property(np, "fifo-watermark-quirk", NULL))
-> +		host->wm_quirk = true;
-> +
->  	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
->  		pdata->bus_hz = clock_frequency;
->  
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 4866ef5..2ccfd9c 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -108,6 +108,7 @@ struct dw_mci_dma_slave {
->   * @slot: Slots sharing this MMC controller.
->   * @fifo_depth: depth of FIFO.
->   * @fifo_addr_override: override fifo reg offset with this value.
-> + * @wm_quirk: force fifo watermark equal with data length in PIO mode.
+This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+eSDHC controller. To match the SoC version and revision, 10 previous version
+patchsets had tried many methods but all of them were rejected by reviewers.
+Such as
+	- dts compatible method
+	- syscon method
+	- ifdef PPC method
+	- GUTS driver getting SVR method
+Anrd suggested a soc_device_match method in v10, and this is the only available
+method left now. This v11 patchset introduces the soc_device_match interface in
+soc driver.
 
-quirk...hmm..It might be just my preference..
-quirk looks like workaround...so how about changing other name?
+The first six patches of Yangbo are to add the GUTS driver. This is used to
+register a soc device which contain soc version and revision information.
+The other two patches introduce the soc_device_match method in soc driver
+and apply it on esdhc driver to fix this bug.
 
->   * @data_shift: log2 of FIFO item size.
->   * @part_buf_start: Start index in part_buf.
->   * @part_buf_count: Bytes of partial data in part_buf.
-> @@ -156,6 +157,7 @@ struct dw_mci {
->  	void __iomem		*regs;
->  	void __iomem		*fifo_reg;
->  	u32			fifo_addr_override;
-> +	u32			wm_quirk;
+Arnd Bergmann (1):
+  base: soc: introduce soc_device_match() interface
 
-For True or false, u32?
+Yangbo Lu (7):
+  dt: bindings: update Freescale DCFG compatible
+  ARM64: dts: ls2080a: add device configuration node
+  dt: bindings: move guts devicetree doc out of powerpc directory
+  powerpc/fsl: move mpc85xx.h to include/linux/fsl
+  soc: fsl: add GUTS driver for QorIQ platforms
+  MAINTAINERS: add entry for Freescale SoC drivers
+  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
 
->  
->  	struct scatterlist	*sg;
->  	struct sg_mapping_iter	sg_miter;
-> 
+ Documentation/devicetree/bindings/arm/fsl.txt      |   6 +-
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ MAINTAINERS                                        |  11 +-
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+ arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+ arch/powerpc/sysdev/fsl_pci.c                      |   2 +-
+ drivers/base/Kconfig                               |   1 +
+ drivers/base/soc.c                                 |  66 ++++++
+ drivers/clk/clk-qoriq.c                            |   3 +-
+ drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+ drivers/iommu/fsl_pamu.c                           |   3 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  20 ++
+ drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+ drivers/soc/Kconfig                                |   3 +-
+ drivers/soc/fsl/Kconfig                            |  18 ++
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 238 +++++++++++++++++++++
+ include/linux/fsl/guts.h                           | 125 ++++++-----
+ .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+ include/linux/sys_soc.h                            |   3 +
+ 21 files changed, 458 insertions(+), 62 deletions(-)
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
+ rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
 
+-- 
+2.1.0.27.g96db324
