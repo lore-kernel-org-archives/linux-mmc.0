@@ -1,417 +1,102 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 2/5] mmc: zx: Initial support for ZX mmc controller
-Date: Fri, 28 Oct 2016 14:16:06 +0900
-Message-ID: <331dab06-72d2-d382-f46b-04c2a85b70d1@samsung.com>
+Subject: Re: [PATCH v2 4/5] mmc: dw: Add fifo address property
+Date: Fri, 28 Oct 2016 14:24:40 +0900
+Message-ID: <bc49c0a3-5159-03a2-0023-e32f2dbbf956@samsung.com>
 References: <1477622229-32060-1-git-send-email-jun.nie@linaro.org>
- <CGME20161028023910epcas1p1bb1402ed0abeea9507a77ae70cb49c8b@epcas1p1.samsung.com>
- <1477622229-32060-3-git-send-email-jun.nie@linaro.org>
+ <CGME20161028023953epcas1p3f5326dbfb7cd501916ebe936316841a3@epcas1p3.samsung.com>
+ <1477622229-32060-5-git-send-email-jun.nie@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:39102 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751401AbcJ1FQQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2016 01:16:16 -0400
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout3.samsung.com
+Received: from mailout2.samsung.com ([203.254.224.25]:59078 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751401AbcJ1FYm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2016 01:24:42 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OFQ01ZPBRYS4W50@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 28 Oct 2016 14:16:06 +0900 (KST)
-In-reply-to: <1477622229-32060-3-git-send-email-jun.nie@linaro.org>
+ with ESMTP id <0OFQ00FVNSCXBX50@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 28 Oct 2016 14:24:40 +0900 (KST)
+In-reply-to: <1477622229-32060-5-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jun Nie <jun.nie@linaro.org>, shawn.guo@linaro.org, xie.baoyou@zte.com.cn
 Cc: ulf.hansson@linaro.org, jason.liu@linaro.org, linux-mmc@vger.kernel.org
 
 On 10/28/2016 11:37 AM, Jun Nie wrote:
-> This platform driver adds initial support for the DW host controller
-> found on ZTE SoCs.
-> 
-> It has been tested on ZX296718 EVB board currently. More support on
-> timing tuning will be added when hardware is available.
+> The FIFO address may break default address assumption of 0x100
+> (version < 0x240A) and 0x200(version >= 0x240A) in current driver.
+> The new property is introduced to override fifo address via DT
+> node information.
 > 
 > Signed-off-by: Jun Nie <jun.nie@linaro.org>
 > ---
->  drivers/mmc/host/Kconfig     |   9 ++
->  drivers/mmc/host/Makefile    |   1 +
->  drivers/mmc/host/dw_mmc-zx.c | 230 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc-zx.h |  23 +++++
->  4 files changed, 263 insertions(+)
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.c
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.h
+>  drivers/mmc/host/dw_mmc.c  | 5 +++++
+>  include/linux/mmc/dw_mmc.h | 2 ++
+>  2 files changed, 7 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5274f50..2b3202c 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -662,6 +662,15 @@ config MMC_DW_ROCKCHIP
->  	  Synopsys DesignWare Memory Card Interface driver. Select this option
->  	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1c9ee36..24ae05b6 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2955,6 +2955,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
 >  
-> +config MMC_DW_ZX
-> +	tristate "ZTE specific extensions for Synopsys DW Memory Card Interface"
-> +	depends on MMC_DW
-
-I guess MMC_DW_ZX depends on your SoC config, doesn't?
-
-> +	select MMC_DW_PLTFM
-> +	help
-> +	  This selects support for ZTE SoC specific extensions to the
-> +	  Synopsys DesignWare Memory Card Interface driver. Select this option
-> +	  for platforms based on ZX296718 SoC's.
+>  	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+>  
+> +	of_property_read_u32(np, "fifo-addr", &host->fifo_addr_override);
 > +
->  config MMC_SH_MMCIF
->  	tristate "SuperH Internal MMCIF support"
->  	depends on HAS_DMA
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index e2bdaaf..9766143 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -48,6 +48,7 @@ obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
->  obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
->  obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
->  obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
-> +obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
->  obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
->  obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
->  obj-$(CONFIG_MMC_VUB300)	+= vub300.o
-> diff --git a/drivers/mmc/host/dw_mmc-zx.c b/drivers/mmc/host/dw_mmc-zx.c
-> new file mode 100644
-> index 0000000..0404f8e
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-zx.c
-> @@ -0,0 +1,230 @@
-> +/*
-> + * ZX Specific Extensions for Synopsys DW Multimedia Card Interface driver
-> + *
-> + * Copyright (C) 2016, Linaro Ltd.
-> + * Copyright (C) 2016, ZTE Corp.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#include <linux/clk.h>
-> +#include <linux/mfd/syscon.h>
-> +#include <linux/mmc/dw_mmc.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
-> +#include <linux/regmap.h>
-> +#include <linux/slab.h>
-> +
-> +#include "dw_mmc.h"
-> +#include "dw_mmc-pltfm.h"
-> +#include "dw_mmc-zx.h"
-> +
-> +#define ZX_DLL_LOCKED BIT(2)
-
-Some DLL rigsters and bits are defined in dw_mmc-zx.h.
-why defined ZX_DLL_LOCKED at here.
-
-You can choose that all defines locates to dw_mmc-zx.c or dw_mmc-zx.h
-
-> +
-> +struct dw_mci_zx_priv_data {
-> +	struct regmap	*sysc_base;
-> +};
-> +
-> +static int dw_mci_zx_emmc_set_delay(struct dw_mci *host, unsigned int delay,
-> +				    unsigned int clk_flag)
-
-Why do you use "unsigned int" as clk_flag? It's just use one of 0 and 1.
-And 0 and 1 are what means? On/Off?
-
-> +{
-> +	struct dw_mci_zx_priv_data *priv = host->priv;
-> +	struct regmap *sysc_base = priv->sysc_base;
-> +	unsigned int clksel;
-> +	unsigned int loop = 1000;
-> +	int ret;
+>  	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+>  		pdata->bus_hz = clock_frequency;
+>  
+> @@ -3163,6 +3165,9 @@ int dw_mci_probe(struct dw_mci *host)
+>  	else
+>  		host->fifo_reg = host->regs + DATA_240A_OFFSET;
+>  
+> +	if (host->fifo_addr_override)
+> +		host->fifo_reg = host->regs + host->fifo_addr_override;
 > +
 
-priv->sysc_base doesn't never NULL?
+Check condition the sequentially.
 
-> +	ret = regmap_write(sysc_base, LB_AON_EMMC_CFG_REG0,
-> +			   PARA_DLL_START_POINT(4) | PARA_DLL_LOCK_NUM(4));
+if (host->fifo_addr_override) {
+...
+} else if (host->verid < DW_MMC_240A) {
+..
+} else {
+..
+}
 
-Could you add the comment for controlling this regs?
-I'm not sure because i didn't have ZX TRM..but PARA_DLL_LOCK_NUM should be locked?
+how about?
 
-It doesn't affect to other bit?
-I think you can use the regmap_update_bits instead of regmap_write.
+>  	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+>  	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+>  			       host->irq_flags, "dw-mci", host);
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index f5af2bd..4866ef5 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -107,6 +107,7 @@ struct dw_mci_dma_slave {
+>   * @ciu_clk: Pointer to card interface unit clock instance.
+>   * @slot: Slots sharing this MMC controller.
+>   * @fifo_depth: depth of FIFO.
+> + * @fifo_addr_override: override fifo reg offset with this value.
 
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG1, &clksel);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (clk_flag) {
-> +		clksel &= ~(CLK_SAMP_DELAY(0x7F));
-
-It's meaningless..CLK_SAMP_DELAY used only at here.
-CLK_SAMP_DELAY ((x) & 0x7F << 0)
-
-It's just CLK_SAMP_DELAY_MASK.?
-
-#define CLK_SAMP_DELAY_MASK (0x7F << 0)
-clksel &= ~CLK_SAMP_DELAY_MASK;
-
-
-> +		clksel |= (delay << 8);
-
-Use the CLK_SAMP_DELAY_SHIFT instead of 8.
-
-> +	} else {
-> +		clksel &= ~(READ_DQS_DELAY(0x7F));
-
-Ditto.
-And i think it also can be changed to regmap_update_bits.
-
-> +		clksel |= delay;
-> +	}
-> +
-> +	regmap_write(sysc_base, LB_AON_EMMC_CFG_REG1, clksel);
-> +	regmap_write(sysc_base, LB_AON_EMMC_CFG_REG0,
-> +		     PARA_DLL_START_POINT(4) | PARA_DLL_LOCK_NUM(4) |
-> +		     DLL_REG_SET);
-
-regmap_update_bits?
-
-> +
-> +	do {
-> +		ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG2, &clksel);
-> +		if (ret)
-> +			return ret;
-> +
-> +	} while (--loop && !(clksel & ZX_DLL_LOCKED));
-> +
-> +	if (!loop) {
-> +		dev_err(host->dev, "Error: %s dll lock fail\n", __func__);
-> +		return -EIO;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_zx_emmc_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-> +{
-> +	struct dw_mci *host = slot->host;
-> +	struct mmc_host *mmc = slot->mmc;
-> +	int len, start = 0, end = 0, delay, best = 0;
-> +	int ret = 0;
-> +
-> +	for (delay = 1 ; delay < 128; delay++) {
-> +		ret = dw_mci_zx_emmc_set_delay(host, delay, 1);
-> +		if (ret)
-> +			return ret;
-
-When it's failed, just returned.
-Doesn't need to try with next delay value?
-
-> +
-> +		if (mmc_send_tuning(mmc, opcode, NULL)) {
-> +			if (start >= 0) {
-> +				end = delay - 1;
-> +				/* check and update longest good range */
-> +				if ((end - start) > len) {
-> +					best = (start + end) >> 1;
-> +					len = end - start;
-> +				}
-> +			}
-> +			start = -1;
-> +			end = 0;
-> +			continue;
-> +		}
-> +		if (start < 0)
-> +			start = delay;
-> +	}
-> +
-> +	if (start >= 0) {
-> +		end = delay - 1;
-> +		if ((end - start) > len) {
-> +			best = (start + end) >> 1;
-> +			len = end - start;
-> +		}
-> +	}
-> +	if (best < 0)
-> +		return -EIO;
-> +
-> +	dev_info(host->dev, "%s best range: start %d end %d\n", __func__,
-> +		 start, end);
-> +	dw_mci_zx_emmc_set_delay(host, best, 1);
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_zx_prepare_hs400_tuning(struct dw_mci *host,
-> +					  struct mmc_ios *ios)
-> +{
-> +	int ret;
-> +
-> +	/* config phase shift 90 */
-> +	ret = dw_mci_zx_emmc_set_delay(host, 32, 0);
-
-It's always fixed to 32? What means 32?
-
-> +	if (ret < 0)
-> +		return -EIO;
-> +
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_zx_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-> +{
-> +	struct dw_mci *host = slot->host;
-> +
-> +	if (host->verid == 0x290a) /* emmc */
-> +		return dw_mci_zx_emmc_execute_tuning(slot, opcode);
-
-I didn't know why you check host->verid is 2.90a..
-Is there any reason?
-
-> +
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_zx_parse_dt(struct dw_mci *host)
-> +{
-> +	struct device_node *np = host->dev->of_node;
-> +	struct device_node *node;
-> +	struct dw_mci_zx_priv_data *priv;
-> +	struct regmap *sysc_base;
-> +	int ret;
-> +
-> +	node = of_parse_phandle(np, "zte,aon-syscon", 0);
-> +	if (node) {
-> +		sysc_base = syscon_node_to_regmap(node);
-> +		of_node_put(node);
-
-Use the syscon_regmap_lookup_by_phandle(). It's same behavior.
-
-> +
-> +		if (IS_ERR(sysc_base)) {
-> +			ret = PTR_ERR(sysc_base);
-> +			if (ret != -EPROBE_DEFER)
-> +				dev_err(host->dev, "Can't get syscon: %d\n",
-> +					ret);
-> +			return ret;
-> +		}
-> +	}
-> +
-> +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> +	if (!priv)
-> +		return -ENOMEM;
-> +	priv->sysc_base = sysc_base;
-
-Is there no case that sysc_base is NULL?
-
-> +	host->priv = priv;
-> +
-> +	return 0;
-> +}
-> +
-> +static unsigned long zx_dwmmc_caps[3] = {
-> +	MMC_CAP_CMD23,
-> +	MMC_CAP_CMD23,
-> +	MMC_CAP_CMD23,
-> +};
-> +
-> +static const struct dw_mci_drv_data zx_drv_data = {
-> +	.caps			= zx_dwmmc_caps,
-> +	.execute_tuning		= dw_mci_zx_execute_tuning,
-> +	.prepare_hs400_tuning	= dw_mci_zx_prepare_hs400_tuning,
-> +	.parse_dt               = dw_mci_zx_parse_dt,
-> +};
-> +
-> +static const struct of_device_id dw_mci_zx_match[] = {
-> +	{ .compatible = "zte,dw-mshc", .data = &zx_drv_data},
-> +};
-> +MODULE_DEVICE_TABLE(of, dw_mci_zx_match);
-> +
-> +static int dw_mci_zx_probe(struct platform_device *pdev)
-> +{
-> +	const struct dw_mci_drv_data *drv_data;
-> +	const struct of_device_id *match;
-> +
-> +	match = of_match_node(dw_mci_zx_match, pdev->dev.of_node);
-> +	drv_data = match->data;
-> +
-> +	return dw_mci_pltfm_register(pdev, drv_data);
-> +}
-> +
-> +static const struct dev_pm_ops dw_mci_zx_dev_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +				pm_runtime_force_resume)
-> +	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
-> +			   dw_mci_runtime_resume,
-> +			   NULL)
-> +};
-> +
-> +static struct platform_driver dw_mci_zx_pltfm_driver = {
-> +	.probe		= dw_mci_zx_probe,
-> +	.remove		= dw_mci_pltfm_remove,
-> +	.driver		= {
-> +		.name		= "dwmmc_zx",
-> +		.of_match_table	= dw_mci_zx_match,
-> +		.pm		= &dw_mci_zx_dev_pm_ops,
-> +	},
-> +};
-> +
-> +module_platform_driver(dw_mci_zx_pltfm_driver);
-> +
-> +MODULE_DESCRIPTION("ZTE emmc/sd driver");
-> +MODULE_LICENSE("GPL v2");
-> diff --git a/drivers/mmc/host/dw_mmc-zx.h b/drivers/mmc/host/dw_mmc-zx.h
-> new file mode 100644
-> index 0000000..b1aac52
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-zx.h
-> @@ -0,0 +1,23 @@
-> +#ifndef _DW_MMC_ZX_H_
-> +#define _DW_MMC_ZX_H_
-> +
-> +/* dll reg offset*/
-> +#define LB_AON_EMMC_CFG_REG0  0x1B0
-> +#define LB_AON_EMMC_CFG_REG1  0x1B4
-> +#define LB_AON_EMMC_CFG_REG2  0x1B8
-> +
-> +/* LB_AON_EMMC_CFG_REG0 register defines */
-> +#define PARA_DLL_START_POINT(x)	(((x) & 0xFF) << 0)
-> +#define DLL_REG_SET		BIT(8)
-> +#define PARA_DLL_LOCK_NUM(x)	(((x) & 7) << 16)
-> +#define PARA_PHASE_DET_SEL(x)	(((x) & 7) << 20)
-> +#define PARA_DLL_BYPASS_MODE	BIT(23)
-> +#define PARA_HALF_CLK_MODE	BIT(24)
-
-PAR_PHASE_DET_SEL/PARA_DLL_BYPASS_MODE_BIT/PARA_HALF_CLK_MODE are never used anywhere.
-
-> +
-> +/* LB_AON_EMMC_CFG_REG1 register defines */
-> +#define READ_DQS_DELAY(x)	(((x) & 0x7F) << 0)
-> +#define READ_DQS_BYPASS_MODE	BIT(7)
-> +#define CLK_SAMP_DELAY(x)	(((x) & 0x7F) << 8)
-> +#define CLK_SAMP_BYPASS_MODE	BIT(15)
-
-Also READ_DQS_BYPASS_MODe/CLK_SAMP_BYBASS_MODE didnt used anywhere.
-
-
-Hmm. These are not dwmmc host controller's register.
-So If you needs to add these defines..I think you needs to add dessriptions in more detail.
-
-At least..Which board's DLL reg offset. 
+DATA addr is more correct. it's related with DATA register.
 
 Best Regards,
 Jaehoon Chung
 
-> +
-> +#endif /* _DW_MMC_ZX_H_ */
+>   * @data_shift: log2 of FIFO item size.
+>   * @part_buf_start: Start index in part_buf.
+>   * @part_buf_count: Bytes of partial data in part_buf.
+> @@ -154,6 +155,7 @@ struct dw_mci {
+>  	spinlock_t		irq_lock;
+>  	void __iomem		*regs;
+>  	void __iomem		*fifo_reg;
+> +	u32			fifo_addr_override;
+>  
+>  	struct scatterlist	*sg;
+>  	struct sg_mapping_iter	sg_miter;
 > 
 
