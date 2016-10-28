@@ -1,85 +1,47 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC 1/2] mmc: sdhci: dt: Add device tree properties sdhci-caps
- and sdhci-caps-mask
-Date: Fri, 28 Oct 2016 10:12:33 +0200
-Message-ID: <CAPDyKFpKoXd9yuX5vR-CACtXKGysmV0AqKnjxQ+hTGU+kgwceQ@mail.gmail.com>
-References: <1477425538-3315-1-git-send-email-zach.brown@ni.com> <1477425538-3315-2-git-send-email-zach.brown@ni.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [v15, 6/7] base: soc: introduce soc_device_match() interface
+Date: Fri, 28 Oct 2016 12:47:54 +0200
+Message-ID: <2572890.e6aV4hmMEL@wuerfel>
+References: <1477637418-38938-1-git-send-email-yangbo.lu@nxp.com>
+	<1477637418-38938-7-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1477425538-3315-2-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1477637418-38938-7-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Minghuan Lian <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25 October 2016 at 21:58, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
-> On some systems the sdhci capabilty registers are incorrect for one
-> reason or another.
->
-> The sdhci-caps-mask property specifies which bits in the registers
-> are incorrect and should be turned off before using sdhci-caps to turn
-> on bits.
->
-> The sdhci-caps property specifies which bits should be turned on.
->
-> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 8a37782..1415aa0 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+On Friday, October 28, 2016 2:50:17 PM CEST Yangbo Lu wrote:
+> +
+> +static int soc_device_match_one(struct device *dev, void *arg)
+> +{
+> +       struct soc_device *soc_dev = container_of(dev, struct soc_device, dev);
+> +       const struct soc_device_attribute *match = arg;
+> +
+> +       if (match->machine &&
+> +           !glob_match(match->machine, soc_dev->attr->machine))
+> +               return 0;
+> +
+> +       if (match->family &&
+> +           !glob_match(match->family, soc_dev->attr->family))
+> +               return 0;
+> +
+> 
 
-The bindings in this document are common mmc DT bindings, not bindings
-specific to a mmc controller.
+Geert found a bug in my code, and submitted a fix at
+https://patchwork.kernel.org/patch/9361395/
 
-So unless these bindings are applicable for another controller than
-sdhci, I suggest we create a new file to document these.
-How about Documentation/devicetree/bindings/mmc/sdhci.txt?
+I think you should include that one in your series.
 
-> @@ -52,6 +52,13 @@ Optional properties:
->  - no-sdio: controller is limited to send sdio cmd during initialization
->  - no-sd: controller is limited to send sd cmd during initialization
->  - no-mmc: controller is limited to send mmc cmd during initialization
-> +- sdhci-caps-mask: The sdhci capabilities registers are incorrect. This 64bit
-
-/s/registers/register
-
-This applies to some more places below as well.
-
-> +  property corresponds to the bits in the sdhci capabilty registers. If the bit
-> +  is on in the mask then the bit is incorrect in the registers and should be
-> +  turned off.
-> +- sdhci-caps: The sdhci capabilities registers are incorrect. This 64bit
-> +  property corresponds to the bits in the sdhci capability registers. If the
-> +  bit is on in the property then the bit should be on in the reigsters.
-
-/s/reigsters/register
-
->
->  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->  polarity properties, we have to fix the meaning of the "normal" and "inverted"
-> --
-> 2.7.4
->
-
-Overall, I like this idea as it gives us good flexibility. Thus it
-should avoid us to having to add any further new similar "sdhci broken
-cap" DT binding. We could also decide to start deprecate some of the
-existing sdhci bindings, if we think that makes sense.
-
-The downside is that we get a "magic" hex value in the dts. Although,
-people could address this issue by providing some comments about what
-the bits it means in the dts files themselves.
-
-Let's see what Rob thinks about this.
-
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	Arnd
