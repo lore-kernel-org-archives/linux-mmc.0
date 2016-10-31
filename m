@@ -1,39 +1,33 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH 0/2] mmc: sdhci: Fix sdhci caps register bits with corrections provided by dt
-Date: Fri, 28 Oct 2016 10:56:09 -0500
-Message-ID: <1477670171-30015-1-git-send-email-zach.brown@ni.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 0/2] mmc: dw_mmc: fix the wrong operation for reset controller
+Date: Mon, 31 Oct 2016 11:49:40 +0900
+Message-ID: <20161031024942.4415-1-jh80.chung@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+To: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-kernel@vger.kernel.org, john.stultz@linaro.org, guodong.xu@linaro.org, leo.yan@linaro.org, vincent.guittot@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-For various reasons the sdhci caps register can be incorrect. This patch set
-introduces a general way to correct the bits when they are read to accurately
-reflect the capabilties of the controller/board combo.
+This patch adds the "reset-names" as reset controller for dwmmc controller.
+Linaro guys had reported the issue about booting stuck.
 
-The first patch creates sdhci-caps and sdhci-caps-mask dt properties that
-combined represent the correction to the sdhci caps register.
+Some SoCs are enabled the CONFIG_RESET_CONTROLLER.
+then dwmmc controller are waiting for getting reset controller.
+But if doesn't define "resets" property in device-tree, it should be stuck.
 
-The second patch uses the new dt properties to correct the caps from the
-register as they read during __sdhci_read_caps.
+If use the reset-names as reset controller for dwmmc controller,
+it's more stable than now.
+This commit is related with the below commit.
 
-Changes from RFC:
- * /s/registers/register
- * Moved sdhci dt properties into new documentation file sdhci.txt
+Fixes: d6786fefe816 ("mmc: dw_mmc: add reset support to dwmmc host controller")
 
-Zach Brown (2):
-  mmc: sdhci: dt: Add device tree properties sdhci-caps and
-    sdhci-caps-mask
-  mmc: sdhci: Use sdhci-caps-mask and sdhci-caps to change the caps read
-        during __sdhci_read_caps
+Jaehoon Chung (2):
+  Documentation: synopsys-dw-mshc: add binding for reset-names
+  mmc: dw_mmc: add the "reset" as name of reset controller
 
- Documentation/devicetree/bindings/mmc/sdhci.txt | 14 ++++++++++++++
- drivers/mmc/host/sdhci.c                        | 24 ++++++++++++++++++++++--
- 2 files changed, 36 insertions(+), 2 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci.txt
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 +++++
+ drivers/mmc/host/dw_mmc.c                                  | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
 -- 
-2.7.4
+2.10.1
