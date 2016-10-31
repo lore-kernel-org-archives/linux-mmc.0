@@ -1,53 +1,108 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
-Date: Mon, 31 Oct 2016 09:53:50 +0000
-Message-ID: <C1EB6DD6-A419-4E21-843F-40545CFAE87C@sandisk.com>
-References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
- <1472739890-3384-2-git-send-email-alex.lemberg@sandisk.com>
- <cc6129e7-5250-8c2e-73e0-1134e2a7146d@rock-chips.com>
- <2D82096E-231C-43BA-801D-381F8191F26C@sandisk.com>
- <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
- <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [RFC 1/2] mmc: sdhci: dt: Add device tree properties sdhci-caps
+ and sdhci-caps-mask
+Date: Mon, 31 Oct 2016 20:59:10 +0900
+Message-ID: <6031045c-0eb2-7bea-1efd-874dade0f009@samsung.com>
+References: <1477425538-3315-1-git-send-email-zach.brown@ni.com>
+ <1477425538-3315-2-git-send-email-zach.brown@ni.com>
+ <CGME20161028081315epcas3p4bea31304360f9a6a4a12c5c54334eaa9@epcas3p4.samsung.com>
+ <CAPDyKFpKoXd9yuX5vR-CACtXKGysmV0AqKnjxQ+hTGU+kgwceQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0057.outbound.protection.outlook.com ([104.47.32.57]:7384
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S938931AbcJaL3N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Oct 2016 07:29:13 -0400
-In-Reply-To: <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
-Content-Language: en-US
-Content-ID: <B787F5675F16E94491695274A97032B1@namprd02.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <CAPDyKFpKoXd9yuX5vR-CACtXKGysmV0AqKnjxQ+hTGU+kgwceQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-R3JlYXQuIFRoYW5rcyBmb3IgdGhlIGluZm9ybWF0aW9uIQ0KDQpPbiAxMC8xMy8xNiwgMTE6MzAg
-QU0sICJTaGF3biBMaW4iIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+IHdyb3RlOg0KDQo+5Zyo
-IDIwMTYvMTAvMTMgMTU6MzYsIFVsZiBIYW5zc29uIOWGmemBkzoNCj4+IE9uIDQgU2VwdGVtYmVy
-IDIwMTYgYXQgMTU6MzAsIEFsZXggTGVtYmVyZyA8QWxleC5MZW1iZXJnQHNhbmRpc2suY29tPiB3
-cm90ZToNCj4+PiBIaSBTaGF3biwNCj4+Pg0KPj4+IE9uIDkvMi8xNiwgMTA6MzkgQU0sICJTaGF3
-biBMaW4iIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+IHdyb3RlOg0KPj4+DQo+Pj4+IEhpDQo+
-Pj4+DQo+Pj4+IE9uIDIwMTYvOS8xIDIyOjI0LCBhbGV4IGxlbWJlcmcgd3JvdGU6DQo+Pj4+PiBB
-ZGQgTU1DX0FVVE9TVVNQRU5EX0RFTEFZX01TIGRlZmluZQ0KPj4+Pg0KPj4+PiBJJ20gdGhpbmtp
-bmcgc2hvdWxkIHdlIGV4cG9zZSBpdCB0byB1c2Vyc3BhY2UNCj4+Pj4gdmlhIHN5c2ZzLCBzaW5j
-ZSBJIGRvbid0IGtub3cgd2h5IGl0IHNob3VsZCBiZSAzbXMsIG5vdCA0bXMsIDVtcywgZXRjLg0K
-Pj4+DQo+Pj4gQWdyZWUsIHdlIGNhbiBjb25zaWRlciBleHBvc2luZyBpdCB0byB0aGUgdXNlciBz
-cGFjZS4NCj4+PiBUaGUgZXhwb3N1cmUgdG8gdGhlIHVzZXIgc3BhY2UgaXMgbGVzcyBjcml0aWNh
-bCB0byB0aGUgY3VycmVudA0KPj4+IHBhdGNoc2V0LCBidXQgd2UgY2FuIGRvIGl0IGFzIGEg4oCc
-Zm9sbG93LXVwIGNoYW5nZeKAnSBvbmNlIGl0cyBhcHByb3ZlZC4NCj4+DQo+PiBObyBuZWVkIGZv
-ciB0aGF0LCBpcyBhbHJlYWR5IGF2YWlsYWJsZSBmb3IgdXNlci1zcGFjZS4gOi0pDQo+Pg0KPj4g
-RWFjaCBkZXZpY2Ugd2l0aCBydW50aW1lIFBNIGF1dG9zdXNwZW5kIGVuYWJsZWQsIGFsbG93cyB1
-c2Vyc3BhY2UgdG8NCj4+IGNoYW5nZSB0aGUgZGVsYXkgdmlhIHRoZSAiYXV0b3N1c3BlbmRfZGVs
-YXlfbXMiIHN5c2ZzIGZpbGUuDQo+DQo+SW5kZWVk77yMIEkganVzdCBjaGVjayBpdCB3aGVuIGVu
-YWJsaW5nIHJ1bnRpbWUgUE0gZm9yIGR3X21tYyBhbmQgY291bGQNCj5hYmxlIHRvIGNoYW5nZSB0
-aGUgdmFsdWUgb2YgYXV0b3N1c3BlbmRfZGVsYXlfbXMuDQo+DQo+VGhhbmtzIGZvciBzaGFyaW5n
-IHRoaXMuDQo+DQo+Pg0KPj4gS2luZCByZWdhcmRzDQo+PiBVZmZlDQo+PiAtLQ0KPj4gVG8gdW5z
-dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4
-LW1tYyIgaW4NCj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
-ZWwub3JnDQo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo+DQo+DQo+LS0gDQo+QmVzdCBSZWdhcmRzDQo+U2hh
-d24gTGluDQo+DQoNCg==
+On 10/28/2016 05:12 PM, Ulf Hansson wrote:
+> On 25 October 2016 at 21:58, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
+>> On some systems the sdhci capabilty registers are incorrect for one
+>> reason or another.
+>>
+>> The sdhci-caps-mask property specifies which bits in the registers
+>> are incorrect and should be turned off before using sdhci-caps to turn
+>> on bits.
+>>
+>> The sdhci-caps property specifies which bits should be turned on.
+>>
+>> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+>> ---
+>>  Documentation/devicetree/bindings/mmc/mmc.txt | 7 +++++++
+>>  1 file changed, 7 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> index 8a37782..1415aa0 100644
+>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> 
+> The bindings in this document are common mmc DT bindings, not bindings
+> specific to a mmc controller.
+> 
+> So unless these bindings are applicable for another controller than
+> sdhci, I suggest we create a new file to document these.
+> How about Documentation/devicetree/bindings/mmc/sdhci.txt?
+> 
+>> @@ -52,6 +52,13 @@ Optional properties:
+>>  - no-sdio: controller is limited to send sdio cmd during initialization
+>>  - no-sd: controller is limited to send sd cmd during initialization
+>>  - no-mmc: controller is limited to send mmc cmd during initialization
+>> +- sdhci-caps-mask: The sdhci capabilities registers are incorrect. This 64bit
+> 
+> /s/registers/register
+> 
+> This applies to some more places below as well.
+> 
+>> +  property corresponds to the bits in the sdhci capabilty registers. If the bit
+>> +  is on in the mask then the bit is incorrect in the registers and should be
+>> +  turned off.
+>> +- sdhci-caps: The sdhci capabilities registers are incorrect. This 64bit
+>> +  property corresponds to the bits in the sdhci capability registers. If the
+>> +  bit is on in the property then the bit should be on in the reigsters.
+> 
+> /s/reigsters/register
+> 
+>>
+>>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+>> --
+>> 2.7.4
+>>
+> 
+> Overall, I like this idea as it gives us good flexibility. Thus it
+> should avoid us to having to add any further new similar "sdhci broken
+> cap" DT binding. We could also decide to start deprecate some of the
+> existing sdhci bindings, if we think that makes sense.
+> 
+> The downside is that we get a "magic" hex value in the dts. Although,
+> people could address this issue by providing some comments about what
+> the bits it means in the dts files themselves.
+
+I think it's not good about getting "magic" hex value.
+In my experience, it's too difficult what bits means and calculate..
+Because some people who i know had already used like this.(locally..)
+
+It needs to consider this...otherwise..it should become really complex magic code.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> Let's see what Rob thinks about this.
+> 
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
