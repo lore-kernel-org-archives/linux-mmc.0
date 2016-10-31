@@ -1,91 +1,69 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
-Date: Mon, 31 Oct 2016 10:14:22 +0000
-Message-ID: <A6F6C92B-1E3A-4326-88B7-E3E9100E2DD8@sandisk.com>
-References: <1475504388-31304-1-git-send-email-thierry.escande@collabora.com>
- <CAPDyKFoO1JX2-jpux+f-1O8kDC+jumspXapA0PZvKMBUE3YhSA@mail.gmail.com>
- <e28c3ced-ddaa-27a3-469b-d1f5cc29b407@collabora.com>
- <CAPDyKFq+t4-m3V9Qx37x8B6_FSV3C_vJtQyaEu5+fgSffcEyDg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH 2/10] mmc: sdhci: Export sdhci_start_signal_voltage_switch() in sdhci.c
+Date: Mon, 31 Oct 2016 12:09:51 +0100
+Message-ID: <9f7892b7a21e7c531013ba95c5966948619a31ca.1477911954.git-series.gregory.clement@free-electrons.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0049.outbound.protection.outlook.com ([104.47.42.49]:6828
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1764470AbcJaKOX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Oct 2016 06:14:23 -0400
-In-Reply-To: <CAPDyKFq+t4-m3V9Qx37x8B6_FSV3C_vJtQyaEu5+fgSffcEyDg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <1C758108629FF243BE79D478F00E7BCC@namprd02.prod.outlook.com>
+Received: from up.free-electrons.com ([163.172.77.33]:50746 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S938787AbcJaLKI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2016 07:10:08 -0400
+In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Thierry Escande <thierry.escande@collabora.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Ziji Hu <huziji@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>
 
-SGksDQoNCkJ5IHRoZSBlTU1DNS4wIHNwZWMsIGJlZm9yZSBzZW5kaW5nIFNsZWVwIGNvbW1hbmQg
-KENNRDUpLCBob3N0cyBtYXkgc2V0IHRoZQ0KUE9XRVJfT0ZGX05PVElGSUNBVElPTiBieXRlIHRv
-IFNMRUVQX05PVElGSUNBVElPTiAoMHgwNCkuDQpJc27igJl0IHRoaXMgYSBjYXNlIGluIHRoaXMg
-cGF0Y2g/DQpJZiB5ZXMsIHdoeSBub3Qgc2VuZGluZyBTTEVFUF9OT1RJRklDQVRJT04gaW5zdGVh
-ZCBvZiBQT1dFUl9PRkZfU0hPUlQ/DQoNCkluIHRoZSBwYXN0IHdlIGhhZCBhIGRpc2N1c3Npb24g
-b24gdGhpcyB0b3BpYywgYnV0IHRoZSBzb2x1dGlvbiBiZWNhbWUgbW9yZSBjb21wbGljYXRlZCBi
-ZWNhdXNlIA0Kb2YgcG9zc2libHkgbG9uZyB0aW1lb3V0IChtYXggODMgc2Vjb25kcykgb24gU0xF
-RVBfTk9USUZJQ0FUSU9OLg0KaHR0cHM6Ly9tYXJjLmluZm8vP3Q9MTQzMzc0Njk2NjAwMDAyJnI9
-MSZ3PTENCg0KQnV0IHN0aWxsLCBpbiBjYXNlIHdlIHdhbnQgdG8gc3VwcG9ydCBQT1dFUl9PRkZf
-Tk9USUZJQ0FUSU9OIGJlZm9yZSBTbGVlcCBjb21tYW5kLA0KYW5kIGluIGNhc2Ugd2Ugd2FudCB0
-byBiZSBlTU1DIHNwZWMgYWxpZ25lZCwgSSBiZWxpZXZlIHRoZSByaWdodCB0aGluZyB0byBkbw0K
-aXMgdG8gc3VwcG9ydCBTTEVFUF9OT1RJRklDQVRJT07igKYNCg0KVGhhbmtzLA0KQWxleA0KDQpP
-biAxMC8yNy8xNiwgMTA6NDkgUE0sICJsaW51eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIG9u
-IGJlaGFsZiBvZiBVbGYgSGFuc3NvbiIgPGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-b24gYmVoYWxmIG9mIHVsZi5oYW5zc29uQGxpbmFyby5vcmc+IHdyb3RlOg0KDQo+T24gMjcgT2N0
-b2JlciAyMDE2IGF0IDE3OjA2LCBUaGllcnJ5IEVzY2FuZGUNCj48dGhpZXJyeS5lc2NhbmRlQGNv
-bGxhYm9yYS5jb20+IHdyb3RlOg0KPj4gSGkgVWxmLA0KPj4NCj4+IE9uIDI1LzEwLzIwMTYgMTI6
-MDMsIFVsZiBIYW5zc29uIHdyb3RlOg0KPj4+DQo+Pj4gT24gMyBPY3RvYmVyIDIwMTYgYXQgMTY6
-MTksIFRoaWVycnkgRXNjYW5kZQ0KPj4+IDx0aGllcnJ5LmVzY2FuZGVAY29sbGFib3JhLmNvbT4g
-d3JvdGU6DQo+Pj4+DQo+Pj4+IEZyb206IHpoYW9qb2huIDxqb2huLnpoYW9AaW50ZWwuY29tPg0K
-Pj4+Pg0KPj4+PiBIeW5peCBlTU1DIGRldmljZXMgc29tZXRpbWVzIHRha2UgNTAlIGxvbmdlciB0
-byByZXN1bWUgZnJvbSBzbGVlcC4NCj4+Pj4gQmFzZWQgb24gYSByZWNvbW1lbmRhdGlvbiBmcm9t
-IEh5bml4LCBzZW5kIGEgUG93ZXItT2ZmIE5vdGlmaWNhdGlvbg0KPj4+PiBiZWZvcmUgZ29pbmcg
-dG8gUzMgdG8gcmVzdG9yZSBhIHJlc3VtZSB0aW1lIGNvbnNpc3RlbnRseSB3aXRoaW4gc3BlYy4N
-Cj4+Pg0KPj4+DQo+Pj4gQ291bGQgeW91IGFsc28gc2hhcmUgd2hhdCBtbWMgY29udHJvbGxlciBh
-bmQgU29DIHlvdSBnZXQgdGhpcyByZXN1bHRzDQo+Pj4gZnJvbT8NCj4+Pg0KPj4+IE1vcmUgcHJl
-Y2lzZWx5LCBhcmUgeW91IHVzaW5nIE1NQ19DQVBfV0FJVF9XSElMRV9CVVNZPw0KPj4NCj4+IFRo
-aXMgb2NjdXJzIG9uIGEgYnJhc3dlbGwgYmFzZWQgY2hyb21lYm9vaywgdXNpbmcgdGhlIGFjcGkg
-c2RoY2kgY29udHJvbGxlci4NCj4+IFNvIHllcywgdXNpbmcgTU1DX0NBUF9XQUlUX1dISUxFX0JV
-U1kuDQo+Pg0KPj4gWy4uLl0NCj4+Pj4NCj4+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2Nv
-cmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+Pj4+IGluZGV4IGYyZDE4NWMuLjQ2
-YTQ1NjIgMTAwNjQ0DQo+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4+Pj4gKysr
-IGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPj4+PiBAQCAtMTkyNSw4ICsxOTI1LDE0IEBAIHN0
-YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwNCj4+Pj4gYm9vbCBp
-c19zdXNwZW5kKQ0KPj4+PiAgICAgICAgIGlmIChtbWNfY2FuX3Bvd2Vyb2ZmX25vdGlmeShob3N0
-LT5jYXJkKSAmJg0KPj4+PiAgICAgICAgICAgICAgICAgKChob3N0LT5jYXBzMiAmIE1NQ19DQVAy
-X0ZVTExfUFdSX0NZQ0xFKSB8fCAhaXNfc3VzcGVuZCkpDQo+Pj4+ICAgICAgICAgICAgICAgICBl
-cnIgPSBtbWNfcG93ZXJvZmZfbm90aWZ5KGhvc3QtPmNhcmQsIG5vdGlmeV90eXBlKTsNCj4+Pj4g
-LSAgICAgICBlbHNlIGlmIChtbWNfY2FuX3NsZWVwKGhvc3QtPmNhcmQpKQ0KPj4+PiArICAgICAg
-IGVsc2UgaWYgKG1tY19jYW5fc2xlZXAoaG9zdC0+Y2FyZCkpIHsNCj4+Pj4gKyAgICAgICAgICAg
-ICAgIGlmIChob3N0LT5jYXJkLT5xdWlya3MgJg0KPj4+PiBNTUNfUVVJUktfTk9USUZZX1BPV0VS
-T0ZGX09OX1NMRUVQKSB7DQo+Pj4+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9IG1tY19w
-b3dlcm9mZl9ub3RpZnkoaG9zdC0+Y2FyZCwNCj4+Pj4gbm90aWZ5X3R5cGUpOw0KPj4+PiArICAg
-ICAgICAgICAgICAgICAgICAgICBpZiAoZXJyKQ0KPj4+PiArICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIGdvdG8gb3V0Ow0KPj4+PiArICAgICAgICAgICAgICAgfQ0KPj4+DQo+Pj4NCj4+
-PiBTbywgSSBhbSBjdXJpb3VzIHRvIGtub3cgZnJvbSBhIHBvd2VyIG1hbmFnZW1lbnQgcG9pbnQg
-b2YgdmlldzsgaG93DQo+Pj4gZG9lcyB0aGUgY2FyZCBiZWhhdmUgY29tcGFyaW5nIHRoZSBzbGVl
-cCBhbmQgcG93ZXIgb2ZmIG5vdGlmaWNhdGlvbg0KPj4+IGNvbW1hbmQ/DQo+Pj4NCj4+PiBJcyB0
-aGUgY2FyZCBpbiBhIGxvdyBwb3dlciBzdGF0ZSBhZnRlciB0aGUgcG93ZXIgb2ZmIG5vdGlmaWNh
-dGlvbiBoYXMNCj4+PiBiZWVuIHJlY2VpdmVkPyBJZiBzbywgZGlkIHlvdSBtYW5hZ2UgdG8gZG8g
-c29tZSBtZWFzdXJlbWVudCBmb3IgdGhhdA0KPj4+IG9yIHBlcmhhcHMgdGhlIGRhdGEtc2hlZXQg
-dGVsbHMgYWJvdXQgdGhpcz8gSXQgd291bGQgYmUgaW50ZXJlc3RpbmcgdG8NCj4+PiBrbm93IGlm
-IHRoZXJlIHdlcmUgYW55IGRpZmZlcmVuY2VzIGJldHdlZW4gc2xlZXAgYW5kIHBvd2VyIG9mZg0K
-Pj4+IG5vdGlmaWNhdGlvbiBpbiB0aGlzIHJlZ2FyZHMuDQo+Pg0KPj4gSSBkbyBub3QgaGF2ZSBh
-bnkgY2x1ZSBhYm91dCB0aGF0LiBJdCBhcHBlYXJzIG9ubHkgd2l0aCBIeW5peCBlbW1jIGFuZCB0
-aGUNCj4+IGZpeCBoYXMgYmVlbiBhcHByb3ZlZCBieSBIeW5peCBlbmdpbmVlcnMuLi4gSXQgc2Vl
-bXMgdGhhdCBpZiBub3QgcG93ZXJlZA0KPj4gb2ZmLCB0aGUgZmlybXdhcmUgZG9lcyBzb21lIGdh
-cmJhZ2UgY29sbGVjdGlvbiB3aGVuIHJlc3VtaW5nIGFuZCBpdCB0YWtlcw0KPj4gbW9yZSB0aW1l
-Li4uDQo+DQo+T2theSwgSSBzZWUuIFNvIGJlZm9yZSBJIGNvbnRpbnVlIHJldmlld2luZywgY2Fu
-IHlvdSBwbGVhc2UgYWxzbyB0ZWxsDQo+d2hhdCByZWd1bGF0b3JzIHRvIHRoZSBjYXJkIHRoYXQg
-aXMgYmVpbmcgY3V0IHdoaWxlIHBvd2VyaW5nIG9mZiBpbg0KPnRoaXMgcGF0aC4NCj4NCj5WTU1D
-LCBWUU1NQz8NCj4NCj5LaW5kIHJlZ2FyZHMNCj5VZmZlDQo+LS0NCj5UbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbg0K
-PnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+TW9y
-ZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQoNCg==
+From: Ziji Hu <huziji@marvell.com>
+
+Export sdhci_start_signal_voltage_switch() from sdhci.c.
+Thus vendor sdhci driver can implement its own signal voltage
+switch routine.
+
+Signed-off-by: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+---
+ drivers/mmc/host/sdhci.c | 5 +++--
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ea06faf8a437..8e6e4e37e3b4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1832,8 +1832,8 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+-static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+-					     struct mmc_ios *ios)
++int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
++				      struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	u16 ctrl;
+@@ -1925,6 +1925,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 		return 0;
+ 	}
+ }
++EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
+ 
+ static int sdhci_card_busy(struct mmc_host *mmc)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 37771de4cafa..cd18b6f19c3b 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -689,6 +689,8 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
++int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
++				      struct mmc_ios *ios);
+ 
+ #ifdef CONFIG_PM
+ extern int sdhci_suspend_host(struct sdhci_host *host);
+-- 
+git-series 0.8.10
