@@ -1,53 +1,53 @@
 From: Alex Lemberg <Alex.Lemberg@sandisk.com>
 Subject: Re: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
-Date: Mon, 31 Oct 2016 09:53:48 +0000
-Message-ID: <FE62714F-486D-4649-BB20-A777A75B3B96@sandisk.com>
-References: <1472706726-893-1-git-send-email-alex.lemberg@sandisk.com>
- <CAPDyKFoAxiYWYOYZeYByXOwbK_k0Mgq_LCCqp3t2NJJmV4p1kQ@mail.gmail.com>
+Date: Mon, 31 Oct 2016 09:53:50 +0000
+Message-ID: <C1EB6DD6-A419-4E21-843F-40545CFAE87C@sandisk.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
+ <1472739890-3384-2-git-send-email-alex.lemberg@sandisk.com>
+ <cc6129e7-5250-8c2e-73e0-1134e2a7146d@rock-chips.com>
+ <2D82096E-231C-43BA-801D-381F8191F26C@sandisk.com>
+ <CAPDyKFo=xUkGvqghr3zFB_anvzVQDJgkjFziveceQ+jpjjxdbQ@mail.gmail.com>
+ <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0067.outbound.protection.outlook.com ([104.47.32.67]:43918
+Received: from mail-sn1nam01on0057.outbound.protection.outlook.com ([104.47.32.57]:7384
         "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S941003AbcJaL2d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Oct 2016 07:28:33 -0400
-In-Reply-To: <CAPDyKFoAxiYWYOYZeYByXOwbK_k0Mgq_LCCqp3t2NJJmV4p1kQ@mail.gmail.com>
+        id S938931AbcJaL3N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 31 Oct 2016 07:29:13 -0400
+In-Reply-To: <9277d105-9603-c011-25c4-083590fb4709@rock-chips.com>
 Content-Language: en-US
-Content-ID: <8137E1627FD37146A7A007A465E5F650@namprd02.prod.outlook.com>
+Content-ID: <B787F5675F16E94491695274A97032B1@namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-VGhhbmtzIQ0KDQpPbiAxMC8xMy8xNiwgMTA6MzYgQU0sICJVbGYgSGFuc3NvbiIgPHVsZi5oYW5z
-c29uQGxpbmFyby5vcmc+IHdyb3RlOg0KDQo+T24gMSBTZXB0ZW1iZXIgMjAxNiBhdCAwNzoxMiwg
-YWxleC5sZW1iZXJnIDxhbGV4LmxlbWJlcmdAc2FuZGlzay5jb20+IHdyb3RlOg0KPj4gQWRkIE1N
-Q19BVVRPU1VTUEVORF9ERUxBWV9NUyBkZWZpbmUNCj4+DQo+PiBTaWduZWQtb2ZmLWJ5OiBhbGV4
-LmxlbWJlcmcgPGFsZXgubGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4+IC0tLQ0KPj4gIGRyaXZlcnMv
-bW1jL2NhcmQvYmxvY2suYyB8IDMgKystDQo+PiAgaW5jbHVkZS9saW51eC9tbWMvaG9zdC5oIHwg
-MiArKw0KPj4gIDIgZmlsZXMgY2hhbmdlZCwgNCBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0p
-DQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMv
-bW1jL2NhcmQvYmxvY2suYw0KPj4gaW5kZXggNDhhNWRkNy4uZjQzODZlZCAxMDA2NDQNCj4+IC0t
-LSBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPj4gKysrIGIvZHJpdmVycy9tbWMvY2FyZC9i
-bG9jay5jDQo+PiBAQCAtMjYxMCw3ICsyNjEwLDggQEAgc3RhdGljIGludCBtbWNfYmxrX3Byb2Jl
-KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCkNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8g
-b3V0Ow0KPj4gICAgICAgICB9DQo+Pg0KPj4gLSAgICAgICBwbV9ydW50aW1lX3NldF9hdXRvc3Vz
-cGVuZF9kZWxheSgmY2FyZC0+ZGV2LCAzMDAwKTsNCj4+ICsgICAgICAgcG1fcnVudGltZV9zZXRf
-YXV0b3N1c3BlbmRfZGVsYXkoJmNhcmQtPmRldiwNCj4+ICsgICAgICAgICAgICAgICBNTUNfUlVO
-VElNRV9TVVNQRU5EX0RFTEFZX01TKTsNCj4+ICAgICAgICAgcG1fcnVudGltZV91c2VfYXV0b3N1
-c3BlbmQoJmNhcmQtPmRldik7DQo+Pg0KPj4gICAgICAgICAvKg0KPj4gZGlmZiAtLWdpdCBhL2lu
-Y2x1ZGUvbGludXgvbW1jL2hvc3QuaCBiL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaA0KPj4gaW5k
-ZXggYWE0YmZiZi4uOGNiODIxOCAxMDA2NDQNCj4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1jL2hv
-c3QuaA0KPj4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvaG9zdC5oDQo+PiBAQCAtMjIsNiArMjIs
-OCBAQA0KPj4gICNpbmNsdWRlIDxsaW51eC9tbWMvbW1jLmg+DQo+PiAgI2luY2x1ZGUgPGxpbnV4
-L21tYy9wbS5oPg0KPj4NCj4+ICsjZGVmaW5lIE1NQ19SVU5USU1FX1NVU1BFTkRfREVMQVlfTVMg
-ICAzMDAwDQo+PiArDQo+PiAgc3RydWN0IG1tY19pb3Mgew0KPj4gICAgICAgICB1bnNpZ25lZCBp
-bnQgICAgY2xvY2s7ICAgICAgICAgICAgICAgICAgLyogY2xvY2sgcmF0ZSAqLw0KPj4gICAgICAg
-ICB1bnNpZ25lZCBzaG9ydCAgdmRkOw0KPj4gLS0NCj4+IDEuOS4xDQo+Pg0KPg0KPkFjdHVhbGx5
-LCBJIGRvbid0IG1pbmQgaGF2aW5nIGhhcmRjb2RlZCB2YWx1ZXMgbGlrZSB0aGlzIG9uZSBkaXJl
-Y3RseQ0KPmluIHRoZSBjb2RlLiBFc3BlY2lhbGx5IHNpbmNlIGl0J3MgdXNlZCBvbmx5IGF0IG9u
-ZSBzaW5nbGUgcGxhY2UgYW5kDQo+YmVjYXVzZSBpdCdzIG5vdCBhIG1hZ2ljIG51bWJlci4NCj4N
-Cj5BbHRob3VnaCwgaWYgcmVhbGx5IGZlZWwgc3Ryb25nIGFib3V0IHRoaXMsIEkgY2FuIGFwcGx5
-IGl0Lg0KPg0KPktpbmQgcmVnYXJkcw0KPlVmZmUNCg0K
+R3JlYXQuIFRoYW5rcyBmb3IgdGhlIGluZm9ybWF0aW9uIQ0KDQpPbiAxMC8xMy8xNiwgMTE6MzAg
+QU0sICJTaGF3biBMaW4iIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+IHdyb3RlOg0KDQo+5Zyo
+IDIwMTYvMTAvMTMgMTU6MzYsIFVsZiBIYW5zc29uIOWGmemBkzoNCj4+IE9uIDQgU2VwdGVtYmVy
+IDIwMTYgYXQgMTU6MzAsIEFsZXggTGVtYmVyZyA8QWxleC5MZW1iZXJnQHNhbmRpc2suY29tPiB3
+cm90ZToNCj4+PiBIaSBTaGF3biwNCj4+Pg0KPj4+IE9uIDkvMi8xNiwgMTA6MzkgQU0sICJTaGF3
+biBMaW4iIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+IHdyb3RlOg0KPj4+DQo+Pj4+IEhpDQo+
+Pj4+DQo+Pj4+IE9uIDIwMTYvOS8xIDIyOjI0LCBhbGV4IGxlbWJlcmcgd3JvdGU6DQo+Pj4+PiBB
+ZGQgTU1DX0FVVE9TVVNQRU5EX0RFTEFZX01TIGRlZmluZQ0KPj4+Pg0KPj4+PiBJJ20gdGhpbmtp
+bmcgc2hvdWxkIHdlIGV4cG9zZSBpdCB0byB1c2Vyc3BhY2UNCj4+Pj4gdmlhIHN5c2ZzLCBzaW5j
+ZSBJIGRvbid0IGtub3cgd2h5IGl0IHNob3VsZCBiZSAzbXMsIG5vdCA0bXMsIDVtcywgZXRjLg0K
+Pj4+DQo+Pj4gQWdyZWUsIHdlIGNhbiBjb25zaWRlciBleHBvc2luZyBpdCB0byB0aGUgdXNlciBz
+cGFjZS4NCj4+PiBUaGUgZXhwb3N1cmUgdG8gdGhlIHVzZXIgc3BhY2UgaXMgbGVzcyBjcml0aWNh
+bCB0byB0aGUgY3VycmVudA0KPj4+IHBhdGNoc2V0LCBidXQgd2UgY2FuIGRvIGl0IGFzIGEg4oCc
+Zm9sbG93LXVwIGNoYW5nZeKAnSBvbmNlIGl0cyBhcHByb3ZlZC4NCj4+DQo+PiBObyBuZWVkIGZv
+ciB0aGF0LCBpcyBhbHJlYWR5IGF2YWlsYWJsZSBmb3IgdXNlci1zcGFjZS4gOi0pDQo+Pg0KPj4g
+RWFjaCBkZXZpY2Ugd2l0aCBydW50aW1lIFBNIGF1dG9zdXNwZW5kIGVuYWJsZWQsIGFsbG93cyB1
+c2Vyc3BhY2UgdG8NCj4+IGNoYW5nZSB0aGUgZGVsYXkgdmlhIHRoZSAiYXV0b3N1c3BlbmRfZGVs
+YXlfbXMiIHN5c2ZzIGZpbGUuDQo+DQo+SW5kZWVk77yMIEkganVzdCBjaGVjayBpdCB3aGVuIGVu
+YWJsaW5nIHJ1bnRpbWUgUE0gZm9yIGR3X21tYyBhbmQgY291bGQNCj5hYmxlIHRvIGNoYW5nZSB0
+aGUgdmFsdWUgb2YgYXV0b3N1c3BlbmRfZGVsYXlfbXMuDQo+DQo+VGhhbmtzIGZvciBzaGFyaW5n
+IHRoaXMuDQo+DQo+Pg0KPj4gS2luZCByZWdhcmRzDQo+PiBVZmZlDQo+PiAtLQ0KPj4gVG8gdW5z
+dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4
+LW1tYyIgaW4NCj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJu
+ZWwub3JnDQo+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
+L21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo+DQo+DQo+LS0gDQo+QmVzdCBSZWdhcmRzDQo+U2hh
+d24gTGluDQo+DQoNCg==
