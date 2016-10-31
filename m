@@ -1,65 +1,123 @@
-From: "Y.B. Lu" <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [v15, 6/7] base: soc: introduce soc_device_match() interface
-Date: Mon, 31 Oct 2016 09:28:56 +0000
-Message-ID: <DB6PR0401MB2536CAD001BF3CAB4EDB15DCF8AE0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1477637418-38938-1-git-send-email-yangbo.lu@nxp.com>
-	<1477637418-38938-7-git-send-email-yangbo.lu@nxp.com>
-	<2572890.e6aV4hmMEL@wuerfel>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 5/5] mmc: dw: Add fifo watermark quirk
+Date: Mon, 31 Oct 2016 18:35:04 +0900
+Message-ID: <db1f0415-41a0-8a94-b2fb-bfc39b3cee2a@samsung.com>
+References: <1477622229-32060-1-git-send-email-jun.nie@linaro.org>
+ <CGME20161028024043epcas1p219cba1c30aa9eb8a4d149b799565fba5@epcas1p2.samsung.com>
+ <1477622229-32060-6-git-send-email-jun.nie@linaro.org>
+ <739e77cb-c873-569c-a812-24fa752b41b0@samsung.com>
+ <CABymUCMqjcFmK=T8Um+zLqECvzv+o4M8VjribrG=SrePn5BU+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <2572890.e6aV4hmMEL@wuerfel>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "M.H. Lian" <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:40706 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1764144AbcJaJfH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2016 05:35:07 -0400
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OFW0324SNYG4XB0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 31 Oct 2016 18:35:04 +0900 (KST)
+In-reply-to: <CABymUCMqjcFmK=T8Um+zLqECvzv+o4M8VjribrG=SrePn5BU+Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jun Nie <jun.nie@linaro.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
-> Sent: Friday, October 28, 2016 6:48 PM
-> To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-> Cc: Y.B. Lu; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Scott
-> Wood; Mark Rutland; Greg Kroah-Hartman; X.B. Xie; M.H. Lian; linux-
-> i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Qiang Zhao; Russell King;
-> Bhupesh Sharma; Joerg Roedel; Claudiu Manoil; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> Rob Herring; Santosh Shilimkar; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
-> netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Leo Li;
-> iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org; Kumar Gala; Geert Uytterhoeven
-> Subject: Re: [v15, 6/7] base: soc: introduce soc_device_match() interface
+On 10/31/2016 05:48 PM, Jun Nie wrote:
+> 2016-10-28 13:30 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
+>> On 10/28/2016 11:37 AM, Jun Nie wrote:
+>>> Data done irq is expected if data length is less than
+>>> watermark in PIO mode. But fifo watermark is requested
+>>> to be aligned with data length in some SoC so that TX/RX
+>>> irq can be generated with data done irq. Add the
+>>> watermark quirk to mark this requirement and force
+>>> fifo watermark setting accordingly.
+>>>
+>>> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c  | 11 +++++++++--
+>>>  include/linux/mmc/dw_mmc.h |  2 ++
+>>>  2 files changed, 11 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 24ae05b6..e0f49cc 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1111,11 +1111,15 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+>>>               mci_writel(host, CTRL, temp);
+>>>
+>>>               /*
+>>> -              * Use the initial fifoth_val for PIO mode.
+>>> +              * Use the initial fifoth_val for PIO mode. If wm_quirk
+>>> +              * is set, we set watermark same as data size.
+>>>                * If next issued data may be transfered by DMA mode,
+>>>                * prev_blksz should be invalidated.
+>>>                */
+>>> -             mci_writel(host, FIFOTH, host->fifoth_val);
+>>> +             if (host->wm_quirk)
+>>> +                     dw_mci_adjust_fifoth(host, data);
+>>> +             else
+>>> +                     mci_writel(host, FIFOTH, host->fifoth_val);
+>>>               host->prev_blksz = 0;
+>>>       } else {
+>>>               /*
+>>> @@ -2957,6 +2961,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>
+>>>       of_property_read_u32(np, "fifo-addr", &host->fifo_addr_override);
+>>>
+>>> +     if (of_get_property(np, "fifo-watermark-quirk", NULL))
+>>> +             host->wm_quirk = true;
+>>> +
+>>>       if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+>>>               pdata->bus_hz = clock_frequency;
+>>>
+>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>>> index 4866ef5..2ccfd9c 100644
+>>> --- a/include/linux/mmc/dw_mmc.h
+>>> +++ b/include/linux/mmc/dw_mmc.h
+>>> @@ -108,6 +108,7 @@ struct dw_mci_dma_slave {
+>>>   * @slot: Slots sharing this MMC controller.
+>>>   * @fifo_depth: depth of FIFO.
+>>>   * @fifo_addr_override: override fifo reg offset with this value.
+>>> + * @wm_quirk: force fifo watermark equal with data length in PIO mode.
+>>
+>> quirk...hmm..It might be just my preference..
+>> quirk looks like workaround...so how about changing other name?
 > 
-> On Friday, October 28, 2016 2:50:17 PM CEST Yangbo Lu wrote:
-> > +
-> > +static int soc_device_match_one(struct device *dev, void *arg) {
-> > +       struct soc_device *soc_dev = container_of(dev, struct
-> soc_device, dev);
-> > +       const struct soc_device_attribute *match = arg;
-> > +
-> > +       if (match->machine &&
-> > +           !glob_match(match->machine, soc_dev->attr->machine))
-> > +               return 0;
-> > +
-> > +       if (match->family &&
-> > +           !glob_match(match->family, soc_dev->attr->family))
-> > +               return 0;
-> > +
-> >
+> How about fifo_wm_aligned ?
+
+If it's not quirk or workaround, whatever. :)
+
+Best Regards,
+Jaehoon Chung
+
 > 
-> Geert found a bug in my code, and submitted a fix at
-> https://patchwork.kernel.org/patch/9361395/
+>>
+>>>   * @data_shift: log2 of FIFO item size.
+>>>   * @part_buf_start: Start index in part_buf.
+>>>   * @part_buf_count: Bytes of partial data in part_buf.
+>>> @@ -156,6 +157,7 @@ struct dw_mci {
+>>>       void __iomem            *regs;
+>>>       void __iomem            *fifo_reg;
+>>>       u32                     fifo_addr_override;
+>>> +     u32                     wm_quirk;
+>>
+>> For True or false, u32?
+> True means alignment is needed. Will add  this to comments.
+>>
+>>>
+>>>       struct scatterlist      *sg;
+>>>       struct sg_mapping_iter  sg_miter;
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> I think you should include that one in your series.
+> 
 > 
 
-[Lu Yangbo-B47093] Ok, no problem. Thanks :)
-
-> 	Arnd
