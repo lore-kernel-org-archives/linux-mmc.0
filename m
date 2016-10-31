@@ -1,7 +1,7 @@
 From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH 1/10] mmc: sdhci: Export sdhci_set_ios() from sdhci.c
-Date: Mon, 31 Oct 2016 12:09:50 +0100
-Message-ID: <beb9b84b12ccc6dfc931dbd8cb7706195cdaa490.1477911954.git-series.gregory.clement@free-electrons.com>
+Subject: [PATCH 9/10] arm64: dts: marvell: add sdhci support for Armada 7K/8K
+Date: Mon, 31 Oct 2016 12:09:58 +0100
+Message-ID: <03b90e099080ebb555629386e9fb920a7639752f.1477911954.git-series.gregory.clement@free-electrons.com>
 References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
@@ -12,51 +12,50 @@ To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hu
 Cc: Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Jack(SH) Zhu" <jmzhu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shiwu Zhang <zhangshw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xueping Liu <xpliu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Hilbert Zhang <zzhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Also enable it on the Armada 7040 DB board
 
-Export sdhci_set_ios() in sdhci.c.
-Thus vendor sdhci driver can implement its own set_ios() routine.
-
-Signed-off-by: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/marvell/armada-7040-db.dts |  8 ++++++++
+ arch/arm64/boot/dts/marvell/armada-ap806.dtsi  |  9 +++++++++
+ 2 files changed, 17 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 71654b90227f..ea06faf8a437 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1563,7 +1563,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- }
- EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+diff --git a/arch/arm64/boot/dts/marvell/armada-7040-db.dts b/arch/arm64/boot/dts/marvell/armada-7040-db.dts
+index 070b589680c5..f8bdabdbd864 100644
+--- a/arch/arm64/boot/dts/marvell/armada-7040-db.dts
++++ b/arch/arm64/boot/dts/marvell/armada-7040-db.dts
+@@ -146,3 +146,11 @@
+ &cpm_usb3_1 {
+ 	status = "okay";
+ };
++
++&sdhci0 {
++	status = "okay";
++	bus-width = <4>;
++	no-1-8-v;
++	non-removable;
++	marvell,xenon-emmc;
++};
+diff --git a/arch/arm64/boot/dts/marvell/armada-ap806.dtsi b/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
+index 7b6136182ad0..174c41b24d4c 100644
+--- a/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
++++ b/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
+@@ -229,6 +229,15 @@
  
--static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
-@@ -1723,6 +1723,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
-+EXPORT_SYMBOL_GPL(sdhci_set_ios);
+ 			};
  
- static int sdhci_get_cd(struct mmc_host *mmc)
- {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17fb7eb..37771de4cafa 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -688,6 +688,7 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
- void sdhci_set_bus_width(struct sdhci_host *host, int width);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
- void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-+void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
- 
- #ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host);
++			sdhci0: sdhci@6e0000 {
++				compatible = "marvell,xenon-sdhci";
++				reg = <0x6e0000 0x300>;
++				interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
++				clock-names = "core";
++				clocks = <&cpm_syscon0 1 4>;
++				status = "disabled";
++			};
++
+ 			ap_syscon: system-controller@6f4000 {
+ 				compatible = "marvell,ap806-system-controller",
+ 					     "syscon";
 -- 
 git-series 0.8.10
 --
