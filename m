@@ -1,78 +1,61 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH 0/10] mmc: Add support to Marvell Xenon SD Host Controller
-Date: Mon, 31 Oct 2016 12:09:49 +0100
-Message-ID: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from up.free-electrons.com ([163.172.77.33]:50732 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S935562AbcJaLKI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2016 07:10:08 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 3/10] mmc: sdhci: Export sdhci_execute_tuning() in sdhci.c
+Date: Mon, 31 Oct 2016 12:09:52 +0100
+Message-ID: <316397d154927e413720ca2b2ad4089eaef24551.1477911954.git-series.gregory.clement@free-electrons.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Ziji Hu <huziji@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+From: Ziji Hu <huziji@marvell.com>
 
-This the second version of the series adding support for the SDHCI
-Xenon controller. It can be currently found on the Armada 37xx and the
-Armada 7K/8K but will be also used in more Marvell SoC (and not only
-the mvebu ones actually).
+Export sdhci_execute_tuning() from sdhci.c.
+Thus vendor sdhci driver can execute its own tuning process.
 
-Some of the remarks had been taking into account since the first
-version, according to Ziji Hu, here are the following chcanges:
-"Changes in V2:
-  rebase on v4.9-rc2.
-  Re-write Xenon bindings. Ajust Xenon DT property naming.
-  Add a new DT property to indicate eMMC card type, instead of using
-  variable card_candidate.
-  Clear quirks SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 in Xenon platform data
-  Add support to HS400 retuning."
+Signed-off-by: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+---
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-I think the main open point which remains is about issuing commands
-from the ->set_ios() callback (in patch 7).
-Ulf, could you comment about it?
-
-Thanks,
-
-Gregory
-
-Gregory CLEMENT (3):
-  arm64: dts: marvell: add eMMC support for Armada 37xx
-  arm64: dts: marvell: add sdhci support for Armada 7K/8K
-  arm64: configs: enable SDHCI driver for Xenon
-
-Ziji Hu (7):
-  mmc: sdhci: Export sdhci_set_ios() from sdhci.c
-  mmc: sdhci: Export sdhci_start_signal_voltage_switch() in sdhci.c
-  mmc: sdhci: Export sdhci_execute_tuning() in sdhci.c
-  MAINTAINERS: add entry for Marvell Xenon MMC Host Controller drivers
-  dt: bindings: Add bindings for Marvell Xenon SD Host Controller
-  mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-  mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC
-
- Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt |  161 +-
- MAINTAINERS                                                   |    7 +-
- arch/arm64/boot/dts/marvell/armada-3720-db.dts                |    8 +-
- arch/arm64/boot/dts/marvell/armada-37xx.dtsi                  |   11 +-
- arch/arm64/boot/dts/marvell/armada-7040-db.dts                |    8 +-
- arch/arm64/boot/dts/marvell/armada-ap806.dtsi                 |    9 +-
- arch/arm64/configs/defconfig                                  |    1 +-
- drivers/mmc/host/Kconfig                                      |    9 +-
- drivers/mmc/host/Makefile                                     |    3 +-
- drivers/mmc/host/sdhci-xenon-phy.c                            | 1181 +++++++-
- drivers/mmc/host/sdhci-xenon-phy.h                            |  157 +-
- drivers/mmc/host/sdhci-xenon.c                                |  598 ++++-
- drivers/mmc/host/sdhci-xenon.h                                |  159 +-
- drivers/mmc/host/sdhci.c                                      |   11 +-
- drivers/mmc/host/sdhci.h                                      |    4 +-
- 15 files changed, 2323 insertions(+), 4 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
- create mode 100644 drivers/mmc/host/sdhci-xenon-phy.c
- create mode 100644 drivers/mmc/host/sdhci-xenon-phy.h
- create mode 100644 drivers/mmc/host/sdhci-xenon.c
- create mode 100644 drivers/mmc/host/sdhci-xenon.h
-
-base-commit: 9fe68cad6e74967b88d0c6aeca7d9cd6b6e91942
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8e6e4e37e3b4..e971abb1368f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1950,7 +1950,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return 0;
+ }
+ 
+-static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	u16 ctrl;
+@@ -2139,6 +2139,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	return err;
+ }
++EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
+ 
+ static int sdhci_select_drive_strength(struct mmc_card *card,
+ 				       unsigned int max_dtr, int host_drv,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index cd18b6f19c3b..95beadc66849 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -691,6 +691,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ 
+ #ifdef CONFIG_PM
+ extern int sdhci_suspend_host(struct sdhci_host *host);
 -- 
 git-series 0.8.10
