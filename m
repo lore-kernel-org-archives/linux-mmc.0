@@ -1,49 +1,28 @@
-From: "Leonardo G. Veiga" <leogveiga@gmail.com>
-Subject: [PATCH] sdhci-esdhc-imx: fix bus-width for 1-bit operation.
-Date: Tue,  1 Nov 2016 13:58:25 -0200
-Message-ID: <1478015905-31262-1-git-send-email-leogveiga@gmail.com>
+From: Scott Branden <scott.branden@broadcom.com>
+Subject: [PATCH v2 0/2] mmc: sdhci-iproc: Add byte register access support
+Date: Tue,  1 Nov 2016 09:37:55 -0700
+Message-ID: <1478018277-10097-1-git-send-email-scott.branden@broadcom.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stefan@agner.ch, raul.munoz@toradex.com, leonardo.veiga@toradex.com
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
+Add brcm,sdhci-iproc compat string and code for support of newer versions of
+sdhci-iproc controller that allow byte-wise register accesses.
 
-The 1-bit operation mode, enabled by seeting the 'bus-width' property of
-the device tree 'esdhc' node to <1>, not work while using SD card.
+Changes from v1:
+- added details to bindings documentation to clarify usage of brcm,sdhci-iproc
+compatibility string
 
-The behavior is only noticed when only the data pin 0 is connected to the
-hardware. A series of kernel errors are printed to the console, all of them
-returning the following error message followed by some explanation:
-mmcblk0: error -84 transferring data
+Scott Branden (2):
+  mmc: sdhci-iproc: Add brcm,sdhci-iproc compat string in bindings
+    document
+  mmc: sdhci-iproc: support standard byte register accesses
 
-If four data lines are connected, it ignores the device-tree
-property and works in 4-bit mode of operation without errors. The hardware
-used for testing does not support 8-bit mode.
+ .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  9 ++++++
+ drivers/mmc/host/sdhci-iproc.c                     | 35 ++++++++++++++++++++--
+ 2 files changed, 42 insertions(+), 2 deletions(-)
 
-Check the 'bus-width' property and if set to <1>, enable the
-SDHCI_QUIRK_FORCE_1_BIT_DATA quirk.
-
-Signed-off-by: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index c9fbc4c3..88d7d22 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1003,6 +1003,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
- 	}
- 
-+	if (!of_property_read_u32(np, "bus-width", &boarddata->max_bus_width)
-+		&& boarddata->max_bus_width == 1)
-+		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
-+
- 	/* call to generic mmc_of_parse to support additional capabilities */
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
 -- 
-2.7.4
+2.5.0
