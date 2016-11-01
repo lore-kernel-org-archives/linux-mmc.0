@@ -1,467 +1,156 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: Re: [PATCH v2 2/5] mmc: zx: Initial support for ZX mmc controller
-Date: Tue, 1 Nov 2016 09:16:08 +0800
-Message-ID: <CABymUCOzkUxzC-wSedni+bL3ZCNNrUDKS2-J+Guso8QR5ePf8w@mail.gmail.com>
-References: <1477622229-32060-1-git-send-email-jun.nie@linaro.org>
- <CGME20161028023910epcas1p1bb1402ed0abeea9507a77ae70cb49c8b@epcas1p1.samsung.com>
- <1477622229-32060-3-git-send-email-jun.nie@linaro.org> <331dab06-72d2-d382-f46b-04c2a85b70d1@samsung.com>
- <CABymUCPe3dsn5U-5igUjRUSUw006XkaWLbwYp3a2mk1jSmP9=A@mail.gmail.com> <efa23148-caa2-e9ef-d3c4-f2a6e1d9a4c5@samsung.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: Regression after "do not use CMD13 to get status after speed
+ mode switch"
+Date: Tue, 1 Nov 2016 09:43:45 +0800
+Message-ID: <1477964625.4162.3.camel@mhfsdcap03>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+         <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
+         <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com>
+         <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
+         <1476930167.11050.4.camel@mhfsdcap03>
+         <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+         <CAPDyKFpQn+Es6RwiYp319B1KcUduQ_fa2ou6V_2TrQhEsgV4Jw@mail.gmail.com>
+         <da9c6695-4dfb-6ba3-99f3-4751880d650d@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:36634 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965174AbcKABQK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2016 21:16:10 -0400
-Received: by mail-qk0-f178.google.com with SMTP id o68so184058888qkf.3
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2016 18:16:10 -0700 (PDT)
-In-Reply-To: <efa23148-caa2-e9ef-d3c4-f2a6e1d9a4c5@samsung.com>
+Received: from mailgw02.mediatek.com ([218.249.47.111]:39362 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S947929AbcKABny (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2016 21:43:54 -0400
+In-Reply-To: <da9c6695-4dfb-6ba3-99f3-4751880d650d@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-2016-10-31 17:40 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> On 10/31/2016 05:47 PM, Jun Nie wrote:
->> 2016-10-28 13:16 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
->>> On 10/28/2016 11:37 AM, Jun Nie wrote:
->>>> This platform driver adds initial support for the DW host controller
->>>> found on ZTE SoCs.
->>>>
->>>> It has been tested on ZX296718 EVB board currently. More support on
->>>> timing tuning will be added when hardware is available.
->>>>
->>>> Signed-off-by: Jun Nie <jun.nie@linaro.org>
->>>> ---
->>>>  drivers/mmc/host/Kconfig     |   9 ++
->>>>  drivers/mmc/host/Makefile    |   1 +
->>>>  drivers/mmc/host/dw_mmc-zx.c | 230 +++++++++++++++++++++++++++++++++++++++++++
->>>>  drivers/mmc/host/dw_mmc-zx.h |  23 +++++
->>>>  4 files changed, 263 insertions(+)
->>>>  create mode 100644 drivers/mmc/host/dw_mmc-zx.c
->>>>  create mode 100644 drivers/mmc/host/dw_mmc-zx.h
->>>>
->>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>>> index 5274f50..2b3202c 100644
->>>> --- a/drivers/mmc/host/Kconfig
->>>> +++ b/drivers/mmc/host/Kconfig
->>>> @@ -662,6 +662,15 @@ config MMC_DW_ROCKCHIP
->>>>         Synopsys DesignWare Memory Card Interface driver. Select this option
->>>>         for platforms based on RK3066, RK3188 and RK3288 SoC's.
->>>>
->>>> +config MMC_DW_ZX
->>>> +     tristate "ZTE specific extensions for Synopsys DW Memory Card Interface"
->>>> +     depends on MMC_DW
->>>
->>> I guess MMC_DW_ZX depends on your SoC config, doesn't?
->>
->> Right, will add dependency.
->>
->>>
->>>> +     select MMC_DW_PLTFM
->>>> +     help
->>>> +       This selects support for ZTE SoC specific extensions to the
->>>> +       Synopsys DesignWare Memory Card Interface driver. Select this option
->>>> +       for platforms based on ZX296718 SoC's.
->>>> +
->>>>  config MMC_SH_MMCIF
->>>>       tristate "SuperH Internal MMCIF support"
->>>>       depends on HAS_DMA
->>>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
->>>> index e2bdaaf..9766143 100644
->>>> --- a/drivers/mmc/host/Makefile
->>>> +++ b/drivers/mmc/host/Makefile
->>>> @@ -48,6 +48,7 @@ obj-$(CONFIG_MMC_DW_EXYNOS) += dw_mmc-exynos.o
->>>>  obj-$(CONFIG_MMC_DW_K3)              += dw_mmc-k3.o
->>>>  obj-$(CONFIG_MMC_DW_PCI)     += dw_mmc-pci.o
->>>>  obj-$(CONFIG_MMC_DW_ROCKCHIP)        += dw_mmc-rockchip.o
->>>> +obj-$(CONFIG_MMC_DW_ZX)              += dw_mmc-zx.o
->>>>  obj-$(CONFIG_MMC_SH_MMCIF)   += sh_mmcif.o
->>>>  obj-$(CONFIG_MMC_JZ4740)     += jz4740_mmc.o
->>>>  obj-$(CONFIG_MMC_VUB300)     += vub300.o
->>>> diff --git a/drivers/mmc/host/dw_mmc-zx.c b/drivers/mmc/host/dw_mmc-zx.c
->>>> new file mode 100644
->>>> index 0000000..0404f8e
->>>> --- /dev/null
->>>> +++ b/drivers/mmc/host/dw_mmc-zx.c
->>>> @@ -0,0 +1,230 @@
->>>> +/*
->>>> + * ZX Specific Extensions for Synopsys DW Multimedia Card Interface driver
->>>> + *
->>>> + * Copyright (C) 2016, Linaro Ltd.
->>>> + * Copyright (C) 2016, ZTE Corp.
->>>> + *
->>>> + * This program is free software; you can redistribute it and/or modify
->>>> + * it under the terms of the GNU General Public License as published by
->>>> + * the Free Software Foundation; either version 2 of the License, or
->>>> + * (at your option) any later version.
->>>> + */
->>>> +
->>>> +#include <linux/clk.h>
->>>> +#include <linux/mfd/syscon.h>
->>>> +#include <linux/mmc/dw_mmc.h>
->>>> +#include <linux/mmc/host.h>
->>>> +#include <linux/mmc/mmc.h>
->>>> +#include <linux/module.h>
->>>> +#include <linux/of.h>
->>>> +#include <linux/platform_device.h>
->>>> +#include <linux/pm_runtime.h>
->>>> +#include <linux/regmap.h>
->>>> +#include <linux/slab.h>
->>>> +
->>>> +#include "dw_mmc.h"
->>>> +#include "dw_mmc-pltfm.h"
->>>> +#include "dw_mmc-zx.h"
->>>> +
->>>> +#define ZX_DLL_LOCKED BIT(2)
->>>
->>> Some DLL rigsters and bits are defined in dw_mmc-zx.h.
->>> why defined ZX_DLL_LOCKED at here.
->>>
->>> You can choose that all defines locates to dw_mmc-zx.c or dw_mmc-zx.h
->>>
->> Will move together.
->>
->>>> +
->>>> +struct dw_mci_zx_priv_data {
->>>> +     struct regmap   *sysc_base;
->>>> +};
->>>> +
->>>> +static int dw_mci_zx_emmc_set_delay(struct dw_mci *host, unsigned int delay,
->>>> +                                 unsigned int clk_flag)
->>>
->>> Why do you use "unsigned int" as clk_flag? It's just use one of 0 and 1.
->>> And 0 and 1 are what means? On/Off?
->>>
->> Yes,  enumeration shall looks better here. It is a flag for different
->> delay type. Will change to enumeration.
->>
->>>> +{
->>>> +     struct dw_mci_zx_priv_data *priv = host->priv;
->>>> +     struct regmap *sysc_base = priv->sysc_base;
->>>> +     unsigned int clksel;
->>>> +     unsigned int loop = 1000;
->>>> +     int ret;
->>>> +
->>>
->>> priv->sysc_base doesn't never NULL?
->>
->> For this SoC, it is never NULL if dts is correct. Adding a check is
->> better anyway.
->>>
->>>> +     ret = regmap_write(sysc_base, LB_AON_EMMC_CFG_REG0,
->>>> +                        PARA_DLL_START_POINT(4) | PARA_DLL_LOCK_NUM(4));
->>>
->>> Could you add the comment for controlling this regs?
->>> I'm not sure because i didn't have ZX TRM..but PARA_DLL_LOCK_NUM should be locked?
->>>
->>> It doesn't affect to other bit?
->>> I think you can use the regmap_update_bits instead of regmap_write.
->>
->> It does not affect other bit as all bits are write as desired. But
->> your suggestion make it clearer.
->>
->>>
->>>> +     if (ret)
->>>> +             return ret;
->>>> +
->>>> +     ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG1, &clksel);
->>>> +     if (ret)
->>>> +             return ret;
->>>> +
->>>> +     if (clk_flag) {
->>>> +             clksel &= ~(CLK_SAMP_DELAY(0x7F));
->>>
->>> It's meaningless..CLK_SAMP_DELAY used only at here.
->>> CLK_SAMP_DELAY ((x) & 0x7F << 0)
->>>
->>> It's just CLK_SAMP_DELAY_MASK.?
->>>
->>> #define CLK_SAMP_DELAY_MASK (0x7F << 0)
->>> clksel &= ~CLK_SAMP_DELAY_MASK;
->>>
->> Right, clearer.
->>
->>>
->>>> +             clksel |= (delay << 8);
->>>
->>> Use the CLK_SAMP_DELAY_SHIFT instead of 8.
->>>
->>>> +     } else {
->>>> +             clksel &= ~(READ_DQS_DELAY(0x7F));
->>>
->>> Ditto.
->>> And i think it also can be changed to regmap_update_bits.
->>>
->>>> +             clksel |= delay;
->>>> +     }
->>>> +
->>>> +     regmap_write(sysc_base, LB_AON_EMMC_CFG_REG1, clksel);
->>>> +     regmap_write(sysc_base, LB_AON_EMMC_CFG_REG0,
->>>> +                  PARA_DLL_START_POINT(4) | PARA_DLL_LOCK_NUM(4) |
->>>> +                  DLL_REG_SET);
->>>
->>> regmap_update_bits?
->>
->> Will do.
->>
->>>
->>>> +
->>>> +     do {
->>>> +             ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG2, &clksel);
->>>> +             if (ret)
->>>> +                     return ret;
->>>> +
->>>> +     } while (--loop && !(clksel & ZX_DLL_LOCKED));
->>>> +
->>>> +     if (!loop) {
->>>> +             dev_err(host->dev, "Error: %s dll lock fail\n", __func__);
->>>> +             return -EIO;
->>>> +     }
->>>> +
->>>> +     return 0;
->>>> +}
->>>> +
->>>> +static int dw_mci_zx_emmc_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>>> +{
->>>> +     struct dw_mci *host = slot->host;
->>>> +     struct mmc_host *mmc = slot->mmc;
->>>> +     int len, start = 0, end = 0, delay, best = 0;
->>>> +     int ret = 0;
->>>> +
->>>> +     for (delay = 1 ; delay < 128; delay++) {
->>>> +             ret = dw_mci_zx_emmc_set_delay(host, delay, 1);
->>>> +             if (ret)
->>>> +                     return ret;
->>>
->>> When it's failed, just returned.
->>> Doesn't need to try with next delay value?
->>
->> Yes, more retry make robust.
->>
->>>
->>>> +
->>>> +             if (mmc_send_tuning(mmc, opcode, NULL)) {
->>>> +                     if (start >= 0) {
->>>> +                             end = delay - 1;
->>>> +                             /* check and update longest good range */
->>>> +                             if ((end - start) > len) {
->>>> +                                     best = (start + end) >> 1;
->>>> +                                     len = end - start;
->>>> +                             }
->>>> +                     }
->>>> +                     start = -1;
->>>> +                     end = 0;
->>>> +                     continue;
->>>> +             }
->>>> +             if (start < 0)
->>>> +                     start = delay;
->>>> +     }
->>>> +
->>>> +     if (start >= 0) {
->>>> +             end = delay - 1;
->>>> +             if ((end - start) > len) {
->>>> +                     best = (start + end) >> 1;
->>>> +                     len = end - start;
->>>> +             }
->>>> +     }
->>>> +     if (best < 0)
->>>> +             return -EIO;
->>>> +
->>>> +     dev_info(host->dev, "%s best range: start %d end %d\n", __func__,
->>>> +              start, end);
->>>> +     dw_mci_zx_emmc_set_delay(host, best, 1);
->>>> +     return 0;
->>>> +}
->>>> +
->>>> +static int dw_mci_zx_prepare_hs400_tuning(struct dw_mci *host,
->>>> +                                       struct mmc_ios *ios)
->>>> +{
->>>> +     int ret;
->>>> +
->>>> +     /* config phase shift 90 */
->>>> +     ret = dw_mci_zx_emmc_set_delay(host, 32, 0);
->>>
->>> It's always fixed to 32? What means 32?
->>
->> It means 90 degree shift for value 32. This configuration comes from
->> ZTE engineer as I do not have hardware for this tuning. Let's just
->> keep it with adding more comments till tuning is needed.
->>
->>>
->>>> +     if (ret < 0)
->>>> +             return -EIO;
->>>> +
->>>> +     return 0;
->>>> +}
->>>> +
->>>> +static int dw_mci_zx_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>>> +{
->>>> +     struct dw_mci *host = slot->host;
->>>> +
->>>> +     if (host->verid == 0x290a) /* emmc */
->>>> +             return dw_mci_zx_emmc_execute_tuning(slot, opcode);
->>>
->>> I didn't know why you check host->verid is 2.90a..
->>> Is there any reason?
->> There are two version DW MMC IP on this SoC and different
->> configuration is needed for them. I do not have hardware for tuning
->> version 210A timing and will be added later.
->
-> you means there are two IP version with same SoC?
->
-> Best Regards,
-> Jaehoon Chung
+On Mon, 2016-10-31 at 15:09 +0200, Adrian Hunter wrote:
+> On 27/10/16 13:04, Ulf Hansson wrote:
+> > On 20 October 2016 at 09:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> >>> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
+> >>>> Adrian, Linus,
+> >>>>
+> >>>> Thanks for looking into this and reporting!
+> >>>>
+> >>>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>>>> On 18/10/16 11:36, Linus Walleij wrote:
+> >>>>>> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> >>>>>>
+> >>>>>>> Before this patch the eMMC is detected and all partitions enumerated
+> >>>>>>> immediately, but after the patch it doesn't come up at all, except
+> >>>>>>> sometimes, when it appears minutes (!) after boot, all of a sudden.
+> >>>>>>
+> >>>>>> FYI this is what it looks like when it eventually happens:
+> >>>>>> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+> >>>>>> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+> >>>>>> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+> >>>>>> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+> >>>>>> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+> >>>>>> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+> >>>>>> p14 p15 p16 p17 p18 p19 p20 p21 >
+> >>>>>>
+> >>>>>> So after 627 seconds, a bit hard for users to wait this long for their
+> >>>>>> root filesystem.
+> >>>>>
+> >>>>> If the driver does not support busy detection and the eMMC card provides
+> >>>>> zero as the cmd6 generic timeout (which it may especially as cmd6 generic
+> >>>>> timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
+> >>>>> waiting 10 minutes i.e.
+> >>>>>
+> >>>>> #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
+> >>>>
+> >>>> Urgh! Yes, I have verified that this is exactly what happens.
+> >>>>
+> >>>>>
+> >>>>> So removal of CMD13 polling for HS mode (as per commit
+> >>>>> 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
+> >>>>> combinations of eMMC cards and host drivers.
+> >>>>
+> >>>> I was looking in the __mmc_switch() function, it's just a pain to walk
+> >>>> trough it :-) So first out I decided to clean it up and factor out the
+> >>>> polling parts. I will post the patches first out tomorrow morning,
+> >>>> running some final test right now.
+> >>>>
+> >>>> Although, that of course doesn't solve our problem. As I see it we
+> >>>> only have a few options here.
+> >>>>
+> >>>> 1) In case when cmd6 generic timeout isn't available, let's assign
+> >>>> another empirically selected value.
+> >>>> 2) Use a specific timeout when switching to HS mode.
+> >>>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
+> >>>> with CMD13 for switching to HS mode - unless it causes issues for some
+> >>>> cards/drivers combination?
+> >>>>
+> >>>> BTW, I already tried 2) and it indeed solves the problem, although
+> >>>> depending on the selected timeout, it might delay the card detection
+> >>>> to process.
+> >>>>
+> >>>> Thoughts?
+> >>>
+> >>> I just have a try of switching to HS mode with Hynix EMMC, the first
+> >>> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
+> >>> that CMD13 cannot indicate current card status in this case.
+> >>
+> >> Thanks for sharing that. Okay, so clearly we have some cards that
+> >> don't supports polling with CMD13 when switching to HS mode.
+> >> One could of course add quirks for these kind of cards and do a fixed
+> >> delay for them, but then to find out which these cards are is going to
+> >> be hard.
+> >>
+> >> It seems like we are left with using a fixed delay. Any ideas of what
+> >> such delay should be? And should we have one specific for switch to
+> >> the various speed modes and a different one that overrides the CMD6
+> >> generic timout, when it doesn't exist?
+> >>
+> > 
+> > Replying to my own earlier response, as I believe the problem could
+> > also be related to another old commit, see below.
+> > 
+> > commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
+> > Author: Seungwon Jeon <tgih.jun@samsung.com>
+> > Date:   Wed Sep 4 21:21:05 2013 +0900
+> > 
+> >     mmc: add ignorance case for CMD13 CRC error
+> > 
+> >     While speed mode is changed, CMD13 cannot be guaranteed.
+> >     According to the spec., it is not recommended to use CMD13
+> >     to check the busy completion of the timing change.
+> >     If CMD13 is used in this case, CRC error must be ignored.
+> > 
+> >     Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >     Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >     Signed-off-by: Chris Ball <cjb@laptop.org>
+> > 
+> > 
+> > The intent with this commit was not really correct. We don't want to
+> > ignore CRC errors, but instead we should *re-try* sending CMD13 once
+> > we get a CRC error.
+> > 
+> > Unfortunate since this commit, instead we tell the host driver to
+> > *ignore* CRC errors and instead reads the status and returns 0
+> > (indicating success). In the mmc core, in __mmc_switch(), it will thus
+> > parse the status reply, even for a reply that might have been received
+> > with a CRC error. Not good!
+> 
+> I agree: ignoring CRC errors and then expecting the status in the response
+> to be correct doesn't make sense.
+> 
+> However, it raises the question of what to do if there are always CRC errors
+> e.g. if it only works without CRC errors once the mode and frequency are
+> changed in the host controller.
+> 
+> > I am wondering whether this actually is the main problem to why we
+> > think polling isn't working for some cases. And perhaps that was the
+> > original problem Chaotian was trying to solve?
+> > 
+> > Thoughts?
+> 
+> Does Chaotian have a real problem since his driver has busy detection anyway?
 
-Right, two version IP exist on the same SoC.
+In fact, I have not encounter CRC errors of CMD13, I have tried several
+eMMC cards, after mode switch, CMD13 will only gets 0x800 response and
+we don't know if card is busy by 0x800 response.
 
->
->>
->>>
->>>> +
->>>> +     return 0;
->>>> +}
->>>> +
->>>> +static int dw_mci_zx_parse_dt(struct dw_mci *host)
->>>> +{
->>>> +     struct device_node *np = host->dev->of_node;
->>>> +     struct device_node *node;
->>>> +     struct dw_mci_zx_priv_data *priv;
->>>> +     struct regmap *sysc_base;
->>>> +     int ret;
->>>> +
->>>> +     node = of_parse_phandle(np, "zte,aon-syscon", 0);
->>>> +     if (node) {
->>>> +             sysc_base = syscon_node_to_regmap(node);
->>>> +             of_node_put(node);
->>>
->>> Use the syscon_regmap_lookup_by_phandle(). It's same behavior.
->> Will do.
->>>
->>>> +
->>>> +             if (IS_ERR(sysc_base)) {
->>>> +                     ret = PTR_ERR(sysc_base);
->>>> +                     if (ret != -EPROBE_DEFER)
->>>> +                             dev_err(host->dev, "Can't get syscon: %d\n",
->>>> +                                     ret);
->>>> +                     return ret;
->>>> +             }
->>>> +     }
->>>> +
->>>> +     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->>>> +     if (!priv)
->>>> +             return -ENOMEM;
->>>> +     priv->sysc_base = sysc_base;
->>>
->>> Is there no case that sysc_base is NULL?
->>
->> sysc_base is needed only for eMMC. So it is NULL for SD/MMC cases, and
->> we can save memory for SD/MMC cases here :)
->>
->>>
->>>> +     host->priv = priv;
->>>> +
->>>> +     return 0;
->>>> +}
->>>> +
->>>> +static unsigned long zx_dwmmc_caps[3] = {
->>>> +     MMC_CAP_CMD23,
->>>> +     MMC_CAP_CMD23,
->>>> +     MMC_CAP_CMD23,
->>>> +};
->>>> +
->>>> +static const struct dw_mci_drv_data zx_drv_data = {
->>>> +     .caps                   = zx_dwmmc_caps,
->>>> +     .execute_tuning         = dw_mci_zx_execute_tuning,
->>>> +     .prepare_hs400_tuning   = dw_mci_zx_prepare_hs400_tuning,
->>>> +     .parse_dt               = dw_mci_zx_parse_dt,
->>>> +};
->>>> +
->>>> +static const struct of_device_id dw_mci_zx_match[] = {
->>>> +     { .compatible = "zte,dw-mshc", .data = &zx_drv_data},
->>>> +};
->>>> +MODULE_DEVICE_TABLE(of, dw_mci_zx_match);
->>>> +
->>>> +static int dw_mci_zx_probe(struct platform_device *pdev)
->>>> +{
->>>> +     const struct dw_mci_drv_data *drv_data;
->>>> +     const struct of_device_id *match;
->>>> +
->>>> +     match = of_match_node(dw_mci_zx_match, pdev->dev.of_node);
->>>> +     drv_data = match->data;
->>>> +
->>>> +     return dw_mci_pltfm_register(pdev, drv_data);
->>>> +}
->>>> +
->>>> +static const struct dev_pm_ops dw_mci_zx_dev_pm_ops = {
->>>> +     SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
->>>> +                             pm_runtime_force_resume)
->>>> +     SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
->>>> +                        dw_mci_runtime_resume,
->>>> +                        NULL)
->>>> +};
->>>> +
->>>> +static struct platform_driver dw_mci_zx_pltfm_driver = {
->>>> +     .probe          = dw_mci_zx_probe,
->>>> +     .remove         = dw_mci_pltfm_remove,
->>>> +     .driver         = {
->>>> +             .name           = "dwmmc_zx",
->>>> +             .of_match_table = dw_mci_zx_match,
->>>> +             .pm             = &dw_mci_zx_dev_pm_ops,
->>>> +     },
->>>> +};
->>>> +
->>>> +module_platform_driver(dw_mci_zx_pltfm_driver);
->>>> +
->>>> +MODULE_DESCRIPTION("ZTE emmc/sd driver");
->>>> +MODULE_LICENSE("GPL v2");
->>>> diff --git a/drivers/mmc/host/dw_mmc-zx.h b/drivers/mmc/host/dw_mmc-zx.h
->>>> new file mode 100644
->>>> index 0000000..b1aac52
->>>> --- /dev/null
->>>> +++ b/drivers/mmc/host/dw_mmc-zx.h
->>>> @@ -0,0 +1,23 @@
->>>> +#ifndef _DW_MMC_ZX_H_
->>>> +#define _DW_MMC_ZX_H_
->>>> +
->>>> +/* dll reg offset*/
->>>> +#define LB_AON_EMMC_CFG_REG0  0x1B0
->>>> +#define LB_AON_EMMC_CFG_REG1  0x1B4
->>>> +#define LB_AON_EMMC_CFG_REG2  0x1B8
->>>> +
->>>> +/* LB_AON_EMMC_CFG_REG0 register defines */
->>>> +#define PARA_DLL_START_POINT(x)      (((x) & 0xFF) << 0)
->>>> +#define DLL_REG_SET          BIT(8)
->>>> +#define PARA_DLL_LOCK_NUM(x) (((x) & 7) << 16)
->>>> +#define PARA_PHASE_DET_SEL(x)        (((x) & 7) << 20)
->>>> +#define PARA_DLL_BYPASS_MODE BIT(23)
->>>> +#define PARA_HALF_CLK_MODE   BIT(24)
->>>
->>> PAR_PHASE_DET_SEL/PARA_DLL_BYPASS_MODE_BIT/PARA_HALF_CLK_MODE are never used anywhere.
->>>
->>>> +
->>>> +/* LB_AON_EMMC_CFG_REG1 register defines */
->>>> +#define READ_DQS_DELAY(x)    (((x) & 0x7F) << 0)
->>>> +#define READ_DQS_BYPASS_MODE BIT(7)
->>>> +#define CLK_SAMP_DELAY(x)    (((x) & 0x7F) << 8)
->>>> +#define CLK_SAMP_BYPASS_MODE BIT(15)
->>>
->>> Also READ_DQS_BYPASS_MODe/CLK_SAMP_BYBASS_MODE didnt used anywhere.
->>>
->>>
->>> Hmm. These are not dwmmc host controller's register.
->>> So If you needs to add these defines..I think you needs to add dessriptions in more detail.
->>>
->>> At least..Which board's DLL reg offset.
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>>> +
->>>> +#endif /* _DW_MMC_ZX_H_ */
->>>>
->>>
->>
->>
->>
->
+
