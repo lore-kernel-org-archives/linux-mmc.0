@@ -1,66 +1,43 @@
-From: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: Add brcm,sdhci-iproc compat string
- in bindings document
-Date: Tue, 1 Nov 2016 09:40:31 -0700
-Message-ID: <7b3c4b58-75a7-87c3-f16c-ff2a46cddc19@broadcom.com>
-References: <1476297352-7812-1-git-send-email-scott.branden@broadcom.com>
- <1476297352-7812-2-git-send-email-scott.branden@broadcom.com>
- <20161018131614.lskxbdir3ghun5md@rob-hp-laptop>
- <93502f42-ae86-742f-a8b1-3645005fa98e@broadcom.com>
+From: John Stultz <john.stultz@linaro.org>
+Subject: Re: [PATCH 0/2] mmc: dw_mmc: fix the wrong operation for reset controller
+Date: Tue, 1 Nov 2016 14:56:00 -0700
+Message-ID: <CALAqxLXs704Y-TGAQsggSnDohyFDYvQw=zYuiHRu9UKgHEfbFw@mail.gmail.com>
+References: <20161031024942.4415-1-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <93502f42-ae86-742f-a8b1-3645005fa98e-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Anup Patel <anup.patel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:34246 "EHLO
+        mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751050AbcKAV4C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Nov 2016 17:56:02 -0400
+Received: by mail-oi0-f43.google.com with SMTP id 62so17491202oif.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Nov 2016 14:56:01 -0700 (PDT)
+In-Reply-To: <20161031024942.4415-1-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, lkml <linux-kernel@vger.kernel.org>, Guodong Xu <guodong.xu@linaro.org>, Leo Yan <leo.yan@linaro.org>, Vincent Guittot <vincent.guittot@linaro.org>
 
-Hi Rob,
-
-On 16-10-18 01:08 PM, Scott Branden wrote:
-> Hi Rob,
+On Sun, Oct 30, 2016 at 7:49 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch adds the "reset-names" as reset controller for dwmmc controller.
+> Linaro guys had reported the issue about booting stuck.
 >
-> On 16-10-18 06:16 AM, Rob Herring wrote:
->> On Wed, Oct 12, 2016 at 11:35:51AM -0700, Scott Branden wrote:
->>> Adds brcm,sdhci-iproc compat string to DT bindings document for
->>> the iProc SDHCI driver.
->>>
->>> Signed-off-by: Anup Patel <anup.patel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
->>> Signed-off-by: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt | 1 +
->>>  1 file changed, 1 insertion(+)
->>>
->>> diff --git
->>> a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>> b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>> index be56d2b..aa58b94 100644
->>> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>> @@ -7,6 +7,7 @@ Required properties:
->>>  - compatible : Should be one of the following
->>>             "brcm,bcm2835-sdhci"
->>>             "brcm,sdhci-iproc-cygnus"
->>> +           "brcm,sdhci-iproc"
->>
->> Seems kind of generic. SoC specific compatible strings please.
->>
-> The compatibility string is generic on purpose as it is not intended to
-> be SoC specific but work on all new iproc SoCs that have the proper
-> fixes in place for this block (unlike bcm2835 and cygnus class devices
-> which can only do 32-bit accesses).  I could call it brcm,sdhci-iproc-v2
-> if that is better or leave it as is.  Please let me know your preferences.
+> Some SoCs are enabled the CONFIG_RESET_CONTROLLER.
+> then dwmmc controller are waiting for getting reset controller.
+> But if doesn't define "resets" property in device-tree, it should be stuck.
 >
-I just sent out v2 of the patch with additional details in the device 
-tree bindings document.  Please let me know if this covers your 
-concerns.  The SDHCI controller binding is not SoC specific and is used 
-in multiple SoCs going forward with the same binding.
+> If use the reset-names as reset controller for dwmmc controller,
+> it's more stable than now.
+> This commit is related with the below commit.
+>
+> Fixes: d6786fefe816 ("mmc: dw_mmc: add reset support to dwmmc host controller")
 
-> Regards,
-> Scott
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So I wasn't hit by the issue, as I don't tend to boot from SD on my
+hikey, but I did run these patches and I'm not seeing any issues with
+my Android environment.
+
+So for what its worth:
+Acked-by: John Stultz <john.stultz@linaro.org>
+
+thanks
+-john
