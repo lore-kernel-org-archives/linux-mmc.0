@@ -1,246 +1,170 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 00/25] mmc: mmc: Add Software Command Queuing
-Date: Wed, 2 Nov 2016 12:09:02 +0200
-Message-ID: <3128dca4-374c-02d3-dda6-645f46e64a23@intel.com>
-References: <1477298260-5064-1-git-send-email-adrian.hunter@intel.com>
- <76a4ab7d-b4bb-0500-35af-c1a10b51af7c@codeaurora.org>
- <23591370-9dcc-49f8-fa80-ce2d60c7d082@intel.com>
- <4d64111f-7bdb-22ed-5a53-e23f6bfcb28b@codeaurora.org>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: Regression after "do not use CMD13 to get status after speed
+ mode switch"
+Date: Wed, 2 Nov 2016 18:28:36 +0800
+Message-ID: <1478082516.3862.3.camel@mhfsdcap03>
+References: <CACRpkdbfNq+R9U9AwsKBM=xyKKTzyVDkiW4jqJ0Nb2LXvq20BA@mail.gmail.com>
+         <CACRpkdaUf+YpUEhi-njseR1GQXvM3GuA97Q5GuEpQ3NtFdkoHw@mail.gmail.com>
+         <d08ed4e8-84b2-e337-c9ea-a6e36fb6b9e7@intel.com>
+         <CAPDyKFp097rBjcJuT1os7W+B5zVUVuprU5_gyE0qU4K=AnA88w@mail.gmail.com>
+         <1476930167.11050.4.camel@mhfsdcap03>
+         <CAPDyKFqo_LJ_TS158X9RQ2UeGvLcrgCC8r_4to8c7zy0zQggnQ@mail.gmail.com>
+         <CAPDyKFpQn+Es6RwiYp319B1KcUduQ_fa2ou6V_2TrQhEsgV4Jw@mail.gmail.com>
+         <da9c6695-4dfb-6ba3-99f3-4751880d650d@intel.com>
+         <1477964625.4162.3.camel@mhfsdcap03>
+         <17bdfdf2-5c58-7b09-6d4d-4f5173f6058e@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:53881 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750964AbcKBKN7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Nov 2016 06:13:59 -0400
-In-Reply-To: <4d64111f-7bdb-22ed-5a53-e23f6bfcb28b@codeaurora.org>
+Received: from mailgw02.mediatek.com ([218.249.47.111]:51629 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751130AbcKBK2p (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2016 06:28:45 -0400
+In-Reply-To: <17bdfdf2-5c58-7b09-6d4d-4f5173f6058e@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Andy Gross <andy.gross@linaro.org>
 
-On 02/11/16 11:30, Ritesh Harjani wrote:
-> Hi Adrian,
+On Wed, 2016-11-02 at 10:19 +0200, Adrian Hunter wrote:
+> On 01/11/16 03:43, Chaotian Jing wrote:
+> > On Mon, 2016-10-31 at 15:09 +0200, Adrian Hunter wrote:
+> >> On 27/10/16 13:04, Ulf Hansson wrote:
+> >>> On 20 October 2016 at 09:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >>>> On 20 October 2016 at 04:22, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> >>>>> On Wed, 2016-10-19 at 18:41 +0200, Ulf Hansson wrote:
+> >>>>>> Adrian, Linus,
+> >>>>>>
+> >>>>>> Thanks for looking into this and reporting!
+> >>>>>>
+> >>>>>> On 18 October 2016 at 15:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>>>>>> On 18/10/16 11:36, Linus Walleij wrote:
+> >>>>>>>> On Mon, Oct 17, 2016 at 4:32 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> >>>>>>>>
+> >>>>>>>>> Before this patch the eMMC is detected and all partitions enumerated
+> >>>>>>>>> immediately, but after the patch it doesn't come up at all, except
+> >>>>>>>>> sometimes, when it appears minutes (!) after boot, all of a sudden.
+> >>>>>>>>
+> >>>>>>>> FYI this is what it looks like when it eventually happens:
+> >>>>>>>> root@msm8660:/ [  627.710175] mmc0: new high speed MMC card at address 0001
+> >>>>>>>> [  627.711641] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+> >>>>>>>> [  627.715485] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+> >>>>>>>> [  627.736654] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+> >>>>>>>> [  627.747397] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+> >>>>>>>> [  627.756326]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+> >>>>>>>> p14 p15 p16 p17 p18 p19 p20 p21 >
+> >>>>>>>>
+> >>>>>>>> So after 627 seconds, a bit hard for users to wait this long for their
+> >>>>>>>> root filesystem.
+> >>>>>>>
+> >>>>>>> If the driver does not support busy detection and the eMMC card provides
+> >>>>>>> zero as the cmd6 generic timeout (which it may especially as cmd6 generic
+> >>>>>>> timeout wasn't added until eMMCv4.5), then __mmc_switch() defaults to
+> >>>>>>> waiting 10 minutes i.e.
+> >>>>>>>
+> >>>>>>> #define MMC_OPS_TIMEOUT_MS      (10 * 60 * 1000) /* 10 minute timeout */
+> >>>>>>
+> >>>>>> Urgh! Yes, I have verified that this is exactly what happens.
+> >>>>>>
+> >>>>>>>
+> >>>>>>> So removal of CMD13 polling for HS mode (as per commit
+> >>>>>>> 08573eaf1a70104f83fdbee9b84e5be03480e9ed) is going to be a problem for some
+> >>>>>>> combinations of eMMC cards and host drivers.
+> >>>>>>
+> >>>>>> I was looking in the __mmc_switch() function, it's just a pain to walk
+> >>>>>> trough it :-) So first out I decided to clean it up and factor out the
+> >>>>>> polling parts. I will post the patches first out tomorrow morning,
+> >>>>>> running some final test right now.
+> >>>>>>
+> >>>>>> Although, that of course doesn't solve our problem. As I see it we
+> >>>>>> only have a few options here.
+> >>>>>>
+> >>>>>> 1) In case when cmd6 generic timeout isn't available, let's assign
+> >>>>>> another empirically selected value.
+> >>>>>> 2) Use a specific timeout when switching to HS mode.
+> >>>>>> 3) Even if we deploy 1 (and 2), perhaps we still should allow polling
+> >>>>>> with CMD13 for switching to HS mode - unless it causes issues for some
+> >>>>>> cards/drivers combination?
+> >>>>>>
+> >>>>>> BTW, I already tried 2) and it indeed solves the problem, although
+> >>>>>> depending on the selected timeout, it might delay the card detection
+> >>>>>> to process.
+> >>>>>>
+> >>>>>> Thoughts?
+> >>>>>
+> >>>>> I just have a try of switching to HS mode with Hynix EMMC, the first
+> >>>>> CMD13 gets response of 0x900, but the EMMC is still pull-low DAT0. so
+> >>>>> that CMD13 cannot indicate current card status in this case.
+> >>>>
+> >>>> Thanks for sharing that. Okay, so clearly we have some cards that
+> >>>> don't supports polling with CMD13 when switching to HS mode.
+> >>>> One could of course add quirks for these kind of cards and do a fixed
+> >>>> delay for them, but then to find out which these cards are is going to
+> >>>> be hard.
+> >>>>
+> >>>> It seems like we are left with using a fixed delay. Any ideas of what
+> >>>> such delay should be? And should we have one specific for switch to
+> >>>> the various speed modes and a different one that overrides the CMD6
+> >>>> generic timout, when it doesn't exist?
+> >>>>
+> >>>
+> >>> Replying to my own earlier response, as I believe the problem could
+> >>> also be related to another old commit, see below.
+> >>>
+> >>> commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
+> >>> Author: Seungwon Jeon <tgih.jun@samsung.com>
+> >>> Date:   Wed Sep 4 21:21:05 2013 +0900
+> >>>
+> >>>     mmc: add ignorance case for CMD13 CRC error
+> >>>
+> >>>     While speed mode is changed, CMD13 cannot be guaranteed.
+> >>>     According to the spec., it is not recommended to use CMD13
+> >>>     to check the busy completion of the timing change.
+> >>>     If CMD13 is used in this case, CRC error must be ignored.
+> >>>
+> >>>     Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >>>     Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >>>     Signed-off-by: Chris Ball <cjb@laptop.org>
+> >>>
+> >>>
+> >>> The intent with this commit was not really correct. We don't want to
+> >>> ignore CRC errors, but instead we should *re-try* sending CMD13 once
+> >>> we get a CRC error.
+> >>>
+> >>> Unfortunate since this commit, instead we tell the host driver to
+> >>> *ignore* CRC errors and instead reads the status and returns 0
+> >>> (indicating success). In the mmc core, in __mmc_switch(), it will thus
+> >>> parse the status reply, even for a reply that might have been received
+> >>> with a CRC error. Not good!
+> >>
+> >> I agree: ignoring CRC errors and then expecting the status in the response
+> >> to be correct doesn't make sense.
+> >>
+> >> However, it raises the question of what to do if there are always CRC errors
+> >> e.g. if it only works without CRC errors once the mode and frequency are
+> >> changed in the host controller.
+> >>
+> >>> I am wondering whether this actually is the main problem to why we
+> >>> think polling isn't working for some cases. And perhaps that was the
+> >>> original problem Chaotian was trying to solve?
+> >>>
+> >>> Thoughts?
+> >>
+> >> Does Chaotian have a real problem since his driver has busy detection anyway?
+> > 
+> > In fact, I have not encounter CRC errors of CMD13, I have tried several
+> > eMMC cards, after mode switch, CMD13 will only gets 0x800 response and
+> > we don't know if card is busy by 0x800 response.
 > 
-> Reply got delayed due to festive season holidays here.
+> Does it change to 0x900 when it is not busy?
 > 
-> On 10/28/2016 6:18 PM, Adrian Hunter wrote:
->> On 28/10/16 14:48, Ritesh Harjani wrote:
->>> Hi Adrian,
->>>
->>>
->>> Thanks for the re-base. I am trying to apply this patch series and validate.
->>> I am seeing some tuning related errors, it could be due to my setup/device.
->>> I will be working on this.
->>>
->>>
->>> Meanwhile below perf readout was showing some discrepancy (could be that I
->>> am missing something).
->>> In your last test both sequential and random read gives almost same
->>> throughput and even the percentage increase is similar(legacy v/s SW cmdq).
->>> Could be due to benchmark itself ?
->>
->> Normally sequential reading would result in large transfers due to
->> readahead.  But the test is using Direct-I/O (-I option) to prevent VFS
->> caching distorting the results.  So the sequential read case ends up being
->> more like a random read case anyway.
->>
->>>
->>> Do you think we should get some other benchmarks tested as well?
->>> (may be tio?)
->>>
->>>
->>> Also could you please also add some analysis on where we should expect to
->>> see the score improvement in SW CMDQ and where we may see some decrements
->>> due to SW CMDQ?
->>
->> I would expect random reads to be improved, but there is the overhead of the
->> extra cmdq commands, so a small decrease in performance would be expected
->> otherwise.
->>
->>> You did mention in original cover-letter that we mostly should see
->>> improvement in Random read scores, but below here we are seeing similar or
->>> higher improvement in sequential reads(4 threads). Which is a bit
->>> surprising.
->>
->> As explained above: the test is called "sequential" but the limited record
->> size combined with Direct I/O makes it more like random I/O especially when
->> it is mixed from multiple threads.
-> In that case if we see sequential read v/s random read for single thread of
-> SWCMDQ, both show the same data. Both SR and RR should not be same ideally no?
+No, it will not change to 0x900 when it is not busy.
 
-Yes, with these iozone tests, SR and RR seem the same.
+> But anyway the question was: do you have busy detection in your driver?
+> 
+driver has busy detection ops->card_busy() but seems it's MMC core
+layer's responsibility to ensure that card is not busy when driver
+starts to issue commands.
 
-> 
-> 
->>
->>>
->>>
->>>
->>>
->>> On 10/24/2016 2:07 PM, Adrian Hunter wrote:
->>>> Hi
->>>>
->>>> Here is an updated version of the Software Command Queuing patches,
->>>> re-based on next, with patches 1-5 dropped because they have been applied,
->>>> and 2 fixes that have been rolled in (refer Changes in V5 below).
->>>>
->>>> Performance results:
->>>>
->>>> Results can vary from run to run, but here are some results showing 1, 2
->>>> or 4
->>>> processes with 4k and 32k record sizes.  They show up to 40% improvement in
->>>> read performance when there are multiple processes.
->>>>
->>>> iozone -s 8192k -r 4k -i 0 -i 1 -i 2 -i 8 -I -t 1 -F /mnt/mmc/iozone1.tmp
->>>>
->>>>     Children see throughput for  1 initial writers     =     27909.87
->>>> kB/sec     24204.14 kB/sec      -13.28 %
->>>>     Children see throughput for  1 rewriters     =     28839.28 kB/sec
->>>> 25531.92 kB/sec      -11.47 %
->>>>     Children see throughput for  1 readers         =     25889.65
->>>> kB/sec     24883.23 kB/sec       -3.89 %
->>>>     Children see throughput for 1 re-readers     =     25558.23 kB/sec
->>>> 24679.89 kB/sec       -3.44 %
->>>>     Children see throughput for 1 random readers     =     25571.48
->>>> kB/sec     24689.52 kB/sec       -3.45 %
->>>>     Children see throughput for 1 mixed workload     =     25758.59
->>>> kB/sec     24487.52 kB/sec       -4.93 %
->>>>     Children see throughput for 1 random writers     =     24787.51
->>>> kB/sec     19368.99 kB/sec      -21.86 %
->>>>
->>>> iozone -s 8192k -r 32k -i 0 -i 1 -i 2 -i 8 -I -t 1 -F /mnt/mmc/iozone1.tmp
->>>>
->>>>     Children see throughput for  1 initial writers     =     91344.61
->>>> kB/sec    102008.56 kB/sec       11.67 %
->>>>     Children see throughput for  1 rewriters     =     87932.36 kB/sec
->>>> 96630.44 kB/sec        9.89 %
->>>>     Children see throughput for  1 readers         =    134879.82
->>>> kB/sec    110292.79 kB/sec      -18.23 %
->>>>     Children see throughput for 1 re-readers     =    147632.13 kB/sec
->>>> 109053.33 kB/sec      -26.13 %
->>>>     Children see throughput for 1 random readers     =     93547.37
->>>> kB/sec    112225.50 kB/sec       19.97 %
->>>>     Children see throughput for 1 mixed workload     =     93560.04
->>>> kB/sec    110515.21 kB/sec       18.12 %
->>>>     Children see throughput for 1 random writers     =     92841.84
->>>> kB/sec     81153.81 kB/sec      -12.59 %
->>>>
->>>> iozone -s 8192k -r 4k -i 0 -i 1 -i 2 -i 8 -I -t 2 -F /mnt/mmc/iozone1.tmp
->>>> /mnt/mmc/iozone2.tmp
->>>>
->>>>     Children see throughput for  2 initial writers     =     31145.43
->>>> kB/sec     33771.25 kB/sec        8.43 %
->>>>     Children see throughput for  2 rewriters     =     30592.57 kB/sec
->>>> 35916.46 kB/sec       17.40 %
->>>>     Children see throughput for  2 readers         =     31669.83
->>>> kB/sec     37460.13 kB/sec       18.28 %
->>>>     Children see throughput for 2 re-readers     =     32079.94 kB/sec
->>>> 37373.33 kB/sec       16.50 %
->>>>     Children see throughput for 2 random readers     =     27731.19
->>>> kB/sec     37601.65 kB/sec       35.59 %
->>>>     Children see throughput for 2 mixed workload     =     13927.50
->>>> kB/sec     14617.06 kB/sec        4.95 %
->>>>     Children see throughput for 2 random writers     =     31250.00
->>>> kB/sec     33106.72 kB/sec        5.94 %
->>>>
->>>> iozone -s 8192k -r 32k -i 0 -i 1 -i 2 -i 8 -I -t 2 -F /mnt/mmc/iozone1.tmp
->>>> /mnt/mmc/iozone2.tmp
->>>>
->>>>     Children see throughput for  2 initial writers     =    123255.84
->>>> kB/sec    131252.22 kB/sec        6.49 %
->>>>     Children see throughput for  2 rewriters     =    115234.91 kB/sec
->>>> 107225.74 kB/sec       -6.95 %
->>>>     Children see throughput for  2 readers         =    128921.86
->>>> kB/sec    148562.71 kB/sec       15.23 %
->>>>     Children see throughput for 2 re-readers     =    127815.24 kB/sec
->>>> 149304.32 kB/sec       16.81 %
->>>>     Children see throughput for 2 random readers     =    125600.46
->>>> kB/sec    148406.56 kB/sec       18.16 %
->>>>     Children see throughput for 2 mixed workload     =     44006.94
->>>> kB/sec     50937.36 kB/sec       15.75 %
->>>>     Children see throughput for 2 random writers     =    120623.95
->>>> kB/sec    103969.05 kB/sec      -13.81 %
->>>>
->>>> iozone -s 8192k -r 4k -i 0 -i 1 -i 2 -i 8 -I -t 4 -F /mnt/mmc/iozone1.tmp
->>>> /mnt/mmc/iozone2.tmp /mnt/mmc/iozone3.tmp /mnt/mmc/iozone4.tmp
->>>>
->>>>     Children see throughput for  4 initial writers     =     24100.96
->>>> kB/sec     33336.58 kB/sec       38.32 %
->>>>     Children see throughput for  4 rewriters     =     31650.20 kB/sec
->>>> 33091.53 kB/sec        4.55 %
->>>>     Children see throughput for  4 readers         =     33276.92
->>>> kB/sec     41799.89 kB/sec       25.61 %
->>>>     Children see throughput for 4 re-readers     =     31786.96 kB/sec
->>>> 41501.74 kB/sec       30.56 %
->>>>     Children see throughput for 4 random readers     =     31991.65
->>>> kB/sec     40973.93 kB/sec       28.08 %
->>>>     Children see throughput for 4 mixed workload     =     15804.80
->>>> kB/sec     13581.32 kB/sec      -14.07 %
->>>>     Children see throughput for 4 random writers     =     31231.42
->>>> kB/sec     34537.03 kB/sec       10.58 %
->>>>
->>>> iozone -s 8192k -r 32k -i 0 -i 1 -i 2 -i 8 -I -t 4 -F /mnt/mmc/iozone1.tmp
->>>> /mnt/mmc/iozone2.tmp /mnt/mmc/iozone3.tmp /mnt/mmc/iozone4.tmp
->>>>
->>>>     Children see throughput for  4 initial writers     =    116567.42
->>>> kB/sec    119280.35 kB/sec        2.33 %
->>>>     Children see throughput for  4 rewriters     =    115010.96 kB/sec
->>>> 120864.34 kB/sec        5.09 %
->>>>     Children see throughput for  4 readers         =    130700.29
->>>> kB/sec    177834.21 kB/sec       36.06 %
->>> Do you think sequential read will increase more that of random read. It
->>> should mostly benefit in random reads right. Any idea why it's behaving
->>> differently here?
->>
->> Explained above.
->>
->>>
->>>
->>>>     Children see throughput for 4 re-readers     =    125392.58 kB/sec
->>>> 175975.28 kB/sec       40.34 %
->>>>     Children see throughput for 4 random readers     =    132194.57
->>>> kB/sec    176630.46 kB/sec       33.61 %
->>>>     Children see throughput for 4 mixed workload     =     56464.98
->>>> kB/sec     54140.61 kB/sec       -4.12 %
->>>>     Children see throughput for 4 random writers     =    109128.36
->>>> kB/sec     85359.80 kB/sec      -21.78 %
->>> Similarly, we don't expect random write scores to decrease here. Do you know
->>> why this could be the case here?
->>
->> There is a lot of variation from one run to another
-> 
-> These run-to-run variations are due to what, any idea?
-
-Not really, but there is no knowing how much internal work the eMMC is
-doing, wear-leveling, erasing blocks, cache flushing etc.  Also "random"
-writes that hit the same erase block can be combined when flushing the
-cache, and random writes to the same sectors can also be combined - so the
-potential for variation is very large.
-
-> 21% variations is huge.
-> 
-> Actually can we try and get some data which shows the difference between
-> SeqR and RandR and also RandW should not decrease this much.
-> May be by changing iozone parameters?
-> 
-> 
-> How about below data ?
-
-Yes that would be interesting
-
-> 
-> For Sequential
-> ./iozone -s 64m -r 32m -i 0 -i 1 -i 2 -i 8 -I -t 4 -F /data/mmc/iozone1.tmp
-> /data/mmc/iozone2.tmp /data/mmc/iozone3.tmp /data/mmc/iozone4.tmp
-> 
-> For random -
-> ./iozone -s 64m -r 4k -i 0 -i 1 -i 2 -i 8 -I -t 4 -F /data/mmc/iozone1.tmp
-> /data/mmc/iozone2.tmp /data/mmc/iozone3.tmp /data/mmc/iozone4.tmp
-> 
-> 
-> Regards
-> Ritesh
-> 
 
