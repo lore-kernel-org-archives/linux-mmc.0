@@ -1,74 +1,54 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 09/13] mmc: dw_mmc: remove the "clock-freq-min-max" property
-Date: Thu, 03 Nov 2016 17:42:30 +0900
-Message-ID: <5e85773f-0af1-fcd9-1430-0a36c8f868b5@samsung.com>
-References: <20161103062135.10697-1-jh80.chung@samsung.com>
- <20161103062135.10697-10-jh80.chung@samsung.com>
- <CGME20161103082058epcas4p130e9419cefd2a5bb5626781d94acaa07@epcas4p1.samsung.com>
- <20823767.hqlyMd1aKN@diego>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <20823767.hqlyMd1aKN@diego>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, shawn.lin@rock-chips.com
+From: Jun Nie <jun.nie@linaro.org>
+Subject: [PATCH v3 0/5] Add intial support to DW MMC host on ZTE SoC
+Date: Thu,  3 Nov 2016 21:31:36 +0800
+Message-ID: <1478179901-25645-1-git-send-email-jun.nie@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f174.google.com ([209.85.192.174]:35813 "EHLO
+        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753137AbcKCNbz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2016 09:31:55 -0400
+Received: by mail-pf0-f174.google.com with SMTP id i88so31891622pfk.2
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Nov 2016 06:31:55 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: shawn.guo@linaro.org, xie.baoyou@zte.com.cn
+Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-Hi Heiko.
+Add intial support to DW MMC host on ZTE SoC. It include platform
+specific wrapper driver and workarounds for fifo quirk.
 
-On 11/03/2016 05:20 PM, Heiko Stübner wrote:
-> Hi Jaehoon,
-> 
-> Am Donnerstag, 3. November 2016, 15:21:31 schrieb Jaehoon Chung:
->> Remove the "clock-freq-min-max" property.
->> There is "max-frequency" property in drivers/mmc/core/host.c
->> It can be used for getting maximum frequency.
->>
->> And minimum clock value is assigned to 100K by default.
->> Because MMC core should check the initial clock value from
->> 400K to 100K until finding correct value.
->> It's why Minimum value puts 100K by default.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  3 ---
->>  drivers/mmc/host/dw_mmc.c                                  | 13
->> ++++--------- 2 files changed, 4 insertions(+), 12 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt index
->> 4e00e85..21c8251 100644
->> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> @@ -56,9 +56,6 @@ Optional properties:
->>    is specified and the ciu clock is specified then we'll try to set the ciu
->> clock to this at probe time.
->>
->> -* clock-freq-min-max: Minimum and Maximum clock frequency for card output
->> -  clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz
->> by default. -
-> 
-> I'd think devicetree people will protest about simply removing this property 
-> without deprecating it first - to be backwards compatible with old devicetrees.
-> 
-> Especially as this property was added already back in 2013, so has been in use 
-> for quite some time.
+Patches are prepared based on latest dw mmc runtime change:
+   https://github.com/jh80chung/dw-mmc.git for-ulf
 
-Thanks for pointing out. I will resend the patchset with changing this.
-And maintain the backwards compatible.
+Changes vs version 2:
+  - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
+    fifo-watermark-aligned.
+  - Polish ZX MMC driver on minor coding style issues.
 
-Best Regards,
-Jaehoon Chung
+Changes vs version 1:
+  - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
+  - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
 
-> 
-> 
-> Heiko
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+Jun Nie (5):
+  mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+  mmc: zx: Initial support for ZX mmc controller
+  Documentation: synopsys-dw-mshc: add binding for fifo quirks
+  mmc: dw: Add fifo address property
+  mmc: dw: Add fifo watermark alignment property
+
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
+ .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  34 +++
+ drivers/mmc/host/Kconfig                           |   9 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
+ drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
+ drivers/mmc/host/dw_mmc.c                          |  17 +-
+ include/linux/mmc/dw_mmc.h                         |   5 +
+ 8 files changed, 349 insertions(+), 3 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-zx.c
+ create mode 100644 drivers/mmc/host/dw_mmc-zx.h
+
+-- 
+1.9.1
+
