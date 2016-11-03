@@ -1,58 +1,54 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 0/2] mmc: dw_mmc: fix the wrong operation for reset
- controller
-Date: Thu, 03 Nov 2016 14:19:15 +0900
-Message-ID: <e7ce67f2-9e2a-6895-7bb3-842261915cd8@samsung.com>
-References: <20161031024942.4415-1-jh80.chung@samsung.com>
- <CGME20161101215604epcas1p238d00f298016711e010b097c6aadc4b6@epcas1p2.samsung.com>
- <CALAqxLXs704Y-TGAQsggSnDohyFDYvQw=zYuiHRu9UKgHEfbFw@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] DWMMC controller fixes
+Date: Thu, 03 Nov 2016 14:25:58 +0900
+Message-ID: <587f4226-0c21-899b-b16d-3f33d092e382@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <CALAqxLXs704Y-TGAQsggSnDohyFDYvQw=zYuiHRu9UKgHEfbFw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leo Yan <leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vincent Guittot <vincent.guittot-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:57630 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751512AbcKCF0D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2016 01:26:03 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OG1020KSWFASN60@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 03 Nov 2016 14:25:58 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi,
+Dear Ulf,
 
-On 11/02/2016 06:56 AM, John Stultz wrote:
-> On Sun, Oct 30, 2016 at 7:49 PM, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
->> This patch adds the "reset-names" as reset controller for dwmmc controller.
->> Linaro guys had reported the issue about booting stuck.
->>
->> Some SoCs are enabled the CONFIG_RESET_CONTROLLER.
->> then dwmmc controller are waiting for getting reset controller.
->> But if doesn't define "resets" property in device-tree, it should be stuck.
->>
->> If use the reset-names as reset controller for dwmmc controller,
->> it's more stable than now.
->> This commit is related with the below commit.
->>
->> Fixes: d6786fefe816 ("mmc: dw_mmc: add reset support to dwmmc host controller")
-> 
-> So I wasn't hit by the issue, as I don't tend to boot from SD on my
-> hikey, but I did run these patches and I'm not seeing any issues with
-> my Android environment.
-> 
-> So for what its worth:
-> Acked-by: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Could you pull these patches on your fixes branch?
 
-Applied on my repository (fixes branch).
+The following changes since commit d1f63f0c81c22ba705fcd149a1fcec37b734d818:
+
+  mmc: sdhci-msm: Fix error return code in sdhci_msm_probe() (2016-10-27 09:43:01 +0200)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git fixes
+
+for you to fetch changes up to 5c3d7c7ed1e676d7fa1c9222d9a46c5d09b9fe97:
+
+  mmc: dw_mmc: add the "reset" as name of reset controller (2016-11-03 14:11:59 +0900)
+
+----------------------------------------------------------------
+DWMMC core:
+- Add the "reset" as "#reset-names" property for preventing wrong operation.
+
+----------------------------------------------------------------
+Jaehoon Chung (2):
+      Documentation: synopsys-dw-mshc: add binding for reset-names
+      mmc: dw_mmc: add the "reset" as name of reset controller
+
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 +++++
+ drivers/mmc/host/dw_mmc.c                                  | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
 
 Best Regards,
 Jaehoon Chung
-
-> 
-> thanks
-> -john
-> 
-> 
-> 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
