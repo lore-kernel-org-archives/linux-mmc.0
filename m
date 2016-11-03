@@ -1,61 +1,37 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 00/13] mmc: dw_mmc: cleans the codes for dwmmc controller
-Date: Thu, 03 Nov 2016 15:21:22 +0900
-Message-ID: <20161103062135.10697-1-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38216 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752118AbcKCGVo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2016 02:21:44 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 03/13] mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+Date: Thu, 03 Nov 2016 15:21:25 +0900
+Message-ID: <20161103062135.10697-4-jh80.chung@samsung.com>
+References: <20161103062135.10697-1-jh80.chung@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <20161103062135.10697-1-jh80.chung@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patchset is modified the some minor fixing and cleaning code.
-If needs to split the patches, i will re-send the patches.
+If there is no property "clock-freq-min-max", mmc->f_min should be set
+to 400K by default. But Some SoC can be used 100K.
+When 100K is used, MMC core will try to check from 400K to 100K.
 
-* Major changes
-- Use the cookie enum values like sdhci controller.
-- Remove the unnecessary codes and use stop_abort() by default.
-- Remove the obsoleted property "supports-highspeed"
-- Remove the "clock-freq-min-max" property. Instead, use "max-frequency"
-- Minimum clock value is set to 100K by default.
+Reported-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Jaehoon Chung (13):
-  mmc: dw_mmc: display the real register value on debugfs
-  mmc: dw_mmc: fix the debug message for checking card's present
-  mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
-  mmc: dw_mmc: use the hold register when send stop command
-  mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
-  mmc: core: move the cookie's enum values from sdhci.h to mmc.h
-  mmc: dw_mmc: use the cookie's enum values for post/pre_req()
-  mmc: dw_mmc: remove the unnecessary mmc_data structure
-  mmc: dw_mmc: remove the "clock-freq-min-max" property
-  ARM: dts: exynos: replace to "max-frequecy" instead of
-    "clock-freq-min-max"
-  ARM: dts: rockchip: replace to "max-frequency" instead of
-    "clock-freq-min-max"
-  ARM64: dts: rockchip: replace to "max-frequency" instead of
-    "clock-freq-min-max"
-  Documentation: synopsys-dw-mshc: remove the unused properties
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  8 --
- arch/arm/boot/dts/exynos3250-artik5-eval.dts       |  2 +-
- arch/arm/boot/dts/exynos3250-artik5.dtsi           |  2 +-
- arch/arm/boot/dts/exynos3250-monk.dts              |  2 +-
- arch/arm/boot/dts/exynos3250-rinato.dts            |  2 +-
- arch/arm/boot/dts/rk3036.dtsi                      |  6 +-
- arch/arm/boot/dts/rk322x.dtsi                      |  2 +-
- arch/arm/boot/dts/rk3288.dtsi                      |  8 +-
- .../boot/dts/rockchip/rk3368-orion-r68-meta.dts    |  2 +-
- arch/arm64/boot/dts/rockchip/rk3368.dtsi           |  6 +-
- arch/arm64/boot/dts/rockchip/rk3399.dtsi           |  4 +-
- drivers/mmc/host/dw_mmc.c                          | 99 ++++++++++------------
- drivers/mmc/host/sdhci.h                           |  6 --
- include/linux/mmc/core.h                           |  6 ++
- 14 files changed, 68 insertions(+), 87 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1e71fd4..6ccb817 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -54,7 +54,7 @@
+ #define DW_MCI_DMA_THRESHOLD	16
+ 
+ #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
+-#define DW_MCI_FREQ_MIN	400000		/* unit: HZ */
++#define DW_MCI_FREQ_MIN	100000		/* unit: HZ */
+ 
+ #define IDMAC_INT_CLR		(SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
+ 				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
 -- 
 2.10.1
-
