@@ -1,51 +1,36 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v8 3/6] mmc: tmio: document mandatory and optional callbacks
-Date: Thu,  3 Nov 2016 15:16:01 +0100
-Message-ID: <1478182564-18762-4-git-send-email-horms+renesas@verge.net.au>
-References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:49638 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757150AbcKCO6j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2016 10:58:39 -0400
-In-Reply-To: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH 10/13] ARM: dts: exynos: replace to "max-frequecy"
+ instead of "clock-freq-min-max"
+Date: Thu, 3 Nov 2016 20:41:12 +0200
+Message-ID: <20161103184112.GB11071@kozik-lap>
+References: <20161103062135.10697-1-jh80.chung@samsung.com>
+ <20161103062135.10697-11-jh80.chung@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161103062135.10697-11-jh80.chung@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
-v5
-* New patch
----
- drivers/mmc/host/tmio_mmc.h | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On Thu, Nov 03, 2016 at 03:21:32PM +0900, Jaehoon Chung wrote:
+> In drivers/mmc/core/host.c, there is "max-frequency" property.
+> It should be same behavior. So Use the "max-frequency" instead of
+> "clock-freq-min-max".
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  arch/arm/boot/dts/exynos3250-artik5-eval.dts | 2 +-
+>  arch/arm/boot/dts/exynos3250-artik5.dtsi     | 2 +-
+>  arch/arm/boot/dts/exynos3250-monk.dts        | 2 +-
+>  arch/arm/boot/dts/exynos3250-rinato.dts      | 2 +-
+>  4 files changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 8e126afd988c..b93762950e8f 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -154,8 +154,10 @@ struct tmio_mmc_host {
- 	bool			native_hotplug;
- 	bool			sdio_irq_enabled;
- 
--	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
-+	/* Mandatory callback */
- 	int (*clk_enable)(struct tmio_mmc_host *host);
-+
-+	/* Optional callbacks */
- 	unsigned int (*clk_update)(struct tmio_mmc_host *host,
- 				   unsigned int new_clock);
- 	void (*clk_disable)(struct tmio_mmc_host *host);
-@@ -164,6 +166,7 @@ struct tmio_mmc_host {
- 	int (*card_busy)(struct mmc_host *mmc);
- 	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
- 					   struct mmc_ios *ios);
-+	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- };
- 
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
--- 
-2.7.0.rc3.207.g0ac5344
+This looks totally independent to rest of patches so it can be applied
+separately without any functional impact (except lack of minimum
+frequency). Is that correct?
 
+Best regards,
+Krzysztof
