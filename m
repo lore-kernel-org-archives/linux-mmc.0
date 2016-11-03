@@ -1,92 +1,58 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 12/13] ARM64: dts: rockchip: replace to "max-frequency" instead
- of "clock-freq-min-max"
-Date: Thu, 03 Nov 2016 15:21:34 +0900
-Message-ID: <20161103062135.10697-13-jh80.chung@samsung.com>
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH 01/13] mmc: dw_mmc: display the real register value on debugfs
+Date: Thu, 03 Nov 2016 15:21:23 +0900
+Message-ID: <20161103062135.10697-2-jh80.chung@samsung.com>
 References: <20161103062135.10697-1-jh80.chung@samsung.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20161103062135.10697-1-jh80.chung@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-reply-to: <20161103062135.10697-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-In drivers/mmc/core/host.c, there is "max-freqeuncy" property.
-It should be same behavior, So Use the "max-frequency" instead of
-"clock-freq-min-max".
+Developer wants to see the real register value, not register offset.
+This patch fixed to display the real value of register.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 ---
- arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts | 2 +-
- arch/arm64/boot/dts/rockchip/rk3368.dtsi               | 6 +++---
- arch/arm64/boot/dts/rockchip/rk3399.dtsi               | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts b/arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts
-index 5797933..0acf8a2 100644
---- a/arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3368-orion-r68-meta.dts
-@@ -347,7 +347,7 @@
- &sdmmc {
- 	bus-width = <4>;
- 	clock-frequency = <50000000>;
--	clock-freq-min-max = <400000 50000000>;
-+	max-frequency = <50000000>;
- 	cap-sd-highspeed;
- 	card-detect-delay = <200>;
- 	keep-power-in-suspend;
-diff --git a/arch/arm64/boot/dts/rockchip/rk3368.dtsi b/arch/arm64/boot/dts/rockchip/rk3368.dtsi
-index 0fcb214..79e7c88 100644
---- a/arch/arm64/boot/dts/rockchip/rk3368.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3368.dtsi
-@@ -231,7 +231,7 @@
- 	sdmmc: dwmmc@ff0c0000 {
- 		compatible = "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc";
- 		reg = <0x0 0xff0c0000 0x0 0x4000>;
--		clock-freq-min-max = <400000 150000000>;
-+		max-frequency = <150000000>;
- 		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
- 			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
- 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-@@ -243,7 +243,7 @@
- 	sdio0: dwmmc@ff0d0000 {
- 		compatible = "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc";
- 		reg = <0x0 0xff0d0000 0x0 0x4000>;
--		clock-freq-min-max = <400000 150000000>;
-+		max-frequency = <150000000>;
- 		clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>,
- 			 <&cru SCLK_SDIO0_DRV>, <&cru SCLK_SDIO0_SAMPLE>;
- 		clock-names = "biu", "ciu", "ciu_drv", "ciu_sample";
-@@ -255,7 +255,7 @@
- 	emmc: dwmmc@ff0f0000 {
- 		compatible = "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc";
- 		reg = <0x0 0xff0f0000 0x0 0x4000>;
--		clock-freq-min-max = <400000 150000000>;
-+		max-frequency = <150000000>;
- 		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
- 			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
- 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399.dtsi b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-index b65c193..b1c011d 100644
---- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-@@ -235,7 +235,7 @@
- 			     "rockchip,rk3288-dw-mshc";
- 		reg = <0x0 0xfe310000 0x0 0x4000>;
- 		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH 0>;
--		clock-freq-min-max = <400000 150000000>;
-+		max-frequency = <150000000>;
- 		clocks = <&cru HCLK_SDIO>, <&cru SCLK_SDIO>,
- 			 <&cru SCLK_SDIO_DRV>, <&cru SCLK_SDIO_SAMPLE>;
- 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-@@ -248,7 +248,7 @@
- 			     "rockchip,rk3288-dw-mshc";
- 		reg = <0x0 0xfe320000 0x0 0x4000>;
- 		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH 0>;
--		clock-freq-min-max = <400000 150000000>;
-+		max-frequency = <150000000>;
- 		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
- 			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
- 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1c9ee36..b87dd07 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -165,12 +165,14 @@ static const struct file_operations dw_mci_req_fops = {
+ 
+ static int dw_mci_regs_show(struct seq_file *s, void *v)
+ {
+-	seq_printf(s, "STATUS:\t0x%08x\n", SDMMC_STATUS);
+-	seq_printf(s, "RINTSTS:\t0x%08x\n", SDMMC_RINTSTS);
+-	seq_printf(s, "CMD:\t0x%08x\n", SDMMC_CMD);
+-	seq_printf(s, "CTRL:\t0x%08x\n", SDMMC_CTRL);
+-	seq_printf(s, "INTMASK:\t0x%08x\n", SDMMC_INTMASK);
+-	seq_printf(s, "CLKENA:\t0x%08x\n", SDMMC_CLKENA);
++	struct dw_mci *host = s->private;
++
++	seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
++	seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
++	seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
++	seq_printf(s, "CTRL:\t0x%08x\n", mci_readl(host, CTRL));
++	seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
++	seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
+ 
+ 	return 0;
+ }
 -- 
 2.10.1
