@@ -1,64 +1,78 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 06/13] mmc: core: move the cookie's enum values from sdhci.h to
- mmc.h
-Date: Thu, 03 Nov 2016 15:21:28 +0900
-Message-ID: <20161103062135.10697-7-jh80.chung@samsung.com>
+Subject: [PATCH 05/13] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+Date: Thu, 03 Nov 2016 15:21:27 +0900
+Message-ID: <20161103062135.10697-6-jh80.chung@samsung.com>
 References: <20161103062135.10697-1-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:36272 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754081AbcKCGVv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2016 02:21:51 -0400
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <20161103062135.10697-1-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-It's not for only sdhci controller.
-So it can be moved from sdhci.h to mmc.h. And renamed from sdhci_cookie
-to mmc_cookie.
+stop_cmdr should be set to values relevant to stop command.
+It migth be assigned to values whatever there is mrq->stop or not.
+Then it doesn't need to use dw_mci_prepare_command().
+It's enough to use the prep_stop_abort for preparing stop command.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/sdhci.h | 6 ------
- include/linux/mmc/core.h | 6 ++++++
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17..325663b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -321,12 +321,6 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 23fc505..16df93b 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
  
--enum sdhci_cookie {
--	COOKIE_UNMAPPED,
--	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
--	COOKIE_MAPPED,		/* mapped by sdhci_prepare_data() */
--};
--
- struct sdhci_host {
- 	/* Data set by hardware interface driver */
- 	const char *hw_name;	/* Hardware bus name */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 2b953eb..d23a675 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -106,6 +106,12 @@ struct mmc_command {
- 	struct mmc_request	*mrq;		/* associated request */
- };
+ static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
+ {
+-	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
++	struct mmc_command *stop = &host->stop_abort;
  
-+enum mmc_cookie {
-+	COOKIE_UNMAPPED,
-+	COOKIE_PRE_MAPPED,	/* mapped by pre_req() of controller */
-+	COOKIE_MAPPED,		/* mapped by prepare_data() of controller */
-+};
-+
- struct mmc_data {
- 	unsigned int		timeout_ns;	/* data timeout (in ns, max 80ms) */
- 	unsigned int		timeout_clks;	/* data timeout (in clocks) */
+ 	dw_mci_start_command(host, stop, host->stop_cmdr);
+ }
+@@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 		spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ 	}
+ 
+-	if (mrq->stop)
+-		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
+-	else
+-		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
++	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
+ }
+ 
+ static void dw_mci_start_request(struct dw_mci *host,
+@@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			host->cmd = NULL;
+ 			host->data = NULL;
+ 
+-			if (mrq->stop)
++			if (!mrq->sbc && mrq->stop)
+ 				dw_mci_command_complete(host, mrq->stop);
+ 			else
+ 				host->cmd_status = 0;
 -- 
 2.10.1
-
