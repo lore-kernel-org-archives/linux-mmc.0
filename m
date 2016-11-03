@@ -1,78 +1,54 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 05/13] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
-Date: Thu, 03 Nov 2016 15:21:27 +0900
-Message-ID: <20161103062135.10697-6-jh80.chung@samsung.com>
-References: <20161103062135.10697-1-jh80.chung@samsung.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 09/13] mmc: dw_mmc: remove the "clock-freq-min-max" property
+Date: Thu, 03 Nov 2016 09:20:15 +0100
+Message-ID: <20823767.hqlyMd1aKN@diego>
+References: <20161103062135.10697-1-jh80.chung@samsung.com> <20161103062135.10697-10-jh80.chung@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <20161103062135.10697-1-jh80.chung@samsung.com>
+In-Reply-To: <20161103062135.10697-10-jh80.chung@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, krzk@kernel.org, shawn.lin@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-stop_cmdr should be set to values relevant to stop command.
-It migth be assigned to values whatever there is mrq->stop or not.
-Then it doesn't need to use dw_mci_prepare_command().
-It's enough to use the prep_stop_abort for preparing stop command.
+Hi Jaehoon,
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+Am Donnerstag, 3. November 2016, 15:21:31 schrieb Jaehoon Chung:
+> Remove the "clock-freq-min-max" property.
+> There is "max-frequency" property in drivers/mmc/core/host.c
+> It can be used for getting maximum frequency.
+> 
+> And minimum clock value is assigned to 100K by default.
+> Because MMC core should check the initial clock value from
+> 400K to 100K until finding correct value.
+> It's why Minimum value puts 100K by default.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  3 ---
+>  drivers/mmc/host/dw_mmc.c                                  | 13
+> ++++--------- 2 files changed, 4 insertions(+), 12 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt index
+> 4e00e85..21c8251 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -56,9 +56,6 @@ Optional properties:
+>    is specified and the ciu clock is specified then we'll try to set the ciu
+> clock to this at probe time.
+> 
+> -* clock-freq-min-max: Minimum and Maximum clock frequency for card output
+> -  clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz
+> by default. -
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 23fc505..16df93b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
- 
- static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
- {
--	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
-+	struct mmc_command *stop = &host->stop_abort;
- 
- 	dw_mci_start_command(host, stop, host->stop_cmdr);
- }
-@@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 		spin_unlock_irqrestore(&host->irq_lock, irqflags);
- 	}
- 
--	if (mrq->stop)
--		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
--	else
--		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
-+	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
- }
- 
- static void dw_mci_start_request(struct dw_mci *host,
-@@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			if (test_and_clear_bit(EVENT_DATA_ERROR,
- 					       &host->pending_events)) {
- 				dw_mci_stop_dma(host);
--				if (data->stop ||
--				    !(host->data_status & (SDMMC_INT_DRTO |
-+				if (!(host->data_status & (SDMMC_INT_DRTO |
- 							   SDMMC_INT_EBE)))
- 					send_stop_abort(host, data);
- 				state = STATE_DATA_ERROR;
-@@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			if (test_and_clear_bit(EVENT_DATA_ERROR,
- 					       &host->pending_events)) {
- 				dw_mci_stop_dma(host);
--				if (data->stop ||
--				    !(host->data_status & (SDMMC_INT_DRTO |
-+				if (!(host->data_status & (SDMMC_INT_DRTO |
- 							   SDMMC_INT_EBE)))
- 					send_stop_abort(host, data);
- 				state = STATE_DATA_ERROR;
-@@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			host->cmd = NULL;
- 			host->data = NULL;
- 
--			if (mrq->stop)
-+			if (!mrq->sbc && mrq->stop)
- 				dw_mci_command_complete(host, mrq->stop);
- 			else
- 				host->cmd_status = 0;
--- 
-2.10.1
+I'd think devicetree people will protest about simply removing this property 
+without deprecating it first - to be backwards compatible with old devicetrees.
+
+Especially as this property was added already back in 2013, so has been in use 
+for quite some time.
+
+
+Heiko
