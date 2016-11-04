@@ -1,55 +1,85 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 10/13] ARM: dts: exynos: replace to "max-frequecy" instead
- of "clock-freq-min-max"
-Date: Fri, 04 Nov 2016 19:21:30 +0900
-Message-ID: <ecf4fac2-0ab7-d4c4-69e3-d498ee5b601c@samsung.com>
-References: <20161103062135.10697-1-jh80.chung@samsung.com>
- <20161103062135.10697-11-jh80.chung@samsung.com>
- <CGME20161103184120epcas1p3e51865aa2ea7b6073bcb72f5cba5772f@epcas1p3.samsung.com>
- <20161103184112.GB11071@kozik-lap>
+Subject: Re: [PATCH v3 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Fri, 04 Nov 2016 19:24:05 +0900
+Message-ID: <dc78377a-c63b-29d7-cd36-c01bffc4a410@samsung.com>
+References: <1478179901-25645-1-git-send-email-jun.nie@linaro.org>
+ <CGME20161103133219epcas3p41740ee469f97b36f49d31d31f6332d19@epcas3p4.samsung.com>
+ <1478179901-25645-2-git-send-email-jun.nie@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:59936 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753593AbcKDKVd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2016 06:21:33 -0400
-In-reply-to: <20161103184112.GB11071@kozik-lap>
+Received: from mailout2.samsung.com ([203.254.224.25]:52726 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbcKDKYH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2016 06:24:07 -0400
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OG401R444W4R390@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 04 Nov 2016 19:24:05 +0900 (KST)
+In-reply-to: <1478179901-25645-2-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-rockchip@lists.infradead.org, ulf.hansson@linaro.org, robh+dt@kernel.org, heiko@sntech.de, shawn.lin@rock-chips.com
+To: Jun Nie <jun.nie@linaro.org>, shawn.guo@linaro.org, xie.baoyou@zte.com.cn
+Cc: ulf.hansson@linaro.org, jason.liu@linaro.org, linux-mmc@vger.kernel.org
 
-On 11/04/2016 03:41 AM, Krzysztof Kozlowski wrote:
-> On Thu, Nov 03, 2016 at 03:21:32PM +0900, Jaehoon Chung wrote:
->> In drivers/mmc/core/host.c, there is "max-frequency" property.
->> It should be same behavior. So Use the "max-frequency" instead of
->> "clock-freq-min-max".
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  arch/arm/boot/dts/exynos3250-artik5-eval.dts | 2 +-
->>  arch/arm/boot/dts/exynos3250-artik5.dtsi     | 2 +-
->>  arch/arm/boot/dts/exynos3250-monk.dts        | 2 +-
->>  arch/arm/boot/dts/exynos3250-rinato.dts      | 2 +-
->>  4 files changed, 4 insertions(+), 4 deletions(-)
+On 11/03/2016 10:31 PM, Jun Nie wrote:
+> Document the device-tree binding of ZTE MMC host on
+> ZX296718 SoC.
 > 
-> This looks totally independent to rest of patches so it can be applied
-> separately without any functional impact (except lack of minimum
-> frequency). Is that correct?
+> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 34 ++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> new file mode 100644
+> index 0000000..5e1e16d
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> @@ -0,0 +1,34 @@
+> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
+> +  Host Controller
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
+> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be
+> +	- "zte,zx296718-dw-mshc": for ZX SoCs
+> +
+> +Example:
+> +
+> +	mmc1: mmc@1110000 {
+> +		compatible = "zte,zx296718-dw-mshc";
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		reg = <0x01110000 0x1000>;
+> +		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+> +		fifo-depth = <32>;
+> +		data-addr = <0x200>;
+> +		fifo-watermark-aligned;
+> +		bus-width = <4>;
+> +		clock-frequency = <50000000>;
+> +		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
+> +		clock-names = "biu", "ciu";
+> +		num-slots = <1>;
+> +		max-frequency = <50000000>;
+> +		cap-sdio-irq;
+> +		cap-sd-highspeed;
+> +		status = "disabled";
 
-You're right. I will split the patches. And will resend.
-Thanks!
+bracket is not pair?
+Other things look good to me.
 
 Best Regards,
 Jaehoon Chung
 
-> 
-> Best regards,
-> Krzysztof
-> 
-> 
-> 
 > 
 
