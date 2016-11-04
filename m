@@ -1,72 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: mmc: Use 500ms as the default generic CMD6 timeout
-Date: Fri,  4 Nov 2016 18:32:33 +0100
-Message-ID: <1478280753-2482-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.9 rc4
+Date: Fri, 4 Nov 2016 18:45:23 +0100
+Message-ID: <CAPDyKFpsd5nie+NOnucfU0aYFWoRA3b72jNEORw6XG5A6qnDVg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:36114 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934911AbcKDRcs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2016 13:32:48 -0400
-Received: by mail-yw0-f171.google.com with SMTP id l124so96244453ywb.3
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2016 10:32:48 -0700 (PDT)
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35973 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935270AbcKDRp0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2016 13:45:26 -0400
+Received: by mail-wm0-f42.google.com with SMTP id p190so66014617wmp.1
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2016 10:45:25 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, stable@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-In the eMMC 4.51 version of the spec, an EXT_CSD field called
-GENERIC_CMD6_TIME[248] was added. This allows cards to specify the maximum
-time it may need to move out from its busy state, when a CMD6 command has
-been sent.
+Hi Linus,
 
-In cases when the card is compliant to versions < 4.51 of the eMMC spec,
-obviously the core needs to use a fall-back value for this timeout, which
-currently is set to 10 minutes. This value is completely in the wrong range
-and importantly in some cases it causes a card initialization to take more
-than 10 minute to complete.
+Here are some mmc fixes intended for v4.9 rc4. They are based on v4.9-rc2.
 
-Earlier this scenario was avoided as the mmc core used CMD13 to poll the
-card, to find out when it stopped signaling busy. Commit 08573eaf1a70
-("mmc: mmc: do not use CMD13 to get status after speed mode switch")
-changed this behavior.
+Details are as usual found in the signed tag. Please pull this in!
 
-Instead of reverting that commit, which would cause other issues, let's
-instead start by picking a simple solution for the problem, by using a
-500ms default generic CMD6 timeout.
+Kind regards
+Ulf Hansson
 
-The reason for using exactly 500ms, comes from observations that shows it's
-quite common for cards to specify 250ms. 500ms is two times that value so
-likely it should be enough for most cards.
 
-Cc: <stable@vger.kernel.org> # v4.8+
-Fixes: 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed
-mode switch")
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/mmc.c | 3 +++
- 1 file changed, 3 insertions(+)
+The following changes since commit 07d9a380680d1c0eb51ef87ff2eab5c994949e69:
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index e811bd9..9355366 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -26,6 +26,8 @@
- #include "mmc_ops.h"
- #include "sd_ops.h"
- 
-+#define DEFAULT_CMD6_TIMEOUT_MS	500
-+
- static const unsigned int tran_exp[] = {
- 	10000,		100000,		1000000,	10000000,
- 	0,		0,		0,		0
-@@ -571,6 +573,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->erased_byte = 0x0;
- 
- 	/* eMMC v4.5 or later */
-+	card->ext_csd.generic_cmd6_time = DEFAULT_CMD6_TIMEOUT_MS;
- 	if (card->ext_csd.rev >= 6) {
- 		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
- 
--- 
-1.9.1
+  Linux 4.9-rc2 (2016-10-23 17:10:14 -0700)
 
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.9-rc2
+
+for you to fetch changes up to d1f63f0c81c22ba705fcd149a1fcec37b734d818:
+
+  mmc: sdhci-msm: Fix error return code in sdhci_msm_probe()
+(2016-10-27 09:43:01 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-msm: Fix error path in probe
+ - dw_mmc-pltfm: Avoid NULL pointer dereference
+
+----------------------------------------------------------------
+Jaehoon Chung (1):
+      mmc: dw_mmc-pltfm: fix the potential NULL pointer dereference
+
+Wei Yongjun (1):
+      mmc: sdhci-msm: Fix error return code in sdhci_msm_probe()
+
+ drivers/mmc/host/dw_mmc-pltfm.c | 5 +++--
+ drivers/mmc/host/sdhci-msm.c    | 1 +
+ 2 files changed, 4 insertions(+), 2 deletions(-)
