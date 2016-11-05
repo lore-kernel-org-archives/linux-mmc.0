@@ -1,125 +1,65 @@
-From: Uri Yanai <Uri.Yanai@sandisk.com>
-Subject: =?utf-8?B?UkU6IFtQQVRDSF0gbW1jOiBzZDogRXhwb3J0IFNEIFN0YXR1cyB2aWEg4oCc?=
- =?utf-8?B?c3Ny4oCdIGRldmljZSBhdHRyaWJ1dGU=?=
-Date: Sat, 5 Nov 2016 15:14:29 +0000
-Message-ID: <CY1PR02MB2089BA24853AFFAB693C6D17E2A50@CY1PR02MB2089.namprd02.prod.outlook.com>
-References: <1471164396-16879-1-git-send-email-uri.yanai@sandisk.com>
- <CAPDyKFoJS-darh9D6mhmcOqw7FSMU3f6RJHYO6Z4vqMUqUQUHg@mail.gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: mxs: Use the spinlock irq variants
+Date: Sat, 5 Nov 2016 16:56:09 -0200
+Message-ID: <CAOMZO5D3YqgB7iUuayOw8tX236Usy1S9kOH_XQZ+JdzVyCpmSQ@mail.gmail.com>
+References: <1477594672-31611-1-git-send-email-festevam@gmail.com>
+ <1477594672-31611-2-git-send-email-festevam@gmail.com> <20161028102310.5190d3c7@xhacker>
+ <CAOMZO5DZUrjRgWiaW9mtmVBy0Tq+omEdiuP55TGvPiAxLvBHBg@mail.gmail.com> <20161028194947.463870ab@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0061.outbound.protection.outlook.com ([104.47.40.61]:42400
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752918AbcKERrC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 5 Nov 2016 13:47:02 -0400
-In-Reply-To: <CAPDyKFoJS-darh9D6mhmcOqw7FSMU3f6RJHYO6Z4vqMUqUQUHg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:35678 "EHLO
+        mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755511AbcKES4K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Nov 2016 14:56:10 -0400
+Received: by mail-vk0-f67.google.com with SMTP id x186so4478583vkd.2
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Nov 2016 11:56:10 -0700 (PDT)
+In-Reply-To: <20161028194947.463870ab@xhacker>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Marek Vasut <marex@denx.de>, Fabio Estevam <fabio.estevam@nxp.com>
 
-SGkgVWxmDQpJdCBzZWVtcyB0aGUgcGF0Y2ggaXNuJ3QgeWV0IG1lcmdlZCB0byBrZXJuZWwgbWFp
-bmxpbmUuDQpEbyB5b3Uga25vdyB3aHkgPw0KDQpUaGFua3MNClVyaQ0KDQotLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5h
-cm8ub3JnXSANClNlbnQ6IE1vbmRheSwgQXVndXN0IDIyLCAyMDE2IDQ6NDAgUE0NClRvOiBVcmkg
-WWFuYWkNCkNjOiBsaW51eC1tbWM7IEFsZXggTGVtYmVyZw0KU3ViamVjdDogUmU6IFtQQVRDSF0g
-bW1jOiBzZDogRXhwb3J0IFNEIFN0YXR1cyB2aWEg4oCcc3Ny4oCdIGRldmljZSBhdHRyaWJ1dGUN
-Cg0KT24gMTQgQXVndXN0IDIwMTYgYXQgMTA6NDYsIFVyaSBZYW5haSA8dXJpLnlhbmFpQHNhbmRp
-c2suY29tPiB3cm90ZToNCj4gVGhlIFNEIFN0YXR1cyByZWdpc3RlciBjb250YWlucyBzZXZlcmFs
-IGltcG9ydGFudCBmaWVsZHMgcmVsYXRlZCB0byANCj4gdGhlIFNEIENhcmQgcHJvcHJpZXRhcnkg
-ZmVhdHVyZXMuDQo+IFRob3NlIGZpZWxkcyBtYXkgYmUgdXNlZCBieSB1c2VyIHNwYWNlIGFwcGxp
-Y2F0aW9ucyBmb3IgdmVuZG9yIA0KPiBzcGVjaWZpYyB1c2FnZS4NCj4gTm9uZSBvZiB0aG9zZSBm
-aWVsZHMgYXJlIGV4cG9ydGVkIHRvZGF5IGJ5IHRoZSBkcml2ZXIgdG8gdXNlciBzcGFjZS4NCj4g
-SW4gdGhpcyBwYXRjaCwgd2UgYXJlIHJlYWRpbmcgdGhlIFNEIFN0YXR1cyByZWdpc3RlciBhbmQg
-ZXhwb3J0aW5nIA0KPiAodXNpbmcgTU1DX0RFVl9BVFRSKSB0aGUgU0QgU3RhdHVzIHJlZ2lzdGVy
-IHRvIHRoZSB1c2VyIHNwYWNlLg0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBVcmkgWWFuYWkgPHVyaS55
-YW5haUBzYW5kaXNrLmNvbT4NCg0KVGhhbmtzLCBhcHBsaWVkIGZvciBuZXh0IQ0KDQpLaW5kIHJl
-Z2FyZHMNClVmZmUNCg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2NvcmUvc2QuYyAgICB8IDM3ICsr
-KysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0tLS0NCj4gIGluY2x1ZGUvbGludXgvbW1j
-L2NhcmQuaCB8ICAxICsNCj4gIDIgZmlsZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9ucygrKSwgMTgg
-ZGVsZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL3NkLmMgYi9k
-cml2ZXJzL21tYy9jb3JlL3NkLmMgaW5kZXggDQo+IGI5NWJkMjQuLjY5NGQ3MGQgMTAwNjQ0DQo+
-IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvc2QuYw0KPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL3Nk
-LmMNCj4gQEAgLTIyMyw4ICsyMjMsNyBAQCBzdGF0aWMgaW50IG1tY19kZWNvZGVfc2NyKHN0cnVj
-dCBtbWNfY2FyZCAqY2FyZCkgIA0KPiBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1j
-X2NhcmQgKmNhcmQpICB7DQo+ICAgICAgICAgdW5zaWduZWQgaW50IGF1LCBlcywgZXQsIGVvOw0K
-PiAtICAgICAgIGludCBlcnIsIGk7DQo+IC0gICAgICAgdTMyICpzc3I7DQo+ICsgICAgICAgaW50
-IGk7DQo+DQo+ICAgICAgICAgaWYgKCEoY2FyZC0+Y3NkLmNtZGNsYXNzICYgQ0NDX0FQUF9TUEVD
-KSkgew0KPiAgICAgICAgICAgICAgICAgcHJfd2FybigiJXM6IGNhcmQgbGFja3MgbWFuZGF0b3J5
-IFNEIFN0YXR1cyANCj4gZnVuY3Rpb25cbiIsIEBAIC0yMzIsMzMgKzIzMSwyNyBAQCBzdGF0aWMg
-aW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+ICAgICAgICAgICAgICAg
-ICByZXR1cm4gMDsNCj4gICAgICAgICB9DQo+DQo+IC0gICAgICAgc3NyID0ga21hbGxvYyg2NCwg
-R0ZQX0tFUk5FTCk7DQo+IC0gICAgICAgaWYgKCFzc3IpDQo+IC0gICAgICAgICAgICAgICByZXR1
-cm4gLUVOT01FTTsNCj4gLQ0KPiAtICAgICAgIGVyciA9IG1tY19hcHBfc2Rfc3RhdHVzKGNhcmQs
-IHNzcik7DQo+IC0gICAgICAgaWYgKGVycikgew0KPiArICAgICAgIGlmIChtbWNfYXBwX3NkX3N0
-YXR1cyhjYXJkLCBjYXJkLT5yYXdfc3NyKSkgew0KPiAgICAgICAgICAgICAgICAgcHJfd2Fybigi
-JXM6IHByb2JsZW0gcmVhZGluZyBTRCBTdGF0dXMgcmVnaXN0ZXJcbiIsDQo+ICAgICAgICAgICAg
-ICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSk7DQo+IC0gICAgICAgICAgICAg
-ICBlcnIgPSAwOw0KPiAtICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+ICsgICAgICAgICAgICAg
-ICByZXR1cm4gMDsNCj4gICAgICAgICB9DQo+DQo+ICAgICAgICAgZm9yIChpID0gMDsgaSA8IDE2
-OyBpKyspDQo+IC0gICAgICAgICAgICAgICBzc3JbaV0gPSBiZTMyX3RvX2NwdShzc3JbaV0pOw0K
-PiArICAgICAgICAgICAgICAgY2FyZC0+cmF3X3NzcltpXSA9IGJlMzJfdG9fY3B1KGNhcmQtPnJh
-d19zc3JbaV0pOw0KPg0KPiAgICAgICAgIC8qDQo+ICAgICAgICAgICogVU5TVFVGRl9CSVRTIG9u
-bHkgd29ya3Mgd2l0aCBmb3VyIHUzMnMgc28gd2UgaGF2ZSB0byBvZmZzZXQgdGhlDQo+ICAgICAg
-ICAgICogYml0ZmllbGQgcG9zaXRpb25zIGFjY29yZGluZ2x5Lg0KPiAgICAgICAgICAqLw0KPiAt
-ICAgICAgIGF1ID0gVU5TVFVGRl9CSVRTKHNzciwgNDI4IC0gMzg0LCA0KTsNCj4gKyAgICAgICBh
-dSA9IFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLCA0MjggLSAzODQsIDQpOw0KPiAgICAgICAg
-IGlmIChhdSkgew0KPiAgICAgICAgICAgICAgICAgaWYgKGF1IDw9IDkgfHwgY2FyZC0+c2NyLnNk
-YV9zcGVjMykgew0KPiAgICAgICAgICAgICAgICAgICAgICAgICBjYXJkLT5zc3IuYXUgPSBzZF9h
-dV9zaXplW2F1XTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgZXMgPSBVTlNUVUZGX0JJVFMo
-c3NyLCA0MDggLSAzODQsIDE2KTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgZXQgPSBVTlNU
-VUZGX0JJVFMoc3NyLCA0MDIgLSAzODQsIDYpOw0KPiArICAgICAgICAgICAgICAgICAgICAgICBl
-cyA9IFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLCA0MDggLSAzODQsIDE2KTsNCj4gKyAgICAg
-ICAgICAgICAgICAgICAgICAgZXQgPSBVTlNUVUZGX0JJVFMoY2FyZC0+cmF3X3NzciwgNDAyIC0g
-Mzg0LCANCj4gKyA2KTsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGVzICYmIGV0KSB7
-DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZW8gPSBVTlNUVUZGX0JJVFMoc3Ny
-LCA0MDAgLSAzODQsIDIpOw0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVvID0g
-VU5TVFVGRl9CSVRTKGNhcmQtPnJhd19zc3IsIDQwMCAtIA0KPiArIDM4NCwgMik7DQo+ICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgY2FyZC0+c3NyLmVyYXNlX3RpbWVvdXQgPSAoZXQg
-KiAxMDAwKSAvIGVzOw0KPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPnNz
-ci5lcmFzZV9vZmZzZXQgPSBlbyAqIDEwMDA7DQo+ICAgICAgICAgICAgICAgICAgICAgICAgIH0N
-Cj4gQEAgLTI2Nyw5ICsyNjAsOCBAQCBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1j
-X2NhcmQgKmNhcmQpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3Ru
-YW1lKGNhcmQtPmhvc3QpKTsNCj4gICAgICAgICAgICAgICAgIH0NCj4gICAgICAgICB9DQo+IC1v
-dXQ6DQo+IC0gICAgICAga2ZyZWUoc3NyKTsNCj4gLSAgICAgICByZXR1cm4gZXJyOw0KPiArDQo+
-ICsgICAgICAgcmV0dXJuIDA7DQo+ICB9DQo+DQo+ICAvKg0KPiBAQCAtNjY2LDYgKzY1OCwxNCBA
-QCBNTUNfREVWX0FUVFIoY2lkLCAiJTA4eCUwOHglMDh4JTA4eFxuIiwgDQo+IGNhcmQtPnJhd19j
-aWRbMF0sIGNhcmQtPnJhd19jaWRbMV0sICBNTUNfREVWX0FUVFIoY3NkLCAiJTA4eCUwOHglMDh4
-JTA4eFxuIiwgY2FyZC0+cmF3X2NzZFswXSwgY2FyZC0+cmF3X2NzZFsxXSwNCj4gICAgICAgICBj
-YXJkLT5yYXdfY3NkWzJdLCBjYXJkLT5yYXdfY3NkWzNdKTsgIE1NQ19ERVZfQVRUUihzY3IsIA0K
-PiAiJTA4eCUwOHhcbiIsIGNhcmQtPnJhd19zY3JbMF0sIGNhcmQtPnJhd19zY3JbMV0pOw0KPiAr
-TU1DX0RFVl9BVFRSKHNzciwNCj4gKyAgICAgICAiJTA4eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4
-eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4eFxuIiwNCj4gKyAgICAgICAgICAg
-ICAgIGNhcmQtPnJhd19zc3JbMF0sIGNhcmQtPnJhd19zc3JbMV0sIGNhcmQtPnJhd19zc3JbMl0s
-DQo+ICsgICAgICAgICAgICAgICBjYXJkLT5yYXdfc3NyWzNdLCBjYXJkLT5yYXdfc3NyWzRdLCBj
-YXJkLT5yYXdfc3NyWzVdLA0KPiArICAgICAgICAgICAgICAgY2FyZC0+cmF3X3Nzcls2XSwgY2Fy
-ZC0+cmF3X3Nzcls3XSwgY2FyZC0+cmF3X3Nzcls4XSwNCj4gKyAgICAgICAgICAgICAgIGNhcmQt
-PnJhd19zc3JbOV0sIGNhcmQtPnJhd19zc3JbMTBdLCBjYXJkLT5yYXdfc3NyWzExXSwNCj4gKyAg
-ICAgICAgICAgICAgIGNhcmQtPnJhd19zc3JbMTJdLCBjYXJkLT5yYXdfc3NyWzEzXSwgY2FyZC0+
-cmF3X3NzclsxNF0sDQo+ICsgICAgICAgICAgICAgICBjYXJkLT5yYXdfc3NyWzE1XSk7DQo+ICBN
-TUNfREVWX0FUVFIoZGF0ZSwgIiUwMmQvJTA0ZFxuIiwgY2FyZC0+Y2lkLm1vbnRoLCBjYXJkLT5j
-aWQueWVhcik7ICANCj4gTU1DX0RFVl9BVFRSKGVyYXNlX3NpemUsICIldVxuIiwgY2FyZC0+ZXJh
-c2Vfc2l6ZSA8PCA5KTsgIA0KPiBNTUNfREVWX0FUVFIocHJlZmVycmVkX2VyYXNlX3NpemUsICIl
-dVxuIiwgY2FyZC0+cHJlZl9lcmFzZSA8PCA5KTsgQEAgDQo+IC02ODEsNiArNjgxLDcgQEAgc3Rh
-dGljIHN0cnVjdCBhdHRyaWJ1dGUgKnNkX3N0ZF9hdHRyc1tdID0gew0KPiAgICAgICAgICZkZXZf
-YXR0cl9jaWQuYXR0ciwNCj4gICAgICAgICAmZGV2X2F0dHJfY3NkLmF0dHIsDQo+ICAgICAgICAg
-JmRldl9hdHRyX3Njci5hdHRyLA0KPiArICAgICAgICZkZXZfYXR0cl9zc3IuYXR0ciwNCj4gICAg
-ICAgICAmZGV2X2F0dHJfZGF0ZS5hdHRyLA0KPiAgICAgICAgICZkZXZfYXR0cl9lcmFzZV9zaXpl
-LmF0dHIsDQo+ICAgICAgICAgJmRldl9hdHRyX3ByZWZlcnJlZF9lcmFzZV9zaXplLmF0dHIsDQo+
-IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggYi9pbmNsdWRlL2xpbnV4L21t
-Yy9jYXJkLmggaW5kZXggDQo+IGViMDE1MWIuLjA5NjgxMDkgMTAwNjQ0DQo+IC0tLSBhL2luY2x1
-ZGUvbGludXgvbW1jL2NhcmQuaA0KPiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgNCj4g
-QEAgLTI5MCw2ICsyOTAsNyBAQCBzdHJ1Y3QgbW1jX2NhcmQgew0KPiAgICAgICAgIHUzMiAgICAg
-ICAgICAgICAgICAgICAgIHJhd19jaWRbNF07ICAgICAvKiByYXcgY2FyZCBDSUQgKi8NCj4gICAg
-ICAgICB1MzIgICAgICAgICAgICAgICAgICAgICByYXdfY3NkWzRdOyAgICAgLyogcmF3IGNhcmQg
-Q1NEICovDQo+ICAgICAgICAgdTMyICAgICAgICAgICAgICAgICAgICAgcmF3X3NjclsyXTsgICAg
-IC8qIHJhdyBjYXJkIFNDUiAqLw0KPiArICAgICAgIHUzMiAgICAgICAgICAgICAgICAgICAgIHJh
-d19zc3JbMTZdOyAgICAvKiByYXcgY2FyZCBTU1IgKi8NCj4gICAgICAgICBzdHJ1Y3QgbW1jX2Np
-ZCAgICAgICAgICBjaWQ7ICAgICAgICAgICAgLyogY2FyZCBpZGVudGlmaWNhdGlvbiAqLw0KPiAg
-ICAgICAgIHN0cnVjdCBtbWNfY3NkICAgICAgICAgIGNzZDsgICAgICAgICAgICAvKiBjYXJkIHNw
-ZWNpZmljICovDQo+ICAgICAgICAgc3RydWN0IG1tY19leHRfY3NkICAgICAgZXh0X2NzZDsgICAg
-ICAgIC8qIG1tYyB2NCBleHRlbmRlZCBjYXJkIHNwZWNpZmljICovDQo+IC0tDQo+IDEuOS4xDQo+
-DQo=
+Hi Jisheng,
+
+On Fri, Oct 28, 2016 at 9:49 AM, Jisheng Zhang <jszhang@marvell.com> wrote:
+
+> This is not the key. The key here is:
+>
+> compared with the non-irq version, the irq-version spin lock does one extra
+> work: disable the local interrupts. But since we are in interrupt handler,
+> the local irq is already disabled, so there's no need for the irq-versions.
+>
+> I'm not sure I understand the situation, comments are welcome.
+
+Quoting  http://www.xml.com/ldd/chapter/book/ch09.html:
+
+"Many users of spinlocks stick to spin_lock and spin_unlock. If you
+are using spinlocks in interrupt handlers, however, you must use the
+IRQ-disabling versions (usually spin_lock_irqsave and
+spin_unlock_irqsave) in the noninterrupt code. To do otherwise is to
+invite a deadlock situation.
+
+It is worth considering an example here. Assume that your driver is
+running in its read method, and it obtains a lock with spin_lock.
+While the read method is holding the lock, your device interrupts, and
+your interrupt handler is executed on the same processor. If it
+attempts to use the same lock, it will go into a busy-wait loop, since
+your read method already holds the lock. But, since the interrupt
+routine has preempted that method, the lock will never be released and
+the processor deadlocks, which is probably not what you wanted.
+
+This problem can be avoided by using spin_lock_irqsave to disable
+interrupts on the local processor while the lock is held. When in
+doubt, use the _irqsave versions of the primitives and you will not
+need to worry about deadlocks. Remember, though, that the flags value
+from spin_lock_irqsave must not be passed to other functions."
+
+And as I mentioned before Documentation/locking/spinlocks.txt is very
+clear about the need of using spin_lock_irqsave inside interrupt
+handlers.
+
+Feel free to submit a patch to Documentation/locking/spinlocks.txt if
+you think this is incorrect.
+
+Thanks
