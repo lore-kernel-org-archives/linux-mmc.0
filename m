@@ -1,54 +1,125 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH] mmc: mmc: Use 500ms as the default generic CMD6 timeout
-Date: Fri, 4 Nov 2016 13:13:53 -0700
-Message-ID: <20161104201353.GD16026@codeaurora.org>
-References: <1478280753-2482-1-git-send-email-ulf.hansson@linaro.org>
+From: Uri Yanai <Uri.Yanai@sandisk.com>
+Subject: =?utf-8?B?UkU6IFtQQVRDSF0gbW1jOiBzZDogRXhwb3J0IFNEIFN0YXR1cyB2aWEg4oCc?=
+ =?utf-8?B?c3Ny4oCdIGRldmljZSBhdHRyaWJ1dGU=?=
+Date: Sat, 5 Nov 2016 15:14:29 +0000
+Message-ID: <CY1PR02MB2089BA24853AFFAB693C6D17E2A50@CY1PR02MB2089.namprd02.prod.outlook.com>
+References: <1471164396-16879-1-git-send-email-uri.yanai@sandisk.com>
+ <CAPDyKFoJS-darh9D6mhmcOqw7FSMU3f6RJHYO6Z4vqMUqUQUHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1478280753-2482-1-git-send-email-ulf.hansson@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-co1nam03on0061.outbound.protection.outlook.com ([104.47.40.61]:42400
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752918AbcKERrC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 5 Nov 2016 13:47:02 -0400
+In-Reply-To: <CAPDyKFoJS-darh9D6mhmcOqw7FSMU3f6RJHYO6Z4vqMUqUQUHg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-On 11/04, Ulf Hansson wrote:
-> In the eMMC 4.51 version of the spec, an EXT_CSD field called
-> GENERIC_CMD6_TIME[248] was added. This allows cards to specify the maximum
-> time it may need to move out from its busy state, when a CMD6 command has
-> been sent.
-> 
-> In cases when the card is compliant to versions < 4.51 of the eMMC spec,
-> obviously the core needs to use a fall-back value for this timeout, which
-> currently is set to 10 minutes. This value is completely in the wrong range
-> and importantly in some cases it causes a card initialization to take more
-> than 10 minute to complete.
-> 
-> Earlier this scenario was avoided as the mmc core used CMD13 to poll the
-> card, to find out when it stopped signaling busy. Commit 08573eaf1a70
-> ("mmc: mmc: do not use CMD13 to get status after speed mode switch")
-> changed this behavior.
-> 
-> Instead of reverting that commit, which would cause other issues, let's
-> instead start by picking a simple solution for the problem, by using a
-> 500ms default generic CMD6 timeout.
-> 
-> The reason for using exactly 500ms, comes from observations that shows it's
-> quite common for cards to specify 250ms. 500ms is two times that value so
-> likely it should be enough for most cards.
-> 
-> Cc: <stable@vger.kernel.org> # v4.8+
-> Fixes: 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed
-> mode switch")
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-The 10 minute delay goes away and I see the card almost instantly
-on my msm8960-cdp. I smoke tested on a couple other platforms
-that weren't experiencing the problem and they seems fine too.
-
-Tested-by: Stephen Boyd <sboyd@codeaurora.org>
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+SGkgVWxmDQpJdCBzZWVtcyB0aGUgcGF0Y2ggaXNuJ3QgeWV0IG1lcmdlZCB0byBrZXJuZWwgbWFp
+bmxpbmUuDQpEbyB5b3Uga25vdyB3aHkgPw0KDQpUaGFua3MNClVyaQ0KDQotLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5h
+cm8ub3JnXSANClNlbnQ6IE1vbmRheSwgQXVndXN0IDIyLCAyMDE2IDQ6NDAgUE0NClRvOiBVcmkg
+WWFuYWkNCkNjOiBsaW51eC1tbWM7IEFsZXggTGVtYmVyZw0KU3ViamVjdDogUmU6IFtQQVRDSF0g
+bW1jOiBzZDogRXhwb3J0IFNEIFN0YXR1cyB2aWEg4oCcc3Ny4oCdIGRldmljZSBhdHRyaWJ1dGUN
+Cg0KT24gMTQgQXVndXN0IDIwMTYgYXQgMTA6NDYsIFVyaSBZYW5haSA8dXJpLnlhbmFpQHNhbmRp
+c2suY29tPiB3cm90ZToNCj4gVGhlIFNEIFN0YXR1cyByZWdpc3RlciBjb250YWlucyBzZXZlcmFs
+IGltcG9ydGFudCBmaWVsZHMgcmVsYXRlZCB0byANCj4gdGhlIFNEIENhcmQgcHJvcHJpZXRhcnkg
+ZmVhdHVyZXMuDQo+IFRob3NlIGZpZWxkcyBtYXkgYmUgdXNlZCBieSB1c2VyIHNwYWNlIGFwcGxp
+Y2F0aW9ucyBmb3IgdmVuZG9yIA0KPiBzcGVjaWZpYyB1c2FnZS4NCj4gTm9uZSBvZiB0aG9zZSBm
+aWVsZHMgYXJlIGV4cG9ydGVkIHRvZGF5IGJ5IHRoZSBkcml2ZXIgdG8gdXNlciBzcGFjZS4NCj4g
+SW4gdGhpcyBwYXRjaCwgd2UgYXJlIHJlYWRpbmcgdGhlIFNEIFN0YXR1cyByZWdpc3RlciBhbmQg
+ZXhwb3J0aW5nIA0KPiAodXNpbmcgTU1DX0RFVl9BVFRSKSB0aGUgU0QgU3RhdHVzIHJlZ2lzdGVy
+IHRvIHRoZSB1c2VyIHNwYWNlLg0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBVcmkgWWFuYWkgPHVyaS55
+YW5haUBzYW5kaXNrLmNvbT4NCg0KVGhhbmtzLCBhcHBsaWVkIGZvciBuZXh0IQ0KDQpLaW5kIHJl
+Z2FyZHMNClVmZmUNCg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2NvcmUvc2QuYyAgICB8IDM3ICsr
+KysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0tLS0NCj4gIGluY2x1ZGUvbGludXgvbW1j
+L2NhcmQuaCB8ICAxICsNCj4gIDIgZmlsZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9ucygrKSwgMTgg
+ZGVsZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL3NkLmMgYi9k
+cml2ZXJzL21tYy9jb3JlL3NkLmMgaW5kZXggDQo+IGI5NWJkMjQuLjY5NGQ3MGQgMTAwNjQ0DQo+
+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvc2QuYw0KPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL3Nk
+LmMNCj4gQEAgLTIyMyw4ICsyMjMsNyBAQCBzdGF0aWMgaW50IG1tY19kZWNvZGVfc2NyKHN0cnVj
+dCBtbWNfY2FyZCAqY2FyZCkgIA0KPiBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1j
+X2NhcmQgKmNhcmQpICB7DQo+ICAgICAgICAgdW5zaWduZWQgaW50IGF1LCBlcywgZXQsIGVvOw0K
+PiAtICAgICAgIGludCBlcnIsIGk7DQo+IC0gICAgICAgdTMyICpzc3I7DQo+ICsgICAgICAgaW50
+IGk7DQo+DQo+ICAgICAgICAgaWYgKCEoY2FyZC0+Y3NkLmNtZGNsYXNzICYgQ0NDX0FQUF9TUEVD
+KSkgew0KPiAgICAgICAgICAgICAgICAgcHJfd2FybigiJXM6IGNhcmQgbGFja3MgbWFuZGF0b3J5
+IFNEIFN0YXR1cyANCj4gZnVuY3Rpb25cbiIsIEBAIC0yMzIsMzMgKzIzMSwyNyBAQCBzdGF0aWMg
+aW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+ICAgICAgICAgICAgICAg
+ICByZXR1cm4gMDsNCj4gICAgICAgICB9DQo+DQo+IC0gICAgICAgc3NyID0ga21hbGxvYyg2NCwg
+R0ZQX0tFUk5FTCk7DQo+IC0gICAgICAgaWYgKCFzc3IpDQo+IC0gICAgICAgICAgICAgICByZXR1
+cm4gLUVOT01FTTsNCj4gLQ0KPiAtICAgICAgIGVyciA9IG1tY19hcHBfc2Rfc3RhdHVzKGNhcmQs
+IHNzcik7DQo+IC0gICAgICAgaWYgKGVycikgew0KPiArICAgICAgIGlmIChtbWNfYXBwX3NkX3N0
+YXR1cyhjYXJkLCBjYXJkLT5yYXdfc3NyKSkgew0KPiAgICAgICAgICAgICAgICAgcHJfd2Fybigi
+JXM6IHByb2JsZW0gcmVhZGluZyBTRCBTdGF0dXMgcmVnaXN0ZXJcbiIsDQo+ICAgICAgICAgICAg
+ICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSk7DQo+IC0gICAgICAgICAgICAg
+ICBlcnIgPSAwOw0KPiAtICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+ICsgICAgICAgICAgICAg
+ICByZXR1cm4gMDsNCj4gICAgICAgICB9DQo+DQo+ICAgICAgICAgZm9yIChpID0gMDsgaSA8IDE2
+OyBpKyspDQo+IC0gICAgICAgICAgICAgICBzc3JbaV0gPSBiZTMyX3RvX2NwdShzc3JbaV0pOw0K
+PiArICAgICAgICAgICAgICAgY2FyZC0+cmF3X3NzcltpXSA9IGJlMzJfdG9fY3B1KGNhcmQtPnJh
+d19zc3JbaV0pOw0KPg0KPiAgICAgICAgIC8qDQo+ICAgICAgICAgICogVU5TVFVGRl9CSVRTIG9u
+bHkgd29ya3Mgd2l0aCBmb3VyIHUzMnMgc28gd2UgaGF2ZSB0byBvZmZzZXQgdGhlDQo+ICAgICAg
+ICAgICogYml0ZmllbGQgcG9zaXRpb25zIGFjY29yZGluZ2x5Lg0KPiAgICAgICAgICAqLw0KPiAt
+ICAgICAgIGF1ID0gVU5TVFVGRl9CSVRTKHNzciwgNDI4IC0gMzg0LCA0KTsNCj4gKyAgICAgICBh
+dSA9IFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLCA0MjggLSAzODQsIDQpOw0KPiAgICAgICAg
+IGlmIChhdSkgew0KPiAgICAgICAgICAgICAgICAgaWYgKGF1IDw9IDkgfHwgY2FyZC0+c2NyLnNk
+YV9zcGVjMykgew0KPiAgICAgICAgICAgICAgICAgICAgICAgICBjYXJkLT5zc3IuYXUgPSBzZF9h
+dV9zaXplW2F1XTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgZXMgPSBVTlNUVUZGX0JJVFMo
+c3NyLCA0MDggLSAzODQsIDE2KTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgZXQgPSBVTlNU
+VUZGX0JJVFMoc3NyLCA0MDIgLSAzODQsIDYpOw0KPiArICAgICAgICAgICAgICAgICAgICAgICBl
+cyA9IFVOU1RVRkZfQklUUyhjYXJkLT5yYXdfc3NyLCA0MDggLSAzODQsIDE2KTsNCj4gKyAgICAg
+ICAgICAgICAgICAgICAgICAgZXQgPSBVTlNUVUZGX0JJVFMoY2FyZC0+cmF3X3NzciwgNDAyIC0g
+Mzg0LCANCj4gKyA2KTsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGVzICYmIGV0KSB7
+DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZW8gPSBVTlNUVUZGX0JJVFMoc3Ny
+LCA0MDAgLSAzODQsIDIpOw0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVvID0g
+VU5TVFVGRl9CSVRTKGNhcmQtPnJhd19zc3IsIDQwMCAtIA0KPiArIDM4NCwgMik7DQo+ICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgY2FyZC0+c3NyLmVyYXNlX3RpbWVvdXQgPSAoZXQg
+KiAxMDAwKSAvIGVzOw0KPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPnNz
+ci5lcmFzZV9vZmZzZXQgPSBlbyAqIDEwMDA7DQo+ICAgICAgICAgICAgICAgICAgICAgICAgIH0N
+Cj4gQEAgLTI2Nyw5ICsyNjAsOCBAQCBzdGF0aWMgaW50IG1tY19yZWFkX3NzcihzdHJ1Y3QgbW1j
+X2NhcmQgKmNhcmQpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3Ru
+YW1lKGNhcmQtPmhvc3QpKTsNCj4gICAgICAgICAgICAgICAgIH0NCj4gICAgICAgICB9DQo+IC1v
+dXQ6DQo+IC0gICAgICAga2ZyZWUoc3NyKTsNCj4gLSAgICAgICByZXR1cm4gZXJyOw0KPiArDQo+
+ICsgICAgICAgcmV0dXJuIDA7DQo+ICB9DQo+DQo+ICAvKg0KPiBAQCAtNjY2LDYgKzY1OCwxNCBA
+QCBNTUNfREVWX0FUVFIoY2lkLCAiJTA4eCUwOHglMDh4JTA4eFxuIiwgDQo+IGNhcmQtPnJhd19j
+aWRbMF0sIGNhcmQtPnJhd19jaWRbMV0sICBNTUNfREVWX0FUVFIoY3NkLCAiJTA4eCUwOHglMDh4
+JTA4eFxuIiwgY2FyZC0+cmF3X2NzZFswXSwgY2FyZC0+cmF3X2NzZFsxXSwNCj4gICAgICAgICBj
+YXJkLT5yYXdfY3NkWzJdLCBjYXJkLT5yYXdfY3NkWzNdKTsgIE1NQ19ERVZfQVRUUihzY3IsIA0K
+PiAiJTA4eCUwOHhcbiIsIGNhcmQtPnJhd19zY3JbMF0sIGNhcmQtPnJhd19zY3JbMV0pOw0KPiAr
+TU1DX0RFVl9BVFRSKHNzciwNCj4gKyAgICAgICAiJTA4eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4
+eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4eCUwOHglMDh4JTA4eFxuIiwNCj4gKyAgICAgICAgICAg
+ICAgIGNhcmQtPnJhd19zc3JbMF0sIGNhcmQtPnJhd19zc3JbMV0sIGNhcmQtPnJhd19zc3JbMl0s
+DQo+ICsgICAgICAgICAgICAgICBjYXJkLT5yYXdfc3NyWzNdLCBjYXJkLT5yYXdfc3NyWzRdLCBj
+YXJkLT5yYXdfc3NyWzVdLA0KPiArICAgICAgICAgICAgICAgY2FyZC0+cmF3X3Nzcls2XSwgY2Fy
+ZC0+cmF3X3Nzcls3XSwgY2FyZC0+cmF3X3Nzcls4XSwNCj4gKyAgICAgICAgICAgICAgIGNhcmQt
+PnJhd19zc3JbOV0sIGNhcmQtPnJhd19zc3JbMTBdLCBjYXJkLT5yYXdfc3NyWzExXSwNCj4gKyAg
+ICAgICAgICAgICAgIGNhcmQtPnJhd19zc3JbMTJdLCBjYXJkLT5yYXdfc3NyWzEzXSwgY2FyZC0+
+cmF3X3NzclsxNF0sDQo+ICsgICAgICAgICAgICAgICBjYXJkLT5yYXdfc3NyWzE1XSk7DQo+ICBN
+TUNfREVWX0FUVFIoZGF0ZSwgIiUwMmQvJTA0ZFxuIiwgY2FyZC0+Y2lkLm1vbnRoLCBjYXJkLT5j
+aWQueWVhcik7ICANCj4gTU1DX0RFVl9BVFRSKGVyYXNlX3NpemUsICIldVxuIiwgY2FyZC0+ZXJh
+c2Vfc2l6ZSA8PCA5KTsgIA0KPiBNTUNfREVWX0FUVFIocHJlZmVycmVkX2VyYXNlX3NpemUsICIl
+dVxuIiwgY2FyZC0+cHJlZl9lcmFzZSA8PCA5KTsgQEAgDQo+IC02ODEsNiArNjgxLDcgQEAgc3Rh
+dGljIHN0cnVjdCBhdHRyaWJ1dGUgKnNkX3N0ZF9hdHRyc1tdID0gew0KPiAgICAgICAgICZkZXZf
+YXR0cl9jaWQuYXR0ciwNCj4gICAgICAgICAmZGV2X2F0dHJfY3NkLmF0dHIsDQo+ICAgICAgICAg
+JmRldl9hdHRyX3Njci5hdHRyLA0KPiArICAgICAgICZkZXZfYXR0cl9zc3IuYXR0ciwNCj4gICAg
+ICAgICAmZGV2X2F0dHJfZGF0ZS5hdHRyLA0KPiAgICAgICAgICZkZXZfYXR0cl9lcmFzZV9zaXpl
+LmF0dHIsDQo+ICAgICAgICAgJmRldl9hdHRyX3ByZWZlcnJlZF9lcmFzZV9zaXplLmF0dHIsDQo+
+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggYi9pbmNsdWRlL2xpbnV4L21t
+Yy9jYXJkLmggaW5kZXggDQo+IGViMDE1MWIuLjA5NjgxMDkgMTAwNjQ0DQo+IC0tLSBhL2luY2x1
+ZGUvbGludXgvbW1jL2NhcmQuaA0KPiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgNCj4g
+QEAgLTI5MCw2ICsyOTAsNyBAQCBzdHJ1Y3QgbW1jX2NhcmQgew0KPiAgICAgICAgIHUzMiAgICAg
+ICAgICAgICAgICAgICAgIHJhd19jaWRbNF07ICAgICAvKiByYXcgY2FyZCBDSUQgKi8NCj4gICAg
+ICAgICB1MzIgICAgICAgICAgICAgICAgICAgICByYXdfY3NkWzRdOyAgICAgLyogcmF3IGNhcmQg
+Q1NEICovDQo+ICAgICAgICAgdTMyICAgICAgICAgICAgICAgICAgICAgcmF3X3NjclsyXTsgICAg
+IC8qIHJhdyBjYXJkIFNDUiAqLw0KPiArICAgICAgIHUzMiAgICAgICAgICAgICAgICAgICAgIHJh
+d19zc3JbMTZdOyAgICAvKiByYXcgY2FyZCBTU1IgKi8NCj4gICAgICAgICBzdHJ1Y3QgbW1jX2Np
+ZCAgICAgICAgICBjaWQ7ICAgICAgICAgICAgLyogY2FyZCBpZGVudGlmaWNhdGlvbiAqLw0KPiAg
+ICAgICAgIHN0cnVjdCBtbWNfY3NkICAgICAgICAgIGNzZDsgICAgICAgICAgICAvKiBjYXJkIHNw
+ZWNpZmljICovDQo+ICAgICAgICAgc3RydWN0IG1tY19leHRfY3NkICAgICAgZXh0X2NzZDsgICAg
+ICAgIC8qIG1tYyB2NCBleHRlbmRlZCBjYXJkIHNwZWNpZmljICovDQo+IC0tDQo+IDEuOS4xDQo+
+DQo=
