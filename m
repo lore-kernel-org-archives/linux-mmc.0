@@ -1,43 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] MMC cleanups
-Date: Mon, 7 Nov 2016 13:43:21 +0100
-Message-ID: <CAPDyKFqrBrKAWt0-ifK1nKDv=czJLAZzKOzfKq2MYtnr1cYaXg@mail.gmail.com>
-References: <1478253919-2469-1-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 0/2] mmc: sdhci: Fix sdhci caps register bits with
+ corrections provided by dt
+Date: Mon, 7 Nov 2016 13:42:50 +0100
+Message-ID: <CAPDyKFpU_YW1OkXPK_6LGSHAQG2WjgQqGfWTCbPL4vvwJNRF6Q@mail.gmail.com>
+References: <1478100376-602-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:37991 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751543AbcKGMnY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 07:43:24 -0500
-Received: by mail-wm0-f47.google.com with SMTP id f82so116044755wmf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 04:43:23 -0800 (PST)
-In-Reply-To: <1478253919-2469-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1478100376-602-1-git-send-email-zach.brown@ni.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-On 4 November 2016 at 11:05, Linus Walleij <linus.walleij@linaro.org> wrote:
-> This is a set of three cleanup patches for the MMC core/card/block
-> code. I had to make them to start to understand what the code was
-> doing.
+On 2 November 2016 at 16:26, Zach Brown <zach.brown@ni.com> wrote:
+> For various reasons the sdhci caps register can be incorrect. This patch set
+> introduces a general way to correct the bits when they are read to accurately
+> reflect the capabilties of the controller/board combo.
 >
-> It would be great if we could apply these as a base for further
-> refactoring of the core code, e.g. for multiqueue efforts.
+> The first patch creates sdhci-caps and sdhci-caps-mask dt properties that
+> combined represent the correction to the sdhci caps register.
 >
-> Linus Walleij (3):
->   mmc: block: make gen_err a bool variable
->   mmc: block: convert ecc_err to a bool
->   mmc: core: use enum mmc_blk_status properly
+> The second patch uses the new dt properties to correct the caps from the
+> register as they read during __sdhci_read_caps.
 >
->  drivers/mmc/card/block.c    | 34 ++++++++++++++++++----------------
->  drivers/mmc/card/mmc_test.c | 44 ++++++++++++++++++++++++++++++++++----------
->  drivers/mmc/core/core.c     | 35 ++++++++++++++++++-----------------
->  include/linux/mmc/card.h    | 12 ------------
->  include/linux/mmc/core.h    | 15 ++++++++++++++-
->  include/linux/mmc/host.h    |  2 +-
->  6 files changed, 85 insertions(+), 57 deletions(-)
+> Changes from RFC:
+>  * /s/registers/register
+>  * Moved sdhci dt properties into new documentation file sdhci.txt
+> v2:
+>  * Fixed style issue, all branches of 'if' should have {}
+>
+>
+> Zach Brown (2):
+>   mmc: sdhci: dt: Add device tree properties sdhci-caps and
+>     sdhci-caps-mask
+>   mmc: sdhci: Use sdhci-caps-mask and sdhci-caps to change the caps read
+>         during __sdhci_read_caps
+>
+>  Documentation/devicetree/bindings/mmc/sdhci.txt | 14 ++++++++++++++
+>  drivers/mmc/host/sdhci.c                        | 24 ++++++++++++++++++++++--
+>  2 files changed, 36 insertions(+), 2 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci.txt
 >
 > --
 > 2.7.4
