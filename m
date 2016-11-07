@@ -1,51 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/3] mmc: sh_mobile_sdhi: Add r7s72100 support
-Date: Mon, 7 Nov 2016 19:38:30 +0100
-Message-ID: <CAPDyKFp=d7nQ94wv_LnvuJ4HMD8Hv3X+BanhRoc1wu1i+pmEPw@mail.gmail.com>
-References: <20160912141507.6837-1-chris.brandt@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:35526 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933287AbcKGSid (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 13:38:33 -0500
-Received: by mail-wm0-f42.google.com with SMTP id a197so200573143wmd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 10:38:32 -0800 (PST)
-In-Reply-To: <20160912141507.6837-1-chris.brandt@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [PATCH v7 10/11] scsi: ufs: retrieve rpmb rw size
+Date: Mon,  7 Nov 2016 21:53:13 +0200
+Message-ID: <1478548394-8184-11-git-send-email-tomas.winkler@intel.com>
+References: <1478548394-8184-1-git-send-email-tomas.winkler@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1478548394-8184-1-git-send-email-tomas.winkler@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K . Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?UTF-8?q?Arve=20Hj=C3=B8nnev=C3=A5g?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
+Cc: Avri Altman <avri.altman@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-doc@vger.kernel.org, Tomas Winkler <tomas.winkler@intel.com>, Alexander Usyskin <alexander.usyskin@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 12 September 2016 at 16:15, Chris Brandt <chris.brandt@renesas.com> wrote:
-> For the most part, the SDHI controller in the RZ/A1 (r7s72100)
-> is the same as other Renesas SoC...except for the fact that the
-> data port register was widened to 32-bits and the 16-bit accesses
-> in the current tmio driver aren't going to cut it.
->
-> Also, the tmio driver allows you to pass in what voltages you
-> support via the ocr_mask. For the RZ/A1, it's just simple 3.3v.
-> So, I added the ability to pass that when using DT.
->
-> Chris Brandt (3):
->   mmc: sh_mobile_sdhi: add ocr_mask option
->   mmc: tmio-mmc: add support for 32bit data port
->   mmc: sh_mobile_sdhi: Add r7s72100 support
->
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
->  drivers/mmc/host/sh_mobile_sdhi.c                  |  9 +++++++
->  drivers/mmc/host/tmio_mmc.h                        | 12 +++++++++
->  drivers/mmc/host/tmio_mmc_pio.c                    | 30 ++++++++++++++++++++++
->  include/linux/mfd/tmio.h                           |  5 ++++
->  5 files changed, 57 insertions(+)
->
-> --
-> 2.9.2
->
->
+Retrieve maximum number of RPMB frames that can be
+in a single request.
+Currently the limitations is provided only for writes
+via reliable_wr_cnt API.
 
-Thanks, applied for next!
+V7: New in the series
 
-Kind regards
-Uffe
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+Signed-off-by: Alexander Usyskin <alexander.usyskin@intel.com>
+---
+ drivers/scsi/ufs/ufs.h    |  6 ++++++
+ drivers/scsi/ufs/ufshcd.c | 22 ++++++++++++++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/drivers/scsi/ufs/ufs.h b/drivers/scsi/ufs/ufs.h
+index 845b874e2977..84bb8d7c6b63 100644
+--- a/drivers/scsi/ufs/ufs.h
++++ b/drivers/scsi/ufs/ufs.h
+@@ -176,6 +176,12 @@ enum ufs_desc_max_size {
+ 	QUERY_DESC_RFU_MAX_SIZE			= 0x00,
+ };
+ 
++enum geometry_desc_param_offset {
++	GEOMETRY_DESC_LEN		= 0x0,
++	GEOMETRY_DESC_TYPE		= 0x1,
++	GEOMETRY_DESC_RPMB_RW_SIZE	= 0x17,
++};
++
+ /* Unit descriptor parameters offsets in bytes*/
+ enum unit_desc_param {
+ 	UNIT_DESC_PARAM_LEN			= 0x0,
+diff --git a/drivers/scsi/ufs/ufshcd.c b/drivers/scsi/ufs/ufshcd.c
+index 95bb9dc7fbfe..69f5b03f6774 100644
+--- a/drivers/scsi/ufs/ufshcd.c
++++ b/drivers/scsi/ufs/ufshcd.c
+@@ -2196,6 +2196,15 @@ static inline int ufshcd_read_unit_desc_param(struct ufs_hba *hba,
+ 				      param_offset, param_read_buf, param_size);
+ }
+ 
++static inline int ufshcd_read_geometry_desc_param(struct ufs_hba *hba,
++				enum geometry_desc_param_offset param_offset,
++				u8 *param_read_buf, u32 param_size)
++{
++	return ufshcd_read_desc_param(hba, QUERY_DESC_IDN_GEOMETRY, 0,
++				      param_offset, param_read_buf, param_size);
++}
++
++
+ /**
+  * ufshcd_memory_alloc - allocate memory for host memory space data structures
+  * @hba: per adapter instance
+@@ -4896,6 +4905,19 @@ static struct rpmb_ops ufshcd_rpmb_dev_ops = {
+ static inline void ufshcd_rpmb_add(struct ufs_hba *hba)
+ {
+ 	struct rpmb_dev *rdev;
++	u8 rw_size;
++	int ret;
++
++	ret = ufshcd_read_geometry_desc_param(hba, GEOMETRY_DESC_RPMB_RW_SIZE,
++					&rw_size, sizeof(rw_size));
++	if (ret) {
++		dev_warn(hba->dev, "%s: cannot get rpmb rw limit %d\n",
++			 dev_name(hba->dev), ret);
++		/* fallback to singel frame write */
++		rw_size = 1;
++	}
++
++	ufshcd_rpmb_dev_ops.reliable_wr_cnt = rw_size;
+ 
+ 	scsi_device_get(hba->sdev_ufs_rpmb);
+ 	rdev = rpmb_dev_register(hba->dev, &ufshcd_rpmb_dev_ops);
+-- 
+2.7.4
