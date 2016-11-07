@@ -1,114 +1,145 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v5 03/12] mmc: sdhci-msm: add pltfm_data support to get
- clk-rates from DT
-Date: Mon, 7 Nov 2016 16:51:18 +0530
-Message-ID: <552c5d3e-6b9b-abd1-4a56-0630288aa050@codeaurora.org>
-References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
- <1475678440-3525-4-git-send-email-riteshh@codeaurora.org>
- <20161010125738.GA26940@rob-hp-laptop>
- <1a7f9c09-70a6-da2a-ca84-78a0331e3b4d@codeaurora.org>
- <CAL_JsqKfBjR9sTqzOMdM-ifDJiL_2RNrjAn3cvezvisLqZu-Wg@mail.gmail.com>
- <9db96ae7-9a5e-1494-2371-e5b346a08155@codeaurora.org>
- <CAL_JsqJbkDX3yAf6EGOcZiN=Fk-cz-7VeQxPK7_YOMyN7Pg0zA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v6 00/14] mmc: sdhci-msm: Add clk-rates, DDR, HS400 support
+Date: Mon,  7 Nov 2016 16:54:23 +0530
+Message-ID: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:57074 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:59664 "EHLO
         smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752071AbcKGLVa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 06:21:30 -0500
-In-Reply-To: <CAL_JsqJbkDX3yAf6EGOcZiN=Fk-cz-7VeQxPK7_YOMyN7Pg0zA@mail.gmail.com>
+        with ESMTP id S1751541AbcKGLZO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 06:25:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, David Brown <david.brown@linaro.org>, Andy Gross <andy.gross@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Stephen Boyd <sboyd@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, pramod.gurav@linaro.org, Rajendra Nayak <rnayak@codeaurora.org>
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org
+Cc: devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 
-Hi Rob,
+Hi, 
 
-On 10/11/2016 6:01 PM, Rob Herring wrote:
-> On Tue, Oct 11, 2016 at 4:06 AM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
->> Hi Rob
->>
->>
->> On 10/11/2016 12:59 AM, Rob Herring wrote:
->>>
->>> On Mon, Oct 10, 2016 at 11:07 AM, Ritesh Harjani <riteshh@codeaurora.org>
->>> wrote:
->>>>
->>>> Hi Rob,
->>>>
->>>> Thanks for review.
->>>>
->>>> On 10/10/2016 6:27 PM, Rob Herring wrote:
->>>>>
->>>>>
->>>>> On Wed, Oct 05, 2016 at 08:10:31PM +0530, Ritesh Harjani wrote:
->>>>>>
->>>>>>
->>>>>> This adds support for sdhc-msm controllers to get supported
->>>>>> clk-rates from DT. sdhci-msm would need it's own set_clock
->>>>>> ops to be implemented. For this, supported clk-rates needs
->>>>>> to be populated in sdhci_msm_pltfm_data.
->>>>>>
->>>>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->>>>>> ---
->>>>>>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
->>>>>>  drivers/mmc/host/sdhci-msm.c                       | 48
->>>>>> ++++++++++++++++++++++
->>>>>>  2 files changed, 49 insertions(+)
->>>>>>
->>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>>> b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>>> index 485483a..6a83b38 100644
->>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->>>>>> @@ -17,6 +17,7 @@ Required properties:
->>>>>>         "iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock)
->>>>>> (required)
->>>>>>         "core"  - SDC MMC clock (MCLK) (required)
->>>>>>         "bus"   - SDCC bus voter clock (optional)
->>>>>> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units
->>>>>> -
->>>>>> Hz.
->>>>>
->>>>>
->>>>>
->>>>> Why can't some combination of assigned-clock-rates and querying the
->>>>> clock provider for rates be used here?
->>>>
->>>>
->>>> From what I understood, assigned-clock-rates would only work for setting
->>>> some default clock rates for certain clocks by calling
->>>> of_clk_set_defaults.
->>>>
->>>> Whereas the requirement here is -
->>>> That since SDHC msm directly controls the clk(core clock) at source, it's
->>>> sdhci-msm driver needs to know the supported clk-rates by the underlying
->>>> platform to configure the nearest floor value supported on this platform
->>>> (when the request arrives from the core layer to switch the clock).
->>>
->>>
->>> Why does clk_round_rate not work for you? That will round down to the
->>> nearest frequency supported.
->>
->> clk_round_rate will round off to nearest supported "ceil" frequency.
->> But we require nearest rounded off "floor" frequency.
->
-> Then fix the clk framework to do what you want. This doesn't need to be in DT.
-Sure. Discussed with clk driver. Will make the required changes in qcom 
-clk driver to fix this.
+This is v6 version of the patch series which adds support for MSM8996.
+Adds HS400 driver support as well.
+These are tested on internal msm8996 & db410c HW.
 
-Will soon publish the new series.
+Changes from v5 -> v6 :- 
+1. Earlier in v5 series DT node was added to get the clk-rates table
+needed for sdhci-msm driver. But this is removed in this(v6) patch series
+and instead the clk changes are done in the clk driver as per Rob H comment.
 
->
-> Rob
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+2. Added clk driver changes(patch 1-3) to provide floor rate values of requested
+clock for sdhc client.
+For following boards- apq8084, msm8996, msm8916, msm8974.
+
+3. Other minor patch comments were addressed.
+
+Changes from v4 -> v5 :-
+1. Added HS400 sdhci-msm controller specific changes:- (Patch 10, 11, 12)
+2. Addressed comment from Adrian on Patch 07 @[3].
+3. Addressed comment from Arnd on Patch 03, to directly add
+   clk_table into sdhci_msm_host. [4]
+4. Addressed comment from Bjorn to not enforce having clk-rates property
+   in DT for older targets based on discussion at [5]
+5. Retained Acks from Adrian on patches (01 & 02 & 06) where there were no
+   changes made while addressing above comments.
+
+Older history:- 
+This is v4 version of the patch series.
+Patches 01, 02, 05 & 06 were Acked-by Adrian.
+
+Changes from v3 -> v4 :-
+1. Addressed comments from Adrian on Patch 03, 07, 08.
+2. Addressed comments from Bjorn on Patch 03.
+3. Added clk-rate support for sdhc DT nodes to all MSM platforms.
+   in Pacth 04.
+4. Rebased on next branch of Ulf.
+
+Changes from v2 -> v3 :-
+1. Addded Patch 01 based on Bjorn comment[2] - 
+   This fixes/unrolls the poor coding style of read/writes of
+   registers from base sdhci-msm driver.
+
+2. Fixed/unrolled poor style of reads/writes of registers in Patch 02,
+   based on Bjorn comment[2]. Also changed name of flag from
+   use_updated_dll_reset -> use_14lpp_dll_reset.
+
+Changes from v1->v2 :-
+1. Removed patch 06 & 08 from v1 patch series[1]
+(which were introducing unnecessary quirks).
+   Instead have implemented __sdhci_msm_set_clock version of
+   sdhci_set_clock in sdhci_msm driver itself in patch 07 of
+   this patch series.
+2. Enabled extra quirk (SDHCI_QUIRK2_PRESET_VALUE_BROKEN) in
+   patch 05 of this patch series. 
+
+
+Description of patches :-
+This patchset adds clk-rates & other required changes to
+upstream sdhci-msm driver from codeaurora tree.
+It has been tested on a db410c Dragonboard and msm8996 based
+platform.
+
+Patch 0001-0003- Adds support in qcom clk driver to return
+floor value of requested clock rate instead of ceil rate
+for sdhc clients.
+
+Patch 0004- Adds updated dll sequence for newer controllers
+which has minor_version >= 0x42. This is required for msm8996.
+
+MSM controller HW recommendation is to use the base MCI clock
+and directly control this MCI clock at GCC in order to
+change the clk-rate. 
+Patches 06-08 bring in required change for this to
+sdhci-msm.
+
+MSM controller would require 2x clock rate from source
+for DDR bus speed modes. Patch 09 adds this support.
+
+Patch 0010- adds DDR support in DT for sdhc1 of msm8916.
+
+Patches 0011-0014- Adds HS400 support to sdhci-msm.
+
+
+[1]:- http://www.spinics.net/lists/linux-mmc/msg38467.html
+[2]:- http://www.spinics.net/lists/linux-mmc/msg38578.html 
+[3]:- https://patchwork.kernel.org/patch/9289345/
+[4]:- https://www.spinics.net/lists/linux-mmc/msg39107.html
+[5]:- http://www.spinics.net/lists/linux-mmc/msg38749.html
+[6]:- https://patchwork.kernel.org/patch/9297381/
+
+
+Rajendra Nayak (3):
+  clk: Add clk_hw_get_clk() helper API to be used by clk providers
+  clk: qcom: Add rcg ops to return floor value closest to the requested
+    rate
+  clk: qcom: Move all sdcc rcgs to use clk_rcg2_floor_ops
+
+Ritesh Harjani (9):
+  mmc: sdhci-msm: Change poor style writel/readl of registers
+  mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+  mmc: sdhci-msm: Enable few quirks
+  mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
+  mmc: sdhci-msm: Add clock changes for DDR mode.
+  arm64: dts: qcom: msm8916: Add ddr support to sdhc1
+  mmc: sdhci-msm: Save the calculated tuning phase
+  mmc: sdhci-msm: Add calibration tuning for CDCLP533 circuit
+  sdhci: sdhci-msm: update dll configuration
+
+Venkat Gopalakrishnan (2):
+  mmc: sdhci-msm: Update DLL reset sequence
+  mmc: sdhci-msm: Add HS400 platform support
+
+ arch/arm64/boot/dts/qcom/msm8916.dtsi |   1 +
+ drivers/clk/clk.c                     |   6 +
+ drivers/clk/qcom/clk-rcg.h            |   1 +
+ drivers/clk/qcom/clk-rcg2.c           |  75 +++-
+ drivers/clk/qcom/common.c             |  26 ++
+ drivers/clk/qcom/common.h             |   2 +
+ drivers/clk/qcom/gcc-apq8084.c        |   8 +-
+ drivers/clk/qcom/gcc-msm8916.c        |   4 +-
+ drivers/clk/qcom/gcc-msm8974.c        |   8 +-
+ drivers/clk/qcom/gcc-msm8996.c        |   8 +-
+ drivers/mmc/host/sdhci-msm.c          | 650 ++++++++++++++++++++++++++++++++--
+ include/linux/clk-provider.h          |   1 +
+ 12 files changed, 733 insertions(+), 57 deletions(-)
 
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
+
