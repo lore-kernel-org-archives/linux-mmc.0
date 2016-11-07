@@ -1,61 +1,87 @@
 From: Jun Nie <jun.nie@linaro.org>
-Subject: [PATCH v4 3/5] Documentation: synopsys-dw-mshc: add binding for fifo quirks
-Date: Mon,  7 Nov 2016 21:04:46 +0800
-Message-ID: <1478523888-4524-4-git-send-email-jun.nie@linaro.org>
+Subject: [PATCH v4 5/5] mmc: dw: Add fifo watermark alignment property
+Date: Mon,  7 Nov 2016 21:04:48 +0800
+Message-ID: <1478523888-4524-6-git-send-email-jun.nie@linaro.org>
 References: <1478523888-4524-1-git-send-email-jun.nie@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f179.google.com ([209.85.192.179]:33660 "EHLO
-        mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753161AbcKGNFX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 08:05:23 -0500
-Received: by mail-pf0-f179.google.com with SMTP id d2so91344692pfd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 05:05:22 -0800 (PST)
+Received: from mail-pf0-f171.google.com ([209.85.192.171]:34876 "EHLO
+        mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752774AbcKGNNK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 08:13:10 -0500
+Received: by mail-pf0-f171.google.com with SMTP id i88so90848786pfk.2
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 05:13:09 -0800 (PST)
 In-Reply-To: <1478523888-4524-1-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: shawn.guo@linaro.org, xie.baoyou@zte.com.cn
 Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-Add fifo-addr property and fifo-watermark-quirk property to
-synopsys-dw-mshc bindings. It is intended to provide more
-dt interface to support SoCs specific configuration.
+Data done irq is expected if data length is less than
+watermark in PIO mode. But fifo watermark is requested
+to be aligned with data length in some SoC so that TX/RX
+irq can be generated with data done irq. Add the
+watermark alignment to mark this requirement and force
+fifo watermark setting accordingly.
 
 Signed-off-by: Jun Nie <jun.nie@linaro.org>
 ---
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/host/dw_mmc.c  | 11 +++++++++--
+ include/linux/mmc/dw_mmc.h |  3 +++
+ 2 files changed, 12 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index 4e00e85..8bf2e41 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -76,6 +76,17 @@ Optional properties:
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 696b5e6..6d85ca6 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1111,11 +1111,15 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ 		mci_writel(host, CTRL, temp);
  
- * broken-cd: as documented in mmc core bindings.
+ 		/*
+-		 * Use the initial fifoth_val for PIO mode.
++		 * Use the initial fifoth_val for PIO mode. If wm_algined
++		 * is set, we set watermark same as data size.
+ 		 * If next issued data may be transfered by DMA mode,
+ 		 * prev_blksz should be invalidated.
+ 		 */
+-		mci_writel(host, FIFOTH, host->fifoth_val);
++		if (host->wm_aligned)
++			dw_mci_adjust_fifoth(host, data);
++		else
++			mci_writel(host, FIFOTH, host->fifoth_val);
+ 		host->prev_blksz = 0;
+ 	} else {
+ 		/*
+@@ -2957,6 +2961,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
  
-+* data-addr: Override fifo address with value provided by DT. The default FIFO reg
-+  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
-+  driver. If the controller does not follow this rule, please use this property
-+  to set fifo address in device tree.
+ 	of_property_read_u32(np, "data-addr", &host->data_addr_override);
+ 
++	if (of_get_property(np, "fifo-watermark-aligned", NULL))
++		host->wm_aligned = true;
 +
-+* fifo-watermark-aligned: Data done irq is expected if data length is less than
-+  watermark in PIO mode. But fifo watermark is requested to be aligned with data
-+  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
-+  watermark quirk to mark this requirement and force fifo watermark setting
-+  accordingly.
-+
- * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-   specified we'll defer probe until we can find this regulator.
+ 	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+ 		pdata->bus_hz = clock_frequency;
  
-@@ -103,6 +114,8 @@ board specific portions as listed below.
- 		interrupts = <0 75 0>;
- 		#address-cells = <1>;
- 		#size-cells = <0>;
-+		data-addr = <0x200>;
-+		fifo-watermark-aligned;
- 	};
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 17cb95a..ee4bb30 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -108,6 +108,8 @@ struct dw_mci_dma_slave {
+  * @slot: Slots sharing this MMC controller.
+  * @fifo_depth: depth of FIFO.
+  * @data_addr_override: override fifo reg offset with this value.
++ * @wm_aligned: force fifo watermark equal with data length in PIO mode.
++ *	Set as true if alignment is needed.
+  * @data_shift: log2 of FIFO item size.
+  * @part_buf_start: Start index in part_buf.
+  * @part_buf_count: Bytes of partial data in part_buf.
+@@ -156,6 +158,7 @@ struct dw_mci {
+ 	void __iomem		*regs;
+ 	void __iomem		*fifo_reg;
+ 	u32			data_addr_override;
++	bool			wm_aligned;
  
- [board specific internal DMA resources]
+ 	struct scatterlist	*sg;
+ 	struct sg_mapping_iter	sg_miter;
 -- 
 1.9.1
 
