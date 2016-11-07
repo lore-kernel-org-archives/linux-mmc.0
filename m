@@ -1,44 +1,35 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH v7 09/11] scsi: ufs: connect to RPMB subsystem
-Date: Mon, 7 Nov 2016 19:27:38 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B5431750E@hasmsx108.ger.corp.intel.com>
-References: <1478548394-8184-1-git-send-email-tomas.winkler@intel.com>
- <1478548394-8184-10-git-send-email-tomas.winkler@intel.com>
- <20161107190109.GA5110@lst.de>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [v15, 3/7] powerpc/fsl: move mpc85xx.h to include/linux/fsl
+Date: Mon, 07 Nov 2016 22:20:18 +0100
+Message-ID: <1543282.vWjeo4ynTa@wuerfel>
+References: <1477637418-38938-1-git-send-email-yangbo.lu@nxp.com> <2723366.1bJeJ7SKI6@wuerfel> <DB6PR0401MB2536B1B2E6AC36BDC8FC540DF8AE0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:35277 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751100AbcKGT1n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 7 Nov 2016 14:27:43 -0500
-In-Reply-To: <20161107190109.GA5110@lst.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <DB6PR0401MB2536B1B2E6AC36BDC8FC540DF8AE0-2mNvjAGDOPkZcyyZo0JLBI3W/0Ik+aLCnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Y.B. Lu" <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Cc: "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "X.B. Xie" <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "M.H. Lian" <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K . Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Yaniv Gardi <ygardi@codeaurora.org>, Avri Altman <avri.altman@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "Usyskin, Alexander" <alexan>
 
+On Monday, October 31, 2016 9:35:33 AM CET Y.B. Lu wrote:
+> > 
+> > I don't see any of the contents of this header referenced by the soc
+> > driver any more. I think you can just drop this patch.
+> > 
 > 
-> On Mon, Nov 07, 2016 at 09:53:12PM +0200, Tomas Winkler wrote:
-> > Register UFS RPMB LUN with the RPMB subsystem and provide
-> > implementation for the RPMB access operations. RPMB partition is
-> > accessed via a sequence of security protocol in and security protocol
-> > out commands with UFS specific parameters. This multi step process is
-> > abstracted into 4 basic RPMB commands.
+> [Lu Yangbo-B47093] This header file was included by guts.c.
+> The guts driver used macro SVR_MAJ/SVR_MIN for calculation.
 > 
-> This is a giant layering violation - the security protocol is not something up to
-> the LLDD but the core code.
-> 
-> And honestly the idea of defintining a security protocol in the UFS spec is just
-> as braindead.  If you care about this please take it up with T10 to get RPMB
-> support into one of the core SCSI specs instead of a transport.
+> This header file was for powerpc arch before. And this patch is to made it as
+> common header file for both ARM and PPC.
+> Sooner or later this is needed.
 
-I  value your opinion but I'm not responsible for inventing RPMB 
-and/or its  implementation storage devices (eMMC, UFC, NVMe), it's pretty much done deal out there in the wild. 
-I'm just trying to provide common API above it.
+Let's discuss it once we actually need the header then, ok?
 
-Thanks
-Tomas
-
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
