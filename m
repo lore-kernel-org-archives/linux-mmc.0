@@ -1,61 +1,74 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH v3] mmc: mxs: Initialize the spinlock prior to using it
-Date: Sat,  5 Nov 2016 17:45:07 -0200
-Message-ID: <1478375107-32513-1-git-send-email-festevam@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [GIT PULL] DWMMC controller fixes
+Date: Mon, 07 Nov 2016 09:33:03 +0900
+Message-ID: <c5600c7c-8cea-cc8a-7878-56b0211a6c2c@samsung.com>
+References: <CGME20161103052622epcas1p23ba69cc20d0a6ad576580e39086d2003@epcas1p2.samsung.com>
+ <587f4226-0c21-899b-b16d-3f33d092e382@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:33794 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756848AbcKETpk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Nov 2016 15:45:40 -0400
-Received: by mail-qt0-f196.google.com with SMTP id l20so4153234qta.1
-        for <linux-mmc@vger.kernel.org>; Sat, 05 Nov 2016 12:45:40 -0700 (PDT)
+Received: from mailout1.samsung.com ([203.254.224.24]:47356 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751167AbcKGAdJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Nov 2016 19:33:09 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OG80133NXJ6A8A0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 07 Nov 2016 09:33:06 +0900 (KST)
+In-reply-to: <587f4226-0c21-899b-b16d-3f33d092e382@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: kernel@pengutronix.de, marex@denx.de, stefan.wahren@i2se.com, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-From: Fabio Estevam <fabio.estevam@nxp.com>
+Hi Ulf,
 
-An interrupt may occur right after devm_request_irq() is called and
-prior to the spinlock initialization, leading to a kernel oops,
-as the interrupt handler uses the spinlock.
+On 11/03/2016 02:25 PM, Jaehoon Chung wrote:
+> Dear Ulf,
+> 
+> Could you pull these patches on your fixes branch?
 
-In order to prevent this problem, move the spinlock initialization 
-prior to requesting the interrupts.
+For Reminding..If there is a problem, let me know. 
 
-Fixes: e4243f13d10e (mmc: mxs-mmc: add mmc host driver for i.MX23/28)
-Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
-Reviewed-by: Marek Vasut <marex@denx.de>
----
-Changes since v2:
-- Add a Fixes tag as suggested by Stefan
-Changes since v1:
-- Make it a standalone patch instead of patch series
-- Cc stable as suggested by Stefan
+Best Regards,
+Jaehoon Chung
 
- drivers/mmc/host/mxs-mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index d839147..44ecebd 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -661,13 +661,13 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, mmc);
- 
-+	spin_lock_init(&host->lock);
-+
- 	ret = devm_request_irq(&pdev->dev, irq_err, mxs_mmc_irq_handler, 0,
- 			       dev_name(&pdev->dev), host);
- 	if (ret)
- 		goto out_free_dma;
- 
--	spin_lock_init(&host->lock);
--
- 	ret = mmc_add_host(mmc);
- 	if (ret)
- 		goto out_free_dma;
--- 
-2.7.4
+> 
+> The following changes since commit d1f63f0c81c22ba705fcd149a1fcec37b734d818:
+> 
+>   mmc: sdhci-msm: Fix error return code in sdhci_msm_probe() (2016-10-27 09:43:01 +0200)
+> 
+> are available in the git repository at:
+> 
+>   https://github.com/jh80chung/dw-mmc.git fixes
+> 
+> for you to fetch changes up to 5c3d7c7ed1e676d7fa1c9222d9a46c5d09b9fe97:
+> 
+>   mmc: dw_mmc: add the "reset" as name of reset controller (2016-11-03 14:11:59 +0900)
+> 
+> ----------------------------------------------------------------
+> DWMMC core:
+> - Add the "reset" as "#reset-names" property for preventing wrong operation.
+> 
+> ----------------------------------------------------------------
+> Jaehoon Chung (2):
+>       Documentation: synopsys-dw-mshc: add binding for reset-names
+>       mmc: dw_mmc: add the "reset" as name of reset controller
+> 
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 +++++
+>  drivers/mmc/host/dw_mmc.c                                  | 2 +-
+>  2 files changed, 6 insertions(+), 1 deletion(-)
+> 
+> 
+> Best Regards,
+> Jaehoon Chung
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
 
