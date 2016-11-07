@@ -1,272 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3 v2] mmc: mmci: refactor ST Micro busy detection
-Date: Mon, 7 Nov 2016 13:43:14 +0100
-Message-ID: <CAPDyKFoKwqGATh4wxZrhWkvbs_9iVfEhRNmFVHs6QD51NwOxFA@mail.gmail.com>
-References: <1477386367-18514-1-git-send-email-linus.walleij@linaro.org> <1477386367-18514-2-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH v3] mmc: mxs: Initialize the spinlock prior to using it
+Date: Mon, 7 Nov 2016 13:43:42 +0100
+Message-ID: <CAPDyKFrq_AaJM12tb22bQA=+30-m1YU5FqbW4VsDnD3w5uKzTQ@mail.gmail.com>
+References: <1478375107-32513-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:37350 "EHLO
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:38403 "EHLO
         mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751543AbcKGMnW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 07:43:22 -0500
-Received: by mail-wm0-f51.google.com with SMTP id t79so174742771wmt.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 04:43:21 -0800 (PST)
-In-Reply-To: <1477386367-18514-2-git-send-email-linus.walleij@linaro.org>
+        with ESMTP id S1751605AbcKGMno (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 07:43:44 -0500
+Received: by mail-wm0-f51.google.com with SMTP id f82so116061975wmf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 04:43:44 -0800 (PST)
+In-Reply-To: <1478375107-32513-1-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Sascha Hauer <kernel@pengutronix.de>, =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>, Stefan Wahren <stefan.wahren@i2se.com>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>
 
-On 25 October 2016 at 11:06, Linus Walleij <linus.walleij@linaro.org> wrote:
-> The ST Micro-specific busy detection was made after the assumption
-> that only this variant supports busy detection. So when doing busy
-> detection, the host immediately tries to use some ST-specific
-> register bits.
+On 5 November 2016 at 20:45, Fabio Estevam <festevam@gmail.com> wrote:
+> From: Fabio Estevam <fabio.estevam@nxp.com>
 >
-> Since the qualcomm variant also supports some busy detection
-> schemes, encapsulate the variant flags better in the variant struct
-> and prepare to add more variants by just providing some bitmasks
-> to the logic.
+> An interrupt may occur right after devm_request_irq() is called and
+> prior to the spinlock initialization, leading to a kernel oops,
+> as the interrupt handler uses the spinlock.
 >
-> Put the entire busy detection logic within an if()-clause in the
-> mmci_cmd_irq() function so the code is only executed when busy
-> detection is enabled, and so that it is kept in (almost) one
-> place, and add comments describing what is going on so the
-> code can be understood.
+> In order to prevent this problem, move the spinlock initialization
+> prior to requesting the interrupts.
 >
-> Tested on the Ux500 by introducing some prints in the busy
-> detection path and noticing how the IRQ is enabled, used and
-> disabled successfully.
->
-> Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Fixes: e4243f13d10e (mmc: mxs-mmc: add mmc host driver for i.MX23/28)
+> Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
+> Reviewed-by: Marek Vasut <marex@denx.de>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
-> ChangeLog v1->v2:
-> - Rebase on new register naming.
-> ---
->  drivers/mmc/host/mmci.c | 113 +++++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/host/mmci.h |   2 +-
->  2 files changed, 85 insertions(+), 30 deletions(-)
+> Changes since v2:
+> - Add a Fixes tag as suggested by Stefan
+> Changes since v1:
+> - Make it a standalone patch instead of patch series
+> - Cc stable as suggested by Stefan
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 6a8ea9c633d4..7f68fa7a961e 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -71,7 +71,12 @@ static unsigned int fmax = 515633;
->   * @f_max: maximum clk frequency supported by the controller.
->   * @signal_direction: input/out direction of bus signals can be indicated
->   * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-> - * @busy_detect: true if busy detection on dat0 is supported
-> + * @busy_detect: true if the variant supports busy detection on DAT0.
-> + * @busy_dpsm_flag: bitmask enabling busy detection in the DPSM
-> + * @busy_detect_flag: bitmask identifying the bit in the MMCISTATUS register
-> + *                   indicating that the card is busy
-> + * @busy_detect_mask: bitmask identifying the bit in the MMCIMASK0 to mask for
-> + *                   getting busy end detection interrupts
->   * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
->   * @explicit_mclk_control: enable explicit mclk control in driver.
->   * @qcom_fifo: enables qcom specific fifo pio read logic.
-> @@ -98,6 +103,9 @@ struct variant_data {
->         bool                    signal_direction;
->         bool                    pwrreg_clkgate;
->         bool                    busy_detect;
-> +       u32                     busy_dpsm_flag;
-> +       u32                     busy_detect_flag;
-> +       u32                     busy_detect_mask;
->         bool                    pwrreg_nopower;
->         bool                    explicit_mclk_control;
->         bool                    qcom_fifo;
-> @@ -178,6 +186,9 @@ static struct variant_data variant_ux500 = {
->         .signal_direction       = true,
->         .pwrreg_clkgate         = true,
->         .busy_detect            = true,
-> +       .busy_dpsm_flag         = MCI_DPSM_ST_BUSYMODE,
-> +       .busy_detect_flag       = MCI_ST_CARDBUSY,
-> +       .busy_detect_mask       = MCI_ST_BUSYENDMASK,
->         .pwrreg_nopower         = true,
->  };
+>  drivers/mmc/host/mxs-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> @@ -199,6 +210,9 @@ static struct variant_data variant_ux500v2 = {
->         .signal_direction       = true,
->         .pwrreg_clkgate         = true,
->         .busy_detect            = true,
-> +       .busy_dpsm_flag         = MCI_DPSM_ST_BUSYMODE,
-> +       .busy_detect_flag       = MCI_ST_CARDBUSY,
-> +       .busy_detect_mask       = MCI_ST_BUSYENDMASK,
->         .pwrreg_nopower         = true,
->  };
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index d839147..44ecebd 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -661,13 +661,13 @@ static int mxs_mmc_probe(struct platform_device *pdev)
 >
-> @@ -220,6 +234,7 @@ static struct variant_data variant_qcom = {
->         .qcom_dml               = true,
->  };
+>         platform_set_drvdata(pdev, mmc);
 >
-> +/* Busy detection for the ST Micro variant */
->  static int mmci_card_busy(struct mmc_host *mmc)
->  {
->         struct mmci_host *host = mmc_priv(mmc);
-> @@ -227,7 +242,7 @@ static int mmci_card_busy(struct mmc_host *mmc)
->         int busy = 0;
->
->         spin_lock_irqsave(&host->lock, flags);
-> -       if (readl(host->base + MMCISTATUS) & MCI_ST_CARDBUSY)
-> +       if (readl(host->base + MMCISTATUS) & host->variant->busy_detect_flag)
->                 busy = 1;
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> @@ -294,8 +309,8 @@ static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
->   */
->  static void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl)
->  {
-> -       /* Keep ST Micro busy mode if enabled */
-> -       datactrl |= host->datactrl_reg & MCI_DPSM_ST_BUSYMODE;
-> +       /* Keep busy mode in DPSM if enabled */
-> +       datactrl |= host->datactrl_reg & host->variant->busy_dpsm_flag;
->
->         if (host->datactrl_reg != datactrl) {
->                 host->datactrl_reg = datactrl;
-> @@ -973,37 +988,66 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->              unsigned int status)
->  {
->         void __iomem *base = host->base;
-> -       bool sbc, busy_resp;
-> +       bool sbc;
->
->         if (!cmd)
->                 return;
->
->         sbc = (cmd == host->mrq->sbc);
-> -       busy_resp = host->variant->busy_detect && (cmd->flags & MMC_RSP_BUSY);
->
-> -       if (!((status|host->busy_status) & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|
-> -               MCI_CMDSENT|MCI_CMDRESPEND)))
-> +       /*
-> +        * We need to be one of these interrupts to be considered worth
-> +        * handling. Note that we tag on any latent IRQs postponed
-> +        * due to waiting for busy status.
-> +        */
-> +       if (!((status|host->busy_status) &
-> +             (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|MCI_CMDRESPEND)))
->                 return;
->
-> -       /* Check if we need to wait for busy completion. */
-> -       if (host->busy_status && (status & MCI_ST_CARDBUSY))
-> -               return;
-> +       /*
-> +        * ST Micro variant: handle busy detection.
-> +        */
-> +       if (host->variant->busy_detect) {
-> +               bool busy_resp = !!(cmd->flags & MMC_RSP_BUSY);
->
-> -       /* Enable busy completion if needed and supported. */
-> -       if (!host->busy_status && busy_resp &&
-> -               !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
-> -               (readl(base + MMCISTATUS) & MCI_ST_CARDBUSY)) {
-> -               writel(readl(base + MMCIMASK0) | MCI_ST_BUSYEND,
-> -                       base + MMCIMASK0);
-> -               host->busy_status = status & (MCI_CMDSENT|MCI_CMDRESPEND);
-> -               return;
-> -       }
-> +               /* We are busy with a command, return */
-> +               if (host->busy_status &&
-> +                   (status & host->variant->busy_detect_flag))
-> +                       return;
+> +       spin_lock_init(&host->lock);
 > +
-> +               /*
-> +                * We were not busy, but we now got a busy response on
-> +                * something that was not an error, and we double-check
-> +                * that the special busy status bit is still set before
-> +                * proceeding.
-> +                */
-> +               if (!host->busy_status && busy_resp &&
-> +                   !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
-> +                   (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
-> +                       /* Unmask the busy IRQ */
-> +                       writel(readl(base + MMCIMASK0) |
-> +                              host->variant->busy_detect_mask,
-> +                              base + MMCIMASK0);
-> +                       /*
-> +                        * Now cache the last response status code (until
-> +                        * the busy bit goes low), and return.
-> +                        */
-> +                       host->busy_status =
-> +                               status & (MCI_CMDSENT|MCI_CMDRESPEND);
-> +                       return;
-> +               }
+>         ret = devm_request_irq(&pdev->dev, irq_err, mxs_mmc_irq_handler, 0,
+>                                dev_name(&pdev->dev), host);
+>         if (ret)
+>                 goto out_free_dma;
 >
-> -       /* At busy completion, mask the IRQ and complete the request. */
-> -       if (host->busy_status) {
-> -               writel(readl(base + MMCIMASK0) & ~MCI_ST_BUSYEND,
-> -                       base + MMCIMASK0);
-> -               host->busy_status = 0;
-> +               /*
-> +                * At this point we are not busy with a command, we have
-> +                * not recieved a new busy request, mask the busy IRQ and
-> +                * fall through to process the IRQ.
-> +                */
-> +               if (host->busy_status) {
-> +                       writel(readl(base + MMCIMASK0) &
-> +                              ~host->variant->busy_detect_mask,
-> +                              base + MMCIMASK0);
-> +                       host->busy_status = 0;
-> +               }
->         }
->
->         host->cmd = NULL;
-> @@ -1257,9 +1301,11 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->                         mmci_data_irq(host, host->data, status);
->                 }
->
-> -               /* Don't poll for busy completion in irq context. */
-> -               if (host->busy_status)
-> -                       status &= ~MCI_ST_CARDBUSY;
-> +               /*
-> +                * Don't poll for busy completion in irq context.
-> +                */
-> +               if (host->variant->busy_detect && host->busy_status)
-> +                       status &= ~host->variant->busy_detect_flag;
->
->                 ret = 1;
->         } while (status);
-> @@ -1612,9 +1658,18 @@ static int mmci_probe(struct amba_device *dev,
->         /* We support these capabilities. */
->         mmc->caps |= MMC_CAP_CMD23;
->
-> +       /*
-> +        * Enable busy detection.
-> +        */
->         if (variant->busy_detect) {
->                 mmci_ops.card_busy = mmci_card_busy;
-> -               mmci_write_datactrlreg(host, MCI_DPSM_ST_BUSYMODE);
-> +               /*
-> +                * Not all variants have a flag to enable busy detection
-> +                * in the DPSM, but if they do, set it here.
-> +                */
-> +               if (variant->busy_dpsm_flag)
-> +                       mmci_write_datactrlreg(host,
-> +                                              host->variant->busy_dpsm_flag);
->                 mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->                 mmc->max_busy_timeout = 0;
->         }
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 7cabf270050b..56322c6afba4 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -174,7 +174,7 @@
->  /* Extended status bits for the ST Micro variants */
->  #define MCI_ST_SDIOITMASK      (1 << 22)
->  #define MCI_ST_CEATAENDMASK    (1 << 23)
-> -#define MCI_ST_BUSYEND         (1 << 24)
-> +#define MCI_ST_BUSYENDMASK     (1 << 24)
->
->  #define MMCIMASK1              0x040
->  #define MMCIFIFOCNT            0x048
+> -       spin_lock_init(&host->lock);
+> -
+>         ret = mmc_add_host(mmc);
+>         if (ret)
+>                 goto out_free_dma;
 > --
 > 2.7.4
 >
