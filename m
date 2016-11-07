@@ -1,73 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmc_test: Fix "Commands during non-blocking write" tests
-Date: Mon, 7 Nov 2016 13:43:35 +0100
-Message-ID: <CAPDyKFrgDE4=_x+s4ShAWmA5i2o3fhOH4O6ekprBxvFykqFu+Q@mail.gmail.com>
-References: <1478259665-13406-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 0/3] mmc: sh_mobile_sdhi: Add r7s72100 support
+Date: Mon, 7 Nov 2016 19:38:30 +0100
+Message-ID: <CAPDyKFp=d7nQ94wv_LnvuJ4HMD8Hv3X+BanhRoc1wu1i+pmEPw@mail.gmail.com>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:38632 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752174AbcKGQvf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 11:51:35 -0500
-Received: by mail-wm0-f49.google.com with SMTP id f82so130489217wmf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 08:51:34 -0800 (PST)
-In-Reply-To: <1478259665-13406-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35526 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933287AbcKGSid (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 13:38:33 -0500
+Received: by mail-wm0-f42.google.com with SMTP id a197so200573143wmd.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 10:38:32 -0800 (PST)
+In-Reply-To: <20160912141507.6837-1-chris.brandt@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Harjani Ritesh <riteshh@codeaurora.org>
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 4 November 2016 at 12:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> mmc_test_check_result_async() requires that struct mmc_async_req is
-> contained within struct mmc_test_async_req. Fix the "Commands during
-> non-blocking write" tests so that is the case.
+On 12 September 2016 at 16:15, Chris Brandt <chris.brandt@renesas.com> wrote:
+> For the most part, the SDHI controller in the RZ/A1 (r7s72100)
+> is the same as other Renesas SoC...except for the fact that the
+> data port register was widened to 32-bits and the 16-bit accesses
+> in the current tmio driver aren't going to cut it.
 >
-> Fixes: 4bbb9aac9a9a ("mmc: mmc_test: Add tests for sending commands during transfer")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Also, the tmio driver allows you to pass in what voltages you
+> support via the ocr_mask. For the RZ/A1, it's just simple 3.3v.
+> So, I added the ability to pass that when using DT.
+>
+> Chris Brandt (3):
+>   mmc: sh_mobile_sdhi: add ocr_mask option
+>   mmc: tmio-mmc: add support for 32bit data port
+>   mmc: sh_mobile_sdhi: Add r7s72100 support
+>
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+>  drivers/mmc/host/sh_mobile_sdhi.c                  |  9 +++++++
+>  drivers/mmc/host/tmio_mmc.h                        | 12 +++++++++
+>  drivers/mmc/host/tmio_mmc_pio.c                    | 30 ++++++++++++++++++++++
+>  include/linux/mfd/tmio.h                           |  5 ++++
+>  5 files changed, 57 insertions(+)
+>
+> --
+> 2.9.2
+>
+>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/card/mmc_test.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 5a8dc5a76e0d..3678220964fe 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -2347,7 +2347,7 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
->         struct mmc_test_req *rq = mmc_test_req_alloc();
->         struct mmc_host *host = test->card->host;
->         struct mmc_test_area *t = &test->area;
-> -       struct mmc_async_req areq;
-> +       struct mmc_test_async_req test_areq = { .test = test };
->         struct mmc_request *mrq;
->         unsigned long timeout;
->         bool expired = false;
-> @@ -2363,8 +2363,8 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
->                 mrq->sbc = &rq->sbc;
->         mrq->cap_cmd_during_tfr = true;
->
-> -       areq.mrq = mrq;
-> -       areq.err_check = mmc_test_check_result_async;
-> +       test_areq.areq.mrq = mrq;
-> +       test_areq.areq.err_check = mmc_test_check_result_async;
->
->         mmc_test_prepare_mrq(test, mrq, t->sg, t->sg_len, dev_addr, t->blocks,
->                              512, write);
-> @@ -2378,7 +2378,7 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
->
->         /* Start ongoing data request */
->         if (use_areq) {
-> -               mmc_start_req(host, &areq, &ret);
-> +               mmc_start_req(host, &test_areq.areq, &ret);
->                 if (ret)
->                         goto out_free;
->         } else {
-> --
-> 1.9.1
->
