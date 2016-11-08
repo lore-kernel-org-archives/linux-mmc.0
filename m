@@ -1,47 +1,35 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-core: Tuning mode support for HS200 on AMD
- Platforms
-Date: Tue, 8 Nov 2016 11:45:05 +0200
-Message-ID: <09915eb8-f4c0-fbf3-723d-66441f0e4b7d@intel.com>
-References: <2ef1e2da-5913-85fe-65a7-0984ac04164d@amd.com>
- <418f99e4-18e5-38a6-0b4d-0815f3bd604f@intel.com>
- <8510d441-230a-9d93-222b-ba870869f094@amd.com>
- <CAPDyKFoghPtP0Yff68k7gc+GxUo6uoqb1ucYPFWpEMReGM7Auw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-iproc: support standard byte register
+ accesses
+Date: Tue, 8 Nov 2016 11:55:07 +0200
+Message-ID: <c94dc018-5a2d-d50b-5746-43ae7fc258ce@intel.com>
+References: <1478018277-10097-1-git-send-email-scott.branden@broadcom.com>
+ <1478018277-10097-3-git-send-email-scott.branden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:57022 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752510AbcKHJuC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Nov 2016 04:50:02 -0500
-In-Reply-To: <CAPDyKFoghPtP0Yff68k7gc+GxUo6uoqb1ucYPFWpEMReGM7Auw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1478018277-10097-3-git-send-email-scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shyam Sundar S K <ssundark@amd.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 07/11/16 14:00, Ulf Hansson wrote:
-> On 27 October 2016 at 11:52, Shyam Sundar S K <ssundark@amd.com> wrote:
->> Made changes to the earlier submission based on the comments
->> received from Adrian.
->>
->> Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
->> Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
->> Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
->>
->> Also, adding patch from Adrian for handling the device specific
->> private data.
->>
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Date: Mon, 10 Oct 2016 10:04:45 +0300
->> Subject: [PATCH] mmc: sdhci-pci: Let devices define their own private data
+On 01/11/16 18:37, Scott Branden wrote:
+> Add bytewise register accesses support for newer versions of IPROC
+> SDHCI controllers.
+> Previous sdhci-iproc versions of SDIO controllers
+> (such as Raspberry Pi and Cygnus) only allowed for 32-bit register
+> accesses.
 > 
-> Shyam,
-> 
-> Seems like this should be two separate changes, one made by Adrian and
-> one by you. Can you please re-spin.
+> Signed-off-by: Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+> Signed-off-by: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 
-Yes, 2 separate patches please.  I didn't mean mix the patches together -
-sorry if there was confusion.
+This is unchanged from V1 which I acked, so:
 
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
