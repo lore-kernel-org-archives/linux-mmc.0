@@ -1,117 +1,102 @@
 From: Andrea Merello <andrea.merello@gmail.com>
-Subject: [PATCH 3/9] mmc: mmci: don't pretend all variants to have MCI_STARBITERR flag
-Date: Tue,  8 Nov 2016 14:43:39 +0100
-Message-ID: <1478612625-23256-4-git-send-email-andrea.merello@gmail.com>
+Subject: [PATCH 1/9] mmc: mmci: don't pretend IP variants with only one IRQ to have two mask regs
+Date: Tue,  8 Nov 2016 14:43:37 +0100
+Message-ID: <1478612625-23256-2-git-send-email-andrea.merello@gmail.com>
 References: <1478612625-23256-1-git-send-email-andrea.merello@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:32847 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36457 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752565AbcKHNoX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2016 08:44:23 -0500
-Received: by mail-wm0-f68.google.com with SMTP id u144so22718124wmu.0
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Nov 2016 05:44:23 -0800 (PST)
+        with ESMTP id S1752509AbcKHNoT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2016 08:44:19 -0500
+Received: by mail-wm0-f68.google.com with SMTP id c17so22667515wmc.3
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Nov 2016 05:44:18 -0800 (PST)
 In-Reply-To: <1478612625-23256-1-git-send-email-andrea.merello@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com, alexandre.torgue@st.com
 Cc: linux-mmc@vger.kernel.org, Andrea Merello <andrea.merello@gmail.com>
 
-This patch prepares for supporting the STM32 variant, that has no such bit
-in the status register.
+Currently the driver supports both devices with one and two IRQ lines.
+
+Two mask registers are used in order to select which events have to
+actually generate an interrupt on each IRQ line.
+
+It seems that in the single-IRQ case it's assumed that the IRQs lines
+are simply OR-ed, while the two mask registers are still present. The
+driver still programs the two mask registers separately.
+
+However the STM32 variant has only one IRQ, and also has only one mask
+register.
+
+This patch prepares for STM32 variant support by making the driver using
+only one mask register when only one IRQ is available.
+
+Tested only on STM32 variant. RFT for variants other than STM32
 
 Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 ---
- drivers/mmc/host/mmci.c | 14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b1dfde3..0c629e3 100644
+index df990bb..b826a3a 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -106,6 +106,7 @@ struct variant_data {
- 	bool			qcom_fifo;
- 	bool			qcom_dml;
- 	bool			reversed_irq_handling;
-+	bool			has_start_err;
- };
+@@ -389,9 +389,9 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+ 		mask0 |= mask;
  
- static __maybe_unused struct variant_data variant_arm = {
-@@ -115,6 +116,7 @@ static __maybe_unused struct variant_data variant_arm = {
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
- 	.reversed_irq_handling	= true,
-+	.has_start_err		= true,
- };
+ 		writel(mask0, base + MMCIMASK0);
++	} else {
++		writel(mask, base + MMCIMASK1);
+ 	}
+-
+-	writel(mask, base + MMCIMASK1);
+ }
  
- static __maybe_unused struct variant_data variant_arm_extended_fifo = {
-@@ -123,6 +125,7 @@ static __maybe_unused struct variant_data variant_arm_extended_fifo = {
- 	.datalength_bits	= 16,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
-+	.has_start_err		= true,
- };
+ static void mmci_stop_data(struct mmci_host *host)
+@@ -1231,12 +1231,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
  
- static __maybe_unused struct variant_data variant_arm_extended_fifo_hwfc = {
-@@ -132,6 +135,7 @@ static __maybe_unused struct variant_data variant_arm_extended_fifo_hwfc = {
- 	.datalength_bits	= 16,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 100000000,
-+	.has_start_err		= true,
- };
+ 	do {
+ 		status = readl(host->base + MMCISTATUS);
++		status &= readl(host->base + MMCIMASK0);
  
- static __maybe_unused struct variant_data variant_u300 = {
-@@ -147,6 +151,7 @@ static __maybe_unused struct variant_data variant_u300 = {
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
- 	.pwrreg_nopower		= true,
-+	.has_start_err		= true,
- };
+ 		if (host->singleirq) {
+-			if (status & readl(host->base + MMCIMASK1))
+-				mmci_pio_irq(irq, dev_id);
+-
+-			status &= ~MCI_IRQ1MASK;
++			mmci_pio_irq(irq, dev_id);
+ 		}
  
- static __maybe_unused struct variant_data variant_nomadik = {
-@@ -163,6 +168,7 @@ static __maybe_unused struct variant_data variant_nomadik = {
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
- 	.pwrreg_nopower		= true,
-+	.has_start_err		= true,
- };
+ 		/*
+@@ -1244,7 +1242,6 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 		 * enabled) since the HW seems to be triggering the IRQ on both
+ 		 * edges while monitoring DAT0 for busy completion.
+ 		 */
+-		status &= readl(host->base + MMCIMASK0);
+ 		writel(status, host->base + MMCICLEAR);
  
- static __maybe_unused struct variant_data variant_ux500 = {
-@@ -182,6 +188,7 @@ static __maybe_unused struct variant_data variant_ux500 = {
- 	.pwrreg_clkgate		= true,
- 	.busy_detect		= true,
- 	.pwrreg_nopower		= true,
-+	.has_start_err		= true,
- };
+ 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+@@ -1656,7 +1653,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	spin_lock_init(&host->lock);
  
- static __maybe_unused struct variant_data variant_ux500v2 = {
-@@ -203,6 +210,7 @@ static __maybe_unused struct variant_data variant_ux500v2 = {
- 	.pwrreg_clkgate		= true,
- 	.busy_detect		= true,
- 	.pwrreg_nopower		= true,
-+	.has_start_err		= true,
- };
+ 	writel(0, host->base + MMCIMASK0);
+-	writel(0, host->base + MMCIMASK1);
++	if (!host->singleirq)
++		writel(0, host->base + MMCIMASK1);
+ 	writel(0xfff, host->base + MMCICLEAR);
  
- static __maybe_unused struct variant_data variant_qcom = {
-@@ -221,6 +229,7 @@ static __maybe_unused struct variant_data variant_qcom = {
- 	.explicit_mclk_control	= true,
- 	.qcom_fifo		= true,
- 	.qcom_dml		= true,
-+	.has_start_err		= true,
- };
+ 	/*
+@@ -1746,7 +1744,8 @@ static int mmci_remove(struct amba_device *dev)
+ 		mmc_remove_host(mmc);
  
- static int mmci_card_busy(struct mmc_host *mmc)
-@@ -909,8 +918,9 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 		return;
+ 		writel(0, host->base + MMCIMASK0);
+-		writel(0, host->base + MMCIMASK1);
++		if (!host->singleirq)
++			writel(0, host->base + MMCIMASK1);
  
- 	/* First check for errors */
--	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
--		      MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
-+	if (status & (MCI_DATACRCFAIL | MCI_DATATIMEOUT |
-+			(host->variant->has_start_err ? MCI_STARTBITERR : 0) |
-+			MCI_TXUNDERRUN | MCI_RXOVERRUN)) {
- 		u32 remain, success;
- 
- 		/* Terminate the DMA transfer */
+ 		writel(0, host->base + MMCICOMMAND);
+ 		writel(0, host->base + MMCIDATACTRL);
 -- 
 2.7.4
 
