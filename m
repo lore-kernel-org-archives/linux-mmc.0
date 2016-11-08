@@ -1,76 +1,72 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: [PATCH v5 4/5] mmc: dw: Add fifo address property
-Date: Tue,  8 Nov 2016 09:24:57 +0800
-Message-ID: <1478568298-18380-5-git-send-email-jun.nie@linaro.org>
-References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f177.google.com ([209.85.192.177]:35207 "EHLO
-        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752535AbcKHBZt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2016 20:25:49 -0500
-Received: by mail-pf0-f177.google.com with SMTP id i88so98059324pfk.2
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2016 17:25:49 -0800 (PST)
-In-Reply-To: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v6 01/14] clk: Add clk_hw_get_clk() helper API to be used
+ by clk providers
+Date: Tue, 08 Nov 2016 09:07:06 +0530
+Message-ID: <58214862.8080604@codeaurora.org>
+References: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org> <1478517877-23733-2-git-send-email-riteshh@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1478517877-23733-2-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kdorfman-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: shawn.guo@linaro.org, xie.baoyou@zte.com.cn
-Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-The FIFO address may break default address assumption of 0x100
-(version < 0x240A) and 0x200(version >= 0x240A) in current driver.
-The new property is introduced to override fifo address via DT
-node information.
 
-Signed-off-by: Jun Nie <jun.nie@linaro.org>
----
- drivers/mmc/host/dw_mmc.c  | 6 +++++-
- include/linux/mmc/dw_mmc.h | 2 ++
- 2 files changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1c9ee36..696b5e6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2955,6 +2955,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 
- 	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
- 
-+	of_property_read_u32(np, "data-addr", &host->data_addr_override);
-+
- 	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
- 		pdata->bus_hz = clock_frequency;
- 
-@@ -3158,7 +3160,9 @@ int dw_mci_probe(struct dw_mci *host)
- 	host->verid = SDMMC_GET_VERID(mci_readl(host, VERID));
- 	dev_info(host->dev, "Version ID is %04x\n", host->verid);
- 
--	if (host->verid < DW_MMC_240A)
-+	if (host->data_addr_override)
-+		host->fifo_reg = host->regs + host->data_addr_override;
-+	else if (host->verid < DW_MMC_240A)
- 		host->fifo_reg = host->regs + DATA_OFFSET;
- 	else
- 		host->fifo_reg = host->regs + DATA_240A_OFFSET;
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index f5af2bd..17cb95a 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -107,6 +107,7 @@ struct dw_mci_dma_slave {
-  * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-  * @fifo_depth: depth of FIFO.
-+ * @data_addr_override: override fifo reg offset with this value.
-  * @data_shift: log2 of FIFO item size.
-  * @part_buf_start: Start index in part_buf.
-  * @part_buf_count: Bytes of partial data in part_buf.
-@@ -154,6 +155,7 @@ struct dw_mci {
- 	spinlock_t		irq_lock;
- 	void __iomem		*regs;
- 	void __iomem		*fifo_reg;
-+	u32			data_addr_override;
- 
- 	struct scatterlist	*sg;
- 	struct sg_mapping_iter	sg_miter;
+On 11/07/2016 04:54 PM, Ritesh Harjani wrote:
+> From: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> 
+> Add a helper API that will allow clk providers to turn their clk_hw
+> structures into struct clk pointer.
+> 
+> Signed-off-by: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+
+Please drop this patch, it isn't needed here anyway, besides
+it needs to be reworked as already discussed.
+
+> ---
+>  drivers/clk/clk.c            | 6 ++++++
+>  include/linux/clk-provider.h | 1 +
+>  2 files changed, 7 insertions(+)
+> 
+> diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+> index 0fb39fe..52ef035 100644
+> --- a/drivers/clk/clk.c
+> +++ b/drivers/clk/clk.c
+> @@ -186,6 +186,12 @@ const char *clk_hw_get_name(const struct clk_hw *hw)
+>  }
+>  EXPORT_SYMBOL_GPL(clk_hw_get_name);
+>  
+> +struct clk *clk_hw_get_clk(const struct clk_hw *hw)
+> +{
+> +	return hw->clk;
+> +}
+> +EXPORT_SYMBOL_GPL(clk_hw_get_clk);
+> +
+>  struct clk_hw *__clk_get_hw(struct clk *clk)
+>  {
+>  	return !clk ? NULL : clk->core->hw;
+> diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
+> index af59638..37022a9 100644
+> --- a/include/linux/clk-provider.h
+> +++ b/include/linux/clk-provider.h
+> @@ -729,6 +729,7 @@ struct clk_hw *clk_hw_register_gpio_mux(struct device *dev, const char *name,
+>  /* helper functions */
+>  const char *__clk_get_name(const struct clk *clk);
+>  const char *clk_hw_get_name(const struct clk_hw *hw);
+> +struct clk *clk_hw_get_clk(const struct clk_hw *hw);
+>  struct clk_hw *__clk_get_hw(struct clk *clk);
+>  unsigned int clk_hw_get_num_parents(const struct clk_hw *hw);
+>  struct clk_hw *clk_hw_get_parent(const struct clk_hw *hw);
+> 
+
 -- 
-1.9.1
-
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
