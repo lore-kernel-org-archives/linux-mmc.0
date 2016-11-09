@@ -1,77 +1,66 @@
-From: Krzysztof Kozlowski <krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 10/13] ARM: dts: exynos: replace to "max-frequecy"
- instead of "clock-freq-min-max"
-Date: Wed, 9 Nov 2016 22:10:29 +0200
-Message-ID: <20161109201029.GE23534@kozik-lap>
-References: <20161103062135.10697-1-jh80.chung@samsung.com>
- <20161103184112.GB11071@kozik-lap>
- <ecf4fac2-0ab7-d4c4-69e3-d498ee5b601c@samsung.com>
- <4066252.a1W9ejEKHX@phil>
- <CGME20161104150527epcas4p4004d2c3a8686cccef97760dacdb2892c@epcas4p4.samsung.com>
- <20161104150447.GA4829@kozik-lap>
- <72612112-3b79-8fd3-8be4-a8f60ab3b68a@samsung.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v6 05/14] mmc: sdhci-msm: Update DLL reset sequence
+Date: Wed, 9 Nov 2016 12:43:04 -0800
+Message-ID: <20161109204304.GT16026@codeaurora.org>
+References: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org>
+ <1478517877-23733-6-git-send-email-riteshh@codeaurora.org>
+ <20161108230622.GN16026@codeaurora.org>
+ <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-clk-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <72612112-3b79-8fd3-8be4-a8f60ab3b68a-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Krzysztof Kozlowski <krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
+In-Reply-To: <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 07, 2016 at 09:38:15AM +0900, Jaehoon Chung wrote:
-> On 11/05/2016 12:04 AM, Krzysztof Kozlowski wrote:
-> > On Fri, Nov 04, 2016 at 12:19:49PM +0100, Heiko Stuebner wrote:
-> >> Hi Jaehoon,
-> >>
-> >> Am Freitag, 4. November 2016, 19:21:30 CET schrieb Jaehoon Chung:
-> >>> On 11/04/2016 03:41 AM, Krzysztof Kozlowski wrote:
-> >>>> On Thu, Nov 03, 2016 at 03:21:32PM +0900, Jaehoon Chung wrote:
-> >>>>> In drivers/mmc/core/host.c, there is "max-frequency" property.
-> >>>>> It should be same behavior. So Use the "max-frequency" instead of
-> >>>>> "clock-freq-min-max".
-> >>>>>
-> >>>>> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> >>>>> ---
-> >>>>>
-> >>>>>  arch/arm/boot/dts/exynos3250-artik5-eval.dts | 2 +-
-> >>>>>  arch/arm/boot/dts/exynos3250-artik5.dtsi     | 2 +-
-> >>>>>  arch/arm/boot/dts/exynos3250-monk.dts        | 2 +-
-> >>>>>  arch/arm/boot/dts/exynos3250-rinato.dts      | 2 +-
-> >>>>>  4 files changed, 4 insertions(+), 4 deletions(-)
-> >>>>
-> >>>> This looks totally independent to rest of patches so it can be applied
-> >>>> separately without any functional impact (except lack of minimum
-> >>>> frequency). Is that correct?
-> >>>
-> >>> You're right. I will split the patches. And will resend.
-> >>> Thanks!
-> >>
-> >> I think what Krzysztof was asking was just if he can simply pick up this patch 
-> >> alone, as it does not require any of the previous changes.
-> >>
-> >> Same is true for the Rockchip patches I guess, so we could just take them 
-> >> individually into samsung/rockchip dts branches.
-> > 
-> > Yes, I wanted to get exactly this information. I couldn't find it in
-> > cover letter.
+On 11/09, Ritesh Harjani wrote:
+> Hi Stephen,
 > 
-> In drivers/mmc/core/host.c, there already is "max-frequency" property.
-> It's same functionality with "clock-freq-min-max". 
-> Minimum clock value can be fixed to 100K. because MMC core will check clock value from 400K to 100K.
-> But max-frequency can be difference.
-> If we can use "max-frequency" property, we don't need to use "clock-freq-min-max" property anymore.
-> I will resend the deprecated property instead of removing "clock-freq-min-max".
+> On 11/9/2016 4:36 AM, Stephen Boyd wrote:
+> >On 11/07, Ritesh Harjani wrote:
+> >>
+> >>diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> >>index 42f42aa..32b0b79 100644
+> >>--- a/drivers/mmc/host/sdhci-msm.c
+> >>+++ b/drivers/mmc/host/sdhci-msm.c
+> >>@@ -58,11 +58,17 @@
+> >> #define CORE_DLL_CONFIG		0x100
+> >> #define CORE_DLL_STATUS		0x108
+> >>
+> >>+#define CORE_DLL_CONFIG_2	0x1b4
+> >>+#define CORE_FLL_CYCLE_CNT	BIT(18)
+> >>+#define CORE_DLL_CLOCK_DISABLE	BIT(21)
+> >>+
+> >> #define CORE_VENDOR_SPEC	0x10c
+> >> #define CORE_CLK_PWRSAVE	BIT(1)
+> >>
+> >> #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
+> >>
+> >>+#define TCXO_FREQ		19200000
+> >
+> >TCXO_FREQ could change based on the board. For example, IPQ has
+> >it as 25 MHz.
+> Actually not sure of the proper way on how to get this freq in driver
+> today. We may use xo_board clock but, it is not available for all boards
+> except 8996/8916 I guess.
 > 
-> If you want to pick this, it's possible to pick. Then i will resend the patches without dt patches.
+> Also, there is no sdhc for IPQ board and for all other boards
+> TCXO_FREQ is same where sdhci-msm driver is used. For that purpose
+> this was defined here for sdhci-msm driver.
+> 
+> Do you think in that case we should keep it this way for now and
+> later change if a need arise to change the TCXO_FREQ ?
 
-Thanks, applied.
+We've added xo_board (or cxo_board/pxo_board) to all the qcom
+platforms upstream, so there should always be something to
+reference in the dts and call clk_get_rate() on. So I would add
+it to the binding as another clock and then use that instead of
+hardcoding the value. That's much more flexible in case this
+changes in the future.
 
-Best regards,
-Krzysztof
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
