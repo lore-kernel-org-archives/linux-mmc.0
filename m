@@ -1,96 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Let devices define their own private data
-Date: Wed, 9 Nov 2016 19:14:46 +0100
-Message-ID: <CAPDyKFogpRuUKRLdNn+jxOoup+BrOz49VY_LiCMG2dipFe93gw@mail.gmail.com>
-References: <14a1a029-9e91-2467-5bf0-f3b50b737b2b@amd.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] Documentation: synopsys-dw-mshc: add binding for
+ reset-names
+Date: Wed, 9 Nov 2016 12:24:24 -0600
+Message-ID: <20161109182424.5eais27okcsdmdzx@rob-hp-laptop>
+References: <20161031024942.4415-1-jh80.chung@samsung.com>
+ <20161031024942.4415-2-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:35685 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753182AbcKISOt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 13:14:49 -0500
-Received: by mail-wm0-f43.google.com with SMTP id a197so323473306wmd.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2016 10:14:48 -0800 (PST)
-In-Reply-To: <14a1a029-9e91-2467-5bf0-f3b50b737b2b@amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161031024942.4415-2-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, vincent.guittot-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shyam Sundar S K <ssundark@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 9 November 2016 at 07:34, Shyam Sundar S K <ssundark@amd.com> wrote:
-> Submitting the patch on behalf of Adrian.
-
-This information isn't needed, please remove.
-
->
-> Let devices define their own private data to facilitate device-specific
-> operations. The size of the private structure is specified in the
-> sdhci_pci_fixes structure,then sdhci_pci_probe_slot() will allocate extra
-> space for it, and sdhci_pci_priv() can be used to get a reference to it.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-
-This change has your name as author, it should be Adrian. Please change.
-
-Kind regards
-Uffe
-
+On Mon, Oct 31, 2016 at 11:49:41AM +0900, Jaehoon Chung wrote:
+> Add reset-names property for binding dw-mmc controller.
+> It might be used together with "reset" property.
+> -  Note: It must be "reset" as name.
+> 
+> Fixes: d6786fefe816 ("mmc: dw_mmc: add reset support to dwmmc host controller")
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
->  drivers/mmc/host/sdhci-pci.h      | 7 +++++++
->  2 files changed, 9 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 1d9e00a..782c8d2 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1646,6 +1646,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->         struct sdhci_pci_slot *slot;
->         struct sdhci_host *host;
->         int ret, bar = first_bar + slotno;
-> +       size_t priv_size = chip->fixes ? chip->fixes->priv_size : 0;
->
->         if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
->                 dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
-> @@ -1667,7 +1668,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->                 return ERR_PTR(-ENODEV);
->         }
->
-> -       host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
-> +       host = sdhci_alloc_host(&pdev->dev, sizeof(*slot) + priv_size);
->         if (IS_ERR(host)) {
->                 dev_err(&pdev->dev, "cannot allocate host\n");
->                 return ERR_CAST(host);
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 6bccf56..0bfd568 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -67,6 +67,7 @@ struct sdhci_pci_fixes {
->         int                     (*resume) (struct sdhci_pci_chip *);
->
->         const struct sdhci_ops  *ops;
-> +       size_t                  priv_size;
->  };
->
->  struct sdhci_pci_slot {
-> @@ -87,6 +88,7 @@ struct sdhci_pci_slot {
->                                      struct mmc_card *card,
->                                      unsigned int max_dtr, int host_drv,
->                                      int card_drv, int *drv_type);
-> +       unsigned long           private[0] ____cacheline_aligned;
->  };
->
->  struct sdhci_pci_chip {
-> @@ -101,4 +103,9 @@ struct sdhci_pci_chip {
->         struct sdhci_pci_slot   *slots[MAX_SLOTS]; /* Pointers to host slots */
->  };
->
-> +static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
-> +{
-> +       return (void *)slot->private;
-> +}
-> +
->  #endif /* __SDHCI_PCI_H */
-> --
-> 2.7.4
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index 4e00e85..bfa461a 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -43,6 +43,9 @@ Optional properties:
+>    reset signal present internally in some host controller IC designs.
+>    See Documentation/devicetree/bindings/reset/reset.txt for details.
+>  
+> +* reset-names: request name for using "resets" property. Must be "reset".
+> +	(It will be used together with "resets" property.)
+
+There is no point in having names for a single reset. This should be 
+fixed in the kernel only if this causes a problem.
+
+Rob
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
