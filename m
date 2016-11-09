@@ -1,91 +1,38 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: Re: [RFC 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
- Intel byt sdio host controller sub-vended by NI
-Date: Wed, 9 Nov 2016 10:08:29 -0600
-Message-ID: <20161109160827.GA6138@zach-desktop>
-References: <1478635635-14953-1-git-send-email-zach.brown@ni.com>
- <1478635635-14953-3-git-send-email-zach.brown@ni.com>
- <af8a14a2-55a5-1d44-663e-53ff20408f10@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-pci: Add support for HS200 tuning mode, on AMD eMMC-4.5.1
+Date: Wed, 9 Nov 2016 19:11:27 +0100
+Message-ID: <CAPDyKFpa=dhZLqzk-yhoKAXSvrfg7oPAoMBHJa81fqi2vDNJLA@mail.gmail.com>
+References: <201611091506.s29MX9Hj%fengguang.wu@intel.com> <67dbdf7c-d910-20bc-6a42-aa2ac8a13b30@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <af8a14a2-55a5-1d44-663e-53ff20408f10@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35178 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751589AbcKISLa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 13:11:30 -0500
+Received: by mail-wm0-f48.google.com with SMTP id a197so323301844wmd.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2016 10:11:29 -0800 (PST)
+In-Reply-To: <67dbdf7c-d910-20bc-6a42-aa2ac8a13b30@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shyam Sundar S K <ssundark@amd.com>
+Cc: kbuild test robot <lkp@intel.com>, "kbuild-all@01.org" <kbuild-all@01.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On Wed, Nov 09, 2016 at 03:24:24PM +0200, Adrian Hunter wrote:
-> On 08/11/16 22:07, Zach Brown wrote:
-> > On NI 9037 boards the max SDIO frequency is limited by trace lengths
-> > and other layout choices. The max SDIO frequency is stored in an ACPI
-> > table, as MXFQ.
-> >
-> > The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
-> > f_max field of the host with it.
-> >
-> > Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
-> > Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
-> > Reviewed-by: Josh Cartwright <joshc@ni.com>
-> > Signed-off-by: Zach Brown <zach.brown@ni.com>
-> > ---
-> >  drivers/mmc/host/sdhci-pci-core.c | 30 ++++++++++++++++++++++++++++++
-> >  1 file changed, 30 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> > index c333ce2..4ac7f16 100644
-> > --- a/drivers/mmc/host/sdhci-pci-core.c
-> > +++ b/drivers/mmc/host/sdhci-pci-core.c
-> > @@ -27,6 +27,7 @@
-> >  #include <linux/pm_runtime.h>
-> >  #include <linux/mmc/slot-gpio.h>
-> >  #include <linux/mmc/sdhci-pci-data.h>
-> > +#include <linux/acpi.h>
-> >
-> >  #include "sdhci.h"
-> >  #include "sdhci-pci.h"
-> > @@ -377,6 +378,35 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
-> >
-> >  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
-> >  {
-> > +#ifdef CONFIG_ACPI
-> > +	/* Get max freq from ACPI for NI hardware */
-> > +	acpi_handle acpi_hdl;
-> > +	acpi_status status;
-> > +	struct acpi_buffer acpi_result = {
-> > +		ACPI_ALLOCATE_BUFFER, NULL };
-> > +	union acpi_object *acpi_buffer;
-> > +	int max_freq;
-> > +
-> > +	status = acpi_get_handle(ACPI_HANDLE(&slot->chip->pdev->dev), "MXFQ",
-> > +				 &acpi_hdl);
+On 9 November 2016 at 08:14, Shyam Sundar S K <ssundark@amd.com> wrote:
+> Hi Ulf, Adrian
 >
-> Is "MXFQ" an object that has already been deployed or are you inventing it
-> now?  In the latter case, did you consider device properties as an alternative?
+>>    drivers/mmc/host/sdhci-pci-core.c: In function 'amd_find_good_phase':
+>>>> drivers/mmc/host/sdhci-pci-core.c:877:37: error: implicit declaration of function 'sdhci_pci_priv' [-Werror=implicit-function-declaration]
+>>      struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
 >
-"MXFQ" is an object that we have already deployed on some of our devices.
+> This build error is because, it has dependency on Adrian patch "mmc: sdhci-pci: Let devices define their own private data".
+>
+> Kindly add our patch on top of Adrian's patch and that will resolve the build error.
 
-> > +	if (ACPI_FAILURE(status))
-> > +		return  -ENODEV;
-> > +
-> > +	status = acpi_evaluate_object(acpi_hdl, NULL,
-> > +				      NULL, &acpi_result);
-> > +	if (ACPI_FAILURE(status))
-> > +		return -EINVAL;
-> > +
-> > +	acpi_buffer = (union acpi_object *)acpi_result.pointer;
-> > +
-> > +	if (acpi_buffer->type != ACPI_TYPE_INTEGER)
-> > +		return -EINVAL;
-> > +
-> > +	max_freq = acpi_buffer->integer.value;
-> > +
-> > +	slot->host->mmc->f_max = max_freq * 1000000;
-> > +#endif
-> > +
-> >  	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE;
-> >  	return 0;
-> >  }
-> >
->
+Please resend as a series, then kbuild will use the first patch before
+trying the second.
+
+[...]
+
+Kind regards
+Uffe
