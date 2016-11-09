@@ -1,147 +1,91 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v6 05/14] mmc: sdhci-msm: Update DLL reset sequence
-Date: Wed, 9 Nov 2016 17:36:57 +0530
-Message-ID: <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
-References: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org>
- <1478517877-23733-6-git-send-email-riteshh@codeaurora.org>
- <20161108230622.GN16026@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for Intel
+ byt sdio host controller sub-vended by NI
+Date: Wed, 9 Nov 2016 15:24:24 +0200
+Message-ID: <af8a14a2-55a5-1d44-663e-53ff20408f10@intel.com>
+References: <1478635635-14953-1-git-send-email-zach.brown@ni.com>
+ <1478635635-14953-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:47388 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752395AbcKIMHJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 07:07:09 -0500
-In-Reply-To: <20161108230622.GN16026@codeaurora.org>
+Received: from mga01.intel.com ([192.55.52.88]:39563 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932642AbcKIN3V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 9 Nov 2016 08:29:21 -0500
+In-Reply-To: <1478635635-14953-3-git-send-email-zach.brown@ni.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
+To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Stephen,
+On 08/11/16 22:07, Zach Brown wrote:
+> On NI 9037 boards the max SDIO frequency is limited by trace lengths
+> and other layout choices. The max SDIO frequency is stored in an ACPI
+> table, as MXFQ.
+> 
+> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+> f_max field of the host with it.
+> 
+> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+> Reviewed-by: Josh Cartwright <joshc@ni.com>
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 30 ++++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index c333ce2..4ac7f16 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -27,6 +27,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mmc/sdhci-pci-data.h>
+> +#include <linux/acpi.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+> @@ -377,6 +378,35 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+>  
+>  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+> +#ifdef CONFIG_ACPI
+> +	/* Get max freq from ACPI for NI hardware */
+> +	acpi_handle acpi_hdl;
+> +	acpi_status status;
+> +	struct acpi_buffer acpi_result = {
+> +		ACPI_ALLOCATE_BUFFER, NULL };
+> +	union acpi_object *acpi_buffer;
+> +	int max_freq;
+> +
+> +	status = acpi_get_handle(ACPI_HANDLE(&slot->chip->pdev->dev), "MXFQ",
+> +				 &acpi_hdl);
 
-On 11/9/2016 4:36 AM, Stephen Boyd wrote:
-> On 11/07, Ritesh Harjani wrote:
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 42f42aa..32b0b79 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -58,11 +58,17 @@
->>  #define CORE_DLL_CONFIG		0x100
->>  #define CORE_DLL_STATUS		0x108
->>
->> +#define CORE_DLL_CONFIG_2	0x1b4
->> +#define CORE_FLL_CYCLE_CNT	BIT(18)
->> +#define CORE_DLL_CLOCK_DISABLE	BIT(21)
->> +
->>  #define CORE_VENDOR_SPEC	0x10c
->>  #define CORE_CLK_PWRSAVE	BIT(1)
->>
->>  #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
->>
->> +#define TCXO_FREQ		19200000
->
-> TCXO_FREQ could change based on the board. For example, IPQ has
-> it as 25 MHz.
-Actually not sure of the proper way on how to get this freq in driver
-today. We may use xo_board clock but, it is not available for all boards
-except 8996/8916 I guess.
+Is "MXFQ" an object that has already been deployed or are you inventing it
+now?  In the latter case, did you consider device properties as an alternative?
 
-Also, there is no sdhc for IPQ board and for all other boards TCXO_FREQ 
-is same where sdhci-msm driver is used. For that purpose this was 
-defined here for sdhci-msm driver.
+> +	if (ACPI_FAILURE(status))
+> +		return  -ENODEV;
+> +
+> +	status = acpi_evaluate_object(acpi_hdl, NULL,
+> +				      NULL, &acpi_result);
+> +	if (ACPI_FAILURE(status))
+> +		return -EINVAL;
+> +
+> +	acpi_buffer = (union acpi_object *)acpi_result.pointer;
+> +
+> +	if (acpi_buffer->type != ACPI_TYPE_INTEGER)
+> +		return -EINVAL;
+> +
+> +	max_freq = acpi_buffer->integer.value;
+> +
+> +	slot->host->mmc->f_max = max_freq * 1000000;
+> +#endif
+> +
+>  	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE;
+>  	return 0;
+>  }
+> 
 
-Do you think in that case we should keep it this way for now and later 
-change if a need arise to change the TCXO_FREQ ?
-
->
->> +
->>  #define CDR_SELEXT_SHIFT	20
->>  #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
->>  #define CMUX_SHIFT_PHASE_SHIFT	24
->> @@ -330,6 +349,24 @@ static int msm_init_cm_dll(struct sdhci_host *host)
->>  	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
->>  	msm_cm_dll_set_freq(host);
->>
->> +	if (msm_host->use_14lpp_dll_reset) {
->> +		u32 mclk_freq = 0;
->> +
->> +		if ((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
->> +					& CORE_FLL_CYCLE_CNT))
->
-> I suggest you grow a local variable.
-Ok.
-
->
->> +			mclk_freq = (u32)((host->clock / TCXO_FREQ) * 8);
->
-> Is the cast necessary?
-Will remove it.
-
->
->> +		else
->> +			mclk_freq = (u32)((host->clock / TCXO_FREQ) * 4);
->
-> Ditto
-Will remove it.
-
->
->> +
->> +		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
->> +		config &= ~(0xFF << 10);
->> +		config |= mclk_freq << 10;
->> +
->> +		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
->> +		/* wait for 5us before enabling DLL clock */
->
-> Usually there's a barrier between writel_relaxed() and delay
-> because we don't know when the writel will be posted out and the
-> delay is there to wait for the operation to happen. Probably
-> should change this to be a writel() instead.
-
-Arnd, already explained here.
-We do need the udelay here as per the HW sequence itself.
-
-
->
->> +		udelay(5);
->> +	}
->> +
->>  	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
->>  	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
->>  	config &= ~CORE_DLL_RST;
->> @@ -340,6 +377,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
->>  	config &= ~CORE_DLL_PDN;
->>  	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
->>
->> +	if (msm_host->use_14lpp_dll_reset) {
->> +		msm_cm_dll_set_freq(host);
->> +		/* Enable the DLL clock */
->> +		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
->> +		config &= ~CORE_DLL_CLOCK_DISABLE;
->> +		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
->> +	}
->> +
->>  	/* Set DLL_EN bit to 1. */
->>  	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
->>  	config |= CORE_DLL_EN;
->> @@ -641,6 +686,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>  	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
->>  		core_version, core_major, core_minor);
->>
->> +	if ((core_major == 1) && (core_minor >= 0x42))
->
-> Why so many parenthesis?
-Sure, will remove it.
-
->
->> +		msm_host->use_14lpp_dll_reset = true;
->> +
->>  	/*
->
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
