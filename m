@@ -1,37 +1,48 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-iproc: Add brcm,sdhci-iproc compat
- string in bindings document
-Date: Wed, 9 Nov 2016 12:26:15 -0600
-Message-ID: <20161109182615.22m3wpkv3bi4rcto@rob-hp-laptop>
+From: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-iproc: support standard byte register
+ accesses
+Date: Wed, 9 Nov 2016 10:38:38 -0800
+Message-ID: <132c772b-d4b9-c4b6-2eca-0393e7c995f9@broadcom.com>
 References: <1478018277-10097-1-git-send-email-scott.branden@broadcom.com>
- <1478018277-10097-2-git-send-email-scott.branden@broadcom.com>
+ <1478018277-10097-3-git-send-email-scott.branden@broadcom.com>
+ <c94dc018-5a2d-d50b-5746-43ae7fc258ce@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1478018277-10097-2-git-send-email-scott.branden@broadcom.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Scott Branden <scott.branden@broadcom.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Anup Patel <anup.patel@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-arm-kernel@lists.infradead.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <c94dc018-5a2d-d50b-5746-43ae7fc258ce-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Nov 01, 2016 at 09:37:56AM -0700, Scott Branden wrote:
-> Adds brcm,sdhci-iproc compat string to DT bindings document for
-> the iProc SDHCI driver.
-> 
-> Signed-off-by: Anup Patel <anup.patel@broadcom.com>
-> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-> ---
->  Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt | 9 +++++++++
->  1 file changed, 9 insertions(+)
+Hi Adrian/Ulf,
 
-Acked-by: Rob Herring <robh@kernel.org>
+On 16-11-08 01:55 AM, Adrian Hunter wrote:
+> On 01/11/16 18:37, Scott Branden wrote:
+>> Add bytewise register accesses support for newer versions of IPROC
+>> SDHCI controllers.
+>> Previous sdhci-iproc versions of SDIO controllers
+>> (such as Raspberry Pi and Cygnus) only allowed for 32-bit register
+>> accesses.
+>>
+>> Signed-off-by: Srinath Mannam <srinath.mannam-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+>> Signed-off-by: Scott Branden <scott.branden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+>
+> This is unchanged from V1 which I acked, so:
+I updated the binding name in the documentation but forgot to change it 
+in this patch.  Now that Rob has ack'd the binding documentation I will 
+send out an updated patch with binding string in the code matching the 
+ack'd documentation.
+
+>
+> Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>
+With the minor change I will add your ack to the next version I send out.
+
+Thanks,
+  Scott
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
