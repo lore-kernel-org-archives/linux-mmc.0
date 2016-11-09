@@ -1,38 +1,96 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Add support for HS200 tuning mode, on AMD eMMC-4.5.1
-Date: Wed, 9 Nov 2016 19:11:27 +0100
-Message-ID: <CAPDyKFpa=dhZLqzk-yhoKAXSvrfg7oPAoMBHJa81fqi2vDNJLA@mail.gmail.com>
-References: <201611091506.s29MX9Hj%fengguang.wu@intel.com> <67dbdf7c-d910-20bc-6a42-aa2ac8a13b30@amd.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Let devices define their own private data
+Date: Wed, 9 Nov 2016 19:14:46 +0100
+Message-ID: <CAPDyKFogpRuUKRLdNn+jxOoup+BrOz49VY_LiCMG2dipFe93gw@mail.gmail.com>
+References: <14a1a029-9e91-2467-5bf0-f3b50b737b2b@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:35178 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751589AbcKISLa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 13:11:30 -0500
-Received: by mail-wm0-f48.google.com with SMTP id a197so323301844wmd.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2016 10:11:29 -0800 (PST)
-In-Reply-To: <67dbdf7c-d910-20bc-6a42-aa2ac8a13b30@amd.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35685 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753182AbcKISOt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 13:14:49 -0500
+Received: by mail-wm0-f43.google.com with SMTP id a197so323473306wmd.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2016 10:14:48 -0800 (PST)
+In-Reply-To: <14a1a029-9e91-2467-5bf0-f3b50b737b2b@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shyam Sundar S K <ssundark@amd.com>
-Cc: kbuild test robot <lkp@intel.com>, "kbuild-all@01.org" <kbuild-all@01.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 9 November 2016 at 08:14, Shyam Sundar S K <ssundark@amd.com> wrote:
-> Hi Ulf, Adrian
->
->>    drivers/mmc/host/sdhci-pci-core.c: In function 'amd_find_good_phase':
->>>> drivers/mmc/host/sdhci-pci-core.c:877:37: error: implicit declaration of function 'sdhci_pci_priv' [-Werror=implicit-function-declaration]
->>      struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
->
-> This build error is because, it has dependency on Adrian patch "mmc: sdhci-pci: Let devices define their own private data".
->
-> Kindly add our patch on top of Adrian's patch and that will resolve the build error.
+On 9 November 2016 at 07:34, Shyam Sundar S K <ssundark@amd.com> wrote:
+> Submitting the patch on behalf of Adrian.
 
-Please resend as a series, then kbuild will use the first patch before
-trying the second.
+This information isn't needed, please remove.
 
-[...]
+>
+> Let devices define their own private data to facilitate device-specific
+> operations. The size of the private structure is specified in the
+> sdhci_pci_fixes structure,then sdhci_pci_probe_slot() will allocate extra
+> space for it, and sdhci_pci_priv() can be used to get a reference to it.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+This change has your name as author, it should be Adrian. Please change.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
+>  drivers/mmc/host/sdhci-pci.h      | 7 +++++++
+>  2 files changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 1d9e00a..782c8d2 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1646,6 +1646,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>         struct sdhci_pci_slot *slot;
+>         struct sdhci_host *host;
+>         int ret, bar = first_bar + slotno;
+> +       size_t priv_size = chip->fixes ? chip->fixes->priv_size : 0;
+>
+>         if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
+>                 dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
+> @@ -1667,7 +1668,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>                 return ERR_PTR(-ENODEV);
+>         }
+>
+> -       host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
+> +       host = sdhci_alloc_host(&pdev->dev, sizeof(*slot) + priv_size);
+>         if (IS_ERR(host)) {
+>                 dev_err(&pdev->dev, "cannot allocate host\n");
+>                 return ERR_CAST(host);
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 6bccf56..0bfd568 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -67,6 +67,7 @@ struct sdhci_pci_fixes {
+>         int                     (*resume) (struct sdhci_pci_chip *);
+>
+>         const struct sdhci_ops  *ops;
+> +       size_t                  priv_size;
+>  };
+>
+>  struct sdhci_pci_slot {
+> @@ -87,6 +88,7 @@ struct sdhci_pci_slot {
+>                                      struct mmc_card *card,
+>                                      unsigned int max_dtr, int host_drv,
+>                                      int card_drv, int *drv_type);
+> +       unsigned long           private[0] ____cacheline_aligned;
+>  };
+>
+>  struct sdhci_pci_chip {
+> @@ -101,4 +103,9 @@ struct sdhci_pci_chip {
+>         struct sdhci_pci_slot   *slots[MAX_SLOTS]; /* Pointers to host slots */
+>  };
+>
+> +static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+> +{
+> +       return (void *)slot->private;
+> +}
+> +
+>  #endif /* __SDHCI_PCI_H */
+> --
+> 2.7.4
