@@ -1,80 +1,240 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v8 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
-Date: Thu, 10 Nov 2016 12:45:49 +0100
-Message-ID: <20161110114549.GC1436@katana>
-References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: [PATCH 2/2] mmc: sdhci-pci: Add support for HS200 tuning mode on AMD,
+ eMMC-4.5.1
+Date: Thu, 10 Nov 2016 18:21:25 +0530
+Message-ID: <49d59018-a294-9cea-b92c-f74935314dc8@amd.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="kVXhAStRUZ/+rrGn"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:33484 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755422AbcKJLp7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 10 Nov 2016 06:45:59 -0500
-Content-Disposition: inline
-In-Reply-To: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
+Received: from mail-by2nam03on0051.outbound.protection.outlook.com ([104.47.42.51]:8704
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932295AbcKJNGW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Nov 2016 08:06:22 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
 
+This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
 
---kVXhAStRUZ/+rrGn
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
+Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 178 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 177 insertions(+), 1 deletion(-)
 
-On Thu, Nov 03, 2016 at 03:15:58PM +0100, Simon Horman wrote:
-> Hi,
->=20
-> this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
-> sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
-> Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
-> SDR-50 support to the same driver.
->=20
-> It is based on the next branch of the mmc tree.
->=20
-> To aid review the following git branch is provided:
-> * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topi=
-c/sdr104-driver-v8
->=20
-> Overview of changes since v7:
-> * Correct inverted logic in sh_mobile_sdhi_hw_reset
-> * Correct value of SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN
->=20
-> Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
-> results.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 782c8d2..9576f82 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -817,6 +817,171 @@ enum amd_chipset_gen {
+ 	AMD_CHIPSET_UNKNOWN,
+ };
 
-Successfully tested on a Lager Board with a SanDisk card and a Samsung
-card which used to cause issues before.
++static const struct sdhci_ops amd_sdhci_pci_ops;
++
++struct amd_tuning_descriptor {
++	u8 tune_around;
++	bool this_tune_ok;
++	bool last_tune_ok;
++	u8 valid_front;
++	u8 valid_window_max;
++	u8 tune_low_max;
++	u8 tune_low;
++	u8 valid_window;
++	u8 tune_result;
++};
++
++static int amd_tuning_reset(struct sdhci_host *host)
++{
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val &= ~SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	pci_read_config_dword(pdev, 0xb8, &val);
++	val &= ~0x1f;
++	val |= (0x10800 | (phase << 1));
++	pci_write_config_dword(pdev, 0xb8, val);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_find_good_phase(struct sdhci_host *host)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
++
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (td->this_tune_ok)
++		td->valid_front += 1;
++	if ((!td->this_tune_ok && td->last_tune_ok) ||
++	    (td->tune_around == 11)) {
++		if (td->valid_window > td->valid_window_max) {
++			td->valid_window_max = td->valid_window;
++			td->tune_low_max = td->tune_low;
++		}
++	}
++	if (td->this_tune_ok && (!td->last_tune_ok))
++		td->tune_low = td->tune_around;
++	if (!td->this_tune_ok && td->last_tune_ok)
++		td->valid_window = 0;
++	else if (td->this_tune_ok)
++		td->valid_window += 1;
++
++	td->last_tune_ok = td->this_tune_ok;
++
++	if (td->tune_around == 11) {
++		if ((td->valid_front + td->valid_window) >
++						td->valid_window_max) {
++			if (td->valid_front > td->valid_window)
++				td->tune_result = ((td->valid_front -
++						td->valid_window) >> 1);
++			else
++				td->tune_result = td->tune_low +
++				((td->valid_window + td->valid_front) >> 1);
++		} else {
++			td->tune_result = td->tune_low_max +
++					(td->valid_window_max >> 1);
++		}
++
++		if (td->tune_result > 0x0b)
++			td->tune_result = 0x0b;
++
++		pci_read_config_dword(pdev, 0xb8, &val);
++		val &= ~0x1f;
++		val |= (0x10800 | (td->tune_result << 1));
++		pci_write_config_dword(pdev, 0xb8, val);
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
++{
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++
++	pci_read_config_dword(pdev, 0xd0, &val);
++	val &= 0xffffffcf;
++	val |= 0x30;
++	pci_write_config_dword(pdev, 0xd0, val);
++
++	return 0;
++}
++
++static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
++	u8 ctrl;
++
++	amd_tuning_reset(host);
++	memset(td, 0, sizeof(struct amd_tuning_descriptor));
++
++	/*********************************************************************/
++	/* Enabling Software Tuning */
++	/********************************************************************/
++	/* 1. First switch the eMMC to HS200 Mode
++	 * 2. Prepare the registers by using the sampling clock select
++	 * 3. Send the CMD21 12 times with block length of 64 bytes
++	 * 4. Everytime change the clk phase and check for CRC error
++	 *	(CMD and DATA),if error, soft reset the CMD and DATA line
++	 * 5. Calculate the window and set the clock phase.
++	 */
++
++	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
++		amd_config_tuning_phase(host, td->tune_around);
++
++		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
++			td->this_tune_ok = false;
++			host->mmc->need_retune = 0;
++			mdelay(4);
++			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
++			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
++		} else {
++			td->this_tune_ok = true;
++		}
++
++		amd_find_good_phase(host);
++	}
++
++	host->mmc->retune_period = 0;
++
++	amd_enable_manual_tuning(slot);
++	return 0;
++}
++
+ static int amd_probe(struct sdhci_pci_chip *chip)
+ {
+ 	struct pci_dev	*smbus_dev;
+@@ -841,7 +1006,6 @@ static int amd_probe(struct sdhci_pci_chip *chip)
 
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+ 	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
+ 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+-		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+ 	}
 
-Ulf, I think this series is ready to go for v4.10. All issues we know of
-are related to pinmuxing and will be solved elsewhere. We currently have
-hacks for that so it is quite clear the issues are not caused by this
-series.
+ 	return 0;
+@@ -849,6 +1013,7 @@ static int amd_probe(struct sdhci_pci_chip *chip)
 
+ static const struct sdhci_pci_fixes sdhci_amd = {
+ 	.probe		= amd_probe,
++	.ops		= &amd_sdhci_pci_ops,
+ };
 
---kVXhAStRUZ/+rrGn
-Content-Type: application/pgp-signature; name="signature.asc"
+ static const struct pci_device_id pci_ids[] = {
+@@ -1469,6 +1634,17 @@ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.select_drive_strength	= sdhci_pci_select_drive_strength,
+ };
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYJF3tAAoJEBQN5MwUoCm2+70QAI80WmFzMVGXCnN5ZU2q/Uty
-g+hb5ERt+a3oXUb8xtmbt+ZQob93/i1dKY5NpV0FOfl3CM7FNkGnjsV7ows7x2uQ
-fBncp3l0Gk83Hi3jlRUrWg+fos236FJQzvh5PtsnjFjsprOsQiAMGHXqZAh9bXKR
-Lmu/3Y/EcxlFdpRtrZxTI4289WoXHHldUcN7USm8/2A4fkbg3ERlEad1BxoUa6TN
-4JxJD5Un0Ssw2+lJJFEdWip2zOivG60EV7cJmmi7iRnfYQml94KbBcSuw8te2q4X
-jCN95tRigkjcD7ThvzZmjxf5RlxNaHpp0GlANpP+J2ZXT/zS1Z+iFLFBjLgq3giU
-qz7+g6BUg8MQYmhJmfRAZzdjdfG/6Ba68KEOZRtfC+VrBpWz/fPZjNWxCYwvKofb
-PWphepG9DVSzI34wfRG+U3apWcLgAX1Swz13WPn8og4VarNuQ/IPk1eVOBU/aWhb
-q9YU4I5gYbnMbJ937ggWkk8n3Rjb+dMjjt6mGP15jL29jqTxzPYu8opMFUm7VMmF
-Q6ez+LUO0J/dXVcBnnRpSlxb+Wj9510PfD/VOT4X/pqTLZbnhUPt0BZ/9uXCeG+H
-ASrKFwSumtNkjucR0ap1mEFKtjyyVEumCkkWtjjblOm9w+gB2Ne+fjOIk274YO2K
-YJ1J1kj9S61YmFFFKJzY
-=8X6A
------END PGP SIGNATURE-----
-
---kVXhAStRUZ/+rrGn--
++static const struct sdhci_ops amd_sdhci_pci_ops = {
++	.set_clock	= sdhci_set_clock,
++	.enable_dma	= sdhci_pci_enable_dma,
++	.set_bus_width	= sdhci_pci_set_bus_width,
++	.reset		= sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.hw_reset		= sdhci_pci_hw_reset,
++	.select_drive_strength	= sdhci_pci_select_drive_strength,
++	.platform_execute_tuning = amd_execute_tuning,
++};
++
+ /*****************************************************************************\
+  *                                                                           *
+  * Suspend/resume                                                            *
+-- 
+2.7.4
