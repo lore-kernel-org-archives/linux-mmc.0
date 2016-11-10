@@ -1,161 +1,117 @@
-From: Yingjoe Chen <yingjoe.chen@mediatek.com>
-Subject: Re: [PATCH 4/4] dts: arm64: enable mmc3 for supporting sdio feature
-Date: Thu, 10 Nov 2016 10:08:10 +0800
-Message-ID: <1478743690.19253.4.camel@mtksdaap41>
-References: <1478585341-6749-1-git-send-email-yong.mao@mediatek.com>
-         <1478585341-6749-5-git-send-email-yong.mao@mediatek.com>
+From: Scott Wood <oss@buserror.net>
+Subject: Re: [v16, 0/7] Fix eSDHC host version register bug
+Date: Wed, 09 Nov 2016 21:55:14 -0600
+Message-ID: <1478750114.21746.4.camel@buserror.net>
+References: <1478661252-42439-1-git-send-email-yangbo.lu@nxp.com>
+         <CAPDyKFrcAN_pqgtGaUanfB2zh97zGcL23m5VDtJ3g==NJeRrfA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1478585341-6749-5-git-send-email-yong.mao@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yong Mao <yong.mao@mediatek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, YH Huang <yh.huang@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Mathias Nyman <mathias.nyman@linux.intel.com>, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, linux-mediatek@lists.infradead.org, Will Deacon <will.deacon@arm.com>, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Chunfeng Yun <chunfeng.yun@mediatek.com>, Rob Herring <robh+dt@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-arm-kernel@lists.infradead.org, Philipp Zabel <p.zabel@pengutronix.de>, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Eddie Huang <eddie.huang@mediat>
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from host.buserror.net ([209.198.135.123]:53772 "EHLO
+        host.buserror.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751644AbcKJDzh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2016 22:55:37 -0500
+In-Reply-To: <CAPDyKFrcAN_pqgtGaUanfB2zh97zGcL23m5VDtJ3g==NJeRrfA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Yangbo Lu <yangbo.lu@nxp.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Qiang
 
-On Tue, 2016-11-08 at 14:09 +0800, Yong Mao wrote:
-> From: yong mao <yong.mao@mediatek.com>
+On Wed, 2016-11-09 at 19:27 +0100, Ulf Hansson wrote:
+> - i2c-list
 > 
-> Add description of mmc3 for supporting sdio feature
+> On 9 November 2016 at 04:14, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> > 
+> > This patchset is used to fix a host version register bug in the T4240-
+> > R1.0-R2.0
+> > eSDHC controller. To match the SoC version and revision, 15 previous
+> > version
+> > patchsets had tried many methods but all of them were rejected by
+> > reviewers.
+> > Such as
+> >         - dts compatible method
+> >         - syscon method
+> >         - ifdef PPC method
+> >         - GUTS driver getting SVR method
+> > Anrd suggested a soc_device_match method in v10, and this is the only
+> > available
+> > method left now. This v11 patchset introduces the soc_device_match
+> > interface in
+> > soc driver.
+> > 
+> > The first four patches of Yangbo are to add the GUTS driver. This is used
+> > to
+> > register a soc device which contain soc version and revision information.
+> > The other three patches introduce the soc_device_match method in soc
+> > driver
+> > and apply it on esdhc driver to fix this bug.
+> > 
+> > ---
+> > Changes for v15:
+> >         - Dropped patch 'dt: bindings: update Freescale DCFG compatible'
+> >           since the work had been done by below patch on ShawnGuo's linux
+> > tree.
+> >           'dt-bindings: fsl: add LS1043A/LS1046A/LS2080A compatible for
+> > SCFG
+> >            and DCFG'
+> >         - Fixed error code issue in guts driver
+> > Changes for v16:
+> >         - Dropped patch 'powerpc/fsl: move mpc85xx.h to include/linux/fsl'
+> >         - Added a bug-fix patch from Geert
+> > ---
+> > 
+> > Arnd Bergmann (1):
+> >   base: soc: introduce soc_device_match() interface
+> > 
+> > Geert Uytterhoeven (1):
+> >   base: soc: Check for NULL SoC device attributes
+> > 
+> > Yangbo Lu (5):
+> >   ARM64: dts: ls2080a: add device configuration node
+> >   dt: bindings: move guts devicetree doc out of powerpc directory
+> >   soc: fsl: add GUTS driver for QorIQ platforms
+> >   MAINTAINERS: add entry for Freescale SoC drivers
+> >   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+> > 
+> >  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+> >  MAINTAINERS                                        |  11 +-
+> >  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+> >  drivers/base/Kconfig                               |   1 +
+> >  drivers/base/soc.c                                 |  70 ++++++
+> >  drivers/mmc/host/Kconfig                           |   1 +
+> >  drivers/mmc/host/sdhci-of-esdhc.c                  |  20 ++
+> >  drivers/soc/Kconfig                                |   3 +-
+> >  drivers/soc/fsl/Kconfig                            |  18 ++
+> >  drivers/soc/fsl/Makefile                           |   1 +
+> >  drivers/soc/fsl/guts.c                             | 236
+> > +++++++++++++++++++++
+> >  include/linux/fsl/guts.h                           | 125 ++++++-----
+> >  include/linux/sys_soc.h                            |   3 +
+> >  13 files changed, 447 insertions(+), 51 deletions(-)
+> >  rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt
+> > (91%)
+> >  create mode 100644 drivers/soc/fsl/Kconfig
+> >  create mode 100644 drivers/soc/fsl/guts.c
+> > 
+> > --
+> > 2.1.0.27.g96db324
+> > 
+> Thanks, applied on my mmc tree for next!
 > 
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  arch/arm64/boot/dts/mediatek/mt8173-evb.dts |   82 +++++++++++++++++++++++++++
->  1 file changed, 82 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> index 2a7f731..4dbd299 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> +++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> @@ -43,6 +43,14 @@
->  		enable-active-high;
->  	};
->  
-> +	sdio_fixed_3v3: fixedregulator@0 {
+> I noticed that some DT compatibles weren't documented, according to
+> checkpatch. Please fix that asap!
 
-This should be regulator@1 instead of fixedregulator.
+They are documented, in fsl/guts.txt (the file moved in patch 2/7):
+>  - compatible : Should define the compatible device type for
+>    global-utilities.
+>    Possible compatibles:
+>         "fsl,qoriq-device-config-1.0"
+>         "fsl,qoriq-device-config-2.0"
+>         "fsl,<chip>-device-config"
+>         "fsl,<chip>-guts"
 
-> +		compatible = "regulator-fixed";
-> +		regulator-name = "3V3";
-> +		regulator-min-microvolt = <3300000>;
-> +		regulator-max-microvolt = <3300000>;
-> +		gpio = <&pio 85 GPIO_ACTIVE_HIGH>;
-> +	};
-> +
->  	connector {
->  		compatible = "hdmi-connector";
->  		label = "hdmi";
-> @@ -139,6 +147,25 @@
->  	vqmmc-supply = <&mt6397_vmc_reg>;
->  };
->  
-> +&mmc3 {
-> +	status = "okay";
-> +	pinctrl-names = "default", "state_uhs";
-> +	pinctrl-0 = <&mmc3_pins_default>;
-> +	pinctrl-1 = <&mmc3_pins_uhs>;
-> +	bus-width = <4>;
-> +	max-frequency = <200000000>;
-> +	cap-sd-highspeed;
-> +	sd-uhs-sdr50;
-> +	sd-uhs-sdr104;
-> +	sdr104-clk-delay = <5>;
-> +	keep-power-in-suspend;
-> +	enable-sdio-wakeup;
-> +	cap-sdio-irq;
-> +	vmmc-supply = <&sdio_fixed_3v3>;
-> +	vqmmc-supply = <&mt6397_vgp3_reg>;
-> +	non-removable;
-> +};
-> +
->  &pio {
->  	disp_pwm0_pins: disp_pwm0_pins {
->  		pins1 {
-> @@ -197,6 +224,36 @@
->  		};
->  	};
->  
-> +	mmc3_pins_default: mmc3default {
+Checkpatch doesn't understand compatibles defined in such a way.
 
-Please keep nodes in &pio sorted, move this one after mmc1_pins_uhs.
+-Scott
 
-> +		pins_dat {
-> +			pinmux = <MT8173_PIN_22_MSDC3_DAT0__FUNC_MSDC3_DAT0>,
-> +				 <MT8173_PIN_23_MSDC3_DAT1__FUNC_MSDC3_DAT1>,
-> +				 <MT8173_PIN_24_MSDC3_DAT2__FUNC_MSDC3_DAT2>,
-> +				 <MT8173_PIN_25_MSDC3_DAT3__FUNC_MSDC3_DAT3>;
-> +			input-enable;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
-> +		};
-> +
-> +		pins_cmd {
-> +			pinmux = <MT8173_PIN_27_MSDC3_CMD__FUNC_MSDC3_CMD>;
-> +			input-enable;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
-> +		};
-> +
-> +		pins_clk {
-> +			pinmux = <MT8173_PIN_26_MSDC3_CLK__FUNC_MSDC3_CLK>;
-> +			bias-pull-down;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +		};
-> +
-> +		pins_pdn {
-> +			pinmux = <MT8173_PIN_85_AUD_DAT_MOSI__FUNC_GPIO85>;
-> +			output-low;
-> +		};
-
-This one is used in regulator, not really an mmc pin.
-Also, you don't need to add node for gpio usage, request_gpio will set
-mode for you.
-So please remove pins_pdn node.
-
-
-> +	};
-> +
->  	mmc0_pins_uhs: mmc0 {
->  		pins_cmd_dat {
->  			pinmux = <MT8173_PIN_57_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
-> @@ -243,6 +300,31 @@
->  			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
->  		};
->  	};
-> +
-> +	mmc3_pins_uhs: mmc3 {
-
-
-Please keep nodes in &pio sorted, move this one after mmc1_pins_uhs.
-
-
-Joe.C
-
-> +		pins_dat {
-> +			pinmux = <MT8173_PIN_22_MSDC3_DAT0__FUNC_MSDC3_DAT0>,
-> +				 <MT8173_PIN_23_MSDC3_DAT1__FUNC_MSDC3_DAT1>,
-> +				 <MT8173_PIN_24_MSDC3_DAT2__FUNC_MSDC3_DAT2>,
-> +				 <MT8173_PIN_25_MSDC3_DAT3__FUNC_MSDC3_DAT3>;
-> +			input-enable;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
-> +		};
-> +
-> +		pins_cmd {
-> +			pinmux = <MT8173_PIN_27_MSDC3_CMD__FUNC_MSDC3_CMD>;
-> +			input-enable;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
-> +		};
-> +
-> +		pins_clk {
-> +			pinmux = <MT8173_PIN_26_MSDC3_CLK__FUNC_MSDC3_CLK>;
-> +			drive-strength = <MTK_DRIVE_8mA>;
-> +			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-> +		};
-> +	};
->  };
->  
->  &pwm0 {
