@@ -1,48 +1,70 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: sdhci: remove unneeded (void *) casts in sdhci_(pltfm_)priv()
-Date: Thu, 10 Nov 2016 22:22:17 +0900
-Message-ID: <1478784138-18594-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH 2/2] mmc: tmio: allow tmio_mmc_host_alloc() to return proper error code
+Date: Thu, 10 Nov 2016 22:24:23 +0900
+Message-ID: <1478784263-18777-3-git-send-email-yamada.masahiro@socionext.com>
+References: <1478784263-18777-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1478784263-18777-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The type of host->private is (unsigned long *).  No cast is needed
-to return an opaque pointer.
+Now, mmc_alloc_host() returns an error pointer when it fails.
+So, tmio_mmc_host_alloc() can also return an error pointer to
+propagate the proper error code.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/sdhci-pltfm.h | 2 +-
- drivers/mmc/host/sdhci.h       | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 4 ++--
+ drivers/mmc/host/tmio_mmc.c       | 4 +++-
+ drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 3280f20..957839d 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -106,7 +106,7 @@ extern int sdhci_pltfm_register(struct platform_device *pdev,
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 49edff7..97a796c 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -355,8 +355,8 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	}
  
- static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
- {
--	return (void *)host->private;
-+	return host->private;
- }
+ 	host = tmio_mmc_host_alloc(pdev);
+-	if (!host) {
+-		ret = -ENOMEM;
++	if (IS_ERR(host)) {
++		ret = PTR_ERR(host);
+ 		goto eprobe;
+ 	}
  
- extern const struct dev_pm_ops sdhci_pltfm_pmops;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17..9886115 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -655,7 +655,7 @@ extern struct sdhci_host *sdhci_alloc_host(struct device *dev,
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index e897e7f..3316545 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -93,8 +93,10 @@ static int tmio_mmc_probe(struct platform_device *pdev)
+ 	pdata->flags |= TMIO_MMC_HAVE_HIGH_REG;
  
- static inline void *sdhci_priv(struct sdhci_host *host)
- {
--	return (void *)host->private;
-+	return host->private;
- }
+ 	host = tmio_mmc_host_alloc(pdev);
+-	if (!host)
++	if (IS_ERR(host)) {
++		ret = PTR_ERR(host);
+ 		goto cell_disable;
++	}
  
- extern void sdhci_card_detect(struct sdhci_host *host);
+ 	/* SD control register space size is 0x200, 0x400 for bus_shift=1 */
+ 	host->bus_shift = resource_size(res) >> 10;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 18106fc..7e8c80e 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1014,7 +1014,7 @@ struct tmio_mmc_host*
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct tmio_mmc_host), &pdev->dev);
+ 	if (IS_ERR(mmc))
+-		return NULL;
++		return ERR_CAST(mmc);
+ 
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
 -- 
 1.9.1
