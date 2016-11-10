@@ -1,80 +1,85 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [v16, 0/7] Fix eSDHC host version register bug
-Date: Thu, 10 Nov 2016 10:26:04 +0100
-Message-ID: <CAMuHMdVH0-3qbZiOHnSY8BtWaFESC6poyD-Z6H-wfaSvyd4k+g@mail.gmail.com>
-References: <1478661252-42439-1-git-send-email-yangbo.lu@nxp.com> <CAPDyKFrcAN_pqgtGaUanfB2zh97zGcL23m5VDtJ3g==NJeRrfA@mail.gmail.com>
+From: Alexandre Torgue <alexandre.torgue@st.com>
+Subject: Re: [PATCH 6/9] DT: stm32f429: add pin map for SDIO controller
+Date: Thu, 10 Nov 2016 11:51:22 +0100
+Message-ID: <3ec978cc-c80e-f350-f387-83b3e145dbe3@st.com>
+References: <1478612625-23256-1-git-send-email-andrea.merello@gmail.com>
+ <1478612625-23256-7-git-send-email-andrea.merello@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrcAN_pqgtGaUanfB2zh97zGcL23m5VDtJ3g==NJeRrfA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, Scott Wood <oss@buserror.net>, Arnd Bergmann <arnd@arndb.de>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, iommu@lists.linux-foundation.org, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:64610 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1755201AbcKJKv0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2016 05:51:26 -0500
+In-Reply-To: <1478612625-23256-7-git-send-email-andrea.merello@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrea Merello <andrea.merello@gmail.com>, ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com
+Cc: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi Andrea,
 
-On Wed, Nov 9, 2016 at 7:27 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 9 November 2016 at 04:14, Yangbo Lu <yangbo.lu@nxp.com> wrote:
->> This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
->> eSDHC controller. To match the SoC version and revision, 15 previous version
->> patchsets had tried many methods but all of them were rejected by reviewers.
->> Such as
->>         - dts compatible method
->>         - syscon method
->>         - ifdef PPC method
->>         - GUTS driver getting SVR method
->> Anrd suggested a soc_device_match method in v10, and this is the only available
->> method left now. This v11 patchset introduces the soc_device_match interface in
->> soc driver.
->>
->> The first four patches of Yangbo are to add the GUTS driver. This is used to
->> register a soc device which contain soc version and revision information.
->> The other three patches introduce the soc_device_match method in soc driver
->> and apply it on esdhc driver to fix this bug.
->>
->> ---
->> Changes for v15:
->>         - Dropped patch 'dt: bindings: update Freescale DCFG compatible'
->>           since the work had been done by below patch on ShawnGuo's linux tree.
->>           'dt-bindings: fsl: add LS1043A/LS1046A/LS2080A compatible for SCFG
->>            and DCFG'
->>         - Fixed error code issue in guts driver
->> Changes for v16:
->>         - Dropped patch 'powerpc/fsl: move mpc85xx.h to include/linux/fsl'
->>         - Added a bug-fix patch from Geert
->> ---
->>
->> Arnd Bergmann (1):
->>   base: soc: introduce soc_device_match() interface
->>
->> Geert Uytterhoeven (1):
->>   base: soc: Check for NULL SoC device attributes
+Some minor remarks.
 
-> Thanks, applied on my mmc tree for next!
+On 11/08/2016 02:43 PM, Andrea Merello wrote:
+> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+> ---
+>  arch/arm/boot/dts/stm32f429.dtsi | 31 +++++++++++++++++++++++++++++++
+>  1 file changed, 31 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
+> index 336ee4f..961bc0c 100644
+> --- a/arch/arm/boot/dts/stm32f429.dtsi
+> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+> @@ -313,6 +313,37 @@
+>  				};
+>  			};
+>
+> +			sdio_pins:sdio_pins@0 {
+Add a space after ":"
+> +				pins {
+> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
+> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
+> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
+> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
+> +						 <STM32F429_PC12_FUNC_SDIO_CK>,
+> +						 <STM32F429_PD2_FUNC_SDIO_CMD>;
+> +					drive-push-pull;
+> +					slew-rate = <2>;
+> +				};
+> +			};
+> +
+> +			sdio_pins_od:sdio_pins_od@0 {
+same
+> +				pins {
+> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
+> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
+> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
+> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
+> +						 <STM32F429_PC12_FUNC_SDIO_CK>;
+> +					drive-push-pull;
+> +					slew-rate = <2>;
+> +				};
+> +
+> +				pins_od {
+> +					pinmux = <STM32F429_PD2_FUNC_SDIO_CMD>;
+> +					drive-open-drain;
+> +					slew-rate = <2>;
+> +				};
+Why don't use "pins1" and "pins2" instead of "pins" and "pins_od" like 
+it is done for usart1?
 
-Oops, the above two commits (plus two more enhancements) are also a dependency
-for Samsung and Renesas. Hence the plan was to use an immutable branch for
-that...
+regards
+Alex
 
-Ulf, would it still be possible to replace these two commits in mmc/next:
+> +			};
+> +
 
-    8b82c17a8ae533d6 base: soc: introduce soc_device_match() interface
-    6fa350172b098f0f base: soc: Check for NULL SoC device attributes
 
-by a merge of the immutable branch I've just created?
-Cfr, the other thread  "[PATCH v2 0/7] soc: renesas: Identify SoC and register
-with the SoC bus".
 
-Thanks!
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+>  			ethernet0_mii: mii@0 {
+>  				pins {
+>  					pinmux = <STM32F429_PG13_FUNC_ETH_MII_TXD0_ETH_RMII_TXD0>,
+>
