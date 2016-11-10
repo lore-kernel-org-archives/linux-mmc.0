@@ -1,53 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v8 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
-Date: Thu, 10 Nov 2016 23:21:08 +0100
-Message-ID: <CAPDyKFq-tZheBD_dqkKDeKy11r1UZGt2_NRpFYCqw0SsC-hBJw@mail.gmail.com>
-References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au> <20161110114549.GC1436@katana>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-iproc: support standard byte register accesses
+Date: Thu, 10 Nov 2016 23:21:24 +0100
+Message-ID: <CAPDyKFrPwwXoAgJ7XGYSWDOiZiJqdjF3p6D0t5bUiPYEnn6ysg@mail.gmail.com>
+References: <1478018277-10097-1-git-send-email-scott.branden@broadcom.com> <1478018277-10097-3-git-send-email-scott.branden@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20161110114549.GC1436@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1478018277-10097-3-git-send-email-scott.branden@broadcom.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Scott Branden <scott.branden@broadcom.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Srinath Mannam <srinath.mannam@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 November 2016 at 12:45, Wolfram Sang <wsa@the-dreams.de> wrote:
-> On Thu, Nov 03, 2016 at 03:15:58PM +0100, Simon Horman wrote:
->> Hi,
->>
->> this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
->> sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
->> Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
->> SDR-50 support to the same driver.
->>
->> It is based on the next branch of the mmc tree.
->>
->> To aid review the following git branch is provided:
->> * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-driver-v8
->>
->> Overview of changes since v7:
->> * Correct inverted logic in sh_mobile_sdhi_hw_reset
->> * Correct value of SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN
->>
->> Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
->> results.
+On 1 November 2016 at 17:37, Scott Branden <scott.branden@broadcom.com> wrote:
+> Add bytewise register accesses support for newer versions of IPROC
+> SDHCI controllers.
+> Previous sdhci-iproc versions of SDIO controllers
+> (such as Raspberry Pi and Cygnus) only allowed for 32-bit register
+> accesses.
 >
-> Successfully tested on a Lager Board with a SanDisk card and a Samsung
-> card which used to cause issues before.
->
-> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> Ulf, I think this series is ready to go for v4.10. All issues we know of
-> are related to pinmuxing and will be solved elsewhere. We currently have
-> hacks for that so it is quite clear the issues are not caused by this
-> series.
->
+> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
 
 Thanks, applied for next!
 
-I did have to fix conflict and also to resolve some checkpatch
-warnings - but no worries this time!
-
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-iproc.c | 35 +++++++++++++++++++++++++++++++++--
+>  1 file changed, 33 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 7262466..d7046d6 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -143,6 +143,14 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+>  }
+>
+>  static const struct sdhci_ops sdhci_iproc_ops = {
+> +       .set_clock = sdhci_set_clock,
+> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .set_bus_width = sdhci_set_bus_width,
+> +       .reset = sdhci_reset,
+> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
+> +};
+> +
+> +static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>         .read_l = sdhci_iproc_readl,
+>         .read_w = sdhci_iproc_readw,
+>         .read_b = sdhci_iproc_readb,
+> @@ -156,6 +164,28 @@ static const struct sdhci_ops sdhci_iproc_ops = {
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>
+> +static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
+> +       .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+> +       .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
+> +       .ops = &sdhci_iproc_32only_ops,
+> +};
+> +
+> +static const struct sdhci_iproc_data iproc_cygnus_data = {
+> +       .pdata = &sdhci_iproc_cygnus_pltfm_data,
+> +       .caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+> +                       & SDHCI_MAX_BLOCK_MASK) |
+> +               SDHCI_CAN_VDD_330 |
+> +               SDHCI_CAN_VDD_180 |
+> +               SDHCI_CAN_DO_SUSPEND |
+> +               SDHCI_CAN_DO_HISPD |
+> +               SDHCI_CAN_DO_ADMA2 |
+> +               SDHCI_CAN_DO_SDMA,
+> +       .caps1 = SDHCI_DRIVER_TYPE_C |
+> +                SDHCI_DRIVER_TYPE_D |
+> +                SDHCI_SUPPORT_DDR50,
+> +       .mmc_caps = MMC_CAP_1_8V_DDR,
+> +};
+> +
+>  static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
+>         .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>         .quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
+> @@ -182,7 +212,7 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>         .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+>                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>                   SDHCI_QUIRK_MISSING_CAPS,
+> -       .ops = &sdhci_iproc_ops,
+> +       .ops = &sdhci_iproc_32only_ops,
+>  };
+>
+>  static const struct sdhci_iproc_data bcm2835_data = {
+> @@ -194,7 +224,8 @@ static const struct sdhci_iproc_data bcm2835_data = {
+>
+>  static const struct of_device_id sdhci_iproc_of_match[] = {
+>         { .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
+> -       { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_data },
+> +       { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_cygnus_data},
+> +       { .compatible = "brcm,sdhci-iproc", .data = &iproc_data },
+>         { }
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+> --
+> 2.5.0
+>
