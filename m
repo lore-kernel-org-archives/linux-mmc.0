@@ -1,91 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-pci: Let devices define their own private data
-Date: Thu, 10 Nov 2016 23:16:50 +0100
-Message-ID: <CAPDyKFpZb+2ArPs46UaLTB1jnDPjnNwCs6UZUSwRYRjDyM8sSA@mail.gmail.com>
-References: <78fc9537-4fea-1938-ba1d-b0c6030bd777@amd.com>
+Subject: Re: [PATCH v8 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Thu, 10 Nov 2016 23:21:08 +0100
+Message-ID: <CAPDyKFq-tZheBD_dqkKDeKy11r1UZGt2_NRpFYCqw0SsC-hBJw@mail.gmail.com>
+References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au> <20161110114549.GC1436@katana>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:34899 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756028AbcKJWQx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2016 17:16:53 -0500
-Received: by mail-wm0-f50.google.com with SMTP id a197so394713137wmd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Nov 2016 14:16:52 -0800 (PST)
-In-Reply-To: <78fc9537-4fea-1938-ba1d-b0c6030bd777@amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20161110114549.GC1436@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shyam Sundar S K <ssundark@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
 
-On 10 November 2016 at 13:50, Shyam Sundar S K <ssundark@amd.com> wrote:
-> Let devices define their own private data to facilitate device-specific
-> operations. The size of the private structure is specified in the
-> sdhci_pci_fixes structure,then sdhci_pci_probe_slot() will allocate extra
-> space for it, and sdhci_pci_priv() can be used to get a reference to it.
+On 10 November 2016 at 12:45, Wolfram Sang <wsa@the-dreams.de> wrote:
+> On Thu, Nov 03, 2016 at 03:15:58PM +0100, Simon Horman wrote:
+>> Hi,
+>>
+>> this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
+>> sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+>> Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
+>> SDR-50 support to the same driver.
+>>
+>> It is based on the next branch of the mmc tree.
+>>
+>> To aid review the following git branch is provided:
+>> * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-driver-v8
+>>
+>> Overview of changes since v7:
+>> * Correct inverted logic in sh_mobile_sdhi_hw_reset
+>> * Correct value of SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN
+>>
+>> Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+>> results.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Successfully tested on a Lager Board with a SanDisk card and a Samsung
+> card which used to cause issues before.
+>
+> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
+> Ulf, I think this series is ready to go for v4.10. All issues we know of
+> are related to pinmuxing and will be solved elsewhere. We currently have
+> hacks for that so it is quite clear the issues are not caused by this
+> series.
+>
 
-Still not Adrian as author...
+Thanks, applied for next!
+
+I did have to fix conflict and also to resolve some checkpatch
+warnings - but no worries this time!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
->  drivers/mmc/host/sdhci-pci.h      | 7 +++++++
->  2 files changed, 9 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 1d9e00a..782c8d2 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1646,6 +1646,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->         struct sdhci_pci_slot *slot;
->         struct sdhci_host *host;
->         int ret, bar = first_bar + slotno;
-> +       size_t priv_size = chip->fixes ? chip->fixes->priv_size : 0;
->
->         if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
->                 dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
-> @@ -1667,7 +1668,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->                 return ERR_PTR(-ENODEV);
->         }
->
-> -       host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
-> +       host = sdhci_alloc_host(&pdev->dev, sizeof(*slot) + priv_size);
->         if (IS_ERR(host)) {
->                 dev_err(&pdev->dev, "cannot allocate host\n");
->                 return ERR_CAST(host);
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 6bccf56..0bfd568 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -67,6 +67,7 @@ struct sdhci_pci_fixes {
->         int                     (*resume) (struct sdhci_pci_chip *);
->
->         const struct sdhci_ops  *ops;
-> +       size_t                  priv_size;
->  };
->
->  struct sdhci_pci_slot {
-> @@ -87,6 +88,7 @@ struct sdhci_pci_slot {
->                                      struct mmc_card *card,
->                                      unsigned int max_dtr, int host_drv,
->                                      int card_drv, int *drv_type);
-> +       unsigned long           private[0] ____cacheline_aligned;
->  };
->
->  struct sdhci_pci_chip {
-> @@ -101,4 +103,9 @@ struct sdhci_pci_chip {
->         struct sdhci_pci_slot   *slots[MAX_SLOTS]; /* Pointers to host slots */
->  };
->
-> +static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
-> +{
-> +       return (void *)slot->private;
-> +}
-> +
->  #endif /* __SDHCI_PCI_H */
-> --
-> 2.7.4
