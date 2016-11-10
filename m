@@ -1,42 +1,51 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 0/2] mmc: allow mmc_alloc_host() and tmio_mmc_host_alloc()
-Date: Thu, 10 Nov 2016 14:35:59 +0100
-Message-ID: <20161110133559.GA10191@kroah.com>
-References: <1478784263-18777-1-git-send-email-yamada.masahiro@socionext.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <1478784263-18777-1-git-send-email-yamada.masahiro@socionext.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sascha Sommer <saschasommer@freenet.de>, Johan Hovold <johan@kernel.org>, Sonic Zhang <sonic.zhang@analog.com>, devel@driverdev.osuosl.org, Russell King <linux@armlinux.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, Chen-Yu Tsai <wens@csie.org>, Pierre Ossman <pierre@ossman.eu>, Harald Welte <HaraldWelte@viatech.com>, Alex Dubov <oakad@yahoo.com>, adi-buildroot-devel@lists.sourceforge.net, =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, linux-mediatek@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Tony Olech <tony.olech@elandigitalsystems.com>, Matthias Brugger <matthias.bgg@gmail.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, linux-usb@vger.kernel.org, linux-mm
+From: Michael Walle <michael@walle.cc>
+Subject: [PATCH] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
+Date: Thu, 10 Nov 2016 17:47:36 +0100
+Message-ID: <1478796456-30549-1-git-send-email-michael@walle.cc>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@freescale.com>, Michael Walle <michael@walle.cc>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Nov 10, 2016 at 10:24:21PM +0900, Masahiro Yamada wrote:
-> 
-> sdhci_alloc_host() returns an error pointer when it fails.
-> but mmc_alloc_host() cannot.
-> 
-> This series allow to propagate a proper error code
-> when host-allocation fails.
+Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
+cards in __mmc_switch()") the ESDHC driver is broken:
+  mmc0: Card stuck in programming state! __mmc_switch
+  mmc0: error -110 whilst initialising MMC card
 
-Why?  What can we really do about the error except give up?  Why does
-having a explicit error value make any difference to the caller, they
-can't do anything different, right?
+Since this commit __mmc_switch() uses ->card_busy(), which is
+sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
+PRESENT_STATE register, specifically the DAT0 signal level bit. But the
+ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
+required to make the driver work again.
 
-I suggest just leaving it as-is, it's simple, and you don't have to mess
-with PTR_ERR() anywhere.
+Signed-off-by: Michael Walle <michael@walle.cc>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-thanks,
-
-greg k-h
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index fb71c86..243fee9 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -66,6 +66,18 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 			return ret;
+ 		}
+ 	}
++	/*
++	 * The DAT[3:0] line signal levels and the CMD line signal level is
++	 * not compatible with standard SDHC reegister. Move the corresponding
++	 * bits around.
++	 */
++	if (spec_reg == SDHCI_PRESENT_STATE) {
++		ret = value & 0xf8000000;
++		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
++		ret |= (value << 1) & 0x01000000;
++		return ret;
++	}
++
+ 	ret = value;
+ 	return ret;
+ }
+-- 
+2.1.4
