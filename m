@@ -1,71 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.9 rc5
-Date: Thu, 10 Nov 2016 22:39:36 +0100
-Message-ID: <CAPDyKFoJaa1__V0Td+dVqJy3h50mWFS49iO-g+cCbR7VEQsjXg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pci: Let devices define their own private data
+Date: Thu, 10 Nov 2016 23:16:50 +0100
+Message-ID: <CAPDyKFpZb+2ArPs46UaLTB1jnDPjnNwCs6UZUSwRYRjDyM8sSA@mail.gmail.com>
+References: <78fc9537-4fea-1938-ba1d-b0c6030bd777@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:34899 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756028AbcKJWQx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2016 17:16:53 -0500
+Received: by mail-wm0-f50.google.com with SMTP id a197so394713137wmd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Nov 2016 14:16:52 -0800 (PST)
+In-Reply-To: <78fc9537-4fea-1938-ba1d-b0c6030bd777@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shyam Sundar S K <ssundark@amd.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
 
-Hi Linus,
+On 10 November 2016 at 13:50, Shyam Sundar S K <ssundark@amd.com> wrote:
+> Let devices define their own private data to facilitate device-specific
+> operations. The size of the private structure is specified in the
+> sdhci_pci_fixes structure,then sdhci_pci_probe_slot() will allocate extra
+> space for it, and sdhci_pci_priv() can be used to get a reference to it.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Here are some mmc fixes intended for v4.9 rc5. They are based on v4.9-rc5.
-
-Details are as usual found in the signed tag. Please pull this in!
+Still not Adrian as author...
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit bc33b0ca11e3df467777a4fa7639ba488c9d4911:
-
-  Linux 4.9-rc4 (2016-11-05 16:23:36 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.9-rc4
-
-for you to fetch changes up to f91346e8b5f46aaf12f1df26e87140584ffd1b3f:
-
-  mmc: mxs: Initialize the spinlock prior to using it (2016-11-07
-13:30:08 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix mmc card initialization for hosts not supporting HW busy detection
- - Fix mmc_test for sending commands during non-blocking write
-
-MMC host:
- - mxs: Avoid using an uninitialized
- - sdhci: Restore enhanced strobe setting during runtime resume
- - sdhci: Fix a couple of reset related issues
- - dw_mmc: Fix a reset controller issue
-
-----------------------------------------------------------------
-Adrian Hunter (5):
-      mmc: sdhci: Fix CMD line reset interfering with ongoing data transfer
-      mmc: sdhci: Fix unexpected data interrupt handling
-      mmc: sdhci: Reset cmd and data circuits after tuning failure
-      mmc: sdhci: Fix missing enhanced strobe setting during runtime resume
-      mmc: mmc_test: Fix "Commands during non-blocking write" tests
-
-Fabio Estevam (1):
-      mmc: mxs: Initialize the spinlock prior to using it
-
-Jaehoon Chung (2):
-      Documentation: synopsys-dw-mshc: add binding for reset-names
-      mmc: dw_mmc: add the "reset" as name of reset controller
-
-Ulf Hansson (1):
-      mmc: mmc: Use 500ms as the default generic CMD6 timeout
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  5 +++
- drivers/mmc/card/mmc_test.c                        |  8 ++---
- drivers/mmc/core/mmc.c                             |  3 ++
- drivers/mmc/host/dw_mmc.c                          |  2 +-
- drivers/mmc/host/mxs-mmc.c                         |  4 +--
- drivers/mmc/host/sdhci.c                           | 36 ++++++++++++++++------
- 6 files changed, 41 insertions(+), 17 deletions(-)
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
+>  drivers/mmc/host/sdhci-pci.h      | 7 +++++++
+>  2 files changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 1d9e00a..782c8d2 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1646,6 +1646,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>         struct sdhci_pci_slot *slot;
+>         struct sdhci_host *host;
+>         int ret, bar = first_bar + slotno;
+> +       size_t priv_size = chip->fixes ? chip->fixes->priv_size : 0;
+>
+>         if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
+>                 dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
+> @@ -1667,7 +1668,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>                 return ERR_PTR(-ENODEV);
+>         }
+>
+> -       host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
+> +       host = sdhci_alloc_host(&pdev->dev, sizeof(*slot) + priv_size);
+>         if (IS_ERR(host)) {
+>                 dev_err(&pdev->dev, "cannot allocate host\n");
+>                 return ERR_CAST(host);
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 6bccf56..0bfd568 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -67,6 +67,7 @@ struct sdhci_pci_fixes {
+>         int                     (*resume) (struct sdhci_pci_chip *);
+>
+>         const struct sdhci_ops  *ops;
+> +       size_t                  priv_size;
+>  };
+>
+>  struct sdhci_pci_slot {
+> @@ -87,6 +88,7 @@ struct sdhci_pci_slot {
+>                                      struct mmc_card *card,
+>                                      unsigned int max_dtr, int host_drv,
+>                                      int card_drv, int *drv_type);
+> +       unsigned long           private[0] ____cacheline_aligned;
+>  };
+>
+>  struct sdhci_pci_chip {
+> @@ -101,4 +103,9 @@ struct sdhci_pci_chip {
+>         struct sdhci_pci_slot   *slots[MAX_SLOTS]; /* Pointers to host slots */
+>  };
+>
+> +static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+> +{
+> +       return (void *)slot->private;
+> +}
+> +
+>  #endif /* __SDHCI_PCI_H */
+> --
+> 2.7.4
