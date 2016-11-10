@@ -1,32 +1,71 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 13/13] Documentation: synopsys-dw-mshc: remove the unused
- properties
-Date: Thu, 10 Nov 2016 12:47:17 -0600
-Message-ID: <20161110184717.vgkp2flyi26dmbfo@rob-hp-laptop>
-References: <20161103062135.10697-1-jh80.chung@samsung.com>
- <20161103062135.10697-14-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.9 rc5
+Date: Thu, 10 Nov 2016 22:39:36 +0100
+Message-ID: <CAPDyKFoJaa1__V0Td+dVqJy3h50mWFS49iO-g+cCbR7VEQsjXg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161103062135.10697-14-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Nov 03, 2016 at 03:21:35PM +0900, Jaehoon Chung wrote:
-> "support-highspeed" was the obsoleted property.
-> And "broken-cd" is not synopsys specific property.
-> It can be referred to mmc.txt binding Documentation.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 -----
->  1 file changed, 5 deletions(-)
+Hi Linus,
 
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Here are some mmc fixes intended for v4.9 rc5. They are based on v4.9-rc5.
+
+Details are as usual found in the signed tag. Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit bc33b0ca11e3df467777a4fa7639ba488c9d4911:
+
+  Linux 4.9-rc4 (2016-11-05 16:23:36 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.9-rc4
+
+for you to fetch changes up to f91346e8b5f46aaf12f1df26e87140584ffd1b3f:
+
+  mmc: mxs: Initialize the spinlock prior to using it (2016-11-07
+13:30:08 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix mmc card initialization for hosts not supporting HW busy detection
+ - Fix mmc_test for sending commands during non-blocking write
+
+MMC host:
+ - mxs: Avoid using an uninitialized
+ - sdhci: Restore enhanced strobe setting during runtime resume
+ - sdhci: Fix a couple of reset related issues
+ - dw_mmc: Fix a reset controller issue
+
+----------------------------------------------------------------
+Adrian Hunter (5):
+      mmc: sdhci: Fix CMD line reset interfering with ongoing data transfer
+      mmc: sdhci: Fix unexpected data interrupt handling
+      mmc: sdhci: Reset cmd and data circuits after tuning failure
+      mmc: sdhci: Fix missing enhanced strobe setting during runtime resume
+      mmc: mmc_test: Fix "Commands during non-blocking write" tests
+
+Fabio Estevam (1):
+      mmc: mxs: Initialize the spinlock prior to using it
+
+Jaehoon Chung (2):
+      Documentation: synopsys-dw-mshc: add binding for reset-names
+      mmc: dw_mmc: add the "reset" as name of reset controller
+
+Ulf Hansson (1):
+      mmc: mmc: Use 500ms as the default generic CMD6 timeout
+
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  5 +++
+ drivers/mmc/card/mmc_test.c                        |  8 ++---
+ drivers/mmc/core/mmc.c                             |  3 ++
+ drivers/mmc/host/dw_mmc.c                          |  2 +-
+ drivers/mmc/host/mxs-mmc.c                         |  4 +--
+ drivers/mmc/host/sdhci.c                           | 36 ++++++++++++++++------
+ 6 files changed, 41 insertions(+), 17 deletions(-)
