@@ -1,66 +1,161 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH v6 05/14] mmc: sdhci-msm: Update DLL reset sequence
-Date: Wed, 9 Nov 2016 12:43:04 -0800
-Message-ID: <20161109204304.GT16026@codeaurora.org>
-References: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org>
- <1478517877-23733-6-git-send-email-riteshh@codeaurora.org>
- <20161108230622.GN16026@codeaurora.org>
- <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
+From: Yingjoe Chen <yingjoe.chen@mediatek.com>
+Subject: Re: [PATCH 4/4] dts: arm64: enable mmc3 for supporting sdio feature
+Date: Thu, 10 Nov 2016 10:08:10 +0800
+Message-ID: <1478743690.19253.4.camel@mtksdaap41>
+References: <1478585341-6749-1-git-send-email-yong.mao@mediatek.com>
+         <1478585341-6749-5-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-clk-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1478585341-6749-5-git-send-email-yong.mao@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, YH Huang <yh.huang@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Mathias Nyman <mathias.nyman@linux.intel.com>, srv_heupstream@mediatek.com, Catalin Marinas <catalin.marinas@arm.com>, linux-mediatek@lists.infradead.org, Will Deacon <will.deacon@arm.com>, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Chunfeng Yun <chunfeng.yun@mediatek.com>, Rob Herring <robh+dt@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-arm-kernel@lists.infradead.org, Philipp Zabel <p.zabel@pengutronix.de>, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Eddie Huang <eddie.huang@mediat>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/09, Ritesh Harjani wrote:
-> Hi Stephen,
+On Tue, 2016-11-08 at 14:09 +0800, Yong Mao wrote:
+> From: yong mao <yong.mao@mediatek.com>
 > 
-> On 11/9/2016 4:36 AM, Stephen Boyd wrote:
-> >On 11/07, Ritesh Harjani wrote:
-> >>
-> >>diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> >>index 42f42aa..32b0b79 100644
-> >>--- a/drivers/mmc/host/sdhci-msm.c
-> >>+++ b/drivers/mmc/host/sdhci-msm.c
-> >>@@ -58,11 +58,17 @@
-> >> #define CORE_DLL_CONFIG		0x100
-> >> #define CORE_DLL_STATUS		0x108
-> >>
-> >>+#define CORE_DLL_CONFIG_2	0x1b4
-> >>+#define CORE_FLL_CYCLE_CNT	BIT(18)
-> >>+#define CORE_DLL_CLOCK_DISABLE	BIT(21)
-> >>+
-> >> #define CORE_VENDOR_SPEC	0x10c
-> >> #define CORE_CLK_PWRSAVE	BIT(1)
-> >>
-> >> #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
-> >>
-> >>+#define TCXO_FREQ		19200000
-> >
-> >TCXO_FREQ could change based on the board. For example, IPQ has
-> >it as 25 MHz.
-> Actually not sure of the proper way on how to get this freq in driver
-> today. We may use xo_board clock but, it is not available for all boards
-> except 8996/8916 I guess.
+> Add description of mmc3 for supporting sdio feature
 > 
-> Also, there is no sdhc for IPQ board and for all other boards
-> TCXO_FREQ is same where sdhci-msm driver is used. For that purpose
-> this was defined here for sdhci-msm driver.
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  arch/arm64/boot/dts/mediatek/mt8173-evb.dts |   82 +++++++++++++++++++++++++++
+>  1 file changed, 82 insertions(+)
 > 
-> Do you think in that case we should keep it this way for now and
-> later change if a need arise to change the TCXO_FREQ ?
+> diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> index 2a7f731..4dbd299 100644
+> --- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> +++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> @@ -43,6 +43,14 @@
+>  		enable-active-high;
+>  	};
+>  
+> +	sdio_fixed_3v3: fixedregulator@0 {
 
-We've added xo_board (or cxo_board/pxo_board) to all the qcom
-platforms upstream, so there should always be something to
-reference in the dts and call clk_get_rate() on. So I would add
-it to the binding as another clock and then use that instead of
-hardcoding the value. That's much more flexible in case this
-changes in the future.
+This should be regulator@1 instead of fixedregulator.
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "3V3";
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +		gpio = <&pio 85 GPIO_ACTIVE_HIGH>;
+> +	};
+> +
+>  	connector {
+>  		compatible = "hdmi-connector";
+>  		label = "hdmi";
+> @@ -139,6 +147,25 @@
+>  	vqmmc-supply = <&mt6397_vmc_reg>;
+>  };
+>  
+> +&mmc3 {
+> +	status = "okay";
+> +	pinctrl-names = "default", "state_uhs";
+> +	pinctrl-0 = <&mmc3_pins_default>;
+> +	pinctrl-1 = <&mmc3_pins_uhs>;
+> +	bus-width = <4>;
+> +	max-frequency = <200000000>;
+> +	cap-sd-highspeed;
+> +	sd-uhs-sdr50;
+> +	sd-uhs-sdr104;
+> +	sdr104-clk-delay = <5>;
+> +	keep-power-in-suspend;
+> +	enable-sdio-wakeup;
+> +	cap-sdio-irq;
+> +	vmmc-supply = <&sdio_fixed_3v3>;
+> +	vqmmc-supply = <&mt6397_vgp3_reg>;
+> +	non-removable;
+> +};
+> +
+>  &pio {
+>  	disp_pwm0_pins: disp_pwm0_pins {
+>  		pins1 {
+> @@ -197,6 +224,36 @@
+>  		};
+>  	};
+>  
+> +	mmc3_pins_default: mmc3default {
+
+Please keep nodes in &pio sorted, move this one after mmc1_pins_uhs.
+
+> +		pins_dat {
+> +			pinmux = <MT8173_PIN_22_MSDC3_DAT0__FUNC_MSDC3_DAT0>,
+> +				 <MT8173_PIN_23_MSDC3_DAT1__FUNC_MSDC3_DAT1>,
+> +				 <MT8173_PIN_24_MSDC3_DAT2__FUNC_MSDC3_DAT2>,
+> +				 <MT8173_PIN_25_MSDC3_DAT3__FUNC_MSDC3_DAT3>;
+> +			input-enable;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
+> +		};
+> +
+> +		pins_cmd {
+> +			pinmux = <MT8173_PIN_27_MSDC3_CMD__FUNC_MSDC3_CMD>;
+> +			input-enable;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
+> +		};
+> +
+> +		pins_clk {
+> +			pinmux = <MT8173_PIN_26_MSDC3_CLK__FUNC_MSDC3_CLK>;
+> +			bias-pull-down;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +		};
+> +
+> +		pins_pdn {
+> +			pinmux = <MT8173_PIN_85_AUD_DAT_MOSI__FUNC_GPIO85>;
+> +			output-low;
+> +		};
+
+This one is used in regulator, not really an mmc pin.
+Also, you don't need to add node for gpio usage, request_gpio will set
+mode for you.
+So please remove pins_pdn node.
+
+
+> +	};
+> +
+>  	mmc0_pins_uhs: mmc0 {
+>  		pins_cmd_dat {
+>  			pinmux = <MT8173_PIN_57_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
+> @@ -243,6 +300,31 @@
+>  			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
+>  		};
+>  	};
+> +
+> +	mmc3_pins_uhs: mmc3 {
+
+
+Please keep nodes in &pio sorted, move this one after mmc1_pins_uhs.
+
+
+Joe.C
+
+> +		pins_dat {
+> +			pinmux = <MT8173_PIN_22_MSDC3_DAT0__FUNC_MSDC3_DAT0>,
+> +				 <MT8173_PIN_23_MSDC3_DAT1__FUNC_MSDC3_DAT1>,
+> +				 <MT8173_PIN_24_MSDC3_DAT2__FUNC_MSDC3_DAT2>,
+> +				 <MT8173_PIN_25_MSDC3_DAT3__FUNC_MSDC3_DAT3>;
+> +			input-enable;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
+> +		};
+> +
+> +		pins_cmd {
+> +			pinmux = <MT8173_PIN_27_MSDC3_CMD__FUNC_MSDC3_CMD>;
+> +			input-enable;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
+> +		};
+> +
+> +		pins_clk {
+> +			pinmux = <MT8173_PIN_26_MSDC3_CLK__FUNC_MSDC3_CLK>;
+> +			drive-strength = <MTK_DRIVE_8mA>;
+> +			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
+> +		};
+> +	};
+>  };
+>  
+>  &pwm0 {
