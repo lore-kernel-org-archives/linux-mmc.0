@@ -1,51 +1,32 @@
-From: Michael Walle <michael@walle.cc>
-Subject: [PATCH] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Thu, 10 Nov 2016 17:47:36 +0100
-Message-ID: <1478796456-30549-1-git-send-email-michael@walle.cc>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@freescale.com>, Michael Walle <michael@walle.cc>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 13/13] Documentation: synopsys-dw-mshc: remove the unused
+ properties
+Date: Thu, 10 Nov 2016 12:47:17 -0600
+Message-ID: <20161110184717.vgkp2flyi26dmbfo@rob-hp-laptop>
+References: <20161103062135.10697-1-jh80.chung@samsung.com>
+ <20161103062135.10697-14-jh80.chung@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20161103062135.10697-14-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, krzk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
-cards in __mmc_switch()") the ESDHC driver is broken:
-  mmc0: Card stuck in programming state! __mmc_switch
-  mmc0: error -110 whilst initialising MMC card
+On Thu, Nov 03, 2016 at 03:21:35PM +0900, Jaehoon Chung wrote:
+> "support-highspeed" was the obsoleted property.
+> And "broken-cd" is not synopsys specific property.
+> It can be referred to mmc.txt binding Documentation.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 -----
+>  1 file changed, 5 deletions(-)
 
-Since this commit __mmc_switch() uses ->card_busy(), which is
-sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
-PRESENT_STATE register, specifically the DAT0 signal level bit. But the
-ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
-required to make the driver work again.
-
-Signed-off-by: Michael Walle <michael@walle.cc>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fb71c86..243fee9 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -66,6 +66,18 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 			return ret;
- 		}
- 	}
-+	/*
-+	 * The DAT[3:0] line signal levels and the CMD line signal level is
-+	 * not compatible with standard SDHC reegister. Move the corresponding
-+	 * bits around.
-+	 */
-+	if (spec_reg == SDHCI_PRESENT_STATE) {
-+		ret = value & 0xf8000000;
-+		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
-+		ret |= (value << 1) & 0x01000000;
-+		return ret;
-+	}
-+
- 	ret = value;
- 	return ret;
- }
--- 
-2.1.4
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
