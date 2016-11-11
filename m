@@ -1,62 +1,64 @@
-From: Michael Walle <michael@walle.cc>
-Subject: [PATCH v2] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Fri, 11 Nov 2016 17:04:19 +0100
-Message-ID: <1478880259-24943-1-git-send-email-michael@walle.cc>
+From: Julia Cartwright <julia@ni.com>
+Subject: Re: [RFC 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
+ Intel byt sdio host controller sub-vended by NI
+Date: Fri, 11 Nov 2016 13:49:52 -0600
+Message-ID: <20161111194952.GC16850@jcartwri.amer.corp.natinst.com>
+References: <1478635635-14953-1-git-send-email-zach.brown@ni.com>
+ <1478635635-14953-3-git-send-email-zach.brown@ni.com>
+ <af8a14a2-55a5-1d44-663e-53ff20408f10@intel.com>
+ <20161109160827.GA6138@zach-desktop>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ssl.serverraum.org ([213.133.101.245]:60402 "EHLO
-        ssl.serverraum.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750979AbcKKQEm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2016 11:04:42 -0500
+Received: from skprod2.natinst.com ([130.164.80.23]:56100 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932697AbcKKTtz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 11 Nov 2016 14:49:55 -0500
+Content-Disposition: inline
+In-Reply-To: <20161109160827.GA6138@zach-desktop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@freescale.com>, Michael Walle <michael@walle.cc>
+To: Zach Brown <zach.brown@ni.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
-cards in __mmc_switch()") the ESDHC driver is broken:
-  mmc0: Card stuck in programming state! __mmc_switch
-  mmc0: error -110 whilst initialising MMC card
+On Wed, Nov 09, 2016 at 10:08:29AM -0600, Zach Brown wrote:
+> On Wed, Nov 09, 2016 at 03:24:24PM +0200, Adrian Hunter wrote:
+> > On 08/11/16 22:07, Zach Brown wrote:
+> > > On NI 9037 boards the max SDIO frequency is limited by trace lengths
+> > > and other layout choices. The max SDIO frequency is stored in an ACPI
+> > > table, as MXFQ.
+> > >
+> > > The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+> > > f_max field of the host with it.
+> > >
+> > > Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+> > > Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+> > > Reviewed-by: Josh Cartwright <joshc@ni.com>
+> > > Signed-off-by: Zach Brown <zach.brown@ni.com>
+[..]
+> > >  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+> > >  {
+> > > +#ifdef CONFIG_ACPI
+> > > +	/* Get max freq from ACPI for NI hardware */
+> > > +	acpi_handle acpi_hdl;
+> > > +	acpi_status status;
+> > > +	struct acpi_buffer acpi_result = {
+> > > +		ACPI_ALLOCATE_BUFFER, NULL };
+> > > +	union acpi_object *acpi_buffer;
+> > > +	int max_freq;
+> > > +
+> > > +	status = acpi_get_handle(ACPI_HANDLE(&slot->chip->pdev->dev), "MXFQ",
+> > > +				 &acpi_hdl);
+> >
+> > Is "MXFQ" an object that has already been deployed or are you inventing it
+> > now?  In the latter case, did you consider device properties as an alternative?
+> >
+> "MXFQ" is an object that we have already deployed on some of our devices.
 
-Since this commit __mmc_switch() uses ->card_busy(), which is
-sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
-PRESENT_STATE register, specifically the DAT0 signal level bit. But the
-ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
-required to make the driver work again.
+Unfortunately, the whole ACPI device properties table discussion was
+just starting at the point where we were putting the firmware together
+for these devices :(.  Had we engineered the firmware today, we would
+certainly have looked at using it.
 
-Signed-off-by: Michael Walle <michael@walle.cc>
-Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
----
-v2:
- - use lower bits of the original value (that was actually a typo)
- - add fixes tag
- - fix typo
-
- drivers/mmc/host/sdhci-of-esdhc.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fb71c86..f9c84bb 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -66,6 +66,18 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 			return ret;
- 		}
- 	}
-+	/*
-+	 * The DAT[3:0] line signal levels and the CMD line signal level is
-+	 * not compatible with standard SDHC register. Move the corresponding
-+	 * bits around.
-+	 */
-+	if (spec_reg == SDHCI_PRESENT_STATE) {
-+		ret = value & ~0xf8000000;
-+		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
-+		ret |= (value << 1) & 0x01000000;
-+		return ret;
-+	}
-+
- 	ret = value;
- 	return ret;
- }
--- 
-2.1.4
-
+Thanks,
+   Julia
