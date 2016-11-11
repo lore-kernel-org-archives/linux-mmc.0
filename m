@@ -1,87 +1,84 @@
-From: Michael Walle <michael@walle.cc>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Fri, 11 Nov 2016 14:25:51 +0100
-Message-ID: <307509ddddf1fd672a7e749acd9582c1@walle.cc>
-References: <1478796456-30549-1-git-send-email-michael@walle.cc>
- <0a5454e6-efa6-744e-4a2d-123a47e7cc40@intel.com>
+From: Paul Burton <paul.burton@imgtec.com>
+Subject: [PATCH] mmc: sd: Meet alignment requirements for raw_ssr DMA
+Date: Fri, 11 Nov 2016 14:22:36 +0000
+Message-ID: <20161111142236.8270-1-paul.burton@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ssl.serverraum.org ([213.133.101.245]:60810 "EHLO
-        ssl.serverraum.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751606AbcKKNZ6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2016 08:25:58 -0500
-In-Reply-To: <0a5454e6-efa6-744e-4a2d-123a47e7cc40@intel.com>
+Received: from mailapp01.imgtec.com ([195.59.15.196]:40862 "EHLO
+        mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751821AbcKKOW7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2016 09:22:59 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, yangbo lu <yangbo.lu@freescale.com>
+To: linux-mmc@vger.kernel.org
+Cc: Paul Burton <paul.burton@imgtec.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Am 2016-11-11 14:15, schrieb Adrian Hunter:
-> On 10/11/16 18:47, Michael Walle wrote:
->> Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
->> cards in __mmc_switch()") the ESDHC driver is broken:
->>   mmc0: Card stuck in programming state! __mmc_switch
->>   mmc0: error -110 whilst initialising MMC card
->> 
->> Since this commit __mmc_switch() uses ->card_busy(), which is
->> sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
->> PRESENT_STATE register, specifically the DAT0 signal level bit. But 
->> the
->> ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup 
->> is
->> required to make the driver work again.
->> 
->> Signed-off-by: Michael Walle <michael@walle.cc>
-> 
-> Could add a Fixes tag here.
+The mmc_read_ssr() function results in DMA to the raw_ssr member of
+struct mmc_card, which is not guaranteed to be cache line aligned & thus
+might not meet the requirements set out in Documentation/DMA-API.txt:
 
-ah, right, will do :)
+  Warnings:  Memory coherency operates at a granularity called the cache
+  line width.  In order for memory mapped by this API to operate
+  correctly, the mapped region must begin exactly on a cache line
+  boundary and end exactly on one (to prevent two separately mapped
+  regions from sharing a single cache line).  Since the cache line size
+  may not be known at compile time, the API will not enforce this
+  requirement.  Therefore, it is recommended that driver writers who
+  don't take special care to determine the cache line size at run time
+  only map virtual regions that begin and end on page boundaries (which
+  are guaranteed also to be cache line boundaries).
 
-> 
->> ---
->>  drivers/mmc/host/sdhci-of-esdhc.c | 12 ++++++++++++
->>  1 file changed, 12 insertions(+)
->> 
->> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c 
->> b/drivers/mmc/host/sdhci-of-esdhc.c
->> index fb71c86..243fee9 100644
->> --- a/drivers/mmc/host/sdhci-of-esdhc.c
->> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
->> @@ -66,6 +66,18 @@ static u32 esdhc_readl_fixup(struct sdhci_host 
->> *host,
->>  			return ret;
->>  		}
->>  	}
->> +	/*
->> +	 * The DAT[3:0] line signal levels and the CMD line signal level is
->> +	 * not compatible with standard SDHC reegister. Move the 
->> corresponding
-> 
-> reegister -> register
-ok
+On some systems where DMA is non-coherent this can lead to us losing
+data that shares cache lines with the raw_ssr array.
 
-> 
->> +	 * bits around.
->> +	 */
->> +	if (spec_reg == SDHCI_PRESENT_STATE) {
->> +		ret = value & 0xf8000000;
->> +		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
->> +		ret |= (value << 1) & 0x01000000;
->> +		return ret;
-> 
-> SDHCI also uses other bits in SDHCI_PRESENT_STATE like 
-> SDHCI_CMD_INHIBIT and
-> SDHCI_DATA_INHIBIT etc, but this looks like all those bits will be 
-> zero.  Is
-> that right?
+Fix this by kmalloc'ing a temporary buffer to perform DMA into. kmalloc
+will ensure the buffer is suitably aligned, allowing the DMA to be
+performed without any loss of data.
 
-ugh, thanks for spotting that. actually all lower bits should be taken 
-from the original value. Therefore the first statement should be
-  ret = value & ~0xf8000000;
+Signed-off-by: Paul Burton <paul.burton@imgtec.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/core/sd.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-Will post a v2 soon.
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 73c762a..f6f40a1 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -223,6 +223,7 @@ static int mmc_decode_scr(struct mmc_card *card)
+ static int mmc_read_ssr(struct mmc_card *card)
+ {
+ 	unsigned int au, es, et, eo;
++	u32 *raw_ssr;
+ 	int i;
+ 
+ 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
+@@ -231,14 +232,21 @@ static int mmc_read_ssr(struct mmc_card *card)
+ 		return 0;
+ 	}
+ 
+-	if (mmc_app_sd_status(card, card->raw_ssr)) {
++	raw_ssr = kmalloc(sizeof(card->raw_ssr), GFP_KERNEL);
++	if (!raw_ssr)
++		return -ENOMEM;
++
++	if (mmc_app_sd_status(card, raw_ssr)) {
+ 		pr_warn("%s: problem reading SD Status register\n",
+ 			mmc_hostname(card->host));
++		kfree(raw_ssr);
+ 		return 0;
+ 	}
+ 
+ 	for (i = 0; i < 16; i++)
+-		card->raw_ssr[i] = be32_to_cpu(card->raw_ssr[i]);
++		card->raw_ssr[i] = be32_to_cpu(raw_ssr[i]);
++
++	kfree(raw_ssr);
+ 
+ 	/*
+ 	 * UNSTUFF_BITS only works with four u32s so we have to offset the
+-- 
+2.10.2
 
--michael
