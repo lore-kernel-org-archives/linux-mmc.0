@@ -1,139 +1,154 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v7 08/14] mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
-Date: Mon, 14 Nov 2016 11:30:42 +0530
-Message-ID: <1479103248-9491-9-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v7 05/14] mmc: sdhci-msm: Update DLL reset sequence
+Date: Mon, 14 Nov 2016 11:30:39 +0530
+Message-ID: <1479103248-9491-6-git-send-email-riteshh@codeaurora.org>
 References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-clk-owner@vger.kernel.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-clk-owner@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org, andy.gross@linaro.org
 Cc: devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci-msm controller may have different clk-rates for each
-bus speed mode. Thus implement set_clock callback for
-sdhci-msm driver.
+From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+SDCC core with minor version >= 0x42 introduced new 14lpp
+DLL. This has additional requirements in the reset sequence
+for DLL tuning. Make necessary changes as needed.
+
+Without this patch we see below errors on such SDHC controllers
+	sdhci_msm 7464900.sdhci: mmc0: DLL failed to LOCK
+	mmc0: tuning execution failed: -110
+
+Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 87 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 86 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 61 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 61 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 268424c..b96a4a7 100644
+index 6ea89c2..643956e 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -82,6 +82,7 @@ struct sdhci_msm_host {
+@@ -58,6 +58,10 @@
+ #define CORE_DLL_CONFIG		0x100
+ #define CORE_DLL_STATUS		0x108
+ 
++#define CORE_DLL_CONFIG_2	0x1b4
++#define CORE_FLL_CYCLE_CNT	BIT(18)
++#define CORE_DLL_CLOCK_DISABLE	BIT(21)
++
+ #define CORE_VENDOR_SPEC	0x10c
+ #define CORE_CLK_PWRSAVE	BIT(1)
+ 
+@@ -75,7 +79,9 @@ struct sdhci_msm_host {
+ 	struct clk *clk;	/* main SD/MMC bus clock */
  	struct clk *pclk;	/* SDHC peripheral bus clock */
  	struct clk *bus_clk;	/* SDHC bus voter clock */
- 	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
-+	unsigned long clk_rate;
++	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
  	struct mmc_host *mmc;
- 	bool use_14lpp_dll_reset;
++	bool use_14lpp_dll_reset;
  };
-@@ -577,6 +578,90 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
- 	return SDHCI_MSM_MIN_CLOCK;
- }
  
-+/**
-+ * __sdhci_msm_set_clock - sdhci_msm clock control.
-+ *
-+ * Description:
-+ * Implement MSM version of sdhci_set_clock.
-+ * This is required since MSM controller does not
-+ * use internal divider and instead directly control
-+ * the GCC clock as per HW recommendation.
-+ **/
-+void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	u16 clk;
-+	unsigned long timeout;
-+
-+	/*
-+	 * Keep actual_clock as zero -
-+	 * - since there is no divider used so no need of having actual_clock.
-+	 * - MSM controller uses SDCLK for data timeout calculation. If
-+	 *   actual_clock is zero, host->clock is taken for calculation.
-+	 */
-+	host->mmc->actual_clock = 0;
-+
-+	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+
-+	if (clock == 0)
-+		return;
-+
-+	/*
-+	 * MSM controller do not use clock divider.
-+	 * Thus read SDHCI_CLOCK_CONTROL and only enable
-+	 * clock with no divider value programmed.
-+	 */
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+
-+	clk |= SDHCI_CLOCK_INT_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	/* Wait max 20 ms */
-+	timeout = 20;
-+	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+		& SDHCI_CLOCK_INT_STABLE)) {
-+		if (timeout == 0) {
-+			pr_err("%s: Internal clock never stabilised\n",
-+			       mmc_hostname(host->mmc));
-+			return;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+}
-+
-+/* sdhci_msm_set_clock - Called with (host->lock) spinlock held. */
-+static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
+ /* Platform specific tuning */
+@@ -304,6 +310,8 @@ static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
+ static int msm_init_cm_dll(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc = host->mmc;
 +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int rc;
+ 	int wait_cnt = 50;
+ 	unsigned long flags;
+ 	u32 config;
+@@ -319,6 +327,16 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 	config &= ~CORE_CLK_PWRSAVE;
+ 	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+ 
++	if (msm_host->use_14lpp_dll_reset) {
++		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++		config &= ~CORE_CK_OUT_EN;
++		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
 +
-+	if (!clock) {
-+		msm_host->clk_rate = clock;
-+		goto out;
++		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
++		config |= CORE_DLL_CLOCK_DISABLE;
++		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
 +	}
 +
-+	spin_unlock_irq(&host->lock);
-+	if (clock != msm_host->clk_rate) {
-+		rc = clk_set_rate(msm_host->clk, clock);
-+		if (rc) {
-+			pr_err("%s: Failed to set clock at rate %u\n",
-+			       mmc_hostname(host->mmc), clock);
-+			spin_lock_irq(&host->lock);
-+			goto out;
-+		}
-+		msm_host->clk_rate = clock;
-+		pr_debug("%s: Setting clock at rate %lu\n",
-+			 mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
-+	}
-+	spin_lock_irq(&host->lock);
-+out:
-+	__sdhci_msm_set_clock(host, clock);
-+}
+ 	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
+ 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
+ 	config |= CORE_DLL_RST;
+@@ -330,6 +348,28 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 	msm_cm_dll_set_freq(host);
+ 
++	if (msm_host->use_14lpp_dll_reset &&
++	    !IS_ERR_OR_NULL(msm_host->xo_clk)) {
++		u32 mclk_freq = 0;
 +
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -587,7 +672,7 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
- static const struct sdhci_ops sdhci_msm_ops = {
- 	.platform_execute_tuning = sdhci_msm_execute_tuning,
- 	.reset = sdhci_reset,
--	.set_clock = sdhci_set_clock,
-+	.set_clock = sdhci_msm_set_clock,
- 	.get_min_clock = sdhci_msm_get_min_clock,
- 	.get_max_clock = sdhci_msm_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
++		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
++		config &= CORE_FLL_CYCLE_CNT;
++		if (config)
++			mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 8),
++							  clk_get_rate(msm_host->xo_clk));
++		else
++			mclk_freq = DIV_ROUND_CLOSEST_ULL((host->clock * 4),
++							  clk_get_rate(msm_host->xo_clk));
++
++		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
++		config &= ~(0xFF << 10);
++		config |= mclk_freq << 10;
++
++		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
++		/* wait for 5us before enabling DLL clock */
++		udelay(5);
++	}
++
+ 	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
+ 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
+ 	config &= ~CORE_DLL_RST;
+@@ -340,6 +380,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 	config &= ~CORE_DLL_PDN;
+ 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
++	if (msm_host->use_14lpp_dll_reset) {
++		msm_cm_dll_set_freq(host);
++		/* Enable the DLL clock */
++		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
++		config &= ~CORE_DLL_CLOCK_DISABLE;
++		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
++	}
++
+ 	/* Set DLL_EN bit to 1. */
+ 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
+ 	config |= CORE_DLL_EN;
+@@ -595,6 +643,16 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 		goto pclk_disable;
+ 	}
+ 
++	/*
++	 * xo_clock is needed for FLL feature of cm_dll.
++	 * In case if xo_clock is not mentioned in DT, warn and proceed.
++	 */
++	msm_host->xo_clk = devm_clk_get(&pdev->dev, "xo_clock");
++	if (IS_ERR(msm_host->xo_clk)) {
++		ret = PTR_ERR(msm_host->xo_clk);
++		dev_warn(&pdev->dev, "TCXO clk not present (%d)\n", ret);
++	}
++
+ 	/* Vote for maximum clock rate for maximum performance */
+ 	ret = clk_set_rate(msm_host->clk, INT_MAX);
+ 	if (ret)
+@@ -641,6 +699,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
+ 		core_version, core_major, core_minor);
+ 
++	if (core_major == 1 && core_minor >= 0x42)
++		msm_host->use_14lpp_dll_reset = true;
++
+ 	/*
+ 	 * Support for some capabilities is not advertised by newer
+ 	 * controller versions and must be explicitly enabled.
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
-
