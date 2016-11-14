@@ -1,264 +1,85 @@
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pci: Add support for HS200 tuning mode on
- AMD, eMMC-4.5.1
-Date: Mon, 14 Nov 2016 12:08:03 +0530
-Message-ID: <dbebff7a-d144-9dc5-6e59-3a39274ee21d@amd.com>
-References: <49d59018-a294-9cea-b92c-f74935314dc8@amd.com>
- <5fed9224-f843-fbd4-6ae6-fd0708bc6c98@intel.com>
+From: "Dr. Felix Collins" <felixcollinsfnb2@gmail.com>
+Subject: PLEASE VIEW THE ATTACHED FILE AND CONTACT ME.
+Date: Mon, 14 Nov 2016 07:44:09 +0000 (UTC)
+Message-ID: <1854903249.914393.1479109449106__21771.7154454023$1479110047$gmane$org@mail.yahoo.com>
+References: <1854903249.914393.1479109449106.ref@mail.yahoo.com>
+Reply-To: "Dr. Felix Collins" <felixcollinsa@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+        boundary="----=_Part_914392_57161530.1479109449106"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0043.outbound.protection.outlook.com ([104.47.33.43]:30892
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752188AbcKNGxk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 14 Nov 2016 01:53:40 -0500
-In-Reply-To: <5fed9224-f843-fbd4-6ae6-fd0708bc6c98@intel.com>
+Received: from nm34-vm8.bullet.mail.gq1.yahoo.com ([98.136.216.159]:50269 "EHLO
+        nm34-vm8.bullet.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S934837AbcKNHxr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 02:53:47 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
+
+------=_Part_914392_57161530.1479109449106
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
 
 
-On 11/11/2016 6:11 PM, Adrian Hunter wrote:
-> On 10/11/16 14:51, Shyam Sundar S K wrote:
->> This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
->>
->> Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
->> Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
->> Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
->> ---
->>  drivers/mmc/host/sdhci-pci-core.c | 178 +++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 177 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->> index 782c8d2..9576f82 100644
->> --- a/drivers/mmc/host/sdhci-pci-core.c
->> +++ b/drivers/mmc/host/sdhci-pci-core.c
->> @@ -817,6 +817,171 @@ enum amd_chipset_gen {
->>  	AMD_CHIPSET_UNKNOWN,
->>  };
->>
->> +static const struct sdhci_ops amd_sdhci_pci_ops;
->> +
->> +struct amd_tuning_descriptor {
->> +	u8 tune_around;
->> +	bool this_tune_ok;
->> +	bool last_tune_ok;
->> +	u8 valid_front;
->> +	u8 valid_window_max;
->> +	u8 tune_low_max;
->> +	u8 tune_low;
->> +	u8 valid_window;
->> +	u8 tune_result;
->> +};
->> +
->> +static int amd_tuning_reset(struct sdhci_host *host)
->> +{
->> +	unsigned int val;
->> +	unsigned long flags;
->> +
->> +	spin_lock_irqsave(&host->lock, flags);
->> +
->> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
->> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
->> +
->> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +	val &= ~SDHCI_CTRL_EXEC_TUNING;
->> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
->> +
->> +	spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +	return 0;
->> +}
->> +
->> +static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
->> +{
->> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +	struct pci_dev *pdev = slot->chip->pdev;
->> +	unsigned int val;
->> +	unsigned long flags;
->> +
->> +	spin_lock_irqsave(&host->lock, flags);
->> +
->> +	pci_read_config_dword(pdev, 0xb8, &val);
->> +	val &= ~0x1f;
->> +	val |= (0x10800 | (phase << 1));
->> +	pci_write_config_dword(pdev, 0xb8, val);
->> +
->> +	spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +	return 0;
->> +}
->> +
->> +static int amd_find_good_phase(struct sdhci_host *host)
->> +{
->> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +	struct pci_dev *pdev = slot->chip->pdev;
->> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
->> +
->> +	unsigned int val;
->> +	unsigned long flags;
->> +
->> +	spin_lock_irqsave(&host->lock, flags);
->> +
->> +	if (td->this_tune_ok)
->> +		td->valid_front += 1;
->> +	if ((!td->this_tune_ok && td->last_tune_ok) ||
->> +	    (td->tune_around == 11)) {
->> +		if (td->valid_window > td->valid_window_max) {
->> +			td->valid_window_max = td->valid_window;
->> +			td->tune_low_max = td->tune_low;
->> +		}
->> +	}
->> +	if (td->this_tune_ok && (!td->last_tune_ok))
->> +		td->tune_low = td->tune_around;
->> +	if (!td->this_tune_ok && td->last_tune_ok)
->> +		td->valid_window = 0;
->> +	else if (td->this_tune_ok)
->> +		td->valid_window += 1;
->> +
->> +	td->last_tune_ok = td->this_tune_ok;
->> +
->> +	if (td->tune_around == 11) {
->> +		if ((td->valid_front + td->valid_window) >
->> +						td->valid_window_max) {
->> +			if (td->valid_front > td->valid_window)
->> +				td->tune_result = ((td->valid_front -
->> +						td->valid_window) >> 1);
->> +			else
->> +				td->tune_result = td->tune_low +
->> +				((td->valid_window + td->valid_front) >> 1);
->> +		} else {
->> +			td->tune_result = td->tune_low_max +
->> +					(td->valid_window_max >> 1);
->> +		}
->> +
->> +		if (td->tune_result > 0x0b)
->> +			td->tune_result = 0x0b;
->> +
->> +		pci_read_config_dword(pdev, 0xb8, &val);
->> +		val &= ~0x1f;
->> +		val |= (0x10800 | (td->tune_result << 1));
->> +		pci_write_config_dword(pdev, 0xb8, val);
->> +	}
->> +
->> +	spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +	return 0;
->> +}
->> +
->> +static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
->> +{
->> +	struct pci_dev *pdev = slot->chip->pdev;
->> +	unsigned int val;
->> +
->> +	pci_read_config_dword(pdev, 0xd0, &val);
->> +	val &= 0xffffffcf;
->> +	val |= 0x30;
->> +	pci_write_config_dword(pdev, 0xd0, val);
->> +
->> +	return 0;
->> +}
->> +
->> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
->> +{
->> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
->> +	u8 ctrl;
->> +
->> +	amd_tuning_reset(host);
->> +	memset(td, 0, sizeof(struct amd_tuning_descriptor));
-> 
-> I didn't notice last time that you are always clearing all the values in the
-> tuning descriptor, so it doesn't need to be kept between calls to
-> amd_execute_tuning().  So it should be a local variable that you pass to the
-> functions that need it.  Then you don't need the patch I sent at all.
-> 
-> Does that make sense?
-> 
+------=_Part_914392_57161530.1479109449106
+Content-Type: application/msword
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="FROM FIRST NATIONAL BANK OF SOUTH AFRICA (F.N.B)..rtf"
+Content-ID: <7a5cd6df-04f1-6cf4-dc51-aa1de2c50c02@yahoo.com>
 
-Hi Adrian,
+e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzcxNzd7XGZvbnR0Ymx7XGYwXGZz
+d2lzc1xmY2hhcnNldDAgQXJpYWw7fX0NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgNS40MS4xNS4x
+NTEyO31cdmlld2tpbmQ0XHVjMVxwYXJkXGYwXGZzMjQgSSBhbSBGZWxpeCBDb2xsaW5zLCBJIHdv
+cmsgd2l0aCB0aGUgRklSU1QgTkFUSU9OQUwgQkFOSyBPRiBTT1VUSCBBRlJJQ0EgKEYuTi5CKS5c
+cGFyDQpQbGVhc2UgY29udGFjdCBtZSB3aXRoIHRoaXMgZW1haWwgYWRkcmVzc2VzLlxwYXINCmZl
+bGl4Y29sbGluc2FAZ21haWwuY29tXHBhcg0KUGxlYXNlIGNhbGwgbWUgb24gbXkgcHJpdmF0ZSBu
+dW1iZXIgKCsyNy03OSAtMTQxLTIzODUpXHBhcg0KXHBhcg0KXHBhcg0KQVRURU5USU9OOiBTSVIv
+TUFEQU0sXHBhcg0KXHBhcg0KSSBkbyB1bmRlcnN0YW5kIHRoZSBjb25jZXJuIHRoaXMgbGV0dGVy
+IHdpbGwgYnJpbmcgdG8geW91IGZvciB0aGUgZmFjdCB0aGF0IGl0IGNvbWVzIGZyb20gYSB0b3Rh
+bCBzdHJhbmdlciwgYnV0IGJlIHJlc3QgYXNzdXJlZCBmb3IgaXQgY29tZXMgd2l0aCBnb29kIGlu
+dGVudGlvbnMuIEkgZ290IHlvdXIgY29udGFjdCB0aHJvdWdoIHRoZSBTb3V0aCBBZnJpY2FuIElu
+dGVybmF0aW9uYWwgRXhjaGFuZ2UgTmV0d29yayBPbi1saW5lIGhlcmUgaW4gSm9oYW5uZXNidXJn
+LCBTb3V0aCBBZnJpY2EuIEZvciBwdXJwb3NlIG9mIGludHJvZHVjdGlvbiBJIGFtIEZlbGl4IENv
+bGxpbnMsIEkgd29yayB3aXRoIHRoZSBGSVJTVCBOQVRJT05BTCBCQU5LIE9GIFNPVVRIIEFGUklD
+QSAoRi5OLkIpICBUaGVyZSBpcyBhbiBhY2NvdW50IG9wZW5lZCBpbiB0aGlzIGJhbmsgc2luY2Ug
+MTk4MCBhbmQgc2luY2UgMTk5NSBub2JvZHkgaGFzIG9wZXJhdGVkIG9uIHRoaXMgYWNjb3VudCBh
+Z2Fpbi4gQWZ0ZXIgZ29pbmcgdGhyb3VnaCBzb21lIG9sZCBmaWxlcyBpbiB0aGUgcmVjb3Jkcywg
+SSBkaXNjb3ZlcmVkIHRoYXQgaWYgSSBkb24ndCByZW1pdCB0aGlzIG1vbmV5IG91dCB1cmdlbnRs
+eSBpdCB3b3VsZCBiZSBmb3JmZWl0ZWQgZm9yIG5vdGhpbmcuXHBhcg0KXHBhcg0KVGhlIG93bmVy
+IG9mIHRoaXMgYWNjb3VudCBpcyBNci4gU21pdGggLkIuIEFuZHJlYXMsIGEgZm9yZWlnbmVyIGFu
+ZCBhIG1pbmVyIGF0IEtydWdlciBHb2xkIENvLW9wZXJhdGlvbiwgYSBnZW9sb2dpc3QgYnkgcHJv
+ZmVzc2lvbiBhbmQgaGUgZGllZCBzaW5jZSAxOTk0LiBObyBvdGhlciBwZXJzb24ga25vd3MgYWJv
+dXQgdGhpcyBhY2NvdW50IG9yIGFueXRoaW5nIGNvbmNlcm5pbmcgaXQsIHRoZSBhY2NvdW50IGhh
+cyBubyBvdGhlciBiZW5lZmljaWFyeSBhbmQgbXkgaW52ZXN0aWdhdGlvbiBwcm92ZWQgdG8gbWUg
+YXMgd2VsbCB0aGF0IHRoZSBjb21wYW55IGRvZXMgbm90IGtub3cgYW55dGhpbmcgYWJvdXQgdGhp
+cyBhY2NvdW50IGFuZCB0aGUgYW1vdW50IGludm9sdmVkIGlzIFVTRCQ3NSwwMDAuMDAwLDAwICgg
+U2V2ZW50eSBGaXZlIE1pbGxpb24gVW5pdGVkIFN0YXRlcyBEb2xsYXJzKS4gSSBhbSBvbmx5IGNv
+bnRhY3RpbmcgeW91IGFzIGEgZm9yZWlnbmVyIGJlY2F1c2UgdGhpcyBtb25leSBjYW5ub3QgYmUg
+YXBwcm92ZWQgdG8gYSBsb2NhbCBiYW5rIGhlcmUsIGJ1dCBjYW4gb25seSBiZSBhcHByb3ZlZCB0
+byBhbnkgZm9yZWlnbiBhY2NvdW50IGJlY2F1c2UgdGhlIG1vbmV5IGlzIGluIFVuaXRlZCBTdGF0
+ZXMgRG9sbGFycyBhbmQgdGhlIGZvcm1lciBvd25lciBvZiB0aGUgYWNjb3VudCBNci4gU21pdGgg
+LkIgLiBBbmRyZWFzIGlzIGEgZm9yZWlnbmVyIHRvby4gSSBuZWVkIGEgdHJ1dGhmdWwgcGVyc29u
+IGluIHRoaXMgYnVzaW5lc3MgYmVjYXVzZSBJIGRvbid0IHdhbnQgdG8gbWFrZSBtaXN0YWtlcy5c
+cGFyDQpccGFyDQogSSBuZWVkIHlvdXIgc3Ryb25nIGFzc3VyYW5jZSBhbmQgdHJ1c3QuIFdpdGgg
+bXkgcG9zaXRpb24gbm93IGluIG9mZmljZSBJIGNhbiB0cmFuc2ZlciB0aGlzIG1vbmV5IHRvIGFu
+eSBmb3JlaWduIHJlbGlhYmxlIGFjY291bnQsIHRocm91Z2ggb24tbGluZSBiYW5raW5nIG9yIFRl
+bGVncmFwaGljIFRyYW5zZmVyIChULlQpIHdoaWNoIHlvdSBjYW4gcHJvdmlkZSB3aXRoIGFzc3Vy
+YW5jZSB0aGF0IHRoaXMgbW9uZXkgd2lsbCBiZSBpbnRhY3QgcGVuZGluZyBteSBwaHlzaWNhbCBh
+cnJpdmFsIHRvIHlvdXIgY291bnRyeSBmb3Igc2hhcmluZy4gSSB3aWxsIGFwcGx5IGZvciBhbm51
+YWwgbGVhdmUgdG8gZ2V0IGEgdmlzYSBpbW1lZGlhdGVseSBJIGhlYXIgZnJvbSB5b3UgdGhhdCB5
+b3UgYXJlIHJlYWR5IHRvIGFjdCBhbmQgcmVjZWl2ZSB0aGlzIG1vbmV5IGluIHlvdXIgYWNjb3Vu
+dC4gQXQgdGhlIGNvbmNsdXNpb24gb2YgdGhpcyBidXNpbmVzcywgSSB3aWxsIGNvbWUgdG8geW91
+ciBjb3VudHJ5IGZvciB3aXRoZHJhd2FsIGFuZCBzaGFyaW5nIGFuZCBvdGhlciBpbnZlc3RtZW50
+cy4geW91IHdpbGwgYmUgZ2l2ZW4gNDAlIG9mIHRoZSB0b3RhbCBhbW91bnQsIDUwJSB3aWxsIGJl
+IGZvciBtZSAsIGFuZCB3aGlsZSAxMCUgd2lsbCBiZSBmb3IgZXhwZW5zZXMgYm90aCBwYXJ0aWVz
+IG1pZ2h0IGluY3VyIGR1cmluZyB0aGUgcHJvY2VzcyBvZiB0cmFuc2ZlcnJpbmcgdGhpcyBtb25l
+eS5ccGFyDQpccGFyDQpUaGVyZWZvcmUsIGlmIHlvdSBhcmUgd2lsbGluZyBhbmQgaW50ZXJlc3Rl
+ZCB0byByZW5kZXIgdGhlIG5lZWRlZCBhc3Npc3RhbmNlLCBFbmRlYXZvciB0byByZXBseSB0aHJv
+dWdoIG15IGVtYWlsIGFkZHJlc3MsIEkgYWxzbyBuZWVkIHlvdXIgcHJpdmF0ZSBwaG9uZSBhbmQg
+ZmF4IG51bWJlcnMgZm9yIGVhc3kgY29tbXVuaWNhdGlvbi4gSSB3aWxsIGdpdmUgbW9yZSBjbGFy
+aWZpY2F0aW9ucyBvbiB0aGUgbW9kYWxpdGllcyBuZWVkZWQgZm9yIHRoZSBzdWNjZXNzZnVsIGNv
+bXBsZXRpb24gb2YgdGhpcyB0cmFuc2FjdGlvbi5ccGFyDQpccGFyDQpccGFyDQpCZXN0IFJlZ2Fy
+ZHMsXHBhcg0KRHIuIEZlbGl4IENvbGxpbnNccGFyDQogXHBhcg0KfQ0KAA==
 
-Thanks for pointing this out. Your patch will help, so will remove the memset()
-and redo the submission. Is this OK ?
-
-Thanks,
-Shyam
-
->> +
->> +	/*********************************************************************/
->> +	/* Enabling Software Tuning */
->> +	/********************************************************************/
->> +	/* 1. First switch the eMMC to HS200 Mode
->> +	 * 2. Prepare the registers by using the sampling clock select
->> +	 * 3. Send the CMD21 12 times with block length of 64 bytes
->> +	 * 4. Everytime change the clk phase and check for CRC error
->> +	 *	(CMD and DATA),if error, soft reset the CMD and DATA line
->> +	 * 5. Calculate the window and set the clock phase.
->> +	 */
->> +
->> +	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
->> +		amd_config_tuning_phase(host, td->tune_around);
->> +
->> +		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
->> +			td->this_tune_ok = false;
->> +			host->mmc->need_retune = 0;
->> +			mdelay(4);
->> +			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
->> +			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
->> +		} else {
->> +			td->this_tune_ok = true;
->> +		}
->> +
->> +		amd_find_good_phase(host);
->> +	}
->> +
->> +	host->mmc->retune_period = 0;
->> +
->> +	amd_enable_manual_tuning(slot);
->> +	return 0;
->> +}
->> +
->>  static int amd_probe(struct sdhci_pci_chip *chip)
->>  {
->>  	struct pci_dev	*smbus_dev;
->> @@ -841,7 +1006,6 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->>
->>  	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
->>  		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
->> -		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
->>  	}
->>
->>  	return 0;
->> @@ -849,6 +1013,7 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->>
->>  static const struct sdhci_pci_fixes sdhci_amd = {
->>  	.probe		= amd_probe,
->> +	.ops		= &amd_sdhci_pci_ops,
->>  };
->>
->>  static const struct pci_device_id pci_ids[] = {
->> @@ -1469,6 +1634,17 @@ static const struct sdhci_ops sdhci_pci_ops = {
->>  	.select_drive_strength	= sdhci_pci_select_drive_strength,
->>  };
->>
->> +static const struct sdhci_ops amd_sdhci_pci_ops = {
->> +	.set_clock	= sdhci_set_clock,
->> +	.enable_dma	= sdhci_pci_enable_dma,
->> +	.set_bus_width	= sdhci_pci_set_bus_width,
->> +	.reset		= sdhci_reset,
->> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
->> +	.hw_reset		= sdhci_pci_hw_reset,
->> +	.select_drive_strength	= sdhci_pci_select_drive_strength,
->> +	.platform_execute_tuning = amd_execute_tuning,
->> +};
->> +
->>  /*****************************************************************************\
->>   *                                                                           *
->>   * Suspend/resume                                                            *
->>
-> 
+------=_Part_914392_57161530.1479109449106--
