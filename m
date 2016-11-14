@@ -1,96 +1,113 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: Re: [PATCH v5 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-Date: Mon, 14 Nov 2016 18:00:10 +0800
-Message-ID: <CABymUCMWsCDfM58Ezpu8F7=vgpcPf_pzpbgr8OjCjOJ921tCEg@mail.gmail.com>
-References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
- <1478568298-18380-2-git-send-email-jun.nie@linaro.org> <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
+From: Andrea Merello <andrea.merello@gmail.com>
+Subject: Re: [PATCH 8/9] DT: stm32f469-disco: add node for SDIO controller
+Date: Mon, 14 Nov 2016 11:36:07 +0100
+Message-ID: <CAN8YU5PKU7iP1he6MvPCOZ0pf-4fdKgBi8gWmppjdyMU9c=u5Q@mail.gmail.com>
+References: <1478612625-23256-1-git-send-email-andrea.merello@gmail.com>
+ <1478612625-23256-9-git-send-email-andrea.merello@gmail.com> <ffdc246c-0197-f1a7-f848-a02b4e7df13c@st.com>
+Reply-To: andrea.merello@gmail.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f179.google.com ([209.85.216.179]:33936 "EHLO
-        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752280AbcKNKAM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 05:00:12 -0500
-Received: by mail-qt0-f179.google.com with SMTP id n6so44192782qtd.1
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2016 02:00:11 -0800 (PST)
-In-Reply-To: <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:35453 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752918AbcKNKg2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 05:36:28 -0500
+Received: by mail-yw0-f195.google.com with SMTP id b66so5869633ywh.2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2016 02:36:27 -0800 (PST)
+In-Reply-To: <ffdc246c-0197-f1a7-f848-a02b4e7df13c@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Alexandre Torgue <alexandre.torgue@st.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-mmc@vger.kernel.org, Bruno Herrera <bruherrera@gmail.com>
 
-2016-11-14 15:58 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
-> On 2016/11/8 9:24, Jun Nie wrote:
+On Thu, Nov 10, 2016 at 11:54 AM, Alexandre Torgue
+<alexandre.torgue@st.com> wrote:
+> Hi Andrea
+>
+>
+> On 11/08/2016 02:43 PM, Andrea Merello wrote:
 >>
->> Document the device-tree binding of ZTE MMC host on
->> ZX296718 SoC.
->>
->> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+>> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 >> ---
->>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35
->> ++++++++++++++++++++++
->>  1 file changed, 35 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>>  arch/arm/boot/dts/stm32f429.dtsi      |  2 +-
+>>  arch/arm/boot/dts/stm32f469-disco.dts | 30 ++++++++++++++++++++++++++++++
+>>  2 files changed, 31 insertions(+), 1 deletion(-)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->> b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->> new file mode 100644
->> index 0000000..c175c4b
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->> @@ -0,0 +1,35 @@
->> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
->> +  Host Controller
+>> diff --git a/arch/arm/boot/dts/stm32f429.dtsi
+>> b/arch/arm/boot/dts/stm32f429.dtsi
+>> index d6d0548..23e6a5e 100644
+>> --- a/arch/arm/boot/dts/stm32f429.dtsi
+>> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+>> @@ -185,7 +185,7 @@
+>>                         interrupts = <1>, <2>, <3>, <6>, <7>, <8>, <9>,
+>> <10>, <23>, <40>, <41>, <42>, <62>, <76>;
+>>                 };
+>>
+>> -               pin-controller {
+>> +               pinctrl:pin-controller {
+>>                         #address-cells = <1>;
+>>                         #size-cells = <1>;
+>>                         compatible = "st,stm32f429-pinctrl";
+>> diff --git a/arch/arm/boot/dts/stm32f469-disco.dts
+>> b/arch/arm/boot/dts/stm32f469-disco.dts
+>> index e911af8..e16dfc3 100644
+>> --- a/arch/arm/boot/dts/stm32f469-disco.dts
+>> +++ b/arch/arm/boot/dts/stm32f469-disco.dts
+>> @@ -64,12 +64,42 @@
+>>         aliases {
+>>                 serial0 = &usart3;
+>>         };
 >> +
->> +The Synopsys designware mobile storage host controller is used to
->> interface
->> +a SoC with storage medium such as eMMC or SD/MMC cards. This file
->> documents
->> +differences between the core Synopsys dw mshc controller properties
->> described
->> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
->> +extensions to the Synopsys Designware Mobile Storage Host Controller.
->> +
->> +Required Properties:
->> +
->> +* compatible: should be
->> +       - "zte,zx296718-dw-mshc": for ZX SoCs
->> +
->> +Example:
->> +
->> +       mmc1: mmc@1110000 {
->> +               compatible = "zte,zx296718-dw-mshc";
->> +               #address-cells = <1>;
->> +               #size-cells = <0>;
->> +               reg = <0x01110000 0x1000>;
->> +               interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
->> +               fifo-depth = <32>;
->> +               data-addr = <0x200>;
->> +               fifo-watermark-aligned;
->> +               bus-width = <4>;
->> +               clock-frequency = <50000000>;
+>> +       mmc_vcard: mmc_vcard {
+>> +               compatible = "regulator-fixed";
+>> +               regulator-name = "mmc_vcard";
+>> +               regulator-min-microvolt = <3300000>;
+>> +               regulator-max-microvolt = <3300000>;
 >
->
-> do you need both clock-frequency and max-frequency here?
+> As I assume you will send a v2 (due to kbuild issue) remove empty line
+> please.
 
-According to dts document, clock-frequency is for clock configuration
-when dw core probe. max-frequency is for mmc core to limit max
-frequency for any cards at any time. Do you have any suggestion? Thank
-you for your time!
+Sure. I will do. (But unfortunately it will not happen very soon :( )
 
->
->> +               clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
->> +               clock-names = "biu", "ciu";
->> +               num-slots = <1>;
->> +               max-frequency = <50000000>;
->> +               cap-sdio-irq;
->> +               cap-sd-highspeed;
->> +               status = "disabled";
+In the meantime comments and testing are appreciated. Also, I forgot
+to say that, if one wants to try this, he/she will need the bootloader
+to set properly the 48MHz clk for SD (for afboot use my tree -
+pull-req pending on Maxime Coquelin tree). For clk driver probably my
+patch for making it aware of the 48MHz setting is still needed (I've
+not looked into other recent clk patches yet)..
+
+>> +
 >> +       };
+>>  };
 >>
->
->
-> --
-> Best Regards
-> Shawn Lin
+>>  &clk_hse {
+>>         clock-frequency = <8000000>;
+>>  };
+>>
+>> +&pinctrl {
+>> +       sdio-cd {
+>> +               sdio_cd: sdio-cd {
+>> +                       pins {
+>> +                               pinmux = <STM32F429_PG2_FUNC_GPIO>;
+>> +                               bias-pull-up;
+>> +                       };
+>> +               };
+>> +       };
+>> +};
+>> +
+>> +&sdio {
+>> +       status = "okay";
+>> +       vmmc-supply = <&mmc_vcard>;
+>> +       cd-gpios = <&gpiog 2 0>;
+>> +       cd-inverted;
+>> +       pinctrl-names = "default", "opendrain", "cd";
+>> +       pinctrl-0 = <&sdio_pins>, <&sdio_cd>;
+>> +       pinctrl-1 = <&sdio_pins_od>, <&sdio_cd>;
+>> +       bus-width = <4>;
+>> +};
+>> +
+>>  &usart3 {
+>>         status = "okay";
+>>  };
+>>
 >
