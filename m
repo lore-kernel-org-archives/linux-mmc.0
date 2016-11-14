@@ -1,164 +1,236 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v7 00/14] mmc: sdhci-msm: Add clk-rates, DDR, HS400 support
-Date: Mon, 14 Nov 2016 11:30:34 +0530
-Message-ID: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
+From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH v7 01/14] clk: qcom: Add rcg ops to return floor value closest to the requested rate
+Date: Mon, 14 Nov 2016 11:30:35 +0530
+Message-ID: <1479103248-9491-2-git-send-email-riteshh@codeaurora.org>
+References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479103248-9491-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kdorfman-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+From: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-This is v7 version of the patch series which adds support for MSM8996.
-Adds HS400 driver support as well.
-These are tested on internal msm8996 & db410c HW.
+The default behaviour with clk_rcg2_ops is for the
+clk_round_rate()/clk_set_rate() to return/set a ceil clock
+rate closest to the requested rate by looking up the corresponding
+frequency table.
+However, we do have some instances (mainly sdcc on various platforms)
+of clients expecting a clk_set_rate() to set a floor value instead.
+Add a new clk_rcg2_floor_ops to handle this for such specific
+rcg instances
 
-Below are the changes in v7.
+Signed-off-by: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+---
+ drivers/clk/qcom/clk-rcg.h  |  1 +
+ drivers/clk/qcom/clk-rcg2.c | 76 +++++++++++++++++++++++++++++++++++++++------
+ drivers/clk/qcom/common.c   | 16 ++++++++++
+ drivers/clk/qcom/common.h   |  2 ++
+ 4 files changed, 86 insertions(+), 9 deletions(-)
 
-Changes from v6 -> v7 :-
-1. Removed patch "clk: Add clk_hw_get_clk() helper API to be used by clk providers"
-in v7 as it was not required.
-2. Addressed Stephen review comments on -
-"clk: qcom: Add rcg ops to return floor value closest to the requested rate"
-3. Addressed comments from Stephen to add xo_clock entry in the sdhc clock node.
-Using the same xo_clock entry from DT to get the clk_rate of xo_clock used in
-sdhci-msm driver. Patch 04 adds this entry into DT.
-Patch 05 adds the driver support for xo_clock mentioned above.
-Hence there is a minor change in Patch05, which can be reviewed and taken
-into the tree.
-
-IMHO, almost all patches are almost done and are ready to be accepted.
-Will below process work out? 
-Patches 001 & 002 :- (clock changes) - Can go via Stephen's Boyd Tree.
-Patches 004 & 010 :- (DTS changes) - Can go via Andy Gross. 
-Patches 003, 005-009 & 011-014 :- (sdhci-msm changes) - Adrian's tree.
-
-Please let me know in case if anything else is required on above.
-
-
-Changes from v5 -> v6 :-
-1. Earlier in v5 series DT node was added to get the clk-rates table
-needed for sdhci-msm driver. But this is removed in this(v6) patch series
-and instead the clk changes are done in the clk driver as per Rob H comment.
-
-2. Added clk driver changes(patch 1-3) to provide floor rate values of requested
-clock for sdhc client.
-For following boards- apq8084, msm8996, msm8916, msm8974.
-
-3. Other minor patch comments were addressed.
-
-Changes from v4 -> v5 :-
-1. Added HS400 sdhci-msm controller specific changes:- (Patch 10, 11, 12)
-2. Addressed comment from Adrian on Patch 07 @[3].
-3. Addressed comment from Arnd on Patch 03, to directly add
-   clk_table into sdhci_msm_host. [4]
-4. Addressed comment from Bjorn to not enforce having clk-rates property
-   in DT for older targets based on discussion at [5]
-5. Retained Acks from Adrian on patches (01 & 02 & 06) where there were no
-   changes made while addressing above comments.
-
-Older history:-
-This is v4 version of the patch series.
-Patches 01, 02, 05 & 06 were Acked-by Adrian.
-
-Changes from v3 -> v4 :-
-1. Addressed comments from Adrian on Patch 03, 07, 08.
-2. Addressed comments from Bjorn on Patch 03.
-3. Added clk-rate support for sdhc DT nodes to all MSM platforms.
-   in Pacth 04.
-4. Rebased on next branch of Ulf.
-
-Changes from v2 -> v3 :-
-1. Addded Patch 01 based on Bjorn comment[2] -
-   This fixes/unrolls the poor coding style of read/writes of
-   registers from base sdhci-msm driver.
-
-2. Fixed/unrolled poor style of reads/writes of registers in Patch 02,
-   based on Bjorn comment[2]. Also changed name of flag from
-   use_updated_dll_reset -> use_14lpp_dll_reset.
-
-Changes from v1->v2 :-
-1. Removed patch 06 & 08 from v1 patch series[1]
-(which were introducing unnecessary quirks).
-   Instead have implemented __sdhci_msm_set_clock version of
-   sdhci_set_clock in sdhci_msm driver itself in patch 07 of
-   this patch series.
-2. Enabled extra quirk (SDHCI_QUIRK2_PRESET_VALUE_BROKEN) in
-   patch 05 of this patch series.
-
-
-Description of patches :-
-This patchset adds clk-rates & other required changes to
-upstream sdhci-msm driver from codeaurora tree.
-It has been tested on a db410c Dragonboard and msm8996 based
-platform.
-
-Patch 0001-0003- Adds support in qcom clk driver to return
-floor value of requested clock rate instead of ceil rate
-for sdhc clients.
-
-Patch 0004- Adds updated dll sequence for newer controllers
-which has minor_version >= 0x42. This is required for msm8996.
-
-MSM controller HW recommendation is to use the base MCI clock
-and directly control this MCI clock at GCC in order to
-change the clk-rate.
-Patches 06-08 bring in required change for this to
-sdhci-msm.
-
-MSM controller would require 2x clock rate from source
-for DDR bus speed modes. Patch 09 adds this support.
-
-Patch 0010- adds DDR support in DT for sdhc1 of msm8916.
-
-Patches 0011-0014- Adds HS400 support to sdhci-msm.
-
-
-[1]:- http://www.spinics.net/lists/linux-mmc/msg38467.html
-[2]:- http://www.spinics.net/lists/linux-mmc/msg38578.html
-[3]:- https://patchwork.kernel.org/patch/9289345/
-[4]:- https://www.spinics.net/lists/linux-mmc/msg39107.html
-[5]:- http://www.spinics.net/lists/linux-mmc/msg38749.html
-[6]:- https://patchwork.kernel.org/patch/9297381/
-
-
-Rajendra Nayak (2):
-  clk: qcom: Add rcg ops to return floor value closest to the requested
-    rate
-  clk: qcom: Move all sdcc rcgs to use clk_rcg2_floor_ops
-
-Ritesh Harjani (10):
-  mmc: sdhci-msm: Change poor style writel/readl of registers
-  ARM: dts: Add xo_clock to sdhc nodes on qcom platforms
-  mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
-  mmc: sdhci-msm: Enable few quirks
-  mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
-  mmc: sdhci-msm: Add clock changes for DDR mode.
-  arm64: dts: qcom: msm8916: Add ddr support to sdhc1
-  mmc: sdhci-msm: Save the calculated tuning phase
-  mmc: sdhci-msm: Add calibration tuning for CDCLP533 circuit
-  sdhci: sdhci-msm: update dll configuration
-
-Venkat Gopalakrishnan (2):
-  mmc: sdhci-msm: Update DLL reset sequence
-  mmc: sdhci-msm: Add HS400 platform support
-
- arch/arm/boot/dts/qcom-apq8084.dtsi   |  14 +-
- arch/arm/boot/dts/qcom-msm8974.dtsi   |  14 +-
- arch/arm64/boot/dts/qcom/msm8916.dtsi |  11 +-
- arch/arm64/boot/dts/qcom/msm8996.dtsi |   9 +-
- drivers/clk/qcom/clk-rcg.h            |   1 +
- drivers/clk/qcom/clk-rcg2.c           |  76 +++-
- drivers/clk/qcom/common.c             |  16 +
- drivers/clk/qcom/common.h             |   2 +
- drivers/clk/qcom/gcc-apq8084.c        |   8 +-
- drivers/clk/qcom/gcc-msm8916.c        |   4 +-
- drivers/clk/qcom/gcc-msm8974.c        |   8 +-
- drivers/clk/qcom/gcc-msm8996.c        |   8 +-
- drivers/mmc/host/sdhci-msm.c          | 664 ++++++++++++++++++++++++++++++++--
- 13 files changed, 758 insertions(+), 77 deletions(-)
-
+diff --git a/drivers/clk/qcom/clk-rcg.h b/drivers/clk/qcom/clk-rcg.h
+index b904c33..1b3e8d2 100644
+--- a/drivers/clk/qcom/clk-rcg.h
++++ b/drivers/clk/qcom/clk-rcg.h
+@@ -173,6 +173,7 @@ struct clk_rcg2 {
+ #define to_clk_rcg2(_hw) container_of(to_clk_regmap(_hw), struct clk_rcg2, clkr)
+ 
+ extern const struct clk_ops clk_rcg2_ops;
++extern const struct clk_ops clk_rcg2_floor_ops;
+ extern const struct clk_ops clk_rcg2_shared_ops;
+ extern const struct clk_ops clk_edp_pixel_ops;
+ extern const struct clk_ops clk_byte_ops;
+diff --git a/drivers/clk/qcom/clk-rcg2.c b/drivers/clk/qcom/clk-rcg2.c
+index a071bba..1a0985a 100644
+--- a/drivers/clk/qcom/clk-rcg2.c
++++ b/drivers/clk/qcom/clk-rcg2.c
+@@ -47,6 +47,11 @@
+ #define N_REG			0xc
+ #define D_REG			0x10
+ 
++enum freq_policy {
++	FLOOR,
++	CEIL,
++};
++
+ static int clk_rcg2_is_enabled(struct clk_hw *hw)
+ {
+ 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
+@@ -176,15 +181,26 @@ static int clk_rcg2_set_parent(struct clk_hw *hw, u8 index)
+ 	return calc_rate(parent_rate, m, n, mode, hid_div);
+ }
+ 
+-static int _freq_tbl_determine_rate(struct clk_hw *hw,
+-		const struct freq_tbl *f, struct clk_rate_request *req)
++static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
++				    struct clk_rate_request *req,
++				    enum freq_policy policy)
+ {
+ 	unsigned long clk_flags, rate = req->rate;
+ 	struct clk_hw *p;
+ 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
+ 	int index;
+ 
+-	f = qcom_find_freq(f, rate);
++	switch (policy) {
++	case FLOOR:
++		f = qcom_find_freq_floor(f, rate);
++		break;
++	case CEIL:
++		f = qcom_find_freq(f, rate);
++		break;
++	default:
++		return -EINVAL;
++	};
++
+ 	if (!f)
+ 		return -EINVAL;
+ 
+@@ -221,7 +237,15 @@ static int clk_rcg2_determine_rate(struct clk_hw *hw,
+ {
+ 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
+ 
+-	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req);
++	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req, CEIL);
++}
++
++static int clk_rcg2_determine_floor_rate(struct clk_hw *hw,
++					 struct clk_rate_request *req)
++{
++	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
++
++	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req, FLOOR);
+ }
+ 
+ static int clk_rcg2_configure(struct clk_rcg2 *rcg, const struct freq_tbl *f)
+@@ -265,12 +289,23 @@ static int clk_rcg2_configure(struct clk_rcg2 *rcg, const struct freq_tbl *f)
+ 	return update_config(rcg);
+ }
+ 
+-static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate)
++static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate,
++			       enum freq_policy policy)
+ {
+ 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
+ 	const struct freq_tbl *f;
+ 
+-	f = qcom_find_freq(rcg->freq_tbl, rate);
++	switch (policy) {
++	case FLOOR:
++		f = qcom_find_freq_floor(rcg->freq_tbl, rate);
++		break;
++	case CEIL:
++		f = qcom_find_freq(rcg->freq_tbl, rate);
++		break;
++	default:
++		return -EINVAL;
++	};
++
+ 	if (!f)
+ 		return -EINVAL;
+ 
+@@ -280,13 +315,25 @@ static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate)
+ static int clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate,
+ 			    unsigned long parent_rate)
+ {
+-	return __clk_rcg2_set_rate(hw, rate);
++	return __clk_rcg2_set_rate(hw, rate, CEIL);
++}
++
++static int clk_rcg2_set_floor_rate(struct clk_hw *hw, unsigned long rate,
++				   unsigned long parent_rate)
++{
++	return __clk_rcg2_set_rate(hw, rate, FLOOR);
+ }
+ 
+ static int clk_rcg2_set_rate_and_parent(struct clk_hw *hw,
+ 		unsigned long rate, unsigned long parent_rate, u8 index)
+ {
+-	return __clk_rcg2_set_rate(hw, rate);
++	return __clk_rcg2_set_rate(hw, rate, CEIL);
++}
++
++static int clk_rcg2_set_floor_rate_and_parent(struct clk_hw *hw,
++		unsigned long rate, unsigned long parent_rate, u8 index)
++{
++	return __clk_rcg2_set_rate(hw, rate, FLOOR);
+ }
+ 
+ const struct clk_ops clk_rcg2_ops = {
+@@ -300,6 +347,17 @@ static int clk_rcg2_set_rate_and_parent(struct clk_hw *hw,
+ };
+ EXPORT_SYMBOL_GPL(clk_rcg2_ops);
+ 
++const struct clk_ops clk_rcg2_floor_ops = {
++	.is_enabled = clk_rcg2_is_enabled,
++	.get_parent = clk_rcg2_get_parent,
++	.set_parent = clk_rcg2_set_parent,
++	.recalc_rate = clk_rcg2_recalc_rate,
++	.determine_rate = clk_rcg2_determine_floor_rate,
++	.set_rate = clk_rcg2_set_floor_rate,
++	.set_rate_and_parent = clk_rcg2_set_floor_rate_and_parent,
++};
++EXPORT_SYMBOL_GPL(clk_rcg2_floor_ops);
++
+ static int clk_rcg2_shared_force_enable(struct clk_hw *hw, unsigned long rate)
+ {
+ 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
+@@ -323,7 +381,7 @@ static int clk_rcg2_shared_force_enable(struct clk_hw *hw, unsigned long rate)
+ 		pr_err("%s: RCG did not turn on\n", name);
+ 
+ 	/* set clock rate */
+-	ret = __clk_rcg2_set_rate(hw, rate);
++	ret = __clk_rcg2_set_rate(hw, rate, CEIL);
+ 	if (ret)
+ 		return ret;
+ 
+diff --git a/drivers/clk/qcom/common.c b/drivers/clk/qcom/common.c
+index fffcbaf..d56dd14 100644
+--- a/drivers/clk/qcom/common.c
++++ b/drivers/clk/qcom/common.c
+@@ -46,6 +46,22 @@ struct freq_tbl *qcom_find_freq(const struct freq_tbl *f, unsigned long rate)
+ }
+ EXPORT_SYMBOL_GPL(qcom_find_freq);
+ 
++const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
++				      unsigned long rate)
++{
++	const struct freq_tbl *best = NULL;
++
++	for ( ; f->freq; f++) {
++		if (rate >= f->freq)
++			best = f;
++		else
++			break;
++	}
++
++	return best;
++}
++EXPORT_SYMBOL_GPL(qcom_find_freq_floor);
++
+ int qcom_find_src_index(struct clk_hw *hw, const struct parent_map *map, u8 src)
+ {
+ 	int i, num_parents = clk_hw_get_num_parents(hw);
+diff --git a/drivers/clk/qcom/common.h b/drivers/clk/qcom/common.h
+index ae9bdeb..76886a1 100644
+--- a/drivers/clk/qcom/common.h
++++ b/drivers/clk/qcom/common.h
+@@ -34,6 +34,8 @@ struct qcom_cc_desc {
+ 
+ extern const struct freq_tbl *qcom_find_freq(const struct freq_tbl *f,
+ 					     unsigned long rate);
++extern const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
++						   unsigned long rate);
+ extern int qcom_find_src_index(struct clk_hw *hw, const struct parent_map *map,
+ 			       u8 src);
+ 
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
