@@ -1,66 +1,52 @@
-From: Andy Yan <andy.yan@rock-chips.com>
-Subject: [PATCH v2 00/10] Add basic support for Rockchip RK1108 SOC
-Date: Mon, 14 Nov 2016 19:55:50 +0800
-Message-ID: <1479124550-24037-1-git-send-email-andy.yan@rock-chips.com>
-Return-path: <linux-clk-owner@vger.kernel.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: heiko@sntech.de
-Cc: shawn.lin@rock-chips.com, linus.walleij@linaro.org, robh+dt@kernel.org, linux-clk@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, mturquette@baylibre.com, sboyd@codeaurora.org, linux-gpio@vger.kernel.org, linux@armlinux.org.uk, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, mark.rutland@arm.com, Andy Yan <andy.yan@rock-chips.com>
+From: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v2 01/10] dt-bindings: rockchip-dw-mshc: add RK1108 dw-mshc
+ description
+Date: Mon, 14 Nov 2016 20:01:05 +0800
+Message-ID: <1479124865-24109-1-git-send-email-andy.yan@rock-chips.com>
+References: <1479124550-24037-1-git-send-email-andy.yan@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1479124550-24037-1-git-send-email-andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-RK1108 is embedded with an ARM Cortex-A7 single core and a DSP core.
-It is designed for varies application scenario such as car DVR, sports
-DV, secure camera and UAV camera.
-This patch series add basic support for it, which can boot a board with
-initramfs into shell.
-More new feathers will come soon.
+Add "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc" for
+dwmmc on rk1108 platform.
 
-Changes in v2:
-- split dt-binding header from clk driver
-- fix some CodingStyle issues
-- add dt-binding documentation for pinctrl
-- add pull and drive-strength functionality for pinctrl
-- fix timer and gic dt description
-- ordering devices by register address
-- move the board in the rockchip.txt to the block of Rockchip boards
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-Andy Yan (6):
-  dt-bindings: add documentation for rk1108 pinctrl
-  pinctrl: rockchip: add support for rk1108
-  ARM: add low level debug uart for rk1108
-  ARM: dts: add basic support for Rockchip RK1108 SOC
-  ARM: rockchip: enable support for RK1108 SoC
-  ARM: dts: rockchip: add rockchip RK1108 Evaluation board
+---
 
-Shawn Lin (4):
-  dt-bindings: rockchip-dw-mshc: add RK1108 dw-mshc description
-  dt-bindings: add documentation for rk1108 cru
-  clk: rockchip: add dt-binding header for rk1108
-  clk: rockchip: add clock controller for rk1108
+Changes in v2: None
 
- Documentation/devicetree/bindings/arm/rockchip.txt |   5 +-
- .../bindings/clock/rockchip,rk1108-cru.txt         |  60 +++
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |   1 +
- .../bindings/pinctrl/rockchip,pinctrl.txt          |   9 +-
- arch/arm/Kconfig.debug                             |  30 ++
- arch/arm/boot/dts/Makefile                         |   1 +
- arch/arm/boot/dts/rk1108-evb.dts                   |  69 ++++
- arch/arm/boot/dts/rk1108.dtsi                      | 428 +++++++++++++++++++
- arch/arm/mach-rockchip/rockchip.c                  |   1 +
- drivers/clk/rockchip/Makefile                      |   1 +
- drivers/clk/rockchip/clk-rk1108.c                  | 451 +++++++++++++++++++++
- drivers/clk/rockchip/clk.h                         |  14 +
- drivers/pinctrl/pinctrl-rockchip.c                 |  87 +++-
- include/dt-bindings/clock/rk1108-cru.h             | 270 ++++++++++++
- 14 files changed, 1421 insertions(+), 6 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/clock/rockchip,rk1108-cru.txt
- create mode 100644 arch/arm/boot/dts/rk1108-evb.dts
- create mode 100644 arch/arm/boot/dts/rk1108.dtsi
- create mode 100644 drivers/clk/rockchip/clk-rk1108.c
- create mode 100644 include/dt-bindings/clock/rk1108-cru.h
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+index 07184e8..ea9c1c9 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+@@ -13,6 +13,7 @@ Required Properties:
+ 	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
+ 							before RK3288
+ 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
++	- "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
+ 	- "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
+ 	- "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
+ 	- "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
 -- 
 2.7.4
-
-
