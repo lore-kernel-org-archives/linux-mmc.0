@@ -1,49 +1,47 @@
-From: Gao Pan <pandy.gao@nxp.com>
-Subject: [Patch v1] mmc: sd: update sd_bus_speed when sd card speed switch fails
-Date: Mon, 14 Nov 2016 18:33:49 +0800
-Message-ID: <1479119629-31821-1-git-send-email-pandy.gao@nxp.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 1/2] mmc: tmio: fix wrong bitmask for SDIO irqs
+Date: Mon, 14 Nov 2016 12:24:53 +0100
+Message-ID: <20161114112452.GA13611@verge.net.au>
+References: <20161113142912.4041-1-wsa+renesas@sang-engineering.com>
+ <20161113142912.4041-2-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0055.outbound.protection.outlook.com ([104.47.2.55]:23520
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751750AbcKNKvA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 14 Nov 2016 05:51:00 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161113142912.4041-2-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: pandy.gao@nxp.com, frank.li@nxp.com, fugang.duan@nxp.com
 
-In sd_set_bus_speed_mode(), sd card speed is switched to sd_bus_speed.
-However, the switch process may fail. When it happens, sd card is in
-default speed mode, which is SDR12 as described in Spec3.0.
+On Sun, Nov 13, 2016 at 03:29:11PM +0100, Wolfram Sang wrote:
+> Commit 7729c7a232a953 ("mmc: tmio: Provide separate interrupt handlers")
+> refactored the sdio irq handler and wrongly used the mask for SD irqs,
+> not for SDIO irqs. This doesn't really matter in practice because both
+> values keep the only interrupt we are interested in. But still, this is
+> wrong and wants to be fixed.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-In such case, the sd_bus_speed should be updated according to status[16].
+Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
 
-Signed-off-by: Gao Pan <pandy.gao@nxp.com>
-Reviewed-by: Fugang Duan <B38611@freescale.com>
----
- drivers/mmc/core/sd.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 73c762a..ac456ec 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -471,9 +471,11 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
- 	if (err)
- 		return err;
- 
--	if ((status[16] & 0xF) != card->sd_bus_speed)
-+	if ((status[16] & 0xF) != card->sd_bus_speed) {
-+		card->sd_bus_speed = status[16] & 0xF;
- 		pr_warn("%s: Problem setting bus speed mode!\n",
- 			mmc_hostname(card->host));
-+	}
- 	else {
- 		mmc_set_timing(card->host, timing);
- 		mmc_set_clock(card->host, card->sw_caps.uhs_max_dtr);
--- 
-1.9.1
-
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index dbc3cb14f3321b..2b04e6e87192c7 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -741,7 +741,7 @@ static void tmio_mmc_sdio_irq(int irq, void *devid)
+>  		return;
+>  
+>  	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
+> -	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
+> +	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdio_irq_mask;
+>  
+>  	sdio_status = status & ~TMIO_SDIO_MASK_ALL;
+>  	if (pdata->flags & TMIO_MMC_SDIO_STATUS_QUIRK)
+> -- 
+> 2.9.3
+> 
