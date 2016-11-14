@@ -1,85 +1,81 @@
-From: "Dr. Felix Collins" <felixcollinsfnb2@gmail.com>
-Subject: PLEASE VIEW THE ATTACHED FILE AND CONTACT ME.
-Date: Mon, 14 Nov 2016 07:44:09 +0000 (UTC)
-Message-ID: <1854903249.914393.1479109449106__21771.7154454023$1479110047$gmane$org@mail.yahoo.com>
-References: <1854903249.914393.1479109449106.ref@mail.yahoo.com>
-Reply-To: "Dr. Felix Collins" <felixcollinsa@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v5 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Mon, 14 Nov 2016 15:58:51 +0800
+Message-ID: <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
+References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
+ <1478568298-18380-2-git-send-email-jun.nie@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-        boundary="----=_Part_914392_57161530.1479109449106"
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nm34-vm8.bullet.mail.gq1.yahoo.com ([98.136.216.159]:50269 "EHLO
-        nm34-vm8.bullet.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S934837AbcKNHxr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 02:53:47 -0500
+Received: from lucky1.263xmail.com ([211.157.147.135]:41273 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754158AbcKNH7I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 02:59:08 -0500
+In-Reply-To: <1478568298-18380-2-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jun Nie <jun.nie@linaro.org>, shawn.guo@linaro.org, xie.baoyou@zte.com.cn
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, linux-mmc@vger.kernel.org
 
-------=_Part_914392_57161530.1479109449106
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+On 2016/11/8 9:24, Jun Nie wrote:
+> Document the device-tree binding of ZTE MMC host on
+> ZX296718 SoC.
+>
+> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35 ++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> new file mode 100644
+> index 0000000..c175c4b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> @@ -0,0 +1,35 @@
+> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
+> +  Host Controller
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
+> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be
+> +	- "zte,zx296718-dw-mshc": for ZX SoCs
+> +
+> +Example:
+> +
+> +	mmc1: mmc@1110000 {
+> +		compatible = "zte,zx296718-dw-mshc";
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		reg = <0x01110000 0x1000>;
+> +		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+> +		fifo-depth = <32>;
+> +		data-addr = <0x200>;
+> +		fifo-watermark-aligned;
+> +		bus-width = <4>;
+> +		clock-frequency = <50000000>;
+
+do you need both clock-frequency and max-frequency here?
+
+> +		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
+> +		clock-names = "biu", "ciu";
+> +		num-slots = <1>;
+> +		max-frequency = <50000000>;
+> +		cap-sdio-irq;
+> +		cap-sd-highspeed;
+> +		status = "disabled";
+> +	};
+>
 
 
+-- 
+Best Regards
+Shawn Lin
 
-------=_Part_914392_57161530.1479109449106
-Content-Type: application/msword
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
-	filename="FROM FIRST NATIONAL BANK OF SOUTH AFRICA (F.N.B)..rtf"
-Content-ID: <7a5cd6df-04f1-6cf4-dc51-aa1de2c50c02@yahoo.com>
-
-e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzcxNzd7XGZvbnR0Ymx7XGYwXGZz
-d2lzc1xmY2hhcnNldDAgQXJpYWw7fX0NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgNS40MS4xNS4x
-NTEyO31cdmlld2tpbmQ0XHVjMVxwYXJkXGYwXGZzMjQgSSBhbSBGZWxpeCBDb2xsaW5zLCBJIHdv
-cmsgd2l0aCB0aGUgRklSU1QgTkFUSU9OQUwgQkFOSyBPRiBTT1VUSCBBRlJJQ0EgKEYuTi5CKS5c
-cGFyDQpQbGVhc2UgY29udGFjdCBtZSB3aXRoIHRoaXMgZW1haWwgYWRkcmVzc2VzLlxwYXINCmZl
-bGl4Y29sbGluc2FAZ21haWwuY29tXHBhcg0KUGxlYXNlIGNhbGwgbWUgb24gbXkgcHJpdmF0ZSBu
-dW1iZXIgKCsyNy03OSAtMTQxLTIzODUpXHBhcg0KXHBhcg0KXHBhcg0KQVRURU5USU9OOiBTSVIv
-TUFEQU0sXHBhcg0KXHBhcg0KSSBkbyB1bmRlcnN0YW5kIHRoZSBjb25jZXJuIHRoaXMgbGV0dGVy
-IHdpbGwgYnJpbmcgdG8geW91IGZvciB0aGUgZmFjdCB0aGF0IGl0IGNvbWVzIGZyb20gYSB0b3Rh
-bCBzdHJhbmdlciwgYnV0IGJlIHJlc3QgYXNzdXJlZCBmb3IgaXQgY29tZXMgd2l0aCBnb29kIGlu
-dGVudGlvbnMuIEkgZ290IHlvdXIgY29udGFjdCB0aHJvdWdoIHRoZSBTb3V0aCBBZnJpY2FuIElu
-dGVybmF0aW9uYWwgRXhjaGFuZ2UgTmV0d29yayBPbi1saW5lIGhlcmUgaW4gSm9oYW5uZXNidXJn
-LCBTb3V0aCBBZnJpY2EuIEZvciBwdXJwb3NlIG9mIGludHJvZHVjdGlvbiBJIGFtIEZlbGl4IENv
-bGxpbnMsIEkgd29yayB3aXRoIHRoZSBGSVJTVCBOQVRJT05BTCBCQU5LIE9GIFNPVVRIIEFGUklD
-QSAoRi5OLkIpICBUaGVyZSBpcyBhbiBhY2NvdW50IG9wZW5lZCBpbiB0aGlzIGJhbmsgc2luY2Ug
-MTk4MCBhbmQgc2luY2UgMTk5NSBub2JvZHkgaGFzIG9wZXJhdGVkIG9uIHRoaXMgYWNjb3VudCBh
-Z2Fpbi4gQWZ0ZXIgZ29pbmcgdGhyb3VnaCBzb21lIG9sZCBmaWxlcyBpbiB0aGUgcmVjb3Jkcywg
-SSBkaXNjb3ZlcmVkIHRoYXQgaWYgSSBkb24ndCByZW1pdCB0aGlzIG1vbmV5IG91dCB1cmdlbnRs
-eSBpdCB3b3VsZCBiZSBmb3JmZWl0ZWQgZm9yIG5vdGhpbmcuXHBhcg0KXHBhcg0KVGhlIG93bmVy
-IG9mIHRoaXMgYWNjb3VudCBpcyBNci4gU21pdGggLkIuIEFuZHJlYXMsIGEgZm9yZWlnbmVyIGFu
-ZCBhIG1pbmVyIGF0IEtydWdlciBHb2xkIENvLW9wZXJhdGlvbiwgYSBnZW9sb2dpc3QgYnkgcHJv
-ZmVzc2lvbiBhbmQgaGUgZGllZCBzaW5jZSAxOTk0LiBObyBvdGhlciBwZXJzb24ga25vd3MgYWJv
-dXQgdGhpcyBhY2NvdW50IG9yIGFueXRoaW5nIGNvbmNlcm5pbmcgaXQsIHRoZSBhY2NvdW50IGhh
-cyBubyBvdGhlciBiZW5lZmljaWFyeSBhbmQgbXkgaW52ZXN0aWdhdGlvbiBwcm92ZWQgdG8gbWUg
-YXMgd2VsbCB0aGF0IHRoZSBjb21wYW55IGRvZXMgbm90IGtub3cgYW55dGhpbmcgYWJvdXQgdGhp
-cyBhY2NvdW50IGFuZCB0aGUgYW1vdW50IGludm9sdmVkIGlzIFVTRCQ3NSwwMDAuMDAwLDAwICgg
-U2V2ZW50eSBGaXZlIE1pbGxpb24gVW5pdGVkIFN0YXRlcyBEb2xsYXJzKS4gSSBhbSBvbmx5IGNv
-bnRhY3RpbmcgeW91IGFzIGEgZm9yZWlnbmVyIGJlY2F1c2UgdGhpcyBtb25leSBjYW5ub3QgYmUg
-YXBwcm92ZWQgdG8gYSBsb2NhbCBiYW5rIGhlcmUsIGJ1dCBjYW4gb25seSBiZSBhcHByb3ZlZCB0
-byBhbnkgZm9yZWlnbiBhY2NvdW50IGJlY2F1c2UgdGhlIG1vbmV5IGlzIGluIFVuaXRlZCBTdGF0
-ZXMgRG9sbGFycyBhbmQgdGhlIGZvcm1lciBvd25lciBvZiB0aGUgYWNjb3VudCBNci4gU21pdGgg
-LkIgLiBBbmRyZWFzIGlzIGEgZm9yZWlnbmVyIHRvby4gSSBuZWVkIGEgdHJ1dGhmdWwgcGVyc29u
-IGluIHRoaXMgYnVzaW5lc3MgYmVjYXVzZSBJIGRvbid0IHdhbnQgdG8gbWFrZSBtaXN0YWtlcy5c
-cGFyDQpccGFyDQogSSBuZWVkIHlvdXIgc3Ryb25nIGFzc3VyYW5jZSBhbmQgdHJ1c3QuIFdpdGgg
-bXkgcG9zaXRpb24gbm93IGluIG9mZmljZSBJIGNhbiB0cmFuc2ZlciB0aGlzIG1vbmV5IHRvIGFu
-eSBmb3JlaWduIHJlbGlhYmxlIGFjY291bnQsIHRocm91Z2ggb24tbGluZSBiYW5raW5nIG9yIFRl
-bGVncmFwaGljIFRyYW5zZmVyIChULlQpIHdoaWNoIHlvdSBjYW4gcHJvdmlkZSB3aXRoIGFzc3Vy
-YW5jZSB0aGF0IHRoaXMgbW9uZXkgd2lsbCBiZSBpbnRhY3QgcGVuZGluZyBteSBwaHlzaWNhbCBh
-cnJpdmFsIHRvIHlvdXIgY291bnRyeSBmb3Igc2hhcmluZy4gSSB3aWxsIGFwcGx5IGZvciBhbm51
-YWwgbGVhdmUgdG8gZ2V0IGEgdmlzYSBpbW1lZGlhdGVseSBJIGhlYXIgZnJvbSB5b3UgdGhhdCB5
-b3UgYXJlIHJlYWR5IHRvIGFjdCBhbmQgcmVjZWl2ZSB0aGlzIG1vbmV5IGluIHlvdXIgYWNjb3Vu
-dC4gQXQgdGhlIGNvbmNsdXNpb24gb2YgdGhpcyBidXNpbmVzcywgSSB3aWxsIGNvbWUgdG8geW91
-ciBjb3VudHJ5IGZvciB3aXRoZHJhd2FsIGFuZCBzaGFyaW5nIGFuZCBvdGhlciBpbnZlc3RtZW50
-cy4geW91IHdpbGwgYmUgZ2l2ZW4gNDAlIG9mIHRoZSB0b3RhbCBhbW91bnQsIDUwJSB3aWxsIGJl
-IGZvciBtZSAsIGFuZCB3aGlsZSAxMCUgd2lsbCBiZSBmb3IgZXhwZW5zZXMgYm90aCBwYXJ0aWVz
-IG1pZ2h0IGluY3VyIGR1cmluZyB0aGUgcHJvY2VzcyBvZiB0cmFuc2ZlcnJpbmcgdGhpcyBtb25l
-eS5ccGFyDQpccGFyDQpUaGVyZWZvcmUsIGlmIHlvdSBhcmUgd2lsbGluZyBhbmQgaW50ZXJlc3Rl
-ZCB0byByZW5kZXIgdGhlIG5lZWRlZCBhc3Npc3RhbmNlLCBFbmRlYXZvciB0byByZXBseSB0aHJv
-dWdoIG15IGVtYWlsIGFkZHJlc3MsIEkgYWxzbyBuZWVkIHlvdXIgcHJpdmF0ZSBwaG9uZSBhbmQg
-ZmF4IG51bWJlcnMgZm9yIGVhc3kgY29tbXVuaWNhdGlvbi4gSSB3aWxsIGdpdmUgbW9yZSBjbGFy
-aWZpY2F0aW9ucyBvbiB0aGUgbW9kYWxpdGllcyBuZWVkZWQgZm9yIHRoZSBzdWNjZXNzZnVsIGNv
-bXBsZXRpb24gb2YgdGhpcyB0cmFuc2FjdGlvbi5ccGFyDQpccGFyDQpccGFyDQpCZXN0IFJlZ2Fy
-ZHMsXHBhcg0KRHIuIEZlbGl4IENvbGxpbnNccGFyDQogXHBhcg0KfQ0KAA==
-
-------=_Part_914392_57161530.1479109449106--
