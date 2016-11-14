@@ -1,124 +1,96 @@
-From: Andrea Merello <andrea.merello@gmail.com>
-Subject: Re: [PATCH 6/9] DT: stm32f429: add pin map for SDIO controller
-Date: Mon, 14 Nov 2016 11:19:19 +0100
-Message-ID: <CAN8YU5MgmziqZ16d_sfbRC8u7qjMO=Zij-2qxSYD_RKha24-LQ@mail.gmail.com>
-References: <1478612625-23256-1-git-send-email-andrea.merello@gmail.com>
- <1478612625-23256-7-git-send-email-andrea.merello@gmail.com> <3ec978cc-c80e-f350-f387-83b3e145dbe3@st.com>
-Reply-To: andrea.merello@gmail.com
+From: Jun Nie <jun.nie@linaro.org>
+Subject: Re: [PATCH v5 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Mon, 14 Nov 2016 18:00:10 +0800
+Message-ID: <CABymUCMWsCDfM58Ezpu8F7=vgpcPf_pzpbgr8OjCjOJ921tCEg@mail.gmail.com>
+References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
+ <1478568298-18380-2-git-send-email-jun.nie@linaro.org> <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yb0-f195.google.com ([209.85.213.195]:34740 "EHLO
-        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752909AbcKNKTk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 05:19:40 -0500
-Received: by mail-yb0-f195.google.com with SMTP id h184so2472869ybb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2016 02:19:40 -0800 (PST)
-In-Reply-To: <3ec978cc-c80e-f350-f387-83b3e145dbe3@st.com>
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:33936 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752280AbcKNKAM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 05:00:12 -0500
+Received: by mail-qt0-f179.google.com with SMTP id n6so44192782qtd.1
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2016 02:00:11 -0800 (PST)
+In-Reply-To: <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Torgue <alexandre.torgue@st.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-mmc@vger.kernel.org, Bruno Herrera <bruherrera@gmail.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Thu, Nov 10, 2016 at 11:51 AM, Alexandre Torgue
-<alexandre.torgue@st.com> wrote:
-> Hi Andrea,
->
-> Some minor remarks.
-
-Hi, thank you for reviewing :)
-Also adding Bruno Herrera in CC..
-
-> On 11/08/2016 02:43 PM, Andrea Merello wrote:
+2016-11-14 15:58 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
+> On 2016/11/8 9:24, Jun Nie wrote:
 >>
->> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+>> Document the device-tree binding of ZTE MMC host on
+>> ZX296718 SoC.
+>>
+>> Signed-off-by: Jun Nie <jun.nie@linaro.org>
 >> ---
->>  arch/arm/boot/dts/stm32f429.dtsi | 31 +++++++++++++++++++++++++++++++
->>  1 file changed, 31 insertions(+)
+>>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35
+>> ++++++++++++++++++++++
+>>  1 file changed, 35 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
 >>
->> diff --git a/arch/arm/boot/dts/stm32f429.dtsi
->> b/arch/arm/boot/dts/stm32f429.dtsi
->> index 336ee4f..961bc0c 100644
->> --- a/arch/arm/boot/dts/stm32f429.dtsi
->> +++ b/arch/arm/boot/dts/stm32f429.dtsi
->> @@ -313,6 +313,37 @@
->>                                 };
->>                         };
+>> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>> b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>> new file mode 100644
+>> index 0000000..c175c4b
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>> @@ -0,0 +1,35 @@
+>> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
+>> +  Host Controller
+>> +
+>> +The Synopsys designware mobile storage host controller is used to
+>> interface
+>> +a SoC with storage medium such as eMMC or SD/MMC cards. This file
+>> documents
+>> +differences between the core Synopsys dw mshc controller properties
+>> described
+>> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
+>> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+>> +
+>> +Required Properties:
+>> +
+>> +* compatible: should be
+>> +       - "zte,zx296718-dw-mshc": for ZX SoCs
+>> +
+>> +Example:
+>> +
+>> +       mmc1: mmc@1110000 {
+>> +               compatible = "zte,zx296718-dw-mshc";
+>> +               #address-cells = <1>;
+>> +               #size-cells = <0>;
+>> +               reg = <0x01110000 0x1000>;
+>> +               interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+>> +               fifo-depth = <32>;
+>> +               data-addr = <0x200>;
+>> +               fifo-watermark-aligned;
+>> +               bus-width = <4>;
+>> +               clock-frequency = <50000000>;
+>
+>
+> do you need both clock-frequency and max-frequency here?
+
+According to dts document, clock-frequency is for clock configuration
+when dw core probe. max-frequency is for mmc core to limit max
+frequency for any cards at any time. Do you have any suggestion? Thank
+you for your time!
+
+>
+>> +               clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
+>> +               clock-names = "biu", "ciu";
+>> +               num-slots = <1>;
+>> +               max-frequency = <50000000>;
+>> +               cap-sdio-irq;
+>> +               cap-sd-highspeed;
+>> +               status = "disabled";
+>> +       };
 >>
->> +                       sdio_pins:sdio_pins@0 {
->
-> Add a space after ":"
-
-OK
-
->>
->> +                               pins {
->> +                                       pinmux =
->> <STM32F429_PC8_FUNC_SDIO_D0>,
->> +
->> <STM32F429_PC9_FUNC_SDIO_D1>,
->> +
->> <STM32F429_PC10_FUNC_SDIO_D2>,
->> +
->> <STM32F429_PC11_FUNC_SDIO_D3>,
->> +
->> <STM32F429_PC12_FUNC_SDIO_CK>,
->> +
->> <STM32F429_PD2_FUNC_SDIO_CMD>;
->> +                                       drive-push-pull;
->> +                                       slew-rate = <2>;
->> +                               };
->> +                       };
->> +
->> +                       sdio_pins_od:sdio_pins_od@0 {
->
-> same
-
-OK
-
->>
->> +                               pins {
->> +                                       pinmux =
->> <STM32F429_PC8_FUNC_SDIO_D0>,
->> +
->> <STM32F429_PC9_FUNC_SDIO_D1>,
->> +
->> <STM32F429_PC10_FUNC_SDIO_D2>,
->> +
->> <STM32F429_PC11_FUNC_SDIO_D3>,
->> +
->> <STM32F429_PC12_FUNC_SDIO_CK>;
->> +                                       drive-push-pull;
->> +                                       slew-rate = <2>;
->> +                               };
->> +
->> +                               pins_od {
->> +                                       pinmux =
->> <STM32F429_PD2_FUNC_SDIO_CMD>;
->> +                                       drive-open-drain;
->> +                                       slew-rate = <2>;
->> +                               };
->
-> Why don't use "pins1" and "pins2" instead of "pins" and "pins_od" like it is
-> done for usart1?
-
-
-OK
-
-> regards
-> Alex
 >
 >
->> +                       };
->> +
->
->
->
->
->
->>                         ethernet0_mii: mii@0 {
->>                                 pins {
->>                                         pinmux =
->> <STM32F429_PG13_FUNC_ETH_MII_TXD0_ETH_RMII_TXD0>,
->>
+> --
+> Best Regards
+> Shawn Lin
 >
