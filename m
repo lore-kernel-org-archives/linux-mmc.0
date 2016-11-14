@@ -1,73 +1,264 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v6 05/14] mmc: sdhci-msm: Update DLL reset sequence
-Date: Mon, 14 Nov 2016 11:33:50 +0530
-Message-ID: <a2032294-640b-41fa-8e9a-5a4f759ca2eb@codeaurora.org>
-References: <1478517877-23733-1-git-send-email-riteshh@codeaurora.org>
- <1478517877-23733-6-git-send-email-riteshh@codeaurora.org>
- <20161108230622.GN16026@codeaurora.org>
- <10d66d21-eebd-45a3-6fb7-72117d860142@codeaurora.org>
- <20161109204304.GT16026@codeaurora.org>
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pci: Add support for HS200 tuning mode on
+ AMD, eMMC-4.5.1
+Date: Mon, 14 Nov 2016 12:08:03 +0530
+Message-ID: <dbebff7a-d144-9dc5-6e59-3a39274ee21d@amd.com>
+References: <49d59018-a294-9cea-b92c-f74935314dc8@amd.com>
+ <5fed9224-f843-fbd4-6ae6-fd0708bc6c98@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20161109204304.GT16026@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn3nam01on0043.outbound.protection.outlook.com ([104.47.33.43]:30892
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752188AbcKNGxk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 14 Nov 2016 01:53:40 -0500
+In-Reply-To: <5fed9224-f843-fbd4-6ae6-fd0708bc6c98@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
 
-Hi Stephen,
 
-On 11/10/2016 2:13 AM, Stephen Boyd wrote:
-> On 11/09, Ritesh Harjani wrote:
->> Hi Stephen,
+
+On 11/11/2016 6:11 PM, Adrian Hunter wrote:
+> On 10/11/16 14:51, Shyam Sundar S K wrote:
+>> This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
 >>
->> On 11/9/2016 4:36 AM, Stephen Boyd wrote:
->>> On 11/07, Ritesh Harjani wrote:
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>>> index 42f42aa..32b0b79 100644
->>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>> @@ -58,11 +58,17 @@
->>>> #define CORE_DLL_CONFIG		0x100
->>>> #define CORE_DLL_STATUS		0x108
->>>>
->>>> +#define CORE_DLL_CONFIG_2	0x1b4
->>>> +#define CORE_FLL_CYCLE_CNT	BIT(18)
->>>> +#define CORE_DLL_CLOCK_DISABLE	BIT(21)
->>>> +
->>>> #define CORE_VENDOR_SPEC	0x10c
->>>> #define CORE_CLK_PWRSAVE	BIT(1)
->>>>
->>>> #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
->>>>
->>>> +#define TCXO_FREQ		19200000
->>>
->>> TCXO_FREQ could change based on the board. For example, IPQ has
->>> it as 25 MHz.
->> Actually not sure of the proper way on how to get this freq in driver
->> today. We may use xo_board clock but, it is not available for all boards
->> except 8996/8916 I guess.
+>> Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
+>> Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+>> Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pci-core.c | 178 +++++++++++++++++++++++++++++++++++++-
+>>  1 file changed, 177 insertions(+), 1 deletion(-)
 >>
->> Also, there is no sdhc for IPQ board and for all other boards
->> TCXO_FREQ is same where sdhci-msm driver is used. For that purpose
->> this was defined here for sdhci-msm driver.
+>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>> index 782c8d2..9576f82 100644
+>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>> @@ -817,6 +817,171 @@ enum amd_chipset_gen {
+>>  	AMD_CHIPSET_UNKNOWN,
+>>  };
 >>
->> Do you think in that case we should keep it this way for now and
->> later change if a need arise to change the TCXO_FREQ ?
->
-> We've added xo_board (or cxo_board/pxo_board) to all the qcom
-> platforms upstream, so there should always be something to
-> reference in the dts and call clk_get_rate() on. So I would add
-> it to the binding as another clock and then use that instead of
-> hardcoding the value. That's much more flexible in case this
-> changes in the future.
->
-Sure, I have addressed this in v7 as per your above comment.
+>> +static const struct sdhci_ops amd_sdhci_pci_ops;
+>> +
+>> +struct amd_tuning_descriptor {
+>> +	u8 tune_around;
+>> +	bool this_tune_ok;
+>> +	bool last_tune_ok;
+>> +	u8 valid_front;
+>> +	u8 valid_window_max;
+>> +	u8 tune_low_max;
+>> +	u8 tune_low;
+>> +	u8 valid_window;
+>> +	u8 tune_result;
+>> +};
+>> +
+>> +static int amd_tuning_reset(struct sdhci_host *host)
+>> +{
+>> +	unsigned int val;
+>> +	unsigned long flags;
+>> +
+>> +	spin_lock_irqsave(&host->lock, flags);
+>> +
+>> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
+>> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>> +
+>> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +	val &= ~SDHCI_CTRL_EXEC_TUNING;
+>> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>> +
+>> +	spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
+>> +{
+>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>> +	struct pci_dev *pdev = slot->chip->pdev;
+>> +	unsigned int val;
+>> +	unsigned long flags;
+>> +
+>> +	spin_lock_irqsave(&host->lock, flags);
+>> +
+>> +	pci_read_config_dword(pdev, 0xb8, &val);
+>> +	val &= ~0x1f;
+>> +	val |= (0x10800 | (phase << 1));
+>> +	pci_write_config_dword(pdev, 0xb8, val);
+>> +
+>> +	spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static int amd_find_good_phase(struct sdhci_host *host)
+>> +{
+>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>> +	struct pci_dev *pdev = slot->chip->pdev;
+>> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
+>> +
+>> +	unsigned int val;
+>> +	unsigned long flags;
+>> +
+>> +	spin_lock_irqsave(&host->lock, flags);
+>> +
+>> +	if (td->this_tune_ok)
+>> +		td->valid_front += 1;
+>> +	if ((!td->this_tune_ok && td->last_tune_ok) ||
+>> +	    (td->tune_around == 11)) {
+>> +		if (td->valid_window > td->valid_window_max) {
+>> +			td->valid_window_max = td->valid_window;
+>> +			td->tune_low_max = td->tune_low;
+>> +		}
+>> +	}
+>> +	if (td->this_tune_ok && (!td->last_tune_ok))
+>> +		td->tune_low = td->tune_around;
+>> +	if (!td->this_tune_ok && td->last_tune_ok)
+>> +		td->valid_window = 0;
+>> +	else if (td->this_tune_ok)
+>> +		td->valid_window += 1;
+>> +
+>> +	td->last_tune_ok = td->this_tune_ok;
+>> +
+>> +	if (td->tune_around == 11) {
+>> +		if ((td->valid_front + td->valid_window) >
+>> +						td->valid_window_max) {
+>> +			if (td->valid_front > td->valid_window)
+>> +				td->tune_result = ((td->valid_front -
+>> +						td->valid_window) >> 1);
+>> +			else
+>> +				td->tune_result = td->tune_low +
+>> +				((td->valid_window + td->valid_front) >> 1);
+>> +		} else {
+>> +			td->tune_result = td->tune_low_max +
+>> +					(td->valid_window_max >> 1);
+>> +		}
+>> +
+>> +		if (td->tune_result > 0x0b)
+>> +			td->tune_result = 0x0b;
+>> +
+>> +		pci_read_config_dword(pdev, 0xb8, &val);
+>> +		val &= ~0x1f;
+>> +		val |= (0x10800 | (td->tune_result << 1));
+>> +		pci_write_config_dword(pdev, 0xb8, val);
+>> +	}
+>> +
+>> +	spin_unlock_irqrestore(&host->lock, flags);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
+>> +{
+>> +	struct pci_dev *pdev = slot->chip->pdev;
+>> +	unsigned int val;
+>> +
+>> +	pci_read_config_dword(pdev, 0xd0, &val);
+>> +	val &= 0xffffffcf;
+>> +	val |= 0x30;
+>> +	pci_write_config_dword(pdev, 0xd0, val);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
+>> +{
+>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
+>> +	u8 ctrl;
+>> +
+>> +	amd_tuning_reset(host);
+>> +	memset(td, 0, sizeof(struct amd_tuning_descriptor));
+> 
+> I didn't notice last time that you are always clearing all the values in the
+> tuning descriptor, so it doesn't need to be kept between calls to
+> amd_execute_tuning().  So it should be a local variable that you pass to the
+> functions that need it.  Then you don't need the patch I sent at all.
+> 
+> Does that make sense?
+> 
 
+Hi Adrian,
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Thanks for pointing this out. Your patch will help, so will remove the memset()
+and redo the submission. Is this OK ?
+
+Thanks,
+Shyam
+
+>> +
+>> +	/*********************************************************************/
+>> +	/* Enabling Software Tuning */
+>> +	/********************************************************************/
+>> +	/* 1. First switch the eMMC to HS200 Mode
+>> +	 * 2. Prepare the registers by using the sampling clock select
+>> +	 * 3. Send the CMD21 12 times with block length of 64 bytes
+>> +	 * 4. Everytime change the clk phase and check for CRC error
+>> +	 *	(CMD and DATA),if error, soft reset the CMD and DATA line
+>> +	 * 5. Calculate the window and set the clock phase.
+>> +	 */
+>> +
+>> +	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
+>> +		amd_config_tuning_phase(host, td->tune_around);
+>> +
+>> +		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
+>> +			td->this_tune_ok = false;
+>> +			host->mmc->need_retune = 0;
+>> +			mdelay(4);
+>> +			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
+>> +			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
+>> +		} else {
+>> +			td->this_tune_ok = true;
+>> +		}
+>> +
+>> +		amd_find_good_phase(host);
+>> +	}
+>> +
+>> +	host->mmc->retune_period = 0;
+>> +
+>> +	amd_enable_manual_tuning(slot);
+>> +	return 0;
+>> +}
+>> +
+>>  static int amd_probe(struct sdhci_pci_chip *chip)
+>>  {
+>>  	struct pci_dev	*smbus_dev;
+>> @@ -841,7 +1006,6 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+>>
+>>  	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
+>>  		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+>> -		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+>>  	}
+>>
+>>  	return 0;
+>> @@ -849,6 +1013,7 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+>>
+>>  static const struct sdhci_pci_fixes sdhci_amd = {
+>>  	.probe		= amd_probe,
+>> +	.ops		= &amd_sdhci_pci_ops,
+>>  };
+>>
+>>  static const struct pci_device_id pci_ids[] = {
+>> @@ -1469,6 +1634,17 @@ static const struct sdhci_ops sdhci_pci_ops = {
+>>  	.select_drive_strength	= sdhci_pci_select_drive_strength,
+>>  };
+>>
+>> +static const struct sdhci_ops amd_sdhci_pci_ops = {
+>> +	.set_clock	= sdhci_set_clock,
+>> +	.enable_dma	= sdhci_pci_enable_dma,
+>> +	.set_bus_width	= sdhci_pci_set_bus_width,
+>> +	.reset		= sdhci_reset,
+>> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>> +	.hw_reset		= sdhci_pci_hw_reset,
+>> +	.select_drive_strength	= sdhci_pci_select_drive_strength,
+>> +	.platform_execute_tuning = amd_execute_tuning,
+>> +};
+>> +
+>>  /*****************************************************************************\
+>>   *                                                                           *
+>>   * Suspend/resume                                                            *
+>>
+> 
