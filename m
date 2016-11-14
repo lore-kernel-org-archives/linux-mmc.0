@@ -1,52 +1,191 @@
-From: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 01/10] dt-bindings: rockchip-dw-mshc: add RK1108 dw-mshc
- description
-Date: Mon, 14 Nov 2016 20:01:05 +0800
-Message-ID: <1479124865-24109-1-git-send-email-andy.yan@rock-chips.com>
-References: <1479124550-24037-1-git-send-email-andy.yan@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pci: Add support for HS200 tuning mode on
+ AMD, eMMC-4.5.1
+Date: Mon, 14 Nov 2016 15:37:54 +0200
+Message-ID: <74277e4d-98ee-fc9b-2363-26e207170806@intel.com>
+References: <49d59018-a294-9cea-b92c-f74935314dc8@amd.com>
+ <5fed9224-f843-fbd4-6ae6-fd0708bc6c98@intel.com>
+ <dbebff7a-d144-9dc5-6e59-3a39274ee21d@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1479124550-24037-1-git-send-email-andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:39404 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751455AbcKNNmw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 14 Nov 2016 08:42:52 -0500
+In-Reply-To: <dbebff7a-d144-9dc5-6e59-3a39274ee21d@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shyam Sundar S K <ssundark@amd.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>
 
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+On 14/11/16 08:38, Shyam Sundar S K wrote:
+> 
+> 
+> On 11/11/2016 6:11 PM, Adrian Hunter wrote:
+>> On 10/11/16 14:51, Shyam Sundar S K wrote:
+>>> This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
+>>>
+>>> Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
+>>> Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+>>> Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-pci-core.c | 178 +++++++++++++++++++++++++++++++++++++-
+>>>  1 file changed, 177 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>>> index 782c8d2..9576f82 100644
+>>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>>> @@ -817,6 +817,171 @@ enum amd_chipset_gen {
+>>>  	AMD_CHIPSET_UNKNOWN,
+>>>  };
+>>>
+>>> +static const struct sdhci_ops amd_sdhci_pci_ops;
+>>> +
+>>> +struct amd_tuning_descriptor {
+>>> +	u8 tune_around;
+>>> +	bool this_tune_ok;
+>>> +	bool last_tune_ok;
+>>> +	u8 valid_front;
+>>> +	u8 valid_window_max;
+>>> +	u8 tune_low_max;
+>>> +	u8 tune_low;
+>>> +	u8 valid_window;
+>>> +	u8 tune_result;
+>>> +};
+>>> +
+>>> +static int amd_tuning_reset(struct sdhci_host *host)
+>>> +{
+>>> +	unsigned int val;
+>>> +	unsigned long flags;
+>>> +
+>>> +	spin_lock_irqsave(&host->lock, flags);
+>>> +
+>>> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>>> +	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
+>>> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>>> +
+>>> +	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>>> +	val &= ~SDHCI_CTRL_EXEC_TUNING;
+>>> +	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
+>>> +
+>>> +	spin_unlock_irqrestore(&host->lock, flags);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
+>>> +{
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct pci_dev *pdev = slot->chip->pdev;
+>>> +	unsigned int val;
+>>> +	unsigned long flags;
+>>> +
+>>> +	spin_lock_irqsave(&host->lock, flags);
+>>> +
+>>> +	pci_read_config_dword(pdev, 0xb8, &val);
+>>> +	val &= ~0x1f;
+>>> +	val |= (0x10800 | (phase << 1));
+>>> +	pci_write_config_dword(pdev, 0xb8, val);
+>>> +
+>>> +	spin_unlock_irqrestore(&host->lock, flags);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int amd_find_good_phase(struct sdhci_host *host)
+>>> +{
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct pci_dev *pdev = slot->chip->pdev;
+>>> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
+>>> +
+>>> +	unsigned int val;
+>>> +	unsigned long flags;
+>>> +
+>>> +	spin_lock_irqsave(&host->lock, flags);
+>>> +
+>>> +	if (td->this_tune_ok)
+>>> +		td->valid_front += 1;
+>>> +	if ((!td->this_tune_ok && td->last_tune_ok) ||
+>>> +	    (td->tune_around == 11)) {
+>>> +		if (td->valid_window > td->valid_window_max) {
+>>> +			td->valid_window_max = td->valid_window;
+>>> +			td->tune_low_max = td->tune_low;
+>>> +		}
+>>> +	}
+>>> +	if (td->this_tune_ok && (!td->last_tune_ok))
+>>> +		td->tune_low = td->tune_around;
+>>> +	if (!td->this_tune_ok && td->last_tune_ok)
+>>> +		td->valid_window = 0;
+>>> +	else if (td->this_tune_ok)
+>>> +		td->valid_window += 1;
+>>> +
+>>> +	td->last_tune_ok = td->this_tune_ok;
+>>> +
+>>> +	if (td->tune_around == 11) {
+>>> +		if ((td->valid_front + td->valid_window) >
+>>> +						td->valid_window_max) {
+>>> +			if (td->valid_front > td->valid_window)
+>>> +				td->tune_result = ((td->valid_front -
+>>> +						td->valid_window) >> 1);
+>>> +			else
+>>> +				td->tune_result = td->tune_low +
+>>> +				((td->valid_window + td->valid_front) >> 1);
+>>> +		} else {
+>>> +			td->tune_result = td->tune_low_max +
+>>> +					(td->valid_window_max >> 1);
+>>> +		}
+>>> +
+>>> +		if (td->tune_result > 0x0b)
+>>> +			td->tune_result = 0x0b;
+>>> +
+>>> +		pci_read_config_dword(pdev, 0xb8, &val);
+>>> +		val &= ~0x1f;
+>>> +		val |= (0x10800 | (td->tune_result << 1));
+>>> +		pci_write_config_dword(pdev, 0xb8, val);
+>>> +	}
+>>> +
+>>> +	spin_unlock_irqrestore(&host->lock, flags);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
+>>> +{
+>>> +	struct pci_dev *pdev = slot->chip->pdev;
+>>> +	unsigned int val;
+>>> +
+>>> +	pci_read_config_dword(pdev, 0xd0, &val);
+>>> +	val &= 0xffffffcf;
+>>> +	val |= 0x30;
+>>> +	pci_write_config_dword(pdev, 0xd0, val);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
+>>> +{
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct amd_tuning_descriptor *td = sdhci_pci_priv(slot);
+>>> +	u8 ctrl;
+>>> +
+>>> +	amd_tuning_reset(host);
+>>> +	memset(td, 0, sizeof(struct amd_tuning_descriptor));
+>>
+>> I didn't notice last time that you are always clearing all the values in the
+>> tuning descriptor, so it doesn't need to be kept between calls to
+>> amd_execute_tuning().  So it should be a local variable that you pass to the
+>> functions that need it.  Then you don't need the patch I sent at all.
+>>
+>> Does that make sense?
+>>
+> 
+> Hi Adrian,
+> 
+> Thanks for pointing this out. Your patch will help, so will remove the memset()
+> and redo the submission. Is this OK ?
 
-Add "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc" for
-dwmmc on rk1108 platform.
+Sure
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-
----
-
-Changes in v2: None
-
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index 07184e8..ea9c1c9 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -13,6 +13,7 @@ Required Properties:
- 	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
- 							before RK3288
- 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
-+	- "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
- 	- "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
- 	- "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
- 	- "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
--- 
-2.7.4
