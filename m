@@ -1,38 +1,74 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 2/2] mmc: tmio: remove SDIO from TODO list
-Date: Sun, 13 Nov 2016 15:29:12 +0100
-Message-ID: <20161113142912.4041-3-wsa+renesas@sang-engineering.com>
-References: <20161113142912.4041-1-wsa+renesas@sang-engineering.com>
+From: Jun Nie <jun.nie@linaro.org>
+Subject: Re: [PATCH v5 0/5] Add intial support to DW MMC host on ZTE SoC
+Date: Mon, 14 Nov 2016 11:21:13 +0800
+Message-ID: <CABymUCMfZwzvkZvOFCCsic46A1t-SD8uFqBBRyqnTgmFbTikzQ@mail.gmail.com>
+References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:46121 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752173AbcKMO3Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 13 Nov 2016 09:29:24 -0500
-In-Reply-To: <20161113142912.4041-1-wsa+renesas@sang-engineering.com>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:36625 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932822AbcKNDVP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2016 22:21:15 -0500
+Received: by mail-qk0-f171.google.com with SMTP id n21so81853900qka.3
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Nov 2016 19:21:14 -0800 (PST)
+In-Reply-To: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Jun Nie <jun.nie@linaro.org>
 
-We surely have SDIO support by now :)
+2016-11-08 9:24 GMT+08:00 Jun Nie <jun.nie@linaro.org>:
+> Add intial support to DW MMC host on ZTE SoC. It include platform
+> specific wrapper driver and workarounds for fifo quirk.
+>
+> Patches are prepared based on latest dw mmc runtime change:
+>    https://github.com/jh80chung/dw-mmc.git for-ulf
+>
+> Changes vs version 4:
+>   - Fix missing empty dts compatible element in the end of compatible array.
+>
+> Changes vs version 3:
+>   - Fix brace error in document.
+>
+> Changes vs version 2:
+>   - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
+>     fifo-watermark-aligned.
+>   - Polish ZX MMC driver on minor coding style issues.
+>
+> Changes vs version 1:
+>   - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
+>   - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
+>
+> Jun Nie (5):
+>   mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+>   mmc: zx: Initial support for ZX mmc controller
+>   Documentation: synopsys-dw-mshc: add binding for fifo quirks
+>   mmc: dw: Add fifo address property
+>   mmc: dw: Add fifo watermark alignment property
+>
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  34 +++
+>  drivers/mmc/host/Kconfig                           |   9 +
+>  drivers/mmc/host/Makefile                          |   1 +
+>  drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
+>  drivers/mmc/host/dw_mmc.c                          |  17 +-
+>  include/linux/mmc/dw_mmc.h                         |   5 +
+>  8 files changed, 349 insertions(+), 3 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>  create mode 100644 drivers/mmc/host/dw_mmc-zx.c
+>  create mode 100644 drivers/mmc/host/dw_mmc-zx.h
+>
+> --
+> 1.9.1
+>
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_pio.c | 1 -
- 1 file changed, 1 deletion(-)
+Jaehoon Chung,
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 2b04e6e87192c7..87fea67a743674 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -22,7 +22,6 @@
-  * TODO:
-  *   Investigate using a workqueue for PIO transfers
-  *   Eliminate FIXMEs
-- *   SDIO support
-  *   Better Power management
-  *   Handle MMC errors better
-  *   double buffer support
--- 
-2.9.3
+I assume you do not have more comments on this serial patches, neither
+from community. If so, could you help merge them to your trees so that
+it can go to mainline later?
 
+Thank you!
+Jun
