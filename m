@@ -1,249 +1,68 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v7 11/14] mmc: sdhci-msm: Add HS400 platform support
-Date: Mon, 14 Nov 2016 11:30:45 +0530
-Message-ID: <1479103248-9491-12-git-send-email-riteshh@codeaurora.org>
+From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH v7 09/14] mmc: sdhci-msm: Add clock changes for DDR mode.
+Date: Mon, 14 Nov 2016 11:30:43 +0530
+Message-ID: <1479103248-9491-10-git-send-email-riteshh@codeaurora.org>
 References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479103248-9491-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, kdorfman-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+SDHC MSM controller need 2x clock for MCLK at GCC.
+Hence make required changes to have 2x clock for
+DDR timing modes.
 
-The following msm platform specific changes are added to support HS400.
-- Allow tuning for HS400 mode.
-- Configure HS400 timing mode using the VENDOR_SPECIFIC_FUNC register.
-
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 127 +++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 117 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 41a4ea7..7618bad 100644
+index b96a4a7..41a4ea7 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -31,6 +31,7 @@
- #define HC_MODE_EN		0x1
- #define CORE_POWER		0x0
- #define CORE_SW_RST		BIT(7)
-+#define FF_CLK_SW_RST_DIS	BIT(13)
- 
- #define CORE_PWRCTL_STATUS	0xdc
- #define CORE_PWRCTL_MASK	0xe0
-@@ -64,10 +65,17 @@
- 
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
-+#define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
-+#define CORE_HC_MCLK_SEL_HS400	(3 << 8)
-+#define CORE_HC_MCLK_SEL_MASK	(3 << 8)
-+#define CORE_HC_SELECT_IN_EN	BIT(18)
-+#define CORE_HC_SELECT_IN_HS400	(6 << 19)
-+#define CORE_HC_SELECT_IN_MASK	(7 << 19)
- 
- #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
- 
- #define SDHCI_MSM_MIN_CLOCK	400000
-+#define CORE_FREQ_100MHZ	(100 * 1000 * 1000)
- 
- #define CDR_SELEXT_SHIFT	20
- #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
-@@ -85,6 +93,8 @@ struct sdhci_msm_host {
- 	unsigned long clk_rate;
- 	struct mmc_host *mmc;
- 	bool use_14lpp_dll_reset;
-+	bool tuning_done;
-+	bool calibration_done;
- };
- 
- /* Platform specific tuning */
-@@ -173,8 +183,8 @@ static int msm_config_cm_dll_phase(struct sdhci_host *host, u8 phase)
-  * Find out the greatest range of consecuitive selected
-  * DLL clock output phases that can be used as sampling
-  * setting for SD3.0 UHS-I card read operation (in SDR104
-- * timing mode) or for eMMC4.5 card read operation (in HS200
-- * timing mode).
-+ * timing mode) or for eMMC4.5 card read operation (in
-+ * HS400/HS200 timing mode).
-  * Select the 3/4 of the range and configure the DLL with the
-  * selected DLL clock output phase.
-  */
-@@ -430,9 +440,10 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- 	 * Tuning is required for SDR104, HS200 and HS400 cards and
- 	 * if clock frequency is greater than 100MHz in these modes.
- 	 */
--	if (host->clock <= 100 * 1000 * 1000 ||
--	    !((ios.timing == MMC_TIMING_MMC_HS200) ||
--	      (ios.timing == MMC_TIMING_UHS_SDR104)))
-+	if (host->clock <= CORE_FREQ_100MHZ ||
-+	    !(ios.timing == MMC_TIMING_MMC_HS400 ||
-+	    ios.timing == MMC_TIMING_MMC_HS200 ||
-+	    ios.timing == MMC_TIMING_UHS_SDR104))
- 		return 0;
- 
- retry:
-@@ -483,6 +494,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- 		rc = -EIO;
- 	}
- 
-+	if (!rc)
-+		msm_host->tuning_done = true;
- 	return rc;
- }
- 
-@@ -490,7 +503,10 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 					unsigned int uhs)
+@@ -637,6 +637,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
  {
- 	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	u16 ctrl_2;
-+	u32 config;
- 
- 	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 	/* Select Bus Speed Mode for host */
-@@ -505,6 +521,7 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 	case MMC_TIMING_UHS_SDR50:
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
- 		break;
-+	case MMC_TIMING_MMC_HS400:
- 	case MMC_TIMING_MMC_HS200:
- 	case MMC_TIMING_UHS_SDR104:
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-@@ -521,11 +538,31 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 	 * provide feedback clock, the mode selection can be any value less
- 	 * than 3'b011 in bits [2:0] of HOST CONTROL2 register.
- 	 */
--	if (host->clock <= 100000000 &&
--	    (uhs == MMC_TIMING_MMC_HS400 ||
--	     uhs == MMC_TIMING_MMC_HS200 ||
--	     uhs == MMC_TIMING_UHS_SDR104))
--		ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	if (host->clock <= CORE_FREQ_100MHZ) {
-+		if ((uhs == MMC_TIMING_MMC_HS400) ||
-+		    (uhs == MMC_TIMING_MMC_HS200) ||
-+		    (uhs == MMC_TIMING_UHS_SDR104))
-+			ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+		/*
-+		 * Make sure DLL is disabled when not required
-+		 *
-+		 * Write 1 to DLL_RST bit of DLL_CONFIG register
-+		 */
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+		config |= CORE_DLL_RST;
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+
-+		/* Write 1 to DLL_PDN bit of DLL_CONFIG register */
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+		config |= CORE_DLL_PDN;
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+
-+		/*
-+		 * The DLL needs to be restored and CDCLP533 recalibrated
-+		 * when the clock frequency is set back to 400MHz.
-+		 */
-+		msm_host->calibration_done = false;
-+	}
- 
- 	dev_dbg(mmc_dev(mmc), "%s: clock=%u uhs=%u ctrl_2=0x%x\n",
- 		mmc_hostname(host->mmc), host->clock, uhs, ctrl_2);
-@@ -638,6 +675,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	struct mmc_ios curr_ios = host->mmc->ios;
-+	u32 config;
++	struct mmc_ios curr_ios = host->mmc->ios;
  	int rc;
  
  	if (!clock) {
-@@ -656,6 +694,70 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	    (curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
- 	    (curr_ios.timing == MMC_TIMING_MMC_HS400))
- 		clock *= 2;
-+	/*
-+	 * In general all timing modes are controlled via UHS mode select in
-+	 * Host Control2 register. eMMC specific HS200/HS400 doesn't have
-+	 * their respective modes defined here, hence we use these values.
-+	 *
-+	 * HS200 - SDR104 (Since they both are equivalent in functionality)
-+	 * HS400 - This involves multiple configurations
-+	 *		Initially SDR104 - when tuning is required as HS200
-+	 *		Then when switching to DDR @ 400MHz (HS400) we use
-+	 *		the vendor specific HC_SELECT_IN to control the mode.
-+	 *
-+	 * In addition to controlling the modes we also need to select the
-+	 * correct input clock for DLL depending on the mode.
-+	 *
-+	 * HS400 - divided clock (free running MCLK/2)
-+	 * All other modes - default (free running MCLK)
-+	 */
-+	if (curr_ios.timing == MMC_TIMING_MMC_HS400) {
-+		/* Select the divided clock (free running MCLK/2) */
-+		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+		config &= ~CORE_HC_MCLK_SEL_MASK;
-+		config |= CORE_HC_MCLK_SEL_HS400;
-+
-+		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-+		/*
-+		 * Select HS400 mode using the HC_SELECT_IN from VENDOR SPEC
-+		 * register
-+		 */
-+		if (msm_host->tuning_done && !msm_host->calibration_done) {
-+			/*
-+			 * Write 0x6 to HC_SELECT_IN and 1 to HC_SELECT_IN_EN
-+			 * field in VENDOR_SPEC_FUNC
-+			 */
-+			config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+			config |= CORE_HC_SELECT_IN_HS400;
-+			config |= CORE_HC_SELECT_IN_EN;
-+			writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-+		}
-+	} else {
-+		/* Select the default clock (free running MCLK) */
-+		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+		config &= ~CORE_HC_MCLK_SEL_MASK;
-+		config |= CORE_HC_MCLK_SEL_DFLT;
-+		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-+
-+		/*
-+		 * Disable HC_SELECT_IN to be able to use the UHS mode select
-+		 * configuration from Host Control2 register for all other
-+		 * modes.
-+		 *
-+		 * Write 0 to HC_SELECT_IN and HC_SELECT_IN_EN field
-+		 * in VENDOR_SPEC_FUNC
-+		 */
-+		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+		config &= ~CORE_HC_SELECT_IN_EN;
-+		config &= ~CORE_HC_SELECT_IN_MASK;
-+		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
-+	}
-+
-+	/*
-+	 * Make sure above writes impacting free running MCLK are completed
-+	 * before changing the clk_rate at GCC.
-+	 */
-+	wmb();
+@@ -645,11 +646,23 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
  
+ 	spin_unlock_irq(&host->lock);
++	/*
++	 * The SDHC requires internal clock frequency to be double the
++	 * actual clock that will be set for DDR mode. The controller
++	 * uses the faster clock(100/400MHz) for some of its parts and
++	 * send the actual required clock (50/200MHz) to the card.
++	 */
++	if ((curr_ios.timing == MMC_TIMING_UHS_DDR50) ||
++	    (curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
++	    (curr_ios.timing == MMC_TIMING_MMC_HS400))
++		clock *= 2;
++
  	if (clock != msm_host->clk_rate) {
  		rc = clk_set_rate(msm_host->clk, clock);
-@@ -804,6 +906,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	/* Set HC_MODE_EN bit in HC_MODE register */
- 	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
- 
-+	/* Set FF_CLK_SW_RST_DIS bit in HC_MODE register */
-+	config = readl_relaxed(msm_host->core_mem + CORE_HC_MODE);
-+	config |= FF_CLK_SW_RST_DIS;
-+	writel_relaxed(config, msm_host->core_mem + CORE_HC_MODE);
-+
- 	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
- 	dev_dbg(&pdev->dev, "Host Version: 0x%x Vendor Version 0x%x\n",
- 		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+ 		if (rc) {
+-			pr_err("%s: Failed to set clock at rate %u\n",
+-			       mmc_hostname(host->mmc), clock);
++			pr_err("%s: Failed to set clock at rate %u at timing %d\n",
++			       mmc_hostname(host->mmc), clock,
++			       curr_ios.timing);
+ 			spin_lock_irq(&host->lock);
+ 			goto out;
+ 		}
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
