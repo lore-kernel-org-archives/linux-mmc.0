@@ -1,53 +1,83 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCHv2 01/10] mmc: dw_mmc: display the real register value on debugfs
-Date: Tue, 15 Nov 2016 19:12:23 +0900
-Message-ID: <20161115101232.3854-2-jh80.chung@samsung.com>
-References: <20161115101232.3854-1-jh80.chung@samsung.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20161115101232.3854-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+From: Michael Walle <michael@walle.cc>
+Subject: [PATCH v4] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
+Date: Tue, 15 Nov 2016 11:13:16 +0100
+Message-ID: <1479204796-23982-1-git-send-email-michael@walle.cc>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@nxp.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Michael Walle <michael@walle.cc>
 List-Id: linux-mmc@vger.kernel.org
 
-Developer wants to see the real register value, not register offset.
-This patch fixed to display the real value of register.
+Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
+cards in __mmc_switch()") the ESDHC driver is broken:
+  mmc0: Card stuck in programming state! __mmc_switch
+  mmc0: error -110 whilst initialising MMC card
 
-Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Since this commit __mmc_switch() uses ->card_busy(), which is
+sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
+PRESENT_STATE register, specifically the DAT0 signal level bit. But the
+ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
+required to make the driver work again.
+
+Signed-off-by: Michael Walle <michael@walle.cc>
+Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
+Acked-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- drivers/mmc/host/dw_mmc.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+v4:
+ - add and use SDHCI_CMD_LVL macro
+ - fix typo in comment, thanks alex
+ - add acked-by
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a16c537..e53899e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -165,12 +165,14 @@ static const struct file_operations dw_mci_req_fops = {
- 
- static int dw_mci_regs_show(struct seq_file *s, void *v)
- {
--	seq_printf(s, "STATUS:\t0x%08x\n", SDMMC_STATUS);
--	seq_printf(s, "RINTSTS:\t0x%08x\n", SDMMC_RINTSTS);
--	seq_printf(s, "CMD:\t0x%08x\n", SDMMC_CMD);
--	seq_printf(s, "CTRL:\t0x%08x\n", SDMMC_CTRL);
--	seq_printf(s, "INTMASK:\t0x%08x\n", SDMMC_INTMASK);
--	seq_printf(s, "CLKENA:\t0x%08x\n", SDMMC_CLKENA);
-+	struct dw_mci *host = s->private;
+v3:
+ - explain the bits in the comments
+ - use bits[19:0] from the original value, all other will be taken from the
+   fixup value.
+
+v2:
+ - use lower bits of the original value (that was actually a typo)
+ - add fixes tag
+ - fix typo
+
+ drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
+ drivers/mmc/host/sdhci.h          |  1 +
+ 2 files changed, 15 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index fb71c86..1bb11e4 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -66,6 +66,20 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 			return ret;
+ 		}
+ 	}
++	/*
++	 * The DAT[3:0] line signal levels and the CMD line signal level are
++	 * not compatible with standard SDHC register. The line signal levels
++	 * DAT[7:0] are at bits 31:24 and the command line signal level is at
++	 * bit 23. All other bits are the same as in the standard SDHC
++	 * register.
++	 */
++	if (spec_reg == SDHCI_PRESENT_STATE) {
++		ret = value & 0x000fffff;
++		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
++		ret |= (value << 1) & SDHCI_CMD_LVL;
++		return ret;
++	}
 +
-+	seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
-+	seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
-+	seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
-+	seq_printf(s, "CTRL:\t0x%08x\n", mci_readl(host, CTRL));
-+	seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
-+	seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
- 
- 	return 0;
+ 	ret = value;
+ 	return ret;
  }
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c722cd2..ea38962 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -73,6 +73,7 @@
+ #define  SDHCI_DATA_LVL_MASK	0x00F00000
+ #define   SDHCI_DATA_LVL_SHIFT	20
+ #define   SDHCI_DATA_0_LVL_MASK	0x00100000
++#define  SDHCI_CMD_LVL		0x01000000
+ 
+ #define SDHCI_HOST_CONTROL	0x28
+ #define  SDHCI_CTRL_LED		0x01
 -- 
-2.10.1
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2.1.4
