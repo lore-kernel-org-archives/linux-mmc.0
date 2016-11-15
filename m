@@ -1,23 +1,19 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Alexander Stein <alexander.stein@systec-electronic.com>
 Subject: Re: [PATCH v3] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Tue, 15 Nov 2016 09:11:04 +0200
-Message-ID: <bd5c78ca-746a-2a96-4b44-ee14ce39b917@intel.com>
+Date: Tue, 15 Nov 2016 08:28:03 +0100
+Message-ID: <1689774.ZqPk1S03Lz@ws-stein>
 References: <1479136348-30706-1-git-send-email-michael@walle.cc>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:9749 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932343AbcKOHQC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 15 Nov 2016 02:16:02 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1479136348-30706-1-git-send-email-michael@walle.cc>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Michael Walle <michael@walle.cc>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@freescale.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Walle <michael@walle.cc>, linux-kernel@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, yangbo lu <yangbo.lu@freescale.com>
 
-On 14/11/16 17:12, Michael Walle wrote:
+On Monday 14 November 2016 16:12:27, Michael Walle wrote:
 > Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
 > cards in __mmc_switch()") the ESDHC driver is broken:
 >   mmc0: Card stuck in programming state! __mmc_switch
@@ -30,8 +26,8 @@ On 14/11/16 17:12, Michael Walle wrote:
 > required to make the driver work again.
 > 
 > Signed-off-by: Michael Walle <michael@walle.cc>
-> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
-> ---
+> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in
+> __mmc_switch()") ---
 > v3:
 >  - explain the bits in the comments
 >  - use bits[19:0] from the original value, all other will be taken from the
@@ -45,8 +41,8 @@ On 14/11/16 17:12, Michael Walle wrote:
 >  drivers/mmc/host/sdhci-of-esdhc.c | 13 +++++++++++++
 >  1 file changed, 13 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index fb71c86..74cf3b1 100644
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+> b/drivers/mmc/host/sdhci-of-esdhc.c index fb71c86..74cf3b1 100644
 > --- a/drivers/mmc/host/sdhci-of-esdhc.c
 > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 > @@ -66,6 +66,19 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
@@ -57,35 +53,8 @@ On 14/11/16 17:12, Michael Walle wrote:
 > +	 * The DAT[3:0] line signal levels and the CMD line signal level are
 > +	 * not compatible with standard SDHC register. The line signal levels
 > +	 * DAT[7:0] are at bits 31:24 and the line signal level is at bit 23.
-> +	 * All other bits are the same as in the standard SDHC register.
-> +	 */
-> +	if (spec_reg == SDHCI_PRESENT_STATE) {
-> +		ret = value & 0x000fffff;
-> +		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
-> +		ret |= (value << 1) & 0x01000000;
+                                          ^
+I guess there is a "command" missing, no?
 
-Please define the command line level bit in sdhci.h and use that here.
-e.g.
-
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17fb7eb..2570455b219a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -73,6 +73,7 @@
- #define  SDHCI_DATA_LVL_MASK	0x00F00000
- #define   SDHCI_DATA_LVL_SHIFT	20
- #define   SDHCI_DATA_0_LVL_MASK	0x00100000
-+#define  SDHCI_CMD_LVL		0x01000000
- 
- #define SDHCI_HOST_CONTROL	0x28
- #define  SDHCI_CTRL_LED		0x01
-
-
-> +		return ret;
-> +	}
-> +
->  	ret = value;
->  	return ret;
->  }
-> 
-
+Best regards,
+Alexander
