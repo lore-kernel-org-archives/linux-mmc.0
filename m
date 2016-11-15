@@ -1,156 +1,82 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v5 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-Date: Tue, 15 Nov 2016 14:21:00 +0900
-Message-ID: <983fdc91-5487-3d71-b55c-88edc7b579e7@samsung.com>
-References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
- <1478568298-18380-2-git-send-email-jun.nie@linaro.org>
- <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
- <CGME20161114100051epcas5p28b82151aa7572fb76e190e84d40ba344@epcas5p2.samsung.com>
- <CABymUCMWsCDfM58Ezpu8F7=vgpcPf_pzpbgr8OjCjOJ921tCEg@mail.gmail.com>
- <cfd86f7e-71b1-a878-3486-7ce6e0fa5222@samsung.com>
- <935402c2-c0be-252b-89b8-c69e250c58d3@rock-chips.com>
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: [PATCH 1/2] mmc: sdhci-pci: Let devices define their own private data
+Date: Tue, 15 Nov 2016 12:03:53 +0530
+Message-ID: <97ccb387-da94-8b3c-1622-8866b7737424@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:42862 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754198AbcKOFVD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 00:21:03 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGO02E5K46YE750@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 15 Nov 2016 14:21:00 +0900 (KST)
-In-reply-to: <935402c2-c0be-252b-89b8-c69e250c58d3@rock-chips.com>
+Received: from mail-co1nam03on0045.outbound.protection.outlook.com ([104.47.40.45]:28832
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750766AbcKOGtM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 15 Nov 2016 01:49:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Jun Nie <jun.nie@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 11/15/2016 09:48 AM, Shawn Lin wrote:
-> On 2016/11/14 18:04, Jaehoon Chung wrote:
->> On 11/14/2016 07:00 PM, Jun Nie wrote:
->>> 2016-11-14 15:58 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
->>>> On 2016/11/8 9:24, Jun Nie wrote:
->>>>>
->>>>> Document the device-tree binding of ZTE MMC host on
->>>>> ZX296718 SoC.
->>>>>
->>>>> Signed-off-by: Jun Nie <jun.nie@linaro.org>
->>>>> ---
->>>>>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35
->>>>> ++++++++++++++++++++++
->>>>>  1 file changed, 35 insertions(+)
->>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->>>>>
->>>>> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->>>>> b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->>>>> new file mode 100644
->>>>> index 0000000..c175c4b
->>>>> --- /dev/null
->>>>> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->>>>> @@ -0,0 +1,35 @@
->>>>> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
->>>>> +  Host Controller
->>>>> +
->>>>> +The Synopsys designware mobile storage host controller is used to
->>>>> interface
->>>>> +a SoC with storage medium such as eMMC or SD/MMC cards. This file
->>>>> documents
->>>>> +differences between the core Synopsys dw mshc controller properties
->>>>> described
->>>>> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
->>>>> +extensions to the Synopsys Designware Mobile Storage Host Controller.
->>>>> +
->>>>> +Required Properties:
->>>>> +
->>>>> +* compatible: should be
->>>>> +       - "zte,zx296718-dw-mshc": for ZX SoCs
->>>>> +
->>>>> +Example:
->>>>> +
->>>>> +       mmc1: mmc@1110000 {
->>>>> +               compatible = "zte,zx296718-dw-mshc";
->>>>> +               #address-cells = <1>;
->>>>> +               #size-cells = <0>;
->>>>> +               reg = <0x01110000 0x1000>;
->>>>> +               interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
->>>>> +               fifo-depth = <32>;
->>>>> +               data-addr = <0x200>;
->>>>> +               fifo-watermark-aligned;
->>>>> +               bus-width = <4>;
->>>>> +               clock-frequency = <50000000>;
->>>>
->>>>
->>>> do you need both clock-frequency and max-frequency here?
->>>
->>> According to dts document, clock-frequency is for clock configuration
->>> when dw core probe. max-frequency is for mmc core to limit max
->>> frequency for any cards at any time. Do you have any suggestion? Thank
->>> you for your time!
->>
->> As i know, Jun's comment is right. :)
->> clock-frequency should be used with clk_set_rate().
-> 
-> yup, I was thinking that should we reuse max-frequency instead of
-> clock-frequency in the future?  I saw most of the DT(I didn't check all
-> of them) assign clock-frequency to the same value as max of clock-
-> freq-min-max. I think it's pointless if the clock-frequency is different
-> from max-frequency as both of them will be setted via dw_mmc and finally
-> we only take min(clock-frequency, max-frquency). Was I missing
-> something?
+From: Adrian Hunter <adrian.hunter@intel.com>
+Let devices define their own private data to facilitate device-specific
+operations. The size of the private structure is specified in the
+sdhci_pci_fixes structure,then sdhci_pci_probe_slot() will allocate extra
+space for it, and sdhci_pci_priv() can be used to get a reference to it.
 
-Well, clock-frequency is for setting CMU. but max-frequency is not really used for CMU.
-For example, clock-frequency is 100MHz. Max-frequency is 50MHz.
-It's possible to use. then dwmmc controller should divide to 2 for max-frequency.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 3 ++-
+ drivers/mmc/host/sdhci-pci.h      | 7 +++++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
-There are too many cases. Source clock can be 400MHz or 200MHz..etc..
-but maximum clock is decided according to busmode.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 1d9e00a..782c8d2 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1646,6 +1646,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 	struct sdhci_pci_slot *slot;
+ 	struct sdhci_host *host;
+ 	int ret, bar = first_bar + slotno;
++	size_t priv_size = chip->fixes ? chip->fixes->priv_size : 0;
 
-I'm not sure because i didn't have HW knowledge..
-but in my experience, 
-1) 400MHz/2 = 200MHz,
-2) 800MHz/4 = 200MHz.
+ 	if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
+ 		dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
+@@ -1667,7 +1668,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		return ERR_PTR(-ENODEV);
+ 	}
 
-1) and 2) are same value as 200MHz. but those clock phase might be a little difference.
+-	host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
++	host = sdhci_alloc_host(&pdev->dev, sizeof(*slot) + priv_size);
+ 	if (IS_ERR(host)) {
+ 		dev_err(&pdev->dev, "cannot allocate host\n");
+ 		return ERR_CAST(host);
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 6bccf56..0bfd568 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -67,6 +67,7 @@ struct sdhci_pci_fixes {
+ 	int			(*resume) (struct sdhci_pci_chip *);
 
-So i want to keep the clock-frequency for setting the initial CMU value.
-What your opinion? :)
+ 	const struct sdhci_ops	*ops;
++	size_t			priv_size;
+ };
 
-Best Regards,
-Jaehoon Chung
+ struct sdhci_pci_slot {
+@@ -87,6 +88,7 @@ struct sdhci_pci_slot {
+ 				     struct mmc_card *card,
+ 				     unsigned int max_dtr, int host_drv,
+ 				     int card_drv, int *drv_type);
++	unsigned long		private[0] ____cacheline_aligned;
+ };
 
-> 
-> What is your opinion, Jaehoon and Jun? :)
-> 
->>
->>>
->>>>
->>>>> +               clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
->>>>> +               clock-names = "biu", "ciu";
->>>>> +               num-slots = <1>;
->>>>> +               max-frequency = <50000000>;
->>>>> +               cap-sdio-irq;
->>>>> +               cap-sd-highspeed;
->>>>> +               status = "disabled";
->>>>> +       };
->>>>>
->>>>
->>>>
->>>> -- 
->>>> Best Regards
->>>> Shawn Lin
->>>>
->>>
->>>
->>>
->>
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> 
+ struct sdhci_pci_chip {
+@@ -101,4 +103,9 @@ struct sdhci_pci_chip {
+ 	struct sdhci_pci_slot	*slots[MAX_SLOTS]; /* Pointers to host slots */
+ };
 
++static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
++{
++	return (void *)slot->private;
++}
++
+ #endif /* __SDHCI_PCI_H */
+-- 
+2.7.4
