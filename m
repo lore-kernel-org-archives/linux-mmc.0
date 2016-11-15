@@ -1,61 +1,85 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCHv2 09/10] mmc: dw_mmc: The "clock-freq-min-max" property was
- deprecated
-Date: Tue, 15 Nov 2016 19:12:31 +0900
-Message-ID: <20161115101232.3854-10-jh80.chung@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv2 05/10] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by
+ default
+Date: Tue, 15 Nov 2016 19:12:27 +0900
+Message-ID: <20161115101232.3854-6-jh80.chung@samsung.com>
 References: <20161115101232.3854-1-jh80.chung@samsung.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20161115101232.3854-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:60899 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941563AbcKOKMq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 05:12:46 -0500
+In-reply-to: <20161115101232.3854-1-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, heiko@sntech.de, shawn.lin@rock-chips.com, robh+dt@kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-The "clock-freq-min-max" property was deprecated.
-There is "max-frequency" property in drivers/mmc/core/host.c
-"max-frequency" can be replaced with "clock-freq-min-max".
-Minimum clock value might be set to 100K by default.
-Then MMC core should try to find the correct value from 400K to 100K.
-So it just needs to set Maximum clock value.
+stop_cmdr should be set to values relevant to stop command.
+It migth be assigned to values whatever there is mrq->stop or not.
+Then it doesn't need to use dw_mci_prepare_command().
+It's enough to use the prep_stop_abort for preparing stop command.
 
-Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Tested-by: Heiko Stuebner <heiko@sntech.de>
 ---
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 3 ++-
- drivers/mmc/host/dw_mmc.c                                  | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/dw_mmc.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index bfa461a..1279a22 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -59,8 +59,9 @@ Optional properties:
-   is specified and the ciu clock is specified then we'll try to set the ciu
-   clock to this at probe time.
- 
--* clock-freq-min-max: Minimum and Maximum clock frequency for card output
-+* clock-freq-min-max (DEPRECATED): Minimum and Maximum clock frequency for card output
-   clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
-+	  (Use the "max-frequency" instead of "clock-freq-min-max".)
- 
- * num-slots: specifies the number of slots supported by the controller.
-   The number of physical slots actually used could be equal or less than the
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ec0ba79..48e968a 100644
+index 3cda68c..12e1107 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2608,6 +2608,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 		mmc->f_min = DW_MCI_FREQ_MIN;
- 		mmc->f_max = DW_MCI_FREQ_MAX;
- 	} else {
-+		dev_info(host->dev,
-+			"'clock-freq-min-max' property was deprecated.\n");
- 		mmc->f_min = freq[0];
- 		mmc->f_max = freq[1];
+@@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
+ 
+ static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
+ {
+-	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
++	struct mmc_command *stop = &host->stop_abort;
+ 
+ 	dw_mci_start_command(host, stop, host->stop_cmdr);
+ }
+@@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 		spin_unlock_irqrestore(&host->irq_lock, irqflags);
  	}
+ 
+-	if (mrq->stop)
+-		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
+-	else
+-		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
++	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
+ }
+ 
+ static void dw_mci_start_request(struct dw_mci *host,
+@@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			host->cmd = NULL;
+ 			host->data = NULL;
+ 
+-			if (mrq->stop)
++			if (!mrq->sbc && mrq->stop)
+ 				dw_mci_command_complete(host, mrq->stop);
+ 			else
+ 				host->cmd_status = 0;
 -- 
 2.10.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
