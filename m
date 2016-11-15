@@ -1,65 +1,50 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCHv2 06/10] mmc: core: move the cookie's enum values from sdhci.h
- to mmc.h
-Date: Tue, 15 Nov 2016 19:12:28 +0900
-Message-ID: <20161115101232.3854-7-jh80.chung@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv2 02/10] mmc: dw_mmc: fix the debug message for checking card's
+ present
+Date: Tue, 15 Nov 2016 19:12:24 +0900
+Message-ID: <20161115101232.3854-3-jh80.chung@samsung.com>
 References: <20161115101232.3854-1-jh80.chung@samsung.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20161115101232.3854-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:51235 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941425AbcKOKMn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 05:12:43 -0500
+In-reply-to: <20161115101232.3854-1-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, heiko@sntech.de, shawn.lin@rock-chips.com, robh+dt@kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-It's not for only sdhci controller.
-So it can be moved from sdhci.h to mmc.h. And renamed from sdhci_cookie
-to mmc_cookie.
+If display the debug message, this message should be spamming.
+If flags is maintained the previous value, didn't display the debug
+message.
 
-Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Tested-by: Heiko Stuebner <heiko@sntech.de>
 ---
- drivers/mmc/host/sdhci.h | 6 ------
- include/linux/mmc/core.h | 6 ++++++
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17..325663b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -321,12 +321,6 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index e53899e..6c0c4c5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1537,13 +1537,10 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 			== 0 ? 1 : 0;
  
--enum sdhci_cookie {
--	COOKIE_UNMAPPED,
--	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
--	COOKIE_MAPPED,		/* mapped by sdhci_prepare_data() */
--};
--
- struct sdhci_host {
- 	/* Data set by hardware interface driver */
- 	const char *hw_name;	/* Hardware bus name */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 0ce928b..82d707f 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -118,6 +118,12 @@ struct mmc_command {
- 	struct mmc_request	*mrq;		/* associated request */
- };
+ 	spin_lock_bh(&host->lock);
+-	if (present) {
+-		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
++	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+ 		dev_dbg(&mmc->class_dev, "card is present\n");
+-	} else {
+-		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
++	else if (!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+ 		dev_dbg(&mmc->class_dev, "card is not present\n");
+-	}
+ 	spin_unlock_bh(&host->lock);
  
-+enum mmc_cookie {
-+	COOKIE_UNMAPPED,
-+	COOKIE_PRE_MAPPED,	/* mapped by pre_req() of controller */
-+	COOKIE_MAPPED,		/* mapped by prepare_data() of controller */
-+};
-+
- struct mmc_data {
- 	unsigned int		timeout_ns;	/* data timeout (in ns, max 80ms) */
- 	unsigned int		timeout_clks;	/* data timeout (in clocks) */
+ 	return present;
 -- 
 2.10.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
