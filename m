@@ -1,42 +1,131 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [PATCH v7 02/14] clk: qcom: Move all sdcc rcgs to use
- clk_rcg2_floor_ops
-Date: Mon, 14 Nov 2016 16:06:35 -0800
-Message-ID: <c17ee2b7-0f4a-c310-f8b8-ec48daf57da0@redhat.com>
-References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
- <1479103248-9491-3-git-send-email-riteshh@codeaurora.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v5 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Tue, 15 Nov 2016 08:48:24 +0800
+Message-ID: <935402c2-c0be-252b-89b8-c69e250c58d3@rock-chips.com>
+References: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
+ <1478568298-18380-2-git-send-email-jun.nie@linaro.org>
+ <b72dcd9c-aa90-a487-dbfb-6682fcdf015b@rock-chips.com>
+ <CGME20161114100051epcas5p28b82151aa7572fb76e190e84d40ba344@epcas5p2.samsung.com>
+ <CABymUCMWsCDfM58Ezpu8F7=vgpcPf_pzpbgr8OjCjOJ921tCEg@mail.gmail.com>
+ <cfd86f7e-71b1-a878-3486-7ce6e0fa5222@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1479103248-9491-3-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.136]:43996 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752852AbcKOAsh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2016 19:48:37 -0500
+In-Reply-To: <cfd86f7e-71b1-a878-3486-7ce6e0fa5222@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Jun Nie <jun.nie@linaro.org>
+Cc: shawn.lin@rock-chips.com, Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Liu <jason.liu@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 2016-11-13 10:00 PM, Ritesh Harjani wrote:
-> From: Rajendra Nayak <rnayak@codeaurora.org>
+On 2016/11/14 18:04, Jaehoon Chung wrote:
+> On 11/14/2016 07:00 PM, Jun Nie wrote:
+>> 2016-11-14 15:58 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
+>>> On 2016/11/8 9:24, Jun Nie wrote:
+>>>>
+>>>> Document the device-tree binding of ZTE MMC host on
+>>>> ZX296718 SoC.
+>>>>
+>>>> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+>>>> ---
+>>>>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35
+>>>> ++++++++++++++++++++++
+>>>>  1 file changed, 35 insertions(+)
+>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>>>> b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>>>> new file mode 100644
+>>>> index 0000000..c175c4b
+>>>> --- /dev/null
+>>>> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>>>> @@ -0,0 +1,35 @@
+>>>> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
+>>>> +  Host Controller
+>>>> +
+>>>> +The Synopsys designware mobile storage host controller is used to
+>>>> interface
+>>>> +a SoC with storage medium such as eMMC or SD/MMC cards. This file
+>>>> documents
+>>>> +differences between the core Synopsys dw mshc controller properties
+>>>> described
+>>>> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
+>>>> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+>>>> +
+>>>> +Required Properties:
+>>>> +
+>>>> +* compatible: should be
+>>>> +       - "zte,zx296718-dw-mshc": for ZX SoCs
+>>>> +
+>>>> +Example:
+>>>> +
+>>>> +       mmc1: mmc@1110000 {
+>>>> +               compatible = "zte,zx296718-dw-mshc";
+>>>> +               #address-cells = <1>;
+>>>> +               #size-cells = <0>;
+>>>> +               reg = <0x01110000 0x1000>;
+>>>> +               interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+>>>> +               fifo-depth = <32>;
+>>>> +               data-addr = <0x200>;
+>>>> +               fifo-watermark-aligned;
+>>>> +               bus-width = <4>;
+>>>> +               clock-frequency = <50000000>;
+>>>
+>>>
+>>> do you need both clock-frequency and max-frequency here?
+>>
+>> According to dts document, clock-frequency is for clock configuration
+>> when dw core probe. max-frequency is for mmc core to limit max
+>> frequency for any cards at any time. Do you have any suggestion? Thank
+>> you for your time!
 >
-> The sdcc driver for msm8996/msm8916/msm8974 and apq8084
-> expects a clk_set_rate() on the sdcc rcg clk to set
-> a floor value of supported clk rate closest to the requested
-> rate, by looking up the frequency table.
-> So move all the sdcc rcgs on all these platforms to use the
-> newly introduced clk_rcg2_floor_ops
+> As i know, Jun's comment is right. :)
+> clock-frequency should be used with clk_set_rate().
+
+yup, I was thinking that should we reuse max-frequency instead of
+clock-frequency in the future?  I saw most of the DT(I didn't check all
+of them) assign clock-frequency to the same value as max of clock-
+freq-min-max. I think it's pointless if the clock-frequency is different
+from max-frequency as both of them will be setted via dw_mmc and finally
+we only take min(clock-frequency, max-frquency). Was I missing
+something?
+
+What is your opinion, Jaehoon and Jun? :)
+
 >
-> Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/clk/qcom/gcc-apq8084.c | 8 ++++----
->  drivers/clk/qcom/gcc-msm8916.c | 4 ++--
->  drivers/clk/qcom/gcc-msm8974.c | 8 ++++----
->  drivers/clk/qcom/gcc-msm8996.c | 8 ++++----
+>>
+>>>
+>>>> +               clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
+>>>> +               clock-names = "biu", "ciu";
+>>>> +               num-slots = <1>;
+>>>> +               max-frequency = <50000000>;
+>>>> +               cap-sdio-irq;
+>>>> +               cap-sd-highspeed;
+>>>> +               status = "disabled";
+>>>> +       };
+>>>>
+>>>
+>>>
+>>> --
+>>> Best Regards
+>>> Shawn Lin
+>>>
+>>
+>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Can you please include the same changes for gcc-msm8994.c as it should 
-be in sboyd's tree?
 
-If not I will send a patch directly, either way works for me.
+-- 
+Best Regards
+Shawn Lin
 
-
--jeremy
