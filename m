@@ -1,47 +1,83 @@
-From: Fengguang Wu <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v7 11/14] mmc: sdhci-msm: Add HS400 platform support
-Date: Tue, 15 Nov 2016 08:53:50 +0800
-Message-ID: <20161115005350.s657okf2jifdwj6d@wfg-t540p.sh.intel.com>
-References: <1479103248-9491-12-git-send-email-riteshh@codeaurora.org>
- <201611142112.EdLY7cAN%fengguang.wu@intel.com>
- <CAPDyKFoUiGgXhLtW9-+iAxdV6sy4+wgQfW8P5+VwsqHc3QwkqA@mail.gmail.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v7 14/14] sdhci: sdhci-msm: update dll configuration
+Date: Tue, 15 Nov 2016 09:53:27 +0530
+Message-ID: <a182baf9-4ec5-8491-0385-94f37999f854@codeaurora.org>
+References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
+ <1479103248-9491-15-git-send-email-riteshh@codeaurora.org>
+ <20161114195749.GJ5177@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoUiGgXhLtW9-+iAxdV6sy4+wgQfW8P5+VwsqHc3QwkqA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "kbuild-all-JC7UmRfGjtg@public.gmane.org" <kbuild-all-JC7UmRfGjtg@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Andy Gross <andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, "linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Georgi Djakov <georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Lemberg <alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Mateusz Nowak <mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yuliy Izrailov <Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Asutosh Das <asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "kdorfman-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org" <kdorfman-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, David Griego <david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20161114195749.GJ5177@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, Krishna Konda <kkonda@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 14, 2016 at 04:44:19PM +0100, Ulf Hansson wrote:
->Hi,
->
->On 14 November 2016 at 14:53, kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> Hi Venkat,
->>
->> [auto build test ERROR on ulf.hansson-mmc/next]
->> [also build test ERROR on v4.9-rc5]
->> [cannot apply to next-20161114]
->> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
->
->Here we go...
->
->>
->> url:    https://github.com/0day-ci/linux/commits/Ritesh-Harjani/mmc-sdhci-msm-Add-clk-rates-DDR-HS400-support/20161114-142815
->> base:   https://git.linaro.org/people/ulf.hansson/mmc next
->
->This above is the old tree, here's the new:
->git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
->
->Could you please update the path in the build system?
 
-OK, done.
 
-Regards,
-Fengguang
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 11/15/2016 1:27 AM, Stephen Boyd wrote:
+> On 11/14, Ritesh Harjani wrote:
+>> @@ -903,7 +998,33 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>  			config |= CORE_HC_SELECT_IN_EN;
+>>  			writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+>>  		}
+>> +		if (!msm_host->clk_rate && !msm_host->use_cdclp533) {
+>> +			/*
+>> +			 * Poll on DLL_LOCK or DDR_DLL_LOCK bits in
+>> +			 * CORE_DLL_STATUS to be set.  This should get set
+>> +			 * within 15 us at 200 MHz.
+>> +			 */
+>> +			rc = readl_relaxed_poll_timeout(host->ioaddr +
+>> +							CORE_DLL_STATUS,
+>> +							dll_lock,
+>> +							(dll_lock &
+>> +							(CORE_DLL_LOCK |
+>> +							CORE_DDR_DLL_LOCK)), 10,
+>> +							1000);
+>> +			if (rc == -ETIMEDOUT)
+>> +				pr_err("%s: Unable to get DLL_LOCK/DDR_DLL_LOCK, dll_status: 0x%08x\n",
+>> +				       mmc_hostname(host->mmc), dll_lock);
+>> +		}
+>>  	} else {
+>> +		if (!msm_host->use_cdclp533) {
+>> +			/* set CORE_PWRSAVE_DLL bit in CORE_VENDOR_SPEC3 */
+>
+> These types of comments are totally useless. The code says
+> exactly what is being done, and the comment is actually wrong in
+> this case. Please remove all these "set/clear bit X in register
+> Y" comments.
+Ok, done.
+
+>
+>> +			config = readl_relaxed(host->ioaddr +
+>> +					CORE_VENDOR_SPEC3);
+>> +			config &= ~CORE_PWRSAVE_DLL;
+>> +			writel_relaxed(config, host->ioaddr +
+>> +					CORE_VENDOR_SPEC3);
+>> +		}
+>> +
+>>  		/* Select the default clock (free running MCLK) */
+>>  		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+>>  		config &= ~CORE_HC_MCLK_SEL_MASK;
+>> @@ -1100,6 +1221,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>  		msm_host->use_14lpp_dll_reset = true;
+>>
+>>  	/*
+>> +	 * SDCC 5 controller with major version 1, minor version 0x34 and later
+>> +	 * with HS 400 mode support will use CM DLL instead of CDC LP 533 DLL.
+>> +	 */
+>> +	if ((core_major == 1) && (core_minor < 0x34))
+>
+> Drop useless parenthesis please.
+Done.
+>
+>> +		msm_host->use_cdclp533 = true;
+>> +
+>> +	/*
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
