@@ -1,96 +1,64 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Tue, 15 Nov 2016 12:25:32 +0200
-Message-ID: <ce853983-6fd2-db3d-2047-1b3f192a0ed1@intel.com>
-References: <1479204796-23982-1-git-send-email-michael@walle.cc>
+Subject: Re: [RFC 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for Intel
+ byt sdio host controller sub-vended by NI
+Date: Tue, 15 Nov 2016 15:20:02 +0200
+Message-ID: <bed36ad5-e3a0-b1bd-3772-675675d1b274@intel.com>
+References: <1478635635-14953-1-git-send-email-zach.brown@ni.com>
+ <1478635635-14953-3-git-send-email-zach.brown@ni.com>
+ <af8a14a2-55a5-1d44-663e-53ff20408f10@intel.com>
+ <20161109160827.GA6138@zach-desktop>
+ <20161111194952.GC16850@jcartwri.amer.corp.natinst.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:27732 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755484AbcKOKab (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 15 Nov 2016 05:30:31 -0500
-In-Reply-To: <1479204796-23982-1-git-send-email-michael@walle.cc>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20161111194952.GC16850@jcartwri.amer.corp.natinst.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>
+Cc: Julia Cartwright <julia@ni.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Walle <michael@walle.cc>, linux-kernel@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, yangbo lu <yangbo.lu@nxp.com>, Alexander Stein <alexander.stein@systec-electronic.com>
 
-On 15/11/16 12:13, Michael Walle wrote:
-> Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
-> cards in __mmc_switch()") the ESDHC driver is broken:
->   mmc0: Card stuck in programming state! __mmc_switch
->   mmc0: error -110 whilst initialising MMC card
+On 11/11/16 21:49, Julia Cartwright wrote:
+> On Wed, Nov 09, 2016 at 10:08:29AM -0600, Zach Brown wrote:
+>> On Wed, Nov 09, 2016 at 03:24:24PM +0200, Adrian Hunter wrote:
+>>> On 08/11/16 22:07, Zach Brown wrote:
+>>>> On NI 9037 boards the max SDIO frequency is limited by trace lengths
+>>>> and other layout choices. The max SDIO frequency is stored in an ACPI
+>>>> table, as MXFQ.
+>>>>
+>>>> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+>>>> f_max field of the host with it.
+>>>>
+>>>> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+>>>> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+>>>> Reviewed-by: Josh Cartwright <joshc@ni.com>
+>>>> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> [..]
+>>>>  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>>>>  {
+>>>> +#ifdef CONFIG_ACPI
+>>>> +	/* Get max freq from ACPI for NI hardware */
+>>>> +	acpi_handle acpi_hdl;
+>>>> +	acpi_status status;
+>>>> +	struct acpi_buffer acpi_result = {
+>>>> +		ACPI_ALLOCATE_BUFFER, NULL };
+>>>> +	union acpi_object *acpi_buffer;
+>>>> +	int max_freq;
+>>>> +
+>>>> +	status = acpi_get_handle(ACPI_HANDLE(&slot->chip->pdev->dev), "MXFQ",
+>>>> +				 &acpi_hdl);
+>>>
+>>> Is "MXFQ" an object that has already been deployed or are you inventing it
+>>> now?  In the latter case, did you consider device properties as an alternative?
+>>>
+>> "MXFQ" is an object that we have already deployed on some of our devices.
 > 
-> Since this commit __mmc_switch() uses ->card_busy(), which is
-> sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
-> PRESENT_STATE register, specifically the DAT0 signal level bit. But the
-> ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
-> required to make the driver work again.
-> 
-> Signed-off-by: Michael Walle <michael@walle.cc>
-> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
-> Acked-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Unfortunately, the whole ACPI device properties table discussion was
+> just starting at the point where we were putting the firmware together
+> for these devices :(.  Had we engineered the firmware today, we would
+> certainly have looked at using it.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+No problem.
 
-> ---
-> v4:
->  - add and use SDHCI_CMD_LVL macro
->  - fix typo in comment, thanks alex
->  - add acked-by
-> 
-> v3:
->  - explain the bits in the comments
->  - use bits[19:0] from the original value, all other will be taken from the
->    fixup value.
-> 
-> v2:
->  - use lower bits of the original value (that was actually a typo)
->  - add fixes tag
->  - fix typo
-> 
->  drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
->  drivers/mmc/host/sdhci.h          |  1 +
->  2 files changed, 15 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index fb71c86..1bb11e4 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -66,6 +66,20 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  			return ret;
->  		}
->  	}
-> +	/*
-> +	 * The DAT[3:0] line signal levels and the CMD line signal level are
-> +	 * not compatible with standard SDHC register. The line signal levels
-> +	 * DAT[7:0] are at bits 31:24 and the command line signal level is at
-> +	 * bit 23. All other bits are the same as in the standard SDHC
-> +	 * register.
-> +	 */
-> +	if (spec_reg == SDHCI_PRESENT_STATE) {
-> +		ret = value & 0x000fffff;
-> +		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
-> +		ret |= (value << 1) & SDHCI_CMD_LVL;
-> +		return ret;
-> +	}
-> +
->  	ret = value;
->  	return ret;
->  }
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index c722cd2..ea38962 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -73,6 +73,7 @@
->  #define  SDHCI_DATA_LVL_MASK	0x00F00000
->  #define   SDHCI_DATA_LVL_SHIFT	20
->  #define   SDHCI_DATA_0_LVL_MASK	0x00100000
-> +#define  SDHCI_CMD_LVL		0x01000000
->  
->  #define SDHCI_HOST_CONTROL	0x28
->  #define  SDHCI_CTRL_LED		0x01
-> 
-
+WRT the code, could acpi_evaluate_integer() be used instead of
+acpi_get_handle()/acpi_evaluate_object()?
