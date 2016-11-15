@@ -1,8 +1,8 @@
 From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCHv2 10/10] Documentation: synopsys-dw-mshc: remove the unused
- properties
-Date: Tue, 15 Nov 2016 19:12:32 +0900
-Message-ID: <20161115101232.3854-11-jh80.chung@samsung.com>
+Subject: [PATCHv2 06/10] mmc: core: move the cookie's enum values from sdhci.h
+ to mmc.h
+Date: Tue, 15 Nov 2016 19:12:28 +0900
+Message-ID: <20161115101232.3854-7-jh80.chung@samsung.com>
 References: <20161115101232.3854-1-jh80.chung@samsung.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-reply-to: <20161115101232.3854-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
@@ -11,32 +11,51 @@ To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-"support-highspeed" was the obsoleted property.
-And "broken-cd" is not synopsys specific property.
-It can be referred to mmc.txt binding Documentation.
+It's not for only sdhci controller.
+So it can be moved from sdhci.h to mmc.h. And renamed from sdhci_cookie
+to mmc_cookie.
 
 Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 5 -----
- 1 file changed, 5 deletions(-)
+ drivers/mmc/host/sdhci.h | 6 ------
+ include/linux/mmc/core.h | 6 ++++++
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index 1279a22..7fd17c3 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -75,11 +75,6 @@ Optional properties:
- * card-detect-delay: Delay in milli-seconds before detecting card after card
-   insert event. The default value is 0.
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 766df17..325663b 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -321,12 +321,6 @@ struct sdhci_adma2_64_desc {
+ /* Allow for a a command request and a data request at the same time */
+ #define SDHCI_MAX_MRQS		2
  
--* supports-highspeed (DEPRECATED): Enables support for high speed cards (up to 50MHz)
--			   (use "cap-mmc-highspeed" or "cap-sd-highspeed" instead)
+-enum sdhci_cookie {
+-	COOKIE_UNMAPPED,
+-	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
+-	COOKIE_MAPPED,		/* mapped by sdhci_prepare_data() */
+-};
 -
--* broken-cd: as documented in mmc core bindings.
--
- * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-   specified we'll defer probe until we can find this regulator.
+ struct sdhci_host {
+ 	/* Data set by hardware interface driver */
+ 	const char *hw_name;	/* Hardware bus name */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 0ce928b..82d707f 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -118,6 +118,12 @@ struct mmc_command {
+ 	struct mmc_request	*mrq;		/* associated request */
+ };
  
++enum mmc_cookie {
++	COOKIE_UNMAPPED,
++	COOKIE_PRE_MAPPED,	/* mapped by pre_req() of controller */
++	COOKIE_MAPPED,		/* mapped by prepare_data() of controller */
++};
++
+ struct mmc_data {
+ 	unsigned int		timeout_ns;	/* data timeout (in ns, max 80ms) */
+ 	unsigned int		timeout_clks;	/* data timeout (in clocks) */
 -- 
 2.10.1
 
