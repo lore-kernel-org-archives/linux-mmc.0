@@ -1,75 +1,46 @@
 From: Zach Brown <zach.brown@ni.com>
-Subject: [RFC v2 1/2] mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller sub-vended by NI
-Date: Tue, 15 Nov 2016 10:32:20 -0600
-Message-ID: <1479227541-21201-2-git-send-email-zach.brown@ni.com>
-References: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
+Subject: [RFC v2 0/2] mmc: sdhci-pci: Use ACPI to set max frequency of sdio host controller
+Date: Tue, 15 Nov 2016 10:32:19 -0600
+Message-ID: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from skprod3.natinst.com ([130.164.80.24]:46713 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752200AbcKOQcZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 15 Nov 2016 11:32:25 -0500
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
 Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
-List-Id: linux-mmc@vger.kernel.org
 
-Add PCI ID for Intel byt sdio host controller sub-vended by NI.
+On some boards, max SDIO frequency is limited by trace lengths and other layout
+choices. We would like a way to specify this limitation so the driver can
+behave accordingly.
 
-The controller has different behavior because of the board layout NI
-puts it on.
+This patch set assumes that the limitation has been reported in an ACPI table
+which the driver can check to get the max frequency.
 
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+The first patch creates a PCI ID and support for the Intel byt sdio where NI is
+the subvendor.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1d9e00a..9741505 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -375,6 +375,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 	return 0;
- }
- 
-+static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-+				 MMC_CAP_WAIT_WHILE_BUSY;
-+	return 0;
-+}
-+
- static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-@@ -447,6 +454,15 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
- 	.ops		= &sdhci_intel_byt_ops,
- };
- 
-+static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			  SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.allow_runtime_pm = true,
-+	.probe_slot	= ni_byt_sdio_probe_slot,
-+	.ops		= &sdhci_intel_byt_ops,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-@@ -1079,6 +1095,14 @@ static const struct pci_device_id pci_ids[] = {
- 	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
- 		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
-+		.subvendor	= PCI_VENDOR_ID_NI,
-+		.subdevice	= 0x7884,
-+		.driver_data	= (kernel_ulong_t)&sdhci_ni_byt_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
- 		.subvendor	= PCI_ANY_ID,
- 		.subdevice	= PCI_ANY_ID,
- 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+The second patch uses the ACPI table to set f_max during the new
+ni_byt_sdio_probe_slot.
+
+v2:
+  * Use acpi_evaluate_integer() instead of
+    acpi_get_handle()/acpi_evaluate_object()
+
+
+Zach Brown (2):
+  mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller
+    sub-vended by NI
+  mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio    
+    controller sub-vended by NI
+
+ drivers/mmc/host/sdhci-pci-core.c | 37 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+
 -- 
 2.7.4
+
