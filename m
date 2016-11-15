@@ -1,46 +1,49 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv2 04/10] mmc: dw_mmc: use the hold register when send stop
- command
-Date: Tue, 15 Nov 2016 19:12:26 +0900
-Message-ID: <20161115101232.3854-5-jh80.chung@samsung.com>
-References: <20161115101232.3854-1-jh80.chung@samsung.com>
+Subject: [PATCHv2 00/10] mmc: dw_mmc: clean the codes for dwmmc controller
+Date: Tue, 15 Nov 2016 19:12:22 +0900
+Message-ID: <20161115101232.3854-1-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mailout1.samsung.com ([203.254.224.24]:51235 "EHLO
         mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941462AbcKOKMp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 05:12:45 -0500
-In-reply-to: <20161115101232.3854-1-jh80.chung@samsung.com>
+        with ESMTP id S941589AbcKOKMh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 05:12:37 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, heiko@sntech.de, shawn.lin@rock-chips.com, robh+dt@kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-If DW_MMC_CARD_NO_USE_HOLD isn't set, it's usesd by default.
-Enve if SDMMC_CMD_USB_HOLD_REG is set in prepare_command(), but it
-doesn't set in pre_stop_abort().
+This patchset is modified the some minor fixing and cleaning codes.
 
-To maintain the consistency, add the checking condition for this.
+* Major changes
+- Use the cookie enum values like sdhci controller.
+- Remove the unnecessary codes and use_stop_abort() by default.
+- Remove the obsoleted property "supports-highspeed"
+- Deprecated the "clock-freq-min-max" property. Instead, use "max-frequency"
+- Minimum clock value is set to 100K by default.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Tested-by: Heiko Stuebner <heiko@sntech.de>
----
- drivers/mmc/host/dw_mmc.c | 3 +++
- 1 file changed, 3 insertions(+)
+Change in v2:
+- Applied patches relevant to dt files
+- Use "deperecated" instead of removing about "clock-freq-min-max"
+- Added Heiko's Tested-by tag
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index be36f48..3cda68c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -337,6 +337,9 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
- 	cmdr = stop->opcode | SDMMC_CMD_STOP |
- 		SDMMC_CMD_RESP_CRC | SDMMC_CMD_RESP_EXP;
- 
-+	if (!test_bit(DW_MMC_CARD_NO_USE_HOLD, &host->cur_slot->flags))
-+		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+
- 	return cmdr;
- }
- 
+Jaehoon Chung (10):
+  mmc: dw_mmc: display the real register value on debugfs
+  mmc: dw_mmc: fix the debug message for checking card's present
+  mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+  mmc: dw_mmc: use the hold register when send stop command
+  mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+  mmc: core: move the cookie's enum values from sdhci.h to mmc.h
+  mmc: dw_mmc: use the cookie's enum values for post/pre_req()
+  mmc: dw_mmc: remove the unnecessary mmc_data structure
+  mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
+  Documentation: synopsys-dw-mshc: remove the unused properties
+
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  8 +-
+ drivers/mmc/host/dw_mmc.c                          | 88 +++++++++++-----------
+ drivers/mmc/host/sdhci.h                           |  6 --
+ include/linux/mmc/core.h                           |  6 ++
+ 4 files changed, 50 insertions(+), 58 deletions(-)
+
 -- 
 2.10.1
 
