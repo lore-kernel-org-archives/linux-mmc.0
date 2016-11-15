@@ -1,62 +1,59 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [RFC v2 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio controller sub-vended by NI
-Date: Tue, 15 Nov 2016 10:32:21 -0600
-Message-ID: <1479227541-21201-3-git-send-email-zach.brown@ni.com>
-References: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v7 08/14] mmc: sdhci-msm: Implement set_clock callback
+ for sdhci-msm
+Date: Tue, 15 Nov 2016 11:27:27 -0800
+Message-ID: <20161115192727.GD25626@codeaurora.org>
+References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
+ <1479103248-9491-9-git-send-email-riteshh@codeaurora.org>
+ <20161114193004.GI5177@codeaurora.org>
+ <3c1a7c72-0ac1-8ed0-87fc-238331f0645b@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <3c1a7c72-0ac1-8ed0-87fc-238331f0645b@codeaurora.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On NI 9037 boards the max SDIO frequency is limited by trace lengths
-and other layout choices. The max SDIO frequency is stored in an ACPI
-table.
+On 11/15, Ritesh Harjani wrote:
+> On 11/15/2016 1:07 AM, Stephen Boyd wrote:
+> >On 11/14, Ritesh Harjani wrote:
+> >
+> >>+}
+> >>+
+> >>+/* sdhci_msm_set_clock - Called with (host->lock) spinlock held. */
+> >>+static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+> >>+{
+> >>+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >>+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> >>+	int rc;
+> >>+
+> >>+	if (!clock) {
+> >>+		msm_host->clk_rate = clock;
+> >>+		goto out;
+> >>+	}
+> >>+
+> >>+	spin_unlock_irq(&host->lock);
+> >>+	if (clock != msm_host->clk_rate) {
+> >
+> >Why do we need to check here? Can't we call clk_set_rate()
+> >Unconditionally?
+> Since it may so happen that above layers may call for ->set_clock
+> function with same requested clock more than once, hence we cache
+> the host->clock here.
+> Also, since requested clock (host->clock) can be say 400Mhz but the
+> actual pltfm supported clock would be say 384MHz.
 
-The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
-f_max field of the host.
+clk_set_rate() detects the same rate being set even after it
+internally rounds the rate. We're not going to touch the clk
+hardware if 400 is requested once but 384 is what's set and then
+400 is requested again. Caching the rate here in the driver can
+lead to problems too if the driver is out of sync with the clk
+hardware state, so it's best to avoid doing anything fancy here
+and just let the framework handle duplicates.
 
-Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
-Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
-Reviewed-by: Josh Cartwright <joshc@ni.com>
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 9741505..4c31d16 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -27,6 +27,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/mmc/slot-gpio.h>
- #include <linux/mmc/sdhci-pci-data.h>
-+#include <linux/acpi.h>
- 
- #include "sdhci.h"
- #include "sdhci-pci.h"
-@@ -377,6 +378,18 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 
- static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
-+#ifdef CONFIG_ACPI
-+	/* Get max freq from ACPI for NI hardware */
-+	acpi_status status;
-+	unsigned long long max_freq;
-+
-+	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
-+				       "MXFQ", NULL, &max_freq);
-+	if (ACPI_FAILURE(status))
-+		return -EINVAL;
-+
-+	slot->host->mmc->f_max = max_freq * 1000000;
-+#endif
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
- 				 MMC_CAP_WAIT_WHILE_BUSY;
- 	return 0;
 -- 
-2.7.4
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
