@@ -1,49 +1,53 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv2 00/10] mmc: dw_mmc: clean the codes for dwmmc controller
-Date: Tue, 15 Nov 2016 19:12:22 +0900
-Message-ID: <20161115101232.3854-1-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51235 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941589AbcKOKMh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2016 05:12:37 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCHv2 01/10] mmc: dw_mmc: display the real register value on debugfs
+Date: Tue, 15 Nov 2016 19:12:23 +0900
+Message-ID: <20161115101232.3854-2-jh80.chung@samsung.com>
+References: <20161115101232.3854-1-jh80.chung@samsung.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <20161115101232.3854-1-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, heiko@sntech.de, shawn.lin@rock-chips.com, robh+dt@kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-This patchset is modified the some minor fixing and cleaning codes.
+Developer wants to see the real register value, not register offset.
+This patch fixed to display the real value of register.
 
-* Major changes
-- Use the cookie enum values like sdhci controller.
-- Remove the unnecessary codes and use_stop_abort() by default.
-- Remove the obsoleted property "supports-highspeed"
-- Deprecated the "clock-freq-min-max" property. Instead, use "max-frequency"
-- Minimum clock value is set to 100K by default.
+Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+---
+ drivers/mmc/host/dw_mmc.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-Change in v2:
-- Applied patches relevant to dt files
-- Use "deperecated" instead of removing about "clock-freq-min-max"
-- Added Heiko's Tested-by tag
-
-Jaehoon Chung (10):
-  mmc: dw_mmc: display the real register value on debugfs
-  mmc: dw_mmc: fix the debug message for checking card's present
-  mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
-  mmc: dw_mmc: use the hold register when send stop command
-  mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
-  mmc: core: move the cookie's enum values from sdhci.h to mmc.h
-  mmc: dw_mmc: use the cookie's enum values for post/pre_req()
-  mmc: dw_mmc: remove the unnecessary mmc_data structure
-  mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
-  Documentation: synopsys-dw-mshc: remove the unused properties
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  8 +-
- drivers/mmc/host/dw_mmc.c                          | 88 +++++++++++-----------
- drivers/mmc/host/sdhci.h                           |  6 --
- include/linux/mmc/core.h                           |  6 ++
- 4 files changed, 50 insertions(+), 58 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a16c537..e53899e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -165,12 +165,14 @@ static const struct file_operations dw_mci_req_fops = {
+ 
+ static int dw_mci_regs_show(struct seq_file *s, void *v)
+ {
+-	seq_printf(s, "STATUS:\t0x%08x\n", SDMMC_STATUS);
+-	seq_printf(s, "RINTSTS:\t0x%08x\n", SDMMC_RINTSTS);
+-	seq_printf(s, "CMD:\t0x%08x\n", SDMMC_CMD);
+-	seq_printf(s, "CTRL:\t0x%08x\n", SDMMC_CTRL);
+-	seq_printf(s, "INTMASK:\t0x%08x\n", SDMMC_INTMASK);
+-	seq_printf(s, "CLKENA:\t0x%08x\n", SDMMC_CLKENA);
++	struct dw_mci *host = s->private;
++
++	seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
++	seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
++	seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
++	seq_printf(s, "CTRL:\t0x%08x\n", mci_readl(host, CTRL));
++	seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
++	seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
+ 
+ 	return 0;
+ }
 -- 
 2.10.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
