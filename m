@@ -1,66 +1,36 @@
-From: Jiri Kosina <jikos@kernel.org>
-Subject: Re: [PATCH] RFC: mmc: block: replace semaphore with freezing
-Date: Wed, 16 Nov 2016 13:57:37 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1611161351520.29400@cbobk.fhfr.pm>
-References: <1479293464-4576-1-git-send-email-linus.walleij@linaro.org> <CAJZ5v0gCDQXebsQoCYJY5FyE6oJUw4s6sQrNbKLuxpLvOe2RoA@mail.gmail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCHv2 09/10] mmc: dw_mmc: The "clock-freq-min-max" property
+ was deprecated
+Date: Wed, 16 Nov 2016 07:45:51 -0600
+Message-ID: <20161116134551.3f7jgdyjhh766kfn@rob-hp-laptop>
+References: <20161115101232.3854-1-jh80.chung@samsung.com>
+ <20161115101232.3854-10-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAJZ5v0gCDQXebsQoCYJY5FyE6oJUw4s6sQrNbKLuxpLvOe2RoA@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Russell King <linux@armlinux.org.uk>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:34364 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751953AbcKPNpx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 08:45:53 -0500
+Content-Disposition: inline
+In-Reply-To: <20161115101232.3854-10-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, heiko@sntech.de, shawn.lin@rock-chips.com
 
-On Wed, 16 Nov 2016, Rafael J. Wysocki wrote:
-
-> > The MMC/SD block core request processing thread is taking a
-> > semaphore in the request processing section and the same
-> > semaphore is taken around suspend/resume operations.
-> >
-> > The purpose of the semaphore is to block any request from being
-> > issued to the MMC/SD host controllers when the system is
-> > suspended. A semaphore is used in place of a mutex since the
-> > calls are coming from different threads.
-> >
-> > This construction predates the kernel thread freezer mechanism:
-> > we can easily replace the semaphore by instead activating the
-> > freezer with set_freezable() and call try_to_freeze() instead
-> > of the up(); schedule(); down(); construction that is devised
-> > to let the suspend/resume calls get in and grab the semaphore.
-> >
-> > Tested with a few suspend/resume to memory cycles on the Ux500
-> > when doing intense dd operations in the background: the
-> > thread thaws and resumes operation after resume.
+On Tue, Nov 15, 2016 at 07:12:31PM +0900, Jaehoon Chung wrote:
+> The "clock-freq-min-max" property was deprecated.
+> There is "max-frequency" property in drivers/mmc/core/host.c
+> "max-frequency" can be replaced with "clock-freq-min-max".
+> Minimum clock value might be set to 100K by default.
+> Then MMC core should try to find the correct value from 400K to 100K.
+> So it just needs to set Maximum clock value.
 > 
-> Well, we had a session at the KS regarding usage of the freezer on
-> kernel threads and the conclusion was to get rid of that (as opposed
-> to freezing user space, which is necessary IMO).  So this change would
-> go in the opposite direction. :-)
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 3 ++-
+>  drivers/mmc/host/dw_mmc.c                                  | 2 ++
+>  2 files changed, 4 insertions(+), 1 deletion(-)
 
-[ thanks for CCing me, Rafael ]
-
-Agreed. You already have PM callbacks handled properly, so the way this 
-should be done is once you're in the PM-callback due to system going 
-through power management change, you just stop generation of any new I/O, 
-and tell the kthread that it should schedule itself out.
-
-Plus the schedule() has to stay there anyway, as try_to_freeze() is not 
-going to provide you with the schedule() semantics unless the system is 
-actually undergoing a PM transition towards suspend.
-
-So either semaphore, or some kind of atomic flag, is exactly the 
-information that should be passed from the PM callback to the kthread.
-
-(now, I agree, that this is one of the very rare cases where the kthread 
-freezer is actually being used properly -- IOW to pause a kthread that is 
-actually generating new I/O ... but given the fact that this is so rare, 
-and the API is so heavily abused, I really tend to heavily prefer a 
-semaphore / flag based aproach).
-
-Thanks,
-
--- 
-Jiri Kosina
-SUSE Labs
-
+Acked-by: Rob Herring <robh@kernel.org>
