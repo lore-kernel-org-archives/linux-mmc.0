@@ -1,114 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH] RFC: mmc: block: replace semaphore with freezing
-Date: Wed, 16 Nov 2016 11:51:04 +0100
-Message-ID: <1479293464-4576-1-git-send-email-linus.walleij@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-pm@vger.kernel.org, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Russell King <linux@armlinux.org.uk>, Arnd Bergmann <arnd@arndb.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 2/9] mmc: core: Remove redundant __mmc_send_status()
+Date: Wed, 16 Nov 2016 11:51:14 +0100
+Message-ID: <1479293481-20186-3-git-send-email-ulf.hansson@linaro.org>
+References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:37775 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754180AbcKPKvh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 05:51:37 -0500
+Received: by mail-wm0-f44.google.com with SMTP id t79so63886406wmt.0
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2016 02:51:36 -0800 (PST)
+In-Reply-To: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-The MMC/SD block core request processing thread is taking a
-semaphore in the request processing section and the same
-semaphore is taken around suspend/resume operations.
+There are only one users left which calls __mmc_send_status(). Moreover,
+the ignore_crc parameter isn't being used, so let's just remove these
+redundant parts.
 
-The purpose of the semaphore is to block any request from being
-issued to the MMC/SD host controllers when the system is
-suspended. A semaphore is used in place of a mutex since the
-calls are coming from different threads.
-
-This construction predates the kernel thread freezer mechanism:
-we can easily replace the semaphore by instead activating the
-freezer with set_freezable() and call try_to_freeze() instead
-of the up(); schedule(); down(); construction that is devised
-to let the suspend/resume calls get in and grab the semaphore.
-
-Tested with a few suspend/resume to memory cycles on the Ux500
-when doing intense dd operations in the background: the
-thread thaws and resumes operation after resume.
-
-Cc: linux-pm@vger.kernel.org
-Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
-Cc: Russell King <linux@armlinux.org.uk>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
-I haven't seen any need to preserve the call to schedule()
-in the request processing thread, but I want advice on whether
-that has a point. I would guess the thread will just anyway
-be preempted if needed anyway as it is marked interruptible?
----
- drivers/mmc/card/queue.c | 13 ++-----------
- drivers/mmc/card/queue.h |  1 -
- 2 files changed, 2 insertions(+), 12 deletions(-)
+ drivers/mmc/core/mmc_ops.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 8037f73a109a..09a932ffe46e 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -55,8 +55,8 @@ static int mmc_queue_thread(void *d)
- 	struct request_queue *q = mq->queue;
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 4773c56..0515748 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -54,8 +54,7 @@
+ 	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+ };
  
- 	current->flags |= PF_MEMALLOC;
-+	set_freezable();
+-static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+-				    bool ignore_crc)
++int mmc_send_status(struct mmc_card *card, u32 *status)
+ {
+ 	int err;
+ 	struct mmc_command cmd = {0};
+@@ -67,8 +66,6 @@ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+ 	if (!mmc_host_is_spi(card->host))
+ 		cmd.arg = card->rca << 16;
+ 	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+-	if (ignore_crc)
+-		cmd.flags &= ~MMC_RSP_CRC;
  
--	down(&mq->thread_sem);
- 	do {
- 		struct request *req = NULL;
- 
-@@ -95,12 +95,9 @@ static int mmc_queue_thread(void *d)
- 				set_current_state(TASK_RUNNING);
- 				break;
- 			}
--			up(&mq->thread_sem);
--			schedule();
--			down(&mq->thread_sem);
-+			try_to_freeze();
- 		}
- 	} while (1);
--	up(&mq->thread_sem);
- 
+ 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+ 	if (err)
+@@ -83,11 +80,6 @@ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
  	return 0;
  }
-@@ -289,8 +286,6 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 			goto cleanup_queue;
- 	}
  
--	sema_init(&mq->thread_sem, 1);
+-int mmc_send_status(struct mmc_card *card, u32 *status)
+-{
+-	return __mmc_send_status(card, status, false);
+-}
 -
- 	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
- 		host->index, subname ? subname : "");
- 
-@@ -424,8 +419,6 @@ void mmc_queue_suspend(struct mmc_queue *mq)
- 		spin_lock_irqsave(q->queue_lock, flags);
- 		blk_stop_queue(q);
- 		spin_unlock_irqrestore(q->queue_lock, flags);
--
--		down(&mq->thread_sem);
- 	}
- }
- 
-@@ -441,8 +434,6 @@ void mmc_queue_resume(struct mmc_queue *mq)
- 	if (mq->flags & MMC_QUEUE_SUSPENDED) {
- 		mq->flags &= ~MMC_QUEUE_SUSPENDED;
- 
--		up(&mq->thread_sem);
--
- 		spin_lock_irqsave(q->queue_lock, flags);
- 		blk_start_queue(q);
- 		spin_unlock_irqrestore(q->queue_lock, flags);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 3c15a75bae86..fe10f94795de 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -53,7 +53,6 @@ struct mmc_queue_req {
- struct mmc_queue {
- 	struct mmc_card		*card;
- 	struct task_struct	*thread;
--	struct semaphore	thread_sem;
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
+ {
+ 	struct mmc_command cmd = {0};
 -- 
-2.7.4
+1.9.1
 
