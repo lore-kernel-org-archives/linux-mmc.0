@@ -1,88 +1,255 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [PATCH v3] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Tue, 15 Nov 2016 06:12:01 +0000
-Message-ID: <DB6PR0401MB2536A311EE5215FBC9DE0397F8BF0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1479136348-30706-1-git-send-email-michael@walle.cc>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v7 08/14] mmc: sdhci-msm: Implement set_clock callback for
+ sdhci-msm
+Date: Wed, 16 Nov 2016 14:23:04 +0530
+Message-ID: <745484d6-2b3e-7a26-5c05-280a93c55248@codeaurora.org>
+References: <1479103248-9491-1-git-send-email-riteshh@codeaurora.org>
+ <1479103248-9491-9-git-send-email-riteshh@codeaurora.org>
+ <20161114193004.GI5177@codeaurora.org>
+ <3c1a7c72-0ac1-8ed0-87fc-238331f0645b@codeaurora.org>
+ <d723b9fb-0cfc-e72b-ad78-36c8b996b012@codeaurora.org>
+ <875c9051-bd8b-60cf-82e4-3e26612a8623@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1479136348-30706-1-git-send-email-michael@walle.cc>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Michael Walle <michael@walle.cc>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@freescale.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:55252 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751335AbcKPIxQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 03:53:16 -0500
+In-Reply-To: <875c9051-bd8b-60cf-82e4-3e26612a8623@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Stephen Boyd <sboyd@codeaurora.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org
 
-> -----Original Message-----
-> From: Michael Walle [mailto:michael@walle.cc]
-> Sent: Monday, November 14, 2016 11:12 PM
-> To: linux-kernel@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org; Ulf Hansson; Adrian Hunter; yangbo lu;
-> Michael Walle
-> Subject: [PATCH v3] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
->=20
-> Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
-> cards in __mmc_switch()") the ESDHC driver is broken:
->   mmc0: Card stuck in programming state! __mmc_switch
->   mmc0: error -110 whilst initialising MMC card
->=20
-> Since this commit __mmc_switch() uses ->card_busy(), which is
-> sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
-> PRESENT_STATE register, specifically the DAT0 signal level bit. But the
-> ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
-> required to make the driver work again.
->=20
-> Signed-off-by: Michael Walle <michael@walle.cc>
-> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in
-> __mmc_switch()")
-> ---
-> v3:
->  - explain the bits in the comments
->  - use bits[19:0] from the original value, all other will be taken from
-> the
->    fixup value.
->=20
-> v2:
->  - use lower bits of the original value (that was actually a typo)
->  - add fixes tag
->  - fix typo
->=20
->  drivers/mmc/host/sdhci-of-esdhc.c | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
->=20
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-
-> of-esdhc.c
-> index fb71c86..74cf3b1 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -66,6 +66,19 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  			return ret;
->  		}
->  	}
-> +	/*
-> +	 * The DAT[3:0] line signal levels and the CMD line signal level
-> are
-> +	 * not compatible with standard SDHC register. The line signal
-> levels
-> +	 * DAT[7:0] are at bits 31:24 and the line signal level is at bit
-> 23.
-> +	 * All other bits are the same as in the standard SDHC register.
-> +	 */
-> +	if (spec_reg =3D=3D SDHCI_PRESENT_STATE) {
-> +		ret =3D value & 0x000fffff;
-> +		ret |=3D (value >> 4) & SDHCI_DATA_LVL_MASK;
-> +		ret |=3D (value << 1) & 0x01000000;
-> +		return ret;
-> +	}
-> +
 
-[Lu Yangbo-B47093] This is the proper fix.
 
-Acked-by: Yangbo Lu <yangbo.lu@nxp.com>
+On 11/16/2016 1:12 PM, Adrian Hunter wrote:
+> On 16/11/16 06:42, Ritesh Harjani wrote:
+>> Hi,
+>>
+>> On 11/15/2016 10:40 AM, Ritesh Harjani wrote:
+>>> Hi Stephen/Adrian,
+>>>
+>>> On 11/15/2016 1:07 AM, Stephen Boyd wrote:
+>>>> On 11/14, Ritesh Harjani wrote:
+>>>>> @@ -577,6 +578,90 @@ static unsigned int
+>>>>> sdhci_msm_get_min_clock(struct sdhci_host *host)
+>>>>>      return SDHCI_MSM_MIN_CLOCK;
+>>>>>  }
+>>>>>
+>>>>> +/**
+>>>>> + * __sdhci_msm_set_clock - sdhci_msm clock control.
+>>>>> + *
+>>>>> + * Description:
+>>>>> + * Implement MSM version of sdhci_set_clock.
+>>>>> + * This is required since MSM controller does not
+>>>>> + * use internal divider and instead directly control
+>>>>> + * the GCC clock as per HW recommendation.
+>>>>> + **/
+>>>>> +void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>>> +{
+>>>>> +    u16 clk;
+>>>>> +    unsigned long timeout;
+>>>>> +
+>>>>> +    /*
+>>>>> +     * Keep actual_clock as zero -
+>>>>> +     * - since there is no divider used so no need of having
+>>>>> actual_clock.
+>>>>> +     * - MSM controller uses SDCLK for data timeout calculation. If
+>>>>> +     *   actual_clock is zero, host->clock is taken for calculation.
+>>>>> +     */
+>>>>> +    host->mmc->actual_clock = 0;
+>>>>> +
+>>>>> +    sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>>>>> +
+>>>>> +    if (clock == 0)
+>>>>> +        return;
+>>>>> +
+>>>>> +    /*
+>>>>> +     * MSM controller do not use clock divider.
+>>>>> +     * Thus read SDHCI_CLOCK_CONTROL and only enable
+>>>>> +     * clock with no divider value programmed.
+>>>>> +     */
+>>>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>>>> +
+>>>>> +    clk |= SDHCI_CLOCK_INT_EN;
+>>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>>>> +
+>>>>> +    /* Wait max 20 ms */
+>>>>> +    timeout = 20;
+>>>>> +    while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+>>>>> +        & SDHCI_CLOCK_INT_STABLE)) {
+>>>>> +        if (timeout == 0) {
+>>>>> +            pr_err("%s: Internal clock never stabilised\n",
+>>>>> +                   mmc_hostname(host->mmc));
+>>>>> +            return;
+>>>>> +        }
+>>>>> +        timeout--;
+>>>>> +        mdelay(1);
+>>>>> +    }
+>>>>> +
+>>>>> +    clk |= SDHCI_CLOCK_CARD_EN;
+>>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>>>
+>>>> This is almost a copy/paste of sdhci_set_clock(). Can we make
+>>>> sdhci_set_clock() call a __sdhci_set_clock() function that takes
+>>>> unsigned int clock, and also a flag indicating if we want to set
+>>>> the internal clock divider or not? Then we can call
+>>>> __sdhci_set_clock() from sdhci_set_clock() with (clock, true) as
+>>>> arguments and (clock, false).
+>> Actually what you may be referring here is some sort of quirks which is not
+>> entertained any more for sdhci driver.
+>> sdhci is tending towards becoming a library and hence such changes are
+>> restricted.
+>>
+>> But I think we may do below changes to avoid duplication of code which
+>> enables the sdhci internal clock and waits for internal clock to be stable.
+>>
+>> Adrian, could you please tell if this should be ok?
+>
+> That seems fine, but the name seems too long - how about changing
+> sdhci_set_clock_enable to sdhci_enable_clk.
+Sure. Will make the changes then.
 
->  	ret =3D value;
->  	return ret;
->  }
-> --
-> 2.1.4
+>
+>> Then we may be able to call for sdhci_set_clock_enable function from
+>> sdhci_msm_set_clock.
+>>
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 42ef3eb..28e605c 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1343,19 +1343,8 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned
+>> int clock,
+>>  }
+>>  EXPORT_SYMBOL_GPL(sdhci_calc_clk);
+>>
+>> -void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>> +void sdhci_set_clock_enable(struct sdhci_host *host, unsigned short clk)
+>>  {
+>> -       u16 clk;
+>> -       unsigned long timeout;
+>> -
+>> -       host->mmc->actual_clock = 0;
+>> -
+>> -       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>> -
+>> -       if (clock == 0)
+>> -               return;
+>> -
+>> -       clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+>>
+>>         clk |= SDHCI_CLOCK_INT_EN;
+>>         sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>> @@ -1377,6 +1366,24 @@ void sdhci_set_clock(struct sdhci_host *host,
+>> unsigned int clock)
+>>         clk |= SDHCI_CLOCK_CARD_EN;
+>>         sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>  }
+>> +EXPORT_SYMBOL_GPL(sdhci_set_clock_enable);
+>> +
+>> +void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>> +{
+>> +       u16 clk;
+>> +       unsigned long timeout;
+>> +
+>> +       host->mmc->actual_clock = 0;
+>> +
+>> +       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>> +
+>> +       if (clock == 0)
+>> +               return;
+>> +
+>> +       clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+>> +
+>> +       sdhci_set_clock_enable(host, clk);
+>> +}
+>>  EXPORT_SYMBOL_GPL(sdhci_set_clock);
+>>
+>>  static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 766df17..43382e1 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -681,6 +681,7 @@ static inline bool sdhci_sdio_irq_enabled(struct
+>> sdhci_host *host)
+>>  u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>>                    unsigned int *actual_clock);
+>>  void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+>> +void sdhci_set_clock_enable(struct sdhci_host *host, unsigned short clk);
+>>  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>>                      unsigned short vdd);
+>>  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>>
+>>
+>>
+>>> Adrian,
+>>> Could you please comment here ?
+>>>
+>>>>
+>>>>> +}
+>>>>> +
+>>>>> +/* sdhci_msm_set_clock - Called with (host->lock) spinlock held. */
+>>>>> +static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned
+>>>>> int clock)
+>>>>> +{
+>>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>>>> +    int rc;
+>>>>> +
+>>>>> +    if (!clock) {
+>>>>> +        msm_host->clk_rate = clock;
+>>>>> +        goto out;
+>>>>> +    }
+>>>>> +
+>>>>> +    spin_unlock_irq(&host->lock);
+>>>>> +    if (clock != msm_host->clk_rate) {
+>>>>
+>>>> Why do we need to check here? Can't we call clk_set_rate()
+>>>> Unconditionally?
+>>> Since it may so happen that above layers may call for ->set_clock
+>>> function with same requested clock more than once, hence we cache the
+>>> host->clock here.
+>>> Also, since requested clock (host->clock) can be say 400Mhz but the
+>>> actual pltfm supported clock would be say 384MHz.
+>>>
+>>>
+>>>>
+>>>>> +        rc = clk_set_rate(msm_host->clk, clock);
+>>>>> +        if (rc) {
+>>>>> +            pr_err("%s: Failed to set clock at rate %u\n",
+>>>>> +                   mmc_hostname(host->mmc), clock);
+>>>>> +            spin_lock_irq(&host->lock);
+>>>>> +            goto out;
+>>>>
+>>>> Or replace the above two lines with goto err;
+>>> Ok, I will have another label out_lock instead of err.
+>>>>
+>>>>> +        }
+>>>>> +        msm_host->clk_rate = clock;
+>>>>> +        pr_debug("%s: Setting clock at rate %lu\n",
+>>>>> +             mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
+>>>>> +    }
+>>>>
+>>>> And put an err label here.
+>>> will put the label here as out_lock;
+>>>>
+>>>>> +    spin_lock_irq(&host->lock);
+>>>>> +out:
+>>>>> +    __sdhci_msm_set_clock(host, clock);
+>>>>> +}
+>>>>> +
+>>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>>      { .compatible = "qcom,sdhci-msm-v4" },
+>>>>>      {},
+>>>>
+>>>
+>>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
