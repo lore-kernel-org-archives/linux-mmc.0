@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH v8 08/16] mmc: sdhci-msm: Enable few quirks
-Date: Wed, 16 Nov 2016 21:30:44 +0530
-Message-ID: <1479312052-22396-9-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v8 09/16] mmc: sdhci: Factor out sdhci_enable_clock
+Date: Wed, 16 Nov 2016 21:30:45 +0530
+Message-ID: <1479312052-22396-10-git-send-email-riteshh@codeaurora.org>
 References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1479312052-22396-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
@@ -10,31 +10,76 @@ To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76
 Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-sdhc-msm controller needs this SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-& SDHCI_QUIRK2_PRESET_VALUE_BROKEN to be set. Hence setting it.
+Factor out sdhci_enable_clock from sdhci_set_clock
+and make it EXPORT_SYMBOL so that it can be called.
 
-Signed-off-by: Sahitya Tummala <stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 28 +++++++++++++++++-----------
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 18 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 518021d..45ead68 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -592,7 +592,9 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
--		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
-+		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops = &sdhci_msm_ops,
- };
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index d08d507..8a89d89 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1344,20 +1344,10 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+ }
+ EXPORT_SYMBOL_GPL(sdhci_calc_clk);
  
+-void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk)
+ {
+-	u16 clk;
+ 	unsigned long timeout;
+ 
+-	host->mmc->actual_clock = 0;
+-
+-	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+-
+-	if (clock == 0)
+-		return;
+-
+-	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+-
+ 	clk |= SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
+@@ -1378,6 +1368,22 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ }
++EXPORT_SYMBOL_GPL(sdhci_enable_clock);
++
++void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	u16 clk;
++
++	host->mmc->actual_clock = 0;
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++	if (clock == 0)
++		return;
++
++	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
++	sdhci_enable_clock(host, clk);
++}
+ EXPORT_SYMBOL_GPL(sdhci_set_clock);
+ 
+ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 766df17..8e77a3b 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -681,6 +681,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+ 		   unsigned int *actual_clock);
+ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
++void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk);
+ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 		     unsigned short vdd);
+ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
