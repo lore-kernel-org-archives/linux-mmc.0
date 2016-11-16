@@ -1,75 +1,39 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v8 11/16] mmc: sdhci-msm: Add clock changes for DDR mode.
-Date: Wed, 16 Nov 2016 21:30:47 +0530
-Message-ID: <1479312052-22396-12-git-send-email-riteshh@codeaurora.org>
+From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH v8 12/16] arm64: dts: qcom: msm8916: Add ddr support to sdhc1
+Date: Wed, 16 Nov 2016 21:30:48 +0530
+Message-ID: <1479312052-22396-13-git-send-email-riteshh@codeaurora.org>
 References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:49556 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753157AbcKPQDQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 11:03:16 -0500
-In-Reply-To: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479312052-22396-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Ritesh Harjani <riteshh@codeaurora.org>
 
-SDHC MSM controller need 2x clock for MCLK at GCC.
-Hence make required changes to have 2x clock for
-DDR timing modes.
+This adds mmc-ddr-1_8v support to DT for sdhc1 of msm8916.
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 6d02fc2..eb29b97 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -610,6 +610,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct mmc_ios curr_ios = host->mmc->ios;
- 	int rc;
- 
- 	if (!clock) {
-@@ -618,16 +619,28 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- 
- 	spin_unlock_irq(&host->lock);
-+	/*
-+	 * The SDHC requires internal clock frequency to be double the
-+	 * actual clock that will be set for DDR mode. The controller
-+	 * uses the faster clock(100/400MHz) for some of its parts and
-+	 * send the actual required clock (50/200MHz) to the card.
-+	 */
-+	if (curr_ios.timing == MMC_TIMING_UHS_DDR50 ||
-+	    curr_ios.timing == MMC_TIMING_MMC_DDR52 ||
-+	    curr_ios.timing == MMC_TIMING_MMC_HS400)
-+		clock *= 2;
- 
- 	rc = clk_set_rate(msm_host->clk, clock);
- 	if (rc) {
--		pr_err("%s: Failed to set clock at rate %u\n",
--		       mmc_hostname(host->mmc), clock);
-+		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-+		       mmc_hostname(host->mmc), clock,
-+		       curr_ios.timing);
- 		goto out_lock;
- 	}
- 	msm_host->clk_rate = clock;
--	pr_debug("%s: Setting clock at rate %lu\n",
--		 mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
-+	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
-+		 mmc_hostname(host->mmc), clk_get_rate(msm_host->clk),
-+		 curr_ios.timing);
- 
- out_lock:
- 	spin_lock_irq(&host->lock);
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index 6265822..5bc187c 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -515,6 +515,7 @@
+ 				 <&gcc GCC_SDCC1_AHB_CLK>,
+ 				 <&xo_board 0>;
+ 			clock-names = "core", "iface", "xo_clock";
++			mmc-ddr-1_8v;
+ 			bus-width = <8>;
+ 			non-removable;
+ 			status = "disabled";
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
