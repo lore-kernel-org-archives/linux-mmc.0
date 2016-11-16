@@ -1,90 +1,95 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 3/9] mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
-Date: Wed, 16 Nov 2016 11:51:15 +0100
-Message-ID: <1479293481-20186-4-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 5/9] mmc: core: Allow CMD13 polling when switching to HS mode for mmc
+Date: Wed, 16 Nov 2016 11:51:17 +0100
+Message-ID: <1479293481-20186-6-git-send-email-ulf.hansson@linaro.org>
 References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:35718 "EHLO
-        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754986AbcKPKvi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 05:51:38 -0500
-Received: by mail-qt0-f169.google.com with SMTP id c47so95937409qtc.2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2016 02:51:37 -0800 (PST)
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37885 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934463AbcKPKvm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 05:51:42 -0500
+Received: by mail-wm0-f47.google.com with SMTP id t79so63891223wmt.0
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2016 02:51:41 -0800 (PST)
 In-Reply-To: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-The ignore_crc parameter/variable name is used at a couple of places in the
-mmc core. Let's rename it to retry_crc_err to reflect its new purpose.
+In cases when the mmc host doesn't support HW busy detection, polling for a
+card being busy by using CMD13 is beneficial. That is because, instead of
+waiting a fixed amount of time, 500ms or the generic CMD6 time from
+EXT_CSD, we find out a lot sooner when the card stops signaling busy. This
+leads to a significant decreased total initialization time for the mmc
+card.
+
+However, to allow polling with CMD13 during a bus timing change operation,
+such as switching to HS mode, we first need to update the mmc host's bus
+timing before starting to poll. Deal with that, simply by providing
+MMC_TIMING_MMC_HS as the timing parameter to __mmc_switch() from
+mmc_select_hs().
+
+By telling __mmc_switch() to allow polling with CMD13, also makes it
+validate the CMD6 status, thus we can remove the corresponding checks.
+
+When switching to HS400ES, the mmc_select_hs() function is called in one of
+the intermediate steps. To still prevent CMD13 polling for HS400ES, let's
+call the __mmc_switch() function in this path as it enables us to keep
+using the existing method.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc_ops.c | 10 +++++-----
- drivers/mmc/core/mmc_ops.h |  2 +-
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/core/mmc.c | 24 +++++++++++++-----------
+ 1 file changed, 13 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0515748..214e734 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -461,7 +461,7 @@ int mmc_switch_status(struct mmc_card *card)
- }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index cb1cf4e..15dd51c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1012,13 +1012,8 @@ static int mmc_select_hs(struct mmc_card *card)
  
- static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
--			bool send_status, bool ignore_crc)
-+			bool send_status, bool retry_crc_err)
- {
- 	struct mmc_host *host = card->host;
- 	int err;
-@@ -496,7 +496,7 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 			busy = host->ops->card_busy(host);
- 		} else {
- 			err = mmc_send_status(card, &status);
--			if (ignore_crc && err == -EILSEQ)
-+			if (retry_crc_err && err == -EILSEQ)
- 				busy = true;
- 			else if (err)
- 				return err;
-@@ -528,13 +528,13 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-  *                   timeout of zero implies maximum possible timeout
-  *	@use_busy_signal: use the busy signal as response type
-  *	@send_status: send status cmd to poll for busy
-- *	@ignore_crc: ignore CRC errors when sending status cmd to poll for busy
-+ *	@retry_crc_err: retry when CRC errors when polling with CMD13 for busy
-  *
-  *	Modifies the EXT_CSD register for selected card.
-  */
- int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		unsigned int timeout_ms, bool use_busy_signal, bool send_status,
--		bool ignore_crc)
-+		bool retry_crc_err)
- {
- 	struct mmc_host *host = card->host;
- 	int err;
-@@ -590,7 +590,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	}
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+-			   card->ext_csd.generic_cmd6_time, 0,
+-			   true, false, true);
+-	if (!err) {
+-		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+-		err = mmc_switch_status(card);
+-	}
+-
++			   card->ext_csd.generic_cmd6_time, MMC_TIMING_MMC_HS,
++			   true, true, true);
+ 	if (err)
+ 		pr_warn("%s: switch to high-speed failed, err:%d\n",
+ 			mmc_hostname(card->host), err);
+@@ -1268,16 +1263,23 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 		goto out_err;
  
- 	/* Let's try to poll to find out when the command is completed. */
--	err = mmc_poll_for_busy(card, timeout_ms, send_status, ignore_crc);
-+	err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
- out:
- 	mmc_retune_release(host);
+ 	/* Switch card to HS mode */
+-	err = mmc_select_hs(card);
+-	if (err)
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
++			   card->ext_csd.generic_cmd6_time, 0,
++			   true, false, true);
++	if (err) {
++		pr_err("%s: switch to hs for hs400es failed, err:%d\n",
++			mmc_hostname(host), err);
+ 		goto out_err;
++	}
  
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 7f6c0e9..9fccddb 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -30,7 +30,7 @@
- int mmc_switch_status(struct mmc_card *card);
- int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		unsigned int timeout_ms, bool use_busy_signal, bool send_status,
--		bool ignore_crc);
-+		bool retry_crc_err);
+-	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+-
++	mmc_set_timing(host, MMC_TIMING_MMC_HS);
+ 	err = mmc_switch_status(card);
+ 	if (err)
+ 		goto out_err;
  
- #endif
- 
++	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
++
+ 	/* Switch card to DDR with strobe bit */
+ 	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
+ 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 -- 
 1.9.1
 
