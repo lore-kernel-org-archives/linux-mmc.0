@@ -1,232 +1,222 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v8 01/16] clk: qcom: Add rcg ops to return floor value closest to the requested rate
-Date: Wed, 16 Nov 2016 21:30:37 +0530
-Message-ID: <1479312052-22396-2-git-send-email-riteshh@codeaurora.org>
+From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH v8 02/16] clk: qcom: Move all sdcc rcgs to use clk_rcg2_floor_ops
+Date: Wed, 16 Nov 2016 21:30:38 +0530
+Message-ID: <1479312052-22396-3-git-send-email-riteshh@codeaurora.org>
 References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Ritesh Harjani <riteshh@codeaurora.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1479312052-22396-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Rajendra Nayak <rnayak@codeaurora.org>
+From: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-The default behaviour with clk_rcg2_ops is for the
-clk_round_rate()/clk_set_rate() to return/set a ceil clock
-rate closest to the requested rate by looking up the corresponding
-frequency table.
-However, we do have some instances (mainly sdcc on various platforms)
-of clients expecting a clk_set_rate() to set a floor value instead.
-Add a new clk_rcg2_floor_ops to handle this for such specific
-rcg instances
+The sdcc driver for msm8996/msm8916/msm8974/msm8994 and apq8084
+expects a clk_set_rate() on the sdcc rcg clk to set
+a floor value of supported clk rate closest to the requested
+rate, by looking up the frequency table.
+So move all the sdcc rcgs on all these platforms to use the
+newly introduced clk_rcg2_floor_ops
 
-Signed-off-by: Rajendra Nayak <rnayak@codeaurora.org>
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+Signed-off-by: Rajendra Nayak <rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/clk/qcom/clk-rcg.h  |  1 +
- drivers/clk/qcom/clk-rcg2.c | 76 +++++++++++++++++++++++++++++++++++++++------
- drivers/clk/qcom/common.c   | 16 ++++++++++
- drivers/clk/qcom/common.h   |  2 ++
- 4 files changed, 86 insertions(+), 9 deletions(-)
+ drivers/clk/qcom/gcc-apq8084.c | 8 ++++----
+ drivers/clk/qcom/gcc-msm8916.c | 4 ++--
+ drivers/clk/qcom/gcc-msm8974.c | 8 ++++----
+ drivers/clk/qcom/gcc-msm8994.c | 8 ++++----
+ drivers/clk/qcom/gcc-msm8996.c | 8 ++++----
+ 5 files changed, 18 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/clk/qcom/clk-rcg.h b/drivers/clk/qcom/clk-rcg.h
-index b904c33..1b3e8d2 100644
---- a/drivers/clk/qcom/clk-rcg.h
-+++ b/drivers/clk/qcom/clk-rcg.h
-@@ -173,6 +173,7 @@ struct clk_rcg2 {
- #define to_clk_rcg2(_hw) container_of(to_clk_regmap(_hw), struct clk_rcg2, clkr)
- 
- extern const struct clk_ops clk_rcg2_ops;
-+extern const struct clk_ops clk_rcg2_floor_ops;
- extern const struct clk_ops clk_rcg2_shared_ops;
- extern const struct clk_ops clk_edp_pixel_ops;
- extern const struct clk_ops clk_byte_ops;
-diff --git a/drivers/clk/qcom/clk-rcg2.c b/drivers/clk/qcom/clk-rcg2.c
-index a071bba..1a0985a 100644
---- a/drivers/clk/qcom/clk-rcg2.c
-+++ b/drivers/clk/qcom/clk-rcg2.c
-@@ -47,6 +47,11 @@
- #define N_REG			0xc
- #define D_REG			0x10
- 
-+enum freq_policy {
-+	FLOOR,
-+	CEIL,
-+};
-+
- static int clk_rcg2_is_enabled(struct clk_hw *hw)
- {
- 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
-@@ -176,15 +181,26 @@ static int clk_rcg2_set_parent(struct clk_hw *hw, u8 index)
- 	return calc_rate(parent_rate, m, n, mode, hid_div);
- }
- 
--static int _freq_tbl_determine_rate(struct clk_hw *hw,
--		const struct freq_tbl *f, struct clk_rate_request *req)
-+static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
-+				    struct clk_rate_request *req,
-+				    enum freq_policy policy)
- {
- 	unsigned long clk_flags, rate = req->rate;
- 	struct clk_hw *p;
- 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
- 	int index;
- 
--	f = qcom_find_freq(f, rate);
-+	switch (policy) {
-+	case FLOOR:
-+		f = qcom_find_freq_floor(f, rate);
-+		break;
-+	case CEIL:
-+		f = qcom_find_freq(f, rate);
-+		break;
-+	default:
-+		return -EINVAL;
-+	};
-+
- 	if (!f)
- 		return -EINVAL;
- 
-@@ -221,7 +237,15 @@ static int clk_rcg2_determine_rate(struct clk_hw *hw,
- {
- 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
- 
--	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req);
-+	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req, CEIL);
-+}
-+
-+static int clk_rcg2_determine_floor_rate(struct clk_hw *hw,
-+					 struct clk_rate_request *req)
-+{
-+	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
-+
-+	return _freq_tbl_determine_rate(hw, rcg->freq_tbl, req, FLOOR);
- }
- 
- static int clk_rcg2_configure(struct clk_rcg2 *rcg, const struct freq_tbl *f)
-@@ -265,12 +289,23 @@ static int clk_rcg2_configure(struct clk_rcg2 *rcg, const struct freq_tbl *f)
- 	return update_config(rcg);
- }
- 
--static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate)
-+static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate,
-+			       enum freq_policy policy)
- {
- 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
- 	const struct freq_tbl *f;
- 
--	f = qcom_find_freq(rcg->freq_tbl, rate);
-+	switch (policy) {
-+	case FLOOR:
-+		f = qcom_find_freq_floor(rcg->freq_tbl, rate);
-+		break;
-+	case CEIL:
-+		f = qcom_find_freq(rcg->freq_tbl, rate);
-+		break;
-+	default:
-+		return -EINVAL;
-+	};
-+
- 	if (!f)
- 		return -EINVAL;
- 
-@@ -280,13 +315,25 @@ static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate)
- static int clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate,
- 			    unsigned long parent_rate)
- {
--	return __clk_rcg2_set_rate(hw, rate);
-+	return __clk_rcg2_set_rate(hw, rate, CEIL);
-+}
-+
-+static int clk_rcg2_set_floor_rate(struct clk_hw *hw, unsigned long rate,
-+				   unsigned long parent_rate)
-+{
-+	return __clk_rcg2_set_rate(hw, rate, FLOOR);
- }
- 
- static int clk_rcg2_set_rate_and_parent(struct clk_hw *hw,
- 		unsigned long rate, unsigned long parent_rate, u8 index)
- {
--	return __clk_rcg2_set_rate(hw, rate);
-+	return __clk_rcg2_set_rate(hw, rate, CEIL);
-+}
-+
-+static int clk_rcg2_set_floor_rate_and_parent(struct clk_hw *hw,
-+		unsigned long rate, unsigned long parent_rate, u8 index)
-+{
-+	return __clk_rcg2_set_rate(hw, rate, FLOOR);
- }
- 
- const struct clk_ops clk_rcg2_ops = {
-@@ -300,6 +347,17 @@ static int clk_rcg2_set_rate_and_parent(struct clk_hw *hw,
+diff --git a/drivers/clk/qcom/gcc-apq8084.c b/drivers/clk/qcom/gcc-apq8084.c
+index 070037a..486d961 100644
+--- a/drivers/clk/qcom/gcc-apq8084.c
++++ b/drivers/clk/qcom/gcc-apq8084.c
+@@ -1142,7 +1142,7 @@ enum {
+ 		.name = "sdcc1_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0_gpll4,
+ 		.num_parents = 3,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
  };
- EXPORT_SYMBOL_GPL(clk_rcg2_ops);
  
-+const struct clk_ops clk_rcg2_floor_ops = {
-+	.is_enabled = clk_rcg2_is_enabled,
-+	.get_parent = clk_rcg2_get_parent,
-+	.set_parent = clk_rcg2_set_parent,
-+	.recalc_rate = clk_rcg2_recalc_rate,
-+	.determine_rate = clk_rcg2_determine_floor_rate,
-+	.set_rate = clk_rcg2_set_floor_rate,
-+	.set_rate_and_parent = clk_rcg2_set_floor_rate_and_parent,
-+};
-+EXPORT_SYMBOL_GPL(clk_rcg2_floor_ops);
-+
- static int clk_rcg2_shared_force_enable(struct clk_hw *hw, unsigned long rate)
- {
- 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
-@@ -323,7 +381,7 @@ static int clk_rcg2_shared_force_enable(struct clk_hw *hw, unsigned long rate)
- 		pr_err("%s: RCG did not turn on\n", name);
+@@ -1156,7 +1156,7 @@ enum {
+ 		.name = "sdcc2_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
  
- 	/* set clock rate */
--	ret = __clk_rcg2_set_rate(hw, rate);
-+	ret = __clk_rcg2_set_rate(hw, rate, CEIL);
- 	if (ret)
- 		return ret;
+@@ -1170,7 +1170,7 @@ enum {
+ 		.name = "sdcc3_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
  
-diff --git a/drivers/clk/qcom/common.c b/drivers/clk/qcom/common.c
-index 94569f4..cfab7b4 100644
---- a/drivers/clk/qcom/common.c
-+++ b/drivers/clk/qcom/common.c
-@@ -46,6 +46,22 @@ struct freq_tbl *qcom_find_freq(const struct freq_tbl *f, unsigned long rate)
- }
- EXPORT_SYMBOL_GPL(qcom_find_freq);
+@@ -1184,7 +1184,7 @@ enum {
+ 		.name = "sdcc4_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
  
-+const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
-+					    unsigned long rate)
-+{
-+	const struct freq_tbl *best = NULL;
-+
-+	for ( ; f->freq; f++) {
-+		if (rate >= f->freq)
-+			best = f;
-+		else
-+			break;
-+	}
-+
-+	return best;
-+}
-+EXPORT_SYMBOL_GPL(qcom_find_freq_floor);
-+
- int qcom_find_src_index(struct clk_hw *hw, const struct parent_map *map, u8 src)
- {
- 	int i, num_parents = clk_hw_get_num_parents(hw);
-diff --git a/drivers/clk/qcom/common.h b/drivers/clk/qcom/common.h
-index 9fb5b8e..23c1927 100644
---- a/drivers/clk/qcom/common.h
-+++ b/drivers/clk/qcom/common.h
-@@ -41,6 +41,8 @@ struct qcom_cc_desc {
+diff --git a/drivers/clk/qcom/gcc-msm8916.c b/drivers/clk/qcom/gcc-msm8916.c
+index 5c4e193..628e6ca 100644
+--- a/drivers/clk/qcom/gcc-msm8916.c
++++ b/drivers/clk/qcom/gcc-msm8916.c
+@@ -1107,7 +1107,7 @@ enum {
+ 		.name = "sdcc1_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
  
- extern const struct freq_tbl *qcom_find_freq(const struct freq_tbl *f,
- 					     unsigned long rate);
-+extern const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
-+						   unsigned long rate);
- extern void
- qcom_pll_set_fsm_mode(struct regmap *m, u32 reg, u8 bias_count, u8 lock_count);
- extern int qcom_find_src_index(struct clk_hw *hw, const struct parent_map *map,
+@@ -1132,7 +1132,7 @@ enum {
+ 		.name = "sdcc2_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/qcom/gcc-msm8974.c b/drivers/clk/qcom/gcc-msm8974.c
+index 0091520..348e30d 100644
+--- a/drivers/clk/qcom/gcc-msm8974.c
++++ b/drivers/clk/qcom/gcc-msm8974.c
+@@ -872,7 +872,7 @@ enum {
+ 	.name = "sdcc1_apps_clk_src",
+ 	.parent_names = gcc_xo_gpll0,
+ 	.num_parents = 2,
+-	.ops = &clk_rcg2_ops,
++	.ops = &clk_rcg2_floor_ops,
+ };
+ 
+ static struct clk_rcg2 sdcc1_apps_clk_src = {
+@@ -894,7 +894,7 @@ enum {
+ 		.name = "sdcc2_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -908,7 +908,7 @@ enum {
+ 		.name = "sdcc3_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -922,7 +922,7 @@ enum {
+ 		.name = "sdcc4_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/qcom/gcc-msm8994.c b/drivers/clk/qcom/gcc-msm8994.c
+index 84093c1..8afd830 100644
+--- a/drivers/clk/qcom/gcc-msm8994.c
++++ b/drivers/clk/qcom/gcc-msm8994.c
+@@ -912,7 +912,7 @@ enum {
+ 		.name = "sdcc1_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0_gpll4,
+ 		.num_parents = 3,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -938,7 +938,7 @@ enum {
+ 		.name = "sdcc2_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -953,7 +953,7 @@ enum {
+ 		.name = "sdcc3_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -968,7 +968,7 @@ enum {
+ 		.name = "sdcc4_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/qcom/gcc-msm8996.c b/drivers/clk/qcom/gcc-msm8996.c
+index e22bbc2..4b1fc17 100644
+--- a/drivers/clk/qcom/gcc-msm8996.c
++++ b/drivers/clk/qcom/gcc-msm8996.c
+@@ -460,7 +460,7 @@ enum {
+ 		.name = "sdcc1_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0_gpll4_gpll0_early_div,
+ 		.num_parents = 4,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -505,7 +505,7 @@ enum {
+ 		.name = "sdcc2_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0_gpll4,
+ 		.num_parents = 3,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -519,7 +519,7 @@ enum {
+ 		.name = "sdcc3_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0_gpll4,
+ 		.num_parents = 3,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
+@@ -543,7 +543,7 @@ enum {
+ 		.name = "sdcc4_apps_clk_src",
+ 		.parent_names = gcc_xo_gpll0,
+ 		.num_parents = 2,
+-		.ops = &clk_rcg2_ops,
++		.ops = &clk_rcg2_floor_ops,
+ 	},
+ };
+ 
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
