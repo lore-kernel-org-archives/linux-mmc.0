@@ -1,142 +1,180 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v8 03/16] mmc: sdhci-msm: Change poor style writel/readl of registers
-Date: Wed, 16 Nov 2016 21:30:39 +0530
-Message-ID: <1479312052-22396-4-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v8 04/16] ARM: dts: Add xo_clock to sdhc nodes on qcom platforms
+Date: Wed, 16 Nov 2016 21:30:40 +0530
+Message-ID: <1479312052-22396-5-git-send-email-riteshh@codeaurora.org>
 References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-clk-owner@vger.kernel.org>
 In-Reply-To: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-clk-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, andy.gross@linaro.org
 Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch changes the poor style of writel/readl registers
-into more readable format. This avoid mixed style format
-of readl/writel in sdhci-msm driver.
-This patch also removes the one line comments which were present for
-above writel/readl, since they were of no help.
+Add xo_clock to sdhc clock node on all qcom platforms.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 62 +++++++++++++++++++++++---------------------
- 1 file changed, 32 insertions(+), 30 deletions(-)
+ arch/arm/boot/dts/qcom-apq8084.dtsi   | 16 ++++++++++------
+ arch/arm/boot/dts/qcom-msm8974.dtsi   | 16 ++++++++++------
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 10 ++++++----
+ arch/arm64/boot/dts/qcom/msm8996.dtsi |  9 +++++----
+ 4 files changed, 31 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index b78d72f..2dcbeb0 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -138,9 +138,9 @@ static int msm_config_cm_dll_phase(struct sdhci_host *host, u8 phase)
- 	config |= grey_coded_phase_table[phase] << CDR_SELEXT_SHIFT;
- 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+index 39eb7a4..6857e42 100644
+--- a/arch/arm/boot/dts/qcom-apq8084.dtsi
++++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+@@ -182,13 +182,13 @@
+ 	};
  
--	/* Set CK_OUT_EN bit of DLL_CONFIG register to 1. */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_CK_OUT_EN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 	clocks {
+-		xo_board {
++		xo_board: xo_board {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <19200000>;
+ 		};
  
- 	/* Wait until CK_OUT_EN bit of DLL_CONFIG register becomes '1' */
- 	rc = msm_dll_poll_ck_out_en(host, 1);
-@@ -307,6 +307,7 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	struct mmc_host *mmc = host->mmc;
- 	int wait_cnt = 50;
- 	unsigned long flags;
-+	u32 config;
+-		sleep_clk {
++		sleep_clk: sleep_clk {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <32768>;
+@@ -416,8 +416,10 @@
+ 			reg-names = "hc_mem", "core_mem";
+ 			interrupts = <0 123 0>, <0 138 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+-			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+-			clock-names = "core", "iface";
++			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
++				 <&gcc GCC_SDCC1_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			status = "disabled";
+ 		};
  
- 	spin_lock_irqsave(&host->lock, flags);
+@@ -427,8 +429,10 @@
+ 			reg-names = "hc_mem", "core_mem";
+ 			interrupts = <0 125 0>, <0 221 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+-			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+-			clock-names = "core", "iface";
++			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
++				 <&gcc GCC_SDCC2_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			status = "disabled";
+ 		};
  
-@@ -315,33 +316,34 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	 * tuning is in progress. Keeping PWRSAVE ON may
- 	 * turn off the clock.
- 	 */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC)
--			& ~CORE_CLK_PWRSAVE), host->ioaddr + CORE_VENDOR_SPEC);
-+	config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
-+	config &= ~CORE_CLK_PWRSAVE;
-+	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
+index d210947..947b7b1 100644
+--- a/arch/arm/boot/dts/qcom-msm8974.dtsi
++++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
+@@ -220,13 +220,13 @@
+ 	};
  
--	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			| CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_DLL_RST;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 	clocks {
+-		xo_board {
++		xo_board: xo_board {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <19200000>;
+ 		};
  
--	/* Write 1 to DLL_PDN bit of DLL_CONFIG register */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			| CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_DLL_PDN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
- 	msm_cm_dll_set_freq(host);
+-		sleep_clk {
++		sleep_clk: sleep_clk {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <32768>;
+@@ -558,8 +558,10 @@
+ 			reg-names = "hc_mem", "core_mem";
+ 			interrupts = <0 123 0>, <0 138 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+-			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+-			clock-names = "core", "iface";
++			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
++				 <&gcc GCC_SDCC1_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			status = "disabled";
+ 		};
  
--	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			& ~CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config &= ~CORE_DLL_RST;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+@@ -569,8 +571,10 @@
+ 			reg-names = "hc_mem", "core_mem";
+ 			interrupts = <0 125 0>, <0 221 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+-			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+-			clock-names = "core", "iface";
++			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
++				 <&gcc GCC_SDCC2_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			status = "disabled";
+ 		};
  
--	/* Write 0 to DLL_PDN bit of DLL_CONFIG register */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			& ~CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config &= ~CORE_DLL_PDN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index 466ca57..6265822 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -512,8 +512,9 @@
+ 			interrupts = <0 123 0>, <0 138 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+-				 <&gcc GCC_SDCC1_AHB_CLK>;
+-			clock-names = "core", "iface";
++				 <&gcc GCC_SDCC1_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			bus-width = <8>;
+ 			non-removable;
+ 			status = "disabled";
+@@ -527,8 +528,9 @@
+ 			interrupts = <0 125 0>, <0 221 0>;
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+-				 <&gcc GCC_SDCC2_AHB_CLK>;
+-			clock-names = "core", "iface";
++				 <&gcc GCC_SDCC2_AHB_CLK>,
++				 <&xo_board 0>;
++			clock-names = "core", "iface", "xo_clock";
+ 			bus-width = <4>;
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm64/boot/dts/qcom/msm8996.dtsi b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+index 338f82a..73178fd 100644
+--- a/arch/arm64/boot/dts/qcom/msm8996.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+@@ -192,14 +192,14 @@
+ 	};
  
--	/* Set DLL_EN bit to 1. */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			| CORE_DLL_EN), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_DLL_EN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 	clocks {
+-		xo_board {
++		xo_board: xo_board {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <19200000>;
+ 			clock-output-names = "xo_board";
+ 		};
  
--	/* Set CK_OUT_EN bit to 1. */
--	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
--			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_CK_OUT_EN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+-		sleep_clk {
++		sleep_clk: sleep_clk {
+ 			compatible = "fixed-clock";
+ 			#clock-cells = <0>;
+ 			clock-frequency = <32764>;
+@@ -347,9 +347,10 @@
+ 			 interrupts = <0 125 0>, <0 221 0>;
+ 			 interrupt-names = "hc_irq", "pwr_irq";
  
- 	/* Wait until DLL_LOCK bit of DLL_STATUS register becomes '1' */
- 	while (!(readl_relaxed(host->ioaddr + CORE_DLL_STATUS) &
-@@ -538,7 +540,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	struct resource *core_memres;
- 	int ret;
- 	u16 host_version, core_minor;
--	u32 core_version, caps;
-+	u32 core_version, config;
- 	u8 core_major;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
-@@ -606,9 +608,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
- 
--	/* Reset the core and Enable SDHC mode */
--	writel_relaxed(readl_relaxed(msm_host->core_mem + CORE_POWER) |
--		       CORE_SW_RST, msm_host->core_mem + CORE_POWER);
-+	config = readl_relaxed(msm_host->core_mem + CORE_POWER);
-+	config |= CORE_SW_RST;
-+	writel_relaxed(config, msm_host->core_mem + CORE_POWER);
- 
- 	/* SW reset can take upto 10HCLK + 15MCLK cycles. (min 40us) */
- 	usleep_range(1000, 5000);
-@@ -638,9 +640,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	 * controller versions and must be explicitly enabled.
- 	 */
- 	if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12) {
--		caps = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
--		caps |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
--		writel_relaxed(caps, host->ioaddr +
-+		config = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
-+		config |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
-+		writel_relaxed(config, host->ioaddr +
- 			       CORE_VENDOR_SPEC_CAPABILITIES0);
- 	}
+-			 clock-names = "iface", "core";
++			 clock-names = "iface", "core", "xo_clock";
+ 			 clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+-			 <&gcc GCC_SDCC2_APPS_CLK>;
++			 <&gcc GCC_SDCC2_APPS_CLK>,
++			 <&xo_board 0>;
+ 			 bus-width = <4>;
+ 		 };
  
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
+
