@@ -1,40 +1,52 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] RFC: mmc: block: replace semaphore with freezing
-Date: Wed, 16 Nov 2016 17:32:44 +0100
-Message-ID: <17679227.zg8zl3jhbr@wuerfel>
-References: <1479293464-4576-1-git-send-email-linus.walleij@linaro.org> <CAJZ5v0gCDQXebsQoCYJY5FyE6oJUw4s6sQrNbKLuxpLvOe2RoA@mail.gmail.com> <CACRpkdY+jdU4ETuMJsY-efSkjwE0fWWRZoyCyrYAs_GxUo-DhQ@mail.gmail.com>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: dw_mmc: fix spelling mistake in dev_dbg message
+Date: Wed, 16 Nov 2016 18:55:01 +0000
+Message-ID: <20161116185501.10976-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdY+jdU4ETuMJsY-efSkjwE0fWWRZoyCyrYAs_GxUo-DhQ@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Russell King <linux@armlinux.org.uk>, Jiri Kosina <jikos@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from youngberry.canonical.com ([91.189.89.112]:52212 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754084AbcKPSzL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 13:55:11 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-On Wednesday, November 16, 2016 4:20:47 PM CET Linus Walleij wrote:
-> On Wed, Nov 16, 2016 at 1:46 PM, Rafael J. Wysocki <rafael@kernel.org> wrote:
-> 
-> > Well, we had a session at the KS regarding usage of the freezer on
-> > kernel threads and the conclusion was to get rid of that (as opposed
-> > to freezing user space, which is necessary IMO).  So this change would
-> > go in the opposite direction. 
-> 
-> Aha so I should not make this thread look like everyone else, instead
-> everyone else should look like this thread, haha 
-> 
-> Ah well, I'll just drop it.
+From: Colin Ian King <colin.king@canonical.com>
 
-It would still be good to remove the semaphore and do something else,
-as we also want to remove all semaphores. ;-)
+Trivial fix to spelling mistake "desciptor" to "descriptor" in
+dev_dbg message.
 
-We could check "mq->flags & MMC_QUEUE_SUSPENDED" in the kthread to see
-if the queue is currently suspended, and otherwise go to sleep there,
-and then call wake_up() in the resume function.
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/dw_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-While looking at that code, I just noticed that access to 
-mq->flags is racy and should be fixed as well.
-
-	Arnd
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a16c537..9341b18 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -612,7 +612,7 @@ static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+ 	return 0;
+ err_own_bit:
+ 	/* restore the descriptor chain as it's polluted */
+-	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
++	dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
+ 	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+ 	dw_mci_idmac_init(host);
+ 	return -EINVAL;
+@@ -688,7 +688,7 @@ static inline int dw_mci_prepare_desc32(struct dw_mci *host,
+ 	return 0;
+ err_own_bit:
+ 	/* restore the descriptor chain as it's polluted */
+-	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
++	dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
+ 	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+ 	dw_mci_idmac_init(host);
+ 	return -EINVAL;
+-- 
+2.10.2
 
