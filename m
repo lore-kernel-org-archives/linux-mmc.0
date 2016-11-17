@@ -1,101 +1,72 @@
-From: Thierry Escande <thierry.escande@collabora.com>
-Subject: [PATCH v2] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
-Date: Thu, 17 Nov 2016 11:59:16 +0100
-Message-ID: <1479380356-7228-1-git-send-email-thierry.escande@collabora.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC v2 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
+ Intel byt sdio controller sub-vended by NI
+Date: Thu, 17 Nov 2016 14:26:34 +0200
+Message-ID: <d9254fda-8249-2dfa-2939-80c224cae05f@intel.com>
+References: <1479227541-21201-1-git-send-email-zach.brown@ni.com>
+ <1479227541-21201-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset = "utf-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:33673 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941009AbcKQK7Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 05:59:24 -0500
-Content-Transfert-Encoding: 8bit
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1479227541-21201-3-git-send-email-zach.brown@ni.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, bhthompson@chromium.org
 
-From: zhaojohn <john.zhao@intel.com>
+On 15/11/16 18:32, Zach Brown wrote:
+> On NI 9037 boards the max SDIO frequency is limited by trace lengths
+> and other layout choices. The max SDIO frequency is stored in an ACPI
+> table.
+> 
+> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+> f_max field of the host.
+> 
+> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+> Reviewed-by: Josh Cartwright <joshc@ni.com>
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 9741505..4c31d16 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -27,6 +27,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mmc/sdhci-pci-data.h>
+> +#include <linux/acpi.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+> @@ -377,6 +378,18 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+>  
+>  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+> +#ifdef CONFIG_ACPI
+> +	/* Get max freq from ACPI for NI hardware */
 
-Hynix eMMC devices sometimes take 50% longer to resume from sleep. This
-occurs on Braswell based chromebook with acpi sdhci controller.
+The comment seems a little redundant.
 
-Based on a recommendation from Hynix engineers, this patch sends a
-Power-Off Notification using mmc_poweroff_notify() before going to S3 to
-have a resume time consistently within spec. No voltage regulator are
-being cut through this notification but merely tells the eMMC firmware
-that we're about to do so and get it to behave better on resume.
+> +	acpi_status status;
+> +	unsigned long long max_freq;
+> +
+> +	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
+> +				       "MXFQ", NULL, &max_freq);
+> +	if (ACPI_FAILURE(status))
+> +		return -EINVAL;
 
-Signed-off-by: zhaojohn <john.zhao@intel.com>
-Signed-off-by: Arindam Roy <arindam.roy@intel.com>
-Tested-by: Freddy Paul <freddy.paul@intel.com>
-Reviewed-by: Icarus W Sparry <icarus.w.sparry@intel.com>
-Reviewed-by: Marc Herbert <marc.herbert@intel.com>
-Reviewed-by: Eric Caruso <ejcaruso@chromium.org>
-Signed-off-by: Brian Norris <briannorris@chromium.org>
-Signed-off-by: Thierry Escande <thierry.escande@collabora.com>
----
+I wonder if you should print an error message to let the user know why the
+driver failed to probe.
 
-Changes in v2:
-- Add a few more details in the commit message
-
- drivers/mmc/card/block.c | 8 ++++++++
- drivers/mmc/core/mmc.c   | 8 +++++++-
- include/linux/mmc/card.h | 2 ++
- 3 files changed, 17 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 709a872..3db5344 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2573,6 +2573,14 @@ static const struct mmc_fixup blk_fixups[] =
- 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
-+	/*
-+	 * Hynix eMMC devices sometimes take 50% longer to resume from sleep.
-+	 * Based on a recommendation from Hynix, send a Power-Off Notification
-+	 * before going to S3 to restore a resume time consistently within spec.
-+	 */
-+	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_HYNIX, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP),
-+
- 	END_FIXUP
- };
- 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index df19777..774d478 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1941,8 +1941,14 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	if (mmc_can_poweroff_notify(host->card) &&
- 		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
- 		err = mmc_poweroff_notify(host->card, notify_type);
--	else if (mmc_can_sleep(host->card))
-+	else if (mmc_can_sleep(host->card)) {
-+		if (host->card->quirks & MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP) {
-+			err = mmc_poweroff_notify(host->card, notify_type);
-+			if (err)
-+				goto out;
-+		}
- 		err = mmc_sleep(host);
-+	}
- 	else if (!mmc_host_is_spi(host))
- 		err = mmc_deselect_cards(host);
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 73fad83..e4940f4 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -281,6 +281,8 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP \
-+				(1<<14)		/* Poweroff notification*/
- 
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
--- 
-2.7.4
-
+> +
+> +	slot->host->mmc->f_max = max_freq * 1000000;
+> +#endif
+>  	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+>  				 MMC_CAP_WAIT_WHILE_BUSY;
+>  	return 0;
+> 
