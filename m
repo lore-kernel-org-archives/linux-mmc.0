@@ -1,44 +1,101 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [PATCH v8 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400
- support
-Date: Wed, 16 Nov 2016 16:08:53 -0800
-Message-ID: <1993f1b4-2989-af06-a5f0-06170db7c333@redhat.com>
-References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH] sdhci-esdhc-imx: fix bus-width for 1-bit operation.
+Date: Wed, 16 Nov 2016 16:28:45 -0800
+Message-ID: <261f073f9b19e4a390a62ea111925b87@agner.ch>
+References: <1478015905-31262-1-git-send-email-leogveiga@gmail.com>
+ <CAA+hA=SMgEM_UVt2=3-Kx23fG0epMJv3mt7ZEPo=Eo5ib7Lj=w@mail.gmail.com>
+ <a96c51d622e802cb01052699e7c6f1c7@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57836 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753994AbcKQAI4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 16 Nov 2016 19:08:56 -0500
-In-Reply-To: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a96c51d622e802cb01052699e7c6f1c7@agner.ch>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Leonardo G. Veiga" <leogveiga@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, raul.munoz@toradex.com, leonardo.veiga@toradex.com, Haibo Chen <haibo.chen@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 
-On 2016-11-16 8:00 AM, Ritesh Harjani wrote:
-> Hi,
->
-> This is v8 version of the patch series which adds support for MSM8996.
-> Adds HS400 driver support as well.
-> These are tested on internal msm8996 & db410c HW.
->
-> Changes from v7 -> v8 :-
-> 1. Added patch 005 to add dt bindings for xo_clock.
-> 2. Added patch 009 to factor out sdhci_enable_clock as discussed on v7 series.
-> 2.a. Modified patch 010 by making use of sdhci_enable_clock.
-> 2.b. Addressed Stephen's comment on patch 010 to call clk_set_rate unconditionally.
-> 3. Addressed Stephen comments to remove unncessary one line comments, braces and other
-> minor comments.
-> 4. Added changes from Jeremy in patch 002 for gcc-msm8994 as well for sdcc clk_rcg2_floor_ops.
-> minor comments.
->
-> v7 series was verified on msm8994 target by Jeremy McNicoll.
+On 2016-11-02 09:40, Stefan Agner wrote:
+> On 2016-11-02 01:42, Dong Aisheng wrote:
+>> Hi Leonardo,
+>>
+>> On Tue, Nov 1, 2016 at 11:58 PM, Leonardo G. Veiga <leogveiga@gmail.com> wrote:
+>>> From: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
+>>>
+>>> The 1-bit operation mode, enabled by seeting the 'bus-width' property of
+>>> the device tree 'esdhc' node to <1>, not work while using SD card.
+>>>
+>>> The behavior is only noticed when only the data pin 0 is connected to the
+>>> hardware. A series of kernel errors are printed to the console, all of them
+>>> returning the following error message followed by some explanation:
+>>> mmcblk0: error -84 transferring data
+>>>
+>>> If four data lines are connected, it ignores the device-tree
+>>> property and works in 4-bit mode of operation without errors. The hardware
+>>> used for testing does not support 8-bit mode.
+>>>
+>>> Check the 'bus-width' property and if set to <1>, enable the
+>>> SDHCI_QUIRK_FORCE_1_BIT_DATA quirk.
+>>>
+>>> Signed-off-by: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++++
+>>>  1 file changed, 4 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> index c9fbc4c3..88d7d22 100644
+>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> @@ -1003,6 +1003,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>>>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>>>         }
+>>>
+>>> +       if (!of_property_read_u32(np, "bus-width", &boarddata->max_bus_width)
+>>> +               && boarddata->max_bus_width == 1)
+>>> +               host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+>>> +
+>>
+>> This looks like a common SDHCI driver issue that it assumes the default
+>> bus-width as 4 bit if no SDHCI_QUIRK_FORCE_1_BIT_DATA specified.
+>>         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+>>                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+>>
+>> And I'm not sure Andrian or Ulf would like to see people keep using this quirk.
+>> IMHO we probably could totally remove it since bus-width already tells
+>> what the driver needs.
+> 
+> Hm, I see what you are saying, the problem is that the core
+> (sdhci_setup_host) falls back to 4-bit if SDHCI_QUIRK_FORCE_1_BIT_DATA
+> is not set... Removing that should be fine for DT enabled SDHC drivers,
+> since mmc_of_parse sets MMC_CAP_4_BIT_DATA. But not sure about drivers
+> which parse dt on their own or still support platform data.... Those
+> might rely on MMC_CAP_4_BIT_DATA being set by default...
 
+Any thoughts on this?
 
-v7 was verified on my Nexus 5X (msm8992).
+Btw, I just realized that this used to work in 4.1 because back then the
+device tree properties got parsed into struct esdhc_platform_data, which
+does set the 1-bit quirk.. So this can be seen as a regression...
 
--jeremy
+--
+Stefan
 
+> 
+> --
+> Stefan
+> 
+> 
+> 
+>>
+>> Andrian & Ulf,
+>> Comments?
+>>
+>>>         /* call to generic mmc_of_parse to support additional capabilities */
+>>>         ret = mmc_of_parse(host->mmc);
+>>>         if (ret)
+>>> --
+>>> 2.7.4
+>>>
+>>
+>> Regards
+>> Dong Aisheng
