@@ -1,117 +1,101 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 7/9] mmc: core: Allow CMD13 polling when switch to HS200
- mode
-Date: Thu, 17 Nov 2016 12:23:33 +0200
-Message-ID: <e003f72a-6084-eb1a-6b44-c6a11d93b3ae@intel.com>
-References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
- <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org>
+From: Thierry Escande <thierry.escande@collabora.com>
+Subject: [PATCH v2] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
+Date: Thu, 17 Nov 2016 11:59:16 +0100
+Message-ID: <1479380356-7228-1-git-send-email-thierry.escande@collabora.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset = "utf-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:13141 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750785AbcKQK2f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Nov 2016 05:28:35 -0500
-In-Reply-To: <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:33673 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941009AbcKQK7Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 05:59:24 -0500
+Content-Transfert-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, bhthompson@chromium.org
 
-On 16/11/16 12:51, Ulf Hansson wrote:
-> In cases when the mmc host doesn't support HW busy detection, polling for
-> busy by using CMD13 is beneficial. The reasons have already been explained
-> in earlier change logs.
-> 
-> To allow polling with CMD13, let's provide MMC_TIMING_MMC_HS200 as the
-> timing parameter to __mmc_switch(), which makes sure the mmc host and the
-> mmc card operates at the same bus timing during the polling.
+From: zhaojohn <john.zhao@intel.com>
 
-I have reports of cases where CMD13 always gives CRC errors after switch
-to HS200.  Currently we are assuming the low frequency should mean that
-won't happen, but it does in some cases.  That is not entirely surprising
-since HS200 needs tuning at the final operating frequency.
+Hynix eMMC devices sometimes take 50% longer to resume from sleep. This
+occurs on Braswell based chromebook with acpi sdhci controller.
 
-What I would like to do for hosts that support busy waiting or DAT0 polling
-(i.e. MMC_CAP_WAIT_WHILE_BUSY or host->ops->card_busy), is to ignore CRC
-errors from the CMD13 that checks the switch status.  The main reason for
-doing that is that we really expect the switch to succeed and, given HS200
-tuning requirement, the CRC error is not a reliable means of determining
-that it hasn't.
+Based on a recommendation from Hynix engineers, this patch sends a
+Power-Off Notification using mmc_poweroff_notify() before going to S3 to
+have a resume time consistently within spec. No voltage regulator are
+being cut through this notification but merely tells the eMMC firmware
+that we're about to do so and get it to behave better on resume.
 
-With the existing code I would just change the err check:
+Signed-off-by: zhaojohn <john.zhao@intel.com>
+Signed-off-by: Arindam Roy <arindam.roy@intel.com>
+Tested-by: Freddy Paul <freddy.paul@intel.com>
+Reviewed-by: Icarus W Sparry <icarus.w.sparry@intel.com>
+Reviewed-by: Marc Herbert <marc.herbert@intel.com>
+Reviewed-by: Eric Caruso <ejcaruso@chromium.org>
+Signed-off-by: Brian Norris <briannorris@chromium.org>
+Signed-off-by: Thierry Escande <thierry.escande@collabora.com>
+---
 
+Changes in v2:
+- Add a few more details in the commit message
 
+ drivers/mmc/card/block.c | 8 ++++++++
+ drivers/mmc/core/mmc.c   | 8 +++++++-
+ include/linux/mmc/card.h | 2 ++
+ 3 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 709a872..3db5344 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2573,6 +2573,14 @@ static const struct mmc_fixup blk_fixups[] =
+ 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++	/*
++	 * Hynix eMMC devices sometimes take 50% longer to resume from sleep.
++	 * Based on a recommendation from Hynix, send a Power-Off Notification
++	 * before going to S3 to restore a resume time consistently within spec.
++	 */
++	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_HYNIX, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP),
++
+ 	END_FIXUP
+ };
+ 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3268fcd3378d..c8862c58b60b 100644
+index df19777..774d478 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1387,6 +1387,13 @@ static int mmc_select_hs200(struct mmc_card *card)
+@@ -1941,8 +1941,14 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (mmc_can_poweroff_notify(host->card) &&
+ 		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+ 		err = mmc_poweroff_notify(host->card, notify_type);
+-	else if (mmc_can_sleep(host->card))
++	else if (mmc_can_sleep(host->card)) {
++		if (host->card->quirks & MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP) {
++			err = mmc_poweroff_notify(host->card, notify_type);
++			if (err)
++				goto out;
++		}
+ 		err = mmc_sleep(host);
++	}
+ 	else if (!mmc_host_is_spi(host))
+ 		err = mmc_deselect_cards(host);
  
- 		err = mmc_switch_status(card);
- 		/*
-+		 * For HS200, CRC errors are not a reliable way to know the
-+		 * switch failed. If there really is a problem, we would expect
-+		 * tuning will fail and the result ends up the same.
-+		 */
-+		if (err == -EILSEQ)
-+			err = 0;
-+		/*
- 		 * mmc_select_timing() assumes timing has not changed if
- 		 * it is a switch error.
- 		 */
-
-
-Then to support polling:
-
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index c8862c58b60b..66d8d57ae2fb 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1352,6 +1352,7 @@ static int mmc_select_hs200(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
- 	unsigned int old_timing, old_signal_voltage;
-+	bool send_status;
- 	int err = -EINVAL;
- 	u8 val;
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 73fad83..e4940f4 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -281,6 +281,8 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
++#define MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP \
++				(1<<14)		/* Poweroff notification*/
  
-@@ -1373,18 +1374,20 @@ static int mmc_select_hs200(struct mmc_card *card)
- 	 * switch to HS200 mode if bus width is set successfully.
- 	 */
- 	err = mmc_select_bus_width(card);
--	if (err > 0) {
--		val = EXT_CSD_TIMING_HS200 |
--		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
--		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				   EXT_CSD_HS_TIMING, val,
--				   card->ext_csd.generic_cmd6_time, 0,
--				   true, false, true);
--		if (err)
--			goto err;
--		old_timing = host->ios.timing;
--		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-+	if (err <= 0)
-+		goto err;
-+
-+	send_status = !(host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
-+		      !host->ops->card_busy;
-+	old_timing = host->ios.timing;
-+
-+	val = EXT_CSD_TIMING_HS200 |
-+	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING, val,
-+			   card->ext_csd.generic_cmd6_time,
-+			   MMC_TIMING_MMC_HS200, true, send_status, true);
  
-+	if (!err && !send_status) {
- 		err = mmc_switch_status(card);
- 		/*
- 		 * For HS200, CRC errors are not a reliable way to know the
-
-
-
-Thoughts?
+ 	unsigned int		erase_size;	/* erase size in sectors */
+-- 
+2.7.4
 
