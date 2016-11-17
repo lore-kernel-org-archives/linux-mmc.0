@@ -1,116 +1,55 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCHv2 05/10] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by
- default
-Date: Thu, 17 Nov 2016 14:05:25 +0900
-Message-ID: <868dbb62-4b0d-3492-0b13-093ce63c5cde@samsung.com>
-References: <20161115101232.3854-1-jh80.chung@samsung.com>
- <20161115101232.3854-6-jh80.chung@samsung.com>
- <CGME20161116091850epcas5p43ee5a8003c36321f4266c5942bd42060@epcas5p4.samsung.com>
- <6d7625c0-8588-5d11-7475-38fa611d8614@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <6d7625c0-8588-5d11-7475-38fa611d8614-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv3 0/9] mmc: dw_mmc: clean the codes for dwmmc controller
+Date: Thu, 17 Nov 2016 16:40:32 +0900
+Message-ID: <20161117074041.8641-1-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:58231 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751059AbcKQHky (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:40:54 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OGR01SAEZZO5X60@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:40:42 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 11/16/2016 06:16 PM, Shawn Lin wrote:
-> ÔÚ 2016/11/15 18:12, Jaehoon Chung Ð´µÀ:
->> stop_cmdr should be set to values relevant to stop command.
->> It migth be assigned to values whatever there is mrq->stop or not.
->> Then it doesn't need to use dw_mci_prepare_command().
->> It's enough to use the prep_stop_abort for preparing stop command.
->>
-> 
-> Have you considered to clean up the logic of preparing abort cmd
-> within dw_mci_prepare_command?
+This patchset is modified the some minor fixing and cleaning codes.
 
-I have considered this..but i didn't check fully for this logic.
-I think it's possible to clean and make more simpler than now.
+* Major changes
+- Remove the unnecessary codes and use_stop_abort() by default.
+- Remove the obsoleted property "supports-highspeed"
+- Deprecated the "clock-freq-min-max" property. Instead, use "max-frequency"
+- Minimum clock value is set to 100K by default.
 
-how about thinking more after applying these patch-set? :)
+Change in v3:
+- Use the dwmmc private cookie enum.
+- Add the reviewed-by and acked-by tags.
 
-Best Regards,
-Jaehoon Chung
+Change in v2:
+- Applied patches relevant to dt files
+- Use "deprecated" instead of removing about "clock-freq-min-max"
+- Added Heiko's Tested-by tag
 
-> 
-> 
->         if (cmd->opcode == MMC_STOP_TRANSMISSION ||
->             cmd->opcode == MMC_GO_IDLE_STATE ||
->             cmd->opcode == MMC_GO_INACTIVE_STATE ||
->             (cmd->opcode == SD_IO_RW_DIRECT &&
->              ((cmd->arg >> 9) & 0x1FFFF) == SDIO_CCCR_ABORT))
->                 cmdr |= SDMMC_CMD_STOP;
-> 
-> 
->> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
->> Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 15 +++++----------
->>  1 file changed, 5 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 3cda68c..12e1107 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
->>
->>  static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
->>  {
->> -    struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
->> +    struct mmc_command *stop = &host->stop_abort;
->>
->>      dw_mci_start_command(host, stop, host->stop_cmdr);
->>  }
->> @@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
->>          spin_unlock_irqrestore(&host->irq_lock, irqflags);
->>      }
->>
->> -    if (mrq->stop)
->> -        host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
->> -    else
->> -        host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
->> +    host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
->>  }
->>
->>  static void dw_mci_start_request(struct dw_mci *host,
->> @@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>              if (test_and_clear_bit(EVENT_DATA_ERROR,
->>                             &host->pending_events)) {
->>                  dw_mci_stop_dma(host);
->> -                if (data->stop ||
->> -                    !(host->data_status & (SDMMC_INT_DRTO |
->> +                if (!(host->data_status & (SDMMC_INT_DRTO |
->>                                 SDMMC_INT_EBE)))
->>                      send_stop_abort(host, data);
->>                  state = STATE_DATA_ERROR;
->> @@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>              if (test_and_clear_bit(EVENT_DATA_ERROR,
->>                             &host->pending_events)) {
->>                  dw_mci_stop_dma(host);
->> -                if (data->stop ||
->> -                    !(host->data_status & (SDMMC_INT_DRTO |
->> +                if (!(host->data_status & (SDMMC_INT_DRTO |
->>                                 SDMMC_INT_EBE)))
->>                      send_stop_abort(host, data);
->>                  state = STATE_DATA_ERROR;
->> @@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>              host->cmd = NULL;
->>              host->data = NULL;
->>
->> -            if (mrq->stop)
->> +            if (!mrq->sbc && mrq->stop)
->>                  dw_mci_command_complete(host, mrq->stop);
->>              else
->>                  host->cmd_status = 0;
->>
-> 
-> 
+Jaehoon Chung (9):
+  mmc: dw_mmc: display the real register value on debugfs
+  mmc: dw_mmc: fix the debug message for checking card's present
+  mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+  mmc: dw_mmc: use the hold register when send stop command
+  mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+  mmc: dw_mmc: use the cookie's enum values for post/pre_req()
+  mmc: dw_mmc: remove the unnecessary mmc_data structure
+  mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
+  Documentation: synopsys-dw-mshc: remove the unused properties
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  8 +-
+ drivers/mmc/host/dw_mmc.c                          | 88 +++++++++++-----------
+ include/linux/mmc/dw_mmc.h                         |  6 ++
+ 3 files changed, 50 insertions(+), 52 deletions(-)
+
+-- 
+2.10.1
+
