@@ -1,35 +1,63 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v8 12/16] arm64: dts: qcom: msm8916: Add ddr support to sdhc1
-Date: Thu, 17 Nov 2016 06:22:08 +0530
-Message-ID: <1479343928-31493-1-git-send-email-riteshh@codeaurora.org>
-References: <1479312052-22396-13-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1479312052-22396-13-git-send-email-riteshh@codeaurora.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, andy.gross@linaro.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, Ritesh Harjani <riteshh@codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix spelling mistake in dev_dbg message
+Date: Thu, 17 Nov 2016 10:24:20 +0900
+Message-ID: <360eeabd-3deb-ad52-cd41-d78e0c8b7973@samsung.com>
+References: <CGME20161116185513epcas4p1d969894081c8dabb75a554321d1e4bed@epcas4p1.samsung.com>
+ <20161116185501.10976-1-colin.king@canonical.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:46190 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932263AbcKQBYq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2016 20:24:46 -0500
+In-reply-to: <20161116185501.10976-1-colin.king@canonical.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Colin King <colin.king@canonical.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-This adds mmc-ddr-1_8v support to DT for sdhc1 of msm8916.
+Hi Colin,
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
----
- arch/arm64/boot/dts/qcom/msm8916.dtsi | 1 +
- 1 file changed, 1 insertion(+)
+On 11/17/2016 03:55 AM, Colin King wrote:
+> From: Colin Ian King <colin.king@canonical.com>
+> 
+> Trivial fix to spelling mistake "desciptor" to "descriptor" in
+> dev_dbg message.
 
-diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-index 7bce1b3..1be5cd4 100644
---- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-@@ -515,6 +515,7 @@
- 				 <&gcc GCC_SDCC1_AHB_CLK>,
- 				 <&xo_board 0>;
- 			clock-names = "core", "iface", "xo";
-+			mmc-ddr-1_8v;
- 			bus-width = <8>;
- 			non-removable;
- 			status = "disabled";
--- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-a Linux Foundation Collaborative Project.
+Applied on my dwmmc repository. Thanks!
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a16c537..9341b18 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -612,7 +612,7 @@ static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+>  	return 0;
+>  err_own_bit:
+>  	/* restore the descriptor chain as it's polluted */
+> -	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
+> +	dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
+>  	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+>  	dw_mci_idmac_init(host);
+>  	return -EINVAL;
+> @@ -688,7 +688,7 @@ static inline int dw_mci_prepare_desc32(struct dw_mci *host,
+>  	return 0;
+>  err_own_bit:
+>  	/* restore the descriptor chain as it's polluted */
+> -	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
+> +	dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
+>  	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+>  	dw_mci_idmac_init(host);
+>  	return -EINVAL;
+> 
 
