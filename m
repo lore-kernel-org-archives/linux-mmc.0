@@ -1,97 +1,50 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCHv3 5/9] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by
- default
-Date: Thu, 17 Nov 2016 15:51:06 +0800
-Message-ID: <c939c91c-6e00-72ea-62f9-94ea6320a753@rock-chips.com>
-References: <20161117074041.8641-1-jh80.chung@samsung.com>
- <20161117074041.8641-6-jh80.chung@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: fix the error handling for dma operation
+Date: Thu, 17 Nov 2016 16:53:47 +0900
+Message-ID: <20161117075347.9061-1-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:39287 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752941AbcKQHvS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:51:18 -0500
-In-Reply-To: <20161117074041.8641-6-jh80.chung@samsung.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:59351 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751567AbcKQHxy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:53:54 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OGS00WZM0LP1F60@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:53:49 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, adrian.hunter@intel.com
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-ÔÚ 2016/11/17 15:40, Jaehoon Chung Ð´µÀ:
-> stop_cmdr should be set to values relevant to stop command.
-> It migth be assigned to values whatever there is mrq->stop or not.
-> Then it doesn't need to use dw_mci_prepare_command().
-> It's enough to use the prep_stop_abort for preparing stop command.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Tested-by: Heiko Stuebner <heiko@sntech.de>
+When OWN bit of dma descriptor is not cleared, then it returns -EINVAL.
+Then it has to fall back to PIO mode for current transfer.
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Host controller was already set to bits relevant to DMA operation.
+If needs to use the PIO mode, Host controller has to stop the DMA
+operation. (It's more stable than now.)
 
-> ---
->  drivers/mmc/host/dw_mmc.c | 15 +++++----------
->  1 file changed, 5 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index f592280..f01b5ce 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
->
->  static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
->  {
-> -	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
-> +	struct mmc_command *stop = &host->stop_abort;
->
->  	dw_mci_start_command(host, stop, host->stop_cmdr);
->  }
-> @@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
->  		spin_unlock_irqrestore(&host->irq_lock, irqflags);
->  	}
->
-> -	if (mrq->stop)
-> -		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
-> -	else
-> -		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
-> +	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
->  }
->
->  static void dw_mci_start_request(struct dw_mci *host,
-> @@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  			if (test_and_clear_bit(EVENT_DATA_ERROR,
->  					       &host->pending_events)) {
->  				dw_mci_stop_dma(host);
-> -				if (data->stop ||
-> -				    !(host->data_status & (SDMMC_INT_DRTO |
-> +				if (!(host->data_status & (SDMMC_INT_DRTO |
->  							   SDMMC_INT_EBE)))
->  					send_stop_abort(host, data);
->  				state = STATE_DATA_ERROR;
-> @@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  			if (test_and_clear_bit(EVENT_DATA_ERROR,
->  					       &host->pending_events)) {
->  				dw_mci_stop_dma(host);
-> -				if (data->stop ||
-> -				    !(host->data_status & (SDMMC_INT_DRTO |
-> +				if (!(host->data_status & (SDMMC_INT_DRTO |
->  							   SDMMC_INT_EBE)))
->  					send_stop_abort(host, data);
->  				state = STATE_DATA_ERROR;
-> @@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  			host->cmd = NULL;
->  			host->data = NULL;
->
-> -			if (mrq->stop)
-> +			if (!mrq->sbc && mrq->stop)
->  				dw_mci_command_complete(host, mrq->stop);
->  			else
->  				host->cmd_status = 0;
->
+When it occurred error, it's not running any request.
 
+Fixes: 3b2a067b98b4 ("mmc: dw_mmc: avoid race condition of cpu and IDMAC")
 
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9341b18..080003b 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1058,6 +1058,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ 
+ 	if (host->dma_ops->start(host, sg_len)) {
++		host->dma_ops->stop(host);
+ 		/* We can't do DMA, try PIO for this one */
+ 		dev_dbg(host->dev,
+ 			"%s: fall back to PIO mode for current transfer\n",
 -- 
-Best Regards
-Shawn Lin
+2.10.1
 
