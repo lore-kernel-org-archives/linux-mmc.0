@@ -1,81 +1,65 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: fix the error handling for dma operation
-Date: Thu, 17 Nov 2016 17:25:29 +0900
-Message-ID: <bbb9dcda-ead5-0a52-4c9a-3b5ff078ad45@samsung.com>
-References: <20161117075347.9061-1-jh80.chung@samsung.com>
- <CGME20161117081315epcas5p11cfc5661a0c9b1c8543a0414b06d039d@epcas5p1.samsung.com>
- <75493dd3-f3c2-e7d7-0d21-01b430978cb6@rock-chips.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 0/9] mmc: core: Re-work CMD13 polling method for CMD6 for mmc
+Date: Thu, 17 Nov 2016 10:06:32 +0100
+Message-ID: <CACRpkdaWnwY+gty9bCZhpGtzcjpAz5Z8nqS9HT+pb+LHtcPRXw@mail.gmail.com>
+References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:57636 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751127AbcKQIZu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 03:25:50 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGS00JWK22G4IC0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 17:25:29 +0900 (KST)
-In-reply-to: <75493dd3-f3c2-e7d7-0d21-01b430978cb6@rock-chips.com>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:35456 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750951AbcKQJGe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 04:06:34 -0500
+Received: by mail-qk0-f170.google.com with SMTP id n204so210010301qke.2
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2016 01:06:33 -0800 (PST)
+In-Reply-To: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 11/17/2016 05:08 PM, Shawn Lin wrote:
-> Hi Jaehoon,
-> 
-> ÔÚ 2016/11/17 15:53, Jaehoon Chung Ð´µÀ:
->> When OWN bit of dma descriptor is not cleared, then it returns -EINVAL.
->> Then it has to fall back to PIO mode for current transfer.
->>
->> Host controller was already set to bits relevant to DMA operation.
->> If needs to use the PIO mode, Host controller has to stop the DMA
->> operation. (It's more stable than now.)
->>
-> 
-> It looks good to me, but
-> 
->> When it occurred error, it's not running any request.
->>
->> Fixes: 3b2a067b98b4 ("mmc: dw_mmc: avoid race condition of cpu and IDMAC")
->>
-> 
-> I think the real fixes tag should indicate the another commit,
-> 3fc7eaef44dbcbcd60 ("mmc: dw_mmc: Add external dma interface support")
+On Wed, Nov 16, 2016 at 11:51 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-You're right. 
-But my main problem is "checking OWN bit".  Thanks for noticing this commit. :)
-Some time..OWN bit is never released.. 
+> To improve this behaviour and shorten the card initialization time, we need to
+> allow using CMD13 as polling method to find out when the card stops signaling
+> busy. Although, enabling CMD13 polling may also introduce other issues as
+> according to the JEDEC spec, it's not the recommended method. Especially it
+> mentions that CRC errors may be triggered when sending a CMD13 command during a
+> bus timing change.
+>
+> To deal with these issues, we need to change from ignoring those CRC errors but
+> instead continue to treat the card as being busy and continue to poll with
+> CMD13. Perhaps this behaviour is one of reasons to why the earlier CMD13 polling
+> method didn't work out well.
+>
+> This series requires extensive testing, please help with that!
 
-Best Regards,
-Jaehoon Chung
+I cloned the MMC tree "next" and applied the patches on top.
 
-> 
-> otherwise,
-> 
-> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 9341b18..080003b 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1058,6 +1058,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->>      spin_unlock_irqrestore(&host->irq_lock, irqflags);
->>
->>      if (host->dma_ops->start(host, sg_len)) {
->> +        host->dma_ops->stop(host);
->>          /* We can't do DMA, try PIO for this one */
->>          dev_dbg(host->dev,
->>              "%s: fall back to PIO mode for current transfer\n",
->>
-> 
-> 
+(I guess if you want wider testing it's good to publish a branch,
+but I'd recommend just putting it into linux-next, it seems solid
+to me.)
 
+Tested on my previously problematic APQ8060 Dragonboard, it switches
+to highspeed and works like a charm! Now the eMMC comes up smacky
+right after registering the host:
+
+[    1.955105] mmci-pl18x 12400000.sdcc: mmc0: PL180 manf 51 rev0 at
+0x12400000 irq 197,0 (pio)
+[    1.955149] mmci-pl18x 12400000.sdcc: DMA channels RX none, TX none
+[    1.964202] mmci-pl18x 12400000.sdcc: Voltage switch failed
+[    2.031744] mmci-pl18x 12180000.sdcc: Got CD GPIO
+[    2.031829] mmci-pl18x 12180000.sdcc: Got WP GPIO
+[    2.040263] mmci-pl18x 12180000.sdcc: DMA channels RX none, TX none
+[    2.094161] mmc0: new high speed MMC card at address 0001
+[    2.095590] mmcblk0: mmc0:0001 SEM04G 3.69 GiB
+[    2.120905] mmcblk0boot0: mmc0:0001 SEM04G partition 1 1.00 MiB
+[    2.133068] mmcblk0boot1: mmc0:0001 SEM04G partition 2 1.00 MiB
+[    2.139657] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 128 KiB
+[    2.158004]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 p9 p10 p11 p12 p13
+p14 p15 p16 p17 p18 p19 p20 p21 >
+
+Tested-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
