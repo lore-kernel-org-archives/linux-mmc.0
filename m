@@ -1,101 +1,46 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH] sdhci-esdhc-imx: fix bus-width for 1-bit operation.
-Date: Wed, 16 Nov 2016 16:28:45 -0800
-Message-ID: <261f073f9b19e4a390a62ea111925b87@agner.ch>
-References: <1478015905-31262-1-git-send-email-leogveiga@gmail.com>
- <CAA+hA=SMgEM_UVt2=3-Kx23fG0epMJv3mt7ZEPo=Eo5ib7Lj=w@mail.gmail.com>
- <a96c51d622e802cb01052699e7c6f1c7@agner.ch>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v8 05/16] dt-bindings: sdhci-msm: Add xo_clock property
+Date: Thu, 17 Nov 2016 06:11:05 +0530
+Message-ID: <07895935-39af-5609-cf4b-2aee09974cab@codeaurora.org>
+References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
+ <1479312052-22396-6-git-send-email-riteshh@codeaurora.org>
+ <20161116191335.GH25626@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a96c51d622e802cb01052699e7c6f1c7@agner.ch>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Leonardo G. Veiga" <leogveiga@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, raul.munoz@toradex.com, leonardo.veiga@toradex.com, Haibo Chen <haibo.chen@nxp.com>
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <20161116191335.GH25626@codeaurora.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, andy.gross@linaro.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 2016-11-02 09:40, Stefan Agner wrote:
-> On 2016-11-02 01:42, Dong Aisheng wrote:
->> Hi Leonardo,
->>
->> On Tue, Nov 1, 2016 at 11:58 PM, Leonardo G. Veiga <leogveiga@gmail.com> wrote:
->>> From: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
->>>
->>> The 1-bit operation mode, enabled by seeting the 'bus-width' property of
->>> the device tree 'esdhc' node to <1>, not work while using SD card.
->>>
->>> The behavior is only noticed when only the data pin 0 is connected to the
->>> hardware. A series of kernel errors are printed to the console, all of them
->>> returning the following error message followed by some explanation:
->>> mmcblk0: error -84 transferring data
->>>
->>> If four data lines are connected, it ignores the device-tree
->>> property and works in 4-bit mode of operation without errors. The hardware
->>> used for testing does not support 8-bit mode.
->>>
->>> Check the 'bus-width' property and if set to <1>, enable the
->>> SDHCI_QUIRK_FORCE_1_BIT_DATA quirk.
->>>
->>> Signed-off-by: Leonardo Graboski Veiga <leonardo.veiga@toradex.com>
->>> ---
->>>  drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++++
->>>  1 file changed, 4 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->>> index c9fbc4c3..88d7d22 100644
->>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->>> @@ -1003,6 +1003,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
->>>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->>>         }
->>>
->>> +       if (!of_property_read_u32(np, "bus-width", &boarddata->max_bus_width)
->>> +               && boarddata->max_bus_width == 1)
->>> +               host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
->>> +
->>
->> This looks like a common SDHCI driver issue that it assumes the default
->> bus-width as 4 bit if no SDHCI_QUIRK_FORCE_1_BIT_DATA specified.
->>         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
->>                 mmc->caps |= MMC_CAP_4_BIT_DATA;
->>
->> And I'm not sure Andrian or Ulf would like to see people keep using this quirk.
->> IMHO we probably could totally remove it since bus-width already tells
->> what the driver needs.
-> 
-> Hm, I see what you are saying, the problem is that the core
-> (sdhci_setup_host) falls back to 4-bit if SDHCI_QUIRK_FORCE_1_BIT_DATA
-> is not set... Removing that should be fine for DT enabled SDHC drivers,
-> since mmc_of_parse sets MMC_CAP_4_BIT_DATA. But not sure about drivers
-> which parse dt on their own or still support platform data.... Those
-> might rely on MMC_CAP_4_BIT_DATA being set by default...
+Hi,
 
-Any thoughts on this?
-
-Btw, I just realized that this used to work in 4.1 because back then the
-device tree properties got parsed into struct esdhc_platform_data, which
-does set the 1-bit quirk.. So this can be seen as a regression...
-
---
-Stefan
-
-> 
-> --
-> Stefan
-> 
-> 
-> 
+On 11/17/2016 12:43 AM, Stephen Boyd wrote:
+> On 11/16, Ritesh Harjani wrote:
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
+>>  1 file changed, 1 insertion(+)
 >>
->> Andrian & Ulf,
->> Comments?
->>
->>>         /* call to generic mmc_of_parse to support additional capabilities */
->>>         ret = mmc_of_parse(host->mmc);
->>>         if (ret)
->>> --
->>> 2.7.4
->>>
->>
->> Regards
->> Dong Aisheng
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> index 485483a..243c9f0 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -17,6 +17,7 @@ Required properties:
+>>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>>  	"core"	- SDC MMC clock (MCLK) (required)
+>>  	"bus"	- SDCC bus voter clock (optional)
+>> +	"xo_clock" - TCXO clock (optional)
+>
+> I'd prefer we just call it "xo". We usually leave out _clk or
+> _clock from clock names because it's redundant.
+Ok. I will send patch 004(DT), 005(DT-documentation), 006(driver) & 
+012(DT conflicts) again. Since these will be affected with above change.
+
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
