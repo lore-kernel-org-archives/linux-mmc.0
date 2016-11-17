@@ -1,56 +1,89 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv3 2/9] mmc: dw_mmc: fix the debug message for checking card's
- present
-Date: Thu, 17 Nov 2016 16:40:34 +0900
-Message-ID: <20161117074041.8641-3-jh80.chung@samsung.com>
+Subject: [PATCHv3 5/9] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+Date: Thu, 17 Nov 2016 16:40:37 +0900
+Message-ID: <20161117074041.8641-6-jh80.chung@samsung.com>
 References: <20161117074041.8641-1-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mailout1.samsung.com ([203.254.224.24]:58231 "EHLO
         mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751059AbcKQHk5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:40:57 -0500
+        with ESMTP id S1751059AbcKQHk7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:40:59 -0500
 Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
  by mailout1.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
  with ESMTP id <0OGR01SAEZZO5X60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:40:42 +0900 (KST)
+ linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:40:43 +0900 (KST)
 In-reply-to: <20161117074041.8641-1-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-If display the debug message, this message should be spamming.
-If flags is maintained the previous value, didn't display the debug
-message.
+stop_cmdr should be set to values relevant to stop command.
+It migth be assigned to values whatever there is mrq->stop or not.
+Then it doesn't need to use dw_mci_prepare_command().
+It's enough to use the prep_stop_abort for preparing stop command.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 Tested-by: Heiko Stuebner <heiko@sntech.de>
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
- drivers/mmc/host/dw_mmc.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 7ffd57b..6adefb8 100644
+index f592280..f01b5ce 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1537,13 +1537,10 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 			== 0 ? 1 : 0;
+@@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
  
- 	spin_lock_bh(&host->lock);
--	if (present) {
--		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-+	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &slot->flags))
- 		dev_dbg(&mmc->class_dev, "card is present\n");
--	} else {
--		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-+	else if (!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
- 		dev_dbg(&mmc->class_dev, "card is not present\n");
--	}
- 	spin_unlock_bh(&host->lock);
+ static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
+ {
+-	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
++	struct mmc_command *stop = &host->stop_abort;
  
- 	return present;
+ 	dw_mci_start_command(host, stop, host->stop_cmdr);
+ }
+@@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 		spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ 	}
+ 
+-	if (mrq->stop)
+-		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
+-	else
+-		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
++	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
+ }
+ 
+ static void dw_mci_start_request(struct dw_mci *host,
+@@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				if (data->stop ||
+-				    !(host->data_status & (SDMMC_INT_DRTO |
++				if (!(host->data_status & (SDMMC_INT_DRTO |
+ 							   SDMMC_INT_EBE)))
+ 					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+@@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			host->cmd = NULL;
+ 			host->data = NULL;
+ 
+-			if (mrq->stop)
++			if (!mrq->sbc && mrq->stop)
+ 				dw_mci_command_complete(host, mrq->stop);
+ 			else
+ 				host->cmd_status = 0;
 -- 
 2.10.1
 
