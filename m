@@ -1,89 +1,49 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv3 5/9] mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
-Date: Thu, 17 Nov 2016 16:40:37 +0900
-Message-ID: <20161117074041.8641-6-jh80.chung@samsung.com>
+Subject: [PATCHv3 3/9] mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+Date: Thu, 17 Nov 2016 16:40:35 +0900
+Message-ID: <20161117074041.8641-4-jh80.chung@samsung.com>
 References: <20161117074041.8641-1-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mailout1.samsung.com ([203.254.224.24]:58231 "EHLO
         mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751059AbcKQHk7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:40:59 -0500
+        with ESMTP id S1751059AbcKQHk6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 02:40:58 -0500
 Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
  by mailout1.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
  with ESMTP id <0OGR01SAEZZO5X60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:40:43 +0900 (KST)
+ linux-mmc@vger.kernel.org; Thu, 17 Nov 2016 16:40:42 +0900 (KST)
 In-reply-to: <20161117074041.8641-1-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-stop_cmdr should be set to values relevant to stop command.
-It migth be assigned to values whatever there is mrq->stop or not.
-Then it doesn't need to use dw_mci_prepare_command().
-It's enough to use the prep_stop_abort for preparing stop command.
+If there is no property "clock-freq-min-max", mmc->f_min should be set
+to 400K by default. But Some SoC can be used 100K.
+When 100K is used, MMC core will try to check from 400K to 100K.
 
+Reported-by: Shawn Lin <shawn.lin@rock-chips.com>
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 Tested-by: Heiko Stuebner <heiko@sntech.de>
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
- drivers/mmc/host/dw_mmc.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index f592280..f01b5ce 100644
+index 6adefb8..d5f0384 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -385,7 +385,7 @@ static void dw_mci_start_command(struct dw_mci *host,
+@@ -54,7 +54,7 @@
+ #define DW_MCI_DMA_THRESHOLD	16
  
- static inline void send_stop_abort(struct dw_mci *host, struct mmc_data *data)
- {
--	struct mmc_command *stop = data->stop ? data->stop : &host->stop_abort;
-+	struct mmc_command *stop = &host->stop_abort;
+ #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
+-#define DW_MCI_FREQ_MIN	400000		/* unit: HZ */
++#define DW_MCI_FREQ_MIN	100000		/* unit: HZ */
  
- 	dw_mci_start_command(host, stop, host->stop_cmdr);
- }
-@@ -1277,10 +1277,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 		spin_unlock_irqrestore(&host->irq_lock, irqflags);
- 	}
- 
--	if (mrq->stop)
--		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
--	else
--		host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
-+	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
- }
- 
- static void dw_mci_start_request(struct dw_mci *host,
-@@ -1890,8 +1887,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			if (test_and_clear_bit(EVENT_DATA_ERROR,
- 					       &host->pending_events)) {
- 				dw_mci_stop_dma(host);
--				if (data->stop ||
--				    !(host->data_status & (SDMMC_INT_DRTO |
-+				if (!(host->data_status & (SDMMC_INT_DRTO |
- 							   SDMMC_INT_EBE)))
- 					send_stop_abort(host, data);
- 				state = STATE_DATA_ERROR;
-@@ -1927,8 +1923,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			if (test_and_clear_bit(EVENT_DATA_ERROR,
- 					       &host->pending_events)) {
- 				dw_mci_stop_dma(host);
--				if (data->stop ||
--				    !(host->data_status & (SDMMC_INT_DRTO |
-+				if (!(host->data_status & (SDMMC_INT_DRTO |
- 							   SDMMC_INT_EBE)))
- 					send_stop_abort(host, data);
- 				state = STATE_DATA_ERROR;
-@@ -2004,7 +1999,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			host->cmd = NULL;
- 			host->data = NULL;
- 
--			if (mrq->stop)
-+			if (!mrq->sbc && mrq->stop)
- 				dw_mci_command_complete(host, mrq->stop);
- 			else
- 				host->cmd_status = 0;
+ #define IDMAC_INT_CLR		(SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
+ 				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
 -- 
 2.10.1
 
