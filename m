@@ -1,77 +1,66 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v5 0/5] Add intial support to DW MMC host on ZTE SoC
-Date: Fri, 18 Nov 2016 11:16:43 +0900
-Message-ID: <20eca791-015f-1d9f-d24b-213276db08db@samsung.com>
-References: <CGME20161108012533epcas5p19f44057ff5477f35ebf057527fea9788@epcas5p1.samsung.com>
- <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
+From: Andy Gross <andy.gross@linaro.org>
+Subject: Re: [PATCH v8 04/16] ARM: dts: Add xo to sdhc clock node on qcom
+ platforms
+Date: Thu, 17 Nov 2016 21:56:19 -0600
+Message-ID: <20161118035619.GA6400@hector>
+References: <1479312052-22396-5-git-send-email-riteshh@codeaurora.org>
+ <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:43091 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751091AbcKRCQq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 21:16:46 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGT02IGNFNUZRC0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 18 Nov 2016 11:16:44 +0900 (KST)
-In-reply-to: <1478568298-18380-1-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jun Nie <jun.nie@linaro.org>, shawn.guo@linaro.org, xie.baoyou@zte.com.cn
-Cc: ulf.hansson@linaro.org, jason.liu@linaro.org, linux-mmc@vger.kernel.org
 
-Hi Jun,
+On Thu, Nov 17, 2016 at 06:13:39AM +0530, Ritesh Harjani wrote:
+> Add xo entry to sdhc clock node on all qcom platforms.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> ---
+>  arch/arm/boot/dts/qcom-apq8084.dtsi   | 16 ++++++++++------
+>  arch/arm/boot/dts/qcom-msm8974.dtsi   | 16 ++++++++++------
+>  arch/arm64/boot/dts/qcom/msm8916.dtsi | 10 ++++++----
+>  arch/arm64/boot/dts/qcom/msm8996.dtsi |  9 +++++----
+>  4 files changed, 31 insertions(+), 20 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+> index 39eb7a4..f756cbb 100644
+> --- a/arch/arm/boot/dts/qcom-apq8084.dtsi
+> +++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+> @@ -182,13 +182,13 @@
+>  	};
+>  
+>  	clocks {
+> -		xo_board {
+> +		xo_board: xo_board {
+>  			compatible = "fixed-clock";
+>  			#clock-cells = <0>;
+>  			clock-frequency = <19200000>;
+>  		};
+>  
+> -		sleep_clk {
+> +		sleep_clk: sleep_clk {
+>  			compatible = "fixed-clock";
+>  			#clock-cells = <0>;
+>  			clock-frequency = <32768>;
+> @@ -416,8 +416,10 @@
+>  			reg-names = "hc_mem", "core_mem";
+>  			interrupts = <0 123 0>, <0 138 0>;
+>  			interrupt-names = "hc_irq", "pwr_irq";
+> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+> -			clock-names = "core", "iface";
+> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+> +				 <&gcc GCC_SDCC1_AHB_CLK>,
+> +				 <&xo_board 0>;
 
-On 11/08/2016 10:24 AM, Jun Nie wrote:
-> Add intial support to DW MMC host on ZTE SoC. It include platform
-> specific wrapper driver and workarounds for fifo quirk.
+With clock-cells = <0>, this should be <&xo_board>
 
-If you send the patch after modifying Shawn's comment, I will apply these patchset on my repository.
-I don't know but i guess you want to apply these patches on v4.10.
+Somehow this passes the dtc compiler.  But it is still incorrect.  Please fix
+all instances of this to use the correct number of cells in the xo_board
+references.
 
-Best Regards,
-Jaehoon Chung
 
-> 
-> Patches are prepared based on latest dw mmc runtime change:
->    https://github.com/jh80chung/dw-mmc.git for-ulf
-> 
-> Changes vs version 4:
->   - Fix missing empty dts compatible element in the end of compatible array.
-> 
-> Changes vs version 3:
->   - Fix brace error in document.
-> 
-> Changes vs version 2:
->   - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
->     fifo-watermark-aligned.
->   - Polish ZX MMC driver on minor coding style issues.
-> 
-> Changes vs version 1:
->   - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
->   - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
-> 
-> Jun Nie (5):
->   mmc: dt-bindings: add ZTE ZX296718 MMC bindings
->   mmc: zx: Initial support for ZX mmc controller
->   Documentation: synopsys-dw-mshc: add binding for fifo quirks
->   mmc: dw: Add fifo address property
->   mmc: dw: Add fifo watermark alignment property
-> 
->  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
->  .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  34 +++
->  drivers/mmc/host/Kconfig                           |   9 +
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
->  drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
->  drivers/mmc/host/dw_mmc.c                          |  17 +-
->  include/linux/mmc/dw_mmc.h                         |   5 +
->  8 files changed, 349 insertions(+), 3 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.c
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.h
-> 
-
+Andy
