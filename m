@@ -1,127 +1,202 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 7/9] mmc: core: Allow CMD13 polling when switch to HS200 mode
-Date: Fri, 18 Nov 2016 12:45:34 +0100
-Message-ID: <CAPDyKFqeyxN54ntW=sQ7WHic9caPzy8dduXDeUD_JtmHKi7QbA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 8/9] mmc: core: Allow CMD13 polling when switch to HS400
+ mode
+Date: Fri, 18 Nov 2016 14:02:21 +0200
+Message-ID: <5b69bb3b-ede3-753c-e261-89e51ca0e43d@intel.com>
 References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
- <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org> <847df7a0-6a00-a3ac-01f5-bdd1bffcc185@rock-chips.com>
+ <1479293481-20186-9-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35979 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753036AbcKRLph (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 06:45:37 -0500
-Received: by mail-wm0-f46.google.com with SMTP id g23so32743413wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 03:45:36 -0800 (PST)
-In-Reply-To: <847df7a0-6a00-a3ac-01f5-bdd1bffcc185@rock-chips.com>
+Received: from mga11.intel.com ([192.55.52.93]:46449 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752302AbcKRMHV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 18 Nov 2016 07:07:21 -0500
+In-Reply-To: <1479293481-20186-9-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>
 
-Hi Shawn,
+On 16/11/16 12:51, Ulf Hansson wrote:
+> In cases when the mmc host doesn't support HW busy detection, polling for
+> busy by using CMD13 is beneficial. The reasons have already been explained
+> in earlier change logs.
+> 
+> Moreover, when polling with CMD13 during bus timing changes, we should
+> retry instead of fail when we get CRC errors.
+> 
+> Switching from HS200 to HS400 and reverse includes several steps, where
+> each step changes the bus speed timing. Let's improve the behaviour during
+> these sequences, by allowing CMD13 polling for each of the step. Let's also
+> make sure the CMD13 polling becomes retried, while receiving a CRC error.
 
-On 18 November 2016 at 09:05, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi Ulf,
->
->
-> =E5=9C=A8 2016/11/16 18:51, Ulf Hansson =E5=86=99=E9=81=93:
->>
->> In cases when the mmc host doesn't support HW busy detection, polling fo=
-r
->> busy by using CMD13 is beneficial. The reasons have already been explain=
-ed
->> in earlier change logs.
->>
->> To allow polling with CMD13, let's provide MMC_TIMING_MMC_HS200 as the
->> timing parameter to __mmc_switch(), which makes sure the mmc host and th=
-e
->> mmc card operates at the same bus timing during the polling.
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/core/mmc.c | 21 +++++----------------
->>  1 file changed, 5 insertions(+), 16 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 3268fcd..0b26383 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1351,7 +1351,7 @@ static void mmc_select_driver_type(struct mmc_card
->> *card)
->>  static int mmc_select_hs200(struct mmc_card *card)
->>  {
->>         struct mmc_host *host =3D card->host;
->> -       unsigned int old_timing, old_signal_voltage;
->> +       unsigned int old_signal_voltage;
->>         int err =3D -EINVAL;
->>         u8 val;
->>
->> @@ -1378,22 +1378,11 @@ static int mmc_select_hs200(struct mmc_card *car=
-d)
->>                       card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->>                 err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>                                    EXT_CSD_HS_TIMING, val,
->> -                                  card->ext_csd.generic_cmd6_time, 0,
->> -                                  true, false, true);
->> -               if (err)
->> -                       goto err;
->> -               old_timing =3D host->ios.timing;
->> -               mmc_set_timing(host, MMC_TIMING_MMC_HS200);
->> -
->> -               err =3D mmc_switch_status(card);
->> -               /*
->> -                * mmc_select_timing() assumes timing has not changed if
->> -                * it is a switch error.
->> -                */
->> -               if (err =3D=3D -EBADMSG)
->> -                       mmc_set_timing(host, old_timing);
->> +                                  card->ext_csd.generic_cmd6_time,
->> +                                  MMC_TIMING_MMC_HS200,
->> +                                  true, true, true);
->
->
-> I was finding a failure from the test last night after applying these
-> patches and using HS200 only.
->
-> It seems like the controller(sdhci-of-arasan,5.1) continuously generate
-> response timeout for checking CMD13.. Per TRM, response timeout could
-> means the device didn't ack the CMD13 or the controller was failing to
-> latch the response..
+I don't know we need to try to get polling for HS400.  The support of HS400
+suggests a relatively sophisticated host controller which really should
+support busy waiting as well.
 
-Did you make any changes to the sdchi driver while testing this?
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc.c | 87 +++++++++++++++-----------------------------------
+>  1 file changed, 26 insertions(+), 61 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 0b26383..24b9e72 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1094,8 +1094,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>  static int mmc_select_hs400(struct mmc_card *card)
+>  {
+>  	struct mmc_host *host = card->host;
+> -	unsigned int max_dtr;
+> -	int err = 0;
+> +	int err;
+>  	u8 val;
+>  
+>  	/*
+> @@ -1105,34 +1104,26 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  	      host->ios.bus_width == MMC_BUS_WIDTH_8))
+>  		return 0;
+>  
+> -	/* Switch card to HS mode */
+> -	val = EXT_CSD_TIMING_HS;
+> -	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -			   EXT_CSD_HS_TIMING, val,
+> -			   card->ext_csd.generic_cmd6_time, 0,
+> -			   true, false, true);
+> +	/*
+> +	 * Switch card to HS mode.
+> +	 * First reduce to the HS frequency as CMD13 are sent to poll for busy
+> +	 * and/or to validate the switch status.
+> +	 */
+> +	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
 
-What I am wondering is whether you tested this with an implemented
-->card_busy() host ops or not, as sdhci has a default implementation
-of it.
+That was moved by commit 649c6059d2371fef886a8f967e21416204723d63
+("mmc: mmc: Fix HS switch failure in mmc_select_hs400()") i.e. if you put it
+back I would expect the gru board problem to reappear.
 
-BTW, some sdhci hosts have lately shown problem [1] with sdhci's
-default ->card_busy() host ops.
+> +	err = mmc_select_hs(card);
+>  	if (err) {
+>  		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
+>  			mmc_hostname(host), err);
+>  		return err;
+>  	}
+>  
+> -	/* Set host controller to HS timing */
+> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+> -
+> -	/* Reduce frequency to HS frequency */
+> -	max_dtr = card->ext_csd.hs_max_dtr;
+> -	mmc_set_clock(host, max_dtr);
+> -
+> -	err = mmc_switch_status(card);
+> -	if (err)
+> -		goto out_err;
+> -
+> -	/* Switch card to DDR */
+> -	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -			 EXT_CSD_BUS_WIDTH,
+> -			 EXT_CSD_DDR_BUS_WIDTH_8,
+> -			 card->ext_csd.generic_cmd6_time);
+> +	/* Switch card to HS DDR */
+> +	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +			   EXT_CSD_BUS_WIDTH,
+> +			   EXT_CSD_DDR_BUS_WIDTH_8,
+> +			   card->ext_csd.generic_cmd6_time,
+> +			   MMC_TIMING_MMC_DDR52,
+> +			   true, true, true);
+>  	if (err) {
+>  		pr_err("%s: switch to bus width for hs400 failed, err:%d\n",
+>  			mmc_hostname(host), err);
+> @@ -1144,28 +1135,17 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  			   EXT_CSD_HS_TIMING, val,
+> -			   card->ext_csd.generic_cmd6_time, 0,
+> -			   true, false, true);
+> +			   card->ext_csd.generic_cmd6_time,
+> +			   MMC_TIMING_MMC_HS400,
+> +			   true, true, true);
 
->
-> The eMMC part number is KLMBG2JENB-B041. I will use two boards to check
-> if it was indeed related to these patches.
->
->>         }
->> -err:
->> +
->>         if (err) {
->>                 /* fall back to the old signal voltage, if fails report
->> error */
->>                 if (__mmc_set_signal_voltage(host, old_signal_voltage))
->>
->
->
-> --
-> Best Regards
-> Shawn Lin
->
+This is not exactly right.  Tuning has been done at the HS400 operating
+frequency.  That is why we set the bus speed before sending any more
+commands. i.e. mmc_switch_status(card) is below mmc_set_bus_speed(card)
 
-Thanks for helping out with testing etc, I really appreciate it!
+>  	if (err) {
+>  		pr_err("%s: switch to hs400 failed, err:%d\n",
+>  			 mmc_hostname(host), err);
+>  		return err;
+>  	}
+>  
+> -	/* Set host controller to HS400 timing and frequency */
+> -	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+>  	mmc_set_bus_speed(card);
+> -
+> -	err = mmc_switch_status(card);
+> -	if (err)
+> -		goto out_err;
+> -
+>  	return 0;
+> -
+> -out_err:
+> -	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
+> -	       __func__, err);
+> -	return err;
+>  }
+>  
+>  int mmc_hs200_to_hs400(struct mmc_card *card)
+> @@ -1187,27 +1167,17 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>  	/* Switch HS400 to HS DDR */
+>  	val = EXT_CSD_TIMING_HS;
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+> -			   val, card->ext_csd.generic_cmd6_time, 0,
+> -			   true, false, true);
+> -	if (err)
+> -		goto out_err;
+> -
+> -	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+> -
+> -	err = mmc_switch_status(card);
+> +			   val, card->ext_csd.generic_cmd6_time,
+> +			   MMC_TIMING_MMC_DDR52,
+> +			   true, true, true);
+>  	if (err)
+>  		goto out_err;
+>  
+>  	/* Switch HS DDR to HS */
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
+>  			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
+> -			   0, true, false, true);
+> -	if (err)
+> -		goto out_err;
+> -
+> -	mmc_set_timing(host, MMC_TIMING_MMC_HS);
+> -
+> -	err = mmc_switch_status(card);
+> +			   MMC_TIMING_MMC_HS,
+> +			   true, true, true);
+>  	if (err)
+>  		goto out_err;
+>  
+> @@ -1215,14 +1185,9 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>  	val = EXT_CSD_TIMING_HS200 |
+>  	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+> -			   val, card->ext_csd.generic_cmd6_time, 0,
+> -			   true, false, true);
+> -	if (err)
+> -		goto out_err;
+> -
+> -	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+> -
+> -	err = mmc_switch_status(card);
+> +			   val, card->ext_csd.generic_cmd6_time,
+> +			   MMC_TIMING_MMC_HS200,
+> +			   true, true, true);
+>  	if (err)
+>  		goto out_err;
+>  
+> 
 
-Kind regards
-Uffe
-
-[1]
-https://patchwork.kernel.org/patch/9429299/
