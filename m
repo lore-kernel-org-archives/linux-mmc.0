@@ -1,69 +1,127 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv3 0/9] mmc: dw_mmc: clean the codes for dwmmc controller
-Date: Fri, 18 Nov 2016 20:17:23 +0900
-Message-ID: <3a5028b0-fbf2-f2d8-0141-51826a10a6ed@samsung.com>
-References: <CGME20161117074336epcas3p3e02ba42edba96bba201f26d05e80601c@epcas3p3.samsung.com>
- <20161117074041.8641-1-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 7/9] mmc: core: Allow CMD13 polling when switch to HS200 mode
+Date: Fri, 18 Nov 2016 12:45:34 +0100
+Message-ID: <CAPDyKFqeyxN54ntW=sQ7WHic9caPzy8dduXDeUD_JtmHKi7QbA@mail.gmail.com>
+References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
+ <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org> <847df7a0-6a00-a3ac-01f5-bdd1bffcc185@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:37442 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752497AbcKRLRZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 06:17:25 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGU02P5X4OZIL80@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 18 Nov 2016 20:17:23 +0900 (KST)
-In-reply-to: <20161117074041.8641-1-jh80.chung@samsung.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35979 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753036AbcKRLph (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 06:45:37 -0500
+Received: by mail-wm0-f46.google.com with SMTP id g23so32743413wme.1
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 03:45:36 -0800 (PST)
+In-Reply-To: <847df7a0-6a00-a3ac-01f5-bdd1bffcc185@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, adrian.hunter@intel.com
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>
 
-Hi,
+Hi Shawn,
 
-On 11/17/2016 04:40 PM, Jaehoon Chung wrote:
-> This patchset is modified the some minor fixing and cleaning codes.
-> 
-> * Major changes
-> - Remove the unnecessary codes and use_stop_abort() by default.
-> - Remove the obsoleted property "supports-highspeed"
-> - Deprecated the "clock-freq-min-max" property. Instead, use "max-frequency"
-> - Minimum clock value is set to 100K by default.
+On 18 November 2016 at 09:05, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Hi Ulf,
+>
+>
+> =E5=9C=A8 2016/11/16 18:51, Ulf Hansson =E5=86=99=E9=81=93:
+>>
+>> In cases when the mmc host doesn't support HW busy detection, polling fo=
+r
+>> busy by using CMD13 is beneficial. The reasons have already been explain=
+ed
+>> in earlier change logs.
+>>
+>> To allow polling with CMD13, let's provide MMC_TIMING_MMC_HS200 as the
+>> timing parameter to __mmc_switch(), which makes sure the mmc host and th=
+e
+>> mmc card operates at the same bus timing during the polling.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/core/mmc.c | 21 +++++----------------
+>>  1 file changed, 5 insertions(+), 16 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 3268fcd..0b26383 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1351,7 +1351,7 @@ static void mmc_select_driver_type(struct mmc_card
+>> *card)
+>>  static int mmc_select_hs200(struct mmc_card *card)
+>>  {
+>>         struct mmc_host *host =3D card->host;
+>> -       unsigned int old_timing, old_signal_voltage;
+>> +       unsigned int old_signal_voltage;
+>>         int err =3D -EINVAL;
+>>         u8 val;
+>>
+>> @@ -1378,22 +1378,11 @@ static int mmc_select_hs200(struct mmc_card *car=
+d)
+>>                       card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>>                 err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>                                    EXT_CSD_HS_TIMING, val,
+>> -                                  card->ext_csd.generic_cmd6_time, 0,
+>> -                                  true, false, true);
+>> -               if (err)
+>> -                       goto err;
+>> -               old_timing =3D host->ios.timing;
+>> -               mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>> -
+>> -               err =3D mmc_switch_status(card);
+>> -               /*
+>> -                * mmc_select_timing() assumes timing has not changed if
+>> -                * it is a switch error.
+>> -                */
+>> -               if (err =3D=3D -EBADMSG)
+>> -                       mmc_set_timing(host, old_timing);
+>> +                                  card->ext_csd.generic_cmd6_time,
+>> +                                  MMC_TIMING_MMC_HS200,
+>> +                                  true, true, true);
+>
+>
+> I was finding a failure from the test last night after applying these
+> patches and using HS200 only.
+>
+> It seems like the controller(sdhci-of-arasan,5.1) continuously generate
+> response timeout for checking CMD13.. Per TRM, response timeout could
+> means the device didn't ack the CMD13 or the controller was failing to
+> latch the response..
 
-I have applied this patchset on my dwmmc repository.
-If there are some issues, let me know, plz.
+Did you make any changes to the sdchi driver while testing this?
 
-Best Regards,
-Jaehoon Chung
+What I am wondering is whether you tested this with an implemented
+->card_busy() host ops or not, as sdhci has a default implementation
+of it.
 
-> 
-> Change in v3:
-> - Use the dwmmc private cookie enum.
-> - Add the reviewed-by and acked-by tags.
-> 
-> Change in v2:
-> - Applied patches relevant to dt files
-> - Use "deprecated" instead of removing about "clock-freq-min-max"
-> - Added Heiko's Tested-by tag
-> 
-> Jaehoon Chung (9):
->   mmc: dw_mmc: display the real register value on debugfs
->   mmc: dw_mmc: fix the debug message for checking card's present
->   mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
->   mmc: dw_mmc: use the hold register when send stop command
->   mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
->   mmc: dw_mmc: use the cookie's enum values for post/pre_req()
->   mmc: dw_mmc: remove the unnecessary mmc_data structure
->   mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
->   Documentation: synopsys-dw-mshc: remove the unused properties
-> 
->  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  8 +-
->  drivers/mmc/host/dw_mmc.c                          | 88 +++++++++++-----------
->  include/linux/mmc/dw_mmc.h                         |  6 ++
->  3 files changed, 50 insertions(+), 52 deletions(-)
-> 
+BTW, some sdhci hosts have lately shown problem [1] with sdhci's
+default ->card_busy() host ops.
 
+>
+> The eMMC part number is KLMBG2JENB-B041. I will use two boards to check
+> if it was indeed related to these patches.
+>
+>>         }
+>> -err:
+>> +
+>>         if (err) {
+>>                 /* fall back to the old signal voltage, if fails report
+>> error */
+>>                 if (__mmc_set_signal_voltage(host, old_signal_voltage))
+>>
+>
+>
+> --
+> Best Regards
+> Shawn Lin
+>
+
+Thanks for helping out with testing etc, I really appreciate it!
+
+Kind regards
+Uffe
+
+[1]
+https://patchwork.kernel.org/patch/9429299/
