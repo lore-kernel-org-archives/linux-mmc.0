@@ -1,66 +1,116 @@
-From: Andy Gross <andy.gross@linaro.org>
-Subject: Re: [PATCH v8 04/16] ARM: dts: Add xo to sdhc clock node on qcom
- platforms
-Date: Thu, 17 Nov 2016 21:56:19 -0600
-Message-ID: <20161118035619.GA6400@hector>
-References: <1479312052-22396-5-git-send-email-riteshh@codeaurora.org>
- <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
+Date: Fri, 18 Nov 2016 12:27:36 +0800
+Message-ID: <504193bf-4d6c-32d1-4639-5feadc2f3b75@rock-chips.com>
+References: <1479380356-7228-1-git-send-email-thierry.escande@collabora.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.135]:55890 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751222AbcKRE1t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2016 23:27:49 -0500
+In-Reply-To: <1479380356-7228-1-git-send-email-thierry.escande@collabora.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Thierry Escande <thierry.escande@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, bhthompson@chromium.org
 
-On Thu, Nov 17, 2016 at 06:13:39AM +0530, Ritesh Harjani wrote:
-> Add xo entry to sdhc clock node on all qcom platforms.
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+On 2016/11/17 18:59, Thierry Escande wrote:
+> From: zhaojohn <john.zhao@intel.com>
+>
+> Hynix eMMC devices sometimes take 50% longer to resume from sleep. This
+> occurs on Braswell based chromebook with acpi sdhci controller.
+>
+> Based on a recommendation from Hynix engineers, this patch sends a
+> Power-Off Notification using mmc_poweroff_notify() before going to S3 to
+> have a resume time consistently within spec. No voltage regulator are
+> being cut through this notification but merely tells the eMMC firmware
+> that we're about to do so and get it to behave better on resume.
+>
+> Signed-off-by: zhaojohn <john.zhao@intel.com>
+> Signed-off-by: Arindam Roy <arindam.roy@intel.com>
+> Tested-by: Freddy Paul <freddy.paul@intel.com>
+> Reviewed-by: Icarus W Sparry <icarus.w.sparry@intel.com>
+> Reviewed-by: Marc Herbert <marc.herbert@intel.com>
+> Reviewed-by: Eric Caruso <ejcaruso@chromium.org>
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
+> Signed-off-by: Thierry Escande <thierry.escande@collabora.com>
+
+You shouldn't carry on these tags from your local tree.
+
 > ---
->  arch/arm/boot/dts/qcom-apq8084.dtsi   | 16 ++++++++++------
->  arch/arm/boot/dts/qcom-msm8974.dtsi   | 16 ++++++++++------
->  arch/arm64/boot/dts/qcom/msm8916.dtsi | 10 ++++++----
->  arch/arm64/boot/dts/qcom/msm8996.dtsi |  9 +++++----
->  4 files changed, 31 insertions(+), 20 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-> index 39eb7a4..f756cbb 100644
-> --- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-> +++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-> @@ -182,13 +182,13 @@
->  	};
->  
->  	clocks {
-> -		xo_board {
-> +		xo_board: xo_board {
->  			compatible = "fixed-clock";
->  			#clock-cells = <0>;
->  			clock-frequency = <19200000>;
->  		};
->  
-> -		sleep_clk {
-> +		sleep_clk: sleep_clk {
->  			compatible = "fixed-clock";
->  			#clock-cells = <0>;
->  			clock-frequency = <32768>;
-> @@ -416,8 +416,10 @@
->  			reg-names = "hc_mem", "core_mem";
->  			interrupts = <0 123 0>, <0 138 0>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
-> -			clock-names = "core", "iface";
-> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> +				 <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&xo_board 0>;
+>
+> Changes in v2:
+> - Add a few more details in the commit message
+>
+>  drivers/mmc/card/block.c | 8 ++++++++
+>  drivers/mmc/core/mmc.c   | 8 +++++++-
+>  include/linux/mmc/card.h | 2 ++
+>  3 files changed, 17 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 709a872..3db5344 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2573,6 +2573,14 @@ static const struct mmc_fixup blk_fixups[] =
+>  	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+>  		  MMC_QUIRK_TRIM_BROKEN),
+>
+> +	/*
+> +	 * Hynix eMMC devices sometimes take 50% longer to resume from sleep.
+> +	 * Based on a recommendation from Hynix, send a Power-Off Notification
+> +	 * before going to S3 to restore a resume time consistently within spec.
+> +	 */
 
-With clock-cells = <0>, this should be <&xo_board>
+I don't have time to check this although I have handful of Hynix eMMCs
+on my test farm.. But it doesn't seem correct to me that *ALL* of the
+Hynix eMMCs have the same problems and they won't be fixed?
 
-Somehow this passes the dtc compiler.  But it is still incorrect.  Please fix
-all instances of this to use the correct number of cells in the xo_board
-references.
+> +	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_HYNIX, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP),
+> +
+>  	END_FIXUP
+>  };
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index df19777..774d478 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1941,8 +1941,14 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>  	if (mmc_can_poweroff_notify(host->card) &&
+>  		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+>  		err = mmc_poweroff_notify(host->card, notify_type);
+> -	else if (mmc_can_sleep(host->card))
+> +	else if (mmc_can_sleep(host->card)) {
+> +		if (host->card->quirks & MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP) {
+> +			err = mmc_poweroff_notify(host->card, notify_type);
+> +			if (err)
+> +				goto out;
+> +		}
+>  		err = mmc_sleep(host);
+> +	}
+>  	else if (!mmc_host_is_spi(host))
+>  		err = mmc_deselect_cards(host);
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 73fad83..e4940f4 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -281,6 +281,8 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>  #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+>  #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+> +#define MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP \
+> +				(1<<14)		/* Poweroff notification*/
+>
+>
+>  	unsigned int		erase_size;	/* erase size in sectors */
+>
 
 
-Andy
+-- 
+Best Regards
+Shawn Lin
+
