@@ -1,61 +1,97 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: remove unneeded (void *) casts in sdhci_(pltfm_)priv()
-Date: Fri, 18 Nov 2016 15:28:57 +0100
-Message-ID: <CAPDyKFps5kZYbuQVJJjZ9AyCiW+GGS5rf9-BvDuBaQ1UpU4u8g@mail.gmail.com>
-References: <1478784138-18594-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v4] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
+Date: Fri, 18 Nov 2016 15:29:10 +0100
+Message-ID: <CAPDyKFqP2drF6MUHZNY2__J-E20Fy+jctBL9k-s=oWRcwz2NTw@mail.gmail.com>
+References: <1479204796-23982-1-git-send-email-michael@walle.cc>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1478784138-18594-1-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <1479204796-23982-1-git-send-email-michael@walle.cc>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Michael Walle <michael@walle.cc>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@nxp.com>, Alexander Stein <alexander.stein@systec-electronic.com>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 November 2016 at 14:22, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> The type of host->private is (unsigned long *).  No cast is needed
-> to return an opaque pointer.
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
++stable
 
-Thanks, applied for next!
+On 15 November 2016 at 11:13, Michael Walle <michael@walle.cc> wrote:
+> Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
+> cards in __mmc_switch()") the ESDHC driver is broken:
+>   mmc0: Card stuck in programming state! __mmc_switch
+>   mmc0: error -110 whilst initialising MMC card
+>
+> Since this commit __mmc_switch() uses ->card_busy(), which is
+> sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
+> PRESENT_STATE register, specifically the DAT0 signal level bit. But the
+> ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
+> required to make the driver work again.
+>
+> Signed-off-by: Michael Walle <michael@walle.cc>
+> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
+> Acked-by: Yangbo Lu <yangbo.lu@nxp.com>
+
+Thanks, applied for fixes and added a stable tag.
 
 Kind regards
 Uffe
 
 > ---
+> v4:
+>  - add and use SDHCI_CMD_LVL macro
+>  - fix typo in comment, thanks alex
+>  - add acked-by
 >
->  drivers/mmc/host/sdhci-pltfm.h | 2 +-
->  drivers/mmc/host/sdhci.h       | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+> v3:
+>  - explain the bits in the comments
+>  - use bits[19:0] from the original value, all other will be taken from the
+>    fixup value.
 >
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index 3280f20..957839d 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -106,7 +106,7 @@ extern int sdhci_pltfm_register(struct platform_device *pdev,
+> v2:
+>  - use lower bits of the original value (that was actually a typo)
+>  - add fixes tag
+>  - fix typo
 >
->  static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
->  {
-> -       return (void *)host->private;
-> +       return host->private;
+>  drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
+>  drivers/mmc/host/sdhci.h          |  1 +
+>  2 files changed, 15 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index fb71c86..1bb11e4 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -66,6 +66,20 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+>                         return ret;
+>                 }
+>         }
+> +       /*
+> +        * The DAT[3:0] line signal levels and the CMD line signal level are
+> +        * not compatible with standard SDHC register. The line signal levels
+> +        * DAT[7:0] are at bits 31:24 and the command line signal level is at
+> +        * bit 23. All other bits are the same as in the standard SDHC
+> +        * register.
+> +        */
+> +       if (spec_reg == SDHCI_PRESENT_STATE) {
+> +               ret = value & 0x000fffff;
+> +               ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
+> +               ret |= (value << 1) & SDHCI_CMD_LVL;
+> +               return ret;
+> +       }
+> +
+>         ret = value;
+>         return ret;
 >  }
->
->  extern const struct dev_pm_ops sdhci_pltfm_pmops;
 > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 766df17..9886115 100644
+> index c722cd2..ea38962 100644
 > --- a/drivers/mmc/host/sdhci.h
 > +++ b/drivers/mmc/host/sdhci.h
-> @@ -655,7 +655,7 @@ extern struct sdhci_host *sdhci_alloc_host(struct device *dev,
+> @@ -73,6 +73,7 @@
+>  #define  SDHCI_DATA_LVL_MASK   0x00F00000
+>  #define   SDHCI_DATA_LVL_SHIFT 20
+>  #define   SDHCI_DATA_0_LVL_MASK        0x00100000
+> +#define  SDHCI_CMD_LVL         0x01000000
 >
->  static inline void *sdhci_priv(struct sdhci_host *host)
->  {
-> -       return (void *)host->private;
-> +       return host->private;
->  }
->
->  extern void sdhci_card_detect(struct sdhci_host *host);
+>  #define SDHCI_HOST_CONTROL     0x28
+>  #define  SDHCI_CTRL_LED                0x01
 > --
-> 1.9.1
+> 2.1.4
 >
