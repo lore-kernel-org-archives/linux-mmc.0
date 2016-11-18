@@ -1,96 +1,99 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 7/9] mmc: core: Allow CMD13 polling when switch to HS200
- mode
-Date: Fri, 18 Nov 2016 16:05:16 +0800
-Message-ID: <847df7a0-6a00-a3ac-01f5-bdd1bffcc185@rock-chips.com>
-References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
- <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] ARM: dts: sunxi: Explicitly enable pull-ups
+ for MMC pins
+Date: Fri, 18 Nov 2016 10:18:43 +0100
+Message-ID: <CACRpkdY-cO7f8Ad9=OiCfW4fy3oMFEF4ojhGxspijH5XWMSJnQ@mail.gmail.com>
+References: <20161117093438.17988-1-wens@csie.org> <ea02ec937a12d6ca2a2e0d8bbea5c484@theobroma-systems.com>
+Reply-To: linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:47662 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751959AbcKRIFd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 03:05:33 -0500
-In-Reply-To: <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDE6RCFOWIARB5UOXPAQKGQEHRXAFHA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <ea02ec937a12d6ca2a2e0d8bbea5c484-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: klaus.goger-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>
 
-Hi Ulf,
+[Notice this reply has little to do with the patch in question: I think
+it should be applied. I just want to involve some MMC/SD people here]
 
-ÔÚ 2016/11/16 18:51, Ulf Hansson Ð´µÀ:
-> In cases when the mmc host doesn't support HW busy detection, polling for
-> busy by using CMD13 is beneficial. The reasons have already been explained
-> in earlier change logs.
+On Thu, Nov 17, 2016 at 9:57 PM,  <klaus.goger-SN7IsUiht6C/RdPyistoZJqQE7yCjDx5@public.gmane.org> wrote:
+> On 2016-11-17 10:34, Chen-Yu Tsai wrote:
+>>
+>> Given that MMC starts in open-drain mode and the pull-ups are required,
+>> it's best to enable it for all the pin settings.
 >
-> To allow polling with CMD13, let's provide MMC_TIMING_MMC_HS200 as the
-> timing parameter to __mmc_switch(), which makes sure the mmc host and the
-> mmc card operates at the same bus timing during the polling.
+> It's even more complicated than that with MMC. It starts in open-drain mode
+> for
+> CMD during initialization but changes to push-pull afterwards. The card has
+> internal pull-ups to prevent bus floating during setup and will disable them
+> after switching to 4bit mode (or 8bit for eMMC when available).
+> But even after switching to push-pull drivers there are states the bus would
+> float and pull ups have to ensure a high level on the bus.
 >
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/mmc.c | 21 +++++----------------
->  1 file changed, 5 insertions(+), 16 deletions(-)
+> See JESD84-A441 chapter 7.15 ff as reference.
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3268fcd..0b26383 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1351,7 +1351,7 @@ static void mmc_select_driver_type(struct mmc_card *card)
->  static int mmc_select_hs200(struct mmc_card *card)
->  {
->  	struct mmc_host *host = card->host;
-> -	unsigned int old_timing, old_signal_voltage;
-> +	unsigned int old_signal_voltage;
->  	int err = -EINVAL;
->  	u8 val;
+>   The difference between the P-bit and Z-bit is that a P-bit is actively
+> driven
+>   to HIGH by the card respectively host output driver, while Z-bit is driven
+> to
+>  (respectively kept) HIGH by the pull-up resistors Rcmd respectively Rdat.
 >
-> @@ -1378,22 +1378,11 @@ static int mmc_select_hs200(struct mmc_card *card)
->  		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->  		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  				   EXT_CSD_HS_TIMING, val,
-> -				   card->ext_csd.generic_cmd6_time, 0,
-> -				   true, false, true);
-> -		if (err)
-> -			goto err;
-> -		old_timing = host->ios.timing;
-> -		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-> -
-> -		err = mmc_switch_status(card);
-> -		/*
-> -		 * mmc_select_timing() assumes timing has not changed if
-> -		 * it is a switch error.
-> -		 */
-> -		if (err == -EBADMSG)
-> -			mmc_set_timing(host, old_timing);
-> +				   card->ext_csd.generic_cmd6_time,
-> +				   MMC_TIMING_MMC_HS200,
-> +				   true, true, true);
+> Enabling the pull ups on the CPU would be the right choice considering that
+> most boards will not have external pull-ups. Even if they would have one,
+> adding the internal in parallel would work in almost all cases and the
+> increase in power consumption would be negligible.
 
-I was finding a failure from the test last night after applying these 
-patches and using HS200 only.
+I guess you are referring to software-controlled pull up on the pad ring of
+the SoC. Nominally that should be handled by pin control like in this
+patch.
 
-It seems like the controller(sdhci-of-arasan,5.1) continuously generate
-response timeout for checking CMD13.. Per TRM, response timeout could
-means the device didn't ack the CMD13 or the controller was failing to
-latch the response..
+It is not clear from context to me which of the lines need to be handled
+like this? Just the data lines? DAT0 would be the critical line to pull up
+in that case, since the others will not be used until bus switch anyways
+right?
 
-The eMMC part number is KLMBG2JENB-B041. I will use two boards to check
-if it was indeed related to these patches.
+But what about CMD?
 
->  	}
-> -err:
-> +
->  	if (err) {
->  		/* fall back to the old signal voltage, if fails report error */
->  		if (__mmc_set_signal_voltage(host, old_signal_voltage))
->
+I assume CLK should always be push-pull?
 
+Also: if the pins have an explicit Open Drain setting, should that
+be used? I guess so?
 
--- 
-Best Regards
-Shawn Lin
+Overall I think this construction is pretty common.
 
+We essentially have two classes of connections:
+
+- Those connecting the eMMC or even MMC/SD card directly to
+  the SoC. No pull-ups on the board. Here it makes sense to have:
+
+  1. A pin control default state with open drain and pull-ups
+     enabled for those lines
+
+  and it then needs
+
+  2. A second "4/8bit mode" that will switch these
+     pins to push-pull mode and turn off the pull-ups.
+
+  If the OD+pull-up state is the default we should probably
+  standardize a default name for the state when we kick in 4/8bit
+  mode from the IOS operation.
+
+- Those connection the MMC/SD on an external slot through a
+  levelshifter/EMI filter. In that case I guess it is pretty much
+  dependent on the levelshifter or EMI thing how the lines out
+  of the SoC should be configured, and usually it is static so
+  you do not need to worry about it after boot configuration
+  of pins. (Mostly no bias, push-pull I think.)
+
+I highly suspect a whole bunch of SoC drivers are not getting
+this business right today. Not even in out-of-tree vendor kernels.
+
+Yours,
+Linus Walleij
