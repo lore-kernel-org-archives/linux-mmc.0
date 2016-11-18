@@ -1,97 +1,39 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: sdhci-of-esdhc: fixup PRESENT_STATE read
-Date: Fri, 18 Nov 2016 15:29:10 +0100
-Message-ID: <CAPDyKFqP2drF6MUHZNY2__J-E20Fy+jctBL9k-s=oWRcwz2NTw@mail.gmail.com>
-References: <1479204796-23982-1-git-send-email-michael@walle.cc>
+Subject: Re: [patch] mmc: mmc_test: Uninitialized return value
+Date: Fri, 18 Nov 2016 15:29:18 +0100
+Message-ID: <CAPDyKFrOH2h7TXLx8GUr8_nb6DHTqUr9J=ppJM-UJNDaJj-rLw@mail.gmail.com>
+References: <20161114113134.GA20543@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1479204796-23982-1-git-send-email-michael@walle.cc>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Michael Walle <michael@walle.cc>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, yangbo lu <yangbo.lu@nxp.com>, Alexander Stein <alexander.stein@systec-electronic.com>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20161114113134.GA20543@mwanda>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Per Forlin <per.forlin@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-+stable
-
-On 15 November 2016 at 11:13, Michael Walle <michael@walle.cc> wrote:
-> Since commit 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy
-> cards in __mmc_switch()") the ESDHC driver is broken:
->   mmc0: Card stuck in programming state! __mmc_switch
->   mmc0: error -110 whilst initialising MMC card
+On 14 November 2016 at 12:31, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> We never set "ret" to RESULT_OK.
 >
-> Since this commit __mmc_switch() uses ->card_busy(), which is
-> sdhci_card_busy() for the esdhc driver. sdhci_card_busy() uses the
-> PRESENT_STATE register, specifically the DAT0 signal level bit. But the
-> ESDHC uses a non-conformant PRESENT_STATE register, thus a read fixup is
-> required to make the driver work again.
->
-> Signed-off-by: Michael Walle <michael@walle.cc>
-> Fixes: 87a18a6a5652 ("mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()")
-> Acked-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Fixes: 9f9c4180f88d ("mmc: mmc_test: add test for non-blocking transfers")
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-Thanks, applied for fixes and added a stable tag.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-> ---
-> v4:
->  - add and use SDHCI_CMD_LVL macro
->  - fix typo in comment, thanks alex
->  - add acked-by
 >
-> v3:
->  - explain the bits in the comments
->  - use bits[19:0] from the original value, all other will be taken from the
->    fixup value.
+> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+> index f61c812..5ba6d77 100644
+> --- a/drivers/mmc/card/mmc_test.c
+> +++ b/drivers/mmc/card/mmc_test.c
+> @@ -832,7 +832,7 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+>         struct mmc_async_req *other_areq = &test_areq[1].areq;
+>         enum mmc_blk_status status;
+>         int i;
+> -       int ret;
+> +       int ret = RESULT_OK;
 >
-> v2:
->  - use lower bits of the original value (that was actually a typo)
->  - add fixes tag
->  - fix typo
->
->  drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
->  drivers/mmc/host/sdhci.h          |  1 +
->  2 files changed, 15 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index fb71c86..1bb11e4 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -66,6 +66,20 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->                         return ret;
->                 }
->         }
-> +       /*
-> +        * The DAT[3:0] line signal levels and the CMD line signal level are
-> +        * not compatible with standard SDHC register. The line signal levels
-> +        * DAT[7:0] are at bits 31:24 and the command line signal level is at
-> +        * bit 23. All other bits are the same as in the standard SDHC
-> +        * register.
-> +        */
-> +       if (spec_reg == SDHCI_PRESENT_STATE) {
-> +               ret = value & 0x000fffff;
-> +               ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
-> +               ret |= (value << 1) & SDHCI_CMD_LVL;
-> +               return ret;
-> +       }
-> +
->         ret = value;
->         return ret;
->  }
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index c722cd2..ea38962 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -73,6 +73,7 @@
->  #define  SDHCI_DATA_LVL_MASK   0x00F00000
->  #define   SDHCI_DATA_LVL_SHIFT 20
->  #define   SDHCI_DATA_0_LVL_MASK        0x00100000
-> +#define  SDHCI_CMD_LVL         0x01000000
->
->  #define SDHCI_HOST_CONTROL     0x28
->  #define  SDHCI_CTRL_LED                0x01
-> --
-> 2.1.4
->
+>         test_areq[0].test = test;
+>         test_areq[1].test = test;
