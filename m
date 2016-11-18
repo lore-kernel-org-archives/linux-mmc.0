@@ -1,23 +1,32 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: wbsd: implement check for dma mapping error
-Date: Fri, 18 Nov 2016 15:29:27 +0100
-Message-ID: <CAPDyKFoZS+Fp3jPdsRnOX3r1_KLVZ64w1yq0nXBj6VtqW_r5CQ@mail.gmail.com>
-References: <1478900564-5086-1-git-send-email-khoroshilov@ispras.ru>
+Subject: Re: [PATCH 1/2] mmc: tmio: fix wrong bitmask for SDIO irqs
+Date: Fri, 18 Nov 2016 15:29:34 +0100
+Message-ID: <CAPDyKFr7wxsG6bF0aS6DQnVRP+8m4qXiU+kz6+wQ9yMEHiumMA@mail.gmail.com>
+References: <20161113142912.4041-1-wsa+renesas@sang-engineering.com> <20161113142912.4041-2-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1478900564-5086-1-git-send-email-khoroshilov@ispras.ru>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Cc: Pierre Ossman <pierre@ossman.eu>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:36221 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932291AbcKRO3g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 09:29:36 -0500
+Received: by mail-wm0-f48.google.com with SMTP id g23so41823375wme.1
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 06:29:36 -0800 (PST)
+In-Reply-To: <20161113142912.4041-2-wsa+renesas@sang-engineering.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 
-On 11 November 2016 at 22:42, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
-> wbsd_request_dma() does not check for dma mapping errors.
+On 13 November 2016 at 15:29, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Commit 7729c7a232a953 ("mmc: tmio: Provide separate interrupt handlers")
+> refactored the sdio irq handler and wrongly used the mask for SD irqs,
+> not for SDIO irqs. This doesn't really matter in practice because both
+> values keep the only interrupt we are interested in. But still, this is
+> wrong and wants to be fixed.
 >
-> Found by Linux Driver Verification project (linuxtesting.org).
->
-> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
 
@@ -25,59 +34,26 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/wbsd.c | 11 +++++++----
->  1 file changed, 7 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-> index c3fd16d997ca..80a3b11f3217 100644
-> --- a/drivers/mmc/host/wbsd.c
-> +++ b/drivers/mmc/host/wbsd.c
-> @@ -1395,23 +1395,25 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
->          */
->         host->dma_addr = dma_map_single(mmc_dev(host->mmc), host->dma_buffer,
->                 WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
-> +       if (dma_mapping_error(mmc_dev(host->mmc), host->dma_addr))
-> +               goto kfree;
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index dbc3cb14f3321b..2b04e6e87192c7 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -741,7 +741,7 @@ static void tmio_mmc_sdio_irq(int irq, void *devid)
+>                 return;
 >
->         /*
->          * ISA DMA must be aligned on a 64k basis.
->          */
->         if ((host->dma_addr & 0xffff) != 0)
-> -               goto kfree;
-> +               goto unmap;
->         /*
->          * ISA cannot access memory above 16 MB.
->          */
->         else if (host->dma_addr >= 0x1000000)
-> -               goto kfree;
-> +               goto unmap;
+>         status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
+> -       ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
+> +       ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdio_irq_mask;
 >
->         host->dma = dma;
->
->         return;
->
-> -kfree:
-> +unmap:
->         /*
->          * If we've gotten here then there is some kind of alignment bug
->          */
-> @@ -1421,6 +1423,7 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
->                 WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
->         host->dma_addr = 0;
->
-> +kfree:
->         kfree(host->dma_buffer);
->         host->dma_buffer = NULL;
->
-> @@ -1434,7 +1437,7 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
->
->  static void wbsd_release_dma(struct wbsd_host *host)
->  {
-> -       if (host->dma_addr) {
-> +       if (!dma_mapping_error(mmc_dev(host->mmc), host->dma_addr)) {
->                 dma_unmap_single(mmc_dev(host->mmc), host->dma_addr,
->                         WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
->         }
+>         sdio_status = status & ~TMIO_SDIO_MASK_ALL;
+>         if (pdata->flags & TMIO_MMC_SDIO_STATUS_QUIRK)
 > --
-> 2.7.4
+> 2.9.3
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
