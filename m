@@ -1,39 +1,42 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 -next] soc: fsl: fix section mismatch build warnings
-Date: Fri, 18 Nov 2016 15:30:00 +0100
-Message-ID: <CAPDyKFrv44WENWRM-18BgTdsv8gHooFKNaVR+8ZQFnCVq217Eg@mail.gmail.com>
-References: <1479314367-9169-2-git-send-email-sudeep.holla@arm.com>
- <1479395519-20742-1-git-send-email-sudeep.holla@arm.com> <9979998.AzNsm2rgFQ@wuerfel>
+Subject: Re: [PATCH 0/3] More MMC block core cleanup
+Date: Fri, 18 Nov 2016 15:30:09 +0100
+Message-ID: <CAPDyKFo6LVv_hUXYO-A2pTds71g6nacVrzamGT2ujrz09t+J2w@mail.gmail.com>
+References: <1479472576-2687-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:36790 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932291AbcKROaD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 09:30:03 -0500
-Received: by mail-wm0-f42.google.com with SMTP id g23so41849472wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 06:30:02 -0800 (PST)
-In-Reply-To: <9979998.AzNsm2rgFQ@wuerfel>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35416 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753338AbcKROaM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 09:30:12 -0500
+Received: by mail-wm0-f43.google.com with SMTP id a197so41852926wmd.0
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 06:30:11 -0800 (PST)
+In-Reply-To: <1479472576-2687-1-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sudeep Holla <sudeep.holla@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Scott Wood <oss@buserror.net>, Yangbo Lu <yangbo.lu@nxp.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-On 17 November 2016 at 16:25, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Thursday, November 17, 2016 3:11:59 PM CET Sudeep Holla wrote:
->>
->> Cc: Scott Wood <oss@buserror.net>
->> Cc: Yangbo Lu <yangbo.lu@nxp.com>
->> Cc: Arnd Bergmann <arnd@arndb.de>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Signed-off-by: Sudeep Holla <sudeep.holla@arm.com>
->>
+On 18 November 2016 at 13:36, Linus Walleij <linus.walleij@linaro.org> wrote:
+> The more I dig the more I find. These are pretty straight-forward
+> and should be possible to merge right off.
 >
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> Linus Walleij (3):
+>   mmc: block: use mmc_req_is_special()
+>   mmc: block: rename data to blkdata
+>   mmc: block: move packed command struct init
 >
-> Ulf, can you pick this up into the mmc tree?
+>  drivers/mmc/card/block.c | 67 ++++++++++++++++++++++++++++++++++++++----------
+>  drivers/mmc/card/queue.c | 43 -------------------------------
+>  drivers/mmc/card/queue.h |  6 ++---
+>  3 files changed, 56 insertions(+), 60 deletions(-)
+>
+> --
+> 2.7.4
+>
 
-Yes, I have applied it for my next branch, thanks!
+Thanks, applied for next!
 
 Kind regards
 Uffe
