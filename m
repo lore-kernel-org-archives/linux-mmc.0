@@ -1,47 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 7/9] mmc: core: Allow CMD13 polling when switch to HS200 mode
-Date: Fri, 18 Nov 2016 14:16:47 +0100
-Message-ID: <CAPDyKFpjmkOBp_Qh4Xbzf4BKZ1SdknSm-R199ujAb_VJcP7PgA@mail.gmail.com>
-References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
- <1479293481-20186-8-git-send-email-ulf.hansson@linaro.org>
- <e003f72a-6084-eb1a-6b44-c6a11d93b3ae@intel.com> <CAPDyKFrDP_K_muRArcNrMGBeTLB_XWawcMc9yb82k4cdd8z0eQ@mail.gmail.com>
- <2a2f1f8c-871c-164e-d4fe-abc0658df90f@intel.com> <CAPDyKFoAGeMqdUaniohshXDULpetNBxj-Tt6+oDzrWR6u9wcQQ@mail.gmail.com>
- <c0781701-5977-533d-6178-d8b5536a82bd@intel.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: arasan,sdhci.txt "compatibility" DT binding
+Date: Fri, 18 Nov 2016 14:22:34 +0100
+Message-ID: <a20b2b4f-15d4-3c29-324c-1ced5dbcc67f@xilinx.com>
+References: <56B07BA5.4060407@free.fr> <56B166F1.5080605@rock-chips.com>
+ <56B1AA44.1010108@xilinx.com> <56B1BAF8.2050907@free.fr>
+ <56B1CF40.1030203@xilinx.com> <20160203152104.GP4215@xsjsorenbubuntu>
+ <56B21DDB.6050708@free.fr> <582ED9E0.5090506@free.fr>
+ <CAFd313x6MJeO90_+rxditdPn762g7TqZc0_D6ojGTKmtGJKjPA@mail.gmail.com>
+ <582EF744.8090307@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35516 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751527AbcKRNQu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 08:16:50 -0500
-Received: by mail-wm0-f46.google.com with SMTP id a197so37754748wmd.0
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 05:16:49 -0800 (PST)
-In-Reply-To: <c0781701-5977-533d-6178-d8b5536a82bd@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <582EF744.8090307@free.fr>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mason <slash.tmp@free.fr>, Rameshwar Sahu <rsahu@apm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Suman Tripathi <stripathi@apm.com>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, Russell King <linux@arm.linux.org.uk>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Linus Walleij <linus.walleij@linaro.org>, P L Sai Krishna <lakshmis@xilinx.com>, Zach Brown <zach.brown@ni.com>, Sebastian Frias <sf84@laposte.net>, Arnd Bergmann <arnd@arndb.de>, Suneel Garapati <suneel.garapati@xilinx.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Michal Simek <monstr@monstr.eu>, linux-mmc <linux-mmc@vger.kernel.org>, Douglas Anderson <dianders@chromium.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Xiaobo Xie <x.xie@freescale.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-[...]
-
->>>
->>> I should point out that retrying CMD13 will clear the error bits in the
->>> status so there is no point retrying when checking for the SWITCH_ERROR bit.
->>> i.e. we need a version of __switch_send_status() that sets retries to zero.
+On 18.11.2016 13:42, Mason wrote:
+> On 18/11/2016 11:49, Rameshwar Sahu wrote:
+> 
+>> Mason wrote:
 >>
->> Are you really sure about this?
->
-> I don't think I have ever tested it.  I was going on what the spec says:
-> "1) Error bit. Signals an error condition was detected by the device. These
-> bits are cleared as soon as the response (reporting the error) is sent out."
+>>> Suman/APM added "arasan,sdhci-4.9a" in 308f3f8d8112
+>>> @Suman, @Rameshwar: what specific IP block does your SoC embed?
+>>> What does 4.9a refer to? The documentation revision number?
+>>
+>> We have Arasan SD3.0/ SDIO3.0/ eMMC4.41 AHB Host Controller IP
+>> embedded in our SoC and 4.9a is documentation revision number which
+>> was given by Arasan.
+>> FYI this documentation date was May, 2012.
+> 
+> Hello Ram,
+> 
+> Thanks for the information.
+> 
+>   Xilinx is using "SD2.0/SDIO2.0/MMC3.31 AHB Host Controller"
 
-Couldn't have been more clear than that.
+in Xilinx Zynq device
 
-So when doing CMD13 polling, it's seems like we should be validating
-the SWITCH_ERROR bit for each successful CMD13 response, as otherwise
-we may end up loosing that information.
+and
+Xilinx ZynqMP device is using
+"SD3.0/SDIO3.0/eMMC4.51 AHB Host Controller"
 
-[...]
-
-Kind regards
-Uffe
+Thanks,
+Michal
