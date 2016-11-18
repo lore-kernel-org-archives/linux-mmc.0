@@ -1,121 +1,98 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 9/9] mmc: core: Allow CMD13 polling when switch to HS400ES
- mode
-Date: Fri, 18 Nov 2016 15:35:08 +0200
-Message-ID: <851c300f-ba5e-1944-64fd-51a32f88cb89@intel.com>
-References: <1479293481-20186-1-git-send-email-ulf.hansson@linaro.org>
- <1479293481-20186-10-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v8 09/16] mmc: sdhci: Factor out sdhci_enable_clock
+Date: Fri, 18 Nov 2016 15:56:00 +0200
+Message-ID: <df833f0b-041f-67d1-4b91-ef4399ecf15c@intel.com>
+References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
+ <1479312052-22396-10-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:64842 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751543AbcKRNkI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Nov 2016 08:40:08 -0500
-In-Reply-To: <1479293481-20186-10-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1479312052-22396-10-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, sboyd@codeaurora.org, andy.gross@linaro.org
+Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 16/11/16 12:51, Ulf Hansson wrote:
-> In cases when the mmc host doesn't support HW busy detection, polling for
-> busy by using CMD13 is beneficial. The reasons have already been explained
-> in earlier change logs.
+On 16/11/16 18:00, Ritesh Harjani wrote:
+> Factor out sdhci_enable_clock from sdhci_set_clock
+> and make it EXPORT_SYMBOL so that it can be called.
+
+This seems fine apart from minor comments below.
+
 > 
-> Moreover, when polling with CMD13 during bus timing changes, we should
-> retry instead of fail when we get CRC errors.
-> 
-> Switching to HS400ES includes several steps, where each step changes the
-> bus speed timing. Let's improve the behaviour during these sequences, by
-> allowing CMD13 polling for each of the step. Let's also make sure the CMD13
-> polling becomes retried, while receiving a CRC error.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 > ---
->  drivers/mmc/core/mmc.c | 35 +++++++++++------------------------
->  1 file changed, 11 insertions(+), 24 deletions(-)
+>  drivers/mmc/host/sdhci.c | 28 +++++++++++++++++-----------
+>  drivers/mmc/host/sdhci.h |  1 +
+>  2 files changed, 18 insertions(+), 11 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 24b9e72..b6f0035 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1227,31 +1227,24 @@ static int mmc_select_hs400es(struct mmc_card *card)
->  		goto out_err;
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d08d507..8a89d89 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1344,20 +1344,10 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_calc_clk);
 >  
->  	/* Switch card to HS mode */
-> -	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
-> -			   card->ext_csd.generic_cmd6_time, 0,
-> -			   true, false, true);
-> +	err = mmc_select_hs(card);
->  	if (err) {
->  		pr_err("%s: switch to hs for hs400es failed, err:%d\n",
->  			mmc_hostname(host), err);
->  		goto out_err;
->  	}
->  
-> -	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-> -	err = mmc_switch_status(card);
-> -	if (err)
-> -		goto out_err;
-> -
->  	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
->  
-> -	/* Switch card to DDR with strobe bit */
-> +	/* Switch card to HS DDR with strobe bit */
->  	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
-> -	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -			 EXT_CSD_BUS_WIDTH,
-> -			 val,
-> -			 card->ext_csd.generic_cmd6_time);
-> +	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			   EXT_CSD_BUS_WIDTH, val,
-> +			   card->ext_csd.generic_cmd6_time,
-> +			   MMC_TIMING_MMC_DDR52,
-> +			   true, true, true);
->  	if (err) {
-> -		pr_err("%s: switch to bus width for hs400es failed, err:%d\n",
-> +		pr_err("%s: switch to hs ddr for hs400es failed, err:%d\n",
->  			mmc_hostname(host), err);
->  		goto out_err;
->  	}
-> @@ -1261,26 +1254,20 @@ static int mmc_select_hs400es(struct mmc_card *card)
->  	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  			   EXT_CSD_HS_TIMING, val,
-> -			   card->ext_csd.generic_cmd6_time, 0,
-> -			   true, false, true);
-> +			   card->ext_csd.generic_cmd6_time,
-> +			   MMC_TIMING_MMC_HS400,
-> +			   true, true, true);
+> -void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+> +void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk)
 
-This could be a problem because the CMD13 is being sent to a card in HS400
-enhanced strobe mode but we haven't enabled enhanced strobe on the host
-controller yet.  Previously mmc_switch_status(card) was below
-host->ops->hs400_enhanced_strobe().
+We write a u16 so let's make clk a u16 instead of unsigned short.
 
->  	if (err) {
->  		pr_err("%s: switch to hs400es failed, err:%d\n",
->  			mmc_hostname(host), err);
->  		goto out_err;
->  	}
+I would have called it sdhci_enable_clk() to go with sdhci_calc_clk() and
+slightly different from sdhci_set_clock() which is a callback whereas the
+other 2 are helpers.
+
+>  {
+> -	u16 clk;
+>  	unsigned long timeout;
 >  
-> -	/* Set host controller to HS400 timing and frequency */
-> -	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+> -	host->mmc->actual_clock = 0;
 > -
->  	/* Controller enable enhanced strobe function */
->  	host->ios.enhanced_strobe = true;
->  	if (host->ops->hs400_enhanced_strobe)
->  		host->ops->hs400_enhanced_strobe(host, &host->ios);
->  
-> -	err = mmc_switch_status(card);
-> -	if (err)
-> -		goto out_err;
+> -	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
 > -
->  	return 0;
+> -	if (clock == 0)
+> -		return;
+> -
+> -	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+> -
+>  	clk |= SDHCI_CLOCK_INT_EN;
+>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 >  
->  out_err:
+> @@ -1378,6 +1368,22 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	clk |= SDHCI_CLOCK_CARD_EN;
+>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_enable_clock);
+> +
+> +void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	u16 clk;
+> +
+> +	host->mmc->actual_clock = 0;
+> +
+> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +
+> +	if (clock == 0)
+> +		return;
+> +
+> +	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+> +	sdhci_enable_clock(host, clk);
+> +}
+>  EXPORT_SYMBOL_GPL(sdhci_set_clock);
+>  
+>  static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 766df17..8e77a3b 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -681,6 +681,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+>  u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>  		   unsigned int *actual_clock);
+>  void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+> +void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk);
+>  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>  		     unsigned short vdd);
+>  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
 > 
-
