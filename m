@@ -1,53 +1,39 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] MMC: davinci: fix card detect and write protect
-Date: Fri, 18 Nov 2016 15:29:49 +0100
-Message-ID: <CAPDyKFp=tVkY_2t7ZEPzgK=mQ-Ce3JvWcebuch2=Mvh3RSn7aw@mail.gmail.com>
-References: <20161115162822.25791-1-ahaslam@baylibre.com>
+Subject: Re: [PATCH v2 -next] soc: fsl: fix section mismatch build warnings
+Date: Fri, 18 Nov 2016 15:30:00 +0100
+Message-ID: <CAPDyKFrv44WENWRM-18BgTdsv8gHooFKNaVR+8ZQFnCVq217Eg@mail.gmail.com>
+References: <1479314367-9169-2-git-send-email-sudeep.holla@arm.com>
+ <1479395519-20742-1-git-send-email-sudeep.holla@arm.com> <9979998.AzNsm2rgFQ@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:33631 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753860AbcKRO3w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 09:29:52 -0500
-Received: by mail-wm0-f51.google.com with SMTP id c184so6185562wmd.0
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 06:29:51 -0800 (PST)
-In-Reply-To: <20161115162822.25791-1-ahaslam@baylibre.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:36790 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932291AbcKROaD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2016 09:30:03 -0500
+Received: by mail-wm0-f42.google.com with SMTP id g23so41849472wme.1
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2016 06:30:02 -0800 (PST)
+In-Reply-To: <9979998.AzNsm2rgFQ@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Haslam <ahaslam@baylibre.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Kevin Hilman <khilman@baylibre.com>, David Lechner <david@lechnology.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Sudeep Holla <sudeep.holla@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Scott Wood <oss@buserror.net>, Yangbo Lu <yangbo.lu@nxp.com>
 
-On 15 November 2016 at 17:28, Axel Haslam <ahaslam@baylibre.com> wrote:
-> This series fixes the card detect and write protect parsing for
-> the davinci_mmc driver, and takes care of a technical debt to
-> remove card polling when a card detect gpio is available.
+On 17 November 2016 at 16:25, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Thursday, November 17, 2016 3:11:59 PM CET Sudeep Holla wrote:
+>>
+>> Cc: Scott Wood <oss@buserror.net>
+>> Cc: Yangbo Lu <yangbo.lu@nxp.com>
+>> Cc: Arnd Bergmann <arnd@arndb.de>
+>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Sudeep Holla <sudeep.holla@arm.com>
+>>
 >
-> In the case of a platform based boot we register the gpios
-> using the APIs provided by slot-gpio.
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
 >
-> In the case of a DT based boot we use the mmc_of_parse API to parse
-> all DT properties and register the gpios.
->
-> If this series is accepted, the next series will convert all users
-> to use gpio descriptors and we could then remove the platform
-> callbacks.
->
-> This was tested on the omap138-lcdk, and the da850-evm, with
-> additional patches to platform data and dts files.
->
-> Axel Haslam (2):
->   MMC: davinci: use mmc_of_parse to parse common mmc configuration
->   MMC: davinci: request gpios using gpio descriptors
->
->  drivers/mmc/host/davinci_mmc.c | 130 +++++++++++++++++++++--------------------
->  1 file changed, 66 insertions(+), 64 deletions(-)
->
-> --
-> 2.10.1
->
+> Ulf, can you pick this up into the mmc tree?
 
-Thanks, applied for next!
+Yes, I have applied it for my next branch, thanks!
 
 Kind regards
 Uffe
