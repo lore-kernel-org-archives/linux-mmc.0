@@ -1,123 +1,45 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: block: delete packed command support
-Date: Mon, 21 Nov 2016 16:27:59 +0100
-Message-ID: <CACRpkdarRZkv2f_FCpEJ7+teQB7dDtHiXFeN3wU8wfG8dx0cJg@mail.gmail.com>
-References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
- <2697103.lML87IM8sj@wuerfel> <d0722644-2922-b580-9bfe-01dd3c38ec67@intel.com>
- <CAPDyKFrW+Jge-Kd=PhRJvHG1Y==MMYinXxgHM1ySSG8gOx3tyA@mail.gmail.com> <135cb4af-fbbe-d6a7-182b-73543f1c551a@intel.com>
+Subject: Re: [PATCH RFCv2 01/10] mmc: core: Add support to read command queue parameters
+Date: Mon, 21 Nov 2016 16:34:40 +0100
+Message-ID: <CACRpkdYDfdCoZUOryjVX4byu2BFx9KZx7YKoFG9wESDpaKtirg@mail.gmail.com>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org> <1467033757-32498-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:33314 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753227AbcKUP2B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 10:28:01 -0500
-Received: by mail-qk0-f181.google.com with SMTP id x190so354742781qkb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2016 07:28:01 -0800 (PST)
-In-Reply-To: <135cb4af-fbbe-d6a7-182b-73543f1c551a@intel.com>
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:35634 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754570AbcKUPel (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 10:34:41 -0500
+Received: by mail-qt0-f174.google.com with SMTP id c47so206312737qtc.2
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2016 07:34:41 -0800 (PST)
+In-Reply-To: <1467033757-32498-2-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Paolo Valente <paolo.valente@linaro.org>
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Alex Lemberg <alex.lemberg@sandisk.com>, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Asutosh Das <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, kdorfman@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Shawn Lin <shawn.lin@rock-chips.com>, Subhash Jadavani <subhashj@codeaurora.org>
 
-[CC the block layer maintainers so they can smack my fingers
-if I misunderstood any of how the block layer semantics work...]
+On Mon, Jun 27, 2016 at 3:22 PM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
 
-On Mon, Nov 21, 2016 at 3:17 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/11/16 16:02, Ulf Hansson wrote:
-
->> I also believe, the implementation would become really complex, as you
->> would need to "hold" the first write request, while waiting for a
->> second to arrive. Then for how long shall you hold it? And then what
->> if you are unlucky so the next is read request, thus you can't pack
->> them. The solution will be suboptimal, won't it?
+> From: Asutosh Das <asutoshd@codeaurora.org>
 >
-> It doesn't hold and wait now.  So why would it in the blk-mq case?
+> eMMC cards with EXT_CSD version >= 8, optionally support command
+> queuing feature as defined by JEDEC eMMC5.1. Add support for probing
+> command queue feature for such type of cards.
+>
+> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> [subhashj@codeaurora.org: fixed trivial merge conflicts]
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 
-The current kthread in drivers/mmc/card/queue.c looks like this
-in essence:
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-struct request *r;
+Even if we don't merge the specific mechanism provided by the
+rest of the patches, this patch just make us know more about
+the capabilities of the hardware we're running on, which is good.
 
-while (1)
-    r = blk_fetch_request(q);
-    issue();
-}
-
-It is pulling out as much as it can to asynchronously issue
-two requests in parallel and also the packed command (as
-mentioned in the commitlog to $SUBJECT) pulls out even more
-stuff of the queue to speculatively issue things in a packed
-command.
-
-The block layer isn't supposed to be used like this. It is
-supposed to be used like so:
-
-1. You get notified by the request_fn that is passed with
-   blk_init_queue()
-2. The request function fires a work.
-3. The work pick ONE request with blk_fetch_request()
-  and handles it.
-4. Repeat from (1)
-
-Instead of doing this the MMC layer kthread is speculatively
-pulling out stuff of the queue whenever it can, including
-pulling out a few NULL at the end before it stops. The
-mechanism is similar to a person running along a queue and
-picking a segment of passengers into a bus to send off,
-batching them. Which is clever, but the block layer is not
-supposed to be used like that. It just happens to work.
-
-In blk-mq this speculative fetching is no longer possible.
-Instead you register a notification function in struct blk_mq_ops
-vtable .queue_rq() callback: this will be called by the block
-layer core whenever there is a request available on "our"
-queue. It further approves a .init_request() callback that is
-called overhead to allocate a per-request context, such as
-the current struct mmc_queue_req - just not quite because
-the current mmc_queue_req is not mapped 1-to-1 onto a
-request from the block layer because of packed command;
-but it is after this patch, hehe ;)
-
-Any speculative batching needs to happen *after* this, i.e.
-the MMC layer would have to report a certain larger queue
-depth (if you set it to 1 you only ever get one request at the time
-and have to finish it before you get a new one), group the
-requests itself with packed command or command queueing,
-then signal them back as they are confirmed completed by
-the device, or, if they cannot be grouped, handle as far as you
-can and put the remaining requests back on the queue
-(creating a "bubble" in the pipeline).
-
-Relying on iterating and inspecting the block layer queue is
-*not* possible with blk-mq, sure blk_fetch_request() is still
-there, but if you call it on an mq-registered queue, it will
-crash the kernel. (At least it did for me.) Clearly it is not
-intended to be used with MQ: none of the MQ-converted
-subsystems use this. (drivers/mtd/ubi/block.c is a good
-simple example)
-
-I liken these mechanisms to a pipeline:
-
-- The two-levels deep speculation buffer in struct mmc_queue
-  field .mqrq[2] is a "software pipeline" in the MMC layer (so we
-  can prepare and handle requests in parallel)
-
-- The packed command and command queue is a
-  hardware-supported pipeline on the device side.
-
-Both try to overcome the hardware limitations of the MMC/SD
-logical interface. This batching-style pipelining isn't really
-solving the problem the way real multiqueue hardware does,
-so it is a poor man's patchwork to the problem.
-
-In either case, as Ulf notes, you need to get a few requests
-off the queue and group them using packed command or
-command queueing if possible, but that grouping needs to
-happen in the MMC/SD layer, after picking the requests from
-the queue. I think it is OK to do so and just put any requests
-you cannot pack into the pipeline back on the queue. But I
-am not sure (still learning....)
+WIll it be reported properly by the lsmmc command too?
 
 Yours,
 Linus Walleij
