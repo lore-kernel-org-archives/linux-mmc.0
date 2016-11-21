@@ -1,80 +1,54 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH 1/2] mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller sub-vended by NI
-Date: Mon, 21 Nov 2016 17:04:05 -0600
-Message-ID: <1479769446-8490-2-git-send-email-zach.brown@ni.com>
-References: <1479769446-8490-1-git-send-email-zach.brown@ni.com>
+From: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH v9 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400
+ support
+Date: Mon, 21 Nov 2016 15:11:38 -0800
+Message-ID: <20161121231138.GY25626@codeaurora.org>
+References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
+ <CAPDyKFrRbf0+G5K=-jsaevAGbTqhTAss2zJv3QdiyCrv0BG-zA@mail.gmail.com>
+ <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod3.natinst.com ([130.164.80.24]:57389 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754790AbcKUXEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Nov 2016 18:04:09 -0500
-In-Reply-To: <1479769446-8490-1-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andy Gross <andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Brown <david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Georgi Djakov <georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Lemberg <alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Mateusz Nowak <mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yuliy Izrailov <Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Asutosh Das <asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, David Griego <david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sahitya Tummala <stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rajendra Nayak <rnayak@codea>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-Add PCI ID for Intel byt sdio host controller sub-vended by NI.
+On 11/21, Ritesh Harjani wrote:
+> 
+> 
+> On 11/21/2016 3:36 PM, Ulf Hansson wrote:
+> >On 21 November 2016 at 07:37, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+> >>Hi,
+> >>
+> >>This is v9 version of the patch series which adds support for MSM8996.
+> >>Adds HS400 driver support as well.
+> >>These are tested on internal msm8996 & db410c HW.
+> >>
+> >>The patch series is ready. Do we think we can apply these
+> >>patches for next now?
+> >
+> >I guess the DTS changes can be picked up by Andy, so they can go via arm-soc?
+> Yes.
+> 
+> >
+> >Then, does the mmc changes depend on the clock changes? If so, I can
+> >pick them as well, but then I need an ack from Stephen....
+> Ideal and preferable, would be that clk & mmc changes go in
+> together. But either ways should be fine.
+> 
 
-The controller has different behavior because of the board layout NI
-puts it on.
+There's only a runtime dependency where the clk rates will be
+wrong if clk tree isn't merged. I'd rather just apply the clk
+ones directly to clk tree and let all three trees come together
+in linux-next and work.
 
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1d9e00a..9741505 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -375,6 +375,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 	return 0;
- }
- 
-+static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-+				 MMC_CAP_WAIT_WHILE_BUSY;
-+	return 0;
-+}
-+
- static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-@@ -447,6 +454,15 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
- 	.ops		= &sdhci_intel_byt_ops,
- };
- 
-+static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			  SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.allow_runtime_pm = true,
-+	.probe_slot	= ni_byt_sdio_probe_slot,
-+	.ops		= &sdhci_intel_byt_ops,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-@@ -1079,6 +1095,14 @@ static const struct pci_device_id pci_ids[] = {
- 	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
- 		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
-+		.subvendor	= PCI_VENDOR_ID_NI,
-+		.subdevice	= 0x7884,
-+		.driver_data	= (kernel_ulong_t)&sdhci_ni_byt_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
- 		.subvendor	= PCI_ANY_ID,
- 		.subdevice	= PCI_ANY_ID,
- 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
 -- 
-2.7.4
-
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
