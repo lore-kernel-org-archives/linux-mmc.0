@@ -1,79 +1,108 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v8 04/16] ARM: dts: Add xo to sdhc clock node on qcom
- platforms
-Date: Mon, 21 Nov 2016 12:00:32 +0530
-Message-ID: <7fe256e5-aaad-e087-0c7a-34a39060379b@codeaurora.org>
-References: <1479312052-22396-5-git-send-email-riteshh@codeaurora.org>
- <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
- <20161118035619.GA6400@hector>
+Subject: Re: [PATCH v8 09/16] mmc: sdhci: Factor out sdhci_enable_clock
+Date: Mon, 21 Nov 2016 12:01:19 +0530
+Message-ID: <abed48c3-d220-e907-d482-dda074c72764@codeaurora.org>
+References: <1479312052-22396-1-git-send-email-riteshh@codeaurora.org>
+ <1479312052-22396-10-git-send-email-riteshh@codeaurora.org>
+ <df833f0b-041f-67d1-4b91-ef4399ecf15c@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20161118035619.GA6400@hector>
+In-Reply-To: <df833f0b-041f-67d1-4b91-ef4399ecf15c@intel.com>
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: Andy Gross <andy.gross@linaro.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, sboyd@codeaurora.org, andy.gross@linaro.org
+Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
 
 
 
-On 11/18/2016 9:26 AM, Andy Gross wrote:
-> On Thu, Nov 17, 2016 at 06:13:39AM +0530, Ritesh Harjani wrote:
->> Add xo entry to sdhc clock node on all qcom platforms.
+On 11/18/2016 7:26 PM, Adrian Hunter wrote:
+> On 16/11/16 18:00, Ritesh Harjani wrote:
+>> Factor out sdhci_enable_clock from sdhci_set_clock
+>> and make it EXPORT_SYMBOL so that it can be called.
+>
+> This seems fine apart from minor comments below.
+>
 >>
 >> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 >> ---
->>  arch/arm/boot/dts/qcom-apq8084.dtsi   | 16 ++++++++++------
->>  arch/arm/boot/dts/qcom-msm8974.dtsi   | 16 ++++++++++------
->>  arch/arm64/boot/dts/qcom/msm8916.dtsi | 10 ++++++----
->>  arch/arm64/boot/dts/qcom/msm8996.dtsi |  9 +++++----
->>  4 files changed, 31 insertions(+), 20 deletions(-)
+>>  drivers/mmc/host/sdhci.c | 28 +++++++++++++++++-----------
+>>  drivers/mmc/host/sdhci.h |  1 +
+>>  2 files changed, 18 insertions(+), 11 deletions(-)
 >>
->> diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
->> index 39eb7a4..f756cbb 100644
->> --- a/arch/arm/boot/dts/qcom-apq8084.dtsi
->> +++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
->> @@ -182,13 +182,13 @@
->>  	};
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index d08d507..8a89d89 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1344,20 +1344,10 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>>  }
+>>  EXPORT_SYMBOL_GPL(sdhci_calc_clk);
 >>
->>  	clocks {
->> -		xo_board {
->> +		xo_board: xo_board {
->>  			compatible = "fixed-clock";
->>  			#clock-cells = <0>;
->>  			clock-frequency = <19200000>;
->>  		};
+>> -void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>> +void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk)
+>
+> We write a u16 so let's make clk a u16 instead of unsigned short.
+Ok.
+>
+> I would have called it sdhci_enable_clk() to go with sdhci_calc_clk() and
+> slightly different from sdhci_set_clock() which is a callback whereas the
+> other 2 are helpers.
+Sure, will make sdhci_enable_clk()
+
+>
+>>  {
+>> -	u16 clk;
+>>  	unsigned long timeout;
 >>
->> -		sleep_clk {
->> +		sleep_clk: sleep_clk {
->>  			compatible = "fixed-clock";
->>  			#clock-cells = <0>;
->>  			clock-frequency = <32768>;
->> @@ -416,8 +416,10 @@
->>  			reg-names = "hc_mem", "core_mem";
->>  			interrupts = <0 123 0>, <0 138 0>;
->>  			interrupt-names = "hc_irq", "pwr_irq";
->> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
->> -			clock-names = "core", "iface";
->> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
->> +				 <&gcc GCC_SDCC1_AHB_CLK>,
->> +				 <&xo_board 0>;
->
-> With clock-cells = <0>, this should be <&xo_board>
-Ok, done.
->
-> Somehow this passes the dtc compiler.  But it is still incorrect.  Please fix
-> all instances of this to use the correct number of cells in the xo_board
-> references.
-Sure.
->
->
-> Andy
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> -	host->mmc->actual_clock = 0;
+>> -
+>> -	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>> -
+>> -	if (clock == 0)
+>> -		return;
+>> -
+>> -	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+>> -
+>>  	clk |= SDHCI_CLOCK_INT_EN;
+>>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>
+>> @@ -1378,6 +1368,22 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>>  	clk |= SDHCI_CLOCK_CARD_EN;
+>>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>  }
+>> +EXPORT_SYMBOL_GPL(sdhci_enable_clock);
+>> +
+>> +void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>> +{
+>> +	u16 clk;
+>> +
+>> +	host->mmc->actual_clock = 0;
+>> +
+>> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>> +
+>> +	if (clock == 0)
+>> +		return;
+>> +
+>> +	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+>> +	sdhci_enable_clock(host, clk);
+>> +}
+>>  EXPORT_SYMBOL_GPL(sdhci_set_clock);
+>>
+>>  static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 766df17..8e77a3b 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -681,6 +681,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+>>  u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>>  		   unsigned int *actual_clock);
+>>  void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+>> +void sdhci_enable_clock(struct sdhci_host *host, unsigned short clk);
+>>  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>>  		     unsigned short vdd);
+>>  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>>
 >
 
 -- 
