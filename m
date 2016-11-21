@@ -1,51 +1,198 @@
 From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v8 05/16] dt-bindings: sdhci-msm: Add xo property
-Date: Mon, 21 Nov 2016 12:01:59 +0530
-Message-ID: <f0051303-a18f-9f9c-5ed6-3d4ade5cbe74@codeaurora.org>
-References: <20161116191335.GH25626@codeaurora.org>
- <1479343623-31163-1-git-send-email-riteshh@codeaurora.org>
- <20161117230352.GO25626@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v9 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400 support
+Date: Mon, 21 Nov 2016 12:07:10 +0530
+Message-ID: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161117230352.GO25626-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rnayak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
+
+This is v9 version of the patch series which adds support for MSM8996.
+Adds HS400 driver support as well.
+These are tested on internal msm8996 & db410c HW.
+
+The patch series is ready. Do we think we can apply these
+patches for next now?
+
+There are only minor changes in v9.
+1. From <&xo_board 0> -> <&xo_board>.
+2. Addressed Adrian minor comments on 009.
+3. Other minor changes.
 
 
-On 11/18/2016 4:33 AM, Stephen Boyd wrote:
-> On 11/17, Ritesh Harjani wrote:
->> Add "xo" property which is tcxo clock.
->>
->> Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index 485483a..4e61086 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -17,6 +17,7 @@ Required properties:
->>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
->>  	"core"	- SDC MMC clock (MCLK) (required)
->>  	"bus"	- SDCC bus voter clock (optional)
->> +	"xo" - TCXO clock (optional)
->
-> Seems everything else is tabbed before the dash. Otherwise,
-Sure.
->
-> Reviewed-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Thanks.
->
+Older history:-
+
+Changes from v7 -> v8 :-
+1. Added patch 005 to add dt bindings for xo_clock.
+2. Added patch 009 to factor out sdhci_enable_clock as discussed on v7 series.
+2.a. Modified patch 010 by making use of sdhci_enable_clock.
+2.b. Addressed Stephen's comment on patch 010 to call clk_set_rate unconditionally.
+3. Addressed Stephen comments to remove unncessary one line comments, braces and other
+minor comments.
+4. Added changes from Jeremy in patch 002 for gcc-msm8994 as well for sdcc clk_rcg2_floor_ops.
+minor comments.
+
+v7 was verified on my Nexus 5X (msm8992). 
+
+Older history :-
+Below are the changes in v7.
+
+Changes from v6 -> v7 :-
+1. Removed patch "clk: Add clk_hw_get_clk() helper API to be used by clk providers"
+in v7 as it was not required.
+2. Addressed Stephen review comments on -
+"clk: qcom: Add rcg ops to return floor value closest to the requested rate"
+3. Addressed comments from Stephen to add xo_clock entry in the sdhc clock node.
+Using the same xo_clock entry from DT to get the clk_rate of xo_clock used in
+sdhci-msm driver. Patch 04 adds this entry into DT.
+Patch 05 adds the driver support for xo_clock mentioned above.
+Hence there is a minor change in Patch05, which can be reviewed and taken
+into the tree.
+
+IMHO, almost all patches are almost done and are ready to be accepted.
+Will below process work out? 
+Patches 001 & 002 :- (clock changes) - Can go via Stephen's Boyd Tree.
+Patches 004 & 010 :- (DTS changes) - Can go via Andy Gross. 
+Patches 003, 005-009 & 011-014 :- (sdhci-msm changes) - Adrian's tree.
+
+Please let me know in case if anything else is required on above.
+
+
+Changes from v5 -> v6 :-
+1. Earlier in v5 series DT node was added to get the clk-rates table
+needed for sdhci-msm driver. But this is removed in this(v6) patch series
+and instead the clk changes are done in the clk driver as per Rob H comment.
+
+2. Added clk driver changes(patch 1-3) to provide floor rate values of requested
+clock for sdhc client.
+For following boards- apq8084, msm8996, msm8916, msm8974.
+
+3. Other minor patch comments were addressed.
+
+Changes from v4 -> v5 :-
+1. Added HS400 sdhci-msm controller specific changes:- (Patch 10, 11, 12)
+2. Addressed comment from Adrian on Patch 07 @[3].
+3. Addressed comment from Arnd on Patch 03, to directly add
+   clk_table into sdhci_msm_host. [4]
+4. Addressed comment from Bjorn to not enforce having clk-rates property
+   in DT for older targets based on discussion at [5]
+5. Retained Acks from Adrian on patches (01 & 02 & 06) where there were no
+   changes made while addressing above comments.
+
+Older history:-
+This is v4 version of the patch series.
+Patches 01, 02, 05 & 06 were Acked-by Adrian.
+
+Changes from v3 -> v4 :-
+1. Addressed comments from Adrian on Patch 03, 07, 08.
+2. Addressed comments from Bjorn on Patch 03.
+3. Added clk-rate support for sdhc DT nodes to all MSM platforms.
+   in Pacth 04.
+4. Rebased on next branch of Ulf.
+
+Changes from v2 -> v3 :-
+1. Addded Patch 01 based on Bjorn comment[2] -
+   This fixes/unrolls the poor coding style of read/writes of
+   registers from base sdhci-msm driver.
+
+2. Fixed/unrolled poor style of reads/writes of registers in Patch 02,
+   based on Bjorn comment[2]. Also changed name of flag from
+   use_updated_dll_reset -> use_14lpp_dll_reset.
+
+Changes from v1->v2 :-
+1. Removed patch 06 & 08 from v1 patch series[1]
+(which were introducing unnecessary quirks).
+   Instead have implemented __sdhci_msm_set_clock version of
+   sdhci_set_clock in sdhci_msm driver itself in patch 07 of
+   this patch series.
+2. Enabled extra quirk (SDHCI_QUIRK2_PRESET_VALUE_BROKEN) in
+   patch 05 of this patch series.
+
+
+Description of patches :-
+This patchset adds clk-rates & other required changes to
+upstream sdhci-msm driver from codeaurora tree.
+It has been tested on a db410c Dragonboard and msm8996 based
+platform.
+
+Patch 0001-0003- Adds support in qcom clk driver to return
+floor value of requested clock rate instead of ceil rate
+for sdhc clients.
+
+Patch 0004- Adds updated dll sequence for newer controllers
+which has minor_version >= 0x42. This is required for msm8996.
+
+MSM controller HW recommendation is to use the base MCI clock
+and directly control this MCI clock at GCC in order to
+change the clk-rate.
+Patches 06-08 bring in required change for this to
+sdhci-msm.
+
+MSM controller would require 2x clock rate from source
+for DDR bus speed modes. Patch 09 adds this support.
+
+Patch 0010- adds DDR support in DT for sdhc1 of msm8916.
+
+Patches 0011-0014- Adds HS400 support to sdhci-msm.
+
+
+[1]:- http://www.spinics.net/lists/linux-mmc/msg38467.html
+[2]:- http://www.spinics.net/lists/linux-mmc/msg38578.html
+[3]:- https://patchwork.kernel.org/patch/9289345/
+[4]:- https://www.spinics.net/lists/linux-mmc/msg39107.html
+[5]:- http://www.spinics.net/lists/linux-mmc/msg38749.html
+[6]:- https://patchwork.kernel.org/patch/9297381/
+
+
+Rajendra Nayak (2):
+  clk: qcom: Add rcg ops to return floor value closest to the requested
+    rate
+  clk: qcom: Move all sdcc rcgs to use clk_rcg2_floor_ops
+
+Ritesh Harjani (12):
+  mmc: sdhci-msm: Change poor style writel/readl of registers
+  ARM: dts: Add xo to sdhc clock node on qcom platforms
+  dt-bindings: sdhci-msm: Add xo value
+  mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+  mmc: sdhci-msm: Enable few quirks
+  mmc: sdhci: Factor out sdhci_enable_clk
+  mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
+  mmc: sdhci-msm: Add clock changes for DDR mode.
+  arm64: dts: qcom: msm8916: Add ddr support to sdhc1
+  mmc: sdhci-msm: Save the calculated tuning phase
+  mmc: sdhci-msm: Add calibration tuning for CDCLP533 circuit
+  sdhci: sdhci-msm: update dll configuration
+
+Venkat Gopalakrishnan (2):
+  mmc: sdhci-msm: Update DLL reset sequence
+  mmc: sdhci-msm: Add HS400 platform support
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
+ arch/arm/boot/dts/qcom-apq8084.dtsi                |  16 +-
+ arch/arm/boot/dts/qcom-msm8974.dtsi                |  16 +-
+ arch/arm64/boot/dts/qcom/msm8916.dtsi              |  11 +-
+ arch/arm64/boot/dts/qcom/msm8996.dtsi              |   9 +-
+ drivers/clk/qcom/clk-rcg.h                         |   1 +
+ drivers/clk/qcom/clk-rcg2.c                        |  76 ++-
+ drivers/clk/qcom/common.c                          |  16 +
+ drivers/clk/qcom/common.h                          |   2 +
+ drivers/clk/qcom/gcc-apq8084.c                     |   8 +-
+ drivers/clk/qcom/gcc-msm8916.c                     |   4 +-
+ drivers/clk/qcom/gcc-msm8974.c                     |   8 +-
+ drivers/clk/qcom/gcc-msm8994.c                     |   8 +-
+ drivers/clk/qcom/gcc-msm8996.c                     |   8 +-
+ drivers/mmc/host/sdhci-msm.c                       | 626 +++++++++++++++++++--
+ drivers/mmc/host/sdhci.c                           |  28 +-
+ drivers/mmc/host/sdhci.h                           |   1 +
+ 17 files changed, 739 insertions(+), 100 deletions(-)
 
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
+
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
