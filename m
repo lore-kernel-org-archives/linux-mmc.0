@@ -1,37 +1,42 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH RFCv2 00/10] mmc: Add HW Command Queuing Support
-Date: Mon, 21 Nov 2016 17:05:15 +0100
-Message-ID: <10880752.H1JikWMFDK@wuerfel>
-References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org> <CACRpkdbTkAzTGiKFLFgxFTQA0wa8egCAwZf8WzJNTa-nOifqOA@mail.gmail.com>
+From: Zach Brown <zach.brown@ni.com>
+Subject: [PATCH 0/2] mmc: sdhci-pci: Use ACPI to set max frequency of sdio host
+Date: Mon, 21 Nov 2016 17:04:04 -0600
+Message-ID: <1479769446-8490-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.24]:61136 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752889AbcKUQFo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 11:05:44 -0500
-In-Reply-To: <CACRpkdbTkAzTGiKFLFgxFTQA0wa8egCAwZf8WzJNTa-nOifqOA@mail.gmail.com>
+Received: from skprod3.natinst.com ([130.164.80.24]:57386 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754711AbcKUXEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Nov 2016 18:04:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Alex Lemberg <alex.lemberg@sandisk.com>, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Asutosh Das <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, kdorfman@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-On Monday, November 21, 2016 4:52:37 PM CET Linus Walleij wrote:
-> On Mon, Jun 27, 2016 at 3:22 PM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
-> 
-> > This patch series refreshes the older patch series sent a
-> > while ago by Asutosh Das[1].
-> >
-> > Current set of patch series is only introducing the basic CMDQ
-> > driver to get more review comments. Based on the reviews, will
-> > add other features as well to the patch list.
-> 
-> kthread is deprecated since the talks of the last kernel
-> summit. You should prefer to use workqueues.
+On some boards, max SDIO frequency is limited by trace lengths and other layout
+choices. We would like a way to specify this limitation so the driver can
+behave accordingly.
 
-It's the kthread freezer that is deprecated, not kthreads. It with
-blk_mq, we probably won't want to have this kthread, but that's
-a differennt issue, and using workqueues instead won't help.
+This patch set assumes that the limitation has been reported in an ACPI table
+which the driver can check to get the max frequency.
 
-	Arnd
+The first patch creates a PCI ID and support for the Intel byt sdio where NI is
+the subvendor.
+
+The second patch uses the ACPI table to set f_max during the new
+ni_byt_sdio_probe_slot.
+
+
+Zach Brown (2):
+  mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller
+    sub-vended by NI
+  mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio    
+    controller sub-vended by NI
+
+ drivers/mmc/host/sdhci-pci-core.c | 39 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
+
+-- 
+2.7.4
+
