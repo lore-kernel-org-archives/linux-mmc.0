@@ -1,54 +1,86 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] dw-mmc controller fixes
-Date: Mon, 21 Nov 2016 11:10:41 +0100
-Message-ID: <CAPDyKFqP34Z+fWKikdFwFSCYsLx2mMC=BYCddJ_Jd2wJ4mPkjw@mail.gmail.com>
-References: <d43a35c0-0961-ccc6-70ad-0b9b0f0ce2eb@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: block: delete packed command support
+Date: Mon, 21 Nov 2016 12:11:39 +0100
+Message-ID: <2697103.lML87IM8sj@wuerfel>
+References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:37960 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752469AbcKUKKn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 05:10:43 -0500
-Received: by mail-wm0-f47.google.com with SMTP id f82so135420004wmf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2016 02:10:43 -0800 (PST)
-In-Reply-To: <d43a35c0-0961-ccc6-70ad-0b9b0f0ce2eb@samsung.com>
+Received: from mout.kundenserver.de ([212.227.126.187]:54149 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753528AbcKULMA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 06:12:00 -0500
+In-Reply-To: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-On 21 November 2016 at 05:28, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear Ulf,
->
-> Could you pull this patch into your "fixes" branch?
-> Before applied this patch, there is the potential lock issue.
+On Monday, November 21, 2016 11:08:57 AM CET Linus Walleij wrote:
+> I've had it with this code now.
+> 
+> The packed command support is a complex hurdle in the MMC/SD block
+> layer, around 500+ lines of code which was introduced in 2013 in
+> commits
+> 
+> ce39f9d17c14 ("mmc: support packed write command for eMMC4.5 devices")
+> abd9ac144947 ("mmc: add packed command feature of eMMC4.5")
+> 
+> ...and since then it has been rotting. The original author of the
+> code has disappeared from the community and the mail address is
+> bouncing.
+> 
+> For the code to be exercised the host must flag that it supports
+> packed commands, so in mmc_blk_prep_packed_list() which is called for
+> every single request, the following construction appears:
+> 
+> u8 max_packed_rw = 0;
+> 
+> if ((rq_data_dir(cur) == WRITE) &&
+>     mmc_host_packed_wr(card->host))
+>         max_packed_rw = card->ext_csd.max_packed_writes;
+> 
+> if (max_packed_rw == 0)
+>     goto no_packed;
+> 
+> This has the following logical deductions:
+> 
+> - Only WRITE commands can really be packed, so the solution is
+>   only half-done: we support packed WRITE but not packed READ.
+>   The packed command support has not been finalized by supporting
+>   reads in three years!
 
-Thanks, applied for fixes!
+Packed reads don't make a lot of sense, there is very little
+for an MMC to optimize in reads that it can't already do without
+the packing. For writes, packing makes could be an important
+performance optimization, if the eMMC supports it.
 
-Kind regards
-Uffe
+I've added Luca Porzio  and Alex Lemberg to Cc. I think they
+are subscribed to the list already, but it would be good to
+get some estimate from them too about how common the packed
+write support is on existing hardware from their respective
+employers before we kill it off.
 
->
-> Best Regards,
-> Jaehoon Chung
->
->
-> The following changes since commit b0921d5c9ed6ffa8a4d6afc5ee5f136b87445f14:
->
->   mmc: sdhci-of-esdhc: fixup PRESENT_STATE read (2016-11-18 14:41:47 +0100)
->
-> are available in the git repository at:
->
->   https://github.com/jh80chung/dw-mmc.git fixes
->
-> for you to fetch changes up to 93fad54b87ace925631d8a09de6e0ac7d26af96d:
->
->   mmc: dw_mmc: fix the error handling for dma operation (2016-11-21 13:21:38 +0900)
->
-> ----------------------------------------------------------------
-> Jaehoon Chung (1):
->       mmc: dw_mmc: fix the error handling for dma operation
->
->  drivers/mmc/host/dw_mmc.c | 1 +
->  1 file changed, 1 insertion(+)
+If none of Samsung/Micron/Sandisk are currently shipping
+devices that support eMMC-4.5 packed commands but don't
+support the eMMC-5.1 command queuing (which IIRC is a more
+general way to achieve the same), we probably don't need to
+worry about it too much. 
+
+> - mmc_host_packed_wr() is just a static inline that checks
+>   host->caps2 & MMC_CAP2_PACKED_WR. The problem with this is
+>   that NO upstream host sets this capability flag! No driver
+>   in the kernel is using it, and we can't test it. Packed
+>   command may be supported in out-of-tree code, but I doubt
+>   it. I doubt that the code is even working anymore due to
+>   other refactorings in the MMC block layer, who would
+>   notice if patches affecting it broke packed commands?
+>   No one.
+
+This is a very good indication that it's not really used.
+It would be useful to also check out the Android AOSP
+kernel tree to see if it's in there, if anything important
+supports packed commands, it's probably in there.
+
+	Arnd
