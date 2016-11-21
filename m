@@ -1,68 +1,49 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RESEND PATCHv2] mmc: dw_mmc: fix the error handling for dma
- operation
-Date: Mon, 21 Nov 2016 13:23:53 +0900
-Message-ID: <a9b1dd5f-810c-8ee1-b158-ab362992df11@samsung.com>
-References: <CGME20161121015149epcas1p3dba28eada908046d76d8791a20de2480@epcas1p3.samsung.com>
- <20161121015148.5699-1-jh80.chung@samsung.com>
+Subject: [GIT PULL] dw-mmc controller fixes
+Date: Mon, 21 Nov 2016 13:28:22 +0900
+Message-ID: <d43a35c0-0961-ccc6-70ad-0b9b0f0ce2eb@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:49995 "EHLO
+Received: from mailout2.samsung.com ([203.254.224.25]:60343 "EHLO
         mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752833AbcKUEX4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 23:23:56 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+        with ESMTP id S1753032AbcKUE2a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 23:28:30 -0500
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
  by mailout2.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGZ0116N5JSVH40@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Nov 2016 13:23:54 +0900 (KST)
-In-reply-to: <20161121015148.5699-1-jh80.chung@samsung.com>
+ with ESMTP id <0OGZ011I25R3VH40@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Nov 2016 13:28:22 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, m.szyprowski@samsung.com
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On 11/21/2016 10:51 AM, Jaehoon Chung wrote:
-> When dma->start is failed,then it has to fall back to PIO mode
-> for current transfer.
-> 
-> But Host controller was already set to bits relevant to DMA operation.
-> If needs to use the PIO mode, Host controller has to stop the DMA
-> operation. (It's more stable than now.)
-> 
-> When it occurred error, it's not running any request.
-> 
-> Fixes: 3fc7eaef44db ("mmc: dw_mmc: Add external dma interface support")
-> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Dear Ulf,
 
-Applied on my fixes branch with stable tags.
+Could you pull this patch into your "fixes" branch?
+Before applied this patch, there is the potential lock issue.
 
 Best Regards,
 Jaehoon Chung
 
-> ---
-> Changelog on V2
-> - Change the Fixes Commit Id
-> - Added the Marek's Reported-by tags
-> 
->  drivers/mmc/host/dw_mmc.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 50a674b..df478ae 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1058,6 +1058,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->  	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->  
->  	if (host->dma_ops->start(host, sg_len)) {
-> +		host->dma_ops->stop(host);
->  		/* We can't do DMA, try PIO for this one */
->  		dev_dbg(host->dev,
->  			"%s: fall back to PIO mode for current transfer\n",
-> 
 
+The following changes since commit b0921d5c9ed6ffa8a4d6afc5ee5f136b87445f14:
+
+  mmc: sdhci-of-esdhc: fixup PRESENT_STATE read (2016-11-18 14:41:47 +0100)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git fixes
+
+for you to fetch changes up to 93fad54b87ace925631d8a09de6e0ac7d26af96d:
+
+  mmc: dw_mmc: fix the error handling for dma operation (2016-11-21 13:21:38 +0900)
+
+----------------------------------------------------------------
+Jaehoon Chung (1):
+      mmc: dw_mmc: fix the error handling for dma operation
+
+ drivers/mmc/host/dw_mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
