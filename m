@@ -1,70 +1,78 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6 0/5] Add intial support to DW MMC host on ZTE SoC
-Date: Mon, 21 Nov 2016 10:22:02 +0900
-Message-ID: <1b5c053e-b869-de84-3428-8c3d95927307@samsung.com>
-References: <CGME20161118062929epcas2p35fff280ed75b50d35c3194514c7e0d8d@epcas2p3.samsung.com>
- <1479450555-19047-1-git-send-email-jun.nie@linaro.org>
- <2205472e-963f-319b-6523-76a4f486cafe@samsung.com>
- <CAPDyKFrjmQCN=YckNTrQtLNk3pCsCt5PFxRdqpk5rEqCHWh1bw@mail.gmail.com>
+From: Jun Nie <jun.nie@linaro.org>
+Subject: Re: [PATCH v6 1/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Mon, 21 Nov 2016 09:26:09 +0800
+Message-ID: <CABymUCO94ce0wuzBgZ41cxeRvGBKXeMx2cyDh+5yEr0dnwqPvw@mail.gmail.com>
+References: <1479450555-19047-1-git-send-email-jun.nie@linaro.org> <1479450555-19047-2-git-send-email-jun.nie@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49642 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751713AbcKUBWI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 20:22:08 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGY012RBX4TUL20@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Nov 2016 10:22:05 +0900 (KST)
-In-reply-to: <CAPDyKFrjmQCN=YckNTrQtLNk3pCsCt5PFxRdqpk5rEqCHWh1bw@mail.gmail.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35464 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751490AbcKUB0K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 20:26:10 -0500
+Received: by mail-qt0-f178.google.com with SMTP id c47so195337502qtc.2
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Nov 2016 17:26:10 -0800 (PST)
+In-Reply-To: <1479450555-19047-2-git-send-email-jun.nie@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, xie.baoyou@zte.com.cn, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc <linux-mmc@vger.kernel.org>
+To: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Rob Herring <robh+dt@kernel.org>, mark.rutland@arm.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jason Liu <jason.liu@linaro.org>, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc <linux-mmc@vger.kernel.org>, Jun Nie <jun.nie@linaro.org>, devicetree@vger.kernel.org
 
-Hi Ulf,
-
-On 11/18/2016 11:31 PM, Ulf Hansson wrote:
-> On 18 November 2016 at 07:52, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Jun,
->>
->> On 11/18/2016 03:29 PM, Jun Nie wrote:
->>> Add intial support to DW MMC host on ZTE SoC. It include platform
->>> specific wrapper driver and workarounds for fifo quirk.
->>>
->>> Patches are prepared based on latest dw mmc runtime change:
->>>    https://github.com/jh80chung/dw-mmc.git for-ulf
->>
->> Applied on my dwmmc repository.
->> I have applied your patches, after modifying some conflict and subject prefix as "dw_mmc*".
->> And added Shawn's reviewed-by tags. Thanks!
-> 
-> [...]
-> 
->>> Jun Nie (5):
->>>   mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-> 
-> Don't forget to make sure DT bindings get acked. I don't think I have
-> seen that happening for this change, unless I missed it of course.
-
-Thanks for noticing this. I will wait for DT guy's acked.
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+2016-11-18 14:29 GMT+08:00 Jun Nie <jun.nie@linaro.org>:
+> Document the device-tree binding of ZTE MMC host on
+> ZX296718 SoC.
+>
+> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 35 ++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> new file mode 100644
+> index 0000000..c175c4b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+> @@ -0,0 +1,35 @@
+> +* ZTE specific extensions to the Synopsys Designware Mobile Storage
+> +  Host Controller
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the ZTE specific
+> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be
+> +       - "zte,zx296718-dw-mshc": for ZX SoCs
+> +
+> +Example:
+> +
+> +       mmc1: mmc@1110000 {
+> +               compatible = "zte,zx296718-dw-mshc";
+> +               #address-cells = <1>;
+> +               #size-cells = <0>;
+> +               reg = <0x01110000 0x1000>;
+> +               interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+> +               fifo-depth = <32>;
+> +               data-addr = <0x200>;
+> +               fifo-watermark-aligned;
+> +               bus-width = <4>;
+> +               clock-frequency = <50000000>;
+> +               clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
+> +               clock-names = "biu", "ciu";
+> +               num-slots = <1>;
+> +               max-frequency = <50000000>;
+> +               cap-sdio-irq;
+> +               cap-sd-highspeed;
+> +               status = "disabled";
+> +       };
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+> 1.9.1
+>
 
+Add DT maintainer to review and act. Thank you!
+
+Jun
