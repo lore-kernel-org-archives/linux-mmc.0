@@ -1,49 +1,81 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] dw-mmc controller fixes
-Date: Mon, 21 Nov 2016 13:28:22 +0900
-Message-ID: <d43a35c0-0961-ccc6-70ad-0b9b0f0ce2eb@samsung.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v8 04/16] ARM: dts: Add xo to sdhc clock node on qcom
+ platforms
+Date: Mon, 21 Nov 2016 12:00:32 +0530
+Message-ID: <7fe256e5-aaad-e087-0c7a-34a39060379b@codeaurora.org>
+References: <1479312052-22396-5-git-send-email-riteshh@codeaurora.org>
+ <1479343419-29326-1-git-send-email-riteshh@codeaurora.org>
+ <20161118035619.GA6400@hector>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:60343 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753032AbcKUE2a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 23:28:30 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OGZ011I25R3VH40@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Nov 2016 13:28:22 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20161118035619.GA6400@hector>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Andy Gross <andy.gross@linaro.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-
-Dear Ulf,
-
-Could you pull this patch into your "fixes" branch?
-Before applied this patch, there is the potential lock issue.
-
-Best Regards,
-Jaehoon Chung
 
 
-The following changes since commit b0921d5c9ed6ffa8a4d6afc5ee5f136b87445f14:
 
-  mmc: sdhci-of-esdhc: fixup PRESENT_STATE read (2016-11-18 14:41:47 +0100)
+On 11/18/2016 9:26 AM, Andy Gross wrote:
+> On Thu, Nov 17, 2016 at 06:13:39AM +0530, Ritesh Harjani wrote:
+>> Add xo entry to sdhc clock node on all qcom platforms.
+>>
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>>  arch/arm/boot/dts/qcom-apq8084.dtsi   | 16 ++++++++++------
+>>  arch/arm/boot/dts/qcom-msm8974.dtsi   | 16 ++++++++++------
+>>  arch/arm64/boot/dts/qcom/msm8916.dtsi | 10 ++++++----
+>>  arch/arm64/boot/dts/qcom/msm8996.dtsi |  9 +++++----
+>>  4 files changed, 31 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+>> index 39eb7a4..f756cbb 100644
+>> --- a/arch/arm/boot/dts/qcom-apq8084.dtsi
+>> +++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+>> @@ -182,13 +182,13 @@
+>>  	};
+>>
+>>  	clocks {
+>> -		xo_board {
+>> +		xo_board: xo_board {
+>>  			compatible = "fixed-clock";
+>>  			#clock-cells = <0>;
+>>  			clock-frequency = <19200000>;
+>>  		};
+>>
+>> -		sleep_clk {
+>> +		sleep_clk: sleep_clk {
+>>  			compatible = "fixed-clock";
+>>  			#clock-cells = <0>;
+>>  			clock-frequency = <32768>;
+>> @@ -416,8 +416,10 @@
+>>  			reg-names = "hc_mem", "core_mem";
+>>  			interrupts = <0 123 0>, <0 138 0>;
+>>  			interrupt-names = "hc_irq", "pwr_irq";
+>> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+>> -			clock-names = "core", "iface";
+>> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+>> +				 <&gcc GCC_SDCC1_AHB_CLK>,
+>> +				 <&xo_board 0>;
+>
+> With clock-cells = <0>, this should be <&xo_board>
+Ok, done.
+>
+> Somehow this passes the dtc compiler.  But it is still incorrect.  Please fix
+> all instances of this to use the correct number of cells in the xo_board
+> references.
+Sure.
+>
+>
+> Andy
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-are available in the git repository at:
-
-  https://github.com/jh80chung/dw-mmc.git fixes
-
-for you to fetch changes up to 93fad54b87ace925631d8a09de6e0ac7d26af96d:
-
-  mmc: dw_mmc: fix the error handling for dma operation (2016-11-21 13:21:38 +0900)
-
-----------------------------------------------------------------
-Jaehoon Chung (1):
-      mmc: dw_mmc: fix the error handling for dma operation
-
- drivers/mmc/host/dw_mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
