@@ -1,84 +1,59 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH] mmc: block: delete packed command support
-Date: Mon, 21 Nov 2016 14:23:32 +0000
-Message-ID: <0420FC2A-518F-49D5-90A0-556A0BA5395A@sandisk.com>
+Date: Mon, 21 Nov 2016 16:17:53 +0100
+Message-ID: <CAPDyKFrPhTi_9oGPfLFkO34GWZR561KHD5GebXUe2mq-rt1uRQ@mail.gmail.com>
 References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
- <2697103.lML87IM8sj@wuerfel>
+ <2697103.lML87IM8sj@wuerfel> <d0722644-2922-b580-9bfe-01dd3c38ec67@intel.com>
+ <CAPDyKFrW+Jge-Kd=PhRJvHG1Y==MMYinXxgHM1ySSG8gOx3tyA@mail.gmail.com> <135cb4af-fbbe-d6a7-182b-73543f1c551a@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0043.outbound.protection.outlook.com ([104.47.42.43]:12062
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753142AbcKUOXf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Nov 2016 09:23:35 -0500
-In-Reply-To: <2697103.lML87IM8sj@wuerfel>
-Content-Language: en-US
-Content-ID: <91D7C658A1ED9E418629422234BFEA65@namprd02.prod.outlook.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:34794 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753250AbcKUPRz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 10:17:55 -0500
+Received: by mail-wm0-f50.google.com with SMTP id u144so22245006wmu.1
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2016 07:17:55 -0800 (PST)
+In-Reply-To: <135cb4af-fbbe-d6a7-182b-73543f1c551a@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-SGksDQoNCg0KT24gMTEvMjEvMTYsIDE6MTEgUE0sICJBcm5kIEJlcmdtYW5uIiA8YXJuZEBhcm5k
-Yi5kZT4gd3JvdGU6DQoNCj5PbiBNb25kYXksIE5vdmVtYmVyIDIxLCAyMDE2IDExOjA4OjU3IEFN
-IENFVCBMaW51cyBXYWxsZWlqIHdyb3RlOg0KPj4gSSd2ZSBoYWQgaXQgd2l0aCB0aGlzIGNvZGUg
-bm93Lg0KPj4gDQo+PiBUaGUgcGFja2VkIGNvbW1hbmQgc3VwcG9ydCBpcyBhIGNvbXBsZXggaHVy
-ZGxlIGluIHRoZSBNTUMvU0QgYmxvY2sNCj4+IGxheWVyLCBhcm91bmQgNTAwKyBsaW5lcyBvZiBj
-b2RlIHdoaWNoIHdhcyBpbnRyb2R1Y2VkIGluIDIwMTMgaW4NCj4+IGNvbW1pdHMNCj4+IA0KPj4g
-Y2UzOWY5ZDE3YzE0ICgibW1jOiBzdXBwb3J0IHBhY2tlZCB3cml0ZSBjb21tYW5kIGZvciBlTU1D
-NC41IGRldmljZXMiKQ0KPj4gYWJkOWFjMTQ0OTQ3ICgibW1jOiBhZGQgcGFja2VkIGNvbW1hbmQg
-ZmVhdHVyZSBvZiBlTU1DNC41IikNCj4+IA0KPj4gLi4uYW5kIHNpbmNlIHRoZW4gaXQgaGFzIGJl
-ZW4gcm90dGluZy4gVGhlIG9yaWdpbmFsIGF1dGhvciBvZiB0aGUNCj4+IGNvZGUgaGFzIGRpc2Fw
-cGVhcmVkIGZyb20gdGhlIGNvbW11bml0eSBhbmQgdGhlIG1haWwgYWRkcmVzcyBpcw0KPj4gYm91
-bmNpbmcuDQo+PiANCj4+IEZvciB0aGUgY29kZSB0byBiZSBleGVyY2lzZWQgdGhlIGhvc3QgbXVz
-dCBmbGFnIHRoYXQgaXQgc3VwcG9ydHMNCj4+IHBhY2tlZCBjb21tYW5kcywgc28gaW4gbW1jX2Js
-a19wcmVwX3BhY2tlZF9saXN0KCkgd2hpY2ggaXMgY2FsbGVkIGZvcg0KPj4gZXZlcnkgc2luZ2xl
-IHJlcXVlc3QsIHRoZSBmb2xsb3dpbmcgY29uc3RydWN0aW9uIGFwcGVhcnM6DQo+PiANCj4+IHU4
-IG1heF9wYWNrZWRfcncgPSAwOw0KPj4gDQo+PiBpZiAoKHJxX2RhdGFfZGlyKGN1cikgPT0gV1JJ
-VEUpICYmDQo+PiAgICAgbW1jX2hvc3RfcGFja2VkX3dyKGNhcmQtPmhvc3QpKQ0KPj4gICAgICAg
-ICBtYXhfcGFja2VkX3J3ID0gY2FyZC0+ZXh0X2NzZC5tYXhfcGFja2VkX3dyaXRlczsNCj4+IA0K
-Pj4gaWYgKG1heF9wYWNrZWRfcncgPT0gMCkNCj4+ICAgICBnb3RvIG5vX3BhY2tlZDsNCj4+IA0K
-Pj4gVGhpcyBoYXMgdGhlIGZvbGxvd2luZyBsb2dpY2FsIGRlZHVjdGlvbnM6DQo+PiANCj4+IC0g
-T25seSBXUklURSBjb21tYW5kcyBjYW4gcmVhbGx5IGJlIHBhY2tlZCwgc28gdGhlIHNvbHV0aW9u
-IGlzDQo+PiAgIG9ubHkgaGFsZi1kb25lOiB3ZSBzdXBwb3J0IHBhY2tlZCBXUklURSBidXQgbm90
-IHBhY2tlZCBSRUFELg0KPj4gICBUaGUgcGFja2VkIGNvbW1hbmQgc3VwcG9ydCBoYXMgbm90IGJl
-ZW4gZmluYWxpemVkIGJ5IHN1cHBvcnRpbmcNCj4+ICAgcmVhZHMgaW4gdGhyZWUgeWVhcnMhDQo+
-DQo+UGFja2VkIHJlYWRzIGRvbid0IG1ha2UgYSBsb3Qgb2Ygc2Vuc2UsIHRoZXJlIGlzIHZlcnkg
-bGl0dGxlDQo+Zm9yIGFuIE1NQyB0byBvcHRpbWl6ZSBpbiByZWFkcyB0aGF0IGl0IGNhbid0IGFs
-cmVhZHkgZG8gd2l0aG91dA0KPnRoZSBwYWNraW5nLiBGb3Igd3JpdGVzLCBwYWNraW5nIG1ha2Vz
-IGNvdWxkIGJlIGFuIGltcG9ydGFudA0KPnBlcmZvcm1hbmNlIG9wdGltaXphdGlvbiwgaWYgdGhl
-IGVNTUMgc3VwcG9ydHMgaXQuDQo+DQo+SSd2ZSBhZGRlZCBMdWNhIFBvcnppbyAgYW5kIEFsZXgg
-TGVtYmVyZyB0byBDYy4gSSB0aGluayB0aGV5DQo+YXJlIHN1YnNjcmliZWQgdG8gdGhlIGxpc3Qg
-YWxyZWFkeSwgYnV0IGl0IHdvdWxkIGJlIGdvb2QgdG8NCj5nZXQgc29tZSBlc3RpbWF0ZSBmcm9t
-IHRoZW0gdG9vIGFib3V0IGhvdyBjb21tb24gdGhlIHBhY2tlZA0KPndyaXRlIHN1cHBvcnQgaXMg
-b24gZXhpc3RpbmcgaGFyZHdhcmUgZnJvbSB0aGVpciByZXNwZWN0aXZlDQo+ZW1wbG95ZXJzIGJl
-Zm9yZSB3ZSBraWxsIGl0IG9mZi4NCg0KQ29ycmVjdCwgaW4gZ2VuZXJhbCB0aGVyZSBpcyBubyB2
-YWx1ZSBpbiB1c2luZyBwYWNrZWQgZm9yIFJlYWQuDQpCdXQgSSBjYW7igJl0IHNheSB0aGlzIGZv
-ciBhbGwgZXhpc3RpbmcgZmxhc2ggbWFuYWdlbWVudCBzb2x1dGlvbi4NClRoZSBlTU1DIHNwZWMg
-YWxsb3dzIHRvIHVzZSBpdCBmb3IgUmVhZCBhcyB3ZWxsLg0KDQo+DQo+SWYgbm9uZSBvZiBTYW1z
-dW5nL01pY3Jvbi9TYW5kaXNrIGFyZSBjdXJyZW50bHkgc2hpcHBpbmcNCj5kZXZpY2VzIHRoYXQg
-c3VwcG9ydCBlTU1DLTQuNSBwYWNrZWQgY29tbWFuZHMgYnV0IGRvbid0DQo+c3VwcG9ydCB0aGUg
-ZU1NQy01LjEgY29tbWFuZCBxdWV1aW5nICh3aGljaCBJSVJDIGlzIGEgbW9yZQ0KPmdlbmVyYWwg
-d2F5IHRvIGFjaGlldmUgdGhlIHNhbWUpLCB3ZSBwcm9iYWJseSBkb24ndCBuZWVkIHRvDQo+d29y
-cnkgYWJvdXQgaXQgdG9vIG11Y2guIA0KDQpQbGVhc2Ugbm90ZSB0aGF0IGV2ZW4gYnkgaGF2aW5n
-IGVNTUMtNS4xIGRldmljZSwNCm5vdCBhbGwgY2hpcHNldCB2ZW5kb3JzIGFyZSBoYXZpbmcgSFcv
-U1cgQ01EUSBzdXBwb3J0Lg0KU28gdGhleSBtaWdodCBiZSB1c2luZyBwYWNrZWQgY29tbWFuZHMg
-aW5zdGVhZC4NCg0KPg0KPj4gLSBtbWNfaG9zdF9wYWNrZWRfd3IoKSBpcyBqdXN0IGEgc3RhdGlj
-IGlubGluZSB0aGF0IGNoZWNrcw0KPj4gICBob3N0LT5jYXBzMiAmIE1NQ19DQVAyX1BBQ0tFRF9X
-Ui4gVGhlIHByb2JsZW0gd2l0aCB0aGlzIGlzDQo+PiAgIHRoYXQgTk8gdXBzdHJlYW0gaG9zdCBz
-ZXRzIHRoaXMgY2FwYWJpbGl0eSBmbGFnISBObyBkcml2ZXINCj4+ICAgaW4gdGhlIGtlcm5lbCBp
-cyB1c2luZyBpdCwgYW5kIHdlIGNhbid0IHRlc3QgaXQuIFBhY2tlZA0KPj4gICBjb21tYW5kIG1h
-eSBiZSBzdXBwb3J0ZWQgaW4gb3V0LW9mLXRyZWUgY29kZSwgYnV0IEkgZG91YnQNCj4+ICAgaXQu
-IEkgZG91YnQgdGhhdCB0aGUgY29kZSBpcyBldmVuIHdvcmtpbmcgYW55bW9yZSBkdWUgdG8NCj4+
-ICAgb3RoZXIgcmVmYWN0b3JpbmdzIGluIHRoZSBNTUMgYmxvY2sgbGF5ZXIsIHdobyB3b3VsZA0K
-Pj4gICBub3RpY2UgaWYgcGF0Y2hlcyBhZmZlY3RpbmcgaXQgYnJva2UgcGFja2VkIGNvbW1hbmRz
-Pw0KPj4gICBObyBvbmUuDQo+DQo+VGhpcyBpcyBhIHZlcnkgZ29vZCBpbmRpY2F0aW9uIHRoYXQg
-aXQncyBub3QgcmVhbGx5IHVzZWQuDQo+SXQgd291bGQgYmUgdXNlZnVsIHRvIGFsc28gY2hlY2sg
-b3V0IHRoZSBBbmRyb2lkIEFPU1ANCj5rZXJuZWwgdHJlZSB0byBzZWUgaWYgaXQncyBpbiB0aGVy
-ZSwgaWYgYW55dGhpbmcgaW1wb3J0YW50DQo+c3VwcG9ydHMgcGFja2VkIGNvbW1hbmRzLCBpdCdz
-IHByb2JhYmx5IGluIHRoZXJlLg0KDQpBcyBmYXIgYXMgSSBjYW4gc2F5IGZyb20gcmV2aWV3aW5n
-IHRoZSBtb2JpbGUgKEFuZHJvaWQpDQpwbGF0Zm9ybXMga2VybmVsIHNvdXJjZSAoZnJvbSBkaWZm
-ZXJlbnQgdmVuZG9ycyksIA0KbWFueSBvZiB0aGVtIGFyZSBlbmFibGluZyBQYWNrZWQgQ29tbWFu
-ZHMuDQoNCj4NCj4JQXJuZA0KDQo=
+[...]
+
+>>>
+>>> SDHCIv4 has a feature (ADMA3) which is slightly similar to packed
+>>> commands but it does not require card support.
+>>>
+>>> Why is it a problem for blk-mq to allow some extra requests to
+>>> pick from for packing?
+>>>
+>>
+>> In blk-mq, requests don't get picked from the queue, but instead those
+>> gets "pushed" to the block device driver.
+>>
+>> First, to support packing, it seems like we would need to specify a
+>> queue-depth > 1, more or less lie to blk-mq layer about the device's
+>> capability. Okay, we can do that. But..
+>>
+>> I also believe, the implementation would become really complex, as you
+>> would need to "hold" the first write request, while waiting for a
+>> second to arrive. Then for how long shall you hold it? And then what
+>> if you are unlucky so the next is read request, thus you can't pack
+>> them. The solution will be suboptimal, won't it?
+>
+> It doesn't hold and wait now.  So why would it in the blk-mq case?
+
+Because earlier the mmc block device driver *fetches* requests from
+the queue and when finding more than one request, we could try to pack
+them. If there are only one request, we just move on with it.
+
+With blk-mq, we don't *fetch* request from the queue, but instead
+those would get pushed to the mmc block device driver via the
+implemented block-mq ops.
+
+Please note, I am not an blk-mq expert, but this is my understanding.
+
+Kind regards
+Uffe
