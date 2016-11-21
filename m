@@ -1,69 +1,55 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: Re: [PATCH v6 3/5] Documentation: synopsys-dw-mshc: add binding for
- fifo quirks
-Date: Mon, 21 Nov 2016 09:28:06 +0800
-Message-ID: <CABymUCOwgZF76tkpN-fB9BS4WX6kUH_7DmUuwjFPmrirDXmmxw@mail.gmail.com>
-References: <1479450555-19047-1-git-send-email-jun.nie@linaro.org> <1479450555-19047-4-git-send-email-jun.nie@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RESEND PATCHv2] mmc: dw_mmc: fix the error handling for dma operation
+Date: Mon, 21 Nov 2016 10:51:48 +0900
+Message-ID: <20161121015148.5699-1-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:36205 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751713AbcKUB2H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 20:28:07 -0500
-Received: by mail-qk0-f172.google.com with SMTP id n21so332554540qka.3
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Nov 2016 17:28:07 -0800 (PST)
-In-Reply-To: <1479450555-19047-4-git-send-email-jun.nie@linaro.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:35008 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751713AbcKUBvw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2016 20:51:52 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OGY01ZA1YI6JO80@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Nov 2016 10:51:49 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>, "xie.baoyou" <xie.baoyou@zte.com.cn>, Rob Herring <robh+dt@kernel.org>, mark.rutland@arm.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jason Liu <jason.liu@linaro.org>, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc <linux-mmc@vger.kernel.org>, Jun Nie <jun.nie@linaro.org>, devicetree@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, m.szyprowski@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-2016-11-18 14:29 GMT+08:00 Jun Nie <jun.nie@linaro.org>:
-> Add fifo-addr property and fifo-watermark-quirk property to
-> synopsys-dw-mshc bindings. It is intended to provide more
-> dt interface to support SoCs specific configuration.
->
-> Signed-off-by: Jun Nie <jun.nie@linaro.org>
-> ---
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> index 4e00e85..8bf2e41 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> @@ -76,6 +76,17 @@ Optional properties:
->
->  * broken-cd: as documented in mmc core bindings.
->
-> +* data-addr: Override fifo address with value provided by DT. The default FIFO reg
-> +  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
-> +  driver. If the controller does not follow this rule, please use this property
-> +  to set fifo address in device tree.
-> +
-> +* fifo-watermark-aligned: Data done irq is expected if data length is less than
-> +  watermark in PIO mode. But fifo watermark is requested to be aligned with data
-> +  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
-> +  watermark quirk to mark this requirement and force fifo watermark setting
-> +  accordingly.
-> +
->  * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
->    specified we'll defer probe until we can find this regulator.
->
-> @@ -103,6 +114,8 @@ board specific portions as listed below.
->                 interrupts = <0 75 0>;
->                 #address-cells = <1>;
->                 #size-cells = <0>;
-> +               data-addr = <0x200>;
-> +               fifo-watermark-aligned;
->         };
->
->  [board specific internal DMA resources]
-> --
-> 1.9.1
->
+When dma->start is failed,then it has to fall back to PIO mode
+for current transfer.
 
-Add DT maintainer to review and act. Thank you!
+But Host controller was already set to bits relevant to DMA operation.
+If needs to use the PIO mode, Host controller has to stop the DMA
+operation. (It's more stable than now.)
 
-Jun
+When it occurred error, it's not running any request.
+
+Fixes: 3fc7eaef44db ("mmc: dw_mmc: Add external dma interface support")
+Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+Changelog on V2
+- Change the Fixes Commit Id
+- Added the Marek's Reported-by tags
+
+ drivers/mmc/host/dw_mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 50a674b..df478ae 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1058,6 +1058,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ 
+ 	if (host->dma_ops->start(host, sg_len)) {
++		host->dma_ops->stop(host);
+ 		/* We can't do DMA, try PIO for this one */
+ 		dev_dbg(host->dev,
+ 			"%s: fall back to PIO mode for current transfer\n",
+-- 
+2.10.1
+
