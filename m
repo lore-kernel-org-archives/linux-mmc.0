@@ -1,58 +1,56 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] mmc: sdhci-pci: Allow deferred probe for sd card detect gpio
-Date: Tue, 22 Nov 2016 11:03:38 +0200
-Message-ID: <1479805418-19603-3-git-send-email-adrian.hunter@intel.com>
-References: <1479805418-19603-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:52183 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932305AbcKVJJK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Nov 2016 04:09:10 -0500
-In-Reply-To: <1479805418-19603-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Russell King - ARM Linux <linux@armlinux.org.uk>
+Subject: Re: [PATCH] RFC: mmc: block: replace semaphore with freezing
+Date: Tue, 22 Nov 2016 09:10:23 +0000
+Message-ID: <20161122091023.GS1041@n2100.armlinux.org.uk>
+References: <1479293464-4576-1-git-send-email-linus.walleij@linaro.org>
+ <CAJZ5v0gCDQXebsQoCYJY5FyE6oJUw4s6sQrNbKLuxpLvOe2RoA@mail.gmail.com>
+ <CACRpkdY+jdU4ETuMJsY-efSkjwE0fWWRZoyCyrYAs_GxUo-DhQ@mail.gmail.com>
+ <17679227.zg8zl3jhbr@wuerfel>
+ <CACRpkdagS-7kaYCd2Sq0vLR8+19Mmckx=CuCqPv+HheRk8Cm7w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CACRpkdagS-7kaYCd2Sq0vLR8+19Mmckx=CuCqPv+HheRk8Cm7w@mail.gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Binoy Jayan <binoy.jayan@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Jiri Kosina <jikos@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "David E. Box" <david.e.box@linux.intel.com>
 
-From: "David E. Box" <david.e.box@linux.intel.com>
+On Tue, Nov 22, 2016 at 09:54:18AM +0100, Linus Walleij wrote:
+> On Wed, Nov 16, 2016 at 5:32 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Wednesday, November 16, 2016 4:20:47 PM CET Linus Walleij wrote:
+> >> On Wed, Nov 16, 2016 at 1:46 PM, Rafael J. Wysocki <rafael@kernel.org> wrote:
+> >>
+> >> > Well, we had a session at the KS regarding usage of the freezer on
+> >> > kernel threads and the conclusion was to get rid of that (as opposed
+> >> > to freezing user space, which is necessary IMO).  So this change would
+> >> > go in the opposite direction.
+> >>
+> >> Aha so I should not make this thread look like everyone else, instead
+> >> everyone else should look like this thread, haha
+> >>
+> >> Ah well, I'll just drop it.
+> >
+> > It would still be good to remove the semaphore and do something else,
+> > as we also want to remove all semaphores. ;-)
+> >
+> > We could check "mq->flags & MMC_QUEUE_SUSPENDED" in the kthread to see
+> > if the queue is currently suspended, and otherwise go to sleep there,
+> > and then call wake_up() in the resume function.
+> 
+> Hm... so simply:
+> 
+> if (mq->flags & MMC_QUEUE_SUSPENDED)
+>   schedule();
+> 
+> ?
 
-With commit f35bbf61ab77 ("gpio / ACPI: Return -EPROBE_DEFER if the
-gpiochip was not found"), a gpio descriptor request can now be deferred if
-the providing gpio host controller driver hasn't been loaded yet. Allow use
-in mmc slot probe in order to prevent card detect gpio setup from failing
-in this case.
+No, the schedule() is required when there are no more requests to
+process, so the thread doesn't spin waiting for the next request to
+appear.
 
-Signed-off-by: David E. Box <david.e.box@linux.intel.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 15 ++++++++++-----
- 1 file changed, 10 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 501098e65b0e..2d20fb60ce83 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1760,11 +1760,16 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	host->mmc->slotno = slotno;
- 	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
- 
--	if (slot->cd_idx >= 0 &&
--	    mmc_gpiod_request_cd(host->mmc, slot->cd_con_id, slot->cd_idx,
--				 slot->cd_override_level, 0, NULL)) {
--		dev_warn(&pdev->dev, "failed to setup card detect gpio\n");
--		slot->cd_idx = -1;
-+	if (slot->cd_idx >= 0) {
-+		ret = mmc_gpiod_request_cd(host->mmc, slot->cd_con_id, slot->cd_idx,
-+					   slot->cd_override_level, 0, NULL);
-+		if (ret == -EPROBE_DEFER)
-+			goto remove;
-+
-+		if (ret) {
-+			dev_warn(&pdev->dev, "failed to setup card detect gpio\n");
-+			slot->cd_idx = -1;
-+		}
- 	}
- 
- 	ret = sdhci_add_host(host);
 -- 
-1.9.1
-
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
