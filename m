@@ -1,74 +1,61 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] RFC: mmc: block: replace semaphore with freezing
-Date: Tue, 22 Nov 2016 10:16:09 +0100
-Message-ID: <2495798.NCupJYMGV1@wuerfel>
-References: <1479293464-4576-1-git-send-email-linus.walleij@linaro.org> <17679227.zg8zl3jhbr@wuerfel> <CACRpkdagS-7kaYCd2Sq0vLR8+19Mmckx=CuCqPv+HheRk8Cm7w@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] DWMMC controller for next
+Date: Tue, 22 Nov 2016 18:59:02 +0900
+Message-ID: <63a0b568-cd9e-d038-b7eb-08b7868f96f2@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdagS-7kaYCd2Sq0vLR8+19Mmckx=CuCqPv+HheRk8Cm7w@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Binoy Jayan <binoy.jayan@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linux PM <linux-pm@vger.kernel.org>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Russell King <linux@armlinux.org.uk>, Jiri Kosina <jikos@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:47848 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755482AbcKVJ7L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 04:59:11 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OH1031RWFQLFW50@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Nov 2016 18:59:09 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Tuesday, November 22, 2016 9:54:18 AM CET Linus Walleij wrote:
-> On Wed, Nov 16, 2016 at 5:32 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Wednesday, November 16, 2016 4:20:47 PM CET Linus Walleij wrote:
-> >> On Wed, Nov 16, 2016 at 1:46 PM, Rafael J. Wysocki <rafael@kernel.org> wrote:
-> >>
-> >> > Well, we had a session at the KS regarding usage of the freezer on
-> >> > kernel threads and the conclusion was to get rid of that (as opposed
-> >> > to freezing user space, which is necessary IMO).  So this change would
-> >> > go in the opposite direction.
-> >>
-> >> Aha so I should not make this thread look like everyone else, instead
-> >> everyone else should look like this thread, haha
-> >>
-> >> Ah well, I'll just drop it.
-> >
-> > It would still be good to remove the semaphore and do something else,
-> > as we also want to remove all semaphores. 
-> >
-> > We could check "mq->flags & MMC_QUEUE_SUSPENDED" in the kthread to see
-> > if the queue is currently suspended, and otherwise go to sleep there,
-> > and then call wake_up() in the resume function.
-> 
-> Hm... so simply:
-> 
-> if (mq->flags & MMC_QUEUE_SUSPENDED)
->   schedule();
-> 
-> ?
+Dear Ulf,
 
-Something like that.
+Could you pull these patches on your next branch?
+If there is a problem, let me know, plz.
 
-> This whole kthread business is pretty messy. I would prefer if I could
-> just convert it to a workqueue. Just that it's not very simple the way
-> it speculates around in the request queue from the block layer.
+The following changes since commit e2081b37d910c5e6c6925d9b4d0a7a6283f84ec5:
 
-I don't see how that would work, but might be worth trying.
-After doing that, a simple flush_workqueue() might be enough
-to take care of the suspend operation.
+  Merge branch 'fixes' into next (2016-11-21 11:09:18 +0100)
 
-> > While looking at that code, I just noticed that access to
-> > mq->flags is racy and should be fixed as well.
-> 
-> I guess we should take the queue lock &q->lock around accessing
-> the flags.
+are available in the git repository at:
 
-Yes, either that, or use set_bit/test_bit/test_and_set_bit for
-atomic access. For instance, this one
+  https://github.com/jh80chung/dw-mmc.git for-ulf
 
-        if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
-                mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+for you to fetch changes up to e25fd245b557482a8e0f7ab87841085f30706f3a:
 
-Could be
+  Documentation: synopsys-dw-mshc: remove the unused properties (2016-11-22 10:34:05 +0900)
 
-	if (test_and_clear(MMC_QUEUE_NEW_REQUEST_BIT, &mq->flags))
-			...
+----------------------------------------------------------------
+Colin Ian King (1):
+      mmc: dw_mmc: fix spelling mistake in dev_dbg message
 
+Jaehoon Chung (9):
+      mmc: dw_mmc: display the real register value on debugfs
+      mmc: dw_mmc: fix the debug message for checking card's present
+      mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+      mmc: dw_mmc: use the hold register when send stop command
+      mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+      mmc: dw_mmc: use the cookie's enum values for post/pre_req()
+      mmc: dw_mmc: remove the unnecessary mmc_data structure
+      mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
+      Documentation: synopsys-dw-mshc: remove the unused properties
 
-	Arnd
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  8 ++------
+ drivers/mmc/host/dw_mmc.c                                  | 92 ++++++++++++++++++++++++++++++++++++++++++++------------------------------------------------
+ include/linux/mmc/dw_mmc.h                                 |  6 ++++++
+ 3 files changed, 52 insertions(+), 54 deletions(-)
 
+Best Regards,
+Jaehoon Chung
