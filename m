@@ -1,67 +1,36 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] DWMMC controller for next
-Date: Tue, 22 Nov 2016 17:13:50 +0100
-Message-ID: <CAPDyKFo+W12sV-U8r44ySerWHi2tAwEEnGNMd97iUN8NLV4duA@mail.gmail.com>
-References: <63a0b568-cd9e-d038-b7eb-08b7868f96f2@samsung.com>
+From: Zach Brown <zach.brown@ni.com>
+Subject: Re: [PATCH 0/2] mmc: sdhci-pci: Use ACPI to set max frequency of
+ sdio host
+Date: Tue, 22 Nov 2016 10:37:40 -0600
+Message-ID: <20161122163739.GA10111@zach-desktop>
+References: <1479769446-8490-1-git-send-email-zach.brown@ni.com>
+ <CAPDyKFrbfiTuU6zvQ8RR9pcO+x+9AZUejHrw396+Xsn2gCMsGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:38264 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755316AbcKVQNw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 11:13:52 -0500
-Received: by mail-wm0-f53.google.com with SMTP id f82so33239873wmf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2016 08:13:52 -0800 (PST)
-In-Reply-To: <63a0b568-cd9e-d038-b7eb-08b7868f96f2@samsung.com>
+Received: from mail-bn3nam01on0126.outbound.protection.outlook.com ([104.47.33.126]:27520
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751288AbcKVRKf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 22 Nov 2016 12:10:35 -0500
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrbfiTuU6zvQ8RR9pcO+x+9AZUejHrw396+Xsn2gCMsGA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 22 November 2016 at 10:59, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear Ulf,
+On Tue, Nov 22, 2016 at 09:27:29AM +0100, Ulf Hansson wrote:
 >
-> Could you pull these patches on your next branch?
-> If there is a problem, let me know, plz.
+> Please try to not forget to bump the version number and to provide a
+> history of the what changes between revisions. It makes life easier
+> when reviewing and when I am about to apply patches.
 >
-> The following changes since commit e2081b37d910c5e6c6925d9b4d0a7a6283f84ec5:
->
->   Merge branch 'fixes' into next (2016-11-21 11:09:18 +0100)
->
-> are available in the git repository at:
->
->   https://github.com/jh80chung/dw-mmc.git for-ulf
->
-> for you to fetch changes up to e25fd245b557482a8e0f7ab87841085f30706f3a:
->
->   Documentation: synopsys-dw-mshc: remove the unused properties (2016-11-22 10:34:05 +0900)
->
-> ----------------------------------------------------------------
-> Colin Ian King (1):
->       mmc: dw_mmc: fix spelling mistake in dev_dbg message
->
-> Jaehoon Chung (9):
->       mmc: dw_mmc: display the real register value on debugfs
->       mmc: dw_mmc: fix the debug message for checking card's present
->       mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
->       mmc: dw_mmc: use the hold register when send stop command
->       mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
->       mmc: dw_mmc: use the cookie's enum values for post/pre_req()
->       mmc: dw_mmc: remove the unnecessary mmc_data structure
->       mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
->       Documentation: synopsys-dw-mshc: remove the unused properties
->
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  8 ++------
->  drivers/mmc/host/dw_mmc.c                                  | 92 ++++++++++++++++++++++++++++++++++++++++++++------------------------------------------------
->  include/linux/mmc/dw_mmc.h                                 |  6 ++++++
->  3 files changed, 52 insertions(+), 54 deletions(-)
->
-> Best Regards,
-> Jaehoon Chung
 
-Dear Jaehoon, thanks for the pull request. I have add queued it all up
-for my next branch!
+Sorry, I'll make sure to include a history.
+When switching from RFC to PATCH should the version number of the PATCH
+be 1 or the lastest RFC version plus 1? Or does it not matter either way
+as long as the history is present?
 
-
-Kind regards
-Uffe
+--
+Zach
