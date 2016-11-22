@@ -1,123 +1,57 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: tegra: Support module reset
-Date: Tue, 22 Nov 2016 13:30:13 +0200
-Message-ID: <49527691-17f6-4547-a1af-a8f6234b6243@intel.com>
-References: <20161117171855.20843-1-thierry.reding@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RFCv2 01/10] mmc: core: Add support to read command queue parameters
+Date: Tue, 22 Nov 2016 13:30:53 +0100
+Message-ID: <CACRpkdZkYVJmZ_M3oYhY3i4JrqEA_Xxc3ZALKaMdQq2ybxfvZA@mail.gmail.com>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
+ <1467033757-32498-2-git-send-email-riteshh@codeaurora.org>
+ <CACRpkdYDfdCoZUOryjVX4byu2BFx9KZx7YKoFG9wESDpaKtirg@mail.gmail.com>
+ <e18147ff-ac6b-a48f-4487-18ebd51bbc99@intel.com> <CACRpkdaHgN7XGdXjeE1dwQ2gn0z=VXfjVdVGYcT0gRfASNUKbQ@mail.gmail.com>
+ <0cf555d9-4e79-73fb-954d-8f022c90d4dc@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161117171855.20843-1-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <0cf555d9-4e79-73fb-954d-8f022c90d4dc@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Asutosh Das <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, kdorfman@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Shawn Lin <shawn.lin@rock-chips.com>, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 17/11/16 19:18, Thierry Reding wrote:
-> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> 
-> The device tree binding for the SDHCI controller found on Tegra SoCs
-> specifies that a reset control can be provided by the device tree. No
-> code was ever added to support the module reset, which can cause the
-> driver to try and access registers from a module that's in reset. On
-> most Tegra SoC generations doing so would cause a hang.
-> 
-> Note that it's unlikely to see this happen because on most platforms
-> these resets will have been deasserted by the bootloader. However the
-> portability can be improved by making sure the driver deasserts the
-> reset before accessing any registers.
-> 
-> Since resets are synchronous on Tegra SoCs, the platform driver needs
-> to implement a custom ->remove() callback now to make sure the clock
-> is disabled after the reset is asserted.
-> 
-> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 38 +++++++++++++++++++++++++++++++++++++-
->  1 file changed, 37 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 20b6ff5b4af1..eac57bb161d3 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -21,6 +21,7 @@
->  #include <linux/io.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/reset.h>
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
-> @@ -65,6 +66,8 @@ struct sdhci_tegra {
->  	struct gpio_desc *power_gpio;
->  	bool ddr_signaling;
->  	bool pad_calib_required;
-> +
-> +	struct reset_control *rst;
->  };
->  
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -489,6 +492,16 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	clk_prepare_enable(clk);
->  	pltfm_host->clk = clk;
->  
-> +	tegra_host->rst = devm_reset_control_get(&pdev->dev, "sdhci");
-> +	if (IS_ERR(tegra_host->rst)) {
-> +		rc = PTR_ERR(tegra_host->rst);
-> +		dev_err(&pdev->dev, "failed to get reset control: %d\n", rc);
-> +		goto err_clk_get;
-> +	}
-> +
-> +	reset_control_deassert(tegra_host->rst);
-> +	usleep_range(2000, 4000);
-> +
->  	rc = sdhci_add_host(host);
->  	if (rc)
->  		goto err_add_host;
+On Tue, Nov 22, 2016 at 11:31 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 22/11/16 12:20, Linus Walleij wrote:
+>> On Tue, Nov 22, 2016 at 8:58 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 21/11/16 17:34, Linus Walleij wrote:
+>>>> On Mon, Jun 27, 2016 at 3:22 PM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
+>>>>
+>>>>> From: Asutosh Das <asutoshd@codeaurora.org>
+>>>>>
+>>>>> eMMC cards with EXT_CSD version >= 8, optionally support command
+>>>>> queuing feature as defined by JEDEC eMMC5.1. Add support for probing
+>>>>> command queue feature for such type of cards.
+>>>>>
+>>>>> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+>>>>> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+>>>>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>>>>> [subhashj@codeaurora.org: fixed trivial merge conflicts]
+>>>>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>>>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>>>>
+>>>> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+>>>>
+>>>> Even if we don't merge the specific mechanism provided by the
+>>>> rest of the patches, this patch just make us know more about
+>>>> the capabilities of the hardware we're running on, which is good.
+>>>
+>>> I think SW CMDQ is a better starting point:
+>>
+>> When I supplied the Reviewe-by, as stated below it I am not talking
+>> about the patch set as a whole. I am talking about *this* patch.
+>
+> I should have been more explicit.  SW CMDQ covers some of the same ground
+> and has basically the same patch:
+>
+>         https://marc.info/?l=linux-mmc&m=147729859922297&w=2
 
-Should you reset_control_assert() in the err_add_host path?
+OK it seems to define more of the constants, I'll go and review it.
 
-> @@ -504,6 +517,29 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	return rc;
->  }
->  
-> +static int sdhci_tegra_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *platform = sdhci_priv(host);
-> +	struct sdhci_tegra *tegra = sdhci_pltfm_priv(platform);
-> +	int dead = 0;
-> +	u32 value;
-> +
-> +	value = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +	if (value == 0xffffffff)
-
-I think this check of 0xffffffff is a PCI thing.  Unless you know it is
-meaningful for your platforms, you could leave it out.
-
-> +		dead = 1;
-> +
-> +	sdhci_remove_host(host, dead);
-> +
-> +	reset_control_assert(tegra->rst);
-> +	usleep_range(2000, 4000);
-> +	clk_disable_unprepare(platform->clk);
-> +
-> +	sdhci_pltfm_free(pdev);
-> +
-> +	return 0;
-> +}
-> +
->  static struct platform_driver sdhci_tegra_driver = {
->  	.driver		= {
->  		.name	= "sdhci-tegra",
-> @@ -511,7 +547,7 @@ static struct platform_driver sdhci_tegra_driver = {
->  		.pm	= &sdhci_pltfm_pmops,
->  	},
->  	.probe		= sdhci_tegra_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove		= sdhci_tegra_remove,
->  };
->  
->  module_platform_driver(sdhci_tegra_driver);
-> 
+Yours,
+Linus Walleij
