@@ -1,54 +1,129 @@
-From: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v9 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400
- support
-Date: Mon, 21 Nov 2016 15:11:38 -0800
-Message-ID: <20161121231138.GY25626@codeaurora.org>
-References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
- <CAPDyKFrRbf0+G5K=-jsaevAGbTqhTAss2zJv3QdiyCrv0BG-zA@mail.gmail.com>
- <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55@codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: block: delete packed command support
+Date: Tue, 22 Nov 2016 12:53:06 +0900
+Message-ID: <22ef57c2-4e09-afaa-8349-32e4ae687c8d@samsung.com>
+References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
+ <2697103.lML87IM8sj@wuerfel>
+ <CGME20161121142337epcas2p2089bae3d66c796b0013dfe4ed09f9573@epcas2p2.samsung.com>
+ <0420FC2A-518F-49D5-90A0-556A0BA5395A@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andy Gross <andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Brown <david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Georgi Djakov <georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Lemberg <alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Mateusz Nowak <mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yuliy Izrailov <Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Asutosh Das <asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, David Griego <david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sahitya Tummala <stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rajendra Nayak <rnayak@codea>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:57016 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754718AbcKVDxJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2016 22:53:09 -0500
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OH000ISBYSH8G40@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Nov 2016 12:53:07 +0900 (KST)
+In-reply-to: <0420FC2A-518F-49D5-90A0-556A0BA5395A@sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>
 
-On 11/21, Ritesh Harjani wrote:
+On 11/21/2016 11:23 PM, Alex Lemberg wrote:
+> Hi,
 > 
 > 
-> On 11/21/2016 3:36 PM, Ulf Hansson wrote:
-> >On 21 November 2016 at 07:37, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
-> >>Hi,
-> >>
-> >>This is v9 version of the patch series which adds support for MSM8996.
-> >>Adds HS400 driver support as well.
-> >>These are tested on internal msm8996 & db410c HW.
-> >>
-> >>The patch series is ready. Do we think we can apply these
-> >>patches for next now?
-> >
-> >I guess the DTS changes can be picked up by Andy, so they can go via arm-soc?
-> Yes.
+> On 11/21/16, 1:11 PM, "Arnd Bergmann" <arnd@arndb.de> wrote:
 > 
-> >
-> >Then, does the mmc changes depend on the clock changes? If so, I can
-> >pick them as well, but then I need an ack from Stephen....
-> Ideal and preferable, would be that clk & mmc changes go in
-> together. But either ways should be fine.
+>> On Monday, November 21, 2016 11:08:57 AM CET Linus Walleij wrote:
+>>> I've had it with this code now.
+>>>
+>>> The packed command support is a complex hurdle in the MMC/SD block
+>>> layer, around 500+ lines of code which was introduced in 2013 in
+>>> commits
+>>>
+>>> ce39f9d17c14 ("mmc: support packed write command for eMMC4.5 devices")
+>>> abd9ac144947 ("mmc: add packed command feature of eMMC4.5")
+>>>
+>>> ...and since then it has been rotting. The original author of the
+>>> code has disappeared from the community and the mail address is
+>>> bouncing.
+>>>
+>>> For the code to be exercised the host must flag that it supports
+>>> packed commands, so in mmc_blk_prep_packed_list() which is called for
+>>> every single request, the following construction appears:
+>>>
+>>> u8 max_packed_rw = 0;
+>>>
+>>> if ((rq_data_dir(cur) == WRITE) &&
+>>>     mmc_host_packed_wr(card->host))
+>>>         max_packed_rw = card->ext_csd.max_packed_writes;
+>>>
+>>> if (max_packed_rw == 0)
+>>>     goto no_packed;
+>>>
+>>> This has the following logical deductions:
+>>>
+>>> - Only WRITE commands can really be packed, so the solution is
+>>>   only half-done: we support packed WRITE but not packed READ.
+>>>   The packed command support has not been finalized by supporting
+>>>   reads in three years!
+>>
+>> Packed reads don't make a lot of sense, there is very little
+>> for an MMC to optimize in reads that it can't already do without
+>> the packing. For writes, packing makes could be an important
+>> performance optimization, if the eMMC supports it.
+>>
+>> I've added Luca Porzio  and Alex Lemberg to Cc. I think they
+>> are subscribed to the list already, but it would be good to
+>> get some estimate from them too about how common the packed
+>> write support is on existing hardware from their respective
+>> employers before we kill it off.
+> 
+> Correct, in general there is no value in using packed for Read.
+> But I can’t say this for all existing flash management solution.
+> The eMMC spec allows to use it for Read as well.
+
+As i know, when packed command had implemented, early eMMC had the firmware problem
+for Packed Read operation. but so I can't say Packed Read doesn't have the benefit for performance.
+But Packed Write command can see the benefit for performance.
+
+> 
+>>
+>> If none of Samsung/Micron/Sandisk are currently shipping
+>> devices that support eMMC-4.5 packed commands but don't
+>> support the eMMC-5.1 command queuing (which IIRC is a more
+>> general way to achieve the same), we probably don't need to
+>> worry about it too much. 
+> 
+> Please note that even by having eMMC-5.1 device,
+> not all chipset vendors are having HW/SW CMDQ support.
+> So they might be using packed commands instead.
+> 
+>>
+>>> - mmc_host_packed_wr() is just a static inline that checks
+>>>   host->caps2 & MMC_CAP2_PACKED_WR. The problem with this is
+>>>   that NO upstream host sets this capability flag! No driver
+>>>   in the kernel is using it, and we can't test it. Packed
+>>>   command may be supported in out-of-tree code, but I doubt
+>>>   it. I doubt that the code is even working anymore due to
+>>>   other refactorings in the MMC block layer, who would
+>>>   notice if patches affecting it broke packed commands?
+>>>   No one.
+>>
+>> This is a very good indication that it's not really used.
+>> It would be useful to also check out the Android AOSP
+>> kernel tree to see if it's in there, if anything important
+>> supports packed commands, it's probably in there.
+> 
+> As far as I can say from reviewing the mobile (Android)
+> platforms kernel source (from different vendors), 
+> many of them are enabling Packed Commands.
+
+Actually, some shipping Samsung devices with eMMC4.5 might be used packed command.
+(For Android/Tizen OS and ARTIK boards)
+
+Best Regards,
+Jaehoon Chung
+
+> 
+>>
+>> 	Arnd
 > 
 
-There's only a runtime dependency where the clk rates will be
-wrong if clk tree isn't merged. I'd rather just apply the clk
-ones directly to clk tree and let all three trees come together
-in linux-next and work.
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
