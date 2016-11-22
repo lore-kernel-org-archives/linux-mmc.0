@@ -1,91 +1,93 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH] mmc: block: delete packed command support
-Date: Tue, 22 Nov 2016 13:49:14 +0100
-Message-ID: <CACRpkdZ_aaq5hA=LG5k0OM52Sx-ca8ntdpohsi8j47VH60ucNw@mail.gmail.com>
-References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
- <2697103.lML87IM8sj@wuerfel> <CGME20161121142337epcas2p2089bae3d66c796b0013dfe4ed09f9573@epcas2p2.samsung.com>
- <0420FC2A-518F-49D5-90A0-556A0BA5395A@sandisk.com> <22ef57c2-4e09-afaa-8349-32e4ae687c8d@samsung.com>
- <CAPDyKFqVJeurr2jZcKRMxbvEuJfttnnFz_JWjqoCvP584h_byg@mail.gmail.com>
+Date: Tue, 22 Nov 2016 15:44:19 +0100
+Message-ID: <44199908.WIlGo4b061@wuerfel>
+References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org> <22ef57c2-4e09-afaa-8349-32e4ae687c8d@samsung.com> <CAPDyKFqVJeurr2jZcKRMxbvEuJfttnnFz_JWjqoCvP584h_byg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34760 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753817AbcKVMtQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 07:49:16 -0500
-Received: by mail-qk0-f171.google.com with SMTP id q130so21790088qke.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2016 04:49:16 -0800 (PST)
+Received: from mout.kundenserver.de ([217.72.192.73]:61992 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932949AbcKVOoi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 09:44:38 -0500
 In-Reply-To: <CAPDyKFqVJeurr2jZcKRMxbvEuJfttnnFz_JWjqoCvP584h_byg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>
 
-On Tue, Nov 22, 2016 at 9:49 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote=
-:
-> On 22 November 2016 at 04:53, Jaehoon Chung <jh80.chung@samsung.com> wrot=
-e:
-
->>> Correct, in general there is no value in using packed for Read.
->>> But I can=E2=80=99t say this for all existing flash management solution=
-.
->>> The eMMC spec allows to use it for Read as well.
->>
->> As i know, when packed command had implemented, early eMMC had the firmw=
-are problem
->> for Packed Read operation. but so I can't say Packed Read doesn't have t=
-he benefit for performance.
->> But Packed Write command can see the benefit for performance.
->
+On Tuesday, November 22, 2016 9:49:26 AM CET Ulf Hansson wrote:
+> On 22 November 2016 at 04:53, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> > On 11/21/2016 11:23 PM, Alex Lemberg wrote:
+> >> On 11/21/16, 1:11 PM, "Arnd Bergmann" <arnd@arndb.de> wrote:
+> >>> On Monday, November 21, 2016 11:08:57 AM CET Linus Walleij wrote:
+> >>>
+> >>> Packed reads don't make a lot of sense, there is very little
+> >>> for an MMC to optimize in reads that it can't already do without
+> >>> the packing. For writes, packing makes could be an important
+> >>> performance optimization, if the eMMC supports it.
+> >>>
+> >>> I've added Luca Porzio  and Alex Lemberg to Cc. I think they
+> >>> are subscribed to the list already, but it would be good to
+> >>> get some estimate from them too about how common the packed
+> >>> write support is on existing hardware from their respective
+> >>> employers before we kill it off.
+> >>
+> >> Correct, in general there is no value in using packed for Read.
+> >> But I can’t say this for all existing flash management solution.
+> >> The eMMC spec allows to use it for Read as well.
+> >
+> > As i know, when packed command had implemented, early eMMC had the firmware problem
+> > for Packed Read operation. but so I can't say Packed Read doesn't have the benefit for performance.
+> > But Packed Write command can see the benefit for performance.
+> 
 > Regarding "performance", are you merely thinking about increased
 > throughput? With packed command we decrease the communication overhead
 > with the card so less commands becomes sent/received.
->
+> 
 > Or, did you also observed an improved behaviour of the card from a
 > garbage collect point of view? In other words also a decreased latency
 > when the device is becoming more and more used?
->
+> 
 > Finally, did you compare the packed command, towards using the
 > asynchronous request mechanisms (using the ->pre|post_req() mmc host
 > ops)?
 
-Packed write (and read, if we had implemented it) can only happen when
-we get a number of requests to different areas of the card.
+The main point of command packing is that the device can be smarter
+about garbage collection as well as combine sub-page sized writes.
 
-If they are to consecutive sectors (such as with a dd-test) it will not
-improve performance, as that case is already optimized by the block
-layer by front-merging of the requests into large chunks, I guess?
+The communication overhead is nearly irrelevant in comparison,
+and we would probably not have done anything for that.
 
-Indeed commit ce39f9d17c14 mentions improvement on lmdd but not
-how it was invoked. I suspect it was invoked with random writes...
-
-It is important to do everything we can to improve random small writes
-though, and it seems packed command can do that.
-
-(...)
->> Actually, some shipping Samsung devices with eMMC4.5 might be used packe=
-d command.
->> (For Android/Tizen OS and ARTIK boards)
->
+> >> As far as I can say from reviewing the mobile (Android)
+> >> platforms kernel source (from different vendors),
+> >> many of them are enabling Packed Commands.
+> >
+> > Actually, some shipping Samsung devices with eMMC4.5 might be used packed command.
+> > (For Android/Tizen OS and ARTIK boards)
+> 
 > Thanks for sharing this information!
->
+> 
 > It seems like we need to run another round of performance
 > measurements, as to get some fresh number of the benefit of packed
 > command.
 > I would really appreciate if you could help out with that.
 
-I would add: do it on the upstream kernel and submit the stuff needed
-to make it work for you out-of-the box.
+As far as I'm concerned, there are already two conclusions and
+I don't think those measurements would help much:
 
-This is on Exynos I guess?
+- It's a problem that none of our upstream drivers support this
+  feature, and we really want them to do so, at least after the
+  blk_mq change.
 
-Can we have this flag set for the Exynos host controller, and/or
-proper DT bindings to mark it as packed command enabled?
+- Linus' analysis is still valid: there is no regression in removing
+  it from the traditional blk code today, anyone who has a private
+  driver that uses it can simply revert the removal in their next
+  private product release.
 
-Hell I don't even know if this is a feature that needs anything special
-from the host controller. Does it? Should we rather just enable it for all
-host controllers if the card supports packed command? I'm lost.
+If removing it helps us enable blk_mq support more easily, then
+I think we can take out the packed command handling, but we have
+to be prepared to put it back later on top of blk_mq.
 
-Yours,
-Linus Walleij
+	Arnd
