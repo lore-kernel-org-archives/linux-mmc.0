@@ -1,56 +1,91 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFCv2 01/10] mmc: core: Add support to read command queue parameters
-Date: Tue, 22 Nov 2016 13:37:44 +0100
-Message-ID: <CACRpkdZ4U=ho0o9X1z1NNM0oBijMsrf9euSoKkOPO+x7sat2Aw@mail.gmail.com>
-References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
- <1467033757-32498-2-git-send-email-riteshh@codeaurora.org>
- <CACRpkdYDfdCoZUOryjVX4byu2BFx9KZx7YKoFG9wESDpaKtirg@mail.gmail.com>
- <e18147ff-ac6b-a48f-4487-18ebd51bbc99@intel.com> <CACRpkdaHgN7XGdXjeE1dwQ2gn0z=VXfjVdVGYcT0gRfASNUKbQ@mail.gmail.com>
- <0cf555d9-4e79-73fb-954d-8f022c90d4dc@intel.com> <CACRpkdZkYVJmZ_M3oYhY3i4JrqEA_Xxc3ZALKaMdQq2ybxfvZA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: delete packed command support
+Date: Tue, 22 Nov 2016 13:49:14 +0100
+Message-ID: <CACRpkdZ_aaq5hA=LG5k0OM52Sx-ca8ntdpohsi8j47VH60ucNw@mail.gmail.com>
+References: <1479722937-19551-1-git-send-email-linus.walleij@linaro.org>
+ <2697103.lML87IM8sj@wuerfel> <CGME20161121142337epcas2p2089bae3d66c796b0013dfe4ed09f9573@epcas2p2.samsung.com>
+ <0420FC2A-518F-49D5-90A0-556A0BA5395A@sandisk.com> <22ef57c2-4e09-afaa-8349-32e4ae687c8d@samsung.com>
+ <CAPDyKFqVJeurr2jZcKRMxbvEuJfttnnFz_JWjqoCvP584h_byg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:34159 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932422AbcKVMhq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 07:37:46 -0500
-Received: by mail-qk0-f179.google.com with SMTP id q130so21342854qke.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2016 04:37:45 -0800 (PST)
-In-Reply-To: <CACRpkdZkYVJmZ_M3oYhY3i4JrqEA_Xxc3ZALKaMdQq2ybxfvZA@mail.gmail.com>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:34760 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753817AbcKVMtQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2016 07:49:16 -0500
+Received: by mail-qk0-f171.google.com with SMTP id q130so21790088qke.1
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2016 04:49:16 -0800 (PST)
+In-Reply-To: <CAPDyKFqVJeurr2jZcKRMxbvEuJfttnnFz_JWjqoCvP584h_byg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Asutosh Das <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, kdorfman@codeaurora.org, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, venkatg@codeaurora.org, Shawn Lin <shawn.lin@rock-chips.com>, Subhash Jadavani <subhashj@codeaurora.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Luca Porzio <lporzio@micron.com>
 
-On Tue, Nov 22, 2016 at 1:30 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Tue, Nov 22, 2016 at 11:31 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Tue, Nov 22, 2016 at 9:49 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote=
+:
+> On 22 November 2016 at 04:53, Jaehoon Chung <jh80.chung@samsung.com> wrot=
+e:
 
->> I should have been more explicit.  SW CMDQ covers some of the same ground
->> and has basically the same patch:
+>>> Correct, in general there is no value in using packed for Read.
+>>> But I can=E2=80=99t say this for all existing flash management solution=
+.
+>>> The eMMC spec allows to use it for Read as well.
 >>
->>         https://marc.info/?l=linux-mmc&m=147729859922297&w=2
+>> As i know, when packed command had implemented, early eMMC had the firmw=
+are problem
+>> for Packed Read operation. but so I can't say Packed Read doesn't have t=
+he benefit for performance.
+>> But Packed Write command can see the benefit for performance.
 >
-> OK it seems to define more of the constants, I'll go and review it.
+> Regarding "performance", are you merely thinking about increased
+> throughput? With packed command we decrease the communication overhead
+> with the card so less commands becomes sent/received.
+>
+> Or, did you also observed an improved behaviour of the card from a
+> garbage collect point of view? In other words also a decreased latency
+> when the device is becoming more and more used?
+>
+> Finally, did you compare the packed command, towards using the
+> asynchronous request mechanisms (using the ->pre|post_req() mmc host
+> ops)?
 
-Bah it's not in my INBOX for some reason, maybe I fell off the linux-mmc list
-at some point :( I review it here:
+Packed write (and read, if we had implemented it) can only happen when
+we get a number of requests to different areas of the card.
 
-Leave out this:
+If they are to consecutive sectors (such as with a dd-test) it will not
+improve performance, as that case is already optimized by the block
+layer by front-merging of the requests into large chunks, I guess?
 
-+ cmdq_en Command Queue enabled: 1 => enabled, 0 => not enabled
+Indeed commit ce39f9d17c14 mentions improvement on lmdd but not
+how it was invoked. I suspect it was invoked with random writes...
+
+It is important to do everything we can to improve random small writes
+though, and it seems packed command can do that.
+
 (...)
-+MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
-(...)
-+ &dev_attr_cmdq_en.attr,
-(...)
-+ bool cmdq_en; /* Command Queue enabled */
+>> Actually, some shipping Samsung devices with eMMC4.5 might be used packe=
+d command.
+>> (For Android/Tizen OS and ARTIK boards)
+>
+> Thanks for sharing this information!
+>
+> It seems like we need to run another round of performance
+> measurements, as to get some fresh number of the benefit of packed
+> command.
+> I would really appreciate if you could help out with that.
 
-Because that is about enabling the *use* of this mechnism rather than
-detecting its presence.
+I would add: do it on the upstream kernel and submit the stuff needed
+to make it work for you out-of-the box.
 
-With the above removed it is superior to $SUBJECT so you
-can add:
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+This is on Exynos I guess?
+
+Can we have this flag set for the Exynos host controller, and/or
+proper DT bindings to mark it as packed command enabled?
+
+Hell I don't even know if this is a feature that needs anything special
+from the host controller. Does it? Should we rather just enable it for all
+host controllers if the card supports packed command? I'm lost.
 
 Yours,
 Linus Walleij
