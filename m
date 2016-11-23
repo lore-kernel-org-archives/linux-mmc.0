@@ -1,82 +1,53 @@
 From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH 0/5] Enable onboard SDHCI for Nexus 5X (msm8992)
-Date: Tue, 22 Nov 2016 17:09:43 -0800
-Message-ID: <1479863388-23678-1-git-send-email-jeremymc@redhat.com>
+Subject: [PATCH 2/5] smd: Make packet size a constant
+Date: Tue, 22 Nov 2016 17:09:45 -0800
+Message-ID: <1479863388-23678-3-git-send-email-jeremymc@redhat.com>
+References: <1479863388-23678-1-git-send-email-jeremymc@redhat.com>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1479863388-23678-1-git-send-email-jeremymc@redhat.com>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
 
+Use a macro to define the maximum size of a RPM message.
 
+Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
+---
+ drivers/soc/qcom/smd-rpm.c   | 2 +-
+ include/linux/soc/qcom/smd.h | 7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-Now that the basic board support is available:
-     http://www.spinics.net/lists/linux-arm-msm/msg24533.html
-
-and the associated clock changes have been picked up for next,
-      http://www.spinics.net/lists/linux-arm-msm/msg24499.html
-
-
-Using V8 from Ritesh Harjani, with the additional changes provided to him for gcc-msm8994.c 
- [ http://www.spinics.net/lists/linux-arm-msm/msg24652.html ]
-
-
-Additionally V9 of the RPM clock support [http://www.spinics.net/lists/linux-arm-msm/msg24211.html]
- is needed.  
-
-At this point, "qcom,rpmcc-msm8916" was used successfully for testing of
-the rpm clock controller.  It has been marked as a TODO item in the DTS
-and once the rpmcc clocks are added for 8992/8994 the needed change will
-be made.  i.e.) expect a follow up patch for rpmcc 
-
-Currently, the minimal regulators to verify / enable SDHCI functionality
-have been added.   While looking at the downstream code, I saw a few more
-obvious entries so they have been included (completely untested).   Hopefully
-someone with the hardware docs can provide feedback  and/or an individual
-with better eye site than I who can ferret out more of the entries from
-downstream.
-
-The nonremovable "keyword/flag" was used to assess the reliability of the
-initial mmc detection.  When the flag is present in the DTS only 1 check
-for SDHCI was made, without non removable it checks over and over again.
-Without the workaround (patch 5/5) mmc/sdhci didn't get detected 8/20
-times.  When including the afore mentioned workaround MMC detection is
-100% (35 boots) .  
-
-While at it, I took the liberty of re-tabifying include/dt-bindings/
-clock/qcom,gcc-msm8994.h to make it look nice according to VIM using (:set list ).  
-Sorry emacs users, you are on your own.
-
-
-Question:
-   In what DT-bindings txt file should the following, compatible = "qcom,rpm-msm8994"; 
-  be placed?  (arch/arm64/boot/dts/qcom/msm8992.dtsi, rpm_requests node)
-
-
-Obviously, this is a work in progress,  and its progressing :-)
-
-
-
-Jeremy McNicoll (5):
-  clk: gcc: Updates for SDHCI enablement
-  smd: Make packet size a constant
-  arm64: dts: Enable SDHCI for Nexus 5X (msm8992)
-  sdhci: dump vendor state and regs
-  sdhci: Add quirk for delayed IRQ ACK
-
- .../bindings/regulator/qcom,smd-rpm-regulator.txt  |  40 ++++
- .../boot/dts/qcom/msm8992-bullhead-rev-101.dts     | 262 +++++++++++++++++++++
- arch/arm64/boot/dts/qcom/msm8992-pins.dtsi         |  82 +++++++
- arch/arm64/boot/dts/qcom/msm8992.dtsi              | 153 ++++++++++++
- drivers/clk/qcom/gcc-msm8994.c                     | 108 +++++++--
- drivers/mmc/host/sdhci-msm.c                       |  86 +++++++
- drivers/mmc/host/sdhci.c                           |  37 ++-
- drivers/mmc/host/sdhci.h                           |   3 +
- drivers/regulator/qcom_smd-regulator.c             |  49 ++++
- drivers/soc/qcom/smd-rpm.c                         |   2 +-
- include/dt-bindings/clock/qcom,gcc-msm8994.h       |  32 ++-
- include/linux/soc/qcom/smd.h                       |   7 +
- 12 files changed, 824 insertions(+), 37 deletions(-)
-
+diff --git a/drivers/soc/qcom/smd-rpm.c b/drivers/soc/qcom/smd-rpm.c
+index 6609d7e..b5a2836 100644
+--- a/drivers/soc/qcom/smd-rpm.c
++++ b/drivers/soc/qcom/smd-rpm.c
+@@ -114,7 +114,7 @@ int qcom_rpm_smd_write(struct qcom_smd_rpm *rpm,
+ 	size_t size = sizeof(*pkt) + count;
+ 
+ 	/* SMD packets to the RPM may not exceed 256 bytes */
+-	if (WARN_ON(size >= 256))
++	if (WARN_ON(size >= SMD_RPM_MAX_SIZE))
+ 		return -EINVAL;
+ 
+ 	pkt = kmalloc(size, GFP_KERNEL);
+diff --git a/include/linux/soc/qcom/smd.h b/include/linux/soc/qcom/smd.h
+index f148e0f..8039015 100644
+--- a/include/linux/soc/qcom/smd.h
++++ b/include/linux/soc/qcom/smd.h
+@@ -4,6 +4,13 @@
+ #include <linux/device.h>
+ #include <linux/mod_devicetable.h>
+ 
++
++/*
++ * SMD packets to the RPM may not exceed 256 bytes
++ */
++#define SMD_RPM_MAX_SIZE 256
++
++
+ struct qcom_smd;
+ struct qcom_smd_channel;
+ struct qcom_smd_lookup;
 -- 
 2.6.1
