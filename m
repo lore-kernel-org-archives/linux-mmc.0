@@ -1,100 +1,68 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
- Intel byt sdio controller sub-vended by NI
-Date: Wed, 23 Nov 2016 09:35:10 +0200
-Message-ID: <0020c9d8-fcfb-e092-0ec8-5767f4ae7fed@intel.com>
-References: <1479851602-19788-1-git-send-email-zach.brown@ni.com>
- <1479851602-19788-3-git-send-email-zach.brown@ni.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: Re: [PATCH 0/10] mmc: Add support to Marvell Xenon SD Host Controller
+Date: Wed, 23 Nov 2016 09:30:14 +0100
+Message-ID: <87vavemwdl.fsf@free-electrons.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1479851602-19788-3-git-send-email-zach.brown@ni.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ (Gregory CLEMENT's message of "Mon, 31 Oct 2016 12:09:49 +0100")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Hilbert Zhang <zzhang@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, linux-kernel@vger.kernel.org, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehu da Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Xueping Liu <xpliu@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Hanna Hawa <hannah@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 22/11/16 23:53, Zach Brown wrote:
-> On NI 9037 boards the max SDIO frequency is limited by trace lengths
-> and other layout choices. The max SDIO frequency is stored in an ACPI
-> table.
-> 
-> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
-> f_max field of the host.
-> 
-> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
-> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
-> Reviewed-by: Josh Cartwright <joshc@ni.com>
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 28 ++++++++++++++++++++++++++++
->  1 file changed, 28 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 9741505..34284b8 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -27,6 +27,7 @@
->  #include <linux/pm_runtime.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/mmc/sdhci-pci-data.h>
-> +#include <linux/acpi.h>
->  
->  #include "sdhci.h"
->  #include "sdhci-pci.h"
-> @@ -375,6 +376,30 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
->  	return 0;
->  }
->  
-> +#ifdef CONFIG_ACPI
-> +
-> +static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
-> +{
-> +	acpi_status status;
-> +	unsigned long long max_freq;
-> +
-> +	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
-> +				       "MXFQ", NULL, &max_freq);
-> +	if (ACPI_FAILURE(status)) {
-> +		dev_err(&slot->chip->pdev->dev,
-> +			"MXFQ not found in acpi table\n");
-> +		return -EINVAL;
-> +	}
-> +
-> +	slot->host->mmc->f_max = max_freq * 1000000;
-> +
-> +	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-> +				 MMC_CAP_WAIT_WHILE_BUSY;
-> +	return 0;
-> +}
-> +
-> +#else
+Hi Ulf,
+ 
+ On lun., oct. 31 2016, Gregory CLEMENT <gregory.clement@free-electrons.com> wrote:
 
-No, it is the ACPI access that needs to be a separate function.  We don't
-want 2 ni_byt_sdio_probe_slot(). Perhaps, something like:
+> Hello,
+>
+> This the second version of the series adding support for the SDHCI
+> Xenon controller. It can be currently found on the Armada 37xx and the
+> Armada 7K/8K but will be also used in more Marvell SoC (and not only
+> the mvebu ones actually).
+>
+> Some of the remarks had been taking into account since the first
+> version, according to Ziji Hu, here are the following chcanges:
+> "Changes in V2:
+>   rebase on v4.9-rc2.
+>   Re-write Xenon bindings. Ajust Xenon DT property naming.
+>   Add a new DT property to indicate eMMC card type, instead of using
+>   variable card_candidate.
+>   Clear quirks SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 in Xenon platform data
+>   Add support to HS400 retuning."
+>
+> I think the main open point which remains is about issuing commands
+> from the ->set_ios() callback (in patch 7).
+> Ulf, could you comment about it?
 
-#ifdef CONFIG_ACPI
-static int ni_set_max_freq(struct sdhci_pci_slot *slot)
-{
-	acpi_status status;
-	unsigned long long max_freq;
+This part is the last thing missing, we are about to solve the last
+issues about the binding, but we still didn't have your opinion about
+issuing commands from the ->set_ios() callback and Adrian required it to
+take this series.
 
-	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
-				       "MXFQ", NULL, &max_freq);
-	if (ACPI_FAILURE(status))
-		dev_err(&slot->chip->pdev->dev,
-			"MXFQ not found in acpi table\n");
-		return -EINVAL;
-	}
+To have more context you can have a look on:
+http://marc.info/?l=linux-mmc&m=147618996414673&w=2
 
-	slot->host->mmc->f_max = max_freq * 1000000;
+it is the original email where Adrian wanted your agreement.
 
-	return 0;
-}
-#else
-static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
-{
-	return 0;
-}
-#endif
+Thanks,
+
+Gregory
+
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
