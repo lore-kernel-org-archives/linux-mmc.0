@@ -1,164 +1,72 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sd: Meet alignment requirements for raw_ssr DMA
-Date: Wed, 23 Nov 2016 13:36:34 +0100
-Message-ID: <CAPDyKFqehff8FZEcom3QzVy=Yu_H3Pd4Z0excgAsw=YgvcQo1Q@mail.gmail.com>
-References: <20161111142236.8270-1-paul.burton@imgtec.com> <CAPDyKFqNNP-M37_ieq2na0agsQvh8oyv=nWdSsW2nQDw+zB9WA@mail.gmail.com>
- <3676563.EjIzX52DqA@np-p-burton>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v9 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400 support
+Date: Wed, 23 Nov 2016 13:49:29 +0100
+Message-ID: <CAPDyKFr-zu1V-7oOndAb_uZCSj2BEvyiUR-siZjteyyoy98Txw@mail.gmail.com>
+References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
+ <CAPDyKFrRbf0+G5K=-jsaevAGbTqhTAss2zJv3QdiyCrv0BG-zA@mail.gmail.com>
+ <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55@codeaurora.org> <20161121231138.GY25626@codeaurora.org>
+ <6dd874b4-8f60-471b-d1e7-089b4b035ad2@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:34961 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934685AbcKWMgs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2016 07:36:48 -0500
-Received: by mail-wm0-f52.google.com with SMTP id a197so76013589wmd.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2016 04:36:36 -0800 (PST)
-In-Reply-To: <3676563.EjIzX52DqA@np-p-burton>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6dd874b4-8f60-471b-d1e7-089b4b035ad2-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Andy Gross <andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Brown <david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Georgi Djakov <georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Lemberg <alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Mateusz Nowak <mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yuliy Izrailov <Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Asutosh Das <asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, David Griego <david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sahitya Tummala <stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rajendra Nayak <rnayak@codeau>
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Burton <paul.burton@imgtec.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-[...]
-
->> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->> > index 73c762a..f6f40a1 100644
->> > --- a/drivers/mmc/core/sd.c
->> > +++ b/drivers/mmc/core/sd.c
->> > @@ -223,6 +223,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->> >
->> >  static int mmc_read_ssr(struct mmc_card *card)
->> >  {
->> >
->> >         unsigned int au, es, et, eo;
->> >
->> > +       u32 *raw_ssr;
->> >
->> >         int i;
->> >
->> >         if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
->> >
->> > @@ -231,14 +232,21 @@ static int mmc_read_ssr(struct mmc_card *card)
->> >
->> >                 return 0;
->> >
->> >         }
->> >
->> > -       if (mmc_app_sd_status(card, card->raw_ssr)) {
+On 23 November 2016 at 01:05, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
+>
+>
+> On 11/22/2016 4:41 AM, Stephen Boyd wrote:
 >>
->> So the struct mmc_card, which contains "u32 raw_ssr[16]", is already
->> allocated via using a kzalloc().
->> As kzalloc() returns a physically contiguous allocated memory, using
->> DMA for reading the data into the memory pointed to by card->raw_ssr
->> should be safe.
+>> On 11/21, Ritesh Harjani wrote:
+>>>
+>>>
+>>>
+>>> On 11/21/2016 3:36 PM, Ulf Hansson wrote:
+>>>>
+>>>> On 21 November 2016 at 07:37, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+>>>> wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>> This is v9 version of the patch series which adds support for MSM8996.
+>>>>> Adds HS400 driver support as well.
+>>>>> These are tested on internal msm8996 & db410c HW.
+>>>>>
+>>>>> The patch series is ready. Do we think we can apply these
+>>>>> patches for next now?
+>>>>
+>>>>
+>>>> I guess the DTS changes can be picked up by Andy, so they can go via
+>>>> arm-soc?
+>>>
+>>> Yes.
+>>>
+>>>>
+>>>> Then, does the mmc changes depend on the clock changes? If so, I can
+>>>> pick them as well, but then I need an ack from Stephen....
+>>>
+>>> Ideal and preferable, would be that clk & mmc changes go in
+>>> together. But either ways should be fine.
+>>>
 >>
->> Unless I am missing something, of course.
+>> There's only a runtime dependency where the clk rates will be
+>> wrong if clk tree isn't merged. I'd rather just apply the clk
+>> ones directly to clk tree and let all three trees come together
+>> in linux-next and work.
 >
-> Sadly you are. This is incorrect because the raw_ssr field of struct mmc_card
-> may not begin or end at a cache-line boundary. On systems where mapping a
-> buffer for DMA requires cache invalidation we may therefore lose data if it
-> shares a cache line with some other data. In this case let's say we have
-
-Yes, of course - you are right! Apologize for my ignorance!
-
-> something like this:
 >
-> 0x1000: u32 raw_scr[2];
-> 0x1008: u32 raw_ssr[16];
->
-> Now let's say we have 16 byte cache lines and we try to map raw_ssr for DMA.
-> If the architecture requires that we invalidate the memory being mapped in
-> caches (in order to avoid any writebacks clobbering the DMA'd data) then we
-> have a problem because our choice is either to:
->
-> - Writeback the line that overlaps with raw_scr, then invalidate it along with
->   the rest of the cache lines covering raw_ssr. This won't do because there's
->   nothing stopping us from pulling the line back into the cache whilst the DMA
->   occurs on some systems - say we access raw_scr whilst the DMA to raw_ssr
->   happens or the CPU just speculatively prefetches something. The DMA API
->   cannot detect the former & would have no way to deal with it if it could,
->   and on systems where the latter is possible we have no choice but to
->   invalidate the cache lines again after the DMA is complete. What would we do
->   with the first line then? We can't write it back to preserve raw_scr because
->   it includes some potentially stale copy of the start of raw_ssr, which we
->   would then clobber the DMA'd data with.
->
-> - Or, we just invalidate the line which overlaps with raw_scr. We can't do
->   this because we might throw away some part of raw_scr.
->
-> So we have no choice but to align the buffers used for DMA at a cache line
-> boundary. This is what the paragraph in Documentation/DMA-API.txt is about &
-> the MMC code currently fails to meet the requirements it sets out. Allocating
-> the buffer to be DMA'd to with kmalloc will meet that alignment requirement.
-> One possible alternative would be to ensure that the raw_ssr field of struct
-> mmc_card is always aligned at an ARCH_DMA_MINALIGN boundary within the struct,
-> with nothing after it until another ARCH_DMA_MINALIGN boundary. That seems
-> like it'd be a bit messy though, and probably easy for someone to break.
->
-> Of course when a system has DMA that is coherent with caches there's generally
-> no need to worry about any of this, but users of the DMA API generally can't
-> rely on that, again as Documentation/DMA-API.txt says. Any buffers mapped for
-> DMA should be ensured to be cache-line aligned at minimum giving the
-> architecture code backing the DMA API a chance to do the right thing for the
-> given system.
+> Ok great! So can we queue this patch series to next?
 
-Thanks a lot for providing this detailed description to the problem.
-It really helped to refresh my mind for how this works!
+Yes. I have picked up all the mmc patches, including the DT
+documentation patch. They are queued for next!
+The rest is for Andy and Stephen to pick.
 
->
-> Thanks,
->     Paul
->
->>
->> > +       raw_ssr = kmalloc(sizeof(card->raw_ssr), GFP_KERNEL);
->> > +       if (!raw_ssr)
->> > +               return -ENOMEM;
->> > +
-
-Creating this bounce buffer does of course comes with a small cost.
-Maybe we could neglect its impact!?
-
-However we could also make the card->raw_ssr be cacheline aligned, via
-using the __cacheline_aligned attribute for it.
-
-Also, this isn't the only case when the mmc core creates bounce
-buffers while reading card registers during the card initialization.
-
-Perhaps a better method is to use the __cacheline_aligned for these
-buffers that needs to be DMA-able (requests which is
-MMC_DATA_READ|WRITE)). Of course that change would affect/increase the
-number of bytes allocated for each card struct (due to padding), but
-since this is just a single struct being allocated per card, this
-shouldn't be an issue.
-
-What do you think?
-
->> > +       if (mmc_app_sd_status(card, raw_ssr)) {
->> >
->> >                 pr_warn("%s: problem reading SD Status register\n",
->> >
->> >                         mmc_hostname(card->host));
->> >
->> > +               kfree(raw_ssr);
->> >
->> >                 return 0;
->> >
->> >         }
->> >
->> >         for (i = 0; i < 16; i++)
->> >
->> > -               card->raw_ssr[i] = be32_to_cpu(card->raw_ssr[i]);
->> > +               card->raw_ssr[i] = be32_to_cpu(raw_ssr[i]);
->> > +
->> > +       kfree(raw_ssr);
->> >
->> >         /*
->> >
->> >          * UNSTUFF_BITS only works with four u32s so we have to offset the
->> >
->> > --
->> > 2.10.2
->>
-
-Kind regards
+Thanks and kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
