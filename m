@@ -1,41 +1,148 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: sdhci-pci: Add GLK support and misc
-Date: Wed, 23 Nov 2016 13:49:41 +0100
-Message-ID: <CAPDyKFr11HaZ8ee1JMorMw5TDBqxY__NNsDWAt7F1etU10=VOA@mail.gmail.com>
-References: <1479805418-19603-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 0/7] mmc: core: Re-work CMD13 polling method for CMD6
+ for mmc
+Date: Wed, 23 Nov 2016 13:50:13 +0100
+Message-ID: <CAPDyKFrbE2NWQcMtjsTmEhQ8UX7YvyWKNGM2P+v+UjPC8H-R4w@mail.gmail.com>
+References: <1479848173-20881-1-git-send-email-ulf.hansson@linaro.org> <CAPDyKFp8PwbZeCYkp6eoAv1zKEcdJ6wFtozXWErn_NFPferJCw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36632 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936202AbcKWMtn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2016 07:49:43 -0500
-Received: by mail-wm0-f52.google.com with SMTP id g23so76597518wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2016 04:49:42 -0800 (PST)
-In-Reply-To: <1479805418-19603-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:36080 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934958AbcKWMuR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2016 07:50:17 -0500
+Received: by mail-wm0-f41.google.com with SMTP id g23so76618288wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2016 04:50:16 -0800 (PST)
+In-Reply-To: <CAPDyKFp8PwbZeCYkp6eoAv1zKEcdJ6wFtozXWErn_NFPferJCw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "David E. Box" <david.e.box@linux.intel.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 22 November 2016 at 10:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
+On 22 November 2016 at 22:01, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 22 November 2016 at 21:56, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Changes in v2:
+>>
+>>         - From discussions around the difficulties for how to support CMD13
+>>         polling for HS200, HS400 HS400ES, I decided to drop those patches for
+>>         now. It's is particularly due to the need for tuning, after a speed mode
+>>         switch, that makes it hard to rely on CMD13 polling for these cases.
+>>         Perhaps we can allow CMD13 polling when switching to the intermediate
+>>         speed modes, but let's deal with that outside of this series.
+>>
+>>         - Folded in a new patch, which checks the SWITCH_ERROR bit in each
+>>           CMD13 response when polling with CMD13. Patch v2 4/7.
+>>
+>>         - No other changes made to the rest of the series.
+>>
+>>
+>>
+>> Several changes has been made for how and when to use CMD13 as a
+>> polling-method, to find out when the mmc cards stops signaling busy after
+>> sending a CMD6. This particularly concerns the cases when switching to new bus
+>> speed modes, such as HS (high-speed), HS DDR, HS200, HS400 and HS400ES.
+>>
+>> Currently CMD13 polling is *not* allowed for these cases, but this was recently
+>> changed - and which did cause regressions for card detection for some
+>> platforms.
+>>
+>> A simple fix was made to solve these regressions, simply by using a default
+>> CMD6 generic timeout of 500ms, as to avoid using the fall-back timeout in
+>> __mmc_switch() of 10min. That greatly improve the situation and one could
+>> consider the regressions as "solved".
+>>
+>> However, this simple fix is still causing unnecessary long card initialization
+>> times, especially for those mmc hosts that doesn't support HW busy detection
+>> (using MMC_CAP_WAIT_WHILE_BUSY and/or implements the ->card_busy() host ops).
+>>
+>> This because we wait a fixed amount of time (CMD6 generic timeout) to make sure
+>> the card is done signaling busy, while in practice this happens a lot sooner.
+>>
+>> A couple of tests for HS and HS DDR eMMC cards, shows the card only need a few
+>> ms to complete the bus speed mode changes, thus it's far less than the CMD6
+>> generic timeout.
+>>
+>> To improve this behaviour and shorten the card initialization time, we need to
+>> allow using CMD13 as polling method to find out when the card stops signaling
+>> busy. Although, enabling CMD13 polling may also introduce other issues as
+>> according to the JEDEC spec, it's not the recommended method. Especially it
+>> mentions that CRC errors may be triggered when sending a CMD13 command during a
+>> bus timing change.
+>>
+>> To deal with these issues, we need to change from ignoring those CRC errors but
+>> instead continue to treat the card as being busy and continue to poll with
+>> CMD13. Perhaps this behaviour is one of reasons to why the earlier CMD13 polling
+>> method didn't work out well.
+>>
+>> This series requires extensive testing, please help with that!
+>>
+>> I have currently tested it with HS and HS DDR eMMC cards, and for combinations
+>> of an mmc hosts (mmci) supporting HW busy detection and not (local hacks in
+>> mmci.c).
+>>
+>>
+>> Ulf Hansson (9):
+>>   mmc: core: Retry instead of ignore at CRC errors when polling for busy
+>>   mmc: core: Remove redundant __mmc_send_status()
+>>   mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
+>>   mmc: core: Enable __mmc_switch() to change bus speed timing for the
+>>     host
+>>   mmc: core: Allow CMD13 polling when switching to HS mode for mmc
+>>   mmc: core: Update CMD13 polling policy when switch to HS DDR mode
+>>   mmc: core: Allow CMD13 polling when switch to HS200 mode
+>>   mmc: core: Allow CMD13 polling when switch to HS400 mode
+>>   mmc: core: Allow CMD13 polling when switch to HS400ES mode
+>>
+>>  drivers/mmc/core/core.c    |   2 +-
+>>  drivers/mmc/core/mmc.c     | 156 ++++++++++++++-------------------------------
+>>  drivers/mmc/core/mmc_ops.c |  45 +++++++------
+>>  drivers/mmc/core/mmc_ops.h |   4 +-
+>>  4 files changed, 77 insertions(+), 130 deletions(-)
 >
-> Here are a couple of small patches.
+> Oops, forgot to clean up the cover letter. Please ignore the summary
+> of changes above. It's the below changes that are the v2 series.
 >
+> Apologize for the inconvenience!
 >
-> Adrian Hunter (1):
->   mmc: sdhci-pci: Add support for Intel GLK
+> Kind regards
+> Uffe
 >
-> David E. Box (1):
->   mmc: sdhci-pci: Allow deferred probe for sd card detect gpio
->
->  drivers/mmc/host/sdhci-pci-core.c | 42 +++++++++++++++++++++++++++++++++------
->  drivers/mmc/host/sdhci-pci.h      |  3 +++
->  2 files changed, 39 insertions(+), 6 deletions(-)
->
+>>
+>> --
+>> 1.9.1
+>>
+>>
+>>
+>>
+>>
+>>
+>> *** BLURB HERE ***
+>>
+>> Ulf Hansson (7):
+>>   mmc: core: Retry instead of ignore at CRC errors when polling for busy
+>>   mmc: core: Remove redundant __mmc_send_status()
+>>   mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
+>>   mmc: core: Check SWITCH_ERROR bit from each CMD13 response when
+>>     polling
+>>   mmc: core: Enable __mmc_switch() to change bus speed timing for the
+>>     host
+>>   mmc: core: Allow CMD13 polling when switching to HS mode for mmc
+>>   mmc: core: Update CMD13 polling policy when switch to HS DDR mode
+>>
+>>  drivers/mmc/core/core.c    |  2 +-
+>>  drivers/mmc/core/mmc.c     | 53 +++++++++++++++++++++++-----------------------
+>>  drivers/mmc/core/mmc_ops.c | 51 ++++++++++++++++++++++++++------------------
+>>  drivers/mmc/core/mmc_ops.h |  4 ++--
+>>  4 files changed, 60 insertions(+), 50 deletions(-)
+>>
+>> --
+>> 1.9.1
+>>
 
-Thanks, applied for next!
+I have applied this for next, let's see what the kernelci reports.
+
+More tests is still warmly appreciated, and I can still add
+tested/reviewed-by tags.
 
 Kind regards
 Uffe
