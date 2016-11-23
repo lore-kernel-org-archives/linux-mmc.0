@@ -1,108 +1,100 @@
-From: Jeremy McNicoll <jmcnicol-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 5/5] sdhci: Add quirk for delayed IRQ ACK
-Date: Tue, 22 Nov 2016 21:23:46 -0800
-Message-ID: <a24c780d-424a-8ef0-8daf-01cffc728615@redhat.com>
-References: <1479863388-23678-1-git-send-email-jeremymc@redhat.com>
- <1479863388-23678-6-git-send-email-jeremymc@redhat.com>
- <20161123113647.0b3deac0@xhacker>
- <ecacec51-4b06-49cd-c756-489128729499@redhat.com>
- <20161123121209.3623e14b@xhacker>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
+ Intel byt sdio controller sub-vended by NI
+Date: Wed, 23 Nov 2016 09:35:10 +0200
+Message-ID: <0020c9d8-fcfb-e092-0ec8-5767f4ae7fed@intel.com>
+References: <1479851602-19788-1-git-send-email-zach.brown@ni.com>
+ <1479851602-19788-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161123121209.3623e14b@xhacker>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Cc: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1479851602-19788-3-git-send-email-zach.brown@ni.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2016-11-22 8:12 PM, Jisheng Zhang wrote:
-> On Tue, 22 Nov 2016 19:48:56 -0800 Jeremy McNicoll wrote:
->
->> On 2016-11-22 7:36 PM, Jisheng Zhang wrote:
->>> On Tue, 22 Nov 2016 17:09:48 -0800
->>> Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>>
->>>> On msm8992 it has been observed that IRQs were not getting
->>>> ACK'd correctly when clocked at speeds greater than 400KHz.
->>>>
->>>> Signed-off-by: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>>> ---
->>>>  drivers/mmc/host/sdhci-msm.c |  7 +++++++
->>>>  drivers/mmc/host/sdhci.c     | 12 ++++++++++--
->>>>  drivers/mmc/host/sdhci.h     |  2 ++
->>>>  3 files changed, 19 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>>> index 1fcda96..459003c 100644
->>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>> @@ -1303,6 +1303,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>>>  			       CORE_VENDOR_SPEC_CAPABILITIES0);
->>>>  	}
->>>>
->>>> +	/* Enable delayed IRQ handling workaround on 8992 */
->>>> +	if (core_major == 1 && core_minor == 0x3e) {
->>>> +		/* Add 40us delay in interrupt handler when operating
->>>> +		 * at initialization frequency of 400KHz. */
->>>> +		host->quirks2 |= SDHCI_QUIRK2_SLOW_INT_CLR;
->>>> +	}
->>>> +
->>>>  	/* Setup IRQ for handling power/voltage tasks with PMIC */
->>>>  	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
->>>>  	if (msm_host->pwr_irq < 0) {
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index 5911f98..c1aae22 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -2703,11 +2703,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->>>>  			result = IRQ_WAKE_THREAD;
->>>>  		}
->>>>
->>>> -		if (intmask & SDHCI_INT_CMD_MASK)
->>>> +		if (intmask & SDHCI_INT_CMD_MASK) {
->>>> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
->>>> +				udelay(40);
->>>> +			}
->>>>  			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
->>>> +		}
->>>>
->>>> -		if (intmask & SDHCI_INT_DATA_MASK)
->>>> +		if (intmask & SDHCI_INT_DATA_MASK) {
->>>> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
->>>> +				udelay(40);
->>>> +			}
->>>>  			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
->>>> +		}
->>>>
->>>>  		if (intmask & SDHCI_INT_BUS_POWER)
->>>>  			pr_err("%s: Card is consuming too much power!\n",
->>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>>> index c055e24..5f8301e 100644
->>>> --- a/drivers/mmc/host/sdhci.h
->>>> +++ b/drivers/mmc/host/sdhci.h
->>>> @@ -24,6 +24,8 @@
->>>>   * Controller registers
->>>>   */
->>>>
->>>> +#define SDHCI_QUIRK2_SLOW_INT_CLR	(1<<5)
->>>
->>> IIRC, new quirk isn't allowed now.
->>>
->>
->> Why not?
->
-> IIRC, mmc subsystem will behave as a lib in the long run, so the community
-> and developers call for no new quirk. For your case, we may need to handle
-> the udelay in sdhci-msm.c, export sdhci_irq as a helper function?
->
-Thanks for the details and suggestions.  I am going to wait until the US
-Thanksgiving (and cyber Monday) is over before I do any more.
+On 22/11/16 23:53, Zach Brown wrote:
+> On NI 9037 boards the max SDIO frequency is limited by trace lengths
+> and other layout choices. The max SDIO frequency is stored in an ACPI
+> table.
+> 
+> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+> f_max field of the host.
+> 
+> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+> Reviewed-by: Josh Cartwright <joshc@ni.com>
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 28 ++++++++++++++++++++++++++++
+>  1 file changed, 28 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 9741505..34284b8 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -27,6 +27,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mmc/sdhci-pci-data.h>
+> +#include <linux/acpi.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+> @@ -375,6 +376,30 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+>  	return 0;
+>  }
+>  
+> +#ifdef CONFIG_ACPI
+> +
+> +static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+> +{
+> +	acpi_status status;
+> +	unsigned long long max_freq;
+> +
+> +	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
+> +				       "MXFQ", NULL, &max_freq);
+> +	if (ACPI_FAILURE(status)) {
+> +		dev_err(&slot->chip->pdev->dev,
+> +			"MXFQ not found in acpi table\n");
+> +		return -EINVAL;
+> +	}
+> +
+> +	slot->host->mmc->f_max = max_freq * 1000000;
+> +
+> +	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+> +				 MMC_CAP_WAIT_WHILE_BUSY;
+> +	return 0;
+> +}
+> +
+> +#else
 
--jeremy
+No, it is the ACPI access that needs to be a separate function.  We don't
+want 2 ni_byt_sdio_probe_slot(). Perhaps, something like:
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+#ifdef CONFIG_ACPI
+static int ni_set_max_freq(struct sdhci_pci_slot *slot)
+{
+	acpi_status status;
+	unsigned long long max_freq;
+
+	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
+				       "MXFQ", NULL, &max_freq);
+	if (ACPI_FAILURE(status))
+		dev_err(&slot->chip->pdev->dev,
+			"MXFQ not found in acpi table\n");
+		return -EINVAL;
+	}
+
+	slot->host->mmc->f_max = max_freq * 1000000;
+
+	return 0;
+}
+#else
+static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
+{
+	return 0;
+}
+#endif
