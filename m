@@ -1,80 +1,57 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v2 1/2] mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller sub-vended by NI
-Date: Tue, 22 Nov 2016 15:53:21 -0600
-Message-ID: <1479851602-19788-2-git-send-email-zach.brown@ni.com>
-References: <1479851602-19788-1-git-send-email-zach.brown@ni.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v9 00/16] mmc: sdhci-msm: Add clk-rates, DDR, HS400
+ support
+Date: Wed, 23 Nov 2016 05:35:25 +0530
+Message-ID: <6dd874b4-8f60-471b-d1e7-089b4b035ad2@codeaurora.org>
+References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
+ <CAPDyKFrRbf0+G5K=-jsaevAGbTqhTAss2zJv3QdiyCrv0BG-zA@mail.gmail.com>
+ <d4d05fb9-8a9e-6cf2-dc63-0edbd27a9e55@codeaurora.org>
+ <20161121231138.GY25626@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod3.natinst.com ([130.164.80.24]:59893 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932231AbcKVXLf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Nov 2016 18:11:35 -0500
-In-Reply-To: <1479851602-19788-1-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <20161121231138.GY25626@codeaurora.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Gross <andy.gross@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, David Brown <david.brown@linaro.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Asutosh Das <asutoshd@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Rajendra Nayak <rnayak@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-Add PCI ID for Intel byt sdio host controller sub-vended by NI.
 
-The controller has different behavior because of the board layout NI
-puts it on.
 
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+On 11/22/2016 4:41 AM, Stephen Boyd wrote:
+> On 11/21, Ritesh Harjani wrote:
+>>
+>>
+>> On 11/21/2016 3:36 PM, Ulf Hansson wrote:
+>>> On 21 November 2016 at 07:37, Ritesh Harjani <riteshh@codeaurora.org> wrote:
+>>>> Hi,
+>>>>
+>>>> This is v9 version of the patch series which adds support for MSM8996.
+>>>> Adds HS400 driver support as well.
+>>>> These are tested on internal msm8996 & db410c HW.
+>>>>
+>>>> The patch series is ready. Do we think we can apply these
+>>>> patches for next now?
+>>>
+>>> I guess the DTS changes can be picked up by Andy, so they can go via arm-soc?
+>> Yes.
+>>
+>>>
+>>> Then, does the mmc changes depend on the clock changes? If so, I can
+>>> pick them as well, but then I need an ack from Stephen....
+>> Ideal and preferable, would be that clk & mmc changes go in
+>> together. But either ways should be fine.
+>>
+>
+> There's only a runtime dependency where the clk rates will be
+> wrong if clk tree isn't merged. I'd rather just apply the clk
+> ones directly to clk tree and let all three trees come together
+> in linux-next and work.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1d9e00a..9741505 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -375,6 +375,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 	return 0;
- }
- 
-+static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-+				 MMC_CAP_WAIT_WHILE_BUSY;
-+	return 0;
-+}
-+
- static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-@@ -447,6 +454,15 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
- 	.ops		= &sdhci_intel_byt_ops,
- };
- 
-+static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			  SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.allow_runtime_pm = true,
-+	.probe_slot	= ni_byt_sdio_probe_slot,
-+	.ops		= &sdhci_intel_byt_ops,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-@@ -1079,6 +1095,14 @@ static const struct pci_device_id pci_ids[] = {
- 	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
- 		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
-+		.subvendor	= PCI_VENDOR_ID_NI,
-+		.subdevice	= 0x7884,
-+		.driver_data	= (kernel_ulong_t)&sdhci_ni_byt_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
- 		.subvendor	= PCI_ANY_ID,
- 		.subdevice	= PCI_ANY_ID,
- 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+Ok great! So can we queue this patch series to next?
+>
+
 -- 
-2.7.4
-
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
