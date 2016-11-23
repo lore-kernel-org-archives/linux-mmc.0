@@ -1,148 +1,210 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/7] mmc: core: Re-work CMD13 polling method for CMD6
- for mmc
-Date: Wed, 23 Nov 2016 13:50:13 +0100
-Message-ID: <CAPDyKFrbE2NWQcMtjsTmEhQ8UX7YvyWKNGM2P+v+UjPC8H-R4w@mail.gmail.com>
-References: <1479848173-20881-1-git-send-email-ulf.hansson@linaro.org> <CAPDyKFp8PwbZeCYkp6eoAv1zKEcdJ6wFtozXWErn_NFPferJCw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: delete is_first_req parameter from pre-request callback
+Date: Wed, 23 Nov 2016 14:02:23 +0100
+Message-ID: <CAPDyKFqgLJL46aZSfgUpm3KydBF6b2a93y4101VdzgEsc1c5qg@mail.gmail.com>
+References: <1479895344-16818-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:36080 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934958AbcKWMuR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2016 07:50:17 -0500
-Received: by mail-wm0-f41.google.com with SMTP id g23so76618288wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2016 04:50:16 -0800 (PST)
-In-Reply-To: <CAPDyKFp8PwbZeCYkp6eoAv1zKEcdJ6wFtozXWErn_NFPferJCw@mail.gmail.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35991 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935439AbcKWNC0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2016 08:02:26 -0500
+Received: by mail-wm0-f46.google.com with SMTP id g23so77065443wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2016 05:02:26 -0800 (PST)
+In-Reply-To: <1479895344-16818-1-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-On 22 November 2016 at 22:01, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 22 November 2016 at 21:56, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> Changes in v2:
->>
->>         - From discussions around the difficulties for how to support CMD13
->>         polling for HS200, HS400 HS400ES, I decided to drop those patches for
->>         now. It's is particularly due to the need for tuning, after a speed mode
->>         switch, that makes it hard to rely on CMD13 polling for these cases.
->>         Perhaps we can allow CMD13 polling when switching to the intermediate
->>         speed modes, but let's deal with that outside of this series.
->>
->>         - Folded in a new patch, which checks the SWITCH_ERROR bit in each
->>           CMD13 response when polling with CMD13. Patch v2 4/7.
->>
->>         - No other changes made to the rest of the series.
->>
->>
->>
->> Several changes has been made for how and when to use CMD13 as a
->> polling-method, to find out when the mmc cards stops signaling busy after
->> sending a CMD6. This particularly concerns the cases when switching to new bus
->> speed modes, such as HS (high-speed), HS DDR, HS200, HS400 and HS400ES.
->>
->> Currently CMD13 polling is *not* allowed for these cases, but this was recently
->> changed - and which did cause regressions for card detection for some
->> platforms.
->>
->> A simple fix was made to solve these regressions, simply by using a default
->> CMD6 generic timeout of 500ms, as to avoid using the fall-back timeout in
->> __mmc_switch() of 10min. That greatly improve the situation and one could
->> consider the regressions as "solved".
->>
->> However, this simple fix is still causing unnecessary long card initialization
->> times, especially for those mmc hosts that doesn't support HW busy detection
->> (using MMC_CAP_WAIT_WHILE_BUSY and/or implements the ->card_busy() host ops).
->>
->> This because we wait a fixed amount of time (CMD6 generic timeout) to make sure
->> the card is done signaling busy, while in practice this happens a lot sooner.
->>
->> A couple of tests for HS and HS DDR eMMC cards, shows the card only need a few
->> ms to complete the bus speed mode changes, thus it's far less than the CMD6
->> generic timeout.
->>
->> To improve this behaviour and shorten the card initialization time, we need to
->> allow using CMD13 as polling method to find out when the card stops signaling
->> busy. Although, enabling CMD13 polling may also introduce other issues as
->> according to the JEDEC spec, it's not the recommended method. Especially it
->> mentions that CRC errors may be triggered when sending a CMD13 command during a
->> bus timing change.
->>
->> To deal with these issues, we need to change from ignoring those CRC errors but
->> instead continue to treat the card as being busy and continue to poll with
->> CMD13. Perhaps this behaviour is one of reasons to why the earlier CMD13 polling
->> method didn't work out well.
->>
->> This series requires extensive testing, please help with that!
->>
->> I have currently tested it with HS and HS DDR eMMC cards, and for combinations
->> of an mmc hosts (mmci) supporting HW busy detection and not (local hacks in
->> mmci.c).
->>
->>
->> Ulf Hansson (9):
->>   mmc: core: Retry instead of ignore at CRC errors when polling for busy
->>   mmc: core: Remove redundant __mmc_send_status()
->>   mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
->>   mmc: core: Enable __mmc_switch() to change bus speed timing for the
->>     host
->>   mmc: core: Allow CMD13 polling when switching to HS mode for mmc
->>   mmc: core: Update CMD13 polling policy when switch to HS DDR mode
->>   mmc: core: Allow CMD13 polling when switch to HS200 mode
->>   mmc: core: Allow CMD13 polling when switch to HS400 mode
->>   mmc: core: Allow CMD13 polling when switch to HS400ES mode
->>
->>  drivers/mmc/core/core.c    |   2 +-
->>  drivers/mmc/core/mmc.c     | 156 ++++++++++++++-------------------------------
->>  drivers/mmc/core/mmc_ops.c |  45 +++++++------
->>  drivers/mmc/core/mmc_ops.h |   4 +-
->>  4 files changed, 77 insertions(+), 130 deletions(-)
+On 23 November 2016 at 11:02, Linus Walleij <linus.walleij@linaro.org> wrote:
+> The void (*pre_req) callback in the struct mmc_host_ops vtable
+> is passing an argument "is_first_req" indicating whether this is
+> the first request or not.
 >
-> Oops, forgot to clean up the cover letter. Please ignore the summary
-> of changes above. It's the below changes that are the v2 series.
+> None of the in-kernel users use this parameter: instead, since
+> they all just do variants of dma_map* they use the DMA cookie
+> to indicate whether a pre* callback has already been done for
+> a request when they decide how to handle it.
 >
-> Apologize for the inconvenience!
+> Delete the parameter from the callback and all users, as it is
+> just pointless cruft.
 >
-> Kind regards
-> Uffe
->
->>
->> --
->> 1.9.1
->>
->>
->>
->>
->>
->>
->> *** BLURB HERE ***
->>
->> Ulf Hansson (7):
->>   mmc: core: Retry instead of ignore at CRC errors when polling for busy
->>   mmc: core: Remove redundant __mmc_send_status()
->>   mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
->>   mmc: core: Check SWITCH_ERROR bit from each CMD13 response when
->>     polling
->>   mmc: core: Enable __mmc_switch() to change bus speed timing for the
->>     host
->>   mmc: core: Allow CMD13 polling when switching to HS mode for mmc
->>   mmc: core: Update CMD13 polling policy when switch to HS DDR mode
->>
->>  drivers/mmc/core/core.c    |  2 +-
->>  drivers/mmc/core/mmc.c     | 53 +++++++++++++++++++++++-----------------------
->>  drivers/mmc/core/mmc_ops.c | 51 ++++++++++++++++++++++++++------------------
->>  drivers/mmc/core/mmc_ops.h |  4 ++--
->>  4 files changed, 60 insertions(+), 50 deletions(-)
->>
->> --
->> 1.9.1
->>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-I have applied this for next, let's see what the kernelci reports.
-
-More tests is still warmly appreciated, and I can still add
-tested/reviewed-by tags.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/core.c           | 11 ++++-------
+>  drivers/mmc/host/dw_mmc.c         |  3 +--
+>  drivers/mmc/host/jz4740_mmc.c     |  3 +--
+>  drivers/mmc/host/mmci.c           |  3 +--
+>  drivers/mmc/host/mtk-sd.c         |  3 +--
+>  drivers/mmc/host/omap_hsmmc.c     |  3 +--
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |  3 +--
+>  drivers/mmc/host/sdhci.c          |  3 +--
+>  include/linux/mmc/host.h          |  3 +--
+>  9 files changed, 12 insertions(+), 23 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 67e262315a50..faeea26efba5 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -611,18 +611,15 @@ EXPORT_SYMBOL(mmc_is_req_done);
+>   *     mmc_pre_req - Prepare for a new request
+>   *     @host: MMC host to prepare command
+>   *     @mrq: MMC request to prepare for
+> - *     @is_first_req: true if there is no previous started request
+> - *                     that may run in parellel to this call, otherwise false
+>   *
+>   *     mmc_pre_req() is called in prior to mmc_start_req() to let
+>   *     host prepare for the new request. Preparation of a request may be
+>   *     performed while another request is running on the host.
+>   */
+> -static void mmc_pre_req(struct mmc_host *host, struct mmc_request *mrq,
+> -                bool is_first_req)
+> +static void mmc_pre_req(struct mmc_host *host, struct mmc_request *mrq)
+>  {
+>         if (host->ops->pre_req)
+> -               host->ops->pre_req(host, mrq, is_first_req);
+> +               host->ops->pre_req(host, mrq);
+>  }
+>
+>  /**
+> @@ -667,7 +664,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>
+>         /* Prepare a new request */
+>         if (areq)
+> -               mmc_pre_req(host, areq->mrq, !host->areq);
+> +               mmc_pre_req(host, areq->mrq);
+>
+>         if (host->areq) {
+>                 status = mmc_wait_for_data_req_done(host, host->areq->mrq, areq);
+> @@ -696,7 +693,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>
+>                         /* prepare the request again */
+>                         if (areq)
+> -                               mmc_pre_req(host, areq->mrq, !host->areq);
+> +                               mmc_pre_req(host, areq->mrq);
+>                 }
+>         }
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4fcbc4012ed0..969acbf0740c 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -883,8 +883,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
+>  }
+>
+>  static void dw_mci_pre_req(struct mmc_host *mmc,
+> -                          struct mmc_request *mrq,
+> -                          bool is_first_req)
+> +                          struct mmc_request *mrq)
+>  {
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 684087db170b..819ad32964fc 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -320,8 +320,7 @@ static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
+>  }
+>
+>  static void jz4740_mmc_pre_request(struct mmc_host *mmc,
+> -                                  struct mmc_request *mrq,
+> -                                  bool is_first_req)
+> +                                  struct mmc_request *mrq)
+>  {
+>         struct jz4740_mmc_host *host = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index df990bb8c873..1ddbb64e385a 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -684,8 +684,7 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+>         next->dma_chan = NULL;
+>  }
+>
+> -static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq,
+> -                            bool is_first_req)
+> +static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct mmci_host *host = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 84e9afcb5c09..db185441966d 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -927,8 +927,7 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 msdc_start_command(host, mrq, mrq->cmd);
+>  }
+>
+> -static void msdc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> -               bool is_first_req)
+> +static void msdc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct msdc_host *host = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 5f2f24a7360d..ad11c4cc12ed 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1565,8 +1565,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+>         }
+>  }
+>
+> -static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> -                              bool is_first_req)
+> +static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct omap_hsmmc_host *host = mmc_priv(mmc);
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 3ccaa1415f33..ecb99a8d2fa2 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -190,8 +190,7 @@ static int sd_pre_dma_transfer(struct realtek_pci_sdmmc *host,
+>         return using_cookie;
+>  }
+>
+> -static void sdmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> -               bool is_first_req)
+> +static void sdmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+>         struct mmc_data *data = mrq->data;
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 48055666c655..eefe5ed73822 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2190,8 +2190,7 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+>         data->host_cookie = COOKIE_UNMAPPED;
+>  }
+>
+> -static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> -                              bool is_first_req)
+> +static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct sdhci_host *host = mmc_priv(mmc);
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 5310f94be0ab..fdd13e0b8ec8 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -93,8 +93,7 @@ struct mmc_host_ops {
+>          */
+>         void    (*post_req)(struct mmc_host *host, struct mmc_request *req,
+>                             int err);
+> -       void    (*pre_req)(struct mmc_host *host, struct mmc_request *req,
+> -                          bool is_first_req);
+> +       void    (*pre_req)(struct mmc_host *host, struct mmc_request *req);
+>         void    (*request)(struct mmc_host *host, struct mmc_request *req);
+>
+>         /*
+> --
+> 2.7.4
+>
