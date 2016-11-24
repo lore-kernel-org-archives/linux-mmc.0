@@ -1,208 +1,178 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Thu, 24 Nov 2016 23:37:37 +0800
-Message-ID: <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
- <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com>
- <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add sdhci_reset() implementation
+Date: Thu, 24 Nov 2016 21:36:54 +0530
+Message-ID: <95ef8403-5e3c-4219-f45e-e289cf59f1b8@codeaurora.org>
+References: <20161122155005.16910-1-georgi.djakov@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:52690 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S965802AbcKXPig (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 10:38:36 -0500
-In-Reply-To: <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20161122155005.16910-1-georgi.djakov@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>
 
-Hi Ulf,
+Hi Georgi,
 
-On 2016/11/24 22:33, Ulf Hansson wrote:
-> [...]
-> 
->>>
->>>>
->>>> +
->>>> +static int __xenon_emmc_delay_adj_test(struct mmc_card *card)
->>>> +{
->>>> +       int err;
->>>> +       u8 *ext_csd = NULL;
->>>> +
->>>> +       err = mmc_get_ext_csd(card, &ext_csd);
->>>> +       kfree(ext_csd);
->>>
->>> Why do you read the ext csd here?
->>>
->>    I would like to simply introduce the PHY setting of our SDHC.
->>    The target of the PHY setting is to achieve a perfect sampling
->>    point for transfers, during card initialization.
-> 
-> Okay, so the phy is involved when running the tuning sequence.
-> 
-    Actually, all the transfers pass our host PHY.
+I collected some info on this problem. May be below info might help you.
 
->>
->>    For HS200/HS400/SDR104 whose SDCLK is more than 50MHz, SDHC HW
->>    will search for this sampling point with DLL's help.
-> 
-> Apologize for my ignorance, but what is a "DLL" in this case?
-> 
-   DLL is Delay-locked Loop. It is a HW module similar to PLL.
 
->>
->>    For other speed mode whose SDLCK is less than or equals to 50MHz,
->>    SW has to scan the PHY delay line to find out this perfect sampling
->>    point. Our driver sends a command to verify a sampling point
->>    in current environment.
-> 
-> Ahh, okay! I guess the important part here is to not only send a
-> command, but also to make sure data becomes transferred on the DAT
-> lines, as to confirm your tuning sequence!?
+I think "Reset 0x1" problem is occurring because of below call stack.
+SDHCI_RESET_ALL to SDHCI_SOFTWARE_RESET register will anyway trigger the 
+sdhci_msm_pwr_irq.
 
-   Yes.
-   It is the best if the test command can transfer on DAT lines.
+But I think the problem is that the above occurs in spinlock context
+and because of only one core the IRQ will never be serviced, hence you 
+were seeing (Reset 0x1) error.
 
-> 
-> In cases of HS200/HS400/SDR104 you should be able to use the
-> mmc_send_tuning() API, don't you think?
 
-   For HS200/HS400/SDR104, we finally call sdhci_execute_tuning() to
-   execute tuning. Those test commands are not used.
-   In HS200/HS400/SDR104, HW will provide our host driver with suitable
-   tuning step. Our host driver set the tuning step in SDHCI register and
-   then start standard tuning sequence. The tuning step value provided
-   by our host HW will enhance tuning. 
+[   12.583245] systemd-journald[1236]: Received SIGTERM from PID 1 
+(systemd-shutdow).
+[   12.673684] EXT4-fs (mmcblk0p10): re-mounted. Opts: data=ordered
+[   12.678224] EXT4-fs (mmcblk0p10): re-mounted. Opts: data=ordered
+[   13.698330] mmc0: Reset 0x1 never completed.
+[   13.698353] sdhci: =========== REGISTER DUMP (mmc0)===========
+[   13.701659] sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
+[   13.707301] sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
+[   13.713117] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+[   13.718933] sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
+[   13.724750] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[   13.730564] sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
+[   13.736381] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+[   13.742197] sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+[   13.748012] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+[   13.753830] sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
+[   13.759644] sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
+[   13.765461] sdhci: Host ctl2: 0x00000000
+[   13.771275] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+[   13.775357] sdhci: ===========================================
+[   13.781698] CPU: 0 PID: 1 Comm: systemd-shutdow Not tainted 
+4.9.0-rc5-00222-g59ac3c0-dirty #9
+[   13.787514] Hardware name: Qualcomm Technologies, Inc. APQ 8016 SBC (DT)
+[   13.796104] Call trace:
+[   13.802878] [<ffff0000080882c4>] dump_backtrace+0x0/0x1a8
+[   13.805049] [<ffff000008088480>] show_stack+0x14/0x1c
+[   13.810602] [<ffff000008366274>] dump_stack+0x8c/0xb0
+[   13.815640] [<ffff00000870eab0>] sdhci_reset+0xd8/0x114
+[   13.820670] [<ffff00000870ee30>] sdhci_do_reset+0x48/0x7c
+[   13.825706] [<ffff00000870ef20>] sdhci_init+0xbc/0x110
+[   13.831260] [<ffff000008710c44>] sdhci_set_ios+0x68/0x59c
+[   13.836299] [<ffff0000086f95f4>] mmc_set_initial_state+0xc0/0xcc
+[   13.841767] [<ffff0000086f983c>] mmc_power_off.part.22+0x28/0x40
+[   13.847841] [<ffff0000086f9b5c>] mmc_power_off+0x14/0x1c
+[   13.853832] [<ffff0000086fc754>] _mmc_suspend+0x1e4/0x260
+[   13.859127] [<ffff0000086fe104>] mmc_shutdown+0x2c/0x60
+[   13.864421] [<ffff0000086faa00>] mmc_bus_shutdown+0x40/0x74
+[   13.869458] [<ffff0000084f9280>] device_shutdown+0xf0/0x1a8
+[   13.875013] [<ffff0000080db908>] kernel_restart_prepare+0x34/0x3c
+[   13.880568] [<ffff0000080db9e4>] kernel_restart+0x14/0x74
+[   13.886817] [<ffff0000080dbd2c>] SyS_reboot+0x178/0x244
+[   13.892198] [<ffff000008082ef0>] el0_svc_naked+0x24/0x28
+[   13.897300] mmc0: sdhci_msm_pwr_irq:
+[   13.902799] mmc0: sdhci_msm_voltage_switch: irq_status 9
+[   13.906355] mmc0: sdhci_msm_voltage_switch: irq_status 9, irq_ack 5
 
-> 
-> For the other cases (lower speed modes) which cards doesn't support
-> the tuning command, perhaps you can just assume the PHY scan succeeded
-> and then allow to core to continue with the card initialization
-> sequence? Or do you foresee any issues with that? My point is that, if
-> it will fail - it will fail anyway.
 
-  Usually, our host driver will always successfully scan and select a
-  perfect sampling point.
-  If driver cannot find any suitable sampling point, it is likely that
-  transfers will also fail after init. But usually it is a issue, caused by
-  incorrect setting on boards/SOC/other PHY parameters, especially in development.
-  We will fix the issue and then scan will succeed in final product.
+To prove above I tried this and the problem goes away. But I still dont 
+think that the below approach is correct. As it will still trigger a 
+pwr_irq as well.
 
-> 
->>
->>    As result, our SDHC driver has to implement the functionality to
->>    send commands and check the results, in host layer.
->>    If directly calling mmc_wait_for_cmd() is improper, could you please
->>    give us some suggestions?
->>
->>    For eMMC, CMD8 is used to test current sampling point set in PHY.
-> 
-> Try to use mmc_send_tuning().
-> 
 
-    Could you please tell me the requirement of "op_code" parameter in
-    mmc_send_tuning()?
-    According to mmc_send_tuning(),it seems that tuning command(CMD19/CMD21)
-    is required. Thus device will not response mmc_send_tuning() if current
-    speed mode doesn't support tuning command.
-    Please correct me if I am wrong.
-    
->>
->>>> +
->>>> +       return err;
->>>> +}
->>>> +
->>>> +static int __xenon_sdio_delay_adj_test(struct mmc_card *card)
->>>> +{
->>>> +       struct mmc_command cmd = {0};
->>>> +       int err;
->>>> +
->>>> +       cmd.opcode = SD_IO_RW_DIRECT;
->>>> +       cmd.flags = MMC_RSP_R5 | MMC_CMD_AC;
->>>> +
->>>> +       err = mmc_wait_for_cmd(card->host, &cmd, 0);
->>>> +       if (err)
->>>> +               return err;
->>>> +
->>>> +       if (cmd.resp[0] & R5_ERROR)
->>>> +               return -EIO;
->>>> +       if (cmd.resp[0] & R5_FUNCTION_NUMBER)
->>>> +               return -EINVAL;
->>>> +       if (cmd.resp[0] & R5_OUT_OF_RANGE)
->>>> +               return -ERANGE;
->>>> +       return 0;
->>>
->>> No thanks! MMC/SD/SDIO protocol code belongs in the core.
->>>
->>    For SDIO, SD_IO_RW_DIRECT command is sent to test current sampling point
->>    in PHY.
->>    Please help provide some suggestion to implement the command transfer.
-> 
-> Again, I think mmc_send_tuning() should be possible for you to use.
-> 
-> [...]
-> 
->>>> +       if (mmc->card)
->>>> +               card = mmc->card;
->>>> +       else
->>>> +               /*
->>>> +                * Only valid during initialization
->>>> +                * before mmc->card is set
->>>> +                */
->>>> +               card = priv->card_candidate;
->>>> +       if (unlikely(!card)) {
->>>> +               dev_warn(mmc_dev(mmc), "card is not present\n");
->>>> +               return -EINVAL;
->>>> +       }
->>>
->>> That your host need to hold a copy of the card pointer, tells me that
->>> something is not really correct.
->>>
->>> I might be wrong, if this turns out to be a special case, but I doubt
->>> it. Although, if it *is* a special such case, we shall most likely try
->>> to extend the the mmc core layer instead of adding all these hacks in
->>> your host driver.
->>>
->>     This card pointer copies the temporary structure mmc_card
->>     used in mmc_init_card(), mmc_sd_init_card() and mmc_sdio_init_card().
->>     Since we call mmc_wait_for_cmd() to send test commands, we need a copy
->>     of that temporary mmc_card here in our host driver.
-> 
-> I see, thanks for clarifying.
-> 
->>
->>     During PHY setting in card initialization, mmc_host->card is not updated
->>     yet with that temporary mmc_card. Thus we are not able to directly use
->>     mmc_host->card. Instead, this card pointer is introduced to enable
->>     mmc_wait_for_cmd().
->>
->>     If we can improve our host driver to send test commands without mmc_card,
->>     this card pointer can be removed.
->>     Could you please share your opinion please?
-> 
-> The mmc_send_tuning() API takes the mmc_host as parameter. If you
-> convert to that, perhaps you would be able to remove the need to hold
-> the card pointer.
-> 
-> BTW, the reason why mmc_send_tuning() doesn't take the card as a
-> parameter, is exactly those you just described above.
-> 
-   Got it.
-   Thanks a lot for the information.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 62aedf1..01e611c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -174,6 +174,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+                 /* Reset-all turns off SD Bus Power */
+                 if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+                         sdhci_runtime_pm_bus_off(host);
++               if (host->ops->voltage_switch)
++                       host->ops->voltage_switch(host);
+         }
 
-   Thank you for the great help.
+         /* Wait max 100 ms */
 
-Best regards,
-Hu Ziji
 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+
+On 11/22/2016 9:20 PM, Georgi Djakov wrote:
+> On apq8016, apq8084 and apq8074 platforms, when we want to do a
+> software reset, we need to poke some additional vendor specific
+> registers. If we don't do so, the following error message appears:
+>
+> mmc0: Reset 0x1 never completed.
+> sdhci: =========== REGISTER DUMP (mmc0)===========
+> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
+> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
+> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
+> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
+> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
+> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
+> sdhci: Host ctl2: 0x00000000
+> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+> sdhci: ===========================================
+>
+> Fix it by implementing the custom sdhci_reset() function,
+> which does what is needed.
+>
+> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 19 ++++++++++++++++++-
+>  1 file changed, 18 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 8ef44a2a2fd9..87a124a37408 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -505,6 +505,23 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
+>  	return IRQ_HANDLED;
+>  }
+>
+> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	if (mask & SDHCI_RESET_ALL) {
+> +		u32 val = readl_relaxed(msm_host->core_mem + CORE_POWER);
+> +
+> +		val |= CORE_SW_RST;
+> +		writel_relaxed(val, msm_host->core_mem + CORE_POWER);
+Not required as sdhci_reset register should anyway reset and trigger a 
+pwr_irq. Because you are not servicing that IRQ the problem is present.
+
+> +
+> +		sdhci_msm_voltage_switch(host);
+> +	}
+> +
+> +	sdhci_reset(host, mask);
+This I think is sufficient.
+
+> +}
+> +
+>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>  	{ .compatible = "qcom,sdhci-msm-v4" },
+>  	{},
+> @@ -514,7 +531,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>
+>  static const struct sdhci_ops sdhci_msm_ops = {
+>  	.platform_execute_tuning = sdhci_msm_execute_tuning,
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_msm_reset,
+>  	.set_clock = sdhci_set_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
