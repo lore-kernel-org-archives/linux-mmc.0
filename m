@@ -1,36 +1,52 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH mmc/next] mmc: sh_mobile_sdhi: remove support for sh7372
-Date: Thu, 24 Nov 2016 11:53:30 +0100
-Message-ID: <CAMuHMdU4Pj99NF4xLHqa4fjEVSyMtFDqN8Y2jKpGU+BsGrQ+vg@mail.gmail.com>
-References: <1479984534-25468-1-git-send-email-horms+renesas@verge.net.au>
+From: Ziji Hu <huziji@marvell.com>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC
+Date: Thu, 24 Nov 2016 18:57:18 +0800
+Message-ID: <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
+ <2204525.IWIYQVjIXl@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1479984534-25468-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2204525.IWIYQVjIXl@wuerfel>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Nov 24, 2016 at 11:48 AM, Simon Horman
-<horms+renesas@verge.net.au> wrote:
-> Remove documentation of support for the SH7372 (SH-Mobile AP4) from the MMC
-> driver. The driver itself appears to have no SH7372 specific code.
->
-> Commit edf4100906044225 ("ARM: shmobile: sh7372 dtsi: Remove Legacy file")
-> removes this SoC from the kernel in v4.1.
->
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+Hi Arnd,
 
-Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
+On 2016/11/24 17:56, Arnd Bergmann wrote:
+> On Monday, October 31, 2016 12:09:56 PM CET Gregory CLEMENT wrote:
+>> From: Ziji Hu <huziji@marvell.com>
+>>
+>> Marvell Xenon eMMC/SD/SDIO Host Controller contains PHY.
+>> Three types of PHYs are supported.
+>>
+>> Add support to multiple types of PHYs init and configuration.
+>> Add register definitions of PHYs.
+>>
+>> Signed-off-by: Hu Ziji <huziji@marvell.com>
+>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>>
+> 
+> Please explain in the changelog why this is not a generic
+> phy driver (or three of them).
+> 
+	Actually we tried to put the PHY code into Linux PHY framework.
+	But it cannot fit in Linux common PHY framework.
 
-Gr{oetje,eeting}s,
+	Our Xenon SDHC PHY register is a part of Xenon SDHC register set.
+	Besides, during MMC initialization, MMC sequence has to call several PHY functions to complete timing setting.
+	In those PHY setting functions, they have to access SDHC register and know current MMC setting, such as bus width, clock frequency and speed mode.
+	As a result, we have to implement PHY under MMC directory.
 
-                        Geert
+	Thank you.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Best regards,
+Hu Ziji
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> 	Arnd
+> 
