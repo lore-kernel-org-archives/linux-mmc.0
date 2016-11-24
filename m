@@ -1,56 +1,44 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH 5/10] dt: bindings: Add bindings for Marvell Xenon SD Host Controller
-Date: Thu, 24 Nov 2016 10:49:23 +0100
-Message-ID: <CAPv3WKddPHgpRU2_tVoDF=5Z-nqfFPxjgJ-+z9o-1tR2=fFvAA@mail.gmail.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <4031579.CBE32NHUoW@wuerfel> <877f7tmduw.fsf@free-electrons.com>
- <28082657.RK5ubAe11Q@wuerfel> <8737ihmctr.fsf@free-electrons.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: block: delete packed command support
+Date: Thu, 24 Nov 2016 10:50:55 +0100
+Message-ID: <CACRpkdZqL0b9i0r+TwRVYD-uw5PuoNbOsxKoghtHam+Wawp1Rg@mail.gmail.com>
+References: <CGME20161123154834epcas3p479d3731e59db07c42688b323cd37104e@epcas3p4.samsung.com>
+ <1479916086-26641-1-git-send-email-linus.walleij@linaro.org> <0e12314b-e1ce-d2ce-1136-02465fdbead4@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8737ihmctr.fsf@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian Hesselbarth <sebastian.he>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:35667 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935913AbcKXJu5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 04:50:57 -0500
+Received: by mail-qk0-f171.google.com with SMTP id n204so43944049qke.2
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Nov 2016 01:50:56 -0800 (PST)
+In-Reply-To: <0e12314b-e1ce-d2ce-1136-02465fdbead4@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
 
-Hi Gregory,
+On Thu, Nov 24, 2016 at 6:24 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
 
-2016-11-24 10:44 GMT+01:00 Gregory CLEMENT <gregory.clement@free-electrons.com>:
-> Hi Arnd,
+>> Cc: Namjae Jeon <namjae.jeon@samsung.com>
+>> Cc: Maya Erez <qca_merez@qca.qualcomm.com>
+>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 >
->  On jeu., nov. 24 2016, Arnd Bergmann <arnd@arndb.de> wrote:
->
->> On Thursday, November 24, 2016 10:22:31 AM CET Gregory CLEMENT wrote:
->>>
->>> I don't have an option for mmc in general, but using child node do not
->>> fit at all the xenon controller.
->>>
->>> For this controller each slot has its own set of register, so there is
->>> no common ressource to share so no advantage to use it. Using child node
->>> in our case will just make the code more complex for no benefit.
->>
->> If every slot has its own registers, what is it that makes up the
->> 'controller'? It sounds to me that you just have to adjust the terminology
->> and talk about multiple controllers then, with one slot per controller.
->>
->
-> I agree and actually there were some words about in at the begining of
-> the binding:
->
-> "A single Xenon IP can support multiple slots.
-> Each slot acts as an independent SDHC. It owns independent resources, such
-> as register sets clock and PHY.
-> Each slot should have an independent device tree node."
->
-> All the confusion came from the fact that we still need to identify a
-> slot ID. For an obscure reason the hardware can't guess the slot ID from
-> the address register."
->
+> Did i send the acked-by tag? :)
+> I just agreed some this patch's points.
+> When i become assured, i will send the acked-by tag. is this way right?
 
-How about to avoid confusion, by simply renaming this number to
-port-id/xenon-id or anything else but slot? I guess this may allow to
-avoid some misunderstandings.
+As per Documentation/SubmittingPatches, section 12:
 
-Best regards,
-Marcin
+--------------------------
+Acked-by: is not as formal as Signed-off-by:.  It is a record that the acker
+has at least reviewed the patch and has indicated acceptance.  Hence patch
+mergers will sometimes manually convert an acker's "yep, looks good to me"
+into an Acked-by: (but note that it is usually better to ask for an
+explicit ack).
+---------------------------
+
+Yours,
+Linus Walleij
