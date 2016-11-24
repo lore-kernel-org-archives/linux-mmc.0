@@ -1,77 +1,34 @@
-From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH 5/10] dt: bindings: Add bindings for Marvell Xenon SD Host Controller
-Date: Thu, 24 Nov 2016 10:22:31 +0100
-Message-ID: <877f7tmduw.fsf@free-electrons.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
-        <87d1hno2d7.fsf@free-electrons.com>
-        <CAPDyKFpoifsKkse7Fc-bbZAoa=QGT=9QOQ-4D=f60ptx0hzZsA@mail.gmail.com>
-        <4031579.CBE32NHUoW@wuerfel>
+Date: Thu, 24 Nov 2016 10:34:27 +0100
+Message-ID: <28082657.RK5ubAe11Q@wuerfel>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com> <4031579.CBE32NHUoW@wuerfel> <877f7tmduw.fsf@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4031579.CBE32NHUoW@wuerfel> (Arnd Bergmann's message of "Thu, 24
-        Nov 2016 10:11:19 +0100")
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc@vger.kernel.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "devicetree@vger.kernel.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "Jack(SH) Zhu" <jmzhu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shiwu Zhang <zhangshw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xi>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.135]:53209 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934194AbcKXJfX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 04:35:23 -0500
+In-Reply-To: <877f7tmduw.fsf@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>d
 
-Hi Arnd,
- 
- On jeu., nov. 24 2016, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+On Thursday, November 24, 2016 10:22:31 AM CET Gregory CLEMENT wrote:
+> 
+> I don't have an option for mmc in general, but using child node do not
+> fit at all the xenon controller.
+> 
+> For this controller each slot has its own set of register, so there is
+> no common ressource to share so no advantage to use it. Using child node
+> in our case will just make the code more complex for no benefit.
 
-> On Thursday, November 24, 2016 10:05:45 AM CET Ulf Hansson wrote:
->> > You also mentioned other bindings using child nodes, but for this one
->> > we have one controller with only one set of register with multiple slots
->> > (Atmel is an example). Here each slot have it own set of register.
->> >
->> > Actually giving the fact that each slot is controlled by a different set
->> > of register I wonder why the hardware can't also deduce the slot number
->> > from the address register. For me it looks like an hardware bug but we
->> > have to deal with it.
->> >
->> > Do you still think we needchild node here?
->> 
->> Using child-nodes for slots like what's done in the atmel case, is
->> currently broken. I would recommend to avoid using child-nodes for
->> slots, if possible.
->> 
->> To give you some more background, currently the mmc core treats child
->> nodes as embedded non-removable cards or SDIO funcs. However, we can
->> change to make child-nodes also allowed to describe slots, but it
->> requires a specific compatible for "slots" and of course then we also
->> need to update the DT parsing of the child-nodes in the mmc core.
->> 
->> Documentation/devicetree/bindings/mmc/mmc.txt
->> Documentation/devicetree/bindings/mmc/mmc-card.txt
->
-> I don't see anything wrong with having child nodes for the slots
-> even with the current binding, under one condition:
->
-> The mmc.txt binding above must refer only to the child node, while
-> the parent node conceptually becomes a plain bus or MFD that
-> happens to encapsulate multiple MMC host controllers, and possibly
-> provides some shared registers to them.
+If every slot has its own registers, what is it that makes up the
+'controller'? It sounds to me that you just have to adjust the terminology
+and talk about multiple controllers then, with one slot per controller.
 
+	Arnd
 
-I don't have an option for mmc in general, but using child node do not
-fit at all the xenon controller.
-
-For this controller each slot has its own set of register, so there is
-no common ressource to share so no advantage to use it. Using child node
-in our case will just make the code more complex for no benefit.
-
-Gregory
-
->
-> 	Arnd
-
--- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
