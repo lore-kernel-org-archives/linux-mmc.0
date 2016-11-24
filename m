@@ -1,79 +1,43 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 3/3] mmc: dw_mmc: display the clock message only one time when
- card is polling
-Date: Thu, 24 Nov 2016 20:04:42 +0900
-Message-ID: <20161124110442.22058-3-jh80.chung@samsung.com>
-References: <20161124110442.22058-1-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:59475 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937926AbcKXLFC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 06:05:02 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OH5034GM83XHCD0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Nov 2016 20:04:45 +0900 (KST)
-In-reply-to: <20161124110442.22058-1-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC
+Date: Thu, 24 Nov 2016 12:09:41 +0100
+Message-ID: <23084629.DpfWxNEgoY@wuerfel>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <2204525.IWIYQVjIXl@wuerfel>
+ <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Hilbert Zhang <zzhang@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Nadav Haklai <nadavh@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Xueping Liu <xpliu@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Keji Zhang <keji@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-When card is polling (broken-cd), there is a spamming messge related to
-clock.
-After applied this patch, display the message only one time at boot
-time. It's enough to check which clock values is used.
-Also prevent to display the spamming message.
+On Thursday, November 24, 2016 6:57:18 PM CET Ziji Hu wrote:
+> > 
+> > Please explain in the changelog why this is not a generic
+> > phy driver (or three of them).
+> > 
+>         Actually we tried to put the PHY code into Linux PHY framework.
+>         But it cannot fit in Linux common PHY framework.
+> 
+>         Our Xenon SDHC PHY register is a part of Xenon SDHC register set.
+>         Besides, during MMC initialization, MMC sequence has to call several PHY functions to complete timing setting.
+>         In those PHY setting functions, they have to access SDHC register and know current MMC setting, such as bus width, clock frequency and speed mode.
+>         As a result, we have to implement PHY under MMC directory.
+> 
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c | 13 ++++++++++++-
- drivers/mmc/host/dw_mmc.h |  1 +
- 2 files changed, 13 insertions(+), 1 deletion(-)
+Ok, that makes sense, just put the same text in the changelog comment.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d508225..dd7e95d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1176,13 +1176,24 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 
- 		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
- 
--		if (clock != slot->__clk_old || force_clkinit)
-+		if ((clock != slot->__clk_old &&
-+			!test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
-+			force_clkinit) {
- 			dev_info(&slot->mmc->class_dev,
- 				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
- 				 slot->id, host->bus_hz, clock,
- 				 div ? ((host->bus_hz / div) >> 1) :
- 				 host->bus_hz, div);
- 
-+			/*
-+			 * If card is polling, display the message only
-+			 * one time at boot time.
-+			 */
-+			if (slot->mmc->caps & MMC_CAP_NEEDS_POLL &&
-+					slot->mmc->f_min == clock)
-+				set_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags);
-+		}
-+
- 		/* disable clock */
- 		mci_writel(host, CLKENA, 0);
- 		mci_writel(host, CLKSRC, 0);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 4a6ae750..c594658 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -272,6 +272,7 @@ struct dw_mci_slot {
- #define DW_MMC_CARD_NEED_INIT	1
- #define DW_MMC_CARD_NO_LOW_PWR	2
- #define DW_MMC_CARD_NO_USE_HOLD 3
-+#define DW_MMC_CARD_NEEDS_POLL	4
- 	int			id;
- 	int			sdio_id;
- };
--- 
-2.10.1
-
+	Arnd
