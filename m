@@ -1,43 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Thu, 24 Nov 2016 12:09:41 +0100
-Message-ID: <23084629.DpfWxNEgoY@wuerfel>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <2204525.IWIYQVjIXl@wuerfel>
- <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Hilbert Zhang <zzhang@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Nadav Haklai <nadavh@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Xueping Liu <xpliu@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Keji Zhang <keji@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 1/3] mmc: dw_mmc: check the "present" variable before checking
+ flags
+Date: Thu, 24 Nov 2016 20:04:40 +0900
+Message-ID: <20161124110442.22058-1-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:37963 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964907AbcKXLPA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 06:15:00 -0500
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OH5034GM83XHCD0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 24 Nov 2016 20:04:45 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Thursday, November 24, 2016 6:57:18 PM CET Ziji Hu wrote:
-> > 
-> > Please explain in the changelog why this is not a generic
-> > phy driver (or three of them).
-> > 
->         Actually we tried to put the PHY code into Linux PHY framework.
->         But it cannot fit in Linux common PHY framework.
-> 
->         Our Xenon SDHC PHY register is a part of Xenon SDHC register set.
->         Besides, during MMC initialization, MMC sequence has to call several PHY functions to complete timing setting.
->         In those PHY setting functions, they have to access SDHC register and know current MMC setting, such as bus width, clock frequency and speed mode.
->         As a result, we have to implement PHY under MMC directory.
-> 
+Before checking flags, it has to check "present" variable.
+Otherwise, flags should be cleared everytime.
 
-Ok, that makes sense, just put the same text in the changelog comment.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-	Arnd
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index d400afc..c6cc618 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1536,7 +1536,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	spin_lock_bh(&host->lock);
+ 	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+ 		dev_dbg(&mmc->class_dev, "card is present\n");
+-	else if (!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
++	else if (!present &&
++			!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+ 		dev_dbg(&mmc->class_dev, "card is not present\n");
+ 	spin_unlock_bh(&host->lock);
+ 
+-- 
+2.10.1
+
