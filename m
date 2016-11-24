@@ -1,52 +1,63 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Thu, 24 Nov 2016 18:57:18 +0800
-Message-ID: <f7334e41-39dd-f868-ff10-199afaebe926@marvell.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <2204525.IWIYQVjIXl@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2204525.IWIYQVjIXl@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Xueping Liu <xpliu@marvell.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 2/3] mmc: dw_mmc: add the debug message for polling and
+ non-removable
+Date: Thu, 24 Nov 2016 20:04:41 +0900
+Message-ID: <20161124110442.22058-2-jh80.chung@samsung.com>
+References: <20161124110442.22058-1-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:59475 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S940999AbcKXLFB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 06:05:01 -0500
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OH5034GM83XHCD0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 24 Nov 2016 20:04:45 +0900 (KST)
+In-reply-to: <20161124110442.22058-1-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Arnd,
+If card is polling or non-removable, display the more exact message.
+It's helpful to debug which detecting scheme is using.
 
-On 2016/11/24 17:56, Arnd Bergmann wrote:
-> On Monday, October 31, 2016 12:09:56 PM CET Gregory CLEMENT wrote:
->> From: Ziji Hu <huziji@marvell.com>
->>
->> Marvell Xenon eMMC/SD/SDIO Host Controller contains PHY.
->> Three types of PHYs are supported.
->>
->> Add support to multiple types of PHYs init and configuration.
->> Add register definitions of PHYs.
->>
->> Signed-off-by: Hu Ziji <huziji@marvell.com>
->> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
->>
-> 
-> Please explain in the changelog why this is not a generic
-> phy driver (or three of them).
-> 
-	Actually we tried to put the PHY code into Linux PHY framework.
-	But it cannot fit in Linux common PHY framework.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
 
-	Our Xenon SDHC PHY register is a part of Xenon SDHC register set.
-	Besides, during MMC initialization, MMC sequence has to call several PHY functions to complete timing setting.
-	In those PHY setting functions, they have to access SDHC register and know current MMC setting, such as bus width, clock frequency and speed mode.
-	As a result, we have to implement PHY under MMC directory.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c6cc618..d508225 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1525,9 +1525,23 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
+ 
+ 	/* Use platform get_cd function, else try onboard card detect */
+-	if ((mmc->caps & MMC_CAP_NEEDS_POLL) || !mmc_card_is_removable(mmc))
++	if (((mmc->caps & MMC_CAP_NEEDS_POLL)
++				|| !mmc_card_is_removable(mmc))) {
+ 		present = 1;
+-	else if (gpio_cd >= 0)
++
++		if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
++			if (mmc->caps & MMC_CAP_NEEDS_POLL) {
++				dev_info(&mmc->class_dev,
++					"card is polling.\n");
++			} else {
++				dev_info(&mmc->class_dev,
++					"card is non-removable.\n");
++			}
++			set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
++		}
++
++		return present;
++	} else if (gpio_cd >= 0)
+ 		present = gpio_cd;
+ 	else
+ 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+-- 
+2.10.1
 
-	Thank you.
-
-Best regards,
-Hu Ziji
-
-> 	Arnd
-> 
