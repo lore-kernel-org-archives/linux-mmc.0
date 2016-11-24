@@ -1,167 +1,196 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [GIT PULL] DWMMC controller for next
-Date: Thu, 24 Nov 2016 20:17:28 +0900
-Message-ID: <ca995842-9e10-a5c5-27b9-dd24750e36a1@samsung.com>
-References: <63a0b568-cd9e-d038-b7eb-08b7868f96f2@samsung.com>
- <CAPDyKFo+W12sV-U8r44ySerWHi2tAwEEnGNMd97iUN8NLV4duA@mail.gmail.com>
- <CGME20161123114758epcas5p25465d2ecaf5f7332003aa0eab61cac31@epcas5p2.samsung.com>
- <CAPDyKFokGM+-6hjGpgJRJOVwANX43gEww4p17LCxvD=e0Qbj=g@mail.gmail.com>
- <ed2ab8e4-6209-49d4-8ef3-76db0a0342bf@samsung.com>
- <a6358997-0e19-05b6-e488-3a17bdac5952@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC
+Date: Thu, 24 Nov 2016 12:37:32 +0100
+Message-ID: <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:40177 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964968AbcKXLSB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 06:18:01 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OH502FIU8OK1J20@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Nov 2016 20:17:28 +0900 (KST)
-In-reply-to: <a6358997-0e19-05b6-e488-3a17bdac5952@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ziji Hu <huziji@marvell.com>, "Jack(SH) Zhu" <jmzhu@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Victor Gu <xigu@marvell.com>, Wei(SOCP) Liu
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 11/23/2016 09:31 PM, Jaehoon Chung wrote:
-> On 11/23/2016 08:50 PM, Jaehoon Chung wrote:
->> On 11/23/2016 08:47 PM, Ulf Hansson wrote:
->>> On 22 November 2016 at 17:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>> On 22 November 2016 at 10:59, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>> Dear Ulf,
->>>>>
->>>>> Could you pull these patches on your next branch?
->>>>> If there is a problem, let me know, plz.
->>>>>
->>>>> The following changes since commit e2081b37d910c5e6c6925d9b4d0a7a6283f84ec5:
->>>>>
->>>>>   Merge branch 'fixes' into next (2016-11-21 11:09:18 +0100)
->>>>>
->>>>> are available in the git repository at:
->>>>>
->>>>>   https://github.com/jh80chung/dw-mmc.git for-ulf
->>>>>
->>>>> for you to fetch changes up to e25fd245b557482a8e0f7ab87841085f30706f3a:
->>>>>
->>>>>   Documentation: synopsys-dw-mshc: remove the unused properties (2016-11-22 10:34:05 +0900)
->>>>>
->>>>> ----------------------------------------------------------------
->>>>> Colin Ian King (1):
->>>>>       mmc: dw_mmc: fix spelling mistake in dev_dbg message
->>>>>
->>>>> Jaehoon Chung (9):
->>>>>       mmc: dw_mmc: display the real register value on debugfs
->>>>>       mmc: dw_mmc: fix the debug message for checking card's present
->>>>>       mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
->>>>>       mmc: dw_mmc: use the hold register when send stop command
->>>>>       mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
->>>>>       mmc: dw_mmc: use the cookie's enum values for post/pre_req()
->>>>>       mmc: dw_mmc: remove the unnecessary mmc_data structure
->>>>>       mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
->>>>>       Documentation: synopsys-dw-mshc: remove the unused properties
->>>>>
->>>>>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  8 ++------
->>>>>  drivers/mmc/host/dw_mmc.c                                  | 92 ++++++++++++++++++++++++++++++++++++++++++++------------------------------------------------
->>>>>  include/linux/mmc/dw_mmc.h                                 |  6 ++++++
->>>>>  3 files changed, 52 insertions(+), 54 deletions(-)
->>>>>
->>>>> Best Regards,
->>>>> Jaehoon Chung
->>>>
->>>> Dear Jaehoon, thanks for the pull request. I have add queued it all up
->>>> for my next branch!
->>>>
->>>>
->>>> Kind regards
->>>> Uffe
->>>
->>> Jaehoon,
->>>
->>> It seems like some of these patches breaks Exynos 5250-arndale. Can
->>> you please have a look and see what you think?
->>> https://kernelci.org/boot/all/job/ulfh/kernel/v4.9-rc5-78-g52eb5d4531e4/
->>
->> I will check and reply. Thanks for noticing.
+On 31 October 2016 at 12:09, Gregory CLEMENT
+<gregory.clement@free-electrons.com> wrote:
+> From: Ziji Hu <huziji@marvell.com>
+>
+> Marvell Xenon eMMC/SD/SDIO Host Controller contains PHY.
+> Three types of PHYs are supported.
+>
+> Add support to multiple types of PHYs init and configuration.
+> Add register definitions of PHYs.
+>
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+> ---
+>  MAINTAINERS                        |    2 +-
+>  drivers/mmc/host/Makefile          |    2 +-
+>  drivers/mmc/host/sdhci-xenon-phy.c | 1181 +++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci-xenon-phy.h |  157 ++++-
+>  drivers/mmc/host/sdhci-xenon.c     |    4 +-
+>  drivers/mmc/host/sdhci-xenon.h     |   17 +-
+>  6 files changed, 1361 insertions(+), 2 deletions(-)
+>  create mode 100644 drivers/mmc/host/sdhci-xenon-phy.c
+>  create mode 100644 drivers/mmc/host/sdhci-xenon-phy.h
 
-Ulf,
+Can you please consider to split this up somehow!? It would make it
+easier to review...
 
-It's strange..My patches didn't have any dependency...
-There is no any log for dwmmc..and even it doesn't initialize dwmmc controller.
+Anyway, allow me to provide some initial feedback, particularly around
+those things that Adrian and you requested for my input.
 
-Did you think that this failure is my patches problem? What is your thinking?
+[...]
 
-Best Regards,
-Jaehoon Chung 
+>
+> +
+> +static int __xenon_emmc_delay_adj_test(struct mmc_card *card)
+> +{
+> +       int err;
+> +       u8 *ext_csd = NULL;
+> +
+> +       err = mmc_get_ext_csd(card, &ext_csd);
+> +       kfree(ext_csd);
 
-> 
-> Ulf,
-> 
-> I'm not sure but if more stable than now..i think that needs to check NULL pointer.
-> What do you want how i do? Send patch or revert commit?
-> 
-> I didn't have the 5250-arndale..so i can't test..How about the below?
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 881ca3e..7a0cb97 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -167,12 +167,14 @@ static int dw_mci_regs_show(struct seq_file *s, void *v)
->  {
->         struct dw_mci *host = s->private;
->  
-> -       seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
-> -       seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
-> -       seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
-> -       seq_printf(s, "CTRL:\t0x%08x\n", mci_readl(host, CTRL));
-> -       seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
-> -       seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
-> +       if (host->regs) {
-> +               seq_printf(s, "STATUS:\t0x%08x\n", mci_readl(host, STATUS));
-> +               seq_printf(s, "RINTSTS:\t0x%08x\n", mci_readl(host, RINTSTS));
-> +               seq_printf(s, "CMD:\t0x%08x\n", mci_readl(host, CMD));
-> +               seq_printf(s, "CTRL:\t0x%08x\n", mci_readl(host, CTRL));
-> +               seq_printf(s, "INTMASK:\t0x%08x\n", mci_readl(host, INTMASK));
-> +               seq_printf(s, "CLKENA:\t0x%08x\n", mci_readl(host, CLKENA));
+Why do you read the ext csd here?
+
+> +
+> +       return err;
+> +}
+> +
+> +static int __xenon_sdio_delay_adj_test(struct mmc_card *card)
+> +{
+> +       struct mmc_command cmd = {0};
+> +       int err;
+> +
+> +       cmd.opcode = SD_IO_RW_DIRECT;
+> +       cmd.flags = MMC_RSP_R5 | MMC_CMD_AC;
+> +
+> +       err = mmc_wait_for_cmd(card->host, &cmd, 0);
+> +       if (err)
+> +               return err;
+> +
+> +       if (cmd.resp[0] & R5_ERROR)
+> +               return -EIO;
+> +       if (cmd.resp[0] & R5_FUNCTION_NUMBER)
+> +               return -EINVAL;
+> +       if (cmd.resp[0] & R5_OUT_OF_RANGE)
+> +               return -ERANGE;
+> +       return 0;
+
+No thanks! MMC/SD/SDIO protocol code belongs in the core.
+
+> +}
+> +
+> +static int __xenon_sd_delay_adj_test(struct mmc_card *card)
+> +{
+> +       struct mmc_command cmd = {0};
+> +       int err;
+> +
+> +       cmd.opcode = MMC_SEND_STATUS;
+> +       cmd.arg = card->rca << 16;
+> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+> +
+> +       err = mmc_wait_for_cmd(card->host, &cmd, 0);
+> +       return err;
+
+No thanks! MMC/SD/SDIO protocol code belongs in the core.
+
+> +}
+> +
+
+[...]
+
+> +int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios)
+> +{
+> +       struct mmc_host *mmc = host->mmc;
+> +       struct mmc_card *card;
+> +       int ret = 0;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +       if (!host->clock) {
+> +               priv->clock = 0;
+> +               return 0;
 > +       }
->  
->         return 0;
->  }
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
->>
->> Beset Regards,
->> Jaehoon Chung
->>
->>>
->>> Kind regards
->>> Uffe
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+> +
+> +       /*
+> +        * The timing, frequency or bus width is changed,
+> +        * better to set eMMC PHY based on current setting
+> +        * and adjust Xenon SDHC delay.
+> +        */
+> +       if ((host->clock == priv->clock) &&
+> +           (ios->bus_width == priv->bus_width) &&
+> +           (ios->timing == priv->timing))
+> +               return 0;
+> +
+> +       xenon_phy_set(host, ios->timing);
+> +
+> +       /* Update the record */
+> +       priv->bus_width = ios->bus_width;
+> +       /* Temp stage from HS200 to HS400 */
+> +       if (((priv->timing == MMC_TIMING_MMC_HS200) &&
+> +            (ios->timing == MMC_TIMING_MMC_HS)) ||
+> +           ((ios->timing == MMC_TIMING_MMC_HS) &&
+> +            (priv->clock > host->clock))) {
+> +               priv->timing = ios->timing;
+> +               priv->clock = host->clock;
+> +               return 0;
+> +       }
+> +       /*
+> +        * Skip temp stages from HS400 t0 HS200:
+> +        * from 200MHz to 52MHz in HS400
+> +        * from HS400 to HS DDR in 52MHz
+> +        * from HS DDR to HS in 52MHz
+> +        * from HS to HS200 in 52MHz
+> +        */
+> +       if (((priv->timing == MMC_TIMING_MMC_HS400) &&
+> +            ((host->clock == MMC_HIGH_52_MAX_DTR) ||
+> +             (ios->timing == MMC_TIMING_MMC_DDR52))) ||
+> +           ((priv->timing == MMC_TIMING_MMC_DDR52) &&
+> +            (ios->timing == MMC_TIMING_MMC_HS)) ||
+> +           ((ios->timing == MMC_TIMING_MMC_HS200) &&
+> +            (ios->clock == MMC_HIGH_52_MAX_DTR))) {
+> +               priv->timing = ios->timing;
+> +               priv->clock = host->clock;
+> +               return 0;
+> +       }
+> +       priv->timing = ios->timing;
+> +       priv->clock = host->clock;
+> +
+> +       /* Legacy mode is a special case */
+> +       if (ios->timing == MMC_TIMING_LEGACY)
+> +               return 0;
+> +
+> +       if (mmc->card)
+> +               card = mmc->card;
+> +       else
+> +               /*
+> +                * Only valid during initialization
+> +                * before mmc->card is set
+> +                */
+> +               card = priv->card_candidate;
+> +       if (unlikely(!card)) {
+> +               dev_warn(mmc_dev(mmc), "card is not present\n");
+> +               return -EINVAL;
+> +       }
 
+That your host need to hold a copy of the card pointer, tells me that
+something is not really correct.
+
+I might be wrong, if this turns out to be a special case, but I doubt
+it. Although, if it *is* a special such case, we shall most likely try
+to extend the the mmc core layer instead of adding all these hacks in
+your host driver.
+
+[...]
+
+Another suggestion of a general improvement; could you perhaps try to
+add some brief information about what goes on in function headers.
+Perhaps that could help to more easily understand things.
+
+Kind regards
+Uffe
