@@ -1,36 +1,36 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2] mmc: block: delete packed command support
-Date: Thu, 24 Nov 2016 10:53:55 +0100
-Message-ID: <CACRpkdYaCs4f-aaCmGu-RPQJe4HMKbhE10vcekxNpKHVm=6YYg@mail.gmail.com>
-References: <1479916086-26641-1-git-send-email-linus.walleij@linaro.org> <201611241455.f15P3Xee%fengguang.wu@intel.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC
+Date: Thu, 24 Nov 2016 10:56:04 +0100
+Message-ID: <2204525.IWIYQVjIXl@wuerfel>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com> <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34634 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936459AbcKXJx7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 04:53:59 -0500
-Received: by mail-qk0-f171.google.com with SMTP id q130so43973422qke.1
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Nov 2016 01:53:57 -0800 (PST)
-In-Reply-To: <201611241455.f15P3Xee%fengguang.wu@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Jack(SH) Zhu" <jmzhu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shiwu Zhang <zhangshw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xueping Liu <xpli>
 List-Id: linux-mmc@vger.kernel.org
-To: kbuild test robot <lkp@intel.com>
-Cc: "kbuild-all@01.org" <kbuild-all@01.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
 
-On Thu, Nov 24, 2016 at 7:35 AM, kbuild test robot <lkp@intel.com> wrote:
+On Monday, October 31, 2016 12:09:56 PM CET Gregory CLEMENT wrote:
+> From: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> 
+> Marvell Xenon eMMC/SD/SDIO Host Controller contains PHY.
+> Three types of PHYs are supported.
+> 
+> Add support to multiple types of PHYs init and configuration.
+> Add register definitions of PHYs.
+> 
+> Signed-off-by: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> 
 
-> Hi Linus,
->
-> [auto build test WARNING on ulf.hansson-mmc/next]
-> [cannot apply to linus/master linux/master v4.9-rc6 next-20161123]
-> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+Please explain in the changelog why this is not a generic
+phy driver (or three of them).
 
-This is indeed a false build error.
-
-Patches sent to linux-mmc@vger.kernel.org is probably better tested agains
-the "next" branch on Ulf's MMC tree at:
-https://git.kernel.org/cgit/linux/kernel/git/ulfh/mmc.git/
-
-Yours,
-Linus Walleij
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
