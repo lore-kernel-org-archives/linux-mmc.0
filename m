@@ -1,70 +1,50 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: block: delete packed command support
-Date: Thu, 24 Nov 2016 19:23:15 +0900
-Message-ID: <bffa21b9-6c14-345b-bf90-f12ffe56b542@samsung.com>
-References: <CGME20161123154834epcas3p479d3731e59db07c42688b323cd37104e@epcas3p4.samsung.com>
- <1479916086-26641-1-git-send-email-linus.walleij@linaro.org>
- <0e12314b-e1ce-d2ce-1136-02465fdbead4@samsung.com>
- <CACRpkdZqL0b9i0r+TwRVYD-uw5PuoNbOsxKoghtHam+Wawp1Rg@mail.gmail.com>
+From: Ziji Hu <huziji@marvell.com>
+Subject: Re: [PATCH 5/10] dt: bindings: Add bindings for Marvell Xenon SD Host
+ Controller
+Date: Thu, 24 Nov 2016 18:38:19 +0800
+Message-ID: <f7d2ff41-5f64-e8c1-b028-dfc7aea294ae@marvell.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <4031579.CBE32NHUoW@wuerfel> <877f7tmduw.fsf@free-electrons.com>
+ <28082657.RK5ubAe11Q@wuerfel> <8737ihmctr.fsf@free-electrons.com>
+ <CAPv3WKddPHgpRU2_tVoDF=5Z-nqfFPxjgJ-+z9o-1tR2=fFvAA@mail.gmail.com>
+ <20161124111029.035553ce@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:60368 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757152AbcKXKXR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 05:23:17 -0500
-Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OH500IIO66RTZE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Nov 2016 19:23:15 +0900 (KST)
-In-reply-to: <CACRpkdZqL0b9i0r+TwRVYD-uw5PuoNbOsxKoghtHam+Wawp1Rg@mail.gmail.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:47804 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S933774AbcKXKjV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 05:39:21 -0500
+In-Reply-To: <20161124111029.035553ce@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Marcin Wojtas <mw@semihalf.com>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Liuliu Zhao <zhaoliul@marvell.com>, Peng Zhu <zhupeng@marvell.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Xueping Liu <xpliu@marvell.com>, Hilbert Zhang <zzhang@marvell.com>, Shiwu Zhang <zhangshw@marvell.com>, Yu Cao <yucao@marvell.com>, Sebastian
 
-On 11/24/2016 06:50 PM, Linus Walleij wrote:
-> On Thu, Nov 24, 2016 at 6:24 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+Hi all,
+
+On 2016/11/24 18:10, Thomas Petazzoni wrote:
+> Hello,
 > 
->>> Cc: Namjae Jeon <namjae.jeon@samsung.com>
->>> Cc: Maya Erez <qca_merez@qca.qualcomm.com>
->>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
->>
->> Did i send the acked-by tag? :)
->> I just agreed some this patch's points.
->> When i become assured, i will send the acked-by tag. is this way right?
+> On Thu, 24 Nov 2016 10:49:23 +0100, Marcin Wojtas wrote:
 > 
-> As per Documentation/SubmittingPatches, section 12:
+>> How about to avoid confusion, by simply renaming this number to
+>> port-id/xenon-id or anything else but slot? I guess this may allow to
+>> avoid some misunderstandings.
 > 
-> --------------------------
-> Acked-by: is not as formal as Signed-off-by:.  It is a record that the acker
-> has at least reviewed the patch and has indicated acceptance.  Hence patch
-> mergers will sometimes manually convert an acker's "yep, looks good to me"
-> into an Acked-by: (but note that it is usually better to ask for an
-> explicit ack).
-> ---------------------------
+	We borrow the term "slot" from PCIe interface from SD spec.
+	According to Appendix C in SD spec 3.0, slot means an independent set of register from the view of SW.
 
-Thanks for sharing this information..i didn't read this documentation.
+	I can avoid using "slot" and replace "slot index" with "sdhc-id".
+	Thanks for the suggestions.
 
-Anyway, until today, i have checked the I/O performance with Exynos3/4/5 boards which i have.
-It seems that there is no I/O performance benefit about packed command at this time.
+	Thank you.
 
-I don't know how other guys are thinking.
+Best regards,
+Hu Ziji
 
-Explicit..
-
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
+> Agreed.
 > 
-> Yours,
-> Linus Walleij
+> Thomas
 > 
-> 
-> 
-
