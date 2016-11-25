@@ -1,44 +1,67 @@
-From: Fengguang Wu <lkp@intel.com>
-Subject: Re: [PATCH v2] mmc: block: delete packed command support
-Date: Fri, 25 Nov 2016 09:43:15 +0800
-Message-ID: <20161125014315.ik5tbmwrtk7xbgjl@wfg-t540p.sh.intel.com>
-References: <1479916086-26641-1-git-send-email-linus.walleij@linaro.org>
- <201611241455.f15P3Xee%fengguang.wu@intel.com>
- <CACRpkdYaCs4f-aaCmGu-RPQJe4HMKbhE10vcekxNpKHVm=6YYg@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add missing codes for runtime resume
+Date: Fri, 25 Nov 2016 11:37:24 +0900
+Message-ID: <994098ad-ae2c-7e35-8300-d4937cd77881@samsung.com>
+References: <CGME20161123093310epcas5p2dddadfc26d93d80161d16ee4c1509f35@epcas5p2.samsung.com>
+ <1479893632-1742-1-git-send-email-jy0922.shim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:50507 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750861AbcKYBnT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 24 Nov 2016 20:43:19 -0500
-Content-Disposition: inline
-In-Reply-To: <CACRpkdYaCs4f-aaCmGu-RPQJe4HMKbhE10vcekxNpKHVm=6YYg@mail.gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:59982 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751171AbcKYCh0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 21:37:26 -0500
+Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OH6013GIFACGN50@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Nov 2016 11:37:24 +0900 (KST)
+In-reply-to: <1479893632-1742-1-git-send-email-jy0922.shim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "kbuild-all@01.org" <kbuild-all@01.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
+To: Joonyoung Shim <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com
 
-Hi Linus,
+Hi Joonyoung,
 
-On Thu, Nov 24, 2016 at 10:53:55AM +0100, Linus Walleij wrote:
->On Thu, Nov 24, 2016 at 7:35 AM, kbuild test robot <lkp@intel.com> wrote:
->
->> Hi Linus,
->>
->> [auto build test WARNING on ulf.hansson-mmc/next]
+On 11/23/2016 06:33 PM, Joonyoung Shim wrote:
+> The commit 64997de4fd17 ("mmc: dw_mmc: remove system PM callback") is
+> missing to call dw_mci_ctrl_reset(). This adds to call
+> dw_mci_ctrl_reset() and to handle error of clocks.
+> 
+> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
 
-That line indicates the patch is applied to 'ulf.hansson-mmc/next',
-which is exactly the tree/branch you mentioned below. :)
+Applied on my dwmmc repository. Thanks!
 
->> [cannot apply to linus/master linux/master v4.9-rc6 next-20161123]
->> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
->
->This is indeed a false build error.
->
->Patches sent to linux-mmc@vger.kernel.org is probably better tested agains
->the "next" branch on Ulf's MMC tree at:
->https://git.kernel.org/cgit/linux/kernel/git/ulfh/mmc.git/
->
->Yours,
->Linus Walleij
+Best Regards,
+Jaehoon Chung
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index d426fa41bcce..25e21a20ee04 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3303,6 +3303,17 @@ int dw_mci_runtime_resume(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>  
+> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+> +		clk_disable_unprepare(host->ciu_clk);
+> +
+> +		if (host->cur_slot &&
+> +		    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
+> +		     !mmc_card_is_removable(host->cur_slot->mmc)))
+> +			clk_disable_unprepare(host->biu_clk);
+> +
+> +		return -ENODEV;
+> +	}
+> +
+>  	if (host->use_dma && host->dma_ops->init)
+>  		host->dma_ops->init(host);
+>  
+> 
+
