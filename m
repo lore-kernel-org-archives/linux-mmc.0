@@ -1,80 +1,104 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: add missing codes for runtime resume
-Date: Fri, 25 Nov 2016 12:49:54 +0900
-Message-ID: <96aa5cfb-02c1-4639-7a71-b97d126ac027@samsung.com>
-References: <CGME20161125034631epcas1p31fe5114a49893a671bbcaaa300d53e6f@epcas1p3.samsung.com>
- <1480045635-32042-1-git-send-email-jy0922.shim@samsung.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH 2/2] mmc: sdhci-of-esdhc: avoid clock glitch when frequency is changing
+Date: Fri, 25 Nov 2016 12:00:51 +0800
+Message-ID: <1480046451-29492-2-git-send-email-yangbo.lu@nxp.com>
+References: <1480046451-29492-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:55254 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750991AbcKYDt4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 22:49:56 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OH601FF7IN6C080@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Nov 2016 12:49:54 +0900 (KST)
-In-reply-to: <1480045635-32042-1-git-send-email-jy0922.shim@samsung.com>
+Received: from mail-cys01nam02on0066.outbound.protection.outlook.com ([104.47.37.66]:10592
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751303AbcKYEOK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 24 Nov 2016 23:14:10 -0500
+In-Reply-To: <1480046451-29492-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joonyoung Shim <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-On 11/25/2016 12:47 PM, Joonyoung Shim wrote:
-> The commit 64997de4fd17 ("mmc: dw_mmc: remove system PM callback") is
-> missing to call dw_mci_ctrl_reset(). This adds to call
-> dw_mci_ctrl_reset() and to handle error of clocks.
-> 
-> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+The eSDHC_PRSSTAT[SDSTB] bit indicates whether the internal card clock is
+stable. This bit is for the host driver to poll clock status when changing
+the clock frequency. It is recommended to clear eSDHC_SYSCTL[SDCLKEN]
+to remove glitch on the card clock when the frequency is changing. This
+patch is to disable SDCLKEN bit before changing frequency and enable it
+after SDSTB bit is set.
 
-Applied on my repository, instead of v1. Thanks for noticing.
-If someone find the issue, let me know before PR to Ulf. 
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+ drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
+ drivers/mmc/host/sdhci-of-esdhc.c | 21 ++++++++++++++++++---
+ 2 files changed, 23 insertions(+), 3 deletions(-)
 
-Best Regards,
-Jaehoon Chung
-
-> ---
-> v2: fix error handling of biu_clk.
-> 
->  drivers/mmc/host/dw_mmc.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index d426fa41bcce..5b50b2cdb008 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3301,7 +3301,13 @@ int dw_mci_runtime_resume(struct device *dev)
->  
->  	ret = clk_prepare_enable(host->ciu_clk);
->  	if (ret)
-> -		return ret;
-> +		goto err;
-> +
-> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
-> +		clk_disable_unprepare(host->ciu_clk);
-> +		ret = -ENODEV;
-> +		goto err;
-> +	}
->  
->  	if (host->use_dma && host->dma_ops->init)
->  		host->dma_ops->init(host);
-> @@ -3336,6 +3342,14 @@ int dw_mci_runtime_resume(struct device *dev)
->  	/* Now that slots are all setup, we can enable card detect */
->  	dw_mci_enable_cd(host);
->  
-> +	return 0;
-> +
-> +err:
-> +	if (host->cur_slot &&
-> +	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
-> +	     !mmc_card_is_removable(host->cur_slot->mmc)))
-> +		clk_disable_unprepare(host->biu_clk);
-> +
->  	return ret;
->  }
->  EXPORT_SYMBOL(dw_mci_runtime_resume);
-> 
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index 8cd8449..ece8b37 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -31,6 +31,10 @@
+  * eSDHC register definition
+  */
+ 
++/* Present State Register */
++#define ESDHC_PRSSTAT			0x24
++#define ESDHC_CLOCK_STABLE		0x00000008
++
+ /* Protocol Control Register */
+ #define ESDHC_PROCTL			0x28
+ #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
+@@ -43,6 +47,7 @@
+ #define ESDHC_CLOCK_MASK		0x0000fff0
+ #define ESDHC_PREDIV_SHIFT		8
+ #define ESDHC_DIVIDER_SHIFT		4
++#define ESDHC_CLOCK_SDCLKEN		0x00000008
+ #define ESDHC_CLOCK_PEREN		0x00000004
+ #define ESDHC_CLOCK_HCKEN		0x00000002
+ #define ESDHC_CLOCK_IPGEN		0x00000001
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 9a6eb44..0849885 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -431,6 +431,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
++	u32 timeout;
+ 	u32 temp;
+ 
+ 	host->mmc->actual_clock = 0;
+@@ -451,8 +452,8 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ 
+ 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+-	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+-		| ESDHC_CLOCK_MASK);
++	temp &= ~(ESDHC_CLOCK_SDCLKEN | ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
++		  ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ 
+ 	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+@@ -472,7 +473,21 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		| (div << ESDHC_DIVIDER_SHIFT)
+ 		| (pre_div << ESDHC_PREDIV_SHIFT));
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+-	mdelay(1);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
++		if (timeout == 0) {
++			pr_err("%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	temp |= ESDHC_CLOCK_SDCLKEN;
++	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ }
+ 
+ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+-- 
+2.1.0.27.g96db324
 
