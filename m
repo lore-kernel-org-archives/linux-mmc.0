@@ -1,39 +1,78 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 25/25] mmc: sdhci-acpi: Enable Software Command Queuing for some Intel controllers
-Date: Fri, 25 Nov 2016 12:07:22 +0200
-Message-ID: <1480068442-5169-26-git-send-email-adrian.hunter@intel.com>
-References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:16412 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752243AbcKYKO3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Nov 2016 05:14:29 -0500
-In-Reply-To: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 6/10] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
+Date: Fri, 25 Nov 2016 14:01:04 +0100
+Message-ID: <CAPDyKFrObxNVN+9uY7arCyGLDh_3jKCfdpw0d8KnncnGugwCbw@mail.gmail.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <0390e7a05b6163deabb545f93729ea615eeaaee2.1477911954.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFpqPSqiEi=0UW5LoZmy+y-KHm9nbcGKBSy3RzchdLU9cA@mail.gmail.com>
+ <dd230463-04f6-df31-7056-1a185eb6cfc7@marvell.com> <CAPDyKFr9uEjVQmTNP0KK8Zj9mxCW3i564E=47vTK0RLvXCjw3Q@mail.gmail.com>
+ <76ce72f8-4b86-3b83-544f-b9a7ef871393@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <76ce72f8-4b86-3b83-544f-b9a7ef871393-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
+[...]
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> Moreover, we have ->enable_sdio_irq() ops that deals with this.
+>>
+>    Yes. I mean the SDIO irqs on DAT1 line in async mode.
+>    This field enables our host to recognize the async SDIO irq from SDIO device.
+>    It controls our host side behavior, other than the SDIO device.
+>
+>    I think ->enable_sdio_irq() is a more reasonable place to put this workraound.
+>    I will export sdhci_enable_sdio_irq() and implement out host own
+>    enable_sdio_irq() calling sdhci_enable_sdio)irq() plus this workaround.
+>    Does it sound reasonable to you?
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 81d4dc034793..95fc4de05c54 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -274,7 +274,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.chip    = &sdhci_acpi_chip_int,
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
--		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
-+		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR | MMC_CAP_SWCMDQ |
- 		   MMC_CAP_CMD_DURING_TFR | MMC_CAP_WAIT_WHILE_BUSY,
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
--- 
-1.9.1
+Yes.
 
+[...]
+
+>>
+>> Got it. Although I think we can cope with that fine just by using the
+>> different SD/eMMC speed modes settings defined in DT (or from the
+>> SDHCI caps register)
+>>
+>     In my very opinion, I'm not sure if there is any corner case that driver cannot
+>     determine the eMMC card type from DT and SDHC caps.
+>
+>>>    Unfortunately, MMC driver cannot determine the card type yet when eMMC voltage
+>>>    setting should be executed.
+>>>    Thus an flag is required here to tell driver to execute eMMC voltage setting.
+>>>
+>>>    Besides, additional eMMC specific settings might be implemented in future, besides
+>>>    voltage setting. Most of them should be completed before MMC driver recognizes the
+>>>    card type. Thus I have to keep this flag to indicate current SDHC is for eMMC.
+>>
+>> I doubt you will need a generic "eMMC" flag, but let's see when we go forward.
+>>
+>> Currently it's clear you don't need such a flag, so I will submit a
+>> change adding a DT binding for "mmc-ddr-3_3v" then we can take it from
+>> there, to see if it suits your needs.
+>>
+>
+>     Actually, our eMMC is usually fixed as 1.8V.
+>
+>     The pair "no-sd" + "no-sdio" can provide the similar information.
+>     But I'm not sure if it is proper to use those two property in such a way.
+
+Well, potentially those could be used like that.
+
+The point of why we added them was to allow hosts that don't support
+the different protocols (which is somewhat true for your case, because
+of signal voltage issues) to tell the mmc core about it. That instead
+of having to all kind of crazy hacks in the drives, that in then
+didn't work out so well.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
