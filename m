@@ -1,22 +1,22 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH] mmc: dw_mmc: add missing codes for runtime resume
-Date: Fri, 25 Nov 2016 11:37:24 +0900
-Message-ID: <994098ad-ae2c-7e35-8300-d4937cd77881@samsung.com>
-References: <CGME20161123093310epcas5p2dddadfc26d93d80161d16ee4c1509f35@epcas5p2.samsung.com>
+Date: Fri, 25 Nov 2016 11:37:22 +0900
+Message-ID: <4478096a-4d57-f739-d746-17c506548981@samsung.com>
+References: <CGME20161123094435epcas1p358457576f3e08aa57b19012efc8c7ad1@epcas1p3.samsung.com>
  <1479893632-1742-1-git-send-email-jy0922.shim@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:59982 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751171AbcKYCh0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 21:37:26 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
+Received: from mailout3.samsung.com ([203.254.224.33]:38461 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751171AbcKYCh2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2016 21:37:28 -0500
+Received: from epcpsbgm2new.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OH6013GIFACGN50@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Nov 2016 11:37:24 +0900 (KST)
+ with ESMTP id <0OH601K6XFAAKA60@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Nov 2016 11:37:22 +0900 (KST)
 In-reply-to: <1479893632-1742-1-git-send-email-jy0922.shim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
