@@ -1,77 +1,69 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 14/25] mmc: core: Export mmc_retune_hold() and mmc_retune_release()
-Date: Fri, 25 Nov 2016 12:07:11 +0200
-Message-ID: <1480068442-5169-15-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 15/25] mmc: block: Factor out mmc_blk_requeue()
+Date: Fri, 25 Nov 2016 12:07:12 +0200
+Message-ID: <1480068442-5169-16-git-send-email-adrian.hunter@intel.com>
 References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:47582 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752487AbcKYKN3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Nov 2016 05:13:29 -0500
+        id S1752487AbcKYKNe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 25 Nov 2016 05:13:34 -0500
 In-Reply-To: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Re-tuning can only be done when the Command Queue is empty, when means
-holding and releasing re-tuning from the block driver, so export those
-functions.
+The same code is used in a couple of places.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/host.c  | 2 ++
- drivers/mmc/core/host.h  | 2 --
- include/linux/mmc/core.h | 3 +++
- 3 files changed, 5 insertions(+), 2 deletions(-)
+ drivers/mmc/card/block.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 98f25ffb4258..878405e28bdb 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -112,6 +112,7 @@ void mmc_retune_hold(struct mmc_host *host)
- 		host->retune_now = 1;
- 	host->hold_retune += 1;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 157d1b3d58d6..35e8d01b3013 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1319,6 +1319,13 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+ 	return ret ? 0 : 1;
  }
-+EXPORT_SYMBOL(mmc_retune_hold);
  
- void mmc_retune_release(struct mmc_host *host)
- {
-@@ -120,6 +121,7 @@ void mmc_retune_release(struct mmc_host *host)
- 	else
- 		WARN_ON(1);
- }
-+EXPORT_SYMBOL(mmc_retune_release);
- 
- int mmc_retune(struct mmc_host *host)
- {
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index 992bf5397633..0787b3002481 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -17,8 +17,6 @@
- 
- void mmc_retune_enable(struct mmc_host *host);
- void mmc_retune_disable(struct mmc_host *host);
--void mmc_retune_hold(struct mmc_host *host);
--void mmc_retune_release(struct mmc_host *host);
- int mmc_retune(struct mmc_host *host);
- 
- #endif
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index d045b06fc7ea..d8f46e1ae7f2 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -220,6 +220,9 @@ extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
- 
- extern int mmc_detect_card_removed(struct mmc_host *host);
- 
-+extern void mmc_retune_hold(struct mmc_host *host);
-+extern void mmc_retune_release(struct mmc_host *host);
++static void mmc_blk_requeue(struct request_queue *q, struct request *req)
++{
++	spin_lock_irq(q->queue_lock);
++	blk_requeue_request(q, req);
++	spin_unlock_irq(q->queue_lock);
++}
 +
- /**
-  *	mmc_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
+ /*
+  * Reformat current write as a reliable write, supporting
+  * both legacy and the enhanced reliable write MMC cards.
+@@ -1835,11 +1842,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+ 		reqs++;
+ 	} while (1);
+ 
+-	if (put_back) {
+-		spin_lock_irq(q->queue_lock);
+-		blk_requeue_request(q, next);
+-		spin_unlock_irq(q->queue_lock);
+-	}
++	if (put_back)
++		mmc_blk_requeue(q, next);
+ 
+ 	if (reqs > 0) {
+ 		list_add(&req->queuelist, &mqrq->packed->list);
+@@ -2018,9 +2022,7 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
+ 		prq = list_entry_rq(packed->list.prev);
+ 		if (prq->queuelist.prev != &packed->list) {
+ 			list_del_init(&prq->queuelist);
+-			spin_lock_irq(q->queue_lock);
+-			blk_requeue_request(mq->queue, prq);
+-			spin_unlock_irq(q->queue_lock);
++			mmc_blk_requeue(q, prq);
+ 		} else {
+ 			list_del_init(&prq->queuelist);
+ 		}
 -- 
 1.9.1
 
