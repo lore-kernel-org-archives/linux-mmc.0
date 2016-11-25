@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V7 01/25] mmc: queue: Fix queue thread wake-up
-Date: Fri, 25 Nov 2016 15:37:44 +0100
-Message-ID: <CACRpkdZB1kKxMY6jh2=1wbSta-57sctAb+fZoN8zW3G37L8wDA@mail.gmail.com>
-References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com> <1480068442-5169-2-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 02/25] mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
+Date: Fri, 25 Nov 2016 15:38:47 +0100
+Message-ID: <CACRpkdZZJU2LceHNYM5gRPe+S-o=fCHDkO5SjyX5f-dJnvJqHA@mail.gmail.com>
+References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com> <1480068442-5169-3-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36407 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932240AbcKYOhq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2016 09:37:46 -0500
-Received: by mail-qk0-f176.google.com with SMTP id n21so79938474qka.3
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2016 06:37:45 -0800 (PST)
-In-Reply-To: <1480068442-5169-2-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:32844 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754533AbcKYOis (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2016 09:38:48 -0500
+Received: by mail-qk0-f174.google.com with SMTP id x190so80050808qkb.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2016 06:38:47 -0800 (PST)
+In-Reply-To: <1480068442-5169-3-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,21 +20,12 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Fri, Nov 25, 2016 at 11:06 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> The only time the driver sleeps expecting to be woken upon the arrival of
-> a new request, is when the dispatch queue is empty. The only time that it
-> is known whether the dispatch queue is empty is after NULL is returned
-> from blk_fetch_request() while under the queue lock.
->
-> Recognizing those facts, simplify the synchronization between the queue
-> thread and the request function. A couple of flags tell the request
-> function what to do, and the queue lock and barriers associated with
-> wake-ups ensure synchronization.
->
-> The result is simpler and allows the removal of the context_info lock.
+> In preparation for supporting a queue of requests, factor out
+> mmc_queue_alloc_bounce_bufs().
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Very nice patch!
+Nice refactoring.
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
