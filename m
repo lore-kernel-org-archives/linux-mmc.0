@@ -1,110 +1,77 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 13/25] mmc: core: Do not prepare a new request twice
-Date: Fri, 25 Nov 2016 12:07:10 +0200
-Message-ID: <1480068442-5169-14-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 14/25] mmc: core: Export mmc_retune_hold() and mmc_retune_release()
+Date: Fri, 25 Nov 2016 12:07:11 +0200
+Message-ID: <1480068442-5169-15-git-send-email-adrian.hunter@intel.com>
 References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:47582 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751932AbcKYKNZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Nov 2016 05:13:25 -0500
+        id S1752487AbcKYKN3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 25 Nov 2016 05:13:29 -0500
 In-Reply-To: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-mmc_start_req() assumes it is never called with the new request already
-prepared. That is true if the queue consists of only 2 requests, but is not
-true for a longer queue. e.g. mmc_start_req() has a current and previous
-request but still exits to queue a new request if the queue size is
-greater than 2. In that case, when mmc_start_req() is called again, the
-current request will have been prepared already. Fix by flagging if the
-request has been prepared.
-
-That also means ensuring that struct mmc_async_req is always initialized
-to zero, which wasn't the case in mmc_test.
+Re-tuning can only be done when the Command Queue is empty, when means
+holding and releasing re-tuning from the block driver, so export those
+functions.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/mmc_test.c |  8 ++++----
- drivers/mmc/core/core.c     | 12 +++++++++---
- include/linux/mmc/host.h    |  1 +
- 3 files changed, 14 insertions(+), 7 deletions(-)
+ drivers/mmc/core/host.c  | 2 ++
+ drivers/mmc/core/host.h  | 2 --
+ include/linux/mmc/core.h | 3 +++
+ 3 files changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index b42c23665104..81a71d28239a 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -826,7 +826,10 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
- 	struct mmc_command stop2;
- 	struct mmc_data data2;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 98f25ffb4258..878405e28bdb 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -112,6 +112,7 @@ void mmc_retune_hold(struct mmc_host *host)
+ 		host->retune_now = 1;
+ 	host->hold_retune += 1;
+ }
++EXPORT_SYMBOL(mmc_retune_hold);
  
--	struct mmc_test_async_req test_areq[2];
-+	struct mmc_test_async_req test_areq[2] = {
-+		{ .test = test },
-+		{ .test = test },
-+	};
- 	struct mmc_async_req *done_areq;
- 	struct mmc_async_req *cur_areq = &test_areq[0].areq;
- 	struct mmc_async_req *other_areq = &test_areq[1].areq;
-@@ -834,9 +837,6 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
- 	int i;
- 	int ret = RESULT_OK;
+ void mmc_retune_release(struct mmc_host *host)
+ {
+@@ -120,6 +121,7 @@ void mmc_retune_release(struct mmc_host *host)
+ 	else
+ 		WARN_ON(1);
+ }
++EXPORT_SYMBOL(mmc_retune_release);
  
--	test_areq[0].test = test;
--	test_areq[1].test = test;
--
- 	mmc_test_nonblock_reset(&mrq1, &cmd1, &stop1, &data1);
- 	mmc_test_nonblock_reset(&mrq2, &cmd2, &stop2, &data2);
+ int mmc_retune(struct mmc_host *host)
+ {
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 992bf5397633..0787b3002481 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -17,8 +17,6 @@
  
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index dc1f27ee50b8..28e1495ac903 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -658,8 +658,10 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	struct mmc_async_req *data = host->areq;
+ void mmc_retune_enable(struct mmc_host *host);
+ void mmc_retune_disable(struct mmc_host *host);
+-void mmc_retune_hold(struct mmc_host *host);
+-void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
  
- 	/* Prepare a new request */
--	if (areq)
-+	if (areq && !areq->pre_req_done) {
-+		areq->pre_req_done = true;
- 		mmc_pre_req(host, areq->mrq);
-+	}
+ #endif
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index d045b06fc7ea..d8f46e1ae7f2 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -220,6 +220,9 @@ extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
  
- 	if (host->areq) {
- 		status = mmc_wait_for_data_req_done(host, host->areq->mrq, areq);
-@@ -695,12 +697,16 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	if (status == MMC_BLK_SUCCESS && areq)
- 		start_err = __mmc_start_data_req(host, areq->mrq);
+ extern int mmc_detect_card_removed(struct mmc_host *host);
  
--	if (host->areq)
-+	if (host->areq) {
-+		host->areq->pre_req_done = false;
- 		mmc_post_req(host, host->areq->mrq, 0);
-+	}
- 
- 	 /* Cancel a prepared request if it was not started. */
--	if ((status != MMC_BLK_SUCCESS || start_err) && areq)
-+	if ((status != MMC_BLK_SUCCESS || start_err) && areq) {
-+		areq->pre_req_done = false;
- 		mmc_post_req(host, areq->mrq, -EINVAL);
-+	}
- 
- 	if (status != MMC_BLK_SUCCESS)
- 		host->areq = NULL;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index bcf6d252ec67..fa44aa93505a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -173,6 +173,7 @@ struct mmc_async_req {
- 	 * Returns 0 if success otherwise non zero.
- 	 */
- 	enum mmc_blk_status (*err_check)(struct mmc_card *, struct mmc_async_req *);
-+	bool pre_req_done;
- };
- 
++extern void mmc_retune_hold(struct mmc_host *host);
++extern void mmc_retune_release(struct mmc_host *host);
++
  /**
+  *	mmc_claim_host - exclusively claim a host
+  *	@host: mmc host to claim
 -- 
 1.9.1
 
