@@ -1,78 +1,130 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH 6/10] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-Date: Fri, 25 Nov 2016 14:01:04 +0100
-Message-ID: <CAPDyKFrObxNVN+9uY7arCyGLDh_3jKCfdpw0d8KnncnGugwCbw@mail.gmail.com>
+Date: Fri, 25 Nov 2016 14:06:17 +0100
+Message-ID: <CAPDyKFoqyF5QkJy+PmGa-b8JhaUmVXeoqBfv+pdupFiJBgyiLg@mail.gmail.com>
 References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
  <0390e7a05b6163deabb545f93729ea615eeaaee2.1477911954.git-series.gregory.clement@free-electrons.com>
  <CAPDyKFpqPSqiEi=0UW5LoZmy+y-KHm9nbcGKBSy3RzchdLU9cA@mail.gmail.com>
  <dd230463-04f6-df31-7056-1a185eb6cfc7@marvell.com> <CAPDyKFr9uEjVQmTNP0KK8Zj9mxCW3i564E=47vTK0RLvXCjw3Q@mail.gmail.com>
- <76ce72f8-4b86-3b83-544f-b9a7ef871393@marvell.com>
+ <76ce72f8-4b86-3b83-544f-b9a7ef871393@marvell.com> <07e71ce4-a78e-750c-6325-0a88891519d5@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <76ce72f8-4b86-3b83-544f-b9a7ef871393-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:37122 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753655AbcKYNGU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2016 08:06:20 -0500
+Received: by mail-wm0-f43.google.com with SMTP id t79so91098837wmt.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2016 05:06:19 -0800 (PST)
+In-Reply-To: <07e71ce4-a78e-750c-6325-0a88891519d5@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ziji Hu <huziji@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>
 
 [...]
 
->>
->> Moreover, we have ->enable_sdio_irq() ops that deals with this.
->>
->    Yes. I mean the SDIO irqs on DAT1 line in async mode.
->    This field enables our host to recognize the async SDIO irq from SDIO device.
->    It controls our host side behavior, other than the SDIO device.
->
->    I think ->enable_sdio_irq() is a more reasonable place to put this workraound.
->    I will export sdhci_enable_sdio_irq() and implement out host own
->    enable_sdio_irq() calling sdhci_enable_sdio)irq() plus this workaround.
->    Does it sound reasonable to you?
-
-Yes.
-
-[...]
-
->>
->> Got it. Although I think we can cope with that fine just by using the
->> different SD/eMMC speed modes settings defined in DT (or from the
->> SDHCI caps register)
->>
->     In my very opinion, I'm not sure if there is any corner case that driver cannot
->     determine the eMMC card type from DT and SDHC caps.
->
->>>    Unfortunately, MMC driver cannot determine the card type yet when eMMC voltage
->>>    setting should be executed.
->>>    Thus an flag is required here to tell driver to execute eMMC voltage setting.
+>>>>>> +
+>>>>>> +       /*
+>>>>>> +        * Xenon Specific property:
+>>>>>> +        * emmc: explicitly indicate whether this slot is for eMMC
+>>>>>> +        * slotno: the index of slot. Refer to SDHC_SYS_CFG_INFO register
+>>>>>> +        * tun-count: the interval between re-tuning
+>>>>>> +        * PHY type: "sdhc phy", "emmc phy 5.0" or "emmc phy 5.1"
+>>>>>> +        */
+>>>>>> +       if (of_property_read_bool(np, "marvell,xenon-emmc"))
+>>>>>> +               priv->emmc_slot = true;
+>>>>>
+>>>>> So, you need this because of the eMMC voltage switch behaviour, right?
+>>>>>
+>>>>> Then I would rather like to describe this a generic DT bindings for
+>>>>> the eMMC voltage level support. There have acutally been some earlier
+>>>>> discussions for this, but we haven't yet made some changes.
+>>>>>
+>>>>> I think what is missing is a mmc-ddr-3_3v DT binding, which when set,
+>>>>> allows the host driver to accept I/O voltage switches to 3.3V. If not
+>>>>> supported the  ->start_signal_voltage_switch() ops may return -EINVAL.
+>>>>> This would inform the mmc core to move on to the next supported
+>>>>> voltage level. There might be some minor additional changes to the mmc
+>>>>> card initialization sequence, but those should be simple.
+>>>>>
+>>>>> I can help out to look into this, unless you want to do it yourself of course!?
+>>>>>
+>>>>    Yes. One of the reasons is to provide eMMC specific voltage setting.
+>>>>    But in my very own opinion, it should be irrelevant to voltage level.
+>>>>    The eMMC voltage setting on our SDHC is different from SD/SDIO voltage switch.
+>>>>    It will become more complex with different SOC implementation details.
 >>>
->>>    Besides, additional eMMC specific settings might be implemented in future, besides
->>>    voltage setting. Most of them should be completed before MMC driver recognizes the
->>>    card type. Thus I have to keep this flag to indicate current SDHC is for eMMC.
+>>> Got it. Although I think we can cope with that fine just by using the
+>>> different SD/eMMC speed modes settings defined in DT (or from the
+>>> SDHCI caps register)
+>>>
+>>     In my very opinion, I'm not sure if there is any corner case that driver cannot
+>>     determine the eMMC card type from DT and SDHC caps.
 >>
->> I doubt you will need a generic "eMMC" flag, but let's see when we go forward.
->>
->> Currently it's clear you don't need such a flag, so I will submit a
->> change adding a DT binding for "mmc-ddr-3_3v" then we can take it from
->> there, to see if it suits your needs.
->>
+>>>>    Unfortunately, MMC driver cannot determine the card type yet when eMMC voltage
+>>>>    setting should be executed.
+>>>>    Thus an flag is required here to tell driver to execute eMMC voltage setting.
+>>>>
+>>>>    Besides, additional eMMC specific settings might be implemented in future, besides
+>>>>    voltage setting. Most of them should be completed before MMC driver recognizes the
+>>>>    card type. Thus I have to keep this flag to indicate current SDHC is for eMMC.
+>>>
+>>> I doubt you will need a generic "eMMC" flag, but let's see when we go forward.
+>>>
+>>> Currently it's clear you don't need such a flag, so I will submit a
+>>> change adding a DT binding for "mmc-ddr-3_3v" then we can take it from
+>>> there, to see if it suits your needs.
+>>>
 >
->     Actually, our eMMC is usually fixed as 1.8V.
+>     Another reason for a special "xenon-emmc" property is that our host IP usually can
+>     support both eMMC and SD. Whether a host is used as eMMC or SD depends on the
+>     final implementation of the actual product.
+>     Thus our host driver needs to know whether current SDHC is fixed as eMMC or SD.
+>     So far, It can only get the information from DT.
+
+As a matter of fact for mounted non-removable cards, such as eMMC, we
+already have the option to describe some of their characteristics in
+DT. Perhaps that's what you need?
+
+Please have a look at:
+Documentation/devicetree/bindings/mmc/mmc-card.txt
+
 >
->     The pair "no-sd" + "no-sdio" can provide the similar information.
->     But I'm not sure if it is proper to use those two property in such a way.
-
-Well, potentially those could be used like that.
-
-The point of why we added them was to allow hosts that don't support
-the different protocols (which is somewhat true for your case, because
-of signal voltage issues) to tell the mmc core about it. That instead
-of having to all kind of crazy hacks in the drives, that in then
-didn't work out so well.
+>     After out host driver get the card type information from DT, it can prepare eMMC
+>     specific voltage, set eMMC specific mmc->caps/caps2 flags and do other
+>     vendor specific init, before card init procedure.
+>     Otherwise, our host driver has to wait until card type is determined in mmc_rescan().
+>
+>     A generic "eMMC" flag is unnecessary. I just require a private property,
+>     which is only used in our host driver and DT.
+>
+>     Thank you.
+>
+> Best regards,
+> Hu Ziji
+>
+>>
+>>     Actually, our eMMC is usually fixed as 1.8V.
+>>
+>>     The pair "no-sd" + "no-sdio" can provide the similar information.
+>>     But I'm not sure if it is proper to use those two property in such a way.
+>>
+>>     Thank you.
+>>
+>> Best regards
+>> Hu Ziji
+>>
+>>> [...]
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
