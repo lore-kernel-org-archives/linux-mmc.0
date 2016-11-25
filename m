@@ -1,18 +1,19 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V7 20/25] mmc: queue: Share mmc request array between partitions
-Date: Fri, 25 Nov 2016 16:01:46 +0100
-Message-ID: <CACRpkdYfVUgh2kx97HKTcG9zcGX=3b9MQsUi-0MNj6KTkfmCCw@mail.gmail.com>
-References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com> <1480068442-5169-21-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 25/25] mmc: sdhci-acpi: Enable Software Command Queuing
+ for some Intel controllers
+Date: Fri, 25 Nov 2016 16:15:01 +0100
+Message-ID: <CACRpkdZZa8O3NPm3+1gDb=mfRDZqAjzgqdW5EZyrxGQn-_XbbQ@mail.gmail.com>
+References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com> <1480068442-5169-26-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:35189 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754355AbcKYPKc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2016 10:10:32 -0500
-Received: by mail-qk0-f178.google.com with SMTP id n204so80747986qke.2
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2016 07:10:04 -0800 (PST)
-In-Reply-To: <1480068442-5169-21-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:33572 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755008AbcKYPQO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2016 10:16:14 -0500
+Received: by mail-qt0-f171.google.com with SMTP id p16so68070860qta.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2016 07:15:02 -0800 (PST)
+In-Reply-To: <1480068442-5169-26-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,66 +21,32 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Fri, Nov 25, 2016 at 11:07 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> eMMC can have multiple internal partitions that are represented as separate
-> disks / queues. However the card has only 1 command queue which must be
-> empty when switching partitions. Consequently the array of mmc requests
-> that are queued can be shared between partitions saving memory.
->
-> Keep a pointer to the mmc request queue on the card, and use that instead
-> of allocating a new one for each partition. Use a reference count to keep
-> track of when to free it.
+> Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-
-This is a good refactoring no matter how we proceed with command
-queueuing. Some comments.
-
-> @@ -1480,6 +1480,9 @@ static int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
->         if (mq->qdepth != 2)
->                 return -EINVAL;
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> +       if (mqrq_cur->packed)
-> +               goto out;
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 81d4dc034793..95fc4de05c54 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -274,7 +274,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>         .chip    = &sdhci_acpi_chip_int,
+>         .caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+> -                  MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+> +                  MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR | MMC_CAP_SWCMDQ |
 
-Well packed command is gone so this goes away.
+Actually I don't see why SOFTWARE command queueing would need a cap flag
+in the host at all?
 
-> +++ b/drivers/mmc/card/queue.c
-> @@ -200,10 +200,17 @@ static struct mmc_queue_req *mmc_queue_alloc_mqrqs(struct mmc_queue *mq,
->         struct mmc_queue_req *mqrq;
->         int i;
->
-> +       if (mq->card->mqrq) {
-> +               mq->card->mqrq_ref_cnt += 1;
-> +               return mq->card->mqrq;
-> +       }
-> +
->         mqrq = kcalloc(qdepth, sizeof(*mqrq), GFP_KERNEL);
->         if (mqrq) {
->                 for (i = 0; i < mq->qdepth; i++)
->                         mqrq[i].task_id = i;
-> +               mq->card->mqrq = mqrq;
-> +               mq->card->mqrq_ref_cnt = 1;
->         }
+Isn't the whole point with it that if it is available, we don't need any special
+hardware support to use it with any host?
 
-OK
-
-> +       if (mq->card->mqrq_ref_cnt > 1)
-> +               return !!mq->mqrq[0].bounce_buf;
-
-Hm that seems inseparable from the other changes.
-
-Decrease of refcount seems correct.
-
-> +       struct mmc_queue_req    *mqrq;          /* Shared queue structure */
-> +       int                     mqrq_ref_cnt;   /* Shared queue ref. count */
-
-I'm not smart enough to see if we're always increasing/decreasing
-this under a lock or otherwise exclusive context, or if it would be
-better to use an atomic type for counting, like kref does?
-
-Well maybe the whole thing could use kref I dunno.
-
-I guess it should be an unsigned int atleast.
+So why not just enable it if the card supports it in that case, why flag
+it in the host at all?
 
 Yours,
 Linus Walleij
