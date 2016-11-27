@@ -1,19 +1,82 @@
-From: Mrs Julie Leach <info@nbrc.ac.in>
-Subject: Xmas Offer
-Date: Sat, 26 Nov 2016 04:20:36 +0200
-Message-ID: <201611260144.uAQ1f69A004903__27736.6874776364$1480184650$gmane$org@mx1.nbrc.ac.in>
-Reply-To: julieleach913@gmail.com
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH v3] mmc: block: delete packed command support
+Date: Sun, 27 Nov 2016 14:25:15 +0000
+Message-ID: <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
+References: <1480066500-4983-1-git-send-email-linus.walleij@linaro.org>
+ <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.nbrc.ac.in ([14.139.62.4]:41215 "EHLO mx1.nbrc.ac.in"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752533AbcKZSYF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 26 Nov 2016 13:24:05 -0500
-Content-Description: Mail message body
+Received: from mail-by2nam03on0057.outbound.protection.outlook.com ([104.47.42.57]:11040
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751042AbcK0OZR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 27 Nov 2016 09:25:17 -0500
+In-Reply-To: <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <FB8E86F1421B0A488F0B578CB1F40C7E@namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <info@nbrc.ac.in>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
 
-You are a recipient to Mrs Julie Leach Donation of $3 million USD. Contact ( julieleach93@gmail.com ) for claims.
+SGkgVWxmIGFuZCBMaW51cywNCg0KSSB1bmRlcnN0YW5kIHlvdXIgY29uY2VybnMgYWJvdXQgdGhl
+IGN1cnJlbnQgcGFja2VkIGNvbW1hbmRzDQpzdXBwb3J0IGFuZCB0aGUgcHJvYmxlbSBvZiB0cmFu
+c2l0aW9uIHRvIGJsa19tcS4NCkJ1dCBhcyBJIG1lbnRpb25lZCBpbiBwcmV2aW91cyBlbWFpbCB0
+aHJlYWQsIHRoZSBwYWNrZWQgY29tbWFuZHMNCmZlYXR1cmUgaXMgc3RpbGwgaW4gdXNlIG9uIGVN
+TUM0LjUgb3IgZU1NQzUuMSBkZXZpY2VzIG9uIGhvc3RzDQp3aXRob3V0IFNXL0hXIENNRFEgc3Vw
+cG9ydC4NClRha2luZyB0aGlzIGZlYXR1cmUgb3V0IG1lYW5pbmcgc3RvcCBzdXBwb3J0aW5nIG9u
+ZSBvZiBpbXBvcnRhbnQNCnBlcmZvcm1hbmNlIGZlYXR1cmVzIG9mIGVNTUMgZGV2aWNlcy4NCkxv
+b2tpbmcgZm9yd2FyZCB0aGlzIGZlYXR1cmUgaXMgcmVwbGFjZWQgd2l0aCBhIENNRFEsIGJ1dCBz
+aG91bGQgd2UNCmtpbGwgaXQgZm9yIHRob3NlIHdobyBkb2VzbuKAmXQgaGF2ZSBhIENNRFE/IA0K
+DQpUaGFua3MsDQpBbGV4DQoNCk9uIDExLzI1LzE2LCAzOjMwIFBNLCAibGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgVWxmIEhhbnNzb24iIDxsaW51eC1tbWMtb3du
+ZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiB1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPiB3
+cm90ZToNCg0KPk9uIDI1IE5vdmVtYmVyIDIwMTYgYXQgMTA6MzUsIExpbnVzIFdhbGxlaWogPGxp
+bnVzLndhbGxlaWpAbGluYXJvLm9yZz4gd3JvdGU6DQo+PiBJJ3ZlIGhhZCBpdCB3aXRoIHRoaXMg
+Y29kZSBub3cuDQo+Pg0KPj4gVGhlIHBhY2tlZCBjb21tYW5kIHN1cHBvcnQgaXMgYSBjb21wbGV4
+IGh1cmRsZSBpbiB0aGUgTU1DL1NEIGJsb2NrDQo+PiBsYXllciwgYXJvdW5kIDUwMCsgbGluZXMg
+b2YgY29kZSB3aGljaCB3YXMgaW50cm9kdWNlZCBpbiAyMDEzIGluDQo+PiBjb21taXRzDQo+Pg0K
+Pj4gY2UzOWY5ZDE3YzE0ICgibW1jOiBzdXBwb3J0IHBhY2tlZCB3cml0ZSBjb21tYW5kIGZvciBl
+TU1DNC41IGRldmljZXMiKQ0KPj4gYWJkOWFjMTQ0OTQ3ICgibW1jOiBhZGQgcGFja2VkIGNvbW1h
+bmQgZmVhdHVyZSBvZiBlTU1DNC41IikNCj4+DQo+PiAuLi5hbmQgc2luY2UgdGhlbiBpdCBoYXMg
+YmVlbiByb3R0aW5nLiBUaGUgb3JpZ2luYWwgYXV0aG9yIG9mIHRoZQ0KPj4gY29kZSBoYXMgZGlz
+YXBwZWFyZWQgZnJvbSB0aGUgY29tbXVuaXR5IGFuZCB0aGUgbWFpbCBhZGRyZXNzIGlzDQo+PiBi
+b3VuY2luZy4NCj4+DQo+PiBGb3IgdGhlIGNvZGUgdG8gYmUgZXhlcmNpc2VkIHRoZSBob3N0IG11
+c3QgZmxhZyB0aGF0IGl0IHN1cHBvcnRzDQo+PiBwYWNrZWQgY29tbWFuZHMsIHNvIGluIG1tY19i
+bGtfcHJlcF9wYWNrZWRfbGlzdCgpIHdoaWNoIGlzIGNhbGxlZCBmb3INCj4+IGV2ZXJ5IHNpbmds
+ZSByZXF1ZXN0LCB0aGUgZm9sbG93aW5nIGNvbnN0cnVjdGlvbiBhcHBlYXJzOg0KPj4NCj4+IHU4
+IG1heF9wYWNrZWRfcncgPSAwOw0KPj4NCj4+IGlmICgocnFfZGF0YV9kaXIoY3VyKSA9PSBXUklU
+RSkgJiYNCj4+ICAgICBtbWNfaG9zdF9wYWNrZWRfd3IoY2FyZC0+aG9zdCkpDQo+PiAgICAgICAg
+IG1heF9wYWNrZWRfcncgPSBjYXJkLT5leHRfY3NkLm1heF9wYWNrZWRfd3JpdGVzOw0KPj4NCj4+
+IGlmIChtYXhfcGFja2VkX3J3ID09IDApDQo+PiAgICAgZ290byBub19wYWNrZWQ7DQo+Pg0KPj4g
+VGhpcyBoYXMgdGhlIGZvbGxvd2luZyBsb2dpY2FsIGRlZHVjdGlvbnM6DQo+Pg0KPj4gLSBPbmx5
+IFdSSVRFIGNvbW1hbmRzIGNhbiByZWFsbHkgYmUgcGFja2VkLCBzbyB0aGUgc29sdXRpb24gaXMN
+Cj4+ICAgb25seSBoYWxmLWRvbmU6IHdlIHN1cHBvcnQgcGFja2VkIFdSSVRFIGJ1dCBub3QgcGFj
+a2VkIFJFQUQuDQo+PiAgIFRoZSBwYWNrZWQgY29tbWFuZCBzdXBwb3J0IGhhcyBub3QgYmVlbiBm
+aW5hbGl6ZWQgYnkgc3VwcG9ydGluZw0KPj4gICByZWFkcyBpbiB0aHJlZSB5ZWFycyENCj4+DQo+
+PiAtIG1tY19ob3N0X3BhY2tlZF93cigpIGlzIGp1c3QgYSBzdGF0aWMgaW5saW5lIHRoYXQgY2hl
+Y2tzDQo+PiAgIGhvc3QtPmNhcHMyICYgTU1DX0NBUDJfUEFDS0VEX1dSLiBUaGUgcHJvYmxlbSB3
+aXRoIHRoaXMgaXMNCj4+ICAgdGhhdCBOTyB1cHN0cmVhbSBob3N0IHNldHMgdGhpcyBjYXBhYmls
+aXR5IGZsYWchIE5vIGRyaXZlcg0KPj4gICBpbiB0aGUga2VybmVsIGlzIHVzaW5nIGl0LCBhbmQg
+d2UgY2FuJ3QgdGVzdCBpdC4gUGFja2VkDQo+PiAgIGNvbW1hbmQgbWF5IGJlIHN1cHBvcnRlZCBp
+biBvdXQtb2YtdHJlZSBjb2RlLCBidXQgSSBkb3VidA0KPj4gICBpdC4gSSBkb3VidCB0aGF0IHRo
+ZSBjb2RlIGlzIGV2ZW4gd29ya2luZyBhbnltb3JlIGR1ZSB0bw0KPj4gICBvdGhlciByZWZhY3Rv
+cmluZ3MgaW4gdGhlIE1NQyBibG9jayBsYXllciwgd2hvIHdvdWxkDQo+PiAgIG5vdGljZSBpZiBw
+YXRjaGVzIGFmZmVjdGluZyBpdCBicm9rZSBwYWNrZWQgY29tbWFuZHM/DQo+PiAgIE5vIG9uZS4N
+Cj4+DQo+PiAtIFRoZXJlIGlzIG5vIERldmljZSBUcmVlIGJpbmRpbmcgb3IgY29kZSB0byBtYXJr
+IGEgaG9zdCBhcw0KPj4gICBzdXBwb3J0aW5nIHBhY2tlZCByZWFkIG9yIHdyaXRlIGNvbW1hbmRz
+LCBqdXN0IHRoaXMgZmxhZw0KPj4gICBpbiBjYXBzMiwgc28gZm9yIHN1cmUgdGhlcmUgYXJlIG5v
+dCBhbnkgRFQgc3lzdGVtcyB1c2luZw0KPj4gICBpdCBlaXRoZXIuDQo+Pg0KPj4gSXQgaGFzIG90
+aGVyIHByb2JsZW1zIGFzIHdlbGw6IG1tY19ibGtfcHJlcF9wYWNrZWRfbGlzdCgpIGlzDQo+PiBz
+cGVjdWxhdGl2ZWx5IHBpY2tpbmcgcmVxdWVzdHMgb3V0IG9mIHRoZSByZXF1ZXN0IHF1ZXVlIHdp
+dGgNCj4+IGJsa19mZXRjaF9yZXF1ZXN0KCkgbWFraW5nIHRoZSBNTUMvU0Qgc3RhY2sgaGFyZGVy
+IHRvIGNvbnZlcnQNCj4+IHRvIHRoZSBtdWx0aXF1ZXVlIGJsb2NrIGxheWVyLiBCeSB0aGlzIHdl
+IGdldCByaWQgb2YgYW4NCj4+IG9ic3RhY2xlLg0KPj4NCj4+IFRoZSB3YXkgSSBzZWUgaXQgdGhp
+cyBpcyBqdXN0IGNydWZ0IGxpdHRlcmluZyB0aGUgTU1DL1NEDQo+PiBzdGFjay4NCj4+DQo+PiBD
+YzogTmFtamFlIEplb24gPG5hbWphZS5qZW9uQHNhbXN1bmcuY29tPg0KPj4gQ2M6IE1heWEgRXJl
+eiA8cWNhX21lcmV6QHFjYS5xdWFsY29tbS5jb20+DQo+PiBBY2tlZC1ieTogSmFlaG9vbiBDaHVu
+ZyA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT4NCj4+IFNpZ25lZC1vZmYtYnk6IExpbnVzIFdhbGxl
+aWogPGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZz4NCj4NCj5UaGFua3MsIGFwcGxpZWQgZm9yIG5l
+eHQhDQo+DQo+S2luZCByZWdhcmRzDQo+VWZmZQ0KPg0KDQoNCg==
