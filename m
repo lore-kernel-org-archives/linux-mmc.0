@@ -1,53 +1,30 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v3 0/2] mmc: sdhci-pci: Use ACPI to set max frequency of sdio host controller
-Date: Mon, 28 Nov 2016 13:16:37 -0600
-Message-ID: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
+From: Jeremy McNicoll <jmcnicol@redhat.com>
+Subject: Re: [PATCH 2/5] smd: Make packet size a constant
+Date: Mon, 28 Nov 2016 13:20:12 -0800
+Message-ID: <20161128212012.GA12333@mini-rhel.redhat.com>
+References: <1479863388-23678-1-git-send-email-jeremymc@redhat.com>
+ <1479863388-23678-3-git-send-email-jeremymc@redhat.com>
+ <20161124061450.GV28340@tuxbot>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20161124061450.GV28340@tuxbot>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Jeremy McNicoll <jeremymc@redhat.com>, linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, riteshh@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On some boards, max SDIO frequency is limited by trace lengths and other layout
-choices. We would like a way to specify this limitation so the driver can
-behave accordingly.
+On Wed, Nov 23, 2016 at 10:14:50PM -0800, Bjorn Andersson wrote:
+> On Tue 22 Nov 17:09 PST 2016, Jeremy McNicoll wrote:
+> 
+> > Use a macro to define the maximum size of a RPM message.
+> > 
+> 
+> No thanks.
+>
 
-This patch set assumes that the limitation has been reported in an ACPI table
-which the driver can check to get the max frequency.
+Sure, will drop this change with V2 in a few days so that people have a chance
+to provide feedback. 
 
-The first patch creates a PCI ID and support for the Intel byt sdio where NI is
-the subvendor.
-
-If CONFIG_ACPI is set, the second patch uses the ACPI table to set f_max during
-the new ni_byt_sdio_probe_slot.
-
-rv2:
-   * Use acpi_evaluate_integer() instead of
-     acpi_get_handle()/acpi_evaluate_object()
-pv1:
-   * Removed redundant comment
-   * Print info message if MXFQ not found in acpi table
-pv2:
-   * Changed info message to error message if MXFQ not found
-   * Replaced ni_byt_sdio_probe_slot with one of two versions depending on
-     whether CONFIG_ACPI is set.
-pv3:
-   * Replaced the two versions of ni_byt_sdio_probe_slot with new version that
-     calls ni_set_max_freq.
-   * Created ni_set_max_freq which sets the slot's max_freq if CONFIG_ACPI is
-     set.
-
-
-Zach Brown (2):
-  mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller
-    sub-vended by NI
-  mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio    
-    controller sub-vended by NI
-
- drivers/mmc/host/sdhci-pci-core.c | 56 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 56 insertions(+)
-
--- 
-2.7.4
+-jeremy
