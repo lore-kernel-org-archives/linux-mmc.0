@@ -1,91 +1,80 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
-Date: Mon, 28 Nov 2016 19:39:20 +0200
-Message-ID: <20161128173920.25334-1-georgi.djakov@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, riteshh@codeaurora.org, georgi.djakov@linaro.org
+From: Zach Brown <zach.brown@ni.com>
+Subject: [PATCH v3 1/2] mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller sub-vended by NI
+Date: Mon, 28 Nov 2016 13:16:38 -0600
+Message-ID: <1480360599-13295-2-git-send-email-zach.brown@ni.com>
+References: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from skprod2.natinst.com ([130.164.80.23]:37938 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751400AbcK1TRf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 28 Nov 2016 14:17:35 -0500
+In-Reply-To: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
 
-On apq8016, apq8084 and apq8074 platforms, writing to the software
-reset register triggers the "power irq". We need to ack and handle
-the irq, otherwise the following message appears:
+Add PCI ID for Intel byt sdio host controller sub-vended by NI.
 
-mmc0: Reset 0x1 never completed.
-sdhci: =========== REGISTER DUMP (mmc0)===========
-sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
-sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
-sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
-sdhci: Power:    0x00000000 | Blk gap:  0x00000000
-sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
-sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
-sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
-sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
-sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
-sdhci: Host ctl2: 0x00000000
-sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
-sdhci: ===========================================
+The controller has different behavior because of the board layout NI
+puts it on.
 
-Fix it by implementing the custom sdhci_reset() function,
-which performs the software reset and then handles the irq.
-
-Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+Signed-off-by: Zach Brown <zach.brown@ni.com>
 ---
+ drivers/mmc/host/sdhci-pci-core.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
- * Perform the software reset by just writing to the SDHCI_SOFTWARE_RESET
-   register and then check for the irq.
-
- drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 32879b845b75..157ae07f9309 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	__sdhci_msm_set_clock(host, clock);
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 1d9e00a..9741505 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -375,6 +375,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 	return 0;
  }
  
-+void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
++static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
 +{
-+	unsigned long timeout = 100;
-+
-+	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
-+
-+	if (mask & SDHCI_RESET_ALL) {
-+		host->clock = 0;
-+
-+		/*
-+		 * SDHCI_RESET_ALL triggers the PWR IRQ and we need
-+		 * to handle it here.
-+		 */
-+		sdhci_msm_voltage_switch(host);
-+	}
-+
-+	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
-+		if (timeout == 0) {
-+			pr_err("%s: Reset 0x%x never completed.\n",
-+			       mmc_hostname(host->mmc), (int)mask);
-+			return;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
++	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
++				 MMC_CAP_WAIT_WHILE_BUSY;
++	return 0;
 +}
 +
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+@@ -447,6 +454,15 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
+ 	.ops		= &sdhci_intel_byt_ops,
+ };
  
- static const struct sdhci_ops sdhci_msm_ops = {
- 	.platform_execute_tuning = sdhci_msm_execute_tuning,
--	.reset = sdhci_reset,
-+	.reset = sdhci_msm_reset,
- 	.set_clock = sdhci_msm_set_clock,
- 	.get_min_clock = sdhci_msm_get_min_clock,
- 	.get_max_clock = sdhci_msm_get_max_clock,
++static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++			  SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.allow_runtime_pm = true,
++	.probe_slot	= ni_byt_sdio_probe_slot,
++	.ops		= &sdhci_intel_byt_ops,
++};
++
+ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+@@ -1079,6 +1095,14 @@ static const struct pci_device_id pci_ids[] = {
+ 	{
+ 		.vendor		= PCI_VENDOR_ID_INTEL,
+ 		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
++		.subvendor	= PCI_VENDOR_ID_NI,
++		.subdevice	= 0x7884,
++		.driver_data	= (kernel_ulong_t)&sdhci_ni_byt_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
+ 		.subvendor	= PCI_ANY_ID,
+ 		.subdevice	= PCI_ANY_ID,
+ 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-- 
+2.7.4
+
