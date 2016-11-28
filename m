@@ -1,77 +1,95 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Mon, 28 Nov 2016 19:38:11 +0800
-Message-ID: <10a885f0-82e9-a35c-f62f-3fc4518ea8b4@marvell.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
- <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com>
- <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
- <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com>
- <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
- <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V7 06/25] mmc: queue: Introduce queue depth
+Date: Mon, 28 Nov 2016 14:45:22 +0200
+Message-ID: <ecd5485e-1b34-6c46-cb0d-5a12af5ceff5@intel.com>
+References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
+ <1480068442-5169-7-git-send-email-adrian.hunter@intel.com>
+ <fc5ca510-e383-e0dc-90e1-397a07dec791@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:34919 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1754036AbcK1Lix (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 06:38:53 -0500
-In-Reply-To: <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:14184 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754388AbcK1Mu0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 28 Nov 2016 07:50:26 -0500
+In-Reply-To: <fc5ca510-e383-e0dc-90e1-397a07dec791@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Ulf,
+On 28/11/16 06:19, Ritesh Harjani wrote:
+> 
+> 
+> On 11/25/2016 3:37 PM, Adrian Hunter wrote:
+>> Add a mmc_queue member to record the size of the queue, which currently
+>> supports 2 requests on-the-go at a time.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/card/block.c | 3 +++
+>>  drivers/mmc/card/queue.c | 1 +
+>>  drivers/mmc/card/queue.h | 1 +
+>>  3 files changed, 5 insertions(+)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index f8e51640596e..47835b78872f 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1439,6 +1439,9 @@ static int mmc_packed_init(struct mmc_queue *mq,
+>> struct mmc_card *card)
+>>      struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+>>      int ret = 0;
+>>
+>> +    /* Queue depth is only ever 2 with packed commands */
+>> +    if (mq->qdepth != 2)
+>> +        return -EINVAL;
+> I think you are referring here that with SWMCDQ, packed commands wont be
+> used. Instead of qdepth do you think we should check cmdq_en ?
+> Also maybe we shouldn't even call mmc_packed_init if cmdq_en is true?
 
-On 2016/11/28 19:13, Ulf Hansson wrote:
+mmc_packed_init() has gone away but the intention was to make the code
+protect itself because the implementation supports only 2 requests.  So,
+something like this would be more explicit:
+
+	/* Packed commands implementation depends on qdepth being 2 */
+	if (mq->qdepth != 2) {
+		WARN_ON(1):
+		return -EINVAL;
+	}
+
+> 
+> 
 >>
->>     As you suggest, I replace mmc_wait_for_cmd() with mmc_send_tuning(), to
->>     send commands for testing current sampling point set in our host PHY.
+>>      mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
+>>      if (!mqrq_cur->packed) {
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index cbe92c9cfda1..60fa095adb14 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -296,6 +296,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct
+>> mmc_card *card,
+>>      if (!mq->queue)
+>>          return -ENOMEM;
 >>
->>     According to my test result, it shows that mmc_send_tuning() can only support
->>     tuning command (CMD21/CMD19).
->>     As a result, we cannot use mmc_send_tuning() when card is in the speed modes
->>     which doesn't support tuning, such as eMMC HS SDR, eMMC HS DRR and
->>     SD SDR 12/SDR25/DDR50. Card will not response to tuning commands in those
->>     speed modes.
+>> +    mq->qdepth = 2;
+>>      mq->mqrq_cur = &mq->mqrq[0];
+>>      mq->mqrq_prev = &mq->mqrq[1];
+>>      mq->queue->queuedata = mq;
+>> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+>> index 0e8133c626c9..8a0a45e5650d 100644
+>> --- a/drivers/mmc/card/queue.h
+>> +++ b/drivers/mmc/card/queue.h
+>> @@ -64,6 +64,7 @@ struct mmc_queue {
+>>      struct mmc_queue_req    mqrq[2];
+>>      struct mmc_queue_req    *mqrq_cur;
+>>      struct mmc_queue_req    *mqrq_prev;
+>> +    int            qdepth;
+>>  };
 >>
->>     Could you please provide suggestions for the speed mode in which tuning is
->>     not available?
+>>  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *,
+>> spinlock_t *,
 >>
 > 
-> Normally the mmc host driver shouldn't have to care about what the
-> card supports, as that is the responsibility of the mmc core to
-> manage.
-> 
-> The host should only need to implement the ->execute_tuning() ops,
-> which gets called when the card supports tuning (CMD19/21). Does it
-> make sense?
-> 
-   I think it is irrelevant to tuning procedure.
 
-   Our host requires to adjust PHY setting after each time ios setting
-   (SDCLK/bus width/speed mode) is changed.
-   The simplified sequence is:
-   mmc change ios --> mmc_set_ios() --> ->set_ios() --> after sdhci_set_ios(),
-   adjust PHY setting.
-   During PHY setting adjustment, out host driver has to send commands to
-   test current sampling point. Tuning is another independent step.
-
-   Thus our host needs a valid command in PHY setting adjustment. Tuning command
-   can be borrowed to complete this task in SD SDR50. But for other speed mode,
-   we have to find out a valid command.
-
-   Any suggestion please?
-
-   Thank you.
-
-Best regards,
-Hu Ziji
-
-> Kind regards
-> Uffe
-> 
