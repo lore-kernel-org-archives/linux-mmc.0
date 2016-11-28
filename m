@@ -1,18 +1,18 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH V7 06/25] mmc: queue: Introduce queue depth
-Date: Mon, 28 Nov 2016 09:49:43 +0530
-Message-ID: <fc5ca510-e383-e0dc-90e1-397a07dec791@codeaurora.org>
+Subject: Re: [PATCH V7 07/25] mmc: queue: Use queue depth to allocate and free
+Date: Mon, 28 Nov 2016 09:51:24 +0530
+Message-ID: <f6c7543f-fc49-d2b2-d9cf-73de5b528a38@codeaurora.org>
 References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
- <1480068442-5169-7-git-send-email-adrian.hunter@intel.com>
+ <1480068442-5169-8-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:35640 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:36284 "EHLO
         smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754118AbcK1ETx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Nov 2016 23:19:53 -0500
-In-Reply-To: <1480068442-5169-7-git-send-email-adrian.hunter@intel.com>
+        with ESMTP id S1753790AbcK1EVv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Nov 2016 23:21:51 -0500
+In-Reply-To: <1480068442-5169-8-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -21,59 +21,158 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 
 On 11/25/2016 3:37 PM, Adrian Hunter wrote:
-> Add a mmc_queue member to record the size of the queue, which currently
-> supports 2 requests on-the-go at a time.
+> Instead of allocating resources for 2 slots in the queue, allow for an
+> arbitrary number.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Looks good!
+Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
+
+Regards
+Ritesh
+
 > ---
->  drivers/mmc/card/block.c | 3 +++
->  drivers/mmc/card/queue.c | 1 +
->  drivers/mmc/card/queue.h | 1 +
->  3 files changed, 5 insertions(+)
+>  drivers/mmc/card/queue.c | 103 +++++++++++++++++++++--------------------------
+>  1 file changed, 46 insertions(+), 57 deletions(-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index f8e51640596e..47835b78872f 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1439,6 +1439,9 @@ static int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
->  	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
->  	int ret = 0;
->
-> +	/* Queue depth is only ever 2 with packed commands */
-> +	if (mq->qdepth != 2)
-> +		return -EINVAL;
-I think you are referring here that with SWMCDQ, packed commands wont be 
-used. Instead of qdepth do you think we should check cmdq_en ?
-Also maybe we shouldn't even call mmc_packed_init if cmdq_en is true?
-
-
->
->  	mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
->  	if (!mqrq_cur->packed) {
 > diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index cbe92c9cfda1..60fa095adb14 100644
+> index 60fa095adb14..1ea007f51ec9 100644
 > --- a/drivers/mmc/card/queue.c
 > +++ b/drivers/mmc/card/queue.c
-> @@ -296,6 +296,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
->  	if (!mq->queue)
->  		return -ENOMEM;
+> @@ -189,86 +189,75 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>  static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
+>  					unsigned int bouncesz)
+>  {
+> -	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+> -	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+> -
+> -	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+> -	if (!mqrq_cur->bounce_buf) {
+> -		pr_warn("%s: unable to allocate bounce cur buffer\n",
+> -			mmc_card_name(mq->card));
+> -		return false;
+> -	}
+> +	int i;
 >
-> +	mq->qdepth = 2;
->  	mq->mqrq_cur = &mq->mqrq[0];
->  	mq->mqrq_prev = &mq->mqrq[1];
->  	mq->queue->queuedata = mq;
-> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-> index 0e8133c626c9..8a0a45e5650d 100644
-> --- a/drivers/mmc/card/queue.h
-> +++ b/drivers/mmc/card/queue.h
-> @@ -64,6 +64,7 @@ struct mmc_queue {
->  	struct mmc_queue_req	mqrq[2];
->  	struct mmc_queue_req	*mqrq_cur;
->  	struct mmc_queue_req	*mqrq_prev;
-> +	int			qdepth;
->  };
+> -	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+> -	if (!mqrq_prev->bounce_buf) {
+> -		pr_warn("%s: unable to allocate bounce prev buffer\n",
+> -			mmc_card_name(mq->card));
+> -		kfree(mqrq_cur->bounce_buf);
+> -		mqrq_cur->bounce_buf = NULL;
+> -		return false;
+> +	for (i = 0; i < mq->qdepth; i++) {
+> +		mq->mqrq[i].bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+> +		if (!mq->mqrq[i].bounce_buf)
+> +			goto out_err;
+>  	}
 >
->  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+>  	return true;
+> +
+> +out_err:
+> +	while (--i >= 0) {
+> +		kfree(mq->mqrq[i].bounce_buf);
+> +		mq->mqrq[i].bounce_buf = NULL;
+> +	}
+> +	pr_warn("%s: unable to allocate bounce buffers\n",
+> +		mmc_card_name(mq->card));
+> +	return false;
+>  }
+>
+>  static int mmc_queue_alloc_bounce_sgs(struct mmc_queue *mq,
+>  				      unsigned int bouncesz)
+>  {
+> -	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+> -	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+> -	int ret;
+> -
+> -	mqrq_cur->sg = mmc_alloc_sg(1, &ret);
+> -	if (ret)
+> -		return ret;
+> +	int i, ret;
+>
+> -	mqrq_cur->bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
+> -	if (ret)
+> -		return ret;
+> -
+> -	mqrq_prev->sg = mmc_alloc_sg(1, &ret);
+> -	if (ret)
+> -		return ret;
+> +	for (i = 0; i < mq->qdepth; i++) {
+> +		mq->mqrq[i].sg = mmc_alloc_sg(1, &ret);
+> +		if (ret)
+> +			return ret;
+>
+> -	mqrq_prev->bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
+> +		mq->mqrq[i].bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
+> +		if (ret)
+> +			return ret;
+> +	}
+>
+> -	return ret;
+> +	return 0;
+>  }
+>
+>  static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
+>  {
+> -	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+> -	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+> -	int ret;
+> +	int i, ret;
+>
+> -	mqrq_cur->sg = mmc_alloc_sg(max_segs, &ret);
+> -	if (ret)
+> -		return ret;
+> +	for (i = 0; i < mq->qdepth; i++) {
+> +		mq->mqrq[i].sg = mmc_alloc_sg(max_segs, &ret);
+> +		if (ret)
+> +			return ret;
+> +	}
+>
+> -	mqrq_prev->sg = mmc_alloc_sg(max_segs, &ret);
+> +	return 0;
+> +}
+>
+> -	return ret;
+> +static void mmc_queue_req_free_bufs(struct mmc_queue_req *mqrq)
+> +{
+> +	kfree(mqrq->bounce_sg);
+> +	mqrq->bounce_sg = NULL;
+> +
+> +	kfree(mqrq->sg);
+> +	mqrq->sg = NULL;
+> +
+> +	kfree(mqrq->bounce_buf);
+> +	mqrq->bounce_buf = NULL;
+>  }
+>
+>  static void mmc_queue_reqs_free_bufs(struct mmc_queue *mq)
+>  {
+> -	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+> -	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+> -
+> -	kfree(mqrq_cur->bounce_sg);
+> -	mqrq_cur->bounce_sg = NULL;
+> -	kfree(mqrq_prev->bounce_sg);
+> -	mqrq_prev->bounce_sg = NULL;
+> -
+> -	kfree(mqrq_cur->sg);
+> -	mqrq_cur->sg = NULL;
+> -	kfree(mqrq_cur->bounce_buf);
+> -	mqrq_cur->bounce_buf = NULL;
+> -
+> -	kfree(mqrq_prev->sg);
+> -	mqrq_prev->sg = NULL;
+> -	kfree(mqrq_prev->bounce_buf);
+> -	mqrq_prev->bounce_buf = NULL;
+> +	int i;
+> +
+> +	for (i = 0; i < mq->qdepth; i++)
+> +		mmc_queue_req_free_bufs(&mq->mqrq[i]);
+>  }
+>
+>  /**
 >
 
 -- 
