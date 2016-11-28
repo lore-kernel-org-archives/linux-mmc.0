@@ -1,59 +1,56 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-msm: Add sdhci_reset() implementation
-Date: Mon, 28 Nov 2016 17:51:05 +0200
-Message-ID: <df2a5586-0cd3-d744-d490-fa24c7e385a3@linaro.org>
-References: <20161122155005.16910-1-georgi.djakov@linaro.org>
- <95ef8403-5e3c-4219-f45e-e289cf59f1b8@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Mon, 28 Nov 2016 16:54:58 +0100
+Message-ID: <CAPDyKFr=TE+EuZ9rZV3ygsjBFN_mRrE2imkFa-wQs_ykM5d+cQ@mail.gmail.com>
+References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting> <20161128141513.agnkyz6ronigbukn@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <95ef8403-5e3c-4219-f45e-e289cf59f1b8@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wj0-f170.google.com ([209.85.210.170]:36461 "EHLO
+        mail-wj0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932334AbcK1PzB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 10:55:01 -0500
+Received: by mail-wj0-f170.google.com with SMTP id qp4so119971939wjc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2016 07:55:00 -0800 (PST)
+In-Reply-To: <20161128141513.agnkyz6ronigbukn@rob-hp-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: Matt Ranostay <matt@ranostay.consulting>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Mark Rutland <mark.rutland@arm.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On 11/24/2016 06:06 PM, Ritesh Harjani wrote:
-> Hi Georgi,
->
-> I collected some info on this problem. May be below info might help you.
->
-> I think "Reset 0x1" problem is occurring because of below call stack.
-> SDHCI_RESET_ALL to SDHCI_SOFTWARE_RESET register will anyway trigger the
-> sdhci_msm_pwr_irq.
->
-> But I think the problem is that the above occurs in spinlock context
-> and because of only one core the IRQ will never be serviced, hence you
-> were seeing (Reset 0x1) error.
->
+[...]
 
-Hi Ritesh,
-Thanks for looking into this. So yes, its called in spinlock context and 
-what we need to do is just handle the power irq after writing to reset 
-register.
+>> +
+>> +Example:
+>> +
+>> +     wifi_pwrseq: wifi_pwrseq {
+>> +             compatible = "mmc-pwrseq-sd8787";
+>> +             pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+>> +             reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+>> +     }
+>> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>> index c421aba0a5bc..08fd65d35725 100644
+>> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>> @@ -32,6 +32,9 @@ Optional properties:
+>>                so that the wifi chip can wakeup host platform under certain condition.
+>>                during system resume, the irq will be disabled to make sure
+>>                unnecessary interrupt is not received.
+>> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
+>
+> This is why pwrseq is wrong. You have some properties in the card node
+> and some in pwrseq node. Everything should be in the card node.
 
-[..]
->
-> To prove above I tried this and the problem goes away. But I still dont
-> think that the below approach is correct. As it will still trigger a
-> pwr_irq as well.
->
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 62aedf1..01e611c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -174,6 +174,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->                 /* Reset-all turns off SD Bus Power */
->                 if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->                         sdhci_runtime_pm_bus_off(host);
-> +               if (host->ops->voltage_switch)
-> +                       host->ops->voltage_switch(host);
->         }
->
+Put "all" in the card node, just doesn't work for MMC. Particular in
+cases when we have removable cards, as then it would be wrong to have
+a card node.
 
-Yes, our own reset() function that additionally handles the irq will work.
+The mmc pwrseq DT bindings just follows the legacy approach for MMC
+and that's why the pwrseq handle is at the controller node. Yes, would
+could have done it differently, but this is the case now, so we will
+have to accept that.
 
-Thanks,
-Georgi
+[...]
+
+Kind regards
+Uffe
