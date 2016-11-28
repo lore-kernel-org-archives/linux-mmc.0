@@ -1,56 +1,81 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Mon, 28 Nov 2016 16:54:58 +0100
-Message-ID: <CAPDyKFr=TE+EuZ9rZV3ygsjBFN_mRrE2imkFa-wQs_ykM5d+cQ@mail.gmail.com>
-References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting> <20161128141513.agnkyz6ronigbukn@rob-hp-laptop>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: arasan,sdhci.txt "compatibility" DT binding
+Date: Mon, 28 Nov 2016 17:15:25 +0100
+Message-ID: <14771688.Q8f97gHC2H@wuerfel>
+References: <56B07BA5.4060407@free.fr> <a20b2b4f-15d4-3c29-324c-1ced5dbcc67f@xilinx.com> <583C50E7.6030400@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f170.google.com ([209.85.210.170]:36461 "EHLO
-        mail-wj0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932334AbcK1PzB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 10:55:01 -0500
-Received: by mail-wj0-f170.google.com with SMTP id qp4so119971939wjc.3
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2016 07:55:00 -0800 (PST)
-In-Reply-To: <20161128141513.agnkyz6ronigbukn@rob-hp-laptop>
+Received: from mout.kundenserver.de ([217.72.192.73]:65197 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932508AbcK1QQv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 11:16:51 -0500
+In-Reply-To: <583C50E7.6030400@free.fr>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Matt Ranostay <matt@ranostay.consulting>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Mark Rutland <mark.rutland@arm.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Mason <slash.tmp@free.fr>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Rameshwar Sahu <rsahu@apm.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Linus Walleij <linus.walleij@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Rob Herring <robh@kernel.org>, Zach Brown <zach.brown@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, Suneel Garapati <sune>
 
-[...]
+On Monday, November 28, 2016 4:44:39 PM CET Mason wrote:
+> Hello,
+> 
+> @Shawn Lin, could you take a look below and tell me exactly
+> which IP core(s) Rockchip is using in its SoCs?
+> 
+> Based on the feedback I received, here is an updated list of
+> compatible strings and controller versions dealt with by the
+> drivers/mmc/host/sdhci-of-arasan.c code.
+> 
+> 
+> Xilinx Zynq:
+> "SD2.0 / SDIO2.0 / MMC3.31 AHB Host Controller"
+> "arasan,sdhci-8.9a"
+> NB: 8.9a is the documentation revision (dated 2011-10-19)
+> subsequent tweaks labeled 9.0a, 9.1a, 9.2a
+> 
+> Xilinx ZynqMP:
+> "SD3.0 / SDIO3.0 / eMMC4.51 AHB Host Controller"
+> "arasan,sdhci-8.9a"
+> NB: using the same compatible string as Zynq
+> 
+> Sigma SMP87xx
+> "SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
+> no compatible string yet, platform-specific init required
+> 
+> APM:
+> "SD3.0 / SDIO3.0 / eMMC4.41 AHB Host Controller"
+> "arasan,sdhci-4.9a"
+> NB: 4.9a appears to be the documentation revision
+> no functional diff with "arasan,sdhci-8.9a"
+> 
+> Rockchip
+> Exact IP unknown, waiting for Shawn's answer
+> "arasan,sdhci-5.1"
+> NB: 5.1 appears to refer to the eMMC standard supported
+> 
+> 
+> On a final note, there are many variations of the Arasan IP.
+> I've tracked down at least the following:
+> 
+> SD_2.0_SDIO_2.0__MMC_3.31_AHB_Host_Controller.pdf
+> SD_3.0_SDIO_3.0_eMMC_4.41_OCP_Host_Controller.pdf
+> SD_3.0_SDIO_3.0_eMMC_4.4__AHB_Host_Controller.pdf
+> SD_3.0_SDIO_3.0_eMMC_4.51_Host_Controller.pdf
+> SD_3.0_SDIO_3.0_eMMC_4.5__Host_Controller.pdf
+> SD_4.1_SDIO_4.1_eMMC_4.51_Host_Controller.pdf
+> SD_4.1_SDIO_4.1_eMMC_5.1__Host_Controller.pdf
+> 
+> It seems to me the compatible string should specify
+> the SD/SDIO version AND the eMMC version, since it
+> seems many combinations are allowed, e.g. eMMC 4.51
+> has two possible SD versions.
+> 
+> What do you think?
 
->> +
->> +Example:
->> +
->> +     wifi_pwrseq: wifi_pwrseq {
->> +             compatible = "mmc-pwrseq-sd8787";
->> +             pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
->> +             reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
->> +     }
->> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->> index c421aba0a5bc..08fd65d35725 100644
->> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->> @@ -32,6 +32,9 @@ Optional properties:
->>                so that the wifi chip can wakeup host platform under certain condition.
->>                during system resume, the irq will be disabled to make sure
->>                unnecessary interrupt is not received.
->> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
->
-> This is why pwrseq is wrong. You have some properties in the card node
-> and some in pwrseq node. Everything should be in the card node.
+It seems wrong to have the eMMC or SD version in the compatible
+string.  Is that the only difference between the documents you
+found? Normally there should be a version of IP block itself,
+besides the supported protocol.
 
-Put "all" in the card node, just doesn't work for MMC. Particular in
-cases when we have removable cards, as then it would be wrong to have
-a card node.
-
-The mmc pwrseq DT bindings just follows the legacy approach for MMC
-and that's why the pwrseq handle is at the controller node. Yes, would
-could have done it differently, but this is the case now, so we will
-have to accept that.
-
-[...]
-
-Kind regards
-Uffe
+	Arnd
