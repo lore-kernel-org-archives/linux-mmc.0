@@ -1,62 +1,89 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V7 25/25] mmc: sdhci-acpi: Enable Software Command Queuing
- for some Intel controllers
-Date: Mon, 28 Nov 2016 15:55:46 +0200
-Message-ID: <df8a64ad-244a-a75f-c79d-a4fd2c2acd62@intel.com>
-References: <1480068442-5169-1-git-send-email-adrian.hunter@intel.com>
- <1480068442-5169-26-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZZa8O3NPm3+1gDb=mfRDZqAjzgqdW5EZyrxGQn-_XbbQ@mail.gmail.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Mon, 28 Nov 2016 08:15:13 -0600
+Message-ID: <20161128141513.agnkyz6ronigbukn@rob-hp-laptop>
+References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:56485 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932294AbcK1OA4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 28 Nov 2016 09:00:56 -0500
-In-Reply-To: <CACRpkdZZa8O3NPm3+1gDb=mfRDZqAjzgqdW5EZyrxGQn-_XbbQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1479434109-8745-1-git-send-email-matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-On 25/11/16 17:15, Linus Walleij wrote:
-> On Fri, Nov 25, 2016 at 11:07 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Thu, Nov 17, 2016 at 05:55:09PM -0800, Matt Ranostay wrote:
+> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
+> This can be abstracted to other chipsets if needed in the future.
+
+I don't like the MMC pwrseq bindings, so I won't be acking any. Look at 
+the USB pwrseq for why.
+
+> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Cc: Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+> ---
+>  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt  |  14 +++
+>  .../bindings/net/wireless/marvell-sd8xxx.txt       |   4 +
+>  drivers/mmc/core/Kconfig                           |  10 ++
+>  drivers/mmc/core/Makefile                          |   1 +
+>  drivers/mmc/core/pwrseq_sd8787.c                   | 117 +++++++++++++++++++++
+>  5 files changed, 146 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
 > 
->> Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/host/sdhci-acpi.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->> index 81d4dc034793..95fc4de05c54 100644
->> --- a/drivers/mmc/host/sdhci-acpi.c
->> +++ b/drivers/mmc/host/sdhci-acpi.c
->> @@ -274,7 +274,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
->>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->>         .chip    = &sdhci_acpi_chip_int,
->>         .caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
->> -                  MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
->> +                  MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR | MMC_CAP_SWCMDQ |
-> 
-> Actually I don't see why SOFTWARE command queueing would need a cap flag
-> in the host at all?
-> 
-> Isn't the whole point with it that if it is available, we don't need any special
-> hardware support to use it with any host?
-> 
-> So why not just enable it if the card supports it in that case, why flag
-> it in the host at all?
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> new file mode 100644
+> index 000000000000..1b658351629b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> @@ -0,0 +1,14 @@
+> +* Marvell SD8787 power sequence provider
+> +
+> +Required properties:
+> +- compatible: must be "mmc-pwrseq-sd8787".
+> +- pwndn-gpio: contains a power down GPIO specifier.
 
-It is a good question.  I was trying to remember why I did that way, but
-nothing came to mind.
+powerdown-gpios
 
-Now it is dependent on MMC_CAP_CMD_DURING_TFR which host controllers may not
-support.  An example is SDHCI host controllers that have
-SDHCI_QUIRK_RESET_AFTER_REQUEST since the reset will interfere with ongoing
-transfers.
+> +- reset-gpio: contains a reset GPIO specifier.
 
-So I will drop MMC_CAP_SWCMDQ and just check MMC_CAP_CMD_DURING_TFR.
+reset-gpios
 
+> +
+> +Example:
+> +
+> +	wifi_pwrseq: wifi_pwrseq {
+> +		compatible = "mmc-pwrseq-sd8787";
+> +		pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+> +		reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+> +	}
+> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+> index c421aba0a5bc..08fd65d35725 100644
+> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+> @@ -32,6 +32,9 @@ Optional properties:
+>  		 so that the wifi chip can wakeup host platform under certain condition.
+>  		 during system resume, the irq will be disabled to make sure
+>  		 unnecessary interrupt is not received.
+> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
+
+This is why pwrseq is wrong. You have some properties in the card node 
+and some in pwrseq node. Everything should be in the card node.
+
+> +  - mmc-pwrseq:  phandle to the MMC power sequence node. See "mmc-pwrseq-*"
+> +		 for documentation of MMC power sequence bindings.
+>  
+>  Example:
+>  
+> @@ -44,6 +47,7 @@ so that firmware can wakeup host using this device side pin.
+>  &mmc3 {
+>  	status = "okay";
+>  	vmmc-supply = <&wlan_en_reg>;
+> +	mmc-pwrseq = <&wifi_pwrseq>;
+>  	bus-width = <4>;
+>  	cap-power-off-card;
+>  	keep-power-in-suspend;
