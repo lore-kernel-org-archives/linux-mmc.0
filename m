@@ -1,34 +1,67 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v3] mmc: block: delete packed command support
-Date: Mon, 28 Nov 2016 00:23:40 -0800
-Message-ID: <20161128082340.GA5391@infradead.org>
-References: <1480066500-4983-1-git-send-email-linus.walleij@linaro.org>
- <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com>
- <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: core: add DT binding for CMD23
+Date: Mon, 28 Nov 2016 18:40:28 +0900
+Message-ID: <8af2b7b1-7473-e048-87b7-4acf7e2ba014@samsung.com>
+References: <20161125065215.10833-1-jh80.chung@samsung.com>
+ <CGME20161125082443epcas2p2c0f10ecaf32225c09747a7736b1bb7cc@epcas2p2.samsung.com>
+ <CAPDyKFr3CMeqDpQxf13Z1Ae5W_Q3X75if4fK9eYstXaVeTTVwg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:59092 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754074AbcK1IXm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 03:23:42 -0500
-Content-Disposition: inline
-In-Reply-To: <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <CAPDyKFr3CMeqDpQxf13Z1Ae5W_Q3X75if4fK9eYstXaVeTTVwg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
 
-On Sun, Nov 27, 2016 at 02:25:15PM +0000, Alex Lemberg wrote:
-> I understand your concerns about the current packed commands
-> support and the problem of transition to blk_mq.
-> But as I mentioned in previous email thread, the packed commands
-> feature is still in use on eMMC4.5 or eMMC5.1 devices on hosts
-> without SW/HW CMDQ support.
-> Taking this feature out meaning stop supporting one of important
-> performance features of eMMC devices.
-> Looking forward this feature is replaced with a CMDQ, but should we
-> kill it for those who doesn’t have a CMDQ? 
+On 11/25/2016 05:19 PM, Ulf Hansson wrote:
+> On 25 November 2016 at 07:52, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
+>> Provide the option to configure one type of multiple block read/wrte
+>> transatction (CMD23 - it's optional.)
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+>> ---
+>>  drivers/mmc/core/host.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>> index 98f25ff..9bdc369 100644
+>> --- a/drivers/mmc/core/host.c
+>> +++ b/drivers/mmc/core/host.c
+>> @@ -321,6 +321,8 @@ int mmc_of_parse(struct mmc_host *host)
+>>                 host->caps2 |= MMC_CAP2_NO_SD;
+>>         if (of_property_read_bool(np, "no-mmc"))
+>>                 host->caps2 |= MMC_CAP2_NO_MMC;
+>> +       if (of_property_read_bool(np, "cap-mmc-cmd23"))
+>> +               host->caps |= MMC_CAP_CMD23;
+>>
+>>         host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
+>>         if (host->dsr_req && (host->dsr & ~0xffff)) {
+>> --
+>> 2.10.1
+>>
+> 
+> I don't think this as HW configuration, but more a SW configuration.
+> Thus we don't need a DT binding for it, right?
 
-No driver actually uses it, as-is it's simply dead code.
+Got it. Then discard these patches.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
