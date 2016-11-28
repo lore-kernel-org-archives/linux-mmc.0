@@ -1,88 +1,53 @@
 From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v3 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio controller sub-vended by NI
-Date: Mon, 28 Nov 2016 13:16:39 -0600
-Message-ID: <1480360599-13295-3-git-send-email-zach.brown@ni.com>
-References: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
+Subject: [PATCH v3 0/2] mmc: sdhci-pci: Use ACPI to set max frequency of sdio host controller
+Date: Mon, 28 Nov 2016 13:16:37 -0600
+Message-ID: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod2.natinst.com ([130.164.80.23]:37937 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751569AbcK1TRf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 28 Nov 2016 14:17:35 -0500
-In-Reply-To: <1480360599-13295-1-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org
 Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, zach.brown@ni.com
+List-Id: linux-mmc@vger.kernel.org
 
-On NI 9037 boards the max SDIO frequency is limited by trace lengths
-and other layout choices. The max SDIO frequency is stored in an ACPI
-table.
+On some boards, max SDIO frequency is limited by trace lengths and other layout
+choices. We would like a way to specify this limitation so the driver can
+behave accordingly.
 
-The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
-f_max field of the host.
+This patch set assumes that the limitation has been reported in an ACPI table
+which the driver can check to get the max frequency.
 
-Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
-Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
-Reviewed-by: Josh Cartwright <joshc@ni.com>
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+The first patch creates a PCI ID and support for the Intel byt sdio where NI is
+the subvendor.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 9741505..c9e51b1 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -27,6 +27,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/mmc/slot-gpio.h>
- #include <linux/mmc/sdhci-pci-data.h>
-+#include <linux/acpi.h>
- 
- #include "sdhci.h"
- #include "sdhci-pci.h"
-@@ -375,8 +376,39 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 	return 0;
- }
- 
-+#ifdef CONFIG_ACPI
-+static int ni_set_max_freq(struct sdhci_pci_slot *slot)
-+{
-+	acpi_status status;
-+	unsigned long long max_freq;
-+
-+	status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
-+				       "MXFQ", NULL, &max_freq);
-+	if (ACPI_FAILURE(status)) {
-+		dev_err(&slot->chip->pdev->dev,
-+			"MXFQ not found in acpi table\n");
-+		return -EINVAL;
-+	}
-+
-+	slot->host->mmc->f_max = max_freq * 1000000;
-+
-+	return 0;
-+}
-+#else
-+static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
-+{
-+	return 0;
-+}
-+#endif
-+
- static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- {
-+	int err;
-+
-+	err = ni_set_max_freq(slot);
-+	if (err)
-+		return err;
-+
- 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
- 				 MMC_CAP_WAIT_WHILE_BUSY;
- 	return 0;
+If CONFIG_ACPI is set, the second patch uses the ACPI table to set f_max during
+the new ni_byt_sdio_probe_slot.
+
+rv2:
+   * Use acpi_evaluate_integer() instead of
+     acpi_get_handle()/acpi_evaluate_object()
+pv1:
+   * Removed redundant comment
+   * Print info message if MXFQ not found in acpi table
+pv2:
+   * Changed info message to error message if MXFQ not found
+   * Replaced ni_byt_sdio_probe_slot with one of two versions depending on
+     whether CONFIG_ACPI is set.
+pv3:
+   * Replaced the two versions of ni_byt_sdio_probe_slot with new version that
+     calls ni_set_max_freq.
+   * Created ni_set_max_freq which sets the slot's max_freq if CONFIG_ACPI is
+     set.
+
+
+Zach Brown (2):
+  mmc: sdhci-pci: Add PCI ID for Intel byt sdio host controller
+    sub-vended by NI
+  mmc: sdhci-pci: Use ACPI to get max frequency for Intel byt sdio    
+    controller sub-vended by NI
+
+ drivers/mmc/host/sdhci-pci-core.c | 56 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+
 -- 
 2.7.4
-
