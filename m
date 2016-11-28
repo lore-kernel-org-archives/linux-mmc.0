@@ -1,44 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Mon, 28 Nov 2016 12:13:31 +0100
-Message-ID: <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
- <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com> <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
- <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com> <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
+Subject: Re: [PATCH v3] mmc: block: delete packed command support
+Date: Mon, 28 Nov 2016 12:35:36 +0100
+Message-ID: <CAPDyKFoEsCuoW_6LRAZ5bJTyesyetCjBp6-+bSPUR-jwyUnL2A@mail.gmail.com>
+References: <1480066500-4983-1-git-send-email-linus.walleij@linaro.org>
+ <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com> <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ziji Hu <huziji@marvell.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wj0-f174.google.com ([209.85.210.174]:34466 "EHLO
+        mail-wj0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754466AbcK1Lfj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 06:35:39 -0500
+Received: by mail-wj0-f174.google.com with SMTP id mp19so113286685wjc.1
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2016 03:35:39 -0800 (PST)
+In-Reply-To: <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>
 
+On 27 November 2016 at 15:25, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote=
+:
+> Hi Ulf and Linus,
 >
->     As you suggest, I replace mmc_wait_for_cmd() with mmc_send_tuning(), to
->     send commands for testing current sampling point set in our host PHY.
->
->     According to my test result, it shows that mmc_send_tuning() can only support
->     tuning command (CMD21/CMD19).
->     As a result, we cannot use mmc_send_tuning() when card is in the speed modes
->     which doesn't support tuning, such as eMMC HS SDR, eMMC HS DRR and
->     SD SDR 12/SDR25/DDR50. Card will not response to tuning commands in those
->     speed modes.
->
->     Could you please provide suggestions for the speed mode in which tuning is
->     not available?
->
+> I understand your concerns about the current packed commands
+> support and the problem of transition to blk_mq.
+> But as I mentioned in previous email thread, the packed commands
+> feature is still in use on eMMC4.5 or eMMC5.1 devices on hosts
+> without SW/HW CMDQ support.
+> Taking this feature out meaning stop supporting one of important
+> performance features of eMMC devices.
 
-Normally the mmc host driver shouldn't have to care about what the
-card supports, as that is the responsibility of the mmc core to
-manage.
+How do we get an improved performance from using packed-command?
 
-The host should only need to implement the ->execute_tuning() ops,
-which gets called when the card supports tuning (CMD19/21). Does it
-make sense?
+If this is about decreasing communication overhead, as the JEDEC spec
+states, we should compare against using the asynchronous request
+mechanism. Then is there really any noticeable improvement?
+
+> Looking forward this feature is replaced with a CMDQ, but should we
+> kill it for those who doesn=E2=80=99t have a CMDQ?
+
+Yes, I think so.
+
+>From the performance perspective, but also from that there are no
+users of the code, except in some vendor trees - then there are just
+no justification for keep maintaining this messy piece of code.
+
+[...]
 
 Kind regards
 Uffe
