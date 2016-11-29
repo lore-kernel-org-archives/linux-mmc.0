@@ -1,204 +1,62 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 03/20] mmc: queue: Fix queue thread wake-up
-Date: Tue, 29 Nov 2016 12:09:10 +0200
-Message-ID: <1480414167-15577-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V8 02/20] mmc: block: Fix 4K native sector check
+Date: Tue, 29 Nov 2016 12:09:09 +0200
+Message-ID: <1480414167-15577-3-git-send-email-adrian.hunter@intel.com>
 References: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:23174 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750853AbcK2KOo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 29 Nov 2016 05:14:44 -0500
+        id S1755412AbcK2KOm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Nov 2016 05:14:42 -0500
 In-Reply-To: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-The only time the driver sleeps expecting to be woken upon the arrival of
-a new request, is when the dispatch queue is empty. The only time that it
-is known whether the dispatch queue is empty is after NULL is returned
-from blk_fetch_request() while under the queue lock.
+The 4K native sector check does not allow for the 'do' loop nor the
+variables used after the 'cmd_abort' label.
 
-Recognizing those facts, simplify the synchronization between the queue
-thread and the request function. A couple of flags tell the request
-function what to do, and the queue lock and barriers associated with
-wake-ups ensure synchronization.
-
-The result is simpler and allows the removal of the context_info lock.
+'brq' and 'req' get reassigned in the 'do' loop, so the check must not
+assume what their values are. After the 'cmd_abort' label, 'mq_rq' and
+'req' are used, but 'rqc' must be NULL otherwise it can be started again.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
 ---
- drivers/mmc/card/block.c |  7 -------
- drivers/mmc/card/queue.c | 35 +++++++++++++++++++++--------------
- drivers/mmc/card/queue.h |  1 +
- drivers/mmc/core/core.c  |  6 ------
- include/linux/mmc/host.h |  2 --
- 5 files changed, 22 insertions(+), 29 deletions(-)
+ drivers/mmc/card/block.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 3e73be0e7281..646d1a1fa6ca 100644
+index 19597e3cefcb..3e73be0e7281 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1758,8 +1758,6 @@ int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	int ret;
+@@ -1597,11 +1597,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ {
  	struct mmc_blk_data *md = mq->blkdata;
  	struct mmc_card *card = md->queue.card;
--	struct mmc_host *host = card->host;
--	unsigned long flags;
- 	bool req_is_special = mmc_req_is_special(req);
- 
- 	if (req && !mq->mqrq_prev->req)
-@@ -1792,11 +1790,6 @@ int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 			mmc_blk_issue_rw_rq(mq, NULL);
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
--		if (!req && host->areq) {
--			spin_lock_irqsave(&host->context_info.lock, flags);
--			host->context_info.is_waiting_last_req = true;
--			spin_unlock_irqrestore(&host->context_info.lock, flags);
--		}
- 		ret = mmc_blk_issue_rw_rq(mq, req);
- 	}
- 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 7dacf2744fbd..010888d8d97c 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -53,6 +53,7 @@ static int mmc_queue_thread(void *d)
- {
- 	struct mmc_queue *mq = d;
- 	struct request_queue *q = mq->queue;
-+	struct mmc_context_info *cntx = &mq->card->host->context_info;
- 
- 	current->flags |= PF_MEMALLOC;
- 
-@@ -63,6 +64,19 @@ static int mmc_queue_thread(void *d)
- 		spin_lock_irq(q->queue_lock);
- 		set_current_state(TASK_INTERRUPTIBLE);
- 		req = blk_fetch_request(q);
-+		mq->asleep = false;
-+		cntx->is_waiting_last_req = false;
-+		cntx->is_new_req = false;
-+		if (!req) {
-+			/*
-+			 * Dispatch queue is empty so set flags for
-+			 * mmc_request_fn() to wake us up.
-+			 */
-+			if (mq->mqrq_prev->req)
-+				cntx->is_waiting_last_req = true;
-+			else
-+				mq->asleep = true;
-+		}
- 		mq->mqrq_cur->req = req;
- 		spin_unlock_irq(q->queue_lock);
- 
-@@ -115,7 +129,6 @@ static void mmc_request_fn(struct request_queue *q)
- {
- 	struct mmc_queue *mq = q->queuedata;
- 	struct request *req;
--	unsigned long flags;
- 	struct mmc_context_info *cntx;
- 
- 	if (!mq) {
-@@ -127,19 +140,13 @@ static void mmc_request_fn(struct request_queue *q)
- 	}
- 
- 	cntx = &mq->card->host->context_info;
--	if (!mq->mqrq_cur->req && mq->mqrq_prev->req) {
--		/*
--		 * New MMC request arrived when MMC thread may be
--		 * blocked on the previous request to be complete
--		 * with no current request fetched
--		 */
--		spin_lock_irqsave(&cntx->lock, flags);
--		if (cntx->is_waiting_last_req) {
--			cntx->is_new_req = true;
--			wake_up_interruptible(&cntx->wait);
--		}
--		spin_unlock_irqrestore(&cntx->lock, flags);
--	} else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
-+
-+	if (cntx->is_waiting_last_req) {
-+		cntx->is_new_req = true;
-+		wake_up_interruptible(&cntx->wait);
-+	}
-+
-+	if (mq->asleep)
- 		wake_up_process(mq->thread);
- }
- 
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 47f5532b5776..d09fce655800 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -39,6 +39,7 @@ struct mmc_queue {
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
-+	bool			asleep;
- 	struct mmc_blk_data	*blkdata;
- 	struct request_queue	*queue;
- 	struct mmc_queue_req	mqrq[2];
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f39397f7c8dc..dc1f27ee50b8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -504,18 +504,14 @@ static enum mmc_blk_status mmc_wait_for_data_req_done(struct mmc_host *host,
- 	struct mmc_command *cmd;
- 	struct mmc_context_info *context_info = &host->context_info;
+-	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
++	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
  	enum mmc_blk_status status;
--	unsigned long flags;
+ 	struct mmc_queue_req *mq_rq;
+-	struct request *req = rqc;
++	struct request *req;
+ 	struct mmc_async_req *areq;
  
- 	while (1) {
- 		wait_event_interruptible(context_info->wait,
- 				(context_info->is_done_rcv ||
- 				 context_info->is_new_req));
--		spin_lock_irqsave(&context_info->lock, flags);
- 		context_info->is_waiting_last_req = false;
--		spin_unlock_irqrestore(&context_info->lock, flags);
- 		if (context_info->is_done_rcv) {
- 			context_info->is_done_rcv = false;
--			context_info->is_new_req = false;
- 			cmd = mrq->cmd;
- 
- 			if (!cmd->error || !cmd->retries ||
-@@ -534,7 +530,6 @@ static enum mmc_blk_status mmc_wait_for_data_req_done(struct mmc_host *host,
- 				continue; /* wait for done/new event again */
+ 	if (!rqc && !mq->mqrq_prev->req)
+@@ -1616,8 +1616,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			if (mmc_large_sector(card) &&
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+-					req->rq_disk->disk_name);
++					rqc->rq_disk->disk_name);
+ 				mq_rq = mq->mqrq_cur;
++				req = rqc;
++				rqc = NULL;
+ 				goto cmd_abort;
  			}
- 		} else if (context_info->is_new_req) {
--			context_info->is_new_req = false;
- 			if (!next_req)
- 				return MMC_BLK_NEW_REQUEST;
- 		}
-@@ -3016,7 +3011,6 @@ void mmc_unregister_pm_notifier(struct mmc_host *host)
-  */
- void mmc_init_context_info(struct mmc_host *host)
- {
--	spin_lock_init(&host->context_info.lock);
- 	host->context_info.is_new_req = false;
- 	host->context_info.is_done_rcv = false;
- 	host->context_info.is_waiting_last_req = false;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 2ce32fefb41c..8bc884121465 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -197,14 +197,12 @@ struct mmc_slot {
-  * @is_new_req		wake up reason was new request
-  * @is_waiting_last_req	mmc context waiting for single running request
-  * @wait		wait queue
-- * @lock		lock to protect data fields
-  */
- struct mmc_context_info {
- 	bool			is_done_rcv;
- 	bool			is_new_req;
- 	bool			is_waiting_last_req;
- 	wait_queue_head_t	wait;
--	spinlock_t		lock;
- };
  
- struct regulator;
 -- 
 1.9.1
 
