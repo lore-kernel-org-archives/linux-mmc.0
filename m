@@ -1,68 +1,61 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3] mmc: block: delete packed command support
-Date: Tue, 29 Nov 2016 15:25:28 +0100
-Message-ID: <CACRpkdZ_U=uGcW-wdvDc6GQ0-A5XviG4X=Vr1VmXG4wygw3NXQ@mail.gmail.com>
-References: <1480066500-4983-1-git-send-email-linus.walleij@linaro.org>
- <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com> <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Tue, 29 Nov 2016 08:51:22 -0600
+Message-ID: <CAL_Jsq+80LAkCGEdP5T0AWFV2nRtZ8nrkBoNRB47CR9JN=9dog@mail.gmail.com>
+References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting>
+ <20161128141513.agnkyz6ronigbukn@rob-hp-laptop> <CAPDyKFr=TE+EuZ9rZV3ygsjBFN_mRrE2imkFa-wQs_ykM5d+cQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:33544 "EHLO
-        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757663AbcK2OZa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 09:25:30 -0500
-Received: by mail-qk0-f169.google.com with SMTP id x190so175729516qkb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 06:25:30 -0800 (PST)
-In-Reply-To: <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFr=TE+EuZ9rZV3ygsjBFN_mRrE2imkFa-wQs_ykM5d+cQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Christoph Hellwig <hch@infradead.org>
 
-On Sun, Nov 27, 2016 at 3:25 PM, Alex Lemberg <Alex.Lemberg@sandisk.com> wr=
-ote:
+On Mon, Nov 28, 2016 at 9:54 AM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> [...]
+>
+>>> +
+>>> +Example:
+>>> +
+>>> +     wifi_pwrseq: wifi_pwrseq {
+>>> +             compatible = "mmc-pwrseq-sd8787";
+>>> +             pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+>>> +             reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+>>> +     }
+>>> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>>> index c421aba0a5bc..08fd65d35725 100644
+>>> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>>> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>>> @@ -32,6 +32,9 @@ Optional properties:
+>>>                so that the wifi chip can wakeup host platform under certain condition.
+>>>                during system resume, the irq will be disabled to make sure
+>>>                unnecessary interrupt is not received.
+>>> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
+>>
+>> This is why pwrseq is wrong. You have some properties in the card node
+>> and some in pwrseq node. Everything should be in the card node.
+>
+> Put "all" in the card node, just doesn't work for MMC. Particular in
+> cases when we have removable cards, as then it would be wrong to have
+> a card node.
 
-> I understand your concerns about the current packed commands
-> support and the problem of transition to blk_mq.
+When is there a problem with removable cards? The connector is
+standard and everything needed (CD, VMMC, VDDIO, etc.) is defined in
+the host controller node. If that isn't sufficient, then we should
+start defining a connector node.
 
-It may be possible to re-implement the feature later, but then
-only if we get some queue inspection features in blk-mq.
+> The mmc pwrseq DT bindings just follows the legacy approach for MMC
+> and that's why the pwrseq handle is at the controller node. Yes, would
+> could have done it differently, but this is the case now, so we will
+> have to accept that.
 
-Do you agree with my assessment in the thread that this
-feature can only really make an improvement on random writes,
-i.e. it will not improve reads (even random reads) and it will not
-improve sequential writes?
+We're stuck with supporting the existing cases. That doesn't mean
+we're stuck with the same thing for new cases.
 
-> But as I mentioned in previous email thread, the packed commands
-> feature is still in use on eMMC4.5 or eMMC5.1 devices on hosts
-> without SW/HW CMDQ support.
-
-True. In the market place of devices, sure.
-
-But noone is maintaining or testing the code in the Linux
-kernel. Noone bothered to enable it for their platform so we can
-test it.
-
-> Taking this feature out meaning stop supporting one of important
-> performance features of eMMC devices.
-> Looking forward this feature is replaced with a CMDQ, but should we
-> kill it for those who doesn=E2=80=99t have a CMDQ?
-
-What we need from memory card vendors like you (SanDisk)
-is a target test rig.
-
-That is: a board with an SoC that we developers can get hold
-of (for reasonable cost) and where both the host controller and
-the eMMC card has the desired features so we can test it.
-
-Also that this board has support in the upstream kernel.
-
-There are too many vendor trees with too much forked code
-out there, I know this is common, but we cannot develop
-important core features in the kernel that have no in-kernel
-user and no way for us to test it if we need to re-write the
-code, it is just unmaintainable.
-
-Yours,
-Linus Walleij
+Rob
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
