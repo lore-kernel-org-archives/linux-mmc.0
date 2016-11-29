@@ -1,158 +1,118 @@
-From: Rameshwar Sahu <rsahu@apm.com>
-Subject: Re: arasan,sdhci.txt "compatibility" DT binding
-Date: Tue, 29 Nov 2016 12:59:27 +0530
-Message-ID: <CAFd313zQHmFQ61Y4UEvQAvhhVeNFe=nNyjXUKfYXiTKnvm9VWQ@mail.gmail.com>
-References: <56B07BA5.4060407@free.fr> <a20b2b4f-15d4-3c29-324c-1ced5dbcc67f@xilinx.com>
- <583C50E7.6030400@free.fr> <14771688.Q8f97gHC2H@wuerfel> <583C60CC.2020408@free.fr>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC
+Date: Tue, 29 Nov 2016 08:49:00 +0100
+Message-ID: <CAPDyKFqjNy2oJiHHt+8CkTaiiExFKaR0i4GXGKdOMMRX-swPRg@mail.gmail.com>
+References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
+ <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
+ <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com> <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
+ <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com> <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
+ <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
+ <10a885f0-82e9-a35c-f62f-3fc4518ea8b4@marvell.com> <CAPDyKFr8rX04iY92OeQpSkS+3HN2-FxijCCiDb2sSKvP+TZPog@mail.gmail.com>
+ <c30cead8-17b6-48b0-7355-cd82268842e1@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:34285 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755947AbcK2H33 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 02:29:29 -0500
-Received: by mail-io0-f181.google.com with SMTP id c21so264412843ioj.1
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2016 23:29:29 -0800 (PST)
-In-Reply-To: <583C60CC.2020408@free.fr>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <c30cead8-17b6-48b0-7355-cd82268842e1-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Cc: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mason <slash.tmp@free.fr>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Linus Walleij <linus.walleij@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Rob Herring <robh@kernel.org>, Zach Brown <zach.brown@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, Suneel Garapati <sunee>
 
-Hi Mason,
-
-Nowhere in the documentation do they specify an "IP version".
-Some documents do provide a revision number, but that's just
-a *documentation* revision number, e.g.
-
-changes in version 3.6 : fix typos
-changes in version 9.1a : update company logo
-
-That's why Xilinx used "arasan,sdhci-8.9a" and APM used
-"arasan,sdhci-4.9a". These are documentation revisions.
-In my opinion, that information is mostly worthless.
-
-Arasan SD/SDIO/eMMC IP has a register which tells about the SD
-specification version and  Vendor version number
-Reg Name: Host controller version register (offset 0FEh)
-bit [15:8] is for vendor version number,
-But, I have seen that Arasaan vendor version number is same as
-document revision number.
-
-On Mon, Nov 28, 2016 at 10:22 PM, Mason <slash.tmp@free.fr> wrote:
-> On 28/11/2016 17:15, Arnd Bergmann wrote:
+On 29 November 2016 at 03:53, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
+> Hi Ulf,
 >
->> On Monday, November 28, 2016 4:44:39 PM CET Mason wrote:
+> On 2016/11/28 23:16, Ulf Hansson wrote:
+>> On 28 November 2016 at 12:38, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
+>>> Hi Ulf,
+>>>
+>>> On 2016/11/28 19:13, Ulf Hansson wrote:
+>>>>>
+>>>>>     As you suggest, I replace mmc_wait_for_cmd() with mmc_send_tuning(), to
+>>>>>     send commands for testing current sampling point set in our host PHY.
+>>>>>
+>>>>>     According to my test result, it shows that mmc_send_tuning() can only support
+>>>>>     tuning command (CMD21/CMD19).
+>>>>>     As a result, we cannot use mmc_send_tuning() when card is in the speed modes
+>>>>>     which doesn't support tuning, such as eMMC HS SDR, eMMC HS DRR and
+>>>>>     SD SDR 12/SDR25/DDR50. Card will not response to tuning commands in those
+>>>>>     speed modes.
+>>>>>
+>>>>>     Could you please provide suggestions for the speed mode in which tuning is
+>>>>>     not available?
+>>>>>
+>>>>
+>>>> Normally the mmc host driver shouldn't have to care about what the
+>>>> card supports, as that is the responsibility of the mmc core to
+>>>> manage.
+>>>>
+>>>> The host should only need to implement the ->execute_tuning() ops,
+>>>> which gets called when the card supports tuning (CMD19/21). Does it
+>>>> make sense?
+>>>>
+>>>    I think it is irrelevant to tuning procedure.
+>>>
+>>>    Our host requires to adjust PHY setting after each time ios setting
+>>>    (SDCLK/bus width/speed mode) is changed.
+>>>    The simplified sequence is:
+>>>    mmc change ios --> mmc_set_ios() --> ->set_ios() --> after sdhci_set_ios(),
+>>>    adjust PHY setting.
+>>>    During PHY setting adjustment, out host driver has to send commands to
+>>>    test current sampling point. Tuning is another independent step.
 >>
->>> Hello,
->>>
->>> @Shawn Lin, could you take a look below and tell me exactly
->>> which IP core(s) Rockchip is using in its SoCs?
->>>
->>> Based on the feedback I received, here is an updated list of
->>> compatible strings and controller versions dealt with by the
->>> drivers/mmc/host/sdhci-of-arasan.c code.
->>>
->>>
->>> Xilinx Zynq:
->>> "SD2.0 / SDIO2.0 / MMC3.31 AHB Host Controller"
->>> "arasan,sdhci-8.9a"
->>> NB: 8.9a is the documentation revision (dated 2011-10-19)
->>> subsequent tweaks labeled 9.0a, 9.1a, 9.2a
->>>
->>> Xilinx ZynqMP:
->>> "SD3.0 / SDIO3.0 / eMMC4.51 AHB Host Controller"
->>> "arasan,sdhci-8.9a"
->>> NB: using the same compatible string as Zynq
->>>
->>> Sigma SMP87xx
->>> "SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
->>> no compatible string yet, platform-specific init required
->>>
->>> APM:
->>> "SD3.0 / SDIO3.0 / eMMC4.41 AHB Host Controller"
->>> "arasan,sdhci-4.9a"
->>> NB: 4.9a appears to be the documentation revision
->>> no functional diff with "arasan,sdhci-8.9a"
->>>
->>> Rockchip
->>> Exact IP unknown, waiting for Shawn's answer
->>> "arasan,sdhci-5.1"
->>> NB: 5.1 appears to refer to the eMMC standard supported
->>>
->>>
->>> On a final note, there are many variations of the Arasan IP.
->>> I've tracked down at least the following:
->>>
->>> SD_2.0_SDIO_2.0__MMC_3.31_AHB_Host_Controller.pdf
->>> SD_3.0_SDIO_3.0_eMMC_4.41_OCP_Host_Controller.pdf
->>> SD_3.0_SDIO_3.0_eMMC_4.4__AHB_Host_Controller.pdf
->>> SD_3.0_SDIO_3.0_eMMC_4.51_Host_Controller.pdf
->>> SD_3.0_SDIO_3.0_eMMC_4.5__Host_Controller.pdf
->>> SD_4.1_SDIO_4.1_eMMC_4.51_Host_Controller.pdf
->>> SD_4.1_SDIO_4.1_eMMC_5.1__Host_Controller.pdf
->>>
->>> It seems to me the compatible string should specify
->>> the SD/SDIO version AND the eMMC version, since it
->>> seems many combinations are allowed, e.g. eMMC 4.51
->>> has two possible SD versions.
->>>
->>> What do you think?
+>> For those speed modes (or other ios changes) that *don't* requires
+>> tuning, then what will you do when you send the command to confirm the
+>> change of PHY setting and it fails?
 >>
->> It seems wrong to have the eMMC or SD version in the compatible
->> string.  Is that the only difference between the documents you
->> found? Normally there should be a version of IP block itself,
->> besides the supported protocol.
+>> My assumption is that you will fail anyway, by propagating the error
+>> to the mmc core. At least that what was my understanding from your
+>> earlier replies, right!?
+>>
+>> Then, I think there are no point having the host driver sending a
+>> command to confirm the PHY settings, as the mmc core will anyway
+>> discover if something goes wrong when the next command is sent.
+>>
+>> Please correct me if I am wrong!
+>>
 >
-> But that is exactly the problem :-)
+>    Sorry that I didn't make myself clear.
 >
-> Nowhere in the documentation do they specify an "IP version".
-> Some documents do provide a revision number, but that's just
-> a *documentation* revision number, e.g.
+>    Our host PHY delay line consists of hundreds of sampling points.
+>    Each sampling point represents a different phase shift.
 >
-> changes in version 3.6 : fix typos
-> changes in version 9.1a : update company logo
+>    In lower speed mode, our host driver will scan the delay line.
+>    It will select and test multiple sampling points, other than testing
+>    only single sampling point.
 >
-> That's why Xilinx used "arasan,sdhci-8.9a" and APM used
-> "arasan,sdhci-4.9a". These are documentation revisions.
-> In my opinion, that information is mostly worthless.
->
->
-> Looking more closely at SD_3.0_SDIO_3.0_eMMC_4.4__AHB_Host_Controller.pdf
-> (User Guide, which has more info than Datasheet) I see this:
->
-> Changed Host Controller Version Register value from 16'h0002 to 16'h7501
-> Changed Host Controller Version Register value from 16'h8301 to 16'h8401
-> Changed Host Controller Version Register value from 16'h8401 to 16'h8501
-> Changed Host Controller Version Register to 16'h9502
-> Changed Host Controller Version Register to 16'h9602
-> Changed Host Controller Version Register to 16'h9902
->
-> Host controller version register (offset 0FEh)
->
-> Vendor Version Number 15:8
-> HwInit=0x99
-> This status is reserved for the vendor version number.
-> The HD should not use this status.
->
-> Specification Version Number 7:0
-> HwInit=0x02
-> This status indicates the Host Controller Spec. Version.
-> The upper and lower 4-bits indicate the version.
-> Description
-> 00 - SD Host Specification version 1.0
-> 01 - SD Host Specification version 2.00
-> including only the feature of the Test Register
-> 02 - SD Host Specification Version 3.00
-> others - Reserved
->
-> I'm not sure what this "Vendor Version Number" specifies, nor if is
-> guaranteed to be unique across controllers.
->
-> In SD_3.0_SDIO_3.0_eMMC_4.5__Host_Controller_UserGuide.pdf,
-> they write "The Vendor Version Number is set to 0x10 (1.0)"
->
-> I don't have a UserGuide for "arasan,sdhci-5.1".
->
-> Regards.
->
+>    If a sampling point fails to transfer cmd/data, our host driver will
+>    move to test next sampling point, until we find out a group of successful
+>    sampling points which can transfer cmd/data. At last we will select
+>    a perfect one from them.
+
+Ahh, I see. Unfortunate, this is going to be very hard to implement properly.
+
+The main problem is that the host driver has *no* knowledge about the
+internal state of the card, as that is the responsibility of the mmc
+core to keep track of.
+
+If the host driver would send a command during every update of the
+"ios" setting, from ->set_ios(), for sure it would lead to commands
+being sent that are "forbidden" in the current internal state of the
+card.
+This would lead to that the card initialization sequence fails,
+because the card may move to an unknown internal state and the mmc
+core would have no knowledge about what happened.
+
+Hmm..
+
+Can you specify, *exactly*, under which "ios updates" you need to
+verify updated PHY setting changes by sending a cmd/data? Also, please
+specify if it's enough to only test the CMD line or also DATA lines.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
