@@ -1,86 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 8/8] mmc: mmc_test: remove BUG_ONs and deploy error handling
-Date: Tue, 29 Nov 2016 13:41:39 +0100
-Message-ID: <CAPDyKFqtaCH_KghhHPSYmHQHi39=SRbw7eCOWJC2O9p-zMZDrg@mail.gmail.com>
-References: <1478071440-12689-1-git-send-email-shawn.lin@rock-chips.com> <1478071617-12984-1-git-send-email-shawn.lin@rock-chips.com>
+From: Thierry Escande <thierry.escande@collabora.com>
+Subject: [PATCH v3 0/1] Hynix quirk on sleep notifcation
+Date: Tue, 29 Nov 2016 15:24:47 +0100
+Message-ID: <1480429488-22289-1-git-send-email-thierry.escande@collabora.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset = "utf-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35446 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755684AbcK2Mll (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 07:41:41 -0500
-Received: by mail-wm0-f53.google.com with SMTP id a197so235923981wmd.0
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 04:41:41 -0800 (PST)
-In-Reply-To: <1478071617-12984-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:44304 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757590AbcK2OY4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 09:24:56 -0500
+Content-Transfert-Encoding: 8bit
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: bhthompson@chromium.org, linux-mmc@vger.kernel.org
 
-On 2 November 2016 at 08:26, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> It is unnecessary to panic the kernel when testing mmc. Instead,
-> cast a warning for folkz to debug and return the error code to
-> the caller to indicate the failure of this test should be enough.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Hi Ulf, Hi Shawn,
 
-Thanks, applied for next!
+I added the cid device name and the oemid to the MMC_FIXUP macro call.
+There is an issue in the CID product name: The 6th byte contains a non
+printable character and I had to add it to the compared string. Please
+tell me if this is ok for you.
 
-Kind regards
-Uffe
+Changes in v2:
+- Add a few more details in the commit message
 
+Changes in v3:
+- Install the quirk only on HBG4e controller and 0x014a oemid
 
-> ---
->
->  drivers/mmc/card/mmc_test.c | 12 ++++++++----
->  1 file changed, 8 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 5a8dc5a..db1a7ac 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -214,7 +214,8 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
->         struct mmc_request *mrq, struct scatterlist *sg, unsigned sg_len,
->         unsigned dev_addr, unsigned blocks, unsigned blksz, int write)
->  {
-> -       BUG_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop);
-> +       if (WARN_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop))
-> +               return;
->
->         if (blocks > 1) {
->                 mrq->cmd->opcode = write ?
-> @@ -694,7 +695,8 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
->  static void mmc_test_prepare_broken_mrq(struct mmc_test_card *test,
->         struct mmc_request *mrq, int write)
->  {
-> -       BUG_ON(!mrq || !mrq->cmd || !mrq->data);
-> +       if (WARN_ON(!mrq || !mrq->cmd || !mrq->data))
-> +               return;
->
->         if (mrq->data->blocks > 1) {
->                 mrq->cmd->opcode = write ?
-> @@ -714,7 +716,8 @@ static int mmc_test_check_result(struct mmc_test_card *test,
->  {
->         int ret;
->
-> -       BUG_ON(!mrq || !mrq->cmd || !mrq->data);
-> +       if (WARN_ON(!mrq || !mrq->cmd || !mrq->data))
-> +               return -EINVAL;
->
->         ret = 0;
->
-> @@ -755,7 +758,8 @@ static int mmc_test_check_broken_result(struct mmc_test_card *test,
->  {
->         int ret;
->
-> -       BUG_ON(!mrq || !mrq->cmd || !mrq->data);
-> +       if (WARN_ON(!mrq || !mrq->cmd || !mrq->data))
-> +               return -EINVAL;
->
->         ret = 0;
->
-> --
-> 2.3.7
->
->
+zhaojohn (1):
+  mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
+
+ drivers/mmc/card/block.c | 8 ++++++++
+ drivers/mmc/core/mmc.c   | 8 +++++++-
+ include/linux/mmc/card.h | 2 ++
+ 3 files changed, 17 insertions(+), 1 deletion(-)
+
+-- 
+2.7.4
+
