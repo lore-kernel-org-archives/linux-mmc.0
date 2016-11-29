@@ -1,56 +1,37 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc: tmio: why enable/disable SDIO irq on every transaction with IOMOD?
-Date: Tue, 29 Nov 2016 09:52:21 +0100
-Message-ID: <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
-References: <87h96qkdn0.wl@dns1.atmark-techno.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V8 01/20] mmc: block: Restore line inadvertently removed with packed commands
+Date: Tue, 29 Nov 2016 12:09:08 +0200
+Message-ID: <1480414167-15577-2-git-send-email-adrian.hunter@intel.com>
+References: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f173.google.com ([209.85.210.173]:35692 "EHLO
-        mail-wj0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755990AbcK2IwY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 03:52:24 -0500
-Received: by mail-wj0-f173.google.com with SMTP id v7so138577850wjy.2
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 00:52:24 -0800 (PST)
-In-Reply-To: <87h96qkdn0.wl@dns1.atmark-techno.com>
+Received: from mga02.intel.com ([134.134.136.20]:19090 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750795AbcK2KOf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Nov 2016 05:14:35 -0500
+In-Reply-To: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yasushi SHOJI <yashi@atmark-techno.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-+Wolfram, Simon
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/card/block.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Looping maintainers of TMIO/SDHI.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 86ff28f84698..19597e3cefcb 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1587,6 +1587,8 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+ 		if (blocks != (u32)-1) {
+ 			ret = blk_end_request(req, 0, blocks << 9);
+ 		}
++	} else {
++		ret = blk_end_request(req, 0, brq->data.bytes_xfered);
+ 	}
+ 	return ret;
+ }
+-- 
+1.9.1
 
-On 29 November 2016 at 07:23, Yasushi SHOJI <yashi@atmark-techno.com> wrote:
-> Hello,
->
-> We've been using tmio_mmc_pio.c and seeing the following message:
->
->         "sh_mobile_sdhi sh_mobile_sdhi.1: timeout waiting for SD bus idle"
->
-> While searching for a fix, we found some code we don't understand.
-> I'm sending this question with a hope that someone would enlighten us a
-> bit.  So, here goes.
->
-> The SDIO spec. seems to allow sending SDIO IRQ between the blocks of
-> multi-block transfer.  The hardware, SCLKDIVEN bit of SD_INFO02, is
-> set to zero (0) and prohibits to access IOMOD bit of SDIO_MODE
-> register while multi-block transfer is going.
->
-> The current code, however, tries to disable SDIO IRQ by setting IOMOD
-> to zero in tmio_mmc_enable_sdio_irq() all the time, even during
-> multi-block transfer.  This prints the above waring.  What we don't
-> understand is that the code does both masking and disabling the IRQ.
->
-> So my question is that "What is the reason behind to disable IRQ with
-> SDIO_MODE?  Is there any situation which masking with SDIO_INFO1_MASK
-> is not enough?
->
-> Thanks you,
-> --
->            yashi
-> --
-
-Kind regards
-Uffe
