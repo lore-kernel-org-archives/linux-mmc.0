@@ -1,70 +1,78 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V8 15/20] mmc: block: Use local var for mqrq_cur
-Date: Tue, 29 Nov 2016 12:09:22 +0200
-Message-ID: <1480414167-15577-16-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V8 14/20] mmc: core: Export mmc_retune_hold() and mmc_retune_release()
+Date: Tue, 29 Nov 2016 12:09:21 +0200
+Message-ID: <1480414167-15577-15-git-send-email-adrian.hunter@intel.com>
 References: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:37725 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754234AbcK2KPb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 29 Nov 2016 05:15:31 -0500
+        id S1756239AbcK2KP1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Nov 2016 05:15:27 -0500
 In-Reply-To: <1480414167-15577-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
-assigning it to a local variable.
+Re-tuning can only be done when the Command Queue is empty, when means
+holding and releasing re-tuning from the block driver, so export those
+functions.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
 ---
- drivers/mmc/card/block.c | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
+ drivers/mmc/core/host.c  | 2 ++
+ drivers/mmc/core/host.h  | 2 --
+ include/linux/mmc/core.h | 3 +++
+ 3 files changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index e84e2d8f6e31..fdeb3f335fd5 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1630,6 +1630,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	struct mmc_blk_request *brq;
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
-+	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
- 	struct mmc_queue_req *mq_rq;
- 	struct request *req;
- 	struct mmc_async_req *areq;
-@@ -1647,14 +1648,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
- 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
- 					rqc->rq_disk->disk_name);
--				mq_rq = mq->mqrq_cur;
-+				mq_rq = mqrq_cur;
- 				req = rqc;
- 				rqc = NULL;
- 				goto cmd_abort;
- 			}
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 98f25ffb4258..878405e28bdb 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -112,6 +112,7 @@ void mmc_retune_hold(struct mmc_host *host)
+ 		host->retune_now = 1;
+ 	host->hold_retune += 1;
+ }
++EXPORT_SYMBOL(mmc_retune_hold);
  
--			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
--			areq = &mq->mqrq_cur->mmc_active;
-+			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
-+			areq = &mqrq_cur->mmc_active;
- 		} else
- 			areq = NULL;
- 		areq = mmc_start_req(card->host, areq, &status);
-@@ -1774,9 +1775,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			rqc->cmd_flags |= REQ_QUIET;
- 			blk_end_request_all(rqc, -EIO);
- 		} else {
--			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
- 			mmc_start_req(card->host,
--				      &mq->mqrq_cur->mmc_active, NULL);
-+				      &mqrq_cur->mmc_active, NULL);
- 		}
- 	}
+ void mmc_retune_release(struct mmc_host *host)
+ {
+@@ -120,6 +121,7 @@ void mmc_retune_release(struct mmc_host *host)
+ 	else
+ 		WARN_ON(1);
+ }
++EXPORT_SYMBOL(mmc_retune_release);
  
+ int mmc_retune(struct mmc_host *host)
+ {
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 992bf5397633..0787b3002481 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -17,8 +17,6 @@
+ 
+ void mmc_retune_enable(struct mmc_host *host);
+ void mmc_retune_disable(struct mmc_host *host);
+-void mmc_retune_hold(struct mmc_host *host);
+-void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
+ 
+ #endif
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index d045b06fc7ea..d8f46e1ae7f2 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -220,6 +220,9 @@ extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+ 
+ extern int mmc_detect_card_removed(struct mmc_host *host);
+ 
++extern void mmc_retune_hold(struct mmc_host *host);
++extern void mmc_retune_release(struct mmc_host *host);
++
+ /**
+  *	mmc_claim_host - exclusively claim a host
+  *	@host: mmc host to claim
 -- 
 1.9.1
 
