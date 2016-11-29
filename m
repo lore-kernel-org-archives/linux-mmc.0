@@ -1,113 +1,122 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Tue, 29 Nov 2016 10:53:47 +0800
-Message-ID: <c30cead8-17b6-48b0-7355-cd82268842e1@marvell.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
- <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com>
- <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
- <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com>
- <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
- <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
- <10a885f0-82e9-a35c-f62f-3fc4518ea8b4@marvell.com>
- <CAPDyKFr8rX04iY92OeQpSkS+3HN2-FxijCCiDb2sSKvP+TZPog@mail.gmail.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
+Date: Tue, 29 Nov 2016 09:10:07 +0530
+Message-ID: <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
+References: <20161128173920.25334-1-georgi.djakov@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:35335 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751765AbcK2Cyo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2016 21:54:44 -0500
-In-Reply-To: <CAPDyKFr8rX04iY92OeQpSkS+3HN2-FxijCCiDb2sSKvP+TZPog@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20161128173920.25334-1-georgi.djakov@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>
 
-Hi Ulf,
+Hi Georgi,
 
-On 2016/11/28 23:16, Ulf Hansson wrote:
-> On 28 November 2016 at 12:38, Ziji Hu <huziji@marvell.com> wrote:
->> Hi Ulf,
->>
->> On 2016/11/28 19:13, Ulf Hansson wrote:
->>>>
->>>>     As you suggest, I replace mmc_wait_for_cmd() with mmc_send_tuning(), to
->>>>     send commands for testing current sampling point set in our host PHY.
->>>>
->>>>     According to my test result, it shows that mmc_send_tuning() can only support
->>>>     tuning command (CMD21/CMD19).
->>>>     As a result, we cannot use mmc_send_tuning() when card is in the speed modes
->>>>     which doesn't support tuning, such as eMMC HS SDR, eMMC HS DRR and
->>>>     SD SDR 12/SDR25/DDR50. Card will not response to tuning commands in those
->>>>     speed modes.
->>>>
->>>>     Could you please provide suggestions for the speed mode in which tuning is
->>>>     not available?
->>>>
->>>
->>> Normally the mmc host driver shouldn't have to care about what the
->>> card supports, as that is the responsibility of the mmc core to
->>> manage.
->>>
->>> The host should only need to implement the ->execute_tuning() ops,
->>> which gets called when the card supports tuning (CMD19/21). Does it
->>> make sense?
->>>
->>    I think it is irrelevant to tuning procedure.
->>
->>    Our host requires to adjust PHY setting after each time ios setting
->>    (SDCLK/bus width/speed mode) is changed.
->>    The simplified sequence is:
->>    mmc change ios --> mmc_set_ios() --> ->set_ios() --> after sdhci_set_ios(),
->>    adjust PHY setting.
->>    During PHY setting adjustment, out host driver has to send commands to
->>    test current sampling point. Tuning is another independent step.
-> 
-> For those speed modes (or other ios changes) that *don't* requires
-> tuning, then what will you do when you send the command to confirm the
-> change of PHY setting and it fails?
-> 
-> My assumption is that you will fail anyway, by propagating the error
-> to the mmc core. At least that what was my understanding from your
-> earlier replies, right!?
-> 
-> Then, I think there are no point having the host driver sending a
-> command to confirm the PHY settings, as the mmc core will anyway
-> discover if something goes wrong when the next command is sent.
-> 
-> Please correct me if I am wrong!
+On 11/28/2016 11:09 PM, Georgi Djakov wrote:
+> On apq8016, apq8084 and apq8074 platforms, writing to the software
+> reset register triggers the "power irq". We need to ack and handle
+> the irq, otherwise the following message appears:
+>
+> mmc0: Reset 0x1 never completed.
+> sdhci: =========== REGISTER DUMP (mmc0)===========
+> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
+> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
+> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
+> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
+> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
+> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
+> sdhci: Host ctl2: 0x00000000
+> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+> sdhci: ===========================================
+>
+> Fix it by implementing the custom sdhci_reset() function,
+> which performs the software reset and then handles the irq.
+>
+> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+> ---
+>
+> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
+>  * Perform the software reset by just writing to the SDHCI_SOFTWARE_RESET
+>    register and then check for the irq.
+I am still not sure about this change. Below change will trigger the 
+IRQ, once this call is completed (say on a single core system) -since 
+this is called while holding spin_lock_irqsave.
+
+But you will be end up calling sdhci_msm_voltage_switch twice,
+which to me does not seems correct.
+1. 1st time you are directly calling it in sdhci_msm_reset.
+2. 2nd time will be called from within pwr_irq to handle the same case.
+
+Please let me know your thoughts on this ?
+
+Regards
+Ritesh
+
+>
+>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
+>  1 file changed, 28 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 32879b845b75..157ae07f9309 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	__sdhci_msm_set_clock(host, clock);
+>  }
+>
+> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	unsigned long timeout = 100;
+> +
+> +	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+> +
+> +	if (mask & SDHCI_RESET_ALL) {
+> +		host->clock = 0;
+> +
+> +		/*
+> +		 * SDHCI_RESET_ALL triggers the PWR IRQ and we need
+> +		 * to handle it here.
+> +		 */
+> +		sdhci_msm_voltage_switch(host);
+> +	}
+> +
+> +	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+> +		if (timeout == 0) {
+> +			pr_err("%s: Reset 0x%x never completed.\n",
+> +			       mmc_hostname(host->mmc), (int)mask);
+> +			return;
+> +		}
+> +		timeout--;
+> +		mdelay(1);
+> +	}
+> +}
+> +
+>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>  	{ .compatible = "qcom,sdhci-msm-v4" },
+>  	{},
+> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>
+>  static const struct sdhci_ops sdhci_msm_ops = {
+>  	.platform_execute_tuning = sdhci_msm_execute_tuning,
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_msm_reset,
+>  	.set_clock = sdhci_msm_set_clock,
+>  	.get_min_clock = sdhci_msm_get_min_clock,
+>  	.get_max_clock = sdhci_msm_get_max_clock,
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 
-   Sorry that I didn't make myself clear.
-
-   Our host PHY delay line consists of hundreds of sampling points.
-   Each sampling point represents a different phase shift.
-
-   In lower speed mode, our host driver will scan the delay line.
-   It will select and test multiple sampling points, other than testing
-   only single sampling point.
-
-   If a sampling point fails to transfer cmd/data, our host driver will
-   move to test next sampling point, until we find out a group of successful
-   sampling points which can transfer cmd/data. At last we will select
-   a perfect one from them.
-
-   Thank you.
-
-Best regards,
-Hu Ziji
- 
->>
->>    Thus our host needs a valid command in PHY setting adjustment. Tuning command
->>    can be borrowed to complete this task in SD SDR50. But for other speed mode,
->>    we have to find out a valid command.
-> 
-> I thought we agreed on this wasn't necessary? Please see my upper response.
-> 
-> Kind regards
-> Uffe
-> 
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
