@@ -1,118 +1,56 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 7/10] mmc: sdhci-xenon: Add support to PHYs of Marvell
- Xenon SDHC
-Date: Tue, 29 Nov 2016 08:49:00 +0100
-Message-ID: <CAPDyKFqjNy2oJiHHt+8CkTaiiExFKaR0i4GXGKdOMMRX-swPRg@mail.gmail.com>
-References: <cover.86006f271b60cf7c0b4c5a51762a9dacca4c4718.1477911954.git-series.gregory.clement@free-electrons.com>
- <a05ffd140f4edc02fc3128db8445b2264cf38723.1477911954.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpkcoVMKbVOwjX1WDyNgc1vvUX60D6XRX6=YHGvkvHvnA@mail.gmail.com>
- <3cd05a26-d340-476e-bab1-8be9d5446f47@marvell.com> <CAPDyKFrskyZvMwhmj8ioyaowU8GL5=d-6ipGQcmmig_a9E9AQQ@mail.gmail.com>
- <436c6925-cb0d-afe7-e3a2-384eca15ff42@marvell.com> <8359307d-5f44-3db9-aae1-eb1fe8e1141d@marvell.com>
- <CAPDyKFo3ezYOywtSZ8GGQ1XK9KPsxCgQNbaiz45EVgbgtnUxjg@mail.gmail.com>
- <10a885f0-82e9-a35c-f62f-3fc4518ea8b4@marvell.com> <CAPDyKFr8rX04iY92OeQpSkS+3HN2-FxijCCiDb2sSKvP+TZPog@mail.gmail.com>
- <c30cead8-17b6-48b0-7355-cd82268842e1@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: mmc: tmio: why enable/disable SDIO irq on every transaction with IOMOD?
+Date: Tue, 29 Nov 2016 09:52:21 +0100
+Message-ID: <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
+References: <87h96qkdn0.wl@dns1.atmark-techno.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <c30cead8-17b6-48b0-7355-cd82268842e1-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Cc: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wj0-f173.google.com ([209.85.210.173]:35692 "EHLO
+        mail-wj0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755990AbcK2IwY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 03:52:24 -0500
+Received: by mail-wj0-f173.google.com with SMTP id v7so138577850wjy.2
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 00:52:24 -0800 (PST)
+In-Reply-To: <87h96qkdn0.wl@dns1.atmark-techno.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yasushi SHOJI <yashi@atmark-techno.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>
 
-On 29 November 2016 at 03:53, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
-> Hi Ulf,
++Wolfram, Simon
+
+Looping maintainers of TMIO/SDHI.
+
+On 29 November 2016 at 07:23, Yasushi SHOJI <yashi@atmark-techno.com> wrote:
+> Hello,
 >
-> On 2016/11/28 23:16, Ulf Hansson wrote:
->> On 28 November 2016 at 12:38, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
->>> Hi Ulf,
->>>
->>> On 2016/11/28 19:13, Ulf Hansson wrote:
->>>>>
->>>>>     As you suggest, I replace mmc_wait_for_cmd() with mmc_send_tuning(), to
->>>>>     send commands for testing current sampling point set in our host PHY.
->>>>>
->>>>>     According to my test result, it shows that mmc_send_tuning() can only support
->>>>>     tuning command (CMD21/CMD19).
->>>>>     As a result, we cannot use mmc_send_tuning() when card is in the speed modes
->>>>>     which doesn't support tuning, such as eMMC HS SDR, eMMC HS DRR and
->>>>>     SD SDR 12/SDR25/DDR50. Card will not response to tuning commands in those
->>>>>     speed modes.
->>>>>
->>>>>     Could you please provide suggestions for the speed mode in which tuning is
->>>>>     not available?
->>>>>
->>>>
->>>> Normally the mmc host driver shouldn't have to care about what the
->>>> card supports, as that is the responsibility of the mmc core to
->>>> manage.
->>>>
->>>> The host should only need to implement the ->execute_tuning() ops,
->>>> which gets called when the card supports tuning (CMD19/21). Does it
->>>> make sense?
->>>>
->>>    I think it is irrelevant to tuning procedure.
->>>
->>>    Our host requires to adjust PHY setting after each time ios setting
->>>    (SDCLK/bus width/speed mode) is changed.
->>>    The simplified sequence is:
->>>    mmc change ios --> mmc_set_ios() --> ->set_ios() --> after sdhci_set_ios(),
->>>    adjust PHY setting.
->>>    During PHY setting adjustment, out host driver has to send commands to
->>>    test current sampling point. Tuning is another independent step.
->>
->> For those speed modes (or other ios changes) that *don't* requires
->> tuning, then what will you do when you send the command to confirm the
->> change of PHY setting and it fails?
->>
->> My assumption is that you will fail anyway, by propagating the error
->> to the mmc core. At least that what was my understanding from your
->> earlier replies, right!?
->>
->> Then, I think there are no point having the host driver sending a
->> command to confirm the PHY settings, as the mmc core will anyway
->> discover if something goes wrong when the next command is sent.
->>
->> Please correct me if I am wrong!
->>
+> We've been using tmio_mmc_pio.c and seeing the following message:
 >
->    Sorry that I didn't make myself clear.
+>         "sh_mobile_sdhi sh_mobile_sdhi.1: timeout waiting for SD bus idle"
 >
->    Our host PHY delay line consists of hundreds of sampling points.
->    Each sampling point represents a different phase shift.
+> While searching for a fix, we found some code we don't understand.
+> I'm sending this question with a hope that someone would enlighten us a
+> bit.  So, here goes.
 >
->    In lower speed mode, our host driver will scan the delay line.
->    It will select and test multiple sampling points, other than testing
->    only single sampling point.
+> The SDIO spec. seems to allow sending SDIO IRQ between the blocks of
+> multi-block transfer.  The hardware, SCLKDIVEN bit of SD_INFO02, is
+> set to zero (0) and prohibits to access IOMOD bit of SDIO_MODE
+> register while multi-block transfer is going.
 >
->    If a sampling point fails to transfer cmd/data, our host driver will
->    move to test next sampling point, until we find out a group of successful
->    sampling points which can transfer cmd/data. At last we will select
->    a perfect one from them.
-
-Ahh, I see. Unfortunate, this is going to be very hard to implement properly.
-
-The main problem is that the host driver has *no* knowledge about the
-internal state of the card, as that is the responsibility of the mmc
-core to keep track of.
-
-If the host driver would send a command during every update of the
-"ios" setting, from ->set_ios(), for sure it would lead to commands
-being sent that are "forbidden" in the current internal state of the
-card.
-This would lead to that the card initialization sequence fails,
-because the card may move to an unknown internal state and the mmc
-core would have no knowledge about what happened.
-
-Hmm..
-
-Can you specify, *exactly*, under which "ios updates" you need to
-verify updated PHY setting changes by sending a cmd/data? Also, please
-specify if it's enough to only test the CMD line or also DATA lines.
+> The current code, however, tries to disable SDIO IRQ by setting IOMOD
+> to zero in tmio_mmc_enable_sdio_irq() all the time, even during
+> multi-block transfer.  This prints the above waring.  What we don't
+> understand is that the code does both masking and disabling the IRQ.
+>
+> So my question is that "What is the reason behind to disable IRQ with
+> SDIO_MODE?  Is there any situation which masking with SDIO_INFO1_MASK
+> is not enough?
+>
+> Thanks you,
+> --
+>            yashi
+> --
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
