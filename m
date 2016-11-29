@@ -1,84 +1,110 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Javier Martinez Canillas <javier@dowhile0.org>
 Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Tue, 29 Nov 2016 17:53:26 +0100
-Message-ID: <CAPDyKFrCYX=d9ZhNzwT5CVbeGRcxfh9PYfn_Vwf8OopfQ2ZKKA@mail.gmail.com>
+Date: Tue, 29 Nov 2016 14:13:47 -0300
+Message-ID: <CABxcv=nEih8xX4fM0eqjkqprdt1uGTEyx5tzK04GuSgsHc=Haw@mail.gmail.com>
 References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting>
- <20161128141513.agnkyz6ronigbukn@rob-hp-laptop> <CAPDyKFr=TE+EuZ9rZV3ygsjBFN_mRrE2imkFa-wQs_ykM5d+cQ@mail.gmail.com>
- <CAL_Jsq+80LAkCGEdP5T0AWFV2nRtZ8nrkBoNRB47CR9JN=9dog@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL_Jsq+80LAkCGEdP5T0AWFV2nRtZ8nrkBoNRB47CR9JN=9dog@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Matt Ranostay <matt@ranostay.consulting>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Mark Rutland <mark.rutland@arm.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f196.google.com ([209.85.223.196]:34585 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755335AbcK2RNt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 12:13:49 -0500
+Received: by mail-io0-f196.google.com with SMTP id r94so30623144ioe.1
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 09:13:49 -0800 (PST)
+In-Reply-To: <1479434109-8745-1-git-send-email-matt@ranostay.consulting>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Ranostay <matt@ranostay.consulting>
+Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On 29 November 2016 at 15:51, Rob Herring <robh@kernel.org> wrote:
-> On Mon, Nov 28, 2016 at 9:54 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> [...]
->>
->>>> +
->>>> +Example:
->>>> +
->>>> +     wifi_pwrseq: wifi_pwrseq {
->>>> +             compatible = "mmc-pwrseq-sd8787";
->>>> +             pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
->>>> +             reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
->>>> +     }
->>>> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->>>> index c421aba0a5bc..08fd65d35725 100644
->>>> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->>>> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->>>> @@ -32,6 +32,9 @@ Optional properties:
->>>>                so that the wifi chip can wakeup host platform under certain condition.
->>>>                during system resume, the irq will be disabled to make sure
->>>>                unnecessary interrupt is not received.
->>>> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
->>>
->>> This is why pwrseq is wrong. You have some properties in the card node
->>> and some in pwrseq node. Everything should be in the card node.
->>
->> Put "all" in the card node, just doesn't work for MMC. Particular in
->> cases when we have removable cards, as then it would be wrong to have
->> a card node.
+Hello Matt,
+
+On Thu, Nov 17, 2016 at 10:55 PM, Matt Ranostay
+<matt@ranostay.consulting> wrote:
+> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
+> This can be abstracted to other chipsets if needed in the future.
 >
-> When is there a problem with removable cards? The connector is
-> standard and everything needed (CD, VMMC, VDDIO, etc.) is defined in
-> the host controller node. If that isn't sufficient, then we should
-> start defining a connector node.
-
-I probably didn't get your point. Anyway, let's try again.
-
-I don't see any problems with removable cards and neither with
-non-removable cards.
-
-Normally, we don't need a connector node, but instead we put the
-related properties/phandles in the host controller node. This works
-fine!
-
-For SDIO func devices, sometimes we need a child node of the host
-controller node, as to be able to describe certain characteristics of
-the SDIO func device. So this case is kind of a special type of card
-node (because one can have several SDIO func devices attached, even if
-this isn't used).
-
-Now, to follow the current bindings, we must not put connector related
-bindings in the card node, like the vmmc-supply, perhaps that is what
-causes confusion here?
-
+> Cc: Tony Lindgren <tony@atomide.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Mark Rutland <mark.rutland@arm.com>
+> Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
+> ---
+>  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt  |  14 +++
+>  .../bindings/net/wireless/marvell-sd8xxx.txt       |   4 +
+>  drivers/mmc/core/Kconfig                           |  10 ++
+>  drivers/mmc/core/Makefile                          |   1 +
+>  drivers/mmc/core/pwrseq_sd8787.c                   | 117 +++++++++++++++++++++
+>  5 files changed, 146 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
 >
->> The mmc pwrseq DT bindings just follows the legacy approach for MMC
->> and that's why the pwrseq handle is at the controller node. Yes, would
->> could have done it differently, but this is the case now, so we will
->> have to accept that.
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+
+According Documentation/devicetree/bindings/submitting-patches.txt,
+the DT bindings patches should posted as a separate patch.
+
+> new file mode 100644
+> index 000000000000..1b658351629b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> @@ -0,0 +1,14 @@
+> +* Marvell SD8787 power sequence provider
+> +
+> +Required properties:
+> +- compatible: must be "mmc-pwrseq-sd8787".
+
+Since this is not a generic binding, the compatible string should have
+a vendor prefix.
+
+> +- pwndn-gpio: contains a power down GPIO specifier.
+> +- reset-gpio: contains a reset GPIO specifier.
+> +
+
+I wonder if we really need a custom power sequence provider for just
+this SDIO WiFI chip though. AFAICT the only missing piece in
+mmc-pwrseq-simple is the power down GPIO property, so maybe
+mmc-pwrseq-simple could be extended instead to have an optional
+powerdown-gpios property and instead in the Marvell SD8787 DT binding
+can be mentioned which mmc-pwrseq-simple properties are required for
+the device.
+
+> +Example:
+> +
+> +       wifi_pwrseq: wifi_pwrseq {
+> +               compatible = "mmc-pwrseq-sd8787";
+> +               pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+> +               reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+> +       }
+> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+
+Does this patch depend on a previous posted series? I don't see this
+file in today's linux-next...
+
+> index c421aba0a5bc..08fd65d35725 100644
+> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+> @@ -32,6 +32,9 @@ Optional properties:
+>                  so that the wifi chip can wakeup host platform under certain condition.
+>                  during system resume, the irq will be disabled to make sure
+>                  unnecessary interrupt is not received.
+> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
+> +  - mmc-pwrseq:  phandle to the MMC power sequence node. See "mmc-pwrseq-*"
+> +                for documentation of MMC power sequence bindings.
 >
-> We're stuck with supporting the existing cases. That doesn't mean
-> we're stuck with the same thing for new cases.
+>  Example:
+>
+> @@ -44,6 +47,7 @@ so that firmware can wakeup host using this device side pin.
+>  &mmc3 {
+>         status = "okay";
+>         vmmc-supply = <&wlan_en_reg>;
+> +       mmc-pwrseq = <&wifi_pwrseq>;
+>         bus-width = <4>;
+>         cap-power-off-card;
+>         keep-power-in-suspend;
 
-Agree!
+I think this change should be split in a separate patch as well.
 
-But I think there is nothing to improve in this case, or am I wrong?
-
-Kind regards
-Uffe
+Best regards,
+Javier
