@@ -1,93 +1,68 @@
-From: Thierry Escande <thierry.escande@collabora.com>
-Subject: [PATCH v3 1/1] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
-Date: Tue, 29 Nov 2016 15:24:48 +0100
-Message-ID: <1480429488-22289-2-git-send-email-thierry.escande@collabora.com>
-References: <1480429488-22289-1-git-send-email-thierry.escande@collabora.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v3] mmc: block: delete packed command support
+Date: Tue, 29 Nov 2016 15:25:28 +0100
+Message-ID: <CACRpkdZ_U=uGcW-wdvDc6GQ0-A5XviG4X=Vr1VmXG4wygw3NXQ@mail.gmail.com>
+References: <1480066500-4983-1-git-send-email-linus.walleij@linaro.org>
+ <CAPDyKFoQOb19xq2zLZuAHp_JCcpyeo5MvtvFnNjq8hRcPZcTxA@mail.gmail.com> <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset = "utf-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:44309 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757602AbcK2OZB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 09:25:01 -0500
-In-Reply-To: <1480429488-22289-1-git-send-email-thierry.escande@collabora.com>
-Content-Transfert-Encoding: 8bit
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:33544 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757663AbcK2OZa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 09:25:30 -0500
+Received: by mail-qk0-f169.google.com with SMTP id x190so175729516qkb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2016 06:25:30 -0800 (PST)
+In-Reply-To: <50128E8A-D7B3-49E3-9E18-4AD240F1EBD0@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: bhthompson@chromium.org, linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Namjae Jeon <namjae.jeon@samsung.com>, Maya Erez <qca_merez@qca.qualcomm.com>, Christoph Hellwig <hch@infradead.org>
 
-From: zhaojohn <john.zhao@intel.com>
+On Sun, Nov 27, 2016 at 3:25 PM, Alex Lemberg <Alex.Lemberg@sandisk.com> wr=
+ote:
 
-Hynix eMMC devices sometimes take 50% longer to resume from sleep. This
-occurs on Braswell based chromebook with acpi sdhci controller.
+> I understand your concerns about the current packed commands
+> support and the problem of transition to blk_mq.
 
-Based on a recommendation from Hynix engineers, this patch sends a
-Power-Off Notification using mmc_poweroff_notify() before going to S3 to
-have a resume time consistently within spec. No voltage regulator are
-being cut through this notification but merely tells the eMMC firmware
-that we're about to do so and get it to behave better on resume.
+It may be possible to re-implement the feature later, but then
+only if we get some queue inspection features in blk-mq.
 
-Signed-off-by: zhaojohn <john.zhao@intel.com>
-Signed-off-by: Thierry Escande <thierry.escande@collabora.com>
----
- drivers/mmc/card/block.c | 8 ++++++++
- drivers/mmc/core/mmc.c   | 8 +++++++-
- include/linux/mmc/card.h | 2 ++
- 3 files changed, 17 insertions(+), 1 deletion(-)
+Do you agree with my assessment in the thread that this
+feature can only really make an improvement on random writes,
+i.e. it will not improve reads (even random reads) and it will not
+improve sequential writes?
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 709a872..0066a66 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2573,6 +2573,14 @@ static const struct mmc_fixup blk_fixups[] =
- 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
-+	/*
-+	 * Hynix eMMC devices sometimes take 50% longer to resume from sleep.
-+	 * Based on a recommendation from Hynix, send a Power-Off Notification
-+	 * before going to S3 to restore a resume time consistently within spec.
-+	 */
-+	MMC_FIXUP("HBG4e\005", CID_MANFID_HYNIX, 0x014a, add_quirk_mmc,
-+		  MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP),
-+
- 	END_FIXUP
- };
- 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index df19777..774d478 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1941,8 +1941,14 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	if (mmc_can_poweroff_notify(host->card) &&
- 		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
- 		err = mmc_poweroff_notify(host->card, notify_type);
--	else if (mmc_can_sleep(host->card))
-+	else if (mmc_can_sleep(host->card)) {
-+		if (host->card->quirks & MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP) {
-+			err = mmc_poweroff_notify(host->card, notify_type);
-+			if (err)
-+				goto out;
-+		}
- 		err = mmc_sleep(host);
-+	}
- 	else if (!mmc_host_is_spi(host))
- 		err = mmc_deselect_cards(host);
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 73fad83..e4940f4 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -281,6 +281,8 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP \
-+				(1<<14)		/* Poweroff notification*/
- 
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
--- 
-2.7.4
+> But as I mentioned in previous email thread, the packed commands
+> feature is still in use on eMMC4.5 or eMMC5.1 devices on hosts
+> without SW/HW CMDQ support.
 
+True. In the market place of devices, sure.
+
+But noone is maintaining or testing the code in the Linux
+kernel. Noone bothered to enable it for their platform so we can
+test it.
+
+> Taking this feature out meaning stop supporting one of important
+> performance features of eMMC devices.
+> Looking forward this feature is replaced with a CMDQ, but should we
+> kill it for those who doesn=E2=80=99t have a CMDQ?
+
+What we need from memory card vendors like you (SanDisk)
+is a target test rig.
+
+That is: a board with an SoC that we developers can get hold
+of (for reasonable cost) and where both the host controller and
+the eMMC card has the desired features so we can test it.
+
+Also that this board has support in the upstream kernel.
+
+There are too many vendor trees with too much forked code
+out there, I know this is common, but we cannot develop
+important core features in the kernel that have no in-kernel
+user and no way for us to test it if we need to re-write the
+code, it is just unmaintainable.
+
+Yours,
+Linus Walleij
