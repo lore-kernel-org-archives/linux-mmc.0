@@ -1,116 +1,81 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Wed, 30 Nov 2016 10:11:20 -0300
-Message-ID: <CABxcv=nc1qjtSjzfcuGTo-zUpuWdRT6OR7MZCCWaoeq4Co3Uew@mail.gmail.com>
-References: <1479434109-8745-1-git-send-email-matt@ranostay.consulting>
- <CABxcv=nEih8xX4fM0eqjkqprdt1uGTEyx5tzK04GuSgsHc=Haw@mail.gmail.com> <CAJ_EiST_bpBm+spPuWH-a+47t4qVsDVFjUm=a+TtL-BWN3DHdw@mail.gmail.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: arasan,sdhci.txt "compatibility" DT binding
+Date: Wed, 30 Nov 2016 14:17:10 +0100
+Message-ID: <215d077d-cba8-3c95-eb36-9d5a7afb9bcd@xilinx.com>
+References: <56B07BA5.4060407@free.fr>
+ <a20b2b4f-15d4-3c29-324c-1ced5dbcc67f@xilinx.com> <583C50E7.6030400@free.fr>
+ <14771688.Q8f97gHC2H@wuerfel> <583C60CC.2020408@free.fr>
+ <CAFd313zQHmFQ61Y4UEvQAvhhVeNFe=nNyjXUKfYXiTKnvm9VWQ@mail.gmail.com>
+ <648bd95b-5be0-b39f-a956-af741c6407e4@laposte.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33911 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754832AbcK3NLW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2016 08:11:22 -0500
-Received: by mail-io0-f195.google.com with SMTP id r94so2266880ioe.1
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2016 05:11:21 -0800 (PST)
-In-Reply-To: <CAJ_EiST_bpBm+spPuWH-a+47t4qVsDVFjUm=a+TtL-BWN3DHdw@mail.gmail.com>
+Received: from mail-by2nam01on0050.outbound.protection.outlook.com ([104.47.34.50]:48123
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754961AbcK3NRa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Nov 2016 08:17:30 -0500
+In-Reply-To: <648bd95b-5be0-b39f-a956-af741c6407e4@laposte.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Sebastian Frias <sf84@laposte.net>, Rameshwar Sahu <rsahu@apm.com>, Mason <slash.tmp@free.fr>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Linus Walleij <linus.walleij@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Rob Herring <robh@kernel.org>, Zach Brown <zach.brown@ni.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, Suneel Garapati
 
-Hello Matt,
-
-On Tue, Nov 29, 2016 at 10:20 PM, Matt Ranostay
-<matt@ranostay.consulting> wrote:
-> On Tue, Nov 29, 2016 at 9:13 AM, Javier Martinez Canillas
-
-[snip]
-
->
->
->>> +- pwndn-gpio: contains a power down GPIO specifier.
->>> +- reset-gpio: contains a reset GPIO specifier.
->>> +
+On 30.11.2016 11:51, Sebastian Frias wrote:
+> On 29/11/16 08:29, Rameshwar Sahu wrote:
+>> Hi Mason,
 >>
->> I wonder if we really need a custom power sequence provider for just
->> this SDIO WiFI chip though. AFAICT the only missing piece in
->> mmc-pwrseq-simple is the power down GPIO property, so maybe
->> mmc-pwrseq-simple could be extended instead to have an optional
->> powerdown-gpios property and instead in the Marvell SD8787 DT binding
->> can be mentioned which mmc-pwrseq-simple properties are required for
->> the device.
+>> Nowhere in the documentation do they specify an "IP version".
+>> Some documents do provide a revision number, but that's just
+>> a *documentation* revision number, e.g.
 >>
->
-> The reason we didn't do that is we need delay between the two
-> assertions/desertions of GPIOs. It wouldn't seems good practice to
-> hack the pwrseq-simple for this...
->
-
-Yes, I noticed that. I wouldn't say that it would be a hack for the
-pwrseq-simple since it already has a "post-power-on-delay-ms" DT
-property, so AFAICT it would just be adding a "pre-power-on-delay-ms"
-property for your use case.
-
-It would also be more consistent since it would support a delay for
-pre and post power callbacks. It would also make you avoid hardcoding
-the 300 msec wait, in case other device has a similar need but with a
-different wait time.
-
-In summary, I think that devices having a power (or power down) and
-enable GPIO, and needing to wait between the GPIO toggling are common.
-So I would prefer to make pwrseq-simple usable for these instead of
-adding device specific power sequence providers. But it's just my
-opinion and not my call :-)
-
->>> +Example:
->>> +
->>> +       wifi_pwrseq: wifi_pwrseq {
->>> +               compatible = "mmc-pwrseq-sd8787";
->>> +               pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
->>> +               reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
->>> +       }
->>> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
+>> changes in version 3.6 : fix typos
+>> changes in version 9.1a : update company logo
 >>
->> Does this patch depend on a previous posted series? I don't see this
->> file in today's linux-next...
->
-> Got renamed to ->
-> Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt it
-> seems very recently.
->
-
-I see, that's what I thought but I wasn't able to find the commit /
-patch that did it.
-
+>> That's why Xilinx used "arasan,sdhci-8.9a" and APM used
+>> "arasan,sdhci-4.9a". These are documentation revisions.
+>> In my opinion, that information is mostly worthless.
 >>
->>> index c421aba0a5bc..08fd65d35725 100644
->>> --- a/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->>> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt
->>> @@ -32,6 +32,9 @@ Optional properties:
->>>                  so that the wifi chip can wakeup host platform under certain condition.
->>>                  during system resume, the irq will be disabled to make sure
->>>                  unnecessary interrupt is not received.
->>> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
->>> +  - mmc-pwrseq:  phandle to the MMC power sequence node. See "mmc-pwrseq-*"
->>> +                for documentation of MMC power sequence bindings.
->>>
->>>  Example:
->>>
->>> @@ -44,6 +47,7 @@ so that firmware can wakeup host using this device side pin.
->>>  &mmc3 {
->>>         status = "okay";
->>>         vmmc-supply = <&wlan_en_reg>;
->>> +       mmc-pwrseq = <&wifi_pwrseq>;
->>>         bus-width = <4>;
->>>         cap-power-off-card;
->>>         keep-power-in-suspend;
->>
->> I think this change should be split in a separate patch as well.
->>
+> 
+> For the record, the important information conveyed by Rameshwar's
+> email is the following:
+> 
+> Arasan SD/SDIO/eMMC IP has a register which tells about the SD
+> specification version and  Vendor version number
+> Reg Name: Host controller version register (offset 0FEh)
+> bit [15:8] is for vendor version number,
+> But, I have seen that Arasaan vendor version number is same as
+> document revision number.
+> 
+> (At first I had ignored the email because it repeated Mason's email
+> without quoting, but then I realised it contained some information)
+> 
+> 
 
-You didn't answer about this, but I guess you agree it should be in a
-separate patch.
+Values on real HW.
 
-Best regards,
-Javier
+ZynqMP device
+xsdb% mrd 0xFF1600FC
+FF1600FC:   10020000
+
+Zynq device:
+xsdb% mrd 0xE01000FC
+E01000FC:   89010000
+
+Based on docs I have access to.
+
+Specification_Version_Number (bits:23:16)
+00 - SD Host Specification version 1.0
+01 - SD Host Specification version 2.00 including only the feature of
+the Test Register
+02 - SD Host Specification version 3.00
+
+
+Vendor_Version_Number 	31:24
+
+with 32bit access from FC
+
+Thanks,
+Michal
+
