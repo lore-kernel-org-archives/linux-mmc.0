@@ -1,51 +1,46 @@
-From: Thierry Escande <thierry.escande@collabora.com>
-Subject: Re: [PATCH v3 1/1] mmc: Hynix: add QUIRK_NOTIFY_POWEROFF_ON_SLEEP
-Date: Wed, 30 Nov 2016 10:10:15 +0100
-Message-ID: <302c7160-bdb2-d31a-4847-5c066f43feaf@collabora.com>
-References: <1480429488-22289-1-git-send-email-thierry.escande@collabora.com>
- <CGME20161129142519epcas3p17c89a8e9123e8daa7d2479cb9d107fad@epcas3p1.samsung.com>
- <1480429488-22289-2-git-send-email-thierry.escande@collabora.com>
- <89a61073-6f1e-d386-c2d1-866447bcd715@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 1/4] Revert "mmc: sdhci: Reset cmd and data circuits after tuning failure"
+Date: Wed, 30 Nov 2016 11:20:11 +0200
+Message-ID: <1480497614-3501-2-git-send-email-adrian.hunter@intel.com>
+References: <1480497614-3501-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:50297 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932141AbcK3JKT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2016 04:10:19 -0500
-In-Reply-To: <89a61073-6f1e-d386-c2d1-866447bcd715@samsung.com>
+Received: from mga02.intel.com ([134.134.136.20]:18535 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754740AbcK3JZT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Nov 2016 04:25:19 -0500
+In-Reply-To: <1480497614-3501-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, bhthompson@chromium.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Dan O'Donovan <dan@emutex.com>
 
-Hi Jaehoon,
+This reverts commit fe5fb2e3b58f ("mmc: sdhci: Reset cmd and data circuits
+after tuning failure").
 
-On 30/11/2016 09:46, Jaehoon Chung wrote:
-> On 11/29/2016 11:24 PM, Thierry Escande wrote:
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index df19777..774d478 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1941,8 +1941,14 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->>  	if (mmc_can_poweroff_notify(host->card) &&
->>  		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
->>  		err = mmc_poweroff_notify(host->card, notify_type);
->> -	else if (mmc_can_sleep(host->card))
->> +	else if (mmc_can_sleep(host->card)) {
->> +		if (host->card->quirks & MMC_QUIRK_NOTIFY_POWEROFF_ON_SLEEP) {
->> +			err = mmc_poweroff_notify(host->card, notify_type);
->> +			if (err)
->> +				goto out;
->> +		}
->>  		err = mmc_sleep(host);
->
-> After running mmc_poweroff_notify(), also doing mmc_sleep()? Is it right?
+A better fix is available, and it will be applied to older stable releases,
+so get this out of the way by reverting it.
 
-Yes, that's what the quirk is intended for. This firmware resumes from 
-sleep faster if it has been notified for power-off. This is a 
-recommendation from Hynix.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org # v4.9+
+---
+ drivers/mmc/host/sdhci.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
-Regards,
-  Thierry
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7f2526c9572f..e761fe2aa99e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2090,10 +2090,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 		if (!host->tuning_done) {
+ 			pr_info(DRIVER_NAME ": Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock\n");
+-
+-			sdhci_do_reset(host, SDHCI_RESET_CMD);
+-			sdhci_do_reset(host, SDHCI_RESET_DATA);
+-
+ 			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 			ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+ 			ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+-- 
+1.9.1
+
