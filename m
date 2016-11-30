@@ -1,72 +1,93 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 4/4] mmc: sdhci: Always allow tuning to fall back to fixed sampling
-Date: Wed, 30 Nov 2016 11:20:14 +0200
-Message-ID: <1480497614-3501-5-git-send-email-adrian.hunter@intel.com>
-References: <1480497614-3501-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/4] mmc: sdhci: Fix recovery from tuning timeout
+Date: Wed, 30 Nov 2016 11:06:21 +0100
+Message-ID: <CAPDyKFqz36hsJxVJpNcH-Y+gzTOfewPiV3w4LApQOdrQiKLNtg@mail.gmail.com>
+References: <1480497614-3501-1-git-send-email-adrian.hunter@intel.com> <1480497614-3501-3-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:18535 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756470AbcK3JZX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Nov 2016 04:25:23 -0500
-In-Reply-To: <1480497614-3501-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wj0-f182.google.com ([209.85.210.182]:32946 "EHLO
+        mail-wj0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752376AbcK3KGY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2016 05:06:24 -0500
+Received: by mail-wj0-f182.google.com with SMTP id xy5so169005824wjc.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2016 02:06:23 -0800 (PST)
+In-Reply-To: <1480497614-3501-3-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Dan O'Donovan <dan@emutex.com>
 
-SDHCI falls back to fixed sampling if there is an error during tuning.
-However it also reports an error unless there is periodic re-tuning.
-That is not the best option because:
-a) there is a reasonable chance that fixed sampling will work, especially
-at room temperature.
-b) re-tuning will be done again anyway if there are CRC errors.
-Change to return no error always when falling back to fixed sampling.
+On 30 November 2016 at 10:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Clearing the tuning bits should reset the tuning circuit. However there is
+> more to do. Reset the command and data lines for good measure, and then
+> for eMMC ensure the card is not still trying to process a tuning command by
+> sending a stop command.
+>
+> Note the JEDEC eMMC specification says the stop command (CMD12) can be used
+> to stop a tuning command (CMD21) whereas the SD specification is silent on
+> the subject with respect to the SD tuning command (CMD19). Considering that
+> CMD12 is not a valid SDIO command, the stop command is sent only when the
+> tuning command is CMD21 i.e. for eMMC. That addresses cases seen so far
+> which have been on eMMC.
+>
+> Note that this replaces the commit fe5fb2e3b58f ("mmc: sdhci: Reset cmd and
+> data circuits after tuning failure") which is being reverted for v4.9+.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Tested-by: Dan O'Donovan <dan@emutex.com>
+> Cc: stable@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci.c | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index e761fe2aa99e..1d72a51287d4 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2095,7 +2095,27 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                         ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+>                         sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>
+> +                       sdhci_do_reset(host, SDHCI_RESET_CMD);
+> +                       sdhci_do_reset(host, SDHCI_RESET_DATA);
+> +
+>                         err = -EIO;
+> +
+> +                       if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
+> +                               goto out;
+> +
+> +                       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +                       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +
+> +                       spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +                       memset(&cmd, 0, sizeof(cmd));
+> +                       cmd.opcode = MMC_STOP_TRANSMISSION;
+> +                       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +                       cmd.busy_timeout = 50;
+> +                       mmc_wait_for_cmd(mmc, &cmd, 0);
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 20 ++------------------
- 1 file changed, 2 insertions(+), 18 deletions(-)
+No, please don't add more hacks to send commands internally from sdhci.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ad2f2c6113e4..a23887799f43 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2098,8 +2098,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 			sdhci_do_reset(host, SDHCI_RESET_CMD);
- 			sdhci_do_reset(host, SDHCI_RESET_DATA);
- 
--			err = -EIO;
--
- 			if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
- 				goto out;
- 
-@@ -2137,24 +2135,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 	}
--	if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
-+	if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
- 		pr_info(DRIVER_NAME ": Tuning procedure failed, falling back to fixed sampling clock\n");
--		err = -EIO;
--	}
--
- out:
--	if (tuning_count) {
--		/*
--		 * In case tuning fails, host controllers which support
--		 * re-tuning can try tuning again at a later time, when the
--		 * re-tuning timer expires.  So for these controllers, we
--		 * return 0. Since there might be other controllers who do not
--		 * have this capability, we return error for them.
--		 */
--		err = 0;
--	}
--
--	host->mmc->retune_period = err ? 0 : tuning_count;
-+	host->mmc->retune_period = tuning_count;
- 
- 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
--- 
-1.9.1
+Maybe even before you start fix the problems for tuning, perhaps you
+try to clean up the current code when sending CMD21/19 in
+sdhci_execute_tuning()?
 
+Moreover, according to the change log above, it seems like a generic
+thing to send CMD12 to abort tuning. In such case, we could either
+make the core deal with it in the error path - or we could implement a
+"mmc_abort_tuning()" function, host drivers may call when needed.
+
+> +
+> +                       spin_lock_irqsave(&host->lock, flags);
+> +
+>                         goto out;
+>                 }
+>
+> --
+> 1.9.1
+>
+
+Kind regards
+Uffe
