@@ -1,55 +1,68 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] DWMMC controller for next
-Date: Wed, 30 Nov 2016 10:39:34 +0900
-Message-ID: <657025e2-decd-338e-60e9-f7ebfc7fcbb4@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH 1/2] mmc: sdhci: continue normal tuning if unsupported by platform tuning
+Date: Wed, 30 Nov 2016 13:07:44 +0900
+Message-ID: <1480478865-5271-2-git-send-email-yamada.masahiro@socionext.com>
+References: <1480478865-5271-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:49336 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751726AbcK3Bjg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 20:39:36 -0500
-Received: from epcpsbgm1new.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OHF00RNCLXYJHB0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Nov 2016 10:39:34 +0900 (KST)
+Received: from conuserg-10.nifty.com ([210.131.2.77]:64906 "EHLO
+        conuserg-10.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752099AbcK3EIT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2016 23:08:19 -0500
+In-Reply-To: <1480478865-5271-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 
-Dear Ulf,
+Some SDHCI-compat controllers support not only SD, but also eMMC,
+but they use different commands for tuning: CMD19 for SD, CMD21 for
+eMMC.
 
-Could you pull these patches for next on your repository?
+Due to the difference of the underlying mechanism, some controllers
+(at least, the Cadence IP is the case) provide their own registers
+for the eMMC tuning.
 
-The following changes since commit b977a3400ee697f80e128e8bb927652026e400da:
+This commit will be useful when we want to use platform-specific
+tuning (to support eMMC HS200), but still let it reuse the code
+provided by sdhci_execute_tuning() for SD timing.
 
-  mmc: mmc_test: remove BUG_ONs and deploy error handling (2016-11-29 13:40:22 +0100)
+If sdhci_ops::platform_execute_tuning receives a timing it does not
+take care of, it can return -ENOTSUPP.  Then, it will fall back to
+the SDHCI standard tuning.
 
-are available in the git repository at:
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-  http://github.com/jh80chung/dw-mmc.git for-ulf
+I want to use this in the next commit.
 
-for you to fetch changes up to dc595736c5549b82d02fb4217cf68be595e479be:
+The Cadence IP supports eMMC as well as SD.
 
-  mmc: dw_mmc: display the clock message only one time when card is polling (2016-11-30 10:36:33 +0900)
+The tuning for SD is pretty simple; just set the "Execute Tuning" bit
+of the HOST_CONTROL2 register.  So, I can re-use the
+sdhci_execute_tuning().
 
-----------------------------------------------------------------
-Jaehoon Chung (3):
-      mmc: dw_mmc: check the "present" variable before checking flags
-      mmc: dw_mmc: add the debug message for polling and non-removable
-      mmc: dw_mmc: display the clock message only one time when card is polling
+On the other hand, Cadence provides its own way for eMMC HS200 tuning;
+I need to touch some registers that are specific to Cadence's design.
 
-Joonyoung Shim (2):
-      mmc: dw_mmc: exynos: fix to call suspend callback
-      mmc: dw_mmc: add missing codes for runtime resume
 
- drivers/mmc/host/dw_mmc-exynos.c | 28 ++++++++++++++++++++++++++--
- drivers/mmc/host/dw_mmc.c        | 50 +++++++++++++++++++++++++++++++++++++++++++++-----
- drivers/mmc/host/dw_mmc.h        |  1 +
- 3 files changed, 72 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Best Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42ef3eb..cdce489 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2004,7 +2004,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	if (host->ops->platform_execute_tuning) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+-		return err;
++		if (err != -ENOTSUPP)
++			return err;
++		spin_lock_irqsave(&host->lock, flags);
+ 	}
+ 
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-- 
+2.7.4
+
