@@ -1,38 +1,42 @@
-From: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
-Subject: [PATCH v2 0/2] mmc: sdhci: one expansion for SDHCI base code and add Cadence SDHCI driver
-Date: Thu,  1 Dec 2016 12:36:04 +0900
-Message-ID: <1480563366-7259-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Al Cooper <alcooperx-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Andrei Pistirica <andrei.pistirica-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: sdhci-of-at91: remove bogus MMC_SDHCI_IO_ACCESSORS select
+Date: Thu,  1 Dec 2016 13:05:46 +0900
+Message-ID: <1480565146-4857-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conuserg-11.nifty.com ([210.131.2.78]:18745 "EHLO
+        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750975AbcLAEHQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2016 23:07:16 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Al Cooper <alcooperx@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Simon Horman <horms+renesas@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>
 
-1/2 tweaks sdhci_execute_tuning(), which I want to use for 2/2.
+I see no override of read/write callbacks in sdhci-of-at91.c.
 
-2/2 adds a new driver for Cadence's controller IP.
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+BTW, this config may not be so useful in recent multi-platforms.
+Perhaps, is it better to remove this config entirely instead of
+the AT91 fix only.
 
 
-Changes in v2:
-  - Remove unnecessary "select MMC_SDHCI_IO_ACCESSORS"
+ drivers/mmc/host/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
 
-Masahiro Yamada (2):
-  mmc: sdhci: continue normal tuning if unsupported by platform tuning
-  mmc: sdhci-cadence: add Cadence SD4HC support
-
- .../devicetree/bindings/mmc/sdhci-cadence.txt      |  31 +++
- drivers/mmc/host/Kconfig                           |  11 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-cadence.c                   | 279 +++++++++++++++++++++
- drivers/mmc/host/sdhci.c                           |   4 +-
- 5 files changed, 325 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
- create mode 100644 drivers/mmc/host/sdhci-cadence.c
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 39f6f96..8ac1640 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -135,7 +135,6 @@ config MMC_SDHCI_OF_AT91
+ 	tristate "SDHCI OF support for the Atmel SDMMC controller"
+ 	depends on MMC_SDHCI_PLTFM
+ 	depends on OF
+-	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+ 	  This selects the Atmel SDMMC driver
+ 
 -- 
 2.7.4
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
