@@ -1,279 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 3/5] mmc: sdhci: Factor out tuning helper functions
-Date: Thu,  1 Dec 2016 16:04:29 +0200
-Message-ID: <1480601071-8881-4-git-send-email-adrian.hunter@intel.com>
-References: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:19066 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752954AbcLAOJi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Dec 2016 09:09:38 -0500
-In-Reply-To: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa-dev@sang-engineering.com>
+Subject: Re: mmc: tmio: why enable/disable SDIO irq on every transaction with
+ IOMOD?
+Date: Thu, 1 Dec 2016 15:49:19 +0100
+Message-ID: <20161201144919.GB6361@katana>
+References: <87h96qkdn0.wl@dns1.atmark-techno.com>
+ <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
+ <20161201104622.GA1541@katana>
+ <87y3zzvmth.wl@dns1.atmark-techno.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="aM3YZ0Iwxop3KEKx"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <87y3zzvmth.wl@dns1.atmark-techno.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Yasushi SHOJI <yashi@atmark-techno.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, wsa+renesas@sang-engineering.com, horms@verge.net.au, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Factor out some functions to tidy up the code in sdhci_execute_tuning.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 209 ++++++++++++++++++++++++++---------------------
- 1 file changed, 117 insertions(+), 92 deletions(-)
+--aM3YZ0Iwxop3KEKx
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b841d0a57af1..fa89870a690b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1952,6 +1952,115 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return 0;
- }
- 
-+static void sdhci_start_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl |= SDHCI_CTRL_EXEC_TUNING;
-+	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
-+		ctrl |= SDHCI_CTRL_TUNED_CLK;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+	/*
-+	 * As per the Host Controller spec v3.00, tuning command
-+	 * generates Buffer Read Ready interrupt, so enable that.
-+	 *
-+	 * Note: The spec clearly says that when tuning sequence
-+	 * is being performed, the controller does not generate
-+	 * interrupts other than Buffer Read Ready interrupt. But
-+	 * to make sure we don't hit a controller bug, we _only_
-+	 * enable Buffer Read Ready interrupt here.
-+	 */
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static void sdhci_end_tuning(struct sdhci_host *host)
-+{
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static void sdhci_reset_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-+	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+}
-+
-+static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
-+			       unsigned long flags)
-+{
-+	sdhci_reset_tuning(host);
-+
-+	sdhci_do_reset(host, SDHCI_RESET_CMD);
-+	sdhci_do_reset(host, SDHCI_RESET_DATA);
-+
-+	sdhci_end_tuning(host);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	mmc_abort_tuning(host->mmc, opcode);
-+	spin_lock_irqsave(&host->lock, flags);
-+}
-+
-+static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
-+			      unsigned long flags)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_command cmd = {0};
-+	struct mmc_request mrq = {NULL};
-+
-+	cmd.opcode = opcode;
-+	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+	cmd.mrq = &mrq;
-+
-+	mrq.cmd = &cmd;
-+	/*
-+	 * In response to CMD19, the card sends 64 bytes of tuning
-+	 * block to the Host Controller. So we set the block size
-+	 * to 64 here.
-+	 */
-+	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-+		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
-+				     SDHCI_BLOCK_SIZE);
-+		else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+				     SDHCI_BLOCK_SIZE);
-+	} else {
-+		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+			     SDHCI_BLOCK_SIZE);
-+	}
-+
-+	/*
-+	 * The tuning block is sent by the card to the host controller.
-+	 * So we set the TRNS_READ bit in the Transfer Mode register.
-+	 * This also takes care of setting DMA Enable and Multi Block
-+	 * Select in the same register to 0.
-+	 */
-+	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-+
-+	sdhci_send_command(host, &cmd);
-+
-+	host->cmd = NULL;
-+
-+	sdhci_del_timer(host, &mrq);
-+
-+	host->tuning_done = 0;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	/* Wait for Buffer Read Ready interrupt */
-+	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
-+			   msecs_to_jiffies(50));
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+}
-+
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -2011,105 +2120,24 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		return err;
- 	}
- 
--	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--	ctrl |= SDHCI_CTRL_EXEC_TUNING;
--	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
--		ctrl |= SDHCI_CTRL_TUNED_CLK;
--	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--	/*
--	 * As per the Host Controller spec v3.00, tuning command
--	 * generates Buffer Read Ready interrupt, so enable that.
--	 *
--	 * Note: The spec clearly says that when tuning sequence
--	 * is being performed, the controller does not generate
--	 * interrupts other than Buffer Read Ready interrupt. But
--	 * to make sure we don't hit a controller bug, we _only_
--	 * enable Buffer Read Ready interrupt here.
--	 */
--	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
--	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-+	sdhci_start_tuning(host);
- 
- 	/*
- 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
- 	 * of loops reaches 40 times.
- 	 */
- 	do {
--		struct mmc_command cmd = {0};
--		struct mmc_request mrq = {NULL};
--
--		cmd.opcode = opcode;
--		cmd.arg = 0;
--		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
--		cmd.retries = 0;
--		cmd.data = NULL;
--		cmd.mrq = &mrq;
--		cmd.error = 0;
--
- 		if (tuning_loop_counter-- == 0)
- 			break;
- 
--		mrq.cmd = &cmd;
--
--		/*
--		 * In response to CMD19, the card sends 64 bytes of tuning
--		 * block to the Host Controller. So we set the block size
--		 * to 64 here.
--		 */
--		if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
--			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
--					     SDHCI_BLOCK_SIZE);
--			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
--				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
--					     SDHCI_BLOCK_SIZE);
--		} else {
--			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
--				     SDHCI_BLOCK_SIZE);
--		}
--
--		/*
--		 * The tuning block is sent by the card to the host controller.
--		 * So we set the TRNS_READ bit in the Transfer Mode register.
--		 * This also takes care of setting DMA Enable and Multi Block
--		 * Select in the same register to 0.
--		 */
--		sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
--
--		sdhci_send_command(host, &cmd);
--
--		host->cmd = NULL;
--		sdhci_del_timer(host, &mrq);
--
--		spin_unlock_irqrestore(&host->lock, flags);
--		/* Wait for Buffer Read Ready interrupt */
--		wait_event_timeout(host->buf_ready_int,
--					(host->tuning_done == 1),
--					msecs_to_jiffies(50));
--		spin_lock_irqsave(&host->lock, flags);
-+		sdhci_send_tuning(host, opcode, flags);
- 
- 		if (!host->tuning_done) {
- 			pr_info(DRIVER_NAME ": Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock\n");
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			ctrl &= ~SDHCI_CTRL_TUNED_CLK;
--			ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
--			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--			sdhci_do_reset(host, SDHCI_RESET_CMD);
--			sdhci_do_reset(host, SDHCI_RESET_DATA);
--
--			sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
--			sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
--
--			spin_unlock_irqrestore(&host->lock, flags);
--			mmc_abort_tuning(mmc, opcode);
--			spin_lock_irqsave(&host->lock, flags);
--
-+			sdhci_abort_tuning(host, opcode, flags);
- 			goto out;
- 		}
- 
--		host->tuning_done = 0;
--
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
- 		/* eMMC spec does not require a delay between tuning cycles */
-@@ -2121,18 +2149,15 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * The Host Driver has exhausted the maximum number of loops allowed,
- 	 * so use fixed sampling frequency.
- 	 */
--	if (tuning_loop_counter < 0) {
--		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
--		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
--		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--	}
--	if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
-+	if (tuning_loop_counter < 0)
-+		sdhci_reset_tuning(host);
-+
-+	if (tuning_loop_counter < 0 || !(ctrl & SDHCI_CTRL_TUNED_CLK))
- 		pr_info(DRIVER_NAME ": Tuning procedure failed, falling back to fixed sampling clock\n");
- out:
- 	host->mmc->retune_period = tuning_count;
- 
--	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
--	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+	sdhci_end_tuning(host);
- out_unlock:
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	return err;
--- 
-1.9.1
+Hi,
 
+> Is Arnd Hannemann, the author, around these days by any chance?
+
+According to git history, he is sending a patch occasionally, but all
+his SH involvement was from 2010. I don't know him.
+
+> We don't have it yet.  A question we have is that where should we
+> enable / disable the IOMOD?
+
+I think unconditionally in probe. I will send an RFC with some
+explanations in a minute.
+
+Thanks,
+
+   Wolfram
+
+
+--aM3YZ0Iwxop3KEKx
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYQDhvAAoJEBQN5MwUoCm2pkcP/jJqargpoBKF05XggPfml9W0
+ZzCo49O356rg+Z1IeVhKu7Pr5nvoka1iezo5VIuVcDTceJ8Z0ySkPI0AmTYA52Kh
+jL92a47OIaZ9bpuGx0vpADloGe7aM0Fh+wYRC6837Q69Ql1h/9IWTndRT5VSOfXG
+td38RRBOJAnMZTRmUmH7pPokyWUzZODZ6IUBr851/Lxx+T3IzDxRT0HuQnnoLLC2
+6F3Do3hXnL3oJ39cIITGsBEktsdTEGu3CQiKBTcr6ExGNfb16r+PazbHA2hzwRHL
+LSxxKdD/x3fq00fBy4EomKPowkFBuHHMuHCqoPtdfXwwXdeyBI+Upe/qKRU06c2X
+hZhRNXswLOQB5e+GBK1A0x6LnjJYmIvWuLuRlxymEYVH16UOvXdBuGef4ZVlt/rk
+Q8WD3J7W1CFXqc15LyrQH/MXMnvgBCzXFo5GuP/j/9XE6lNPOsP7xIHTBscUdTVi
+r6XzBLfLuF66YjVN5IebQnnnBv9DG2aNK+sP3U8RJGJu+Mugv/hMBvpJdeo69QFh
+dBpl/sv0eO4sEjfKaWMcetYOMdUx7qncDDlXVos51vYPtDK11OlzyPh0ZBlhfjt6
+y3HMXg5nzRlvEDF4BpvmFzzNg6OeEkZmHHspg0F2Pn089lKmQg0BrBHlDGj4rFWA
+MkEoACQwBE07ECAScZQv
+=0aIP
+-----END PGP SIGNATURE-----
+
+--aM3YZ0Iwxop3KEKx--
