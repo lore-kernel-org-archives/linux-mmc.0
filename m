@@ -1,99 +1,52 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
- Intel byt sdio controller sub-vended by NI
-Date: Thu, 1 Dec 2016 09:14:16 +0100
-Message-ID: <CAPDyKFo6q0T7b0VMav51YpzG76qYPwjL-yJBNDJAu_FVOfL+eQ@mail.gmail.com>
-References: <1480360599-13295-1-git-send-email-zach.brown@ni.com> <1480360599-13295-3-git-send-email-zach.brown@ni.com>
+Subject: Re: [PATCH] mmc: sdhci-s3c: add spin_unlock_irq() before calling clk_round_rate
+Date: Thu, 1 Dec 2016 09:14:02 +0100
+Message-ID: <CAPDyKFo8tnz8OjXSfLCJmh4_PkwC+CFMKgOyrAK6cEuEPg74XQ@mail.gmail.com>
+References: <20161130060542.18225-1-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:35802 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751566AbcLAIOd (ORCPT
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:37459 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751164AbcLAIOd (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 03:14:33 -0500
-Received: by mail-wm0-f54.google.com with SMTP id a197so290684504wmd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 00:14:18 -0800 (PST)
-In-Reply-To: <1480360599-13295-3-git-send-email-zach.brown@ni.com>
+Received: by mail-wm0-f52.google.com with SMTP id t79so239814870wmt.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 00:14:04 -0800 (PST)
+In-Reply-To: <20161130060542.18225-1-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 28 November 2016 at 20:16, Zach Brown <zach.brown@ni.com> wrote:
-> On NI 9037 boards the max SDIO frequency is limited by trace lengths
-> and other layout choices. The max SDIO frequency is stored in an ACPI
-> table.
+On 30 November 2016 at 07:05, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Before calling clk_round_rate(), put the spin_unlock_irq() in
+> sdhci_s3c_consider_clock() function.
 >
-> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
-> f_max field of the host.
->
-> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
-> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
-> Reviewed-by: Josh Cartwright <joshc@ni.com>
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 32 ++++++++++++++++++++++++++++++++
->  1 file changed, 32 insertions(+)
+>  drivers/mmc/host/sdhci-s3c.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 9741505..c9e51b1 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -27,6 +27,7 @@
->  #include <linux/pm_runtime.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/mmc/sdhci-pci-data.h>
-> +#include <linux/acpi.h>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 784c5a8..de219ca 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -121,7 +121,9 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
+>          * speed possible with selected clock source and skip the division.
+>          */
+>         if (ourhost->no_divider) {
+> +               spin_unlock_irq(&ourhost->host->lock);
+>                 rate = clk_round_rate(clksrc, wanted);
+> +               spin_lock_irq(&ourhost->host->lock);
+>                 return wanted - rate;
+>         }
 >
->  #include "sdhci.h"
->  #include "sdhci-pci.h"
-> @@ -375,8 +376,39 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
->         return 0;
->  }
->
-> +#ifdef CONFIG_ACPI
-> +static int ni_set_max_freq(struct sdhci_pci_slot *slot)
-> +{
-> +       acpi_status status;
-> +       unsigned long long max_freq;
-> +
-> +       status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
-> +                                      "MXFQ", NULL, &max_freq);
-> +       if (ACPI_FAILURE(status)) {
-> +               dev_err(&slot->chip->pdev->dev,
-> +                       "MXFQ not found in acpi table\n");
-> +               return -EINVAL;
-> +       }
-> +
-> +       slot->host->mmc->f_max = max_freq * 1000000;
-> +
-> +       return 0;
-> +}
-> +#else
-> +static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
-> +{
-> +       return 0;
-> +}
-> +#endif
-> +
->  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
->  {
-> +       int err;
-> +
-> +       err = ni_set_max_freq(slot);
-> +       if (err)
-> +               return err;
-> +
->         slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
->                                  MMC_CAP_WAIT_WHILE_BUSY;
->         return 0;
 > --
-> 2.7.4
+> 2.10.2
 >
