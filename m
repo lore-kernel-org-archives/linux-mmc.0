@@ -1,93 +1,81 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: mmc: Relax checking for switch errors after
- HS200 switch
-Date: Thu, 1 Dec 2016 11:18:06 +0100
-Message-ID: <CAPDyKFpxHVYc2wYc-yV3YLa=NKg1k1aktKhzCKfaZ2oaA_QLSQ@mail.gmail.com>
-References: <1479988969-1747-1-git-send-email-adrian.hunter@intel.com> <1479988969-1747-2-git-send-email-adrian.hunter@intel.com>
+From: Wolfram Sang <wsa-dev@sang-engineering.com>
+Subject: Re: mmc: tmio: why enable/disable SDIO irq on every transaction with
+ IOMOD?
+Date: Thu, 1 Dec 2016 11:46:22 +0100
+Message-ID: <20161201104622.GA1541@katana>
+References: <87h96qkdn0.wl@dns1.atmark-techno.com>
+ <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f180.google.com ([209.85.210.180]:35232 "EHLO
-        mail-wj0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753042AbcLAKSJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 05:18:09 -0500
-Received: by mail-wj0-f180.google.com with SMTP id v7so199966468wjy.2
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 02:18:08 -0800 (PST)
-In-Reply-To: <1479988969-1747-2-git-send-email-adrian.hunter@intel.com>
+Received: from www.zeus03.de ([194.117.254.33]:58297 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751503AbcLAKq0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Dec 2016 05:46:26 -0500
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yasushi SHOJI <yashi@atmark-techno.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, linux-renesas-soc@vger.kernel.org
 
-On 24 November 2016 at 13:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> The JEDEC specification indicates CMD13 can be used after a HS200 switch
-> to check for errors. However in practice some boards experience CRC errors
-> in the CMD13 response. Consequently, for HS200, CRC errors are not a
-> reliable way to know the switch failed. If there really is a problem, we
-> would expect tuning will fail and the result ends up the same. So change
-> the error condition to ignore CRC errors in that case.
 
-I agree, this seems like a good idea.
+--5mCyUwZo2JvN/JJP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-However...
+Hi,
 
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/mmc.c | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3268fcd3378d..34d30e2a09ff 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1223,7 +1223,12 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
->         mmc_set_timing(host, MMC_TIMING_MMC_HS200);
->
->         err = mmc_switch_status(card);
-> -       if (err)
-> +       /*
-> +        * For HS200, CRC errors are not a reliable way to know the switch
-> +        * failed. If there really is a problem, we would expect tuning will
-> +        * fail and the result ends up the same.
-> +        */
-> +       if (err && err != -EILSEQ)
+thanks for the report and thanks to Ulf for forwarding. Adding
+renesas-soc list, too.
 
-I would rather change mmc_switch_status() to take a new parameter,
-which tells it about ignoring CRC errors.
+> > So my question is that "What is the reason behind to disable IRQ with
+> > SDIO_MODE?  Is there any situation which masking with SDIO_INFO1_MASK
+> > is not enough?
 
-The reason is simply that I think these changes should probably apply
-to HS400 as well, and then it just gets lots of duplicated code for
-the same error check.
+This code predates the time since I took over maintainership of the
+driver, so I had to dig in git history.
 
->                 goto out_err;
->
->         mmc_set_bus_speed(card);
-> @@ -1387,6 +1392,14 @@ static int mmc_select_hs200(struct mmc_card *card)
->
->                 err = mmc_switch_status(card);
->                 /*
-> +                * For HS200, CRC errors are not a reliable way to know the
-> +                * switch failed. If there really is a problem, we would expect
-> +                * tuning will fail and the result ends up the same.
-> +                */
-> +               if (err == -EILSEQ)
-> +                       err = 0;
-> +
-> +               /*
->                  * mmc_select_timing() assumes timing has not changed if
->                  * it is a switch error.
->                  */
-> --
-> 1.9.1
->
+The code was introduced with 845ecd20239c28 ("mmc: tmio_mmc: implement
+SDIO IRQ support") which was in 2010. I don't have that old datasheets
+to check if the SCLKDIVEN restriction was already present in the SDHI
+cores which were available back then.
 
-Moreover, and somewhat related to this change:
+My assumption is that it was not, or it was overlooked. So, it might be
+just for completeness that not only the individual IRQs have been
+disabled but also the big master switch (IOMOD) was turned off.
 
-Do we want to change mmc_switch_status() to be able to tell
-mmc_send_status() about the number of command retries? Currently it
-defaults to MMC_CMD_RETRIES, but I guess we only want to send *one*
-CMD13?
+My further assumption is that it is very likely good enough to disable
+the individual IRQs. If we can't guarantee the conditions to set IOMOD,
+it seems okay to me to just leave it.
 
-Kind regards
-Uffe
+Do you have a patch which works for you?
+
+Regards,
+
+   Wolfram
+
+
+--5mCyUwZo2JvN/JJP
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYP/9+AAoJEBQN5MwUoCm27mIP/0Eclxe6j41WRlyBLevwZo/Z
+rUyS7yBkxcrQcYIuBiCBVIrwK6ZvTnpy4FQpfUsAeLJK7+c81/tOx0Ki1VljN+L5
+6cLYBBV/vsr4/OEnE7CJOK7IqRclrqa8Q8G48xAoZMXERnW/70rVc6/vJt8+Cskh
+VEWSkD7I6HyAqWbLtgcqG0pKCM8cpHQlAvXN62NLM58OAbOUmm6rOItksfUEpszc
+9ygrZWuM20zFfPO6ebIEGJNZv091WgkMuUwtqBm8uYdscfg0lbZIoUgSqYSdBATA
+frkM1zkwvqeCpensYMDIy0eJS5UdBNEsU9aMqJEp0Lf5Pm6rb2dYs1qpOAfJzvvt
+aF1vtkE6hrMcXfXrA6UPk+O4JPrsTGIDrB6Eshz6KIWl5MflBYITxHdJGx1ZaaeY
+JfR0mP+hyaposJ0L0jpL/KP8RbV4aVA2ToSTmod/lNkPHSfcDb92UJl2RrWyICKK
+EX1F10lEWpyQai22oxQJ4WA86Mq7RSKP7eQ7GVrZEyhOOUEkRfNU70QCJGzsVsi9
+bFc21iCCSaqMiWDGuh6+EYFh7xX9CbnwxrOVcmpP/dVuXw/xh3qE3tofwZ2xE1D2
+YYmqXSo2QavldCjcqAE1yEtgUPrr2y5X3hw0hIgbnHT1tugW/0gHWMS0Jv1XY1LQ
+K8iVMRyMgwUwmRPzyc3e
+=Fahq
+-----END PGP SIGNATURE-----
+
+--5mCyUwZo2JvN/JJP--
