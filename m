@@ -1,35 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC 0/5] mmc: sdhci: Tidy tuning
-Date: Thu, 1 Dec 2016 15:57:07 +0100
-Message-ID: <CAPDyKFqbpGQuzirU98MTX4TXjn6inDY8K8NozrSwBZVJGMDyLg@mail.gmail.com>
-References: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f169.google.com ([209.85.210.169]:34982 "EHLO
-        mail-wj0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750789AbcLAO5K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 09:57:10 -0500
-Received: by mail-wj0-f169.google.com with SMTP id v7so206727986wjy.2
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 06:57:09 -0800 (PST)
-In-Reply-To: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC] mmc: tmio: use SDIO master interrupt bit only when allowed
+Date: Thu,  1 Dec 2016 16:08:13 +0100
+Message-ID: <20161201150813.13058-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Yasushi SHOJI <yashi@atmark-techno.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 1 December 2016 at 15:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
->
-> Here are some tidy-ups wrt SDHCI tuning.  Un-tested so far.
+The master bit to enable SDIO interrupts can only be accessed if
+SCLKDIVEN bit allows that. However, the core uses the SDIO enable
+callback at times when SCLKDIVEN forbids the change. This leads to
+"timeout waiting for SD bus idle" messages.
 
-Nice. Thanks!
+We now activate the master bit in probe once if SDIO is supported. IRQ
+en-/disabling will be done now by the individual IRQ enablement bits
+only.
 
->
-> Any other suggestions?  Otherwise I will test and submit the whole series.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-As an additional step, could you try to make use of mmc_send_tuning(),
-instead of sending the command internally from sdhci_send_tuning()?
+Compile tested only, due to no testcase.
 
-Kind regards
-Uffe
+ drivers/mmc/host/tmio_mmc_pio.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 700567603107a0..476c4e1094a014 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -140,12 +140,10 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
+ 					~TMIO_SDIO_STAT_IOIRQ;
+-		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+ 	} else if (!enable && host->sdio_irq_enabled) {
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+-		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
+ 
+ 		host->sdio_irq_enabled = false;
+ 		pm_runtime_mark_last_busy(mmc_dev(mmc));
+@@ -1137,7 +1135,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+ 		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
+-		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0000);
++		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
+ 	}
+ 
+ 	spin_lock_init(&_host->lock);
+@@ -1185,6 +1183,9 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 	struct platform_device *pdev = host->pdev;
+ 	struct mmc_host *mmc = host->mmc;
+ 
++	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ)
++		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
++
+ 	if (!host->native_hotplug)
+ 		pm_runtime_get_sync(&pdev->dev);
+ 
+-- 
+2.10.2
