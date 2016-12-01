@@ -1,77 +1,65 @@
-From: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v6 3/5] Documentation: synopsys-dw-mshc: add binding for
- fifo quirks
-Date: Thu, 1 Dec 2016 09:35:43 +0800
-Message-ID: <CABymUCP6_pHs55Jx53Qt9-jTNO+Bw3xMp7NCnu49=ASEemXgyw@mail.gmail.com>
-References: <1479450555-19047-1-git-send-email-jun.nie@linaro.org>
- <1479450555-19047-4-git-send-email-jun.nie@linaro.org> <CABymUCN_+kJC2NZaPuqOg1C_Q2ASmiGwbwWCtfiLjGwSqPjgkQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CABymUCN_+kJC2NZaPuqOg1C_Q2ASmiGwbwWCtfiLjGwSqPjgkQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xie.baoyou" <xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jason Liu <jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v2 1/2] mmc: sdhci: continue normal tuning if unsupported by platform tuning
+Date: Thu,  1 Dec 2016 12:36:05 +0900
+Message-ID: <1480563366-7259-2-git-send-email-yamada.masahiro@socionext.com>
+References: <1480563366-7259-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1480563366-7259-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-2016-11-24 10:19 GMT+08:00 Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
-> 2016-11-18 14:29 GMT+08:00 Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
->> Add fifo-addr property and fifo-watermark-quirk property to
->> synopsys-dw-mshc bindings. It is intended to provide more
->> dt interface to support SoCs specific configuration.
->>
->> Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
->>  1 file changed, 13 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> index 4e00e85..8bf2e41 100644
->> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> @@ -76,6 +76,17 @@ Optional properties:
->>
->>  * broken-cd: as documented in mmc core bindings.
->>
->> +* data-addr: Override fifo address with value provided by DT. The default FIFO reg
->> +  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
->> +  driver. If the controller does not follow this rule, please use this property
->> +  to set fifo address in device tree.
->> +
->> +* fifo-watermark-aligned: Data done irq is expected if data length is less than
->> +  watermark in PIO mode. But fifo watermark is requested to be aligned with data
->> +  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
->> +  watermark quirk to mark this requirement and force fifo watermark setting
->> +  accordingly.
->> +
->>  * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
->>    specified we'll defer probe until we can find this regulator.
->>
->> @@ -103,6 +114,8 @@ board specific portions as listed below.
->>                 interrupts = <0 75 0>;
->>                 #address-cells = <1>;
->>                 #size-cells = <0>;
->> +               data-addr = <0x200>;
->> +               fifo-watermark-aligned;
->>         };
->>
->>  [board specific internal DMA resources]
->> --
->> 1.9.1
->>
-> Hi Rob & Mark,
->
-> Could you help review and act this patch if you think it is OK? Thank you!
->
-> Jun
+Some SDHCI-compat controllers support not only SD, but also eMMC,
+but they use different commands for tuning: CMD19 for SD, CMD21 for
+eMMC.
+
+Due to the difference of the underlying mechanism, some controllers
+(at least, the Cadence IP is the case) provide their own registers
+for the eMMC tuning.
+
+This commit will be useful when we want to use platform-specific
+tuning (to support eMMC HS200), but still let it reuse the code
+provided by sdhci_execute_tuning() for SD timing.
+
+If sdhci_ops::platform_execute_tuning receives a timing it does not
+take care of, it can return -ENOTSUPP.  Then, it will fall back to
+the SDHCI standard tuning.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+I want to use this in the next commit.
+
+The Cadence IP supports eMMC as well as SD.
+
+The tuning for SD is pretty simple; just set the "Execute Tuning" bit
+of the HOST_CONTROL2 register.  So, I can re-use the
+sdhci_execute_tuning().
+
+On the other hand, Cadence provides its own way for eMMC HS200 tuning;
+I need to touch some registers that are specific to Cadence's design.
 
 
-Hi Rob & Mark,
+Changes in v2: None
 
-Could you help comment or act on this patch in revsion 6? Thank you!
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Jun
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42ef3eb..cdce489 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2004,7 +2004,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	if (host->ops->platform_execute_tuning) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+-		return err;
++		if (err != -ENOTSUPP)
++			return err;
++		spin_lock_irqsave(&host->lock, flags);
+ 	}
+ 
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-- 
+2.7.4
