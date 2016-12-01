@@ -1,81 +1,92 @@
-From: Wolfram Sang <wsa-dev@sang-engineering.com>
-Subject: Re: mmc: tmio: why enable/disable SDIO irq on every transaction with
- IOMOD?
-Date: Thu, 1 Dec 2016 11:46:22 +0100
-Message-ID: <20161201104622.GA1541@katana>
-References: <87h96qkdn0.wl@dns1.atmark-techno.com>
- <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
+From: Mason <slash.tmp@free.fr>
+Subject: Re: arasan,sdhci.txt "compatibility" DT binding
+Date: Thu, 1 Dec 2016 13:29:26 +0100
+Message-ID: <584017A6.3000301@free.fr>
+References: <56B07BA5.4060407@free.fr> <56B166F1.5080605@rock-chips.com>
+ <56B1AA44.1010108@xilinx.com> <56B1BAF8.2050907@free.fr>
+ <56B1CF40.1030203@xilinx.com> <20160203152104.GP4215@xsjsorenbubuntu>
+ <56B21DDB.6050708@free.fr> <582ED9E0.5090506@free.fr>
+ <CAFd313x6MJeO90_+rxditdPn762g7TqZc0_D6ojGTKmtGJKjPA@mail.gmail.com>
+ <582EF744.8090307@free.fr> <a20b2b4f-15d4-3c29-324c-1ced5dbcc67f@xilinx.com>
+ <583C50E7.6030400@free.fr>
+ <f64ea0f8-31be-c5b5-3a43-a30abd8aec30@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:58297 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751503AbcLAKq0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Dec 2016 05:46:26 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFop3a6eHhOZq1E=BdFiHzmpu4uEx0F79nyBVCOu6z6usw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <f64ea0f8-31be-c5b5-3a43-a30abd8aec30@rock-chips.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rameshwar Sahu <rsahu@apm.com>, Suman Tripathi <stripathi@apm.com>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, Russell King <linux@arm.linux.org.uk>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Linus Walleij <linus.walleij@linaro.org>, P L Sai Krishna <lakshmis@xilinx.com>, Zach Brown <zach.brown@ni.com>, Sebastian Frias <sf84@laposte.net>, Arnd Bergmann <arnd@arndb.de>, Suneel Garapati <suneel.garapati@xilinx.com>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Michal Simek <monstr@monstr.eu>, Douglas Anderson <dianders@chromium.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Xiaobo Xie <x.xie@freescale>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yasushi SHOJI <yashi@atmark-techno.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, linux-renesas-soc@vger.kernel.org
+
+On 01/12/2016 05:09, Shawn Lin wrote:
+
+> On 2016/11/28 23:44, Mason wrote:
+>
+>> Shawn Lin, could you take a look below and tell me exactly
+>> which IP core(s) Rockchip is using in its SoCs?
+> 
+> From the Host Controller version register (0xfe)
+> bit[7:0]: 0x2 : specification version number is 3.00
+> bit[15:8]: 0x10: Vendor version number is 1.0
+> 
+> Command Queueing version register (0x200)
+> bit[11:8]: 0x5  eMMC Major version number
+> bit[7:4]: 0x1 eMMC manor version number
+> bit[3:0]: 0x0 eMMC version suffix
+> 
+> User guide "eMMC 5.1/SD3.0/SDIO3.0 Host Controller"
+> Revision number: 1.14
+> Released on Dec. 2014
+
+Wow! Yet another HW revision I wasn't aware of :-)
+
+For the record, I think the 0x200 register was introduced fairly
+recently, as it's not documented in any of the user guides I have
+access to.
 
 
---5mCyUwZo2JvN/JJP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+To summarize the situation, Arasan has made (at least) the
+following versions of the HW block:
 
-Hi,
-
-thanks for the report and thanks to Ulf for forwarding. Adding
-renesas-soc list, too.
-
-> > So my question is that "What is the reason behind to disable IRQ with
-> > SDIO_MODE?  Is there any situation which masking with SDIO_INFO1_MASK
-> > is not enough?
-
-This code predates the time since I took over maintainership of the
-driver, so I had to dig in git history.
-
-The code was introduced with 845ecd20239c28 ("mmc: tmio_mmc: implement
-SDIO IRQ support") which was in 2010. I don't have that old datasheets
-to check if the SCLKDIVEN restriction was already present in the SDHI
-cores which were available back then.
-
-My assumption is that it was not, or it was overlooked. So, it might be
-just for completeness that not only the individual IRQs have been
-disabled but also the big master switch (IOMOD) was turned off.
-
-My further assumption is that it is very likely good enough to disable
-the individual IRQs. If we can't guarantee the conditions to set IOMOD,
-it seems okay to me to just leave it.
-
-Do you have a patch which works for you?
-
-Regards,
-
-   Wolfram
+  SD_2.0_SDIO_2.0__MMC_3.31_Host_Controller
+  SD_3.0_SDIO_3.0_eMMC_4.4__Host_Controller
+  SD_3.0_SDIO_3.0_eMMC_4.41_Host_Controller
+  SD_3.0_SDIO_3.0_eMMC_4.5__Host_Controller
+  SD_3.0_SDIO_3.0_eMMC_4.51_Host_Controller
+  SD_3.0_SDIO_3.0_eMMC_5.1__Host Controller
+  SD_4.1_SDIO_4.1_eMMC_4.51_Host_Controller
+  SD_4.1_SDIO_4.1_eMMC_5.1__Host_Controller
 
 
---5mCyUwZo2JvN/JJP
-Content-Type: application/pgp-signature; name="signature.asc"
+Xilinx = "arasan,sdhci-8.9a" compat string
+SD2.0 / SDIO2.0 /  MMC3.31 (in Zynq)
+SD3.0 / SDIO3.0 / eMMC4.51 (in ZynqMP)
+Vendor version 0x89 (Zynq, from 8.9a) and 0x10 (ZynqMP)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+Sigma = no compat string yet
+SD3.0 / SDIO3.0 / eMMC4.4  (in SMP87xx)
+Vendor version 0x99 (not related to document revision)
 
-iQIcBAEBAgAGBQJYP/9+AAoJEBQN5MwUoCm27mIP/0Eclxe6j41WRlyBLevwZo/Z
-rUyS7yBkxcrQcYIuBiCBVIrwK6ZvTnpy4FQpfUsAeLJK7+c81/tOx0Ki1VljN+L5
-6cLYBBV/vsr4/OEnE7CJOK7IqRclrqa8Q8G48xAoZMXERnW/70rVc6/vJt8+Cskh
-VEWSkD7I6HyAqWbLtgcqG0pKCM8cpHQlAvXN62NLM58OAbOUmm6rOItksfUEpszc
-9ygrZWuM20zFfPO6ebIEGJNZv091WgkMuUwtqBm8uYdscfg0lbZIoUgSqYSdBATA
-frkM1zkwvqeCpensYMDIy0eJS5UdBNEsU9aMqJEp0Lf5Pm6rb2dYs1qpOAfJzvvt
-aF1vtkE6hrMcXfXrA6UPk+O4JPrsTGIDrB6Eshz6KIWl5MflBYITxHdJGx1ZaaeY
-JfR0mP+hyaposJ0L0jpL/KP8RbV4aVA2ToSTmod/lNkPHSfcDb92UJl2RrWyICKK
-EX1F10lEWpyQai22oxQJ4WA86Mq7RSKP7eQ7GVrZEyhOOUEkRfNU70QCJGzsVsi9
-bFc21iCCSaqMiWDGuh6+EYFh7xX9CbnwxrOVcmpP/dVuXw/xh3qE3tofwZ2xE1D2
-YYmqXSo2QavldCjcqAE1yEtgUPrr2y5X3hw0hIgbnHT1tugW/0gHWMS0Jv1XY1LQ
-K8iVMRyMgwUwmRPzyc3e
-=Fahq
------END PGP SIGNATURE-----
+APM = "arasan,sdhci-4.9a"
+SD3.0 / SDIO3.0 / eMMC4.41
+Vendor version unknown
 
---5mCyUwZo2JvN/JJP--
+Rockchip = "arasan,sdhci-5.1"
+SD3.0 / SDIO3.0 / eMMC 5.1
+Vendor version 0x10
+
+Conclusion, it doesn't look like the "Vendor version" field
+contains dependable information, considering the duplicate
+0x10 in different HW revisions.
+
+Regards.
