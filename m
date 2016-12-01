@@ -1,24 +1,35 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/2] mmc: sdhci-pci: Add PCI ID for Intel byt sdio host
- controller sub-vended by NI
-Date: Thu, 1 Dec 2016 09:14:09 +0100
-Message-ID: <CAPDyKFoMB2VEgmtnJiQ=ODbtgau9_L43539Z8xEYTeLUoekVFQ@mail.gmail.com>
-References: <1480360599-13295-1-git-send-email-zach.brown@ni.com> <1480360599-13295-2-git-send-email-zach.brown@ni.com>
+Subject: Re: [PATCH v3 2/2] mmc: sdhci-pci: Use ACPI to get max frequency for
+ Intel byt sdio controller sub-vended by NI
+Date: Thu, 1 Dec 2016 09:14:16 +0100
+Message-ID: <CAPDyKFo6q0T7b0VMav51YpzG76qYPwjL-yJBNDJAu_FVOfL+eQ@mail.gmail.com>
+References: <1480360599-13295-1-git-send-email-zach.brown@ni.com> <1480360599-13295-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1480360599-13295-2-git-send-email-zach.brown@ni.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:35802 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751566AbcLAIOd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 03:14:33 -0500
+Received: by mail-wm0-f54.google.com with SMTP id a197so290684504wmd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 00:14:18 -0800 (PST)
+In-Reply-To: <1480360599-13295-3-git-send-email-zach.brown@ni.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Zach Brown <zach.brown@ni.com>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: linux-mmc@vger.kernel.org
 
 On 28 November 2016 at 20:16, Zach Brown <zach.brown@ni.com> wrote:
-> Add PCI ID for Intel byt sdio host controller sub-vended by NI.
+> On NI 9037 boards the max SDIO frequency is limited by trace lengths
+> and other layout choices. The max SDIO frequency is stored in an ACPI
+> table.
 >
-> The controller has different behavior because of the board layout NI
-> puts it on.
+> The driver reads the ACPI entry MXFQ during sdio_probe_slot and sets the
+> f_max field of the host.
 >
+> Signed-off-by: Nathan Sullivan <nathan.sullivan@ni.com>
+> Reviewed-by: Jaeden Amero <jaeden.amero@ni.com>
+> Reviewed-by: Josh Cartwright <joshc@ni.com>
 > Signed-off-by: Zach Brown <zach.brown@ni.com>
 
 Thanks, applied for next!
@@ -26,59 +37,63 @@ Thanks, applied for next!
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+>  drivers/mmc/host/sdhci-pci-core.c | 32 ++++++++++++++++++++++++++++++++
+>  1 file changed, 32 insertions(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 1d9e00a..9741505 100644
+> index 9741505..c9e51b1 100644
 > --- a/drivers/mmc/host/sdhci-pci-core.c
 > +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -375,6 +375,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+> @@ -27,6 +27,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mmc/sdhci-pci-data.h>
+> +#include <linux/acpi.h>
+>
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+> @@ -375,8 +376,39 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
 >         return 0;
 >  }
 >
-> +static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+> +#ifdef CONFIG_ACPI
+> +static int ni_set_max_freq(struct sdhci_pci_slot *slot)
 > +{
-> +       slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-> +                                MMC_CAP_WAIT_WHILE_BUSY;
+> +       acpi_status status;
+> +       unsigned long long max_freq;
+> +
+> +       status = acpi_evaluate_integer(ACPI_HANDLE(&slot->chip->pdev->dev),
+> +                                      "MXFQ", NULL, &max_freq);
+> +       if (ACPI_FAILURE(status)) {
+> +               dev_err(&slot->chip->pdev->dev,
+> +                       "MXFQ not found in acpi table\n");
+> +               return -EINVAL;
+> +       }
+> +
+> +       slot->host->mmc->f_max = max_freq * 1000000;
+> +
 > +       return 0;
 > +}
+> +#else
+> +static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
+> +{
+> +       return 0;
+> +}
+> +#endif
 > +
->  static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>  static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
 >  {
+> +       int err;
+> +
+> +       err = ni_set_max_freq(slot);
+> +       if (err)
+> +               return err;
+> +
 >         slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
-> @@ -447,6 +454,15 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
->         .ops            = &sdhci_intel_byt_ops,
->  };
->
-> +static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
-> +       .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +       .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-> +                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +       .allow_runtime_pm = true,
-> +       .probe_slot     = ni_byt_sdio_probe_slot,
-> +       .ops            = &sdhci_intel_byt_ops,
-> +};
-> +
->  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-> @@ -1079,6 +1095,14 @@ static const struct pci_device_id pci_ids[] = {
->         {
->                 .vendor         = PCI_VENDOR_ID_INTEL,
->                 .device         = PCI_DEVICE_ID_INTEL_BYT_SDIO,
-> +               .subvendor      = PCI_VENDOR_ID_NI,
-> +               .subdevice      = 0x7884,
-> +               .driver_data    = (kernel_ulong_t)&sdhci_ni_byt_sdio,
-> +       },
-> +
-> +       {
-> +               .vendor         = PCI_VENDOR_ID_INTEL,
-> +               .device         = PCI_DEVICE_ID_INTEL_BYT_SDIO,
->                 .subvendor      = PCI_ANY_ID,
->                 .subdevice      = PCI_ANY_ID,
->                 .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sdio,
+>                                  MMC_CAP_WAIT_WHILE_BUSY;
+>         return 0;
 > --
 > 2.7.4
 >
