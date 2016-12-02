@@ -1,75 +1,109 @@
-From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Fri, 2 Dec 2016 01:06:47 -0800
-Message-ID: <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting> <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Liam Breck <liam-RYWXG+zxWwBdeoIcmNTgJF6hYfS7NtTn@public.gmane.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 1/1] mmc: mmc: Relax checking for switch errors after HS200 switch
+Date: Fri,  2 Dec 2016 13:16:35 +0200
+Message-ID: <1480677395-14169-2-git-send-email-adrian.hunter@intel.com>
+References: <1480677395-14169-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:7518 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1758734AbcLBLVk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 2 Dec 2016 06:21:40 -0500
+In-Reply-To: <1480677395-14169-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 2 December 2016 at 08:22, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->>
->>
->>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>
->>>> On 2 December 2016 at 07:17, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->>>> Add optional device-post-power-on parameters to disable post_power_on
->>>> function from being called since this breaks some device.
->>>>
->>>> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
->>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
->>>> ---
->>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
->>>> 2 files changed, 9 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>>> index bea306d772d1..09fa153f743e 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>>> @@ -24,6 +24,8 @@ Optional properties:
->>>>        de-asserting the reset-gpios (if any)
->>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
->>>>        and pwrdn-gpios (if any)
->>>> +- disable-post-power-on : Avoid post_power_on function from being called since
->>>> +       this breaks some devices
->>>
->>> This is a bit weird. I would like to avoid this, if possible.
->>>
->>> Perhaps if you simply describe the sequence in detail for your device
->>> we can figure out the best option together.
->>
->> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
->
-> This went offlist, please resend.
->
-> Moreover, please try to describe the sequence you need in detail
-> according to your HW spec.
->
+The JEDEC specification indicates CMD13 can be used after a HS200 switch
+to check for errors. However in practice some boards experience CRC errors
+in the CMD13 response. Consequently, for HS200, CRC errors are not a
+reliable way to know the switch failed. If there really is a problem, we
+would expect tuning will fail and the result ends up the same. So change
+the error condition to ignore CRC errors in that case.
 
-Yeah oops....
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/mmc.c     | 15 +++++++++++++--
+ drivers/mmc/core/mmc_ops.c |  9 ++++++++-
+ drivers/mmc/core/mmc_ops.h |  1 +
+ 3 files changed, 22 insertions(+), 3 deletions(-)
 
-So basically we need to drive the reset and powerdown lines high with
-a 300 milliseconds delay between both...
-can't have the reset line low with post power on (pretty sure but
-would need a delay anyway), and we need both reset + powerdown line
-set low on powerdown.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 033e00abe93f..b61b52f9da3d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1240,7 +1240,12 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 
+ 	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+ 
+-	err = mmc_switch_status(card);
++	/*
++	 * For HS200, CRC errors are not a reliable way to know the switch
++	 * failed. If there really is a problem, we would expect tuning will
++	 * fail and the result ends up the same.
++	 */
++	err = __mmc_switch_status(card, false);
+ 	if (err)
+ 		goto out_err;
+ 
+@@ -1403,7 +1408,13 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 		old_timing = host->ios.timing;
+ 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+ 
+-		err = mmc_switch_status(card);
++		/*
++		 * For HS200, CRC errors are not a reliable way to know the
++		 * switch failed. If there really is a problem, we would expect
++		 * tuning will fail and the result ends up the same.
++		 */
++		err = __mmc_switch_status(card, false);
++
+ 		/*
+ 		 * mmc_select_timing() assumes timing has not changed if
+ 		 * it is a switch error.
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index cb7006feb5c4..81ce63bb0773 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -431,18 +431,25 @@ static int mmc_switch_status_error(struct mmc_host *host, u32 status)
+ }
+ 
+ /* Caller must hold re-tuning */
+-int mmc_switch_status(struct mmc_card *card)
++int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal)
+ {
+ 	u32 status;
+ 	int err;
+ 
+ 	err = mmc_send_status(card, &status);
++	if (!crc_err_fatal && err == -EILSEQ)
++		return 0;
+ 	if (err)
+ 		return err;
+ 
+ 	return mmc_switch_status_error(card->host, status);
+ }
+ 
++int mmc_switch_status(struct mmc_card *card)
++{
++	return __mmc_switch_status(card, true);
++}
++
+ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 			bool send_status, bool retry_crc_err)
+ {
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 761cb69c46af..abd525ed74be 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -28,6 +28,7 @@
+ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+ int mmc_can_ext_csd(struct mmc_card *card);
+ int mmc_switch_status(struct mmc_card *card);
++int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms, unsigned char timing,
+ 		bool use_busy_signal, bool send_status,	bool retry_crc_err);
+-- 
+1.9.1
 
-So the power down sequence would need to be reversed for this
-application in pwrseq-simple.
-
-> Br
-> Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
