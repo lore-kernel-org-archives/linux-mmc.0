@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 7/9] mmc: sdhci: Factor out tuning helper functions
-Date: Fri,  2 Dec 2016 15:14:25 +0200
-Message-ID: <1480684467-26833-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 8/9] mmc: sdhci: Simplify tuning block size logic
+Date: Fri,  2 Dec 2016 15:14:26 +0200
+Message-ID: <1480684467-26833-9-git-send-email-adrian.hunter@intel.com>
 References: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:19569 "EHLO mga03.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:50159 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752143AbcLBNTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1756967AbcLBNTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 2 Dec 2016 08:19:46 -0500
 In-Reply-To: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -14,266 +14,40 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Factor out some functions to tidy up the code in sdhci_execute_tuning.
+There are only 2 possible block sizes, so simplify 2 if-statements into 1.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 209 ++++++++++++++++++++++++++---------------------
- 1 file changed, 117 insertions(+), 92 deletions(-)
+ drivers/mmc/host/sdhci.c | 16 +++++-----------
+ 1 file changed, 5 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b841d0a57af1..fa89870a690b 100644
+index fa89870a690b..e9ff7d005851 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1952,6 +1952,115 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return 0;
- }
- 
-+static void sdhci_start_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl |= SDHCI_CTRL_EXEC_TUNING;
-+	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
-+		ctrl |= SDHCI_CTRL_TUNED_CLK;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+	/*
-+	 * As per the Host Controller spec v3.00, tuning command
-+	 * generates Buffer Read Ready interrupt, so enable that.
-+	 *
-+	 * Note: The spec clearly says that when tuning sequence
-+	 * is being performed, the controller does not generate
-+	 * interrupts other than Buffer Read Ready interrupt. But
-+	 * to make sure we don't hit a controller bug, we _only_
-+	 * enable Buffer Read Ready interrupt here.
-+	 */
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static void sdhci_end_tuning(struct sdhci_host *host)
-+{
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+}
-+
-+static void sdhci_reset_tuning(struct sdhci_host *host)
-+{
-+	u16 ctrl;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-+	ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+}
-+
-+static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
-+			       unsigned long flags)
-+{
-+	sdhci_reset_tuning(host);
-+
-+	sdhci_do_reset(host, SDHCI_RESET_CMD);
-+	sdhci_do_reset(host, SDHCI_RESET_DATA);
-+
-+	sdhci_end_tuning(host);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	mmc_abort_tuning(host->mmc, opcode);
-+	spin_lock_irqsave(&host->lock, flags);
-+}
-+
-+static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
-+			      unsigned long flags)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_command cmd = {0};
-+	struct mmc_request mrq = {NULL};
-+
-+	cmd.opcode = opcode;
-+	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+	cmd.mrq = &mrq;
-+
-+	mrq.cmd = &cmd;
-+	/*
-+	 * In response to CMD19, the card sends 64 bytes of tuning
-+	 * block to the Host Controller. So we set the block size
-+	 * to 64 here.
-+	 */
-+	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-+		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
-+				     SDHCI_BLOCK_SIZE);
-+		else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+				     SDHCI_BLOCK_SIZE);
-+	} else {
-+		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+			     SDHCI_BLOCK_SIZE);
-+	}
-+
-+	/*
-+	 * The tuning block is sent by the card to the host controller.
-+	 * So we set the TRNS_READ bit in the Transfer Mode register.
-+	 * This also takes care of setting DMA Enable and Multi Block
-+	 * Select in the same register to 0.
-+	 */
-+	sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-+
-+	sdhci_send_command(host, &cmd);
-+
-+	host->cmd = NULL;
-+
-+	sdhci_del_timer(host, &mrq);
-+
-+	host->tuning_done = 0;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	/* Wait for Buffer Read Ready interrupt */
-+	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
-+			   msecs_to_jiffies(50));
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+}
-+
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -2011,105 +2120,24 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		return err;
- 	}
- 
--	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--	ctrl |= SDHCI_CTRL_EXEC_TUNING;
--	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
--		ctrl |= SDHCI_CTRL_TUNED_CLK;
--	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--	/*
--	 * As per the Host Controller spec v3.00, tuning command
--	 * generates Buffer Read Ready interrupt, so enable that.
--	 *
--	 * Note: The spec clearly says that when tuning sequence
--	 * is being performed, the controller does not generate
--	 * interrupts other than Buffer Read Ready interrupt. But
--	 * to make sure we don't hit a controller bug, we _only_
--	 * enable Buffer Read Ready interrupt here.
--	 */
--	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_INT_ENABLE);
--	sdhci_writel(host, SDHCI_INT_DATA_AVAIL, SDHCI_SIGNAL_ENABLE);
-+	sdhci_start_tuning(host);
- 
- 	/*
- 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
- 	 * of loops reaches 40 times.
+@@ -2024,17 +2024,11 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
+ 	 * block to the Host Controller. So we set the block size
+ 	 * to 64 here.
  	 */
- 	do {
--		struct mmc_command cmd = {0};
--		struct mmc_request mrq = {NULL};
--
--		cmd.opcode = opcode;
--		cmd.arg = 0;
--		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
--		cmd.retries = 0;
--		cmd.data = NULL;
--		cmd.mrq = &mrq;
--		cmd.error = 0;
--
- 		if (tuning_loop_counter-- == 0)
- 			break;
- 
--		mrq.cmd = &cmd;
--
--		/*
--		 * In response to CMD19, the card sends 64 bytes of tuning
--		 * block to the Host Controller. So we set the block size
--		 * to 64 here.
--		 */
--		if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
--			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
--					     SDHCI_BLOCK_SIZE);
--			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
--				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
--					     SDHCI_BLOCK_SIZE);
--		} else {
+-	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+-		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+-			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
+-				     SDHCI_BLOCK_SIZE);
+-		else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
 -			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
 -				     SDHCI_BLOCK_SIZE);
--		}
--
--		/*
--		 * The tuning block is sent by the card to the host controller.
--		 * So we set the TRNS_READ bit in the Transfer Mode register.
--		 * This also takes care of setting DMA Enable and Multi Block
--		 * Select in the same register to 0.
--		 */
--		sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
--
--		sdhci_send_command(host, &cmd);
--
--		host->cmd = NULL;
--		sdhci_del_timer(host, &mrq);
--
--		spin_unlock_irqrestore(&host->lock, flags);
--		/* Wait for Buffer Read Ready interrupt */
--		wait_event_timeout(host->buf_ready_int,
--					(host->tuning_done == 1),
--					msecs_to_jiffies(50));
--		spin_lock_irqsave(&host->lock, flags);
-+		sdhci_send_tuning(host, opcode, flags);
- 
- 		if (!host->tuning_done) {
- 			pr_info(DRIVER_NAME ": Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock\n");
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			ctrl &= ~SDHCI_CTRL_TUNED_CLK;
--			ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
--			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--			sdhci_do_reset(host, SDHCI_RESET_CMD);
--			sdhci_do_reset(host, SDHCI_RESET_DATA);
--
--			sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
--			sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
--
--			spin_unlock_irqrestore(&host->lock, flags);
--			mmc_abort_tuning(mmc, opcode);
--			spin_lock_irqsave(&host->lock, flags);
--
-+			sdhci_abort_tuning(host, opcode, flags);
- 			goto out;
- 		}
- 
--		host->tuning_done = 0;
--
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
- 		/* eMMC spec does not require a delay between tuning cycles */
-@@ -2121,18 +2149,15 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * The Host Driver has exhausted the maximum number of loops allowed,
- 	 * so use fixed sampling frequency.
- 	 */
--	if (tuning_loop_counter < 0) {
--		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
--		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
--		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+-	} else {
+-		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
+-			     SDHCI_BLOCK_SIZE);
 -	}
--	if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
-+	if (tuning_loop_counter < 0)
-+		sdhci_reset_tuning(host);
-+
-+	if (tuning_loop_counter < 0 || !(ctrl & SDHCI_CTRL_TUNED_CLK))
- 		pr_info(DRIVER_NAME ": Tuning procedure failed, falling back to fixed sampling clock\n");
- out:
- 	host->mmc->retune_period = tuning_count;
++	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200 &&
++	    mmc->ios.bus_width == MMC_BUS_WIDTH_8)
++		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128), SDHCI_BLOCK_SIZE);
++	else
++		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
  
--	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
--	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+	sdhci_end_tuning(host);
- out_unlock:
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	return err;
+ 	/*
+ 	 * The tuning block is sent by the card to the host controller.
 -- 
 1.9.1
 
