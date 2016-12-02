@@ -1,52 +1,41 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 6/9] mmc: sdhci: Use mmc_abort_tuning()
-Date: Fri,  2 Dec 2016 15:14:24 +0200
-Message-ID: <1480684467-26833-7-git-send-email-adrian.hunter@intel.com>
-References: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 0/9] mmc: sdhci: Fix recovery from tuning timeout
+Date: Fri,  2 Dec 2016 15:14:18 +0200
+Message-ID: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:19835 "EHLO mga03.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:50159 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752569AbcLBNTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 2 Dec 2016 08:19:46 -0500
-In-Reply-To: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
+        id S1755680AbcLBNTo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 2 Dec 2016 08:19:44 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Use mmc_abort_tuning() instead of open-coding the stop command.
+Hi
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 11 +----------
- 1 file changed, 1 insertion(+), 10 deletions(-)
+Here are some small SDHCI tuning-related fixes and some clean-ups.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a23887799f43..b841d0a57af1 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2098,20 +2098,11 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 			sdhci_do_reset(host, SDHCI_RESET_CMD);
- 			sdhci_do_reset(host, SDHCI_RESET_DATA);
- 
--			if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
--				goto out;
--
- 			sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
- 			sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- 
- 			spin_unlock_irqrestore(&host->lock, flags);
--
--			memset(&cmd, 0, sizeof(cmd));
--			cmd.opcode = MMC_STOP_TRANSMISSION;
--			cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
--			cmd.busy_timeout = 50;
--			mmc_wait_for_cmd(mmc, &cmd, 0);
--
-+			mmc_abort_tuning(mmc, opcode);
- 			spin_lock_irqsave(&host->lock, flags);
- 
- 			goto out;
--- 
-1.9.1
+Changes in V2:
+	Added clean-up patches
 
+
+Adrian Hunter (9):
+      Revert "mmc: sdhci: Reset cmd and data circuits after tuning failure"
+      mmc: sdhci: Fix recovery from tuning timeout
+      mmc: sdhci: Fix tuning reset after exhausting the maximum number of loops
+      mmc: sdhci: Always allow tuning to fall back to fixed sampling
+      mmc: mmc: Introduce mmc_abort_tuning()
+      mmc: sdhci: Use mmc_abort_tuning()
+      mmc: sdhci: Factor out tuning helper functions
+      mmc: sdhci: Simplify tuning block size logic
+      mmc: sdhci: Tidy tuning loop
+
+ drivers/mmc/core/mmc_ops.c |  25 ++++
+ drivers/mmc/host/sdhci.c   | 278 ++++++++++++++++++++++++---------------------
+ include/linux/mmc/core.h   |   1 +
+ 3 files changed, 173 insertions(+), 131 deletions(-)
+
+
+Regards
+Adrian
