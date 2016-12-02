@@ -1,57 +1,52 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: remove bogus MMC_SDHCI_IO_ACCESSORS
- select
-Date: Fri, 2 Dec 2016 07:41:28 +0100
-Message-ID: <20161202064128.a5ap4jgwl72v35af@rfolt0960.corp.atmel.com>
-References: <1480565146-4857-1-git-send-email-yamada.masahiro@socionext.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/4] mmc: pwrseq-simple: add support for power down GPIO pins
+Date: Fri, 2 Dec 2016 07:47:27 +0100
+Message-ID: <CAPDyKFrLm0KPL=zi5ge80h5H0pv5xwZkr1cz+JVA-WXqCRZ7OA@mail.gmail.com>
+References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting> <1480659462-29536-3-git-send-email-matt@ranostay.consulting>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exsmtp02.microchip.com ([198.175.253.38]:53006 "EHLO
-        email.microchip.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751201AbcLBGqw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2016 01:46:52 -0500
-Content-Disposition: inline
-In-Reply-To: <1480565146-4857-1-git-send-email-yamada.masahiro@socionext.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:34468 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755548AbcLBGr3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2016 01:47:29 -0500
+Received: by mail-wm0-f50.google.com with SMTP id u144so1796057wmu.1
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 22:47:29 -0800 (PST)
+In-Reply-To: <1480659462-29536-3-git-send-email-matt@ranostay.consulting>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Al Cooper <alcooperx@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Simon Horman <horms+renesas@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Matt Ranostay <matt@ranostay.consulting>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 
-On Thu, Dec 01, 2016 at 01:05:46PM +0900, Masahiro Yamada wrote:
-> I see no override of read/write callbacks in sdhci-of-at91.c.
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-
-Thanks
-
+On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
+> Some devices have additional pins that control power but need to
+> asserted separately from reset-gpios using a defined time delay.
+>
+> Cc: Tony Lindgren <tony@atomide.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
 > ---
-> 
-> BTW, this config may not be so useful in recent multi-platforms.
-> Perhaps, is it better to remove this config entirely instead of
-> the AT91 fix only.
-> 
-> 
->  drivers/mmc/host/Kconfig | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 39f6f96..8ac1640 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -135,7 +135,6 @@ config MMC_SDHCI_OF_AT91
->  	tristate "SDHCI OF support for the Atmel SDMMC controller"
->  	depends on MMC_SDHCI_PLTFM
->  	depends on OF
-> -	select MMC_SDHCI_IO_ACCESSORS
->  	help
->  	  This selects the Atmel SDMMC driver
->  
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 ++
+>  drivers/mmc/core/pwrseq_simple.c                   | 26 +++++++++++++---------
+>  2 files changed, 18 insertions(+), 10 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> index 88826f7d1d38..703a714201d8 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> @@ -12,6 +12,8 @@ Optional properties:
+>         at initialization and prior we start the power up procedure of the card.
+>         They will be de-asserted right after the power has been provided to the
+>         card.
+> +- pwrdn-gpios : contains a list of GPIO specifiers. The pwrdn GPIOs are asserted
+> +       at initialization and prior we start the power up procedure of the card.
+
+I think "powerdown-gpios" would be better, as Rob earlier also suggested.
+
+Moreover I think the DT doc change be a separate change. This comment
+applies to the other changes in this series as well.
+
+[...]
+
+Kind regards
+Uffe
