@@ -1,7 +1,7 @@
 From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: [PATCH 1/4] mmc: pwrseq-simple: add an optional pre-power-on-delay
-Date: Thu,  1 Dec 2016 22:17:39 -0800
-Message-ID: <1480659462-29536-2-git-send-email-matt@ranostay.consulting>
+Subject: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
+Date: Thu,  1 Dec 2016 22:17:42 -0800
+Message-ID: <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
 References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1480659462-29536-1-git-send-email-matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
@@ -10,11 +10,8 @@ To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z
 Cc: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Some devices need some time between asserting reset-gpios before can
-receive sdio commands.
-
-This commits adds a pre-power-on-delay-ms devicetree property to
-mmc-pwrseq-simple for use with such devices.
+Add optional device-post-power-on parameters to disable post_power_on
+function from being called since this breaks some device.
 
 Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -25,50 +22,50 @@ Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane
  2 files changed, 9 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index e25436861867..88826f7d1d38 100644
+index bea306d772d1..09fa153f743e 100644
 --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -16,6 +16,8 @@ Optional properties:
-   See ../clocks/clock-bindings.txt for details.
- - clock-names : Must include the following entry:
-   "ext_clock" (External clock provided to the card).
-+- pre-power-on-delay-ms : Delay in ms before powering the card which
-+	the reset-gpios (if any) are asserted
- - post-power-on-delay-ms : Delay in ms after powering the card and
+@@ -24,6 +24,8 @@ Optional properties:
  	de-asserting the reset-gpios (if any)
+ - invert-off-state: Invert the power down state for the reset-gpios (if any)
+ 	and pwrdn-gpios (if any)
++- disable-post-power-on : Avoid post_power_on function from being called since
++	this breaks some devices
+ 
+ Example:
  
 diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 1304160de168..cb2ba7b11383 100644
+index 857dde3e0456..d34084c51f9c 100644
 --- a/drivers/mmc/core/pwrseq_simple.c
 +++ b/drivers/mmc/core/pwrseq_simple.c
 @@ -26,6 +26,7 @@
  struct mmc_pwrseq_simple {
  	struct mmc_pwrseq pwrseq;
  	bool clk_enabled;
-+	u32 pre_power_on_delay_ms;
++	bool disable_post_power_on;
+ 	bool invert_off_state;
+ 	u32 pre_power_on_delay_ms;
  	u32 post_power_on_delay_ms;
- 	struct clk *ext_clk;
- 	struct gpio_descs *reset_gpios;
-@@ -60,6 +61,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
- 	}
+@@ -72,6 +73,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
  
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
++	if (pwrseq->disable_post_power_on)
++		return;
 +
-+	if (pwrseq->pre_power_on_delay_ms)
-+		msleep(pwrseq->pre_power_on_delay_ms);
- }
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->reset_gpios, 0);
  
- static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
-@@ -117,6 +121,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
- 		return PTR_ERR(pwrseq->reset_gpios);
- 	}
- 
-+	device_property_read_u32(dev, "pre-power-on-delay-ms",
-+				 &pwrseq->pre_power_on_delay_ms);
-+
+ 	if (pwrseq->post_power_on_delay_ms)
+@@ -139,6 +143,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
  	device_property_read_u32(dev, "post-power-on-delay-ms",
  				 &pwrseq->post_power_on_delay_ms);
  
++	if (device_property_read_bool(dev, "disable-post-power-on"))
++		pwrseq->disable_post_power_on = true;
++
+ 	pwrseq->pwrseq.dev = dev;
+ 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+ 	pwrseq->pwrseq.owner = THIS_MODULE;
 -- 
 2.7.4
 
