@@ -1,41 +1,41 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 0/9] mmc: sdhci: Fix recovery from tuning timeout
-Date: Fri,  2 Dec 2016 15:14:18 +0200
-Message-ID: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 3/9] mmc: sdhci: Fix tuning reset after exhausting the maximum number of loops
+Date: Fri,  2 Dec 2016 15:14:21 +0200
+Message-ID: <1480684467-26833-4-git-send-email-adrian.hunter@intel.com>
+References: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:50159 "EHLO mga03.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:19835 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755680AbcLBNTo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1759049AbcLBNTo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 2 Dec 2016 08:19:44 -0500
+In-Reply-To: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi
+If the driver has exhausted the maximum number of tuning loops, then fixed
+sampling is used. To do that both SDHCI_CTRL_TUNED_CLK and
+SDHCI_CTRL_EXEC_TUNING must be reset to 0, but only SDHCI_CTRL_TUNED_CLK
+was being reset. Reset SDHCI_CTRL_EXEC_TUNING to 0 also.
 
-Here are some small SDHCI tuning-related fixes and some clean-ups.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Changes in V2:
-	Added clean-up patches
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1d72a51287d4..ad2f2c6113e4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2134,6 +2134,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 */
+ 	if (tuning_loop_counter < 0) {
+ 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
++		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 	}
+ 	if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
+-- 
+1.9.1
 
-
-Adrian Hunter (9):
-      Revert "mmc: sdhci: Reset cmd and data circuits after tuning failure"
-      mmc: sdhci: Fix recovery from tuning timeout
-      mmc: sdhci: Fix tuning reset after exhausting the maximum number of loops
-      mmc: sdhci: Always allow tuning to fall back to fixed sampling
-      mmc: mmc: Introduce mmc_abort_tuning()
-      mmc: sdhci: Use mmc_abort_tuning()
-      mmc: sdhci: Factor out tuning helper functions
-      mmc: sdhci: Simplify tuning block size logic
-      mmc: sdhci: Tidy tuning loop
-
- drivers/mmc/core/mmc_ops.c |  25 ++++
- drivers/mmc/host/sdhci.c   | 278 ++++++++++++++++++++++++---------------------
- include/linux/mmc/core.h   |   1 +
- 3 files changed, 173 insertions(+), 131 deletions(-)
-
-
-Regards
-Adrian
