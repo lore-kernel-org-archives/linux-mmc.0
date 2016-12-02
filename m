@@ -1,85 +1,71 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: add DT binding for S3C24XX
- MMC/SD/SDIO controller
-Date: Fri, 02 Dec 2016 09:48:45 +0900
-Message-ID: <054a65d8-8606-eeb0-e028-1b85dbf1c8ba@samsung.com>
-References: <1480637665-6325-1-git-send-email-sergio.prado@e-labworks.com>
- <CGME20161202001621epcas3p2fcc946ce070dfcc594e4b89729e149d7@epcas3p2.samsung.com>
- <1480637665-6325-2-git-send-email-sergio.prado@e-labworks.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v3 1/2] mmc: sdhci: continue normal tuning if unsupported by platform tuning
+Date: Fri,  2 Dec 2016 11:21:50 +0900
+Message-ID: <1480645311-13004-2-git-send-email-yamada.masahiro@socionext.com>
+References: <1480645311-13004-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:53785 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751301AbcLBAss (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 19:48:48 -0500
-In-reply-to: <1480637665-6325-2-git-send-email-sergio.prado@e-labworks.com>
+Received: from conuserg-11.nifty.com ([210.131.2.78]:39398 "EHLO
+        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751678AbcLBCWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 21:22:33 -0500
+In-Reply-To: <1480645311-13004-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergio Prado <sergio.prado@e-labworks.com>, ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
 
-On 12/02/2016 09:14 AM, Sergio Prado wrote:
-> Adds the device tree bindings description for Samsung S3C24XX
-> MMC/SD/SDIO controller, used as a connectivity interface with external
-> MMC, SD and SDIO storage mediums.
-> 
-> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
-> ---
->  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 38 ++++++++++++++++++++++
->  1 file changed, 38 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> new file mode 100644
-> index 000000000000..3f044076e69a
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> @@ -0,0 +1,38 @@
-> +* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
-> +
-> +Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
-> +with external MMC, SD and SDIO storage mediums.
-> +
-> +This file documents differences between the core mmc properties described by
-> +mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
-> +implementation.
-> +
-> +Required SoC Specific Properties:
-> +- compatible: should be one of the following
-> +  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
-> +  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
-> +  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
-> +- clocks: Should reference the controller clock
-> +- clock-names: Should contain "sdi"
-> +
-> +Required Board Specific Properties:
-> +- pinctrl-0: Should specify pin control groups used for this controller.
-> +- pinctrl-names: Should contain only one value - "default".
+Some SDHCI-compat controllers support not only SD, but also eMMC,
+but they use different commands for tuning: CMD19 for SD, CMD21 for
+eMMC.
 
-I'm not sure but i think this description doesn't need at here.
+Due to the difference of the underlying mechanism, some controllers
+(at least, the Cadence IP is the case) provide their own registers
+for the eMMC tuning.
 
-> +
-> +Example:
-> +	sdi: sdi@5a000000 {
+This commit will be useful when we want to use platform-specific
+tuning (to support eMMC HS200), but still let it reuse the code
+provided by sdhci_execute_tuning() for SD timing.
 
-I think it needs to use "mmc0: sdi@5a000000" instead of "sdi: sdi@5a000000"
-Because mmc is more clear than sdi.
+If sdhci_ops::platform_execute_tuning receives a timing it does not
+take care of, it can return -ENOTSUPP.  Then, it will fall back to
+the SDHCI standard tuning.
 
-> +		compatible = "samsung,s3c2440-sdi";
-> +		pinctrl-names = "default";
-> +		pinctrl-0 = <&sdi_pins>;
-> +		reg = <0x5a000000 0x100000>;
-> +		interrupts = <0 0 21 3>;
-> +		clocks = <&clocks PCLK_SDI>;
-> +		clock-names = "sdi";
-> +		bus-width = <4>;
-> +		cd-gpios = <&gpg 8 GPIO_ACTIVE_LOW>;
-> +		wp-gpios = <&gph 8 GPIO_ACTIVE_LOW>;
-> +	};
-> +
-> +	Note: This example shows both SoC specific and board specific properties
-> +	in a single device node. The properties can be actually be separated
-> +	into SoC specific node and board specific node.
-> 
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+I want to use this in the next commit.
+
+The Cadence IP supports eMMC as well as SD.
+
+The tuning for SD is pretty simple; just set the "Execute Tuning" bit
+of the HOST_CONTROL2 register.  So, I can re-use the
+sdhci_execute_tuning().
+
+On the other hand, Cadence provides its own way for eMMC HS200 tuning;
+I need to touch some registers that are specific to Cadence's design.
+
+
+Changes in v3: None
+Changes in v2: None
+
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42ef3eb..cdce489 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2004,7 +2004,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	if (host->ops->platform_execute_tuning) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+-		return err;
++		if (err != -ENOTSUPP)
++			return err;
++		spin_lock_irqsave(&host->lock, flags);
+ 	}
+ 
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-- 
+2.7.4
 
