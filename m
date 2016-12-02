@@ -1,75 +1,128 @@
-From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Thu,  1 Dec 2016 22:17:42 -0800
-Message-ID: <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
+From: Matt Ranostay <matt@ranostay.consulting>
+Subject: [PATCH 2/4] mmc: pwrseq-simple: add support for power down GPIO pins
+Date: Thu,  1 Dec 2016 22:17:40 -0800
+Message-ID: <1480659462-29536-3-git-send-email-matt@ranostay.consulting>
 References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1480659462-29536-1-git-send-email-matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f170.google.com ([209.85.192.170]:34246 "EHLO
+        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755727AbcLBGRr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2016 01:17:47 -0500
+Received: by mail-pf0-f170.google.com with SMTP id c4so50925939pfb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 22:17:46 -0800 (PST)
+In-Reply-To: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Matt Ranostay <matt@ranostay.consulting>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Add optional device-post-power-on parameters to disable post_power_on
-function from being called since this breaks some device.
+Some devices have additional pins that control power but need to
+asserted separately from reset-gpios using a defined time delay.
 
-Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
 ---
- Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
- drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
- 2 files changed, 9 insertions(+)
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 ++
+ drivers/mmc/core/pwrseq_simple.c                   | 26 +++++++++++++---------
+ 2 files changed, 18 insertions(+), 10 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index bea306d772d1..09fa153f743e 100644
+index 88826f7d1d38..703a714201d8 100644
 --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -24,6 +24,8 @@ Optional properties:
- 	de-asserting the reset-gpios (if any)
- - invert-off-state: Invert the power down state for the reset-gpios (if any)
- 	and pwrdn-gpios (if any)
-+- disable-post-power-on : Avoid post_power_on function from being called since
-+	this breaks some devices
- 
- Example:
- 
+@@ -12,6 +12,8 @@ Optional properties:
+ 	at initialization and prior we start the power up procedure of the card.
+ 	They will be de-asserted right after the power has been provided to the
+ 	card.
++- pwrdn-gpios : contains a list of GPIO specifiers. The pwrdn GPIOs are asserted
++	at initialization and prior we start the power up procedure of the card.
+ - clocks : Must contain an entry for the entry in clock-names.
+   See ../clocks/clock-bindings.txt for details.
+ - clock-names : Must include the following entry:
 diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 857dde3e0456..d34084c51f9c 100644
+index cb2ba7b11383..adf1f7161fe3 100644
 --- a/drivers/mmc/core/pwrseq_simple.c
 +++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -26,6 +26,7 @@
- struct mmc_pwrseq_simple {
- 	struct mmc_pwrseq pwrseq;
- 	bool clk_enabled;
-+	bool disable_post_power_on;
- 	bool invert_off_state;
- 	u32 pre_power_on_delay_ms;
+@@ -30,24 +30,23 @@ struct mmc_pwrseq_simple {
  	u32 post_power_on_delay_ms;
-@@ -72,6 +73,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
++	struct gpio_descs *pwrdn_gpios;
+ };
+ 
+ #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
+ 
+ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
++					      struct gpio_descs *gpios,
+ 					      int value)
+ {
+-	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+-
+-	if (!IS_ERR(reset_gpios)) {
++	if (!IS_ERR(gpios)) {
+ 		int i;
+-		int values[reset_gpios->ndescs];
++		int values[gpios->ndescs];
+ 
+-		for (i = 0; i < reset_gpios->ndescs; i++)
++		for (i = 0; i < gpios->ndescs; i++)
+ 			values[i] = value;
+ 
+-		gpiod_set_array_value_cansleep(
+-			reset_gpios->ndescs, reset_gpios->desc, values);
++		gpiod_set_array_value_cansleep(gpios->ndescs, gpios->desc, values);
+ 	}
+ }
+ 
+@@ -60,17 +59,19 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ 		pwrseq->clk_enabled = true;
+ 	}
+ 
+-	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->reset_gpios, 1);
+ 
+ 	if (pwrseq->pre_power_on_delay_ms)
+ 		msleep(pwrseq->pre_power_on_delay_ms);
++
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->pwrdn_gpios, 1);
+ }
+ 
+ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
  {
  	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
  
-+	if (pwrseq->disable_post_power_on)
-+		return;
-+
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->reset_gpios, 0);
+-	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->reset_gpios, 0);
  
  	if (pwrseq->post_power_on_delay_ms)
-@@ -139,6 +143,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
- 	device_property_read_u32(dev, "post-power-on-delay-ms",
- 				 &pwrseq->post_power_on_delay_ms);
+ 		msleep(pwrseq->post_power_on_delay_ms);
+@@ -80,12 +81,14 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
  
-+	if (device_property_read_bool(dev, "disable-post-power-on"))
-+		pwrseq->disable_post_power_on = true;
+-	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->reset_gpios, 1);
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, pwrseq->pwrdn_gpios, 1);
+ 
+ 	if (!IS_ERR(pwrseq->ext_clk) && pwrseq->clk_enabled) {
+ 		clk_disable_unprepare(pwrseq->ext_clk);
+ 		pwrseq->clk_enabled = false;
+ 	}
 +
- 	pwrseq->pwrseq.dev = dev;
- 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
- 	pwrseq->pwrseq.owner = THIS_MODULE;
+ }
+ 
+ static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+@@ -121,6 +124,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 		return PTR_ERR(pwrseq->reset_gpios);
+ 	}
+ 
++	pwrseq->pwrdn_gpios = devm_gpiod_get_array(dev, "pwrdn",
++							GPIOD_OUT_HIGH);
++
+ 	device_property_read_u32(dev, "pre-power-on-delay-ms",
+ 				 &pwrseq->pre_power_on_delay_ms);
+ 
 -- 
 2.7.4
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
