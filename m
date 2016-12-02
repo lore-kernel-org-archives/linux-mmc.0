@@ -1,44 +1,75 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 0/5] mmc: sdhci: Tidy tuning
-Date: Fri, 2 Dec 2016 10:28:26 +0200
-Message-ID: <5f30261c-3e5e-bae1-b706-434cfa024534@intel.com>
-References: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFqbpGQuzirU98MTX4TXjn6inDY8K8NozrSwBZVJGMDyLg@mail.gmail.com>
+From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
+Date: Fri, 2 Dec 2016 01:06:47 -0800
+Message-ID: <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
+References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
+ <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
+ <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
+ <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting> <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:41406 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750955AbcLBId3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 2 Dec 2016 03:33:29 -0500
-In-Reply-To: <CAPDyKFqbpGQuzirU98MTX4TXjn6inDY8K8NozrSwBZVJGMDyLg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Liam Breck <liam-RYWXG+zxWwBdeoIcmNTgJF6hYfS7NtTn@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 01/12/16 16:57, Ulf Hansson wrote:
-> On 1 December 2016 at 15:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Hi
+On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 2 December 2016 at 08:22, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
 >>
->> Here are some tidy-ups wrt SDHCI tuning.  Un-tested so far.
-> 
-> Nice. Thanks!
-> 
 >>
->> Any other suggestions?  Otherwise I will test and submit the whole series.
-> 
-> As an additional step, could you try to make use of mmc_send_tuning(),
-> instead of sending the command internally from sdhci_send_tuning()?
+>>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>
+>>>> On 2 December 2016 at 07:17, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
+>>>> Add optional device-post-power-on parameters to disable post_power_on
+>>>> function from being called since this breaks some device.
+>>>>
+>>>> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+>>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+>>>> ---
+>>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+>>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
+>>>> 2 files changed, 9 insertions(+)
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> index bea306d772d1..09fa153f743e 100644
+>>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> @@ -24,6 +24,8 @@ Optional properties:
+>>>>        de-asserting the reset-gpios (if any)
+>>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
+>>>>        and pwrdn-gpios (if any)
+>>>> +- disable-post-power-on : Avoid post_power_on function from being called since
+>>>> +       this breaks some devices
+>>>
+>>> This is a bit weird. I would like to avoid this, if possible.
+>>>
+>>> Perhaps if you simply describe the sequence in detail for your device
+>>> we can figure out the best option together.
+>>
+>> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
+>
+> This went offlist, please resend.
+>
+> Moreover, please try to describe the sequence you need in detail
+> according to your HW spec.
+>
 
-mmc_send_tuning() is not a good fit.  SDHCI tuning command does not have a
-data payload (or rather the hardware does it automatically) so unless
-mmc_send_tuning() is changed it will return -EIO.  If that is changed then,
-SDHCI request function needs to be changed to special-case the tuning
-command because the interrupt setup is different.  Then the problem is that
-there is no timeout interrupt so another timer is needed, so a special case
-would have to be created for that too.
+Yeah oops....
 
-The current code is much simpler.
+So basically we need to drive the reset and powerdown lines high with
+a 300 milliseconds delay between both...
+can't have the reset line low with post power on (pretty sure but
+would need a delay anyway), and we need both reset + powerdown line
+set low on powerdown.
 
+So the power down sequence would need to be reversed for this
+application in pwrseq-simple.
+
+> Br
+> Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
