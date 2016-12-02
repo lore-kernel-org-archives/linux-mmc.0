@@ -1,72 +1,55 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 4/9] mmc: sdhci: Always allow tuning to fall back to fixed sampling
-Date: Fri,  2 Dec 2016 15:14:22 +0200
-Message-ID: <1480684467-26833-5-git-send-email-adrian.hunter@intel.com>
-References: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus
+Date: Fri, 2 Dec 2016 15:41:09 +0200
+Message-ID: <12fd0555-ab90-0cc3-3907-9a0290f376ca@intel.com>
+References: <20161201203303.24676-1-drake@endlessm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:19569 "EHLO mga03.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:10479 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1759294AbcLBNTp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 2 Dec 2016 08:19:45 -0500
-In-Reply-To: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
+        id S1755961AbcLBNqL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 2 Dec 2016 08:46:11 -0500
+In-Reply-To: <20161201203303.24676-1-drake@endlessm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Daniel Drake <drake@endlessm.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux@endlessm.com
 
-SDHCI falls back to fixed sampling if there is an error during tuning.
-However it also reports an error unless there is periodic re-tuning.
-That is not the best option because:
-a) there is a reasonable chance that fixed sampling will work, especially
-at room temperature.
-b) re-tuning will be done again anyway if there are CRC errors.
-Change to return no error always when falling back to fixed sampling.
+On 01/12/16 22:33, Daniel Drake wrote:
+> Add an entry for the SDIO bus in the ECS EF20 cherry trail laptop:
+> 
+>   Device (SDHB) {
+>     Name (_ADR, 0x00110000)
+>     Name (_HID, "80860F14" /* Intel Baytrail SDIO/MMC Host Controller */)
+>     Name (_CID, "PNP0D40" /* SDA Standard Compliant SD Host Controller */)
+>     Name (_DDN, "Intel(R) SDIO Controller - 80862295")
+>     Name (_UID, 0x02)
+>     Name (_HRV, One)
+> 
+> A SDHB device with the same _HID and _UID can also be found on other
+> cherry trail products like Chuwi Hi10.
+> 
+> Signed-off-by: Daniel Drake <drake@endlessm.com>
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 20 ++------------------
- 1 file changed, 2 insertions(+), 18 deletions(-)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ad2f2c6113e4..a23887799f43 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2098,8 +2098,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 			sdhci_do_reset(host, SDHCI_RESET_CMD);
- 			sdhci_do_reset(host, SDHCI_RESET_DATA);
- 
--			err = -EIO;
--
- 			if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
- 				goto out;
- 
-@@ -2137,24 +2135,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 	}
--	if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
-+	if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
- 		pr_info(DRIVER_NAME ": Tuning procedure failed, falling back to fixed sampling clock\n");
--		err = -EIO;
--	}
--
- out:
--	if (tuning_count) {
--		/*
--		 * In case tuning fails, host controllers which support
--		 * re-tuning can try tuning again at a later time, when the
--		 * re-tuning timer expires.  So for these controllers, we
--		 * return 0. Since there might be other controllers who do not
--		 * have this capability, we return error for them.
--		 */
--		err = 0;
--	}
--
--	host->mmc->retune_period = err ? 0 : tuning_count;
-+	host->mmc->retune_period = tuning_count;
- 
- 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
--- 
-1.9.1
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 81d4dc0..160f695 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -328,6 +328,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+>  	{ "80865ACC", NULL, &sdhci_acpi_slot_int_emmc },
+>  	{ "80865AD0", NULL, &sdhci_acpi_slot_int_sdio },
+>  	{ "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
+> +	{ "80860F14" , "2" , &sdhci_acpi_slot_int_sdio },
+>  	{ "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
+>  	{ "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
+>  	{ "INT33BB"  , "2" , &sdhci_acpi_slot_int_sdio },
+> 
 
