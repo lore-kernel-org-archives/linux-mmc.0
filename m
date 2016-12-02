@@ -1,71 +1,32 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 1/2] mmc: sdhci: continue normal tuning if unsupported by platform tuning
-Date: Fri,  2 Dec 2016 11:21:50 +0900
-Message-ID: <1480645311-13004-2-git-send-email-yamada.masahiro@socionext.com>
-References: <1480645311-13004-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-11.nifty.com ([210.131.2.78]:39398 "EHLO
-        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751678AbcLBCWd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 21:22:33 -0500
-In-Reply-To: <1480645311-13004-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v3 0/2] mmc: sdhci: one expansion for SDHCI base code and add Cadence SDHCI driver
+Date: Fri,  2 Dec 2016 11:21:49 +0900
+Message-ID: <1480645311-13004-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
-
-Some SDHCI-compat controllers support not only SD, but also eMMC,
-but they use different commands for tuning: CMD19 for SD, CMD21 for
-eMMC.
-
-Due to the difference of the underlying mechanism, some controllers
-(at least, the Cadence IP is the case) provide their own registers
-for the eMMC tuning.
-
-This commit will be useful when we want to use platform-specific
-tuning (to support eMMC HS200), but still let it reuse the code
-provided by sdhci_execute_tuning() for SD timing.
-
-If sdhci_ops::platform_execute_tuning receives a timing it does not
-take care of, it can return -ENOTSUPP.  Then, it will fall back to
-the SDHCI standard tuning.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
-
-I want to use this in the next commit.
-
-The Cadence IP supports eMMC as well as SD.
-
-The tuning for SD is pretty simple; just set the "Execute Tuning" bit
-of the HOST_CONTROL2 register.  So, I can re-use the
-sdhci_execute_tuning().
-
-On the other hand, Cadence provides its own way for eMMC HS200 tuning;
-I need to touch some registers that are specific to Cadence's design.
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, devicetree@vger.kernel.org, Joshua Henderson <joshua.henderson@microchip.com>, Linus Walleij <linus.walleij@linaro.org>, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Rob Herring <robh+dt@kernel.org>, Al Cooper <alcooperx@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>
+List-Id: linux-mmc@vger.kernel.org
 
 
-Changes in v3: None
-Changes in v2: None
+1/2 tweaks sdhci_execute_tuning(), which I want to use for 2/2.
 
- drivers/mmc/host/sdhci.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+2/2 adds a new driver for Cadence's controller IP.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 42ef3eb..cdce489 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2004,7 +2004,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->ops->platform_execute_tuning) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		err = host->ops->platform_execute_tuning(host, opcode);
--		return err;
-+		if (err != -ENOTSUPP)
-+			return err;
-+		spin_lock_irqsave(&host->lock, flags);
- 	}
- 
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+
+
+Masahiro Yamada (2):
+  mmc: sdhci: continue normal tuning if unsupported by platform tuning
+  mmc: sdhci-cadence: add Cadence SD4HC support
+
+ .../devicetree/bindings/mmc/sdhci-cadence.txt      |  30 +++
+ drivers/mmc/host/Kconfig                           |  11 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-cadence.c                   | 279 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           |   4 +-
+ 5 files changed, 324 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+ create mode 100644 drivers/mmc/host/sdhci-cadence.c
+
 -- 
 2.7.4
-
