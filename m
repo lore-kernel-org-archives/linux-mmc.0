@@ -1,71 +1,44 @@
-From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: Re: [PATCH 3/4] mmc: pwrseq-simple: allow inverting of off state logic
-Date: Fri, 2 Dec 2016 00:24:18 -0800
-Message-ID: <CAJ_EiSTRafJ7ODwKiCDRZK1WG3eBYmdUsB4NLQAhiGagm7Cc0g@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-4-git-send-email-matt@ranostay.consulting>
- <CAPDyKFrYVL52N22JVDA3wiWLAwUhht+6-=fi9kbGA8DYu=zPiA@mail.gmail.com> <313A249C-2BB9-487E-AF75-02ADB8AE83CC@ranostay.consulting>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 0/5] mmc: sdhci: Tidy tuning
+Date: Fri, 2 Dec 2016 10:28:26 +0200
+Message-ID: <5f30261c-3e5e-bae1-b706-434cfa024534@intel.com>
+References: <1480601071-8881-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFqbpGQuzirU98MTX4TXjn6inDY8K8NozrSwBZVJGMDyLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <313A249C-2BB9-487E-AF75-02ADB8AE83CC-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:41406 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750955AbcLBId3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 2 Dec 2016 03:33:29 -0500
+In-Reply-To: <CAPDyKFqbpGQuzirU98MTX4TXjn6inDY8K8NozrSwBZVJGMDyLg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Thu, Dec 1, 2016 at 11:28 PM, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->
->
->
->>> On Dec 1, 2016, at 22:57, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+On 01/12/16 16:57, Ulf Hansson wrote:
+> On 1 December 2016 at 15:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Hi
 >>
->>> On 2 December 2016 at 07:17, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->>> Some devices need a logic level low instead of high to be in the
->>> off state.
->>>
->>> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
->>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
->>> ---
->>> .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt         |  2 ++
->>> drivers/mmc/core/pwrseq_simple.c                          | 15 +++++++++++----
->>> 2 files changed, 13 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> index 703a714201d8..bea306d772d1 100644
->>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> @@ -22,6 +22,8 @@ Optional properties:
->>>        the reset-gpios (if any) are asserted
->>> - post-power-on-delay-ms : Delay in ms after powering the card and
->>>        de-asserting the reset-gpios (if any)
->>> +- invert-off-state: Invert the power down state for the reset-gpios (if any)
->>> +       and pwrdn-gpios (if any)
+>> Here are some tidy-ups wrt SDHCI tuning.  Un-tested so far.
+> 
+> Nice. Thanks!
+> 
 >>
->> We already have DT bindings to describe GPIO pins as active high or
->> low. I think we should be able to use that instead, don't you think?
->
-> Ah issue is we are using inverse logic in the power down from anything else. But I guess we could read the gpios active high and low stats from device tree and deduce it from that
->
+>> Any other suggestions?  Otherwise I will test and submit the whole series.
+> 
+> As an additional step, could you try to make use of mmc_send_tuning(),
+> instead of sending the command internally from sdhci_send_tuning()?
 
-BTW this quirkiness is which why me and Lindgren went the route of an
-another pwrseq driver versus hacking the pwrseq-simple initially...
+mmc_send_tuning() is not a good fit.  SDHCI tuning command does not have a
+data payload (or rather the hardware does it automatically) so unless
+mmc_send_tuning() is changed it will return -EIO.  If that is changed then,
+SDHCI request function needs to be changed to special-case the tuning
+command because the interrupt setup is different.  Then the problem is that
+there is no timeout interrupt so another timer is needed, so a special case
+would have to be created for that too.
 
-In any case we can change the active high or low in the gpio
-descriptors but doesn't change the timing we need or the inverse state
-for power down.
+The current code is much simpler.
 
-Thanks,
-
-Matt
->
->>
->> [...]
->>
->> Kind regards
->> Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
