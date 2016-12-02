@@ -1,52 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: pwrseq-simple: add support for power down GPIO pins
-Date: Fri, 2 Dec 2016 07:47:27 +0100
-Message-ID: <CAPDyKFrLm0KPL=zi5ge80h5H0pv5xwZkr1cz+JVA-WXqCRZ7OA@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting> <1480659462-29536-3-git-send-email-matt@ranostay.consulting>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 3/4] mmc: pwrseq-simple: allow inverting of off state logic
+Date: Fri, 2 Dec 2016 07:57:41 +0100
+Message-ID: <CAPDyKFrYVL52N22JVDA3wiWLAwUhht+6-=fi9kbGA8DYu=zPiA@mail.gmail.com>
+References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting> <1480659462-29536-4-git-send-email-matt@ranostay.consulting>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:34468 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755548AbcLBGr3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2016 01:47:29 -0500
-Received: by mail-wm0-f50.google.com with SMTP id u144so1796057wmu.1
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 22:47:29 -0800 (PST)
-In-Reply-To: <1480659462-29536-3-git-send-email-matt@ranostay.consulting>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1480659462-29536-4-git-send-email-matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 
-On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
-> Some devices have additional pins that control power but need to
-> asserted separately from reset-gpios using a defined time delay.
+On 2 December 2016 at 07:17, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
+> Some devices need a logic level low instead of high to be in the
+> off state.
 >
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
+> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
 > ---
->  .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 ++
->  drivers/mmc/core/pwrseq_simple.c                   | 26 +++++++++++++---------
->  2 files changed, 18 insertions(+), 10 deletions(-)
+>  .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt         |  2 ++
+>  drivers/mmc/core/pwrseq_simple.c                          | 15 +++++++++++----
+>  2 files changed, 13 insertions(+), 4 deletions(-)
 >
 > diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> index 88826f7d1d38..703a714201d8 100644
+> index 703a714201d8..bea306d772d1 100644
 > --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
 > +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> @@ -12,6 +12,8 @@ Optional properties:
->         at initialization and prior we start the power up procedure of the card.
->         They will be de-asserted right after the power has been provided to the
->         card.
-> +- pwrdn-gpios : contains a list of GPIO specifiers. The pwrdn GPIOs are asserted
-> +       at initialization and prior we start the power up procedure of the card.
+> @@ -22,6 +22,8 @@ Optional properties:
+>         the reset-gpios (if any) are asserted
+>  - post-power-on-delay-ms : Delay in ms after powering the card and
+>         de-asserting the reset-gpios (if any)
+> +- invert-off-state: Invert the power down state for the reset-gpios (if any)
+> +       and pwrdn-gpios (if any)
 
-I think "powerdown-gpios" would be better, as Rob earlier also suggested.
-
-Moreover I think the DT doc change be a separate change. This comment
-applies to the other changes in this series as well.
+We already have DT bindings to describe GPIO pins as active high or
+low. I think we should be able to use that instead, don't you think?
 
 [...]
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
