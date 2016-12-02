@@ -1,53 +1,72 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 8/9] mmc: sdhci: Simplify tuning block size logic
-Date: Fri,  2 Dec 2016 15:14:26 +0200
-Message-ID: <1480684467-26833-9-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 4/9] mmc: sdhci: Always allow tuning to fall back to fixed sampling
+Date: Fri,  2 Dec 2016 15:14:22 +0200
+Message-ID: <1480684467-26833-5-git-send-email-adrian.hunter@intel.com>
 References: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:50159 "EHLO mga03.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:19569 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756967AbcLBNTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 2 Dec 2016 08:19:46 -0500
+        id S1759294AbcLBNTp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 2 Dec 2016 08:19:45 -0500
 In-Reply-To: <1480684467-26833-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-There are only 2 possible block sizes, so simplify 2 if-statements into 1.
+SDHCI falls back to fixed sampling if there is an error during tuning.
+However it also reports an error unless there is periodic re-tuning.
+That is not the best option because:
+a) there is a reasonable chance that fixed sampling will work, especially
+at room temperature.
+b) re-tuning will be done again anyway if there are CRC errors.
+Change to return no error always when falling back to fixed sampling.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 16 +++++-----------
- 1 file changed, 5 insertions(+), 11 deletions(-)
+ drivers/mmc/host/sdhci.c | 20 ++------------------
+ 1 file changed, 2 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fa89870a690b..e9ff7d005851 100644
+index ad2f2c6113e4..a23887799f43 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2024,17 +2024,11 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
- 	 * block to the Host Controller. So we set the block size
- 	 * to 64 here.
- 	 */
--	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
--		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
--				     SDHCI_BLOCK_SIZE);
--		else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
--			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
--				     SDHCI_BLOCK_SIZE);
--	} else {
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
--			     SDHCI_BLOCK_SIZE);
--	}
-+	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200 &&
-+	    mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128), SDHCI_BLOCK_SIZE);
-+	else
-+		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
+@@ -2098,8 +2098,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 			sdhci_do_reset(host, SDHCI_RESET_CMD);
+ 			sdhci_do_reset(host, SDHCI_RESET_DATA);
  
- 	/*
- 	 * The tuning block is sent by the card to the host controller.
+-			err = -EIO;
+-
+ 			if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
+ 				goto out;
+ 
+@@ -2137,24 +2135,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 	}
+-	if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
++	if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+ 		pr_info(DRIVER_NAME ": Tuning procedure failed, falling back to fixed sampling clock\n");
+-		err = -EIO;
+-	}
+-
+ out:
+-	if (tuning_count) {
+-		/*
+-		 * In case tuning fails, host controllers which support
+-		 * re-tuning can try tuning again at a later time, when the
+-		 * re-tuning timer expires.  So for these controllers, we
+-		 * return 0. Since there might be other controllers who do not
+-		 * have this capability, we return error for them.
+-		 */
+-		err = 0;
+-	}
+-
+-	host->mmc->retune_period = err ? 0 : tuning_count;
++	host->mmc->retune_period = tuning_count;
+ 
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
 -- 
 1.9.1
 
