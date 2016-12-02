@@ -1,49 +1,37 @@
-From: Daniel Drake <drake@endlessm.com>
-Subject: [PATCH] mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus
-Date: Thu,  1 Dec 2016 14:33:03 -0600
-Message-ID: <20161201203303.24676-1-drake@endlessm.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:35827 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759322AbcLAUdL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2016 15:33:11 -0500
-Received: by mail-ua0-f179.google.com with SMTP id 12so260665609uas.2
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2016 12:33:11 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sergio Prado <sergio.prado@e-labworks.com>
+Subject: [PATCH 0/2] mmc: host: s3cmci: add device tree support
+Date: Thu,  1 Dec 2016 22:14:23 -0200
+Message-ID: <1480637665-6325-1-git-send-email-sergio.prado@e-labworks.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Cc: Sergio Prado <sergio.prado@e-labworks.com>
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux@endlessm.com
 
-Add an entry for the SDIO bus in the ECS EF20 cherry trail laptop:
+This series adds support for configuring Samsung's S3C24XX MMC/SD/SDIO
+controller via device tree.
 
-  Device (SDHB) {
-    Name (_ADR, 0x00110000)
-    Name (_HID, "80860F14" /* Intel Baytrail SDIO/MMC Host Controller */)
-    Name (_CID, "PNP0D40" /* SDA Standard Compliant SD Host Controller */)
-    Name (_DDN, "Intel(R) SDIO Controller - 80862295")
-    Name (_UID, 0x02)
-    Name (_HRV, One)
+Tested on FriendlyARM mini2440, based on s3c2440 SoC.
 
-A SDHB device with the same _HID and _UID can also be found on other
-cherry trail products like Chuwi Hi10.
+Sergio Prado (2):
+  dt-bindings: mmc: add DT binding for S3C24XX MMC/SD/SDIO controller
+  mmc: host: s3cmci: allow probing from device tree
 
-Signed-off-by: Daniel Drake <drake@endlessm.com>
----
- drivers/mmc/host/sdhci-acpi.c | 1 +
- 1 file changed, 1 insertion(+)
+ .../devicetree/bindings/mmc/samsung,s3cmci.txt     |  38 +++++
+ drivers/mmc/host/s3cmci.c                          | 155 +++++++++++++++++----
+ 2 files changed, 169 insertions(+), 24 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 81d4dc0..160f695 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -328,6 +328,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- 	{ "80865ACC", NULL, &sdhci_acpi_slot_int_emmc },
- 	{ "80865AD0", NULL, &sdhci_acpi_slot_int_sdio },
- 	{ "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
-+	{ "80860F14" , "2" , &sdhci_acpi_slot_int_sdio },
- 	{ "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
- 	{ "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
- 	{ "INT33BB"  , "2" , &sdhci_acpi_slot_int_sdio },
 -- 
-2.9.3
-
+1.9.1
