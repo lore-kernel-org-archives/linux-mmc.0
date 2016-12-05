@@ -1,156 +1,87 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
-Date: Sat, 3 Dec 2016 14:24:04 +0530
-Message-ID: <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
-References: <20161128173920.25334-1-georgi.djakov@linaro.org>
- <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
- <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Georgi Djakov <georgi.djakov@linaro.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v4 1/2] mmc: sdhci: export sdhci_execute_tuning()
+Date: Mon,  5 Dec 2016 11:10:53 +0900
+Message-ID: <1480903854-22701-2-git-send-email-yamada.masahiro@socionext.com>
+References: <1480903854-22701-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conuserg-09.nifty.com ([210.131.2.76]:30796 "EHLO
+        conuserg-09.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751168AbcLECLm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2016 21:11:42 -0500
+In-Reply-To: <1480903854-22701-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org
+
+Some SDHCI-compat controllers support not only SD, but also eMMC,
+but they use different commands for tuning: CMD19 for SD, CMD21 for
+eMMC.
+
+Due to the difference of the underlying mechanism, some controllers
+(at least, the Cadence IP is the case) provide their own registers
+for the eMMC tuning.
+
+This commit will be useful when we want to override .execute_tuning
+callback (for eMMC HS200 tuning), but still let it fall back to
+sdhci_execute_tuning() for SD timing.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+I want to use this in the next commit.
+The Cadence IP supports eMMC as well as SD.
+
+I want to re-use the sdhci_execute_tuning() for SD timing.
+
+On the other hand, Cadence provides its own way for eMMC HS200 tuning;
+I need to touch some registers that are specific to Cadence's design.
 
 
+Changes in v4:
+  - export sdhci_execute_tuning() instead of using
+    execute_execute_tuning()
 
-On 12/1/2016 11:38 PM, Georgi Djakov wrote:
-> On 11/29/2016 05:40 AM, Ritesh Harjani wrote:
->> Hi Georgi,
->>
->> On 11/28/2016 11:09 PM, Georgi Djakov wrote:
->>> On apq8016, apq8084 and apq8074 platforms, writing to the software
->>> reset register triggers the "power irq". We need to ack and handle
->>> the irq, otherwise the following message appears:
->>>
->>> mmc0: Reset 0x1 never completed.
->>> sdhci: =========== REGISTER DUMP (mmc0)===========
->>> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
->>> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
->>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
->>> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
->>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
->>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
->>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
->>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
->>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
->>> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
->>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
->>> sdhci: Host ctl2: 0x00000000
->>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
->>> sdhci: ===========================================
->>>
->>> Fix it by implementing the custom sdhci_reset() function,
->>> which performs the software reset and then handles the irq.
->>>
->>> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
->>> ---
->>>
->>> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
->>>  * Perform the software reset by just writing to the
->>> SDHCI_SOFTWARE_RESET
->>>    register and then check for the irq.
->> I am still not sure about this change. Below change will trigger the
->> IRQ, once this call is completed (say on a single core system) -since
->> this is called while holding spin_lock_irqsave.
->>
->> But you will be end up calling sdhci_msm_voltage_switch twice,
->> which to me does not seems correct.
->> 1. 1st time you are directly calling it in sdhci_msm_reset.
->> 2. 2nd time will be called from within pwr_irq to handle the same case.
->
-> Yes, that would be the behavior. This function actually is not doing
-> anything much than to check irq status and ack it. Testing the patch
-Ok.
+Changes in v3: None
+Changes in v2: None
 
-> on a few different platforms does not show any side effects, however i
-> could not be 100% sure as i have limited information about the hardware.
-what about the case when say the IRQ is delayed because of some other 
-overheads in the system. Will this approach still works?
-I understand this would require some HW knowledge to understand the 
-functioning/importance of this pwr_irq. I will try and get in touch with 
-HW folk here.
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-Regards
-Ritesh
-
-
->
-> Thanks,
-> Georgi
->
->>
->> Please let me know your thoughts on this ?
->>
->> Regards
->> Ritesh
->>
->>>
->>>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
->>>  1 file changed, 28 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>> index 32879b845b75..157ae07f9309 100644
->>> --- a/drivers/mmc/host/sdhci-msm.c
->>> +++ b/drivers/mmc/host/sdhci-msm.c
->>> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct
->>> sdhci_host *host, unsigned int clock)
->>>      __sdhci_msm_set_clock(host, clock);
->>>  }
->>>
->>> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
->>> +{
->>> +    unsigned long timeout = 100;
->>> +
->>> +    sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
->>> +
->>> +    if (mask & SDHCI_RESET_ALL) {
->>> +        host->clock = 0;
->>> +
->>> +        /*
->>> +         * SDHCI_RESET_ALL triggers the PWR IRQ and we need
->>> +         * to handle it here.
->>> +         */
->>> +        sdhci_msm_voltage_switch(host);
->>> +    }
->>> +
->>> +    while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
->>> +        if (timeout == 0) {
->>> +            pr_err("%s: Reset 0x%x never completed.\n",
->>> +                   mmc_hostname(host->mmc), (int)mask);
->>> +            return;
->>> +        }
->>> +        timeout--;
->>> +        mdelay(1);
->>> +    }
->>> +}
->>> +
->>>  static const struct of_device_id sdhci_msm_dt_match[] = {
->>>      { .compatible = "qcom,sdhci-msm-v4" },
->>>      {},
->>> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
->>>
->>>  static const struct sdhci_ops sdhci_msm_ops = {
->>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
->>> -    .reset = sdhci_reset,
->>> +    .reset = sdhci_msm_reset,
->>>      .set_clock = sdhci_msm_set_clock,
->>>      .get_min_clock = sdhci_msm_get_min_clock,
->>>      .get_max_clock = sdhci_msm_get_max_clock,
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42ef3eb..0c03a89 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1948,7 +1948,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return 0;
+ }
+ 
+-static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	u16 ctrl;
+@@ -2141,6 +2141,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	return err;
+ }
++EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
+ 
+ static int sdhci_select_drive_strength(struct mmc_card *card,
+ 				       unsigned int max_dtr, int host_drv,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 9c35776..786eee9 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -689,6 +689,7 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ 
+ #ifdef CONFIG_PM
+ extern int sdhci_suspend_host(struct sdhci_host *host);
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.7.4
+
