@@ -1,60 +1,125 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus
-Date: Mon, 5 Dec 2016 14:18:53 +0100
-Message-ID: <CAPDyKFq=noqw4tBWwyFzrFYWJMefBsVOwyL0OnSQYAMwsEXmUw@mail.gmail.com>
-References: <20161201203303.24676-1-drake@endlessm.com>
+Subject: Re: [PATCH V2 1/1] mmc: mmc: Relax checking for switch errors after
+ HS200 switch
+Date: Mon, 5 Dec 2016 14:19:32 +0100
+Message-ID: <CAPDyKFqiBQ2F_MA2Q5gFQQQQEVRtFdPD=sSDyo7AJhL_=0Rxow@mail.gmail.com>
+References: <1480677395-14169-1-git-send-email-adrian.hunter@intel.com> <1480677395-14169-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35825 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751697AbcLENS4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2016 08:18:56 -0500
-Received: by mail-wm0-f46.google.com with SMTP id a197so96699467wmd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Dec 2016 05:18:55 -0800 (PST)
-In-Reply-To: <20161201203303.24676-1-drake@endlessm.com>
+Received: from mail-wj0-f174.google.com ([209.85.210.174]:36801 "EHLO
+        mail-wj0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751451AbcLENVE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2016 08:21:04 -0500
+Received: by mail-wj0-f174.google.com with SMTP id qp4so290198566wjc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Dec 2016 05:19:34 -0800 (PST)
+In-Reply-To: <1480677395-14169-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <drake@endlessm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com
+To: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 1 December 2016 at 21:33, Daniel Drake <drake@endlessm.com> wrote:
-> Add an entry for the SDIO bus in the ECS EF20 cherry trail laptop:
+On 2 December 2016 at 12:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> The JEDEC specification indicates CMD13 can be used after a HS200 switch
+> to check for errors. However in practice some boards experience CRC errors
+> in the CMD13 response. Consequently, for HS200, CRC errors are not a
+> reliable way to know the switch failed. If there really is a problem, we
+> would expect tuning will fail and the result ends up the same. So change
+> the error condition to ignore CRC errors in that case.
 >
->   Device (SDHB) {
->     Name (_ADR, 0x00110000)
->     Name (_HID, "80860F14" /* Intel Baytrail SDIO/MMC Host Controller */)
->     Name (_CID, "PNP0D40" /* SDA Standard Compliant SD Host Controller */)
->     Name (_DDN, "Intel(R) SDIO Controller - 80862295")
->     Name (_UID, 0x02)
->     Name (_HRV, One)
->
-> A SDHB device with the same _HID and _UID can also be found on other
-> cherry trail products like Chuwi Hi10.
->
-> Signed-off-by: Daniel Drake <drake@endlessm.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Thanks, applied for next!
+
+I also took the liberty to add the ack from Jaehoon, as he acked v1
+(conceptual wise v2 is the same, but not the code). Please tell if you
+don't like it.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/core/mmc.c     | 15 +++++++++++++--
+>  drivers/mmc/core/mmc_ops.c |  9 ++++++++-
+>  drivers/mmc/core/mmc_ops.h |  1 +
+>  3 files changed, 22 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 81d4dc0..160f695 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -328,6 +328,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
->         { "80865ACC", NULL, &sdhci_acpi_slot_int_emmc },
->         { "80865AD0", NULL, &sdhci_acpi_slot_int_sdio },
->         { "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
-> +       { "80860F14" , "2" , &sdhci_acpi_slot_int_sdio },
->         { "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
->         { "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
->         { "INT33BB"  , "2" , &sdhci_acpi_slot_int_sdio },
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 033e00abe93f..b61b52f9da3d 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1240,7 +1240,12 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>
+>         mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>
+> -       err = mmc_switch_status(card);
+> +       /*
+> +        * For HS200, CRC errors are not a reliable way to know the switch
+> +        * failed. If there really is a problem, we would expect tuning will
+> +        * fail and the result ends up the same.
+> +        */
+> +       err = __mmc_switch_status(card, false);
+>         if (err)
+>                 goto out_err;
+>
+> @@ -1403,7 +1408,13 @@ static int mmc_select_hs200(struct mmc_card *card)
+>                 old_timing = host->ios.timing;
+>                 mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>
+> -               err = mmc_switch_status(card);
+> +               /*
+> +                * For HS200, CRC errors are not a reliable way to know the
+> +                * switch failed. If there really is a problem, we would expect
+> +                * tuning will fail and the result ends up the same.
+> +                */
+> +               err = __mmc_switch_status(card, false);
+> +
+>                 /*
+>                  * mmc_select_timing() assumes timing has not changed if
+>                  * it is a switch error.
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index cb7006feb5c4..81ce63bb0773 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -431,18 +431,25 @@ static int mmc_switch_status_error(struct mmc_host *host, u32 status)
+>  }
+>
+>  /* Caller must hold re-tuning */
+> -int mmc_switch_status(struct mmc_card *card)
+> +int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal)
+>  {
+>         u32 status;
+>         int err;
+>
+>         err = mmc_send_status(card, &status);
+> +       if (!crc_err_fatal && err == -EILSEQ)
+> +               return 0;
+>         if (err)
+>                 return err;
+>
+>         return mmc_switch_status_error(card->host, status);
+>  }
+>
+> +int mmc_switch_status(struct mmc_card *card)
+> +{
+> +       return __mmc_switch_status(card, true);
+> +}
+> +
+>  static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>                         bool send_status, bool retry_crc_err)
+>  {
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index 761cb69c46af..abd525ed74be 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -28,6 +28,7 @@
+>  int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+>  int mmc_can_ext_csd(struct mmc_card *card);
+>  int mmc_switch_status(struct mmc_card *card);
+> +int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+>  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                 unsigned int timeout_ms, unsigned char timing,
+>                 bool use_busy_signal, bool send_status, bool retry_crc_err);
 > --
-> 2.9.3
+> 1.9.1
 >
