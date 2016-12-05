@@ -1,67 +1,141 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: [PATCH v7 0/5] Add intial support to DW MMC host on ZTE SoC
-Date: Mon,  5 Dec 2016 10:29:31 +0800
-Message-ID: <1480904976-7081-1-git-send-email-jun.nie@linaro.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH V2 1/1] mmc: mmc: Relax checking for switch errors after
+ HS200 switch
+Date: Mon, 5 Dec 2016 11:28:54 +0800
+Message-ID: <d9186009-adfc-690b-c51a-5460ce65cf83@rock-chips.com>
+References: <1480677395-14169-1-git-send-email-adrian.hunter@intel.com>
+ <1480677395-14169-2-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:35774 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751241AbcLEC3o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2016 21:29:44 -0500
-Received: by mail-pg0-f42.google.com with SMTP id p66so130946221pga.2
-        for <linux-mmc@vger.kernel.org>; Sun, 04 Dec 2016 18:29:43 -0800 (PST)
+Received: from lucky1.263xmail.com ([211.157.147.133]:54672 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751501AbcLED3K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2016 22:29:10 -0500
+In-Reply-To: <1480677395-14169-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, shawn.guo@linaro.org, xie.baoyou@zte.com.cn, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Stephen Boyd <sboyd@codeaurora.org>, Michael Walle <michael@walle.cc>, Yong Mao <yong.mao@mediatek.com>
 
-Add intial support to DW MMC host on ZTE SoC. It include platform
-specific wrapper driver and workarounds for fifo quirk.
+On 2016/12/2 19:16, Adrian Hunter wrote:
+> The JEDEC specification indicates CMD13 can be used after a HS200 switch
+> to check for errors. However in practice some boards experience CRC errors
+> in the CMD13 response. Consequently, for HS200, CRC errors are not a
+> reliable way to know the switch failed. If there really is a problem, we
+> would expect tuning will fail and the result ends up the same. So change
+> the error condition to ignore CRC errors in that case.
+>
 
-Patches are prepared based on latest dw mmc runtime change:
-   https://github.com/jh80chung/dw-mmc.git for-ulf
+This makes sense to me, especially for arasan,sdhci-5.1. As it actually
+needs to update the sd_clk rate to PHY before sending commands when
+finishing to switch timing. It leads to a dilemma that we should really
+update the sd_clk to PHY *only after* we actually finish switching
+timing. But how we need to know we finish switching to e.g HS200? If
+not using .card_busy, we have to send CMD13 but as I mentioned we need
+to update sd_clk first, otherwise we expected a CRC there in theory.
 
-Changes vs version 6:
-  - Resolve confilict when rebase to latest dw-mmc.git for-ulf branch.
-  - Add Shawn Lin's review tag.
+Which comes first?
+updating sd_clk to PHY for it to latch the successful result of CMD13
+to know we are in HS200 now but updating sd_clk indicates that we
+already know we are in HS200? :)
 
-Changes vs version 5:
-  - Add clock delay lock status check to save CPU cycle in timing tuning CMD.
+Although it indeed could work using current code by theoretically it
+shouldn't. CMD13 shouldn't be used to indicate the status of bus
+switching at all from my point.
 
-Changes vs version 4:
-  - Fix missing empty dts compatible element in the end of compatible array.
+This patchs improve it much,
 
-Changes vs version 3:
-  - Fix brace error in document.
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Changes vs version 2:
-  - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
-    fifo-watermark-aligned.
-  - Polish ZX MMC driver on minor coding style issues.
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/core/mmc.c     | 15 +++++++++++++--
+>  drivers/mmc/core/mmc_ops.c |  9 ++++++++-
+>  drivers/mmc/core/mmc_ops.h |  1 +
+>  3 files changed, 22 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 033e00abe93f..b61b52f9da3d 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1240,7 +1240,12 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>
+>  	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>
+> -	err = mmc_switch_status(card);
+> +	/*
+> +	 * For HS200, CRC errors are not a reliable way to know the switch
+> +	 * failed. If there really is a problem, we would expect tuning will
+> +	 * fail and the result ends up the same.
+> +	 */
+> +	err = __mmc_switch_status(card, false);
+>  	if (err)
+>  		goto out_err;
+>
+> @@ -1403,7 +1408,13 @@ static int mmc_select_hs200(struct mmc_card *card)
+>  		old_timing = host->ios.timing;
+>  		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>
+> -		err = mmc_switch_status(card);
+> +		/*
+> +		 * For HS200, CRC errors are not a reliable way to know the
+> +		 * switch failed. If there really is a problem, we would expect
+> +		 * tuning will fail and the result ends up the same.
+> +		 */
+> +		err = __mmc_switch_status(card, false);
+> +
+>  		/*
+>  		 * mmc_select_timing() assumes timing has not changed if
+>  		 * it is a switch error.
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index cb7006feb5c4..81ce63bb0773 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -431,18 +431,25 @@ static int mmc_switch_status_error(struct mmc_host *host, u32 status)
+>  }
+>
+>  /* Caller must hold re-tuning */
+> -int mmc_switch_status(struct mmc_card *card)
+> +int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal)
+>  {
+>  	u32 status;
+>  	int err;
+>
+>  	err = mmc_send_status(card, &status);
+> +	if (!crc_err_fatal && err == -EILSEQ)
+> +		return 0;
+>  	if (err)
+>  		return err;
+>
+>  	return mmc_switch_status_error(card->host, status);
+>  }
+>
+> +int mmc_switch_status(struct mmc_card *card)
+> +{
+> +	return __mmc_switch_status(card, true);
+> +}
+> +
+>  static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>  			bool send_status, bool retry_crc_err)
+>  {
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index 761cb69c46af..abd525ed74be 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -28,6 +28,7 @@
+>  int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+>  int mmc_can_ext_csd(struct mmc_card *card);
+>  int mmc_switch_status(struct mmc_card *card);
+> +int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+>  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  		unsigned int timeout_ms, unsigned char timing,
+>  		bool use_busy_signal, bool send_status,	bool retry_crc_err);
+>
 
-Changes vs version 1:
-  - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
-  - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
-
-Jun Nie (5):
-  mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-  mmc: zx: Initial support for ZX mmc controller
-  Documentation: synopsys-dw-mshc: add binding for fifo quirks
-  mmc: dw: Add fifo address property
-  mmc: dw: Add fifo watermark alignment property
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
- .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  34 +++
- drivers/mmc/host/Kconfig                           |   9 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
- drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
- drivers/mmc/host/dw_mmc.c                          |  17 +-
- include/linux/mmc/dw_mmc.h                         |   5 +
- 8 files changed, 349 insertions(+), 3 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-zx.c
- create mode 100644 drivers/mmc/host/dw_mmc-zx.h
 
 -- 
-1.9.1
+Best Regards
+Shawn Lin
 
