@@ -1,147 +1,78 @@
-From: Caleb Crome <caleb@crome.org>
-Subject: Re: How to prevent high speed mode due to signal integrity problem
-Date: Tue, 6 Dec 2016 06:35:11 -0800
-Message-ID: <CAG5mAdwsrw=Znau=tqkQxXsUfUqXyFhwaHExu5=S34h=FR8ZrA@mail.gmail.com>
-References: <CAG5mAdyAkc3bJS6VD-1s5pKkE7E7XDSA4eq5Ree9ysP5YZd96A@mail.gmail.com>
- <CAG5mAdyyOq-m61OfTAsE532CLDhQgejYL=dGv_Cg89PbbQZGZg@mail.gmail.com>
- <CAOMZO5A5ejaX6DE22DS2Fh_NNTmcpak4SWhbZhsjg6108rvwGw@mail.gmail.com>
- <CAG5mAdxMxzgon6tSNpoYnRPOzdkBU0qkxQa-ECqMT0DqmbFGnQ@mail.gmail.com> <CAG5mAdwmqSOnLvnNynhCJAVKeVVCrQCLRrRmbtvWjigXgksrpw@mail.gmail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: add DT binding for S3C24XX
+ MMC/SD/SDIO controller
+Date: Tue, 6 Dec 2016 17:13:18 -0600
+Message-ID: <20161206231318.m4oo2e6t5zk2txbx@rob-hp-laptop>
+References: <1480637665-6325-1-git-send-email-sergio.prado@e-labworks.com>
+ <CGME20161202001621epcas3p2fcc946ce070dfcc594e4b89729e149d7@epcas3p2.samsung.com>
+ <1480637665-6325-2-git-send-email-sergio.prado@e-labworks.com>
+ <054a65d8-8606-eeb0-e028-1b85dbf1c8ba@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:36345 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753266AbcLFOfr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2016 09:35:47 -0500
-Received: by mail-oi0-f52.google.com with SMTP id v84so378577088oie.3
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Dec 2016 06:35:32 -0800 (PST)
-In-Reply-To: <CAG5mAdwmqSOnLvnNynhCJAVKeVVCrQCLRrRmbtvWjigXgksrpw@mail.gmail.com>
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:35962 "EHLO
+        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751266AbcLFXNU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2016 18:13:20 -0500
+Content-Disposition: inline
+In-Reply-To: <054a65d8-8606-eeb0-e028-1b85dbf1c8ba@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Sergio Prado <sergio.prado@e-labworks.com>, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, Dec 5, 2016 at 6:08 PM, Caleb Crome <caleb@crome.org> wrote:
-> On Mon, Dec 5, 2016 at 5:24 PM, Caleb Crome <caleb@crome.org> wrote:
->> On Mon, Dec 5, 2016 at 4:46 PM, Fabio Estevam <festevam@gmail.com> wrote=
-:
->>> Hi Caleb,
->>>
->>> On Mon, Dec 5, 2016 at 10:36 PM, Caleb Crome <caleb@crome.org> wrote:
->>>> Hello,
->>>>    We have a board here where there is a signal integrity problem on t=
-he MMC
->>>> bus.  It works fine at 25MHz, but does not work in higher speed modes.
->>>>
->>>> Is there an easy way to disable all the high speed modes?  Perhaps fro=
-m the
->>>> device tree?
->>>>
->>>> I tried searching the archives, but gmane seems to be not working.
->>>>
->>>> I'm using a stock 4.8.11 kernel.
->>>> Host processor is i.MX6
->>>
->>> Would max-frequency =3D <25000000>; do the trick?
->>>
->>> Please take a look at Documentation/devicetree/bindings/mmc/mmc.txt .
->>
->> Hi Fabio,
->>   Thanks for the quick feedback -- I was momentarily hopeful...
->> Unfortunatley, that doesn't seem to work.
->>
->> I have set (using a solid-run hummingboard uSOM):
->> &usdhc2 {
->>     pinctrl-names =3D "default";
->>     pinctrl-0 =3D <
->>     &pinctrl_hummingboard_usdhc2_aux
->>    &pinctrl_hummingboard_usdhc2
->>    >;
->>    vmmc-supply =3D <&reg_3p3v>;
->>    cd-gpios =3D <&gpio1 4 GPIO_ACTIVE_LOW>;
->>    max-frequency =3D <25000000>;
->>    status =3D "okay";
->> };
->>
->> and just for good measure I set:
->> &usdhc1 {
->>     max-frequency =3D <25000000>;
->> };
->> &usdhc3 {
->>    max-frequency =3D <25000000>;
->> };
->> &usdhc4 {
->>    max-frequency =3D <25000000>;
->> };
->> (though I'm pretty sure it's using SD2).
->>
->> And it not only attempts to clock at 50MHz, but also at 200 MHz -- way
->> beyond what the board can support.
->>
->> Basically, it doesn't seem to be heeding the max-frequency DT setting at=
- all.
->>
->> I did in fact verify that the max-frequency value was read at
->> http://lxr.free-electrons.com/source/drivers/mmc/core/host.c#L216, and
->> the host->f_max frequency was set to =E2=80=AD25000000=E2=80=AC, but tha=
-t f_max was
->> ignored it seems.
->>
->
-> Okay, I take it back -- sort of.
->
-> The f_max is not ignored -- if I set 5MHz, the clock is *usually* 5MHz.
->
-> However, I have a trigger set with my scope, and it actually does
-> switch to 200MHz mode momentarily.  I don't know whether or not this
-> is the cause of my problems.
->
-> Currently, my problem is that I get hard reboot just as the following
-> happens:  (This is a different problem from before I switch
-> max-frequency).
->
-> [    5.293356] random: fast init done
-> [    5.298871] ALSA device list:
-> [    5.301973]   #0: On-board SPDIF
-> [    5.318480] EXT4-fs (mmcblk0p2): mounting ext3 file system using
-> the ext4 subsystem
-> [    5.350791] mmc1: new SDIO card at address 0001
-> [    5.379811] EXT4-fs (mmcblk0p2): mounted filesystem with ordered
-> data mode. Opts: (null)
-> [    5.388118] VFS: Mounted root (ext3 filesystem) on device 179:2.
-> [    5.411692] devtmpfs: mounted
->
-> U-Boot SPL 2013.10-rc4 (Dec 05 2016 - 14:09:51)
-> Boot Device: SD1
-> spl: error reading image u-boot.img, err - -1
-> Load image from RAW...
->
->
-> Here is an image of the scope capture showing the sd_clk transition
-> from 5MHz to 200MHz in the middle of booting.
->
-> https://drive.google.com/open?id=3D0BxzZmuc2tSowTzRHUms5RW9mUkE
->
-> Thanks again,
->
-> -Caleb
+On Fri, Dec 02, 2016 at 09:48:45AM +0900, Jaehoon Chung wrote:
+> On 12/02/2016 09:14 AM, Sergio Prado wrote:
+> > Adds the device tree bindings description for Samsung S3C24XX
+> > MMC/SD/SDIO controller, used as a connectivity interface with external
+> > MMC, SD and SDIO storage mediums.
+> > 
+> > Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
+> > ---
+> >  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 38 ++++++++++++++++++++++
+> >  1 file changed, 38 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+> > new file mode 100644
+> > index 000000000000..3f044076e69a
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+> > @@ -0,0 +1,38 @@
+> > +* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
+> > +
+> > +Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
+> > +with external MMC, SD and SDIO storage mediums.
+> > +
+> > +This file documents differences between the core mmc properties described by
+> > +mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
+> > +implementation.
+> > +
+> > +Required SoC Specific Properties:
+> > +- compatible: should be one of the following
+> > +  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
+> > +  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
+> > +  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
+> > +- clocks: Should reference the controller clock
+> > +- clock-names: Should contain "sdi"
+> > +
+> > +Required Board Specific Properties:
+> > +- pinctrl-0: Should specify pin control groups used for this controller.
+> > +- pinctrl-names: Should contain only one value - "default".
+> 
+> I'm not sure but i think this description doesn't need at here.
+> 
+> > +
+> > +Example:
+> > +	sdi: sdi@5a000000 {
+> 
+> I think it needs to use "mmc0: sdi@5a000000" instead of "sdi: sdi@5a000000"
+> Because mmc is more clear than sdi.
 
-After some further investigation, I found a couple things:
+The label doesn't matter much as it is not part of the dtb. The unit 
+name should be 'mmc' though.
 
-Firstly, I had a weak power brick causing the spontanious reboot after
-fixing max-frequency, so the max-frequency does seem to fix the
-problem!  Thanks Fabio!
+With that,
 
-Secondly, the SD clock on the SD interface definitely switches to 200
-MHz mode at times.  I'm not sure why.  I checked with 3.14, 4.8, and
-4.9, all have this behavior.  However, there doesn't seem to be any
-data flowing on the other pins during these intervals of 200MHz
-clocking.
+Acked-by: Rob Herring <robh@kernel.org>
 
-I checked the CMD pin, and all the data pins -- no transitions during
-the 200MHz clock mode.  So.. my board runs, but a 200MHz clock on
-SD_CLK definitely doesn't seem right.
-
-Thanks again,
- - Caleb
