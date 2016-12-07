@@ -1,78 +1,54 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: add DT binding for S3C24XX
- MMC/SD/SDIO controller
-Date: Tue, 6 Dec 2016 17:13:18 -0600
-Message-ID: <20161206231318.m4oo2e6t5zk2txbx@rob-hp-laptop>
-References: <1480637665-6325-1-git-send-email-sergio.prado@e-labworks.com>
- <CGME20161202001621epcas3p2fcc946ce070dfcc594e4b89729e149d7@epcas3p2.samsung.com>
- <1480637665-6325-2-git-send-email-sergio.prado@e-labworks.com>
- <054a65d8-8606-eeb0-e028-1b85dbf1c8ba@samsung.com>
+From: "Mr. Hassan Alwan Ali" <katherine54f@gmail.com>
+Subject: Dear Friend.
+Date: Wed, 7 Dec 2016 21:01:16 +0100
+Message-ID: <CAM=bgpGfdddS0EtvW7Zc+kVSvDcT5RuenczFj9WR2_YewTuD3w@mail.gmail.com>
+Reply-To: hassan_alwanali01@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:35962 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751266AbcLFXNU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2016 18:13:20 -0500
-Content-Disposition: inline
-In-Reply-To: <054a65d8-8606-eeb0-e028-1b85dbf1c8ba@samsung.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:36332 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932209AbcLGUB3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2016 15:01:29 -0500
+Received: by mail-qk0-f193.google.com with SMTP id h201so49911586qke.3
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2016 12:01:29 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Sergio Prado <sergio.prado@e-labworks.com>, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, Dec 02, 2016 at 09:48:45AM +0900, Jaehoon Chung wrote:
-> On 12/02/2016 09:14 AM, Sergio Prado wrote:
-> > Adds the device tree bindings description for Samsung S3C24XX
-> > MMC/SD/SDIO controller, used as a connectivity interface with external
-> > MMC, SD and SDIO storage mediums.
-> > 
-> > Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
-> > ---
-> >  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 38 ++++++++++++++++++++++
-> >  1 file changed, 38 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> > new file mode 100644
-> > index 000000000000..3f044076e69a
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> > @@ -0,0 +1,38 @@
-> > +* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
-> > +
-> > +Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
-> > +with external MMC, SD and SDIO storage mediums.
-> > +
-> > +This file documents differences between the core mmc properties described by
-> > +mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
-> > +implementation.
-> > +
-> > +Required SoC Specific Properties:
-> > +- compatible: should be one of the following
-> > +  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
-> > +  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
-> > +  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
-> > +- clocks: Should reference the controller clock
-> > +- clock-names: Should contain "sdi"
-> > +
-> > +Required Board Specific Properties:
-> > +- pinctrl-0: Should specify pin control groups used for this controller.
-> > +- pinctrl-names: Should contain only one value - "default".
-> 
-> I'm not sure but i think this description doesn't need at here.
-> 
-> > +
-> > +Example:
-> > +	sdi: sdi@5a000000 {
-> 
-> I think it needs to use "mmc0: sdi@5a000000" instead of "sdi: sdi@5a000000"
-> Because mmc is more clear than sdi.
+Dear Friend,
 
-The label doesn't matter much as it is not part of the dtb. The unit 
-name should be 'mmc' though.
+I know that this mail will come to you as a surprise since we have not
+known or met before now, but please, I would like you to treat it like
+blood brother affair and with the urgency and secrecy it requires. I
+am Mr. Hassan Alwan Ali, an Audit staff of (C.B.N) Central Bank of
+Nigeria.
 
-With that,
 
-Acked-by: Rob Herring <robh@kernel.org>
+An investor (name with-held) died without naming any next of kin to
+his fund he deposited in my bank. The amount is $10.5M (Ten Million
+Five hundred Thousand Dollars) and banking regulation/legislation in
+Nigeria demands that I should notify the fiscal authorities after
+three years.
 
+The above set of facts underscores my reason to seek your permission
+to have you stand in as the next of kin to the deceased.
+
+This fund will be approved and released in your favour as the next of
+kin if only you will adhere to my instruction and cooperate with me in
+one accord.
+
+I have all the legal and banking details of the deceased client that
+will facilitate our putting you forward as the claimant/beneficiary of
+the funds and ultimately transfer of the $10.5M plus interest to any
+bank account nominated by you.
+
+I am prepared to compensate you with a 35% share of the total funds
+for your efforts. The final details will be given upon receipt an
+affirmation of your desire to participate.
+
+Please contact me immediately on (  hassan_alwanali01@yahoo.com  ) if
+you are interest in my proposal to enable me not to start scouting for
+another foreign partner.
+
+Thanks,
+Mr. Hassan Alwan Ali.
