@@ -1,60 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Move files to core
-Date: Thu, 8 Dec 2016 14:55:30 +0100
-Message-ID: <CAPDyKFqkmA6e+47cNt9ecXfZGhrvpQPG0PPjByyhoAnappQyLA@mail.gmail.com>
-References: <1481195892-31779-1-git-send-email-ulf.hansson@linaro.org>
- <e0cab491-2902-1931-a14b-75ed7ac3e8af@intel.com> <CAPDyKFphV0SFLfnL19EfTLH2ZuGpHpP991xMhSq1O_J500BNTw@mail.gmail.com>
- <6ca1c5b1-ed43-47b8-c6eb-64f58b11d813@intel.com>
+Subject: Re: [PATCH v4 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
+Date: Thu, 8 Dec 2016 15:05:41 +0100
+Message-ID: <CAPDyKFpFmBnydazS0pYOYajN1-QOiw=Sxid6Uuxn8z4RMVO3KA@mail.gmail.com>
+References: <1480903854-22701-1-git-send-email-yamada.masahiro@socionext.com>
+ <1480903854-22701-3-git-send-email-yamada.masahiro@socionext.com>
+ <CAPDyKFqbAzCyXArikgTUeTrs9vOzfwKWJcs3TgF7D-4f_xfjfQ@mail.gmail.com> <CAK7LNAQkJO0vN9T-pB3ys4N=3pG9wdWZ9z+VkYToL7F_fLo9dA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f170.google.com ([209.85.210.170]:34836 "EHLO
-        mail-wj0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752817AbcLHNzd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2016 08:55:33 -0500
-Received: by mail-wj0-f170.google.com with SMTP id v7so388926158wjy.2
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2016 05:55:33 -0800 (PST)
-In-Reply-To: <6ca1c5b1-ed43-47b8-c6eb-64f58b11d813@intel.com>
+Received: from mail-wj0-f171.google.com ([209.85.210.171]:33597 "EHLO
+        mail-wj0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753187AbcLHOFo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2016 09:05:44 -0500
+Received: by mail-wj0-f171.google.com with SMTP id xy5so389108878wjc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2016 06:05:44 -0800 (PST)
+In-Reply-To: <CAK7LNAQkJO0vN9T-pB3ys4N=3pG9wdWZ9z+VkYToL7F_fLo9dA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Rob Herring <robh+dt@kernel.org>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Joshua Henderson <joshua.henderson@microchip.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>, Eric Anholt <eric@anholt.net>
 
-On 8 December 2016 at 13:47, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/12/16 14:21, Ulf Hansson wrote:
->> On 8 December 2016 at 12:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 08/12/16 13:18, Ulf Hansson wrote:
->>>> Once upon a time it made sense to keep the mmc block device driver and its
->>>> related code, in a separate directory. Over time, more an more interfaces
->>>> and structures have been exported by the core layer to outsiders. This to
->>>> allow the mmc block device driver to do its job. In other words, the
->>>> relationship between the block code and the core code has become closer.
->>>>
->>>> Let's not continue this path, but instead let's join the two directories.
->>>> Simply by moving the block files into the core directory, lots of clean ups
->>>> can be made, but more importantly, this change should also enables us
->>>> remove unnecessary exported interfaces.
+On 8 December 2016 at 13:52, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> Hi Ulf,
+>
+> 2016-12-08 21:32 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 5 December 2016 at 03:10, Masahiro Yamada
+>> <yamada.masahiro@socionext.com> wrote:
+>>> Add a driver for the Cadence SD4HC SD/SDIO/eMMC Controller.
 >>>
->>> Don't you still need to export things if they are separate modules?
+>>> For SD, it basically relies on the SDHCI standard code.
+>>> For eMMC, this driver provides some callbacks to support the
+>>> hardware part that is specific to this IP design.
+>>>
+>>> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 >>
->> Yes, right! Perhaps I was a bit too vague in my change-log.
+>> Thanks, applied for next!
 >>
->> I aim to slim down generic mmc headers in include/linux/mmc/* as to
->> achieve the goal of only providing interfaces/structures to outsiders
->> which they are allowed to use. Currently it's it too easy to abuse the
->> mmc interfaces.
 >
-> Then would another option be to have the mmc block driver reach over and
-> include what it needs?
-> e.g.
 >
->         #include "../core/blkonly.h"
+> Very sorry for my fix at the last minute.
+>
+> I've just posted v5.
+>
+> Please make sure to apply v5.
 
-Nah, that doesn't seem better to me. Moreover it would hint that such
-kind of "includes" should be okay to do in kernel in general, which I
-disagree with.
+Okay, I have replaced v4 with v5.
 
-[...]
+Perhaps you should have a look at my next branch to make sure it's all okay.
 
 Kind regards
 Uffe
