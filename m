@@ -1,35 +1,56 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v5 0/2] mmc: sdhci: export sdhci_execute_tuning(), then add Cadence SDHCI driver
-Date: Thu,  8 Dec 2016 21:50:53 +0900
-Message-ID: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Douglas Anderson <dianders@chromium.org>, devicetree@vger.kernel.org, Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Rob Herring <robh+dt@kernel.org>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: Move files to core
+Date: Thu, 8 Dec 2016 14:47:26 +0200
+Message-ID: <6ca1c5b1-ed43-47b8-c6eb-64f58b11d813@intel.com>
+References: <1481195892-31779-1-git-send-email-ulf.hansson@linaro.org>
+ <e0cab491-2902-1931-a14b-75ed7ac3e8af@intel.com>
+ <CAPDyKFphV0SFLfnL19EfTLH2ZuGpHpP991xMhSq1O_J500BNTw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:43420 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932115AbcLHMwf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 8 Dec 2016 07:52:35 -0500
+In-Reply-To: <CAPDyKFphV0SFLfnL19EfTLH2ZuGpHpP991xMhSq1O_J500BNTw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>
 
+On 08/12/16 14:21, Ulf Hansson wrote:
+> On 8 December 2016 at 12:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 08/12/16 13:18, Ulf Hansson wrote:
+>>> Once upon a time it made sense to keep the mmc block device driver and its
+>>> related code, in a separate directory. Over time, more an more interfaces
+>>> and structures have been exported by the core layer to outsiders. This to
+>>> allow the mmc block device driver to do its job. In other words, the
+>>> relationship between the block code and the core code has become closer.
+>>>
+>>> Let's not continue this path, but instead let's join the two directories.
+>>> Simply by moving the block files into the core directory, lots of clean ups
+>>> can be made, but more importantly, this change should also enables us
+>>> remove unnecessary exported interfaces.
+>>
+>> Don't you still need to export things if they are separate modules?
+> 
+> Yes, right! Perhaps I was a bit too vague in my change-log.
+> 
+> I aim to slim down generic mmc headers in include/linux/mmc/* as to
+> achieve the goal of only providing interfaces/structures to outsiders
+> which they are allowed to use. Currently it's it too easy to abuse the
+> mmc interfaces.
 
-1/2 exports sdhci_execute_tuning(), which I want to use for 2/2.
+Then would another option be to have the mmc block driver reach over and
+include what it needs?
+e.g.
 
-2/2 adds a new driver for Cadence's controller IP.
+	#include "../core/blkonly.h"
 
+> 
+> BTW, regarding your eMMC CMDQ series, that can easily be re-based on
+> top of this change as git takes good care of files being renamed.
 
-Changes in v2:
-  - Remove unnecessary "select MMC_SDHCI_IO_ACCESSORS"
+Yes, re-basing is normal :-)
 
-Masahiro Yamada (2):
-  mmc: sdhci: export sdhci_execute_tuning()
-  mmc: sdhci-cadence: add Cadence SD4HC support
-
- .../devicetree/bindings/mmc/sdhci-cadence.txt      |  30 +++
- drivers/mmc/host/Kconfig                           |  11 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-cadence.c                   | 283 +++++++++++++++++++++
- drivers/mmc/host/sdhci.c                           |   3 +-
- drivers/mmc/host/sdhci.h                           |   1 +
- 6 files changed, 328 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
- create mode 100644 drivers/mmc/host/sdhci-cadence.c
-
--- 
-2.7.4
