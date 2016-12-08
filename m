@@ -1,47 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Move files to core
-Date: Thu, 8 Dec 2016 13:21:12 +0100
-Message-ID: <CAPDyKFphV0SFLfnL19EfTLH2ZuGpHpP991xMhSq1O_J500BNTw@mail.gmail.com>
-References: <1481195892-31779-1-git-send-email-ulf.hansson@linaro.org> <e0cab491-2902-1931-a14b-75ed7ac3e8af@intel.com>
+Subject: Re: [PATCH v4 1/2] mmc: sdhci: export sdhci_execute_tuning()
+Date: Thu, 8 Dec 2016 13:31:57 +0100
+Message-ID: <CAPDyKFoEYgLNX=SnMu32iXHZ5hzF-89Yve0csuNiKO79UavyRg@mail.gmail.com>
+References: <1480903854-22701-1-git-send-email-yamada.masahiro@socionext.com> <1480903854-22701-2-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37479 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752414AbcLHMVP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2016 07:21:15 -0500
-Received: by mail-wm0-f42.google.com with SMTP id t79so22768808wmt.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2016 04:21:14 -0800 (PST)
-In-Reply-To: <e0cab491-2902-1931-a14b-75ed7ac3e8af@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1480903854-22701-2-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 8 December 2016 at 12:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/12/16 13:18, Ulf Hansson wrote:
->> Once upon a time it made sense to keep the mmc block device driver and its
->> related code, in a separate directory. Over time, more an more interfaces
->> and structures have been exported by the core layer to outsiders. This to
->> allow the mmc block device driver to do its job. In other words, the
->> relationship between the block code and the core code has become closer.
->>
->> Let's not continue this path, but instead let's join the two directories.
->> Simply by moving the block files into the core directory, lots of clean ups
->> can be made, but more importantly, this change should also enables us
->> remove unnecessary exported interfaces.
+On 5 December 2016 at 03:10, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> Some SDHCI-compat controllers support not only SD, but also eMMC,
+> but they use different commands for tuning: CMD19 for SD, CMD21 for
+> eMMC.
 >
-> Don't you still need to export things if they are separate modules?
+> Due to the difference of the underlying mechanism, some controllers
+> (at least, the Cadence IP is the case) provide their own registers
+> for the eMMC tuning.
+>
+> This commit will be useful when we want to override .execute_tuning
+> callback (for eMMC HS200 tuning), but still let it fall back to
+> sdhci_execute_tuning() for SD timing.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Yes, right! Perhaps I was a bit too vague in my change-log.
-
-I aim to slim down generic mmc headers in include/linux/mmc/* as to
-achieve the goal of only providing interfaces/structures to outsiders
-which they are allowed to use. Currently it's it too easy to abuse the
-mmc interfaces.
-
-BTW, regarding your eMMC CMDQ series, that can easily be re-based on
-top of this change as git takes good care of files being renamed.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>
+> I want to use this in the next commit.
+> The Cadence IP supports eMMC as well as SD.
+>
+> I want to re-use the sdhci_execute_tuning() for SD timing.
+>
+> On the other hand, Cadence provides its own way for eMMC HS200 tuning;
+> I need to touch some registers that are specific to Cadence's design.
+>
+>
+> Changes in v4:
+>   - export sdhci_execute_tuning() instead of using
+>     execute_execute_tuning()
+>
+> Changes in v3: None
+> Changes in v2: None
+>
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  drivers/mmc/host/sdhci.h | 1 +
+>  2 files changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 42ef3eb..0c03a89 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1948,7 +1948,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+>         return 0;
+>  }
+>
+> -static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>         struct sdhci_host *host = mmc_priv(mmc);
+>         u16 ctrl;
+> @@ -2141,6 +2141,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         spin_unlock_irqrestore(&host->lock, flags);
+>         return err;
+>  }
+> +EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
+>
+>  static int sdhci_select_drive_strength(struct mmc_card *card,
+>                                        unsigned int max_dtr, int host_drv,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 9c35776..786eee9 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -689,6 +689,7 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>  void sdhci_set_bus_width(struct sdhci_host *host, int width);
+>  void sdhci_reset(struct sdhci_host *host, u8 mask);
+>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+> +int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+>
+>  #ifdef CONFIG_PM
+>  extern int sdhci_suspend_host(struct sdhci_host *host);
+> --
+> 2.7.4
+>
