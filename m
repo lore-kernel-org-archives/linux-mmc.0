@@ -1,98 +1,91 @@
-From: Jungseung Lee <js07.lee@samsung.com>
-Subject: [PATCH v2] mmc: core: Export device lifetime information through sysf
-Date: Fri, 09 Dec 2016 14:53:09 +0900
-Message-ID: <20161209055309.10976-1-js07.lee@samsung.com>
-References: <CGME20161209055329eucas1p1f0718317b23071fe732cb40ed1c65fd3@eucas1p1.samsung.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH v3 00/12] mmc: Add support to Marvell Xenon SD Host Controller
+Date: Fri,  9 Dec 2016 11:29:56 +0100
+Message-ID: <cover.e0137cef24a16a2c7d795548de554993595d4a98.1481279228.git-series.gregory.clement@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.w1.samsung.com ([210.118.77.14]:21892 "EHLO
-        mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750944AbcLIFxe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2016 00:53:34 -0500
+Received: from mail.free-electrons.com ([62.4.15.54]:37358 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932349AbcLIKao (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2016 05:30:44 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, js07.lee@gmail.com
-Cc: Jungseung Lee <js07.lee@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Hanna Hawa <hannah@marvell.com>, Kostya Porotchkin <kostap@marvell.com>
 
-In the eMMC 5.0 version of the spec, several EXT_CSD fields about
-device lifetime are added.
+Hello,
 
- - Two types of estimated indications reflected by averaged wear out of memory
- - An indication reflected by average reserved blocks
+This the third version of the series adding support for the SDHCI
+Xenon controller. It can be currently found on the Armada 37xx and the
+Armada 7K/8K but will be also used in more Marvell SoC (and not only
+the mvebu ones actually).
 
-Export the information through sysfs.
+I think that now most (if not all) the remarks had been taking into
+account since the second version. According to Ziji Hu, here are the
+following changes:
+" Changes in V3:
+  Adjust and improve Xenon DT bindings. Move some caps setting from driver into
+  DT. Use mmc-card sub-node to represent eMMC type.
+  Remove PHY Sampling Fixed Delay Line scan in lower speed mode.
+  Improve Xenon probe and ->init_card() functions.
+  Export sdhci_enable_sdio_irq() and implement own SDIO IRQ control.
+  Split PHY patch into two smaller patches.
+  Temporarily remove AXI clock before its implementation is improved."
 
-Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
----
- drivers/mmc/core/mmc.c   | 12 ++++++++++++
- include/linux/mmc/card.h |  3 +++
- include/linux/mmc/mmc.h  |  3 +++
- 3 files changed, 18 insertions(+)
+Besides this changes I also
+- Removed the sdhci-xenon-phy.h and moved its content in the
+shc-xenon-phy.c file.
+- Fixed the tuning-count usage
+- Managed the error case for clk_prepare_enable
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index b61b52f9..c0e2507 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -617,6 +617,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.ffu_capable =
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-+
-+		card->ext_csd.pre_eol_info = ext_csd[EXT_CSD_PRE_EOL_INFO];
-+		card->ext_csd.device_life_time_est_typ_a =
-+			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
-+		card->ext_csd.device_life_time_est_typ_b =
-+			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
- 	}
- 
- 	/* eMMC v5.1 or later */
-@@ -764,6 +770,10 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-+MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
-+MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
-+	card->ext_csd.device_life_time_est_typ_a,
-+	card->ext_csd.device_life_time_est_typ_b);
- MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
- MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
- 		card->ext_csd.enhanced_area_offset);
-@@ -817,6 +827,8 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_oemid.attr,
- 	&dev_attr_prv.attr,
-+	&dev_attr_pre_eol_info.attr,
-+	&dev_attr_life_time.attr,
- 	&dev_attr_serial.attr,
- 	&dev_attr_enhanced_area_offset.attr,
- 	&dev_attr_enhanced_area_size.attr,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 95d69d4..00449e5 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -121,6 +121,9 @@ struct mmc_ext_csd {
- 	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
- 	u8			raw_bkops_status;	/* 246 */
- 	u8			raw_sectors[4];		/* 212 - 4 bytes */
-+	u8			pre_eol_info;		/* 267 */
-+	u8			device_life_time_est_typ_a;	/* 268 */
-+	u8			device_life_time_est_typ_b;	/* 269 */
- 
- 	unsigned int            feature_support;
- #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 672730a..a074082 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -339,6 +339,9 @@ struct _mmc_csd {
- #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
- #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
- #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
-+#define EXT_CSD_PRE_EOL_INFO		267	/* RO */
-+#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A	268	/* RO */
-+#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B	269	/* RO */
- #define EXT_CSD_CMDQ_DEPTH		307	/* RO */
- #define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
- #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+For the record the change from v1 was:
+" Changes in V2:
+  rebase on v4.9-rc2.
+  Re-write Xenon bindings. Ajust Xenon DT property naming.
+  Add a new DT property to indicate eMMC card type, instead of using
+  variable card_candidate.
+  Clear quirks SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 in Xenon platform data
+  Add support to HS400 retuning."
+
+Thanks,
+
+Gregory
+
+Gregory CLEMENT (3):
+  arm64: dts: marvell: add eMMC support for Armada 37xx
+  arm64: dts: marvell: add sdhci support for Armada 7K/8K
+  arm64: configs: enable SDHCI driver for Xenon
+
+Hu Ziji (9):
+  mmc: sdhci: Export sdhci_set_ios() from sdhci.c
+  mmc: sdhci: Export sdhci_start_signal_voltage_switch() in sdhci.c
+  mmc: sdhci: Export sdhci_execute_tuning() in sdhci.c
+  mmc: sdhci: Export sdhci_enable_sdio_irq() from sdhci.c
+  MAINTAINERS: add entry for Marvell Xenon MMC Host Controller drivers
+  dt: bindings: Add bindings for Marvell Xenon SD Host Controller
+  mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
+  mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC.
+  mmc: sdhci-xenon: Add SOC PHY PAD voltage control
+
+ Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 197 ++-
+ MAINTAINERS                                                   |   7 +-
+ arch/arm64/boot/dts/marvell/armada-3720-db.dts                |  17 +-
+ arch/arm64/boot/dts/marvell/armada-37xx.dtsi                  |  11 +-
+ arch/arm64/boot/dts/marvell/armada-7040-db.dts                |   7 +-
+ arch/arm64/boot/dts/marvell/armada-ap806.dtsi                 |   9 +-
+ arch/arm64/configs/defconfig                                  |   1 +-
+ drivers/mmc/host/Kconfig                                      |   9 +-
+ drivers/mmc/host/Makefile                                     |   3 +-
+ drivers/mmc/host/sdhci-xenon-phy.c                            | 908 +++++++-
+ drivers/mmc/host/sdhci-xenon.c                                | 616 +++++-
+ drivers/mmc/host/sdhci-xenon.h                                | 111 +-
+ drivers/mmc/host/sdhci.c                                      |  14 +-
+ drivers/mmc/host/sdhci.h                                      |   5 +-
+ 14 files changed, 1910 insertions(+), 5 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+ create mode 100644 drivers/mmc/host/sdhci-xenon-phy.c
+ create mode 100644 drivers/mmc/host/sdhci-xenon.c
+ create mode 100644 drivers/mmc/host/sdhci-xenon.h
+
+base-commit: 9fe68cad6e74967b88d0c6aeca7d9cd6b6e91942
 -- 
-2.10.1
-
+git-series 0.9.1
