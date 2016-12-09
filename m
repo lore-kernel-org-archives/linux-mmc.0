@@ -1,7 +1,7 @@
 From: Sergio Prado <sergio.prado@e-labworks.com>
-Subject: [PATCH v2 1/2] dt-bindings: mmc: add DT binding for S3C24XX MMC/SD/SDIO controller
-Date: Fri,  9 Dec 2016 11:14:43 -0200
-Message-ID: <1481289284-19919-2-git-send-email-sergio.prado@e-labworks.com>
+Subject: [PATCH v2 2/2] mmc: host: s3cmci: allow probing from device tree
+Date: Fri,  9 Dec 2016 11:14:44 -0200
+Message-ID: <1481289284-19919-3-git-send-email-sergio.prado@e-labworks.com>
 References: <1481289284-19919-1-git-send-email-sergio.prado@e-labworks.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1481289284-19919-1-git-send-email-sergio.prado@e-labworks.com>
@@ -10,56 +10,257 @@ To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@
 Cc: Sergio Prado <sergio.prado@e-labworks.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Adds the device tree bindings description for Samsung S3C24XX
-MMC/SD/SDIO controller, used as a connectivity interface with external
-MMC, SD and SDIO storage mediums.
+Allows configuring Samsung S3C24XX MMC/SD/SDIO controller using a device
+tree.
 
 Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 34 ++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+ drivers/mmc/host/s3cmci.c | 155 +++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 131 insertions(+), 24 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-new file mode 100644
-index 000000000000..d09dbf4b3824
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-@@ -0,0 +1,34 @@
-+* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index 932a4b1fed33..bfeb90e8ffee 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -23,6 +23,9 @@
+ #include <linux/gpio.h>
+ #include <linux/irq.h>
+ #include <linux/io.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_gpio.h>
+ 
+ #include <plat/gpio-cfg.h>
+ #include <mach/dma.h>
+@@ -127,6 +130,22 @@ enum dbg_channels {
+ 	dbg_conf  = (1 << 8),
+ };
+ 
++struct s3cmci_drv_data {
++	int is2440;
++};
 +
-+Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
-+with external MMC, SD and SDIO storage mediums.
++static const struct s3cmci_drv_data s3c2410_s3cmci_drv_data = {
++	.is2440 = 0,
++};
 +
-+This file documents differences between the core mmc properties described by
-+mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
-+implementation.
++static const struct s3cmci_drv_data s3c2412_s3cmci_drv_data = {
++	.is2440 = 1,
++};
 +
-+Required SoC Specific Properties:
-+- compatible: should be one of the following
-+  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
-+  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
-+  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
-+- clocks: Should reference the controller clock
-+- clock-names: Should contain "sdi"
++static const struct s3cmci_drv_data s3c2440_s3cmci_drv_data = {
++	.is2440 = 1,
++};
 +
-+Example:
-+	mmc0: mmc@5a000000 {
-+		compatible = "samsung,s3c2440-sdi";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sdi_pins>;
-+		reg = <0x5a000000 0x100000>;
-+		interrupts = <0 0 21 3>;
-+		clocks = <&clocks PCLK_SDI>;
-+		clock-names = "sdi";
-+		bus-width = <4>;
-+		cd-gpios = <&gpg 8 GPIO_ACTIVE_LOW>;
-+		wp-gpios = <&gph 8 GPIO_ACTIVE_LOW>;
-+	};
+ static const int dbgmap_err   = dbg_fail;
+ static const int dbgmap_info  = dbg_info | dbg_conf;
+ static const int dbgmap_debug = dbg_err | dbg_debug;
+@@ -1241,8 +1260,9 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	case MMC_POWER_ON:
+ 	case MMC_POWER_UP:
+ 		/* Configure GPE5...GPE10 pins in SD mode */
+-		s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
+-				      S3C_GPIO_PULL_NONE);
++		if (!host->pdev->dev.of_node)
++			s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
++					      S3C_GPIO_PULL_NONE);
+ 
+ 		if (host->pdata->set_power)
+ 			host->pdata->set_power(ios->power_mode, ios->vdd);
+@@ -1254,7 +1274,8 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	case MMC_POWER_OFF:
+ 	default:
+-		gpio_direction_output(S3C2410_GPE(5), 0);
++		if (!host->pdev->dev.of_node)
++			gpio_direction_output(S3C2410_GPE(5), 0);
+ 
+ 		if (host->is2440)
+ 			mci_con |= S3C2440_SDICON_SDRESET;
+@@ -1544,21 +1565,12 @@ static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
+ 
+ #endif /* CONFIG_DEBUG_FS */
+ 
+-static int s3cmci_probe(struct platform_device *pdev)
++static int s3cmci_probe_pdata(struct s3cmci_host *host)
+ {
+-	struct s3cmci_host *host;
+-	struct mmc_host	*mmc;
+-	int ret;
+-	int is2440;
+-	int i;
++	struct platform_device *pdev = host->pdev;
++	int i, ret;
+ 
+-	is2440 = platform_get_device_id(pdev)->driver_data;
+-
+-	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
+-	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto probe_out;
+-	}
++	host->is2440 = platform_get_device_id(pdev)->driver_data;
+ 
+ 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++) {
+ 		ret = gpio_request(i, dev_name(&pdev->dev));
+@@ -1568,14 +1580,90 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 			for (i--; i >= S3C2410_GPE(5); i--)
+ 				gpio_free(i);
+ 
+-			goto probe_free_host;
++			return ret;
+ 		}
+ 	}
+ 
++	return 0;
++}
 +
-+	Note: This example shows both SoC specific and board specific properties
-+	in a single device node. The properties can be actually be separated
-+	into SoC specific node and board specific node.
++static int s3cmci_probe_dt(struct s3cmci_host *host)
++{
++	struct platform_device *pdev = host->pdev;
++	struct s3c24xx_mci_pdata *pdata;
++	const struct s3cmci_drv_data *drvdata;
++	struct mmc_host *mmc = host->mmc;
++	int gpio, ret;
++
++	drvdata = of_device_get_match_data(&pdev->dev);
++	if (!drvdata)
++		return -ENODEV;
++
++	host->is2440 = drvdata->is2440;
++
++	ret = mmc_of_parse(mmc);
++	if (ret)
++		return ret;
++
++	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
++	if (!pdata)
++		return -ENOMEM;
++
++	pdata->ocr_avail = mmc->ocr_avail;
++
++	if (mmc->caps2 & MMC_CAP2_NO_WRITE_PROTECT)
++		pdata->no_wprotect = 1;
++
++	if (mmc->caps & MMC_CAP_NEEDS_POLL)
++		pdata->no_detect = 1;
++
++	if (mmc->caps2 & MMC_CAP2_RO_ACTIVE_HIGH)
++		pdata->wprotect_invert = 1;
++
++	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
++		pdata->detect_invert = 1;
++
++	gpio = of_get_named_gpio(pdev->dev.of_node, "cd-gpios", 0);
++	if (gpio_is_valid(gpio)) {
++		pdata->gpio_detect = gpio;
++		gpio_free(gpio);
++	}
++
++	gpio = of_get_named_gpio(pdev->dev.of_node, "wp-gpios", 0);
++	if (gpio_is_valid(gpio)) {
++		pdata->gpio_wprotect = gpio;
++		gpio_free(gpio);
++	}
++
++	pdev->dev.platform_data = pdata;
++
++	return 0;
++}
++
++static int s3cmci_probe(struct platform_device *pdev)
++{
++	struct s3cmci_host *host;
++	struct mmc_host	*mmc;
++	int ret;
++	int i;
++
++	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
++	if (!mmc) {
++		ret = -ENOMEM;
++		goto probe_out;
++	}
++
+ 	host = mmc_priv(mmc);
+ 	host->mmc 	= mmc;
+ 	host->pdev	= pdev;
+-	host->is2440	= is2440;
++
++	if (pdev->dev.of_node)
++		ret = s3cmci_probe_dt(host);
++	else
++		ret = s3cmci_probe_pdata(host);
++
++	if (ret)
++		goto probe_free_host;
+ 
+ 	host->pdata = pdev->dev.platform_data;
+ 	if (!host->pdata) {
+@@ -1586,7 +1674,7 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->complete_lock);
+ 	tasklet_init(&host->pio_tasklet, pio_tasklet, (unsigned long) host);
+ 
+-	if (is2440) {
++	if (host->is2440) {
+ 		host->sdiimsk	= S3C2440_SDIIMSK;
+ 		host->sdidata	= S3C2440_SDIDATA;
+ 		host->clk_div	= 1;
+@@ -1789,8 +1877,9 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
+  probe_free_gpio:
+-	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
+-		gpio_free(i);
++	if (!pdev->dev.of_node)
++		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
++			gpio_free(i);
+ 
+  probe_free_host:
+ 	mmc_free_host(mmc);
+@@ -1837,9 +1926,9 @@ static int s3cmci_remove(struct platform_device *pdev)
+ 	if (!pd->no_detect)
+ 		gpio_free(pd->gpio_detect);
+ 
+-	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
+-		gpio_free(i);
+-
++	if (!pdev->dev.of_node)
++		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
++			gpio_free(i);
+ 
+ 	iounmap(host->base);
+ 	release_mem_region(host->mem->start, resource_size(host->mem));
+@@ -1848,6 +1937,23 @@ static int s3cmci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++static const struct of_device_id s3cmci_dt_match[] = {
++	{
++		.compatible = "samsung,s3c2410-sdi",
++		.data = &s3c2410_s3cmci_drv_data,
++	},
++	{
++		.compatible = "samsung,s3c2412-sdi",
++		.data = &s3c2412_s3cmci_drv_data,
++	},
++	{
++		.compatible = "samsung,s3c2440-sdi",
++		.data = &s3c2440_s3cmci_drv_data,
++	},
++	{ /* sentinel */ },
++};
++MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
++
+ static const struct platform_device_id s3cmci_driver_ids[] = {
+ 	{
+ 		.name	= "s3c2410-sdi",
+@@ -1867,6 +1973,7 @@ static int s3cmci_remove(struct platform_device *pdev)
+ static struct platform_driver s3cmci_driver = {
+ 	.driver	= {
+ 		.name	= "s3c-sdi",
++		.of_match_table = s3cmci_dt_match,
+ 	},
+ 	.id_table	= s3cmci_driver_ids,
+ 	.probe		= s3cmci_probe,
 -- 
 1.9.1
