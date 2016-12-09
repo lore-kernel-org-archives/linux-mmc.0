@@ -1,84 +1,47 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Fri, 9 Dec 2016 12:09:30 -0600
-Message-ID: <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
+From: kbuild test robot <lkp@intel.com>
+Subject: [PATCH] mmc: sdhci-xenon: fix boolreturn.cocci warnings
+Date: Sat, 10 Dec 2016 02:27:53 +0800
+Message-ID: <20161209182750.GA80755@lkp-hsx03.lkp.intel.com>
+References: <201612100213.2R0DRXrE%fengguang.wu@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:33522 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753380AbcLISJc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2016 13:09:32 -0500
+Received: from mga05.intel.com ([192.55.52.43]:47417 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751075AbcLIS2n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Dec 2016 13:28:43 -0500
 Content-Disposition: inline
-In-Reply-To: <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
+In-Reply-To: <fd1e454d2d8c30c4b191ae78e911d481315352e0.1481279228.git-series.gregory.clement@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
+Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Hanna
 
-On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
-> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On 2 December 2016 at 08:22, Matt Ranostay <matt@ranostay.consulting> wrote:
-> >>
-> >>
-> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >>>
-> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
-> >>>> Add optional device-post-power-on parameters to disable post_power_on
-> >>>> function from being called since this breaks some device.
-> >>>>
-> >>>> Cc: Tony Lindgren <tony@atomide.com>
-> >>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> >>>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
-> >>>> ---
-> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
-> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
-> >>>> 2 files changed, 9 insertions(+)
-> >>>>
-> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> >>>> index bea306d772d1..09fa153f743e 100644
-> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> >>>> @@ -24,6 +24,8 @@ Optional properties:
-> >>>>        de-asserting the reset-gpios (if any)
-> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
-> >>>>        and pwrdn-gpios (if any)
-> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
-> >>>> +       this breaks some devices
-> >>>
-> >>> This is a bit weird. I would like to avoid this, if possible.
-> >>>
-> >>> Perhaps if you simply describe the sequence in detail for your device
-> >>> we can figure out the best option together.
-> >>
-> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
-> >
-> > This went offlist, please resend.
-> >
-> > Moreover, please try to describe the sequence you need in detail
-> > according to your HW spec.
-> >
-> 
-> Yeah oops....
-> 
-> So basically we need to drive the reset and powerdown lines high with
-> a 300 milliseconds delay between both...
-> can't have the reset line low with post power on (pretty sure but
-> would need a delay anyway), and we need both reset + powerdown line
-> set low on powerdown.
-> 
-> So the power down sequence would need to be reversed for this
-> application in pwrseq-simple.
+drivers/mmc/host/sdhci-xenon-phy.c:469:9-10: WARNING: return of 0/1 in function 'emmc_phy_slow_mode' with return type bool
 
-This sounds like you need a device specific sequence to me. Otherwise, 
-write a language to describe any power control waveforms rather than 
-trying to bolt on more and more properties. (Don't really go write a 
-language.) 
+ Return statements in functions returning bool should use
+ true/false instead of 1/0.
+Generated by: scripts/coccinelle/misc/boolreturn.cocci
 
-Rob
+CC: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Fengguang Wu <fengguang.wu@intel.com>
+---
+
+ sdhci-xenon-phy.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/mmc/host/sdhci-xenon-phy.c
++++ b/drivers/mmc/host/sdhci-xenon-phy.c
+@@ -466,11 +466,11 @@ static bool emmc_phy_slow_mode(struct sd
+ 
+ 	/* Skip temp stages from HS200 to HS400 */
+ 	if (temp_stage_hs200_to_hs400(host, priv))
+-		return 0;
++		return false;
+ 
+ 	/* Skip temp stages from HS400 t0 HS200 */
+ 	if (temp_stage_hs400_to_h200(host, priv))
+-		return 0;
++		return false;
+ 
+ 	reg = sdhci_readl(host, phy_regs->timing_adj);
+ 	/* Enable Slow Mode for SDIO in slower SDR mode */
