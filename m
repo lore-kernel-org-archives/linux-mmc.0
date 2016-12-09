@@ -1,266 +1,66 @@
-From: Sergio Prado <sergio.prado@e-labworks.com>
-Subject: [PATCH v2 2/2] mmc: host: s3cmci: allow probing from device tree
-Date: Fri,  9 Dec 2016 11:14:44 -0200
-Message-ID: <1481289284-19919-3-git-send-email-sergio.prado@e-labworks.com>
-References: <1481289284-19919-1-git-send-email-sergio.prado@e-labworks.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1481289284-19919-1-git-send-email-sergio.prado@e-labworks.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
-Cc: Sergio Prado <sergio.prado@e-labworks.com>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: tmio: use SDIO master interrupt bit only when allowed
+Date: Fri,  9 Dec 2016 17:51:41 +0100
+Message-ID: <20161209165141.26599-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Yasushi SHOJI <yashi@atmark-techno.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Allows configuring Samsung S3C24XX MMC/SD/SDIO controller using a device
-tree.
+The master bit to enable SDIO interrupts can only be accessed if
+SCLKDIVEN bit allows that. However, the core uses the SDIO enable
+callback at times when SCLKDIVEN forbids the change. This leads to
+"timeout waiting for SD bus idle" messages.
 
-Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
+We now activate the master bit in probe once if SDIO is supported. IRQ
+en-/disabling will be done now by the individual IRQ enablement bits
+only.
+
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Yasushi SHOJI <yashi@atmark-techno.com>
 ---
- drivers/mmc/host/s3cmci.c | 155 +++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 131 insertions(+), 24 deletions(-)
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 932a4b1fed33..bfeb90e8ffee 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -23,6 +23,9 @@
- #include <linux/gpio.h>
- #include <linux/irq.h>
- #include <linux/io.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_gpio.h>
+No change from RFC, only Rev-by added (which included testing).
+
+ drivers/mmc/host/tmio_mmc_pio.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 7ef24ec620b542..526e52719f81b9 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -140,12 +140,10 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
  
- #include <plat/gpio-cfg.h>
- #include <mach/dma.h>
-@@ -127,6 +130,22 @@ enum dbg_channels {
- 	dbg_conf  = (1 << 8),
- };
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
+ 					~TMIO_SDIO_STAT_IOIRQ;
+-		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+ 	} else if (!enable && host->sdio_irq_enabled) {
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+-		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
  
-+struct s3cmci_drv_data {
-+	int is2440;
-+};
-+
-+static const struct s3cmci_drv_data s3c2410_s3cmci_drv_data = {
-+	.is2440 = 0,
-+};
-+
-+static const struct s3cmci_drv_data s3c2412_s3cmci_drv_data = {
-+	.is2440 = 1,
-+};
-+
-+static const struct s3cmci_drv_data s3c2440_s3cmci_drv_data = {
-+	.is2440 = 1,
-+};
-+
- static const int dbgmap_err   = dbg_fail;
- static const int dbgmap_info  = dbg_info | dbg_conf;
- static const int dbgmap_debug = dbg_err | dbg_debug;
-@@ -1241,8 +1260,9 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_POWER_ON:
- 	case MMC_POWER_UP:
- 		/* Configure GPE5...GPE10 pins in SD mode */
--		s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
--				      S3C_GPIO_PULL_NONE);
-+		if (!host->pdev->dev.of_node)
-+			s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
-+					      S3C_GPIO_PULL_NONE);
- 
- 		if (host->pdata->set_power)
- 			host->pdata->set_power(ios->power_mode, ios->vdd);
-@@ -1254,7 +1274,8 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	case MMC_POWER_OFF:
- 	default:
--		gpio_direction_output(S3C2410_GPE(5), 0);
-+		if (!host->pdev->dev.of_node)
-+			gpio_direction_output(S3C2410_GPE(5), 0);
- 
- 		if (host->is2440)
- 			mci_con |= S3C2440_SDICON_SDRESET;
-@@ -1544,21 +1565,12 @@ static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
- 
- #endif /* CONFIG_DEBUG_FS */
- 
--static int s3cmci_probe(struct platform_device *pdev)
-+static int s3cmci_probe_pdata(struct s3cmci_host *host)
- {
--	struct s3cmci_host *host;
--	struct mmc_host	*mmc;
--	int ret;
--	int is2440;
--	int i;
-+	struct platform_device *pdev = host->pdev;
-+	int i, ret;
- 
--	is2440 = platform_get_device_id(pdev)->driver_data;
--
--	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto probe_out;
--	}
-+	host->is2440 = platform_get_device_id(pdev)->driver_data;
- 
- 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++) {
- 		ret = gpio_request(i, dev_name(&pdev->dev));
-@@ -1568,14 +1580,90 @@ static int s3cmci_probe(struct platform_device *pdev)
- 			for (i--; i >= S3C2410_GPE(5); i--)
- 				gpio_free(i);
- 
--			goto probe_free_host;
-+			return ret;
- 		}
+ 		host->sdio_irq_enabled = false;
+ 		pm_runtime_mark_last_busy(mmc_dev(mmc));
+@@ -1203,7 +1201,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+ 		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
+-		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0000);
++		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
  	}
  
-+	return 0;
-+}
-+
-+static int s3cmci_probe_dt(struct s3cmci_host *host)
-+{
-+	struct platform_device *pdev = host->pdev;
-+	struct s3c24xx_mci_pdata *pdata;
-+	const struct s3cmci_drv_data *drvdata;
-+	struct mmc_host *mmc = host->mmc;
-+	int gpio, ret;
-+
-+	drvdata = of_device_get_match_data(&pdev->dev);
-+	if (!drvdata)
-+		return -ENODEV;
-+
-+	host->is2440 = drvdata->is2440;
-+
-+	ret = mmc_of_parse(mmc);
-+	if (ret)
-+		return ret;
-+
-+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata)
-+		return -ENOMEM;
-+
-+	pdata->ocr_avail = mmc->ocr_avail;
-+
-+	if (mmc->caps2 & MMC_CAP2_NO_WRITE_PROTECT)
-+		pdata->no_wprotect = 1;
-+
-+	if (mmc->caps & MMC_CAP_NEEDS_POLL)
-+		pdata->no_detect = 1;
-+
-+	if (mmc->caps2 & MMC_CAP2_RO_ACTIVE_HIGH)
-+		pdata->wprotect_invert = 1;
-+
-+	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-+		pdata->detect_invert = 1;
-+
-+	gpio = of_get_named_gpio(pdev->dev.of_node, "cd-gpios", 0);
-+	if (gpio_is_valid(gpio)) {
-+		pdata->gpio_detect = gpio;
-+		gpio_free(gpio);
-+	}
-+
-+	gpio = of_get_named_gpio(pdev->dev.of_node, "wp-gpios", 0);
-+	if (gpio_is_valid(gpio)) {
-+		pdata->gpio_wprotect = gpio;
-+		gpio_free(gpio);
-+	}
-+
-+	pdev->dev.platform_data = pdata;
-+
-+	return 0;
-+}
-+
-+static int s3cmci_probe(struct platform_device *pdev)
-+{
-+	struct s3cmci_host *host;
-+	struct mmc_host	*mmc;
-+	int ret;
-+	int i;
-+
-+	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
-+	if (!mmc) {
-+		ret = -ENOMEM;
-+		goto probe_out;
-+	}
-+
- 	host = mmc_priv(mmc);
- 	host->mmc 	= mmc;
- 	host->pdev	= pdev;
--	host->is2440	= is2440;
-+
-+	if (pdev->dev.of_node)
-+		ret = s3cmci_probe_dt(host);
-+	else
-+		ret = s3cmci_probe_pdata(host);
-+
-+	if (ret)
-+		goto probe_free_host;
+ 	spin_lock_init(&_host->lock);
+@@ -1251,6 +1249,9 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 	struct platform_device *pdev = host->pdev;
+ 	struct mmc_host *mmc = host->mmc;
  
- 	host->pdata = pdev->dev.platform_data;
- 	if (!host->pdata) {
-@@ -1586,7 +1674,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	spin_lock_init(&host->complete_lock);
- 	tasklet_init(&host->pio_tasklet, pio_tasklet, (unsigned long) host);
- 
--	if (is2440) {
-+	if (host->is2440) {
- 		host->sdiimsk	= S3C2440_SDIIMSK;
- 		host->sdidata	= S3C2440_SDIDATA;
- 		host->clk_div	= 1;
-@@ -1789,8 +1877,9 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	release_mem_region(host->mem->start, resource_size(host->mem));
- 
-  probe_free_gpio:
--	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
--		gpio_free(i);
-+	if (!pdev->dev.of_node)
-+		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+			gpio_free(i);
- 
-  probe_free_host:
- 	mmc_free_host(mmc);
-@@ -1837,9 +1926,9 @@ static int s3cmci_remove(struct platform_device *pdev)
- 	if (!pd->no_detect)
- 		gpio_free(pd->gpio_detect);
- 
--	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
--		gpio_free(i);
--
-+	if (!pdev->dev.of_node)
-+		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+			gpio_free(i);
- 
- 	iounmap(host->base);
- 	release_mem_region(host->mem->start, resource_size(host->mem));
-@@ -1848,6 +1937,23 @@ static int s3cmci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static const struct of_device_id s3cmci_dt_match[] = {
-+	{
-+		.compatible = "samsung,s3c2410-sdi",
-+		.data = &s3c2410_s3cmci_drv_data,
-+	},
-+	{
-+		.compatible = "samsung,s3c2412-sdi",
-+		.data = &s3c2412_s3cmci_drv_data,
-+	},
-+	{
-+		.compatible = "samsung,s3c2440-sdi",
-+		.data = &s3c2440_s3cmci_drv_data,
-+	},
-+	{ /* sentinel */ },
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
++	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ)
++		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
 +
- static const struct platform_device_id s3cmci_driver_ids[] = {
- 	{
- 		.name	= "s3c2410-sdi",
-@@ -1867,6 +1973,7 @@ static int s3cmci_remove(struct platform_device *pdev)
- static struct platform_driver s3cmci_driver = {
- 	.driver	= {
- 		.name	= "s3c-sdi",
-+		.of_match_table = s3cmci_dt_match,
- 	},
- 	.id_table	= s3cmci_driver_ids,
- 	.probe		= s3cmci_probe,
+ 	if (!host->native_hotplug)
+ 		pm_runtime_get_sync(&pdev->dev);
+ 
 -- 
-1.9.1
+2.10.2
