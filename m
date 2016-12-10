@@ -1,89 +1,218 @@
-From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Fri, 9 Dec 2016 21:47:29 -0800
-Message-ID: <CAJ_EiSTBmm6HDCCNSTp1moOM3gOQx3eiMEBT0vo6Eawi_cxNcQ@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com> <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: [PATCH v2] mmc: sdhci-pci: Add support for HS200 tuning mode on AMD,
+ eMMC-4.5.1
+Date: Sat, 10 Dec 2016 16:14:43 +0530
+Message-ID: <7842b0ed-45f9-9521-112d-d5d7c97007d9@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Liam Breck <liam-RYWXG+zxWwBdeoIcmNTgJF6hYfS7NtTn@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam01on0067.outbound.protection.outlook.com ([104.47.32.67]:60526
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752706AbcLJLA7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 10 Dec 2016 06:00:59 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On Fri, Dec 9, 2016 at 10:09 AM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
->> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > On 2 December 2016 at 08:22, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->> >>
->> >>
->> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> >>>
->> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->> >>>> Add optional device-post-power-on parameters to disable post_power_on
->> >>>> function from being called since this breaks some device.
->> >>>>
->> >>>> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
->> >>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >>>> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
->> >>>> ---
->> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
->> >>>> 2 files changed, 9 insertions(+)
->> >>>>
->> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> index bea306d772d1..09fa153f743e 100644
->> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> @@ -24,6 +24,8 @@ Optional properties:
->> >>>>        de-asserting the reset-gpios (if any)
->> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
->> >>>>        and pwrdn-gpios (if any)
->> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
->> >>>> +       this breaks some devices
->> >>>
->> >>> This is a bit weird. I would like to avoid this, if possible.
->> >>>
->> >>> Perhaps if you simply describe the sequence in detail for your device
->> >>> we can figure out the best option together.
->> >>
->> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
->> >
->> > This went offlist, please resend.
->> >
->> > Moreover, please try to describe the sequence you need in detail
->> > according to your HW spec.
->> >
->>
->> Yeah oops....
->>
->> So basically we need to drive the reset and powerdown lines high with
->> a 300 milliseconds delay between both...
->> can't have the reset line low with post power on (pretty sure but
->> would need a delay anyway), and we need both reset + powerdown line
->> set low on powerdown.
->>
->> So the power down sequence would need to be reversed for this
->> application in pwrseq-simple.
->
-> This sounds like you need a device specific sequence to me. Otherwise,
-> write a language to describe any power control waveforms rather than
-> trying to bolt on more and more properties. (Don't really go write a
-> language.)
->
+This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
 
-Yeah I no interest in that as well :).
+Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
+Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
+Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 155 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 152 insertions(+), 3 deletions(-)
 
-So I'll resubmit with the patchset comments so far.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 1d9e00a..b2b8a82 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -817,6 +817,143 @@ enum amd_chipset_gen {
+ 	AMD_CHIPSET_UNKNOWN,
+ };
 
-> Rob
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
++/* AMD registers */
++#define AMD_SD_AUTO_PATTERN		(0xB8)
++#define AMD_MSLEEP_DURATION		(4)
++#define AMD_SD_MISC_CONTROL		(0xD0)
++#define AMD_MAX_TUNE_VALUE		(0x0B)
++#define AMD_AUTO_TUNE_SEL		(0x10800)
++#define AMD_FIFO_PTR			(0x30)
++#define AMD_BIT_MASK			(0x1F)
++
++static int amd_tuning_reset(struct sdhci_host *host)
++{
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val &= ~SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	pci_read_config_dword(pdev, AMD_SD_AUTO_PATTERN, &val);
++	val &= ~AMD_BIT_MASK;
++	val |= (AMD_AUTO_TUNE_SEL | (phase << 1));
++	pci_write_config_dword(pdev, AMD_SD_AUTO_PATTERN, val);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
++{
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++
++	pci_read_config_dword(pdev, AMD_SD_MISC_CONTROL, &val);
++	val |= AMD_FIFO_PTR;
++	pci_write_config_dword(pdev, AMD_SD_MISC_CONTROL, val);
++
++	return 0;
++}
++
++static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++	u8 ctrl, tune_around, valid_f = 0, valid_win_max = 0;
++	u8 tune_low_max = 0, tune_low = 0, valid_win = 0, tune_res = 0;
++	bool this_tune_ok = 0, last_tune_ok = 0;
++
++	amd_tuning_reset(host);
++
++	/*********************************************************************/
++	/* Enabling Software Tuning */
++	/********************************************************************/
++	/* 1. First switch the eMMC to HS200 Mode
++	 * 2. Prepare the registers by using the sampling clock select
++	 * 3. Send the CMD21 12 times with block length of 64 bytes
++	 * 4. Everytime change the clk phase and check for CRC error
++	 *	(CMD and DATA),if error, soft reset the CMD and DATA line
++	 * 5. Calculate the window and set the clock phase.
++	 */
++
++	for (tune_around = 0; tune_around < 12; tune_around++) {
++		amd_config_tuning_phase(host, tune_around);
++
++		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
++			this_tune_ok = false;
++			host->mmc->need_retune = 0;
++			msleep(AMD_MSLEEP_DURATION);
++			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
++			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
++		} else {
++			this_tune_ok = true;
++			valid_f += 1;
++		}
++
++		/* find good phase */
++		if ((!this_tune_ok && last_tune_ok) || (tune_around == 11)) {
++			if (valid_win > valid_win_max) {
++				valid_win_max = valid_win;
++				tune_low_max = tune_low;
++			}
++		}
++
++		if (this_tune_ok && (!last_tune_ok))
++			tune_low = tune_around;
++		if (!this_tune_ok && last_tune_ok)
++			valid_win = 0;
++		else if (this_tune_ok)
++			valid_win += 1;
++
++		last_tune_ok = this_tune_ok;
++
++		if (tune_around == 11) {
++			if ((valid_f + valid_win) > valid_win_max) {
++				if (valid_f > valid_win)
++					tune_res = ((valid_f - valid_win) >> 1);
++				else
++					tune_res = tune_low + ((valid_win +
++								valid_f) >> 1);
++			} else {
++				tune_res = tune_low_max + (valid_win_max >> 1);
++			}
++
++			if (tune_res > AMD_MAX_TUNE_VALUE)
++				tune_res = AMD_MAX_TUNE_VALUE;
++
++			amd_config_tuning_phase(host, tune_res);
++		}
++	}
++	host->mmc->retune_period = 0;
++
++	amd_enable_manual_tuning(slot);
++	return 0;
++}
++
+ static int amd_probe(struct sdhci_pci_chip *chip)
+ {
+ 	struct pci_dev	*smbus_dev;
+@@ -839,16 +976,17 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+ 		}
+ 	}
+
+-	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
++	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ))
+ 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+-		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+-	}
+
+ 	return 0;
+ }
+
++static const struct sdhci_ops amd_sdhci_pci_ops;
++
+ static const struct sdhci_pci_fixes sdhci_amd = {
+ 	.probe		= amd_probe,
++	.ops		= &amd_sdhci_pci_ops,
+ };
+
+ static const struct pci_device_id pci_ids[] = {
+@@ -1469,6 +1607,17 @@ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.select_drive_strength	= sdhci_pci_select_drive_strength,
+ };
+
++static const struct sdhci_ops amd_sdhci_pci_ops = {
++	.set_clock			= sdhci_set_clock,
++	.enable_dma			= sdhci_pci_enable_dma,
++	.set_bus_width			= sdhci_pci_set_bus_width,
++	.reset				= sdhci_reset,
++	.set_uhs_signaling		= sdhci_set_uhs_signaling,
++	.hw_reset			= sdhci_pci_hw_reset,
++	.select_drive_strength		= sdhci_pci_select_drive_strength,
++	.platform_execute_tuning	= amd_execute_tuning,
++};
++
+ /*****************************************************************************\
+  *                                                                           *
+  * Suspend/resume                                                            *
+-- 
+2.7.4
