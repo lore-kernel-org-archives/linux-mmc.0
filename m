@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 7/9] mmc: sh_mobile_sdhi: enable HS200
-Date: Mon, 12 Dec 2016 20:51:26 +0100
-Message-ID: <20161212195128.16633-8-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 8/9] arm64: dts: r8a7795: enable HS200 for eMMC
+Date: Mon, 12 Dec 2016 20:51:27 +0100
+Message-ID: <20161212195128.16633-9-wsa+renesas@sang-engineering.com>
 References: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
@@ -10,27 +10,22 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Setup tuning when the board is HS200 enabled.
-
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 2bd17890ec4b77..c79545e4f69444 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -641,7 +641,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto efree;
- 
- 	/* Enable tuning iff we have an SCC and a supported mode */
--	if (of_data && of_data->scc_offset && host->mmc->caps & MMC_CAP_UHS_SDR104) {
-+	if (of_data && of_data->scc_offset &&
-+	    (host->mmc->caps & MMC_CAP_UHS_SDR104 ||
-+	     host->mmc->caps2 & MMC_CAP2_HS200_1_8V_SDR)) {
- 		const struct sh_mobile_sdhi_scc *taps = of_data->taps;
- 		bool hit = false;
- 
+diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+index 56f3a91c72cc9b..d7758d3c0efa21 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+@@ -547,6 +547,7 @@
+ 	vmmc-supply = <&reg_3p3v>;
+ 	vqmmc-supply = <&reg_1p8v>;
+ 	bus-width = <8>;
++	mmc-hs200-1_8v;
+ 	non-removable;
+ 	status = "okay";
+ };
 -- 
 2.10.2
