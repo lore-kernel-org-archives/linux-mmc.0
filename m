@@ -1,57 +1,64 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/9] mmc: sh_mobile_sdhi: add HS200 support
-Date: Mon, 12 Dec 2016 20:51:19 +0100
-Message-ID: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:41852 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750712AbcLLTvr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 12 Dec 2016 14:51:47 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 1/9] mmc: sh_mobile_sdhi: simplify accessing DT data
+Date: Mon, 12 Dec 2016 20:51:20 +0100
+Message-ID: <20161212195128.16633-2-wsa+renesas@sang-engineering.com>
+References: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Here is a series adding HS200 support to the SDHI driver. Building the actual
-functionality on top of SDR104 support was rather easy. However, I figured the
-checks for enabling tuning were rather scattered over the driver and could be
-further improved. So I did some refactoring of that to make adding HS200
-support then a one-liner :)
+By using the helper of_device_get_match_data(), we can skip some
+checking and make the code simpler.
 
-This has been tested on Salvator-X boards with R-Car H3 and M3-W SoCs. It has
-also been tested on a Lager board (R-Car H2) checking SDR50/104 for
-regressions. The whole test document showing significant speed-ups reading from
-the on-board eMMC can be found here:
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c | 15 ++++-----------
+ 1 file changed, 4 insertions(+), 11 deletions(-)
 
-http://elinux.org/Tests:eMMC-HS
-
-and the branch can be found here:
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-emmc-hs
-
-Please comment, review, apply...
-
-Thanks,
-
-   Wolfram
-
-
-Wolfram Sang (9):
-  mmc: sh_mobile_sdhi: simplify accessing DT data
-  mmc: sh_mobile_sdhi: improve prerequisite for hw_reset
-  mmc: sh_mobile_sdhi: improve prerequisites for tuning
-  mmc: sh_mobile_sdhi: remove superfluous check in hw_reset
-  mmc: sh_mobile_sdhi: remove superfluous check in init_tuning
-  mmc: sh_mobile_sdhi: remove superfluous check in SCC error check
-  mmc: sh_mobile_sdhi: enable HS200
-  arm64: dts: r8a7795: enable HS200 for eMMC
-  arm64: dts: r8a7796: enable HS200 for eMMC
-
- arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts |  1 +
- arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts |  1 +
- drivers/mmc/host/sh_mobile_sdhi.c                  | 67 ++++++++--------------
- 3 files changed, 27 insertions(+), 42 deletions(-)
-
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 15c77bc6e4ee72..b48e3ae4549b6b 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -548,8 +548,7 @@ static void sh_mobile_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
+ 
+ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ {
+-	const struct of_device_id *of_id =
+-		of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
++	const struct sh_mobile_sdhi_of_data *of_data = of_device_get_match_data(&pdev->dev);
+ 	struct sh_mobile_sdhi *priv;
+ 	struct tmio_mmc_data *mmc_data;
+ 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
+@@ -590,9 +589,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
+ 
+-	if (of_id && of_id->data) {
+-		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+-
++	if (of_data) {
+ 		mmc_data->flags |= of_data->tmio_flags;
+ 		mmc_data->capabilities |= of_data->capabilities;
+ 		mmc_data->capabilities2 |= of_data->capabilities2;
+@@ -662,14 +659,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	if (host->mmc->caps & MMC_CAP_UHS_SDR104) {
+ 		host->mmc->caps |= MMC_CAP_HW_RESET;
+ 
+-		if (of_id && of_id->data) {
+-			const struct sh_mobile_sdhi_of_data *of_data;
+-			const struct sh_mobile_sdhi_scc *taps;
++		if (of_data) {
++			const struct sh_mobile_sdhi_scc *taps = of_data->taps;
+ 			bool hit = false;
+ 
+-			of_data = of_id->data;
+-			taps = of_data->taps;
+-
+ 			for (i = 0; i < of_data->taps_num; i++) {
+ 				if (taps[i].clk_rate == 0 ||
+ 				    taps[i].clk_rate == host->mmc->f_max) {
 -- 
 2.10.2
-
