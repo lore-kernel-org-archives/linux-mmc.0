@@ -1,49 +1,64 @@
-From: =?UTF-8?Q?Jo=C3=A3o_Paulo_Rechi_Vita?= <jprvita@gmail.com>
-Subject: SDIO bus hang on BayTrail machines
-Date: Mon, 12 Dec 2016 17:55:35 -0500
-Message-ID: <CA+A7VXXmA1KGjPfnUmZPBKDXmUMYhjLeXbo=8Ho3CrCvt7rjbA@mail.gmail.com>
+From: kbuild test robot <fengguang.wu@intel.com>
+Subject: [ulf.hansson-mmc:next 134/134] drivers/mmc/core/block.c:342:14-21:
+ WARNING opportunity for memdup_user
+Date: Tue, 13 Dec 2016 07:16:47 +0800
+Message-ID: <201612130735.n1VmdCAl%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:34399 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751697AbcLLW4R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2016 17:56:17 -0500
-Received: by mail-yw0-f195.google.com with SMTP id a10so8874072ywa.1
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Dec 2016 14:56:16 -0800 (PST)
+Received: from mga11.intel.com ([192.55.52.93]:12394 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751756AbcLLXRi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 12 Dec 2016 18:17:38 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: =?UTF-8?Q?Jo=C3=A3o_Paulo_Rechi_Vita?= <jprvita@endlessm.com>, linux-mmc@vger.kernel.org, linux@endlessm.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: kbuild-all@01.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-Hello Dong Adrian and Ulf,
+tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+head:   f397c8d80a5e413984bd9ccdf4161c7156b365ce
+commit: f397c8d80a5e413984bd9ccdf4161c7156b365ce [134/134] mmc: block: Move files to core
 
-I'm working on enabling a BayTrail-based machine with very similar
-hardware to one of the Intel Compute sticks, which is an Intel
-BayTrail and has a RTL8723BS WiFi card on the SDIO bus. I'm using
-Linux 4.8 with the driver from https://github.com/hadess/rtl8723bs,
-and I was experiencing a complete machine hang when using the WiFi
-card. Passing `intel_idle.max_cstate=3D1` together with the following
-patch (with the sdhci_runtime_pm_get and sdhci_runtime_pm_put
-implementations added back) makes the problem go away:
-https://github.com/hadess/rtl8723bs/blob/master/patches_4.5/0002-mmc-sdhci-=
-get-runtime-pm-when-sdio-irq-is-enabled.patch
 
-I could not find much information on why this was never sent upstream,
-and would like to know if this approach would be acceptable, or if
-there are any other better alternatives to solve this problem. I'm not
-a runtime PM expert, but as I understand this keeps the device powered
-on as long as interrupts are enabled, potentially increasing the power
-consumption. As this kernel has to run several different machines
-using the same code base and config, I would rather avoid something
-that could have a negative impact on other platforms.
+coccinelle warnings: (new ones prefixed by >>)
 
-Any ideas appreciated, and I'm happy to try a newer tree if you guys
-think some other commit might have fixed the problem.
+>> drivers/mmc/core/block.c:342:14-21: WARNING opportunity for memdup_user
 
-Thanks and best regards,
+vim +342 drivers/mmc/core/block.c
 
---
-Jo=C3=A3o Paulo Rechi Vita
-http://about.me/jprvita
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  326  	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  327  		err = -EFAULT;
+aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  328  		goto idata_err;
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  329  	}
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  330  
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  331  	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  332  	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  333  		err = -EOVERFLOW;
+aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  334  		goto idata_err;
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  335  	}
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  336  
+bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  337  	if (!idata->buf_bytes) {
+bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  338  		idata->buf = NULL;
+4d6144de drivers/mmc/card/block.c Johan Rudholm   2011-11-23  339  		return idata;
+bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  340  	}
+4d6144de drivers/mmc/card/block.c Johan Rudholm   2011-11-23  341  
+1ff8950c drivers/mmc/card/block.c yalin wang      2015-11-12 @342  	idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  343  	if (!idata->buf) {
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  344  		err = -ENOMEM;
+aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  345  		goto idata_err;
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  346  	}
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  347  
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  348  	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  349  					idata->ic.data_ptr, idata->buf_bytes)) {
+cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  350  		err = -EFAULT;
+
+:::::: The code at line 342 was first introduced by commit
+:::::: 1ff8950c04331883b11c5e0d6db96e2da8b6f8c9 mmc: block: change to use kmalloc when copy data from userspace
+
+:::::: TO: yalin wang <yalin.wang2010@gmail.com>
+:::::: CC: Ulf Hansson <ulf.hansson@linaro.org>
+
+---
+0-DAY kernel test infrastructure                Open Source Technology Center
+https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
