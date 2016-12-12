@@ -1,231 +1,378 @@
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH v4] mmc: sdhci-pci: Add support for HS200 tuning mode on AMD
- eMMC-4.5.1
-Date: Mon, 12 Dec 2016 14:33:44 +0530
-Message-ID: <f2409173-92c9-406b-a90b-44537dc11e15@amd.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC for v.4.10
+Date: Mon, 12 Dec 2016 16:24:23 +0100
+Message-ID: <CAPDyKFrU25smj26MUsZQwj00iC0w_yurgY-k6=aPgjfG-0SEqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0079.outbound.protection.outlook.com ([104.47.32.79]:23584
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751574AbcLLJEN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 12 Dec 2016 04:04:13 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
+Hi Linus,
 
-Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
-Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
-Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
----
+Here's the PR for MMC v4.10. Details about the highlights are as usual
+found in the signed tag.
 
-Changes since v1: (https://patchwork.kernel.org/patch/9429071/)
- * Reworked on review comments received which has the following:
-   -> Removed the amd_tuning_descriptor struct and amd_find_good_phase()
-      and handled the tuning changes in amd_execute_tuning().
-   -> Fix some alignment problems.
-   -> Defined macros for registers and bit fields used.
-   -> removed mdelay and used msleep
+One note, you should expect a merge conflict when pulling in changes
+with the block tree. The conflict is in drivers/mmc/card/block.c, also
+reported by Stephen Rothwell, but I think it should be quite trivial
+to resolve. Please, drop me an email if you encounter issues.
+
+Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
-Changes since v2: (https://patchwork.kernel.org/patch/9469247/)
- * Resubmitted the v1 patch by removing unused variables.
+The following changes since commit e5517c2a5a49ed5e99047008629f1cd60246ea0e:
 
-Changes in v3: (https://patchwork.kernel.org/patch/9469571/)
- * Adding a changelog description and resubmitting the changes made in v2
+  Linux 4.9-rc7 (2016-11-27 13:08:04 -0800)
 
- drivers/mmc/host/sdhci-pci-core.c | 152 +++++++++++++++++++++++++++++++++++++-
- 1 file changed, 149 insertions(+), 3 deletions(-)
+are available in the git repository at:
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1d9e00a..c2a8da4 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -817,6 +817,140 @@ enum amd_chipset_gen {
- 	AMD_CHIPSET_UNKNOWN,
- };
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.10
 
-+/* AMD registers */
-+#define AMD_SD_AUTO_PATTERN		(0xB8)
-+#define AMD_MSLEEP_DURATION		(4)
-+#define AMD_SD_MISC_CONTROL		(0xD0)
-+#define AMD_MAX_TUNE_VALUE		(0x0B)
-+#define AMD_AUTO_TUNE_SEL		(0x10800)
-+#define AMD_FIFO_PTR			(0x30)
-+#define AMD_BIT_MASK			(0x1F)
-+
-+static int amd_tuning_reset(struct sdhci_host *host)
-+{
-+	unsigned int val;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val &= ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	pci_read_config_dword(pdev, AMD_SD_AUTO_PATTERN, &val);
-+	val &= ~AMD_BIT_MASK;
-+	val |= (AMD_AUTO_TUNE_SEL | (phase << 1));
-+	pci_write_config_dword(pdev, AMD_SD_AUTO_PATTERN, val);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
-+{
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+
-+	pci_read_config_dword(pdev, AMD_SD_MISC_CONTROL, &val);
-+	val |= AMD_FIFO_PTR;
-+	pci_write_config_dword(pdev, AMD_SD_MISC_CONTROL, val);
-+
-+	return 0;
-+}
-+
-+static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	u8 ctrl, tune_around, valid_f = 0, valid_win_max = 0;
-+	u8 tune_low_max = 0, tune_low = 0, valid_win = 0, tune_res = 0;
-+	bool this_tune_ok = 0, last_tune_ok = 0;
-+
-+	amd_tuning_reset(host);
-+
-+	/*********************************************************************/
-+	/* Enabling Software Tuning */
-+	/********************************************************************/
-+	/* 1. First switch the eMMC to HS200 Mode
-+	 * 2. Prepare the registers by using the sampling clock select
-+	 * 3. Send the CMD21 12 times with block length of 64 bytes
-+	 * 4. Everytime change the clk phase and check for CRC error
-+	 *	(CMD and DATA),if error, soft reset the CMD and DATA line
-+	 * 5. Calculate the window and set the clock phase.
-+	 */
-+
-+	for (tune_around = 0; tune_around < 12; tune_around++) {
-+		amd_config_tuning_phase(host, tune_around);
-+
-+		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-+			this_tune_ok = false;
-+			host->mmc->need_retune = 0;
-+			msleep(AMD_MSLEEP_DURATION);
-+			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-+			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
-+		} else {
-+			this_tune_ok = true;
-+			valid_f += 1;
-+		}
-+
-+		/* find good phase */
-+		if ((!this_tune_ok && last_tune_ok) || (tune_around == 11)) {
-+			if (valid_win > valid_win_max) {
-+				valid_win_max = valid_win;
-+				tune_low_max = tune_low;
-+			}
-+		}
-+
-+		if (this_tune_ok && (!last_tune_ok))
-+			tune_low = tune_around;
-+		if (!this_tune_ok && last_tune_ok)
-+			valid_win = 0;
-+		else if (this_tune_ok)
-+			valid_win += 1;
-+
-+		last_tune_ok = this_tune_ok;
-+
-+		if (tune_around == 11) {
-+			if ((valid_f + valid_win) > valid_win_max) {
-+				if (valid_f > valid_win)
-+					tune_res = ((valid_f - valid_win) >> 1);
-+				else
-+					tune_res = tune_low + ((valid_win +
-+								valid_f) >> 1);
-+			} else {
-+				tune_res = tune_low_max + (valid_win_max >> 1);
-+			}
-+
-+			if (tune_res > AMD_MAX_TUNE_VALUE)
-+				tune_res = AMD_MAX_TUNE_VALUE;
-+
-+			amd_config_tuning_phase(host, tune_res);
-+		}
-+	}
-+	host->mmc->retune_period = 0;
-+
-+	amd_enable_manual_tuning(slot);
-+	return 0;
-+}
-+
- static int amd_probe(struct sdhci_pci_chip *chip)
- {
- 	struct pci_dev	*smbus_dev;
-@@ -839,16 +973,17 @@ static int amd_probe(struct sdhci_pci_chip *chip)
- 		}
- 	}
+for you to fetch changes up to ff6af28faff53a7389230026b83e543385f7b21d:
 
--	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
-+	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ))
- 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
--		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
--	}
+  mmc: sdhci-cadence: add Cadence SD4HC support (2016-12-08 15:02:52 +0100)
 
- 	return 0;
- }
+----------------------------------------------------------------
+It's been an busy period for mmc. Quite some changes in the mmc core, two new
+mmc host drivers, some existing drivers being extended to support new IP
+versions and lots of other updates.
 
-+static const struct sdhci_ops amd_sdhci_pci_ops;
-+
- static const struct sdhci_pci_fixes sdhci_amd = {
- 	.probe		= amd_probe,
-+	.ops		= &amd_sdhci_pci_ops,
- };
+MMC core:
+ - Delete eMMC packed command support
+ - Introduce mmc_abort_tuning() to enable eMMC tuning to fail gracefully
+ - Introduce mmc_can_retune() to see if a host can be retuned
+ - Re-work and improve the sequence when sending a CMD6 for mmc
+ - Enable CDM13 polling when switching to HS and HS DDR mode for mmc
+ - Relax checking for CMD6 errors after switch to HS200
+ - Re-factoring the code dealing with the mmc block queue
+ - Recognize whether the eMMC card supports CMDQ
+ - Fix 4K native sector check
+ - Don't power off the card when starting the host
+ - Increase MMC_IOC_MAX_BYTES to support bigger firmware binaries
+ - Improve error handling and drop meaningless BUG_ONs()
+ - Lots of clean-ups and changes to improve the quality of the code
 
- static const struct pci_device_id pci_ids[] = {
-@@ -1469,6 +1604,17 @@ static const struct sdhci_ops sdhci_pci_ops = {
- 	.select_drive_strength	= sdhci_pci_select_drive_strength,
- };
+MMC host:
+ - sdhci: Fix tuning sequence and clean-up the related code
+ - sdhci: Add support to via DT override broken SDHCI cap register bits
+ - sdhci-cadence: Add new driver for Cadence SD4HC SDHCI variant
+ - sdhci-msm: Update clock management
+ - sdhci-msm: Add support for eMMC HS400 mode
+ - sdhci-msm: Deploy runtime/system PM support
+ - sdhci-iproc: Extend driver support to newer IP versions
+ - sdhci-pci: Add support for Intel GLK
+ - sdhci-pci: Add support for Intel NI byt sdio
+ - sdhci-acpi: Add support for 80860F14 UID 2 SDIO bus
+ - sdhci: Lots of various small improvements and clean-ups
+ - tmio: Add support for tuning
+ - sh_mobile_sdhi: Add support for tuning
+ - sh_mobile_sdhi: Extend driver to support SDHI IP on R7S72100 SoC
+ - sh_mobile_sdhi: remove support for sh7372
+ - davinci: Use mmc_of_parse() to enable generic mmc DT bindings
+ - meson: Add new driver to support GX platforms
+ - dw_mmc: Deploy generic runtime/system PM support
+ - dw_mmc: Lots of various small improvements
 
-+static const struct sdhci_ops amd_sdhci_pci_ops = {
-+	.set_clock			= sdhci_set_clock,
-+	.enable_dma			= sdhci_pci_enable_dma,
-+	.set_bus_width			= sdhci_pci_set_bus_width,
-+	.reset				= sdhci_reset,
-+	.set_uhs_signaling		= sdhci_set_uhs_signaling,
-+	.hw_reset			= sdhci_pci_hw_reset,
-+	.select_drive_strength		= sdhci_pci_select_drive_strength,
-+	.platform_execute_tuning	= amd_execute_tuning,
-+};
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Suspend/resume                                                            *
--- 
-2.7.4
+As a part of the mmc changes this time, I have also pulled in an immutable
+branch/tag (soc-device-match-tag1) hosted by Geert Uytterhoeven, to share the
+implementation of the new soc_device_match() interface. This is needed by the
+below mmc related changes:
+ - mmc: sdhci-of-esdhc: Get correct IP version for T4240-R1.0-R2.0
+ - soc: fsl: add GUTS driver for QorIQ platforms
+
+----------------------------------------------------------------
+Adrian Hunter (20):
+      mmc: sdhci-pci: Add support for Intel GLK
+      mmc: block: Restore line inadvertently removed with packed commands
+      mmc: block: Fix 4K native sector check
+      mmc: queue: Fix queue thread wake-up
+      mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
+      mmc: queue: Factor out mmc_queue_alloc_bounce_sgs()
+      mmc: queue: Factor out mmc_queue_alloc_sgs()
+      mmc: queue: Factor out mmc_queue_reqs_free_bufs()
+      mmc: queue: Introduce queue depth and use it to allocate and free
+      mmc: mmc: Add Command Queue definitions
+      mmc: mmc: Relax checking for switch errors after HS200 switch
+      Revert "mmc: sdhci: Reset cmd and data circuits after tuning failure"
+      mmc: sdhci: Fix recovery from tuning timeout
+      mmc: sdhci: Fix tuning reset after exhausting the maximum number of loops
+      mmc: sdhci: Always allow tuning to fall back to fixed sampling
+      mmc: mmc: Introduce mmc_abort_tuning()
+      mmc: sdhci: Use mmc_abort_tuning()
+      mmc: sdhci: Factor out tuning helper functions
+      mmc: sdhci: Simplify tuning block size logic
+      mmc: sdhci: Tidy tuning loop
+
+Ai Kyuse (3):
+      mmc: tmio: enhance illegal sequence handling
+      mmc: tmio: Add hw reset support
+      mmc: tmio: Add tuning support
+
+Alexey Khoroshilov (1):
+      mmc: wbsd: implement check for dma mapping error
+
+Arnd Bergmann (1):
+      base: soc: Introduce soc_device_match() interface
+
+Chris Brandt (3):
+      mmc: sh_mobile_sdhi: add ocr_mask option
+      mmc: tmio-mmc: add support for 32bit data port
+      mmc: sh_mobile_sdhi: Add r7s72100 support
+
+Colin Ian King (1):
+      mmc: dw_mmc: fix spelling mistake in dev_dbg message
+
+Dan Carpenter (1):
+      mmc: mmc_test: Uninitialized return value
+
+Daniel Drake (1):
+      mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus
+
+David E. Box (1):
+      mmc: sdhci-pci: Allow deferred probe for sd card detect gpio
+
+Geert Uytterhoeven (3):
+
+      base: soc: Early register bus when needed
+      base: soc: Check for NULL SoC device attributes
+      base: soc: Provide a dummy implementation of soc_device_match()
+
+Jaehoon Chung (14):
+      mmc: sdhci: put together into one condition checking
+      mmc: dw_mmc: display the real register value on debugfs
+      mmc: dw_mmc: fix the debug message for checking card's present
+      mmc: dw_mmc: change the DW_MCI_FREQ_MIN from 400K to 100K
+      mmc: dw_mmc: use the hold register when send stop command
+      mmc: dw_mmc: call the dw_mci_prep_stop_abort() by default
+      mmc: dw_mmc: use the cookie's enum values for post/pre_req()
+      mmc: dw_mmc: remove the unnecessary mmc_data structure
+      mmc: dw_mmc: The "clock-freq-min-max" property was deprecated
+      Documentation: synopsys-dw-mshc: remove the unused properties
+      mmc: dw_mmc: check the "present" variable before checking flags
+      mmc: dw_mmc: add the debug message for polling and non-removable
+      mmc: dw_mmc: display the clock message only one time when card is polling
+      mmc: sdhci-s3c: add spin_unlock_irq() before calling clk_round_rate
+
+Javier Martinez Canillas (2):
+      mmc: mediatek: Fix module autoload
+      mmc: sdhci-of-at91: Fix module autoload
+
+Jeonghan Kim (1):
+      mmc: block: Change MMC_IOC_MAX_BYTES
+
+Joonyoung Shim (2):
+      mmc: dw_mmc: exynos: fix to call suspend callback
+      mmc: dw_mmc: add missing codes for runtime resume
+
+Kevin Hilman (2):
+      MMC: meson: initial support for GX platforms
+      Documentation: DT: MMC: meson-gx: new bindings doc
+
+Linus Walleij (10):
+      mmc: mmci: clean up header defines
+      mmc: mmci: refactor ST Micro busy detection
+      mmc: block: make gen_err a bool variable
+      mmc: block: convert ecc_err to a bool
+      mmc: core: use enum mmc_blk_status properly
+      mmc: block: use mmc_req_is_special()
+      mmc: block: rename data to blkdata
+      mmc: block: move packed command struct init
+      mmc: delete is_first_req parameter from pre-request callback
+      mmc: block: delete packed command support
+
+Masahiro Yamada (4):
+      mmc: sdhci: remove unneeded (void *) casts in sdhci_(pltfm_)priv()
+      mmc: sdhci-of-at91: remove bogus MMC_SDHCI_IO_ACCESSORS select
+      mmc: sdhci: export sdhci_execute_tuning()
+      mmc: sdhci-cadence: add Cadence SD4HC support
+
+Maxime Ripard (1):
+      mmc: sunxi: Prevent against null dereference for vmmc
+
+Pramod Gurav (1):
+      mmc: sdhci-msm: Add pm_runtime and system PM support
+
+Ritesh Harjani (10):
+      mmc: sdhci-msm: Change poor style writel/readl of registers
+      dt-bindings: sdhci-msm: Add xo value
+      mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+      mmc: sdhci-msm: Enable few quirks
+      mmc: sdhci: Factor out sdhci_enable_clk
+      mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
+      mmc: sdhci-msm: Add clock changes for DDR mode.
+      mmc: sdhci-msm: Save the calculated tuning phase
+      mmc: sdhci-msm: Add calibration tuning for CDCLP533 circuit
+      sdhci: sdhci-msm: update dll configuration
+
+Scott Branden (2):
+      mmc: sdhci-iproc: Add brcm, sdhci-iproc compat string in bindings document
+      mmc: sdhci-iproc: support standard byte register accesses
+
+Shawn Lin (17):
+      mmc: dw_mmc: add runtime PM callback
+      mmc: dw_mmc-rockchip: add runtime PM support
+      mmc: core: expose the capability of gpio card detect
+      mmc: dw_mmc: disable biu clk if possible
+      mmc: dw_mmc-k3: deploy runtime PM facilities
+      mmc: dw_mmc-exynos: deploy runtime PM facilities
+      mmc: dw_mmc-pci: deploy runtime PM facilities
+      mmc: dw_mmc-pltfm: deploy runtime PM facilities
+      mmc: dw_mmc: remove system PM callback
+      mmc: core: remove BUG_ONs from sdio
+      mmc: debugfs: remove BUG_ON from mmc_ext_csd_open
+      mmc: core: remove BUG_ONs from mmc
+      mmc: core: remove BUG_ONs from sd
+      mmc: core: remove BUG_ONs from core.c
+      mmc: sdio_uart: remove meaningless BUG_ON
+      mmc: queue: remove BUG_ON for bounce_sg
+      mmc: mmc_test: remove BUG_ONs and deploy error handling
+
+Simon Horman (5):
+      mmc: core: Add helper to see if a host can be retuned
+      mmc: tmio: document mandatory and optional callbacks
+      mmc: sh_mobile_sdhi: Add tuning support
+      mmc: sh_mobile_sdhi: remove support for sh7372
+      mmc: sh_mmcif: Document r8a73a4, r8a7778 and sh73a0 DT bindings
+
+Sudeep Holla (1):
+      soc: fsl: fix section mismatch build warnings
+
+Sylwester Nawrocki (1):
+      mmc: s3cmci: Use DMA slave map rather than exported DMA filter
+
+Ulf Hansson (14):
+      mmc: rtsx_usb_sdmmc: Enable runtime PM autosuspend
+      mmc: core: Make mmc_switch_status() available for mmc core
+      mmc: core: Clarify code which deals with polling in __mmc_switch()
+      mmc: core: Factor out code related to polling in __mmc_switch()
+      mmc: core: Don't use ->card_busy() and CMD13 in combination when polling
+      mmc: core: Don't power off the card when starting the host
+      mmc: core: Retry instead of ignore at CRC errors when polling for busy
+      mmc: core: Remove redundant __mmc_send_status()
+      mmc: core: Rename ignore_crc to retry_crc_err to reflect its purpose
+      mmc: core: Check SWITCH_ERROR bit from each CMD13 response when polling
+      mmc: core: Enable __mmc_switch() to change bus speed timing for the host
+      mmc: core: Allow CMD13 polling when switching to HS mode for mmc
+      mmc: core: Update CMD13 polling policy when switch to HS DDR mode
+      Merge tag 'soc-device-match-tag1' into next
+
+Venkat Gopalakrishnan (2):
+      mmc: sdhci-msm: Update DLL reset sequence
+      mmc: sdhci-msm: Add HS400 platform support
+
+Wolfram Sang (2):
+      mmc: tmio: fix wrong bitmask for SDIO irqs
+      mmc: tmio: remove SDIO from TODO list
+
+Zach Brown (4):
+      mmc: sdhci: dt: Add device tree properties sdhci-caps and sdhci-caps-mask
+      mmc: sdhci: Use sdhci-caps-mask and sdhci-caps to change the
+caps read during __sdhci_read_caps
+      mmc: sdhci-pci: Add PCI ID for Intel NI byt sdio
+      mmc: sdhci-pci: Use ACPI to get max frequency for Intel NI byt sdio
+
+ahaslam@baylibre.com (2):
+      mmc: davinci: use mmc_of_parse to parse common mmc configuration
+      mmc: davinci: request gpios using gpio descriptors
+
+yangbo lu (5):
+      ARM64: dts: ls2080a: add device configuration node
+      dt: bindings: move guts devicetree doc out of powerpc directory
+      soc: fsl: add GUTS driver for QorIQ platforms
+      MAINTAINERS: add entry for Freescale SoC drivers
+      mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+
+ .../devicetree/bindings/mmc/amlogic,meson-gx.txt   |  32 +
+ .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |   9 +
+ .../devicetree/bindings/mmc/renesas,mmcif.txt      |   3 +
+ .../devicetree/bindings/mmc/sdhci-cadence.txt      |  30 +
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
+ Documentation/devicetree/bindings/mmc/sdhci.txt    |  13 +
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   8 +-
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   2 +-
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ MAINTAINERS                                        |  12 +-
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+ drivers/base/Kconfig                               |   1 +
+ drivers/base/soc.c                                 |  79 ++
+ drivers/mmc/card/block.c                           | 499 ++----------
+ drivers/mmc/card/mmc_test.c                        |  58 +-
+ drivers/mmc/card/queue.c                           | 312 +++-----
+ drivers/mmc/card/queue.h                           |  29 +-
+ drivers/mmc/card/sdio_uart.c                       |   2 -
+ drivers/mmc/core/core.c                            |  97 +--
+ drivers/mmc/core/debugfs.c                         |   6 +-
+ drivers/mmc/core/mmc.c                             | 113 +--
+ drivers/mmc/core/mmc_ops.c                         | 220 +++---
+ drivers/mmc/core/mmc_ops.h                         |   7 +-
+ drivers/mmc/core/sd.c                              |  14 -
+ drivers/mmc/core/sd_ops.c                          |  27 +-
+ drivers/mmc/core/sdio.c                            |  17 +-
+ drivers/mmc/core/sdio_cis.c                        |   3 +-
+ drivers/mmc/core/sdio_irq.c                        |  12 +-
+ drivers/mmc/core/slot-gpio.c                       |   8 +
+ drivers/mmc/host/Kconfig                           |  23 +-
+ drivers/mmc/host/Makefile                          |   2 +
+ drivers/mmc/host/davinci_mmc.c                     | 130 ++--
+ drivers/mmc/host/dw_mmc-exynos.c                   |  52 +-
+ drivers/mmc/host/dw_mmc-k3.c                       |  39 +-
+ drivers/mmc/host/dw_mmc-pci.c                      |  29 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |  28 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |  42 +-
+ drivers/mmc/host/dw_mmc.c                          | 181 +++--
+ drivers/mmc/host/dw_mmc.h                          |   7 +-
+ drivers/mmc/host/jz4740_mmc.c                      |   3 +-
+ drivers/mmc/host/meson-gx-mmc.c                    | 851 +++++++++++++++++++++
+ drivers/mmc/host/mmci.c                            | 128 +++-
+ drivers/mmc/host/mmci.h                            |  71 +-
+ drivers/mmc/host/mtk-sd.c                          |   4 +-
+ drivers/mmc/host/omap_hsmmc.c                      |   3 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |   3 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |   3 +
+ drivers/mmc/host/s3cmci.c                          |  15 +-
+ drivers/mmc/host/sdhci-acpi.c                      |   1 +
+ drivers/mmc/host/sdhci-cadence.c                   | 283 +++++++
+ drivers/mmc/host/sdhci-iproc.c                     |  35 +-
+ drivers/mmc/host/sdhci-msm.c                       | 694 +++++++++++++++--
+ drivers/mmc/host/sdhci-of-at91.c                   |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  20 +
+ drivers/mmc/host/sdhci-pci-core.c                  |  98 ++-
+ drivers/mmc/host/sdhci-pci.h                       |   3 +
+ drivers/mmc/host/sdhci-pltfm.h                     |   2 +-
+ drivers/mmc/host/sdhci-s3c.c                       |   2 +
+ drivers/mmc/host/sdhci.c                           | 362 +++++----
+ drivers/mmc/host/sdhci.h                           |   4 +-
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 274 ++++++-
+ drivers/mmc/host/sunxi-mmc.c                       |  15 +-
+ drivers/mmc/host/tmio_mmc.h                        |  32 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    | 119 ++-
+ drivers/mmc/host/wbsd.c                            |  11 +-
+ drivers/soc/Kconfig                                |   3 +-
+ drivers/soc/fsl/Kconfig                            |  18 +
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 239 ++++++
+ include/linux/fsl/guts.h                           | 125 +--
+ include/linux/mfd/tmio.h                           |   5 +
+ include/linux/mmc/card.h                           |  14 +-
+ include/linux/mmc/core.h                           |  16 +-
+ include/linux/mmc/dw_mmc.h                         |   6 +
+ include/linux/mmc/host.h                           |  17 +-
+ include/linux/mmc/mmc.h                            |  17 +
+ include/linux/mmc/slot-gpio.h                      |   1 +
+ include/linux/sys_soc.h                            |   9 +
+ include/uapi/linux/mmc/ioctl.h                     |   2 +-
+ 79 files changed, 4092 insertions(+), 1574 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci.txt
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/mmc/host/meson-gx-mmc.c
+ create mode 100644 drivers/mmc/host/sdhci-cadence.c
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
