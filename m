@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 6/9] mmc: sh_mobile_sdhi: remove superfluous check in SCC error check
-Date: Mon, 12 Dec 2016 20:51:25 +0100
-Message-ID: <20161212195128.16633-7-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 9/9] arm64: dts: r8a7796: enable HS200 for eMMC
+Date: Mon, 12 Dec 2016 20:51:28 +0100
+Message-ID: <20161212195128.16633-10-wsa+renesas@sang-engineering.com>
 References: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
@@ -10,31 +10,22 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The function will only be available if SDR104 was detected in probe,
-so no need to check in the function itself again.
-
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 22bedbea8ec502..2bd17890ec4b77 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -433,12 +433,7 @@ static int sh_mobile_sdhi_select_tuning(struct tmio_mmc_host *host)
- 
- static bool sh_mobile_sdhi_check_scc_error(struct tmio_mmc_host *host)
- {
--	struct sh_mobile_sdhi *priv;
--
--	if (!(host->mmc->caps & MMC_CAP_UHS_SDR104))
--		return 0;
--
--	priv = host_to_priv(host);
-+	struct sh_mobile_sdhi *priv = host_to_priv(host);
- 
- 	/* Check SCC error */
- 	if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL) &
+diff --git a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+index da46ac73ff2ae3..f8e1211b1d9034 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+@@ -262,6 +262,7 @@
+ 	vmmc-supply = <&reg_3p3v>;
+ 	vqmmc-supply = <&reg_1p8v>;
+ 	bus-width = <8>;
++	mmc-hs200-1_8v;
+ 	non-removable;
+ 	status = "okay";
+ };
 -- 
 2.10.2
