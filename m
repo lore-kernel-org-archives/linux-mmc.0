@@ -1,95 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Tue, 13 Dec 2016 09:01:18 +0100
-Message-ID: <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com> <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 1/9] mmc: sh_mobile_sdhi: simplify accessing DT data
+Date: Tue, 13 Dec 2016 11:48:34 +0100
+Message-ID: <CAMuHMdWQQvA9bOdY-Yf_-eJvNRiMrEdqr_K7GCxsf_KeWdBxbw@mail.gmail.com>
+References: <20161212195128.16633-1-wsa+renesas@sang-engineering.com> <20161212195128.16633-2-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:37451 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753060AbcLMIBX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 03:01:23 -0500
-Received: by mail-wm0-f45.google.com with SMTP id t79so106506635wmt.0
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2016 00:01:22 -0800 (PST)
-In-Reply-To: <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20161212195128.16633-2-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh@kernel.org>, Matt Ranostay <matt@ranostay.consulting>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
 
-On 9 December 2016 at 19:09, Rob Herring <robh@kernel.org> wrote:
-> On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
->> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> > On 2 December 2016 at 08:22, Matt Ranostay <matt@ranostay.consulting> wrote:
->> >>
->> >>
->> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> >>>
->> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
->> >>>> Add optional device-post-power-on parameters to disable post_power_on
->> >>>> function from being called since this breaks some device.
->> >>>>
->> >>>> Cc: Tony Lindgren <tony@atomide.com>
->> >>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> >>>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
->> >>>> ---
->> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
->> >>>> 2 files changed, 9 insertions(+)
->> >>>>
->> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> index bea306d772d1..09fa153f743e 100644
->> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->> >>>> @@ -24,6 +24,8 @@ Optional properties:
->> >>>>        de-asserting the reset-gpios (if any)
->> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
->> >>>>        and pwrdn-gpios (if any)
->> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
->> >>>> +       this breaks some devices
->> >>>
->> >>> This is a bit weird. I would like to avoid this, if possible.
->> >>>
->> >>> Perhaps if you simply describe the sequence in detail for your device
->> >>> we can figure out the best option together.
->> >>
->> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
->> >
->> > This went offlist, please resend.
->> >
->> > Moreover, please try to describe the sequence you need in detail
->> > according to your HW spec.
->> >
->>
->> Yeah oops....
->>
->> So basically we need to drive the reset and powerdown lines high with
->> a 300 milliseconds delay between both...
->> can't have the reset line low with post power on (pretty sure but
->> would need a delay anyway), and we need both reset + powerdown line
->> set low on powerdown.
->>
->> So the power down sequence would need to be reversed for this
->> application in pwrseq-simple.
+On Mon, Dec 12, 2016 at 8:51 PM, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> By using the helper of_device_get_match_data(), we can skip some
+> checking and make the code simpler.
 >
-> This sounds like you need a device specific sequence to me. Otherwise,
-> write a language to describe any power control waveforms rather than
-> trying to bolt on more and more properties. (Don't really go write a
-> language.)
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Actually this isn't so device specific. The cw1200 wifi chip which is
-being used with ux500 SoCs has a very similar sequence. Allow me to
-check the details and get back.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Anyway, my point is that I think we can figure out a common sequence
-to support these kind required sequences. That is to me preferred over
-adding a new (two to support cw1200) device specific pwrseq driver.
+Gr{oetje,eeting}s,
 
-Kind regards
-Uffe
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
