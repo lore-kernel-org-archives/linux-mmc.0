@@ -1,8 +1,8 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v4 04/12] mmc: sdhci: Export sdhci_enable_sdio_irq() from
- sdhci.c
-Date: Tue, 13 Dec 2016 18:48:33 +0100
-Message-ID: <04201111658cabdce1aa10767fa408da36636d64.1481651244.git-series.gregory.clement@free-electrons.com>
+Subject: [PATCH v4 02/12] mmc: sdhci: Export
+ sdhci_start_signal_voltage_switch() in sdhci.c
+Date: Tue, 13 Dec 2016 18:48:31 +0100
+Message-ID: <e63f9c5a962426c811955927a322c967ff822607.1481651244.git-series.gregory.clement@free-electrons.com>
 References: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,46 +26,50 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Hu Ziji <huziji@marvell.com>
 
-Export sdhci_enable_sdio_irq() from sdhci.c. Thus vendor SDHC
-driver can implement its specific SDIO irq contorl.
+Export sdhci_start_signal_voltage_switch() from sdhci.c.
+Thus vendor sdhci driver can implement its own signal voltage
+switch routine.
 
 Signed-off-by: Hu Ziji <huziji@marvell.com>
 Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 5 +++--
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e971abb1368f..e174379ee019 100644
+index ea06faf8a437..8e6e4e37e3b4 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1817,7 +1817,7 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- 	}
- }
- 
--static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
-@@ -1831,6 +1831,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	sdhci_enable_sdio_irq_nolock(host, enable);
+@@ -1832,8 +1832,8 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
  	spin_unlock_irqrestore(&host->lock, flags);
  }
-+EXPORT_SYMBOL_GPL(sdhci_enable_sdio_irq);
  
- int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 				      struct mmc_ios *ios)
+-static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+-					     struct mmc_ios *ios)
++int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
++				      struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	u16 ctrl;
+@@ -1925,6 +1925,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 		return 0;
+ 	}
+ }
++EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
+ 
+ static int sdhci_card_busy(struct mmc_host *mmc)
+ {
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 95beadc66849..a3e8913452fc 100644
+index 37771de4cafa..cd18b6f19c3b 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -692,6 +692,7 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
- int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 				      struct mmc_ios *ios);
- int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-+void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
+@@ -689,6 +689,8 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
++int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
++				      struct mmc_ios *ios);
  
  #ifdef CONFIG_PM
  extern int sdhci_suspend_host(struct sdhci_host *host);
