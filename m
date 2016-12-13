@@ -1,13 +1,13 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v4 09/12] mmc: sdhci-xenon: Add SOC PHY PAD voltage control
-Date: Tue, 13 Dec 2016 18:48:38 +0100
-Message-ID: <3e310ce4b31626cffda558b5f50e54caa0db6056.1481651244.git-series.gregory.clement@free-electrons.com>
+Subject: [PATCH v4 03/12] mmc: sdhci: Export sdhci_execute_tuning() in sdhci.c
+Date: Tue, 13 Dec 2016 18:48:32 +0100
+Message-ID: <6fe2592010e4dbb20da55e88ef80d95c30647f10.1481651244.git-series.gregory.clement@free-electrons.com>
 References: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:34876 "EHLO
+Received: from mail.free-electrons.com ([62.4.15.54]:34826 "EHLO
         mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934371AbcLMRss (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 12:48:48 -0500
+        with ESMTP id S934051AbcLMRsq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 12:48:46 -0500
 In-Reply-To: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
 In-Reply-To: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
 References: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
@@ -18,193 +18,48 @@ Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian
 
 From: Hu Ziji <huziji@marvell.com>
 
-Some SOCs have PHY PAD outside Xenon IP.
-PHY PAD voltage should match signalling voltage in use.
-
-Add generic SOC PHY PAD voltage control interface.
-Implement Aramda-3700 SOC PHY PAD voltage control.
+Export sdhci_execute_tuning() from sdhci.c.
+Thus vendor sdhci driver can execute its own tuning process.
 
 Signed-off-by: Hu Ziji <huziji@marvell.com>
 Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 ---
- drivers/mmc/host/sdhci-xenon-phy.c | 111 +++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-xenon.c     |   2 +-
- drivers/mmc/host/sdhci-xenon.h     |   2 +-
- 3 files changed, 114 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index 453c5076761c..8b06bad34b26 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -148,6 +148,22 @@ enum phy_type_enum {
- 	NR_PHY_TYPES
- };
- 
-+struct soc_pad_ctrl_table {
-+	const char *soc;
-+	void (*set_soc_pad)(struct sdhci_host *host,
-+			    unsigned char signal_voltage);
-+};
-+
-+struct soc_pad_ctrl {
-+	/* Register address of SOC PHY PAD ctrl */
-+	void __iomem	*reg;
-+	/* SOC PHY PAD ctrl type */
-+	enum soc_pad_ctrl_type pad_type;
-+	/* SOC specific operation to set SOC PHY PAD */
-+	void (*set_soc_pad)(struct sdhci_host *host,
-+			    unsigned char signal_voltage);
-+};
-+
- static struct xenon_emmc_phy_regs xenon_emmc_5_0_phy_regs = {
- 	.timing_adj	= SDHCI_EMMC_5_0_PHY_TIMING_ADJUST,
- 	.func_ctrl	= SDHCI_EMMC_5_0_PHY_FUNC_CONTROL,
-@@ -181,6 +197,8 @@ struct emmc_phy_params {
- 	u8	nr_tun_times;
- 	/* Divider for calculating Tuning Step */
- 	u8	tun_step_divider;
-+
-+	struct soc_pad_ctrl pad_ctrl;
- };
- 
- static int alloc_emmc_phy(struct sdhci_xenon_priv *priv)
-@@ -257,6 +275,45 @@ static int emmc_phy_init(struct sdhci_host *host)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8e6e4e37e3b4..e971abb1368f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1950,7 +1950,7 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
  	return 0;
  }
  
-+#define ARMADA_3700_SOC_PAD_1_8V	0x1
-+#define ARMADA_3700_SOC_PAD_3_3V	0x0
-+
-+static void armada_3700_soc_pad_voltage_set(struct sdhci_host *host,
-+					    unsigned char signal_voltage)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	struct emmc_phy_params *params = priv->phy_params;
-+
-+	if (params->pad_ctrl.pad_type == SOC_PAD_FIXED_1_8V) {
-+		writel(ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
-+	} else if (params->pad_ctrl.pad_type == SOC_PAD_SD) {
-+		if (signal_voltage == MMC_SIGNAL_VOLTAGE_180)
-+			writel(ARMADA_3700_SOC_PAD_1_8V, params->pad_ctrl.reg);
-+		else if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-+			writel(ARMADA_3700_SOC_PAD_3_3V, params->pad_ctrl.reg);
-+	}
-+}
-+
-+/*
-+ * Set SOC PHY voltage PAD control register,
-+ * according to the operation voltage on PAD.
-+ * The detailed operation depends on SOC implementaion.
-+ */
-+static void emmc_phy_set_soc_pad(struct sdhci_host *host,
-+				 unsigned char signal_voltage)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	struct emmc_phy_params *params = priv->phy_params;
-+
-+	if (!params->pad_ctrl.reg)
-+		return;
-+
-+	if (params->pad_ctrl.set_soc_pad)
-+		params->pad_ctrl.set_soc_pad(host, signal_voltage);
-+}
-+
- /*
-  * Enable eMMC PHY HW DLL
-  * DLL should be enabled and stable before HS200/SDR104 tuning,
-@@ -630,6 +687,51 @@ static void emmc_phy_set(struct sdhci_host *host,
- 	dev_dbg(mmc_dev(host->mmc), "eMMC PHY setting completes\n");
+-static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	u16 ctrl;
+@@ -2139,6 +2139,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	return err;
  }
++EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
  
-+static int get_dt_pad_ctrl_data(struct sdhci_host *host,
-+				struct device_node *np,
-+				struct emmc_phy_params *params)
-+{
-+	int ret = 0;
-+	const char *name;
-+	struct resource iomem;
-+
-+	if (of_device_is_compatible(np, "marvell,armada-3700-sdhci"))
-+		params->pad_ctrl.set_soc_pad = armada_3700_soc_pad_voltage_set;
-+	else
-+		return 0;
-+
-+	if (of_address_to_resource(np, 1, &iomem)) {
-+		dev_err(mmc_dev(host->mmc), "Unable to find SOC PAD ctrl register address for %s\n",
-+			np->name);
-+		return -EINVAL;
-+	}
-+
-+	params->pad_ctrl.reg = devm_ioremap_resource(mmc_dev(host->mmc),
-+						     &iomem);
-+	if (IS_ERR(params->pad_ctrl.reg)) {
-+		dev_err(mmc_dev(host->mmc), "Unable to get SOC PHY PAD ctrl regiser for %s\n",
-+			np->name);
-+		return PTR_ERR(params->pad_ctrl.reg);
-+	}
-+
-+	ret = of_property_read_string(np, "marvell,pad-type", &name);
-+	if (ret) {
-+		dev_err(mmc_dev(host->mmc), "Unable to determine SOC PHY PAD ctrl type\n");
-+		return ret;
-+	}
-+	if (!strcmp(name, "sd")) {
-+		params->pad_ctrl.pad_type = SOC_PAD_SD;
-+	} else if (!strcmp(name, "fixed-1-8v")) {
-+		params->pad_ctrl.pad_type = SOC_PAD_FIXED_1_8V;
-+	} else {
-+		dev_err(mmc_dev(host->mmc), "Unsupported SOC PHY PAD ctrl type %s\n",
-+			name);
-+		return -EINVAL;
-+	}
-+
-+	return ret;
-+}
-+
- static int emmc_phy_parse_param_dt(struct sdhci_host *host,
- 				   struct device_node *np,
- 				   struct emmc_phy_params *params)
-@@ -663,7 +765,14 @@ static int emmc_phy_parse_param_dt(struct sdhci_host *host,
- 	else
- 		params->tun_step_divider = SDHCI_TUNING_STEP_DIVIDER;
+ static int sdhci_select_drive_strength(struct mmc_card *card,
+ 				       unsigned int max_dtr, int host_drv,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index cd18b6f19c3b..95beadc66849 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -691,6 +691,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
++int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
  
--	return 0;
-+	return get_dt_pad_ctrl_data(host, np, params);
-+}
-+
-+/* Set SOC PHY Voltage PAD */
-+void xenon_soc_pad_ctrl(struct sdhci_host *host,
-+			unsigned char signal_voltage)
-+{
-+	emmc_phy_set_soc_pad(host, signal_voltage);
- }
- 
- /*
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 0347de533777..9b4fc4ac0216 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -322,6 +322,8 @@ static int xenon_start_signal_voltage_switch(struct mmc_host *mmc,
- 	 */
- 	enable_xenon_internal_clk(host);
- 
-+	xenon_soc_pad_ctrl(host, ios->signal_voltage);
-+
- 	if (priv->init_card_type == MMC_TYPE_MMC)
- 		return xenon_emmc_signal_voltage_switch(mmc, ios);
- 
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-index 86b5d2b1f1aa..a8312e36a03c 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -106,4 +106,6 @@ struct sdhci_xenon_priv {
- int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
- int xenon_phy_parse_dt(struct device_node *np,
- 		       struct sdhci_host *host);
-+void xenon_soc_pad_ctrl(struct sdhci_host *host,
-+			unsigned char signal_voltage);
- #endif
+ #ifdef CONFIG_PM
+ extern int sdhci_suspend_host(struct sdhci_host *host);
 -- 
 git-series 0.9.1
