@@ -1,64 +1,114 @@
-From: kbuild test robot <fengguang.wu@intel.com>
-Subject: [ulf.hansson-mmc:next 134/134] drivers/mmc/core/block.c:342:14-21:
- WARNING opportunity for memdup_user
-Date: Tue, 13 Dec 2016 07:16:47 +0800
-Message-ID: <201612130735.n1VmdCAl%fengguang.wu@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: core: Export device lifetime information through
+ sysf
+Date: Tue, 13 Dec 2016 09:18:28 +0800
+Message-ID: <c52d26d9-1e50-48c9-6e47-d7fa80ffa445@rock-chips.com>
+References: <CGME20161209055329eucas1p1f0718317b23071fe732cb40ed1c65fd3@eucas1p1.samsung.com>
+ <20161209055309.10976-1-js07.lee@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:12394 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751756AbcLLXRi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 12 Dec 2016 18:17:38 -0500
-Content-Disposition: inline
+Received: from lucky1.263xmail.com ([211.157.147.135]:37561 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753024AbcLMBSu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2016 20:18:50 -0500
+In-Reply-To: <20161209055309.10976-1-js07.lee@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: kbuild-all@01.org, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+To: Jungseung Lee <js07.lee@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, js07.lee@gmail.com
+Cc: shawn.lin@rock-chips.com
 
-tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
-head:   f397c8d80a5e413984bd9ccdf4161c7156b365ce
-commit: f397c8d80a5e413984bd9ccdf4161c7156b365ce [134/134] mmc: block: Move files to core
+On 2016/12/9 13:53, Jungseung Lee wrote:
+> In the eMMC 5.0 version of the spec, several EXT_CSD fields about
+> device lifetime are added.
+>
+>  - Two types of estimated indications reflected by averaged wear out of memory
+>  - An indication reflected by average reserved blocks
+>
+> Export the information through sysfs.
+>
+
+Looks good,
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+> ---
+>  drivers/mmc/core/mmc.c   | 12 ++++++++++++
+>  include/linux/mmc/card.h |  3 +++
+>  include/linux/mmc/mmc.h  |  3 +++
+>  3 files changed, 18 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index b61b52f9..c0e2507 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -617,6 +617,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		card->ext_csd.ffu_capable =
+>  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+>  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
+> +
+> +		card->ext_csd.pre_eol_info = ext_csd[EXT_CSD_PRE_EOL_INFO];
+> +		card->ext_csd.device_life_time_est_typ_a =
+> +			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
+> +		card->ext_csd.device_life_time_est_typ_b =
+> +			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
+>  	}
+>
+>  	/* eMMC v5.1 or later */
+> @@ -764,6 +770,10 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
+> +MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+> +MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+> +	card->ext_csd.device_life_time_est_typ_a,
+> +	card->ext_csd.device_life_time_est_typ_b);
+>  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
+>  MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+>  		card->ext_csd.enhanced_area_offset);
+> @@ -817,6 +827,8 @@ static struct attribute *mmc_std_attrs[] = {
+>  	&dev_attr_name.attr,
+>  	&dev_attr_oemid.attr,
+>  	&dev_attr_prv.attr,
+> +	&dev_attr_pre_eol_info.attr,
+> +	&dev_attr_life_time.attr,
+>  	&dev_attr_serial.attr,
+>  	&dev_attr_enhanced_area_offset.attr,
+>  	&dev_attr_enhanced_area_size.attr,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 95d69d4..00449e5 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -121,6 +121,9 @@ struct mmc_ext_csd {
+>  	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
+>  	u8			raw_bkops_status;	/* 246 */
+>  	u8			raw_sectors[4];		/* 212 - 4 bytes */
+> +	u8			pre_eol_info;		/* 267 */
+> +	u8			device_life_time_est_typ_a;	/* 268 */
+> +	u8			device_life_time_est_typ_b;	/* 269 */
+>
+>  	unsigned int            feature_support;
+>  #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 672730a..a074082 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -339,6 +339,9 @@ struct _mmc_csd {
+>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>  #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
+>  #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
+> +#define EXT_CSD_PRE_EOL_INFO		267	/* RO */
+> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A	268	/* RO */
+> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B	269	/* RO */
+>  #define EXT_CSD_CMDQ_DEPTH		307	/* RO */
+>  #define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
+>  #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+>
 
 
-coccinelle warnings: (new ones prefixed by >>)
+-- 
+Best Regards
+Shawn Lin
 
->> drivers/mmc/core/block.c:342:14-21: WARNING opportunity for memdup_user
-
-vim +342 drivers/mmc/core/block.c
-
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  326  	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  327  		err = -EFAULT;
-aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  328  		goto idata_err;
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  329  	}
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  330  
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  331  	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  332  	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  333  		err = -EOVERFLOW;
-aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  334  		goto idata_err;
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  335  	}
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  336  
-bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  337  	if (!idata->buf_bytes) {
-bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  338  		idata->buf = NULL;
-4d6144de drivers/mmc/card/block.c Johan Rudholm   2011-11-23  339  		return idata;
-bfe5b1b1 drivers/mmc/card/block.c Ville Viinikka  2016-07-08  340  	}
-4d6144de drivers/mmc/card/block.c Johan Rudholm   2011-11-23  341  
-1ff8950c drivers/mmc/card/block.c yalin wang      2015-11-12 @342  	idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  343  	if (!idata->buf) {
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  344  		err = -ENOMEM;
-aea253ec drivers/mmc/card/block.c Vladimir Motyka 2011-05-11  345  		goto idata_err;
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  346  	}
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  347  
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  348  	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  349  					idata->ic.data_ptr, idata->buf_bytes)) {
-cb87ea28 drivers/mmc/card/block.c John Calixto    2011-04-26  350  		err = -EFAULT;
-
-:::::: The code at line 342 was first introduced by commit
-:::::: 1ff8950c04331883b11c5e0d6db96e2da8b6f8c9 mmc: block: change to use kmalloc when copy data from userspace
-
-:::::: TO: yalin wang <yalin.wang2010@gmail.com>
-:::::: CC: Ulf Hansson <ulf.hansson@linaro.org>
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
