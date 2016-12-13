@@ -1,114 +1,109 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: core: Export device lifetime information through
- sysf
-Date: Tue, 13 Dec 2016 09:18:28 +0800
-Message-ID: <c52d26d9-1e50-48c9-6e47-d7fa80ffa445@rock-chips.com>
-References: <CGME20161209055329eucas1p1f0718317b23071fe732cb40ed1c65fd3@eucas1p1.samsung.com>
- <20161209055309.10976-1-js07.lee@samsung.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
+Date: Tue, 13 Dec 2016 13:39:13 +0900
+Message-ID: <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
+References: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
+ <1481201455-3483-3-git-send-email-yamada.masahiro@socionext.com> <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:37561 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753024AbcLMBSu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2016 20:18:50 -0500
-In-Reply-To: <20161209055309.10976-1-js07.lee@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, devicetree@vger.kernel.org, Al Cooper <alcooperx@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Jungseung Lee <js07.lee@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, js07.lee@gmail.com
-Cc: shawn.lin@rock-chips.com
 
-On 2016/12/9 13:53, Jungseung Lee wrote:
-> In the eMMC 5.0 version of the spec, several EXT_CSD fields about
-> device lifetime are added.
+Hi Rob.
+
+2016-12-13 2:14 GMT+09:00 Rob Herring <robh@kernel.org>:
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+>> new file mode 100644
+>> index 0000000..750374f
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+>> @@ -0,0 +1,30 @@
+>> +* Cadence SD/SDIO/eMMC Host Controller
+>> +
+>> +Required properties:
+>> +- compatible: should be "cdns,sd4hc".
 >
->  - Two types of estimated indications reflected by averaged wear out of memory
->  - An indication reflected by average reserved blocks
+> Needs SoC specific compatible strings too.
+
+
+I remember you mentioned the vendor prefix
+stands for the SoC vendor, not the IP vendor.
+The compatible prefixed with the IP vendor is prepared for a fallback.
+
+I will add "socionext,sd4hc".
+
+
+
+
+>> +- reg: offset and length of the register set for the device.
+>> +- interrupts: a single interrupt specifier.
+>> +- clocks: phandle to the input clock.
+>> +
+>> +Optional properties:
+>> +For eMMC configuration, supported speed modes are not indicated by the SDHCI
+>> +Capabilities Register.  Instead, the following properties should be specified
+>> +if supported.  See mmc.txt for details.
+>> +- mmc-ddr-1_8v
+>> +- mmc-ddr-1_2v
+>> +- mmc-hs200-1_8v
+>> +- mmc-hs200-1_2v
+>> +- mmc-hs400-1_8v
+>> +- mmc-hs400-1_2v
 >
-> Export the information through sysfs.
+> There's now a property to override SDHCI capabilities register. Maybe
+> you should use that instead? I'll defer to Ulf.
 >
 
-Looks good,
+I did not know this new property.
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+So, now we have two ways to specify MMC speed mode capabilities
+by only touching DT.
 
-> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
-> ---
->  drivers/mmc/core/mmc.c   | 12 ++++++++++++
->  include/linux/mmc/card.h |  3 +++
->  include/linux/mmc/mmc.h  |  3 +++
->  3 files changed, 18 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index b61b52f9..c0e2507 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -617,6 +617,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  		card->ext_csd.ffu_capable =
->  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
->  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-> +
-> +		card->ext_csd.pre_eol_info = ext_csd[EXT_CSD_PRE_EOL_INFO];
-> +		card->ext_csd.device_life_time_est_typ_a =
-> +			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
-> +		card->ext_csd.device_life_time_est_typ_b =
-> +			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
->  	}
->
->  	/* eMMC v5.1 or later */
-> @@ -764,6 +770,10 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-> +MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
-> +MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
-> +	card->ext_csd.device_life_time_est_typ_a,
-> +	card->ext_csd.device_life_time_est_typ_b);
->  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
->  MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
->  		card->ext_csd.enhanced_area_offset);
-> @@ -817,6 +827,8 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_name.attr,
->  	&dev_attr_oemid.attr,
->  	&dev_attr_prv.attr,
-> +	&dev_attr_pre_eol_info.attr,
-> +	&dev_attr_life_time.attr,
->  	&dev_attr_serial.attr,
->  	&dev_attr_enhanced_area_offset.attr,
->  	&dev_attr_enhanced_area_size.attr,
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 95d69d4..00449e5 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -121,6 +121,9 @@ struct mmc_ext_csd {
->  	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
->  	u8			raw_bkops_status;	/* 246 */
->  	u8			raw_sectors[4];		/* 212 - 4 bytes */
-> +	u8			pre_eol_info;		/* 267 */
-> +	u8			device_life_time_est_typ_a;	/* 268 */
-> +	u8			device_life_time_est_typ_b;	/* 269 */
->
->  	unsigned int            feature_support;
->  #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 672730a..a074082 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -339,6 +339,9 @@ struct _mmc_csd {
->  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
->  #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
->  #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
-> +#define EXT_CSD_PRE_EOL_INFO		267	/* RO */
-> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A	268	/* RO */
-> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B	269	/* RO */
->  #define EXT_CSD_CMDQ_DEPTH		307	/* RO */
->  #define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
->  #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
->
+[1] Add MMC mode flags directly, like I did.
+[2] Use "sdhci-caps-mask" and "sdhci-caps"
+
+
+The problem for [2] is that eMMC capabilities
+do not perfectly correspond to the SDHCI capabilities register.
+
+
+>> +- mmc-hs400-1_8v
+>> +- mmc-hs400-1_2v
+
+If the driver sets SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+we can use the bit63 of caps for specifying HS400.
+
+But, this is not defined in the SDHCI standard.
+#define  SDHCI_SUPPORT_HS400 0x80000000 /* Non-standard */
+
+
+
+>> +- mmc-ddr-1_8v
+
+For High Speed DDR, perhaps we can imply MMC_CAP_1_8V_DDR
+from MMC_CAP_UHS_DDR50  (bit34 of caps)
+
+This is not supported in the current code, but
+if this is a good idea, I can send a patch.
+
+
+>> +- mmc-ddr-1_2v
+
+This does not have the corresponding bit, but
+1.2V is not commonly used, so this is not a fatal problem.
+
+
+
+What I can do at most now, is to delete the
+Optional properties section entirely
+so users can choose [1] or [2] as they like.
+
 
 
 -- 
 Best Regards
-Shawn Lin
-
+Masahiro Yamada
