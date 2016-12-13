@@ -1,93 +1,95 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
-Date: Tue, 13 Dec 2016 08:52:55 +0100
-Message-ID: <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com>
-References: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
- <1481201455-3483-3-git-send-email-yamada.masahiro@socionext.com>
- <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop> <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
+Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
+Date: Tue, 13 Dec 2016 09:01:18 +0100
+Message-ID: <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
+References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
+ <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
+ <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
+ <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
+ <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
+ <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com> <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Rob Herring <robh@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:37451 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753060AbcLMIBX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 03:01:23 -0500
+Received: by mail-wm0-f45.google.com with SMTP id t79so106506635wmt.0
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2016 00:01:22 -0800 (PST)
+In-Reply-To: <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh@kernel.org>, Matt Ranostay <matt@ranostay.consulting>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
 
-[...]
-
->>> +
->>> +Optional properties:
->>> +For eMMC configuration, supported speed modes are not indicated by the SDHCI
->>> +Capabilities Register.  Instead, the following properties should be specified
->>> +if supported.  See mmc.txt for details.
->>> +- mmc-ddr-1_8v
->>> +- mmc-ddr-1_2v
->>> +- mmc-hs200-1_8v
->>> +- mmc-hs200-1_2v
->>> +- mmc-hs400-1_8v
->>> +- mmc-hs400-1_2v
+On 9 December 2016 at 19:09, Rob Herring <robh@kernel.org> wrote:
+> On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
+>> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> > On 2 December 2016 at 08:22, Matt Ranostay <matt@ranostay.consulting> wrote:
+>> >>
+>> >>
+>> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> >>>
+>> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
+>> >>>> Add optional device-post-power-on parameters to disable post_power_on
+>> >>>> function from being called since this breaks some device.
+>> >>>>
+>> >>>> Cc: Tony Lindgren <tony@atomide.com>
+>> >>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>> >>>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
+>> >>>> ---
+>> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+>> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
+>> >>>> 2 files changed, 9 insertions(+)
+>> >>>>
+>> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>> >>>> index bea306d772d1..09fa153f743e 100644
+>> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>> >>>> @@ -24,6 +24,8 @@ Optional properties:
+>> >>>>        de-asserting the reset-gpios (if any)
+>> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
+>> >>>>        and pwrdn-gpios (if any)
+>> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
+>> >>>> +       this breaks some devices
+>> >>>
+>> >>> This is a bit weird. I would like to avoid this, if possible.
+>> >>>
+>> >>> Perhaps if you simply describe the sequence in detail for your device
+>> >>> we can figure out the best option together.
+>> >>
+>> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
+>> >
+>> > This went offlist, please resend.
+>> >
+>> > Moreover, please try to describe the sequence you need in detail
+>> > according to your HW spec.
+>> >
 >>
->> There's now a property to override SDHCI capabilities register. Maybe
->> you should use that instead? I'll defer to Ulf.
+>> Yeah oops....
 >>
+>> So basically we need to drive the reset and powerdown lines high with
+>> a 300 milliseconds delay between both...
+>> can't have the reset line low with post power on (pretty sure but
+>> would need a delay anyway), and we need both reset + powerdown line
+>> set low on powerdown.
+>>
+>> So the power down sequence would need to be reversed for this
+>> application in pwrseq-simple.
 >
-> I did not know this new property.
->
-> So, now we have two ways to specify MMC speed mode capabilities
-> by only touching DT.
+> This sounds like you need a device specific sequence to me. Otherwise,
+> write a language to describe any power control waveforms rather than
+> trying to bolt on more and more properties. (Don't really go write a
+> language.)
 
-Let me clarify a bit.
+Actually this isn't so device specific. The cw1200 wifi chip which is
+being used with ux500 SoCs has a very similar sequence. Allow me to
+check the details and get back.
 
-The point with the new bindings is to be able to override *broken*
-SDHCI caps bits. So, not only related to the speed modes.
-
->
-> [1] Add MMC mode flags directly, like I did.
-> [2] Use "sdhci-caps-mask" and "sdhci-caps"
->
->
-> The problem for [2] is that eMMC capabilities
-> do not perfectly correspond to the SDHCI capabilities register.
->
->
->>> +- mmc-hs400-1_8v
->>> +- mmc-hs400-1_2v
->
-> If the driver sets SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
-> we can use the bit63 of caps for specifying HS400.
->
-> But, this is not defined in the SDHCI standard.
-> #define  SDHCI_SUPPORT_HS400 0x80000000 /* Non-standard */
->
->
->
->>> +- mmc-ddr-1_8v
->
-> For High Speed DDR, perhaps we can imply MMC_CAP_1_8V_DDR
-> from MMC_CAP_UHS_DDR50  (bit34 of caps)
->
-> This is not supported in the current code, but
-> if this is a good idea, I can send a patch.
->
->
->>> +- mmc-ddr-1_2v
->
-> This does not have the corresponding bit, but
-> 1.2V is not commonly used, so this is not a fatal problem.
->
->
->
-> What I can do at most now, is to delete the
-> Optional properties section entirely
-> so users can choose [1] or [2] as they like.
->
-
-I think a better approach is to use the new sdhci-caps* bindings to
-mask those caps that can't be trusted. And then use the generic mmc
-bindings for speed modes instead.
-
-That should be a safer approach, right!?
+Anyway, my point is that I think we can figure out a common sequence
+to support these kind required sequences. That is to me preferred over
+adding a new (two to support cw1200) device specific pwrseq driver.
 
 Kind regards
 Uffe
