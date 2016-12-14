@@ -1,112 +1,63 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v5 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
-Date: Wed, 14 Dec 2016 11:27:19 +0900
-Message-ID: <CAK7LNASaKpGyE_qpQGyqxeVRSkqwj6Rm4WKNq2Zs4Woj4MY01A@mail.gmail.com>
-References: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
- <1481201455-3483-3-git-send-email-yamada.masahiro@socionext.com>
- <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop> <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
- <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 1/2]  mmc: sdio: Factor out retry init card helper function
+Date: Wed, 14 Dec 2016 12:15:09 +0800
+Message-ID: <1481688910-117631-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:34572 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754592AbcLNEP7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 23:15:59 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, =Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Ulf,
+Add new helper function, mmc_sdio_retry_init_card, to be
+reused when trying to retry the init sequence.
 
-2016-12-13 16:52 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> [...]
->
->>>> +
->>>> +Optional properties:
->>>> +For eMMC configuration, supported speed modes are not indicated by the SDHCI
->>>> +Capabilities Register.  Instead, the following properties should be specified
->>>> +if supported.  See mmc.txt for details.
->>>> +- mmc-ddr-1_8v
->>>> +- mmc-ddr-1_2v
->>>> +- mmc-hs200-1_8v
->>>> +- mmc-hs200-1_2v
->>>> +- mmc-hs400-1_8v
->>>> +- mmc-hs400-1_2v
->>>
->>> There's now a property to override SDHCI capabilities register. Maybe
->>> you should use that instead? I'll defer to Ulf.
->>>
->>
->> I did not know this new property.
->>
->> So, now we have two ways to specify MMC speed mode capabilities
->> by only touching DT.
->
-> Let me clarify a bit.
->
-> The point with the new bindings is to be able to override *broken*
-> SDHCI caps bits. So, not only related to the speed modes.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-Right.
+ drivers/mmc/core/sdio.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
-So my approach ([1] Add MMC mode flags directly)
-basically sounds OK.
-
-
-
->>
->> [1] Add MMC mode flags directly, like I did.
->> [2] Use "sdhci-caps-mask" and "sdhci-caps"
->>
->>
->> The problem for [2] is that eMMC capabilities
->> do not perfectly correspond to the SDHCI capabilities register.
->>
->>
->>>> +- mmc-hs400-1_8v
->>>> +- mmc-hs400-1_2v
->>
->> If the driver sets SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
->> we can use the bit63 of caps for specifying HS400.
->>
->> But, this is not defined in the SDHCI standard.
->> #define  SDHCI_SUPPORT_HS400 0x80000000 /* Non-standard */
->>
->>
->>
->>>> +- mmc-ddr-1_8v
->>
->> For High Speed DDR, perhaps we can imply MMC_CAP_1_8V_DDR
->> from MMC_CAP_UHS_DDR50  (bit34 of caps)
->>
->> This is not supported in the current code, but
->> if this is a good idea, I can send a patch.
->>
->>
->>>> +- mmc-ddr-1_2v
->>
->> This does not have the corresponding bit, but
->> 1.2V is not commonly used, so this is not a fatal problem.
->>
->>
->>
->> What I can do at most now, is to delete the
->> Optional properties section entirely
->> so users can choose [1] or [2] as they like.
->>
->
-> I think a better approach is to use the new sdhci-caps* bindings to
-> mask those caps that can't be trusted. And then use the generic mmc
-> bindings for speed modes instead.
->
-> That should be a safer approach, right!?
-
-Right.
-
-But, if I know the caps register bits 63-32 are all zero,
-I need not explicitly specify sdhci-caps-mask, right?
-
-
-
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ecbc529..47f824b 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -541,6 +541,18 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
+ 	return err;
+ }
+ 
++static void mmc_sdio_retry_init_card(struct mmc_host *host,
++				     struct mmc_card *card,
++				     int *retries)
++{
++	sdio_reset(host);
++	mmc_go_idle(host);
++	mmc_send_if_cond(host, host->ocr_avail);
++	mmc_remove_card(card);
++	(*retries)--;
++
++}
++
+ /*
+  * Handle the detection and initialisation of a card.
+  *
+@@ -630,11 +642,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+ 					ocr_card);
+ 		if (err == -EAGAIN) {
+-			sdio_reset(host);
+-			mmc_go_idle(host);
+-			mmc_send_if_cond(host, host->ocr_avail);
+-			mmc_remove_card(card);
+-			retries--;
++			mmc_sdio_retry_init_card(host, card, &retries);
+ 			goto try_again;
+ 		} else if (err) {
+ 			ocr &= ~R4_18V_PRESENT;
 -- 
-Best Regards
-Masahiro Yamada
+1.9.1
+
+
