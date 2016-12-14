@@ -1,34 +1,109 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] mmc: sdhci-cadence: add SoC specific compatible string
-Date: Wed, 14 Dec 2016 11:12:24 +0900
-Message-ID: <CAK7LNASg=apv0JGcdwnS8Yy2zO6u9rQS-1ca717T4QaZ8QOO1A@mail.gmail.com>
-References: <1481680795-15697-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
+Date: Wed, 14 Dec 2016 11:27:19 +0900
+Message-ID: <CAK7LNASaKpGyE_qpQGyqxeVRSkqwj6Rm4WKNq2Zs4Woj4MY01A@mail.gmail.com>
+References: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
+ <1481201455-3483-3-git-send-email-yamada.masahiro@socionext.com>
+ <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop> <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
+ <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-05.nifty.com ([210.131.2.90]:20652 "EHLO
-        conssluserg-05.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750999AbcLNCMc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2016 21:12:32 -0500
-In-Reply-To: <1481680795-15697-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
 
-2016-12-14 10:59 GMT+09:00 Masahiro Yamada <yamada.masahiro@socionext.com>:
-> Add a Socionext SoC specific compatible (suggested by Rob Herring).
+Hi Ulf,
+
+2016-12-13 16:52 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> [...]
 >
-> No SoC specific data are associated with the compatible strings for
-> now, but other SoC vendors may use this IP and want to differentiate
-> IP variants in the future.
+>>>> +
+>>>> +Optional properties:
+>>>> +For eMMC configuration, supported speed modes are not indicated by the SDHCI
+>>>> +Capabilities Register.  Instead, the following properties should be specified
+>>>> +if supported.  See mmc.txt for details.
+>>>> +- mmc-ddr-1_8v
+>>>> +- mmc-ddr-1_2v
+>>>> +- mmc-hs200-1_8v
+>>>> +- mmc-hs200-1_2v
+>>>> +- mmc-hs400-1_8v
+>>>> +- mmc-hs400-1_2v
+>>>
+>>> There's now a property to override SDHCI capabilities register. Maybe
+>>> you should use that instead? I'll defer to Ulf.
+>>>
+>>
+>> I did not know this new property.
+>>
+>> So, now we have two ways to specify MMC speed mode capabilities
+>> by only touching DT.
 >
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Let me clarify a bit.
+>
+> The point with the new bindings is to be able to override *broken*
+> SDHCI caps bits. So, not only related to the speed modes.
 
-I thought adding SoC family name ("uniphier") would be better.
+Right.
 
-I've just sent v2.
+So my approach ([1] Add MMC mode flags directly)
+basically sounds OK.
 
+
+
+>>
+>> [1] Add MMC mode flags directly, like I did.
+>> [2] Use "sdhci-caps-mask" and "sdhci-caps"
+>>
+>>
+>> The problem for [2] is that eMMC capabilities
+>> do not perfectly correspond to the SDHCI capabilities register.
+>>
+>>
+>>>> +- mmc-hs400-1_8v
+>>>> +- mmc-hs400-1_2v
+>>
+>> If the driver sets SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+>> we can use the bit63 of caps for specifying HS400.
+>>
+>> But, this is not defined in the SDHCI standard.
+>> #define  SDHCI_SUPPORT_HS400 0x80000000 /* Non-standard */
+>>
+>>
+>>
+>>>> +- mmc-ddr-1_8v
+>>
+>> For High Speed DDR, perhaps we can imply MMC_CAP_1_8V_DDR
+>> from MMC_CAP_UHS_DDR50  (bit34 of caps)
+>>
+>> This is not supported in the current code, but
+>> if this is a good idea, I can send a patch.
+>>
+>>
+>>>> +- mmc-ddr-1_2v
+>>
+>> This does not have the corresponding bit, but
+>> 1.2V is not commonly used, so this is not a fatal problem.
+>>
+>>
+>>
+>> What I can do at most now, is to delete the
+>> Optional properties section entirely
+>> so users can choose [1] or [2] as they like.
+>>
+>
+> I think a better approach is to use the new sdhci-caps* bindings to
+> mask those caps that can't be trusted. And then use the generic mmc
+> bindings for speed modes instead.
+>
+> That should be a safer approach, right!?
+
+Right.
+
+But, if I know the caps register bits 63-32 are all zero,
+I need not explicitly specify sdhci-caps-mask, right?
 
 
 
