@@ -1,101 +1,59 @@
-From: Matt Ranostay <matt@ranostay.consulting>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Wed, 14 Dec 2016 17:46:37 -0800
-Message-ID: <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
- <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: Fix calc_max_discard.
+Date: Thu, 15 Dec 2016 10:14:17 +0200
+Message-ID: <3c68bce2-8426-f1d6-03c3-9f285092091d@intel.com>
+References: <1481656818-21141-1-git-send-email-gwendal@chromium.org>
+ <8d4b89c1-678d-f85d-29b9-e2b8a5a3b40c@intel.com>
+ <CAMHSBOUyZtSDy8VMwy8HTBUjNL7108mAJHKg-JpswFnhsjB8fQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:33805 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752959AbcLOBq7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2016 20:46:59 -0500
-Received: by mail-qt0-f170.google.com with SMTP id n6so43561879qtd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Dec 2016 17:46:38 -0800 (PST)
-In-Reply-To: <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:4574 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751125AbcLOIUz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 15 Dec 2016 03:20:55 -0500
+In-Reply-To: <CAMHSBOUyZtSDy8VMwy8HTBUjNL7108mAJHKg-JpswFnhsjB8fQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Doug Anderson <dianders@chromium.org>, hisanao.kinkawa@toshiba.co.jp, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, Dec 13, 2016 at 12:01 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 9 December 2016 at 19:09, Rob Herring <robh@kernel.org> wrote:
->> On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
->>> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> > On 2 December 2016 at 08:22, Matt Ranostay <matt@ranostay.consulting> wrote:
->>> >>
->>> >>
->>> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> >>>
->>> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
->>> >>>> Add optional device-post-power-on parameters to disable post_power_on
->>> >>>> function from being called since this breaks some device.
->>> >>>>
->>> >>>> Cc: Tony Lindgren <tony@atomide.com>
->>> >>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>> >>>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
->>> >>>> ---
->>> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->>> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
->>> >>>> 2 files changed, 9 insertions(+)
->>> >>>>
->>> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> >>>> index bea306d772d1..09fa153f743e 100644
->>> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
->>> >>>> @@ -24,6 +24,8 @@ Optional properties:
->>> >>>>        de-asserting the reset-gpios (if any)
->>> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
->>> >>>>        and pwrdn-gpios (if any)
->>> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
->>> >>>> +       this breaks some devices
->>> >>>
->>> >>> This is a bit weird. I would like to avoid this, if possible.
->>> >>>
->>> >>> Perhaps if you simply describe the sequence in detail for your device
->>> >>> we can figure out the best option together.
->>> >>
->>> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
->>> >
->>> > This went offlist, please resend.
->>> >
->>> > Moreover, please try to describe the sequence you need in detail
->>> > according to your HW spec.
->>> >
+On 14/12/16 20:13, Gwendal Grignou wrote:
+> On Tue, Dec 13, 2016 at 11:19 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 13/12/16 21:20, Gwendal Grignou wrote:
+>>> Working with a SDHCI controller and a Toshiba 16GB THGBMFG7C2LBAIL.
+>>> The Toshiba part has a large erase group size and a long erase timeout.
+>>> It barely fits within the controller timeout, but mmc reports a
+>>> 512B discard size to the block layer instead of the expected 4MB:
+>>> /sys/block/mmcblk0/queue/discard_max_bytes = 512
 >>>
->>> Yeah oops....
+>>> The host caps[0] is 0x...b2, so host->max_busy_timeout is set to
+>>> 2684.35ms: (1 << 27 / ((0xb2 & 0x3f) * 1000).
 >>>
->>> So basically we need to drive the reset and powerdown lines high with
->>> a 300 milliseconds delay between both...
->>> can't have the reset line low with post power on (pretty sure but
->>> would need a delay anyway), and we need both reset + powerdown line
->>> set low on powerdown.
+>>> In Toshiba EXT_CSD, HC_ERASE_GRP_SIZE is set to 7 (2100ms erase timeout)
+>>> HC_ERASE_GRP_SIZE is set to 8, (8192 512B sectors erase size).
 >>>
->>> So the power down sequence would need to be reversed for this
->>> application in pwrseq-simple.
+>>> In mmc_do_calc_max_discard(), as a safety, for eMMC device, number of
+>>> erase groups that could safely be erased with the host timeout (qty) was
+>>> reduced by 1.
 >>
->> This sounds like you need a device specific sequence to me. Otherwise,
->> write a language to describe any power control waveforms rather than
->> trying to bolt on more and more properties. (Don't really go write a
->> language.)
->
-> Actually this isn't so device specific. The cw1200 wifi chip which is
-> being used with ux500 SoCs has a very similar sequence. Allow me to
-> check the details and get back.
+>> It was not for safety - it was to allow for crossing an erase group boundary.
+> Got it.
+>>
+>> But the current code is quite different now, so please have a look at that
+>> because this code does not apply anymore.
+> Indeed, looking at the block layer, it is paying attention not to
+> cross  boundary, issuing an extra erase command when necessary.
+> in blkdev_issue_discard(),  we use  bdev_discard_alignment to be sure
+> erasing within a partition still start on a erase group boundary.
+> It has been addressed with c6e66634 (block: split discard into aligned
+> requests) and following changes.
 
-Ok. It would be good to have something common than a bunch of one-off
-solutions for sure.
+I think you are misreading that patch.  It won't split a discard unless it
+exceeds the maximum discard size.  So a discard of 2 sectors crossing an
+erase group boundary is not split unless the max discard is 1.  The mmc core
+now does a split since commit 642c28ab86f7 ("mmc: core: Optimize case for
+exactly one erase-group budget")
 
->
-> Anyway, my point is that I think we can figure out a common sequence
-> to support these kind required sequences. That is to me preferred over
-> adding a new (two to support cw1200) device specific pwrseq driver.
->
-> Kind regards
-> Uffe
+
