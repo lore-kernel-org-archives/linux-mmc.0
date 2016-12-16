@@ -1,84 +1,58 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sdhci-cadence: add Socionext UniPhier specific
- compatible string
-Date: Fri, 16 Dec 2016 12:09:17 +0100
-Message-ID: <CAPDyKFpJOLv8XoT6MLpHYOKoPZFXKwrhyCvmaB=RdQm3G4OYQA@mail.gmail.com>
-References: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1481681446-29832-1-git-send-email-yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH 1/2] mmc: sdhci-acpi: Sync quirks with sdhci_intel_byt_* from sdhci-pci-core.c
+Date: Fri, 16 Dec 2016 17:36:19 +0100
+Message-ID: <20161216163620.4318-1-hdegoede@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:55510 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934030AbcLPQgY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 16 Dec 2016 11:36:24 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>
 
-On 14 December 2016 at 03:10, Masahiro Yamada
-<yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org> wrote:
-> Add a Socionext SoC specific compatible (suggested by Rob Herring).
->
-> No SoC specific data are associated with the compatible strings for
-> now, but other SoC vendors may use this IP and want to differentiate
-> IP variants in the future.
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+The sdhci_intel_byt_* and the non _qcom_ sdhci_acpi_slot_ entries in
+sdhci-acpi.c are for the same mmc host in either pci or acpi mapped
+mode, so the flags should be the same.
 
-This looks good to me. I intend to apply this as fix, although
-deferring to first get an ack from Rob - to make sure we get it right
-this time. :-)
+The syncing removes the SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk from
+sdhci_acpi_slot_int_sdio, this quirk is a nop as this slot also has
+MMC_CAP_NONREMOVABLE, and adds SDHCI_QUIRK2_PRESET_VALUE_BROKEN to
+sdhci_acpi_slot_int_sdio and sdhci_acpi_slot_int_sd. Note that
+sdhci_acpi_slot_int_mmc already has the SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+quirk, which is another indication that the others need it too.
 
-Kind regards
-Uffe
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-> ---
->
-> Changes in v2:
->   - Add "uniphier" to the compatible to make it more SoC-specific
->
->  Documentation/devicetree/bindings/mmc/sdhci-cadence.txt | 6 ++++--
->  drivers/mmc/host/sdhci-cadence.c                        | 1 +
->  2 files changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-> index 750374f..c0f37cb 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-> @@ -1,7 +1,9 @@
->  * Cadence SD/SDIO/eMMC Host Controller
->
->  Required properties:
-> -- compatible: should be "cdns,sd4hc".
-> +- compatible: should be one of the following:
-> +    "cdns,sd4hc"               - default of the IP
-> +    "socionext,uniphier-sd4hc" - for Socionext UniPhier SoCs
->  - reg: offset and length of the register set for the device.
->  - interrupts: a single interrupt specifier.
->  - clocks: phandle to the input clock.
-> @@ -19,7 +21,7 @@ if supported.  See mmc.txt for details.
->
->  Example:
->         emmc: sdhci@5a000000 {
-> -               compatible = "cdns,sd4hc";
-> +               compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
->                 reg = <0x5a000000 0x400>;
->                 interrupts = <0 78 4>;
->                 clocks = <&clk 4>;
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 1501cfd..4b0ecb9 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -262,6 +262,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  }
->
->  static const struct of_device_id sdhci_cdns_match[] = {
-> +       { .compatible = "socionext,uniphier-sd4hc" },
->         { .compatible = "cdns,sd4hc" },
->         { /* sentinel */ }
->  };
-> --
-> 2.7.4
->
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 81d4dc0..69c332b 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -286,9 +286,9 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ };
+ 
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+-	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+-		   SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+-	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
++	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+ 		   MMC_CAP_WAIT_WHILE_BUSY,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+@@ -301,6 +301,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
+ 		   SDHCI_ACPI_RUNTIME_PM,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 		   SDHCI_QUIRK2_STOP_WITH_TC,
+ 	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
+ 	.probe_slot	= sdhci_acpi_sd_probe_slot,
+-- 
+2.9.3
+
