@@ -1,36 +1,40 @@
-From: Gwendal Grignou <gwendal@chromium.org>
-Subject: Re: [PATCH] mmc: core: Fix calc_max_discard.
-Date: Thu, 15 Dec 2016 02:12:05 -0800
-Message-ID: <CAMHSBOVj3+xHhYG6iXS5x6bGVvJNyvC56TabLt5ouJcmkyjaYg@mail.gmail.com>
-References: <1481656818-21141-1-git-send-email-gwendal@chromium.org>
- <8d4b89c1-678d-f85d-29b9-e2b8a5a3b40c@intel.com> <CAMHSBOUyZtSDy8VMwy8HTBUjNL7108mAJHKg-JpswFnhsjB8fQ@mail.gmail.com>
- <3c68bce2-8426-f1d6-03c3-9f285092091d@intel.com> <edd6d97c-2ef3-75bf-cbcc-a4604c2f2d70@toshiba.co.jp>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-cadence: add Cadence SD4HC support
+Date: Fri, 16 Dec 2016 12:07:42 +0100
+Message-ID: <CAPDyKFqmTP1+pe7UNavOAZA0QWFOu8M4FcQOpGkqZj=nnpP9qA@mail.gmail.com>
+References: <1481201455-3483-1-git-send-email-yamada.masahiro@socionext.com>
+ <1481201455-3483-3-git-send-email-yamada.masahiro@socionext.com>
+ <20161212171408.2yf4jauz7czv44fy@rob-hp-laptop> <CAK7LNATO+vpxmDV-XEupjeXXhPNdrXHNwfwWcAVWLdbJi+37QA@mail.gmail.com>
+ <CAPDyKFrejOSGVWb=gsuCixxj_OXfLfo22VwLDC_Y4scw+Se8FQ@mail.gmail.com> <CAK7LNASaKpGyE_qpQGyqxeVRSkqwj6Rm4WKNq2Zs4Woj4MY01A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:35195 "EHLO
-        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757792AbcLOKM1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2016 05:12:27 -0500
-Received: by mail-vk0-f47.google.com with SMTP id w194so67937195vkw.2
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Dec 2016 02:12:26 -0800 (PST)
-In-Reply-To: <edd6d97c-2ef3-75bf-cbcc-a4604c2f2d70@toshiba.co.jp>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAK7LNASaKpGyE_qpQGyqxeVRSkqwj6Rm4WKNq2Zs4Woj4MY01A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Cc: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Al Cooper <alcooperx-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Andrei Pistirica <andrei.pistirica-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: hisanao.kinkawa@toshiba.co.jp
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Gwendal Grignou <gwendal@chromium.org>, Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 1:46 AM,  <hisanao.kinkawa@toshiba.co.jp> wrote:
-> On 2016/12/15 17:14, Adrian Hunter wrote:
+[...]
 
-> But the current code is quite different now, so please have a look at that
-> because this code does not apply anymore.
+>>
+>> I think a better approach is to use the new sdhci-caps* bindings to
+>> mask those caps that can't be trusted. And then use the generic mmc
+>> bindings for speed modes instead.
+>>
+>> That should be a safer approach, right!?
 >
-...
-> The mmc core
-> now does a split since commit 642c28ab86f7 ("mmc: core: Optimize case for
-> exactly one erase-group budget")
-You are correct. I should have looked at upstream kernel. My patch is
-incomplete and the issue has already been addressed with 642c28ab86f7.
-Gwendal.
+> Right.
 >
+> But, if I know the caps register bits 63-32 are all zero,
+> I need not explicitly specify sdhci-caps-mask, right?
+
+Maybe not. I don't have a strong opinion here, so l am fine with
+whatever you choose.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
