@@ -1,7 +1,7 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v10 5/8] mmc: thunderx: Add MMC PCI driver for ThunderX SOCs
-Date: Mon, 19 Dec 2016 13:15:49 +0100
-Message-ID: <20161219121552.18316-6-jglauber@cavium.com>
+Subject: [PATCH v10 4/8] mmc: octeon: Add support for Octeon cn7890
+Date: Mon, 19 Dec 2016 13:15:48 +0100
+Message-ID: <20161219121552.18316-5-jglauber@cavium.com>
 References: <20161219121552.18316-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20161219121552.18316-1-jglauber@cavium.com>
@@ -10,337 +10,201 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a platform driver for ThunderX ARM SOCs.
+The MMC unit on Octeon cn7890 differs in that it has multiple
+interrupts. Requires a lock for the interrupt handler. DMA addresses
+have a dedicated 64 bit register now, so use that when available.
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 ---
- drivers/mmc/host/Kconfig               |   9 ++
- drivers/mmc/host/Makefile              |   2 +
- drivers/mmc/host/cavium_mmc.h          |  38 ++++++
- drivers/mmc/host/thunderx_pcidrv_mmc.c | 214 +++++++++++++++++++++++++++++++++
- 4 files changed, 263 insertions(+)
- create mode 100644 drivers/mmc/host/thunderx_pcidrv_mmc.c
+ drivers/mmc/host/cavium_core_mmc.c    | 16 ++++++-
+ drivers/mmc/host/cavium_mmc.h         |  6 +++
+ drivers/mmc/host/octeon_platdrv_mmc.c | 79 ++++++++++++++++++++++++++++-------
+ 3 files changed, 84 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 6f22e16..38d7403 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -353,6 +353,15 @@ config MMC_OCTEON
+diff --git a/drivers/mmc/host/cavium_core_mmc.c b/drivers/mmc/host/cavium_core_mmc.c
+index 1bdba06..596505a 100644
+--- a/drivers/mmc/host/cavium_core_mmc.c
++++ b/drivers/mmc/host/cavium_core_mmc.c
+@@ -384,8 +384,14 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+ 	union mio_emm_rsp_sts rsp_sts;
+ 	union mio_emm_int emm_int;
+ 	struct mmc_request *req;
++	unsigned long flags = 0;
+ 	bool host_done;
  
- 	  If unsure, say N.
- 
-+config MMC_THUNDERX
-+	tristate "Cavium ThunderX SD/MMC Card Interface support"
-+	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
-+	help
-+	  This selects Cavium ThunderX SD/MMC Card Interface.
-+	  If you have an Cavium ARM64 board with a Multimedia Card slot
-+	  or builtin eMMC chip say Y or M here. If built as a module
-+	  the module will be called thunderx_mmc.ko.
++	if (host->need_irq_handler_lock)
++		spin_lock_irqsave(&host->irq_handler_lock, flags);
++	else
++		__acquire(&host->irq_handler_lock);
 +
- config MMC_OMAP
- 	tristate "TI OMAP Multimedia Card Interface support"
- 	depends on ARCH_OMAP
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 6e57e11..488351f 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -23,6 +23,8 @@ obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
- obj-$(CONFIG_MMC_MTK)		+= mtk-sd.o
- octeon_mmc-objs := cavium_core_mmc.o octeon_platdrv_mmc.o
- obj-$(CONFIG_MMC_OCTEON)	+= octeon_mmc.o
-+thunderx_mmc-objs := cavium_core_mmc.o thunderx_pcidrv_mmc.o
-+obj-$(CONFIG_MMC_THUNDERX)	+= thunderx_mmc.o
- obj-$(CONFIG_MMC_OMAP)		+= omap.o
- obj-$(CONFIG_MMC_OMAP_HS)	+= omap_hsmmc.o
- obj-$(CONFIG_MMC_ATMELMCI)	+= atmel-mci.o
+ 	/* Clear interrupt bits (write 1 clears ). */
+ 	emm_int.val = readq(host->base + MIO_EMM_INT);
+ 	writeq(emm_int.val, host->base + MIO_EMM_INT);
+@@ -443,6 +449,10 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+ 	if (host_done)
+ 		host->release_bus(host);
+ out:
++	if (host->need_irq_handler_lock)
++		spin_unlock_irqrestore(&host->irq_handler_lock, flags);
++	else
++		__release(&host->irq_handler_lock);
+ 	return IRQ_RETVAL(emm_int.val != 0);
+ }
+ 
+@@ -470,11 +480,15 @@ static u64 prepare_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
+ 	dma_cfg.s.size = (sg_dma_len(&data->sg[0]) / 8) - 1;
+ 
+ 	addr = sg_dma_address(&data->sg[0]);
+-	dma_cfg.s.adr = addr;
++	if (!host->big_dma_addr)
++		dma_cfg.s.adr = addr;
+ 	writeq(dma_cfg.val, host->dma_base + MIO_EMM_DMA_CFG);
+ 
+ 	pr_debug("[%s] sg_dma_len: %u  total sg_elem: %d\n",
+ 		 (dma_cfg.s.rw) ? "W" : "R", sg_dma_len(&data->sg[0]), count);
++
++	if (host->big_dma_addr)
++		writeq(addr, host->dma_base + MIO_EMM_DMA_ADR);
+ 	return addr;
+ }
+ 
 diff --git a/drivers/mmc/host/cavium_mmc.h b/drivers/mmc/host/cavium_mmc.h
-index 5f41be9..09fe6d9 100644
+index f350212..5f41be9 100644
 --- a/drivers/mmc/host/cavium_mmc.h
 +++ b/drivers/mmc/host/cavium_mmc.h
-@@ -11,11 +11,14 @@
- #include <linux/io.h>
- #include <linux/mmc/host.h>
- #include <linux/of.h>
-+#include <linux/pci.h>
- #include <linux/scatterlist.h>
- #include <linux/semaphore.h>
+@@ -49,6 +49,12 @@ struct cvm_mmc_host {
+ 	struct sg_mapping_iter smi;
+ 	bool dma_active;
  
- #define CAVIUM_MAX_MMC		4
++	bool has_ciu3;
++	bool big_dma_addr;
++	bool need_irq_handler_lock;
++	spinlock_t irq_handler_lock;
++	struct semaphore mmc_serializer;
++
+ 	struct gpio_desc *global_pwr_gpiod;
  
-+#if IS_ENABLED(CONFIG_OCTEON_MMC)
-+
- #define MIO_EMM_DMA_CFG		0x00
- #define MIO_EMM_DMA_ADR		0x08
+ 	struct cvm_mmc_slot *slot[CAVIUM_MAX_MMC];
+diff --git a/drivers/mmc/host/octeon_platdrv_mmc.c b/drivers/mmc/host/octeon_platdrv_mmc.c
+index 59b73fb..c5dba81 100644
+--- a/drivers/mmc/host/octeon_platdrv_mmc.c
++++ b/drivers/mmc/host/octeon_platdrv_mmc.c
+@@ -25,20 +25,28 @@ extern void l2c_unlock_mem_region(u64 start, u64 len);
  
-@@ -35,6 +38,36 @@
- #define MIO_EMM_BUF_IDX		0xe0
- #define MIO_EMM_BUF_DAT		0xe8
- 
-+#else /* CONFIG_THUNDERX_MMC */
-+
-+#define MIO_EMM_DMA_CFG		0x180
-+#define MIO_EMM_DMA_ADR		0x188
-+#define MIO_EMM_DMA_INT		0x190
-+#define MIO_EMM_DMA_INT_W1S	0x198
-+#define MIO_EMM_DMA_INT_ENA_W1S	0x1a0
-+#define MIO_EMM_DMA_INT_ENA_W1C	0x1a8
-+
-+#define MIO_EMM_CFG		0x2000
-+#define MIO_EMM_SWITCH		0x2048
-+#define MIO_EMM_DMA		0x2050
-+#define MIO_EMM_CMD		0x2058
-+#define MIO_EMM_RSP_STS		0x2060
-+#define MIO_EMM_RSP_LO		0x2068
-+#define MIO_EMM_RSP_HI		0x2070
-+#define MIO_EMM_INT		0x2078
-+#define MIO_EMM_INT_EN		0x2080
-+#define MIO_EMM_WDOG		0x2088
-+#define MIO_EMM_SAMPLE		0x2090
-+#define MIO_EMM_STS_MASK	0x2098
-+#define MIO_EMM_RCA		0x20a0
-+#define MIO_EMM_BUF_IDX		0x20e0
-+#define MIO_EMM_BUF_DAT		0x20e8
-+
-+#define MIO_EMM_INT_EN_SET	0x20b0
-+#define MIO_EMM_INT_EN_CLR	0x20b8
-+
-+#endif
-+
- struct cvm_mmc_host {
- 	struct device *dev;
- 	void __iomem *base;
-@@ -66,6 +99,11 @@ struct cvm_mmc_host {
- 	void (*dmar_fixup)(struct cvm_mmc_host *, struct mmc_command *,
- 			   struct mmc_data *, u64);
- 	void (*dmar_fixup_done)(struct cvm_mmc_host *);
-+
-+#if IS_ENABLED(CONFIG_MMC_THUNDERX)
-+	struct msix_entry	*mmc_msix;
-+	unsigned int		msix_count;
-+#endif
- };
- 
- struct cvm_mmc_slot {
-diff --git a/drivers/mmc/host/thunderx_pcidrv_mmc.c b/drivers/mmc/host/thunderx_pcidrv_mmc.c
-new file mode 100644
-index 0000000..04d03bf
---- /dev/null
-+++ b/drivers/mmc/host/thunderx_pcidrv_mmc.c
-@@ -0,0 +1,214 @@
-+/*
-+ * Driver for MMC and SSD cards for Cavium ThunderX SOCs.
-+ *
-+ * This file is subject to the terms and conditions of the GNU General Public
-+ * License.  See the file "COPYING" in the main directory of this archive
-+ * for more details.
-+ *
-+ * Copyright (C) 2016 Cavium Inc.
-+ */
-+#include <linux/dma-mapping.h>
-+#include <linux/gpio/consumer.h>
-+#include <linux/interrupt.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/slot-gpio.h>
-+#include <linux/module.h>
-+#include <linux/of_platform.h>
-+#include "cavium_mmc.h"
-+
-+#define DRV_NAME "thunderx_mmc"
-+
-+static void thunder_mmc_acquire_bus(struct cvm_mmc_host *host)
-+{
-+	down(&host->mmc_serializer);
-+}
-+
-+static void thunder_mmc_release_bus(struct cvm_mmc_host *host)
-+{
-+	up(&host->mmc_serializer);
-+}
-+
-+static void thunder_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
-+{
-+	writeq(val, host->base + MIO_EMM_INT);
-+	writeq(val, host->base + MIO_EMM_INT_EN_SET);
-+}
-+
-+static int thunder_mmc_register_interrupts(struct cvm_mmc_host *host,
-+					   struct pci_dev *pdev)
-+{
-+	int ret, i;
-+
-+	host->msix_count = pci_msix_vec_count(pdev);
-+	host->mmc_msix = devm_kzalloc(&pdev->dev,
-+		(sizeof(struct msix_entry)) * host->msix_count, GFP_KERNEL);
-+	if (!host->mmc_msix)
-+		return -ENOMEM;
-+
-+	for (i = 0; i < host->msix_count; i++)
-+		host->mmc_msix[i].entry = i;
-+
-+	ret = pci_enable_msix(pdev, host->mmc_msix, host->msix_count);
-+	if (ret)
-+		return ret;
-+
-+	/* register interrupts */
-+	for (i = 0; i < host->msix_count; i++) {
-+		ret = devm_request_irq(&pdev->dev, host->mmc_msix[i].vector,
-+				       cvm_mmc_interrupt,
-+				       0, DRV_NAME, host);
-+		if (ret)
-+			return ret;
+ static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
+ {
+-	/* Switch the MMC controller onto the bus. */
+-	down(&octeon_bootbus_sem);
+-	writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
++	if (!host->has_ciu3) {
++		/* Switch the MMC controller onto the bus. */
++		down(&octeon_bootbus_sem);
++		writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
++	} else {
++		down(&host->mmc_serializer);
 +	}
-+	return 0;
-+}
-+
-+static int thunder_mmc_probe(struct pci_dev *pdev,
-+			     const struct pci_device_id *id)
-+{
-+	struct device_node *node = pdev->dev.of_node;
-+	struct device *dev = &pdev->dev;
-+	struct device_node *child_node;
-+	struct cvm_mmc_host *host;
-+	int ret;
-+
-+	host = devm_kzalloc(dev, sizeof(*host), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
-+
-+	pci_set_drvdata(pdev, host);
-+	ret = pcim_enable_device(pdev);
-+	if (ret)
-+		return ret;
-+
-+	ret = pci_request_regions(pdev, DRV_NAME);
-+	if (ret)
-+		return ret;
-+
-+	host->base = pcim_iomap(pdev, 0, pci_resource_len(pdev, 0));
-+	if (!host->base)
-+		return -EINVAL;
-+
-+	/* On ThunderX these are identical */
-+	host->dma_base = host->base;
-+
-+	host->clk = devm_clk_get(dev, NULL);
-+	if (IS_ERR(host->clk))
-+		return PTR_ERR(host->clk);
-+
-+	ret = clk_prepare_enable(host->clk);
-+	if (ret)
-+		return ret;
-+	host->sys_freq = clk_get_rate(host->clk);
-+
+ }
+ 
+ static void octeon_mmc_release_bus(struct cvm_mmc_host *host)
+ {
+-	up(&octeon_bootbus_sem);
++	if (!host->has_ciu3)
++		up(&octeon_bootbus_sem);
++	else
++		up(&host->mmc_serializer);
+ }
+ 
+ static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
+ {
+ 	writeq(val, host->base + MIO_EMM_INT);
+-	writeq(val, host->base + MIO_EMM_INT_EN);
++	if (!host->dma_active || (host->dma_active && !host->has_ciu3))
++		writeq(val, host->base + MIO_EMM_INT_EN);
+ }
+ 
+ static void octeon_mmc_dmar_fixup(struct cvm_mmc_host *host,
+@@ -77,6 +85,9 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 	if (!host)
+ 		return -ENOMEM;
+ 
 +	spin_lock_init(&host->irq_handler_lock);
 +	sema_init(&host->mmc_serializer, 1);
 +
-+	host->dev = dev;
-+	host->acquire_bus = thunder_mmc_acquire_bus;
-+	host->release_bus = thunder_mmc_release_bus;
-+	host->int_enable = thunder_mmc_int_enable;
-+
-+	host->big_dma_addr = true;
-+	host->need_irq_handler_lock = true;
-+	host->last_slot = -1;
-+
-+	ret = dma_set_mask(dev, DMA_BIT_MASK(48));
-+	if (ret)
-+		goto error;
-+
-+	/*
-+	 * Clear out any pending interrupts that may be left over from
-+	 * bootloader. Writing 1 to the bits clears them.
-+	 */
-+	writeq(127, host->base + MIO_EMM_INT_EN);
-+	writeq(3, host->base + MIO_EMM_DMA_INT_ENA_W1C);
-+
-+	ret = thunder_mmc_register_interrupts(host, pdev);
-+	if (ret)
-+		goto error;
-+
-+	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
-+							 GPIOD_OUT_LOW);
-+	if (IS_ERR(host->global_pwr_gpiod)) {
-+		ret = PTR_ERR(host->global_pwr_gpiod);
-+		goto error;
-+	}
-+
-+	for_each_child_of_node(node, child_node) {
+ 	host->dev = &pdev->dev;
+ 	host->acquire_bus = octeon_mmc_acquire_bus;
+ 	host->release_bus = octeon_mmc_release_bus;
+@@ -89,12 +100,34 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 
+ 	host->sys_freq = octeon_get_io_clock_rate();
+ 
+-	/* First one is EMM second DMA */
+-	for (i = 0; i < 2; i++) {
+-		mmc_irq[i] = platform_get_irq(pdev, i);
+-		if (mmc_irq[i] < 0)
+-			return mmc_irq[i];
++	if (of_device_is_compatible(node, "cavium,octeon-7890-mmc")) {
++		host->big_dma_addr = true;
++		host->need_irq_handler_lock = true;
++		host->has_ciu3 = true;
 +		/*
-+		 * XXX hack: mmc_of_parse looks only at the current device's
-+		 * DT node. That means we require one device per slot with
-+		 * it's node pointing to the slot. The easiest way to get this
-+		 * is using of_platform_device_create. Not sure what a proper
-+		 * solution is, maybe extend mmc_of_parse to handle multiple
-+		 * slots? --jang
++		 * First seven are the EMM_INT bits 0..6, then two for
++		 * the EMM_DMA_INT bits
 +		 */
-+		struct platform_device *slot_pdev;
++		for (i = 0; i < 9; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
 +
-+		slot_pdev = of_platform_device_create(child_node, NULL,
-+						      &pdev->dev);
-+		if (!slot_pdev)
-+			continue;
-+		ret = cvm_mmc_slot_probe(&slot_pdev->dev, host);
-+		if (ret) {
-+			gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
-+			goto error;
++			/* work around legacy u-boot device trees */
++			irq_set_irq_type(mmc_irq[i], IRQ_TYPE_EDGE_RISING);
 +		}
-+	}
-+	dev_info(dev, "probed\n");
-+	return 0;
++	} else {
++		host->big_dma_addr = false;
++		host->need_irq_handler_lock = false;
++		host->has_ciu3 = false;
++		/* First one is EMM second DMA */
++		for (i = 0; i < 2; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
++		}
+ 	}
 +
-+error:
-+	clk_disable_unprepare(host->clk);
-+	return ret;
-+}
-+
-+static void thunder_mmc_remove(struct pci_dev *pdev)
-+{
-+	struct cvm_mmc_host *host = pci_get_drvdata(pdev);
-+	union mio_emm_dma_cfg dma_cfg;
-+	int i;
-+
-+	for (i = 0; i < CAVIUM_MAX_MMC; i++)
-+		if (host->slot[i])
-+			cvm_mmc_slot_remove(host->slot[i]);
-+
-+	dma_cfg.val = readq(host->dma_base + MIO_EMM_DMA_CFG);
-+	dma_cfg.s.en = 0;
-+	writeq(dma_cfg.val, host->dma_base + MIO_EMM_DMA_CFG);
-+
-+	gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
-+	clk_disable_unprepare(host->clk);
-+}
-+
-+static const struct pci_device_id thunder_mmc_id_table[] = {
-+	{ PCI_DEVICE(PCI_VENDOR_ID_CAVIUM, 0xa010) },
-+	{ 0, }  /* end of table */
-+};
-+
-+static struct pci_driver thunder_mmc_driver = {
-+	.name = DRV_NAME,
-+	.id_table = thunder_mmc_id_table,
-+	.probe = thunder_mmc_probe,
-+	.remove = thunder_mmc_remove,
-+};
-+
-+static int __init thunder_mmc_init_module(void)
-+{
-+	return pci_register_driver(&thunder_mmc_driver);
-+}
-+
-+static void __exit thunder_mmc_exit_module(void)
-+{
-+	pci_unregister_driver(&thunder_mmc_driver);
-+}
-+
-+module_init(thunder_mmc_init_module);
-+module_exit(thunder_mmc_exit_module);
-+
-+MODULE_AUTHOR("Cavium Inc.");
-+MODULE_DESCRIPTION("Cavium ThunderX eMMC Driver");
-+MODULE_LICENSE("GPL");
-+MODULE_DEVICE_TABLE(pci, thunder_mmc_id_table);
-+
+ 	host->last_slot = -1;
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -124,12 +157,26 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 	val = readq(host->base + MIO_EMM_INT);
+ 	writeq(val, host->base + MIO_EMM_INT);
+ 
+-	ret = devm_request_irq(&pdev->dev, mmc_irq[0],
+-			       cvm_mmc_interrupt, 0, DRV_NAME, host);
+-	if (ret < 0) {
+-		dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
+-			mmc_irq[0]);
+-		return ret;
++	if (host->has_ciu3) {
++		/* Only CMD_DONE, DMA_DONE, CMD_ERR, DMA_ERR */
++		for (i = 1; i <= 4; i++) {
++			ret = devm_request_irq(&pdev->dev, mmc_irq[i],
++					       cvm_mmc_interrupt,
++					       0, DRV_NAME, host);
++			if (ret < 0) {
++				dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++					mmc_irq[i]);
++				return ret;
++			}
++		}
++	} else {
++		ret = devm_request_irq(&pdev->dev, mmc_irq[0],
++				       cvm_mmc_interrupt, 0, DRV_NAME, host);
++		if (ret < 0) {
++			dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++				mmc_irq[0]);
++			return ret;
++		}
+ 	}
+ 
+ 	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
 -- 
 2.9.0.rc0.21.g7777322
