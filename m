@@ -1,95 +1,119 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 2/2] mmc: sdhci: sdio-intel: Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk
-Date: Fri, 16 Dec 2016 17:36:20 +0100
-Message-ID: <20161216163620.4318-2-hdegoede@redhat.com>
-References: <20161216163620.4318-1-hdegoede@redhat.com>
+From: Matt Ranostay <matt@ranostay.consulting>
+Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
+Date: Sun, 18 Dec 2016 16:01:14 -0800
+Message-ID: <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com>
+References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
+ <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
+ <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
+ <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
+ <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
+ <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
+ <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
+ <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57430 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934159AbcLPQgZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 16 Dec 2016 11:36:25 -0500
-In-Reply-To: <20161216163620.4318-1-hdegoede@redhat.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:34240 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751368AbcLSABQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Dec 2016 19:01:16 -0500
+Received: by mail-qk0-f173.google.com with SMTP id q68so197284qki.1
+        for <linux-mmc@vger.kernel.org>; Sun, 18 Dec 2016 16:01:15 -0800 (PST)
+In-Reply-To: <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Dong Aisheng <b29396@freescale.com>, Hans de Goede <hdegoede@redhat.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
 
-From: Dong Aisheng <b29396@freescale.com>
+On Wed, Dec 14, 2016 at 5:46 PM, Matt Ranostay <matt@ranostay.consulting> wrote:
+> On Tue, Dec 13, 2016 at 12:01 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 9 December 2016 at 19:09, Rob Herring <robh@kernel.org> wrote:
+>>> On Fri, Dec 02, 2016 at 01:06:47AM -0800, Matt Ranostay wrote:
+>>>> On Fri, Dec 2, 2016 at 12:28 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> > On 2 December 2016 at 08:22, Matt Ranostay <matt@ranostay.consulting> wrote:
+>>>> >>
+>>>> >>
+>>>> >>> On Dec 1, 2016, at 23:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> >>>
+>>>> >>>> On 2 December 2016 at 07:17, Matt Ranostay <matt@ranostay.consulting> wrote:
+>>>> >>>> Add optional device-post-power-on parameters to disable post_power_on
+>>>> >>>> function from being called since this breaks some device.
+>>>> >>>>
+>>>> >>>> Cc: Tony Lindgren <tony@atomide.com>
+>>>> >>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>>>> >>>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
+>>>> >>>> ---
+>>>> >>>> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+>>>> >>>> drivers/mmc/core/pwrseq_simple.c                            | 7 +++++++
+>>>> >>>> 2 files changed, 9 insertions(+)
+>>>> >>>>
+>>>> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> >>>> index bea306d772d1..09fa153f743e 100644
+>>>> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+>>>> >>>> @@ -24,6 +24,8 @@ Optional properties:
+>>>> >>>>        de-asserting the reset-gpios (if any)
+>>>> >>>> - invert-off-state: Invert the power down state for the reset-gpios (if any)
+>>>> >>>>        and pwrdn-gpios (if any)
+>>>> >>>> +- disable-post-power-on : Avoid post_power_on function from being called since
+>>>> >>>> +       this breaks some devices
+>>>> >>>
+>>>> >>> This is a bit weird. I would like to avoid this, if possible.
+>>>> >>>
+>>>> >>> Perhaps if you simply describe the sequence in detail for your device
+>>>> >>> we can figure out the best option together.
+>>>> >>
+>>>> >> Yeah I know it is a bit weird but we need to keep that reset pin high for at least some time after pre power on.   So any case it would be another property
+>>>> >
+>>>> > This went offlist, please resend.
+>>>> >
+>>>> > Moreover, please try to describe the sequence you need in detail
+>>>> > according to your HW spec.
+>>>> >
+>>>>
+>>>> Yeah oops....
+>>>>
+>>>> So basically we need to drive the reset and powerdown lines high with
+>>>> a 300 milliseconds delay between both...
+>>>> can't have the reset line low with post power on (pretty sure but
+>>>> would need a delay anyway), and we need both reset + powerdown line
+>>>> set low on powerdown.
+>>>>
+>>>> So the power down sequence would need to be reversed for this
+>>>> application in pwrseq-simple.
+>>>
+>>> This sounds like you need a device specific sequence to me. Otherwise,
+>>> write a language to describe any power control waveforms rather than
+>>> trying to bolt on more and more properties. (Don't really go write a
+>>> language.)
+>>
+>> Actually this isn't so device specific. The cw1200 wifi chip which is
+>> being used with ux500 SoCs has a very similar sequence. Allow me to
+>> check the details and get back.
+>
+> Ok. It would be good to have something common than a bunch of one-off
+> solutions for sure.
+>
+>>
+>> Anyway, my point is that I think we can figure out a common sequence
+>> to support these kind required sequences. That is to me preferred over
+>> adding a new (two to support cw1200) device specific pwrseq driver.
+>>
 
-SDIO cards may need clock to send the card interrupt to the host.
-Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON to prevent the clock resource
-being released.
+So briefly looked at the cw1200 driver (I'm guessing the datasheet is
+NDA since I couldn't find it) and it seems like it would be a good fit
+to have a common pwrseq driver.
 
-Hans de Goede:
+So minor things I noticed that the cw1200 device has different from
+our SD8787 chipset.
 
-It looks like we still need this patch, on a cherrytrail tablet with
-a RTL8723BS wifi chip, without this patch pinging the tablet results in:
+* SD8787 has a "powerdown" line, and CW1200 has a "powerup" line.. I
+know this is a simple logic inversion.
+* CW1200 has a clock control line, that seems to be asserted between
+the powerup/reset steps.
 
-PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
-64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
-64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
-64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
-64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
-64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
-64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
-64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
-64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
-64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
+Would there need to be some per driver functions that could be
+registered for edge cases like this?
 
-Where as with this patch I get:
-
-PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
-64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
-64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
-64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
-64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
-64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
-64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
-64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
-64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
-64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
-
-Signed-off-by: Dong Aisheng <b29396@freescale.com>
-[hdegoede@redhat.com: Updated commit msg with sdio wifi ping output]
-[hdegoede@redhat.com: Add quirk to both acpi and pci intel-sdio entries]
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Note an alternative approach would be to add a new flag for this and do
-a runtime_pm_get on sdio_irq_enable and runtime_pm_put on
-sdio_irq_disable, that would safe some power if the sdio-driver properly
-disables the irq when e.g. wifi is turned off, or an oob interrupt is
-used.
----
- drivers/mmc/host/sdhci-acpi.c     | 1 +
- drivers/mmc/host/sdhci-pci-core.c | 1 +
- 2 files changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 69c332b..92096db 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+		   SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
- 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
- 		   MMC_CAP_WAIT_WHILE_BUSY,
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1d9e00a..166af7c 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -450,6 +450,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
- 			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= byt_sdio_probe_slot,
--- 
-2.9.3
-
+>> Kind regards
+>> Uffe
