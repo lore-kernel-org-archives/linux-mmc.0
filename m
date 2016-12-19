@@ -1,7 +1,7 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v10 6/8] mmc: thunderx: Add scatter-gather DMA support
-Date: Mon, 19 Dec 2016 13:15:50 +0100
-Message-ID: <20161219121552.18316-7-jglauber@cavium.com>
+Subject: [PATCH v10 2/8] mmc: octeon: Add MMC platform driver for Octeon SOCs
+Date: Mon, 19 Dec 2016 13:15:46 +0100
+Message-ID: <20161219121552.18316-3-jglauber@cavium.com>
 References: <20161219121552.18316-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20161219121552.18316-1-jglauber@cavium.com>
@@ -10,250 +10,269 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add Support for the scatter-gather DMA available in the
-ThunderX MMC units. Up to 16 DMA requests can be processed
-together.
+Add a platform driver for Octeon MIPS SOCs.
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 ---
- drivers/mmc/host/cavium_core_mmc.c     | 105 ++++++++++++++++++++++++++++++++-
- drivers/mmc/host/cavium_mmc.h          |  54 +++++++++++++++++
- drivers/mmc/host/thunderx_pcidrv_mmc.c |   3 +
- 3 files changed, 159 insertions(+), 3 deletions(-)
+ drivers/mmc/host/Kconfig              |  10 ++
+ drivers/mmc/host/Makefile             |   2 +
+ drivers/mmc/host/cavium_mmc.h         |  19 ++++
+ drivers/mmc/host/octeon_platdrv_mmc.c | 183 ++++++++++++++++++++++++++++++++++
+ 4 files changed, 214 insertions(+)
+ create mode 100644 drivers/mmc/host/octeon_platdrv_mmc.c
 
-diff --git a/drivers/mmc/host/cavium_core_mmc.c b/drivers/mmc/host/cavium_core_mmc.c
-index 596505a..3cd4849 100644
---- a/drivers/mmc/host/cavium_core_mmc.c
-+++ b/drivers/mmc/host/cavium_core_mmc.c
-@@ -350,9 +350,31 @@ static int finish_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
- 	return 1;
- }
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 5274f50..6f22e16 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -343,6 +343,16 @@ config MMC_SDHCI_ST
+ 	  If you have a controller with this interface, say Y or M here.
+ 	  If unsure, say N.
  
-+static int finish_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
++config MMC_OCTEON
++	tristate "Cavium OCTEON SD/MMC Card Interface support"
++	depends on CAVIUM_OCTEON_SOC
++	help
++	  This selects Cavium OCTEON SD/MMC card Interface.
++	  If you have an OCTEON board with a Multimedia Card slot,
++	  say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_OMAP
+ 	tristate "TI OMAP Multimedia Card Interface support"
+ 	depends on ARCH_OMAP
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index e2bdaaf..6e57e11 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -21,6 +21,8 @@ obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+ obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
+ obj-$(CONFIG_MMC_MTK)		+= mtk-sd.o
++octeon_mmc-objs := cavium_core_mmc.o octeon_platdrv_mmc.o
++obj-$(CONFIG_MMC_OCTEON)	+= octeon_mmc.o
+ obj-$(CONFIG_MMC_OMAP)		+= omap.o
+ obj-$(CONFIG_MMC_OMAP_HS)	+= omap_hsmmc.o
+ obj-$(CONFIG_MMC_ATMELMCI)	+= atmel-mci.o
+diff --git a/drivers/mmc/host/cavium_mmc.h b/drivers/mmc/host/cavium_mmc.h
+index 27fb02b..e900dd1 100644
+--- a/drivers/mmc/host/cavium_mmc.h
++++ b/drivers/mmc/host/cavium_mmc.h
+@@ -16,6 +16,25 @@
+ 
+ #define CAVIUM_MAX_MMC		4
+ 
++#define MIO_EMM_DMA_CFG		0x00
++#define MIO_EMM_DMA_ADR		0x08
++
++#define MIO_EMM_CFG		0x00
++#define MIO_EMM_SWITCH		0x48
++#define MIO_EMM_DMA		0x50
++#define MIO_EMM_CMD		0x58
++#define MIO_EMM_RSP_STS		0x60
++#define MIO_EMM_RSP_LO		0x68
++#define MIO_EMM_RSP_HI		0x70
++#define MIO_EMM_INT		0x78
++#define MIO_EMM_INT_EN		0x80
++#define MIO_EMM_WDOG		0x88
++#define MIO_EMM_SAMPLE		0x90
++#define MIO_EMM_STS_MASK	0x98
++#define MIO_EMM_RCA		0xa0
++#define MIO_EMM_BUF_IDX		0xe0
++#define MIO_EMM_BUF_DAT		0xe8
++
+ struct cvm_mmc_host {
+ 	struct device *dev;
+ 	void __iomem *base;
+diff --git a/drivers/mmc/host/octeon_platdrv_mmc.c b/drivers/mmc/host/octeon_platdrv_mmc.c
+new file mode 100644
+index 0000000..f3f6581
+--- /dev/null
++++ b/drivers/mmc/host/octeon_platdrv_mmc.c
+@@ -0,0 +1,183 @@
++/*
++ * Driver for MMC and SSD cards for Cavium OCTEON SOCs.
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Copyright (C) 2012-2016 Cavium Inc.
++ */
++#include <linux/gpio/consumer.h>
++#include <linux/interrupt.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/slot-gpio.h>
++#include <linux/module.h>
++#include <linux/of_platform.h>
++#include <asm/octeon/octeon.h>
++#include "cavium_mmc.h"
++
++#define DRV_NAME "octeon_mmc"
++
++#define CVMX_MIO_BOOT_CTL CVMX_ADD_IO_SEG(0x00011800000000D0ull)
++
++static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
 +{
-+	union mio_emm_dma_fifo_cfg fifo_cfg;
-+
-+	/* Check if there are any pending requests left */
-+	fifo_cfg.val = readq(host->dma_base + MIO_EMM_DMA_FIFO_CFG);
-+	if (fifo_cfg.s.count)
-+		dev_err(host->dev, "%u requests still pending\n",
-+			fifo_cfg.s.count);
-+
-+	data->bytes_xfered = data->blocks * data->blksz;
-+	data->error = 0;
-+
-+	/* Clear and disable FIFO */
-+	writeq(BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG);
-+	dma_unmap_sg(host->dev, data->sg, data->sg_len, get_dma_dir(data));
-+	return 1;
++	/* Switch the MMC controller onto the bus. */
++	down(&octeon_bootbus_sem);
++	writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
 +}
 +
- static int finish_dma(struct cvm_mmc_host *host, struct mmc_data *data)
- {
--	return finish_dma_single(host, data);
-+	if (host->use_sg && data->sg_len > 1)
-+		return finish_dma_sg(host, data);
-+	else
-+		return finish_dma_single(host, data);
- }
- 
- static bool bad_status(union mio_emm_rsp_sts *rsp_sts)
-@@ -492,9 +514,83 @@ static u64 prepare_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
- 	return addr;
- }
- 
-+/*
-+ * Queue complete sg list into the FIFO.
-+ * Returns 0 on error, 1 otherwise.
-+ */
-+static u64 prepare_dma_sg(struct cvm_mmc_host *host, struct mmc_data *data)
++static void octeon_mmc_release_bus(struct cvm_mmc_host *host)
 +{
-+	union mio_emm_dma_fifo_cmd fifo_cmd;
-+	struct scatterlist *sg;
-+	int count, i;
-+	u64 addr;
++	up(&octeon_bootbus_sem);
++}
 +
-+	count = dma_map_sg(host->dev, data->sg, data->sg_len,
-+			   get_dma_dir(data));
-+	if (!count)
-+		return 0;
-+	if (count > 16)
-+		goto error;
++static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
++{
++	writeq(val, host->base + MIO_EMM_INT);
++	writeq(val, host->base + MIO_EMM_INT_EN);
++}
 +
-+	/* Enable FIFO by removing CLR bit */
-+	writeq(0, host->dma_base + MIO_EMM_DMA_FIFO_CFG);
++static int octeon_mmc_probe(struct platform_device *pdev)
++{
++	struct device_node *cn, *node = pdev->dev.of_node;
++	struct cvm_mmc_host *host;
++	struct resource	*res;
++	void __iomem *base;
++	int mmc_irq[9];
++	int i, ret = 0;
++	u64 val;
 +
-+	for_each_sg(data->sg, sg, count, i) {
-+		/* Program DMA address */
-+		addr = sg_dma_address(sg);
-+		if (addr & 7)
-+			goto error;
-+		writeq(addr, host->dma_base + MIO_EMM_DMA_FIFO_ADR);
++	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
++	if (!host)
++		return -ENOMEM;
 +
-+		/*
-+		 * If we have scatter-gather support we also have an extra
-+		 * register for the DMA addr, so no need to check
-+		 * host->big_dma_addr here.
-+		 */
-+		fifo_cmd.val = 0;
-+		fifo_cmd.s.rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++	host->dev = &pdev->dev;
++	host->acquire_bus = octeon_mmc_acquire_bus;
++	host->release_bus = octeon_mmc_release_bus;
++	host->int_enable = octeon_mmc_int_enable;
 +
-+		/* enable interrupts on the last element */
-+		if (i + 1 == count)
-+			fifo_cmd.s.intdis = 0;
-+		else
-+			fifo_cmd.s.intdis = 1;
++	host->sys_freq = octeon_get_io_clock_rate();
 +
-+#ifdef __LITTLE_ENDIAN
-+		fifo_cmd.s.endian = 1;
-+#endif
-+		fifo_cmd.s.size = sg_dma_len(sg) / 8 - 1;
-+		/*
-+		 * The write copies the address and the command to the FIFO
-+		 * and increments the FIFO's COUNT field.
-+		 */
-+		writeq(fifo_cmd.val, host->dma_base + MIO_EMM_DMA_FIFO_CMD);
-+		pr_debug("[%s] sg_dma_len: %u  sg_elem: %d/%d\n",
-+			 (fifo_cmd.s.rw) ? "W" : "R", sg_dma_len(sg), i, count);
++	/* First one is EMM second DMA */
++	for (i = 0; i < 2; i++) {
++		mmc_irq[i] = platform_get_irq(pdev, i);
++		if (mmc_irq[i] < 0)
++			return mmc_irq[i];
 +	}
++	host->last_slot = -1;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!res) {
++		dev_err(&pdev->dev, "Platform resource[0] is missing\n");
++		return -ENXIO;
++	}
++	base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(base))
++		return PTR_ERR(base);
++	host->base = (void __iomem *)base;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
++	if (!res) {
++		dev_err(&pdev->dev, "Platform resource[1] is missing\n");
++		return -EINVAL;
++	}
++	base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(base))
++		return PTR_ERR(base);
++	host->dma_base = (void __iomem *)base;
 +
 +	/*
-+	 * In difference to prepare_dma_single we don't return the
-+	 * address here, as it would not make sense for scatter-gather.
-+	 * The dma fixup is only required on models that don't support
-+	 * scatter-gather, so that is not a problem.
++	 * Clear out any pending interrupts that may be left over from
++	 * bootloader.
 +	 */
-+	return 1;
++	val = readq(host->base + MIO_EMM_INT);
++	writeq(val, host->base + MIO_EMM_INT);
 +
-+error:
-+	WARN_ON_ONCE(1);
-+	dma_unmap_sg(host->dev, data->sg, data->sg_len, get_dma_dir(data));
-+	/* Disable FIFO */
-+	writeq(BIT_ULL(16), host->dma_base + MIO_EMM_DMA_FIFO_CFG);
++	ret = devm_request_irq(&pdev->dev, mmc_irq[0],
++			       cvm_mmc_interrupt, 0, DRV_NAME, host);
++	if (ret < 0) {
++		dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++			mmc_irq[0]);
++		return ret;
++	}
++
++	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
++							 GPIOD_OUT_HIGH);
++	if (IS_ERR(host->global_pwr_gpiod)) {
++		dev_err(&pdev->dev, "Invalid power GPIO\n");
++		return PTR_ERR(host->global_pwr_gpiod);
++	}
++
++	platform_set_drvdata(pdev, host);
++
++	for_each_child_of_node(node, cn) {
++		struct platform_device *slot_pdev;
++
++		slot_pdev = of_platform_device_create(cn, NULL, &pdev->dev);
++		ret = cvm_mmc_slot_probe(&slot_pdev->dev, host);
++		if (ret) {
++			dev_err(&pdev->dev, "Error populating slots\n");
++			gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
++			return ret;
++		}
++	}
++
 +	return 0;
 +}
 +
- static u64 prepare_dma(struct cvm_mmc_host *host, struct mmc_data *data)
- {
--	return prepare_dma_single(host, data);
-+	if (host->use_sg && data->sg_len > 1)
-+		return prepare_dma_sg(host, data);
-+	else
-+		return prepare_dma_single(host, data);
- }
- 
- static void prepare_ext_dma(struct mmc_host *mmc, struct mmc_request *mrq,
-@@ -972,7 +1068,10 @@ int cvm_mmc_slot_probe(struct device *dev, struct cvm_mmc_host *host)
- 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
- 		     MMC_CAP_ERASE | MMC_CAP_CMD23;
- 
--	mmc->max_segs = 1;
-+	if (host->use_sg)
-+		mmc->max_segs = 16;
-+	else
-+		mmc->max_segs = 1;
- 
- 	/* DMA size field can address up to 8 MB */
- 	mmc->max_seg_size = 8 * 1024 * 1024;
-diff --git a/drivers/mmc/host/cavium_mmc.h b/drivers/mmc/host/cavium_mmc.h
-index 09fe6d9..9fab637 100644
---- a/drivers/mmc/host/cavium_mmc.h
-+++ b/drivers/mmc/host/cavium_mmc.h
-@@ -40,6 +40,9 @@
- 
- #else /* CONFIG_THUNDERX_MMC */
- 
-+#define MIO_EMM_DMA_FIFO_CFG	0x160
-+#define MIO_EMM_DMA_FIFO_ADR	0x170
-+#define MIO_EMM_DMA_FIFO_CMD	0x178
- #define MIO_EMM_DMA_CFG		0x180
- #define MIO_EMM_DMA_ADR		0x188
- #define MIO_EMM_DMA_INT		0x190
-@@ -81,6 +84,7 @@ struct cvm_mmc_host {
- 	struct mmc_request *current_req;
- 	struct sg_mapping_iter smi;
- 	bool dma_active;
-+	bool use_sg;
- 
- 	bool has_ciu3;
- 	bool big_dma_addr;
-@@ -135,6 +139,56 @@ struct cvm_mmc_cr_mods {
- 
- /* Bitfield definitions */
- 
-+union mio_emm_dma_fifo_cfg {
-+	u64 val;
-+	struct mio_emm_dma_fifo_cfg_s {
-+#ifdef __BIG_ENDIAN_BITFIELD
-+		u64 :48;
-+		u64 clr:1;
-+		u64 :3;
-+		u64 int_lvl:4;
-+		u64 :3;
-+		u64 count:5;
-+#else
-+		u64 count:5;
-+		u64 :3;
-+		u64 int_lvl:4;
-+		u64 :3;
-+		u64 clr:1;
-+		u64 :48;
-+#endif
-+	} s;
++static int octeon_mmc_remove(struct platform_device *pdev)
++{
++	union mio_emm_dma_cfg dma_cfg;
++	struct cvm_mmc_host *host = platform_get_drvdata(pdev);
++	int i;
++
++	for (i = 0; i < CAVIUM_MAX_MMC; i++)
++		if (host->slot[i])
++			cvm_mmc_slot_remove(host->slot[i]);
++
++	dma_cfg.val = readq(host->dma_base + MIO_EMM_DMA_CFG);
++	dma_cfg.s.en = 0;
++	writeq(dma_cfg.val, host->dma_base + MIO_EMM_DMA_CFG);
++
++	gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
++
++	return 0;
++}
++
++static const struct of_device_id octeon_mmc_match[] = {
++	{
++		.compatible = "cavium,octeon-6130-mmc",
++	},
++	{
++		.compatible = "cavium,octeon-7890-mmc",
++	},
++	{},
++};
++MODULE_DEVICE_TABLE(of, octeon_mmc_match);
++
++static struct platform_driver octeon_mmc_driver = {
++	.probe		= octeon_mmc_probe,
++	.remove		= octeon_mmc_remove,
++	.driver		= {
++		.name	= DRV_NAME,
++		.of_match_table = octeon_mmc_match,
++	},
 +};
 +
-+union mio_emm_dma_fifo_cmd {
-+	u64 val;
-+	struct mio_emm_dma_fifo_cmd_s {
-+#ifdef __BIG_ENDIAN_BITFIELD
-+		u64 :1;
-+		u64 rw:1;
-+		u64 :1;
-+		u64 intdis:1;
-+		u64 swap32:1;
-+		u64 swap16:1;
-+		u64 swap8:1;
-+		u64 endian:1;
-+		u64 size:20;
-+		u64 :36;
-+#else
-+		u64 :36;
-+		u64 size:20;
-+		u64 endian:1;
-+		u64 swap8:1;
-+		u64 swap16:1;
-+		u64 swap32:1;
-+		u64 intdis:1;
-+		u64 :1;
-+		u64 rw:1;
-+		u64 :1;
-+#endif
-+	} s;
-+};
++static int __init octeon_mmc_init(void)
++{
++	return platform_driver_register(&octeon_mmc_driver);
++}
 +
- union mio_emm_cmd {
- 	u64 val;
- 	struct mio_emm_cmd_s {
-diff --git a/drivers/mmc/host/thunderx_pcidrv_mmc.c b/drivers/mmc/host/thunderx_pcidrv_mmc.c
-index 04d03bf..d5b38ba 100644
---- a/drivers/mmc/host/thunderx_pcidrv_mmc.c
-+++ b/drivers/mmc/host/thunderx_pcidrv_mmc.c
-@@ -109,6 +109,7 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
- 	host->release_bus = thunder_mmc_release_bus;
- 	host->int_enable = thunder_mmc_int_enable;
- 
-+	host->use_sg = true;
- 	host->big_dma_addr = true;
- 	host->need_irq_handler_lock = true;
- 	host->last_slot = -1;
-@@ -123,6 +124,8 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
- 	 */
- 	writeq(127, host->base + MIO_EMM_INT_EN);
- 	writeq(3, host->base + MIO_EMM_DMA_INT_ENA_W1C);
-+	/* Clear DMA FIFO */
-+	writeq(BIT_ULL(16), host->base + MIO_EMM_DMA_FIFO_CFG);
- 
- 	ret = thunder_mmc_register_interrupts(host, pdev);
- 	if (ret)
++static void __exit octeon_mmc_cleanup(void)
++{
++	platform_driver_unregister(&octeon_mmc_driver);
++}
++
++module_init(octeon_mmc_init);
++module_exit(octeon_mmc_cleanup);
++
++MODULE_AUTHOR("Cavium Inc. <support@cavium.com>");
++MODULE_DESCRIPTION("Low-level driver for Cavium OCTEON MMC/SSD card");
++MODULE_LICENSE("GPL");
 -- 
 2.9.0.rc0.21.g7777322
