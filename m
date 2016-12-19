@@ -1,46 +1,38 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH 1/1] mmc: core: Further fix thread wake-up
-Date: Mon, 19 Dec 2016 21:22:32 +0530
-Message-ID: <9e0109c6-d3a1-3776-9beb-5f5277f2f4dd@codeaurora.org>
-References: <1482155854-24963-1-git-send-email-adrian.hunter@intel.com>
- <1482155854-24963-2-git-send-email-adrian.hunter@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2] mmc: sdhci-cadence: add Socionext UniPhier specific
+ compatible string
+Date: Mon, 19 Dec 2016 12:44:59 -0600
+Message-ID: <20161219184459.sdo3c3regs4sflpk@rob-hp-laptop>
+References: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:33862 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755334AbcLSPwl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2016 10:52:41 -0500
-In-Reply-To: <1482155854-24963-2-git-send-email-adrian.hunter@intel.com>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:33966 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932519AbcLSSpB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2016 13:45:01 -0500
+Content-Disposition: inline
+In-Reply-To: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>
 
+On Wed, Dec 14, 2016 at 11:10:46AM +0900, Masahiro Yamada wrote:
+> Add a Socionext SoC specific compatible (suggested by Rob Herring).
+> 
+> No SoC specific data are associated with the compatible strings for
+> now, but other SoC vendors may use this IP and want to differentiate
+> IP variants in the future.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
+> 
+> Changes in v2:
+>   - Add "uniphier" to the compatible to make it more SoC-specific
+> 
+>  Documentation/devicetree/bindings/mmc/sdhci-cadence.txt | 6 ++++--
+>  drivers/mmc/host/sdhci-cadence.c                        | 1 +
+>  2 files changed, 5 insertions(+), 2 deletions(-)
 
-
-On 12/19/2016 7:27 PM, Adrian Hunter wrote:
-> Commit e0097cf5f2f1 ("mmc: queue: Fix queue thread wake-up") did not go far
-> enough. mmc_wait_for_data_req_done() still contains some problems and can
-> be further simplified.  First it should not touch
-> context_info->is_waiting_last_req because that is a wake-up control used by
-> the owner of the context. Secondly, it should always return when one of its
-> wake-up conditions is met because, again, that is contolled by the owner of
-> the context.
->
-> While the current block driver does not have an issue, these problems were
-> exposed during testing of the Software Command Queue patches.
->
-> Fixes: e0097cf5f2f1 ("mmc: queue: Fix queue thread wake-up")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Patch looks good to me. Please feel free to add.
-
-Tested-by: Harjani Ritesh <riteshh@codeaurora.org>
-
-Regards
-Ritesh
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Acked-by: Rob Herring <robh@kernel.org>
