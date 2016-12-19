@@ -1,243 +1,82 @@
-From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v10 3/8] mmc: octeon: Work-around hardware bug on cn6xxx and cnf7xxx
-Date: Mon, 19 Dec 2016 13:15:47 +0100
-Message-ID: <20161219121552.18316-4-jglauber@cavium.com>
-References: <20161219121552.18316-1-jglauber@cavium.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161219121552.18316-1-jglauber@cavium.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: sdhci: Fix to handle MMC_POWER_UNDEFINED
+Date: Mon, 19 Dec 2016 15:33:11 +0200
+Message-ID: <1482154391-17019-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:35871 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754933AbcLSNiS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Dec 2016 08:38:18 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Prevent data corruption on cn6xxx and cnf7xxx.
-Due to an imperfection in the design of the MMC bus hardware,
-the 2nd to last cache block of a DMA read must be locked into the L2
-cache.
+Since commit c2c24819b280 ("mmc: core: Don't power off the card when
+starting the host"), the power state can still be MMC_POWER_UNDEFINED after
+mmc_start_host() is called. That can trigger a warning in SDHCI during
+runtime resume as it tries to restore the I/O state. Handle
+MMC_POWER_UNDEFINED simply by not updating the I/O state in that case.
 
-Signed-off-by: Jan Glauber <jglauber@cavium.com>
+Fixes: c2c24819b280 ("mmc: core: Don't power off the card when starting the host")
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- arch/mips/cavium-octeon/Makefile      |  1 +
- arch/mips/cavium-octeon/octeon-mmc.c  | 98 +++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cavium_core_mmc.c    |  5 ++
- drivers/mmc/host/cavium_mmc.h         |  5 ++
- drivers/mmc/host/octeon_platdrv_mmc.c | 30 +++++++++++
- 5 files changed, 139 insertions(+)
- create mode 100644 arch/mips/cavium-octeon/octeon-mmc.c
+ drivers/mmc/host/sdhci.c | 33 +++++++++++++++++++--------------
+ 1 file changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/arch/mips/cavium-octeon/Makefile b/arch/mips/cavium-octeon/Makefile
-index 2a59265..5f09d26 100644
---- a/arch/mips/cavium-octeon/Makefile
-+++ b/arch/mips/cavium-octeon/Makefile
-@@ -18,3 +18,4 @@ obj-y += crypto/
- obj-$(CONFIG_MTD)		      += flash_setup.o
- obj-$(CONFIG_SMP)		      += smp.o
- obj-$(CONFIG_OCTEON_ILM)	      += oct_ilm.o
-+obj-$(CONFIG_MMC_OCTEON)	      += octeon-mmc.o
-diff --git a/arch/mips/cavium-octeon/octeon-mmc.c b/arch/mips/cavium-octeon/octeon-mmc.c
-new file mode 100644
-index 0000000..6aaaf73
---- /dev/null
-+++ b/arch/mips/cavium-octeon/octeon-mmc.c
-@@ -0,0 +1,98 @@
-+/*
-+ * Driver for MMC and SSD cards for Cavium OCTEON SOCs.
-+ *
-+ * This file is subject to the terms and conditions of the GNU General Public
-+ * License.  See the file "COPYING" in the main directory of this archive
-+ * for more details.
-+ *
-+ * Copyright (C) 2012-2016 Cavium Inc.
-+ */
-+#include <linux/export.h>
-+#include <asm/octeon/octeon.h>
-+
-+/*
-+ * The functions below are used for the EMMC-17978 workaround.
-+ *
-+ * Due to an imperfection in the design of the MMC bus hardware,
-+ * the 2nd to last cache block of a DMA read must be locked into the L2 Cache.
-+ * Otherwise, data corruption may occur.
-+ */
-+
-+static inline void *phys_to_ptr(u64 address)
-+{
-+	return (void *)(address | (1ull << 63)); /* XKPHYS */
-+}
-+
-+/**
-+ * Lock a single line into L2. The line is zeroed before locking
-+ * to make sure no dram accesses are made.
-+ *
-+ * @addr   Physical address to lock
-+ */
-+static void l2c_lock_line(u64 addr)
-+{
-+	char *addr_ptr = phys_to_ptr(addr);
-+
-+	asm volatile (
-+		"cache 31, %[line]"	/* Unlock the line */
-+		:: [line] "m" (*addr_ptr));
-+}
-+
-+/**
-+ * Unlock a single line in the L2 cache.
-+ *
-+ * @addr	Physical address to unlock
-+ *
-+ * Return Zero on success
-+ */
-+static void l2c_unlock_line(u64 addr)
-+{
-+	char *addr_ptr = phys_to_ptr(addr);
-+
-+	asm volatile (
-+		"cache 23, %[line]"	/* Unlock the line */
-+		:: [line] "m" (*addr_ptr));
-+}
-+
-+/**
-+ * Locks a memory region in the L2 cache
-+ *
-+ * @start - start address to begin locking
-+ * @len - length in bytes to lock
-+ */
-+void l2c_lock_mem_region(u64 start, u64 len)
-+{
-+	u64 end;
-+
-+	/* Round start/end to cache line boundaries */
-+	end = ALIGN(start + len - 1, CVMX_CACHE_LINE_SIZE);
-+	start = ALIGN(start, CVMX_CACHE_LINE_SIZE);
-+
-+	while (start <= end) {
-+		l2c_lock_line(start);
-+		start += CVMX_CACHE_LINE_SIZE;
-+	}
-+	asm volatile("sync");
-+}
-+EXPORT_SYMBOL_GPL(l2c_lock_mem_region);
-+
-+/**
-+ * Unlock a memory region in the L2 cache
-+ *
-+ * @start - start address to unlock
-+ * @len - length to unlock in bytes
-+ */
-+void l2c_unlock_mem_region(u64 start, u64 len)
-+{
-+	u64 end;
-+
-+	/* Round start/end to cache line boundaries */
-+	end = ALIGN(start + len - 1, CVMX_CACHE_LINE_SIZE);
-+	start = ALIGN(start, CVMX_CACHE_LINE_SIZE);
-+
-+	while (start <= end) {
-+		l2c_unlock_line(start);
-+		start += CVMX_CACHE_LINE_SIZE;
-+	}
-+}
-+EXPORT_SYMBOL_GPL(l2c_unlock_mem_region);
-diff --git a/drivers/mmc/host/cavium_core_mmc.c b/drivers/mmc/host/cavium_core_mmc.c
-index 89d23d3..1bdba06 100644
---- a/drivers/mmc/host/cavium_core_mmc.c
-+++ b/drivers/mmc/host/cavium_core_mmc.c
-@@ -438,6 +438,8 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
- 	req->done(req);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 111991e5b9a0..23909804ffb8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1576,6 +1576,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	unsigned long flags;
+ 	u8 ctrl;
  
- no_req_done:
-+	if (host->dmar_fixup_done)
-+		host->dmar_fixup_done(host);
- 	if (host_done)
- 		host->release_bus(host);
- out:
-@@ -558,6 +560,9 @@ static void cvm_mmc_dma_request(struct mmc_host *mmc,
- 	host->dma_active = true;
- 	host->int_enable(host, emm_int.val);
- 
-+	if (host->dmar_fixup)
-+		host->dmar_fixup(host, mrq->cmd, data, addr);
-+
- 	/*
- 	 * If we have a valid SD card in the slot, we set the response
- 	 * bit mask to check for CRC errors and timeouts only.
-diff --git a/drivers/mmc/host/cavium_mmc.h b/drivers/mmc/host/cavium_mmc.h
-index e900dd1..f350212 100644
---- a/drivers/mmc/host/cavium_mmc.h
-+++ b/drivers/mmc/host/cavium_mmc.h
-@@ -40,6 +40,7 @@ struct cvm_mmc_host {
- 	void __iomem *base;
- 	void __iomem *dma_base;
- 	u64 emm_cfg;
-+	u64 n_minus_one;	/* OCTEON II workaround location */
- 	int last_slot;
- 	struct clk *clk;
- 	int sys_freq;
-@@ -55,6 +56,10 @@ struct cvm_mmc_host {
- 	void (*acquire_bus)(struct cvm_mmc_host *);
- 	void (*release_bus)(struct cvm_mmc_host *);
- 	void (*int_enable)(struct cvm_mmc_host *, u64);
-+	/* required on some MIPS models */
-+	void (*dmar_fixup)(struct cvm_mmc_host *, struct mmc_command *,
-+			   struct mmc_data *, u64);
-+	void (*dmar_fixup_done)(struct cvm_mmc_host *);
- };
- 
- struct cvm_mmc_slot {
-diff --git a/drivers/mmc/host/octeon_platdrv_mmc.c b/drivers/mmc/host/octeon_platdrv_mmc.c
-index f3f6581..59b73fb 100644
---- a/drivers/mmc/host/octeon_platdrv_mmc.c
-+++ b/drivers/mmc/host/octeon_platdrv_mmc.c
-@@ -20,6 +20,9 @@
- 
- #define CVMX_MIO_BOOT_CTL CVMX_ADD_IO_SEG(0x00011800000000D0ull)
- 
-+extern void l2c_lock_mem_region(u64 start, u64 len);
-+extern void l2c_unlock_mem_region(u64 start, u64 len);
-+
- static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
- {
- 	/* Switch the MMC controller onto the bus. */
-@@ -38,6 +41,28 @@ static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
- 	writeq(val, host->base + MIO_EMM_INT_EN);
- }
- 
-+static void octeon_mmc_dmar_fixup(struct cvm_mmc_host *host,
-+				  struct mmc_command *cmd,
-+				  struct mmc_data *data,
-+				  u64 addr)
-+{
-+	if (cmd->opcode != MMC_WRITE_MULTIPLE_BLOCK)
-+		return;
-+	if (data->blksz * data->blocks <= 1024)
++	if (ios->power_mode == MMC_POWER_UNDEFINED)
 +		return;
 +
-+	host->n_minus_one = addr + (data->blksz * data->blocks) - 1024;
-+	l2c_lock_mem_region(host->n_minus_one, 512);
-+}
-+
-+static void octeon_mmc_dmar_fixup_done(struct cvm_mmc_host *host)
-+{
-+	if (!host->n_minus_one)
-+		return;
-+	l2c_unlock_mem_region(host->n_minus_one, 512);
-+	host->n_minus_one = 0;
-+}
-+
- static int octeon_mmc_probe(struct platform_device *pdev)
- {
- 	struct device_node *cn, *node = pdev->dev.of_node;
-@@ -56,6 +81,11 @@ static int octeon_mmc_probe(struct platform_device *pdev)
- 	host->acquire_bus = octeon_mmc_acquire_bus;
- 	host->release_bus = octeon_mmc_release_bus;
- 	host->int_enable = octeon_mmc_int_enable;
-+	if (OCTEON_IS_MODEL(OCTEON_CN6XXX) ||
-+	    OCTEON_IS_MODEL(OCTEON_CNF7XXX)) {
-+		host->dmar_fixup = octeon_mmc_dmar_fixup;
-+		host->dmar_fixup_done = octeon_mmc_dmar_fixup_done;
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->flags & SDHCI_DEVICE_DEAD) {
+@@ -2938,22 +2941,24 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 
+ 	sdhci_init(host, 0);
+ 
+-	/* Force clock and power re-program */
+-	host->pwr = 0;
+-	host->clock = 0;
+-	mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
+-	mmc->ops->set_ios(mmc, &mmc->ios);
++	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
++		/* Force clock and power re-program */
++		host->pwr = 0;
++		host->clock = 0;
++		mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
++		mmc->ops->set_ios(mmc, &mmc->ios);
+ 
+-	if ((host_flags & SDHCI_PV_ENABLED) &&
+-		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
+-		spin_lock_irqsave(&host->lock, flags);
+-		sdhci_enable_preset_value(host, true);
+-		spin_unlock_irqrestore(&host->lock, flags);
+-	}
++		if ((host_flags & SDHCI_PV_ENABLED) &&
++		    !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
++			spin_lock_irqsave(&host->lock, flags);
++			sdhci_enable_preset_value(host, true);
++			spin_unlock_irqrestore(&host->lock, flags);
++		}
+ 
+-	if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
+-	    mmc->ops->hs400_enhanced_strobe)
+-		mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
++		if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
++		    mmc->ops->hs400_enhanced_strobe)
++			mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
 +	}
  
- 	host->sys_freq = octeon_get_io_clock_rate();
+ 	spin_lock_irqsave(&host->lock, flags);
  
 -- 
-2.9.0.rc0.21.g7777322
+1.9.1
+
