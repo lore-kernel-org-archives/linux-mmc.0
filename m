@@ -1,38 +1,37 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2] mmc: sdhci-cadence: add Socionext UniPhier specific
- compatible string
-Date: Mon, 19 Dec 2016 12:44:59 -0600
-Message-ID: <20161219184459.sdo3c3regs4sflpk@rob-hp-laptop>
-References: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: [PATCH 0/4] mmc: Provide enhanced strobe support for sdhci-msm
+Date: Tue, 20 Dec 2016 11:23:15 +0530
+Message-ID: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:33966 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932519AbcLSSpB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2016 13:45:01 -0500
-Content-Disposition: inline
-In-Reply-To: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:42086 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751821AbcLTFxf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 00:53:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 
-On Wed, Dec 14, 2016 at 11:10:46AM +0900, Masahiro Yamada wrote:
-> Add a Socionext SoC specific compatible (suggested by Rob Herring).
-> 
-> No SoC specific data are associated with the compatible strings for
-> now, but other SoC vendors may use this IP and want to differentiate
-> IP variants in the future.
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> ---
-> 
-> Changes in v2:
->   - Add "uniphier" to the compatible to make it more SoC-specific
-> 
->  Documentation/devicetree/bindings/mmc/sdhci-cadence.txt | 6 ++++--
->  drivers/mmc/host/sdhci-cadence.c                        | 1 +
->  2 files changed, 5 insertions(+), 2 deletions(-)
+Hi, 
 
-Acked-by: Rob Herring <robh@kernel.org>
+Patch series is to enable enhanced strobe feature for sdhci-msm driver.
+But there are also some changes done in core layer for this.
+
+This was tested on msm8996 based interal target with emmc-5.1 card.
+
+Ritesh Harjani (4):
+  mmc: core: Return from mmc_set_clock if hz is already set to ios.clock
+  mmc: mmc: Add change to set controller to HS400 frequency in enhanced
+    strobe
+  mmc: mmc: enable ios.enhanced_strobe before mmc_set_timing
+  mmc: sdhci-msm: provide enhanced_strobe mode feature support
+
+ drivers/mmc/core/core.c      |  3 +++
+ drivers/mmc/core/mmc.c       |  9 ++++++++-
+ drivers/mmc/host/sdhci-msm.c | 32 +++++++++++++++++++++++---------
+ 3 files changed, 34 insertions(+), 10 deletions(-)
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
+
