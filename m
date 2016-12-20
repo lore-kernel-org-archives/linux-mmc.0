@@ -1,99 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Fix to handle MMC_POWER_UNDEFINED
-Date: Tue, 20 Dec 2016 11:49:47 +0100
-Message-ID: <CAPDyKFpdLb62ANfYB+Pc3L0pEfrcPmtKnuAotE8A8v-3+ezeuQ@mail.gmail.com>
-References: <1482154391-17019-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-cadence: add Socionext UniPhier specific
+ compatible string
+Date: Tue, 20 Dec 2016 11:50:01 +0100
+Message-ID: <CAPDyKFom4s4kx+vgE3+9zvSG3Pso4Pcd+Zrc6fRdivyLzwHhsA@mail.gmail.com>
+References: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f172.google.com ([209.85.210.172]:34278 "EHLO
-        mail-wj0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752230AbcLTKtu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 05:49:50 -0500
-Received: by mail-wj0-f172.google.com with SMTP id tg4so174157225wjb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Dec 2016 02:49:49 -0800 (PST)
-In-Reply-To: <1482154391-17019-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37721 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752230AbcLTKuD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 05:50:03 -0500
+Received: by mail-wm0-f47.google.com with SMTP id t79so126315704wmt.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Dec 2016 02:50:03 -0800 (PST)
+In-Reply-To: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
 
-On 19 December 2016 at 14:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Since commit c2c24819b280 ("mmc: core: Don't power off the card when
-> starting the host"), the power state can still be MMC_POWER_UNDEFINED after
-> mmc_start_host() is called. That can trigger a warning in SDHCI during
-> runtime resume as it tries to restore the I/O state. Handle
-> MMC_POWER_UNDEFINED simply by not updating the I/O state in that case.
+On 14 December 2016 at 03:10, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> Add a Socionext SoC specific compatible (suggested by Rob Herring).
 >
-> Fixes: c2c24819b280 ("mmc: core: Don't power off the card when starting the host")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> No SoC specific data are associated with the compatible strings for
+> now, but other SoC vendors may use this IP and want to differentiate
+> IP variants in the future.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Adrian, thanks for fixing this - my bad! Applied for fixes!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci.c | 33 +++++++++++++++++++--------------
->  1 file changed, 19 insertions(+), 14 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 111991e5b9a0..23909804ffb8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1576,6 +1576,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         unsigned long flags;
->         u8 ctrl;
+> Changes in v2:
+>   - Add "uniphier" to the compatible to make it more SoC-specific
 >
-> +       if (ios->power_mode == MMC_POWER_UNDEFINED)
-> +               return;
-> +
->         spin_lock_irqsave(&host->lock, flags);
+>  Documentation/devicetree/bindings/mmc/sdhci-cadence.txt | 6 ++++--
+>  drivers/mmc/host/sdhci-cadence.c                        | 1 +
+>  2 files changed, 5 insertions(+), 2 deletions(-)
 >
->         if (host->flags & SDHCI_DEVICE_DEAD) {
-> @@ -2938,22 +2941,24 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> index 750374f..c0f37cb 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> @@ -1,7 +1,9 @@
+>  * Cadence SD/SDIO/eMMC Host Controller
 >
->         sdhci_init(host, 0);
+>  Required properties:
+> -- compatible: should be "cdns,sd4hc".
+> +- compatible: should be one of the following:
+> +    "cdns,sd4hc"               - default of the IP
+> +    "socionext,uniphier-sd4hc" - for Socionext UniPhier SoCs
+>  - reg: offset and length of the register set for the device.
+>  - interrupts: a single interrupt specifier.
+>  - clocks: phandle to the input clock.
+> @@ -19,7 +21,7 @@ if supported.  See mmc.txt for details.
 >
-> -       /* Force clock and power re-program */
-> -       host->pwr = 0;
-> -       host->clock = 0;
-> -       mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
-> -       mmc->ops->set_ios(mmc, &mmc->ios);
-> +       if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
-> +               /* Force clock and power re-program */
-> +               host->pwr = 0;
-> +               host->clock = 0;
-> +               mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
-> +               mmc->ops->set_ios(mmc, &mmc->ios);
+>  Example:
+>         emmc: sdhci@5a000000 {
+> -               compatible = "cdns,sd4hc";
+> +               compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+>                 reg = <0x5a000000 0x400>;
+>                 interrupts = <0 78 4>;
+>                 clocks = <&clk 4>;
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 1501cfd..4b0ecb9 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -262,6 +262,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  }
 >
-> -       if ((host_flags & SDHCI_PV_ENABLED) &&
-> -               !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
-> -               spin_lock_irqsave(&host->lock, flags);
-> -               sdhci_enable_preset_value(host, true);
-> -               spin_unlock_irqrestore(&host->lock, flags);
-> -       }
-> +               if ((host_flags & SDHCI_PV_ENABLED) &&
-> +                   !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
-> +                       spin_lock_irqsave(&host->lock, flags);
-> +                       sdhci_enable_preset_value(host, true);
-> +                       spin_unlock_irqrestore(&host->lock, flags);
-> +               }
->
-> -       if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
-> -           mmc->ops->hs400_enhanced_strobe)
-> -               mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
-> +               if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
-> +                   mmc->ops->hs400_enhanced_strobe)
-> +                       mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
-> +       }
->
->         spin_lock_irqsave(&host->lock, flags);
->
+>  static const struct of_device_id sdhci_cdns_match[] = {
+> +       { .compatible = "socionext,uniphier-sd4hc" },
+>         { .compatible = "cdns,sd4hc" },
+>         { /* sentinel */ }
+>  };
 > --
-> 1.9.1
+> 2.7.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
