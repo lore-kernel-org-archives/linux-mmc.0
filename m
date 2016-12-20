@@ -1,139 +1,118 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH 2/4] mmc: mmc: Add change to set controller to HS400
- frequency in enhanced strobe
-Date: Tue, 20 Dec 2016 17:38:29 +0530
-Message-ID: <0db75984-bd05-5d63-91f0-e303e56d83d3@codeaurora.org>
-References: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
- <1482213199-29152-3-git-send-email-riteshh@codeaurora.org>
- <5a9ad9e8-6fc5-1a33-6119-7c411df4b6e0@rock-chips.com>
- <1412bf82-6292-20a5-3086-c8dccae930a4@codeaurora.org>
- <1419cbfe-5f37-f300-ca6e-7ee39c1d1e29@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v10 0/8] Cavium MMC driver
+Date: Tue, 20 Dec 2016 13:10:56 +0100
+Message-ID: <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
+References: <20161219121552.18316-1-jglauber@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:51268 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754020AbcLTMIj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 07:08:39 -0500
-In-Reply-To: <1419cbfe-5f37-f300-ca6e-7ee39c1d1e29@rock-chips.com>
+Received: from mail-wj0-f175.google.com ([209.85.210.175]:33783 "EHLO
+        mail-wj0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757552AbcLTMK7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 07:10:59 -0500
+Received: by mail-wj0-f175.google.com with SMTP id xy5so174090375wjc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Dec 2016 04:10:58 -0800 (PST)
+In-Reply-To: <20161219121552.18316-1-jglauber@cavium.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org
+To: Jan Glauber <jglauber@cavium.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>
 
-Hi Shawn,
+Hi Jan,
 
-On 12/20/2016 4:33 PM, Shawn Lin wrote:
-> On 2016/12/20 18:33, Ritesh Harjani wrote:
->> Hi Shawn,
->>
->> On 12/20/2016 12:59 PM, Shawn Lin wrote:
->>> On 2016/12/20 13:53, Ritesh Harjani wrote:
->>>> Currently mmc_select_hs400es is not setting the desired frequency
->>>> before sending switch command. This makes CMD13 to timeout on
->>>> some controllers.
->>>> Thus add a change to set the desired HS400 frequency
->>>> in mmc_select_hs400es when the timing is switched to HS400.
->>>
->>> What is the desired HS400 freq? I guess it is 200MHz, right?
->>>
->>> Well, per the spec, it just say "host *may* changes frequency to
->>> <= 200Mhz". So before setting timing to MMC_TIMING_MMC_HS400, we
->>> already reach ext_csd.hs_max_dtr. So it should meet the spec. If
->>> the fact that some controllers would see CMD13 timeout here, I guess
->>> you wouldn't let folks add max-frequency to the DT as if the max freq
->>> is set to just lower than your *desired HS400 freq* , it the same
->>> failure result even you add this patch, right?
->>>
->>> the root cause the controllers see failure for CMD13 is it didn't
->>> configure the right delay phase or something similar to fit the timing
->>> under the freq of hs_max_dtr, I guess.
->> Actually this may be limitation of sdhc msm controller that it cannot
->> work at lower frequency while in HS400 mode. I would have to see more on
->> this to confirm on why this limitation is there (mostly it was with some
->> DLL limitation).
->> In that case maybe I should not generalize this for other controllers.
->>
->>
->> But still the below code change to set the bus_speed after setting the
->> timing should be fine right ? Since host controller may as well change
->> the frequency to 200MHz.
+On 19 December 2016 at 13:15, Jan Glauber <jglauber@cavium.com> wrote:
+> While this patch series seems to be somehow overdue, in the meantime the
+> same MMC unit was re-used on Cavium's ThunderX SOC so our interest in making
+> progress upstreaming this driver has doubled now...
 >
-> maybe not, I was guessing what would happend when folks add
-> max-frequency = <100000000> as well as mmc-hs400-enhanced-strobe in
-> the DT? It won't work for your case. So the question is how you would
-> make that case work?
->
->>
->> Do you think the below change is fine in this sense? I can change the
->> commit message to just -
->> "set both timing mode and frequency before sending CMD13 in
->> mmc_select_hs400es."
->>
->> Or do you see any other approach to this ?
->>
->
-> I haven't had clear thought about how to deal with it but
-> I guess you are not alone for this case maybe. Now there
-> will be more and more mmc controllers using PHY or DLL and
-> some more special limitions is ineluctable, so we need to
-> discuss a more general/legit way to make it work.
->
-> Your patch is a good begin to open this topic. :)
-> I would like to hear some input from Ulf and Adian.
-I see there is a miss from my side here. Although there is still some 
-limitation on msm host controller which I cannot recollect. But for this 
-case we can get it done by configuring the DLL properly.
+> Glancing over the history of the series I think most of the high-level
+> comments should be adressed by now (like DTS representation of the
+> multiple slots). I've added some new features for the ARM64 port
+> and in the process re-wrote parts of the driver and split it into smaller,
+> hopefully easier to review parts.
 
-I missed that particular check of clock >= 100MHz in 
-sdhci_msm_set_uhs_signaling which configures the DLL.
+I only had a quick review, but the overall impression is that it's
+getting far better. Here follows my summary.
 
+1) I intend to especially look at DTS representation for the slot
+nodes, to make sure we have a good solution. Allow me to get back on
+this.
 
-I guess if I could use the host->mmc_host_ops.hs400_enhanced_strobe ops 
-and provide a callback to configure the DLL without any restriction on 
-clock frequency, then this can be worked out.
+2) I don't like how you have named files, as it doesn't express the
+obvious relationship between the core library and the drivers. I would
+rather see something similar to dw_mmc or sdhci.
 
-I will check more on this and get back. Thanks for your inputs.
+3) Related to 2), I would also like to have a prefix of the commit
+messages which express the relationships. Again follow dw_mmc/sdhci.
 
-Regards
-Ritesh
+4) GPIO powers should be modelled as GPIO regulators. I believe we
+have discussed this earlier as well (I don't really recall in detail
+about the last things). It gives us the opportunity to via the
+regulator framework to find out the supported voltage levels. This is
+the generic method which is used by mmc drivers, you need to adopt to
+this as well.
 
+5) Please reorder the series so the DT bindings doc change comes
+first. I need an ack from the DT maintainer for it.
 
-
+6) The most important feedback:
+This driver has been posted in many versions by now. Perhaps I could
+have been more responsive throughout the attempts, I apologize for
+that. On the other hand, you seems to have a round robin schedule for
+whom that sends a new version. :-) That makes me wonder about your
+support in the maintenance phase. I hope my concern is wrong, but how
+about that you point out a responsible maintainer? Especially since
+this seems to become a family of Cavium variants, it would help me if
+I could rely on someone providing acks for future changes. Would you
+be able to accept that role?
 
 >
->>
->> Regards
->> Ritesh
->>
->>>
->>>>
->>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->>>> ---
->>>>  drivers/mmc/core/mmc.c | 1 +
->>>>  1 file changed, 1 insertion(+)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index b61b52f9..eb69497 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -1329,6 +1329,7 @@ static int mmc_select_hs400es(struct mmc_card
->>>> *card)
->>>>
->>>>      /* Set host controller to HS400 timing and frequency */
->>>>      mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->>>> +    mmc_set_bus_speed(card);
->>>>
->>>>      /* Controller enable enhanced strobe function */
->>>>      host->ios.enhanced_strobe = true;
->>>>
->>>
->>>
->>
+> In porting the driver to arm64 I run into some issues.
 >
->
+> 1. mmc_parse_of is not capable of supporting multiple slots behind one
+>    controller. On arm64 the host controller is presented as one PCI device.
+>    There are no devices per slot as with the platform variant, so I
+>    needed to create dummy devices to make mmc_parse_of work.
+>    IMHO it would be cleaner if mmc_parse_of could be extended to cover
+>    the multiple slots case.
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Yes. I agree that this make sense!
+Seems like we could try to make use of the struct device_node instead
+of the struct device.
+
+I will try to come up with an idea, I keep you posted.
+
+>
+> 2. Without setting MMC_CAP_1_8V_DDR DDR mode is not usable for eMMC.
+>    I would prefer to introduce a new cap flag, MMC_CAP_3_3V_DDR,
+>    if possible. Currently I need to add "mmc-ddr-1_8v" to DTS,
+>    which seems odd for a 3.3v only host controller.
+
+This keep coming back. Both DT bindings and changing to the mmc core
+has been posted.
+
+Allow me to help out and re-post a new series. You can build on top of
+them - I will keep you on cc.
+
+>
+> 3. Because the slots share the host controller using the
+>    "full-pwr-cycle" attribute turned out to not work well.
+>    I'm not 100% sure just ignoring the attribute is correct.
+
+The full-pwr-cycle shall be set whether you are able to power cycle
+the *card*. So this binding should be a part of each slot/child node -
+if the host supports it.
+
+>
+> For the driver to work GPIO support is required, the GPIO driver is
+> not yet available upstream. Therefore, for the time being I removed
+> the GPIO dependency from Kconfig.
+
+Is this is about the GPIO powers or also GPIO card detect?
+
+Anyway, I am fine with not depending on GPIO Kconfig.
+
+[...]
+
+Kind regards
+Uffe
