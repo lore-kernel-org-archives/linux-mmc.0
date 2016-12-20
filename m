@@ -1,90 +1,99 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH 2/4] mmc: mmc: Add change to set controller to HS400
- frequency in enhanced strobe
-Date: Tue, 20 Dec 2016 16:03:46 +0530
-Message-ID: <1412bf82-6292-20a5-3086-c8dccae930a4@codeaurora.org>
-References: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
- <1482213199-29152-3-git-send-email-riteshh@codeaurora.org>
- <5a9ad9e8-6fc5-1a33-6119-7c411df4b6e0@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci: Fix to handle MMC_POWER_UNDEFINED
+Date: Tue, 20 Dec 2016 11:49:47 +0100
+Message-ID: <CAPDyKFpdLb62ANfYB+Pc3L0pEfrcPmtKnuAotE8A8v-3+ezeuQ@mail.gmail.com>
+References: <1482154391-17019-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5a9ad9e8-6fc5-1a33-6119-7c411df4b6e0@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wj0-f172.google.com ([209.85.210.172]:34278 "EHLO
+        mail-wj0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752230AbcLTKtu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2016 05:49:50 -0500
+Received: by mail-wj0-f172.google.com with SMTP id tg4so174157225wjb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Dec 2016 02:49:49 -0800 (PST)
+In-Reply-To: <1482154391-17019-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Shawn,
-
-On 12/20/2016 12:59 PM, Shawn Lin wrote:
-> On 2016/12/20 13:53, Ritesh Harjani wrote:
->> Currently mmc_select_hs400es is not setting the desired frequency
->> before sending switch command. This makes CMD13 to timeout on
->> some controllers.
->> Thus add a change to set the desired HS400 frequency
->> in mmc_select_hs400es when the timing is switched to HS400.
+On 19 December 2016 at 14:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Since commit c2c24819b280 ("mmc: core: Don't power off the card when
+> starting the host"), the power state can still be MMC_POWER_UNDEFINED after
+> mmc_start_host() is called. That can trigger a warning in SDHCI during
+> runtime resume as it tries to restore the I/O state. Handle
+> MMC_POWER_UNDEFINED simply by not updating the I/O state in that case.
 >
-> What is the desired HS400 freq? I guess it is 200MHz, right?
+> Fixes: c2c24819b280 ("mmc: core: Don't power off the card when starting the host")
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Adrian, thanks for fixing this - my bad! Applied for fixes!
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci.c | 33 +++++++++++++++++++--------------
+>  1 file changed, 19 insertions(+), 14 deletions(-)
 >
-> Well, per the spec, it just say "host *may* changes frequency to
-> <= 200Mhz". So before setting timing to MMC_TIMING_MMC_HS400, we
-> already reach ext_csd.hs_max_dtr. So it should meet the spec. If
-> the fact that some controllers would see CMD13 timeout here, I guess
-> you wouldn't let folks add max-frequency to the DT as if the max freq
-> is set to just lower than your *desired HS400 freq* , it the same
-> failure result even you add this patch, right?
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 111991e5b9a0..23909804ffb8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1576,6 +1576,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         unsigned long flags;
+>         u8 ctrl;
 >
-> the root cause the controllers see failure for CMD13 is it didn't
-> configure the right delay phase or something similar to fit the timing
-> under the freq of hs_max_dtr, I guess.
-Actually this may be limitation of sdhc msm controller that it cannot 
-work at lower frequency while in HS400 mode. I would have to see more on 
-this to confirm on why this limitation is there (mostly it was with some 
-DLL limitation).
-In that case maybe I should not generalize this for other controllers.
-
-
-But still the below code change to set the bus_speed after setting the 
-timing should be fine right ? Since host controller may as well change 
-the frequency to 200MHz.
-
-Do you think the below change is fine in this sense? I can change the 
-commit message to just -
-"set both timing mode and frequency before sending CMD13 in 
-mmc_select_hs400es."
-
-Or do you see any other approach to this ?
-
-
-Regards
-Ritesh
-
+> +       if (ios->power_mode == MMC_POWER_UNDEFINED)
+> +               return;
+> +
+>         spin_lock_irqsave(&host->lock, flags);
 >
->>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> ---
->>  drivers/mmc/core/mmc.c | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index b61b52f9..eb69497 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1329,6 +1329,7 @@ static int mmc_select_hs400es(struct mmc_card
->> *card)
->>
->>      /* Set host controller to HS400 timing and frequency */
->>      mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->> +    mmc_set_bus_speed(card);
->>
->>      /* Controller enable enhanced strobe function */
->>      host->ios.enhanced_strobe = true;
->>
+>         if (host->flags & SDHCI_DEVICE_DEAD) {
+> @@ -2938,22 +2941,24 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
 >
+>         sdhci_init(host, 0);
 >
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> -       /* Force clock and power re-program */
+> -       host->pwr = 0;
+> -       host->clock = 0;
+> -       mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
+> -       mmc->ops->set_ios(mmc, &mmc->ios);
+> +       if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
+> +               /* Force clock and power re-program */
+> +               host->pwr = 0;
+> +               host->clock = 0;
+> +               mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
+> +               mmc->ops->set_ios(mmc, &mmc->ios);
+>
+> -       if ((host_flags & SDHCI_PV_ENABLED) &&
+> -               !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
+> -               spin_lock_irqsave(&host->lock, flags);
+> -               sdhci_enable_preset_value(host, true);
+> -               spin_unlock_irqrestore(&host->lock, flags);
+> -       }
+> +               if ((host_flags & SDHCI_PV_ENABLED) &&
+> +                   !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
+> +                       spin_lock_irqsave(&host->lock, flags);
+> +                       sdhci_enable_preset_value(host, true);
+> +                       spin_unlock_irqrestore(&host->lock, flags);
+> +               }
+>
+> -       if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
+> -           mmc->ops->hs400_enhanced_strobe)
+> -               mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
+> +               if ((mmc->caps2 & MMC_CAP2_HS400_ES) &&
+> +                   mmc->ops->hs400_enhanced_strobe)
+> +                       mmc->ops->hs400_enhanced_strobe(mmc, &mmc->ios);
+> +       }
+>
+>         spin_lock_irqsave(&host->lock, flags);
+>
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
