@@ -1,36 +1,31 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v8 1/5] Documentation: synopsys-dw-mshc: add binding for
- fifo quirks
-Date: Thu, 22 Dec 2016 17:04:24 -0600
-Message-ID: <20161222230424.bxe4pirlfkouq4ie@rob-hp-laptop>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v8 4/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Thu, 22 Dec 2016 17:13:19 -0600
+Message-ID: <20161222231319.b77fjvld3bbhrgsu@rob-hp-laptop>
 References: <1482382657-16681-1-git-send-email-jun.nie@linaro.org>
- <1482382657-16681-2-git-send-email-jun.nie@linaro.org>
+ <1482382657-16681-5-git-send-email-jun.nie@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:35408 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941783AbcLVXE1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2016 18:04:27 -0500
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1482382657-16681-2-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1482382657-16681-5-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jun Nie <jun.nie@linaro.org>
-Cc: mark.rutland@arm.com, shawn.guo@linaro.org, xie.baoyou@zte.com.cn, devicetree@vger.kernel.org, ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc@vger.kernel.org
 
-On Thu, Dec 22, 2016 at 12:57:33PM +0800, Jun Nie wrote:
-> Add fifo-addr property and fifo-watermark-quirk property to
-> synopsys-dw-mshc bindings. It is intended to provide more
-> dt interface to support SoCs specific configuration.
+On Thu, Dec 22, 2016 at 12:57:36PM +0800, Jun Nie wrote:
+> Document the device-tree binding of ZTE MMC host on
+> ZX296718 SoC.
 > 
-> Signed-off-by: Jun Nie <jun.nie@linaro.org>
+> Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 33 ++++++++++++++++++++++
+>  1 file changed, 33 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
 
-Add acks when reposting.
-
-Acked-by: Rob Herring <robh@kernel.org>
-
-Rob
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
