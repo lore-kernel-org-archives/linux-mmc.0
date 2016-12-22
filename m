@@ -1,67 +1,61 @@
-From: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v8 0/5] Add intial support to DW MMC host on ZTE SoC
-Date: Thu, 22 Dec 2016 12:57:32 +0800
-Message-ID: <1482382657-16681-1-git-send-email-jun.nie@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Jun Nie <jun.nie@linaro.org>
+Subject: [PATCH v8 1/5] Documentation: synopsys-dw-mshc: add binding for fifo quirks
+Date: Thu, 22 Dec 2016 12:57:33 +0800
+Message-ID: <1482382657-16681-2-git-send-email-jun.nie@linaro.org>
+References: <1482382657-16681-1-git-send-email-jun.nie@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f170.google.com ([209.85.192.170]:34223 "EHLO
+        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757982AbcLVE5s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Dec 2016 23:57:48 -0500
+Received: by mail-pf0-f170.google.com with SMTP id c4so37804196pfb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Dec 2016 20:57:48 -0800 (PST)
+In-Reply-To: <1482382657-16681-1-git-send-email-jun.nie@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: robh+dt@kernel.org, mark.rutland@arm.com, shawn.guo@linaro.org, xie.baoyou@zte.com.cn, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-Add intial support to DW MMC host on ZTE SoC. It include platform
-specific wrapper driver and workarounds for fifo quirk.
+Add fifo-addr property and fifo-watermark-quirk property to
+synopsys-dw-mshc bindings. It is intended to provide more
+dt interface to support SoCs specific configuration.
 
-Changes vs version 7:
-  - Re-order patches sequence so that new dts property is introduced before usage.
-  - Remove unecessary property in zx mmc dts.
+Signed-off-by: Jun Nie <jun.nie@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-Changes vs version 6:
-  - Resolve confilict when rebase to latest dw-mmc.git for-ulf branch.
-  - Add Shawn Lin's review tag.
-
-Changes vs version 5:
-  - Add clock delay lock status check to save CPU cycle in timing tuning CMD.
-
-Changes vs version 4:
-  - Fix missing empty dts compatible element in the end of compatible array.
-
-Changes vs version 3:
-  - Fix brace error in document.
-
-Changes vs version 2:
-  - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
-    fifo-watermark-aligned.
-  - Polish ZX MMC driver on minor coding style issues.
-
-Changes vs version 1:
-  - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
-  - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
-
-
-Jun Nie (5):
-  Documentation: synopsys-dw-mshc: add binding for fifo quirks
-  mmc: dw: Add fifo address property
-  mmc: dw: Add fifo watermark alignment property
-  mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-  mmc: zx: Initial support for ZX mmc controller
-
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
- .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  33 +++
- drivers/mmc/host/Kconfig                           |   9 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
- drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
- drivers/mmc/host/dw_mmc.c                          |  17 +-
- include/linux/mmc/dw_mmc.h                         |   5 +
- 8 files changed, 348 insertions(+), 3 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-zx.c
- create mode 100644 drivers/mmc/host/dw_mmc-zx.h
-
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 7fd17c3..bca30b6 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -75,6 +75,17 @@ Optional properties:
+ * card-detect-delay: Delay in milli-seconds before detecting card after card
+   insert event. The default value is 0.
+ 
++* data-addr: Override fifo address with value provided by DT. The default FIFO reg
++  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
++  driver. If the controller does not follow this rule, please use this property
++  to set fifo address in device tree.
++
++* fifo-watermark-aligned: Data done irq is expected if data length is less than
++  watermark in PIO mode. But fifo watermark is requested to be aligned with data
++  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
++  watermark quirk to mark this requirement and force fifo watermark setting
++  accordingly.
++
+ * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+   specified we'll defer probe until we can find this regulator.
+ 
+@@ -102,6 +113,8 @@ board specific portions as listed below.
+ 		interrupts = <0 75 0>;
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
++		data-addr = <0x200>;
++		fifo-watermark-aligned;
+ 		resets = <&rst 20>;
+ 		reset-names = "reset";
+ 	};
 -- 
 1.9.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
