@@ -1,49 +1,49 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH v4 06/12] dt: bindings: Add bindings for Marvell Xenon SD
- Host Controller
-Date: Thu, 22 Dec 2016 20:47:07 +0800
-Message-ID: <c7755b17-d1a8-b1eb-4750-9b57c35768f1@marvell.com>
-References: <cover.67d726f70f6bd48d38a2023513f2711080bc66c8.1481651244.git-series.gregory.clement@free-electrons.com>
- <b8acb86f1e7977648977ed5c6b4eb86323e4b777.1481651244.git-series.gregory.clement@free-electrons.com>
- <20161222111802.GX14217@n2100.armlinux.org.uk>
+From: arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: Re: [v1] mmc: host: dw_mmc-pci:- Handle return NULL error from
+ pcim_iomap_table
+Date: Thu, 22 Dec 2016 22:42:49 +0530
+Message-ID: <7735ce5d-643a-1e8a-1f13-0ea24cc4b65b@gmail.com>
+References: <1482408409-13404-1-git-send-email-arvind.yadav.cs@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:40553 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S966312AbcLVMr4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2016 07:47:56 -0500
-In-Reply-To: <20161222111802.GX14217@n2100.armlinux.org.uk>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:34946 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1762052AbcLVRM7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2016 12:12:59 -0500
+In-Reply-To: <1482408409-13404-1-git-send-email-arvind.yadav.cs@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@armlinux.org.uk>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Jason Cooper <jason@lakedaemon.net>, Hanna Hawa <hannah@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, linux-arm-kernel@lists.infradead.org, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Russell,
+Ignore this change. Sorry for noise.
 
-On 2016/12/22 19:18, Russell King - ARM Linux wrote:
-> On Tue, Dec 13, 2016 at 06:48:35PM +0100, Gregory CLEMENT wrote:
->> +Optional Properties:
->> +- mmc-card:
->> +  mmc-card child node must be provided when current SDHC is for eMMC.
->> +  Xenon SDHC often can support both SD and eMMC. This child node indicates that
->> +  current SDHC is for eMMC card. Thus Xenon eMMC specific configuration and
->> +  operations can be enabled prior to eMMC init sequence.
->> +  Please refer to Documentation/devicetree/bindings/mmc/mmc-card.txt.
->> +  This child node should not be set if current Xenon SDHC is for SD/SDIO.
-> 
-> This looks like a typo - shouldn't it be "mmccard" and not "mmc-card"?
-> Your examples below use "mmccard" as does the documentation you point
-> towards.
+Thanks
+-Arvind
+
+On Thursday 22 December 2016 05:36 PM, Arvind Yadav wrote:
+> Here, If pcim_iomap_table will fail. It will return NULL.
+> Kernel can run into a NULL-pointer dereference.
+> This error check will avoid NULL pointer dereference.
 >
+> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+> ---
+>   drivers/mmc/host/dw_mmc-pci.c |    2 ++
+>   1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
+> index ab82796..f42d302 100644
+> --- a/drivers/mmc/host/dw_mmc-pci.c
+> +++ b/drivers/mmc/host/dw_mmc-pci.c
+> @@ -61,6 +61,8 @@ static int dw_mci_pci_probe(struct pci_dev *pdev,
+>   		return ret;
+>   
+>   	host->regs = pcim_iomap_table(pdev)[PCI_BAR_NO];
+> +	if (!host->regs)
+> +		return -ENOMEM;
+>   
+>   	pci_set_master(pdev);
+>   
 
-    Thanks a lot for the review.
-
-    I might mix up it with compatible "mmc-card".
-    I will change it to sub-node name in next version soon.
-
-    Thank you.
-
-Best regards,
-Hu Ziji
