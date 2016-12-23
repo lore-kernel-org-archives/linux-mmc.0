@@ -1,31 +1,77 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v8 4/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
-Date: Thu, 22 Dec 2016 17:13:19 -0600
-Message-ID: <20161222231319.b77fjvld3bbhrgsu@rob-hp-laptop>
-References: <1482382657-16681-1-git-send-email-jun.nie@linaro.org>
- <1482382657-16681-5-git-send-email-jun.nie@linaro.org>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH 3/4] mmc: mmc: enable ios.enhanced_strobe before
+ mmc_set_timing
+Date: Fri, 23 Dec 2016 14:48:57 +0530
+Message-ID: <2bb5dca4-faad-fc93-1dfb-18d1e1e72961@codeaurora.org>
+References: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
+ <1482213199-29152-4-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1482382657-16681-5-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1482213199-29152-4-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Dec 22, 2016 at 12:57:36PM +0800, Jun Nie wrote:
-> Document the device-tree binding of ZTE MMC host on
-> ZX296718 SoC.
-> 
-> Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 33 ++++++++++++++++++++++
->  1 file changed, 33 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+Hi Shawn,
 
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Do you think, below change should be fine?
+I am still checking on what we discussed on Patch2.
+
+why I am asking is because - for HS400 in SDHC-MSM, we do the DLL 
+re-calibration as per the HW sequence. So it is done in both the cases, 
+for HS400 mode without and with enhanced strobe mode.
+
+This can be done as part of set_ios when mmc_set_timing is called in 
+sdhci-msm driver.
+
+I am still trying to check more on what would be more generic and 
+appropriate way inside sdhci-msm, for that I would like to know if 
+ios.enhanced_strobe = true before calling mmc_set_timing should be 
+acceptable or not ?
+
+
+Regards
+Ritesh
+
+On 12/20/2016 11:23 AM, Ritesh Harjani wrote:
+> Some controllers may need to configure few registers based on enhanced
+> strobe mode while configuring to HS400 timing, thus make
+> ios.enhanced_strobe to true before mmc_set_timing in mmc_select_hs400es.
+>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> ---
+>  drivers/mmc/core/mmc.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index eb69497..052368e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1327,12 +1327,18 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>  		goto out_err;
+>  	}
+>
+> +	/*
+> +	 * Enable enhanced_strobe in ios, as some controllers
+> +	 * may need to configure few registers based on enhanced
+> +	 * strobe while changing HS400 timing.
+> +	 */
+> +	host->ios.enhanced_strobe = true;
+> +
+>  	/* Set host controller to HS400 timing and frequency */
+>  	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+>  	mmc_set_bus_speed(card);
+>
+>  	/* Controller enable enhanced strobe function */
+> -	host->ios.enhanced_strobe = true;
+>  	if (host->ops->hs400_enhanced_strobe)
+>  		host->ops->hs400_enhanced_strobe(host, &host->ios);
+>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
