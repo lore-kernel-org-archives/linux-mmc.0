@@ -1,88 +1,107 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 3/4] mmc: mmc: enable ios.enhanced_strobe before
- mmc_set_timing
-Date: Mon, 26 Dec 2016 15:12:57 +0800
-Message-ID: <c3e67039-e9af-044d-ccb2-9a2238e0b7f5@rock-chips.com>
-References: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
- <1482213199-29152-4-git-send-email-riteshh@codeaurora.org>
- <2bb5dca4-faad-fc93-1dfb-18d1e1e72961@codeaurora.org>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [v2, 2/2] mmc: sdhci-of-esdhc: avoid clock glitch when frequency is changing
+Date: Mon, 26 Dec 2016 17:46:30 +0800
+Message-ID: <1482745590-29718-2-git-send-email-yangbo.lu@nxp.com>
+References: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2bb5dca4-faad-fc93-1dfb-18d1e1e72961@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-co1nam03on0051.outbound.protection.outlook.com ([104.47.40.51]:59155
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755299AbcLZJ7V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 26 Dec 2016 04:59:21 -0500
+In-Reply-To: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Yangbo Lu <yangbo.lu@nxp.com>
 
-On 2016/12/23 17:18, Ritesh Harjani wrote:
-> Hi Shawn,
->
-> Do you think, below change should be fine?
+The eSDHC_PRSSTAT[SDSTB] bit indicates whether the internal card clock is
+stable. This bit is for the host driver to poll clock status when changing
+the clock frequency. It is recommended to clear eSDHC_SYSCTL[SDCLKEN]
+to remove glitch on the card clock when the frequency is changing. This
+patch is to disable SDCLKEN bit before changing frequency and enable it
+after SDSTB bit is set.
 
-yes.
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+Changes for v2:
+	- added Adrian into to list
+---
+ drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
+ drivers/mmc/host/sdhci-of-esdhc.c | 21 ++++++++++++++++++---
+ 2 files changed, 23 insertions(+), 3 deletions(-)
 
-> I am still checking on what we discussed on Patch2.
->
-> why I am asking is because - for HS400 in SDHC-MSM, we do the DLL
-> re-calibration as per the HW sequence. So it is done in both the cases,
-> for HS400 mode without and with enhanced strobe mode.
->
-> This can be done as part of set_ios when mmc_set_timing is called in
-> sdhci-msm driver.
->
-> I am still trying to check more on what would be more generic and
-> appropriate way inside sdhci-msm, for that I would like to know if
-> ios.enhanced_strobe = true before calling mmc_set_timing should be
-> acceptable or not ?
->
-
-Sure.
-
->
-> Regards
-> Ritesh
->
-> On 12/20/2016 11:23 AM, Ritesh Harjani wrote:
->> Some controllers may need to configure few registers based on enhanced
->> strobe mode while configuring to HS400 timing, thus make
->> ios.enhanced_strobe to true before mmc_set_timing in mmc_select_hs400es.
->>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> ---
->>  drivers/mmc/core/mmc.c | 8 +++++++-
->>  1 file changed, 7 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index eb69497..052368e 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1327,12 +1327,18 @@ static int mmc_select_hs400es(struct mmc_card
->> *card)
->>          goto out_err;
->>      }
->>
->> +    /*
->> +     * Enable enhanced_strobe in ios, as some controllers
->> +     * may need to configure few registers based on enhanced
->> +     * strobe while changing HS400 timing.
->> +     */
->> +    host->ios.enhanced_strobe = true;
->> +
->>      /* Set host controller to HS400 timing and frequency */
->>      mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->>      mmc_set_bus_speed(card);
->>
->>      /* Controller enable enhanced strobe function */
->> -    host->ios.enhanced_strobe = true;
->>      if (host->ops->hs400_enhanced_strobe)
->>          host->ops->hs400_enhanced_strobe(host, &host->ios);
->>
->>
->
-
-
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index 8cd8449..ece8b37 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -31,6 +31,10 @@
+  * eSDHC register definition
+  */
+ 
++/* Present State Register */
++#define ESDHC_PRSSTAT			0x24
++#define ESDHC_CLOCK_STABLE		0x00000008
++
+ /* Protocol Control Register */
+ #define ESDHC_PROCTL			0x28
+ #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
+@@ -43,6 +47,7 @@
+ #define ESDHC_CLOCK_MASK		0x0000fff0
+ #define ESDHC_PREDIV_SHIFT		8
+ #define ESDHC_DIVIDER_SHIFT		4
++#define ESDHC_CLOCK_SDCLKEN		0x00000008
+ #define ESDHC_CLOCK_PEREN		0x00000004
+ #define ESDHC_CLOCK_HCKEN		0x00000002
+ #define ESDHC_CLOCK_IPGEN		0x00000001
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 9a6eb44..0849885 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -431,6 +431,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
++	u32 timeout;
+ 	u32 temp;
+ 
+ 	host->mmc->actual_clock = 0;
+@@ -451,8 +452,8 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ 
+ 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+-	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+-		| ESDHC_CLOCK_MASK);
++	temp &= ~(ESDHC_CLOCK_SDCLKEN | ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
++		  ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ 
+ 	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+@@ -472,7 +473,21 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		| (div << ESDHC_DIVIDER_SHIFT)
+ 		| (pre_div << ESDHC_PREDIV_SHIFT));
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+-	mdelay(1);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
++		if (timeout == 0) {
++			pr_err("%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	temp |= ESDHC_CLOCK_SDCLKEN;
++	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ }
+ 
+ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
 -- 
-Best Regards
-Shawn Lin
+2.1.0.27.g96db324
+
