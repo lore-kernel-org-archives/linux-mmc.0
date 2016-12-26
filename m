@@ -1,86 +1,145 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [v2, 1/2] mmc: sdhci-esdhc: clean up register definitions
-Date: Mon, 26 Dec 2016 17:46:29 +0800
-Message-ID: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH] ACPI / LPSS: Work around wrong sdio _ADR 0 entry on some
+ byt/cht devices
+Date: Mon, 26 Dec 2016 11:48:19 +0100
+Message-ID: <087d2576-66f8-f3ea-e08b-95e5de9f701c@redhat.com>
+References: <20161225102148.7706-1-hdegoede@redhat.com>
+ <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0074.outbound.protection.outlook.com ([104.47.37.74]:21125
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932490AbcLZKbm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Dec 2016 05:31:42 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Stable <stable@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Yangbo Lu <yangbo.lu@nxp.com>
 
-The eSDHC register definitions in header file were messy and confusing.
-This patch is to clean up these definitions.
+Hi,
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
-Changes for v2:
-	- added Adrian into to list
----
- drivers/mmc/host/sdhci-esdhc.h | 39 ++++++++++++++++++++-------------------
- 1 file changed, 20 insertions(+), 19 deletions(-)
+On 26-12-16 00:25, Rafael J. Wysocki wrote:
+> CC Mika and Andy.
+>
+> Plus I don't think -stable is going to take your patches directly.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index de132e2..8cd8449 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -24,30 +24,31 @@
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
- 				SDHCI_QUIRK_NO_HISPD_BIT)
- 
--#define ESDHC_PROCTL		0x28
--
--#define ESDHC_SYSTEM_CONTROL	0x2c
--#define ESDHC_CLOCK_MASK	0x0000fff0
--#define ESDHC_PREDIV_SHIFT	8
--#define ESDHC_DIVIDER_SHIFT	4
--#define ESDHC_CLOCK_PEREN	0x00000004
--#define ESDHC_CLOCK_HCKEN	0x00000002
--#define ESDHC_CLOCK_IPGEN	0x00000001
--
- /* pltfm-specific */
- #define ESDHC_HOST_CONTROL_LE	0x20
- 
- /*
-- * P2020 interpretation of the SDHCI_HOST_CONTROL register
-+ * eSDHC register definition
-  */
--#define ESDHC_CTRL_4BITBUS          (0x1 << 1)
--#define ESDHC_CTRL_8BITBUS          (0x2 << 1)
--#define ESDHC_CTRL_BUSWIDTH_MASK    (0x3 << 1)
--
--/* OF-specific */
--#define ESDHC_DMA_SYSCTL	0x40c
--#define ESDHC_DMA_SNOOP		0x00000040
- 
--#define ESDHC_HOST_CONTROL_RES	0x01
-+/* Protocol Control Register */
-+#define ESDHC_PROCTL			0x28
-+#define ESDHC_CTRL_4BITBUS		(0x1 << 1)
-+#define ESDHC_CTRL_8BITBUS		(0x2 << 1)
-+#define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
-+#define ESDHC_HOST_CONTROL_RES		0x01
-+
-+/* System Control Register */
-+#define ESDHC_SYSTEM_CONTROL		0x2c
-+#define ESDHC_CLOCK_MASK		0x0000fff0
-+#define ESDHC_PREDIV_SHIFT		8
-+#define ESDHC_DIVIDER_SHIFT		4
-+#define ESDHC_CLOCK_PEREN		0x00000004
-+#define ESDHC_CLOCK_HCKEN		0x00000002
-+#define ESDHC_CLOCK_IPGEN		0x00000001
-+
-+/* Control Register for DMA transfer */
-+#define ESDHC_DMA_SYSCTL		0x40c
-+#define ESDHC_DMA_SNOOP			0x00000040
- 
- #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
--- 
-2.1.0.27.g96db324
+Not sure what you mean with this remark? According to:
 
+Documentation/stable_kernel_rules.txt
+
+Option 1
+********
+
+To have the patch automatically included in the stable tree, add the tag
+
+.. code-block:: none
+
+      Cc: stable@vger.kernel.org
+
+in the sign-off area. Once the patch is merged it will be applied to
+the stable tree without anything else needing to be done by the author
+or subsystem maintainer.
+
+
+So yes, it won't get merged until it has been merged into Linus'
+tree. But AFAICT adding Cc: stable@vger.kernel.org is the right way
+to indicate that a patch is a bug-fix which should be applied to
+stable kernels once merged, which is my intention of adding the Cc.
+
+Regards,
+
+Hans
+
+
+
+>
+> On Sun, Dec 25, 2016 at 11:21 AM, Hans de Goede <hdegoede@redhat.com> wrote:
+>> The firmware on some cherrytrail devices wrongly adds _ADR 0 to their
+>> entry describing the 80860F14 uid "2" sd-controller.
+>>
+>> I believe the firmware writers intended this as a sdio function address,
+>> but it is in the wrong place for this, so it gets interpreted as a pci
+>> address, causing the node describing the sd-controller used for the
+>> sdio-wifi to get seen as a firmware_node for the pci host bridge, rather
+>> then being stand-alone device.
+>>
+>> This commit adds a byt_sdio_setup function which detects this scenario
+>> and removes the wrong firmware_node link from the pci host bridge, which
+>> fixes acpi_create_platform_device returning NULL, leading to non-working
+>> sdio-wifi.
+>>
+>> BugLink: https://github.com/hadess/rtl8723bs/issues/80
+>> Cc: stable@vger.kernel.org
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>> ---
+>>  drivers/acpi/acpi_lpss.c | 30 ++++++++++++++++++++++++++++++
+>>  1 file changed, 30 insertions(+)
+>>
+>> diff --git a/drivers/acpi/acpi_lpss.c b/drivers/acpi/acpi_lpss.c
+>> index 373657f..df9cc66 100644
+>> --- a/drivers/acpi/acpi_lpss.c
+>> +++ b/drivers/acpi/acpi_lpss.c
+>> @@ -84,6 +84,7 @@ static const struct lpss_device_desc lpss_dma_desc = {
+>>  };
+>>
+>>  struct lpss_private_data {
+>> +       struct acpi_device *adev;
+>>         void __iomem *mmio_base;
+>>         resource_size_t mmio_size;
+>>         unsigned int fixed_clk_rate;
+>> @@ -154,6 +155,33 @@ static void byt_i2c_setup(struct lpss_private_data *pdata)
+>>         writel(0, pdata->mmio_base + LPSS_I2C_ENABLE);
+>>  }
+>>
+>> +static void byt_sdio_setup(struct lpss_private_data *pdata)
+>> +{
+>> +       unsigned long long adr;
+>> +       acpi_status status;
+>> +       struct device *dev;
+>> +
+>> +       /*
+>> +        * Some firmware has a broken _ADR 0 enter for the 80860F14:2
+>> +        * device, which causes it to get seen as the firmware_node
+>> +        * for the pci host bridge, rather then a stand alone device.
+>> +        *
+>> +        * Check if this is the case, and if it is remove the link.
+>> +        */
+>> +       if (strcmp(acpi_device_uid(pdata->adev), "2") != 0)
+>> +               return;
+>> +
+>> +       status = acpi_evaluate_integer(pdata->adev->handle, "_ADR", NULL, &adr);
+>> +       if (ACPI_FAILURE(status) || adr != 0)
+>> +               return;
+>> +
+>> +       dev = acpi_get_first_physical_node(pdata->adev);
+>> +       if (!dev)
+>> +               return;
+>> +
+>> +       acpi_unbind_one(dev);
+>> +}
+>> +
+>>  static const struct lpss_device_desc lpt_dev_desc = {
+>>         .flags = LPSS_CLK | LPSS_CLK_GATE | LPSS_CLK_DIVIDER | LPSS_LTR,
+>>         .prv_offset = 0x800,
+>> @@ -217,6 +245,7 @@ static const struct lpss_device_desc byt_spi_dev_desc = {
+>>
+>>  static const struct lpss_device_desc byt_sdio_dev_desc = {
+>>         .flags = LPSS_CLK,
+>> +       .setup = byt_sdio_setup,
+>>  };
+>>
+>>  static const struct lpss_device_desc byt_i2c_dev_desc = {
+>> @@ -425,6 +454,7 @@ static int acpi_lpss_create_device(struct acpi_device *adev,
+>>                 goto err_out;
+>>         }
+>>
+>> +       pdata->adev = adev;
+>>         pdata->dev_desc = dev_desc;
+>>
+>>         if (dev_desc->setup)
+>> --
+>> 2.9.3
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
