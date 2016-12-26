@@ -1,49 +1,88 @@
-From: Zhang Rui <rui.zhang@intel.com>
-Subject: [PATCH] sdhci-acpi: support deferred probe
-Date: Mon, 26 Dec 2016 10:28:16 +0800
-Message-ID: <1482719296-4783-1-git-send-email-rui.zhang@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:8633 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751621AbcLZC2S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 25 Dec 2016 21:28:18 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 3/4] mmc: mmc: enable ios.enhanced_strobe before
+ mmc_set_timing
+Date: Mon, 26 Dec 2016 15:12:57 +0800
+Message-ID: <c3e67039-e9af-044d-ccb2-9a2238e0b7f5@rock-chips.com>
+References: <1482213199-29152-1-git-send-email-riteshh@codeaurora.org>
+ <1482213199-29152-4-git-send-email-riteshh@codeaurora.org>
+ <2bb5dca4-faad-fc93-1dfb-18d1e1e72961@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2bb5dca4-faad-fc93-1dfb-18d1e1e72961@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, cja@gmx.net, darcari@redhat.com, Zhang Rui <rui.zhang@intel.com>
 
-With commit
-67bf5156edc4 (gpio / ACPI: fix returned error from acpi_dev_gpio_irq_get()),
-mmc_gpiod_request_cd() returns -EPROBE_DEFER if GPIO is not ready
-when sdhci-acpi driver is probed, and sdhci-acpi driver should be probed
-again later in this case.
+On 2016/12/23 17:18, Ritesh Harjani wrote:
+> Hi Shawn,
+>
+> Do you think, below change should be fine?
 
-This fixes an order issue when both GPIO and sdhci-acpi drivers are built as
-modules.
+yes.
 
-Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
-Tested-by: Jonas Aaberg <cja@gmx.net>
-Signed-off-by: Zhang Rui <rui.zhang@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+> I am still checking on what we discussed on Patch2.
+>
+> why I am asking is because - for HS400 in SDHC-MSM, we do the DLL
+> re-calibration as per the HW sequence. So it is done in both the cases,
+> for HS400 mode without and with enhanced strobe mode.
+>
+> This can be done as part of set_ios when mmc_set_timing is called in
+> sdhci-msm driver.
+>
+> I am still trying to check more on what would be more generic and
+> appropriate way inside sdhci-msm, for that I would like to know if
+> ios.enhanced_strobe = true before calling mmc_set_timing should be
+> acceptable or not ?
+>
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 160f695..5440323 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
- 		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
- 
--		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
-+		err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL);
-+		if (err) {
-+			if (err == -EPROBE_DEFER)
-+				goto err_free;
- 			dev_warn(dev, "failed to setup card detect gpio\n");
- 			c->use_runtime_pm = false;
- 		}
+Sure.
+
+>
+> Regards
+> Ritesh
+>
+> On 12/20/2016 11:23 AM, Ritesh Harjani wrote:
+>> Some controllers may need to configure few registers based on enhanced
+>> strobe mode while configuring to HS400 timing, thus make
+>> ios.enhanced_strobe to true before mmc_set_timing in mmc_select_hs400es.
+>>
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>>  drivers/mmc/core/mmc.c | 8 +++++++-
+>>  1 file changed, 7 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index eb69497..052368e 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1327,12 +1327,18 @@ static int mmc_select_hs400es(struct mmc_card
+>> *card)
+>>          goto out_err;
+>>      }
+>>
+>> +    /*
+>> +     * Enable enhanced_strobe in ios, as some controllers
+>> +     * may need to configure few registers based on enhanced
+>> +     * strobe while changing HS400 timing.
+>> +     */
+>> +    host->ios.enhanced_strobe = true;
+>> +
+>>      /* Set host controller to HS400 timing and frequency */
+>>      mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+>>      mmc_set_bus_speed(card);
+>>
+>>      /* Controller enable enhanced strobe function */
+>> -    host->ios.enhanced_strobe = true;
+>>      if (host->ops->hs400_enhanced_strobe)
+>>          host->ops->hs400_enhanced_strobe(host, &host->ios);
+>>
+>>
+>
+
+
 -- 
-2.7.4
-
+Best Regards
+Shawn Lin
