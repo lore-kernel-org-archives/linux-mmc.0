@@ -1,83 +1,37 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Tue, 27 Dec 2016 13:21:28 +0100
-Message-ID: <CACRpkdazLSk1i37ERs4YwuwXnmbmrnyAX1T5kRXjKcPSaAYd7Q@mail.gmail.com>
-References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] ARM: dts: n900: Mark eMMC slot with no-sdio and no-sd
+ flags
+Date: Tue, 27 Dec 2016 09:57:47 -0800
+Message-ID: <20161227175747.GX4920@atomide.com>
+References: <1481750984-11239-1-git-send-email-pali.rohar@gmail.com>
+ <20161214213445.GD28424@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org>
-Sender: linux-block-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:53720 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932642AbcL0R5w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 27 Dec 2016 12:57:52 -0500
+Content-Disposition: inline
+In-Reply-To: <20161214213445.GD28424@amd>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Pali =?utf-8?B?Um9ow6Fy?= <pali.rohar@gmail.com>, =?utf-8?Q?Beno=C3=AEt?= Cousson <bcousson@baylibre.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, Aaro Koskinen <aaro.koskinen@iki.fi>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Sebastian Reichel <sre@kernel.org>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, Dec 21, 2016 at 6:22 PM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
+* Pavel Machek <pavel@ucw.cz> [161214 13:34]:
+> On Wed 2016-12-14 22:29:44, Pali Rohár wrote:
+> > Trying to initialize eMMC slot as SDIO or SD cause failure in n900 port of
+> > qemu. eMMC itself is not detected and is not working.
+> > 
+> > Real Nokia N900 harware does not have this problem. As eMMC is really not
+> > SDIO or SD based such change is harmless and will fix support for qemu.
+> > 
+> > Signed-off-by: Pali Rohár <pali.rohar@gmail.com>
+> 
+> Acked-by: Pavel Machek <pavel@ucw.cz>
 
-> I may have some silly queries here. Please bear with my little understanding
-> on blk-mq.
+Applying into omap-for-v4.10/fixes thanks.
 
-It's OK we need to build consensus.
-
-> On 12/20/2016 7:31 PM, Linus Walleij wrote:
-
->> This hack switches the MMC/SD subsystem from using the legacy blk
->> layer to using blk-mq. It does this by registering one single
->> hardware queue, since MMC/SD has only one command pipe. I kill
->
-> Could you please confirm on this- does even the HW/SW CMDQ in emmc would use
-> only 1 hardware queue with (say ~31) as queue depth, of that HW queue? Is
-> this understanding correct?
-
-Yes as far as I can tell.
-
-But you may have to tell me, because I'm not an expert in CMDQ.
-
-Multiple queues are for when you can issue different request truly parallel
-without taking any previous and later request into account. CMDQ on
-MMC seems to require rollback etc if any of the issued requests after
-a certain request fail, and then it is essentially one queue, like a pipeline,
-and if one request fails all requests after that request needs to be backed
-out, correct?
-
-> Or will it be possible to have more than 1 HW Queue with lesser queue depth
-> per HW queue?
-
-Depends on the above.
-
-Each queue must have its own error handling, and work isolated from
-the other queues to be considered a real hardware queue.
-
-If the requests have dependencies, like referring each other, or
-as pointed out, needing to be cancelled if there is an error on a totally
-different request, it is just a deep pipeline, single hardware queue.
-
-> I understand that the block drivers are moving to blk-mq framework.
-> But keeping that reason apart, do we also anticipate any theoretical
-> performance gains in moving mmc driver to blk-mq framework  - for both in
-> case of legacy emmc, and SW/HW CMDQ in emmc ? And by how much?
-
-On the contrary we expect a performance regression as mq has no
-scheduling. MQ is created for the usecase where you have multiple
-hardware queues and they are so hungry for work that you have a problem
-feeding them all. Needless to say, on eMMC/SD we don't have that problem
-right now atleast.
-
-> It would be even better to know if adding of scheduler to blk-mq will make
-> any difference in perf gains or not in this case?
-
-The tentative plan as I see it is to shunt in BFQ as the default scheduler
-for MQ in the single-hw-queue case. The old block layer schedulers getting
-deprecated in the process. But this is really up to the block layer developers.
-
-> Do we any rough estimate or study on that?
-> This is only out of curiosity and for information purpose.
-
-No it is a venture into the unknown to go where no man has gone before.
-
-I just have a good feeling about this and confidence that it will work out.
-
-So I am doing RFD patches like this one to see if I'm right.
-
-Yours,
-Linus Walleij
+Tony
