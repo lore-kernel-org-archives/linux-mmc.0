@@ -1,59 +1,83 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH] ACPI / LPSS: Work around wrong sdio _ADR 0 entry on some
- byt/cht devices
-Date: Mon, 26 Dec 2016 23:13:30 +0100
-Message-ID: <CAJZ5v0ikhNok7hE3yQkk82t4+5Ni2OpKSik+RBYGcCENso6psQ@mail.gmail.com>
-References: <20161225102148.7706-1-hdegoede@redhat.com> <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
- <087d2576-66f8-f3ea-e08b-95e5de9f701c@redhat.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
+Date: Tue, 27 Dec 2016 13:21:28 +0100
+Message-ID: <CACRpkdazLSk1i37ERs4YwuwXnmbmrnyAX1T5kRXjKcPSaAYd7Q@mail.gmail.com>
+References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <087d2576-66f8-f3ea-e08b-95e5de9f701c@redhat.com>
-Sender: stable-owner@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Stable <stable@vger.kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org>
+Sender: linux-block-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Dec 26, 2016 at 11:48 AM, Hans de Goede <hdegoede@redhat.com> wrote:
-> Hi,
->
-> On 26-12-16 00:25, Rafael J. Wysocki wrote:
->>
->> CC Mika and Andy.
->>
->> Plus I don't think -stable is going to take your patches directly.
->
->
-> Not sure what you mean with this remark? According to:
->
-> Documentation/stable_kernel_rules.txt
->
-> Option 1
-> ********
->
-> To have the patch automatically included in the stable tree, add the tag
->
-> .. code-block:: none
->
->      Cc: stable@vger.kernel.org
->
-> in the sign-off area. Once the patch is merged it will be applied to
-> the stable tree without anything else needing to be done by the author
-> or subsystem maintainer.
->
-> So yes, it won't get merged until it has been merged into Linus'
-> tree. But AFAICT adding Cc: stable@vger.kernel.org is the right way
-> to indicate that a patch is a bug-fix which should be applied to
-> stable kernels once merged, which is my intention of adding the Cc.
+On Wed, Dec 21, 2016 at 6:22 PM, Ritesh Harjani <riteshh@codeaurora.org> wrote:
 
-Yes, you can add a CC: <stable@...> tag to indicate that the patch is
--stable material (in which case please also indicate which -stable
-series you want it to go to).
+> I may have some silly queries here. Please bear with my little understanding
+> on blk-mq.
 
-No, you should not CC -stable on the patch submission.
+It's OK we need to build consensus.
 
-The CC: <stable@...> tag is for the maintainer you're sending the
-patch to rather than for -stable itself.
+> On 12/20/2016 7:31 PM, Linus Walleij wrote:
 
-Thanks,
-Rafael
+>> This hack switches the MMC/SD subsystem from using the legacy blk
+>> layer to using blk-mq. It does this by registering one single
+>> hardware queue, since MMC/SD has only one command pipe. I kill
+>
+> Could you please confirm on this- does even the HW/SW CMDQ in emmc would use
+> only 1 hardware queue with (say ~31) as queue depth, of that HW queue? Is
+> this understanding correct?
+
+Yes as far as I can tell.
+
+But you may have to tell me, because I'm not an expert in CMDQ.
+
+Multiple queues are for when you can issue different request truly parallel
+without taking any previous and later request into account. CMDQ on
+MMC seems to require rollback etc if any of the issued requests after
+a certain request fail, and then it is essentially one queue, like a pipeline,
+and if one request fails all requests after that request needs to be backed
+out, correct?
+
+> Or will it be possible to have more than 1 HW Queue with lesser queue depth
+> per HW queue?
+
+Depends on the above.
+
+Each queue must have its own error handling, and work isolated from
+the other queues to be considered a real hardware queue.
+
+If the requests have dependencies, like referring each other, or
+as pointed out, needing to be cancelled if there is an error on a totally
+different request, it is just a deep pipeline, single hardware queue.
+
+> I understand that the block drivers are moving to blk-mq framework.
+> But keeping that reason apart, do we also anticipate any theoretical
+> performance gains in moving mmc driver to blk-mq framework  - for both in
+> case of legacy emmc, and SW/HW CMDQ in emmc ? And by how much?
+
+On the contrary we expect a performance regression as mq has no
+scheduling. MQ is created for the usecase where you have multiple
+hardware queues and they are so hungry for work that you have a problem
+feeding them all. Needless to say, on eMMC/SD we don't have that problem
+right now atleast.
+
+> It would be even better to know if adding of scheduler to blk-mq will make
+> any difference in perf gains or not in this case?
+
+The tentative plan as I see it is to shunt in BFQ as the default scheduler
+for MQ in the single-hw-queue case. The old block layer schedulers getting
+deprecated in the process. But this is really up to the block layer developers.
+
+> Do we any rough estimate or study on that?
+> This is only out of curiosity and for information purpose.
+
+No it is a venture into the unknown to go where no man has gone before.
+
+I just have a good feeling about this and confidence that it will work out.
+
+So I am doing RFD patches like this one to see if I'm right.
+
+Yours,
+Linus Walleij
