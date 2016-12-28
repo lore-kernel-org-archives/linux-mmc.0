@@ -1,84 +1,131 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Wed, 28 Dec 2016 09:55:03 +0100
-Message-ID: <20161228085503.GA340@lst.de>
-References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org> <CACRpkdazLSk1i37ERs4YwuwXnmbmrnyAX1T5kRXjKcPSaAYd7Q@mail.gmail.com>
+From: Mika Westerberg <mika.westerberg@linux.intel.com>
+Subject: Re: [PATCH] ACPI / LPSS: Work around wrong sdio _ADR 0 entry on some
+ byt/cht devices
+Date: Wed, 28 Dec 2016 11:14:28 +0200
+Message-ID: <20161228091428.GY1460@lahna.fi.intel.com>
+References: <20161225102148.7706-1-hdegoede@redhat.com>
+ <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CACRpkdazLSk1i37ERs4YwuwXnmbmrnyAX1T5kRXjKcPSaAYd7Q@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>
+In-Reply-To: <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Stable <stable@vger.kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Dec 27, 2016 at 01:21:28PM +0100, Linus Walleij wrote:
-> > Could you please confirm on this- does even the HW/SW CMDQ in emmc would use
-> > only 1 hardware queue with (say ~31) as queue depth, of that HW queue? Is
-> > this understanding correct?
+On Mon, Dec 26, 2016 at 12:25:19AM +0100, Rafael J. Wysocki wrote:
+> CC Mika and Andy.
 > 
-> Yes as far as I can tell.
+> Plus I don't think -stable is going to take your patches directly.
 > 
-> But you may have to tell me, because I'm not an expert in CMDQ.
-> 
-> Multiple queues are for when you can issue different request truly parallel
-> without taking any previous and later request into account. CMDQ on
-> MMC seems to require rollback etc if any of the issued requests after
-> a certain request fail, and then it is essentially one queue, like a pipeline,
-> and if one request fails all requests after that request needs to be backed
-> out, correct?
+> On Sun, Dec 25, 2016 at 11:21 AM, Hans de Goede <hdegoede@redhat.com> wrote:
+> > The firmware on some cherrytrail devices wrongly adds _ADR 0 to their
+> > entry describing the 80860F14 uid "2" sd-controller.
+> >
+> > I believe the firmware writers intended this as a sdio function address,
+> > but it is in the wrong place for this, so it gets interpreted as a pci
+> > address, causing the node describing the sd-controller used for the
+> > sdio-wifi to get seen as a firmware_node for the pci host bridge, rather
+> > then being stand-alone device.
+> >
+> > This commit adds a byt_sdio_setup function which detects this scenario
+> > and removes the wrong firmware_node link from the pci host bridge, which
+> > fixes acpi_create_platform_device returning NULL, leading to non-working
+> > sdio-wifi.
+> >
+> > BugLink: https://github.com/hadess/rtl8723bs/issues/80
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> > ---
+> >  drivers/acpi/acpi_lpss.c | 30 ++++++++++++++++++++++++++++++
+> >  1 file changed, 30 insertions(+)
+> >
+> > diff --git a/drivers/acpi/acpi_lpss.c b/drivers/acpi/acpi_lpss.c
+> > index 373657f..df9cc66 100644
+> > --- a/drivers/acpi/acpi_lpss.c
+> > +++ b/drivers/acpi/acpi_lpss.c
+> > @@ -84,6 +84,7 @@ static const struct lpss_device_desc lpss_dma_desc = {
+> >  };
+> >
+> >  struct lpss_private_data {
+> > +       struct acpi_device *adev;
+> >         void __iomem *mmio_base;
+> >         resource_size_t mmio_size;
+> >         unsigned int fixed_clk_rate;
+> > @@ -154,6 +155,33 @@ static void byt_i2c_setup(struct lpss_private_data *pdata)
+> >         writel(0, pdata->mmio_base + LPSS_I2C_ENABLE);
+> >  }
+> >
+> > +static void byt_sdio_setup(struct lpss_private_data *pdata)
+> > +{
+> > +       unsigned long long adr;
+> > +       acpi_status status;
+> > +       struct device *dev;
+> > +
+> > +       /*
+> > +        * Some firmware has a broken _ADR 0 enter for the 80860F14:2
+> > +        * device, which causes it to get seen as the firmware_node
+> > +        * for the pci host bridge, rather then a stand alone device.
+> > +        *
+> > +        * Check if this is the case, and if it is remove the link.
+> > +        */
+> > +       if (strcmp(acpi_device_uid(pdata->adev), "2") != 0)
+> > +               return;
+> > +
+> > +       status = acpi_evaluate_integer(pdata->adev->handle, "_ADR", NULL, &adr);
+> > +       if (ACPI_FAILURE(status) || adr != 0)
+> > +               return;
+> > +
+> > +       dev = acpi_get_first_physical_node(pdata->adev);
+> > +       if (!dev)
+> > +               return;
+> > +
+> > +       acpi_unbind_one(dev);
+> > +}
 
-I'm not an expert on the MMC CMDQ feature, but I know blk-mq pretty
-well, so based on that and the decription of the series CMDQ finally
-allows MMC to implement one single queue almost properly, but certainly
-not multiple queues.
+IIRC the _ADR 0 problem is not only limited to SDIO devices. I think we
+should just fix the match heuristics in acpi_find_child_device() to
+cover all other devices as well.
 
-In block storage terms a queue is something where the OS can send
-multiple commands to the device and let the device operate on them in
-parallel (or at least pseudo-parallel).  Even with the MMC CMDQ feature
-is seems after queueing up command the host still needs to control
-execution ordering by talking to the hardware again for each command,
-which isn't up to par with what other standards have been doing for the
-last decades.  It's certainly not support for multiple queues, which
-is defined as hardware features where the host allows multiple issuers
-to use queue entirely independently of each other.
+Something like below might do the job.
 
-> Each queue must have its own error handling, and work isolated from
-> the other queues to be considered a real hardware queue.
+diff --git a/drivers/acpi/glue.c b/drivers/acpi/glue.c
+index 5ea5dc219f56..7cfd48f55b6f 100644
+--- a/drivers/acpi/glue.c
++++ b/drivers/acpi/glue.c
+@@ -85,7 +85,7 @@ static struct acpi_bus_type *acpi_get_bus_type(struct device *dev)
+ 
+ static int find_child_checks(struct acpi_device *adev, bool check_children)
+ {
+-	bool sta_present = true;
++	bool hid_present, sta_present = true;
+ 	unsigned long long sta;
+ 	acpi_status status;
+ 
+@@ -98,7 +98,22 @@ static int find_child_checks(struct acpi_device *adev, bool check_children)
+ 	if (check_children && list_empty(&adev->children))
+ 		return -ENODEV;
+ 
+-	return sta_present ? FIND_CHILD_MAX_SCORE : FIND_CHILD_MIN_SCORE;
++	/*
++	 * If there is a _HID or _CID present on a bus that is supposed to
++	 * be matched using _ADR, we prioritize those devices without ID
++	 * higher.
++	 *
++	 * This is because there are many BIOSes out there having ACPI
++	 * enumerated devices and the _ADR is set to 0. This will match the
++	 * root PCI bridge to the first found device with _ADR 0 which is
++	 * not always the right device.
++	 */
++	hid_present = !list_empty(&adev->pnp.ids);
++
++	if (sta_present)
++		return hid_present ? FIND_CHILD_MIN_SCORE : FIND_CHILD_MAX_SCORE;
++
++	return FIND_CHILD_MIN_SCORE;
+ }
+ 
+ struct acpi_device *acpi_find_child_device(struct acpi_device *parent,
 
-Note that error handling actually is one of the areas where queues
-don't actually operate entirely independently once you escalate high
-enough (device / controller reset).  For modern-ish protocols like
-SCSI or NVMe the first level of error handling (abort) actually doesn't
-involve the queue at all at the protocol, just the failed command.
-But once that fails we quickly escalate to a reset, which involves
-more than the queue.
-
-> If the requests have dependencies, like referring each other, or
-> as pointed out, needing to be cancelled if there is an error on a totally
-> different request, it is just a deep pipeline, single hardware queue.
-
-Strictly speaking it's not even a a real hardware queue in that case,
-but with enough workarounds in the driver we can probably make it look
-like a queue at least.  Certainly not multiple queues, though.
-
-> On the contrary we expect a performance regression as mq has no
-> scheduling. MQ is created for the usecase where you have multiple
-> hardware queues and they are so hungry for work that you have a problem
-> feeding them all. Needless to say, on eMMC/SD we don't have that problem
-> right now atleast.
-
-That's not entirely correct.  blk-mq is designed to replace the legacy
-request code eventually.  The focus is on not wasting CPU cycles, and
-to support multiple queues (but not require them).  Sequential workloads
-should always be as fast as the legacy path and use less CPU cycles,
-for random workloads we might have to wait for I/O scheduler support,
-which is under way now:
-
-    http://git.kernel.dk/cgit/linux-block/log/?h=blk-mq-sched
-
-All that assumes a properly converted driver, which as seen by your 
-experiments isn't easy for MMC as it's a very convoluted beast thanks
-the hardware interface which isn't up to the standards we expect from
-block storage protocols.
