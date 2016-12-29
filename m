@@ -1,151 +1,175 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: Re: [PATCH] ACPI / LPSS: Work around wrong sdio _ADR 0 entry on some
- byt/cht devices
-Date: Thu, 29 Dec 2016 10:41:35 +0200
-Message-ID: <20161229084135.GC1460@lahna.fi.intel.com>
-References: <20161225102148.7706-1-hdegoede@redhat.com>
- <CAJZ5v0ibDwkA2Pc+nkYXS6Mq6CKT3jAnjrfCaEiCtZye5JD75A@mail.gmail.com>
- <20161228091428.GY1460@lahna.fi.intel.com>
- <CAJZ5v0gjcaYtskSMueAz+GjHcLZv=4A8Qz_Lf6Bn7S0CLSkgPg@mail.gmail.com>
+From: Randy Li <randy.li@rock-chips.com>
+Subject: Re: [PATCH] Revert "mmc: dw_mmc-rockchip: add runtime PM support"
+Date: Thu, 29 Dec 2016 18:25:22 +0800
+Message-ID: <04b667d9-2591-51ff-e024-047bbb6e17c3@rock-chips.com>
+References: <CGME20161228153516epcas2p253c6bc0371ab0df464573b63218795ef@epcas2p2.samsung.com>
+ <1482939288-14950-1-git-send-email-ayaka@soulik.info>
+ <e0cc8029-0155-4879-a643-ddc4239a55ab@samsung.com>
+ <7e37b8ad-39d0-3a94-f75a-2166ae2caf10@samsung.com>
+ <7fb90b9e-75c3-0184-4f0a-d4113899b860@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAJZ5v0gjcaYtskSMueAz+GjHcLZv=4A8Qz_Lf6Bn7S0CLSkgPg@mail.gmail.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, Stable <stable@vger.kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from regular1.263xmail.com ([211.150.99.134]:36360 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752380AbcL2KZm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2016 05:25:42 -0500
+In-Reply-To: <7fb90b9e-75c3-0184-4f0a-d4113899b860@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Randy Li <ayaka@soulik.info>, ulf.hansson@linaro.org, heiko@sntech.de, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, xzy.xu@rock-chips.com
 
-On Wed, Dec 28, 2016 at 11:30:35PM +0100, Rafael J. Wysocki wrote:
-> On Wed, Dec 28, 2016 at 10:14 AM, Mika Westerberg
-> <mika.westerberg@linux.intel.com> wrote:
-> > On Mon, Dec 26, 2016 at 12:25:19AM +0100, Rafael J. Wysocki wrote:
-> >> CC Mika and Andy.
-> >>
-> >> Plus I don't think -stable is going to take your patches directly.
-> >>
-> >> On Sun, Dec 25, 2016 at 11:21 AM, Hans de Goede <hdegoede@redhat.com> wrote:
-> >> > The firmware on some cherrytrail devices wrongly adds _ADR 0 to their
-> >> > entry describing the 80860F14 uid "2" sd-controller.
-> >> >
-> >> > I believe the firmware writers intended this as a sdio function address,
-> >> > but it is in the wrong place for this, so it gets interpreted as a pci
-> >> > address, causing the node describing the sd-controller used for the
-> >> > sdio-wifi to get seen as a firmware_node for the pci host bridge, rather
-> >> > then being stand-alone device.
-> >> >
-> >> > This commit adds a byt_sdio_setup function which detects this scenario
-> >> > and removes the wrong firmware_node link from the pci host bridge, which
-> >> > fixes acpi_create_platform_device returning NULL, leading to non-working
-> >> > sdio-wifi.
-> >> >
-> >> > BugLink: https://github.com/hadess/rtl8723bs/issues/80
-> >> > Cc: stable@vger.kernel.org
-> >> > Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> >> > ---
-> >> >  drivers/acpi/acpi_lpss.c | 30 ++++++++++++++++++++++++++++++
-> >> >  1 file changed, 30 insertions(+)
-> >> >
-> >> > diff --git a/drivers/acpi/acpi_lpss.c b/drivers/acpi/acpi_lpss.c
-> >> > index 373657f..df9cc66 100644
-> >> > --- a/drivers/acpi/acpi_lpss.c
-> >> > +++ b/drivers/acpi/acpi_lpss.c
-> >> > @@ -84,6 +84,7 @@ static const struct lpss_device_desc lpss_dma_desc = {
-> >> >  };
-> >> >
-> >> >  struct lpss_private_data {
-> >> > +       struct acpi_device *adev;
-> >> >         void __iomem *mmio_base;
-> >> >         resource_size_t mmio_size;
-> >> >         unsigned int fixed_clk_rate;
-> >> > @@ -154,6 +155,33 @@ static void byt_i2c_setup(struct lpss_private_data *pdata)
-> >> >         writel(0, pdata->mmio_base + LPSS_I2C_ENABLE);
-> >> >  }
-> >> >
-> >> > +static void byt_sdio_setup(struct lpss_private_data *pdata)
-> >> > +{
-> >> > +       unsigned long long adr;
-> >> > +       acpi_status status;
-> >> > +       struct device *dev;
-> >> > +
-> >> > +       /*
-> >> > +        * Some firmware has a broken _ADR 0 enter for the 80860F14:2
-> >> > +        * device, which causes it to get seen as the firmware_node
-> >> > +        * for the pci host bridge, rather then a stand alone device.
-> >> > +        *
-> >> > +        * Check if this is the case, and if it is remove the link.
-> >> > +        */
-> >> > +       if (strcmp(acpi_device_uid(pdata->adev), "2") != 0)
-> >> > +               return;
-> >> > +
-> >> > +       status = acpi_evaluate_integer(pdata->adev->handle, "_ADR", NULL, &adr);
-> >> > +       if (ACPI_FAILURE(status) || adr != 0)
-> >> > +               return;
-> >> > +
-> >> > +       dev = acpi_get_first_physical_node(pdata->adev);
-> >> > +       if (!dev)
-> >> > +               return;
-> >> > +
-> >> > +       acpi_unbind_one(dev);
-> >> > +}
-> >
-> > IIRC the _ADR 0 problem is not only limited to SDIO devices. I think we
-> > should just fix the match heuristics in acpi_find_child_device() to
-> > cover all other devices as well.
-> >
-> > Something like below might do the job.
-> >
-> > diff --git a/drivers/acpi/glue.c b/drivers/acpi/glue.c
-> > index 5ea5dc219f56..7cfd48f55b6f 100644
-> > --- a/drivers/acpi/glue.c
-> > +++ b/drivers/acpi/glue.c
-> > @@ -85,7 +85,7 @@ static struct acpi_bus_type *acpi_get_bus_type(struct device *dev)
-> >
-> >  static int find_child_checks(struct acpi_device *adev, bool check_children)
-> >  {
-> > -       bool sta_present = true;
-> > +       bool hid_present, sta_present = true;
-> >         unsigned long long sta;
-> >         acpi_status status;
-> >
-> > @@ -98,7 +98,22 @@ static int find_child_checks(struct acpi_device *adev, bool check_children)
-> >         if (check_children && list_empty(&adev->children))
-> >                 return -ENODEV;
-> >
-> > -       return sta_present ? FIND_CHILD_MAX_SCORE : FIND_CHILD_MIN_SCORE;
-> > +       /*
-> > +        * If there is a _HID or _CID present on a bus that is supposed to
-> > +        * be matched using _ADR, we prioritize those devices without ID
-> > +        * higher.
-> > +        *
-> > +        * This is because there are many BIOSes out there having ACPI
-> > +        * enumerated devices and the _ADR is set to 0. This will match the
-> > +        * root PCI bridge to the first found device with _ADR 0 which is
-> > +        * not always the right device.
-> > +        */
-> > +       hid_present = !list_empty(&adev->pnp.ids);
-> > +
-> > +       if (sta_present)
-> > +               return hid_present ? FIND_CHILD_MIN_SCORE : FIND_CHILD_MAX_SCORE;
-> > +
-> > +       return FIND_CHILD_MIN_SCORE;
-> >  }
-> >
-> >  struct acpi_device *acpi_find_child_device(struct acpi_device *parent,
-> >
-> 
-> I'd rather only change the return statement, like this:
-> 
-> return sta_present && list_empty(&adev->pnp.ids) ?
-> FIND_CHILD_MAX_SCORE : FIND_CHILD_MIN_SCORE;
-> 
-> I'll send a patch tomorrow unless there's something wrong with this.
 
-Looks good to me, thanks.
 
-> BTW, the comment is not correct too, because the host bridge has a
-> _HID.  What is matched against _ADR(0) is the first function on bus 0
-> IIRC.
+On 12/29/2016 03:25 PM, Shawn Lin wrote:
+> On 2016/12/29 15:13, Jaehoon Chung wrote:
+>> On 12/29/2016 12:02 PM, Jaehoon Chung wrote:
+>>> Hi Randy,
+>>>
+>>> On 12/29/2016 12:34 AM, Randy Li wrote:
+>>>> This reverts commit f90142683f04bcb0729bf0df67a5e29562b725b9.
+>>>> It is reported that making RK3288 can't boot from eMMC/MMC.
+>>>
+>>> Could you explain in more detail?
+>>> As you mentioned, this patch is making that RK3288 can't boot..then why?
+>>> Good way should be that finds the main reason and fixes it.
+>>> Not just revert.
+>>
+>> To Shawn,
+>>
+>> Could you check this? If you have rk3288..
+>> If it's not working fine, it needs to revert this patch until finding
+>> the problem.
+>>
+>
+> Hrmm.....as that patchset was tested based on rk3288 and rk3368, so I
+> need to know which board Randy are using now and could you share some
+Sorry, XZY has asked me about this in the morning and I answer him that 
+I would give a feedback at home, so I didn't notice this mail.
+The board is Firefly reload. but the reporter told me that Firefly 
+release also have the same problem.
+> log?
+>
+> I will have a look at it.
+>
+>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> Best Regards,
+>>> Jaehoon Chung
+>>>
+>>>>
+>>>> Signed-off-by: Randy Li <ayaka@soulik.info>
+>>>> ---
+>>>>  drivers/mmc/host/dw_mmc-rockchip.c | 41
+>>>> +++-----------------------------------
+>>>>  1 file changed, 3 insertions(+), 38 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+>>>> b/drivers/mmc/host/dw_mmc-rockchip.c
+>>>> index 9a46e46..3189234 100644
+>>>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>>>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+>>>> @@ -14,7 +14,6 @@
+>>>>  #include <linux/mmc/dw_mmc.h>
+>>>>  #include <linux/of_address.h>
+>>>>  #include <linux/mmc/slot-gpio.h>
+>>>> -#include <linux/pm_runtime.h>
+>>>>  #include <linux/slab.h>
+>>>>
+>>>>  #include "dw_mmc.h"
+>>>> @@ -327,7 +326,6 @@ static int dw_mci_rockchip_probe(struct
+>>>> platform_device *pdev)
+>>>>  {
+>>>>      const struct dw_mci_drv_data *drv_data;
+>>>>      const struct of_device_id *match;
+>>>> -    int ret;
+>>>>
+>>>>      if (!pdev->dev.of_node)
+>>>>          return -ENODEV;
+>>>> @@ -335,49 +333,16 @@ static int dw_mci_rockchip_probe(struct
+>>>> platform_device *pdev)
+>>>>      match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
+>>>>      drv_data = match->data;
+>>>>
+>>>> -    pm_runtime_get_noresume(&pdev->dev);
+>>>> -    pm_runtime_set_active(&pdev->dev);
+>>>> -    pm_runtime_enable(&pdev->dev);
+>>>> -    pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+>>>> -    pm_runtime_use_autosuspend(&pdev->dev);
+>>>> -
+>>>> -    ret = dw_mci_pltfm_register(pdev, drv_data);
+>>>> -    if (ret) {
+>>>> -        pm_runtime_disable(&pdev->dev);
+>>>> -        pm_runtime_set_suspended(&pdev->dev);
+>>>> -        pm_runtime_put_noidle(&pdev->dev);
+>>>> -        return ret;
+>>>> -    }
+>>>> -
+>>>> -    pm_runtime_put_autosuspend(&pdev->dev);
+>>>> -
+>>>> -    return 0;
+>>>> +    return dw_mci_pltfm_register(pdev, drv_data);
+>>>>  }
+>>>>
+>>>> -static int dw_mci_rockchip_remove(struct platform_device *pdev)
+>>>> -{
+>>>> -    pm_runtime_get_sync(&pdev->dev);
+>>>> -    pm_runtime_disable(&pdev->dev);
+>>>> -    pm_runtime_put_noidle(&pdev->dev);
+>>>> -
+>>>> -    return dw_mci_pltfm_remove(pdev);
+>>>> -}
+>>>> -
+>>>> -static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops = {
+>>>> -    SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+>>>> -                pm_runtime_force_resume)
+>>>> -    SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
+>>>> -               dw_mci_runtime_resume,
+>>>> -               NULL)
+>>>> -};
+>>>> -
+>>>>  static struct platform_driver dw_mci_rockchip_pltfm_driver = {
+>>>>      .probe        = dw_mci_rockchip_probe,
+>>>> -    .remove        = dw_mci_rockchip_remove,
+>>>> +    .remove        = dw_mci_pltfm_remove,
+>>>>      .driver        = {
+>>>>          .name        = "dwmmc_rockchip",
+>>>>          .of_match_table    = dw_mci_rockchip_match,
+>>>> -        .pm        = &dw_mci_rockchip_dev_pm_ops,
+>>>> +        .pm        = &dw_mci_pltfm_pmops,
+>>>>      },
+>>>>  };
+>>>>
+>>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>> .
+>>>
+>>
+>>
+>>
+>>
+>
+>
 
-Yes, you are right.
+-- 
+Randy Li
+The third produce department
+===========================================================================
+This email message, including any attachments, is for the sole
+use of the intended recipient(s) and may contain confidential and
+privileged information. Any unauthorized review, use, disclosure or
+distribution is prohibited. If you are not the intended recipient, please
+contact the sender by reply e-mail and destroy all copies of the original
+message. [Fuzhou Rockchip Electronics, INC. China mainland]
+===========================================================================
+
