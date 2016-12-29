@@ -1,70 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/9] mmc: sh_mobile_sdhi: add HS200 support
-Date: Thu, 29 Dec 2016 20:02:32 +0100
-Message-ID: <CAPDyKFrOtcct_bN2qscrLK1pCRKnZiGhicHVAw4Rnwp5ymqRhA@mail.gmail.com>
-References: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH v3] mmc: core: Export device lifetime information through sysfs
+Date: Thu, 29 Dec 2016 20:02:43 +0100
+Message-ID: <CAPDyKFphN05gNVxW0ziqT5Uc1xQQWs=LZerYk5pOa_C_sJksNA@mail.gmail.com>
+References: <CGME20161222033751eucas1p24ad0ec0eee5941833fec4ecafc9f79de@eucas1p2.samsung.com>
+ <20161222033734.7052-1-js07.lee@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20161212195128.16633-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37751 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753088AbcL2TCp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2016 14:02:45 -0500
+Received: by mail-wm0-f47.google.com with SMTP id t79so339733512wmt.0
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2016 11:02:44 -0800 (PST)
+In-Reply-To: <20161222033734.7052-1-js07.lee@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jungseung Lee <js07.lee@samsung.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, yj84.jang@samsung.com
 
-On 12 December 2016 at 20:51, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Here is a series adding HS200 support to the SDHI driver. Building the actual
-> functionality on top of SDR104 support was rather easy. However, I figured the
-> checks for enabling tuning were rather scattered over the driver and could be
-> further improved. So I did some refactoring of that to make adding HS200
-> support then a one-liner :)
+On 22 December 2016 at 04:37, Jungseung Lee <js07.lee@samsung.com> wrote:
+> In the eMMC 5.0 version of the spec, several EXT_CSD fields about
+> device lifetime are added.
 >
-> This has been tested on Salvator-X boards with R-Car H3 and M3-W SoCs. It has
-> also been tested on a Lager board (R-Car H2) checking SDR50/104 for
-> regressions. The whole test document showing significant speed-ups reading from
-> the on-board eMMC can be found here:
+>  - Two types of estimated indications reflected by averaged wear out of memory
+>  - An indication reflected by average reserved blocks
 >
-> http://elinux.org/Tests:eMMC-HS
+> Export the information through sysfs.
 >
-> and the branch can be found here:
->
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-emmc-hs
->
-> Please comment, review, apply...
->
-> Thanks,
->
->    Wolfram
->
->
-> Wolfram Sang (9):
->   mmc: sh_mobile_sdhi: simplify accessing DT data
->   mmc: sh_mobile_sdhi: improve prerequisite for hw_reset
->   mmc: sh_mobile_sdhi: improve prerequisites for tuning
->   mmc: sh_mobile_sdhi: remove superfluous check in hw_reset
->   mmc: sh_mobile_sdhi: remove superfluous check in init_tuning
->   mmc: sh_mobile_sdhi: remove superfluous check in SCC error check
->   mmc: sh_mobile_sdhi: enable HS200
->   arm64: dts: r8a7795: enable HS200 for eMMC
->   arm64: dts: r8a7796: enable HS200 for eMMC
->
->  arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts |  1 +
->  arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts |  1 +
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 67 ++++++++--------------
->  3 files changed, 27 insertions(+), 42 deletions(-)
->
+> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+> Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks, applied patch 1 -> 7 for next. DTS changes in patch 8 and 9
-are for Simon to pick up.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-> --
-> 2.10.2
+> ---
+>  drivers/mmc/core/mmc.c   | 12 ++++++++++++
+>  include/linux/mmc/card.h |  3 +++
+>  include/linux/mmc/mmc.h  |  3 +++
+>  3 files changed, 18 insertions(+)
 >
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index b61b52f9..c0e2507 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -617,6 +617,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 card->ext_csd.ffu_capable =
+>                         (ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+>                         !(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
+> +
+> +               card->ext_csd.pre_eol_info = ext_csd[EXT_CSD_PRE_EOL_INFO];
+> +               card->ext_csd.device_life_time_est_typ_a =
+> +                       ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A];
+> +               card->ext_csd.device_life_time_est_typ_b =
+> +                       ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B];
+>         }
+>
+>         /* eMMC v5.1 or later */
+> @@ -764,6 +770,10 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
+> +MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+> +MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+> +       card->ext_csd.device_life_time_est_typ_a,
+> +       card->ext_csd.device_life_time_est_typ_b);
+>  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
+>  MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+>                 card->ext_csd.enhanced_area_offset);
+> @@ -817,6 +827,8 @@ static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_name.attr,
+>         &dev_attr_oemid.attr,
+>         &dev_attr_prv.attr,
+> +       &dev_attr_pre_eol_info.attr,
+> +       &dev_attr_life_time.attr,
+>         &dev_attr_serial.attr,
+>         &dev_attr_enhanced_area_offset.attr,
+>         &dev_attr_enhanced_area_size.attr,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 95d69d4..00449e5 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -121,6 +121,9 @@ struct mmc_ext_csd {
+>         u8                      raw_pwr_cl_ddr_200_360; /* 253 */
+>         u8                      raw_bkops_status;       /* 246 */
+>         u8                      raw_sectors[4];         /* 212 - 4 bytes */
+> +       u8                      pre_eol_info;           /* 267 */
+> +       u8                      device_life_time_est_typ_a;     /* 268 */
+> +       u8                      device_life_time_est_typ_b;     /* 269 */
+>
+>         unsigned int            feature_support;
+>  #define MMC_DISCARD_FEATURE    BIT(0)                  /* CMD38 feature */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 672730a..a074082 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -339,6 +339,9 @@ struct _mmc_csd {
+>  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
+>  #define EXT_CSD_PWR_CL_DDR_200_360     253     /* RO */
+>  #define EXT_CSD_FIRMWARE_VERSION       254     /* RO, 8 bytes */
+> +#define EXT_CSD_PRE_EOL_INFO           267     /* RO */
+> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A     268     /* RO */
+> +#define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B     269     /* RO */
+>  #define EXT_CSD_CMDQ_DEPTH             307     /* RO */
+>  #define EXT_CSD_CMDQ_SUPPORT           308     /* RO */
+>  #define EXT_CSD_SUPPORTED_MODE         493     /* RO */
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2.10.1
+>
