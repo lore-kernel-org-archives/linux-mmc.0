@@ -1,90 +1,81 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 14/21] mmc: core: Move some host specific public functions to host.h
-Date: Fri, 30 Dec 2016 13:47:27 +0100
-Message-ID: <1483102054-1752-15-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 15/21] mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
+Date: Fri, 30 Dec 2016 13:47:28 +0100
+Message-ID: <1483102054-1752-16-git-send-email-ulf.hansson@linaro.org>
 References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f52.google.com ([209.85.215.52]:35725 "EHLO
-        mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753785AbcL3Ms1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 07:48:27 -0500
-Received: by mail-lf0-f52.google.com with SMTP id b14so236440928lfg.2
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 04:48:26 -0800 (PST)
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33959 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753785AbcL3Msb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 07:48:31 -0500
+Received: by mail-lf0-f54.google.com with SMTP id y21so236382458lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 04:48:30 -0800 (PST)
 In-Reply-To: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Ideally the public mmc header file, core.h, shouldn't contain interfaces
-particularly intended to be used by host drivers. Instead those should
-remain in the host.h header file. Therefore, let's move a couple functions
-from core.h to host.h.
+As the public mmc.h header already contains similar defines for other mmc
+commands and arguments, let's move those for erase/trim/discard into here
+as well.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- include/linux/mmc/core.h | 6 ------
- include/linux/mmc/host.h | 6 ++++++
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ include/linux/mmc/core.h | 10 ----------
+ include/linux/mmc/mmc.h  | 13 ++++++++++++-
+ 2 files changed, 12 insertions(+), 11 deletions(-)
 
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index e679a86..faacc90 100644
+index faacc90..6440e10 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -163,8 +163,6 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   enum mmc_blk_status *);
+@@ -164,16 +164,6 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
  extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
  extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
--extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
--extern int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
  
- #define MMC_ERASE_ARG		0x00000000
- #define MMC_SECURE_ERASE_ARG	0x80000000
-@@ -179,8 +177,4 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+-#define MMC_ERASE_ARG		0x00000000
+-#define MMC_SECURE_ERASE_ARG	0x80000000
+-#define MMC_TRIM_ARG		0x00000001
+-#define MMC_DISCARD_ARG		0x00000003
+-#define MMC_SECURE_TRIM1_ARG	0x80000001
+-#define MMC_SECURE_TRIM2_ARG	0x80008000
+-
+-#define MMC_SECURE_ARGS		0x80000000
+-#define MMC_TRIM_ARGS		0x00008001
+-
  extern int mmc_hw_reset(struct mmc_host *host);
  extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
  
--struct device_node;
--extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
--extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 261772e..8f78543 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -462,12 +462,23 @@ struct _mmc_csd {
+ /*
+  * MMC_SWITCH access modes
+  */
 -
- #endif /* LINUX_MMC_CORE_H */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8d38c76..7de0519 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -392,11 +392,14 @@ struct mmc_host {
- 	unsigned long		private[0] ____cacheline_aligned;
- };
+ #define MMC_SWITCH_MODE_CMD_SET		0x00	/* Change the command set */
+ #define MMC_SWITCH_MODE_SET_BITS	0x01	/* Set bits which are 1 in value */
+ #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
  
-+struct device_node;
++/*
++ * Erase/trim/discard
++ */
++#define MMC_ERASE_ARG			0x00000000
++#define MMC_SECURE_ERASE_ARG		0x80000000
++#define MMC_TRIM_ARG			0x00000001
++#define MMC_DISCARD_ARG			0x00000003
++#define MMC_SECURE_TRIM1_ARG		0x80000001
++#define MMC_SECURE_TRIM2_ARG		0x80008000
++#define MMC_SECURE_ARGS			0x80000000
++#define MMC_TRIM_ARGS			0x00008001
 +
- struct mmc_host *mmc_alloc_host(int extra, struct device *);
- int mmc_add_host(struct mmc_host *);
- void mmc_remove_host(struct mmc_host *);
- void mmc_free_host(struct mmc_host *);
- int mmc_of_parse(struct mmc_host *host);
-+int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+ #define mmc_driver_type_mask(n)		(1 << (n))
  
- static inline void *mmc_priv(struct mmc_host *host)
- {
-@@ -452,6 +455,7 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
- }
- #endif
- 
-+u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
- int mmc_regulator_get_supply(struct mmc_host *mmc);
- 
- static inline int mmc_card_is_removable(struct mmc_host *host)
-@@ -538,6 +542,8 @@ static inline bool mmc_can_retune(struct mmc_host *host)
- 	return host->can_retune == 1;
- }
- 
-+int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
-+int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
- void mmc_retune_pause(struct mmc_host *host);
- void mmc_retune_unpause(struct mmc_host *host);
- 
+ #endif /* LINUX_MMC_MMC_H */
 -- 
 1.9.1
 
