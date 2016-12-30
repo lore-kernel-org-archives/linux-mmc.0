@@ -1,92 +1,73 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] [RFC] mmc: block: Replace "goto retry" by a proper do
- / while loop
-Date: Thu, 29 Dec 2016 20:03:01 +0100
-Message-ID: <CAPDyKFr5Jh1FP9TbpQCBWVGshuRRbTuS=Ne0CvSJZO_aUTF-7A@mail.gmail.com>
-References: <1482156225-32517-1-git-send-email-geert@linux-m68k.org> <1482156225-32517-2-git-send-email-geert@linux-m68k.org>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: [PATCH] ACPI / scan: Prefer devices without _HID/_CID for _ADR matching
+Date: Fri, 30 Dec 2016 02:27:31 +0100
+Message-ID: <2022116.4lq1KAmrJA@aspire.rjw.lan>
+References: <20161225102148.7706-1-hdegoede@redhat.com> <CAJZ5v0gjcaYtskSMueAz+GjHcLZv=4A8Qz_Lf6Bn7S0CLSkgPg@mail.gmail.com> <20161229084135.GC1460@lahna.fi.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f180.google.com ([209.85.210.180]:35009 "EHLO
-        mail-wj0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752982AbcL2TDD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2016 14:03:03 -0500
-Received: by mail-wj0-f180.google.com with SMTP id v7so364584621wjy.2
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2016 11:03:03 -0800 (PST)
-In-Reply-To: <1482156225-32517-2-git-send-email-geert@linux-m68k.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20161229084135.GC1460@lahna.fi.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Mika Westerberg <mika.westerberg@linux.intel.com>, Hans de Goede <hdegoede@redhat.com>
+Cc: Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-mmc@vger.kernel.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linux PCI <linux-pci@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 19 December 2016 at 15:03, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
-Thanks, applied for next!
+The way acpi_find_child_device() works currently is that, if there
+are two (or more) devices with the same _ADR value in the same
+namespace scope (which is not specifically allowed by the spec and
+the OS behavior in that case is not defined), the first one of them
+found to be present (with the help of _STA) will be returned.
 
-Kind regards
-Uffe
+This covers the majority of cases, but is not sufficient if some of
+the devices in question have a _HID (or _CID) returning some valid
+ACPI/PNP device IDs (which is disallowed by the spec) and the
+ASL writers' expectation appears to be that the OS will match
+devices without a valid ACPI/PNP device ID against a given bus
+address first.
 
-> ---
-> Compile-tested only.
->
-> The extra assignment of 0 to err could be avoided:
->
->         do {
->                 if (!(card->quirks & MMC_QUIRK_INAND_CMD38) ||
->                     !(err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->                                        INAND_CMD38_ARG_EXT_CSD,
->                                        arg == MMC_TRIM_ARG ?
->                                        INAND_CMD38_ARG_TRIM :
->                                        INAND_CMD38_ARG_ERASE,
->                                        0)))
->                         err = mmc_erase(card, from, nr, arg);
->         } while (err == -EIO && !mmc_blk_reset(md, card->host, type));
->
-> but that looks uglier to me, and makes the quirk handling less obvious.
-> ---
->  drivers/mmc/core/block.c | 28 +++++++++++++---------------
->  1 file changed, 13 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 8c0e0833d481cf94..4159508df9eea277 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1164,21 +1164,19 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->                 arg = MMC_TRIM_ARG;
->         else
->                 arg = MMC_ERASE_ARG;
-> -retry:
-> -       if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-> -               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -                                INAND_CMD38_ARG_EXT_CSD,
-> -                                arg == MMC_TRIM_ARG ?
-> -                                INAND_CMD38_ARG_TRIM :
-> -                                INAND_CMD38_ARG_ERASE,
-> -                                0);
-> -               if (err)
-> -                       goto out;
-> -       }
-> -       err = mmc_erase(card, from, nr, arg);
-> -out:
-> -       if (err == -EIO && !mmc_blk_reset(md, card->host, type))
-> -               goto retry;
-> +       do {
-> +               err = 0;
-> +               if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                                        INAND_CMD38_ARG_EXT_CSD,
-> +                                        arg == MMC_TRIM_ARG ?
-> +                                        INAND_CMD38_ARG_TRIM :
-> +                                        INAND_CMD38_ARG_ERASE,
-> +                                        0);
-> +               }
-> +               if (!err)
-> +                       err = mmc_erase(card, from, nr, arg);
-> +       } while (err == -EIO && !mmc_blk_reset(md, card->host, type));
->         if (!err)
->                 mmc_blk_reset_success(md, type);
->  fail:
-> --
-> 1.9.1
->
+To cover this special case as well, modify find_child_checks()
+to prefer devices without ACPI/PNP device IDs over devices that
+have them.
+
+Suggested-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+---
+
+I'm not actually sure if this is sufficient to fix the original 80860F14 uid "2"
+sd-controller problem on CherryTrail.  Hans, can you please check?
+
+If it is not sufficient, we may need to fail find_child_checks() right away
+for devices with non-empty pnp.ids lists.
+
+Thanks,
+Rafael
+
+---
+ drivers/acpi/glue.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+Index: linux-pm/drivers/acpi/glue.c
+===================================================================
+--- linux-pm.orig/drivers/acpi/glue.c
++++ linux-pm/drivers/acpi/glue.c
+@@ -98,7 +98,15 @@ static int find_child_checks(struct acpi
+ 	if (check_children && list_empty(&adev->children))
+ 		return -ENODEV;
+ 
+-	return sta_present ? FIND_CHILD_MAX_SCORE : FIND_CHILD_MIN_SCORE;
++	/*
++	 * If the device has a _HID (or _CID) returning a valid ACPI/PNP
++	 * device ID, it is better to make it look less attractive here, so that
++	 * the other device with the same _ADR value (that may not have a valid
++	 * device ID) can be matched going forward.  [This means a second spec
++	 * violation in a row, so whatever we do here is best effort anyway.]
++	 */
++	return sta_present && list_empty(&adev->pnp.ids) ?
++			FIND_CHILD_MAX_SCORE : FIND_CHILD_MIN_SCORE;
+ }
+ 
+ struct acpi_device *acpi_find_child_device(struct acpi_device *parent,
+
