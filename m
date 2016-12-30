@@ -1,57 +1,46 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [RFC PATCH 3/3] mmc: sdhci: Add more debug info in case of data error
-Date: Fri, 30 Dec 2016 17:02:11 +0530
-Message-ID: <1483097531-9991-4-git-send-email-riteshh@codeaurora.org>
-References: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, subhashj@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: tmio: Use mmc_can_gpio_cd() when validating for native hotplug
+Date: Fri, 30 Dec 2016 12:39:45 +0100
+Message-ID: <1483097985-22446-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:36708 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751691AbcL3Lj7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 06:39:59 -0500
+Received: by mail-lf0-f47.google.com with SMTP id t196so235990441lff.3
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 03:39:58 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 
-print error log message and dump sdhc registers for debugging
-purpose in case of data errors (except when tuning commands
-generate CRC/timeout/end bit errors).
+To validate whether native hotplug is intended to be used, the tmio driver
+checks whether the GPIO isr has been successfully assigned. This isn't
+entirely correct, as GPIO could still be used for card detect, but in a
+polling mode.
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+Therefore, let's convert to use the correct mmc interface,
+mmc_can_gpio_cd() as it tells exactly what we need for the native hotplug
+validation.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 21 +++++++++++++++++++--
- 1 file changed, 19 insertions(+), 2 deletions(-)
+ drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 73a8918..2e51e49 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2616,9 +2616,26 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 			host->ops->adma_workaround(host, intmask);
- 	}
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 3ca97f3..580ca9c 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1178,7 +1178,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+ 				  !mmc_card_is_removable(mmc) ||
+-				  mmc->slot.cd_irq >= 0);
++				  mmc_can_gpio_cd(mmc));
  
--	if (host->data->error)
-+	if (host->data->error) {
-+		bool pr_msg = true;
-+
-+		if (intmask & (SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
-+		    SDHCI_INT_DATA_END_BIT)) {
-+			command = SDHCI_GET_CMD(sdhci_readw(host,
-+							    SDHCI_COMMAND));
-+			if (command == MMC_SEND_TUNING_BLOCK_HS200 ||
-+			    command == MMC_SEND_TUNING_BLOCK)
-+				pr_msg = false;
-+		}
-+		if (pr_msg) {
-+			pr_err("%s: data txfr (0x%08x) error: %d\n",
-+			       mmc_hostname(host->mmc), intmask,
-+			       host->data->error);
-+			sdhci_dumpregs(host);
-+		}
-+
- 		sdhci_finish_data(host);
--	else {
-+	} else {
- 		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
- 			sdhci_transfer_pio(host);
- 
+ 	/*
+ 	 * On Gen2+, eMMC with NONREMOVABLE currently fails because native
 -- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-a Linux Foundation Collaborative Project.
+1.9.1
+
