@@ -1,37 +1,56 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Fri, 30 Dec 2016 09:05:49 +0100
-Message-ID: <CACRpkdad7JXzxYfuB_XYdo2vuZmEt5iWgq79Va5cWwTaJc6Y5Q@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
- <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
- <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com> <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: use empty initializer list to zero-clear structures
+Date: Fri, 30 Dec 2016 09:09:24 +0100
+Message-ID: <CACRpkdZ7ovJQWkYzMJ4zxgL-OfR-3FkM71u0G0UevXD2RowLpA@mail.gmail.com>
+References: <1482148278-11395-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:33719 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751922AbcL3IFv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 03:05:51 -0500
-Received: by mail-qt0-f178.google.com with SMTP id p16so387133080qta.0
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 00:05:50 -0800 (PST)
-In-Reply-To: <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:36855 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751587AbcL3IJZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 03:09:25 -0500
+Received: by mail-qk0-f174.google.com with SMTP id n21so286281482qka.3
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 00:09:25 -0800 (PST)
+In-Reply-To: <1482148278-11395-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tejun Heo <tj@kernel.org>, Baolin Wang <baolin.wang@linaro.org>, Bojan Prtvar <prtvar.b@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, Jens Axboe <axboe@fb.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <aisheng.dong@nxp.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Shawn Lin <shawn.lin@rock-chips.com>, Dan Carpenter <dan.carpenter@oracle.com>, Bhaktipriya Shridhar <bhaktipriya96@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Mon, Dec 19, 2016 at 1:01 AM, Matt Ranostay <matt@ranostay.consulting> wrote:
+On Mon, Dec 19, 2016 at 12:51 PM, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
 
-> * SD8787 has a "powerdown" line, and CW1200 has a "powerup" line.. I
-> know this is a simple logic inversion.
+> In the MMC subsystem, we see such initializers that only clears the
+> first member explicitly.
+>
+> For example,
+>
+>   struct mmc_request mrq = {NULL};
+>
+> sets the first member (.sbc) to NULL explicitly.  However, this is
+> an unstable form because we may insert a non-pointer member at the
+> top of the struct mmc_request in the future. (if we do so, the
+> compiler will spit warnings.)
+>
+> So, using a designated initializer is preferred coding style.  The
+> expression above is equivalent to:
+>
+>   struct mmc_request mrq = { .sbc = NULL };
+>
+> Of course, this does not express our intention.  We want to fill
+> all struct members with zeros.  Please note struct members are
+> implicitly zero-cleared unless otherwise specified in the initializer.
+>
+> After all, the most reasonable (and stable) form is:
+>
+>   struct mmc_request mrq = {};
+>
+> Do likewise for mmc_command, mmc_data as well.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-If this is a GPIO line, the GPIO subsystem can flag a line for
-inverted logic. GPIO_ACTIVE_LOW from device tree for example.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
