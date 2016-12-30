@@ -1,133 +1,142 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 10/21] mmc: host: Include interrupt.h in mmc host drivers that depends on it
-Date: Fri, 30 Dec 2016 13:47:23 +0100
-Message-ID: <1483102054-1752-11-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 11/21] mmc: core: First step in cleaning up public mmc header files
+Date: Fri, 30 Dec 2016 13:47:24 +0100
+Message-ID: <1483102054-1752-12-git-send-email-ulf.hansson@linaro.org>
 References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:33891 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753687AbcL3MsQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 07:48:16 -0500
-Received: by mail-lf0-f48.google.com with SMTP id y21so236379550lfa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 04:48:15 -0800 (PST)
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:33905 "EHLO
+        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753864AbcL3MsT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2016 07:48:19 -0500
+Received: by mail-lf0-f42.google.com with SMTP id y21so236380189lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Dec 2016 04:48:18 -0800 (PST)
 In-Reply-To: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-An mmc host driver shouldn't rely on interrupt.h being included by another
-public mmc header. Instead make that dependency explicit by including
-interrupt.h in those host drivers that depends on it.
+This is the first step in cleaning up the public mmc header files. In this
+change we makes sure each header file builds standalone, as that helps to
+resolve dependencies.
+
+While changing this, it also seems reasonable to stop including other
+headers from inside a header itself which it don't depend upon.
+Additionally, in some cases such dependencies are better resolved by
+forward declaring the needed struct.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/davinci_mmc.c  | 1 +
- drivers/mmc/host/dw_mmc.h       | 1 +
- drivers/mmc/host/meson-gx-mmc.c | 1 +
- drivers/mmc/host/mtk-sd.c       | 1 +
- drivers/mmc/host/sdhci.h        | 1 +
- drivers/mmc/host/tmio_mmc.h     | 1 +
- drivers/mmc/host/via-sdmmc.c    | 1 +
- drivers/mmc/host/wmt-sdmmc.c    | 1 +
- 8 files changed, 8 insertions(+)
+ include/linux/mmc/card.h      | 2 --
+ include/linux/mmc/core.h      | 3 +--
+ include/linux/mmc/host.h      | 9 ++-------
+ include/linux/mmc/mmc.h       | 2 ++
+ include/linux/mmc/slot-gpio.h | 3 +++
+ 5 files changed, 8 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 36b5af8..1e2600d 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -36,6 +36,7 @@
- #include <linux/of.h>
- #include <linux/of_device.h>
- #include <linux/mmc/slot-gpio.h>
-+#include <linux/interrupt.h>
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 00449e5..ca64f5b 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -11,7 +11,6 @@
+ #define LINUX_MMC_CARD_H
  
- #include <linux/platform_data/mmc-davinci.h>
+ #include <linux/device.h>
+-#include <linux/mmc/core.h>
+ #include <linux/mod_devicetable.h>
  
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 9601461..231a46f 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -18,6 +18,7 @@
+ struct mmc_cid {
+@@ -206,7 +205,6 @@ struct sdio_cis {
+ };
+ 
+ struct mmc_host;
+-struct mmc_ios;
+ struct sdio_func;
+ struct sdio_func_tuple;
+ 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index e33cc74..64e2ddf 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -8,10 +8,9 @@
+ #ifndef LINUX_MMC_CORE_H
+ #define LINUX_MMC_CORE_H
+ 
+-#include <linux/interrupt.h>
+ #include <linux/completion.h>
++#include <linux/types.h>
+ 
+-struct request;
+ struct mmc_data;
+ struct mmc_request;
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8bc8841..8d38c76 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -10,16 +10,12 @@
+ #ifndef LINUX_MMC_HOST_H
+ #define LINUX_MMC_HOST_H
+ 
+-#include <linux/leds.h>
+-#include <linux/mutex.h>
+-#include <linux/timer.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+ 
  #include <linux/mmc/core.h>
- #include <linux/dmaengine.h>
- #include <linux/reset.h>
-+#include <linux/interrupt.h>
- 
- #define MAX_MCI_SLOTS	2
- 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index b352760..22bfe5e 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -35,6 +35,7 @@
- #include <linux/clk.h>
- #include <linux/clk-provider.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/interrupt.h>
- 
- #define DRIVER_NAME "meson-gx-mmc"
- 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 10ef2ae..d33828e 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -28,6 +28,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/slab.h>
- #include <linux/spinlock.h>
-+#include <linux/interrupt.h>
- 
  #include <linux/mmc/card.h>
- #include <linux/mmc/core.h>
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index a10a7b6..edf3adf 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -18,6 +18,7 @@
- #include <linux/types.h>
- #include <linux/io.h>
- #include <linux/leds.h>
-+#include <linux/interrupt.h>
+-#include <linux/mmc/mmc.h>
+ #include <linux/mmc/pm.h>
  
- #include <linux/mmc/host.h>
+ struct mmc_ios {
+@@ -82,6 +78,8 @@ struct mmc_ios {
+ 	bool enhanced_strobe;			/* hs400es selection */
+ };
  
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 9e20bcf..9b22844 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -24,6 +24,7 @@
- #include <linux/pagemap.h>
- #include <linux/scatterlist.h>
- #include <linux/spinlock.h>
-+#include <linux/interrupt.h>
++struct mmc_host;
++
+ struct mmc_host_ops {
+ 	/*
+ 	 * It is optional for the host to implement pre_req and post_req in
+@@ -162,9 +160,6 @@ struct mmc_host_ops {
+ 				  unsigned int direction, int blk_size);
+ };
  
- #define CTL_SD_CMD 0x00
- #define CTL_ARG_REG 0x04
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index 63fac78..6380044 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -13,6 +13,7 @@
- #include <linux/dma-mapping.h>
- #include <linux/highmem.h>
- #include <linux/delay.h>
-+#include <linux/interrupt.h>
+-struct mmc_card;
+-struct device;
+-
+ struct mmc_async_req {
+ 	/* active mmc request */
+ 	struct mmc_request	*mrq;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index a074082..261772e 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -24,6 +24,8 @@
+ #ifndef LINUX_MMC_MMC_H
+ #define LINUX_MMC_MMC_H
  
- #include <linux/mmc/host.h>
++#include <linux/types.h>
++
+ /* Standard MMC commands (4.1)           type  argument     response */
+    /* class 1 */
+ #define MMC_GO_IDLE_STATE         0   /* bc                          */
+diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+index a7972cd..82f0d28 100644
+--- a/include/linux/mmc/slot-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -11,6 +11,9 @@
+ #ifndef MMC_SLOT_GPIO_H
+ #define MMC_SLOT_GPIO_H
  
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 5af0055..21ebba8 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -20,6 +20,7 @@
- #include <linux/irq.h>
- #include <linux/clk.h>
- #include <linux/gpio.h>
-+#include <linux/interrupt.h>
++#include <linux/types.h>
++#include <linux/irqreturn.h>
++
+ struct mmc_host;
  
- #include <linux/of.h>
- #include <linux/of_address.h>
+ int mmc_gpio_get_ro(struct mmc_host *host);
 -- 
 1.9.1
 
