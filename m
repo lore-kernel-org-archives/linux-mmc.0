@@ -1,69 +1,47 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Mon, 02 Jan 2017 10:40:15 +0100
-Message-ID: <2360959.cyJgAELf50@wuerfel>
-References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <20161228085503.GA340@lst.de> <CACRpkdb2zyjRz_zniT5nLxWCeLwagn1ZiTWwXc6bHW229NmfPQ@mail.gmail.com>
+From: Mika Westerberg <mika.westerberg@linux.intel.com>
+Subject: Re: [PATCH] ACPI / scan: Prefer devices without _HID/_CID for _ADR
+ matching
+Date: Mon, 2 Jan 2017 12:53:22 +0200
+Message-ID: <20170102105322.GG1460@lahna.fi.intel.com>
+References: <20161225102148.7706-1-hdegoede@redhat.com>
+ <CAJZ5v0gjcaYtskSMueAz+GjHcLZv=4A8Qz_Lf6Bn7S0CLSkgPg@mail.gmail.com>
+ <20161229084135.GC1460@lahna.fi.intel.com>
+ <2022116.4lq1KAmrJA@aspire.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdb2zyjRz_zniT5nLxWCeLwagn1ZiTWwXc6bHW229NmfPQ@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:31150 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755406AbdABKx1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Jan 2017 05:53:27 -0500
+Content-Disposition: inline
+In-Reply-To: <2022116.4lq1KAmrJA@aspire.rjw.lan>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-mmc@vger.kernel.org, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Linux PCI <linux-pci@vger.kernel.org>
 
-On Thursday, December 29, 2016 12:59:51 AM CET Linus Walleij wrote:
-> On Wed, Dec 28, 2016 at 9:55 AM, Christoph Hellwig <hch@lst.de> wrote:
-> > On Tue, Dec 27, 2016 at 01:21:28PM +0100, Linus Walleij wrote:
+On Fri, Dec 30, 2016 at 02:27:31AM +0100, Rafael J. Wysocki wrote:
+> From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 > 
-> >> On the contrary we expect a performance regression as mq has no
-> >> scheduling. MQ is created for the usecase where you have multiple
-> >> hardware queues and they are so hungry for work that you have a problem
-> >> feeding them all. Needless to say, on eMMC/SD we don't have that problem
-> >> right now atleast.
-> >
-> > That's not entirely correct.  blk-mq is designed to replace the legacy
-> > request code eventually.  The focus is on not wasting CPU cycles, and
-> > to support multiple queues (but not require them).
+> The way acpi_find_child_device() works currently is that, if there
+> are two (or more) devices with the same _ADR value in the same
+> namespace scope (which is not specifically allowed by the spec and
+> the OS behavior in that case is not defined), the first one of them
+> found to be present (with the help of _STA) will be returned.
 > 
-> OK! Performance is paramount, so this indeed confirms that we need
-> to re-engineer the MMC/SD stack to not rely on this kthread to "drive"
-> transactions, instead we need to complete them quickly from the driver
-> callbacks and let MQ drive.
+> This covers the majority of cases, but is not sufficient if some of
+> the devices in question have a _HID (or _CID) returning some valid
+> ACPI/PNP device IDs (which is disallowed by the spec) and the
+> ASL writers' expectation appears to be that the OS will match
+> devices without a valid ACPI/PNP device ID against a given bus
+> address first.
 > 
-> A problem here is that issueing the requests are in blocking context
-> while completion is in IRQ context (for most drivers) so we need to
-> look into this.
+> To cover this special case as well, modify find_child_checks()
+> to prefer devices without ACPI/PNP device IDs over devices that
+> have them.
+> 
+> Suggested-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+> Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
-I think whether issuing an mmc request requires blocking should ideally
-be up to the host device driver, at least I'd hope that we can end up
-with something like this driving latency to the absolute minimum:
-
-a) with MMC CMDQ support:
-  - report actual queue depth
-  - have blk-mq push requests directly into the device through
-    the mmc-block driver and the host driver
-  - if a host driver needs to block, make it use a private workqueue
-
-b) without MMC CMDQ support:
-  - report queue depth of '2'
-  - first request gets handled as above
-  - if one request is pending, prepare the second request and
-    add a pointer to the mmc host structure (not that different
-    from what we do today)
-  - when the host driver completes a request, have it immediately
-    issue the next one from the interrupt handler. In case we need
-    to sleep here, use a threaded IRQ, or a workqueue. This should
-    avoid the need for the NULL requests
-
-c) possible optimization for command packing without CMDQ:
-   - similar to b)
-   - report a longer queue (e.g. 8, maybe user selectable, to
-     balance throughput against latency)
-   - any request of the same type (read or write) as the one that
-     is currently added to the host as the 'next' one can be
-     added to that request so they get issued together
-   - if the types are different, report the queue to be busy
-
-	Arnd
+Thanks for taking care of this Rafael :)
