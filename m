@@ -1,53 +1,33 @@
-From: Gary Bisson <gary.bisson@boundarydevices.com>
-Subject: mmc: imx: 8-bit bus timeout (4.10-rc1)
-Date: Mon, 2 Jan 2017 20:15:08 +0100
-Message-ID: <20170102191508.ty7wr42pzxhhchaa@t450s.lan>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: mmc: imx: 8-bit bus timeout (4.10-rc1)
+Date: Mon, 2 Jan 2017 19:40:43 -0200
+Message-ID: <CAOMZO5AgFM1T5XSZH3U5O6n+=_bi3eq7jS1XX9xTBS9Z+GwD9w@mail.gmail.com>
+References: <20170102191508.ty7wr42pzxhhchaa@t450s.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f173.google.com ([209.85.210.173]:36792 "EHLO
-        mail-wj0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751256AbdABTPU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2017 14:15:20 -0500
-Received: by mail-wj0-f173.google.com with SMTP id c11so225336871wjx.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2017 11:15:20 -0800 (PST)
-Content-Disposition: inline
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:34024 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755844AbdABVko (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2017 16:40:44 -0500
+Received: by mail-oi0-f68.google.com with SMTP id 3so39102626oih.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2017 13:40:44 -0800 (PST)
+In-Reply-To: <20170102191508.ty7wr42pzxhhchaa@t450s.lan>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: shawnguo@kernel.org, fabio.estevam@nxp.com
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+To: Gary Bisson <gary.bisson@boundarydevices.com>
+Cc: Shawn Guo <shawnguo@kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Fabio, Shawn,
+Hi Gary,
 
-While I was testing some pinctrl modifications based on kernel 4.10-rc1,
-I've encountered some errors with the sdhci driver:
-[   13.919613] mmc2: Timeout waiting for hardware cmd interrupt.
-[   13.925400] sdhci: =========== REGISTER DUMP (mmc2)===========
-[   13.931260] sdhci: Sys addr: 0x3d733000 | Version:  0x00000002
-[   13.937113] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
-[   13.942965] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
-[   13.948817] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
-[   13.954668] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
-[   13.960518] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
-[   13.966369] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
-[   13.972221] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
-[   13.978071] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
-[   13.983922] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
-[   13.989773] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
-[   13.995623] sdhci: Host ctl2: 0x00000000
-[   13.999563] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xefc7d208
-[   14.005406] sdhci: ===========================================
-...
+On Mon, Jan 2, 2017 at 5:15 PM, Gary Bisson
+<gary.bisson@boundarydevices.com> wrote:
 
-This goes on until it finally says:
-[  169.532125] mmc2: switch to bus width 8 ddr failed
-[  169.536970] mmc2: error -110 whilst initialising MMC card
+> Have you seen such behavior? Is the eMMC on the SABRE platform working
+> fine?
 
-This issue was seen on a Nitrogen6_MAX and only affects the eMMC (8-bit
-bus) whereas the regular SD card slot works fine.
+Yes, just noticed the same on a mx6qsabresd.
 
-Have you seen such behavior? Is the eMMC on the SABRE platform working
-fine?
+I haven't had a chance to debug this yet.
 
-Regards,
-Gary
+If you could run a 'git bisect' that would be great. Thanks
