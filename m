@@ -1,12 +1,14 @@
 From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCH 0/5] arm64: sunxi: A64: enable MMC support
-Date: Mon,  2 Jan 2017 23:03:41 +0000
-Message-ID: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
+Subject: [PATCH 3/5] arm64: dts: sun50i: add MMC nodes
+Date: Mon,  2 Jan 2017 23:03:44 +0000
+Message-ID: <1483398226-29321-4-git-send-email-andre.przywara@arm.com>
+References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
 Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBYFYVPBQKGQECDEDMIY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRB2FYVPBQKGQEEC36DQQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <1483398226-29321-1-git-send-email-andre.przywara-5wv7dgnIgG8@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
@@ -17,41 +19,95 @@ To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.o
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-So far the Allwinner A64/Pine64 DT was missing MMC support, because we
-observed issues with that. Those have now been fixed (patch 1 and 2),
-so we can enable the MMC IP block in the SoC .dtsi and the Pine64 .dts.
-As this gives access to the SD card (as the only mass storage device on
-most boards), this makes the kernel support actually useful.
-The A64 MMC controller has more up its sleeves, but for now this level
-of support is good enough.
-Thanks a lot to Maxime for investigating the eMMC failure and coming up
-with a nice fix for that.
-Maxime: I picked that patch from some pastebin drop of yours, please holler
-if there's something wrong with that (patch 2/5).
+Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+---
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 67 +++++++++++++++++++++++++++
+ 1 file changed, 67 insertions(+)
 
-I send the BananaPi M64 .dts patch along with that series, as the eMMC on
-that board now makes some difference.
-
-Cheers,
-Andre.
-
-Andre Przywara (4):
-  drivers: mmc: sunxi: fix A64 calibration routine
-  arm64: dts: sun50i: add MMC nodes
-  arm64: dts: Pine64: add MMC support
-  arm64: dts: add BananaPi-M64 support
-
-Maxime Ripard (1):
-  drivers: mmc: sunxi: limit A64 MMC2 to 8K DMA buffer
-
- .../devicetree/bindings/mmc/sunxi-mmc.txt          |   1 +
- arch/arm64/boot/dts/allwinner/Makefile             |   1 +
- .../boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 125 +++++++++++++++++++++
- .../arm64/boot/dts/allwinner/sun50i-a64-pine64.dts |  18 +++
- arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi      |  77 +++++++++++++
- drivers/mmc/host/sunxi-mmc.c                       |  37 ++++--
- 6 files changed, 247 insertions(+), 12 deletions(-)
- create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
-
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+index e0dcab8..c680566 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+@@ -150,6 +150,32 @@
+ 				pins = "PB8", "PB9";
+ 				function = "uart0";
+ 			};
++
++			mmc0_pins: mmc0@0 {
++				pins = "PF0", "PF1", "PF2", "PF3", "PF4", "PF5";
++				function = "mmc0";
++				drive-strength = <30>;
++			};
++
++			mmc0_default_cd_pin: mmc0_cd_pin@0 {
++				pins = "PF6";
++				function = "gpio_in";
++				bias-pull-up;
++			};
++
++			mmc1_pins: mmc1@0 {
++				pins = "PG0", "PG1", "PG2", "PG3", "PG4", "PG5";
++				function = "mmc1";
++				drive-strength = <30>;
++			};
++
++			mmc2_pins: mmc2@0 {
++				pins = "PC1", "PC5", "PC6", "PC8", "PC9",
++				       "PC10", "PC11", "PC12", "PC13", "PC14",
++				       "PC15", "PC16";
++				function = "mmc2";
++				drive-strength = <30>;
++			};
+ 		};
+ 
+ 		uart0: serial@1c28000 {
+@@ -240,6 +266,47 @@
+ 			#size-cells = <0>;
+ 		};
+ 
++		mmc0: mmc@1c0f000 {
++			compatible = "allwinner,sun50i-a64-mmc",
++				     "allwinner,sun5i-a13-mmc";
++			reg = <0x01c0f000 0x1000>;
++			clocks = <&ccu 31>, <&ccu 75>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu 8>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
++		mmc1: mmc@1c10000 {
++			compatible = "allwinner,sun50i-a64-mmc",
++				     "allwinner,sun5i-a13-mmc";
++			reg = <0x01c10000 0x1000>;
++			clocks = <&ccu 32>, <&ccu 76>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu 9>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
++		mmc2: mmc@1c11000 {
++			compatible = "allwinner,sun50i-a64-emmc";
++			reg = <0x01c11000 0x1000>;
++			clocks = <&ccu 33>, <&ccu 77>;
++			clock-names = "ahb", "mmc";
++			resets = <&ccu 10>;
++			reset-names = "ahb";
++			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
+ 		gic: interrupt-controller@1c81000 {
+ 			compatible = "arm,gic-400";
+ 			reg = <0x01c81000 0x1000>,
 -- 
 2.8.2
