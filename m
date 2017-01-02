@@ -1,58 +1,53 @@
-From: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Subject: [PATCH RESEND] sdhci: Only handle CARD_INT for SDIO cards
-Date: Mon,  2 Jan 2017 16:23:50 -0200
-Message-ID: <20170102182350.14326-1-krisman@collabora.co.uk>
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Subject: mmc: imx: 8-bit bus timeout (4.10-rc1)
+Date: Mon, 2 Jan 2017 20:15:08 +0100
+Message-ID: <20170102191508.ty7wr42pzxhhchaa@t450s.lan>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:52684 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751628AbdABSYP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2017 13:24:15 -0500
+Received: from mail-wj0-f173.google.com ([209.85.210.173]:36792 "EHLO
+        mail-wj0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751256AbdABTPU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2017 14:15:20 -0500
+Received: by mail-wj0-f173.google.com with SMTP id c11so225336871wjx.3
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2017 11:15:20 -0800 (PST)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: Gabriel Krisman Bertazi <krisman@collabora.co.uk>, linux-mmc@vger.kernel.org
+To: shawnguo@kernel.org, fabio.estevam@nxp.com
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org
 
-One of our kernelCI boxes hanged at boot because a faulty eSDHC device
-was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
-reads, which are not allowed for SD devices.  This adds a sanity check
-to the interruption path, preventing that illegal command from getting
-sent to SD devices.
+Hi Fabio, Shawn,
 
-This quirk allows that particular machine to resume boot despite the
-faulty hardware, instead of getting hung dealing with thousands of
-mishandled interrupts.
+While I was testing some pinctrl modifications based on kernel 4.10-rc1,
+I've encountered some errors with the sdhci driver:
+[   13.919613] mmc2: Timeout waiting for hardware cmd interrupt.
+[   13.925400] sdhci: =========== REGISTER DUMP (mmc2)===========
+[   13.931260] sdhci: Sys addr: 0x3d733000 | Version:  0x00000002
+[   13.937113] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+[   13.942965] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+[   13.948817] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+[   13.954668] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+[   13.960518] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+[   13.966369] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+[   13.972221] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+[   13.978071] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+[   13.983922] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+[   13.989773] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+[   13.995623] sdhci: Host ctl2: 0x00000000
+[   13.999563] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0xefc7d208
+[   14.005406] sdhci: ===========================================
+...
 
-Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-CC: Adrian Hunter <adrian.hunter@intel.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: linux-mmc@vger.kernel.org
----
- drivers/mmc/host/sdhci.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+This goes on until it finally says:
+[  169.532125] mmc2: switch to bus width 8 ddr failed
+[  169.536970] mmc2: error -110 whilst initialising MMC card
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 23909804ffb8..43913876581e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2665,6 +2665,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- {
- 	irqreturn_t result = IRQ_NONE;
- 	struct sdhci_host *host = dev_id;
-+	struct mmc_host *mmc = host->mmc;
- 	u32 intmask, mask, unexpected = 0;
- 	int max_loops = 16;
- 
-@@ -2733,7 +2734,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 		if (intmask & SDHCI_INT_RETUNE)
- 			mmc_retune_needed(host->mmc);
- 
--		if (intmask & SDHCI_INT_CARD_INT) {
-+		if (intmask & SDHCI_INT_CARD_INT && mmc->card &&
-+		    (mmc->card->type == MMC_TYPE_SDIO ||
-+		     mmc->card->type == MMC_TYPE_SD_COMBO)) {
- 			sdhci_enable_sdio_irq_nolock(host, false);
- 			host->thread_isr |= SDHCI_INT_CARD_INT;
- 			result = IRQ_WAKE_THREAD;
--- 
-2.11.0
+This issue was seen on a Nitrogen6_MAX and only affects the eMMC (8-bit
+bus) whereas the regular SD card slot works fine.
 
+Have you seen such behavior? Is the eMMC on the SABRE platform working
+fine?
+
+Regards,
+Gary
