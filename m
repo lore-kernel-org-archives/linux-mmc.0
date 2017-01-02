@@ -1,35 +1,56 @@
-From: Bart Van Assche <Bart.VanAssche@sandisk.com>
-Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Mon, 2 Jan 2017 11:58:35 +0000
-Message-ID: <1483358298.3592.52.camel@sandisk.com>
-References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org>
-         <20161228085503.GA340@lst.de>
-         <CACRpkdb2zyjRz_zniT5nLxWCeLwagn1ZiTWwXc6bHW229NmfPQ@mail.gmail.com>
-         <2360959.cyJgAELf50@wuerfel> <68863f25-7faa-88b5-78bb-21027f772ab6@suse.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <68863f25-7faa-88b5-78bb-21027f772ab6@suse.de>
-Content-Language: en-US
-Content-ID: <2C5AB0A181C58A489CDB6757BFB421FD@sandisk.com>
-Sender: linux-block-owner@vger.kernel.org
-To: "hare@suse.de" <hare@suse.de>, "arnd@arndb.de" <arnd@arndb.de>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>
-Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "baolin.wang@linaro.org" <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "paolo.valente@linaro.org" <paolo.valente@linaro.org>, "hch@lst.de" <hch@lst.de>, "axboe@kernel.dk" <axboe@kernel.dk>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "zhang.chunyan@linaro.org" <zhang.chunyan@linaro.org>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 2/2] mmc: slot-gpio: Don't override con_id when request descriptor
+Date: Mon,  2 Jan 2017 14:05:25 +0200
+Message-ID: <20170102120525.178212-2-andriy.shevchenko@linux.intel.com>
+References: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:47240 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751279AbdABMF2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 2 Jan 2017 07:05:28 -0500
+In-Reply-To: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-T24gTW9uLCAyMDE3LTAxLTAyIGF0IDEyOjA2ICswMTAwLCBIYW5uZXMgUmVpbmVja2Ugd3JvdGU6
-DQo+IEhtbS4gQnV0IHRoYXQgd291bGQgYW1vdW50IHRvIGltcGxlbWVudCB5ZXQgYW5vdGhlciBx
-dWV1aW5nIG1lY2hhbmlzbQ0KPiB3aXRoaW4gdGhlIGRyaXZlci9tbWMgc3Vic3lzdGVtLCB3b3Vs
-ZG4ndCBpdD8NCj4gDQo+IFdoaWNoIGlzLCBpbmNpZGVudGFsbHksIHRoZSBzYW1lIG1ldGhvZCB0
-aGUgUy8zOTAgREFTRCBkcml2ZXIgdXNlcw0KPiBub3dhZGF5czsgcmVwb3J0IGFuIGFyYml0cmFy
-eSBxdWV1ZSBkZXB0aCB0byB0aGUgYmxvY2sgbGF5ZXIgYW5kIHF1ZXVlDQo+IGFsbCByZXF1ZXN0
-cyBpbnRlcm5hbGx5IHRvIGJldHRlciBzYXR1cmF0ZSB0aGUgZGV2aWNlLg0KPiANCj4gSG93ZXZl
-ciBJJ2QgcmVhbGx5IGxpa2UgdG8gZ2V0IHJpZCBvZiB0aGlzLCBhbmQgdHdlYWsgdGhlIGJsb2Nr
-IGxheWVyIHRvDQo+IGhhbmRsZSB0aGVzZSBjYXNlcy4NCg0KSGVsbG8gSGFubmVzLA0KDQpTdWNo
-IGZ1bmN0aW9uYWxpdHkgd2lsbCBiZSBhZGRlZCB0byB0aGUgYmxrLW1xIGNvcmUgYXMgcGFydCBv
-ZiB0aGUNCmluaXRpYXRpdmUgdG8gYWRkIGJsay1tcSBJL08gc2NoZWR1bGluZyBzdXBwb3J0LiBP
-bmUgaW1wbGVtZW50YXRpb24gaGFzIGJlZW4NCnByb3Bvc2VkIGJ5IEplbnMgKGh0dHA6Ly9naXQu
-a2VybmVsLmRrL2NnaXQvbGludXgtYmxvY2svbG9nLz9oPWJsay1tcS1zY2hlZCkNCmFuZCBhbm90
-aGVyIGltcGxlbWVudGF0aW9uIGhhcyBiZWVuIHByb3Bvc2VkIGJ5IG15c2VsZiAoaHR0cHM6Ly9s
-a21sLm9yZy9sa20NCmwvMjAxNi8xMi8yMi8zMjIpLg0KDQpCYXJ0Lg==
+The caller may supply connection ID, index, or both. All combinations are
+possible and mmc framework should not make any assumption on what exactly
+caller wants.
+
+Remove con_id override conditionals in mmc_gpiod_request_ro() and
+mmc_gpiod_request_cd().
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/core/slot-gpio.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index babe591aea96..a8450a8701e4 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -235,9 +235,6 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+ 	struct gpio_desc *desc;
+ 	int ret;
+ 
+-	if (!con_id)
+-		con_id = ctx->cd_label;
+-
+ 	desc = devm_gpiod_get_index(host->parent, con_id, idx, GPIOD_IN);
+ 	if (IS_ERR(desc))
+ 		return PTR_ERR(desc);
+@@ -289,9 +286,6 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ 	struct gpio_desc *desc;
+ 	int ret;
+ 
+-	if (!con_id)
+-		con_id = ctx->ro_label;
+-
+ 	desc = devm_gpiod_get_index(host->parent, con_id, idx, GPIOD_IN);
+ 	if (IS_ERR(desc))
+ 		return PTR_ERR(desc);
+-- 
+2.11.0
+
