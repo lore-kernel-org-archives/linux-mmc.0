@@ -1,29 +1,35 @@
 From: Bart Van Assche <Bart.VanAssche@sandisk.com>
 Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Mon, 2 Jan 2017 11:55:21 +0000
-Message-ID: <1483358104.3592.50.camel@sandisk.com>
+Date: Mon, 2 Jan 2017 11:58:35 +0000
+Message-ID: <1483358298.3592.52.camel@sandisk.com>
 References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org>
-         <0fec238b-3c3c-6928-71ec-c3d4bcc6d267@codeaurora.org>
-         <CACRpkdazLSk1i37ERs4YwuwXnmbmrnyAX1T5kRXjKcPSaAYd7Q@mail.gmail.com>
          <20161228085503.GA340@lst.de>
          <CACRpkdb2zyjRz_zniT5nLxWCeLwagn1ZiTWwXc6bHW229NmfPQ@mail.gmail.com>
+         <2360959.cyJgAELf50@wuerfel> <68863f25-7faa-88b5-78bb-21027f772ab6@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdb2zyjRz_zniT5nLxWCeLwagn1ZiTWwXc6bHW229NmfPQ@mail.gmail.com>
+In-Reply-To: <68863f25-7faa-88b5-78bb-21027f772ab6@suse.de>
 Content-Language: en-US
-Content-ID: <4BB5FBD596AB1B498971FCA90DE3DA68@sandisk.com>
+Content-ID: <2C5AB0A181C58A489CDB6757BFB421FD@sandisk.com>
 Sender: linux-block-owner@vger.kernel.org
-To: "hch@lst.de" <hch@lst.de>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>
-Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "baolin.wang@linaro.org" <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "paolo.valente@linaro.org" <paolo.valente@linaro.org>, "axboe@kernel.dk" <axboe@kernel.dk>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "arnd@arndb.de" <arnd@arndb.de>, "zhang.chunyan@linaro.org" <zhang.chunyan@linaro.org>
+To: "hare@suse.de" <hare@suse.de>, "arnd@arndb.de" <arnd@arndb.de>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>
+Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "baolin.wang@linaro.org" <baolin.wang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "riteshh@codeaurora.org" <riteshh@codeaurora.org>, "paolo.valente@linaro.org" <paolo.valente@linaro.org>, "hch@lst.de" <hch@lst.de>, "axboe@kernel.dk" <axboe@kernel.dk>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "zhang.chunyan@linaro.org" <zhang.chunyan@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVGh1LCAyMDE2LTEyLTI5IGF0IDAwOjU5ICswMTAwLCBMaW51cyBXYWxsZWlqIHdyb3RlOg0K
-PiBBIHByb2JsZW0gaGVyZSBpcyB0aGF0IGlzc3VlaW5nIHRoZSByZXF1ZXN0cyBhcmUgaW4gYmxv
-Y2tpbmcgY29udGV4dA0KPiB3aGlsZSBjb21wbGV0aW9uIGlzIGluIElSUSBjb250ZXh0IChmb3Ig
-bW9zdCBkcml2ZXJzKSBzbyB3ZSBuZWVkIHRvDQo+IGxvb2sgaW50byB0aGlzLg0KDQpIZWxsbyBM
-aW51cywNCg0KQWx0aG91Z2ggSSdtIG5vdCBzdXJlIHdoZXRoZXIgSSB1bmRlcnN0b29kIHlvdSBj
-b3JyZWN0bHk6IGFyZSB5b3UgZmFtaWxpYXINCndpdGggdGhlIHJlcXVlc3QgcXVldWUgZmxhZyBC
-TEtfTVFfRl9CTE9DS0lORywgYSBmbGFnIHRoYXQgd2FzIGludHJvZHVjZWQNCmZvciB0aGUgbmJk
-IGRyaXZlcj8NCg0KQmFydC4=
+T24gTW9uLCAyMDE3LTAxLTAyIGF0IDEyOjA2ICswMTAwLCBIYW5uZXMgUmVpbmVja2Ugd3JvdGU6
+DQo+IEhtbS4gQnV0IHRoYXQgd291bGQgYW1vdW50IHRvIGltcGxlbWVudCB5ZXQgYW5vdGhlciBx
+dWV1aW5nIG1lY2hhbmlzbQ0KPiB3aXRoaW4gdGhlIGRyaXZlci9tbWMgc3Vic3lzdGVtLCB3b3Vs
+ZG4ndCBpdD8NCj4gDQo+IFdoaWNoIGlzLCBpbmNpZGVudGFsbHksIHRoZSBzYW1lIG1ldGhvZCB0
+aGUgUy8zOTAgREFTRCBkcml2ZXIgdXNlcw0KPiBub3dhZGF5czsgcmVwb3J0IGFuIGFyYml0cmFy
+eSBxdWV1ZSBkZXB0aCB0byB0aGUgYmxvY2sgbGF5ZXIgYW5kIHF1ZXVlDQo+IGFsbCByZXF1ZXN0
+cyBpbnRlcm5hbGx5IHRvIGJldHRlciBzYXR1cmF0ZSB0aGUgZGV2aWNlLg0KPiANCj4gSG93ZXZl
+ciBJJ2QgcmVhbGx5IGxpa2UgdG8gZ2V0IHJpZCBvZiB0aGlzLCBhbmQgdHdlYWsgdGhlIGJsb2Nr
+IGxheWVyIHRvDQo+IGhhbmRsZSB0aGVzZSBjYXNlcy4NCg0KSGVsbG8gSGFubmVzLA0KDQpTdWNo
+IGZ1bmN0aW9uYWxpdHkgd2lsbCBiZSBhZGRlZCB0byB0aGUgYmxrLW1xIGNvcmUgYXMgcGFydCBv
+ZiB0aGUNCmluaXRpYXRpdmUgdG8gYWRkIGJsay1tcSBJL08gc2NoZWR1bGluZyBzdXBwb3J0LiBP
+bmUgaW1wbGVtZW50YXRpb24gaGFzIGJlZW4NCnByb3Bvc2VkIGJ5IEplbnMgKGh0dHA6Ly9naXQu
+a2VybmVsLmRrL2NnaXQvbGludXgtYmxvY2svbG9nLz9oPWJsay1tcS1zY2hlZCkNCmFuZCBhbm90
+aGVyIGltcGxlbWVudGF0aW9uIGhhcyBiZWVuIHByb3Bvc2VkIGJ5IG15c2VsZiAoaHR0cHM6Ly9s
+a21sLm9yZy9sa20NCmwvMjAxNi8xMi8yMi8zMjIpLg0KDQpCYXJ0Lg==
