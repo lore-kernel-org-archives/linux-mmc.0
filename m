@@ -1,15 +1,12 @@
 From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: [PATCH 2/5] drivers: mmc: sunxi: limit A64 MMC2 to 8K
- DMA buffer
-Date: Mon,  2 Jan 2017 23:03:43 +0000
-Message-ID: <1483398226-29321-3-git-send-email-andre.przywara@arm.com>
-References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
+Subject: [PATCH 0/5] arm64: sunxi: A64: enable MMC support
+Date: Mon,  2 Jan 2017 23:03:41 +0000
+Message-ID: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
 Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBZNYVPBQKGQELKPVA6Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRBYFYVPBQKGQECDEDMIY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <1483398226-29321-1-git-send-email-andre.przywara-5wv7dgnIgG8@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
@@ -20,58 +17,41 @@ To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.o
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+So far the Allwinner A64/Pine64 DT was missing MMC support, because we
+observed issues with that. Those have now been fixed (patch 1 and 2),
+so we can enable the MMC IP block in the SoC .dtsi and the Pine64 .dts.
+As this gives access to the SD card (as the only mass storage device on
+most boards), this makes the kernel support actually useful.
+The A64 MMC controller has more up its sleeves, but for now this level
+of support is good enough.
+Thanks a lot to Maxime for investigating the eMMC failure and coming up
+with a nice fix for that.
+Maxime: I picked that patch from some pastebin drop of yours, please holler
+if there's something wrong with that (patch 2/5).
 
-Unlike the A64 user manual reports, the third MMC controller on the
-A64 (and the only one capable of 8-bit HS400 eMMC transfers) has a
-DMA buffer size limit of 8KB (much like the very old Allwinner SoCs).
-This does not affect the other two controllers, so introduce a new
-DT compatible string to let the driver use different settings for that
-particular device. This will also help to enable the high-speed transfer
-modes of that controller later.
+I send the BananaPi M64 .dts patch along with that series, as the eMMC on
+that board now makes some difference.
 
-Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
----
- Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
- drivers/mmc/host/sunxi-mmc.c                        | 7 +++++++
- 2 files changed, 8 insertions(+)
+Cheers,
+Andre.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-index 55cdd80..3d9170f 100644
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -14,6 +14,7 @@ Required properties:
-    * "allwinner,sun7i-a20-mmc"
-    * "allwinner,sun9i-a80-mmc"
-    * "allwinner,sun50i-a64-mmc"
-+   * "allwinner,sun50i-a64-emmc"
-  - reg : mmc controller base registers
-  - clocks : a list with 4 phandle + clock specifier pairs
-  - clock-names : must contain "ahb", "mmc", "output" and "sample"
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 1e156e8..165486bc 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1097,12 +1097,19 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
- 	.can_calibrate = true,
- };
- 
-+static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
-+	.idma_des_size_bits = 13,
-+	.clk_delays = sun50i_mmc_clk_delays,
-+	.can_calibrate = true,
-+};
-+
- static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", .data = &sun4i_a10_cfg },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
- 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
-+	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+Andre Przywara (4):
+  drivers: mmc: sunxi: fix A64 calibration routine
+  arm64: dts: sun50i: add MMC nodes
+  arm64: dts: Pine64: add MMC support
+  arm64: dts: add BananaPi-M64 support
+
+Maxime Ripard (1):
+  drivers: mmc: sunxi: limit A64 MMC2 to 8K DMA buffer
+
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |   1 +
+ arch/arm64/boot/dts/allwinner/Makefile             |   1 +
+ .../boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 125 +++++++++++++++++++++
+ .../arm64/boot/dts/allwinner/sun50i-a64-pine64.dts |  18 +++
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi      |  77 +++++++++++++
+ drivers/mmc/host/sunxi-mmc.c                       |  37 ++++--
+ 6 files changed, 247 insertions(+), 12 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
+
 -- 
 2.8.2
