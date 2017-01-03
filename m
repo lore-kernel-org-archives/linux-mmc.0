@@ -1,66 +1,75 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1 1/2] mmc: sdhci-pci: Remove unused member cd_con_id
-Date: Tue, 3 Jan 2017 16:12:05 +0200
-Message-ID: <4b7ca4f1-dd05-f87c-6300-e4583006f90d@intel.com>
-References: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-cadence: add Socionext UniPhier specific
+ compatible string
+Date: Tue, 3 Jan 2017 16:24:22 +0200
+Message-ID: <8026e36e-7e21-9c8f-fe9e-77bc9eae6d51@intel.com>
+References: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:30441 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934958AbdACORP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 3 Jan 2017 09:17:15 -0500
-In-Reply-To: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1481681446-29832-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
+Cc: Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 02/01/17 14:05, Andy Shevchenko wrote:
-> cd_con_id is not used and always NULL.
-> Remove it to make code a bit more cleaner.
+On 14/12/16 04:10, Masahiro Yamada wrote:
+> Add a Socionext SoC specific compatible (suggested by Rob Herring).
 > 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> No SoC specific data are associated with the compatible strings for
+> now, but other SoC vendors may use this IP and want to differentiate
+> IP variants in the future.
+> 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+
+For sdhci:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 3 +--
->  drivers/mmc/host/sdhci-pci.h      | 1 -
->  2 files changed, 1 insertion(+), 3 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 1a72d32af07f..5c275b7d0d53 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -424,7 +424,6 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
->  static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
->  {
->  	slot->host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-> -	slot->cd_con_id = NULL;
->  	slot->cd_idx = 0;
->  	slot->cd_override_level = true;
->  	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXT_SD ||
-> @@ -1817,7 +1816,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
->  
->  	if (slot->cd_idx >= 0) {
-> -		ret = mmc_gpiod_request_cd(host->mmc, slot->cd_con_id, slot->cd_idx,
-> +		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
->  					   slot->cd_override_level, 0, NULL);
->  		if (ret == -EPROBE_DEFER)
->  			goto remove;
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 4abdaed72bd4..36f743464fcc 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -81,7 +81,6 @@ struct sdhci_pci_slot {
->  	int			cd_gpio;
->  	int			cd_irq;
->  
-> -	char			*cd_con_id;
->  	int			cd_idx;
->  	bool			cd_override_level;
->  
+> Changes in v2:
+>   - Add "uniphier" to the compatible to make it more SoC-specific
 > 
-
+>  Documentation/devicetree/bindings/mmc/sdhci-cadence.txt | 6 ++++--
+>  drivers/mmc/host/sdhci-cadence.c                        | 1 +
+>  2 files changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> index 750374f..c0f37cb 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+> @@ -1,7 +1,9 @@
+>  * Cadence SD/SDIO/eMMC Host Controller
+>  
+>  Required properties:
+> -- compatible: should be "cdns,sd4hc".
+> +- compatible: should be one of the following:
+> +    "cdns,sd4hc"               - default of the IP
+> +    "socionext,uniphier-sd4hc" - for Socionext UniPhier SoCs
+>  - reg: offset and length of the register set for the device.
+>  - interrupts: a single interrupt specifier.
+>  - clocks: phandle to the input clock.
+> @@ -19,7 +21,7 @@ if supported.  See mmc.txt for details.
+>  
+>  Example:
+>  	emmc: sdhci@5a000000 {
+> -		compatible = "cdns,sd4hc";
+> +		compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+>  		reg = <0x5a000000 0x400>;
+>  		interrupts = <0 78 4>;
+>  		clocks = <&clk 4>;
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 1501cfd..4b0ecb9 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -262,6 +262,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  }
+>  
+>  static const struct of_device_id sdhci_cdns_match[] = {
+> +	{ .compatible = "socionext,uniphier-sd4hc" },
+>  	{ .compatible = "cdns,sd4hc" },
+>  	{ /* sentinel */ }
+>  };
+> 
