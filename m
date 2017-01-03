@@ -1,71 +1,27 @@
-From: Yong Mao <yong.mao@mediatek.com>
-Subject: [PATCH v2 1/2] mmc: core: Fix CMD6 timeout issue
-Date: Tue, 3 Jan 2017 16:49:56 +0800
-Message-ID: <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
-References: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
+From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v2] Fix CMD6 timeout issue
+Date: Tue, 3 Jan 2017 16:49:55 +0800
+Message-ID: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:37703 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1756262AbdACIuU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 03:50:20 -0500
-In-Reply-To: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Baolin Wang <baolin.wang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Nicolas Boichat <drinkcat-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, yong
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Philipp Zabel <p.zabel@pengutronix.de>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Baolin Wang <baolin.wang@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Douglas Anderson <dianders@chromium.org>, Nicolas Boichat <drinkcat@chromium.org>, Javier Martinez Canillas <javier@osg.samsung.com>, yong
 
-From: yong mao <yong.mao@mediatek.com>
+yong mao (2):
+  mmc: core: Fix CMD6 timeout issue
+  mmc: mediatek: correct the implementation of msdc_card_busy
 
-When initializing EMMC, after switch to HS400,
-it will issue CMD6 to change ext_csd,
-if first CMD6 got CRC error,
-the repeat CMD6 may get timeout,
-that's because card is not back to transfer state immediately.
+ drivers/mmc/core/core.c   | 19 +++++++++++++++++++
+ drivers/mmc/host/mtk-sd.c |  7 ++-----
+ 2 files changed, 21 insertions(+), 5 deletions(-)
 
-For resolving this issue, it need check if card is busy
-before sending repeat CMD6.
-
-Not only CMD6 here has this issue, but also other R1B CMD has
-the same issue.
-
-Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/core/core.c |   19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1076b9d..8674dbb 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -566,6 +566,25 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
- 
- 		mmc_retune_recheck(host);
- 
-+		/*
-+		 * If a R1B CMD such as CMD6 occur CRC error,
-+		 * it will retry 3 times here.
-+		 * But before retrying, it must ensure card is in
-+		 * transfer state.
-+		 * Otherwise, the next retried CMD will got TMO error.
-+		 */
-+		if (mmc_resp_type(cmd) == MMC_RSP_R1B && host->ops->card_busy) {
-+			int tries = 500; /* Wait aprox 500ms at maximum */
-+
-+			while (host->ops->card_busy(host) && --tries)
-+				mmc_delay(1);
-+
-+			if (tries == 0) {
-+				cmd->error = -EBUSY;
-+				break;
-+			}
-+		}
-+
- 		pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
- 			 mmc_hostname(host), cmd->opcode, cmd->error);
- 		cmd->retries--;
 -- 
-1.7.9.5
+1.8.1.1.dirty
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
