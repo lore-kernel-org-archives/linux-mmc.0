@@ -1,220 +1,66 @@
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: Re: [PATCH 3/5] arm64: dts: sun50i: add MMC nodes
-Date: Tue, 3 Jan 2017 21:28:54 +0800
-Message-ID: <CAGb2v65GAvyDn1oMXy2cpOD5PFRoYYOk-VbsMPAX3SNFz2ukLg@mail.gmail.com>
-References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
- <1483398226-29321-4-git-send-email-andre.przywara@arm.com>
- <CAGb2v65GJFTnQZtWHCS7CAtA+Dry94o77aakPLr938BpQksLog@mail.gmail.com> <d4c2233c-95aa-4d72-1501-9ecb62f6cd82@arm.com>
-Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v1 1/2] mmc: sdhci-pci: Remove unused member cd_con_id
+Date: Tue, 3 Jan 2017 16:12:05 +0200
+Message-ID: <4b7ca4f1-dd05-f87c-6300-e4583006f90d@intel.com>
+References: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCMILY6JWQBBBLWOV3BQKGQEFL66IVA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <d4c2233c-95aa-4d72-1501-9ecb62f6cd82-5wv7dgnIgG8@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: =?UTF-8?Q?Andr=C3=A9_Przywara?= <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga07.intel.com ([134.134.136.100]:30441 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934958AbdACORP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Jan 2017 09:17:15 -0500
+In-Reply-To: <20170102120525.178212-1-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On Tue, Jan 3, 2017 at 6:48 PM, Andr=C3=A9 Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org=
-> wrote:
-> On 03/01/17 02:52, Chen-Yu Tsai wrote:
->
-> Hi,
->
->> On Tue, Jan 3, 2017 at 7:03 AM, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> =
-wrote:
->>
->> A commit message explaining the mmc controllers would be nice.
->
-> OK.
->
->>> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
->>> ---
->>>  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 67 +++++++++++++++++++=
-++++++++
->>>  1 file changed, 67 insertions(+)
->>>
->>> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64=
-/boot/dts/allwinner/sun50i-a64.dtsi
->>> index e0dcab8..c680566 100644
->>> --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
->>> +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
->>> @@ -150,6 +150,32 @@
->>>                                 pins =3D "PB8", "PB9";
->>>                                 function =3D "uart0";
->>>                         };
->>> +
->>> +                       mmc0_pins: mmc0@0 {
->>> +                               pins =3D "PF0", "PF1", "PF2", "PF3", "P=
-F4", "PF5";
->>> +                               function =3D "mmc0";
->>> +                               drive-strength =3D <30>;
->>> +                       };
->>> +
->>> +                       mmc0_default_cd_pin: mmc0_cd_pin@0 {
->>> +                               pins =3D "PF6";
->>> +                               function =3D "gpio_in";
->>> +                               bias-pull-up;
->>> +                       };
->>
->> We are starting to drop pinmux nodes for gpio usage.
->
-> And replacing them with what?
-> Or do you mean they go in the individual board .dts files?
-> In this case I believe having a default pin defined here would help to
-> define it in every .dts.
+On 02/01/17 14:05, Andy Shevchenko wrote:
+> cd_con_id is not used and always NULL.
+> Remove it to make code a bit more cleaner.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Nope. I meant dropping them. Pinmux and gpio are orthogonal. One should not
-need to specify a gpio pinmux to use it as a gpio. We added them because in
-the past nothing was preventing someone from claiming an already muxed pin
-as a gpio. On some platforms this is fine. For sunxi, this breaks the syste=
-m,
-as the gpio functions are muxed in.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-The idea moving forward is that these cases should be guarded in the driver=
-.
-Of course we would have to deal with existing dtbs, but lets not add any mo=
-re.
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 3 +--
+>  drivers/mmc/host/sdhci-pci.h      | 1 -
+>  2 files changed, 1 insertion(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 1a72d32af07f..5c275b7d0d53 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -424,7 +424,6 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>  static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>  	slot->host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> -	slot->cd_con_id = NULL;
+>  	slot->cd_idx = 0;
+>  	slot->cd_override_level = true;
+>  	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXT_SD ||
+> @@ -1817,7 +1816,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
+>  
+>  	if (slot->cd_idx >= 0) {
+> -		ret = mmc_gpiod_request_cd(host->mmc, slot->cd_con_id, slot->cd_idx,
+> +		ret = mmc_gpiod_request_cd(host->mmc, NULL, slot->cd_idx,
+>  					   slot->cd_override_level, 0, NULL);
+>  		if (ret == -EPROBE_DEFER)
+>  			goto remove;
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 4abdaed72bd4..36f743464fcc 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -81,7 +81,6 @@ struct sdhci_pci_slot {
+>  	int			cd_gpio;
+>  	int			cd_irq;
+>  
+> -	char			*cd_con_id;
+>  	int			cd_idx;
+>  	bool			cd_override_level;
+>  
+> 
 
->>> +
->>> +                       mmc1_pins: mmc1@0 {
->>> +                               pins =3D "PG0", "PG1", "PG2", "PG3", "P=
-G4", "PG5";
->>> +                               function =3D "mmc1";
->>> +                               drive-strength =3D <30>;
->>> +                       };
->>> +
->>> +                       mmc2_pins: mmc2@0 {
->>> +                               pins =3D "PC1", "PC5", "PC6", "PC8", "P=
-C9",
->>> +                                      "PC10", "PC11", "PC12", "PC13", =
-"PC14",
->>> +                                      "PC15", "PC16";
->>> +                               function =3D "mmc2";
->>> +                               drive-strength =3D <30>;
->>> +                       };
->>
->> Moreover I think you should split out the pinmux nodes to a separate pat=
-ch.
->
-> I can surely do, just wondering what's the rationale is behind that?
-
-More or less the "do one thing in one patch" rationale. Of course you can
-claim these are the defaults used in the reference design and pretty much
-every board out there. Then it makes sense to do them together. :)
-
->
->>
->>>                 };
->>>
->>>                 uart0: serial@1c28000 {
->>> @@ -240,6 +266,47 @@
->>>                         #size-cells =3D <0>;
->>>                 };
->>>
->>> +               mmc0: mmc@1c0f000 {
->>> +                       compatible =3D "allwinner,sun50i-a64-mmc",
->>> +                                    "allwinner,sun5i-a13-mmc";
->>
->> Given that sun5i doesn't support mmc delay timings, and the A64 has
->> calibration and delay timings, I wouldn't call them compatible.
->>
->> Or are you claiming that for the A64 has a delay of 0 for the
->> currently supported speeds, so the calibration doesn't really
->> matter? If so this should be mentioned in the commit message.
->
-> Yes, that's my observation: Driving it with sun5-a13-mmc just works.
-> This sun5i driver version does not (and will never) support higher
-> transfer modes anyway, so for that subset they are compatible. This
-> opens up the door to other operating systems not having a particular
-> driver for the A64, for instance, also older Linux kernels.
-> I know that sunxi doesn't use this compatible feature much, but IMHO we
-> should really start thinking about the DT not just being Linux specific
-> - or even being specific to a certain Linux version. And this case here
-> is a good example: An A13 MMC driver can drive this device - if there is
-> no better driver (an A64 one) available.
-
-Cool. Please put this in the commit log. :)
-
->
->>
->>> +                       reg =3D <0x01c0f000 0x1000>;
->>> +                       clocks =3D <&ccu 31>, <&ccu 75>;
->>
->> The clock / reset index macros are in the tree now.
->> Please switch to them.
->
-> The include file is in the tree, but it isn't used in the current HEAD
-> (as in #included and the actual macros being used in the .dtsi).
-> So I was wondering if there is a patch pending for that?
-
-Not yet I think. Perhaps Maxime will do one once he gets back from vacation=
-?
-
-Regards
-ChenYu
-
->
-> Cheers,
-> Andre
->
->>> +                       clock-names =3D "ahb", "mmc";
->>> +                       resets =3D <&ccu 8>;
->>> +                       reset-names =3D "ahb";
->>> +                       interrupts =3D <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>=
-;
->>> +                       status =3D "disabled";
->>> +                       #address-cells =3D <1>;
->>> +                       #size-cells =3D <0>;
->>> +               };
->>> +
->>> +               mmc1: mmc@1c10000 {
->>> +                       compatible =3D "allwinner,sun50i-a64-mmc",
->>> +                                    "allwinner,sun5i-a13-mmc";
->>> +                       reg =3D <0x01c10000 0x1000>;
->>> +                       clocks =3D <&ccu 32>, <&ccu 76>;
->>> +                       clock-names =3D "ahb", "mmc";
->>> +                       resets =3D <&ccu 9>;
->>> +                       reset-names =3D "ahb";
->>> +                       interrupts =3D <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>=
-;
->>> +                       status =3D "disabled";
->>> +                       #address-cells =3D <1>;
->>> +                       #size-cells =3D <0>;
->>> +               };
->>> +
->>> +               mmc2: mmc@1c11000 {
->>> +                       compatible =3D "allwinner,sun50i-a64-emmc";
->>> +                       reg =3D <0x01c11000 0x1000>;
->>> +                       clocks =3D <&ccu 33>, <&ccu 77>;
->>> +                       clock-names =3D "ahb", "mmc";
->>> +                       resets =3D <&ccu 10>;
->>> +                       reset-names =3D "ahb";
->>> +                       interrupts =3D <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>=
-;
->>> +                       status =3D "disabled";
->>> +                       #address-cells =3D <1>;
->>> +                       #size-cells =3D <0>;
->>> +               };
->>> +
->>>                 gic: interrupt-controller@1c81000 {
->>>                         compatible =3D "arm,gic-400";
->>>                         reg =3D <0x01c81000 0x1000>,
->>> --
->>> 2.8.2
->>>
->
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
