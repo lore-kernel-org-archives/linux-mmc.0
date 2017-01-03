@@ -1,37 +1,55 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 01/21] sh: sh7724: Don't use a public mmc header for
- MMC_PROGRESS*
-Date: Tue, 3 Jan 2017 10:24:39 +0100
-Message-ID: <20170103092439.GH14032@verge.net.au>
-References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
- <1483102054-1752-2-git-send-email-ulf.hansson@linaro.org>
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Subject: Re: mmc: imx: 8-bit bus timeout (4.10-rc1)
+Date: Tue, 3 Jan 2017 10:57:30 +0100
+Message-ID: <20170103095729.hxlke5ewajcrtkzz@t450s.lan>
+References: <20170102191508.ty7wr42pzxhhchaa@t450s.lan>
+ <CAOMZO5AgFM1T5XSZH3U5O6n+=_bi3eq7jS1XX9xTBS9Z+GwD9w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:53181 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755709AbdACJYp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 04:24:45 -0500
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35084 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757951AbdACJ5g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 04:57:36 -0500
+Received: by mail-wm0-f42.google.com with SMTP id a197so380801447wmd.0
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jan 2017 01:57:36 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1483102054-1752-2-git-send-email-ulf.hansson@linaro.org>
+In-Reply-To: <CAOMZO5AgFM1T5XSZH3U5O6n+=_bi3eq7jS1XX9xTBS9Z+GwD9w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-sh@vger.kernel.org, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>
+To: Fabio Estevam <festevam@gmail.com>, ulf.hansson@linaro.org, linus.walleij@linaro.org
+Cc: Shawn Guo <shawnguo@kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, Dec 30, 2016 at 01:47:14PM +0100, Ulf Hansson wrote:
-> The enum that specifies the MMC_PROGRESS* types, is a sh mmcif specific
-> thing and has no relevance in a public mmc header. Currently it's used only
-> by the sh romImage MMCIF boot, so let's instead define the enum in there
-> and rename the types to MMCIF_* to show this.
+Hi Fabio,
+
+On Mon, Jan 02, 2017 at 07:40:43PM -0200, Fabio Estevam wrote:
+> Hi Gary,
 > 
-> Cc: linux-sh@vger.kernel.org
-> Cc: Simon Horman <horms@verge.net.au>
-> Cc: Yoshinori Sato <ysato@users.sourceforge.jp>
-> Cc: Rich Felker <dalias@libc.org>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> On Mon, Jan 2, 2017 at 5:15 PM, Gary Bisson
+> <gary.bisson@boundarydevices.com> wrote:
+> 
+> > Have you seen such behavior? Is the eMMC on the SABRE platform working
+> > fine?
+> 
+> Yes, just noticed the same on a mx6qsabresd.
+> 
+> I haven't had a chance to debug this yet.
+> 
+> If you could run a 'git bisect' that would be great. Thanks
 
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+Doing a 'git bisect' shows that the culprit is [1]:
+e173f891 mmc: core: Update CMD13 polling policy when switch to HS DDR
+mode
 
-I assume there is also a patch to remove the enum from
-include/linux/mmc/boot.h
+Unfortunately I don't know the JEDEC specification enough to know what's
+wrong but the patch broke 8-bit eMMC (HS DDR) on i.MX platforms. Which
+platform has it beend tested on?
+
+Ulf and Linus have been added to the loop since they know the details.
+
+Also, I confirm that reverting that patch on v4.10-rc1 fixes the issue.
+
+Regards,
+Gary
+
+[1] http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core/mmc.c?id=e173f891
