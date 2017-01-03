@@ -1,43 +1,71 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] uapi: use wildcards to list files
-Date: Tue, 03 Jan 2017 22:37:04 +0100
-Message-ID: <2108827.WpE3IvfEdH@wuerfel>
-References: <20161203.192346.1198940437155108508.davem@davemloft.net>
- <1483454144-10519-1-git-send-email-nicolas.dichtel@6wind.com>
+Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
+Date: Wed, 04 Jan 2017 00:06:57 +0100
+Message-ID: <3094495.7JvYrDVNM5@wuerfel>
+References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <2740034.Ea571nGSEf@wuerfel> <1C95E699-F2E5-4502-8A00-79CBEBD019EC@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <1483454144-10519-1-git-send-email-nicolas.dichtel@6wind.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
-Cc: linux-arch@vger.kernel.org, David Howells <dhowells@redhat.com>, linux-nfs@vger.kernel.org, alsa-devel@alsa-project.org, linux-rdma@vger.kernel.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-spi@vger.kernel.org, linux-raid@vger.kernel.org, netfilter-devel@vger.kernel.org, linux-fbdev@vger.kernel.org, xen-devel@lists.xenproject.org, fcoe-devel@open-fcoe.org, linux-mtd@lists.infradead.org, davem@davemloft.net, linux-media@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([217.72.192.73]:64715 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761736AbdACXHH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 18:07:07 -0500
+In-Reply-To: <1C95E699-F2E5-4502-8A00-79CBEBD019EC@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Paolo Valente <paolo.valente@linaro.org>
+Cc: Hannes Reinecke <hare@suse.de>, Linus Walleij <linus.walleij@linaro.org>, Christoph Hellwig <hch@lst.de>, Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-T24gVHVlc2RheSwgSmFudWFyeSAzLCAyMDE3IDM6MzU6NDQgUE0gQ0VUIE5pY29sYXMgRGljaHRl
-bCB3cm90ZToKPiBSZWd1bGFybHksIHdoZW4gYSBuZXcgaGVhZGVyIGlzIGNyZWF0ZWQgaW4gaW5j
-bHVkZS91YXBpLywgdGhlIGRldmVsb3Blcgo+IGZvcmdldHMgdG8gYWRkIGl0IGluIHRoZSBjb3Jy
-ZXNwb25kaW5nIEtidWlsZCBmaWxlLiBUaGlzIGVycm9yIGlzIHVzdWFsbHkKPiBkZXRlY3RlZCBh
-ZnRlciB0aGUgcmVsZWFzZSBpcyBvdXQuCj4gCj4gSW4gZmFjdCwgYWxsIGhlYWRlcnMgdW5kZXIg
-aW5jbHVkZS91YXBpLyBzaG91bGQgYmUgZXhwb3J0ZWQsIHNvIGxldCdzCj4gdXNlIHdpbGRjYXJk
-cy4KCkkgdGhpbmsgdGhlIGlkZWEgbWFrZXMgYSBsb3Qgb2Ygc2Vuc2U6IGlmIGEgaGVhZGVyIGlz
-IGluIHVhcGksIHdlIHNob3VsZApyZWFsbHkgZXhwb3J0IGl0LiBIb3dldmVyLCB1c2luZyBhIHdp
-bGRjYXJkIGV4cHJlc3Npb24gc2VlbXMgYSBiaXQKYmFja3dhcmRzIGhlcmUsIEkgdGhpbmsgd2Ug
-c2hvdWxkIG1ha2UgdGhpcyBpbXBsaWNpdCBhbmQgbm90IGhhdmUgdGhlCktidWlsZCBmaWxlIGF0
-IGFsbC4KClRoZSAiaGVhZGVyLXkiIHN5bnRheCB3YXMgb3JpZ2luYWxseSBhZGRlZCBiYWNrIHdo
-ZW4gdGhlIHVhcGkgaGVhZGVycwp3ZXJlIG1peGVkIHdpdGggdGhlIGludGVybmFsIGhlYWRlcnMg
-aW4gdGhlIHNhbWUgZGlyZWN0b3J5LiBBZnRlcgpEYXZpZCBIb3dlbGxzIGludHJvZHVjZWQgdGhl
-IHNlcGFyYXRlIGRpcmVjdG9yeSBmb3IgdWFwaSwgaXQgaGFzCmJlY29tZSBhIGJpdCByZWR1bmRh
-bnQuCgpDYW4geW91IHRyeSB0byBtb2RpZnkgc2NyaXB0cy9NYWtlZmlsZS5oZWFkZXJzaW5zdCBp
-bnN0ZWFkIHNvIHdlCmNhbiBzaW1wbHkgcmVtb3ZlIHRoZSBLYnVpbGQgZmlsZXMgZW50aXJlbHk/
-CgoJQXJuZApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpk
-cmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0
-cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
+On Tuesday, January 3, 2017 8:50:11 AM CET Paolo Valente wrote:
+> 
+> Sorry for the noise, but, assuming that an ignorant point of view
+> might have some value, exactly because it ignores details, here is my
+> point of view.  IMO the cleanest design would be the one where blk-mq
+> does only the job it has been designed for, i.e., pushes requests into
+> queues, and the driver takes care of the idiosyncrasies of the
+> device.  Concretely, the driver could
+> 1) advertise a long queue (e.g., 32) to be constantly fed with a
+> large window of requests;
+> 2) not pass requests immediately to the device, but keep them as long
+> as needed, before finally handing them to the device.
+> 
+> The driver could then use the window of requests, internally queued, to
+> perform exactly the operations that it now performs with the
+> collaboration of blk, such as command packing.  blk-mq would be
+> unchanged.  If I'm not mistaken, this would match, at least in part,
+> what some of you already proposed in more detail.
+
+I think we have to be careful not to trade latency in one place
+for a bigger latency in another place.
+
+Right now, the handoff between blk and mmc introduces an inherent
+latency in some cases, and blk-mq was designed to avoid that by
+allowing minimizing the number of cpu cycles between the file
+system and the hardware, as well as minimizing the depth of the
+queue on the software side.
+
+Having the driver do its own queuing (as dasd and mmc both do
+today) is worse for both of the above, since you need extra
+context switches for a single I/O with an empty queue, while
+a full queue can add a lot of latency that is out of reach of
+the I/O scheduler: a high-priority request can be moved ahead
+of the block queue, but cannot bypass anything that is already
+in a driver-internal queue.
+
+The tradeoff in both cases is that we can prepare (build a
+dasd channel program, or have dma_map_sg manage cache and
+iommu) a new request while waiting for the previous one,
+reducing the latency between two requests being worked on
+by the hardware on devices without hardware queuing.
+
+We clearly want to have both benefits as much as possible,
+and having a ->prepare() callback is probably better here
+than a longer private queue in the device driver.
+
+With the packed commands on MMC, we have a degenerated queue,
+as we would sometimes submit multiple blk requests together
+as one MMC command. Here, advertizing a longer queue as I
+described earlier may be the best option.
+
+	Arnd
