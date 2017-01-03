@@ -1,59 +1,43 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: Apply caps from bcm2835-mmc driver
-Date: Tue, 3 Jan 2017 21:23:15 +0100 (CET)
-Message-ID: <1751352115.251342.1483474996021@email.1und1.de>
-References: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com>
- <1483111474-29907-2-git-send-email-stefan.wahren@i2se.com>
- <87lgusngn7.fsf@eliezer.anholt.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] uapi: use wildcards to list files
+Date: Tue, 03 Jan 2017 22:37:04 +0100
+Message-ID: <2108827.WpE3IvfEdH@wuerfel>
+References: <20161203.192346.1198940437155108508.davem@davemloft.net>
+ <1483454144-10519-1-git-send-email-nicolas.dichtel@6wind.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87lgusngn7.fsf@eliezer.anholt.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gerd Hoffmann <kraxel@redhat.com>, Eric Anholt <eric@anholt.net>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <1483454144-10519-1-git-send-email-nicolas.dichtel@6wind.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Cc: linux-arch@vger.kernel.org, David Howells <dhowells@redhat.com>, linux-nfs@vger.kernel.org, alsa-devel@alsa-project.org, linux-rdma@vger.kernel.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-spi@vger.kernel.org, linux-raid@vger.kernel.org, netfilter-devel@vger.kernel.org, linux-fbdev@vger.kernel.org, xen-devel@lists.xenproject.org, fcoe-devel@open-fcoe.org, linux-mtd@lists.infradead.org, davem@davemloft.net, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Eric,
-
-> Eric Anholt <eric@anholt.net> hat am 3. Januar 2017 um 19:27 geschrieben:
-> 
-> 
-> Stefan Wahren <stefan.wahren@i2se.com> writes:
-> 
-> > Since the mmc module on bcm2835 neither provide a capabilities register nor 
-> > free documentation we must rely on the downstream implementation [1].
-> 
-> Yeah, caps reg is wired to 0, but it can do high speed.
-> 
-> Since we're VDD_330 only, I'm not sure the driver type flags do
-> anything, but I'm still good with having consistency.
-
-yes, the driver type flags currently have no benefit.
-
-> 
-> Reviewed-by: Eric Anholt <eric@anholt.net>
-> 
-> Interested in porting over the DMA support? :)
-
-AFAIK the sdhci doesn't support external DMA (required for bcm2835).
-So DMA support would result in a new driver, which i'm currently not interested.
-
-But i've prepared a fixup patch series for the sdhost driver i want to send to Gerd.
-
-> 
-> I also noticed that the emmc wrapper module claims it can run with a
-> clock from 50-100mhz, and the arasan says it can run at up to 50, 52, or
-> 208mhz depending on SD/MMC mode.  Could we get a boost from running the
-> module at a higher clock rate?
-
-Sorry, i can't follow. Do you mean DDR mode?
+T24gVHVlc2RheSwgSmFudWFyeSAzLCAyMDE3IDM6MzU6NDQgUE0gQ0VUIE5pY29sYXMgRGljaHRl
+bCB3cm90ZToKPiBSZWd1bGFybHksIHdoZW4gYSBuZXcgaGVhZGVyIGlzIGNyZWF0ZWQgaW4gaW5j
+bHVkZS91YXBpLywgdGhlIGRldmVsb3Blcgo+IGZvcmdldHMgdG8gYWRkIGl0IGluIHRoZSBjb3Jy
+ZXNwb25kaW5nIEtidWlsZCBmaWxlLiBUaGlzIGVycm9yIGlzIHVzdWFsbHkKPiBkZXRlY3RlZCBh
+ZnRlciB0aGUgcmVsZWFzZSBpcyBvdXQuCj4gCj4gSW4gZmFjdCwgYWxsIGhlYWRlcnMgdW5kZXIg
+aW5jbHVkZS91YXBpLyBzaG91bGQgYmUgZXhwb3J0ZWQsIHNvIGxldCdzCj4gdXNlIHdpbGRjYXJk
+cy4KCkkgdGhpbmsgdGhlIGlkZWEgbWFrZXMgYSBsb3Qgb2Ygc2Vuc2U6IGlmIGEgaGVhZGVyIGlz
+IGluIHVhcGksIHdlIHNob3VsZApyZWFsbHkgZXhwb3J0IGl0LiBIb3dldmVyLCB1c2luZyBhIHdp
+bGRjYXJkIGV4cHJlc3Npb24gc2VlbXMgYSBiaXQKYmFja3dhcmRzIGhlcmUsIEkgdGhpbmsgd2Ug
+c2hvdWxkIG1ha2UgdGhpcyBpbXBsaWNpdCBhbmQgbm90IGhhdmUgdGhlCktidWlsZCBmaWxlIGF0
+IGFsbC4KClRoZSAiaGVhZGVyLXkiIHN5bnRheCB3YXMgb3JpZ2luYWxseSBhZGRlZCBiYWNrIHdo
+ZW4gdGhlIHVhcGkgaGVhZGVycwp3ZXJlIG1peGVkIHdpdGggdGhlIGludGVybmFsIGhlYWRlcnMg
+aW4gdGhlIHNhbWUgZGlyZWN0b3J5LiBBZnRlcgpEYXZpZCBIb3dlbGxzIGludHJvZHVjZWQgdGhl
+IHNlcGFyYXRlIGRpcmVjdG9yeSBmb3IgdWFwaSwgaXQgaGFzCmJlY29tZSBhIGJpdCByZWR1bmRh
+bnQuCgpDYW4geW91IHRyeSB0byBtb2RpZnkgc2NyaXB0cy9NYWtlZmlsZS5oZWFkZXJzaW5zdCBp
+bnN0ZWFkIHNvIHdlCmNhbiBzaW1wbHkgcmVtb3ZlIHRoZSBLYnVpbGQgZmlsZXMgZW50aXJlbHk/
+CgoJQXJuZApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpk
+cmktZGV2ZWwgbWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0
+cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
