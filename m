@@ -1,145 +1,71 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC RESEND PATCH 2/2] mmc: sdio: don't use rocr to check if the
- card could support UHS mode
-Date: Tue, 3 Jan 2017 16:08:55 +0800
-Message-ID: <6dfd446e-8fd7-5cfd-c69b-a599b8e40c30@rock-chips.com>
-References: <1481689038-128781-1-git-send-email-shawn.lin@rock-chips.com>
- <1481689038-128781-2-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFqJRCt-krcmJDh1YGtnZOpyLP3d2CMi-ufuX+vwayG33g@mail.gmail.com>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: [PATCH v2 1/2] mmc: core: Fix CMD6 timeout issue
+Date: Tue, 3 Jan 2017 16:49:56 +0800
+Message-ID: <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
+References: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:32861 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933567AbdACIJo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 03:09:44 -0500
-In-Reply-To: <CAPDyKFqJRCt-krcmJDh1YGtnZOpyLP3d2CMi-ufuX+vwayG33g@mail.gmail.com>
+Received: from mailgw02.mediatek.com ([210.61.82.184]:37703 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1756262AbdACIuU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 03:50:20 -0500
+In-Reply-To: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Matthias Brugger <matthias.bgg@gmail.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Philipp Zabel <p.zabel@pengutronix.de>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Baolin Wang <baolin.wang@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Douglas Anderson <dianders@chromium.org>, Nicolas Boichat <drinkcat@chromium.org>, Javier Martinez Canillas <javier@osg.samsung.com>, yong
 
-On 2016/12/29 23:31, Ulf Hansson wrote:
-> On 14 December 2016 at 05:17, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> Per SDIO Simplified Specification V3, section 3.1.2, A host that
->> supports UHS-I sets S18R to 1 in the argument of CMD5 to request a
->> change of the signal voltage to 1.8V. If the card supports UHS-I and
->> the current signal voltage is 3.3V, S18A is set to 1 in the R4 response.
->> If the signal voltage is already 1.8V, the card sets S18A to 0 so that
->> host maintains the current signal voltage. UHS-I is supported in SD mode
->> and S18A is always 0 in SPI mode.
->>
->> For the current code, if the signaling voltage is fixed 1.8v, so
->> the card will set S18A to 0 for rocr and thus we would clear the
->> R4_18V_PRESENT from ocr, which make core won't try to use uhs mode.
->>
->> To fix it, we expect sdio_read_cccr would fail if the uhs mode won't
->> work at all. Note that it's interesting that some sdio cards still
->> response S18A even the voltage is fixed to 1.8v and the CMD11 will
->> also accepted and finish enabling UHS mode successfully. I guess this
->> is why folks didn't notice this problem. Anyway, fix it.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> ---
->>
->>  drivers/mmc/core/sdio.c | 22 +++++++++++++++-------
->>  1 file changed, 15 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->> index 47f824b..1d736e4 100644
->> --- a/drivers/mmc/core/sdio.c
->> +++ b/drivers/mmc/core/sdio.c
->> @@ -636,7 +636,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->>          * to switch to 1.8V signaling level.  No 1.8v signalling if
->>          * UHS mode is not enabled to maintain compatibility and some
->>          * systems that claim 1.8v signalling in fact do not support
->> -        * it.
->> +        * it. Per SDIO spec v3, section 3.1.2, if the voltage is already
->> +        * 1.8v, the card sets S18A to 0 in the R4 response. So it will
->> +        * fails to check rocr & R4_18V_PRESENT,  but we still need to
->> +        * try to init uhs card. sdio_read_cccr will take over this task
->> +        * to make sure which speed mode should work.
->>          */
->>         if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
->>                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
->> @@ -647,9 +651,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->>                 } else if (err) {
->>                         ocr &= ~R4_18V_PRESENT;
->>                 }
->> -               err = 0;
->> -       } else {
->> -               ocr &= ~R4_18V_PRESENT;
->>         }
->>
->>         /*
->> @@ -706,11 +707,18 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->>         }
->>
->>         /*
->> -        * Read the common registers.
->> +        * Read the common registers. Note that we should try to
->> +        * validate whether ush would work or not.
->
-> ush? I guess "UHS" is what you want?
+From: yong mao <yong.mao@mediatek.com>
 
-yes, my typo.
+When initializing EMMC, after switch to HS400,
+it will issue CMD6 to change ext_csd,
+if first CMD6 got CRC error,
+the repeat CMD6 may get timeout,
+that's because card is not back to transfer state immediately.
 
->
->>          */
->> +       retries = 1;
->
->
->
->>         err = sdio_read_cccr(card, ocr);
->> -       if (err)
->> -               goto remove;
->> +       if (err) {
->> +               mmc_sdio_retry_init_card(host, card, &retries);
->> +               if (ocr & R4_18V_PRESENT)
->> +                       goto try_again;
->
-> Re-trying like this, would potentially cause us looping forever.
->
-> Do you really need to retry in this case? If so, there need to be a
-> limit for how many times.
+For resolving this issue, it need check if card is busy
+before sending repeat CMD6.
 
-Actually I set the retries to 1, so it won't cause us looping forever.
+Not only CMD6 here has this issue, but also other R1B CMD has
+the same issue.
 
-But the issue doesn't seems so easy to be fixed as...
-most of the controllers have its own bit to indicate the
-signaling voltage likes UHS_REG for dw_mmc and HISPD for sdhci. If the
-card was fixed to 1V8 and mmc core could not do anything to notify this
-info to the host drivers due to the missing vqmmc. So the situation
-would be the host drivers still use 3V3 internal logic settings to
-communicate with the 1V8 supplied cards when initializing the cards.
-This is a potential risk.
+Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/core/core.c |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-But I didn't have clear idea about how to fix this either.
-New dt property like sdio-fixed-1v8 for mmc_of_parse()?
-
-
-
->
->> +               else
->> +                       goto remove;
->> +       }
->>
->>         /*
->>          * Read the common CIS tuples.
->> --
->> 1.9.1
->>
->
-> Kind regards
-> Uffe
->
->
->
-
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1076b9d..8674dbb 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -566,6 +566,25 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ 		mmc_retune_recheck(host);
+ 
++		/*
++		 * If a R1B CMD such as CMD6 occur CRC error,
++		 * it will retry 3 times here.
++		 * But before retrying, it must ensure card is in
++		 * transfer state.
++		 * Otherwise, the next retried CMD will got TMO error.
++		 */
++		if (mmc_resp_type(cmd) == MMC_RSP_R1B && host->ops->card_busy) {
++			int tries = 500; /* Wait aprox 500ms at maximum */
++
++			while (host->ops->card_busy(host) && --tries)
++				mmc_delay(1);
++
++			if (tries == 0) {
++				cmd->error = -EBUSY;
++				break;
++			}
++		}
++
+ 		pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
+ 			 mmc_hostname(host), cmd->opcode, cmd->error);
+ 		cmd->retries--;
 -- 
-Best Regards
-Shawn Lin
+1.7.9.5
 
