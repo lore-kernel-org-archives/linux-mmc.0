@@ -1,127 +1,145 @@
-From: Paolo Valente <paolo.valente@linaro.org>
-Subject: Re: [PATCH v2] RFD: switch MMC/SD to use blk-mq multiqueueing
-Date: Tue, 3 Jan 2017 08:50:11 +0100
-Message-ID: <1C95E699-F2E5-4502-8A00-79CBEBD019EC@linaro.org>
-References: <1482242508-26131-1-git-send-email-linus.walleij@linaro.org> <2360959.cyJgAELf50@wuerfel> <68863f25-7faa-88b5-78bb-21027f772ab6@suse.de> <2740034.Ea571nGSEf@wuerfel>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <2740034.Ea571nGSEf@wuerfel>
-Sender: linux-block-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Hannes Reinecke <hare@suse.de>, Linus Walleij <linus.walleij@linaro.org>, Christoph Hellwig <hch@lst.de>, Ritesh Harjani <riteshh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RFC RESEND PATCH 2/2] mmc: sdio: don't use rocr to check if the
+ card could support UHS mode
+Date: Tue, 3 Jan 2017 16:08:55 +0800
+Message-ID: <6dfd446e-8fd7-5cfd-c69b-a599b8e40c30@rock-chips.com>
+References: <1481689038-128781-1-git-send-email-shawn.lin@rock-chips.com>
+ <1481689038-128781-2-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFqJRCt-krcmJDh1YGtnZOpyLP3d2CMi-ufuX+vwayG33g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:32861 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933567AbdACIJo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2017 03:09:44 -0500
+In-Reply-To: <CAPDyKFqJRCt-krcmJDh1YGtnZOpyLP3d2CMi-ufuX+vwayG33g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+
+On 2016/12/29 23:31, Ulf Hansson wrote:
+> On 14 December 2016 at 05:17, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>> Per SDIO Simplified Specification V3, section 3.1.2, A host that
+>> supports UHS-I sets S18R to 1 in the argument of CMD5 to request a
+>> change of the signal voltage to 1.8V. If the card supports UHS-I and
+>> the current signal voltage is 3.3V, S18A is set to 1 in the R4 response.
+>> If the signal voltage is already 1.8V, the card sets S18A to 0 so that
+>> host maintains the current signal voltage. UHS-I is supported in SD mode
+>> and S18A is always 0 in SPI mode.
+>>
+>> For the current code, if the signaling voltage is fixed 1.8v, so
+>> the card will set S18A to 0 for rocr and thus we would clear the
+>> R4_18V_PRESENT from ocr, which make core won't try to use uhs mode.
+>>
+>> To fix it, we expect sdio_read_cccr would fail if the uhs mode won't
+>> work at all. Note that it's interesting that some sdio cards still
+>> response S18A even the voltage is fixed to 1.8v and the CMD11 will
+>> also accepted and finish enabling UHS mode successfully. I guess this
+>> is why folks didn't notice this problem. Anyway, fix it.
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> ---
+>>
+>>  drivers/mmc/core/sdio.c | 22 +++++++++++++++-------
+>>  1 file changed, 15 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index 47f824b..1d736e4 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -636,7 +636,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>>          * to switch to 1.8V signaling level.  No 1.8v signalling if
+>>          * UHS mode is not enabled to maintain compatibility and some
+>>          * systems that claim 1.8v signalling in fact do not support
+>> -        * it.
+>> +        * it. Per SDIO spec v3, section 3.1.2, if the voltage is already
+>> +        * 1.8v, the card sets S18A to 0 in the R4 response. So it will
+>> +        * fails to check rocr & R4_18V_PRESENT,  but we still need to
+>> +        * try to init uhs card. sdio_read_cccr will take over this task
+>> +        * to make sure which speed mode should work.
+>>          */
+>>         if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
+>>                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+>> @@ -647,9 +651,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>>                 } else if (err) {
+>>                         ocr &= ~R4_18V_PRESENT;
+>>                 }
+>> -               err = 0;
+>> -       } else {
+>> -               ocr &= ~R4_18V_PRESENT;
+>>         }
+>>
+>>         /*
+>> @@ -706,11 +707,18 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>>         }
+>>
+>>         /*
+>> -        * Read the common registers.
+>> +        * Read the common registers. Note that we should try to
+>> +        * validate whether ush would work or not.
+>
+> ush? I guess "UHS" is what you want?
+
+yes, my typo.
+
+>
+>>          */
+>> +       retries = 1;
+>
+>
+>
+>>         err = sdio_read_cccr(card, ocr);
+>> -       if (err)
+>> -               goto remove;
+>> +       if (err) {
+>> +               mmc_sdio_retry_init_card(host, card, &retries);
+>> +               if (ocr & R4_18V_PRESENT)
+>> +                       goto try_again;
+>
+> Re-trying like this, would potentially cause us looping forever.
+>
+> Do you really need to retry in this case? If so, there need to be a
+> limit for how many times.
+
+Actually I set the retries to 1, so it won't cause us looping forever.
+
+But the issue doesn't seems so easy to be fixed as...
+most of the controllers have its own bit to indicate the
+signaling voltage likes UHS_REG for dw_mmc and HISPD for sdhci. If the
+card was fixed to 1V8 and mmc core could not do anything to notify this
+info to the host drivers due to the missing vqmmc. So the situation
+would be the host drivers still use 3V3 internal logic settings to
+communicate with the 1V8 supplied cards when initializing the cards.
+This is a potential risk.
+
+But I didn't have clear idea about how to fix this either.
+New dt property like sdio-fixed-1v8 for mmc_of_parse()?
 
 
-> Il giorno 02 gen 2017, alle ore 18:08, Arnd Bergmann <arnd@arndb.de> =
-ha scritto:
->=20
-> On Monday, January 2, 2017 12:06:04 PM CET Hannes Reinecke wrote:
->> On 01/02/2017 10:40 AM, Arnd Bergmann wrote:
->>> b) without MMC CMDQ support:
->>>  - report queue depth of '2'
->>>  - first request gets handled as above
->>>  - if one request is pending, prepare the second request and
->>>    add a pointer to the mmc host structure (not that different
->>>    from what we do today)
->>>  - when the host driver completes a request, have it immediately
->>>    issue the next one from the interrupt handler. In case we need
->>>    to sleep here, use a threaded IRQ, or a workqueue. This should
->>>    avoid the need for the NULL requests
->>>=20
->>> c) possible optimization for command packing without CMDQ:
->>>   - similar to b)
->>>   - report a longer queue (e.g. 8, maybe user selectable, to
->>>     balance throughput against latency)
->>>   - any request of the same type (read or write) as the one that
->>>     is currently added to the host as the 'next' one can be
->>>     added to that request so they get issued together
->>>   - if the types are different, report the queue to be busy
->>>=20
->> Hmm. But that would amount to implement yet another queuing mechanism
->> within the driver/mmc subsystem, wouldn't it?
->>=20
->> Which is, incidentally, the same method the S/390 DASD driver uses
->> nowadays; report an arbitrary queue depth to the block layer and =
-queue
->> all requests internally to better saturate the device.
->>=20
->> However I'd really like to get rid of this, and tweak the block layer =
-to
->> handle these cases.
->>=20
->> One idea I had was to use a 'prep' function for mq; it would be =
-executed
->> once the request is added to the queue.
->> Key point here is that 'prep' and 'queue_rq' would be two distinct
->> steps; the driver could do all required setup functionality during
->> 'prep', and then do the actual submission via 'queue_rq'.
->=20
-> Right, I had the same idea and I think even talked to you about that.
-> I think this would address case 'b)' above perfectly, but I don't
-> see how we can fit case 'c)' in that scheme.
->=20
-> Maybe if we could teach blk_mq that a device might be able to not
-> just merge consecutive requests but also a limited set of
-> non-consecutive requests in a way that MMC needs them? Unfortunately,
-> the 'packed command' is rather MMC specific, and it might even
-> be worthwhile to do some optimization regarding what commands
-> get packed (e.g. only writes, only small requests, or only up to
-> a total size).
->=20
-> While there are some parallels to DASD, but it's not completely
-> the same, even if we ignore the command packing.
->=20
-> - MMC wants the 'prepare' stage to reduce the latency from
->  dma_map_sg() calls. This is actually more related to the
->  CPU/SoC architecture and really important on most ARM systems
->  as they are not cache coherent, but it's not just specific
->  to MMC other than MMC performance on low-end ARM being
->  really important to a lot of people since it's used in all
->  Android phones.
->  If we could find a way to get blk_mq to call blk_rq_map_sg()
->  for us, we wouldn't need a ->prepare() step or a fake queue
->  for case 'b)', and we could make use of that in other drivers
->  too.
->=20
-> - DASD in contrast wants to build the channel programs while
->  other I/O is running, and this is very specific to that
->  driver. There are probably some other things it does in its
->  own queue implementation that are also driver specific.
->=20
 
-Sorry for the noise, but, assuming that an ignorant point of view
-might have some value, exactly because it ignores details, here is my
-point of view.  IMO the cleanest design would be the one where blk-mq
-does only the job it has been designed for, i.e., pushes requests into
-queues, and the driver takes care of the idiosyncrasies of the
-device.  Concretely, the driver could
-1) advertise a long queue (e.g., 32) to be constantly fed with a
-large window of requests;
-2) not pass requests immediately to the device, but keep them as long
-as needed, before finally handing them to the device.
+>
+>> +               else
+>> +                       goto remove;
+>> +       }
+>>
+>>         /*
+>>          * Read the common CIS tuples.
+>> --
+>> 1.9.1
+>>
+>
+> Kind regards
+> Uffe
+>
+>
+>
 
-The driver could then use the window of requests, internally queued, to
-perform exactly the operations that it now performs with the
-collaboration of blk, such as command packing.  blk-mq would be
-unchanged.  If I'm not mistaken, this would match, at least in part,
-what some of you already proposed in more detail.
 
-I apologize if I'm talking complete nonsense.
-
-Paolo
-
->> That would allow to better distribute the load for timing-sensitive
->> devices, and with a bit of luck remove the need for a separate =
-queuing
->> inside the driver.
->>=20
->> In any case, it looks like a proper subject for LSF/MM...
->> Linus? Arnd? Are you up for it?
->=20
-> I'm probably not going to work on it myself, but I think it would
-> be great for Linus and/or Ulf to bring this up at LSF/MM.
->=20
-> 	Arnd
+-- 
+Best Regards
+Shawn Lin
 
