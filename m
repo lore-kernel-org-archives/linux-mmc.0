@@ -1,158 +1,86 @@
-From: ayaka <ayaka@soulik.info>
-Subject: Re: [PATCH v2] mmc: dw_mmc: revise the reset path in runtime resume
-Date: Thu, 5 Jan 2017 00:04:45 +0800
-Message-ID: <dc2d8514-6b01-150e-12a1-a47302c44723@soulik.info>
-References: <1483534293-6192-1-git-send-email-xzy.xu@rock-chips.com>
+From: Eric Anholt <eric@anholt.net>
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: Apply caps from bcm2835-mmc driver
+Date: Wed, 04 Jan 2017 10:16:06 -0800
+Message-ID: <871swi8zdl.fsf@eliezer.anholt.net>
+References: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com> <1483111474-29907-2-git-send-email-stefan.wahren@i2se.com> <87lgusngn7.fsf@eliezer.anholt.net> <1751352115.251342.1483474996021@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha512; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kozue.soulik.info ([108.61.200.231]:56310 "EHLO
-        kozue.soulik.info" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936147AbdADQEx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2017 11:04:53 -0500
-In-Reply-To: <1483534293-6192-1-git-send-email-xzy.xu@rock-chips.com>
+Received: from anholt.net ([50.246.234.109]:48420 "EHLO anholt.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757840AbdADSXi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Jan 2017 13:23:38 -0500
+In-Reply-To: <1751352115.251342.1483474996021@email.1und1.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ziyuan Xu <xzy.xu@rock-chips.com>, shawn.lin@rock-chips.com
-Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jon Mason <jonmason@broadcom.com>
 
+--=-=-=
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
+Stefan Wahren <stefan.wahren@i2se.com> writes:
 
-On 01/04/2017 08:51 PM, Ziyuan Xu wrote:
-> Immediately after reset, issue the command which sets
-> update_clock_register_only bit, the card clock will restart. Revise
-> dw_mci_ctrl_reset to dw_mci_reset, which has wrapped this sequence.
+> Hi Eric,
 >
-> The patch fixes commit e9ed8835e990 ("mmc: dw_mmc: add runtime PM
-> callback"). MMC_PM_KEEP_POWEP is disabled for SD card and eMMC slots, so
-> that they have no chance to invoke dw_mci_setup_bus for update clock
-> behaviour. Let's consummate it.
+>> Eric Anholt <eric@anholt.net> hat am 3. Januar 2017 um 19:27 geschrieben:
+>>=20
+>>=20
+>> Stefan Wahren <stefan.wahren@i2se.com> writes:
+>>=20
+>> > Since the mmc module on bcm2835 neither provide a capabilities registe=
+r nor=20
+>> > free documentation we must rely on the downstream implementation [1].
+>>=20
+>> Yeah, caps reg is wired to 0, but it can do high speed.
+>>=20
+>> Since we're VDD_330 only, I'm not sure the driver type flags do
+>> anything, but I'm still good with having consistency.
 >
-> Reported-by: Randy Li <randy.li@rock-chips.com>
-> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
-Thank you Ziyuan, it works for me, but I capture those warning message 
-in boot log
-[    5.943096] Unable to handle kernel NULL pointer dereference at 
-virtual address 00000004
-[    5.951227] pgd = c0004000
-[    5.953958] [00000004] *pgd=00000000
-[    5.957563] Internal error: Oops: 5 [#1] SMP ARM
-[    5.962177] Modules linked in:
-[    5.965238] CPU: 0 PID: 117 Comm: kworker/0:3 Not tainted 
-4.9.0-next-20161224+ #122
-[    5.972875] Hardware name: Rockchip (Device Tree)
-[    5.977586] Workqueue: events_freezable mmc_rescan
-[    5.982377] task: ee186740 task.stack: ee1d2000
-[    5.986908] PC is at mci_send_cmd.constprop.5+0x20/0xb0
-[    5.992129] LR is at dw_mci_reset+0xdc/0x130
-[    5.996400] pc : [<c05cf464>]    lr : [<c05d0308>] psr: 60000013
-[    5.996400] sp : ee1d3d38  ip : ee1d3d68  fp : ee1d3d64
-[    6.007862] r10: ee1d2000  r9 : c04fe918  r8 : c04fe918
-[    6.013083] r7 : c0c03d00  r6 : ee171780  r5 : c0c03d00  r4 : ee17e618
-[    6.019604] r3 : 00000201  r2 : f08e4000  r1 : 00200000  r0 : 00000000
-[    6.026127] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM 
-Segment none
-[    6.033253] Control: 10c5387d  Table: 0000406a  DAC: 00000051
-[    6.038994] Process kworker/0:3 (pid: 117, stack limit = 0xee1d2210)
-[    6.045340] Stack: (0xee1d3d38 to 0xee1d4000)
-[    6.049696] 
-3d20:                                                       c0495ed0 
-c0714e60
-[    6.057870] 3d40: ee17e618 00000001 ee171780 c0c03d00 c04fe918 
-c04fe918 ee1d3d7c ee1d3d68
-[    6.066043] 3d60: c05d0308 c05cf450 ee17e618 00000000 ee1d3da4 
-ee1d3d80 c05d07fc c05d0238
-[    6.074216] 3d80: 00000000 eeae5a10 00000000 c0c03d00 c04fe918 
-c04fe918 ee1d3db4 ee1d3da8
-[    6.082389] 3da0: c04fe954 c05d0718 ee1d3dec ee1d3db8 c0501c70 
-c04fe924 c0162310 c044f7b0
-[    6.090563] 3dc0: 00000000 eeae5a10 c0c62510 00000000 c0c03d00 
-c04fe918 c0175574 ee1d2000
-[    6.098737] 3de0: ee1d3e0c ee1d3df0 c0501df0 c0501b88 eeae5a10 
-c0c62510 00000000 c0c03d00
-[    6.106911] 3e00: ee1d3e5c ee1d3e10 c0501898 c0501dcc c0c0408c 
-eeae5aa8 eeda0d00 00000000
-[    6.115085] 3e20: c0c04108 ee1867c0 ee1d3eac 00040900 c016e53c 
-eeae5a10 00000004 eeae5a84
-[    6.123259] 3e40: 60000013 ee1d2000 c0c0408c ee160c00 ee1d3e7c 
-ee1d3e60 c0501b5c c05013e4
-[    6.131433] 3e60: 00000000 ee160e1c 20000013 00000000 ee1d3ecc 
-ee1d3e80 c05b0128 c0501af8
-[    6.139607] 3e80: ffffe000 ee160e80 00000000 ee186740 c0156324 
-00000100 00000200 00040900
-[    6.147781] 3ea0: ee1d3f14 ee160e94 ee160e1c ee160c00 60000013 
-eeda3e00 ee160e98 00000000
-[    6.155956] 3ec0: ee1d3ef4 ee1d3ed0 c05b3a68 c05aff80 ee160e94 
-ee176380 eeda0880 00000000
-[    6.164130] 3ee0: eeda3e00 ee160e98 ee1d3f2c ee1d3ef8 c0142374 
-c05b383c c0c03d00 eeda0898
-[    6.172303] 3f00: ee1d2000 eeda0880 ee176398 00000008 c0c03d00 
-eeda0898 ee1d2000 ee176380
-[    6.180477] 3f20: ee1d3f74 ee1d3f30 c014329c c01421d0 ee1d3f54 
-c0959c8c ee1d2000 00000000
-[    6.188650] 3f40: ee15a880 c0c20f1a ee1d1e7c eea00600 ee1d2000 
-00000000 ee15a880 ee176380
-[    6.196824] 3f60: ee1d1e7c eea0061c ee1d3fac ee1d3f78 c0148ed0 
-c0143248 00000000 c014323c
-[    6.204996] 3f80: ee1d3fac ee15a880 c0148da8 00000000 00000000 
-00000000 00000000 00000000
-[    6.213168] 3fa0: 00000000 ee1d3fb0 c0108e90 c0148db4 00000000 
-00000000 00000000 00000000
-[    6.221341] 3fc0: 00000000 00000000 00000000 00000000 00000000 
-00000000 00000000 00000000
-[    6.229514] 3fe0: 00000000 00000000 00000000 00000000 00000013 
-00000000 ffffffff ffffffff
-[    6.237696] [<c05cf464>] (mci_send_cmd.constprop.5) from [<c05d0308>] 
-(dw_mci_reset+0xdc/0x130)
-[    6.246393] [<c05d0308>] (dw_mci_reset) from [<c05d07fc>] 
-(dw_mci_runtime_resume+0xf0/0x1cc)
-[    6.254833] [<c05d07fc>] (dw_mci_runtime_resume) from [<c04fe954>] 
-(pm_generic_runtime_resume+0x3c/0x48)
-[    6.264313] [<c04fe954>] (pm_generic_runtime_resume) from 
-[<c0501c70>] (__rpm_callback+0xf4/0x244)
-[    6.273273] [<c0501c70>] (__rpm_callback) from [<c0501df0>] 
-(rpm_callback+0x30/0x90)
-[    6.281017] [<c0501df0>] (rpm_callback) from [<c0501898>] 
-(rpm_resume+0x4c0/0x714)
-[    6.288588] [<c0501898>] (rpm_resume) from [<c0501b5c>] 
-(__pm_runtime_resume+0x70/0x90)
-[    6.296592] [<c0501b5c>] (__pm_runtime_resume) from [<c05b0128>] 
-(__mmc_claim_host+0x1b4/0x1ec)
-[    6.305287] [<c05b0128>] (__mmc_claim_host) from [<c05b3a68>] 
-(mmc_rescan+0x238/0x3f4)
-[    6.313206] [<c05b3a68>] (mmc_rescan) from [<c0142374>] 
-(process_one_work+0x1b0/0x4c0)
-[    6.321125] [<c0142374>] (process_one_work) from [<c014329c>] 
-(worker_thread+0x60/0x548)
-[    6.329215] [<c014329c>] (worker_thread) from [<c0148ed0>] 
-(kthread+0x128/0x158)
-[    6.336614] [<c0148ed0>] (kthread) from [<c0108e90>] 
-(ret_from_fork+0x14/0x24)
-[    6.343836] Code: e52de004 e8bd4000 e3035d00 e34c50c0 (e5909004)
-[    6.349974] ---[ end trace b2215a1ef671f11e ]---
+> yes, the driver type flags currently have no benefit.
+>
+>>=20
+>> Reviewed-by: Eric Anholt <eric@anholt.net>
+>>=20
+>> Interested in porting over the DMA support? :)
+>
+> AFAIK the sdhci doesn't support external DMA (required for bcm2835).
+> So DMA support would result in a new driver, which i'm currently not inte=
+rested.
+>
+> But i've prepared a fixup patch series for the sdhost driver i want to se=
+nd to Gerd.
+>
+>>=20
+>> I also noticed that the emmc wrapper module claims it can run with a
+>> clock from 50-100mhz, and the arasan says it can run at up to 50, 52, or
+>> 208mhz depending on SD/MMC mode.  Could we get a boost from running the
+>> module at a higher clock rate?
+>
+> Sorry, i can't follow. Do you mean DDR mode?
 
->
-> ---
->
-> Changes in v2:
-> - update the commit message
-> - use dw_mci_reset instead of dw_mci_ctrl_reset
->
->   drivers/mmc/host/dw_mmc.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index b44306b..ed63237 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3324,7 +3324,7 @@ int dw_mci_runtime_resume(struct device *dev)
->   	if (ret)
->   		goto err;
->   
-> -	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
-> +	if (!dw_mci_reset(host)) {
->   		clk_disable_unprepare(host->ciu_clk);
->   		ret = -ENODEV;
->   		goto err;
+Apparently I what I was reading about was SDR104 mode, which also
+requires 1.8V.
 
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAlhtO+YACgkQtdYpNtH8
+nui/jxAAsDJ8FUnizuI4gNzeB8J4cJIS+IylkdVBLl9htXqNxoxWIToieUC5Q42C
+xaECcCQFJaPtG9YxDrTsG8etVPnAVOuRySkePRm3QftCeNUf6Yzhf7r3ZUGeIGEj
++19jS21nxP8Vndlu3kI+5K/oJF+Yve4/YxXGdln1DFQwm2kmuUK0NJwY56vWGbOM
+uHl5NVJoWApvUx6omTui40nqmtcy/mnvfJPKSiqvzkHgT3z98v9gU6bOrtS/9i4g
+i8VSXvQg7wyoxYx5ofHblsj4QU+L6m4B+3FRCKhQK2f7zzeG3ej4ktnVOJzRMAS0
+lXPVHk7Bp6uFdpFT47KzIt5awENoQ3tYps6UNBzVzObmi/C/TEKJScmm1/29O1ve
+BEh3/EuRM3Xdzidj/ZHJaXIslle19ahQyNxM3CLaj1EuouBhOSDDhKZbAGb/N3NP
+8j5J5qcHk+r+PMaKu/FeYhJZtUtVEPKECOWiqN/GInTIA36XMAXNYHkpQcijz3dO
+9NiV0+t+6ECQeBUzsVkTQ2zOYm713klPEBPDhTGXsybXFN+w3T9pFL/cWo7Ispvw
+NpMaT3Lff7HUsOplKmnMIA+puP97u4KF/sTu4LoVKcFsdVHSWnLgq+/8RQZXrWNl
+0bnmQuFSDy7zFQZTs/QMZF/1WgK9owy3H178qY6Un2P7IZS8l4A=
+=zE9V
+-----END PGP SIGNATURE-----
+--=-=-=--
