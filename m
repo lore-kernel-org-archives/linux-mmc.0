@@ -1,42 +1,89 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH PoCv2 0/2] mmc: add blk-mq support
-Date: Wed, 4 Jan 2017 11:18:14 +0100
-Message-ID: <CACRpkdYEqbpU0sc+-CvJh32hnrM0G=SYQBhb5r34ofmYyBoD3g@mail.gmail.com>
-References: <CGME20170103173113epcas5p3bcc48e614ca71c27917a966640321138@epcas5p3.samsung.com>
- <1483464618-16133-1-git-send-email-b.zolnierkie@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ziyuan Xu <xzy.xu@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: Fix some coding style
+Date: Wed,  4 Jan 2017 20:52:56 +0800
+Message-ID: <1483534376-6521-1-git-send-email-xzy.xu@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1483464618-16133-1-git-send-email-b.zolnierkie@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg KH <gregkh@linuxfoundation.org>, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@fb.com>, Hannes Reinecke <hare@suse.com>, Tejun Heo <tj@kernel.org>, Omar Sandoval <osandov@osandov.com>, Christoph Hellwig <hch@lst.de>, Bart Van Assche <Bart.VanAssche@sandisk.com>, Baolin Wang <baolin.wang@linaro.org>, Ritesh Harjani <riteshh@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Chunyan Zhang <zhang.chunyan@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc: linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 3, 2017 at 6:30 PM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
+Let's fix the warnings from checkpatch.pl:
 
-Interesting patch!
+- line over 80 characters;
+- block comments should align the * on each Lines;
+- statements not starting on a tabstop.
 
-> The differences between these patches and Linus' RFD patch:
-> - request completion is handled from the IRQ handler
->   (or tasklet context as happens in dw_mmc host driver)
+Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+---
 
-I think we need to make a patch like this separately to the
-current (only old blk) code, to stop the kthread from forcing
-in NULL requests to clean the pipeline.
+ drivers/mmc/host/dw_mmc.c | 33 +++++++++++++++++----------------
+ 1 file changed, 17 insertions(+), 16 deletions(-)
 
-We should also avoid sending any completion at
-all: if we know we only get one request at a time as your
-patch does, there is no reason to wait for a completion: we
-will always be complete when a new request arrives.
-
-Same with two requests in parallel, we can trust the block
-layer to not send more than 2 (the queue depth) so there is
-no reason to wait for a completion.
-
-I'm trying to work in this direction at least, your patch is great
-inspiration!
-
-Yours,
-Linus Walleij
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ed63237..a8efe3f 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -94,7 +94,8 @@ struct idmac_desc {
+ 
+ 	__le32		des1;	/* Buffer sizes */
+ #define IDMAC_SET_BUFFER1_SIZE(d, s) \
+-	((d)->des1 = ((d)->des1 & cpu_to_le32(0x03ffe000)) | (cpu_to_le32((s) & 0x1fff)))
++	((d)->des1 = ((d)->des1 & cpu_to_le32(0x03ffe000)) | \
++	 (cpu_to_le32((s) & 0x1fff)))
+ 
+ 	__le32		des2;	/* buffer 1 physical address */
+ 
+@@ -2733,16 +2734,16 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 	struct device_node *np = dev->of_node;
+ 
+ 	/*
+-	* Check tansfer mode from HCON[17:16]
+-	* Clear the ambiguous description of dw_mmc databook:
+-	* 2b'00: No DMA Interface -> Actually means using Internal DMA block
+-	* 2b'01: DesignWare DMA Interface -> Synopsys DW-DMA block
+-	* 2b'10: Generic DMA Interface -> non-Synopsys generic DMA block
+-	* 2b'11: Non DW DMA Interface -> pio only
+-	* Compared to DesignWare DMA Interface, Generic DMA Interface has a
+-	* simpler request/acknowledge handshake mechanism and both of them
+-	* are regarded as external dma master for dw_mmc.
+-	*/
++	 * Check tansfer mode from HCON[17:16]
++	 * Clear the ambiguous description of dw_mmc databook:
++	 * 2b'00: No DMA Interface -> Actually means using Internal DMA block
++	 * 2b'01: DesignWare DMA Interface -> Synopsys DW-DMA block
++	 * 2b'10: Generic DMA Interface -> non-Synopsys generic DMA block
++	 * 2b'11: Non DW DMA Interface -> pio only
++	 * Compared to DesignWare DMA Interface, Generic DMA Interface has a
++	 * simpler request/acknowledge handshake mechanism and both of them
++	 * are regarded as external dma master for dw_mmc.
++	 */
+ 	host->use_dma = SDMMC_GET_TRANS_MODE(mci_readl(host, HCON));
+ 	if (host->use_dma == DMA_INTERFACE_IDMA) {
+ 		host->use_dma = TRANS_MODE_IDMAC;
+@@ -2756,9 +2757,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 	/* Determine which DMA interface to use */
+ 	if (host->use_dma == TRANS_MODE_IDMAC) {
+ 		/*
+-		* Check ADDR_CONFIG bit in HCON to find
+-		* IDMAC address bus width
+-		*/
++		 * Check ADDR_CONFIG bit in HCON to find
++		 * IDMAC address bus width
++		 */
+ 		addr_config = SDMMC_GET_ADDR_CONFIG(mci_readl(host, HCON));
+ 
+ 		if (addr_config == 1) {
+@@ -3337,8 +3338,8 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	 * Restore the initial value at FIFOTH register
+ 	 * And Invalidate the prev_blksz with zero
+ 	 */
+-	 mci_writel(host, FIFOTH, host->fifoth_val);
+-	 host->prev_blksz = 0;
++	mci_writel(host, FIFOTH, host->fifoth_val);
++	host->prev_blksz = 0;
+ 
+ 	/* Put in max timeout */
+ 	mci_writel(host, TMOUT, 0xFFFFFFFF);
+-- 
+2.7.4
