@@ -1,72 +1,52 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH 2/5] drivers: mmc: sunxi: limit A64 MMC2 to
- 8K DMA buffer
-Date: Thu, 5 Jan 2017 18:57:46 +0100
-Message-ID: <20170105175746.fq6crpc3krz7tzxi@lukather>
-References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
- <1483398226-29321-3-git-send-email-andre.przywara@arm.com>
- <20170104140750.7qs4pvggwjdj5cma@rob-hp-laptop>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="chu2rgfkbjn4epfw"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBM4SXLBQKGQEOGGHP7I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <20170104140750.7qs4pvggwjdj5cma@rob-hp-laptop>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH next] mmc: mxs-mmc: Fix additional cycles after transmission stop
+Date: Thu,  5 Jan 2017 19:24:04 +0000
+Message-ID: <1483644245-7538-1-git-send-email-stefan.wahren@i2se.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.187]:57803 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1763560AbdAETZk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2017 14:25:40 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Guo <shawnguo@kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Marek Vasut <marex@denx.de>, =?UTF-8?q?Lothar=20Wa=C3=9Fmann?= <lw@karo-electronics.de>, linux-mmc@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>
 
+According to the code the intention is to append 8 SCK cycles
+instead of 4 at end of a MMC_STOP_TRANSMISSION command. But this
+will never happened because it's an AC command not an ADTC command.
+So fix this by moving the statement into the right function.
 
---chu2rgfkbjn4epfw
-Content-Type: text/plain; charset=UTF-8
-Content-Disposition: inline
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Fixes: e4243f13d10e (mmc: mxs-mmc: add mmc host driver for i.MX23/28)
+---
+ drivers/mmc/host/mxs-mmc.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-Hi Rob,
-
-On Wed, Jan 04, 2017 at 08:07:50AM -0600, Rob Herring wrote:
-> On Mon, Jan 02, 2017 at 11:03:43PM +0000, Andre Przywara wrote:
-> > From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-> > 
-> > Unlike the A64 user manual reports, the third MMC controller on the
-> > A64 (and the only one capable of 8-bit HS400 eMMC transfers) has a
-> > DMA buffer size limit of 8KB (much like the very old Allwinner SoCs).
-> > This does not affect the other two controllers, so introduce a new
-> > DT compatible string to let the driver use different settings for that
-> > particular device. This will also help to enable the high-speed transfer
-> > modes of that controller later.
-> > 
-> > Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-> > Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
-> >  drivers/mmc/host/sunxi-mmc.c                        | 7 +++++++
-> >  2 files changed, 8 insertions(+)
-> 
-> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-
-Some kind of a digression on this: we have three MMC controllers on
-this SoC. Like this patch shows, the third one is clearly different,
-and supports both more modes, a wider bus, and specific quirks. We
-need a new compatible for this one, everything's perfect.
-
-However, the other two are mostly the same, but seems to need
-different tuning parameters to get more performances out of the
-controller (but this is unclear yet). How do we usually deal with
-that?
-
-Thanks,
-Maxime
-
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 44ecebd..c8b8ac6 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -309,6 +309,9 @@ static void mxs_mmc_ac(struct mxs_mmc_host *host)
+ 	cmd0 = BF_SSP(cmd->opcode, CMD0_CMD);
+ 	cmd1 = cmd->arg;
+ 
++	if (cmd->opcode == MMC_STOP_TRANSMISSION)
++		cmd0 |= BM_SSP_CMD0_APPEND_8CYC;
++
+ 	if (host->sdio_irq_en) {
+ 		ctrl0 |= BM_SSP_CTRL0_SDIO_IRQ_CHECK;
+ 		cmd0 |= BM_SSP_CMD0_CONT_CLKING_EN | BM_SSP_CMD0_SLOW_CLKING_EN;
+@@ -417,8 +420,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
+ 		       ssp->base + HW_SSP_BLOCK_SIZE);
+ 	}
+ 
+-	if ((cmd->opcode == MMC_STOP_TRANSMISSION) ||
+-	    (cmd->opcode == SD_IO_RW_EXTENDED))
++	if (cmd->opcode == SD_IO_RW_EXTENDED)
+ 		cmd0 |= BM_SSP_CMD0_APPEND_8CYC;
+ 
+ 	cmd1 = cmd->arg;
 -- 
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
---chu2rgfkbjn4epfw--
+1.7.9.5
+
