@@ -1,101 +1,70 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH v4] mmc: dw_mmc: force setup bus if active slots exist
-Date: Thu, 5 Jan 2017 15:34:16 +0800
-Message-ID: <49544a65-9b3c-c56a-e5f7-89c5fa6e6cd0@rock-chips.com>
-References: <1483601012-18241-1-git-send-email-xzy.xu@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RESEND] sdhci: Only handle CARD_INT for SDIO cards
+Date: Thu, 5 Jan 2017 11:36:49 +0200
+Message-ID: <39099b85-e55c-ac70-8e0f-889638a68418@intel.com>
+References: <20170102182350.14326-1-krisman@collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1483601012-18241-1-git-send-email-xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, randy.li-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:41864 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1762478AbdAEJl7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 5 Jan 2017 04:41:59 -0500
+In-Reply-To: <20170102182350.14326-1-krisman@collabora.co.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 
-On 2017/1/5 15:23, Ziyuan Xu wrote:
-> It's necessary to setup bus if any slots are present.
-> - update clock after ctrl reset
-> - if the host has genpd node, we can guarantee the clock is available
-> before starting request. Otherwies, the clock register is reset once
-> power off the pd, and host can't output the active clock during
-> communication.
->
-> fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
-> Reported-by: Randy Li <randy.li-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->
+On 02/01/17 20:23, Gabriel Krisman Bertazi wrote:
+> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
+> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
+> reads, which are not allowed for SD devices.  This adds a sanity check
+> to the interruption path, preventing that illegal command from getting
+> sent to SD devices.
+> 
+> This quirk allows that particular machine to resume boot despite the
+> faulty hardware, instead of getting hung dealing with thousands of
+> mishandled interrupts.
+> 
+> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+> CC: Adrian Hunter <adrian.hunter@intel.com>
+> CC: Ulf Hansson <ulf.hansson@linaro.org>
+> CC: linux-mmc@vger.kernel.org
 > ---
-> Hi guys,
->
-> I found a similar issue on rk3399 platform, which has a genpd node for
-> SD card host. Power off-on pd will reset the registers to a default
-> value (ie. CLKENA), so that the host can't output the active clock
-> during communication.
->
+>  drivers/mmc/host/sdhci.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 23909804ffb8..43913876581e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2665,6 +2665,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  {
+>  	irqreturn_t result = IRQ_NONE;
+>  	struct sdhci_host *host = dev_id;
+> +	struct mmc_host *mmc = host->mmc;
+>  	u32 intmask, mask, unexpected = 0;
+>  	int max_loops = 16;
+>  
+> @@ -2733,7 +2734,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  		if (intmask & SDHCI_INT_RETUNE)
+>  			mmc_retune_needed(host->mmc);
+>  
+> -		if (intmask & SDHCI_INT_CARD_INT) {
+> +		if (intmask & SDHCI_INT_CARD_INT && mmc->card &&
+> +		    (mmc->card->type == MMC_TYPE_SDIO ||
+> +		     mmc->card->type == MMC_TYPE_SD_COMBO)) {
 
-Indeed, Caesar recently introduced all the genpd for rk3399 platform,
-so we need to restore them.
+We shouldn't have to look at the card type.  But if the interrupt is not
+enabled, then we shouldn't process it.  What about:
 
-> So we need to setup bus in rpm resume. It also wraps the update clock
-> behaviour which I did in V3.
->
-> Thanks,
-> Ziyuan Xu
->
->
-> Changes in v4:
-> - update commit message
-> - fix SD host rpm resume can't work
->
-> Changes in v3:
-> - only reset host with active slot.
->
-> Changes in v2:
-> - update the commit message
-> - use dw_mci_reset instead of dw_mci_ctrl_reset
->
->  drivers/mmc/host/dw_mmc.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index b44306b..b6053b3 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3354,10 +3354,10 @@ int dw_mci_runtime_resume(struct device *dev)
->
->  		if (!slot)
->  			continue;
-> -		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
-> +		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->  			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-> -			dw_mci_setup_bus(slot, true);
-> -		}
-> +		/* Force setup bus to guarantee available clock output */
-> +		dw_mci_setup_bus(slot, true);
+		if (intmask & SDHCI_INT_CARD_INT &&
+		    (host->ier & SDHCI_INT_CARD_INT)) {
 
-So the spamming message about
+>  			sdhci_enable_sdio_irq_nolock(host, false);
+>  			host->thread_isr |= SDHCI_INT_CARD_INT;
+>  			result = IRQ_WAKE_THREAD;
+> 
 
-"Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n"
-
-will always be there, right? So you could append a new patch to shut
-up it as I think it's useless no matter for system pm or rpm to print
-it.  How about?
-
->  	}
->
->  	/* Now that slots are all setup, we can enable card detect */
->
-
-
--- 
-Best Regards
-Shawn Lin
