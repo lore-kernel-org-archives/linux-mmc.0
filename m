@@ -1,70 +1,71 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RESEND] sdhci: Only handle CARD_INT for SDIO cards
-Date: Thu, 5 Jan 2017 11:36:49 +0200
-Message-ID: <39099b85-e55c-ac70-8e0f-889638a68418@intel.com>
-References: <20170102182350.14326-1-krisman@collabora.co.uk>
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: Apply caps from bcm2835-mmc driver
+Date: Thu, 5 Jan 2017 11:53:17 +0200
+Message-ID: <efecfb41-9696-dfb8-69da-966cfbc27078@intel.com>
+References: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com>
+ <1483111474-29907-2-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:41864 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1762478AbdAEJl7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 5 Jan 2017 04:41:59 -0500
-In-Reply-To: <20170102182350.14326-1-krisman@collabora.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1483111474-29907-2-git-send-email-stefan.wahren@i2se.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 
-On 02/01/17 20:23, Gabriel Krisman Bertazi wrote:
-> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
-> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
-> reads, which are not allowed for SD devices.  This adds a sanity check
-> to the interruption path, preventing that illegal command from getting
-> sent to SD devices.
+On 30/12/16 17:24, Stefan Wahren wrote:
+> Since the mmc module on bcm2835 neither provide a capabilities register nor 
+> free documentation we must rely on the downstream implementation [1].
 > 
-> This quirk allows that particular machine to resume boot despite the
-> faulty hardware, instead of getting hung dealing with thousands of
-> mishandled interrupts.
+> So enable the following capabilities for bcm2835:
 > 
-> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-> CC: Adrian Hunter <adrian.hunter@intel.com>
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
-> CC: linux-mmc@vger.kernel.org
+> MMC_CAP_MMC_HIGHSPEED
+> MMC_CAP_SD_HIGHSPEED
+> MMC_CAP_DRIVER_TYPE_A
+> MMC_CAP_DRIVER_TYPE_C
+> 
+> [1] - https://github.com/raspberrypi/linux/blob/rpi-4.4.y/drivers/mmc/host/bcm2835-mmc.c
+> 
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/sdhci.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-iproc.c |    9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 23909804ffb8..43913876581e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2665,6 +2665,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  {
->  	irqreturn_t result = IRQ_NONE;
->  	struct sdhci_host *host = dev_id;
-> +	struct mmc_host *mmc = host->mmc;
->  	u32 intmask, mask, unexpected = 0;
->  	int max_loops = 16;
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index d7046d6..30b3fdf 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -211,14 +211,17 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+>  static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+>  	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+>  		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> -		  SDHCI_QUIRK_MISSING_CAPS,
+> +		  SDHCI_QUIRK_MISSING_CAPS |
+> +		  SDHCI_QUIRK_NO_HISPD_BIT,
+>  	.ops = &sdhci_iproc_32only_ops,
+>  };
 >  
-> @@ -2733,7 +2734,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  		if (intmask & SDHCI_INT_RETUNE)
->  			mmc_retune_needed(host->mmc);
+>  static const struct sdhci_iproc_data bcm2835_data = {
+>  	.pdata = &sdhci_bcm2835_pltfm_data,
+> -	.caps = SDHCI_CAN_VDD_330,
+> -	.caps1 = 0x00000000,
+> +	.caps = SDHCI_CAN_VDD_330 |
+> +		SDHCI_CAN_DO_HISPD,
+> +	.caps1 = SDHCI_DRIVER_TYPE_A |
+> +		 SDHCI_DRIVER_TYPE_C,
+>  	.mmc_caps = 0x00000000,
+>  };
 >  
-> -		if (intmask & SDHCI_INT_CARD_INT) {
-> +		if (intmask & SDHCI_INT_CARD_INT && mmc->card &&
-> +		    (mmc->card->type == MMC_TYPE_SDIO ||
-> +		     mmc->card->type == MMC_TYPE_SD_COMBO)) {
-
-We shouldn't have to look at the card type.  But if the interrupt is not
-enabled, then we shouldn't process it.  What about:
-
-		if (intmask & SDHCI_INT_CARD_INT &&
-		    (host->ier & SDHCI_INT_CARD_INT)) {
-
->  			sdhci_enable_sdio_irq_nolock(host, false);
->  			host->thread_isr |= SDHCI_INT_CARD_INT;
->  			result = IRQ_WAKE_THREAD;
 > 
-
