@@ -1,54 +1,56 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC 3/3] mmc: tmio: discard obsolete SDIO irqs before enabling irqs
-Date: Thu,  5 Jan 2017 12:43:26 +0100
-Message-ID: <20170105114326.12426-4-wsa+renesas@sang-engineering.com>
-References: <20170105114326.12426-1-wsa+renesas@sang-engineering.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: tmio: Use mmc_can_gpio_cd() when validating for
+ native hotplug
+Date: Thu, 5 Jan 2017 12:50:33 +0100
+Message-ID: <20170105115033.jperzle6iww6ecqe@ninjato>
+References: <1483097985-22446-1-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:47358 "EHLO mail.zeus03.de"
+Received: from www.zeus03.de ([194.117.254.33]:47728 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S970584AbdAELuY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 5 Jan 2017 06:50:24 -0500
-In-Reply-To: <20170105114326.12426-1-wsa+renesas@sang-engineering.com>
+        id S970592AbdAELug (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 5 Jan 2017 06:50:36 -0500
+Content-Disposition: inline
+In-Reply-To: <1483097985-22446-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 
-Before enabling SDIO irqs, clear the status bit, so we discard old and
-stale interrupts. Needed to get two wireless cards working.
+On Fri, Dec 30, 2016 at 12:39:45PM +0100, Ulf Hansson wrote:
+> To validate whether native hotplug is intended to be used, the tmio driver
+> checks whether the GPIO isr has been successfully assigned. This isn't
+> entirely correct, as GPIO could still be used for card detect, but in a
+> polling mode.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_pio.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+Isn't that checked with MMC_CAP_NEEDS_POLL? Could we maybe get rid of
+that then?
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index d6033620a45c12..ebe3e12f0083dd 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -134,12 +134,21 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 
- 	if (enable && !host->sdio_irq_enabled) {
-+		u16 sdio_status;
-+
- 		/* Keep device active while SDIO irq is enabled */
- 		pm_runtime_get_sync(mmc_dev(mmc));
--		host->sdio_irq_enabled = true;
- 
-+		host->sdio_irq_enabled = true;
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
- 					~TMIO_SDIO_STAT_IOIRQ;
-+
-+		/* Clear obsolete interrupts before enabling */
-+		sdio_status = sd_ctrl_read16(host, CTL_SDIO_STATUS) & ~TMIO_SDIO_MASK_ALL;
-+		if (host->pdata->flags & TMIO_MMC_SDIO_STATUS_SETBITS)
-+			sdio_status |= 6;
-+		sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status);
-+
- 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
- 	} else if (!enable && host->sdio_irq_enabled) {
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
--- 
-2.11.0
-
+> 
+> Therefore, let's convert to use the correct mmc interface,
+> mmc_can_gpio_cd() as it tells exactly what we need for the native hotplug
+> validation.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 3ca97f3..580ca9c 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1178,7 +1178,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>  	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+>  				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+>  				  !mmc_card_is_removable(mmc) ||
+> -				  mmc->slot.cd_irq >= 0);
+> +				  mmc_can_gpio_cd(mmc));
+>  
+>  	/*
+>  	 * On Gen2+, eMMC with NONREMOVABLE currently fails because native
+> -- 
+> 1.9.1
+> 
