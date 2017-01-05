@@ -1,53 +1,72 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Increase max_blk_size for bcm2835
-Date: Thu, 5 Jan 2017 11:53:39 +0200
-Message-ID: <f869a601-38ba-daf7-e6bb-713547041c3c@intel.com>
-References: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com>
- <1483111474-29907-3-git-send-email-stefan.wahren@i2se.com>
+Subject: Re: [PATCH] sdhci-acpi: support deferred probe
+Date: Thu, 5 Jan 2017 12:06:36 +0200
+Message-ID: <93f55d1d-083d-1ee7-9286-eb1c5aa2811b@intel.com>
+References: <1482719296-4783-1-git-send-email-rui.zhang@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1483111474-29907-3-git-send-email-stefan.wahren@i2se.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:13715 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1761245AbdAEKLw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 5 Jan 2017 05:11:52 -0500
+In-Reply-To: <1482719296-4783-1-git-send-email-rui.zhang@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhang Rui <rui.zhang@intel.com>, linux-mmc@vger.kernel.org
+Cc: cja@gmx.net, darcari@redhat.com
 
-On 30/12/16 17:24, Stefan Wahren wrote:
-> According to the BCM2835 datasheet the maximum block size for the
-> eMMC module is restricted to the internal data FIFO which is 1024 byte.
-> But this is still an improvement to the default of 512 byte.
+On 26/12/16 04:28, Zhang Rui wrote:
+
+Subject should be mmc: sdhci-acpi: ...
+
+> With commit
+> 67bf5156edc4 (gpio / ACPI: fix returned error from acpi_dev_gpio_irq_get()),
+
+> mmc_gpiod_request_cd() returns -EPROBE_DEFER if GPIO is not ready
+> when sdhci-acpi driver is probed, and sdhci-acpi driver should be probed
+> again later in this case.
 > 
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+> This fixes an order issue when both GPIO and sdhci-acpi drivers are built as
+> modules.
+
+Commit message should be formatted as follows:
+
+With commit 67bf5156edc4 ("gpio / ACPI: fix returned error from
+acpi_dev_gpio_irq_get()"), mmc_gpiod_request_cd() returns -EPROBE_DEFER if
+GPIO is not ready when sdhci-acpi driver is probed, and sdhci-acpi driver
+should be probed again later in this case.
+
+This fixes an order issue when both GPIO and sdhci-acpi drivers are built
+as modules.
+
+> 
+> Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
+> Tested-by: Jonas Aaberg <cja@gmx.net>
+> Signed-off-by: Zhang Rui <rui.zhang@intel.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-iproc.c |    4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-acpi.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 30b3fdf..3275d49 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -218,7 +218,9 @@ static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 160f695..5440323 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
+>  		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
 >  
->  static const struct sdhci_iproc_data bcm2835_data = {
->  	.pdata = &sdhci_bcm2835_pltfm_data,
-> -	.caps = SDHCI_CAN_VDD_330 |
-> +	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-> +			& SDHCI_MAX_BLOCK_MASK) |
-> +		SDHCI_CAN_VDD_330 |
->  		SDHCI_CAN_DO_HISPD,
->  	.caps1 = SDHCI_DRIVER_TYPE_A |
->  		 SDHCI_DRIVER_TYPE_C,
+> -		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
+> +		err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL);
+> +		if (err) {
+> +			if (err == -EPROBE_DEFER)
+> +				goto err_free;
+>  			dev_warn(dev, "failed to setup card detect gpio\n");
+>  			c->use_runtime_pm = false;
+>  		}
 > 
+
