@@ -1,352 +1,81 @@
-From: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v9 5/5] mmc: zx: Initial support for ZX mmc controller
-Date: Fri,  6 Jan 2017 12:24:46 +0800
-Message-ID: <1483676686-17011-6-git-send-email-jun.nie@linaro.org>
-References: <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1483676686-17011-1-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: host: tmio: drop superfluous exit path
+Date: Fri,  6 Jan 2017 09:38:33 +0100
+Message-ID: <20170106083833.22137-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.zeus03.de ([194.117.254.33]:38840 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933879AbdAFIit (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Jan 2017 03:38:49 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-This platform driver adds initial support for the DW host controller
-found on ZTE SoCs.
+The probe exit path on error does nothing since commit 94b110aff8679b
+("mmc: tmio: add tmio_mmc_host_alloc/free()"), so we can bail out
+immediately.
 
-It has been tested on ZX296718 EVB board currently. More support on
-timing tuning will be added when hardware is available.
-
-Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/Kconfig     |   9 ++
- drivers/mmc/host/Makefile    |   1 +
- drivers/mmc/host/dw_mmc-zx.c | 242 +++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc-zx.h |  31 ++++++
- 4 files changed, 283 insertions(+)
- create mode 100644 drivers/mmc/host/dw_mmc-zx.c
- create mode 100644 drivers/mmc/host/dw_mmc-zx.h
+ drivers/mmc/host/tmio_mmc_pio.c | 20 ++++++--------------
+ 1 file changed, 6 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2eb9701..f08691a 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -683,6 +683,15 @@ config MMC_DW_ROCKCHIP
- 	  Synopsys DesignWare Memory Card Interface driver. Select this option
- 	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index d0d1743b1c002b..2e2df63ce92658 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1151,7 +1151,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
  
-+config MMC_DW_ZX
-+	tristate "ZTE specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW && ARCH_ZX
-+	select MMC_DW_PLTFM
-+	help
-+	  This selects support for ZTE SoC specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver. Select this option
-+	  for platforms based on ZX296718 SoC's.
-+
- config MMC_SH_MMCIF
- 	tristate "SuperH Internal MMCIF support"
- 	depends on HAS_DMA
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index ccc9c4c..6d548c4 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -48,6 +48,7 @@ obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
- obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
-+obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_VUB300)	+= vub300.o
-diff --git a/drivers/mmc/host/dw_mmc-zx.c b/drivers/mmc/host/dw_mmc-zx.c
-new file mode 100644
-index 0000000..878c9ce
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-zx.c
-@@ -0,0 +1,242 @@
-+/*
-+ * ZX Specific Extensions for Synopsys DW Multimedia Card Interface driver
-+ *
-+ * Copyright (C) 2016, Linaro Ltd.
-+ * Copyright (C) 2016, ZTE Corp.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/mfd/syscon.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/platform_device.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/regmap.h>
-+#include <linux/slab.h>
-+
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
-+#include "dw_mmc-zx.h"
-+
-+struct dw_mci_zx_priv_data {
-+	struct regmap	*sysc_base;
-+};
-+
-+enum delay_type {
-+	DELAY_TYPE_READ,	/* read dqs delay */
-+	DELAY_TYPE_CLK,		/* clk sample delay */
-+};
-+
-+static int dw_mci_zx_emmc_set_delay(struct dw_mci *host, unsigned int delay,
-+				    enum delay_type dflag)
-+{
-+	struct dw_mci_zx_priv_data *priv = host->priv;
-+	struct regmap *sysc_base = priv->sysc_base;
-+	unsigned int clksel;
-+	unsigned int loop = 1000;
-+	int ret;
-+
-+	if (!sysc_base)
-+		return -EINVAL;
-+
-+	ret = regmap_update_bits(sysc_base, LB_AON_EMMC_CFG_REG0,
-+				 PARA_HALF_CLK_MODE | PARA_DLL_BYPASS_MODE |
-+				 PARA_PHASE_DET_SEL_MASK |
-+				 PARA_DLL_LOCK_NUM_MASK |
-+				 DLL_REG_SET | PARA_DLL_START_MASK,
-+				 PARA_DLL_START(4) | PARA_DLL_LOCK_NUM(4));
-+	if (ret)
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret < 0)
+-		goto host_free;
 +		return ret;
-+
-+	ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG1, &clksel);
-+	if (ret)
+ 
+ 	_host->pdata = pdata;
+ 	platform_set_drvdata(pdev, mmc);
+@@ -1161,14 +1161,12 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 
+ 	ret = tmio_mmc_init_ocr(_host);
+ 	if (ret < 0)
+-		goto host_free;
 +		return ret;
-+
-+	if (dflag == DELAY_TYPE_CLK) {
-+		clksel &= ~CLK_SAMP_DELAY_MASK;
-+		clksel |= CLK_SAMP_DELAY(delay);
-+	} else {
-+		clksel &= ~READ_DQS_DELAY_MASK;
-+		clksel |= READ_DQS_DELAY(delay);
-+	}
-+
-+	regmap_write(sysc_base, LB_AON_EMMC_CFG_REG1, clksel);
-+	regmap_update_bits(sysc_base, LB_AON_EMMC_CFG_REG0,
-+			   PARA_DLL_START_MASK | PARA_DLL_LOCK_NUM_MASK |
-+			   DLL_REG_SET,
-+			   PARA_DLL_START(4) | PARA_DLL_LOCK_NUM(4) |
-+			   DLL_REG_SET);
-+
-+	do {
-+		ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG2, &clksel);
-+		if (ret)
-+			return ret;
-+
-+	} while (--loop && !(clksel & ZX_DLL_LOCKED));
-+
-+	if (!loop) {
-+		dev_err(host->dev, "Error: %s dll lock fail\n", __func__);
-+		return -EIO;
-+	}
-+
-+	return 0;
-+}
-+
-+static int dw_mci_zx_emmc_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+{
-+	struct dw_mci *host = slot->host;
-+	struct mmc_host *mmc = slot->mmc;
-+	int ret, len = 0, start = 0, end = 0, delay, best = 0;
-+
-+	for (delay = 1; delay < 128; delay++) {
-+		ret = dw_mci_zx_emmc_set_delay(host, delay, DELAY_TYPE_CLK);
-+		if (!ret && mmc_send_tuning(mmc, opcode, NULL)) {
-+			if (start >= 0) {
-+				end = delay - 1;
-+				/* check and update longest good range */
-+				if ((end - start) > len) {
-+					best = (start + end) >> 1;
-+					len = end - start;
-+				}
-+			}
-+			start = -1;
-+			end = 0;
-+			continue;
-+		}
-+		if (start < 0)
-+			start = delay;
-+	}
-+
-+	if (start >= 0) {
-+		end = delay - 1;
-+		if ((end - start) > len) {
-+			best = (start + end) >> 1;
-+			len = end - start;
-+		}
-+	}
-+	if (best < 0)
-+		return -EIO;
-+
-+	dev_info(host->dev, "%s best range: start %d end %d\n", __func__,
-+		 start, end);
-+	return dw_mci_zx_emmc_set_delay(host, best, DELAY_TYPE_CLK);
-+}
-+
-+static int dw_mci_zx_prepare_hs400_tuning(struct dw_mci *host,
-+					  struct mmc_ios *ios)
-+{
-+	int ret;
-+
-+	/* config phase shift as 90 degree */
-+	ret = dw_mci_zx_emmc_set_delay(host, 32, DELAY_TYPE_READ);
-+	if (ret < 0)
-+		return -EIO;
-+
-+	return 0;
-+}
-+
-+static int dw_mci_zx_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+{
-+	struct dw_mci *host = slot->host;
-+
-+	if (host->verid == 0x290a) /* only for emmc */
-+		return dw_mci_zx_emmc_execute_tuning(slot, opcode);
-+	/* TODO: Add 0x210a dedicated tuning for sd/sdio */
-+
-+	return 0;
-+}
-+
-+static int dw_mci_zx_parse_dt(struct dw_mci *host)
-+{
-+	struct device_node *np = host->dev->of_node;
-+	struct device_node *node;
-+	struct dw_mci_zx_priv_data *priv;
-+	struct regmap *sysc_base;
-+	int ret;
-+
-+	/* syscon is needed only by emmc */
-+	node = of_parse_phandle(np, "zte,aon-syscon", 0);
-+	if (node) {
-+		sysc_base = syscon_node_to_regmap(node);
-+		of_node_put(node);
-+
-+		if (IS_ERR(sysc_base)) {
-+			ret = PTR_ERR(sysc_base);
-+			if (ret != -EPROBE_DEFER)
-+				dev_err(host->dev, "Can't get syscon: %d\n",
-+					ret);
-+			return ret;
-+		}
-+	} else {
-+		return 0;
-+	}
-+
-+	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv)
+ 
+ 	_host->ctl = devm_ioremap(&pdev->dev,
+ 				  res_ctl->start, resource_size(res_ctl));
+-	if (!_host->ctl) {
+-		ret = -ENOMEM;
+-		goto host_free;
+-	}
++	if (!_host->ctl)
 +		return -ENOMEM;
-+	priv->sysc_base = sysc_base;
-+	host->priv = priv;
-+
-+	return 0;
-+}
-+
-+static unsigned long zx_dwmmc_caps[3] = {
-+	MMC_CAP_CMD23,
-+	MMC_CAP_CMD23,
-+	MMC_CAP_CMD23,
-+};
-+
-+static const struct dw_mci_drv_data zx_drv_data = {
-+	.caps			= zx_dwmmc_caps,
-+	.execute_tuning		= dw_mci_zx_execute_tuning,
-+	.prepare_hs400_tuning	= dw_mci_zx_prepare_hs400_tuning,
-+	.parse_dt               = dw_mci_zx_parse_dt,
-+};
-+
-+static const struct of_device_id dw_mci_zx_match[] = {
-+	{ .compatible = "zte,zx296718-dw-mshc", .data = &zx_drv_data},
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_zx_match);
-+
-+static int dw_mci_zx_probe(struct platform_device *pdev)
-+{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
-+
-+	match = of_match_node(dw_mci_zx_match, pdev->dev.of_node);
-+	drv_data = match->data;
-+
-+	return dw_mci_pltfm_register(pdev, drv_data);
-+}
-+
-+static const struct dev_pm_ops dw_mci_zx_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
-+			   dw_mci_runtime_resume,
-+			   NULL)
-+};
-+
-+static struct platform_driver dw_mci_zx_pltfm_driver = {
-+	.probe		= dw_mci_zx_probe,
-+	.remove		= dw_mci_pltfm_remove,
-+	.driver		= {
-+		.name		= "dwmmc_zx",
-+		.of_match_table	= dw_mci_zx_match,
-+		.pm		= &dw_mci_zx_dev_pm_ops,
-+	},
-+};
-+
-+module_platform_driver(dw_mci_zx_pltfm_driver);
-+
-+MODULE_DESCRIPTION("ZTE emmc/sd driver");
-+MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/dw_mmc-zx.h b/drivers/mmc/host/dw_mmc-zx.h
-new file mode 100644
-index 0000000..f369997
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-zx.h
-@@ -0,0 +1,31 @@
-+#ifndef _DW_MMC_ZX_H_
-+#define _DW_MMC_ZX_H_
-+
-+/* ZX296718 SoC specific DLL register offset. */
-+#define LB_AON_EMMC_CFG_REG0  0x1B0
-+#define LB_AON_EMMC_CFG_REG1  0x1B4
-+#define LB_AON_EMMC_CFG_REG2  0x1B8
-+
-+/* LB_AON_EMMC_CFG_REG0 register defines */
-+#define PARA_DLL_START(x)	((x) & 0xFF)
-+#define PARA_DLL_START_MASK	0xFF
-+#define DLL_REG_SET		BIT(8)
-+#define PARA_DLL_LOCK_NUM(x)	(((x) & 7) << 16)
-+#define PARA_DLL_LOCK_NUM_MASK  (7 << 16)
-+#define PARA_PHASE_DET_SEL(x)	(((x) & 7) << 20)
-+#define PARA_PHASE_DET_SEL_MASK	(7 << 20)
-+#define PARA_DLL_BYPASS_MODE	BIT(23)
-+#define PARA_HALF_CLK_MODE	BIT(24)
-+
-+/* LB_AON_EMMC_CFG_REG1 register defines */
-+#define READ_DQS_DELAY(x)	((x) & 0x7F)
-+#define READ_DQS_DELAY_MASK	(0x7F)
-+#define READ_DQS_BYPASS_MODE	BIT(7)
-+#define CLK_SAMP_DELAY(x)	(((x) & 0x7F) << 8)
-+#define CLK_SAMP_DELAY_MASK	(0x7F << 8)
-+#define CLK_SAMP_BYPASS_MODE	BIT(15)
-+
-+/* LB_AON_EMMC_CFG_REG2 register defines */
-+#define ZX_DLL_LOCKED		BIT(2)
-+
-+#endif /* _DW_MMC_ZX_H_ */
+ 
+ 	tmio_mmc_ops.card_busy = _host->card_busy;
+ 	tmio_mmc_ops.start_signal_voltage_switch = _host->start_signal_voltage_switch;
+@@ -1206,10 +1204,8 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	 * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
+ 	 * looping forever...
+ 	 */
+-	if (mmc->f_min == 0) {
+-		ret = -EINVAL;
+-		goto host_free;
+-	}
++	if (mmc->f_min == 0)
++		return -EINVAL;
+ 
+ 	/*
+ 	 * While using internal tmio hardware logic for card detection, we need
+@@ -1274,10 +1270,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	}
+ 
+ 	return 0;
+-
+-host_free:
+-
+-	return ret;
+ }
+ EXPORT_SYMBOL(tmio_mmc_host_probe);
+ 
 -- 
-1.9.1
+2.11.0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
