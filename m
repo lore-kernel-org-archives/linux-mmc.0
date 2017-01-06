@@ -1,62 +1,68 @@
-From: Jun Nie <jun.nie@linaro.org>
-Subject: [PATCH v9 1/5] Documentation: synopsys-dw-mshc: add binding for fifo quirks
-Date: Fri,  6 Jan 2017 12:24:42 +0800
-Message-ID: <1483676686-17011-2-git-send-email-jun.nie@linaro.org>
+From: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v9 4/5] mmc: dt-bindings: add ZTE ZX296718 MMC bindings
+Date: Fri,  6 Jan 2017 12:24:45 +0800
+Message-ID: <1483676686-17011-5-git-send-email-jun.nie@linaro.org>
 References: <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:36038 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937881AbdAFEY7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2017 23:24:59 -0500
-Received: by mail-pg0-f51.google.com with SMTP id f188so247535814pgc.3
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Jan 2017 20:24:59 -0800 (PST)
-In-Reply-To: <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1483676686-17011-1-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, shawn.guo@linaro.org, xie.baoyou@zte.com.cn, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-Add fifo-addr property and fifo-watermark-quirk property to
-synopsys-dw-mshc bindings. It is intended to provide more
-dt interface to support SoCs specific configuration.
+Document the device-tree binding of ZTE MMC host on
+ZX296718 SoC.
 
-Signed-off-by: Jun Nie <jun.nie@linaro.org>
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ .../devicetree/bindings/mmc/zx-dw-mshc.txt         | 33 ++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index 7fd17c3..bca30b6 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -75,6 +75,17 @@ Optional properties:
- * card-detect-delay: Delay in milli-seconds before detecting card after card
-   insert event. The default value is 0.
- 
-+* data-addr: Override fifo address with value provided by DT. The default FIFO reg
-+  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
-+  driver. If the controller does not follow this rule, please use this property
-+  to set fifo address in device tree.
+diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+new file mode 100644
+index 0000000..eaade0e
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+@@ -0,0 +1,33 @@
++* ZTE specific extensions to the Synopsys Designware Mobile Storage
++  Host Controller
 +
-+* fifo-watermark-aligned: Data done irq is expected if data length is less than
-+  watermark in PIO mode. But fifo watermark is requested to be aligned with data
-+  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
-+  watermark quirk to mark this requirement and force fifo watermark setting
-+  accordingly.
++The Synopsys designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsys dw mshc controller properties described
++by synopsys-dw-mshc.txt and the properties used by the ZTE specific
++extensions to the Synopsys Designware Mobile Storage Host Controller.
 +
- * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-   specified we'll defer probe until we can find this regulator.
- 
-@@ -102,6 +113,8 @@ board specific portions as listed below.
- 		interrupts = <0 75 0>;
- 		#address-cells = <1>;
- 		#size-cells = <0>;
++Required Properties:
++
++* compatible: should be
++	- "zte,zx296718-dw-mshc": for ZX SoCs
++
++Example:
++
++	mmc1: mmc@1110000 {
++		compatible = "zte,zx296718-dw-mshc";
++		reg = <0x01110000 0x1000>;
++		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
++		fifo-depth = <32>;
 +		data-addr = <0x200>;
 +		fifo-watermark-aligned;
- 		resets = <&rst 20>;
- 		reset-names = "reset";
- 	};
++		bus-width = <4>;
++		clock-frequency = <50000000>;
++		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
++		clock-names = "biu", "ciu";
++		num-slots = <1>;
++		max-frequency = <50000000>;
++		cap-sdio-irq;
++		cap-sd-highspeed;
++		status = "disabled";
++	};
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
