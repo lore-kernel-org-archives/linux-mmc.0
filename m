@@ -1,78 +1,27 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 1/1] MMC: meson: avoid possible NULL dereference
-Date: Fri, 06 Jan 2017 09:01:31 -0800
-Message-ID: <m237gwcec4.fsf@baylibre.com>
-References: <20161223150108.9229-1-xypron.glpk@gmx.de>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH v2 4/7] x86: put msr-index.h in uapi
+Date: Fri, 6 Jan 2017 22:50:34 +0200
+Message-ID: <CAHp75VdDfopdSy-7oy87ZeosDB9+FN4zFBhErPWLQB7tH81zTw@mail.gmail.com>
+References: <bf83da6b-01ef-bf44-b3e1-ca6fc5636818@6wind.com>
+ <1483695839-18660-1-git-send-email-nicolas.dichtel@6wind.com> <1483695839-18660-5-git-send-email-nicolas.dichtel@6wind.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161223150108.9229-1-xypron.glpk@gmx.de> (Heinrich Schuchardt's
-        message of "Fri, 23 Dec 2016 16:01:08 +0100")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-m68k-owner@vger.kernel.org>
+In-Reply-To: <1483695839-18660-5-git-send-email-nicolas.dichtel@6wind.com>
+Sender: linux-m68k-owner@vger.kernel.org
+To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, mmarek@suse.com, linux-kbuild@vger.kernel.org, Linux Documentation List <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-alpha@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, adi-buildroot-devel@lists.sourceforge.net, linux-c6x-dev@linux-c6x.org, Cris <linux-cris-kernel@axis.com>, uclinux-h8-devel@lists.sourceforge.jp, linux-hexagon@vger.kernel.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-am33-list@redhat.com, nios2-dev@lists.rocketboards.org, openrisc@lists.librecores.org, linux-parisc@vger.kernel.org, open list:LINUX FOR POWERPC PA SEMI PWRFICI
 List-Id: linux-mmc@vger.kernel.org
 
-Heinrich Schuchardt <xypron.glpk@gmx.de> writes:
+On Fri, Jan 6, 2017 at 11:43 AM, Nicolas Dichtel
+<nicolas.dichtel@6wind.com> wrote:
+> This header file is exported, thus move it to uapi.
 
-> No actual segmentation faults were observed but the coding is
-> at least inconsistent.
->
-> irqreturn_t meson_mmc_irq():
->
-> We should not dereference host before checking it.
->
-> meson_mmc_irq_thread():
->
-> If cmd or mrq are NULL we should not dereference them after
-> writing a warning.
->
-> Fixes: 51c5d8447bd7 MMC: meson: initial support for GX platforms
-> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Just hint for the future:
+-M (move)
+-C (copy)
+-D (delete) [though this is NOT for applying]
 
-Acked-by: Kevin Hilman <khilman@baylibre.com>
-
-Ulf, I assume you can pick this up directly for v4.10-rc?
-
-Thanks,
-
-Kevin
-
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index b352760c041e..09739352834c 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -578,13 +578,15 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->  {
->  	struct meson_host *host = dev_id;
->  	struct mmc_request *mrq;
-> -	struct mmc_command *cmd = host->cmd;
-> +	struct mmc_command *cmd;
->  	u32 irq_en, status, raw_status;
->  	irqreturn_t ret = IRQ_HANDLED;
->  
->  	if (WARN_ON(!host))
->  		return IRQ_NONE;
->  
-> +	cmd = host->cmd;
-> +
->  	mrq = host->mrq;
->  
->  	if (WARN_ON(!mrq))
-> @@ -670,10 +672,10 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
->  	int ret = IRQ_HANDLED;
->  
->  	if (WARN_ON(!mrq))
-> -		ret = IRQ_NONE;
-> +		return IRQ_NONE;
->  
->  	if (WARN_ON(!cmd))
-> -		ret = IRQ_NONE;
-> +		return IRQ_NONE;
->  
->  	data = cmd->data;
->  	if (data) {
+-- 
+With Best Regards,
+Andy Shevchenko
