@@ -1,65 +1,81 @@
-From: =?UTF-8?Q?Andr=c3=a9_Przywara?= <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 2/5] drivers: mmc: sunxi: limit A64 MMC2 to
- 8K DMA buffer
-Date: Thu, 5 Jan 2017 23:33:28 +0000
-Message-ID: <87b26848-4f86-f2d2-3f82-db0937c572e2@arm.com>
-References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
- <1483398226-29321-3-git-send-email-andre.przywara@arm.com>
- <20170104140750.7qs4pvggwjdj5cma@rob-hp-laptop>
- <20170105175746.fq6crpc3krz7tzxi@lukather>
-Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
+From: Clemens Gruber <clemens.gruber@pqgruber.com>
+Subject: eMMC boot problem: switch to bus width 8 ddr failed
+Date: Fri, 6 Jan 2017 01:41:14 +0100
+Message-ID: <20170106004114.GA22893@archie.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBUFPXPBQKGQESX44OOA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170105175746.fq6crpc3krz7tzxi@lukather>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 05/01/17 17:57, Maxime Ripard wrote:
-> Hi Rob,
-> 
-> On Wed, Jan 04, 2017 at 08:07:50AM -0600, Rob Herring wrote:
->> On Mon, Jan 02, 2017 at 11:03:43PM +0000, Andre Przywara wrote:
->>> From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
->>>
->>> Unlike the A64 user manual reports, the third MMC controller on the
->>> A64 (and the only one capable of 8-bit HS400 eMMC transfers) has a
->>> DMA buffer size limit of 8KB (much like the very old Allwinner SoCs).
->>> This does not affect the other two controllers, so introduce a new
->>> DT compatible string to let the driver use different settings for that
->>> particular device. This will also help to enable the high-speed transfer
->>> modes of that controller later.
->>>
->>> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
->>> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
->>>  drivers/mmc/host/sunxi-mmc.c                        | 7 +++++++
->>>  2 files changed, 8 insertions(+)
->>
->> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> 
-> Some kind of a digression on this: we have three MMC controllers on
-> this SoC. Like this patch shows, the third one is clearly different,
-> and supports both more modes, a wider bus, and specific quirks. We
-> need a new compatible for this one, everything's perfect.
-> 
-> However, the other two are mostly the same, but seems to need
-> different tuning parameters to get more performances out of the
-> controller (but this is unclear yet). How do we usually deal with
-> that?
+Hi,
 
-I guess you wanted to hear Rob's opinion ;-), but "get more performance"
-sounds like we add one (or more) properties to tune those values.
-If I get this right, it works with default values, but is sub-optimal?
+with the current mainline 4.10-rc2 kernel, I can no longer boot from
+the eMMC on my i.MX6Q board.
 
-Cheers,
-Andre.
+Details:
+The eMMC is a Micron MTFC4GACAJCN-1M WT but as the i.MX6Q only supports
+eMMC 4.41 features and we did not implement voltage switching from 3.3V
+to 1.8V or lower, I did add no-1-8-v; (but none of the mmc-ddr or mmc-hs
+options) to the device tree. The bus-width is 8.
+
+With 4.9 the board booted fine, now with the current mainline 4.10 tree,
+I get the following (repeating) errors at boot:
+
+[    4.326834] Waiting for root device /dev/mmcblk0p2...
+[   14.563861] mmc0: Timeout waiting for hardware cmd interrupt.
+[   14.569619] sdhci: =========== REGISTER DUMP (mmc0)===========
+[   14.575461] sdhci: Sys addr: 0x4e726000 | Version:  0x00000002
+[   14.581300] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+[   14.587140] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+[   14.592979] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+[   14.598816] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+[   14.604654] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+[   14.610493] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+[   14.616332] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+[   14.622168] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+[   14.628007] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+[   14.633845] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+[   14.639682] sdhci: Host ctl2: 0x00000000
+[   14.643611] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x4e6f7208
+[   14.649447] sdhci: ===========================================
+
+This repeats a few times, then more information is shown at the bottom:
+
+[   86.893859] mmc0: Timeout waiting for hardware cmd interrupt.
+[   86.899615] sdhci: =========== REGISTER DUMP (mmc0)===========
+[   86.905453] sdhci: Sys addr: 0x00000000 | Version:  0x00000002
+[   86.911291] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+[   86.917129] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+[   86.922967] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+[   86.928804] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+[   86.934642] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+[   86.940479] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+[   86.946316] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+[   86.952154] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+[   86.957992] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+[   86.963830] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+[   86.969668] sdhci: Host ctl2: 0x00000000
+[   86.973596] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
+[   86.979433] sdhci: ===========================================
+[   86.986356] mmc0: switch to bus width 8 ddr failed
+[   86.991163] mmc0: error -110 whilst initialising MMC card
+[   97.773859] mmc0: Timeout waiting for hardware cmd interrupt.
+
+--
+
+After looking through the latest commits to mmc/core, I found the
+culprit:
+Commit e173f8911f091fa50ccf8cc1fa316dd5569bc470 ("mmc: core: Update
+CMD13 polling policy when switch to HS DDR mode") 
+
+Reverting it fixes the problem. But I am unsure if that's the right
+course of action?
+
+Feel free to send me patches for testing!
+
+Regards,
+Clemens
