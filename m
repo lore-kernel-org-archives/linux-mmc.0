@@ -1,75 +1,62 @@
-From: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v9 2/5] mmc: dw: Add fifo address property
-Date: Fri,  6 Jan 2017 12:24:43 +0800
-Message-ID: <1483676686-17011-3-git-send-email-jun.nie@linaro.org>
+From: Jun Nie <jun.nie@linaro.org>
+Subject: [PATCH v9 1/5] Documentation: synopsys-dw-mshc: add binding for fifo quirks
+Date: Fri,  6 Jan 2017 12:24:42 +0800
+Message-ID: <1483676686-17011-2-git-send-email-jun.nie@linaro.org>
 References: <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1483676686-17011-1-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:36038 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937881AbdAFEY7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2017 23:24:59 -0500
+Received: by mail-pg0-f51.google.com with SMTP id f188so247535814pgc.3
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Jan 2017 20:24:59 -0800 (PST)
+In-Reply-To: <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: robh+dt@kernel.org, mark.rutland@arm.com, shawn.guo@linaro.org, xie.baoyou@zte.com.cn, devicetree@vger.kernel.org
+Cc: ulf.hansson@linaro.org, jh80.chung@samsung.com, jason.liu@linaro.org, chen.chaokai@zte.com.cn, lai.binz@zte.com.cn, linux-mmc@vger.kernel.org, Jun Nie <jun.nie@linaro.org>
 
-The FIFO address may break default address assumption of 0x100
-(version < 0x240A) and 0x200(version >= 0x240A) in current driver.
-The new property is introduced to override fifo address via DT
-node information.
+Add fifo-addr property and fifo-watermark-quirk property to
+synopsys-dw-mshc bindings. It is intended to provide more
+dt interface to support SoCs specific configuration.
 
-Signed-off-by: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Jun Nie <jun.nie@linaro.org>
+Acked-by: Rob Herring <robh@kernel.org>
 ---
- drivers/mmc/host/dw_mmc.c  | 6 +++++-
- include/linux/mmc/dw_mmc.h | 2 ++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index b44306b..b600170 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2977,6 +2977,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 7fd17c3..bca30b6 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -75,6 +75,17 @@ Optional properties:
+ * card-detect-delay: Delay in milli-seconds before detecting card after card
+   insert event. The default value is 0.
  
- 	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
- 
-+	of_property_read_u32(np, "data-addr", &host->data_addr_override);
++* data-addr: Override fifo address with value provided by DT. The default FIFO reg
++  offset is assumed as 0x100 (version < 0x240A) and 0x200(version >= 0x240A) by
++  driver. If the controller does not follow this rule, please use this property
++  to set fifo address in device tree.
 +
- 	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
- 		pdata->bus_hz = clock_frequency;
++* fifo-watermark-aligned: Data done irq is expected if data length is less than
++  watermark in PIO mode. But fifo watermark is requested to be aligned with data
++  length in some SoC so that TX/RX irq can be generated with data done irq. Add this
++  watermark quirk to mark this requirement and force fifo watermark setting
++  accordingly.
++
+ * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+   specified we'll defer probe until we can find this regulator.
  
-@@ -3180,7 +3182,9 @@ int dw_mci_probe(struct dw_mci *host)
- 	host->verid = SDMMC_GET_VERID(mci_readl(host, VERID));
- 	dev_info(host->dev, "Version ID is %04x\n", host->verid);
- 
--	if (host->verid < DW_MMC_240A)
-+	if (host->data_addr_override)
-+		host->fifo_reg = host->regs + host->data_addr_override;
-+	else if (host->verid < DW_MMC_240A)
- 		host->fifo_reg = host->regs + DATA_OFFSET;
- 	else
- 		host->fifo_reg = host->regs + DATA_240A_OFFSET;
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 15db6f8..1c09cca 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -113,6 +113,7 @@ struct dw_mci_dma_slave {
-  * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-  * @fifo_depth: depth of FIFO.
-+ * @data_addr_override: override fifo reg offset with this value.
-  * @data_shift: log2 of FIFO item size.
-  * @part_buf_start: Start index in part_buf.
-  * @part_buf_count: Bytes of partial data in part_buf.
-@@ -160,6 +161,7 @@ struct dw_mci {
- 	spinlock_t		irq_lock;
- 	void __iomem		*regs;
- 	void __iomem		*fifo_reg;
-+	u32			data_addr_override;
- 
- 	struct scatterlist	*sg;
- 	struct sg_mapping_iter	sg_miter;
+@@ -102,6 +113,8 @@ board specific portions as listed below.
+ 		interrupts = <0 75 0>;
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
++		data-addr = <0x200>;
++		fifo-watermark-aligned;
+ 		resets = <&rst 20>;
+ 		reset-names = "reset";
+ 	};
 -- 
 1.9.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
