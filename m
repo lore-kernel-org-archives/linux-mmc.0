@@ -1,24 +1,24 @@
 From: Clemens Gruber <clemens.gruber@pqgruber.com>
 Subject: Re: eMMC boot problem: switch to bus width 8 ddr failed
-Date: Fri, 6 Jan 2017 16:56:18 +0100
-Message-ID: <20170106155618.GA10105@archie.localdomain>
+Date: Fri, 6 Jan 2017 17:07:08 +0100
+Message-ID: <20170106160708.GB10105@archie.localdomain>
 References: <20170106004114.GA22893@archie.localdomain>
- <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
+ <75eba190-ab58-ccdc-aaf7-569f107c695a@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.pqgruber.com ([178.189.19.235]:47490 "EHLO
+Received: from mail.pqgruber.com ([178.189.19.235]:60126 "EHLO
         mail.pqgruber.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752106AbdAFP4X (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2017 10:56:23 -0500
+        with ESMTP id S966991AbdAFQHM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2017 11:07:12 -0500
 Content-Disposition: inline
-In-Reply-To: <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
+In-Reply-To: <75eba190-ab58-ccdc-aaf7-569f107c695a@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org
 
-On Fri, Jan 06, 2017 at 10:33:49AM +0800, Shawn Lin wrote:
+On Fri, Jan 06, 2017 at 10:54:35AM +0800, Shawn Lin wrote:
 > On 2017/1/6 8:41, Clemens Gruber wrote:
 > > Hi,
 > > 
@@ -48,11 +48,6 @@ On Fri, Jan 06, 2017 at 10:33:49AM +0800, Shawn Lin wrote:
 > > [   14.622168] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
 > > [   14.628007] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
 > > [   14.633845] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
-> 
-> it shows you always fail to get resp of sending status within the
-> expected period of time.
-> 
-> 
 > > [   14.639682] sdhci: Host ctl2: 0x00000000
 > > [   14.643611] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x4e6f7208
 > > [   14.649447] sdhci: ===========================================
@@ -90,38 +85,32 @@ On Fri, Jan 06, 2017 at 10:33:49AM +0800, Shawn Lin wrote:
 > > course of action?
 > > 
 > > Feel free to send me patches for testing!
+> > 
 > 
-> By looking the changes itself, it should be good from the view of spec.
-> Maybe you could try the patch below, but don't beat me if that doesn't
-> help at all. :)
+> I just look into both of sdhci and sdhci-esdhc-imx again, and seems the
+> code miss a bit, so could you also try this one?
 > 
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1074,7 +1074,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->                            EXT_CSD_BUS_WIDTH,
->                            ext_csd_bits,
->                            card->ext_csd.generic_cmd6_time,
-> -                          MMC_TIMING_MMC_DDR52,
-> +                          0,
->                            true, true, true);
->         if (err) {
->                 pr_err("%s: switch to bus width %d ddr failed\n",
-> @@ -1118,6 +1118,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->         if (err)
->                 err = __mmc_set_signal_voltage(host,
-> MMC_SIGNAL_VOLTAGE_330);
-> 
-> +       if (!err)
-> +               mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-> +
-> 
+> drivers/mmc/core/mmc_ops.c
+> @@ -486,7 +486,8 @@ static int mmc_poll_for_busy(struct mmc_card *card,
+> unsigned int timeout_ms,
+>                         busy = host->ops->card_busy(host);
+>                 } else {
+>                         err = mmc_send_status(card, &status);
+> -                       if (retry_crc_err && err == -EILSEQ) {
+> +                       if (retry_crc_err && (err == -EILSEQ ||
+> +                                               err == -ETIMEDOUT)) {
+>                                 busy = true;
+>                         } else if (err) {
+>                                 return err;
 > 
 
 Hi,
 
-thank you. This patch solves the problem! :)
+this patch (alone) does not solve the problem. The error message is the
+same as before.
 
-Tested-by: Clemens Gruber <clemens.gruber@pqgruber.com>
+But applying both your first patch and this one does work. Is this one
+beneficial anyway, even if it does not fix my problem?
 
 Regards,
 Clemens
