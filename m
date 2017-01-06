@@ -1,73 +1,127 @@
-From: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Subject: Re: [PATCH RESEND] sdhci: Only handle CARD_INT for SDIO cards
-Date: Fri, 06 Jan 2017 13:49:54 -0200
-Message-ID: <87y3yo89y5.fsf@dilma.collabora.co.uk>
-References: <20170102182350.14326-1-krisman@collabora.co.uk>
-        <39099b85-e55c-ac70-8e0f-889638a68418@intel.com>
+From: Clemens Gruber <clemens.gruber@pqgruber.com>
+Subject: Re: eMMC boot problem: switch to bus width 8 ddr failed
+Date: Fri, 6 Jan 2017 16:56:18 +0100
+Message-ID: <20170106155618.GA10105@archie.localdomain>
+References: <20170106004114.GA22893@archie.localdomain>
+ <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:40401 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936477AbdAFPuG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2017 10:50:06 -0500
-In-Reply-To: <39099b85-e55c-ac70-8e0f-889638a68418@intel.com> (Adrian Hunter's
-        message of "Thu, 5 Jan 2017 11:36:49 +0200")
+Received: from mail.pqgruber.com ([178.189.19.235]:47490 "EHLO
+        mail.pqgruber.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752106AbdAFP4X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2017 10:56:23 -0500
+Content-Disposition: inline
+In-Reply-To: <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org
 
-Adrian Hunter <adrian.hunter@intel.com> writes:
+On Fri, Jan 06, 2017 at 10:33:49AM +0800, Shawn Lin wrote:
+> On 2017/1/6 8:41, Clemens Gruber wrote:
+> > Hi,
+> > 
+> > with the current mainline 4.10-rc2 kernel, I can no longer boot from
+> > the eMMC on my i.MX6Q board.
+> > 
+> > Details:
+> > The eMMC is a Micron MTFC4GACAJCN-1M WT but as the i.MX6Q only supports
+> > eMMC 4.41 features and we did not implement voltage switching from 3.3V
+> > to 1.8V or lower, I did add no-1-8-v; (but none of the mmc-ddr or mmc-hs
+> > options) to the device tree. The bus-width is 8.
+> > 
+> > With 4.9 the board booted fine, now with the current mainline 4.10 tree,
+> > I get the following (repeating) errors at boot:
+> > 
+> > [    4.326834] Waiting for root device /dev/mmcblk0p2...
+> > [   14.563861] mmc0: Timeout waiting for hardware cmd interrupt.
+> > [   14.569619] sdhci: =========== REGISTER DUMP (mmc0)===========
+> > [   14.575461] sdhci: Sys addr: 0x4e726000 | Version:  0x00000002
+> > [   14.581300] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+> > [   14.587140] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+> > [   14.592979] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+> > [   14.598816] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+> > [   14.604654] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+> > [   14.610493] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+> > [   14.616332] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+> > [   14.622168] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+> > [   14.628007] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+> > [   14.633845] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+> 
+> it shows you always fail to get resp of sending status within the
+> expected period of time.
+> 
+> 
+> > [   14.639682] sdhci: Host ctl2: 0x00000000
+> > [   14.643611] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x4e6f7208
+> > [   14.649447] sdhci: ===========================================
+> > 
+> > This repeats a few times, then more information is shown at the bottom:
+> > 
+> > [   86.893859] mmc0: Timeout waiting for hardware cmd interrupt.
+> > [   86.899615] sdhci: =========== REGISTER DUMP (mmc0)===========
+> > [   86.905453] sdhci: Sys addr: 0x00000000 | Version:  0x00000002
+> > [   86.911291] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+> > [   86.917129] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+> > [   86.922967] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+> > [   86.928804] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+> > [   86.934642] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+> > [   86.940479] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+> > [   86.946316] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+> > [   86.952154] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+> > [   86.957992] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+> > [   86.963830] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+> > [   86.969668] sdhci: Host ctl2: 0x00000000
+> > [   86.973596] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
+> > [   86.979433] sdhci: ===========================================
+> > [   86.986356] mmc0: switch to bus width 8 ddr failed
+> > [   86.991163] mmc0: error -110 whilst initialising MMC card
+> > [   97.773859] mmc0: Timeout waiting for hardware cmd interrupt.
+> > 
+> > --
+> > 
+> > After looking through the latest commits to mmc/core, I found the
+> > culprit:
+> > Commit e173f8911f091fa50ccf8cc1fa316dd5569bc470 ("mmc: core: Update
+> > CMD13 polling policy when switch to HS DDR mode")
+> > 
+> > Reverting it fixes the problem. But I am unsure if that's the right
+> > course of action?
+> > 
+> > Feel free to send me patches for testing!
+> 
+> By looking the changes itself, it should be good from the view of spec.
+> Maybe you could try the patch below, but don't beat me if that doesn't
+> help at all. :)
+> 
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1074,7 +1074,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>                            EXT_CSD_BUS_WIDTH,
+>                            ext_csd_bits,
+>                            card->ext_csd.generic_cmd6_time,
+> -                          MMC_TIMING_MMC_DDR52,
+> +                          0,
+>                            true, true, true);
+>         if (err) {
+>                 pr_err("%s: switch to bus width %d ddr failed\n",
+> @@ -1118,6 +1118,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>         if (err)
+>                 err = __mmc_set_signal_voltage(host,
+> MMC_SIGNAL_VOLTAGE_330);
+> 
+> +       if (!err)
+> +               mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+> +
+> 
+> 
 
-> On 02/01/17 20:23, Gabriel Krisman Bertazi wrote:
->> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
->> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
->> reads, which are not allowed for SD devices.  This adds a sanity check
->> to the interruption path, preventing that illegal command from getting
->> sent to SD devices.
->> 
->> This quirk allows that particular machine to resume boot despite the
->> faulty hardware, instead of getting hung dealing with thousands of
->> mishandled interrupts.
->> 
->> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
->> CC: Adrian Hunter <adrian.hunter@intel.com>
->> CC: Ulf Hansson <ulf.hansson@linaro.org>
->> CC: linux-mmc@vger.kernel.org
->> ---
->>  drivers/mmc/host/sdhci.c | 5 ++++-
->>  1 file changed, 4 insertions(+), 1 deletion(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 23909804ffb8..43913876581e 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2665,6 +2665,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->>  {
->>  	irqreturn_t result = IRQ_NONE;
->>  	struct sdhci_host *host = dev_id;
->> +	struct mmc_host *mmc = host->mmc;
->>  	u32 intmask, mask, unexpected = 0;
->>  	int max_loops = 16;
->>  
->> @@ -2733,7 +2734,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->>  		if (intmask & SDHCI_INT_RETUNE)
->>  			mmc_retune_needed(host->mmc);
->>  
->> -		if (intmask & SDHCI_INT_CARD_INT) {
->> +		if (intmask & SDHCI_INT_CARD_INT && mmc->card &&
->> +		    (mmc->card->type == MMC_TYPE_SDIO ||
->> +		     mmc->card->type == MMC_TYPE_SD_COMBO)) {
->
-> We shouldn't have to look at the card type.  But if the interrupt is not
-> enabled, then we shouldn't process it.  What about:
+Hi,
 
-Hi Adrian,
+thank you. This patch solves the problem! :)
 
-Thanks for your review.  I think this way is ok too, I also ran it
-against the faulty hardware and it prevented the hang as well.  I
-just submitted a v2.
+Tested-by: Clemens Gruber <clemens.gruber@pqgruber.com>
 
--- 
-Gabriel Krisman Bertazi
+Regards,
+Clemens
