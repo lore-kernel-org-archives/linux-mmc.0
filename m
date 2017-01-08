@@ -1,27 +1,35 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v2 4/7] x86: put msr-index.h in uapi
-Date: Fri, 6 Jan 2017 22:50:34 +0200
-Message-ID: <CAHp75VdDfopdSy-7oy87ZeosDB9+FN4zFBhErPWLQB7tH81zTw@mail.gmail.com>
-References: <bf83da6b-01ef-bf44-b3e1-ca6fc5636818@6wind.com>
- <1483695839-18660-1-git-send-email-nicolas.dichtel@6wind.com> <1483695839-18660-5-git-send-email-nicolas.dichtel@6wind.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH 0/8] MMC-core: Fine-tuning for some function implementations
+Date: Sun, 8 Jan 2017 22:38:13 +0100
+Message-ID: <8e2accf5-90b3-6bd0-2abd-699927bc459b@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-m68k-owner@vger.kernel.org>
-In-Reply-To: <1483695839-18660-5-git-send-email-nicolas.dichtel@6wind.com>
-Sender: linux-m68k-owner@vger.kernel.org
-To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, mmarek@suse.com, linux-kbuild@vger.kernel.org, Linux Documentation List <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-alpha@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, adi-buildroot-devel@lists.sourceforge.net, linux-c6x-dev@linux-c6x.org, Cris <linux-cris-kernel@axis.com>, uclinux-h8-devel@lists.sourceforge.jp, linux-hexagon@vger.kernel.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-am33-list@redhat.com, nios2-dev@lists.rocketboards.org, openrisc@lists.librecores.org, linux-parisc@vger.kernel.org, open list:LINUX FOR POWERPC PA SEMI PWRFICI
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Harjani Ritesh <riteshh@codeaurora.org>, Jens Axboe <axboe@fb.com>, Linus Walleij <linus.walleij@linaro.org>, Mike Christie <mchristi@redhat.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jan 6, 2017 at 11:43 AM, Nicolas Dichtel
-<nicolas.dichtel@6wind.com> wrote:
-> This header file is exported, thus move it to uapi.
+From: Markus Elfring <elfring@users.sourceforge.net>
+Date: Sun, 8 Jan 2017 22:30:03 +0100
 
-Just hint for the future:
--M (move)
--C (copy)
--D (delete) [though this is NOT for applying]
+Some update suggestions were taken into account
+from static source code analysis.
+
+Markus Elfring (8):
+  Use kmalloc_array() in mmc_test_area_init()
+  Fix a typo in a comment line
+  Use seq_puts() in mtf_testlist_show()
+  mmc_test: Add some spaces for better code readability
+  mmc_test: Combine substrings for 5 messages
+  mmc_test: Improve a size determination in five functions
+  Use kcalloc() in mmc_test_alloc_mem()
+  Use kmalloc_array() in mmc_alloc_sg()
+
+ drivers/mmc/core/mmc_test.c | 77 +++++++++++++++++++++------------------------
+ drivers/mmc/core/queue.c    |  2 +-
+ 2 files changed, 36 insertions(+), 43 deletions(-)
 
 -- 
-With Best Regards,
-Andy Shevchenko
+2.11.0
