@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2 6/6] arm64: allwinner: a64: Increase the MMC max frequency
-Date: Mon,  9 Jan 2017 17:46:55 +0100
-Message-ID: <3689701f93c8426bfa476e9a5f31c3642a8a898e.1483980339.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v2 5/6] arm64: allwinner: a64: Add MMC pinctrl nodes
+Date: Mon,  9 Jan 2017 17:46:54 +0100
+Message-ID: <f7a004f7905badbd8e6fea7fd8591a498b396b9d.1483980339.git-series.maxime.ripard@free-electrons.com>
 References: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
@@ -12,46 +12,49 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
-All the controllers can have a maximum frequency of 200MHz.
-
-Since older SoCs cannot go that high, we cannot change the default maximum
-frequency, but fortunately for us we have a property for that in the DT.
-
-This also has the side effect of allowing to use the MMC HS200 mode for the
-boards that support it (with either 1.2v or 1.8v IOs).
+The A64 only has a single set of pins for each MMC controller. Since we
+already have boards that require all of them, let's add them to the DTSI.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 3 +++
- 1 file changed, 3 insertions(+), 0 deletions(-)
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 25 ++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 0 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-index 8e149498e096..f46ae965cf5b 100644
+index 143e9706438f..8e149498e096 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-@@ -332,6 +332,7 @@
- 			resets = <&ccu RST_BUS_MMC0>;
- 			reset-names = "ahb";
- 			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <200000000>;
- 			status = "disabled";
- 			#address-cells = <1>;
- 			#size-cells = <0>;
-@@ -345,6 +346,7 @@
- 			resets = <&ccu RST_BUS_MMC1>;
- 			reset-names = "ahb";
- 			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <200000000>;
- 			status = "disabled";
- 			#address-cells = <1>;
- 			#size-cells = <0>;
-@@ -358,6 +360,7 @@
- 			resets = <&ccu RST_BUS_MMC2>;
- 			reset-names = "ahb";
- 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <200000000>;
- 			status = "disabled";
- 			#address-cells = <1>;
- 			#size-cells = <0>;
+@@ -205,6 +205,31 @@
+ 				function = "i2c1";
+ 			};
+ 
++			mmc0_pins: mmc0-pins {
++				pins = "PF0", "PF1", "PF2", "PF3",
++				       "PF4", "PF5";
++				function = "mmc0";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
++
++			mmc1_pins: mmc1-pins {
++				pins = "PG0", "PG1", "PG2", "PG3",
++				       "PG4", "PG5";
++				function = "mmc1";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
++
++			mmc2_pins: mmc2-pins {
++				pins = "PC1", "PC5", "PC6", "PC8", "PC9",
++				       "PC10","PC11", "PC12", "PC13",
++				       "PC14", "PC15", "PC16";
++				function = "mmc2";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
++
+ 			uart0_pins_a: uart0@0 {
+ 				pins = "PB8", "PB9";
+ 				function = "uart0";
 -- 
 git-series 0.8.11
