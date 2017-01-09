@@ -1,131 +1,35 @@
-From: Jan Glauber <jan.glauber-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v10 8/8] dt-bindings: mmc: Add Cavium SOCs MMC bindings
-Date: Mon, 9 Jan 2017 16:05:17 +0100
-Message-ID: <20170109150517.GA2862@hardcore>
-References: <20161219121552.18316-1-jglauber@cavium.com>
- <20161219121552.18316-9-jglauber@cavium.com>
- <20161222203242.nxnmqyldtvdxkqhc@rob-hp-laptop>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 09/21] mmc: sdhci: Include leds.h
+Date: Mon, 9 Jan 2017 16:15:31 +0100
+Message-ID: <CACRpkdZhnOnPHoDTmpMSL_jGe32w5ce8qjdoLPQTA=GkGVdQVQ@mail.gmail.com>
+References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org> <1483102054-1752-10-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20161222203242.nxnmqyldtvdxkqhc@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, "Steven J . Hill" <Steven.Hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f172.google.com ([209.85.216.172]:34727 "EHLO
+        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S969821AbdAIPPe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2017 10:15:34 -0500
+Received: by mail-qt0-f172.google.com with SMTP id l7so89206548qtd.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2017 07:15:32 -0800 (PST)
+In-Reply-To: <1483102054-1752-10-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Thu, Dec 22, 2016 at 02:32:42PM -0600, Rob Herring wrote:
-> On Mon, Dec 19, 2016 at 01:15:52PM +0100, Jan Glauber wrote:
-> > Add description of Cavium Octeon and ThunderX SOC device tree bindings.
-> > 
-> > CC: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > CC: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > CC: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > CC: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > 
-> > Signed-off-by: Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  .../devicetree/bindings/mmc/octeon-mmc.txt         | 59 ++++++++++++++++++++++
-> 
-> Perhaps cavium-mmc.txt would be more appropriate now.
+On Fri, Dec 30, 2016 at 1:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Yes, forgot to rename it.
+> Don't rely on host.h to include the mmc.h header, but instead include it
+> explicitly because the driver depends on it.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-> >  1 file changed, 59 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-> > new file mode 100644
-> > index 0000000..aad02eb
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-> > @@ -0,0 +1,59 @@
-> > +* Cavium Octeon & ThunderX MMC controller
-> > +
-> > +The highspeed MMC host controller on Caviums SoCs provides an interface
-> > +for MMC and SD types of memory cards.
-> > +
-> > +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-> > +as the speed of SD standard 4.0. Only 3.3 Volt is supported.
-> > +
-> > +Required properties:
-> > + - compatible : should be one of:
-> > +   * "cavium,octeon-6130-mmc"
-> > +   * "cavium,octeon-6130-mmc-slot"
-> > +   * "cavium,octeon-7890-mmc"
-> > +   * "cavium,octeon-7890-mmc-slot"
-> > +   * "cavium,thunder-8190-mmc"
-> > +   * "cavium,thunder-8190-mmc-slot"
-> > +   * "cavium,thunder-8390-mmc"
-> > +   * "cavium,thunder-8390-mmc-slot"
-> > + - reg : mmc controller base registers
-> 
-> Following PCI addressing?
+As noted, the commit message is bogus.
+Refer to <linux/leds.h>
 
-Yes for the host controller, for the child nodes we use reg as the
-physical slot number. Maybe I should describe the child node properties
-separately?
+With that:
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-> > + - clocks : phandle
-> > +
-> > +Optional properties:
-> > + - for cd, bus-width and additional generic mmc parameters
-> > +   please refer to mmc.txt within this directory
-> > + - "cavium,cmd-clk-skew" : number of coprocessor clocks before sampling command
-> > + - "cavium,dat-clk-skew" : number of coprocessor clocks before sampling data
-> > +
-> > +Deprecated properties:
-> > +- spi-max-frequency : use max-frequency instead
-> > +- "cavium,bus-max-width" : use bus-width instead
-> 
-> Drop the quotes.
-
-OK, droped them also above.
-
-> > +
-> > +Examples:
-> > +	- Within .dtsi:
-> 
-> Don't show the division between files in the example.
-
-OK.
-
-> > +	mmc_1_4: mmc@1,4 {
-> > +		compatible = "cavium,thunder-8390-mmc";
-> > +		reg = <0x0c00 0 0 0 0>;	/* DEVFN = 0x0c (1:4) */
-> > +		#address-cells = <1>;
-> > +		#size-cells = <0>;
-> > +		clocks = <&sclk>;
-> > +	};
-> > +
-> > +	- Within dts:
-> > +	mmc-slot@0 {
-> 
-> Need to show this is a child node.
-
-OK.
-
-> > +		compatible = "cavium,thunder-8390-mmc-slot";
-> > +		reg = <0>;
-> > +		voltage-ranges = <3300 3300>;
-> > +		max-frequency = <42000000>;
-> > +		bus-width = <4>;
-> > +		cap-sd-highspeed;
-> > +	};
-> > +	mmc-slot@1 {
-> > +		compatible = "cavium,thunder-8390-mmc-slot";
-> > +		reg = <1>;
-> > +		voltage-ranges = <3300 3300>;
-> > +		max-frequency = <42000000>;
-> > +		bus-width = <8>;
-> > +		cap-mmc-highspeed;
-> > +		non-removable;
-> > +	};
-> > -- 
-> > 2.9.0.rc0.21.g7777322
-> > 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yours,
+Linus Walleij
