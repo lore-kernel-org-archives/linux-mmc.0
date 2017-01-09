@@ -1,46 +1,117 @@
-From: Matt Ranostay <matt@ranostay.consulting>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Sun, 8 Jan 2017 20:53:40 -0800
-Message-ID: <CAJ_EiSQYz2aEGiCv2npxmby0nHwmJJyR_jzY5wJOK98zp6Bvzg@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
- <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
- <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
- <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com> <CACRpkdad7JXzxYfuB_XYdo2vuZmEt5iWgq79Va5cWwTaJc6Y5Q@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4] mmc: dw_mmc: force setup bus if active slots exist
+Date: Mon, 09 Jan 2017 14:41:20 +0900
+Message-ID: <7c41a01e-ded2-9c03-78d9-c0b75984bf20@samsung.com>
+References: <1483601012-18241-1-git-send-email-xzy.xu@rock-chips.com>
+ <49544a65-9b3c-c56a-e5f7-89c5fa6e6cd0@rock-chips.com>
+ <CGME20170109033926epcas4p3d4ad93f61a96f2c8d5ff5405bb3fc9cc@epcas4p3.samsung.com>
+ <587305E5.30003@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:36765 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751009AbdAIExm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jan 2017 23:53:42 -0500
-Received: by mail-qt0-f181.google.com with SMTP id k15so356316154qtg.3
-        for <linux-mmc@vger.kernel.org>; Sun, 08 Jan 2017 20:53:41 -0800 (PST)
-In-Reply-To: <CACRpkdad7JXzxYfuB_XYdo2vuZmEt5iWgq79Va5cWwTaJc6Y5Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <587305E5.30003@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ziyuan <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org
+Cc: randy.li@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
 
-On Fri, Dec 30, 2016 at 12:05 AM, Linus Walleij
-<linus.walleij@linaro.org> wrote:
-> On Mon, Dec 19, 2016 at 1:01 AM, Matt Ranostay <matt@ranostay.consulting> wrote:
->
->> * SD8787 has a "powerdown" line, and CW1200 has a "powerup" line.. I
->> know this is a simple logic inversion.
->
-> If this is a GPIO line, the GPIO subsystem can flag a line for
-> inverted logic. GPIO_ACTIVE_LOW from device tree for example.
+On 01/09/2017 12:39 PM, Ziyuan wrote:
+> 
+> 
+> On 01/05/2017 03:34 PM, Shawn Lin wrote:
+>> On 2017/1/5 15:23, Ziyuan Xu wrote:
+>>> It's necessary to setup bus if any slots are present.
+>>> - update clock after ctrl reset
+>>> - if the host has genpd node, we can guarantee the clock is available
+>>> before starting request. Otherwies, the clock register is reset once
+>>> power off the pd, and host can't output the active clock during
+>>> communication.
+>>>
+>>> fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
+>>> Reported-by: Randy Li <randy.li@rock-chips.com>
+>>> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+>>>
+>>> ---
+>>> Hi guys,
+>>>
+>>> I found a similar issue on rk3399 platform, which has a genpd node for
+>>> SD card host. Power off-on pd will reset the registers to a default
+>>> value (ie. CLKENA), so that the host can't output the active clock
+>>> during communication.
+>>>
+>>
+>> Indeed, Caesar recently introduced all the genpd for rk3399 platform,
+>> so we need to restore them.
+>>
+>>> So we need to setup bus in rpm resume. It also wraps the update clock
+>>> behaviour which I did in V3.
+>>>
+>>> Thanks,
+>>> Ziyuan Xu
+>>>
+>>>
+>>> Changes in v4:
+>>> - update commit message
+>>> - fix SD host rpm resume can't work
+>>>
+>>> Changes in v3:
+>>> - only reset host with active slot.
+>>>
+>>> Changes in v2:
+>>> - update the commit message
+>>> - use dw_mci_reset instead of dw_mci_ctrl_reset
+>>>
+>>>  drivers/mmc/host/dw_mmc.c | 6 +++---
+>>>  1 file changed, 3 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index b44306b..b6053b3 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -3354,10 +3354,10 @@ int dw_mci_runtime_resume(struct device *dev)
+>>>
+>>>          if (!slot)
+>>>              continue;
+>>> -        if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+>>> +        if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+>>>              dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+>>> -            dw_mci_setup_bus(slot, true);
+>>> -        }
+>>> +        /* Force setup bus to guarantee available clock output */
+>>> +        dw_mci_setup_bus(slot, true);
+>>
+>> So the spamming message about
+>>
+>> "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n"
+>>
+>> will always be there, right? So you could append a new patch to shut
+>> up it as I think it's useless no matter for system pm or rpm to print
+>> it.  How about?
+> 
+> Fine, it's favourable with dev_vdbg if the dw_mmc rpm is enabled.
+> Hi Jaehoon,
+> What's your opinion? If you think this patch and shawn's advice are acceptable, I will send the v5 patch.
 
-Slight ping on Ulf on this thread :).
+I don't agreed to use dev_vdbg()..but it needs not to display at everytime.
+Hmm..It needs to consider more..because we needs to see the clock value when it's initialized.
 
-I do understand the inverted logic flag but that doesn't help if there
-are different logic states between various chipsets.
+Best Regards,
+Jaehoon Chung
 
->
-> Yours,
-> Linus Walleij
+> 
+> BR
+> Ziyuan Xu
+> 
+>>
+>>>      }
+>>>
+>>>      /* Now that slots are all setup, we can enable card detect */
+>>>
+>>
+>>
+> 
+> 
+> 
+> 
+> 
