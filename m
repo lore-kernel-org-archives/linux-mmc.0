@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2 4/6] arm64: allwinner: a64: Add MMC nodes
-Date: Mon,  9 Jan 2017 17:46:53 +0100
-Message-ID: <3b3153389e8745b1e237878d85d5a863ab3f134d.1483980339.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v2 3/6] mmc: sunxi: Add EMMC (MMC2) controller compatible
+Date: Mon,  9 Jan 2017 17:46:52 +0100
+Message-ID: <252556e96270e41e80cfe5bf248883c9b85cdeb7.1483980339.git-series.maxime.ripard@free-electrons.com>
 References: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,71 +23,47 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Andre Przywara <andre.przywara@arm.com>
+The MMC2 controller on the A64 is kind of a special beast.
 
-The A64 has 3 MMC controllers, one of them being especially targeted to
-eMMC. Among other things, it has a data strobe signal and a 8 bits data
-width.
+While the general controller design is the same than the other MMC
+controllers in the SoC, it also has a bunch of features and changes that
+prevent it to be driven in the same way.
 
-The two other are more usual controllers that will have a 4 bits width at
-most and no data strobe signal, which limits it to more usual SD or MMC
-peripherals.
+It has for example a different bus width limit, a different maximum
+frequency, and, for some reason, the maximum buffer size of a DMA
+descriptor.
 
-Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Add a new compatible specifically for this controller.
+
+Acked-by: Rob Herring <robh@kernel.org>
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 39 ++++++++++++++++++++-
- 1 file changed, 39 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 7 +++++++
+ 1 file changed, 7 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-index 99b6bb1e141c..143e9706438f 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-@@ -299,6 +299,45 @@
- 			#size-cells = <0>;
- 		};
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 9a860bcac154..bdcc87c9d8b8 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1081,12 +1081,19 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
+ 	.needs_new_timings = true,
+ };
  
-+		mmc0: mmc@1c0f000 {
-+			compatible = "allwinner,sun50i-a64-mmc";
-+			reg = <0x01c0f000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ccu RST_BUS_MMC0>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
++static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
++	.idma_des_size_bits = 13,
++	.clk_delays = NULL,
++	.can_calibrate = true,
++};
 +
-+		mmc1: mmc@1c10000 {
-+			compatible = "allwinner,sun50i-a64-mmc";
-+			reg = <0x01c10000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ccu RST_BUS_MMC1>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
-+
-+		mmc2: mmc@1c11000 {
-+			compatible = "allwinner,sun50i-a64-emmc";
-+			reg = <0x01c11000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC2>, <&ccu CLK_MMC2>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ccu RST_BUS_MMC2>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
-+
- 		gic: interrupt-controller@1c81000 {
- 			compatible = "arm,gic-400";
- 			reg = <0x01c81000 0x1000>,
+ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun4i-a10-mmc", .data = &sun4i_a10_cfg },
+ 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
+ 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
+ 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
++	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
 -- 
 git-series 0.8.11
