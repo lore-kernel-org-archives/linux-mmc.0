@@ -1,71 +1,39 @@
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: Re: [PATCH v2 6/6] arm64: allwinner: a64: Increase the MMC max frequency
-Date: Tue, 10 Jan 2017 01:01:20 +0800
-Message-ID: <CAGb2v67JoOAtHjMJboNUdCDX=+=Hf+zOWr234rT7GEiUmPb=nQ@mail.gmail.com>
-References: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
- <3689701f93c8426bfa476e9a5f31c3642a8a898e.1483980339.git-series.maxime.ripard@free-electrons.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 13/21] mmc: core: Move public functions from core.h to
+ private headers
+Date: Mon, 9 Jan 2017 19:19:53 +0100
+Message-ID: <CACRpkdb0OHgWH4GDZPvN9SX69xNt52f_6oW1w43JTqKHh9nUpA@mail.gmail.com>
+References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org> <1483102054-1752-14-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <3689701f93c8426bfa476e9a5f31c3642a8a898e.1483980339.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:33915 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1164086AbdAISTy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2017 13:19:54 -0500
+Received: by mail-qt0-f169.google.com with SMTP id l7so94638767qtd.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2017 10:19:54 -0800 (PST)
+In-Reply-To: <1483102054-1752-14-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Tue, Jan 10, 2017 at 12:46 AM, Maxime Ripard
-<maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> All the controllers can have a maximum frequency of 200MHz.
->
-> Since older SoCs cannot go that high, we cannot change the default maximum
-> frequency, but fortunately for us we have a property for that in the DT.
->
-> This also has the side effect of allowing to use the MMC HS200 mode for the
-> boards that support it (with either 1.2v or 1.8v IOs).
->
-> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-> ---
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 3 +++
->  1 file changed, 3 insertions(+), 0 deletions(-)
->
-> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> index 8e149498e096..f46ae965cf5b 100644
-> --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> @@ -332,6 +332,7 @@
->                         resets = <&ccu RST_BUS_MMC0>;
->                         reset-names = "ahb";
->                         interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-> +                       max-frequency = <200000000>;
+On Fri, Dec 30, 2016 at 1:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-You also have to set one of MMC_CAP2_HS200* in the driver,
-or mmc-hs200-1_8v or mmc-hs200-1_2v in the device tree to
-actually use HS200, right?
+> A significant amount of functions are available through the public mmc
+> core.h header file. Let's slim down this public mmc interface, as to
+> prevent users from abusing it, by moving some of the functions to private
+> mmc header files.
+>
+> This change concentrates on moving the functions into private mmc headers,
+> following changes may continue with additional clean-ups, as an example
+> some functions can be turned into static.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-ChenYu
+Nice, encapsulate!
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
->                         status = "disabled";
->                         #address-cells = <1>;
->                         #size-cells = <0>;
-> @@ -345,6 +346,7 @@
->                         resets = <&ccu RST_BUS_MMC1>;
->                         reset-names = "ahb";
->                         interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-> +                       max-frequency = <200000000>;
->                         status = "disabled";
->                         #address-cells = <1>;
->                         #size-cells = <0>;
-> @@ -358,6 +360,7 @@
->                         resets = <&ccu RST_BUS_MMC2>;
->                         reset-names = "ahb";
->                         interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-> +                       max-frequency = <200000000>;
->                         status = "disabled";
->                         #address-cells = <1>;
->                         #size-cells = <0>;
-> --
-> git-series 0.8.11
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yours,
+Linus Walleij
