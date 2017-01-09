@@ -1,19 +1,19 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 13/21] mmc: core: Move public functions from core.h to
- private headers
-Date: Mon, 9 Jan 2017 19:19:53 +0100
-Message-ID: <CACRpkdb0OHgWH4GDZPvN9SX69xNt52f_6oW1w43JTqKHh9nUpA@mail.gmail.com>
-References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org> <1483102054-1752-14-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH 14/21] mmc: core: Move some host specific public functions
+ to host.h
+Date: Mon, 9 Jan 2017 19:21:16 +0100
+Message-ID: <CACRpkdYy+A4shtiJMkjFC356zp_1w7P++LYw30CJabnuwyAc2Q@mail.gmail.com>
+References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org> <1483102054-1752-15-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:33915 "EHLO
-        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1164086AbdAISTy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2017 13:19:54 -0500
-Received: by mail-qt0-f169.google.com with SMTP id l7so94638767qtd.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2017 10:19:54 -0800 (PST)
-In-Reply-To: <1483102054-1752-14-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:36487 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1031638AbdAISVR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2017 13:21:17 -0500
+Received: by mail-qk0-f174.google.com with SMTP id 11so51006002qkl.3
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2017 10:21:17 -0800 (PST)
+In-Reply-To: <1483102054-1752-15-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
@@ -21,18 +21,13 @@ Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80
 
 On Fri, Dec 30, 2016 at 1:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-> A significant amount of functions are available through the public mmc
-> core.h header file. Let's slim down this public mmc interface, as to
-> prevent users from abusing it, by moving some of the functions to private
-> mmc header files.
->
-> This change concentrates on moving the functions into private mmc headers,
-> following changes may continue with additional clean-ups, as an example
-> some functions can be turned into static.
+> Ideally the public mmc header file, core.h, shouldn't contain interfaces
+> particularly intended to be used by host drivers. Instead those should
+> remain in the host.h header file. Therefore, let's move a couple functions
+> from core.h to host.h.
 >
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Nice, encapsulate!
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
