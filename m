@@ -1,57 +1,79 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/8] mmc-core: Use kmalloc_array() in mmc_test_area_init()
-Date: Tue, 10 Jan 2017 16:44:38 +0800
-Message-ID: <beb1ef24-f490-c446-66e4-f13d990c2669@rock-chips.com>
-References: <8e2accf5-90b3-6bd0-2abd-699927bc459b@users.sourceforge.net>
- <a9b14d1d-de5c-5a22-fcd0-021d7b01cb36@users.sourceforge.net>
+From: Alexandre Torgue <alexandre.torgue@st.com>
+Subject: Re: [PATCH v2 6/9] DT: stm32f429: add pin map for SDIO controller
+Date: Tue, 10 Jan 2017 10:06:11 +0100
+Message-ID: <3834168b-2b5a-56ed-694e-1954994496d8@st.com>
+References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
+ <1484037736-25029-7-git-send-email-andrea.merello@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a9b14d1d-de5c-5a22-fcd0-021d7b01cb36@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Harjani Ritesh <riteshh@codeaurora.org>, Jens Axboe <axboe@fb.com>, Linus Walleij <linus.walleij@linaro.org>, Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: shawn.lin@rock-chips.com, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:7214 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752007AbdAJJGR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 04:06:17 -0500
+In-Reply-To: <1484037736-25029-7-git-send-email-andrea.merello@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrea Merello <andrea.merello@gmail.com>, ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com
+Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com
 
-On 2017/1/9 5:42, SF Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sun, 8 Jan 2017 18:44:26 +0100
->
-> * A multiplication for the size determination of a memory allocation
->   indicated that an array data structure should be processed.
->   Thus use the corresponding function "kmalloc_array".
->
->   This issue was detected by using the Coccinelle software.
->
+Hi Andrea
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+On 01/10/2017 09:42 AM, Andrea Merello wrote:
+> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 
-> * Replace the specification of a data structure by a pointer dereference
->   to make the corresponding size determination a bit safer according to
->   the Linux coding style convention.
->
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+Can you please add a commit message.
+Can you also change commit header like: "ARM: dts: stm32: add pin map 
+for SDIO controller on stm32f429
+
+
 > ---
->  drivers/mmc/core/mmc_test.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  arch/arm/boot/dts/stm32f429.dtsi | 33 ++++++++++++++++++++++++++++++++-
+>  1 file changed, 32 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 3ab6e52d106c..e85ef503d7ce 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -1579,7 +1579,7 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
->  	if (!t->mem)
->  		return -ENOMEM;
+> diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
+> index e4dae0e..de7b9c3 100644
+> --- a/arch/arm/boot/dts/stm32f429.dtsi
+> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+> @@ -336,7 +336,38 @@
+>  				};
+>  			};
 >
-> -	t->sg = kmalloc(sizeof(struct scatterlist) * t->max_segs, GFP_KERNEL);
-> +	t->sg = kmalloc_array(t->max_segs, sizeof(*t->sg), GFP_KERNEL);
->  	if (!t->sg) {
->  		ret = -ENOMEM;
->  		goto out_free;
+> -			ethernet_mii: mii@0 {
+> +			sdio_pins: sdio_pins@0 {
+> +				pins {
+> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
+> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
+> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
+> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
+> +						 <STM32F429_PC12_FUNC_SDIO_CK>,
+> +						 <STM32F429_PD2_FUNC_SDIO_CMD>;
+> +					drive-push-pull;
+> +					slew-rate = <2>;
+> +				};
+> +			};
+> +
+> +			sdio_pins_od: sdio_pins_od@0 {
+> +				pins1 {
+> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
+> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
+> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
+> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
+> +						 <STM32F429_PC12_FUNC_SDIO_CK>;
+> +					drive-push-pull;
+> +					slew-rate = <2>;
+> +				};
+> +
+> +				pins2 {
+> +					pinmux = <STM32F429_PD2_FUNC_SDIO_CMD>;
+> +					drive-open-drain;
+> +					slew-rate = <2>;
+> +				};
+> +			};
+> +
+> +			ethernet0_mii: mii@0 {
+>  				pins {
+>  					pinmux = <STM32F429_PG13_FUNC_ETH_MII_TXD0_ETH_RMII_TXD0>,
+>  						 <STM32F429_PG14_FUNC_ETH_MII_TXD1_ETH_RMII_TXD1>,
 >
-
-
--- 
-Best Regards
-Shawn Lin
