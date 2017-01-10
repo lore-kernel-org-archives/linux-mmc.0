@@ -1,43 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 01/21] sh: sh7724: Don't use a public mmc header for MMC_PROGRESS*
-Date: Tue, 10 Jan 2017 16:28:37 +0100
-Message-ID: <CAPDyKFr04PkRL66=ZCBG1Hx1cjeMV487NevGJRUDkrSydV81dw@mail.gmail.com>
+Subject: Re: [PATCH 09/21] mmc: sdhci: Include leds.h
+Date: Tue, 10 Jan 2017 16:32:47 +0100
+Message-ID: <CAPDyKFoB2C8VJk8eTM+S9EgpbazvV3mZ=1YF8tBxvaaQ=qVVDg@mail.gmail.com>
 References: <1483102054-1752-1-git-send-email-ulf.hansson@linaro.org>
- <1483102054-1752-2-git-send-email-ulf.hansson@linaro.org> <CACRpkdaSzQHj0UC+bLO1DyTADCvPLZOLsJVJtVC+V83-udZeOw@mail.gmail.com>
+ <1483102054-1752-10-git-send-email-ulf.hansson@linaro.org> <59d6e628-3553-5811-1fd4-a92359347085@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:37979 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1765815AbdAJP2k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 10:28:40 -0500
-Received: by mail-wm0-f52.google.com with SMTP id k184so165648231wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 07:28:39 -0800 (PST)
-In-Reply-To: <CACRpkdaSzQHj0UC+bLO1DyTADCvPLZOLsJVJtVC+V83-udZeOw@mail.gmail.com>
+Received: from mail-wj0-f182.google.com ([209.85.210.182]:33641 "EHLO
+        mail-wj0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752854AbdAJPct (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 10:32:49 -0500
+Received: by mail-wj0-f182.google.com with SMTP id kq3so38986449wjc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 07:32:49 -0800 (PST)
+In-Reply-To: <59d6e628-3553-5811-1fd4-a92359347085@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Simon Horman <horms@verge.net.au>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>
+To: Mateusz Nowak <mateusz.nowak@linux.intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 9 January 2017 at 16:00, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Fri, Dec 30, 2016 at 1:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On 30 December 2016 at 14:35, Mateusz Nowak
+<mateusz.nowak@linux.intel.com> wrote:
+> Hi Ulf,
 >
->> The enum that specifies the MMC_PROGRESS* types, is a sh mmcif specific
->> thing and has no relevance in a public mmc header. Currently it's used only
->> by the sh romImage MMCIF boot, so let's instead define the enum in there
->> and rename the types to MMCIF_* to show this.
+> On 12/30/2016 13:47, Ulf Hansson wrote:
 >>
->> Cc: linux-sh@vger.kernel.org
->> Cc: Simon Horman <horms@verge.net.au>
->> Cc: Yoshinori Sato <ysato@users.sourceforge.jp>
->> Cc: Rich Felker <dalias@libc.org>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Don't rely on host.h to include the mmc.h header, but instead include it
+>> explicitly because the driver depends on it.
 >
-> As Simon notices: this also needs to delete <linux/mmc/boot.h>.
+> You refer in description to header file (mmc.h) not related to this patch.
 
-Yes, it's done as change on top of this one.
-
-https://patchwork.kernel.org/patch/9492077/
+Ahh, copy/paste error. Thanks, for reviewing!
 
 Kind regards
 Uffe
+
+>
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.h | 1 +
+>>  1 file changed, 1 insertion(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 0b66f21..a10a7b6 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -17,6 +17,7 @@
+>>  #include <linux/compiler.h>
+>>  #include <linux/types.h>
+>>  #include <linux/io.h>
+>> +#include <linux/leds.h>
+>>
+>>  #include <linux/mmc/host.h>
+>>
+>>
+>
+> Regards,
+> Mateusz.
