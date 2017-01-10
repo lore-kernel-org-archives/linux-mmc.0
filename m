@@ -1,47 +1,119 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: tmio: Remove redundant check of mmc->slot.cd_irq
-Date: Tue, 10 Jan 2017 16:10:52 +0100
-Message-ID: <1484061052-25334-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:34285 "EHLO
-        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965013AbdAJPLK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 10:11:10 -0500
-Received: by mail-lf0-f43.google.com with SMTP id v186so63171502lfa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 07:11:10 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: eMMC boot problem: switch to bus width 8 ddr failed
+Date: Tue, 10 Jan 2017 23:22:28 +0800
+Message-ID: <CAA+hA=T=7UZWFwOPUj_P5LZMAQv3n0h_=vj1beioxmKLFbmHkQ@mail.gmail.com>
+References: <20170106004114.GA22893@archie.localdomain>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170106004114.GA22893@archie.localdomain>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Clemens Gruber <clemens.gruber@pqgruber.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 
-To validate whether native hotplug needs to be used, the tmio driver checks
-whether the mmc->slot.cd_irq has been successfully assigned.
+On Fri, Jan 6, 2017 at 8:41 AM, Clemens Gruber
+<clemens.gruber@pqgruber.com> wrote:
+> Hi,
+>
+> with the current mainline 4.10-rc2 kernel, I can no longer boot from
+> the eMMC on my i.MX6Q board.
+>
+> Details:
+> The eMMC is a Micron MTFC4GACAJCN-1M WT but as the i.MX6Q only supports
+> eMMC 4.41 features and we did not implement voltage switching from 3.3V
+> to 1.8V or lower, I did add no-1-8-v; (but none of the mmc-ddr or mmc-hs
+> options) to the device tree. The bus-width is 8.
+>
+> With 4.9 the board booted fine, now with the current mainline 4.10 tree,
+> I get the following (repeating) errors at boot:
+>
+> [    4.326834] Waiting for root device /dev/mmcblk0p2...
+> [   14.563861] mmc0: Timeout waiting for hardware cmd interrupt.
+> [   14.569619] sdhci: =========== REGISTER DUMP (mmc0)===========
+> [   14.575461] sdhci: Sys addr: 0x4e726000 | Version:  0x00000002
+> [   14.581300] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+> [   14.587140] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+> [   14.592979] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+> [   14.598816] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+> [   14.604654] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+> [   14.610493] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+> [   14.616332] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+> [   14.622168] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+> [   14.628007] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+> [   14.633845] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+> [   14.639682] sdhci: Host ctl2: 0x00000000
+> [   14.643611] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x4e6f7208
+> [   14.649447] sdhci: ===========================================
+>
+> This repeats a few times, then more information is shown at the bottom:
+>
+> [   86.893859] mmc0: Timeout waiting for hardware cmd interrupt.
+> [   86.899615] sdhci: =========== REGISTER DUMP (mmc0)===========
+> [   86.905453] sdhci: Sys addr: 0x00000000 | Version:  0x00000002
+> [   86.911291] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
+> [   86.917129] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
+> [   86.922967] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
+> [   86.928804] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
+> [   86.934642] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
+> [   86.940479] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
+> [   86.946316] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
+> [   86.952154] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
+> [   86.957992] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
+> [   86.963830] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
+> [   86.969668] sdhci: Host ctl2: 0x00000000
+> [   86.973596] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
+> [   86.979433] sdhci: ===========================================
+> [   86.986356] mmc0: switch to bus width 8 ddr failed
+> [   86.991163] mmc0: error -110 whilst initialising MMC card
+> [   97.773859] mmc0: Timeout waiting for hardware cmd interrupt.
+>
+> --
+>
+> After looking through the latest commits to mmc/core, I found the
+> culprit:
+> Commit e173f8911f091fa50ccf8cc1fa316dd5569bc470 ("mmc: core: Update
+> CMD13 polling policy when switch to HS DDR mode")
+>
+> Reverting it fixes the problem. But I am unsure if that's the right
+> course of action?
+>
+> Feel free to send me patches for testing!
+>
 
-This check is redundant at its current place in tmio_mmc_host_probe(), as
-the mmc core assigns mmc->slot.cd_irq a valid value first when
-mmc_gpiod_request_cd_irq() is called. Therefore, let's just remove the
-check for now, as that also removes a layering violation of the tmio driver
-accessing core specific data via ->slot.cd_irq.
+I can reproduce the same issue with 4.10 RC3 on MX6Q SabreSD board.
+When the issue happened, it always failed with timeout on the first CMD13
+after CMD6.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/tmio_mmc_pio.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+And it's true that reverting the following commit can avoid the issue.
+Commit e173f8911f091fa50ccf8cc1fa316dd5569bc470 ("mmc: core: Update
+CMD13 polling policy when switch to HS DDR mode")
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 3ca97f3..0ef5780 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1177,8 +1177,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
--				  !mmc_card_is_removable(mmc) ||
--				  mmc->slot.cd_irq >= 0);
-+				  !mmc_card_is_removable(mmc));
- 
- 	/*
- 	 * On Gen2+, eMMC with NONREMOVABLE currently fails because native
--- 
-1.9.1
+I did a close look at that patch, the only change by the reverting is
+hold on the MMC_TIMING_MMC_DDR52 timing setting after CMD13 polling.
+Otherwise the CMD13 may fail.
 
+The current code logic seems okay to me, i still don't understand why
+changing host timing as well during card timing changing process can
+cause such issue. It's quite strange.
+
+I double checked the main IMX DDR timing change code are
+a)  disable clock b) set_uhs_signaling
+which includes DDR enable and pinstate change c) enable clock.
+(a and c are common SDHCI code)
+We may need find out which step causes the issue.
+
+Another interesting is enabling CONFIG_MMC_DEBUG may hide the issue.
+Looks like a bit timing dependent. If i add a bit delay before
+mmc_poll_for_busy(),
+the issue was also gone.
+
+For the temporary fix, i think you can revert the patch first since
+polling in low speed for the card in high speed mode(DDR) normally should work
+in theory.
+
+Regards
+Dong Aisheng
+
+> Regards,
+> Clemens
