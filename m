@@ -1,75 +1,42 @@
-From: =?UTF-8?Q?Andr=c3=a9_Przywara?= <andre.przywara@arm.com>
-Subject: Re: [PATCH v2 5/6] arm64: allwinner: a64: Add MMC pinctrl nodes
-Date: Tue, 10 Jan 2017 00:54:57 +0000
-Message-ID: <0427ccd8-0aa5-2d98-938d-784321a3ec48@arm.com>
-References: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
- <f7a004f7905badbd8e6fea7fd8591a498b396b9d.1483980339.git-series.maxime.ripard@free-electrons.com>
+From: "S. Gilles" <sgilles@math.umd.edu>
+Subject: Re: [BUG] Boot failure since df9bcc2bc on veyron_speedy
+Date: Mon, 9 Jan 2017 20:04:34 -0500
+Message-ID: <20170110010434.GE13205@number18.npnth.net>
+References: <20170109141955.GB13205@number18.npnth.net>
+ <20170109144937.GC13205@number18.npnth.net>
+ <f30b97b0-d0e2-b6dd-e11e-ca4ea592b18d@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from foss.arm.com ([217.140.101.70]:39806 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1032762AbdAJAzJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 9 Jan 2017 19:55:09 -0500
-In-Reply-To: <f7a004f7905badbd8e6fea7fd8591a498b396b9d.1483980339.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <f30b97b0-d0e2-b6dd-e11e-ca4ea592b18d@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Joonyoung Shim <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 09/01/17 16:46, Maxime Ripard wrote:
-> The A64 only has a single set of pins for each MMC controller. Since we
-> already have boards that require all of them, let's add them to the DTSI.
-
-This matches my reworked version from the previous series, so:
-
-Reviewed-by: Andre Przywara <andre.przywara@arm.com>
-
-Cheers,
-Andre.
-
+On 2017-01-10T08:47:16+0800, Shawn Lin wrote:
+> Hi
 > 
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 25 ++++++++++++++++++++-
->  1 file changed, 25 insertions(+), 0 deletions(-)
+> On 2017/1/9 22:49, S. Gilles wrote:
+> > On 2017-01-09T09:19:55-0500, S. Gilles wrote:
+> > > Hi,
+> > > 
+> > > I have a C201, a veyron_speedy device (which uses rk3288) running vanilla
+> > > kernels. With recent kernels it will fail to boot (screen is on, with
+> > > blinking cursor, but no login prompt and the machine does not respond
+> > > over ssh).
+> > > 
+> > > I've bisected this to df9bcc2bc0a1f8d2963bd916698268fb2470713b, and
+> > > reverting that commit on -mainline gives me a bootable kernel. I can
+> > > provide more information as needed.
+> > 
 > 
-> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> index 143e9706438f..8e149498e096 100644
-> --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> @@ -205,6 +205,31 @@
->  				function = "i2c1";
->  			};
->  
-> +			mmc0_pins: mmc0-pins {
-> +				pins = "PF0", "PF1", "PF2", "PF3",
-> +				       "PF4", "PF5";
-> +				function = "mmc0";
-> +				drive-strength = <30>;
-> +				bias-pull-up;
-> +			};
-> +
-> +			mmc1_pins: mmc1-pins {
-> +				pins = "PG0", "PG1", "PG2", "PG3",
-> +				       "PG4", "PG5";
-> +				function = "mmc1";
-> +				drive-strength = <30>;
-> +				bias-pull-up;
-> +			};
-> +
-> +			mmc2_pins: mmc2-pins {
-> +				pins = "PC1", "PC5", "PC6", "PC8", "PC9",
-> +				       "PC10","PC11", "PC12", "PC13",
-> +				       "PC14", "PC15", "PC16";
-> +				function = "mmc2";
-> +				drive-strength = <30>;
-> +				bias-pull-up;
-> +			};
-> +
->  			uart0_pins_a: uart0@0 {
->  				pins = "PB8", "PB9";
->  				function = "uart0";
+> The fix is on the way,
 > 
+> https://patchwork.kernel.org/patch/9498527/
 
+Great - thanks for letting me know.
+
+Thanks,
+S. Gilles
