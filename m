@@ -1,181 +1,113 @@
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH v5] mmc: sdhci-pci: Add support for HS200 tuning mode on AMD
- eMMC-4.5.1
-Date: Tue, 10 Jan 2017 15:39:52 +0530
-Message-ID: <8882eda8-6669-3061-4cce-b1b5dfda9c84@amd.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 2/5] drivers: mmc: sunxi: limit A64 MMC2 to
+ 8K DMA buffer
+Date: Tue, 10 Jan 2017 15:06:00 +0100
+Message-ID: <20170110140600.wr7qyz3d2ri536mt@lukather>
+References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
+ <1483398226-29321-3-git-send-email-andre.przywara@arm.com>
+ <20170104140750.7qs4pvggwjdj5cma@rob-hp-laptop>
+ <20170105175746.fq6crpc3krz7tzxi@lukather>
+ <87b26848-4f86-f2d2-3f82-db0937c572e2@arm.com>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0071.outbound.protection.outlook.com ([104.47.38.71]:20598
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751372AbdAJKKR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Jan 2017 05:10:17 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="2qmu4zrtesiijmpm"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBU6U2PBQKGQEIEJ77AQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <87b26848-4f86-f2d2-3f82-db0937c572e2-5wv7dgnIgG8@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: =?iso-8859-1?Q?Andr=E9?= Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Cc: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
 
-Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
-Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
-Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
----
+--2qmu4zrtesiijmpm
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Changes since v1: (https://patchwork.kernel.org/patch/9429071/)
- * Reworked on review comments received which has the following:
-   -> Removed the amd_tuning_descriptor struct and amd_find_good_phase()
-      and handled the tuning changes in amd_execute_tuning().
-   -> Fix some alignment problems.
-   -> Defined macros for registers and bit fields used.
-   -> removed mdelay and used msleep
+On Thu, Jan 05, 2017 at 11:33:28PM +0000, Andr=C3=A9 Przywara wrote:
+> On 05/01/17 17:57, Maxime Ripard wrote:
+> > Hi Rob,
+> >=20
+> > On Wed, Jan 04, 2017 at 08:07:50AM -0600, Rob Herring wrote:
+> >> On Mon, Jan 02, 2017 at 11:03:43PM +0000, Andre Przywara wrote:
+> >>> From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> >>>
+> >>> Unlike the A64 user manual reports, the third MMC controller on the
+> >>> A64 (and the only one capable of 8-bit HS400 eMMC transfers) has a
+> >>> DMA buffer size limit of 8KB (much like the very old Allwinner SoCs).
+> >>> This does not affect the other two controllers, so introduce a new
+> >>> DT compatible string to let the driver use different settings for tha=
+t
+> >>> particular device. This will also help to enable the high-speed trans=
+fer
+> >>> modes of that controller later.
+> >>>
+> >>> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> >>> Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+> >>> ---
+> >>>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
+> >>>  drivers/mmc/host/sunxi-mmc.c                        | 7 +++++++
+> >>>  2 files changed, 8 insertions(+)
+> >>
+> >> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> >=20
+> > Some kind of a digression on this: we have three MMC controllers on
+> > this SoC. Like this patch shows, the third one is clearly different,
+> > and supports both more modes, a wider bus, and specific quirks. We
+> > need a new compatible for this one, everything's perfect.
+> >=20
+> > However, the other two are mostly the same, but seems to need
+> > different tuning parameters to get more performances out of the
+> > controller (but this is unclear yet). How do we usually deal with
+> > that?
+>=20
+> I guess you wanted to hear Rob's opinion ;-), but "get more performance"
+> sounds like we add one (or more) properties to tune those values.
+> If I get this right, it works with default values, but is sub-optimal?
 
-Changes since v2: (https://patchwork.kernel.org/patch/9469247/)
- * Resubmitted the v1 patch by removing unused variables.
+That would be my understanding too, at least, it works in a decent way
+without fiddling with those parameters.
 
-Changes since v3: (https://patchwork.kernel.org/patch/9469571/)
- * Adding a changelog description and resubmitting the changes made in v2
+Maxime
 
-Changes since v4: (https://patchwork.kernel.org/patch/9470185/)
- * Changed the amd_execute_tuning logic as per Adrian suggestions and
-   addressed the comments received
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
 
- drivers/mmc/host/sdhci-pci-core.c | 103 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 99 insertions(+), 4 deletions(-)
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 1a72d32..b9899d0 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -866,11 +866,98 @@ enum amd_chipset_gen {
- 	AMD_CHIPSET_UNKNOWN,
- };
+--2qmu4zrtesiijmpm
+Content-Type: application/pgp-signature; name="signature.asc"
 
-+/* AMD registers */
-+#define AMD_SD_AUTO_PATTERN		0xB8
-+#define AMD_MSLEEP_DURATION		4
-+#define AMD_SD_MISC_CONTROL		0xD0
-+#define AMD_MAX_TUNE_VALUE		0x0B
-+#define AMD_AUTO_TUNE_SEL		0x10800
-+#define AMD_FIFO_PTR			0x30
-+#define AMD_BIT_MASK			0x1F
-+
-+static int amd_tuning_reset(struct sdhci_host *host)
-+{
-+	unsigned int val;
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val &= ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	return 0;
-+}
-+
-+static int amd_config_tuning_phase(struct sdhci_host *host, u8 phase)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+
-+	pci_read_config_dword(pdev, AMD_SD_AUTO_PATTERN, &val);
-+	val &= ~AMD_BIT_MASK;
-+	val |= (AMD_AUTO_TUNE_SEL | (phase << 1));
-+	pci_write_config_dword(pdev, AMD_SD_AUTO_PATTERN, val);
-+
-+	return 0;
-+}
-+
-+static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
-+{
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+
-+	pci_read_config_dword(pdev, AMD_SD_MISC_CONTROL, &val);
-+	val |= AMD_FIFO_PTR;
-+	pci_write_config_dword(pdev, AMD_SD_MISC_CONTROL, val);
-+
-+	return 0;
-+}
-+
-+static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	u8 valid_win = 0;
-+	u8 valid_win_max = 0;
-+	u8 valid_win_end = 0;
-+	u8 ctrl, tune_around;
-+
-+	amd_tuning_reset(host);
-+
-+	for (tune_around = 0; tune_around < 12; tune_around++) {
-+		amd_config_tuning_phase(host, tune_around);
-+
-+		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-+			valid_win = 0;
-+			msleep(AMD_MSLEEP_DURATION);
-+			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-+			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
-+		} else if (++valid_win > valid_win_max) {
-+			valid_win_max = valid_win;
-+			valid_win_end = tune_around;
-+		}
-+	}
-+
-+	if (!valid_win_max) {
-+		dev_err(&slot->chip->pdev->dev, "no tuning point found\n");
-+		return -EIO;
-+	}
-+
-+	amd_config_tuning_phase(host, valid_win_end - valid_win_max / 2);
-+
-+	amd_enable_manual_tuning(slot);
-+
-+	host->mmc->retune_period = 0;
-+
-+	return 0;
-+}
-+
- static int amd_probe(struct sdhci_pci_chip *chip)
- {
- 	struct pci_dev	*smbus_dev;
- 	enum amd_chipset_gen gen;
--
- 	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
- 			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
- 	if (smbus_dev) {
-@@ -888,16 +975,24 @@ static int amd_probe(struct sdhci_pci_chip *chip)
- 		}
- 	}
+-----BEGIN PGP SIGNATURE-----
 
--	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
-+	if (gen == AMD_CHIPSET_BEFORE_ML || gen == AMD_CHIPSET_CZ)
- 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
--		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
--	}
+iQIcBAEBCAAGBQJYdOpEAAoJEBx+YmzsjxAgp+EP/3hVaW9DMYH6QpzxZR2sH1Xv
+usHFZMrX2IlFUk9Dp5GdMZ1B1Lf0u90CW0kh2pnY3FPEKjsGFiFXjHISQB1NKBc8
+Wk9agm+c0FvfKZQ7IQNkx5T6DWRXoibWxJUbjW8+wdG4isR7vwmJkLCSsNzZG8H8
+RtjE1tTZjeYiDDXl0osu9M1ozqc26Yoyu3yhTVApzkhG9Z2UANjwItTmcb/lv+Sb
+8mFPx5ra9KnWTmL9tJnLVTIC8e+zThcCJtH8IUZJQNqshTJ1WBilnJIuK3HzD2wO
+Ew0vkcNjx8h1uxLwNOI4hKi/zch5dwDNuHf+OUv3vMR1nB+Rs2x33rq0rwh3HtNw
+001AYRG1Q8Dalf2z0PrWN+bLf+t/LxheXRknwQcqOFZ0KQMNZj0DEO8PXJZe8MMl
+vBM6Bfhc83slszRzDcFMKBLl9ryN4nop7SsvgKR7wsROWCXKvXw7jMXOo/2EOTrI
+rmqDbL7OiToDyofil4yGuGYxMd3/mDpWcsAnJwMxKzpVd2NiiGQ1aJQPgDDxyzBn
+YCO//ZH+RPtgYPJGWfzLeaRNPyHpg4h7cX7AJMnlmf2pbi/it0sD1O2vRNGEsCA2
+7cliUT6RFaY5HcSRFFSb3aZq67K1WfaBMYWlx98jCAP7MDdQMyJpbIVNNRaikT4F
+4B6igcgJAH43Y3iNdyRH
+=tXUP
+-----END PGP SIGNATURE-----
 
- 	return 0;
- }
-
-+static const struct sdhci_ops amd_sdhci_pci_ops = {
-+	.set_clock			= sdhci_set_clock,
-+	.enable_dma			= sdhci_pci_enable_dma,
-+	.set_bus_width			= sdhci_pci_set_bus_width,
-+	.reset				= sdhci_reset,
-+	.set_uhs_signaling		= sdhci_set_uhs_signaling,
-+	.platform_execute_tuning	= amd_execute_tuning,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_amd = {
- 	.probe		= amd_probe,
-+	.ops		= &amd_sdhci_pci_ops,
- };
-
- static const struct pci_device_id pci_ids[] = {
--- 
-2.7.4
+--2qmu4zrtesiijmpm--
