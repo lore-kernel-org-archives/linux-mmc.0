@@ -1,66 +1,56 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [RESEND PATCHv1 7/8] mmc: sdhci-msm: Make HS400 tuning follow as per recommeneded HW sequence
-Date: Tue, 10 Jan 2017 12:30:51 +0530
-Message-ID: <1484031652-12059-8-git-send-email-riteshh@codeaurora.org>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+From: Ziyuan <xzy.xu@rock-chips.com>
+Subject: Re: [BUG] Boot failure since df9bcc2bc on veyron_speedy
+Date: Tue, 10 Jan 2017 15:20:17 +0800
+Message-ID: <58748B31.7040307@rock-chips.com>
+References: <20170109141955.GB13205@number18.npnth.net>
+ <20170109144937.GC13205@number18.npnth.net>
+ <f30b97b0-d0e2-b6dd-e11e-ca4ea592b18d@rock-chips.com>
+ <20170110010434.GE13205@number18.npnth.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+In-Reply-To: <20170110010434.GE13205@number18.npnth.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Ritesh Harjani <riteshh@codeaurora.org>
+To: "S. Gilles" <sgilles@math.umd.edu>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Joonyoung Shim <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-During tuning execution for HS400 mode, HW sequence recommends
-to select MCLK_SEL/2(0x3) in VENDOR_SPEC & sdhc msm clock at GCC
-to be 400MHZ (nearest supported clk). Add this change in tuning
-sequence during HS400 tuning.
+Hi,
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+On 01/10/2017 09:04 AM, S. Gilles wrote:
+> On 2017-01-10T08:47:16+0800, Shawn Lin wrote:
+>> Hi
+>>
+>> On 2017/1/9 22:49, S. Gilles wrote:
+>>> On 2017-01-09T09:19:55-0500, S. Gilles wrote:
+>>>> Hi,
+>>>>
+>>>> I have a C201, a veyron_speedy device (which uses rk3288) running vanilla
+>>>> kernels. With recent kernels it will fail to boot (screen is on, with
+>>>> blinking cursor, but no login prompt and the machine does not respond
+>>>> over ssh).
+>>>>
+>>>> I've bisected this to df9bcc2bc0a1f8d2963bd916698268fb2470713b, and
+>>>> reverting that commit on -mainline gives me a bootable kernel. I can
+>>>> provide more information as needed.
+>> The fix is on the way,
+>>
+>> https://patchwork.kernel.org/patch/9498527/
+> Great - thanks for letting me know.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 84d29dd..fa9bce3 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -151,7 +151,8 @@ static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
- 	 */
- 	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
- 	    ios.timing == MMC_TIMING_MMC_DDR52 ||
--	    ios.timing == MMC_TIMING_MMC_HS400)
-+	    ios.timing == MMC_TIMING_MMC_HS400 ||
-+	    host->flags & SDHCI_HS400_TUNING)
- 		clock *= 2;
- 	return clock;
- }
-@@ -611,7 +612,8 @@ void sdhci_msm_hc_select_mode(struct sdhci_host *host)
- {
- 	struct mmc_ios ios = host->mmc->ios;
- 
--	if (ios.timing == MMC_TIMING_MMC_HS400)
-+	if (ios.timing == MMC_TIMING_MMC_HS400 ||
-+	    host->flags & SDHCI_HS400_TUNING)
- 		msm_hc_select_hs400(host);
- 	else
- 		msm_hc_select_default(host);
-@@ -831,6 +833,16 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- 	    ios.timing == MMC_TIMING_UHS_SDR104))
- 		return 0;
- 
-+	/*
-+	 * For HS400 tuning in HS200 timing requires:
-+	 * - select MCLK/2 in VENDOR_SPEC
-+	 * - program MCLK to 400MHz (or nearest supported) in GCC
-+	 */
-+	if (host->flags & SDHCI_HS400_TUNING) {
-+		sdhci_msm_hc_select_mode(host);
-+		msm_set_clock_rate_for_bus_mode(host, ios.clock);
-+	}
-+
- retry:
- 	/* First of all reset the tuning block */
- 	rc = msm_init_cm_dll(host);
--- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-a Linux Foundation Collaborative Project.
+Can you share the result ?
+
+BR
+Ziyuan Xu
+
+>
+> Thanks,
+> S. Gilles
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
