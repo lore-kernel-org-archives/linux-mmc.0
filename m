@@ -1,79 +1,75 @@
-From: Alexandre Torgue <alexandre.torgue@st.com>
-Subject: Re: [PATCH v2 6/9] DT: stm32f429: add pin map for SDIO controller
-Date: Tue, 10 Jan 2017 10:06:11 +0100
-Message-ID: <3834168b-2b5a-56ed-694e-1954994496d8@st.com>
-References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
- <1484037736-25029-7-git-send-email-andrea.merello@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RESEND RFC 1/3] mmc: sdhci: Add platform_dumpregs callback
+ support to sdhci_ops.
+Date: Tue, 10 Jan 2017 17:15:21 +0800
+Message-ID: <7cfc2b6c-fa3f-a8cb-d684-472c3dbacf2f@rock-chips.com>
+References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
+ <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx07-00178001.pphosted.com ([62.209.51.94]:7214 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752007AbdAJJGR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 04:06:17 -0500
-In-Reply-To: <1484037736-25029-7-git-send-email-andrea.merello@gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.135]:40009 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758030AbdAJJQH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 04:16:07 -0500
+In-Reply-To: <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Merello <andrea.merello@gmail.com>, ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com
-Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com
+To: Ritesh Harjani <riteshh@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 
-Hi Andrea
+On 2017/1/10 14:41, Ritesh Harjani wrote:
+> From: Sahitya Tummala <stummala@codeaurora.org>
+>
+> Add new host operation ->platform_dumpregs to provide a
+> mechanism through which host drivers can dump platform
+> specific registers in addition to SDHC registers
+> during error conditions.
+>
 
-On 01/10/2017 09:42 AM, Andrea Merello wrote:
-> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
-
-Can you please add a commit message.
-Can you also change commit header like: "ARM: dts: stm32: add pin map 
-for SDIO controller on stm32f429
+Although we have been preventing from adding new callback
+for sdhci core, this one makes sense as there are more and more
+vendor registers outside the scope of SDHCI spec.
 
 
+> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 > ---
->  arch/arm/boot/dts/stm32f429.dtsi | 33 ++++++++++++++++++++++++++++++++-
->  1 file changed, 32 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci.c | 3 +++
+>  drivers/mmc/host/sdhci.h | 1 +
+>  2 files changed, 4 insertions(+)
 >
-> diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
-> index e4dae0e..de7b9c3 100644
-> --- a/arch/arm/boot/dts/stm32f429.dtsi
-> +++ b/arch/arm/boot/dts/stm32f429.dtsi
-> @@ -336,7 +336,38 @@
->  				};
->  			};
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2390980..73a8918 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -101,6 +101,9 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+>  			       readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
+>  	}
 >
-> -			ethernet_mii: mii@0 {
-> +			sdio_pins: sdio_pins@0 {
-> +				pins {
-> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
-> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
-> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
-> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
-> +						 <STM32F429_PC12_FUNC_SDIO_CK>,
-> +						 <STM32F429_PD2_FUNC_SDIO_CMD>;
-> +					drive-push-pull;
-> +					slew-rate = <2>;
-> +				};
-> +			};
+> +	if (host->ops->platform_dumpregs)
+> +		host->ops->platform_dumpregs(host);
 > +
-> +			sdio_pins_od: sdio_pins_od@0 {
-> +				pins1 {
-> +					pinmux = <STM32F429_PC8_FUNC_SDIO_D0>,
-> +						 <STM32F429_PC9_FUNC_SDIO_D1>,
-> +						 <STM32F429_PC10_FUNC_SDIO_D2>,
-> +						 <STM32F429_PC11_FUNC_SDIO_D3>,
-> +						 <STM32F429_PC12_FUNC_SDIO_CK>;
-> +					drive-push-pull;
-> +					slew-rate = <2>;
-> +				};
-> +
-> +				pins2 {
-> +					pinmux = <STM32F429_PD2_FUNC_SDIO_CMD>;
-> +					drive-open-drain;
-> +					slew-rate = <2>;
-> +				};
-> +			};
-> +
-> +			ethernet0_mii: mii@0 {
->  				pins {
->  					pinmux = <STM32F429_PG13_FUNC_ETH_MII_TXD0_ETH_RMII_TXD0>,
->  						 <STM32F429_PG14_FUNC_ETH_MII_TXD1_ETH_RMII_TXD1>,
+>  	pr_err(DRIVER_NAME ": ===========================================\n");
+>  }
 >
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0b66f21..400f3a1 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -564,6 +564,7 @@ struct sdhci_ops {
+>  					 struct mmc_card *card,
+>  					 unsigned int max_dtr, int host_drv,
+>  					 int card_drv, int *drv_type);
+> +	void	(*platform_dumpregs)(struct sdhci_host *host);
+>  };
+>
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>
+
+
+-- 
+Best Regards
+Shawn Lin
+
