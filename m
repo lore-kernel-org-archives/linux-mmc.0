@@ -1,102 +1,49 @@
 From: Andrea Merello <andrea.merello@gmail.com>
-Subject: [PATCH v2 1/9] mmc: mmci: don't pretend IP variants with only one IRQ to have two mask regs
-Date: Tue, 10 Jan 2017 09:42:08 +0100
-Message-ID: <1484037736-25029-2-git-send-email-andrea.merello@gmail.com>
+Subject: [PATCH v2 7/9] DT: stm32f429: add node for SDIO controller
+Date: Tue, 10 Jan 2017 09:42:14 +0100
+Message-ID: <1484037736-25029-8-git-send-email-andrea.merello@gmail.com>
 References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:33418 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030674AbdAJIms (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 03:42:48 -0500
-Received: by mail-wj0-f195.google.com with SMTP id kp2so86800651wjc.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 00:42:47 -0800 (PST)
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35313 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030674AbdAJImy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 03:42:54 -0500
+Received: by mail-wm0-f68.google.com with SMTP id l2so28046674wml.2
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 00:42:53 -0800 (PST)
 In-Reply-To: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com, alexandre.torgue@st.com
 Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com, Andrea Merello <andrea.merello@gmail.com>
 
-Currently the driver supports both devices with one and two IRQ lines.
-
-Two mask registers are used in order to select which events have to
-actually generate an interrupt on each IRQ line.
-
-It seems that in the single-IRQ case it's assumed that the IRQs lines
-are simply OR-ed, while the two mask registers are still present. The
-driver still programs the two mask registers separately.
-
-However the STM32 variant has only one IRQ, and also has only one mask
-register.
-
-This patch prepares for STM32 variant support by making the driver using
-only one mask register when only one IRQ is available.
-
-Tested only on STM32 variant. RFT for variants other than STM32
-
 Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 ---
- drivers/mmc/host/mmci.c | 17 ++++++++---------
- 1 file changed, 8 insertions(+), 9 deletions(-)
+ arch/arm/boot/dts/stm32f429.dtsi | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 01a8047..597fab8 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -404,9 +404,9 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
- 		mask0 |= mask;
+diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
+index de7b9c3..c12a64e 100644
+--- a/arch/arm/boot/dts/stm32f429.dtsi
++++ b/arch/arm/boot/dts/stm32f429.dtsi
+@@ -388,6 +388,18 @@
+ 			};
+ 		};
  
- 		writel(mask0, base + MMCIMASK0);
-+	} else {
-+		writel(mask, base + MMCIMASK1);
- 	}
--
--	writel(mask, base + MMCIMASK1);
- }
- 
- static void mmci_stop_data(struct mmci_host *host)
-@@ -1274,12 +1274,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 
- 	do {
- 		status = readl(host->base + MMCISTATUS);
-+		status &= readl(host->base + MMCIMASK0);
- 
- 		if (host->singleirq) {
--			if (status & readl(host->base + MMCIMASK1))
--				mmci_pio_irq(irq, dev_id);
--
--			status &= ~MCI_IRQ1MASK;
-+			mmci_pio_irq(irq, dev_id);
- 		}
- 
- 		/*
-@@ -1287,7 +1285,6 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		 * enabled) since the HW seems to be triggering the IRQ on both
- 		 * edges while monitoring DAT0 for busy completion.
- 		 */
--		status &= readl(host->base + MMCIMASK0);
- 		writel(status, host->base + MMCICLEAR);
- 
- 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
-@@ -1710,7 +1707,8 @@ static int mmci_probe(struct amba_device *dev,
- 	spin_lock_init(&host->lock);
- 
- 	writel(0, host->base + MMCIMASK0);
--	writel(0, host->base + MMCIMASK1);
-+	if (!host->singleirq)
-+		writel(0, host->base + MMCIMASK1);
- 	writel(0xfff, host->base + MMCICLEAR);
- 
- 	/*
-@@ -1800,7 +1798,8 @@ static int mmci_remove(struct amba_device *dev)
- 		mmc_remove_host(mmc);
- 
- 		writel(0, host->base + MMCIMASK0);
--		writel(0, host->base + MMCIMASK1);
-+		if (!host->singleirq)
-+			writel(0, host->base + MMCIMASK1);
- 
- 		writel(0, host->base + MMCICOMMAND);
- 		writel(0, host->base + MMCIDATACTRL);
++		sdio: sdio@40012c00 {
++			compatible = "st,stm32f4xx-sdio";
++			reg = <0x40012c00 0x400>;
++			clocks = <&rcc 0 171>;
++			interrupts = <49>;
++			status = "disabled";
++			pinctrl-0 = <&sdio_pins>;
++			pinctrl-1 = <&sdio_pins_od>;
++			pinctrl-names = "default", "opendrain";
++			max-frequency = <48000000>;
++		};
++
+ 		rcc: rcc@40023810 {
+ 			#reset-cells = <1>;
+ 			#clock-cells = <2>;
 -- 
 2.7.4
 
