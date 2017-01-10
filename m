@@ -1,55 +1,64 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 3/8] mmc-core: Use seq_puts() in mtf_testlist_show()
-Date: Tue, 10 Jan 2017 16:41:23 +0800
-Message-ID: <07a62dc9-0c46-2dc3-edcf-231d5dc7521c@rock-chips.com>
-References: <8e2accf5-90b3-6bd0-2abd-699927bc459b@users.sourceforge.net>
- <5b8afe3b-0dee-0d95-c855-f0b93a95a072@users.sourceforge.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5b8afe3b-0dee-0d95-c855-f0b93a95a072@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Harjani Ritesh <riteshh@codeaurora.org>, Jens Axboe <axboe@fb.com>, Linus Walleij <linus.walleij@linaro.org>, Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: shawn.lin@rock-chips.com, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+From: Andrea Merello <andrea.merello@gmail.com>
+Subject: [PATCH v2 0/9] mmc: mmci: add support for STM32 SD controller
+Date: Tue, 10 Jan 2017 09:42:07 +0100
+Message-ID: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35882 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030674AbdAJImo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 03:42:44 -0500
+Received: by mail-wm0-f68.google.com with SMTP id r126so7670576wmr.3
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 00:42:43 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com, alexandre.torgue@st.com
+Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com, Andrea Merello <andrea.merello@gmail.com>
 
-On 2017/1/9 5:45, SF Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sun, 8 Jan 2017 19:48:28 +0100
->
-> The script "checkpatch.pl" pointed information out like the following.
->
-> WARNING: Prefer seq_puts to seq_printf
+The SD controller found in STM32 MCUs happens to be yet another variant
+of the ARM PrimeCell PL18x SD host controller, for which the mmci driver
+exists.
 
-it saves some lock time,
+This series adds support for it to the mmci driver.
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+As other varians, this one need some specific quirks, that this series
+address. Most notably this variant has not AMBA PrimeCell id registers,
+so we can't probe it using the AMBA PrimeCell generic "compatible" and
+mechanism; rather this series adds support to the mmci driver for
+register itself also as platform driver, so that specific "copatible"
+strings can also be used.
 
->
-> Thus fix the affected source code place.
->
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
-> ---
->  drivers/mmc/core/mmc_test.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 2f838a13a904..848f4f30e343 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -3163,7 +3163,7 @@ static int mtf_testlist_show(struct seq_file *sf, void *data)
->
->  	mutex_lock(&mmc_test_lock);
->
-> -	seq_printf(sf, "0:\tRun all tests\n");
-> +	seq_puts(sf, "0:\tRun all tests\n");
->  	for (i = 0; i < ARRAY_SIZE(mmc_test_cases); i++)
->  		seq_printf(sf, "%d:\t%s\n", i+1, mmc_test_cases[i].name);
->
->
+I tested this on my STM32F469-disco board, that is able to boot from an
+SD card, and write/read to/from it.
 
+RFT for other variants (to check I didn't broke anything) and with MMC
+cards. In particular I tried to implement also support for open-collector
+communication mode, that AFAICT is used only on MMC cards, but I couldn't
+test it.
 
--- 
-Best Regards
-Shawn Lin
+Changes since v1:
+- fixed compile failure when CONFIG_ARM_AMBA is enabled
+- fixed mmc CD pin claimed two times
+- trivial whitespace and newline fixes
+
+Andrea Merello (9):
+  mmc: mmci: don't pretend IP variants with only one IRQ to have two
+    mask regs
+  mmc: mmci: add support for not-amba, but still compatible, variants
+  mmc: mmci: don't pretend all variants to have MCI_STARBITERR flag
+  mmc: mmci: add support for setting pad type via pinctrl
+  mmc: mmci: add STM32 variant
+  DT: stm32f429: add pin map for SDIO controller
+  DT: stm32f429: add node for SDIO controller
+  DT: stm32f469-disco: add node for SDIO controller
+  Documentation: document mmci STM32 DT binding
+
+ Documentation/devicetree/bindings/mmc/mmci.txt |   2 +-
+ arch/arm/boot/dts/stm32f429.dtsi               |  47 ++-
+ arch/arm/boot/dts/stm32f469-disco.dts          |  29 ++
+ drivers/mmc/host/Kconfig                       |   8 +-
+ drivers/mmc/host/mmci.c                        | 398 +++++++++++++++++++------
+ drivers/mmc/host/mmci.h                        |   7 +-
+ 6 files changed, 396 insertions(+), 95 deletions(-)
+
+--
+2.7.4
