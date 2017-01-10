@@ -1,74 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: sdhci-iproc: Improve bcm2835 performance
-Date: Tue, 10 Jan 2017 16:38:56 +0100
-Message-ID: <CAPDyKFpWw_MppWqqmVSYCE6AcECq_BLV8GT419o77_8qysagjQ@mail.gmail.com>
-References: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com>
+From: "S. Gilles" <sgilles@math.umd.edu>
+Subject: Re: [BUG] Boot failure since df9bcc2bc on veyron_speedy
+Date: Tue, 10 Jan 2017 12:40:18 -0500
+Message-ID: <20170110174018.GF13205@number18.npnth.net>
+References: <20170109141955.GB13205@number18.npnth.net>
+ <20170109144937.GC13205@number18.npnth.net>
+ <f30b97b0-d0e2-b6dd-e11e-ca4ea592b18d@rock-chips.com>
+ <20170110010434.GE13205@number18.npnth.net>
+ <CGME20170110072114epcas2p3418c5dd1d9e7ec449b027e2543167497@epcas2p3.samsung.com>
+ <58748B31.7040307@rock-chips.com>
+ <d8e83301-f7c5-ad0a-932c-6ccdd51b8c3f@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:36481 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932135AbdAJPi6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 10:38:58 -0500
-Received: by mail-wm0-f51.google.com with SMTP id c85so131561048wmi.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2017 07:38:58 -0800 (PST)
-In-Reply-To: <1483111474-29907-1-git-send-email-stefan.wahren@i2se.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <d8e83301-f7c5-ad0a-932c-6ccdd51b8c3f@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ziyuan <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Joonyoung Shim <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-rpi-kernel@lists.infradead.org
 
-On 30 December 2016 at 16:24, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> The sdhci-iproc waste a lot performance potential on bcm2835 because of
-> missing capabilities in the platform data. This patch series tries to fix
-> this.
->
-> Raspberry Pi Zero with a class 10 sdhc card
->
-> Before:
-> dd if=/dev/zero conv=fdatasync of=test bs=8k count=10000
-> 81920000 Bytes (82 MB), 11,0044 s, 7,4 MB/s
->
-> sudo dd if=/dev/mmcblk0p1 of=/dev/null
-> 62914560 Bytes (63 MB), 5,83784 s, 10,8 MB/s
->
-> After:
-> dd if=/dev/zero conv=fdatasync of=test bs=8k count=10000
-> 81920000 Bytes (82 MB), 9,76938 s, 8,4 MB/s
->
-> sudo dd if=/dev/mmcblk0p1 of=/dev/null
-> 62914560 Bytes (63 MB), 4,73651 s, 13,3 MB/s
->
-> Raspberry Pi Compute Module
->
-> Before:
-> dd if=/dev/zero conv=fdatasync of=test bs=8k count=10000
-> 81920000 Bytes (82 MB), 27,4257 s, 3,0 MB/s
->
-> sudo dd if=/dev/mmcblk0p1 of=/dev/null
-> 66060288 Bytes (66 MB), 21,4365 s, 3,1 MB/s
->
-> After:
-> dd if=/dev/zero conv=fdatasync of=test bs=8k count=10000
-> 81920000 Bytes (82 MB), 7,19661 s, 11,4 MB/s
->
-> sudo dd if=/dev/mmcblk0p1 of=/dev/null
-> 66060288 Bytes (66 MB), 4,76453 s, 13,9 MB/s
->
-> Any tests with a Raspberry Pi 3 (SD and Wifi over SDIO) are welcome.
->
-> Stefan Wahren (2):
->   mmc: sdhci-iproc: Apply caps from bcm2835-mmc driver
->   mmc: sdhci-iproc: Increase max_blk_size for bcm2835
->
->  drivers/mmc/host/sdhci-iproc.c |   11 ++++++++---
->  1 file changed, 8 insertions(+), 3 deletions(-)
->
-> --
-> 1.7.9.5
->
+On 2017-01-10T16:23:11+0900, Jaehoon Chung wrote:
+> Hi 
+> 
+> On 01/10/2017 04:20 PM, Ziyuan wrote:
+> > Hi,
+> > 
+> > On 01/10/2017 09:04 AM, S. Gilles wrote:
+> >> On 2017-01-10T08:47:16+0800, Shawn Lin wrote:
+> >>> Hi
+> >>>
+> >>> On 2017/1/9 22:49, S. Gilles wrote:
+> >>>> On 2017-01-09T09:19:55-0500, S. Gilles wrote:
+> >>>>> Hi,
+> >>>>>
+> >>>>> I have a C201, a veyron_speedy device (which uses rk3288) running vanilla
+> >>>>> kernels. With recent kernels it will fail to boot (screen is on, with
+> >>>>> blinking cursor, but no login prompt and the machine does not respond
+> >>>>> over ssh).
+> >>>>>
+> >>>>> I've bisected this to df9bcc2bc0a1f8d2963bd916698268fb2470713b, and
+> >>>>> reverting that commit on -mainline gives me a bootable kernel. I can
+> >>>>> provide more information as needed.
+> >>> The fix is on the way,
+> >>>
+> >>> https://patchwork.kernel.org/patch/9498527/
+> >> Great - thanks for letting me know.
+> > 
+> > Can you share the result ?
+> 
+> Sorry for late. If it's working fine, I will apply it on fixes.
 
-Thanks, applied for next!
+My apologies - I wasn't sure if the fix was complete, or just in-progress.
 
-Kind regards
-Uffe
+It works fine for me: my system boots as normal.
+
+Thanks,
+S. Gilles
