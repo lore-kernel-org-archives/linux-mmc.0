@@ -1,59 +1,57 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [RFC 3/3] mmc: tmio: discard obsolete SDIO irqs before enabling
- irqs
-Date: Tue, 10 Jan 2017 09:09:19 +0100
-Message-ID: <20170110080919.GE25239@verge.net.au>
-References: <20170105114326.12426-1-wsa+renesas@sang-engineering.com>
- <20170105114326.12426-4-wsa+renesas@sang-engineering.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 8/8] mmc-core: Use kmalloc_array() in mmc_alloc_sg()
+Date: Tue, 10 Jan 2017 16:27:19 +0800
+Message-ID: <cccfd6b4-5b20-8541-6ba0-40db1a150337@rock-chips.com>
+References: <8e2accf5-90b3-6bd0-2abd-699927bc459b@users.sourceforge.net>
+ <a2c80b39-6f7e-81ad-01d2-fce831e6cd8c@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170105114326.12426-4-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a2c80b39-6f7e-81ad-01d2-fce831e6cd8c@users.sourceforge.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: SF Markus Elfring <elfring@users.sourceforge.net>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Harjani Ritesh <riteshh@codeaurora.org>, Jens Axboe <axboe@fb.com>, Linus Walleij <linus.walleij@linaro.org>, Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: shawn.lin@rock-chips.com, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 05, 2017 at 12:43:26PM +0100, Wolfram Sang wrote:
-> Before enabling SDIO irqs, clear the status bit, so we discard old and
-> stale interrupts. Needed to get two wireless cards working.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 2017/1/9 5:55, SF Markus Elfring wrote:
+> From: Markus Elfring <elfring@users.sourceforge.net>
+> Date: Sun, 8 Jan 2017 22:10:40 +0100
+>
+> * A multiplication for the size determination of a memory allocation
+>   indicated that an array data structure should be processed.
+>   Thus use the corresponding function "kmalloc_array".
+>
+>   This issue was detected by using the Coccinelle software.
+>
+> * Replace the specification of a data structure by a pointer dereference
+>   to make the corresponding size determination a bit safer according to
+>   the Linux coding style convention.
+>
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 > ---
->  drivers/mmc/host/tmio_mmc_pio.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index d6033620a45c12..ebe3e12f0083dd 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -134,12 +134,21 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->  	struct tmio_mmc_host *host = mmc_priv(mmc);
->  
->  	if (enable && !host->sdio_irq_enabled) {
-> +		u16 sdio_status;
-> +
->  		/* Keep device active while SDIO irq is enabled */
->  		pm_runtime_get_sync(mmc_dev(mmc));
-> -		host->sdio_irq_enabled = true;
->  
-> +		host->sdio_irq_enabled = true;
->  		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
->  					~TMIO_SDIO_STAT_IOIRQ;
-> +
-> +		/* Clear obsolete interrupts before enabling */
-> +		sdio_status = sd_ctrl_read16(host, CTL_SDIO_STATUS) & ~TMIO_SDIO_MASK_ALL;
-> +		if (host->pdata->flags & TMIO_MMC_SDIO_STATUS_SETBITS)
-> +			sdio_status |= 6;
+>  drivers/mmc/core/queue.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index a6496d8027bc..b1986622c60e 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -152,7 +152,7 @@ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+>  {
+>  	struct scatterlist *sg;
+>
+> -	sg = kmalloc(sizeof(struct scatterlist)*sg_len, GFP_KERNEL);
+> +	sg = kmalloc_array(sg_len, sizeof(*sg), GFP_KERNEL);
+>  	if (!sg)
+>  		*err = -ENOMEM;
+>  	else {
+>
 
-Perhaps a #define would be an improvement over "6".
 
-> +		sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status);
-> +
->  		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
->  	} else if (!enable && host->sdio_irq_enabled) {
->  		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
-> -- 
-> 2.11.0
-> 
+-- 
+Best Regards
+Shawn Lin
