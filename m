@@ -1,75 +1,57 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RESEND RFC 1/3] mmc: sdhci: Add platform_dumpregs callback
- support to sdhci_ops.
-Date: Tue, 10 Jan 2017 17:15:21 +0800
-Message-ID: <7cfc2b6c-fa3f-a8cb-d684-472c3dbacf2f@rock-chips.com>
-References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
- <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
+From: Alexandre Torgue <alexandre.torgue@st.com>
+Subject: Re: [PATCH v2 7/9] DT: stm32f429: add node for SDIO controller
+Date: Tue, 10 Jan 2017 10:15:23 +0100
+Message-ID: <4a6f20ef-d064-9621-12bc-c54092973506@st.com>
+References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
+ <1484037736-25029-8-git-send-email-andrea.merello@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:40009 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758030AbdAJJQH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 04:16:07 -0500
-In-Reply-To: <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:38493 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1757626AbdAJJP2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 04:15:28 -0500
+In-Reply-To: <1484037736-25029-8-git-send-email-andrea.merello@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
+To: Andrea Merello <andrea.merello@gmail.com>, ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com
+Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com
 
-On 2017/1/10 14:41, Ritesh Harjani wrote:
-> From: Sahitya Tummala <stummala@codeaurora.org>
->
-> Add new host operation ->platform_dumpregs to provide a
-> mechanism through which host drivers can dump platform
-> specific registers in addition to SDHC registers
-> during error conditions.
->
+Hi Andrea
 
-Although we have been preventing from adding new callback
-for sdhci core, this one makes sense as there are more and more
-vendor registers outside the scope of SDHCI spec.
+On 01/10/2017 09:42 AM, Andrea Merello wrote:
+> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
 
+Can you please add a commit message.
+Can you also change commit header like: "ARM: dts: stm32: add node for 
+SDIO controller on stm32f429
 
-> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 > ---
->  drivers/mmc/host/sdhci.c | 3 +++
->  drivers/mmc/host/sdhci.h | 1 +
->  2 files changed, 4 insertions(+)
+>  arch/arm/boot/dts/stm32f429.dtsi | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2390980..73a8918 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -101,6 +101,9 @@ static void sdhci_dumpregs(struct sdhci_host *host)
->  			       readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
->  	}
+> diff --git a/arch/arm/boot/dts/stm32f429.dtsi b/arch/arm/boot/dts/stm32f429.dtsi
+> index de7b9c3..c12a64e 100644
+> --- a/arch/arm/boot/dts/stm32f429.dtsi
+> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+> @@ -388,6 +388,18 @@
+>  			};
+>  		};
 >
-> +	if (host->ops->platform_dumpregs)
-> +		host->ops->platform_dumpregs(host);
+> +		sdio: sdio@40012c00 {
+> +			compatible = "st,stm32f4xx-sdio";
+> +			reg = <0x40012c00 0x400>;
+> +			clocks = <&rcc 0 171>;
+> +			interrupts = <49>;
+> +			status = "disabled";
+> +			pinctrl-0 = <&sdio_pins>;
+> +			pinctrl-1 = <&sdio_pins_od>;
+> +			pinctrl-names = "default", "opendrain";
+> +			max-frequency = <48000000>;
+> +		};
 > +
->  	pr_err(DRIVER_NAME ": ===========================================\n");
->  }
+>  		rcc: rcc@40023810 {
+>  			#reset-cells = <1>;
+>  			#clock-cells = <2>;
 >
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0b66f21..400f3a1 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -564,6 +564,7 @@ struct sdhci_ops {
->  					 struct mmc_card *card,
->  					 unsigned int max_dtr, int host_drv,
->  					 int card_drv, int *drv_type);
-> +	void	(*platform_dumpregs)(struct sdhci_host *host);
->  };
->
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->
-
-
--- 
-Best Regards
-Shawn Lin
-
