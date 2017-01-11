@@ -1,69 +1,70 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: SDIO bus hang on BayTrail machines
-Date: Wed, 11 Jan 2017 16:42:16 +0100
-Message-ID: <CAPDyKFrO4ajLw=TDsMa==fL_Q6BYxoO_x1OFODB7+oMJdJCr3w@mail.gmail.com>
-References: <CA+A7VXXmA1KGjPfnUmZPBKDXmUMYhjLeXbo=8Ho3CrCvt7rjbA@mail.gmail.com>
+From: Niklas =?iso-8859-1?Q?S=F6derlund?=
+        <niklas.soderlund@ragnatech.se>
+Subject: Re: [PATCH v8 6/6] mmc: sh_mobile_sdhi: Add tuning support
+Date: Wed, 11 Jan 2017 16:57:23 +0100
+Message-ID: <20170111155723.GE25542@bigcity.dyn.berto.se>
+References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
+ <1478182564-18762-7-git-send-email-horms+renesas@verge.net.au>
+ <20170110210848.GA25542@bigcity.dyn.berto.se>
+ <20170110223043.GA2710@katana>
+ <20170111083541.GB25542@bigcity.dyn.berto.se>
+ <20170111150521.GA1486@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f179.google.com ([209.85.210.179]:34135 "EHLO
-        mail-wj0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1761512AbdAKPmT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 10:42:19 -0500
-Received: by mail-wj0-f179.google.com with SMTP id tn15so105552887wjb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2017 07:42:18 -0800 (PST)
-In-Reply-To: <CA+A7VXXmA1KGjPfnUmZPBKDXmUMYhjLeXbo=8Ho3CrCvt7rjbA@mail.gmail.com>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:35046 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1763695AbdAKP51 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 10:57:27 -0500
+Received: by mail-lf0-f49.google.com with SMTP id m78so118402608lfg.2
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2017 07:57:26 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20170111150521.GA1486@katana>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Jo=C3=A3o_Paulo_Rechi_Vita?= <jprvita@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, =?UTF-8?Q?Jo=C3=A3o_Paulo_Rechi_Vita?= <jprvita@endlessm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-On 12 December 2016 at 23:55, Jo=C3=A3o Paulo Rechi Vita <jprvita@gmail.com=
-> wrote:
-> Hello Dong Adrian and Ulf,
->
-> I'm working on enabling a BayTrail-based machine with very similar
-> hardware to one of the Intel Compute sticks, which is an Intel
-> BayTrail and has a RTL8723BS WiFi card on the SDIO bus. I'm using
-> Linux 4.8 with the driver from https://github.com/hadess/rtl8723bs,
-> and I was experiencing a complete machine hang when using the WiFi
-> card. Passing `intel_idle.max_cstate=3D1` together with the following
-> patch (with the sdhci_runtime_pm_get and sdhci_runtime_pm_put
-> implementations added back) makes the problem go away:
-> https://github.com/hadess/rtl8723bs/blob/master/patches_4.5/0002-mmc-sdhc=
-i-get-runtime-pm-when-sdio-irq-is-enabled.patch
+Hi Wolfram,
 
-It's been a while ago and I wasn't able to dig out some information
-from earlier discussions/submissions.
+On 2017-01-11 16:05:21 +0100, Wolfram Sang wrote:
+> Hi Niklas,
+> 
+> > I'm doing my tests on Koelsch so I'm afraid setting the TDSEL in 
+> > pfc-r8a7795.c won't do much ;-) Nevertheless I tried to mimic the patch 
+> > for Koelsch but found the documentation lacking and where unable to do 
+> > so. That is I found a TDSEL register but no documentation of its 
+> > content.
+> 
+> Sorry, that slipped through. Actually, I sent a patch for H2:
+> 
+> https://patchwork.kernel.org/patch/9434323/
+> 
+> I wanted to do some TDSEL testing on other Gen2 boards in Brussels,
+> provided that people could bring some. So, if you could bring that
+> Koelsch board, that would be really helpful.
 
->
-> I could not find much information on why this was never sent upstream,
-> and would like to know if this approach would be acceptable, or if
-> there are any other better alternatives to solve this problem. I'm not
-> a runtime PM expert, but as I understand this keeps the device powered
-> on as long as interrupts are enabled, potentially increasing the power
-> consumption. As this kernel has to run several different machines
-> using the same code base and config, I would rather avoid something
-> that could have a negative impact on other platforms.
+Sure, can you or someone else bring a power source? I plan to not check 
+luggage so everything to conserve space helps :-)
 
-Unless the board/soc supports an option to re-configure the SDIO IRQ
-as wakeup when entering runtime suspend state, there is no other way
-but to keep the device runtime resumed.
+> 
+> I assume that you created a similar patch to the above for Koelsch and
+> the issue still remained? :(
 
-For this specific case, I have seen two different solutions for how to
-allow the device to be runtime suspended when using SDIO IRQ.
-1) Re-routing the SDIO IRQ DAT line as a GPIO IRQ at runtime suspend,
-thus a wakeup becomes enabled.
-2) Using a completely separate line for SDIO IRQs and thus not a DAT
-line, configured as a GPIO IRQ.
+Yes I did with the help from Geert, I have now also tried your patch.  
+Unfortunately the result is the same and the warning is printed. I hope 
+to be able to spend more time later this week with the tuning patch to 
+try and figure this out.
 
->
-> Any ideas appreciated, and I'm happy to try a newer tree if you guys
-> think some other commit might have fixed the problem.
+> 
+> Regards,
+> 
+>    Wolfram
+> 
 
-I think the best option right now, is something very similar to the
-patch you point to at github above.
 
-Kind regards
-Uffe
+
+-- 
+Regards,
+Niklas Söderlund
