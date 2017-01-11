@@ -1,95 +1,122 @@
-From: Jesper Nilsson <jesper.nilsson@axis.com>
-Subject: Re: [PATCH v2 0/7] uapi: export all headers under uapi directories
-Date: Wed, 11 Jan 2017 13:42:02 +0100
-Message-ID: <20170111124202.GD7275@axis.com>
-References: <bf83da6b-01ef-bf44-b3e1-ca6fc5636818@6wind.com>
- <1483695839-18660-1-git-send-email-nicolas.dichtel@6wind.com>
- <3131144.4Ej3KFWRbz@wuerfel>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v2 6/6] arm64: allwinner: a64: Increase the MMC max
+ frequency
+Date: Wed, 11 Jan 2017 14:38:04 +0100
+Message-ID: <20170111133804.m73q5u54qs3qhwe2@lukather>
+References: <cover.493dc67855a5f1837e875d37307319a03d14d1d0.1483980339.git-series.maxime.ripard@free-electrons.com>
+ <3689701f93c8426bfa476e9a5f31c3642a8a898e.1483980339.git-series.maxime.ripard@free-electrons.com>
+ <CAGb2v67JoOAtHjMJboNUdCDX=+=Hf+zOWr234rT7GEiUmPb=nQ@mail.gmail.com>
+ <20170110191514.kgbesffn3xqltnol@lukather>
+ <CAGb2v64vU5soFybaurCKu1HE9FNo=-NGiy33ZVeoR6E7m4kk6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="kvv63k6iutwmeidz"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <3131144.4Ej3KFWRbz@wuerfel>
-Sender: linux-doc-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linuxppc-dev@lists.ozlabs.org, linux-kbuild@vger.kernel.org, Nicolas Dichtel <nicolas.dichtel@6wind.com>, linux-mips@linux-mips.org, alsa-devel@alsa-project.org, linux-ia64@vger.kernel.org, linux-doc@vger.kernel.org, airlied@linux.ie, linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-mtd@lists.infradead.org, sparclinux@vger.kernel.org, linux-arch@vger.kernel.org, linux-s390@vger.kernel.org, linux-am33-list@redhat.com, linux-c6x-dev@linux-c6x.org, linux-rdma@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, coreteam@netfilter.org, fcoe-devel@open-fcoe.org, xen-devel@lists.xenproject.org, linux-snps-arc@lists.infradead.org, linux-media@vger.kernel.org, uclinux-h8-devel@lists.sourceforge.jp, adi-buildroot-devel@lists.sourceforge.netl
+In-Reply-To: <CAGb2v64vU5soFybaurCKu1HE9FNo=-NGiy33ZVeoR6E7m4kk6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 09, 2017 at 12:33:58PM +0100, Arnd Bergmann wrote:
-> On Friday, January 6, 2017 10:43:52 AM CET Nicolas Dichtel wrote:
-> > Here is the v2 of this series. The first 5 patches are just cleanup: some
-> > exported headers were still under a non-uapi directory.
-> 
-> Since this is meant as a cleanup, I commented on this to point out a cleaner
-> way to do the same.
-> 
-> > The patch 6 was spotted by code review: there is no in-tree user of this
-> > functionality.
-> > The last patch remove the use of header-y. Now all files under an uapi
-> > directory are exported.
-> 
-> Very nice!
-> 
-> > asm is a bit special, most of architectures export asm/<arch>/include/uapi/asm
-> > only, but there is two exceptions:
-> >  - cris which exports arch/cris/include/uapi/arch-v[10|32];
-> 
-> This is interesting, though not your problem. Maybe someone who understands
-> cris better can comment on this: How is the decision made about which of
-> the arch/user.h headers gets used? I couldn't find that in the sources,
-> but it appears to be based on kernel compile-time settings, which is
-> wrong for user space header files that should be independent of the kernel
-> config.
 
-I believe it's since the CRISv10 and CRISv32 are very different beasts,
-and that is selected via kernel config...
+--kvv63k6iutwmeidz
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This part of the CRIS port has been transformed a couple of times from
-the original layout without uapi, and there's still some legacy silliness,
-where some files might have been exported but never used from userspace
-except for some corner cases.
+Hi,
 
-> >  - tile which exports arch/tile/include/uapi/arch.
-> > Because I don't know if the output of 'make headers_install_all' can be changed,
-> > I introduce subdir-y in Kbuild file. The headers_install_all target copies all
-> > asm/<arch>/include/uapi/asm to usr/include/asm-<arch> but
-> > arch/cris/include/uapi/arch-v[10|32] and arch/tile/include/uapi/arch are not
-> > prefixed (they are put asis in usr/include/). If it's acceptable to modify the
-> > output of 'make headers_install_all' to export asm headers in
-> > usr/include/asm-<arch>/asm, then I could remove this new subdir-y and exports
-> > everything under arch/<arch>/include/uapi/.
-> 
-> I don't know if anyone still uses "make headers_install_all", I suspect
-> distros these days all use "make headers_install", so it probably
-> doesn't matter much.
-> 
-> In case of cris, it should be easy enough to move all the contents of the
-> uapi/arch-*/*.h headers into the respective uapi/asm/*.h headers, they
-> only seem to be referenced from there.
+On Wed, Jan 11, 2017 at 02:44:00PM +0800, Chen-Yu Tsai wrote:
+> On Wed, Jan 11, 2017 at 3:15 AM, Maxime Ripard
+> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> > Hi,
+> >
+> > On Tue, Jan 10, 2017 at 01:01:20AM +0800, Chen-Yu Tsai wrote:
+> >> On Tue, Jan 10, 2017 at 12:46 AM, Maxime Ripard
+> >> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> >> > All the controllers can have a maximum frequency of 200MHz.
+> >> >
+> >> > Since older SoCs cannot go that high, we cannot change the default m=
+aximum
+> >> > frequency, but fortunately for us we have a property for that in the=
+ DT.
+> >> >
+> >> > This also has the side effect of allowing to use the MMC HS200 mode =
+for the
+> >> > boards that support it (with either 1.2v or 1.8v IOs).
+> >> >
+> >> > Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> >> > ---
+> >> >  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 3 +++
+> >> >  1 file changed, 3 insertions(+), 0 deletions(-)
+> >> >
+> >> > diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/ar=
+m64/boot/dts/allwinner/sun50i-a64.dtsi
+> >> > index 8e149498e096..f46ae965cf5b 100644
+> >> > --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+> >> > +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+> >> > @@ -332,6 +332,7 @@
+> >> >                         resets =3D <&ccu RST_BUS_MMC0>;
+> >> >                         reset-names =3D "ahb";
+> >> >                         interrupts =3D <GIC_SPI 60 IRQ_TYPE_LEVEL_HI=
+GH>;
+> >> > +                       max-frequency =3D <200000000>;
+> >>
+> >> You also have to set one of MMC_CAP2_HS200* in the driver,
+> >> or mmc-hs200-1_8v or mmc-hs200-1_2v in the device tree to
+> >> actually use HS200, right?
+> >
+> > Yes, but that requires a board with 1.8V IOs to work properly, which
+> > not all board use, so it's probably best to enable it in the board
+> > DTS.
+>=20
+> It's limited by the vqmmc regulator. Either way the host controller
+> supports it right?
 
-This would seem to be a reasonable change.
+Yes, but if the card supports HS200 with 1.8V, and the controller
+reports it too, the core will pick that mode and will try to switch to
+it, which in turn will fail, making the card initialisation fail as
+well.
 
-> For tile, I suspect that would not work as the arch/*.h headers are
-> apparently defined as interfaces for both user space and kernel.
-> 
-> > Note also that exported files for asm are a mix of files listed by:
-> >  - include/uapi/asm-generic/Kbuild.asm;
-> >  - arch/x86/include/uapi/asm/Kbuild;
-> >  - arch/x86/include/asm/Kbuild.
-> > This complicates a lot the processing (arch/x86/include/asm/Kbuild is also
-> > used by scripts/Makefile.asm-generic).
-> > 
-> > This series has been tested with a 'make headers_install' on x86 and a
-> > 'make headers_install_all'. I've checked the result of both commands.
-> > 
-> > This patch is built against linus tree. I don't know if it should be
-> > made against antoher tree.
-> 
-> The series should probably get merged through the kbuild tree, but testing
-> it on mainline is fine here.
-> 
-> 	Arnd
+We basically have two choices: either we ask all the boards that
+support it to set mmc-hs200-1_8v in their DTS, or we set it in the
+DTSI and we have the boards set no-1-8-v in their DTS if they do not
+support those modes.
 
-/^JN - Jesper Nilsson
--- 
-               Jesper Nilsson -- jesper.nilsson@axis.com
+The first case is just the more convenient, because so far we've only
+seen one non-upstream (yet) board that supports 1.8V IOs. All the
+other do not.
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--kvv63k6iutwmeidz
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCAAGBQJYdjU4AAoJEBx+YmzsjxAgrdIP/3J/ENwL7bYGh4hvZKHkxTcI
+2gEEFDhgQqwqRQjrxexuTdXoWBN6FnHoHl83CX/6HVq7aVD5EXKl4V7jsK95mJJc
+EnAbBRcZnvVjWA0YP+uHgO0wC21FLwTDG1JwfOKJVfBKJlELSqvu2Tn3S5ATTj59
+RtuN+oC9yzc606cQcbu6Z7z8Nxwmatr84KdK7wMJfDcTaOgVsSRpEFB3ewua1uSp
++7MsLnxNOX9ZQPQ+W2hLIwMKEvbFBk8O/iDApRlY5CtmhycLifUXs0jz38nQ8DxT
+nMxl91GJdevcNvHOMLzclApAg1zQ9YAu2J5HfwI6epFykSyswA8dpgAQ94K3YQAO
+ChG/Lfov+xBy+NevoPBb4RpAbWTZU5x8qTwhSL0JQQp5ESoR1XWiE00QmTXjsY9k
+yE/Hzk5HaUMkprdiSnv2ZIb0cGN4DWj1BMMAQPT6ydj4c7avv82d8OXAbOVrWsCI
+aWN769yseDgCRBRvHSpvmtCssOa/8DUpOEnOwtDgsyjBhqJfLbdc9cY5Pnidruk3
+sXj2/79JuPZWkip+IrtG/MfjW121HAUB+bZXSqG1hh20SHgtkKzOMDAJ+wdAXV5H
+eAFupS5I25PRfe/ulqAItpD35xxfa0DEl10UKLJtRP6eIJ4iX5V6hpEJmQxVo2vQ
+3dw72PzP2mzA1DnQaCOo
+=9kty
+-----END PGP SIGNATURE-----
+
+--kvv63k6iutwmeidz--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
