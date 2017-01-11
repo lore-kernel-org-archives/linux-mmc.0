@@ -1,95 +1,67 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v9 0/5] Add intial support to DW MMC host on ZTE SoC
-Date: Wed, 11 Jan 2017 15:51:28 +0900
-Message-ID: <fdba7d5b-163b-7b52-3f7e-d98affff64e1@samsung.com>
-References: <CGME20170106042538epcas4p1a06bd50f6335ae882f0f891b6a2f0f29@epcas4p1.samsung.com>
- <1483676686-17011-1-git-send-email-jun.nie@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND PATCH v2] mmc: sdhci-acpi: support deferred probe
+Date: Wed, 11 Jan 2017 09:05:09 +0200
+Message-ID: <d47bf007-ee0b-35a9-9bdd-f3f0bc7299a2@intel.com>
+References: <1484101035.2253.8.camel@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <1483676686-17011-1-git-send-email-jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xie.baoyou-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jason.liu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chen.chaokai-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, lai.binz-Th6q7B73Y6EnDS1+zs4M5A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, CPGS <cpgs-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:31762 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1762087AbdAKHKW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Jan 2017 02:10:22 -0500
+In-Reply-To: <1484101035.2253.8.camel@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhang Rui <rui.zhang@intel.com>, linux-mmc@vger.kernel.org
+Cc: cja@gmx.net, darcari@redhat.com, ulf.hansson@linaro.org
 
-Hi Jun,
+On 11/01/17 04:17, Zhang Rui wrote:
+>>From 760aca40f3f10065f888cdf18cb20491f8b52264 Mon Sep 17 00:00:00 2001
+> From: Zhang Rui <rui.zhang@intel.com>
+> Date: Wed, 7 Dec 2016 13:13:31 +0800
+> Subject: [PATCH v2] mmc: sdhci-acpi: support deferred probe
+> 
+> With commit 67bf5156edc4 (gpio / ACPI: fix returned error from
+> acpi_dev_gpio_irq_get()), mmc_gpiod_request_cd() returns -EPROBE_DEFER if
 
-On 01/06/2017 01:24 PM, Jun Nie wrote:
-> Add intial support to DW MMC host on ZTE SoC. It include platform
-> specific wrapper driver and workarounds for fifo quirk.
+You took out the "" which are needed, and the email contains lines ending
+with CRLF instead of LF.
 
-Thanks for resending patches.
-But There are conflicts because of Ulf's latest patch.
-
-commit 0c4697dcb4f2c8b2e1ee4ddfc2a1498d6e9888ae
-Refs: v4.10-rc3-23-g0c4697d
-Author:     Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-AuthorDate: Fri Dec 30 13:47:20 2016 +0100
-Commit:     Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-CommitDate: Tue Jan 10 16:25:33 2017 +0100
-
-    mmc: dw_mmc: Remove the public dw_mmc header file
-
-So i modified your patches with latest mmc repository before applying.
-I had the building test.
-
-Best Regards,
-Jaehoon Chung
-
+> GPIO is not ready when sdhci-acpi driver is probed, and sdhci-acpi driver
+> should be probed again later in this case.
 > 
-> Changes vs version 8:
->   - Fix bug of uninitialized variable len in zx mmc driver.
+> This fixes an order issue when both GPIO and sdhci-acpi drivers are built
+> as modules.
 > 
-> Changes vs version 7:
->   - Re-order patches sequence so that new dts property is introduced before usage.
->   - Remove unecessary property in zx mmc dts.
+> CC: stable@vger.kernel.org # v4.9
+> Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
+> Tested-by: Jonas Aaberg <cja@gmx.net>
+> Signed-off-by: Zhang Rui <rui.zhang@intel.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 > 
-> Changes vs version 6:
->   - Resolve confilict when rebase to latest dw-mmc.git for-ulf branch.
->   - Add Shawn Lin's review tag.
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 160f695..5440323 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
+>  		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
+>  
+> -		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
+> +		err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL);
+> +		if (err) {
+> +			if (err == -EPROBE_DEFER)
+> +				goto err_free;
+>  			dev_warn(dev, "failed to setup card detect gpio\n");
+>  			c->use_runtime_pm = false;
+>  		}
+> -- 
+> 2.7.4
 > 
-> Changes vs version 5:
->   - Add clock delay lock status check to save CPU cycle in timing tuning CMD.
-> 
-> Changes vs version 4:
->   - Fix missing empty dts compatible element in the end of compatible array.
-> 
-> Changes vs version 3:
->   - Fix brace error in document.
-> 
-> Changes vs version 2:
->   - Change dt property fifo-addr to data-addr and fifo-watermark-quirk to
->     fifo-watermark-aligned.
->   - Polish ZX MMC driver on minor coding style issues.
-> 
-> Changes vs version 1:
->   - Change fifo-addr-override to fifo-addr and remove its workaround tag in comments.
->   - Remove ZX DW MMC driver reset cap in driver, which can be added in dt nodes.
-> 
-> Jun Nie (5):
->   Documentation: synopsys-dw-mshc: add binding for fifo quirks
->   mmc: dw: Add fifo address property
->   mmc: dw: Add fifo watermark alignment property
->   mmc: dt-bindings: add ZTE ZX296718 MMC bindings
->   mmc: zx: Initial support for ZX mmc controller
-> 
->  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  13 ++
->  .../devicetree/bindings/mmc/zx-dw-mshc.txt         |  33 +++
->  drivers/mmc/host/Kconfig                           |   9 +
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/dw_mmc-zx.c                       | 242 +++++++++++++++++++++
->  drivers/mmc/host/dw_mmc-zx.h                       |  31 +++
->  drivers/mmc/host/dw_mmc.c                          |  17 +-
->  include/linux/mmc/dw_mmc.h                         |   5 +
->  8 files changed, 348 insertions(+), 3 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.c
->  create mode 100644 drivers/mmc/host/dw_mmc-zx.h
 > 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
