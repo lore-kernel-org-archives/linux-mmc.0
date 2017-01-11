@@ -1,50 +1,68 @@
-From: Zhang Rui <rui.zhang@intel.com>
-Subject: [PATCH v2] mmc: sdhci-acpi: support deferred probe
-Date: Wed, 11 Jan 2017 09:56:57 +0800
-Message-ID: <1484099817-4010-1-git-send-email-rui.zhang@intel.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 1/8] mmc-core: Use kmalloc_array() in mmc_test_area_init()
+Date: Wed, 11 Jan 2017 03:59:20 +0200
+Message-ID: <CAHp75Vfd_OEUcJacRGi5m1fkNiiGuu9HQv0zb6turiDMkpiNxA@mail.gmail.com>
+References: <8e2accf5-90b3-6bd0-2abd-699927bc459b@users.sourceforge.net> <a9b14d1d-de5c-5a22-fcd0-021d7b01cb36@users.sourceforge.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:12170 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935739AbdAKB5B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Jan 2017 20:57:01 -0500
+Received: from mail-qt0-f196.google.com ([209.85.216.196]:34675 "EHLO
+        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754718AbdAKB7V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2017 20:59:21 -0500
+In-Reply-To: <a9b14d1d-de5c-5a22-fcd0-021d7b01cb36@users.sourceforge.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, cja@gmx.net, darcari@redhat.com, ulf.hansson@linaro.org, stable@vger.kernel.org, #@vger.kernel.org, v4.9@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Harjani Ritesh <riteshh@codeaurora.org>, Jens Axboe <axboe@fb.com>, Linus Walleij <linus.walleij@linaro.org>, Mike Christie <mchristi@redhat.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 
-With commit 67bf5156edc4 (gpio / ACPI: fix returned error from
-acpi_dev_gpio_irq_get()), mmc_gpiod_request_cd() returns -EPROBE_DEFER if
-GPIO is not ready when sdhci-acpi driver is probed, and sdhci-acpi driver
-should be probed again later in this case.
+On Sun, Jan 8, 2017 at 11:42 PM, SF Markus Elfring
+<elfring@users.sourceforge.net> wrote:
+> From: Markus Elfring <elfring@users.sourceforge.net>
+> Date: Sun, 8 Jan 2017 18:44:26 +0100
+>
+> * A multiplication for the size determination of a memory allocation
+>   indicated that an array data structure should be processed.
+>   Thus use the corresponding function "kmalloc_array".
+>
+>   This issue was detected by using the Coccinelle software.
+>
+> * Replace the specification of a data structure by a pointer dereference
+>   to make the corresponding size determination a bit safer according to
+>   the Linux coding style convention.
 
-This fixes an order issue when both GPIO and sdhci-acpi drivers are built
-as modules.
+For the whole series FWIW:
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
 
-CC: stable@vger.kernel.org # v4.9
-Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
-Tested-by: Jonas Aaberg <cja@gmx.net>
-Signed-off-by: Zhang Rui <rui.zhang@intel.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 160f695..5440323 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
- 		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
- 
--		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
-+		err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL);
-+		if (err) {
-+			if (err == -EPROBE_DEFER)
-+				goto err_free;
- 			dev_warn(dev, "failed to setup card detect gpio\n");
- 			c->use_runtime_pm = false;
- 		}
+P.S. Few years back I run those tests a lot, even did some
+modifications, but now Nokia Mobile just gone :-)
+
+>
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> ---
+>  drivers/mmc/core/mmc_test.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+> index 3ab6e52d106c..e85ef503d7ce 100644
+> --- a/drivers/mmc/core/mmc_test.c
+> +++ b/drivers/mmc/core/mmc_test.c
+> @@ -1579,7 +1579,7 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
+>         if (!t->mem)
+>                 return -ENOMEM;
+>
+> -       t->sg = kmalloc(sizeof(struct scatterlist) * t->max_segs, GFP_KERNEL);
+> +       t->sg = kmalloc_array(t->max_segs, sizeof(*t->sg), GFP_KERNEL);
+>         if (!t->sg) {
+>                 ret = -ENOMEM;
+>                 goto out_free;
+> --
+> 2.11.0
+>
+
+
+
 -- 
-2.7.4
-
+With Best Regards,
+Andy Shevchenko
