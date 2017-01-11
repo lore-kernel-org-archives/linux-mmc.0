@@ -1,47 +1,72 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v8 6/6] mmc: sh_mobile_sdhi: Add tuning support
-Date: Wed, 11 Jan 2017 16:59:41 +0100
-Message-ID: <CAMuHMdV5pY+nRC8yd4iVmEJAZkcBgWC2-wDr6UgpmxZSsoPHcA@mail.gmail.com>
-References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
- <1478182564-18762-7-git-send-email-horms+renesas@verge.net.au>
- <20170110210848.GA25542@bigcity.dyn.berto.se> <20170110223043.GA2710@katana>
- <20170111083541.GB25542@bigcity.dyn.berto.se> <20170111150521.GA1486@katana> <20170111155723.GE25542@bigcity.dyn.berto.se>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH v5 02/12] mmc: sdhci: Export sdhci_set_ios() from sdhci.c
+Date: Wed, 11 Jan 2017 18:19:05 +0100
+Message-ID: <0963475695aab0f33fc999314b9a533524432340.1484154449.git-series.gregory.clement@free-electrons.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:36610 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030569AbdAKP7n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 10:59:43 -0500
-In-Reply-To: <20170111155723.GE25542@bigcity.dyn.berto.se>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+In-Reply-To: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Mike Turquette <mturquette@baylibre.com>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, linux-arm-kernel@lists.infradead.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-kernel@vger.kernel.org, Wilson
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>
-Cc: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-On Wed, Jan 11, 2017 at 4:57 PM, Niklas S=C3=B6derlund
-<niklas.soderlund@ragnatech.se> wrote:
-> On 2017-01-11 16:05:21 +0100, Wolfram Sang wrote:
->> I wanted to do some TDSEL testing on other Gen2 boards in Brussels,
->> provided that people could bring some. So, if you could bring that
->> Koelsch board, that would be really helpful.
->
-> Sure, can you or someone else bring a power source? I plan to not check
-> luggage so everything to conserve space helps :-)
+From: Hu Ziji <huziji@marvell.com>
 
-I also have a koelsch, so no need to take one on a plane ;-)
+Export sdhci_set_ios() in sdhci.c.
+Thus vendor sdhci driver can implement its own set_ios() routine.
 
-Gr{oetje,eeting}s,
+Signed-off-by: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+---
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 23909804ffb8..0e9ed0fadff9 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1570,7 +1570,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+ 
+-static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	unsigned long flags;
+@@ -1730,6 +1730,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	mmiowb();
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
++EXPORT_SYMBOL_GPL(sdhci_set_ios);
+ 
+ static int sdhci_get_cd(struct mmc_host *mmc)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0b66f210ae82..3563c0c384ca 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -691,6 +691,7 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
++void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ 
+ #ifdef CONFIG_PM
+ extern int sdhci_suspend_host(struct sdhci_host *host);
+-- 
+git-series 0.9.1
