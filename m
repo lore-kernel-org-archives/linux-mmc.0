@@ -1,131 +1,61 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v5 00/12] mmc: Add support to Marvell Xenon SD Host Controller
-Date: Wed, 11 Jan 2017 18:19:03 +0100
-Message-ID: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v8 6/6] mmc: sh_mobile_sdhi: Add tuning support
+Date: Wed, 11 Jan 2017 18:34:32 +0100
+Message-ID: <20170111173432.GB1486@katana>
+References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
+ <1478182564-18762-7-git-send-email-horms+renesas@verge.net.au>
+ <20170110210848.GA25542@bigcity.dyn.berto.se>
+ <20170110223043.GA2710@katana>
+ <20170111083541.GB25542@bigcity.dyn.berto.se>
+ <20170111150521.GA1486@katana>
+ <20170111155723.GE25542@bigcity.dyn.berto.se>
+ <CAMuHMdV5pY+nRC8yd4iVmEJAZkcBgWC2-wDr6UgpmxZSsoPHcA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="8GpibOaaTibBMecb"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:56029 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754161AbdAKRVH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 12:21:07 -0500
+Received: from www.zeus03.de ([194.117.254.33]:49484 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757871AbdAKReg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Jan 2017 12:34:36 -0500
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdV5pY+nRC8yd4iVmEJAZkcBgWC2-wDr6UgpmxZSsoPHcA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-Hello,
 
-This the fifth version of the series adding support for the SDHCI
-Xenon controller. It can be currently found on the Armada 37xx and the
-Armada 7K/8K but will be also used in more Marvell SoC (and not only
-the mvebu ones actually).
+--8GpibOaaTibBMecb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-v4->v5:
 
-- Remove the patch to export sdhci_execute_tuning(). It is already
-  exported in v4.10.
+> I also have a koelsch, so no need to take one on a plane ;-)
 
-- Introduce a patch adding a missing clock for the sdhci controller
-  present on the CP master for A7K/A8K. There is no build dependency
-  but obviously this patch is need to use the sdhci controller present
-  on the CP part.
+I thought yours was so heavily hooked up that it was a bit cumbersome to
+bring it somewhere. Happy to be wrong here :)
 
-- Adjust Xenon return setup, to avoid being overwritten by
-   sdhci_add_host().
 
-- Change Xenon register definition prefix to "XENON_".
+--8GpibOaaTibBMecb
+Content-Type: application/pgp-signature; name="signature.asc"
 
--  Fix typos in Xenon driver and dt-binding docs.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-- Change compatible string "marvell,armada-7000-sdhci" to
-  "marvell,armada-8k-sdhci". Actually the Armada 7K SoCs are a subset
-  of the Armada 8K SoCs. Moreover, the use of the '000' is not
-  consistent with all the other compatible string already used for the
-  Armada 7K/8K family.
+iQIcBAEBAgAGBQJYdmynAAoJEBQN5MwUoCm2ZjYP/3Wa8ppTSacnfoZyGvqDIMrn
+xaW+pv5PKI4of/OVkhExIx3T3sxbrGdjG2XADDChzNjD1CCJYDYGcsTF8Q7La9G2
+4EXFcLpBuPKhxOXuqvQBflG8zVCIxcu/ZI3/bDSGYOA4v7TEQLPRU0LXONCThnOa
+V6M9uuvX2oPvuMt+Q9lhvtnpvRZ6b8+6B8hPTkqu/rxcQEGY3zhnmUBb3TyJR/66
+bF8K1KzZZ51uoxDoA2qAzzElEWRBFM8IC16MIw78oifTaTuqo/AfzuOwRk1OS7Oc
+gzk6D1vtXl+caQwvb6lPmRTeiP2z5x15N+nXH1VzO7475duZLvVdSVxut1RYGP1S
+snQFyojjBCEoHws3HIn3nV/qNxVEYu9imhytaJoDcXh7LsOyqQ0RpNRJzZclwg7D
+dXENx7WjnVAKvv97fRGFuPC1HogQs+2WB2EcPOe50FCdk5hNppekCyCshtLE5dD/
+6COp+CWNyfZo4aM4OOtPfWcOpAQqvqklvgwSKQFS9F9gZMgcIkDzbyX6pHKzoB4Q
+15zV4tl1Dc+qBlezeD14qNlWrvfMdHe1TS114aw/FI9u4XDuWZG9eSMGlXeJKe3T
+dsohKzQcd7ERO4IYH991HaGgktSQEzK4Oxosg660F/i1D9lQ4EXHnKG6BnHcquYZ
+FmQNl8CZqOF8NkwiKMP7
+=zATh
+-----END PGP SIGNATURE-----
 
-- Added the Tested-by from Russell King on an Armada 8K based board.
-
-v3 -> v4:
-For this version a few change have been done:
-- fixes 2 bug  reported by kbuild-bot
-  - remove extra of_node_put()
-  - convert 0 in false for function returning boolean
-
-- add a device tree node for the sdhci controller present on the CP
-  master for A7K/A8K. It also led to rename the sdhci0 node on AP to
-  ap_sdhci0 to make a distinction with the one present on CP master.
-
-v2 -> v3
-I think that now most (if not all) the remarks had been taking into
-account since the second version. According to Ziji Hu, here are the
-following changes:
-" Changes in V3:
-  Adjust and improve Xenon DT bindings. Move some caps setting from driver into
-  DT. Use mmc-card sub-node to represent eMMC type.
-  Remove PHY Sampling Fixed Delay Line scan in lower speed mode.
-  Improve Xenon probe and ->init_card() functions.
-  Export sdhci_enable_sdio_irq() and implement own SDIO IRQ control.
-  Split PHY patch into two smaller patches.
-  Temporarily remove AXI clock before its implementation is improved."
-
-Besides this changes I also
-- Removed the sdhci-xenon-phy.h and moved its content in the
-shc-xenon-phy.c file.
-- Fixed the tuning-count usage
-- Managed the error case for clk_prepare_enable
-
-For the record the change from v1 was:
-" Changes in V2:
-  rebase on v4.9-rc2.
-  Re-write Xenon bindings. Ajust Xenon DT property naming.
-  Add a new DT property to indicate eMMC card type, instead of using
-  variable card_candidate.
-  Clear quirks SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 in Xenon platform data
-  Add support to HS400 retuning."
-
-Thanks,
-
-Gregory
-
-Gregory CLEMENT (3):
-  arm64: dts: marvell: add eMMC support for Armada 37xx
-  arm64: dts: marvell: add sdhci support for Armada 7K/8K
-  arm64: configs: enable SDHCI driver for Xenon
-
-Hu Ziji (8):
-  mmc: sdhci: Export sdhci_set_ios() from sdhci.c
-  mmc: sdhci: Export sdhci_start_signal_voltage_switch() in sdhci.c
-  mmc: sdhci: Export sdhci_enable_sdio_irq() from sdhci.c
-  dt: bindings: Add bindings for Marvell Xenon SD Host Controller
-  mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-  mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC.
-  mmc: sdhci-xenon: Add SoC PHY PAD voltage control
-  MAINTAINERS: add entry for Marvell Xenon MMC Host Controller drivers
-
-Konstantin Porotchkin (1):
-  clk: apn806: Add eMMC clock to system controller driver
-
- Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 197 ++-
- MAINTAINERS                                                   |   7 +-
- arch/arm64/boot/dts/marvell/armada-3720-db.dts                |  16 +-
- arch/arm64/boot/dts/marvell/armada-37xx.dtsi                  |  11 +-
- arch/arm64/boot/dts/marvell/armada-7040-db.dts                |  14 +-
- arch/arm64/boot/dts/marvell/armada-ap806.dtsi                 |  13 +-
- arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi          |  11 +-
- arch/arm64/configs/defconfig                                  |   1 +-
- drivers/clk/mvebu/ap806-system-controller.c                   |  15 +-
- drivers/mmc/host/Kconfig                                      |   9 +-
- drivers/mmc/host/Makefile                                     |   3 +-
- drivers/mmc/host/sdhci-xenon-phy.c                            | 904 +++++++-
- drivers/mmc/host/sdhci-xenon.c                                | 634 +++++-
- drivers/mmc/host/sdhci-xenon.h                                | 109 +-
- drivers/mmc/host/sdhci.c                                      |  11 +-
- drivers/mmc/host/sdhci.h                                      |   4 +-
- 16 files changed, 1953 insertions(+), 6 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
- create mode 100644 drivers/mmc/host/sdhci-xenon-phy.c
- create mode 100644 drivers/mmc/host/sdhci-xenon.c
- create mode 100644 drivers/mmc/host/sdhci-xenon.h
-
-base-commit: 0c744ea4f77d72b3dcebb7a8f2684633ec79be88
--- 
-git-series 0.9.1
+--8GpibOaaTibBMecb--
