@@ -1,762 +1,305 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 10/12] mmc: core: Move public functions from card.h to private headers
-Date: Wed, 11 Jan 2017 12:51:16 +0100
-Message-ID: <1484135478-2077-11-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH v2 04/12] mmc: core: Move public functions from core.h to private headers
+Date: Wed, 11 Jan 2017 12:51:10 +0100
+Message-ID: <1484135478-2077-5-git-send-email-ulf.hansson@linaro.org>
 References: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:35567 "EHLO
-        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752872AbdAKLwG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 06:52:06 -0500
-Received: by mail-lf0-f45.google.com with SMTP id m78so113824701lfg.2
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2017 03:52:05 -0800 (PST)
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:35883 "EHLO
+        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936752AbdAKLvs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2017 06:51:48 -0500
+Received: by mail-lf0-f51.google.com with SMTP id o140so80119510lff.3
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2017 03:51:48 -0800 (PST)
 In-Reply-To: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-A significant amount of functions and other definitions are available
-through the public mmc card.h header file. Let's slim down this public mmc
-interface, as to prevent users from abusing it, by moving some of the
-functions/definitions to private mmc header files.
+A significant amount of functions are available through the public mmc
+core.h header file. Let's slim down this public mmc interface, as to
+prevent users from abusing it, by moving some of the functions to private
+mmc header files.
 
 This change concentrates on moving the functions into private mmc headers,
-following changes may continue with additional clean-ups.
+following changes may continue with additional clean-ups, as an example
+some functions can be turned into static.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c    |   2 +
- drivers/mmc/core/bus.c      |   1 +
- drivers/mmc/core/bus.h      |  14 ++-
- drivers/mmc/core/card.h     | 223 ++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.c     |   1 +
- drivers/mmc/core/debugfs.c  |   1 +
- drivers/mmc/core/mmc.c      |  13 +++
- drivers/mmc/core/mmc_test.c |   2 +
- drivers/mmc/core/queue.c    |   1 +
- drivers/mmc/core/quirks.c   |   2 +
- drivers/mmc/core/sd.c       |   1 +
- drivers/mmc/core/sdio.c     |   1 +
- drivers/mmc/core/sdio_bus.c |   1 +
- drivers/mmc/core/sdio_io.c  |   1 +
- drivers/mmc/core/sdio_irq.c |   1 +
- include/linux/mmc/card.h    | 240 --------------------------------------------
- 16 files changed, 263 insertions(+), 242 deletions(-)
- create mode 100644 drivers/mmc/core/card.h
+ drivers/mmc/core/block.c    |  3 +++
+ drivers/mmc/core/core.h     | 37 ++++++++++++++++++++++++++++++++-
+ drivers/mmc/core/mmc_ops.h  |  9 ++++++++
+ drivers/mmc/core/mmc_test.c |  2 ++
+ drivers/mmc/core/queue.c    |  1 +
+ drivers/mmc/core/sd_ops.h   |  4 ++++
+ drivers/mmc/core/sdio_io.c  |  1 +
+ drivers/mmc/core/sdio_irq.c |  1 +
+ drivers/mmc/core/sdio_ops.h |  1 +
+ include/linux/mmc/core.h    | 50 ---------------------------------------------
+ 10 files changed, 58 insertions(+), 51 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 41b5dbc..a8300be 100644
+index 6adc3ce..41b5dbc 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -48,6 +48,8 @@
+@@ -47,6 +47,9 @@
+ 
  #include "queue.h"
  #include "block.h"
- #include "core.h"
-+#include "card.h"
-+#include "bus.h"
- #include "mmc_ops.h"
- #include "sd_ops.h"
++#include "core.h"
++#include "mmc_ops.h"
++#include "sd_ops.h"
  
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index c64266f..3be2e6a 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -23,6 +23,7 @@
- #include <linux/mmc/host.h>
+ MODULE_ALIAS("mmc:block");
+ #ifdef MODULE_PARAM_PREFIX
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 29b91ae..8a95c825 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -16,6 +16,7 @@
  
- #include "core.h"
-+#include "card.h"
- #include "sdio_cis.h"
- #include "bus.h"
- 
-diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
-index 93b516a..72b0ef0 100644
---- a/drivers/mmc/core/bus.h
-+++ b/drivers/mmc/core/bus.h
-@@ -11,9 +11,10 @@
- #ifndef _MMC_CORE_BUS_H
- #define _MMC_CORE_BUS_H
- 
-+#include <linux/device.h>
-+
  struct mmc_host;
  struct mmc_card;
--struct device_type;
++struct mmc_request;
  
- #define MMC_DEV_ATTR(name, fmt, args...)					\
- static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)	\
-@@ -31,5 +32,14 @@ struct mmc_card *mmc_alloc_card(struct mmc_host *host,
- int mmc_register_bus(void);
- void mmc_unregister_bus(void);
+ #define MMC_CMD_RETRIES        3
+ 
+@@ -73,6 +74,7 @@ static inline void mmc_delay(unsigned int ms)
+ void mmc_stop_host(struct mmc_host *host);
+ 
+ int _mmc_detect_card_removed(struct mmc_host *host);
++int mmc_detect_card_removed(struct mmc_host *host);
+ 
+ int mmc_attach_mmc(struct mmc_host *host);
+ int mmc_attach_sd(struct mmc_host *host);
+@@ -102,5 +104,38 @@ static inline void mmc_register_pm_notifier(struct mmc_host *host) { }
+ static inline void mmc_unregister_pm_notifier(struct mmc_host *host) { }
+ #endif
  
 -#endif
-+struct mmc_driver {
-+	struct device_driver drv;
-+	int (*probe)(struct mmc_card *card);
-+	void (*remove)(struct mmc_card *card);
-+	void (*shutdown)(struct mmc_card *card);
-+};
- 
-+int mmc_register_driver(struct mmc_driver *drv);
-+void mmc_unregister_driver(struct mmc_driver *drv);
++void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq);
++bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
 +
++int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
++		unsigned int arg);
++int mmc_can_erase(struct mmc_card *card);
++int mmc_can_trim(struct mmc_card *card);
++int mmc_can_discard(struct mmc_card *card);
++int mmc_can_sanitize(struct mmc_card *card);
++int mmc_can_secure_erase_trim(struct mmc_card *card);
++int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
++			unsigned int nr);
++unsigned int mmc_calc_max_discard(struct mmc_card *card);
++
++int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
++int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
++			bool is_rel_write);
++
++int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
++void mmc_release_host(struct mmc_host *host);
++void mmc_get_card(struct mmc_card *card);
++void mmc_put_card(struct mmc_card *card);
++
++/**
++ *	mmc_claim_host - exclusively claim a host
++ *	@host: mmc host to claim
++ *
++ *	Claim a host for a set of operations.
++ */
++static inline void mmc_claim_host(struct mmc_host *host)
++{
++	__mmc_claim_host(host, NULL);
++}
+ 
 +#endif
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-new file mode 100644
-index 0000000..95e8fc5
---- /dev/null
-+++ b/drivers/mmc/core/card.h
-@@ -0,0 +1,223 @@
-+/*
-+ * Private header for the mmc subsystem
-+ *
-+ * Copyright (C) 2016 Linaro Ltd
-+ *
-+ * Author: Ulf Hansson <ulf.hansson@linaro.org>
-+ *
-+ * License terms: GNU General Public License (GPL) version 2
-+ */
-+
-+#ifndef _MMC_CORE_CARD_H
-+#define _MMC_CORE_CARD_H
-+
-+#include <linux/mmc/card.h>
-+
-+#define mmc_card_name(c)	((c)->cid.prod_name)
-+#define mmc_card_id(c)		(dev_name(&(c)->dev))
-+#define mmc_dev_to_card(d)	container_of(d, struct mmc_card, dev)
-+
-+/* Card states */
-+#define MMC_STATE_PRESENT	(1<<0)		/* present in sysfs */
-+#define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
-+#define MMC_STATE_BLOCKADDR	(1<<2)		/* card uses block-addressing */
-+#define MMC_CARD_SDXC		(1<<3)		/* card is SDXC */
-+#define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
-+#define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
-+#define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
-+
-+#define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
-+#define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
-+#define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
-+#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-+#define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
-+#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
-+#define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
-+
-+#define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
-+#define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-+#define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
-+#define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-+#define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
-+#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
-+#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
-+#define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
-+#define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
-+
-+/*
-+ * The world is not perfect and supplies us with broken mmc/sdio devices.
-+ * For at least some of these bugs we need a work-around.
-+ */
-+struct mmc_fixup {
-+	/* CID-specific fields. */
-+	const char *name;
-+
-+	/* Valid revision range */
-+	u64 rev_start, rev_end;
-+
-+	unsigned int manfid;
-+	unsigned short oemid;
-+
-+	/* SDIO-specific fields. You can use SDIO_ANY_ID here of course */
-+	u16 cis_vendor, cis_device;
-+
-+	/* for MMC cards */
-+	unsigned int ext_csd_rev;
-+
-+	void (*vendor_fixup)(struct mmc_card *card, int data);
-+	int data;
-+};
-+
-+#define CID_MANFID_ANY (-1u)
-+#define CID_OEMID_ANY ((unsigned short) -1)
-+#define CID_NAME_ANY (NULL)
-+
-+#define EXT_CSD_REV_ANY (-1u)
-+
-+#define CID_MANFID_SANDISK      0x2
-+#define CID_MANFID_TOSHIBA      0x11
-+#define CID_MANFID_MICRON       0x13
-+#define CID_MANFID_SAMSUNG      0x15
-+#define CID_MANFID_KINGSTON     0x70
-+#define CID_MANFID_HYNIX	0x90
-+
-+#define END_FIXUP { NULL }
-+
-+#define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,	\
-+		   _cis_vendor, _cis_device,				\
-+		   _fixup, _data, _ext_csd_rev)				\
-+	{						\
-+		.name = (_name),			\
-+		.manfid = (_manfid),			\
-+		.oemid = (_oemid),			\
-+		.rev_start = (_rev_start),		\
-+		.rev_end = (_rev_end),			\
-+		.cis_vendor = (_cis_vendor),		\
-+		.cis_device = (_cis_device),		\
-+		.vendor_fixup = (_fixup),		\
-+		.data = (_data),			\
-+		.ext_csd_rev = (_ext_csd_rev),		\
-+	}
-+
-+#define MMC_FIXUP_REV(_name, _manfid, _oemid, _rev_start, _rev_end,	\
-+		      _fixup, _data, _ext_csd_rev)			\
-+	_FIXUP_EXT(_name, _manfid,					\
-+		   _oemid, _rev_start, _rev_end,			\
-+		   SDIO_ANY_ID, SDIO_ANY_ID,				\
-+		   _fixup, _data, _ext_csd_rev)				\
-+
-+#define MMC_FIXUP(_name, _manfid, _oemid, _fixup, _data) \
-+	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
-+		      EXT_CSD_REV_ANY)
-+
-+#define MMC_FIXUP_EXT_CSD_REV(_name, _manfid, _oemid, _fixup, _data,	\
-+			      _ext_csd_rev)				\
-+	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
-+		      _ext_csd_rev)
-+
-+#define SDIO_FIXUP(_vendor, _device, _fixup, _data)			\
-+	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY,			\
-+		    CID_OEMID_ANY, 0, -1ull,				\
-+		   _vendor, _device,					\
-+		   _fixup, _data, EXT_CSD_REV_ANY)			\
-+
-+#define cid_rev(hwrev, fwrev, year, month)	\
-+	(((u64) hwrev) << 40 |			\
-+	 ((u64) fwrev) << 32 |			\
-+	 ((u64) year) << 16 |			\
-+	 ((u64) month))
-+
-+#define cid_rev_card(card)			\
-+	cid_rev(card->cid.hwrev,		\
-+		    card->cid.fwrev,		\
-+		    card->cid.year,		\
-+		    card->cid.month)
-+
-+/*
-+ * Unconditionally quirk add/remove.
-+ */
-+static inline void __maybe_unused add_quirk(struct mmc_card *card, int data)
-+{
-+	card->quirks |= data;
-+}
-+
-+static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
-+{
-+	card->quirks &= ~data;
-+}
-+
-+/*
-+ * Quirk add/remove for MMC products.
-+ */
-+static inline void __maybe_unused add_quirk_mmc(struct mmc_card *card, int data)
-+{
-+	if (mmc_card_mmc(card))
-+		card->quirks |= data;
-+}
-+
-+static inline void __maybe_unused remove_quirk_mmc(struct mmc_card *card,
-+						   int data)
-+{
-+	if (mmc_card_mmc(card))
-+		card->quirks &= ~data;
-+}
-+
-+/*
-+ * Quirk add/remove for SD products.
-+ */
-+static inline void __maybe_unused add_quirk_sd(struct mmc_card *card, int data)
-+{
-+	if (mmc_card_sd(card))
-+		card->quirks |= data;
-+}
-+
-+static inline void __maybe_unused remove_quirk_sd(struct mmc_card *card,
-+						   int data)
-+{
-+	if (mmc_card_sd(card))
-+		card->quirks &= ~data;
-+}
-+
-+static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_LENIENT_FN0;
-+}
-+
-+static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BLKSZ_FOR_BYTE_MODE;
-+}
-+
-+static inline int mmc_card_disable_cd(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_DISABLE_CD;
-+}
-+
-+static inline int mmc_card_nonstd_func_interface(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_NONSTD_FUNC_IF;
-+}
-+
-+static inline int mmc_card_broken_byte_mode_512(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_BYTE_MODE_512;
-+}
-+
-+static inline int mmc_card_long_read_time(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_LONG_READ_TIME;
-+}
-+
-+static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING;
-+}
-+
-+static inline int mmc_card_broken_hpi(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_HPI;
-+}
-+
-+void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table);
-+
-+#endif
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 3b34a75..8c45825 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -40,6 +40,7 @@
- #include <trace/events/mmc.h>
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index e76365a..74beea8 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -31,12 +31,21 @@
+ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
++int mmc_interrupt_hpi(struct mmc_card *card);
+ int mmc_can_ext_csd(struct mmc_card *card);
++int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+ int mmc_switch_status(struct mmc_card *card);
+ int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms, unsigned char timing,
+ 		bool use_busy_signal, bool send_status,	bool retry_crc_err);
++int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
++		unsigned int timeout_ms);
++int mmc_stop_bkops(struct mmc_card *card);
++int mmc_read_bkops_status(struct mmc_card *card);
++void mmc_start_bkops(struct mmc_card *card, bool from_exception);
++int mmc_can_reset(struct mmc_card *card);
++int mmc_flush_cache(struct mmc_card *card);
  
- #include "core.h"
-+#include "card.h"
- #include "bus.h"
- #include "host.h"
- #include "sdio_bus.h"
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 30623b8..2843e6a 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -20,6 +20,7 @@
- #include <linux/mmc/host.h>
+ #endif
  
- #include "core.h"
-+#include "card.h"
- #include "mmc_ops.h"
- 
- #ifdef CONFIG_FAIL_MMC_REQUEST
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ec2e85c..b91abe0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -21,6 +21,7 @@
- #include <linux/mmc/mmc.h>
- 
- #include "core.h"
-+#include "card.h"
- #include "host.h"
- #include "bus.h"
- #include "mmc_ops.h"
-@@ -307,6 +308,18 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
- 	}
- }
- 
-+static void mmc_part_add(struct mmc_card *card, unsigned int size,
-+			 unsigned int part_cfg, char *name, int idx, bool ro,
-+			 int area_type)
-+{
-+	card->part[card->nr_parts].size = size;
-+	card->part[card->nr_parts].part_cfg = part_cfg;
-+	sprintf(card->part[card->nr_parts].name, name, idx);
-+	card->part[card->nr_parts].force_ro = ro;
-+	card->part[card->nr_parts].area_type = area_type;
-+	card->nr_parts++;
-+}
-+
- static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
- {
- 	int idx;
 diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index df42e88..0eac632 100644
+index bd8eb9b..df42e88 100644
 --- a/drivers/mmc/core/mmc_test.c
 +++ b/drivers/mmc/core/mmc_test.c
-@@ -23,6 +23,8 @@
+@@ -22,6 +22,8 @@
+ #include <linux/seq_file.h>
  #include <linux/module.h>
  
- #include "core.h"
-+#include "card.h"
-+#include "bus.h"
- 
++#include "core.h"
++
  #define RESULT_OK		0
  #define RESULT_FAIL		1
+ #define RESULT_UNSUP_HOST	2
 diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 8be0a63..0538aa5 100644
+index a6496d8..8be0a63 100644
 --- a/drivers/mmc/core/queue.c
 +++ b/drivers/mmc/core/queue.c
-@@ -21,6 +21,7 @@
+@@ -20,6 +20,7 @@
+ 
  #include "queue.h"
  #include "block.h"
- #include "core.h"
-+#include "card.h"
++#include "core.h"
  
  #define MMC_QUEUE_BOUNCESZ	65536
  
-diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-index ca9cade..bf25a9c 100644
---- a/drivers/mmc/core/quirks.c
-+++ b/drivers/mmc/core/quirks.c
-@@ -15,6 +15,8 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/sdio_ids.h>
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index ac7223c..784f8e6 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -16,6 +16,7 @@
  
-+#include "card.h"
-+
- #ifndef SDIO_VENDOR_ID_TI
- #define SDIO_VENDOR_ID_TI		0x0097
+ struct mmc_card;
+ struct mmc_host;
++struct mmc_command;
+ 
+ int mmc_app_set_bus_width(struct mmc_card *card, int width);
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+@@ -25,6 +26,9 @@
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ 	u8 value, u8 *resp);
+ int mmc_app_sd_status(struct mmc_card *card, void *ssr);
++int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card);
++int mmc_wait_for_app_cmd(struct mmc_host *host, struct mmc_card *card,
++	struct mmc_command *cmd, int retries);
+ 
  #endif
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index a614f37..d66b08d 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -22,6 +22,7 @@
- #include <linux/mmc/sd.h>
- 
- #include "core.h"
-+#include "card.h"
- #include "bus.h"
- #include "mmc_ops.h"
- #include "sd.h"
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index ecbc529..558ddfc 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -20,6 +20,7 @@
- #include <linux/mmc/sdio_ids.h>
- 
- #include "core.h"
-+#include "card.h"
- #include "bus.h"
- #include "sd.h"
- #include "sdio_bus.h"
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 86f5b32..e992a7f 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -25,6 +25,7 @@
- #include <linux/of.h>
- 
- #include "core.h"
-+#include "card.h"
- #include "sdio_cis.h"
- #include "sdio_bus.h"
  
 diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 76fe6d5..74195d7 100644
+index 406e5f0..76fe6d5 100644
 --- a/drivers/mmc/core/sdio_io.c
 +++ b/drivers/mmc/core/sdio_io.c
-@@ -17,6 +17,7 @@
+@@ -16,6 +16,7 @@
+ #include <linux/mmc/sdio_func.h>
  
  #include "sdio_ops.h"
- #include "core.h"
-+#include "card.h"
++#include "core.h"
  
  /**
   *	sdio_claim_host - exclusively claim a bus for a certain SDIO function
 diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index d084635..d29faf2 100644
+index f1faf9a..d084635 100644
 --- a/drivers/mmc/core/sdio_irq.c
 +++ b/drivers/mmc/core/sdio_irq.c
-@@ -28,6 +28,7 @@
+@@ -27,6 +27,7 @@
+ #include <linux/mmc/sdio_func.h>
  
  #include "sdio_ops.h"
- #include "core.h"
-+#include "card.h"
++#include "core.h"
  
  static int process_sdio_pending_irqs(struct mmc_host *host)
  {
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index ca64f5b..29d00c9 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -248,13 +248,6 @@ struct mmc_card {
- #define MMC_TYPE_SDIO		2		/* SDIO card */
- #define MMC_TYPE_SD_COMBO	3		/* SD combo (IO+mem) card */
- 	unsigned int		state;		/* (our) card state */
--#define MMC_STATE_PRESENT	(1<<0)		/* present in sysfs */
--#define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
--#define MMC_STATE_BLOCKADDR	(1<<2)		/* card uses block-addressing */
--#define MMC_CARD_SDXC		(1<<3)		/* card is SDXC */
--#define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
--#define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
--#define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -273,7 +266,6 @@ struct mmc_card {
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+index e1c36d6..bed8a83 100644
+--- a/drivers/mmc/core/sdio_ops.h
++++ b/drivers/mmc/core/sdio_ops.h
+@@ -24,6 +24,7 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
+ int sdio_reset(struct mmc_host *host);
++unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz);
  
--
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
-  	unsigned int		pref_erase;	/* in sectors */
-@@ -309,245 +301,13 @@ struct mmc_card {
- 	unsigned int    nr_parts;
- };
- 
--/*
-- * This function fill contents in mmc_part.
-- */
--static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
--			unsigned int part_cfg, char *name, int idx, bool ro,
--			int area_type)
--{
--	card->part[card->nr_parts].size = size;
--	card->part[card->nr_parts].part_cfg = part_cfg;
--	sprintf(card->part[card->nr_parts].name, name, idx);
--	card->part[card->nr_parts].force_ro = ro;
--	card->part[card->nr_parts].area_type = area_type;
--	card->nr_parts++;
--}
--
- static inline bool mmc_large_sector(struct mmc_card *card)
+ static inline bool mmc_is_io_op(u32 opcode)
  {
- 	return card->ext_csd.data_sector_size == 4096;
- }
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 64e2ddf..e679a86 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -158,25 +158,13 @@ struct mmc_request {
+ struct mmc_card;
+ struct mmc_async_req;
  
--/*
-- *  The world is not perfect and supplies us with broken mmc/sdio devices.
-- *  For at least some of these bugs we need a work-around.
-- */
--
--struct mmc_fixup {
--	/* CID-specific fields. */
--	const char *name;
--
--	/* Valid revision range */
--	u64 rev_start, rev_end;
--
--	unsigned int manfid;
--	unsigned short oemid;
--
--	/* SDIO-specfic fields. You can use SDIO_ANY_ID here of course */
--	u16 cis_vendor, cis_device;
--
--	/* for MMC cards */
--	unsigned int ext_csd_rev;
--
--	void (*vendor_fixup)(struct mmc_card *card, int data);
--	int data;
--};
--
--#define CID_MANFID_ANY (-1u)
--#define CID_OEMID_ANY ((unsigned short) -1)
--#define CID_NAME_ANY (NULL)
--
--#define EXT_CSD_REV_ANY (-1u)
--
--#define CID_MANFID_SANDISK      0x2
--#define CID_MANFID_TOSHIBA      0x11
--#define CID_MANFID_MICRON       0x13
--#define CID_MANFID_SAMSUNG      0x15
--#define CID_MANFID_KINGSTON     0x70
--#define CID_MANFID_HYNIX	0x90
--
--#define END_FIXUP { NULL }
--
--#define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,	\
--		   _cis_vendor, _cis_device,				\
--		   _fixup, _data, _ext_csd_rev)				\
--	{						   \
--		.name = (_name),			   \
--		.manfid = (_manfid),			   \
--		.oemid = (_oemid),			   \
--		.rev_start = (_rev_start),		   \
--		.rev_end = (_rev_end),			   \
--		.cis_vendor = (_cis_vendor),		   \
--		.cis_device = (_cis_device),		   \
--		.vendor_fixup = (_fixup),		   \
--		.data = (_data),			   \
--		.ext_csd_rev = (_ext_csd_rev),		   \
--	 }
--
--#define MMC_FIXUP_REV(_name, _manfid, _oemid, _rev_start, _rev_end,	\
--		      _fixup, _data, _ext_csd_rev)			\
--	_FIXUP_EXT(_name, _manfid,					\
--		   _oemid, _rev_start, _rev_end,			\
--		   SDIO_ANY_ID, SDIO_ANY_ID,				\
--		   _fixup, _data, _ext_csd_rev)				\
--
--#define MMC_FIXUP(_name, _manfid, _oemid, _fixup, _data) \
--	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
--		      EXT_CSD_REV_ANY)
--
--#define MMC_FIXUP_EXT_CSD_REV(_name, _manfid, _oemid, _fixup, _data,	\
--			      _ext_csd_rev)				\
--	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
--		      _ext_csd_rev)
--
--#define SDIO_FIXUP(_vendor, _device, _fixup, _data)			\
--	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY,			\
--		    CID_OEMID_ANY, 0, -1ull,				\
--		   _vendor, _device,					\
--		   _fixup, _data, EXT_CSD_REV_ANY)			\
--
--#define cid_rev(hwrev, fwrev, year, month)	\
--	(((u64) hwrev) << 40 |                  \
--	 ((u64) fwrev) << 32 |                  \
--	 ((u64) year) << 16 |                   \
--	 ((u64) month))
--
--#define cid_rev_card(card)		  \
--	cid_rev(card->cid.hwrev,	  \
--		    card->cid.fwrev,      \
--		    card->cid.year,	  \
--		    card->cid.month)
--
--/*
-- * Unconditionally quirk add/remove.
-- */
--
--static inline void __maybe_unused add_quirk(struct mmc_card *card, int data)
--{
--	card->quirks |= data;
--}
--
--static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
--{
--	card->quirks &= ~data;
--}
--
- #define mmc_card_mmc(c)		((c)->type == MMC_TYPE_MMC)
- #define mmc_card_sd(c)		((c)->type == MMC_TYPE_SD)
- #define mmc_card_sdio(c)	((c)->type == MMC_TYPE_SDIO)
+-extern int mmc_stop_bkops(struct mmc_card *);
+-extern int mmc_read_bkops_status(struct mmc_card *);
+ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ 					   struct mmc_async_req *,
+ 					   enum mmc_blk_status *);
+-extern int mmc_interrupt_hpi(struct mmc_card *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+-extern void mmc_wait_for_req_done(struct mmc_host *host,
+-				  struct mmc_request *mrq);
+-extern bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+-extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+-extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+-	struct mmc_command *, int);
+-extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+-extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+ extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+ extern int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+-extern int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
  
--#define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
--#define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
--#define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
--#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
--#define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
--#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
--#define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
+ #define MMC_ERASE_ARG		0x00000000
+ #define MMC_SECURE_ERASE_ARG	0x80000000
+@@ -188,46 +176,8 @@ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ #define MMC_SECURE_ARGS		0x80000000
+ #define MMC_TRIM_ARGS		0x00008001
+ 
+-extern int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+-		     unsigned int arg);
+-extern int mmc_can_erase(struct mmc_card *card);
+-extern int mmc_can_trim(struct mmc_card *card);
+-extern int mmc_can_discard(struct mmc_card *card);
+-extern int mmc_can_sanitize(struct mmc_card *card);
+-extern int mmc_can_secure_erase_trim(struct mmc_card *card);
+-extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+-				   unsigned int nr);
+-extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
 -
--#define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
--#define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
--#define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
--#define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
--#define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
--#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
--#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
--#define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
--#define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
+-extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+-extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+-			      bool is_rel_write);
+ extern int mmc_hw_reset(struct mmc_host *host);
+-extern int mmc_can_reset(struct mmc_card *card);
 -
--/*
-- * Quirk add/remove for MMC products.
+ extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
+-extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
+-
+-extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
+-extern void mmc_release_host(struct mmc_host *host);
+-
+-extern void mmc_get_card(struct mmc_card *card);
+-extern void mmc_put_card(struct mmc_card *card);
+-
+-extern int mmc_flush_cache(struct mmc_card *);
+-
+-extern int mmc_detect_card_removed(struct mmc_host *host);
+-
+-/**
+- *	mmc_claim_host - exclusively claim a host
+- *	@host: mmc host to claim
+- *
+- *	Claim a host for a set of operations.
 - */
--
--static inline void __maybe_unused add_quirk_mmc(struct mmc_card *card, int data)
+-static inline void mmc_claim_host(struct mmc_host *host)
 -{
--	if (mmc_card_mmc(card))
--		card->quirks |= data;
+-	__mmc_claim_host(host, NULL);
 -}
--
--static inline void __maybe_unused remove_quirk_mmc(struct mmc_card *card,
--						   int data)
--{
--	if (mmc_card_mmc(card))
--		card->quirks &= ~data;
--}
--
--/*
-- * Quirk add/remove for SD products.
-- */
--
--static inline void __maybe_unused add_quirk_sd(struct mmc_card *card, int data)
--{
--	if (mmc_card_sd(card))
--		card->quirks |= data;
--}
--
--static inline void __maybe_unused remove_quirk_sd(struct mmc_card *card,
--						   int data)
--{
--	if (mmc_card_sd(card))
--		card->quirks &= ~data;
--}
--
--static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_LENIENT_FN0;
--}
--
--static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_BLKSZ_FOR_BYTE_MODE;
--}
--
--static inline int mmc_card_disable_cd(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_DISABLE_CD;
--}
--
--static inline int mmc_card_nonstd_func_interface(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_NONSTD_FUNC_IF;
--}
--
--static inline int mmc_card_broken_byte_mode_512(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_BROKEN_BYTE_MODE_512;
--}
--
--static inline int mmc_card_long_read_time(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_LONG_READ_TIME;
--}
--
--static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING;
--}
--
--static inline int mmc_card_broken_hpi(const struct mmc_card *c)
--{
--	return c->quirks & MMC_QUIRK_BROKEN_HPI;
--}
--
--#define mmc_card_name(c)	((c)->cid.prod_name)
--#define mmc_card_id(c)		(dev_name(&(c)->dev))
--
--#define mmc_dev_to_card(d)	container_of(d, struct mmc_card, dev)
--
--/*
-- * MMC device driver (e.g., Flash card, I/O card...)
-- */
--struct mmc_driver {
--	struct device_driver drv;
--	int (*probe)(struct mmc_card *);
--	void (*remove)(struct mmc_card *);
--	void (*shutdown)(struct mmc_card *);
--};
--
--extern int mmc_register_driver(struct mmc_driver *);
--extern void mmc_unregister_driver(struct mmc_driver *);
--
--extern void mmc_fixup_device(struct mmc_card *card,
--			     const struct mmc_fixup *table);
--
- #endif /* LINUX_MMC_CARD_H */
+ 
+ struct device_node;
+ extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
 -- 
 1.9.1
 
