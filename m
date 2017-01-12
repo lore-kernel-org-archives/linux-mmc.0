@@ -1,83 +1,96 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: core: Fix CMD6 timeout issue
-Date: Thu, 12 Jan 2017 11:58:33 +0100
-Message-ID: <CAPDyKFrYGz2zHZu2iNd09QxcBP5X4nvmYa85uAa7VtZjaH+USQ@mail.gmail.com>
-References: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com> <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
+Subject: Re: [v2, 1/2] mmc: sdhci-esdhc: clean up register definitions
+Date: Thu, 12 Jan 2017 11:58:58 +0100
+Message-ID: <CAPDyKFpdoPJ=g=No7sFe4wQbae76D7peCgQTAyeRy470FihhSw@mail.gmail.com>
+References: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f179.google.com ([209.85.210.179]:35349 "EHLO
-        mail-wj0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750838AbdALK6i (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 05:58:38 -0500
-Received: by mail-wj0-f179.google.com with SMTP id i20so9194440wjn.2
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 02:58:37 -0800 (PST)
-In-Reply-To: <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:38740 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750944AbdALK7B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 05:59:01 -0500
+Received: by mail-wm0-f50.google.com with SMTP id r144so14770521wme.1
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 02:59:00 -0800 (PST)
+In-Reply-To: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Mao <yong.mao@mediatek.com>
-Cc: Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
--trimmed cc list
+On 26 December 2016 at 10:46, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> The eSDHC register definitions in header file were messy and confusing.
+> This patch is to clean up these definitions.
+>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-On 3 January 2017 at 09:49, Yong Mao <yong.mao@mediatek.com> wrote:
-> From: yong mao <yong.mao@mediatek.com>
->
-> When initializing EMMC, after switch to HS400,
-> it will issue CMD6 to change ext_csd,
-> if first CMD6 got CRC error,
-> the repeat CMD6 may get timeout,
-> that's because card is not back to transfer state immediately.
->
-> For resolving this issue, it need check if card is busy
-> before sending repeat CMD6.
->
-> Not only CMD6 here has this issue, but also other R1B CMD has
-> the same issue.
-
-Is this change still something you want to discuss? Or the issue is resolved by:
-https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1308640.html
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 > ---
->  drivers/mmc/core/core.c |   19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
+> Changes for v2:
+>         - added Adrian into to list
+> ---
+>  drivers/mmc/host/sdhci-esdhc.h | 39 ++++++++++++++++++++-------------------
+>  1 file changed, 20 insertions(+), 19 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 1076b9d..8674dbb 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -566,6 +566,25 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+> index de132e2..8cd8449 100644
+> --- a/drivers/mmc/host/sdhci-esdhc.h
+> +++ b/drivers/mmc/host/sdhci-esdhc.h
+> @@ -24,30 +24,31 @@
+>                                 SDHCI_QUIRK_PIO_NEEDS_DELAY | \
+>                                 SDHCI_QUIRK_NO_HISPD_BIT)
 >
->                 mmc_retune_recheck(host);
+> -#define ESDHC_PROCTL           0x28
+> -
+> -#define ESDHC_SYSTEM_CONTROL   0x2c
+> -#define ESDHC_CLOCK_MASK       0x0000fff0
+> -#define ESDHC_PREDIV_SHIFT     8
+> -#define ESDHC_DIVIDER_SHIFT    4
+> -#define ESDHC_CLOCK_PEREN      0x00000004
+> -#define ESDHC_CLOCK_HCKEN      0x00000002
+> -#define ESDHC_CLOCK_IPGEN      0x00000001
+> -
+>  /* pltfm-specific */
+>  #define ESDHC_HOST_CONTROL_LE  0x20
 >
-> +               /*
-> +                * If a R1B CMD such as CMD6 occur CRC error,
-> +                * it will retry 3 times here.
-> +                * But before retrying, it must ensure card is in
-> +                * transfer state.
-> +                * Otherwise, the next retried CMD will got TMO error.
-> +                */
-> +               if (mmc_resp_type(cmd) == MMC_RSP_R1B && host->ops->card_busy) {
-> +                       int tries = 500; /* Wait aprox 500ms at maximum */
+>  /*
+> - * P2020 interpretation of the SDHCI_HOST_CONTROL register
+> + * eSDHC register definition
+>   */
+> -#define ESDHC_CTRL_4BITBUS          (0x1 << 1)
+> -#define ESDHC_CTRL_8BITBUS          (0x2 << 1)
+> -#define ESDHC_CTRL_BUSWIDTH_MASK    (0x3 << 1)
+> -
+> -/* OF-specific */
+> -#define ESDHC_DMA_SYSCTL       0x40c
+> -#define ESDHC_DMA_SNOOP                0x00000040
+>
+> -#define ESDHC_HOST_CONTROL_RES 0x01
+> +/* Protocol Control Register */
+> +#define ESDHC_PROCTL                   0x28
+> +#define ESDHC_CTRL_4BITBUS             (0x1 << 1)
+> +#define ESDHC_CTRL_8BITBUS             (0x2 << 1)
+> +#define ESDHC_CTRL_BUSWIDTH_MASK       (0x3 << 1)
+> +#define ESDHC_HOST_CONTROL_RES         0x01
 > +
-> +                       while (host->ops->card_busy(host) && --tries)
-> +                               mmc_delay(1);
+> +/* System Control Register */
+> +#define ESDHC_SYSTEM_CONTROL           0x2c
+> +#define ESDHC_CLOCK_MASK               0x0000fff0
+> +#define ESDHC_PREDIV_SHIFT             8
+> +#define ESDHC_DIVIDER_SHIFT            4
+> +#define ESDHC_CLOCK_PEREN              0x00000004
+> +#define ESDHC_CLOCK_HCKEN              0x00000002
+> +#define ESDHC_CLOCK_IPGEN              0x00000001
 > +
-> +                       if (tries == 0) {
-> +                               cmd->error = -EBUSY;
-> +                               break;
-> +                       }
-> +               }
-> +
->                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
->                          mmc_hostname(host), cmd->opcode, cmd->error);
->                 cmd->retries--;
+> +/* Control Register for DMA transfer */
+> +#define ESDHC_DMA_SYSCTL               0x40c
+> +#define ESDHC_DMA_SNOOP                        0x00000040
+>
+>  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
 > --
-> 1.7.9.5
+> 2.1.0.27.g96db324
 >
