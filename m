@@ -1,81 +1,129 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: remove default broken-cd for ARM
-Date: Thu, 12 Jan 2017 09:15:21 +0200
-Message-ID: <c04b729e-45ee-6ffd-a52c-bf117f4b3c42@intel.com>
-References: <1482745244-24114-1-git-send-email-yangbo.lu@nxp.com>
+From: Andrea Merello <andrea.merello@gmail.com>
+Subject: Re: [PATCH v2 8/9] DT: stm32f469-disco: add node for SDIO controller
+Date: Thu, 12 Jan 2017 08:25:38 +0100
+Message-ID: <CAN8YU5Modccie5g3PTehwg0YxnBvV+C7mZa4ym2R7uW922U46g@mail.gmail.com>
+References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
+ <1484037736-25029-9-git-send-email-andrea.merello@gmail.com> <a6b5bd41-894e-befb-d3c9-ae0c9119c822@st.com>
+Reply-To: andrea.merello@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:3568 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750869AbdALHUd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 12 Jan 2017 02:20:33 -0500
-In-Reply-To: <1482745244-24114-1-git-send-email-yangbo.lu@nxp.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:33024 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750996AbdALH0A (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 02:26:00 -0500
+Received: by mail-yw0-f194.google.com with SMTP id k6so817084ywk.0
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2017 23:25:59 -0800 (PST)
+In-Reply-To: <a6b5bd41-894e-befb-d3c9-ae0c9119c822@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+To: Alexandre Torgue <alexandre.torgue@st.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-mmc@vger.kernel.org, Bruno Herrera <bruherrera@gmail.com>
 
-On 26/12/16 11:40, Yangbo Lu wrote:
-> Initially all QorIQ platforms were PowerPC architecture and they didn't
-> support card detection except several platforms. The driver added the
-> quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION as default and this made broken-cd
-> property in dts node didn't work. Now QorIQ platform turns to ARM
-> architecture and most of them could support card detection. However it's
-> a large number of dts trees that need to be fixed with broken-cd if we
-> remove the default SDHCI_QUIRK_BROKEN_CARD_DETECTION in driver. And the
-> users don't want to see this. So this patch is to remove this default
-> quirk just for ARM and keep it for PowerPC.(Note, QorIQ PowerPC platform
-> only has big-endian eSDHC while QorIQ ARM platform has big-endian or
-> little-endian eSDHC) This makes broken-cd property work again for ARM.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+On Tue, Jan 10, 2017 at 10:18 AM, Alexandre Torgue
+<alexandre.torgue@st.com> wrote:
+> Hi Andrea
+>
+> On 01/10/2017 09:42 AM, Andrea Merello wrote:
+>>
+>> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+>
+>
+> Can you please add a commit message.
+> Can you also change commit header like: "ARM: dts: stm32: enable SDIO
+> controller on stm32f469 disco board
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Sure.
 
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 18 ++++++++++--------
->  1 file changed, 10 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 9a6eb44..364f6b8 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -569,16 +569,19 @@ static const struct sdhci_ops sdhci_esdhc_le_ops = {
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_esdhc_be_pdata = {
-> -	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
-> -		| SDHCI_QUIRK_NO_CARD_NO_RESET
-> -		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +	.quirks = ESDHC_DEFAULT_QUIRKS |
-> +#ifdef CONFIG_PPC
-> +		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-> +#endif
-> +		  SDHCI_QUIRK_NO_CARD_NO_RESET |
-> +		  SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->  	.ops = &sdhci_esdhc_be_ops,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_esdhc_le_pdata = {
-> -	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
-> -		| SDHCI_QUIRK_NO_CARD_NO_RESET
-> -		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +	.quirks = ESDHC_DEFAULT_QUIRKS |
-> +		  SDHCI_QUIRK_NO_CARD_NO_RESET |
-> +		  SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->  	.ops = &sdhci_esdhc_le_ops,
->  };
->  
-> @@ -643,8 +646,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
->  	    of_device_is_compatible(np, "fsl,p5020-esdhc") ||
->  	    of_device_is_compatible(np, "fsl,p4080-esdhc") ||
->  	    of_device_is_compatible(np, "fsl,p1020-esdhc") ||
-> -	    of_device_is_compatible(np, "fsl,t1040-esdhc") ||
-> -	    of_device_is_compatible(np, "fsl,ls1021a-esdhc"))
-> +	    of_device_is_compatible(np, "fsl,t1040-esdhc"))
->  		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->  
->  	if (of_device_is_compatible(np, "fsl,ls1021a-esdhc"))
-> 
+>
+>
+>> ---
+>>  arch/arm/boot/dts/stm32f429.dtsi      |  2 +-
+>>  arch/arm/boot/dts/stm32f469-disco.dts | 29 +++++++++++++++++++++++++++++
+>>  2 files changed, 30 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/arch/arm/boot/dts/stm32f429.dtsi
+>> b/arch/arm/boot/dts/stm32f429.dtsi
+>> index c12a64e..5aba383 100644
+>> --- a/arch/arm/boot/dts/stm32f429.dtsi
+>> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+>> @@ -206,7 +206,7 @@
+>>                         reg = <0x40007000 0x400>;
+>>                 };
+>>
+>> -               pin-controller {
+>> +               pinctrl:pin-controller {
+>>                         #address-cells = <1>;
+>>                         #size-cells = <1>;
+>>                         compatible = "st,stm32f429-pinctrl";
+>
+>
+>
+>
+>> diff --git a/arch/arm/boot/dts/stm32f469-disco.dts
+>> b/arch/arm/boot/dts/stm32f469-disco.dts
+>> index 8877c00..7b3458e 100644
+>> --- a/arch/arm/boot/dts/stm32f469-disco.dts
+>> +++ b/arch/arm/boot/dts/stm32f469-disco.dts
+>> @@ -65,6 +65,13 @@
+>>                 serial0 = &usart3;
+>>         };
+>>
+>> +       mmc_vcard: mmc_vcard {
+>> +               compatible = "regulator-fixed";
+>> +               regulator-name = "mmc_vcard";
+>> +               regulator-min-microvolt = <3300000>;
+>> +               regulator-max-microvolt = <3300000>;
+>> +       };
+>> +
+>>         soc {
+>>                 dma-ranges = <0xc0000000 0x0 0x10000000>;
+>>         };
+>> @@ -78,6 +85,28 @@
+>>         clock-frequency = <8000000>;
+>>  };
+>>
+>> +&pinctrl {
+>> +       sdio-cd {
+>> +               sdio_cd: sdio-cd {
+>> +                       pins {
+>> +                               pinmux = <STM32F429_PG2_FUNC_GPIO>;
+>> +                               bias-pull-up;
+>> +                       };
+>> +               };
+>> +       };
+>> +};
+>> +
+>
+>
+> As you only have config for 469-disco, please add this configuration of
+> pinmux directly in stm32f429.dtsi.
 
+I'm not sure I got your point here..
+
+I would say that stm32f429.dtsi should contain the HW description of
+the MCU, and should be board-agnostic, while stm32f469-disco should
+contain the HW description of this specific board.
+
+Even if we haven't this config for other boards yet, I would say this
+is still a very board-specific stuff, unrelated to the stm MCU itself.
+Please correct me if I'm wrong: AFAIK the CD could be routed to any
+GPIO pin, and it is not dependant by any STM32 specific AFIO.
+
+>
+>> +&sdio {
+>> +       status = "okay";
+>> +       vmmc-supply = <&mmc_vcard>;
+>> +       cd-gpios = <&gpiog 2 0>;
+>> +       cd-inverted;
+>> +       pinctrl-names = "default", "opendrain";
+>> +       pinctrl-0 = <&sdio_pins>;
+>> +       pinctrl-1 = <&sdio_pins_od>;
+>> +       bus-width = <4>;
+>> +};
+>> +
+>>  &usart3 {
+>>         status = "okay";
+>>  };
+>>
+>
