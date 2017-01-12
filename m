@@ -1,105 +1,121 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/12] mmc: core: A start to slim down public mmc headers
-Date: Thu, 12 Jan 2017 13:01:45 +0100
-Message-ID: <CAPDyKFqANsfiQzw588K527UQxALS2LBRx3szY=-9EPeD0KaRYQ@mail.gmail.com>
-References: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH v2 2/2] mmc: sdio: don't use rocr to check if the card
+ could support UHS mode
+Date: Thu, 12 Jan 2017 13:01:28 +0100
+Message-ID: <CAPDyKFro4cOCeVaGjBN9J-mbHFf4YPDf=xwJ0jvqCjxR_0zXmg@mail.gmail.com>
+References: <1483952180-85063-1-git-send-email-shawn.lin@rock-chips.com> <1483952180-85063-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:35352 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751713AbdALMBy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 07:01:54 -0500
-Received: by mail-wm0-f51.google.com with SMTP id r126so15514028wmr.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 04:01:53 -0800 (PST)
-In-Reply-To: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:35143 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751657AbdALMBf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 07:01:35 -0500
+Received: by mail-wm0-f44.google.com with SMTP id r126so15504748wmr.0
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 04:01:30 -0800 (PST)
+In-Reply-To: <1483952180-85063-2-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 11 January 2017 at 12:51, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Changes in v2:
->         - As patch 1->11 was applied from version 1, those have been dropped
->         from the series.
->         - Folded in a new change in patch 1/12, to solve a build issue for imx
->         which is using the mxcmmc platform data header.
->         - Added reviews/acks.
+On 9 January 2017 at 09:56, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Per SDIO Simplified Specification V3, section 3.1.2, A host that
+> supports UHS-I sets S18R to 1 in the argument of CMD5 to request a
+> change of the signal voltage to 1.8V. If the card supports UHS-I and
+> the current signal voltage is 3.3V, S18A is set to 1 in the R4 response.
+> If the signal voltage is already 1.8V, the card sets S18A to 0 so that
+> host maintains the current signal voltage. UHS-I is supported in SD mode
+> and S18A is always 0 in SPI mode.
 >
+> For the current code, if the signaling voltage is fixed 1.8v, so
+> the card will set S18A to 0 for rocr and thus we would clear the
+> R4_18V_PRESENT from ocr, which make core won't try to use uhs mode.
 >
-> Ideally we should not expose functions nor structures as being public available
-> as the interface for mmc - unless they really are intended to be used like that.
+> To fix it, we expect sdio_read_cccr would fail if the uhs mode won't
+> work at all. Note that it's interesting that some sdio cards still
+> response S18A even the voltage is fixed to 1.8v and the CMD11 will
+> also accepted and finish enabling UHS mode successfully. I guess this
+> is why folks didn't notice this problem. Anyway, fix it.
 >
-> Unfortunate this is not the case today and which has lead to the mmc interface
-> in some cases being abused. That of course has its own problems, but we can
-> still move things in the right direction, which is what this series intend to
-> do. More precisely, it moves things that can be easily moved from the public mmc
-> headers to the private mmc headers.
->
-> This should be considered as a first step of improving the situation, further
-> additional changes will have to continue this path.
->
->
-> Ulf Hansson (12):
->   mmc: mxcmmc: Include interrupt.h in the platform data header
->   mmc: core: First step in cleaning up public mmc header files
->   mmc: core: First step in cleaning up private mmc header files
->   mmc: core: Move public functions from core.h to private headers
->   mmc: core: Move some host specific public functions to host.h
->   mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
->   mmc: core: Remove unused struct _mmc_csd from public mmc.h header
->   mmc: omap: Don't use mmc_card_present() when validating for inserted
->     card
->   mmc: vub300: Don't use mmc_card_present() when validating for inserted
->     card
->   mmc: core: Move public functions from card.h to private headers
->   mmc: core: Move public functions from host.h to private headers
->   mmc: core: Don't use extern declarations of public mmc functions
->
->  drivers/mmc/core/block.c                 |   6 +
->  drivers/mmc/core/block.h                 |   8 +
->  drivers/mmc/core/bus.c                   |   2 +
->  drivers/mmc/core/bus.h                   |  16 +-
->  drivers/mmc/core/card.h                  | 223 ++++++++++++++++++++++++++++
->  drivers/mmc/core/core.c                  |   1 +
->  drivers/mmc/core/core.h                  |  41 +++++-
->  drivers/mmc/core/debugfs.c               |   2 +
->  drivers/mmc/core/host.h                  |  48 ++++++
->  drivers/mmc/core/mmc.c                   |  13 ++
->  drivers/mmc/core/mmc_ops.h               |  14 ++
->  drivers/mmc/core/mmc_test.c              |   5 +
->  drivers/mmc/core/pwrseq.h                |   6 +-
->  drivers/mmc/core/queue.c                 |   2 +
->  drivers/mmc/core/queue.h                 |   6 +-
->  drivers/mmc/core/quirks.c                |   2 +
->  drivers/mmc/core/sd.c                    |   2 +
->  drivers/mmc/core/sd.h                    |   5 +-
->  drivers/mmc/core/sd_ops.h                |   9 ++
->  drivers/mmc/core/sdio.c                  |   2 +
->  drivers/mmc/core/sdio_bus.c              |   1 +
->  drivers/mmc/core/sdio_bus.h              |   3 +
->  drivers/mmc/core/sdio_cis.h              |   3 +
->  drivers/mmc/core/sdio_io.c               |   2 +
->  drivers/mmc/core/sdio_irq.c              |   2 +
->  drivers/mmc/core/sdio_ops.h              |   5 +
->  drivers/mmc/core/slot-gpio.h             |   2 +
->  drivers/mmc/host/omap.c                  |   2 +-
->  drivers/mmc/host/vub300.c                |   6 +-
->  include/linux/mmc/card.h                 | 242 -------------------------------
->  include/linux/mmc/core.h                 |  86 ++---------
->  include/linux/mmc/host.h                 |  63 ++------
->  include/linux/mmc/mmc.h                  |  59 ++------
->  include/linux/mmc/slot-gpio.h            |   3 +
->  include/linux/platform_data/mmc-mxcmmc.h |   1 +
->  35 files changed, 467 insertions(+), 426 deletions(-)
->  create mode 100644 drivers/mmc/core/card.h
->
-> --
-> 1.9.1
->
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-I have now applied this for next to get it well tested. Please tell
-asap, if you have any objections.
+Thanks, applied for next, with minor modification to a comment in the
+code - see below!
 
 Kind regards
 Uffe
+
+>
+> ---
+>
+> Changes in v2:
+> - use the new helper function and improve the retry
+> - fix a typo
+>
+>  drivers/mmc/core/sdio.c | 27 ++++++++++++++++++++-------
+>  1 file changed, 20 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index f417adc..3af09da 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -633,7 +633,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>          * to switch to 1.8V signaling level.  No 1.8v signalling if
+>          * UHS mode is not enabled to maintain compatibility and some
+>          * systems that claim 1.8v signalling in fact do not support
+> -        * it.
+> +        * it. Per SDIO spec v3, section 3.1.2, if the voltage is already
+> +        * 1.8v, the card sets S18A to 0 in the R4 response. So it will
+> +        * fails to check rocr & R4_18V_PRESENT,  but we still need to
+> +        * try to init uhs card. sdio_read_cccr will take over this task
+> +        * to make sure which speed mode should work.
+>          */
+>         if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
+>                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+> @@ -645,9 +649,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>                 } else if (err) {
+>                         ocr &= ~R4_18V_PRESENT;
+>                 }
+> -               err = 0;
+> -       } else {
+> -               ocr &= ~R4_18V_PRESENT;
+>         }
+>
+>         /*
+> @@ -704,11 +705,23 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>         }
+>
+>         /*
+> -        * Read the common registers.
+> +        * Read the common registers. Note that we should try to
+> +        * validate whether UHS would work or not.
+>          */
+>         err = sdio_read_cccr(card, ocr);
+> -       if (err)
+> -               goto remove;
+> +       if (err) {
+> +               mmc_sdio_resend_if_cond(host, card);
+> +               if (ocr & R4_18V_PRESENT) {
+> +                       /*
+> +                        * Not retry it but just retring the sequence
+> +                        * w/o R4_18V_PRESENT.
+
+I am amending the change and rephrasing this to:
+
+"Retry init sequence, but without R4_18V_PRESENT."
+
+> +                        */
+> +                       retries = 0;
+> +                       goto try_again;
+> +               } else {
+> +                       goto remove;
+> +               }
+> +       }
+>
+>         /*
+>          * Read the common CIS tuples.
+> --
+> 1.9.1
+>
+>
