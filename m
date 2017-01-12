@@ -1,70 +1,106 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Wed, 11 Jan 2017 23:55:49 +0100
-Message-ID: <CAPDyKFp5j5ZqJkavCSYwWQ7nKtjOqCTv=ubhjYRsSEJUw07e3Q@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
- <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
- <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
- <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com>
- <CACRpkdad7JXzxYfuB_XYdo2vuZmEt5iWgq79Va5cWwTaJc6Y5Q@mail.gmail.com> <CAJ_EiSQYz2aEGiCv2npxmby0nHwmJJyR_jzY5wJOK98zp6Bvzg@mail.gmail.com>
+From: "Y.B. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [v2, 1/2] mmc: sdhci-esdhc: clean up register definitions
+Date: Thu, 12 Jan 2017 01:32:05 +0000
+Message-ID: <DB6PR0401MB253616A15641316DA99C8698F8790@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAJ_EiSQYz2aEGiCv2npxmby0nHwmJJyR_jzY5wJOK98zp6Bvzg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Liam Breck <liam-RYWXG+zxWwBdeoIcmNTgJF6hYfS7NtTn@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-he1eur01on0053.outbound.protection.outlook.com ([104.47.0.53]:1063
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1762745AbdALBcI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Jan 2017 20:32:08 -0500
+In-Reply-To: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Y.B. Lu" <yangbo.lu@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 9 January 2017 at 05:53, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
-> On Fri, Dec 30, 2016 at 12:05 AM, Linus Walleij
-> <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On Mon, Dec 19, 2016 at 1:01 AM, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
->>
->>> * SD8787 has a "powerdown" line, and CW1200 has a "powerup" line.. I
->>> know this is a simple logic inversion.
->>
->> If this is a GPIO line, the GPIO subsystem can flag a line for
->> inverted logic. GPIO_ACTIVE_LOW from device tree for example.
->
-> Slight ping on Ulf on this thread :).
+Hi Adrian and Uffe,
 
-Thanks, sorry for the delay!
+Could you give comments on these two patches?
+Thank you very much. :)
 
->
-> I do understand the inverted logic flag but that doesn't help if there
-> are different logic states between various chipsets.
 
-For cw1200 (I looked at code from an old ST-Ericsson vendor tree), the
-sequence is as follows:
+Best regards,
+Yangbo Lu
 
-1) Enable clock/power to the card/chip.
-2) Assert GPIO pin. I assume this also can be done before the
-clock/power is enabled.
-3) Wait some time (~50ms).
-4) De-assert GPIO pin.
-5) Wait some time (~20ms)
-6) Assert GPIO pin.
-7) Wait some time (~32ms).
+> -----Original Message-----
+> From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
+> Sent: Monday, December 26, 2016 5:46 PM
+> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Adrian Hunter
+> Cc: Y.B. Lu
+> Subject: [v2, 1/2] mmc: sdhci-esdhc: clean up register definitions
+>=20
+> The eSDHC register definitions in header file were messy and confusing.
+> This patch is to clean up these definitions.
+>=20
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> ---
+> Changes for v2:
+> 	- added Adrian into to list
+> ---
+>  drivers/mmc/host/sdhci-esdhc.h | 39 ++++++++++++++++++++----------------
+> ---
+>  1 file changed, 20 insertions(+), 19 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-
+> esdhc.h index de132e2..8cd8449 100644
+> --- a/drivers/mmc/host/sdhci-esdhc.h
+> +++ b/drivers/mmc/host/sdhci-esdhc.h
+> @@ -24,30 +24,31 @@
+>  				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
+>  				SDHCI_QUIRK_NO_HISPD_BIT)
+>=20
+> -#define ESDHC_PROCTL		0x28
+> -
+> -#define ESDHC_SYSTEM_CONTROL	0x2c
+> -#define ESDHC_CLOCK_MASK	0x0000fff0
+> -#define ESDHC_PREDIV_SHIFT	8
+> -#define ESDHC_DIVIDER_SHIFT	4
+> -#define ESDHC_CLOCK_PEREN	0x00000004
+> -#define ESDHC_CLOCK_HCKEN	0x00000002
+> -#define ESDHC_CLOCK_IPGEN	0x00000001
+> -
+>  /* pltfm-specific */
+>  #define ESDHC_HOST_CONTROL_LE	0x20
+>=20
+>  /*
+> - * P2020 interpretation of the SDHCI_HOST_CONTROL register
+> + * eSDHC register definition
+>   */
+> -#define ESDHC_CTRL_4BITBUS          (0x1 << 1)
+> -#define ESDHC_CTRL_8BITBUS          (0x2 << 1)
+> -#define ESDHC_CTRL_BUSWIDTH_MASK    (0x3 << 1)
+> -
+> -/* OF-specific */
+> -#define ESDHC_DMA_SYSCTL	0x40c
+> -#define ESDHC_DMA_SNOOP		0x00000040
+>=20
+> -#define ESDHC_HOST_CONTROL_RES	0x01
+> +/* Protocol Control Register */
+> +#define ESDHC_PROCTL			0x28
+> +#define ESDHC_CTRL_4BITBUS		(0x1 << 1)
+> +#define ESDHC_CTRL_8BITBUS		(0x2 << 1)
+> +#define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
+> +#define ESDHC_HOST_CONTROL_RES		0x01
+> +
+> +/* System Control Register */
+> +#define ESDHC_SYSTEM_CONTROL		0x2c
+> +#define ESDHC_CLOCK_MASK		0x0000fff0
+> +#define ESDHC_PREDIV_SHIFT		8
+> +#define ESDHC_DIVIDER_SHIFT		4
+> +#define ESDHC_CLOCK_PEREN		0x00000004
+> +#define ESDHC_CLOCK_HCKEN		0x00000002
+> +#define ESDHC_CLOCK_IPGEN		0x00000001
+> +
+> +/* Control Register for DMA transfer */
+> +#define ESDHC_DMA_SYSCTL		0x40c
+> +#define ESDHC_DMA_SNOOP			0x00000040
+>=20
+>  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
+> --
+> 2.1.0.27.g96db324
 
-At power off, the GPIO pin is de-asserted and of course also the
-clock/power is disabled. Just to make sure we have all the relevant
-logic.
-
-Looking at mmc pwrseq simple, perhaps we can extend this to deal with
-GPIOs that needs to be *toggled*, as this is not just reset GPIOs.
-Then we also need to deal with the delays in-between the toggling.
-
-Thoughts?
-
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
