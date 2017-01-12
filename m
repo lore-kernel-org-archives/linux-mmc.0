@@ -1,68 +1,36 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: Only powered up enabled acpi child devices
-Date: Thu, 12 Jan 2017 11:03:38 +0100
-Message-ID: <CAPDyKFoR=W=wqt_mQua9XKB_zXzAPHSgh_c=shxAzjQpiEQg4g@mail.gmail.com>
-References: <20161220231919.10458-1-hdegoede@redhat.com>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: [PATCH 0/2] Use data tune for CMD line tune
+Date: Thu, 12 Jan 2017 18:04:48 +0800
+Message-ID: <1484215490-7494-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f182.google.com ([209.85.210.182]:33718 "EHLO
-        mail-wj0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750872AbdALKDw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 05:03:52 -0500
-Received: by mail-wj0-f182.google.com with SMTP id kq3so8398747wjc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 02:03:40 -0800 (PST)
-In-Reply-To: <20161220231919.10458-1-hdegoede@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Nicolas Boichat <drinkcat@chromium.org>, srv_heupstream@mediatek.com, Javier Martinez Canillas <javier@osg.samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Douglas Anderson <dianders@chromium.org>, yong mao <yong.mao@mediatek.com>, linux-kernel@vger.kernel.org, Chunfeng Yun <chunfeng.yun@mediatek.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Philipp Zabel <p.zabel@pengutronix.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 21 December 2016 at 00:19, Hans de Goede <hdegoede@redhat.com> wrote:
-> Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
-> powered when probing") introduced code to powerup any acpi child
-> nodes listed in the dstd. But some dstd-s list all possible devices
-> used on some board variants, while reporting if the device is actually
-> present and enabled in the status field of the device.
->
-> So we end up calling the acpi _PS0 (power-on) method for devices which
-> are not actually present. This does not always end well, e.g. on my
-> cube iwork8 air tablet, this results in freezing the entire tablet as
-> soon as the r8723bs module is loaded.
->
-> This commit fixes this by checking the child device's status.present
-> and status.enabled bits and only call acpi_device_fix_up_power()
-> if both are set.
->
-> Fixes: e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are powered when probing")
-> BugLink: https://github.com/hadess/rtl8723bs/issues/80
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+CMD response CRC error may cause cannot boot up
+Change to use data tune for CMD line
+Separate cmd internal delay for HS200/HS400 mode
 
-Seems like I should add stable tag to this as well!?
+yong mao (2):
+  mmc: mediatek: Use data tune for CMD line tune
+  mmc: dt-bindings: update Mediatek MMC bindings
 
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 92096db..34ee237 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -396,7 +396,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->         /* Power on the SDHCI controller and its children */
->         acpi_device_fix_up_power(device);
->         list_for_each_entry(child, &device->children, node)
-> -               acpi_device_fix_up_power(child);
-> +               if (child->status.present && child->status.enabled)
-> +                       acpi_device_fix_up_power(child);
->
->         if (acpi_bus_get_status(device) || !device->status.present)
->                 return -ENODEV;
-> --
-> 2.9.3
->
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |   6 +
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |   3 +
+ drivers/mmc/host/mtk-sd.c                        | 169 ++++++++++++++++++++---
+ 3 files changed, 155 insertions(+), 23 deletions(-)
 
-Adrian, are you happy with this fix?
-
-Kind regards
-Uffe
+-- 
+1.8.1.1
