@@ -1,143 +1,112 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: eMMC boot problem: switch to bus width 8 ddr failed
-Date: Thu, 12 Jan 2017 17:51:36 +0100
-Message-ID: <CAPDyKFoUeYrE7nC2Ds8XHBYXtQpLHkRXKp_hFyD0m6fuuFM==w@mail.gmail.com>
-References: <20170106004114.GA22893@archie.localdomain> <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
- <20170106155618.GA10105@archie.localdomain>
+Subject: Re: [PATCH v2 00/12] mmc: core: A start to slim down public mmc headers
+Date: Thu, 12 Jan 2017 21:43:45 +0100
+Message-ID: <CAPDyKFob1ALex_+9jSvby_FBR_YUKkHpH5zX6n=3KF9xgYDaHQ@mail.gmail.com>
+References: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org> <CAPDyKFqANsfiQzw588K527UQxALS2LBRx3szY=-9EPeD0KaRYQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170106155618.GA10105@archie.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Clemens Gruber <clemens.gruber@pqgruber.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Gary Bisson <gary.bisson@boundarydevices.com>, Fabio Estevam <festevam@gmail.com>, Shawn Guo <shawnguo@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:35689 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750753AbdALUn6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 15:43:58 -0500
+Received: by mail-wm0-f50.google.com with SMTP id r126so36930236wmr.0
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 12:43:47 -0800 (PST)
+In-Reply-To: <CAPDyKFqANsfiQzw588K527UQxALS2LBRx3szY=-9EPeD0KaRYQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-+ Haibo, Gary, Fabio, Shawn Gou
-
-On 6 January 2017 at 16:56, Clemens Gruber <clemens.gruber@pqgruber.com> wrote:
-> On Fri, Jan 06, 2017 at 10:33:49AM +0800, Shawn Lin wrote:
->> On 2017/1/6 8:41, Clemens Gruber wrote:
->> > Hi,
->> >
->> > with the current mainline 4.10-rc2 kernel, I can no longer boot from
->> > the eMMC on my i.MX6Q board.
->> >
->> > Details:
->> > The eMMC is a Micron MTFC4GACAJCN-1M WT but as the i.MX6Q only supports
->> > eMMC 4.41 features and we did not implement voltage switching from 3.3V
->> > to 1.8V or lower, I did add no-1-8-v; (but none of the mmc-ddr or mmc-hs
->> > options) to the device tree. The bus-width is 8.
->> >
->> > With 4.9 the board booted fine, now with the current mainline 4.10 tree,
->> > I get the following (repeating) errors at boot:
->> >
->> > [    4.326834] Waiting for root device /dev/mmcblk0p2...
->> > [   14.563861] mmc0: Timeout waiting for hardware cmd interrupt.
->> > [   14.569619] sdhci: =========== REGISTER DUMP (mmc0)===========
->> > [   14.575461] sdhci: Sys addr: 0x4e726000 | Version:  0x00000002
->> > [   14.581300] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
->> > [   14.587140] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
->> > [   14.592979] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
->> > [   14.598816] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
->> > [   14.604654] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
->> > [   14.610493] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
->> > [   14.616332] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
->> > [   14.622168] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
->> > [   14.628007] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
->> > [   14.633845] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
->>
->> it shows you always fail to get resp of sending status within the
->> expected period of time.
+On 12 January 2017 at 13:01, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 11 January 2017 at 12:51, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Changes in v2:
+>>         - As patch 1->11 was applied from version 1, those have been dropped
+>>         from the series.
+>>         - Folded in a new change in patch 1/12, to solve a build issue for imx
+>>         which is using the mxcmmc platform data header.
+>>         - Added reviews/acks.
 >>
 >>
->> > [   14.639682] sdhci: Host ctl2: 0x00000000
->> > [   14.643611] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x4e6f7208
->> > [   14.649447] sdhci: ===========================================
->> >
->> > This repeats a few times, then more information is shown at the bottom:
->> >
->> > [   86.893859] mmc0: Timeout waiting for hardware cmd interrupt.
->> > [   86.899615] sdhci: =========== REGISTER DUMP (mmc0)===========
->> > [   86.905453] sdhci: Sys addr: 0x00000000 | Version:  0x00000002
->> > [   86.911291] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000001
->> > [   86.917129] sdhci: Argument: 0x00010000 | Trn mode: 0x00000013
->> > [   86.922967] sdhci: Present:  0x01fd8009 | Host ctl: 0x00000031
->> > [   86.928804] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
->> > [   86.934642] sdhci: Wake-up:  0x00000008 | Clock:    0x0000001f
->> > [   86.940479] sdhci: Timeout:  0x0000008f | Int stat: 0x00000000
->> > [   86.946316] sdhci: Int enab: 0x107f100b | Sig enab: 0x107f100b
->> > [   86.952154] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
->> > [   86.957992] sdhci: Caps:     0x07eb0000 | Caps_1:   0x0000a007
->> > [   86.963830] sdhci: Cmd:      0x00000d1a | Max curr: 0x00ffffff
->> > [   86.969668] sdhci: Host ctl2: 0x00000000
->> > [   86.973596] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
->> > [   86.979433] sdhci: ===========================================
->> > [   86.986356] mmc0: switch to bus width 8 ddr failed
->> > [   86.991163] mmc0: error -110 whilst initialising MMC card
->> > [   97.773859] mmc0: Timeout waiting for hardware cmd interrupt.
->> >
->> > --
->> >
->> > After looking through the latest commits to mmc/core, I found the
->> > culprit:
->> > Commit e173f8911f091fa50ccf8cc1fa316dd5569bc470 ("mmc: core: Update
->> > CMD13 polling policy when switch to HS DDR mode")
->> >
->> > Reverting it fixes the problem. But I am unsure if that's the right
->> > course of action?
->> >
->> > Feel free to send me patches for testing!
+>> Ideally we should not expose functions nor structures as being public available
+>> as the interface for mmc - unless they really are intended to be used like that.
 >>
->> By looking the changes itself, it should be good from the view of spec.
->> Maybe you could try the patch below, but don't beat me if that doesn't
->> help at all. :)
+>> Unfortunate this is not the case today and which has lead to the mmc interface
+>> in some cases being abused. That of course has its own problems, but we can
+>> still move things in the right direction, which is what this series intend to
+>> do. More precisely, it moves things that can be easily moved from the public mmc
+>> headers to the private mmc headers.
 >>
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1074,7 +1074,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->>                            EXT_CSD_BUS_WIDTH,
->>                            ext_csd_bits,
->>                            card->ext_csd.generic_cmd6_time,
->> -                          MMC_TIMING_MMC_DDR52,
->> +                          0,
->>                            true, true, true);
->>         if (err) {
->>                 pr_err("%s: switch to bus width %d ddr failed\n",
->> @@ -1118,6 +1118,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->>         if (err)
->>                 err = __mmc_set_signal_voltage(host,
->> MMC_SIGNAL_VOLTAGE_330);
+>> This should be considered as a first step of improving the situation, further
+>> additional changes will have to continue this path.
 >>
->> +       if (!err)
->> +               mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->> +
 >>
+>> Ulf Hansson (12):
+>>   mmc: mxcmmc: Include interrupt.h in the platform data header
+>>   mmc: core: First step in cleaning up public mmc header files
+>>   mmc: core: First step in cleaning up private mmc header files
+>>   mmc: core: Move public functions from core.h to private headers
+>>   mmc: core: Move some host specific public functions to host.h
+>>   mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
+>>   mmc: core: Remove unused struct _mmc_csd from public mmc.h header
+>>   mmc: omap: Don't use mmc_card_present() when validating for inserted
+>>     card
+>>   mmc: vub300: Don't use mmc_card_present() when validating for inserted
+>>     card
+>>   mmc: core: Move public functions from card.h to private headers
+>>   mmc: core: Move public functions from host.h to private headers
+>>   mmc: core: Don't use extern declarations of public mmc functions
+>>
+>>  drivers/mmc/core/block.c                 |   6 +
+>>  drivers/mmc/core/block.h                 |   8 +
+>>  drivers/mmc/core/bus.c                   |   2 +
+>>  drivers/mmc/core/bus.h                   |  16 +-
+>>  drivers/mmc/core/card.h                  | 223 ++++++++++++++++++++++++++++
+>>  drivers/mmc/core/core.c                  |   1 +
+>>  drivers/mmc/core/core.h                  |  41 +++++-
+>>  drivers/mmc/core/debugfs.c               |   2 +
+>>  drivers/mmc/core/host.h                  |  48 ++++++
+>>  drivers/mmc/core/mmc.c                   |  13 ++
+>>  drivers/mmc/core/mmc_ops.h               |  14 ++
+>>  drivers/mmc/core/mmc_test.c              |   5 +
+>>  drivers/mmc/core/pwrseq.h                |   6 +-
+>>  drivers/mmc/core/queue.c                 |   2 +
+>>  drivers/mmc/core/queue.h                 |   6 +-
+>>  drivers/mmc/core/quirks.c                |   2 +
+>>  drivers/mmc/core/sd.c                    |   2 +
+>>  drivers/mmc/core/sd.h                    |   5 +-
+>>  drivers/mmc/core/sd_ops.h                |   9 ++
+>>  drivers/mmc/core/sdio.c                  |   2 +
+>>  drivers/mmc/core/sdio_bus.c              |   1 +
+>>  drivers/mmc/core/sdio_bus.h              |   3 +
+>>  drivers/mmc/core/sdio_cis.h              |   3 +
+>>  drivers/mmc/core/sdio_io.c               |   2 +
+>>  drivers/mmc/core/sdio_irq.c              |   2 +
+>>  drivers/mmc/core/sdio_ops.h              |   5 +
+>>  drivers/mmc/core/slot-gpio.h             |   2 +
+>>  drivers/mmc/host/omap.c                  |   2 +-
+>>  drivers/mmc/host/vub300.c                |   6 +-
+>>  include/linux/mmc/card.h                 | 242 -------------------------------
+>>  include/linux/mmc/core.h                 |  86 ++---------
+>>  include/linux/mmc/host.h                 |  63 ++------
+>>  include/linux/mmc/mmc.h                  |  59 ++------
+>>  include/linux/mmc/slot-gpio.h            |   3 +
+>>  include/linux/platform_data/mmc-mxcmmc.h |   1 +
+>>  35 files changed, 467 insertions(+), 426 deletions(-)
+>>  create mode 100644 drivers/mmc/core/card.h
+>>
+>> --
+>> 1.9.1
 >>
 >
-> Hi,
->
-> thank you. This patch solves the problem! :)
->
-> Tested-by: Clemens Gruber <clemens.gruber@pqgruber.com>
->
-> Regards,
-> Clemens
+> I have now applied this for next to get it well tested. Please tell
+> asap, if you have any objections.
 
-Everybody involved, thanks for looking into this!
+Dropping patch 2 and onwards from my next branch, because of build
+issues for some arm/mips SoCs, reported by kernelci.
+https://kernelci.org/build/ulfh/kernel/v4.10-rc3-64-g656ac692663b/
 
-I think the above approach seems like a reasonable fix for the 4.10
-rcs. Shawn Lin, would you mind re-posting a proper patch with a
-change-log?
-
-In the meantime, I will follow the process of Haibo Chen's debugging
-around the voltage switch issue and look into what Dong's suggesting
-around this may be.
-
-Just to be clear, I would definitely prefer a fix in the sdhci driver,
-if that can be done. So I will give Haibo/Dong etc a couple of more
-days to investigate, before applying Shawn Lin's fix for the core.
-Hope that approach is okay with all of you?
+I will look into the issues more closely tomorrow morning.
 
 Kind regards
 Uffe
