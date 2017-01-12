@@ -1,181 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6] mmc: sdhci-pci: Add support for HS200 tuning mode on
- AMD, eMMC-4.5.1
-Date: Thu, 12 Jan 2017 16:27:20 +0100
-Message-ID: <CAPDyKFoLyvRxD-EwWbTo33Xd=KA4V0jP=gt-+w2ObdJUm9Y9jg@mail.gmail.com>
-References: <9ab8fcff-5c60-0a4d-57c1-7d9fe3c79447@amd.com>
+From: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Subject: Re: [PATCH v2 7/7] uapi: export all headers under uapi directories
+Date: Thu, 12 Jan 2017 16:52:57 +0100
+Message-ID: <464a1323-4450-e563-ff59-9e6d57b75959@6wind.com>
+References: <bf83da6b-01ef-bf44-b3e1-ca6fc5636818@6wind.com>
+ <1483695839-18660-1-git-send-email-nicolas.dichtel@6wind.com>
+ <1483695839-18660-8-git-send-email-nicolas.dichtel@6wind.com>
+ <20170109125638.GA15506@infradead.org>
+Reply-To: nicolas.dichtel@6wind.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:36770 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750934AbdALP1X (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 10:27:23 -0500
-Received: by mail-wm0-f53.google.com with SMTP id c85so24011194wmi.1
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 07:27:23 -0800 (PST)
-In-Reply-To: <9ab8fcff-5c60-0a4d-57c1-7d9fe3c79447@amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-alpha-owner@vger.kernel.org>
+In-Reply-To: <20170109125638.GA15506@infradead.org>
+Sender: linux-alpha-owner@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: arnd@arndb.de, mmarek@suse.com, linux-kbuild@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-alpha@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-arm-kernel@lists.infradead.org, adi-buildroot-devel@lists.sourceforge.net, linux-c6x-dev@linux-c6x.org, linux-cris-kernel@axis.com, uclinux-h8-devel@lists.sourceforge.jp, linux-hexagon@vger.kernel.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-am33-list@redhat.com, nios2-dev@lists.rocketboards.org, openrisc@lists.librecores.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-sh@vger.kernel.org, sparclinux@vger.kernel.org, linux-xtensa@linux-xtensa.orglinux-ar
 List-Id: linux-mmc@vger.kernel.org
-To: Shyam Sundar S K <ssundark@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 12 January 2017 at 13:39, Shyam Sundar S K <ssundark@amd.com> wrote:
-> This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
->
-> Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
-> Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-> Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
-> Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+Le 09/01/2017 à 13:56, Christoph Hellwig a écrit :
+> On Fri, Jan 06, 2017 at 10:43:59AM +0100, Nicolas Dichtel wrote:
+>> Regularly, when a new header is created in include/uapi/, the developer
+>> forgets to add it in the corresponding Kbuild file. This error is usually
+>> detected after the release is out.
+>>
+>> In fact, all headers under uapi directories should be exported, thus it's
+>> useless to have an exhaustive list.
+>>
+>> After this patch, the following files, which were not exported, are now
+>> exported (with make headers_install_all):
+> 
+> ... snip ...
+> 
+>> linux/genwqe/.install
+>> linux/genwqe/..install.cmd
+>> linux/cifs/.install
+>> linux/cifs/..install.cmd
+> 
+> I'm pretty sure these should not be exported!
+> 
+Those files are created in every directory:
+$ find usr/include/ -name '\.\.install.cmd' | wc -l
+71
+$ find usr/include/ -name '\.install' | wc -l
+71
 
-Thanks, applied for next!
+See also
+http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/scripts/Makefile.headersinst#n32
 
-Kind regards
-Uffe
 
-> ---
->
-> Changes since v1: (https://patchwork.kernel.org/patch/9429071/)
->  * Reworked on review comments received which has the following:
->    -> Removed the amd_tuning_descriptor struct and amd_find_good_phase()
->       and handled the tuning changes in amd_execute_tuning().
->    -> Fix some alignment problems.
->    -> Defined macros for registers and bit fields used.
->    -> removed mdelay and used msleep
->
-> Changes since v2: (https://patchwork.kernel.org/patch/9469247/)
->  * Resubmitted the v1 patch by removing unused variables.
->
-> Changes since v3: (https://patchwork.kernel.org/patch/9469571/)
->  * Adding a changelog description and resubmitting the changes made in v2
->
-> Changes since v4: (https://patchwork.kernel.org/patch/9470185/)
->  * Changed the amd_execute_tuning logic as per Adrian suggestions and
->    addressed the comments received
->
-> Changes since v5: (https://patchwork.kernel.org/patch/9506847/)
->  * Addressed minor cosmetic changes
->
->  drivers/mmc/host/sdhci-pci-core.c | 94 +++++++++++++++++++++++++++++++++++++--
->  1 file changed, 91 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 1a72d32..2653872 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -866,6 +866,86 @@ enum amd_chipset_gen {
->         AMD_CHIPSET_UNKNOWN,
->  };
->
-> +/* AMD registers */
-> +#define AMD_SD_AUTO_PATTERN            0xB8
-> +#define AMD_MSLEEP_DURATION            4
-> +#define AMD_SD_MISC_CONTROL            0xD0
-> +#define AMD_MAX_TUNE_VALUE             0x0B
-> +#define AMD_AUTO_TUNE_SEL              0x10800
-> +#define AMD_FIFO_PTR                   0x30
-> +#define AMD_BIT_MASK                   0x1F
-> +
-> +static void amd_tuning_reset(struct sdhci_host *host)
-> +{
-> +       unsigned int val;
-> +
-> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +       val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
-> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-> +
-> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +       val &= ~SDHCI_CTRL_EXEC_TUNING;
-> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-> +}
-> +
-> +static void amd_config_tuning_phase(struct pci_dev *pdev, u8 phase)
-> +{
-> +       unsigned int val;
-> +
-> +       pci_read_config_dword(pdev, AMD_SD_AUTO_PATTERN, &val);
-> +       val &= ~AMD_BIT_MASK;
-> +       val |= (AMD_AUTO_TUNE_SEL | (phase << 1));
-> +       pci_write_config_dword(pdev, AMD_SD_AUTO_PATTERN, val);
-> +}
-> +
-> +static void amd_enable_manual_tuning(struct pci_dev *pdev)
-> +{
-> +       unsigned int val;
-> +
-> +       pci_read_config_dword(pdev, AMD_SD_MISC_CONTROL, &val);
-> +       val |= AMD_FIFO_PTR;
-> +       pci_write_config_dword(pdev, AMD_SD_MISC_CONTROL, val);
-> +}
-> +
-> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       struct pci_dev *pdev = slot->chip->pdev;
-> +       u8 valid_win = 0;
-> +       u8 valid_win_max = 0;
-> +       u8 valid_win_end = 0;
-> +       u8 ctrl, tune_around;
-> +
-> +       amd_tuning_reset(host);
-> +
-> +       for (tune_around = 0; tune_around < 12; tune_around++) {
-> +               amd_config_tuning_phase(pdev, tune_around);
-> +
-> +               if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-> +                       valid_win = 0;
-> +                       msleep(AMD_MSLEEP_DURATION);
-> +                       ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
-> +                       sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
-> +               } else if (++valid_win > valid_win_max) {
-> +                       valid_win_max = valid_win;
-> +                       valid_win_end = tune_around;
-> +               }
-> +       }
-> +
-> +       if (!valid_win_max) {
-> +               dev_err(&pdev->dev, "no tuning point found\n");
-> +               return -EIO;
-> +       }
-> +
-> +       amd_config_tuning_phase(pdev, valid_win_end - valid_win_max / 2);
-> +
-> +       amd_enable_manual_tuning(pdev);
-> +
-> +       host->mmc->retune_period = 0;
-> +
-> +       return 0;
-> +}
-> +
->  static int amd_probe(struct sdhci_pci_chip *chip)
->  {
->         struct pci_dev  *smbus_dev;
-> @@ -888,16 +968,24 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->                 }
->         }
->
-> -       if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
-> +       if (gen == AMD_CHIPSET_BEFORE_ML || gen == AMD_CHIPSET_CZ)
->                 chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
-> -               chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
-> -       }
->
->         return 0;
->  }
->
-> +static const struct sdhci_ops amd_sdhci_pci_ops = {
-> +       .set_clock                      = sdhci_set_clock,
-> +       .enable_dma                     = sdhci_pci_enable_dma,
-> +       .set_bus_width                  = sdhci_pci_set_bus_width,
-> +       .reset                          = sdhci_reset,
-> +       .set_uhs_signaling              = sdhci_set_uhs_signaling,
-> +       .platform_execute_tuning        = amd_execute_tuning,
-> +};
-> +
->  static const struct sdhci_pci_fixes sdhci_amd = {
->         .probe          = amd_probe,
-> +       .ops            = &amd_sdhci_pci_ops,
->  };
->
->  static const struct pci_device_id pci_ids[] = {
-> --
-> 2.7.4
+Thank you,
+Nicolas
