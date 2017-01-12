@@ -1,68 +1,77 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH next] mmc: mxs-mmc: Fix additional cycles after
- transmission stop
-Date: Thu, 12 Jan 2017 13:01:02 +0100
-Message-ID: <CAPDyKFo4tpLS2yQjkGYCuyC6HqMHmZ3=qGe7CHWMNty3=K-yaA@mail.gmail.com>
-References: <1483644245-7538-1-git-send-email-stefan.wahren@i2se.com>
+Subject: Re: [RFC PATCH v2 1/2] mmc: sdio: Factor out retry init card helper function
+Date: Thu, 12 Jan 2017 13:01:19 +0100
+Message-ID: <CAPDyKFqiABSSOk6=04nFGn0K78Puqdj6GnycCbWKF_DUTDEQdg@mail.gmail.com>
+References: <1483952180-85063-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:36586 "EHLO
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:35047 "EHLO
         mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751289AbdALMBE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 07:01:04 -0500
-Received: by mail-wm0-f51.google.com with SMTP id c85so15401948wmi.1
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 04:01:04 -0800 (PST)
-In-Reply-To: <1483644245-7538-1-git-send-email-stefan.wahren@i2se.com>
+        with ESMTP id S1751597AbdALMB1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 07:01:27 -0500
+Received: by mail-wm0-f51.google.com with SMTP id r126so15500402wmr.0
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 04:01:21 -0800 (PST)
+In-Reply-To: <1483952180-85063-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Shawn Guo <shawnguo@kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Marek Vasut <marex@denx.de>, =?UTF-8?Q?Lothar_Wa=C3=9Fmann?= <lw@karo-electronics.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-+stable
-
-On 5 January 2017 at 20:24, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> According to the code the intention is to append 8 SCK cycles
-> instead of 4 at end of a MMC_STOP_TRANSMISSION command. But this
-> will never happened because it's an AC command not an ADTC command.
-> So fix this by moving the statement into the right function.
+On 9 January 2017 at 09:56, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Add new helper function, mmc_sdio_resend_if_cond, to be
+> reused when trying to retry the init sequence.
 >
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-> Fixes: e4243f13d10e (mmc: mxs-mmc: add mmc host driver for i.MX23/28)
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks, applied for fixes and added a stable tag.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
+>
 > ---
->  drivers/mmc/host/mxs-mmc.c |    6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 44ecebd..c8b8ac6 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -309,6 +309,9 @@ static void mxs_mmc_ac(struct mxs_mmc_host *host)
->         cmd0 = BF_SSP(cmd->opcode, CMD0_CMD);
->         cmd1 = cmd->arg;
+> Changes in v2:
+> - rename the funtion to mmc_sdio_resend_if_cond
+> - move the control of retries outside the helper function
 >
-> +       if (cmd->opcode == MMC_STOP_TRANSMISSION)
-> +               cmd0 |= BM_SSP_CMD0_APPEND_8CYC;
+>  drivers/mmc/core/sdio.c | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index ecbc529..f417adc 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -541,6 +541,15 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
+>         return err;
+>  }
+>
+> +static void mmc_sdio_resend_if_cond(struct mmc_host *host,
+> +                                   struct mmc_card *card)
+> +{
+> +       sdio_reset(host);
+> +       mmc_go_idle(host);
+> +       mmc_send_if_cond(host, host->ocr_avail);
+> +       mmc_remove_card(card);
+> +}
 > +
->         if (host->sdio_irq_en) {
->                 ctrl0 |= BM_SSP_CTRL0_SDIO_IRQ_CHECK;
->                 cmd0 |= BM_SSP_CMD0_CONT_CLKING_EN | BM_SSP_CMD0_SLOW_CLKING_EN;
-> @@ -417,8 +420,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
->                        ssp->base + HW_SSP_BLOCK_SIZE);
->         }
->
-> -       if ((cmd->opcode == MMC_STOP_TRANSMISSION) ||
-> -           (cmd->opcode == SD_IO_RW_EXTENDED))
-> +       if (cmd->opcode == SD_IO_RW_EXTENDED)
->                 cmd0 |= BM_SSP_CMD0_APPEND_8CYC;
->
->         cmd1 = cmd->arg;
+>  /*
+>   * Handle the detection and initialisation of a card.
+>   *
+> @@ -630,10 +639,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+>                                         ocr_card);
+>                 if (err == -EAGAIN) {
+> -                       sdio_reset(host);
+> -                       mmc_go_idle(host);
+> -                       mmc_send_if_cond(host, host->ocr_avail);
+> -                       mmc_remove_card(card);
+> +                       mmc_sdio_resend_if_cond(host, card);
+>                         retries--;
+>                         goto try_again;
+>                 } else if (err) {
 > --
-> 1.7.9.5
+> 1.9.1
+>
 >
