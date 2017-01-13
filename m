@@ -1,24 +1,58 @@
-From: Tobias Klauser <tklauser@distanz.ch>
-Subject: Re: [PATCH v3 3/8] nios2: put setup.h in uapi
-Date: Fri, 13 Jan 2017 11:55:50 +0100
-Message-ID: <20170113105550.GD1201@distanz.ch>
-References: <3131144.4Ej3KFWRbz@wuerfel>
- <1484304406-10820-1-git-send-email-nicolas.dichtel@6wind.com>
- <1484304406-10820-4-git-send-email-nicolas.dichtel@6wind.com>
+From: Zhang Rui <rui.zhang@intel.com>
+Subject: [PATCH v3] mmc: sdhci-acpi: support deferred probe
+Date: Fri, 13 Jan 2017 19:03:35 +0800
+Message-ID: <1484305415.2221.45.camel@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-m68k-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1484304406-10820-4-git-send-email-nicolas.dichtel@6wind.com>
-Sender: linux-m68k-owner@vger.kernel.org
-To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
-Cc: arnd@arndb.de, mmarek@suse.com, linux-kbuild@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-alpha@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-arm-kernel@lists.infradead.org, adi-buildroot-devel@lists.sourceforge.net, linux-c6x-dev@linux-c6x.org, linux-cris-kernel@axis.com, uclinux-h8-devel@lists.sourceforge.jp, linux-hexagon@vger.kernel.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-am33-list@redhat.com, nios2-dev@lists.rocketboards.org, openrisc@lists.librecores.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-sh@vger.kernel.org, sparclinux@vger.kernel.org, linux-xtensa@linux-xtensa.orglinux-ar
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:57654 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751529AbdAMLDl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Jan 2017 06:03:41 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: cja@gmx.net, darcari@redhat.com, ulf.hansson@linaro.org, adrain <adrian.hunter@intel.com>
 
-On 2017-01-13 at 11:46:41 +0100, Nicolas Dichtel <nicolas.dichtel@6wind.com> wrote:
-> This header file is exported, but from a userland pov, it's just a wrapper
-> to asm-generic/setup.h.
-> 
-> Signed-off-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+>From c889f737322b797b743c63eda241d0283696d3f5 Mon Sep 17 00:00:00 2001
+From: Zhang Rui <rui.zhang@intel.com>
+Date: Wed, 7 Dec 2016 13:13:31 +0800
+Subject: [PATCH v3] mmc: sdhci-acpi: support deferred probe
 
-Reviewed-by: Tobias Klauser <tklauser@distanz.ch>
+With commit 67bf5156edc4 ("gpio / ACPI: fix returned error from
+acpi_dev_gpio_irq_get()"), mmc_gpiod_request_cd() returns -EPROBE_DEFER if
+GPIO is not ready when sdhci-acpi driver is probed, and sdhci-acpi driver
+should be probed again later in this case.
+
+This fixes an order issue when both GPIO and sdhci-acpi drivers are built
+as modules.
+
+CC: stable@vger.kernel.org # v4.9
+Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
+Tested-by: Jonas Aaberg <cja@gmx.net>
+Signed-off-by: Zhang Rui <rui.zhang@intel.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 160f695cc09c..5440323894ee 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
+ 		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
+ 
+-		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
++		err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL);
++		if (err) {
++			if (err == -EPROBE_DEFER)
++				goto err_free;
+ 			dev_warn(dev, "failed to setup card detect gpio\n");
+ 			c->use_runtime_pm = false;
+ 		}
+-- 
+2.7.4
+
