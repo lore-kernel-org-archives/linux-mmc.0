@@ -1,260 +1,178 @@
-From: Andrea Merello <andrea.merello@gmail.com>
-Subject: Re: [PATCH v2 8/9] DT: stm32f469-disco: add node for SDIO controller
-Date: Fri, 13 Jan 2017 19:40:23 +0100
-Message-ID: <CAN8YU5PjsNYTP_6qzX3i_OnqQTL0oVa7xs5uEDL25E32sHraVw@mail.gmail.com>
-References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
- <1484037736-25029-9-git-send-email-andrea.merello@gmail.com>
- <a6b5bd41-894e-befb-d3c9-ae0c9119c822@st.com> <CAN8YU5Neg3i_HKgAMmYAi8juDc7YunmVst-u0EE7_aMO4qDxuA@mail.gmail.com>
- <c740a266-723a-a07e-b94d-c10df0107697@st.com> <CAN8YU5M66Jn7XT9oC-x3mTMbfEq4V0fcsAX06arm6jBHk=KK5Q@mail.gmail.com>
- <406b3d9a-05be-82be-d885-cc35145b226d@st.com>
-Reply-To: andrea.merello@gmail.com
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v5 05/12] dt: bindings: Add bindings for Marvell Xenon SD
+ Host Controller
+Date: Fri, 13 Jan 2017 14:16:26 -0600
+Message-ID: <20170113201626.rt2ces26ra6rot75@rob-hp-laptop>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+ <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:35564 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750713AbdAMSkp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 13:40:45 -0500
-Received: by mail-yw0-f194.google.com with SMTP id 17so4346948ywk.2
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 10:40:45 -0800 (PST)
-In-Reply-To: <406b3d9a-05be-82be-d885-cc35145b226d@st.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.c>
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Torgue <alexandre.torgue@st.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-mmc@vger.kernel.org, Bruno Herrera <bruherrera@gmail.com>
 
-On Fri, Jan 13, 2017 at 5:28 PM, Alexandre Torgue
-<alexandre.torgue@st.com> wrote:
->
->
-> On 01/13/2017 05:12 PM, Andrea Merello wrote:
->>
->> On Fri, Jan 13, 2017 at 4:52 PM, Alexandre Torgue
->> <alexandre.torgue@st.com> wrote:
->>>
->>> Hi Andrea
->>>
->>>
->>> On 01/13/2017 04:01 PM, Andrea Merello wrote:
->>>>
->>>>
->>>> On Tue, Jan 10, 2017 at 10:18 AM, Alexandre Torgue
->>>> <alexandre.torgue@st.com> wrote:
->>>>>
->>>>>
->>>>> Hi Andrea
->>>>>
->>>>> On 01/10/2017 09:42 AM, Andrea Merello wrote:
->>>>>>
->>>>>>
->>>>>>
->>>>>> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
->>>>>
->>>>>
->>>>>
->>>>>
->>>>> Can you please add a commit message.
->>>>> Can you also change commit header like: "ARM: dts: stm32: enable SDIO
->>>>> controller on stm32f469 disco board
->>>>>
->>>>>
->>>>>
->>>>>> ---
->>>>>>  arch/arm/boot/dts/stm32f429.dtsi      |  2 +-
->>>>>>  arch/arm/boot/dts/stm32f469-disco.dts | 29
->>>>>> +++++++++++++++++++++++++++++
->>>>>>  2 files changed, 30 insertions(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/arch/arm/boot/dts/stm32f429.dtsi
->>>>>> b/arch/arm/boot/dts/stm32f429.dtsi
->>>>>> index c12a64e..5aba383 100644
->>>>>> --- a/arch/arm/boot/dts/stm32f429.dtsi
->>>>>> +++ b/arch/arm/boot/dts/stm32f429.dtsi
->>>>>> @@ -206,7 +206,7 @@
->>>>>>                         reg = <0x40007000 0x400>;
->>>>>>                 };
->>>>>>
->>>>>> -               pin-controller {
->>>>>> +               pinctrl:pin-controller {
->>>>>>                         #address-cells = <1>;
->>>>>>                         #size-cells = <1>;
->>>>>>                         compatible = "st,stm32f429-pinctrl";
->>>>>
->>>>>
->>>>>
->>>>>
->>>>>
->>>>>
->>>>>> diff --git a/arch/arm/boot/dts/stm32f469-disco.dts
->>>>>> b/arch/arm/boot/dts/stm32f469-disco.dts
->>>>>> index 8877c00..7b3458e 100644
->>>>>> --- a/arch/arm/boot/dts/stm32f469-disco.dts
->>>>>> +++ b/arch/arm/boot/dts/stm32f469-disco.dts
->>>>>> @@ -65,6 +65,13 @@
->>>>>>                 serial0 = &usart3;
->>>>>>         };
->>>>>>
->>>>>> +       mmc_vcard: mmc_vcard {
->>>>>> +               compatible = "regulator-fixed";
->>>>>> +               regulator-name = "mmc_vcard";
->>>>>> +               regulator-min-microvolt = <3300000>;
->>>>>> +               regulator-max-microvolt = <3300000>;
->>>>>> +       };
->>>>>> +
->>>>>>         soc {
->>>>>>                 dma-ranges = <0xc0000000 0x0 0x10000000>;
->>>>>>         };
->>>>>> @@ -78,6 +85,28 @@
->>>>>>         clock-frequency = <8000000>;
->>>>>>  };
->>>>>>
->>>>>> +&pinctrl {
->>>>>> +       sdio-cd {
->>>>>> +               sdio_cd: sdio-cd {
->>>>>> +                       pins {
->>>>>> +                               pinmux = <STM32F429_PG2_FUNC_GPIO>;
->>>>>> +                               bias-pull-up;
->>>>>> +                       };
->>>>>> +               };
->>>>>> +       };
->>>>>> +};
->>>>>> +
->>>>>
->>>>>
->>>>>
->>>>>
->>>>> As you only have config for 469-disco, please add this configuration of
->>>>> pinmux directly in stm32f429.dtsi.
->>>>
->>>>
->>>>
->>>> While in the process of moving this, I realized that there is
->>>> something wrong here..
->>>>
->>>> Currently this pinmux config ended up to be not referenced by the SDIO
->>>> DT node at all. This happened in V2; it was intended to fix an
->>>> apparently double-claimed GPIO problem, but now I realized that I
->>>> misunderstood this thing, and it was a bad fix..
->>>>
->>>> So, actually the SD works, but as soon as I reference the CD pinmux
->>>> config in the SDIO node, it fails with the following error:
->>>>
->>>> [    0.980000] stm32f429-pinctrl soc:pin-controller: pin PG2 already
->>>> requested by 40012c00.sdio; cannot claim for GPIOG:98
->>>> [    0.990000] stm32f429-pinctrl soc:pin-controller: pin-98 (GPIOG:98)
->>>> status -22
->>>> [    1.000000] mmci-pl18x: probe of 40012c00.sdio failed with error -22
->>>>
->>>> I've bisected this to happen since the 'strict' flag has been added to
->>>> the stm32 pinctrl driver.
->>>> commit c32c22eea0c47e13cffd6b5f7eedd7a6b6f2c18f
->>>>
->>>> Right now It seems that few pinctrl drivers use the 'strict' flag, so
->>>> maybe it could be a bug in pinctrl-realated code.
->>>
->>>
->>>
->>> It is not a bug but added intentionally.
->>>
->>>>
->>>> I need to look more in detail about this, however as far as I could
->>>> understand:
->>>>
->>>> - when the mmc layer asks for the CD pin, due to the "cd-gpios"
->>>> property,  the owner name for this config request is not the one from
->>>> the OF node, but it is "conjured" - as written in comment - from the
->>>> GPIO number and name (GPIOG:98) in pinmux_request_gpio()
->>>>
->>>> - the pinmux config done in behalf of the 'pinctrl-0' property has the
->>>> OF node name (40012c00.sdio) as owner.
->>>>
->>>
->>> I will look at deeper in the driver but first why you need to control
->>> this
->>> pin by both way (gpio lib through gpio definition and pinctrl framework
->>> through pinctrl definition) ?
->>
->>
->> Hmm, sorry, maybe I'm missing something here.. Please correct me if I'm
->> wrong :)
->>
->> Don't I need to reference the pinmux configuration for CD in my
->> pinctrl configs in the SDIO DT node, in order to have it active? e.g.
->> pinctrl-0 = <&sdio_pins>, <&sdio_cd>;
->>
->> Don't I need to provide "cs-gpios" to the MMC layer as well ? e.g.
->> cd-gpios = <&gpiog 2 0>;
->
->
-> Maybe I miss also something but it depends on "how" the driver uses this
-> pin. If you want to control the GPIO (change direction or set gpio in input
-> or read input ...) you have to use gpiolib and so declare "cd-gpios =
-> <&gpiog 2 0>;". By doing that gpiolib will request the gpio to pinctrl for
-> you. No need to declare a pinctrl entry for that.
+On Wed, Jan 11, 2017 at 06:19:08PM +0100, Gregory CLEMENT wrote:
+> From: Hu Ziji <huziji@marvell.com>
+> 
+> Marvell Xenon SDHC can support eMMC/SD/SDIO.
+> Add Xenon-specific properties.
+> Also add properties for Xenon PHY setting.
+> 
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 197 +++++++-
+>  1 file changed, 197 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+> new file mode 100644
+> index 000000000000..a3876d2cc616
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+> @@ -0,0 +1,197 @@
+> +Marvell Xenon SDHCI Controller device tree bindings
+> +This file documents differences between the core mmc properties
+> +described by mmc.txt and the properties used by the Xenon implementation.
+> +
+> +Multiple SDHCs might be put into a single Xenon IP, to save size and cost.
+> +Each SDHC is independent and owns independent resources, such as register sets,
+> +clock and PHY.
+> +Each SDHC should have an independent device tree node.
+> +
+> +Required Properties:
+> +- compatible: should be one of the following
+> +  - "marvell,armada-3700-sdhci": For controllers on Armada-3700 SoC.
+> +  Must provide a second register area and marvell,pad-type.
+> +  - "marvell,armada-8k-sdhci": For controllers on Armada 7K/8K SoC
+> +
+> +- clocks:
+> +  Array of clocks required for SDHC.
+> +  Require at least input clock for Xenon IP core.
+> +
+> +- clock-names:
+> +  Array of names corresponding to clocks property.
+> +  The input clock for Xenon IP core should be named as "core".
+> +
+> +- reg:
+> +  * For "marvell,armada-3700-sdhci", two register areas.
+> +    The first one for Xenon IP register. The second one for the Armada 3700 SoC
+> +    PHY PAD Voltage Control register.
+> +    Please follow the examples with compatible "marvell,armada-3700-sdhci"
+> +    in below.
+> +    Please also check property marvell,pad-type in below.
+> +
+> +  * For other compatible strings, one register area for Xenon IP.
+> +
+> +Optional Properties:
+> +- mmccard:
+> +  mmccard child node must be provided when current SDHC is for eMMC.
+> +  Xenon SDHC often can support both SD and eMMC. This child node indicates that
+> +  current SDHC is for eMMC card. Thus Xenon eMMC specific configuration and
+> +  operations can be enabled prior to eMMC init sequence.
+> +  Please refer to Documentation/devicetree/bindings/mmc/mmc-card.txt.
+> +  This child node should not be set if current Xenon SDHC is for SD/SDIO.
+> +
+> +- bus-width:
+> +  When 8-bit data bus width is in use for eMMC, this property should be
+> +  explicitly provided and set as 8.
+> +  It is optional when data bus width is 4-bit or 1-bit.
+> +
+> +- mmc-ddr-1_8v:
+> +  Select this property when eMMC HS DDR is supported on SDHC side.
+> +
+> +- mmc-hs400-1_8v:
+> +  Select this property when eMMC HS400 is supported on SDHC side.
+> +
+> +- no-1-8-v:
+> +  Select this property when 1.8V signaling voltage supply is unavailable.
+> +  When this property is enabled, both mmc-ddr-1_8v and mmc-hs400-1_8v should be
+> +  cleared.
+> +
+> +- marvell,xenon-sdhc-id:
+> +  Indicate the corresponding bit index of current SDHC in
+> +  SDHC System Operation Control Register Bit[7:0].
+> +  Set/clear the corresponding bit to enable/disable current SDHC.
+> +  If Xenon IP contains only one SDHC, this property is optional.
+> +
+> +- marvell,xenon-phy-type:
+> +  Xenon support mutilple types of PHYs.
+> +  To select eMMC 5.1 PHY, set:
+> +  marvell,xenon-phy-type = "emmc 5.1 phy"
+> +  eMMC 5.1 PHY is the default choice if this property is not provided.
+> +  To select eMMC 5.0 PHY, set:
+> +  marvell,xenon-phy-type = "emmc 5.0 phy"
+> +
+> +  All those types of PHYs can support eMMC, SD and SDIO.
+> +  Please note that this property only presents the type of PHY.
+> +  It doesn't stand for the entire SDHC type or property.
+> +  For example, "emmc 5.1 phy" doesn't mean that this Xenon SDHC only supports
+> +  eMMC 5.1.
+> +
+> +- marvell,xenon-phy-znr:
+> +  Set PHY ZNR value.
+> +  Only available for eMMC PHY 5.1 and eMMC PHY 5.0.
+> +  Valid range = [0:0x1F].
+> +  ZNR is set as 0xF by default if this property is not provided.
+> +
+> +- marvell,xenon-phy-zpr:
+> +  Set PHY ZPR value.
+> +  Only available for eMMC PHY 5.1 and eMMC PHY 5.0.
+> +  Valid range = [0:0x1F].
+> +  ZPR is set as 0xF by default if this property is not provided.
+> +
+> +- marvell,xenon-phy-nr-success-tun:
+> +  Set the number of required consecutive successful sampling points used to
+> +  identify a valid sampling window, in tuning process.
+> +  Valid range = [1:7].
+> +  Set as 0x4 by default if this property is not provided.
+> +
+> +- marvell,xenon-phy-tun-step-divider:
+> +  Set the divider for calculating TUN_STEP.
+> +  Set as 64 by default if this property is not provided.
+> +
+> +- marvell,xenon-phy-slow-mode:
+> +  If this property is selected, transfers will bypass PHY.
+> +  Only available when bus frequency lower than 55MHz in SDR mde.
+> +  Disabled by default. Please only try this property if timing issues always
+> +  occur with PHY enabled in eMMC HS SDR, SD SDR12, SD SDR25, SD SDR50 mode.
+> +
+> +- marvell,xenon-tun-count:
+> +  Xenon SDHC SoC usually doesn't provide re-tuning counter in
+> +  Capabilities Register 3 Bit[11:8].
+> +  This property provides the re-tuning counter.
+> +  If this property is not set, default re-tuning counter will
+> +  be set as 0x9 in driver.
+> +
+> +- marvell,pad-type:
+> +  Type of Armada 3700 SoC PHY PAD Voltage Controller register.
+> +  Only valid when "marvell,armada-3700-sdhci" is selected.
+> +  Two types: "sd" and "fixed-1-8v".
+> +  If "sd" is slected, SoC PHY PAD is set as 3.3V at the beginning and is
+> +  switched to 1.8V when SD in UHS-I.
+> +  If "fixed-1-8v" is slected, SoC PHY PAD is fixed 1.8V, such as for eMMC.
+> +  Please follow the examples with compatible "marvell,armada-3700-sdhci"
+> +  in below.
+> +
+> +Example:
+> +- For eMMC:
+> +
+> +	sdhci@aa0000 {
+> +		compatible = "marvell,armada-8k-sdhci";
+> +		reg = <0xaa0000 0x1000>;
+> +		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
+> +		clocks = <&emmc_clk>;
+> +		clock-names = "core";
+> +		bus-width = <8>;
+> +		mmc-ddr-1_8v;
+> +		mmc-hs400-1_8v;
+> +		marvell,xenon-sdhc-id = <0>;
 
-Ah, ok. Thanks for clarifying :) It's my fault then: I've assumed that
-for some reason both were needed, just because the DTS files I've
-looked at seem to have both. (BTW apparently there are a lot of them
-in arch/arm/dts.. are they all broken and working only because they
-have not a "strict" pinctrl driver?)..
+Should be dropped? With that,
 
-Anyway, it should be enough to drop completely the pinmux config for
-CD. I'll post a new series next week.
+Acked-by: Rob Herring <robh@kernel.org>
 
->>
->> If I do both, it fails (due to mmc_of_parse() failing). No matter what
->> I do in the driver, I believe.
->
->
-> It is normal that both failed; In strict mode you can't request several
-> times the same pin (you request pinG2 one time by gpiolib and oneother time
-> by pinctrl).
->
->
->>
->>> In strict mode the error you get is "normal". You can't control the same
->>> pin
->>> in the same time by gpiolib and pinctrl.
->>>
->>>
->>>> This owner mismatch causes a check to fail in pin_request(), that
->>>> believes that two different owners try to use the same pin (while in
->>>> true both are in behalf of the same SDIO device).
->>>>
->>>> I don't know when I'll have more time to look into this. If you want I
->>>> can temporary drop the CD pinmux config and post the V3 - that
->>>> nevertheless works - and we can add the CD pinmux cfg later, once it
->>>> has been fixed.
->>>>
->>>> In someone have clues, or want to look into this, he/she would be
->>>> really welcome :)
->>>
->>>
->>>
->>> No problem, we can wait. Let's merge it when it will be fully functional.
->>>
->>> Br
->>> Alex
->>>
->>>
->>>>
->>>>>
->>>>>
->>>>>> +&sdio {
->>>>>> +       status = "okay";
->>>>>> +       vmmc-supply = <&mmc_vcard>;
->>>>>> +       cd-gpios = <&gpiog 2 0>;
->>>>>> +       cd-inverted;
->>>>>> +       pinctrl-names = "default", "opendrain";
->>>>>> +       pinctrl-0 = <&sdio_pins>;
->>>>>> +       pinctrl-1 = <&sdio_pins_od>;
->>>>>> +       bus-width = <4>;
->>>>>> +};
->>>>>> +
->>>>>>  &usart3 {
->>>>>>         status = "okay";
->>>>>>  };
->>>>>>
->>>>>
->>>
->
