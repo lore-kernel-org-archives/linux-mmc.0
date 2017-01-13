@@ -1,113 +1,46 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [RFC PATCH 2/3] mmc: sdhci-msm: Implement platform_dumpregs
- callback in sdhci-msm
-Date: Fri, 13 Jan 2017 14:31:17 -0800
-Message-ID: <20170113223117.GB22862@mini-rhel.redhat.com>
-References: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
- <1483097531-9991-3-git-send-email-riteshh@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Subject: [PATCH] mmc: wbsd: safer check if dma_addr is valid DMA address
+Date: Sat, 14 Jan 2017 01:52:51 +0300
+Message-ID: <1484347971-30829-1-git-send-email-khoroshilov@ispras.ru>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43014 "EHLO mx1.redhat.com"
+Received: from mail.ispras.ru ([83.149.199.45]:60480 "EHLO mail.ispras.ru"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751486AbdAMWjl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Jan 2017 17:39:41 -0500
-Content-Disposition: inline
-In-Reply-To: <1483097531-9991-3-git-send-email-riteshh@codeaurora.org>
+        id S1751378AbdAMWxP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Jan 2017 17:53:15 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alexey Khoroshilov <khoroshilov@ispras.ru>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ldv-project@linuxtesting.org
 
-On Fri, Dec 30, 2016 at 05:02:10PM +0530, Ritesh Harjani wrote:
-> From: Sahitya Tummala <stummala@codeaurora.org>
-> 
-> Implement ->platform_dumpregs host operation to print the
-> platform specific registers in addition to standard SDHC
-> register during error conditions.
-> 
-> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 34 ++++++++++++++++++++++++++++++++++
->  1 file changed, 34 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 32879b8..1241dbd 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -29,6 +29,11 @@
->  #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
->  #define CORE_VERSION_MINOR_MASK		0xff
->  
-> +#define CORE_MCI_DATA_CNT	0x30
-> +#define CORE_MCI_STATUS		0x34
-> +#define CORE_MCI_FIFO_CNT	0x44
-> +#define CORE_MCI_STATUS2	0x6c
-> +
->  #define CORE_HC_MODE		0x78
->  #define HC_MODE_EN		0x1
->  #define CORE_POWER		0x0
-> @@ -77,6 +82,10 @@
->  #define CORE_HC_SELECT_IN_HS400	(6 << 19)
->  #define CORE_HC_SELECT_IN_MASK	(7 << 19)
->  
-> +#define CORE_VENDOR_SPEC_FUNC2		0x110
-> +#define CORE_VENDOR_SPEC_ADMA_ERR_ADDR0	0x114
-> +#define CORE_VENDOR_SPEC_ADMA_ERR_ADDR1	0x118
-> +
->  #define CORE_CSR_CDC_CTLR_CFG0		0x130
->  #define CORE_SW_TRIG_FULL_CALIB		BIT(16)
->  #define CORE_HW_AUTOCAL_ENA		BIT(17)
-> @@ -658,6 +667,30 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
->  	return ret;
->  }
->  
-> +static void sdhci_msm_dumpregs(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	pr_err("----------- PLATFORM REGISTER DUMP -----------\n");
-> +
-> +	pr_err("Data cnt: 0x%08x | Fifo cnt: 0x%08x | Int sts: 0x%08x | Int sts2: 0x%08x\n",
-> +	       readl_relaxed(msm_host->core_mem + CORE_MCI_DATA_CNT),
-> +	       readl_relaxed(msm_host->core_mem + CORE_MCI_FIFO_CNT),
-> +	       readl_relaxed(msm_host->core_mem + CORE_MCI_STATUS),
-> +	       readl_relaxed(msm_host->core_mem + CORE_MCI_STATUS2));
-> +	pr_err("DLL cfg:  0x%08x | DLL sts:  0x%08x | SDCC ver: 0x%08x\n",
-> +	       readl_relaxed(host->ioaddr + CORE_DLL_CONFIG),
-> +	       readl_relaxed(host->ioaddr + CORE_DLL_STATUS),
-> +	       readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION));
-> +	pr_err("Vndr func: 0x%08x | Vndr adma err : addr0: 0x%08x addr1: 0x%08x\n",
-> +	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC),
-> +	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_ADMA_ERR_ADDR0),
-> +	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_ADMA_ERR_ADDR1));
-> +	pr_err("Vndr func2: 0x%08x\n",
-> +	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_FUNC2));
-> +}
-> +
+host->dma_addr can store a value that is not returned by the DMA API,
+so it is safer to check if is a valid DMA address indirectly.
 
-Why did you omit the printing of CORE_TESTBUS_CONFIG like that of 
-https://patchwork.kernel.org/patch/9442449/
+Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+---
+ drivers/mmc/host/wbsd.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-and sdhci_dump_state() was dropped too.  Being able to dump the rpm_info
-was very handy for issues I was running into.
+diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
+index 80a3b11f3217..bd04e8bae010 100644
+--- a/drivers/mmc/host/wbsd.c
++++ b/drivers/mmc/host/wbsd.c
+@@ -1437,11 +1437,14 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
+ 
+ static void wbsd_release_dma(struct wbsd_host *host)
+ {
+-	if (!dma_mapping_error(mmc_dev(host->mmc), host->dma_addr)) {
++	/*
++	 * host->dma_addr is valid here iff host->dma_buffer is not NULL.
++	 */
++	if (host->dma_buffer) {
+ 		dma_unmap_single(mmc_dev(host->mmc), host->dma_addr,
+ 			WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
++		kfree(host->dma_buffer);
+ 	}
+-	kfree(host->dma_buffer);
+ 	if (host->dma >= 0)
+ 		free_dma(host->dma);
+ 
+-- 
+2.7.4
 
--jeremy
-
->  static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
->  	int tuning_seq_cnt = 3;
-> @@ -1035,6 +1068,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  	.set_bus_width = sdhci_set_bus_width,
->  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
->  	.voltage_switch = sdhci_msm_voltage_switch,
-> +	.platform_dumpregs = sdhci_msm_dumpregs,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-> -- 
-> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-> a Linux Foundation Collaborative Project.
-> 
