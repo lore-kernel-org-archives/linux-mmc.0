@@ -1,101 +1,102 @@
-From: Matt Ranostay <matt@ranostay.consulting>
-Subject: Re: [PATCH 4/4] mmc: pwrseq-simple: add disable-post-power-on option
-Date: Thu, 12 Jan 2017 19:12:51 -0800
-Message-ID: <CAJ_EiSSbPnKXyXjnUhWCu9kRQX45-uePcV_3VrsZtbHcwdfV4A@mail.gmail.com>
-References: <1480659462-29536-1-git-send-email-matt@ranostay.consulting>
- <1480659462-29536-5-git-send-email-matt@ranostay.consulting>
- <CAPDyKFpCY+LHFkJVJGHaSDODVR7_Xr2ohpdOAn9Hd3qZbDTQ6w@mail.gmail.com>
- <B85DDAB6-D86B-4DD9-BF2C-BCB9FA09CD15@ranostay.consulting>
- <CAPDyKFp9t1SEwQZ=uTHegbpgxxevQEy4kC=wPkc8Bo16030MNg@mail.gmail.com>
- <CAJ_EiSQWN0KF1rJDwzOeoi--g1Z0XNYevYzCLG=NngcdgF6VUw@mail.gmail.com>
- <20161209180930.nsy2ys66q2thbxpx@rob-hp-laptop> <CAPDyKFp2L7x=dV6O5XrA53-OOXE0sf+P3tNH93XGyzNheX9vjQ@mail.gmail.com>
- <CAJ_EiST_kSDn=ypnnZJJJ-wmB7Avp+MT7uK00H+aDhQGc4Yddg@mail.gmail.com>
- <CAJ_EiSRAQefYj+B3AKLb1EWXQUGccV=Z4op0T5sAdo3-vDVOhg@mail.gmail.com>
- <CACRpkdad7JXzxYfuB_XYdo2vuZmEt5iWgq79Va5cWwTaJc6Y5Q@mail.gmail.com>
- <CAJ_EiSQYz2aEGiCv2npxmby0nHwmJJyR_jzY5wJOK98zp6Bvzg@mail.gmail.com>
- <CAPDyKFp5j5ZqJkavCSYwWQ7nKtjOqCTv=ubhjYRsSEJUw07e3Q@mail.gmail.com>
- <CAJ_EiSQaE4FcLdf_8t8=6cNCZ+nAWhqqANKbfEp7VW02=Kj-RA@mail.gmail.com> <CAPDyKFpm_B0aSQ2sY6yz9eYGzp1sokLVt0uk5K-9UkU=gYOOEw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RFC PATCH] mmc: core: retry polling busy when response timeout occurs
+Date: Fri, 13 Jan 2017 11:24:55 +0800
+Message-ID: <1484277895-94393-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:32943 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750887AbdAMDM6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 22:12:58 -0500
-Received: by mail-qt0-f180.google.com with SMTP id v23so36887754qtb.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 19:12:57 -0800 (PST)
-In-Reply-To: <CAPDyKFpm_B0aSQ2sY6yz9eYGzp1sokLVt0uk5K-9UkU=gYOOEw@mail.gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.134]:37015 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750819AbdAMD0g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 22:26:36 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Liam Breck <liam@networkimprov.net>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Thu, Jan 12, 2017 at 7:57 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 12 January 2017 at 05:43, Matt Ranostay <matt@ranostay.consulting> wrote:
->> On Wed, Jan 11, 2017 at 2:55 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 9 January 2017 at 05:53, Matt Ranostay <matt@ranostay.consulting> wrote:
->>>> On Fri, Dec 30, 2016 at 12:05 AM, Linus Walleij
->>>> <linus.walleij@linaro.org> wrote:
->>>>> On Mon, Dec 19, 2016 at 1:01 AM, Matt Ranostay <matt@ranostay.consulting> wrote:
->>>>>
->>>>>> * SD8787 has a "powerdown" line, and CW1200 has a "powerup" line.. I
->>>>>> know this is a simple logic inversion.
->>>>>
->>>>> If this is a GPIO line, the GPIO subsystem can flag a line for
->>>>> inverted logic. GPIO_ACTIVE_LOW from device tree for example.
->>>>
->>>> Slight ping on Ulf on this thread :).
->>>
->>> Thanks, sorry for the delay!
->>>
->>>>
->>>> I do understand the inverted logic flag but that doesn't help if there
->>>> are different logic states between various chipsets.
->>>
->>> For cw1200 (I looked at code from an old ST-Ericsson vendor tree), the
->>> sequence is as follows:
->>>
->>> 1) Enable clock/power to the card/chip.
->>> 2) Assert GPIO pin. I assume this also can be done before the
->>> clock/power is enabled.
->>> 3) Wait some time (~50ms).
->>> 4) De-assert GPIO pin.
->>> 5) Wait some time (~20ms)
->>> 6) Assert GPIO pin.
->>> 7) Wait some time (~32ms).
->>>
->>> At power off, the GPIO pin is de-asserted and of course also the
->>> clock/power is disabled. Just to make sure we have all the relevant
->>> logic.
->>>
->>> Looking at mmc pwrseq simple, perhaps we can extend this to deal with
->>> GPIOs that needs to be *toggled*, as this is not just reset GPIOs.
->>> Then we also need to deal with the delays in-between the toggling.
->>
->> Wouldn't we need to have a per chip function for each device
->> supported? As well document gpios? I suspect we'd need an array of
->
-> I was hoping to avoid this, but the more I look at it, it seems inevitable.
->
->> gpios defined in device tree since different devices will likely have
->> various numbers of pins to toggle
->
-> Maybe we can think of a clever way to combine cw1200 with your case?
-> Perhaps a "mmc pwrseq toggle". :-) If not, please go ahead an repost a
-> device specific mmc pwrseq for your case.
+It always assumed that if the card was not ready after finishing
+switching the mode, we should got a CRC, namely -EILSEQ, from the
+hosts. But the fact is if the host is in higher speed mode but the
+eMMC havn't finished the switch, so the host could fail to sample
+the resp of CMD13 due to the mismatch timing in between. Could it is
+possible that response timeout was generated instaed of -EILSEQ? It's
+quite IP specificed. So I don't think we should take the risk of
+relying on that. In another word, we don't expect to bail out early
+for timeout errors bounced from hosts when polling the status, no
+just for explicit CRC.
 
-I think the best solution for now. We can merge the two solutions
-latter down the road.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks,
+---
 
-Matt
+ drivers/mmc/core/mmc_ops.c | 14 +++++++++-----
+ drivers/mmc/core/mmc_ops.h |  3 ++-
+ 2 files changed, 11 insertions(+), 6 deletions(-)
 
->
-> I realize this would be a good opportunity for me to work on enabling
-> support for cw1200 on ux500, but as the implementation of the
-> clock/power control also needs to be up-streamed, I am quite far from
-> being done.
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index db2969f..a352dea 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -451,7 +451,7 @@ int mmc_switch_status(struct mmc_card *card)
+ }
+ 
+ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+-			bool send_status, bool retry_crc_err)
++			bool send_status, bool retry_crc_and_tmo_err)
+ {
+ 	struct mmc_host *host = card->host;
+ 	int err;
+@@ -486,7 +486,8 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 			busy = host->ops->card_busy(host);
+ 		} else {
+ 			err = mmc_send_status(card, &status);
+-			if (retry_crc_err && err == -EILSEQ) {
++			if (retry_crc_and_tmo_err &&
++			    (err == -EILSEQ || err == -ETIMEDOUT)) {
+ 				busy = true;
+ 			} else if (err) {
+ 				return err;
+@@ -523,13 +524,15 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+  *	@timing: new timing to change to
+  *	@use_busy_signal: use the busy signal as response type
+  *	@send_status: send status cmd to poll for busy
+- *	@retry_crc_err: retry when CRC errors when polling with CMD13 for busy
++ *	@retry_crc_and_tmo_err: retry when CRC errors or response timeout errors
++ *				when polling with CMD13 for busy
+  *
+  *	Modifies the EXT_CSD register for selected card.
+  */
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms, unsigned char timing,
+-		bool use_busy_signal, bool send_status,	bool retry_crc_err)
++		bool use_busy_signal, bool send_status,
++		bool retry_crc_and_tmo_err)
+ {
+ 	struct mmc_host *host = card->host;
+ 	int err;
+@@ -590,7 +593,8 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	}
+ 
+ 	/* Let's try to poll to find out when the command is completed. */
+-	err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
++	err = mmc_poll_for_busy(card, timeout_ms, send_status,
++				retry_crc_and_tmo_err);
+ 
+ out_tim:
+ 	if (err && timing)
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index abd525e..fad9963 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -31,7 +31,8 @@
+ int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms, unsigned char timing,
+-		bool use_busy_signal, bool send_status,	bool retry_crc_err);
++		bool use_busy_signal, bool send_status,
++		bool retry_crc_and_tmo_err);
+ 
+ #endif
+ 
+-- 
+1.9.1
+
+
