@@ -1,112 +1,39 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/12] mmc: core: A start to slim down public mmc headers
-Date: Thu, 12 Jan 2017 21:43:45 +0100
-Message-ID: <CAPDyKFob1ALex_+9jSvby_FBR_YUKkHpH5zX6n=3KF9xgYDaHQ@mail.gmail.com>
-References: <1484135478-2077-1-git-send-email-ulf.hansson@linaro.org> <CAPDyKFqANsfiQzw588K527UQxALS2LBRx3szY=-9EPeD0KaRYQ@mail.gmail.com>
+From: Jeff Epler <jepler@unpythonic.net>
+Subject: Re: [PATCH v2 7/7] uapi: export all headers under uapi directories
+Date: Thu, 12 Jan 2017 19:04:27 -0600
+Message-ID: <20170113010427.GA22650@unpythonic.net>
+References: <bf83da6b-01ef-bf44-b3e1-ca6fc5636818@6wind.com>
+ <1483695839-18660-1-git-send-email-nicolas.dichtel@6wind.com>
+ <1483695839-18660-8-git-send-email-nicolas.dichtel@6wind.com>
+ <20170109125638.GA15506@infradead.org>
+ <464a1323-4450-e563-ff59-9e6d57b75959@6wind.com>
+ <alpine.LSU.2.20.1701121727180.19188@erq.vanv.qr>
+ <9d68af8a-a609-d7b1-58a9-f1155313b077@6wind.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:35689 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750753AbdALUn6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 15:43:58 -0500
-Received: by mail-wm0-f50.google.com with SMTP id r126so36930236wmr.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 12:43:47 -0800 (PST)
-In-Reply-To: <CAPDyKFqANsfiQzw588K527UQxALS2LBRx3szY=-9EPeD0KaRYQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <9d68af8a-a609-d7b1-58a9-f1155313b077@6wind.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
+List-Post: <mailto:linux-snps-arc@lists.infradead.org>
+List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
+ <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
+Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
+To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Cc: linux-mips@linux-mips.org, alsa-devel@alsa-project.org, linux-ia64@vger.kernel.org, linux-doc@vger.kernel.org, airlied@linux.ie, linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-mtd@lists.infradead.org, sparclinux@vger.kernel.org, linux-arch@vger.kernel.org, linux-s390@vger.kernel.org, linux-am33-list@redhat.com, linux-c6x-dev@linux-c6x.org, linux-rdma@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, coreteam@netfilter.org, fcoe-devel@open-fcoe.org, xen-devel@lists.xenproject.org, linux-snps-arc@lists.infradead.org, linux-media@vger.kernel.org, uclinux-h8-devel@lists.sourceforge.jp, linux-xtensa@linux-xtensa.org, arnd@arndb.de, linux-kbuild@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, linux-raid@vger.kernel.org, linux-m68k@lists.linux-m68k.org, mmarek@suse.com, linux-metag@v
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 12 January 2017 at 13:01, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 11 January 2017 at 12:51, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> Changes in v2:
->>         - As patch 1->11 was applied from version 1, those have been dropped
->>         from the series.
->>         - Folded in a new change in patch 1/12, to solve a build issue for imx
->>         which is using the mxcmmc platform data header.
->>         - Added reviews/acks.
->>
->>
->> Ideally we should not expose functions nor structures as being public available
->> as the interface for mmc - unless they really are intended to be used like that.
->>
->> Unfortunate this is not the case today and which has lead to the mmc interface
->> in some cases being abused. That of course has its own problems, but we can
->> still move things in the right direction, which is what this series intend to
->> do. More precisely, it moves things that can be easily moved from the public mmc
->> headers to the private mmc headers.
->>
->> This should be considered as a first step of improving the situation, further
->> additional changes will have to continue this path.
->>
->>
->> Ulf Hansson (12):
->>   mmc: mxcmmc: Include interrupt.h in the platform data header
->>   mmc: core: First step in cleaning up public mmc header files
->>   mmc: core: First step in cleaning up private mmc header files
->>   mmc: core: Move public functions from core.h to private headers
->>   mmc: core: Move some host specific public functions to host.h
->>   mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
->>   mmc: core: Remove unused struct _mmc_csd from public mmc.h header
->>   mmc: omap: Don't use mmc_card_present() when validating for inserted
->>     card
->>   mmc: vub300: Don't use mmc_card_present() when validating for inserted
->>     card
->>   mmc: core: Move public functions from card.h to private headers
->>   mmc: core: Move public functions from host.h to private headers
->>   mmc: core: Don't use extern declarations of public mmc functions
->>
->>  drivers/mmc/core/block.c                 |   6 +
->>  drivers/mmc/core/block.h                 |   8 +
->>  drivers/mmc/core/bus.c                   |   2 +
->>  drivers/mmc/core/bus.h                   |  16 +-
->>  drivers/mmc/core/card.h                  | 223 ++++++++++++++++++++++++++++
->>  drivers/mmc/core/core.c                  |   1 +
->>  drivers/mmc/core/core.h                  |  41 +++++-
->>  drivers/mmc/core/debugfs.c               |   2 +
->>  drivers/mmc/core/host.h                  |  48 ++++++
->>  drivers/mmc/core/mmc.c                   |  13 ++
->>  drivers/mmc/core/mmc_ops.h               |  14 ++
->>  drivers/mmc/core/mmc_test.c              |   5 +
->>  drivers/mmc/core/pwrseq.h                |   6 +-
->>  drivers/mmc/core/queue.c                 |   2 +
->>  drivers/mmc/core/queue.h                 |   6 +-
->>  drivers/mmc/core/quirks.c                |   2 +
->>  drivers/mmc/core/sd.c                    |   2 +
->>  drivers/mmc/core/sd.h                    |   5 +-
->>  drivers/mmc/core/sd_ops.h                |   9 ++
->>  drivers/mmc/core/sdio.c                  |   2 +
->>  drivers/mmc/core/sdio_bus.c              |   1 +
->>  drivers/mmc/core/sdio_bus.h              |   3 +
->>  drivers/mmc/core/sdio_cis.h              |   3 +
->>  drivers/mmc/core/sdio_io.c               |   2 +
->>  drivers/mmc/core/sdio_irq.c              |   2 +
->>  drivers/mmc/core/sdio_ops.h              |   5 +
->>  drivers/mmc/core/slot-gpio.h             |   2 +
->>  drivers/mmc/host/omap.c                  |   2 +-
->>  drivers/mmc/host/vub300.c                |   6 +-
->>  include/linux/mmc/card.h                 | 242 -------------------------------
->>  include/linux/mmc/core.h                 |  86 ++---------
->>  include/linux/mmc/host.h                 |  63 ++------
->>  include/linux/mmc/mmc.h                  |  59 ++------
->>  include/linux/mmc/slot-gpio.h            |   3 +
->>  include/linux/platform_data/mmc-mxcmmc.h |   1 +
->>  35 files changed, 467 insertions(+), 426 deletions(-)
->>  create mode 100644 drivers/mmc/core/card.h
->>
->> --
->> 1.9.1
->>
->
-> I have now applied this for next to get it well tested. Please tell
-> asap, if you have any objections.
+On Thu, Jan 12, 2017 at 05:32:09PM +0100, Nicolas Dichtel wrote:
+> What I was trying to say is that I export those directories like other are.
+> Removing those files is not related to that series.
 
-Dropping patch 2 and onwards from my next branch, because of build
-issues for some arm/mips SoCs, reported by kernelci.
-https://kernelci.org/build/ulfh/kernel/v4.10-rc3-64-g656ac692663b/
+Perhaps the correct solution is to only copy files matching "*.h" to
+reduce the risk of copying files incidentally created by kbuild but
+which shouldn't be installed as uapi headers.
 
-I will look into the issues more closely tomorrow morning.
-
-Kind regards
-Uffe
+jeff
