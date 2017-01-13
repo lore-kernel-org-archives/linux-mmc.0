@@ -1,152 +1,260 @@
-From: Russell King - ARM Linux <linux@armlinux.org.uk>
-Subject: Re: [PATCH v3 1/8] arm: put types.h in uapi
-Date: Fri, 13 Jan 2017 17:06:10 +0000
-Message-ID: <20170113170610.GV14217@n2100.armlinux.org.uk>
-References: <3131144.4Ej3KFWRbz@wuerfel>
- <1484304406-10820-1-git-send-email-nicolas.dichtel@6wind.com>
- <1484304406-10820-2-git-send-email-nicolas.dichtel@6wind.com>
+From: Andrea Merello <andrea.merello@gmail.com>
+Subject: Re: [PATCH v2 8/9] DT: stm32f469-disco: add node for SDIO controller
+Date: Fri, 13 Jan 2017 19:40:23 +0100
+Message-ID: <CAN8YU5PjsNYTP_6qzX3i_OnqQTL0oVa7xs5uEDL25E32sHraVw@mail.gmail.com>
+References: <1484037736-25029-1-git-send-email-andrea.merello@gmail.com>
+ <1484037736-25029-9-git-send-email-andrea.merello@gmail.com>
+ <a6b5bd41-894e-befb-d3c9-ae0c9119c822@st.com> <CAN8YU5Neg3i_HKgAMmYAi8juDc7YunmVst-u0EE7_aMO4qDxuA@mail.gmail.com>
+ <c740a266-723a-a07e-b94d-c10df0107697@st.com> <CAN8YU5M66Jn7XT9oC-x3mTMbfEq4V0fcsAX06arm6jBHk=KK5Q@mail.gmail.com>
+ <406b3d9a-05be-82be-d885-cc35145b226d@st.com>
+Reply-To: andrea.merello@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1484304406-10820-2-git-send-email-nicolas.dichtel@6wind.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-snps-arc/>
-List-Post: <mailto:linux-snps-arc@lists.infradead.org>
-List-Help: <mailto:linux-snps-arc-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-snps-arc>,
- <mailto:linux-snps-arc-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-snps-arc" <linux-snps-arc-bounces@lists.infradead.org>
-Errors-To: linux-snps-arc-bounces+gla-linux-snps-arc=m.gmane.org@lists.infradead.org
-To: Nicolas Dichtel <nicolas.dichtel@6wind.com>
-Cc: linux-mips@linux-mips.org, alsa-devel@alsa-project.org, linux-ia64@vger.kernel.org, linux-doc@vger.kernel.org, airlied@linux.ie, daniel.vetter@ffwll.ch, linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-mtd@lists.infradead.org, sparclinux@vger.kernel.org, linux-arch@vger.kernel.org, linux-s390@vger.kernel.org, linux-am33-list@redhat.com, linux-c6x-dev@linux-c6x.org, linux-rdma@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, hch@infradead.org, coreteam@netfilter.org, msalter@redhat.com, fcoe-devel@open-fcoe.org, xen-devel@lists.xenproject.org, linux-snps-arc@lists.infradead.org, linux-media@vger.kernel.org, uclinux-h8-devel@lists.sourceforge.jp, linux-xtensa@linux-xtensa.org, arnd@arndb.de, linux-kbuild@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, linux-raid@vger.kernel.org, linux-m68k@lists.linux-m68k.org, openri
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:35564 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750713AbdAMSkp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 13:40:45 -0500
+Received: by mail-yw0-f194.google.com with SMTP id 17so4346948ywk.2
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 10:40:45 -0800 (PST)
+In-Reply-To: <406b3d9a-05be-82be-d885-cc35145b226d@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexandre Torgue <alexandre.torgue@st.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, linux-mmc@vger.kernel.org, Bruno Herrera <bruherrera@gmail.com>
 
-On Fri, Jan 13, 2017 at 11:46:39AM +0100, Nicolas Dichtel wrote:
-> This header file is exported, thus move it to uapi.
+On Fri, Jan 13, 2017 at 5:28 PM, Alexandre Torgue
+<alexandre.torgue@st.com> wrote:
+>
+>
+> On 01/13/2017 05:12 PM, Andrea Merello wrote:
+>>
+>> On Fri, Jan 13, 2017 at 4:52 PM, Alexandre Torgue
+>> <alexandre.torgue@st.com> wrote:
+>>>
+>>> Hi Andrea
+>>>
+>>>
+>>> On 01/13/2017 04:01 PM, Andrea Merello wrote:
+>>>>
+>>>>
+>>>> On Tue, Jan 10, 2017 at 10:18 AM, Alexandre Torgue
+>>>> <alexandre.torgue@st.com> wrote:
+>>>>>
+>>>>>
+>>>>> Hi Andrea
+>>>>>
+>>>>> On 01/10/2017 09:42 AM, Andrea Merello wrote:
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>> Can you please add a commit message.
+>>>>> Can you also change commit header like: "ARM: dts: stm32: enable SDIO
+>>>>> controller on stm32f469 disco board
+>>>>>
+>>>>>
+>>>>>
+>>>>>> ---
+>>>>>>  arch/arm/boot/dts/stm32f429.dtsi      |  2 +-
+>>>>>>  arch/arm/boot/dts/stm32f469-disco.dts | 29
+>>>>>> +++++++++++++++++++++++++++++
+>>>>>>  2 files changed, 30 insertions(+), 1 deletion(-)
+>>>>>>
+>>>>>> diff --git a/arch/arm/boot/dts/stm32f429.dtsi
+>>>>>> b/arch/arm/boot/dts/stm32f429.dtsi
+>>>>>> index c12a64e..5aba383 100644
+>>>>>> --- a/arch/arm/boot/dts/stm32f429.dtsi
+>>>>>> +++ b/arch/arm/boot/dts/stm32f429.dtsi
+>>>>>> @@ -206,7 +206,7 @@
+>>>>>>                         reg = <0x40007000 0x400>;
+>>>>>>                 };
+>>>>>>
+>>>>>> -               pin-controller {
+>>>>>> +               pinctrl:pin-controller {
+>>>>>>                         #address-cells = <1>;
+>>>>>>                         #size-cells = <1>;
+>>>>>>                         compatible = "st,stm32f429-pinctrl";
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>>> diff --git a/arch/arm/boot/dts/stm32f469-disco.dts
+>>>>>> b/arch/arm/boot/dts/stm32f469-disco.dts
+>>>>>> index 8877c00..7b3458e 100644
+>>>>>> --- a/arch/arm/boot/dts/stm32f469-disco.dts
+>>>>>> +++ b/arch/arm/boot/dts/stm32f469-disco.dts
+>>>>>> @@ -65,6 +65,13 @@
+>>>>>>                 serial0 = &usart3;
+>>>>>>         };
+>>>>>>
+>>>>>> +       mmc_vcard: mmc_vcard {
+>>>>>> +               compatible = "regulator-fixed";
+>>>>>> +               regulator-name = "mmc_vcard";
+>>>>>> +               regulator-min-microvolt = <3300000>;
+>>>>>> +               regulator-max-microvolt = <3300000>;
+>>>>>> +       };
+>>>>>> +
+>>>>>>         soc {
+>>>>>>                 dma-ranges = <0xc0000000 0x0 0x10000000>;
+>>>>>>         };
+>>>>>> @@ -78,6 +85,28 @@
+>>>>>>         clock-frequency = <8000000>;
+>>>>>>  };
+>>>>>>
+>>>>>> +&pinctrl {
+>>>>>> +       sdio-cd {
+>>>>>> +               sdio_cd: sdio-cd {
+>>>>>> +                       pins {
+>>>>>> +                               pinmux = <STM32F429_PG2_FUNC_GPIO>;
+>>>>>> +                               bias-pull-up;
+>>>>>> +                       };
+>>>>>> +               };
+>>>>>> +       };
+>>>>>> +};
+>>>>>> +
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>> As you only have config for 469-disco, please add this configuration of
+>>>>> pinmux directly in stm32f429.dtsi.
+>>>>
+>>>>
+>>>>
+>>>> While in the process of moving this, I realized that there is
+>>>> something wrong here..
+>>>>
+>>>> Currently this pinmux config ended up to be not referenced by the SDIO
+>>>> DT node at all. This happened in V2; it was intended to fix an
+>>>> apparently double-claimed GPIO problem, but now I realized that I
+>>>> misunderstood this thing, and it was a bad fix..
+>>>>
+>>>> So, actually the SD works, but as soon as I reference the CD pinmux
+>>>> config in the SDIO node, it fails with the following error:
+>>>>
+>>>> [    0.980000] stm32f429-pinctrl soc:pin-controller: pin PG2 already
+>>>> requested by 40012c00.sdio; cannot claim for GPIOG:98
+>>>> [    0.990000] stm32f429-pinctrl soc:pin-controller: pin-98 (GPIOG:98)
+>>>> status -22
+>>>> [    1.000000] mmci-pl18x: probe of 40012c00.sdio failed with error -22
+>>>>
+>>>> I've bisected this to happen since the 'strict' flag has been added to
+>>>> the stm32 pinctrl driver.
+>>>> commit c32c22eea0c47e13cffd6b5f7eedd7a6b6f2c18f
+>>>>
+>>>> Right now It seems that few pinctrl drivers use the 'strict' flag, so
+>>>> maybe it could be a bug in pinctrl-realated code.
+>>>
+>>>
+>>>
+>>> It is not a bug but added intentionally.
+>>>
+>>>>
+>>>> I need to look more in detail about this, however as far as I could
+>>>> understand:
+>>>>
+>>>> - when the mmc layer asks for the CD pin, due to the "cd-gpios"
+>>>> property,  the owner name for this config request is not the one from
+>>>> the OF node, but it is "conjured" - as written in comment - from the
+>>>> GPIO number and name (GPIOG:98) in pinmux_request_gpio()
+>>>>
+>>>> - the pinmux config done in behalf of the 'pinctrl-0' property has the
+>>>> OF node name (40012c00.sdio) as owner.
+>>>>
+>>>
+>>> I will look at deeper in the driver but first why you need to control
+>>> this
+>>> pin by both way (gpio lib through gpio definition and pinctrl framework
+>>> through pinctrl definition) ?
+>>
+>>
+>> Hmm, sorry, maybe I'm missing something here.. Please correct me if I'm
+>> wrong :)
+>>
+>> Don't I need to reference the pinmux configuration for CD in my
+>> pinctrl configs in the SDIO DT node, in order to have it active? e.g.
+>> pinctrl-0 = <&sdio_pins>, <&sdio_cd>;
+>>
+>> Don't I need to provide "cs-gpios" to the MMC layer as well ? e.g.
+>> cd-gpios = <&gpiog 2 0>;
+>
+>
+> Maybe I miss also something but it depends on "how" the driver uses this
+> pin. If you want to control the GPIO (change direction or set gpio in input
+> or read input ...) you have to use gpiolib and so declare "cd-gpios =
+> <&gpiog 2 0>;". By doing that gpiolib will request the gpio to pinctrl for
+> you. No need to declare a pinctrl entry for that.
 
-I'm taking this patch, but with the following commit log:
+Ah, ok. Thanks for clarifying :) It's my fault then: I've assumed that
+for some reason both were needed, just because the DTS files I've
+looked at seem to have both. (BTW apparently there are a lot of them
+in arch/arm/dts.. are they all broken and working only because they
+have not a "strict" pinctrl driver?)..
 
-  Due to the way kbuild works, this header was unintentionally exported
-  back in 2013 when it was created, despite it not being in a uapi/
-  directory.  This is very non-intuitive behaviour by Kbuild.
+Anyway, it should be enough to drop completely the pinmux config for
+CD. I'll post a new series next week.
 
-  However, we've had this include exported to userland for almost four
-  years, and searching google for "ARM types.h __UINTPTR_TYPE__" gives
-  no hint that anyone has complained about it.  So, let's make it
-  officially exported in this state.
-
-If anyone has any objections, they better shout sooner rather than
-later.
-
-> 
-> Signed-off-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
-> ---
->  arch/arm/include/asm/types.h      | 40 ---------------------------------------
->  arch/arm/include/uapi/asm/types.h | 40 +++++++++++++++++++++++++++++++++++++++
->  2 files changed, 40 insertions(+), 40 deletions(-)
->  delete mode 100644 arch/arm/include/asm/types.h
->  create mode 100644 arch/arm/include/uapi/asm/types.h
-> 
-> diff --git a/arch/arm/include/asm/types.h b/arch/arm/include/asm/types.h
-> deleted file mode 100644
-> index a53cdb8f068c..000000000000
-> --- a/arch/arm/include/asm/types.h
-> +++ /dev/null
-> @@ -1,40 +0,0 @@
-> -#ifndef _ASM_TYPES_H
-> -#define _ASM_TYPES_H
-> -
-> -#include <asm-generic/int-ll64.h>
-> -
-> -/*
-> - * The C99 types uintXX_t that are usually defined in 'stdint.h' are not as
-> - * unambiguous on ARM as you would expect. For the types below, there is a
-> - * difference on ARM between GCC built for bare metal ARM, GCC built for glibc
-> - * and the kernel itself, which results in build errors if you try to build with
-> - * -ffreestanding and include 'stdint.h' (such as when you include 'arm_neon.h'
-> - * in order to use NEON intrinsics)
-> - *
-> - * As the typedefs for these types in 'stdint.h' are based on builtin defines
-> - * supplied by GCC, we can tweak these to align with the kernel's idea of those
-> - * types, so 'linux/types.h' and 'stdint.h' can be safely included from the same
-> - * source file (provided that -ffreestanding is used).
-> - *
-> - *                    int32_t         uint32_t               uintptr_t
-> - * bare metal GCC     long            unsigned long          unsigned int
-> - * glibc GCC          int             unsigned int           unsigned int
-> - * kernel             int             unsigned int           unsigned long
-> - */
-> -
-> -#ifdef __INT32_TYPE__
-> -#undef __INT32_TYPE__
-> -#define __INT32_TYPE__		int
-> -#endif
-> -
-> -#ifdef __UINT32_TYPE__
-> -#undef __UINT32_TYPE__
-> -#define __UINT32_TYPE__	unsigned int
-> -#endif
-> -
-> -#ifdef __UINTPTR_TYPE__
-> -#undef __UINTPTR_TYPE__
-> -#define __UINTPTR_TYPE__	unsigned long
-> -#endif
-> -
-> -#endif /* _ASM_TYPES_H */
-> diff --git a/arch/arm/include/uapi/asm/types.h b/arch/arm/include/uapi/asm/types.h
-> new file mode 100644
-> index 000000000000..9435a42f575e
-> --- /dev/null
-> +++ b/arch/arm/include/uapi/asm/types.h
-> @@ -0,0 +1,40 @@
-> +#ifndef _UAPI_ASM_TYPES_H
-> +#define _UAPI_ASM_TYPES_H
-> +
-> +#include <asm-generic/int-ll64.h>
-> +
-> +/*
-> + * The C99 types uintXX_t that are usually defined in 'stdint.h' are not as
-> + * unambiguous on ARM as you would expect. For the types below, there is a
-> + * difference on ARM between GCC built for bare metal ARM, GCC built for glibc
-> + * and the kernel itself, which results in build errors if you try to build with
-> + * -ffreestanding and include 'stdint.h' (such as when you include 'arm_neon.h'
-> + * in order to use NEON intrinsics)
-> + *
-> + * As the typedefs for these types in 'stdint.h' are based on builtin defines
-> + * supplied by GCC, we can tweak these to align with the kernel's idea of those
-> + * types, so 'linux/types.h' and 'stdint.h' can be safely included from the same
-> + * source file (provided that -ffreestanding is used).
-> + *
-> + *                    int32_t         uint32_t               uintptr_t
-> + * bare metal GCC     long            unsigned long          unsigned int
-> + * glibc GCC          int             unsigned int           unsigned int
-> + * kernel             int             unsigned int           unsigned long
-> + */
-> +
-> +#ifdef __INT32_TYPE__
-> +#undef __INT32_TYPE__
-> +#define __INT32_TYPE__		int
-> +#endif
-> +
-> +#ifdef __UINT32_TYPE__
-> +#undef __UINT32_TYPE__
-> +#define __UINT32_TYPE__	unsigned int
-> +#endif
-> +
-> +#ifdef __UINTPTR_TYPE__
-> +#undef __UINTPTR_TYPE__
-> +#define __UINTPTR_TYPE__	unsigned long
-> +#endif
-> +
-> +#endif /* _UAPI_ASM_TYPES_H */
-> -- 
-> 2.8.1
-> 
-
--- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+>>
+>> If I do both, it fails (due to mmc_of_parse() failing). No matter what
+>> I do in the driver, I believe.
+>
+>
+> It is normal that both failed; In strict mode you can't request several
+> times the same pin (you request pinG2 one time by gpiolib and oneother time
+> by pinctrl).
+>
+>
+>>
+>>> In strict mode the error you get is "normal". You can't control the same
+>>> pin
+>>> in the same time by gpiolib and pinctrl.
+>>>
+>>>
+>>>> This owner mismatch causes a check to fail in pin_request(), that
+>>>> believes that two different owners try to use the same pin (while in
+>>>> true both are in behalf of the same SDIO device).
+>>>>
+>>>> I don't know when I'll have more time to look into this. If you want I
+>>>> can temporary drop the CD pinmux config and post the V3 - that
+>>>> nevertheless works - and we can add the CD pinmux cfg later, once it
+>>>> has been fixed.
+>>>>
+>>>> In someone have clues, or want to look into this, he/she would be
+>>>> really welcome :)
+>>>
+>>>
+>>>
+>>> No problem, we can wait. Let's merge it when it will be fully functional.
+>>>
+>>> Br
+>>> Alex
+>>>
+>>>
+>>>>
+>>>>>
+>>>>>
+>>>>>> +&sdio {
+>>>>>> +       status = "okay";
+>>>>>> +       vmmc-supply = <&mmc_vcard>;
+>>>>>> +       cd-gpios = <&gpiog 2 0>;
+>>>>>> +       cd-inverted;
+>>>>>> +       pinctrl-names = "default", "opendrain";
+>>>>>> +       pinctrl-0 = <&sdio_pins>;
+>>>>>> +       pinctrl-1 = <&sdio_pins_od>;
+>>>>>> +       bus-width = <4>;
+>>>>>> +};
+>>>>>> +
+>>>>>>  &usart3 {
+>>>>>>         status = "okay";
+>>>>>>  };
+>>>>>>
+>>>>>
+>>>
+>
