@@ -1,102 +1,140 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH] mmc: core: retry polling busy when response timeout occurs
-Date: Fri, 13 Jan 2017 11:24:55 +0800
-Message-ID: <1484277895-94393-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 1/2] mmc: core: Fix CMD6 timeout issue
+Date: Fri, 13 Jan 2017 11:35:16 +0800
+Message-ID: <b6efb075-226a-c7c8-2c6d-7d61d78eced1@rock-chips.com>
+References: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
+ <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
+ <CAPDyKFrkehvdnYgau1zFmgcHUniMbcat_NOLkB7bSGWF+b=c9Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:37015 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.130]:33498 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750819AbdAMD0g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 22:26:36 -0500
+        with ESMTP id S1750943AbdAMDgD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2017 22:36:03 -0500
+In-Reply-To: <CAPDyKFrkehvdnYgau1zFmgcHUniMbcat_NOLkB7bSGWF+b=c9Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Yong Mao <yong.mao@mediatek.com>
+Cc: shawn.lin@rock-chips.com, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mediatek@lists.infradead.org
 
-It always assumed that if the card was not ready after finishing
-switching the mode, we should got a CRC, namely -EILSEQ, from the
-hosts. But the fact is if the host is in higher speed mode but the
-eMMC havn't finished the switch, so the host could fail to sample
-the resp of CMD13 due to the mismatch timing in between. Could it is
-possible that response timeout was generated instaed of -EILSEQ? It's
-quite IP specificed. So I don't think we should take the risk of
-relying on that. In another word, we don't expect to bail out early
-for timeout errors bounced from hosts when polling the status, no
-just for explicit CRC.
+On 2017/1/12 23:21, Ulf Hansson wrote:
+> - trimmed cc-list
+>
+> On 3 January 2017 at 09:49, Yong Mao <yong.mao@mediatek.com> wrote:
+>> From: yong mao <yong.mao@mediatek.com>
+>>
+>> When initializing EMMC, after switch to HS400,
+>> it will issue CMD6 to change ext_csd,
+>> if first CMD6 got CRC error,
+>> the repeat CMD6 may get timeout,
+>> that's because card is not back to transfer state immediately.
+>>
+>> For resolving this issue, it need check if card is busy
+>> before sending repeat CMD6.
+>
+> I agree that doing retries in this path might may not be correctly
+> done, but currently we do it as best effort.
+>
+> We should probably change this to *not* retry the CMD6 command, in
+> cases when we have a MMC_RSP_R1B response, because of the reasons you
+> describe.
+> I get the feeling that these retry attempts for CMD6, may instead hide
+> other real issues and making it harder to narrow them down. Don't you
+> think?
+>
+> This leads to my following question:
+> Why do you get a CRC error at the first CMD6 attempt? That shouldn't
+> happen, right?
+>
+> Perhaps you can elaborate on what of the CMD6 commands in the HS400
+> enabling sequence that fails. It may help us to understand, perhaps
+> there may be something in that sequence that should be changed.
+>
+>>
+>> Not only CMD6 here has this issue, but also other R1B CMD has
+>> the same issue.
+>
+> Yes, agree!
+>
+> However, can you please try to point out some other commands than CM6
+> that you see uses *retries*, has R1B response, and which you believe
+> may not be properly managed.
+>
+> Dealing with R1B responses isn't always straight forward. Therefore I
+> am wondering whether we perhaps should just not allow "automatic
+> retries" in cases when R1B responses is used.
+>
+> The reason why I think that is easier, is because of the complexity we
+> have when dealing with R1B responses.
+>
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+I'm just thinking a interesting question: What will happen if someone
+uses a userspace tool to switch the partition to RPMB when we are in
+command queue mode? It will fails to finish CMD6 and the emmc should be
+busy for a while. So now we shouldn't retry CMD6 but need to send a
+CMD13 to make sure it's back to transfer state OR a HPI to break it. We
+should be able to cover these cases not only from kernel context but
+also the interaction between user and kernel.
 
----
+> As for example the timeout may differ depending on the command, so
+> just guessing that 500 ms might work, isn't good enough. Moreover we
+> would need to deal with MMC_CAP_WAIT_WHILE_BUSY, etc. Currently I am
+> not saying that we shouldn't do this, but then I first need to
+> understand how big of problem this is.
+>
+>>
+>> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+>> ---
+>>  drivers/mmc/core/core.c |   19 +++++++++++++++++++
+>>  1 file changed, 19 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 1076b9d..8674dbb 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -566,6 +566,25 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+>>
+>>                 mmc_retune_recheck(host);
+>>
+>> +               /*
+>> +                * If a R1B CMD such as CMD6 occur CRC error,
+>> +                * it will retry 3 times here.
+>> +                * But before retrying, it must ensure card is in
+>> +                * transfer state.
+>> +                * Otherwise, the next retried CMD will got TMO error.
+>> +                */
+>> +               if (mmc_resp_type(cmd) == MMC_RSP_R1B && host->ops->card_busy) {
+>> +                       int tries = 500; /* Wait aprox 500ms at maximum */
+>> +
+>> +                       while (host->ops->card_busy(host) && --tries)
+>> +                               mmc_delay(1);
+>> +
+>> +                       if (tries == 0) {
+>> +                               cmd->error = -EBUSY;
+>> +                               break;
+>> +                       }
+>> +               }
+>> +
+>>                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
+>>                          mmc_hostname(host), cmd->opcode, cmd->error);
+>>                 cmd->retries--;
+>> --
+>> 1.7.9.5
+>>
+>
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
- drivers/mmc/core/mmc_ops.c | 14 +++++++++-----
- drivers/mmc/core/mmc_ops.h |  3 ++-
- 2 files changed, 11 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index db2969f..a352dea 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -451,7 +451,7 @@ int mmc_switch_status(struct mmc_card *card)
- }
- 
- static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
--			bool send_status, bool retry_crc_err)
-+			bool send_status, bool retry_crc_and_tmo_err)
- {
- 	struct mmc_host *host = card->host;
- 	int err;
-@@ -486,7 +486,8 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 			busy = host->ops->card_busy(host);
- 		} else {
- 			err = mmc_send_status(card, &status);
--			if (retry_crc_err && err == -EILSEQ) {
-+			if (retry_crc_and_tmo_err &&
-+			    (err == -EILSEQ || err == -ETIMEDOUT)) {
- 				busy = true;
- 			} else if (err) {
- 				return err;
-@@ -523,13 +524,15 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-  *	@timing: new timing to change to
-  *	@use_busy_signal: use the busy signal as response type
-  *	@send_status: send status cmd to poll for busy
-- *	@retry_crc_err: retry when CRC errors when polling with CMD13 for busy
-+ *	@retry_crc_and_tmo_err: retry when CRC errors or response timeout errors
-+ *				when polling with CMD13 for busy
-  *
-  *	Modifies the EXT_CSD register for selected card.
-  */
- int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		unsigned int timeout_ms, unsigned char timing,
--		bool use_busy_signal, bool send_status,	bool retry_crc_err)
-+		bool use_busy_signal, bool send_status,
-+		bool retry_crc_and_tmo_err)
- {
- 	struct mmc_host *host = card->host;
- 	int err;
-@@ -590,7 +593,8 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	}
- 
- 	/* Let's try to poll to find out when the command is completed. */
--	err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
-+	err = mmc_poll_for_busy(card, timeout_ms, send_status,
-+				retry_crc_and_tmo_err);
- 
- out_tim:
- 	if (err && timing)
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index abd525e..fad9963 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -31,7 +31,8 @@
- int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
- int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		unsigned int timeout_ms, unsigned char timing,
--		bool use_busy_signal, bool send_status,	bool retry_crc_err);
-+		bool use_busy_signal, bool send_status,
-+		bool retry_crc_and_tmo_err);
- 
- #endif
- 
 -- 
-1.9.1
-
+Best Regards
+Shawn Lin
 
