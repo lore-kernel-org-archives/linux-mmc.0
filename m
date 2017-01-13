@@ -1,142 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v3 05/15] mmc: core: First step in cleaning up public mmc header files
-Date: Fri, 13 Jan 2017 14:14:06 +0100
-Message-ID: <1484313256-25993-6-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH v3 08/15] mmc: core: Move some host specific public functions to host.h
+Date: Fri, 13 Jan 2017 14:14:09 +0100
+Message-ID: <1484313256-25993-9-git-send-email-ulf.hansson@linaro.org>
 References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:34025 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751648AbdAMNOw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:14:52 -0500
-Received: by mail-lf0-f46.google.com with SMTP id v186so37164959lfa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:14:51 -0800 (PST)
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:34094 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751700AbdAMNPA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:15:00 -0500
+Received: by mail-lf0-f54.google.com with SMTP id v186so37168164lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:15:00 -0800 (PST)
 In-Reply-To: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-This is the first step in cleaning up the public mmc header files. In this
-change we makes sure each header file builds standalone, as that helps to
-resolve dependencies.
-
-While changing this, it also seems reasonable to stop including other
-headers from inside a header itself which it don't depend upon.
-Additionally, in some cases such dependencies are better resolved by
-forward declaring the needed struct.
+Ideally the public mmc header file, core.h, shouldn't contain interfaces
+particularly intended to be used by host drivers. Instead those should
+remain in the host.h header file. Therefore, let's move a couple functions
+from core.h to host.h.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- include/linux/mmc/card.h      | 2 --
- include/linux/mmc/core.h      | 3 +--
- include/linux/mmc/host.h      | 9 ++-------
- include/linux/mmc/mmc.h       | 2 ++
- include/linux/mmc/slot-gpio.h | 3 +++
- 5 files changed, 8 insertions(+), 11 deletions(-)
+ include/linux/mmc/core.h | 6 ------
+ include/linux/mmc/host.h | 6 ++++++
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 00449e5..ca64f5b 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -11,7 +11,6 @@
- #define LINUX_MMC_CARD_H
- 
- #include <linux/device.h>
--#include <linux/mmc/core.h>
- #include <linux/mod_devicetable.h>
- 
- struct mmc_cid {
-@@ -206,7 +205,6 @@ struct sdio_cis {
- };
- 
- struct mmc_host;
--struct mmc_ios;
- struct sdio_func;
- struct sdio_func_tuple;
- 
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index e33cc74..64e2ddf 100644
+index e679a86..faacc90 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -8,10 +8,9 @@
- #ifndef LINUX_MMC_CORE_H
- #define LINUX_MMC_CORE_H
+@@ -163,8 +163,6 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ 					   enum mmc_blk_status *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+-extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+-extern int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
  
--#include <linux/interrupt.h>
- #include <linux/completion.h>
-+#include <linux/types.h>
+ #define MMC_ERASE_ARG		0x00000000
+ #define MMC_SECURE_ERASE_ARG	0x80000000
+@@ -179,8 +177,4 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ extern int mmc_hw_reset(struct mmc_host *host);
+ extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
  
--struct request;
- struct mmc_data;
- struct mmc_request;
- 
+-struct device_node;
+-extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+-extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+-
+ #endif /* LINUX_MMC_CORE_H */
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8bc8841..8d38c76 100644
+index 8d38c76..7de0519 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -10,16 +10,12 @@
- #ifndef LINUX_MMC_HOST_H
- #define LINUX_MMC_HOST_H
- 
--#include <linux/leds.h>
--#include <linux/mutex.h>
--#include <linux/timer.h>
- #include <linux/sched.h>
- #include <linux/device.h>
- #include <linux/fault-inject.h>
- 
- #include <linux/mmc/core.h>
- #include <linux/mmc/card.h>
--#include <linux/mmc/mmc.h>
- #include <linux/mmc/pm.h>
- 
- struct mmc_ios {
-@@ -82,6 +78,8 @@ struct mmc_ios {
- 	bool enhanced_strobe;			/* hs400es selection */
+@@ -392,11 +392,14 @@ struct mmc_host {
+ 	unsigned long		private[0] ____cacheline_aligned;
  };
  
-+struct mmc_host;
++struct device_node;
 +
- struct mmc_host_ops {
- 	/*
- 	 * It is optional for the host to implement pre_req and post_req in
-@@ -162,9 +160,6 @@ struct mmc_host_ops {
- 				  unsigned int direction, int blk_size);
- };
+ struct mmc_host *mmc_alloc_host(int extra, struct device *);
+ int mmc_add_host(struct mmc_host *);
+ void mmc_remove_host(struct mmc_host *);
+ void mmc_free_host(struct mmc_host *);
+ int mmc_of_parse(struct mmc_host *host);
++int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
  
--struct mmc_card;
--struct device;
--
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index a074082..261772e 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -24,6 +24,8 @@
- #ifndef LINUX_MMC_MMC_H
- #define LINUX_MMC_MMC_H
+ static inline void *mmc_priv(struct mmc_host *host)
+ {
+@@ -452,6 +455,7 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
+ }
+ #endif
  
-+#include <linux/types.h>
-+
- /* Standard MMC commands (4.1)           type  argument     response */
-    /* class 1 */
- #define MMC_GO_IDLE_STATE         0   /* bc                          */
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index a7972cd..82f0d28 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -11,6 +11,9 @@
- #ifndef MMC_SLOT_GPIO_H
- #define MMC_SLOT_GPIO_H
++u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+ int mmc_regulator_get_supply(struct mmc_host *mmc);
  
-+#include <linux/types.h>
-+#include <linux/irqreturn.h>
-+
- struct mmc_host;
+ static inline int mmc_card_is_removable(struct mmc_host *host)
+@@ -538,6 +542,8 @@ static inline bool mmc_can_retune(struct mmc_host *host)
+ 	return host->can_retune == 1;
+ }
  
- int mmc_gpio_get_ro(struct mmc_host *host);
++int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
++int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+ void mmc_retune_pause(struct mmc_host *host);
+ void mmc_retune_unpause(struct mmc_host *host);
+ 
 -- 
 1.9.1
 
