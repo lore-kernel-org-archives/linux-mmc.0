@@ -1,82 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v3 09/15] mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
-Date: Fri, 13 Jan 2017 14:14:10 +0100
-Message-ID: <1484313256-25993-10-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH v3 15/15] mmc: core: Don't use extern declarations of public mmc functions
+Date: Fri, 13 Jan 2017 14:14:16 +0100
+Message-ID: <1484313256-25993-16-git-send-email-ulf.hansson@linaro.org>
 References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:34123 "EHLO
-        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751700AbdAMNPE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:15:04 -0500
-Received: by mail-lf0-f47.google.com with SMTP id v186so37169459lfa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:15:03 -0800 (PST)
+Received: from mail-lf0-f53.google.com ([209.85.215.53]:33658 "EHLO
+        mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751602AbdAMNP1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:15:27 -0500
+Received: by mail-lf0-f53.google.com with SMTP id k86so37164285lfi.0
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:15:26 -0800 (PST)
 In-Reply-To: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-As the public mmc.h header already contains similar defines for other mmc
-commands and arguments, let's move those for erase/trim/discard into here
-as well.
+Using extern when declaring functions in the public header, core.h, is
+redundant. Let's just remove the use of it.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- include/linux/mmc/core.h | 10 ----------
- include/linux/mmc/mmc.h  | 13 ++++++++++++-
- 2 files changed, 12 insertions(+), 11 deletions(-)
+ include/linux/mmc/core.h | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index faacc90..6440e10 100644
+index 6440e10..6dcb339 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -164,16 +164,6 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+@@ -158,13 +158,14 @@ struct mmc_request {
+ struct mmc_card;
+ struct mmc_async_req;
  
--#define MMC_ERASE_ARG		0x00000000
--#define MMC_SECURE_ERASE_ARG	0x80000000
--#define MMC_TRIM_ARG		0x00000001
--#define MMC_DISCARD_ARG		0x00000003
--#define MMC_SECURE_TRIM1_ARG	0x80000001
--#define MMC_SECURE_TRIM2_ARG	0x80008000
+-extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+-					   struct mmc_async_req *,
+-					   enum mmc_blk_status *);
+-extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+-extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
 -
--#define MMC_SECURE_ARGS		0x80000000
--#define MMC_TRIM_ARGS		0x00008001
--
- extern int mmc_hw_reset(struct mmc_host *host);
- extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
- 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 261772e..8f78543 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -462,12 +462,23 @@ struct _mmc_csd {
- /*
-  * MMC_SWITCH access modes
-  */
--
- #define MMC_SWITCH_MODE_CMD_SET		0x00	/* Change the command set */
- #define MMC_SWITCH_MODE_SET_BITS	0x01	/* Set bits which are 1 in value */
- #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
- 
-+/*
-+ * Erase/trim/discard
-+ */
-+#define MMC_ERASE_ARG			0x00000000
-+#define MMC_SECURE_ERASE_ARG		0x80000000
-+#define MMC_TRIM_ARG			0x00000001
-+#define MMC_DISCARD_ARG			0x00000003
-+#define MMC_SECURE_TRIM1_ARG		0x80000001
-+#define MMC_SECURE_TRIM2_ARG		0x80008000
-+#define MMC_SECURE_ARGS			0x80000000
-+#define MMC_TRIM_ARGS			0x00008001
+-extern int mmc_hw_reset(struct mmc_host *host);
+-extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
++struct mmc_async_req *mmc_start_req(struct mmc_host *host,
++				struct mmc_async_req *areq,
++				enum mmc_blk_status *ret_stat);
++void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
++int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
++		int retries);
 +
- #define mmc_driver_type_mask(n)		(1 << (n))
++int mmc_hw_reset(struct mmc_host *host);
++void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
  
- #endif /* LINUX_MMC_MMC_H */
+ #endif /* LINUX_MMC_CORE_H */
 -- 
 1.9.1
 
