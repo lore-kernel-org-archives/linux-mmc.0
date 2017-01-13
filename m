@@ -1,57 +1,82 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v3 12/15] mmc: vub300: Don't use mmc_card_present() when validating for inserted card
-Date: Fri, 13 Jan 2017 14:14:13 +0100
-Message-ID: <1484313256-25993-13-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH v3 09/15] mmc: core: Move erase/trim/discard defines from public core.h to mmc.h
+Date: Fri, 13 Jan 2017 14:14:10 +0100
+Message-ID: <1484313256-25993-10-git-send-email-ulf.hansson@linaro.org>
 References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:36051 "EHLO
-        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751562AbdAMNPQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:15:16 -0500
-Received: by mail-lf0-f51.google.com with SMTP id z134so33628959lff.3
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:15:15 -0800 (PST)
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:34123 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751700AbdAMNPE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 08:15:04 -0500
+Received: by mail-lf0-f47.google.com with SMTP id v186so37169459lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2017 05:15:03 -0800 (PST)
 In-Reply-To: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-The mmc_card_present() function helps the mmc core to track an internal
-state of the card device. More importantly, it's not intended to be used by
-mmc host drivers to check for an inserted card. Therefore, let's stop using
-it and instead rely on checking for a valid pointer to a struct mmc_card,
-as it should be good enough.
+As the public mmc.h header already contains similar defines for other mmc
+commands and arguments, let's move those for erase/trim/discard into here
+as well.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/vub300.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ include/linux/mmc/core.h | 10 ----------
+ include/linux/mmc/mmc.h  | 13 ++++++++++++-
+ 2 files changed, 12 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 21ea776..c061e7c 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -726,8 +726,7 @@ static void vub300_deadwork_thread(struct work_struct *work)
- 		 */
- 	} else if (vub300->card_present) {
- 		check_vub300_port_status(vub300);
--	} else if (vub300->mmc && vub300->mmc->card &&
--		   mmc_card_present(vub300->mmc->card)) {
-+	} else if (vub300->mmc && vub300->mmc->card) {
- 		/*
- 		 * the MMC core must not have responded
- 		 * to the previous indication - lets
-@@ -1754,8 +1753,7 @@ static void vub300_cmndwork_thread(struct work_struct *work)
- 		int data_length;
- 		mutex_lock(&vub300->cmd_mutex);
- 		init_completion(&vub300->command_complete);
--		if (likely(vub300->vub_name[0]) || !vub300->mmc->card ||
--		    !mmc_card_present(vub300->mmc->card)) {
-+		if (likely(vub300->vub_name[0]) || !vub300->mmc->card) {
- 			/*
- 			 * the name of the EMPTY Pseudo firmware file
- 			 * is used as a flag to indicate that the file
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index faacc90..6440e10 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -164,16 +164,6 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+ 
+-#define MMC_ERASE_ARG		0x00000000
+-#define MMC_SECURE_ERASE_ARG	0x80000000
+-#define MMC_TRIM_ARG		0x00000001
+-#define MMC_DISCARD_ARG		0x00000003
+-#define MMC_SECURE_TRIM1_ARG	0x80000001
+-#define MMC_SECURE_TRIM2_ARG	0x80008000
+-
+-#define MMC_SECURE_ARGS		0x80000000
+-#define MMC_TRIM_ARGS		0x00008001
+-
+ extern int mmc_hw_reset(struct mmc_host *host);
+ extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 261772e..8f78543 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -462,12 +462,23 @@ struct _mmc_csd {
+ /*
+  * MMC_SWITCH access modes
+  */
+-
+ #define MMC_SWITCH_MODE_CMD_SET		0x00	/* Change the command set */
+ #define MMC_SWITCH_MODE_SET_BITS	0x01	/* Set bits which are 1 in value */
+ #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
+ 
++/*
++ * Erase/trim/discard
++ */
++#define MMC_ERASE_ARG			0x00000000
++#define MMC_SECURE_ERASE_ARG		0x80000000
++#define MMC_TRIM_ARG			0x00000001
++#define MMC_DISCARD_ARG			0x00000003
++#define MMC_SECURE_TRIM1_ARG		0x80000001
++#define MMC_SECURE_TRIM2_ARG		0x80008000
++#define MMC_SECURE_ARGS			0x80000000
++#define MMC_TRIM_ARGS			0x00008001
++
+ #define mmc_driver_type_mask(n)		(1 << (n))
+ 
+ #endif /* LINUX_MMC_MMC_H */
 -- 
 1.9.1
 
