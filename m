@@ -1,102 +1,122 @@
 From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: eMMC boot problem: switch to bus width 8 ddr failed
-Date: Fri, 13 Jan 2017 12:45:13 +0800
-Message-ID: <CAA+hA=QApBAak-g9X637_8S_3nfAgiE-ueMY3giiVUvJ=cRd1A@mail.gmail.com>
-References: <20170106004114.GA22893@archie.localdomain> <1754f0ae-fe6f-00a2-a0d6-9fd55c2b866f@rock-chips.com>
- <20170106155618.GA10105@archie.localdomain> <CAPDyKFoUeYrE7nC2Ds8XHBYXtQpLHkRXKp_hFyD0m6fuuFM==w@mail.gmail.com>
- <103b3045-c17d-ef14-c843-471fcb6e537f@rock-chips.com> <AM4PR0401MB232420E07E9DA5FE18E8B38790780@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <5e8ad3d0-7b45-ff4d-feaf-8cf2e78bd3b8@rock-chips.com>
+Subject: Re: [RFC PATCH] mmc: core: retry polling busy when response timeout occurs
+Date: Fri, 13 Jan 2017 13:03:34 +0800
+Message-ID: <CAA+hA=S-7+gJ6Gbyr2np6419BfFs1hb2d-UAvmaCxCxuFLY-6Q@mail.gmail.com>
+References: <1484277895-94393-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5e8ad3d0-7b45-ff4d-feaf-8cf2e78bd3b8@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Bough Chen <haibo.chen@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Clemens Gruber <clemens.gruber@pqgruber.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, "A.S. Dong" <aisheng.dong@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Gary Bisson <gary.bisson@boundarydevices.com>, Fabio Estevam <festevam@gmail.com>, Shawn Guo <shawnguo@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:34924 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751147AbdAMFDg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2017 00:03:36 -0500
+Received: by mail-qt0-f194.google.com with SMTP id f4so4950805qte.2
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2017 21:03:35 -0800 (PST)
+In-Reply-To: <1484277895-94393-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 Hi Shawn,
 
-On Fri, Jan 13, 2017 at 12:03 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Fri, Jan 13, 2017 at 11:24 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> It always assumed that if the card was not ready after finishing
+> switching the mode, we should got a CRC, namely -EILSEQ, from the
+> hosts. But the fact is if the host is in higher speed mode but the
+> eMMC havn't finished the switch, so the host could fail to sample
+> the resp of CMD13 due to the mismatch timing in between. Could it is
+> possible that response timeout was generated instaed of -EILSEQ? It's
+> quite IP specificed.
 
-[...]
-
->
->> 2) root cause, in __mmc_switch, the process is   send CMD6 --> set DDR52
->> timing --> polling for busy.
->> For the DDR52 timing setting, we call set_ios(), in the set_ios, we first
->> set DDR_EN to config sdhc in ddr mode,
->> and then config the sd clock again.   Here it is, after CMD6 complete, we
->> find data0 still low, which means card
->> busy. At this time, if we set DDR_EN, there is a risk. For i.MX usdhc,
->> DDR_EN setting becomes active only when
->> the DATA and CMD line are idle. So, at this time for HW, DDR_EN do not
->> active, but software think DDR_EN already
->> active, and set the clock again to 49.5MHz, but actually the HW out put
->> the clock as 198MHz. So there is clock glitch.
->> This is the root cause--set DDR_EN when card is still busy.
->>
->
-> Make sense. But it makes me more worried about the problem.
-> Does it impact other controllers if changing timing settings when
-> it's in busy state? It seems very likely possible. So I'm afraid
-> that we now just break hs_ddr mode for your platform but on the
-> contrary your case exposes this potention risk here. Thought?
->
-
-Yes, i got the same concern as i replied in my last email.
-Not sure if any other controllers exposes the same issue
-since the kernel having this issue is quite new.
+I wonder this may not work for IMX since changing timing while card busy
+may cause host unable to send the next CMD anymore.
+Then SW timeout (5s or 10s)  implemented in common SDHCI driver happens.
 
 Regards
 Dong Aisheng
 
->> The following method can fix this issue
->> a) change the HW behavior, DDR_EN setting becomes active at once no matter
->> what the state of the DATA and
->> CMD line are.   This can fix this issue, but our IC guys do not prefer
->> this, this method still not safe enough.
->>
->> b) add 1ms delay before DDR_EN to wait bus idle.  But we still not know
->> whether the time 1ms is appropriate. Better
->> to poll for busy before set DDR_EN.
->>
->> c) set DDR52 timing after CMD6 and pull for busy. This is what Shawn's
->> patch do.
->>
->> Hi Aisheng,
->> Correct me if anything wrong.
->>
->> My suggestion is that,  in __mmc_switch(), move the mmc_set_timing() after
->> the function mmc_poll_for_busy().
->>
->>
->> Best Regards
->> Haibo Chen
->>
->>
->>
->>>> if that can be done. So I will give Haibo/Dong etc a couple of more
->>>> days to investigate, before applying Shawn Lin's fix for the core.
->>>> Hope that approach is okay with all of you?
->>>>
->>>> Kind regards
->>>> Uffe
->>>>
->>>>
->>>>
->>>
->>>
->>> --
->>> Best Regards
->>> Shawn Lin
->>
->>
+> So I don't think we should take the risk of
+> relying on that. In another word, we don't expect to bail out early
+> for timeout errors bounced from hosts when polling the status, no
+> just for explicit CRC.
 >
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> ---
+>
+>  drivers/mmc/core/mmc_ops.c | 14 +++++++++-----
+>  drivers/mmc/core/mmc_ops.h |  3 ++-
+>  2 files changed, 11 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index db2969f..a352dea 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -451,7 +451,7 @@ int mmc_switch_status(struct mmc_card *card)
+>  }
+>
+>  static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+> -                       bool send_status, bool retry_crc_err)
+> +                       bool send_status, bool retry_crc_and_tmo_err)
+>  {
+>         struct mmc_host *host = card->host;
+>         int err;
+> @@ -486,7 +486,8 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>                         busy = host->ops->card_busy(host);
+>                 } else {
+>                         err = mmc_send_status(card, &status);
+> -                       if (retry_crc_err && err == -EILSEQ) {
+> +                       if (retry_crc_and_tmo_err &&
+> +                           (err == -EILSEQ || err == -ETIMEDOUT)) {
+>                                 busy = true;
+>                         } else if (err) {
+>                                 return err;
+> @@ -523,13 +524,15 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>   *     @timing: new timing to change to
+>   *     @use_busy_signal: use the busy signal as response type
+>   *     @send_status: send status cmd to poll for busy
+> - *     @retry_crc_err: retry when CRC errors when polling with CMD13 for busy
+> + *     @retry_crc_and_tmo_err: retry when CRC errors or response timeout errors
+> + *                             when polling with CMD13 for busy
+>   *
+>   *     Modifies the EXT_CSD register for selected card.
+>   */
+>  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                 unsigned int timeout_ms, unsigned char timing,
+> -               bool use_busy_signal, bool send_status, bool retry_crc_err)
+> +               bool use_busy_signal, bool send_status,
+> +               bool retry_crc_and_tmo_err)
+>  {
+>         struct mmc_host *host = card->host;
+>         int err;
+> @@ -590,7 +593,8 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         }
+>
+>         /* Let's try to poll to find out when the command is completed. */
+> -       err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
+> +       err = mmc_poll_for_busy(card, timeout_ms, send_status,
+> +                               retry_crc_and_tmo_err);
+>
+>  out_tim:
+>         if (err && timing)
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index abd525e..fad9963 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -31,7 +31,8 @@
+>  int __mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+>  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                 unsigned int timeout_ms, unsigned char timing,
+> -               bool use_busy_signal, bool send_status, bool retry_crc_err);
+> +               bool use_busy_signal, bool send_status,
+> +               bool retry_crc_and_tmo_err);
+>
+>  #endif
 >
 > --
-> Best Regards
-> Shawn Lin
+> 1.9.1
+>
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
