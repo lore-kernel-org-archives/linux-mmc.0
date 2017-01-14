@@ -1,95 +1,79 @@
-From: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-Subject: Re: Support for various sdio wifi-chips on Allwinner
- tablets and SBCs
-Date: Sat, 14 Jan 2017 22:08:46 +0800
-Message-ID: <4020591484402926@web44j.yandex.ru>
-References: <5844eef2-71bd-bbb9-dff6-92e01a393b36@gmail.com>
-Reply-To: icenowy-ymACFijhrKM@public.gmane.org
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH RFC] mmc: mxs-mmc: Implement CMD23 support
+Date: Sat, 14 Jan 2017 17:29:18 +0000
+Message-ID: <1484414958-2665-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBCZLPFN5Q4OBB4XB5DBQKGQESBAIV4Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <5844eef2-71bd-bbb9-dff6-92e01a393b36-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Hans de Goede <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>, Bastien Nocera <hadess-0MeiytkfxGOsTnJN9+BGXg@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Marek Vasut <marex@denx.de>, Stefan Wahren <stefan.wahren@i2se.com>, =?UTF-8?q?J=C3=B6rg=20Krause?= <joerg.krause@embedded.rocks>, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>, linux-arm-kernel@lists.infradead.org, =?UTF-8?q?Lothar=20Wa=C3=9Fmann?= <lw@karo-electronics.de>
 List-Id: linux-mmc@vger.kernel.org
 
+This patch implements support for multiblock transfers bounded
+by SET_BLOCK_COUNT (CMD23) on the MXS MMC host driver.
 
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+---
+ drivers/mmc/host/mxs-mmc.c |   16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
-08.08.2016, 03:25, "Hans de Goede" <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> Hi All,
->
-> Recently I've been working on getting the sdio-wifi, found on
-> many a23 / a33 tablets as well as on some a10s hdmi sticks and
-> on various h3 SBCs such as the Orange Pi, to work with the
-> mainline kernel.
->
-> If you use my sunxi-wip kernel branch (which has some dts bits
-> to enable this as well as some misc. bits, which I'm all
-> trying to get upstream) together with one of the following
-> out of tree drivers, you should be able to get your wifi to
-> work.
->
-> RTL8723BS or RTL8703AS wifi:
-> ----------------------------
-> git clone https://github.com/jwrdegoede/rtl8723bs.git
-> cd rtl8723bs
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-> Do not forget to copy *.bin to /lib/firmware/rtlwifi/ on
-> the target system.
->
-> Many thanks to Bastien Nocera for his great work on the
-> rtl8723bs driver, my repo just adds 2 small fixes
-> to also make the rtl8703as work.
->
-> RTL8189ES / RTL8189ETV
-> ----------------------
-> git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
-> cd rtl8189ES_linux.git
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-> Thanks to Jean-Francois Moine for his initial work on getting
-> the RTL8989ES code to run with upstream kernels.
->
-> RTL8189FTV
-> ----------
-> git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
-> cd rtl8189ES_linux.git
-> git checkout -B rtl8189fs origin/rtl8189fs
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-
-Excuse me for replying such an old email...
-
-If a distro want to provide both 8189es and 8189fs in a kernel package,
-is blacklisting one of them on boards needed?
-
-> ESP8089
-> -------
-> git clone https://github.com/jwrdegoede/esp8089.git
-> git checkout -B cleanup origin/cleanup
-> cd ../linux
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- modules M=../esp8089 CONFIG_ESP8089=m
->
-> Do not forget to copy firmware/*.bin to /lib/firmware/ on
-> the target system.
->
-> Many thanks to Icenowy for his work on the esp8089 driver.
->
-> I hope this is useful to at least some of you.
->
-> A quick note for Orange Pi users, the older models H3 based
-> Pi-s use a soldered on wifi module with the RTL8189ETV.
-> The newer models (the PC Plus, Lite and Plus 2E) use the
-> RTL8189FTV soldered directly onto the PCB.
->
-> Regards,
->
-> Hans
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index c8b8ac6..add1e70 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -153,7 +153,11 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (data) {
++	if (cmd == mrq->sbc) {
++		/* Finished CMD23, now send actual command. */
++		mxs_mmc_start_cmd(host, mrq->cmd);
++		return;
++	} else if (data) {
+ 		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+ 			     data->sg_len, ssp->dma_dir);
+ 		/*
+@@ -166,7 +170,7 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
+ 			data->bytes_xfered = 0;
+ 
+ 		host->data = NULL;
+-		if (mrq->stop) {
++		if (data->stop && (data->error || !mrq->sbc)) {
+ 			mxs_mmc_start_cmd(host, mrq->stop);
+ 			return;
+ 		}
+@@ -495,7 +499,11 @@ static void mxs_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	WARN_ON(host->mrq != NULL);
+ 	host->mrq = mrq;
+-	mxs_mmc_start_cmd(host, mrq->cmd);
++
++	if (mrq->sbc)
++		mxs_mmc_start_cmd(host, mrq->sbc);
++	else
++		mxs_mmc_start_cmd(host, mrq->cmd);
+ }
+ 
+ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -642,7 +650,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	/* set mmc core parameters */
+ 	mmc->ops = &mxs_mmc_ops;
+ 	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+-		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
++		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
+ 
+ 	host->broken_cd = of_property_read_bool(np, "broken-cd");
+ 
+-- 
+1.7.9.5
