@@ -1,62 +1,49 @@
-From: Arend Van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH] brcmfmac: add support for BCM43455 with modalias
- sdio:c00v02D0dA9BF
-Date: Mon, 16 Jan 2017 11:50:11 +0100
-Message-ID: <2e008b34-9da9-2278-b3f4-039db6397499@broadcom.com>
-References: <20170116101757.20483-1-martin.blumenstingl@googlemail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170116101757.20483-1-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: franky.lin-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, hante.meuleman-dY08KVG/lbpWk0Htik3J/w@public.gmane.org
+From: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+Subject: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
+Date: Mon, 16 Jan 2017 12:23:42 -0200
+Message-ID: <20170116142342.21283-1-krisman@collabora.co.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:34888 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750865AbdAPOXz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2017 09:23:55 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, Gabriel Krisman Bertazi <krisman@collabora.co.uk>
 
-On 16-1-2017 11:17, Martin Blumenstingl wrote:
-> BCM43455 is a more recent revision of the BCM4345. Some of the BCM43455
-> got a dedicated SDIO device ID which is currently not supported by
-> brcmfmac.
-> Adding the new sdio_device_id to brcmfmac is enough to get the BCM43455
-> supported because the chip itself is already supported (due to BCM4345
-> support in the driver).
+One of our kernelCI boxes hanged at boot because a faulty eSDHC device
+was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
+reads, which are not allowed for SD devices.  This adds a sanity check
+to the interruption path, preventing that illegal command from getting
+sent if the CARD_INT interruption should be disabled.
 
-Hopefully Kalle can take this through his tree, ie. wireless-drivers-next.
+This quirk allows that particular machine to resume boot despite the
+faulty hardware, instead of getting hung dealing with thousands of
+mishandled interrupts.
 
-Acked-by: Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-> ---
-> This is the proper patch following the (short) discussion from [0]
-> 
-> [0] https://marc.info/?l=linux-wireless&m=148455981002310&w=2
-> 
->  drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c | 1 +
->  include/linux/mmc/sdio_ids.h                              | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> index 72139b579b18..5bc2ba214735 100644
-> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> @@ -1104,6 +1104,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345),
-> +	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4356),
->  	{ /* end: all zeroes */ }
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index d43ef96bf075..71b113e1223f 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -36,6 +36,7 @@
->  #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
->  #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
->  #define SDIO_DEVICE_ID_BROADCOM_4345		0x4345
-> +#define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
->  #define SDIO_DEVICE_ID_BROADCOM_4354		0x4354
->  #define SDIO_DEVICE_ID_BROADCOM_4356		0x4356
->  
-> 
+Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/sdhci.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 51cd4f0e973f..a2efa25c7f3b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2733,7 +2733,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 		if (intmask & SDHCI_INT_RETUNE)
+ 			mmc_retune_needed(host->mmc);
+ 
+-		if (intmask & SDHCI_INT_CARD_INT) {
++		if ((intmask & SDHCI_INT_CARD_INT) &&
++		    (host->ier & SDHCI_INT_CARD_INT)) {
+ 			sdhci_enable_sdio_irq_nolock(host, false);
+ 			host->thread_isr |= SDHCI_INT_CARD_INT;
+ 			result = IRQ_WAKE_THREAD;
+-- 
+2.11.0
+
