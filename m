@@ -1,120 +1,137 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH] mmc: core: Restore parts of the polling policy when
- switch to HS/HS DDR
-Date: Mon, 16 Jan 2017 11:48:38 +0800
-Message-ID: <CAA+hA=QU8Uq9zCyg_-bmSVuPPLEnUrsbXJCgMZtab7Aw4FVrnw@mail.gmail.com>
-References: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
+From: Jeremy McNicoll <jmcnicol@redhat.com>
+Subject: Re: [RFC PATCH 2/3] mmc: sdhci-msm: Implement platform_dumpregs
+ callback in sdhci-msm
+Date: Sun, 15 Jan 2017 21:20:12 -0800
+Message-ID: <20170116052011.GA623@mini-rhel.redhat.com>
+References: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
+ <1483097531-9991-3-git-send-email-riteshh@codeaurora.org>
+ <20170113223117.GB22862@mini-rhel.redhat.com>
+ <120ebd64-e643-c859-05f7-c97294925803@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f195.google.com ([209.85.216.195]:34840 "EHLO
-        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750851AbdAPDsk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 22:48:40 -0500
-Received: by mail-qt0-f195.google.com with SMTP id f4so13029228qte.2
-        for <linux-mmc@vger.kernel.org>; Sun, 15 Jan 2017 19:48:40 -0800 (PST)
-In-Reply-To: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mx1.redhat.com ([209.132.183.28]:47396 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750897AbdAPFUR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Jan 2017 00:20:17 -0500
+Content-Disposition: inline
+In-Reply-To: <120ebd64-e643-c859-05f7-c97294925803@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>, Clemens Gruber <clemens.gruber@pqgruber.com>, Gary Bisson <gary.bisson@boundarydevices.com>, Fabio Estevam <festevam@gmail.com>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@nxp.com>
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
 
-Hi Ulf,
+On Mon, Jan 16, 2017 at 07:51:40AM +0530, Ritesh Harjani wrote:
+> Hi Jeremy,
+> 
+> On 1/14/2017 4:01 AM, Jeremy McNicoll wrote:
+> >On Fri, Dec 30, 2016 at 05:02:10PM +0530, Ritesh Harjani wrote:
+> >>From: Sahitya Tummala <stummala@codeaurora.org>
+> >>
+> >>Implement ->platform_dumpregs host operation to print the
+> >>platform specific registers in addition to standard SDHC
+> >>register during error conditions.
+> >>
+> >>Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+> >>Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> >>---
+> >> drivers/mmc/host/sdhci-msm.c | 34 ++++++++++++++++++++++++++++++++++
+> >> 1 file changed, 34 insertions(+)
+> >>
+> >>diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> >>index 32879b8..1241dbd 100644
+> >>--- a/drivers/mmc/host/sdhci-msm.c
+> >>+++ b/drivers/mmc/host/sdhci-msm.c
+> >>@@ -29,6 +29,11 @@
+> >> #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
+> >> #define CORE_VERSION_MINOR_MASK		0xff
+> >>
+> >>+#define CORE_MCI_DATA_CNT	0x30
+> >>+#define CORE_MCI_STATUS		0x34
+> >>+#define CORE_MCI_FIFO_CNT	0x44
+> >>+#define CORE_MCI_STATUS2	0x6c
+> >>+
+> >> #define CORE_HC_MODE		0x78
+> >> #define HC_MODE_EN		0x1
+> >> #define CORE_POWER		0x0
+> >>@@ -77,6 +82,10 @@
+> >> #define CORE_HC_SELECT_IN_HS400	(6 << 19)
+> >> #define CORE_HC_SELECT_IN_MASK	(7 << 19)
+> >>
+> >>+#define CORE_VENDOR_SPEC_FUNC2		0x110
+> >>+#define CORE_VENDOR_SPEC_ADMA_ERR_ADDR0	0x114
+> >>+#define CORE_VENDOR_SPEC_ADMA_ERR_ADDR1	0x118
+> >>+
+> >> #define CORE_CSR_CDC_CTLR_CFG0		0x130
+> >> #define CORE_SW_TRIG_FULL_CALIB		BIT(16)
+> >> #define CORE_HW_AUTOCAL_ENA		BIT(17)
+> >>@@ -658,6 +667,30 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+> >> 	return ret;
+> >> }
+> >>
+> >>+static void sdhci_msm_dumpregs(struct sdhci_host *host)
+> >>+{
+> >>+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >>+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> >>+
+> >>+	pr_err("----------- PLATFORM REGISTER DUMP -----------\n");
+> >>+
+> >>+	pr_err("Data cnt: 0x%08x | Fifo cnt: 0x%08x | Int sts: 0x%08x | Int sts2: 0x%08x\n",
+> >>+	       readl_relaxed(msm_host->core_mem + CORE_MCI_DATA_CNT),
+> >>+	       readl_relaxed(msm_host->core_mem + CORE_MCI_FIFO_CNT),
+> >>+	       readl_relaxed(msm_host->core_mem + CORE_MCI_STATUS),
+> >>+	       readl_relaxed(msm_host->core_mem + CORE_MCI_STATUS2));
+> >>+	pr_err("DLL cfg:  0x%08x | DLL sts:  0x%08x | SDCC ver: 0x%08x\n",
+> >>+	       readl_relaxed(host->ioaddr + CORE_DLL_CONFIG),
+> >>+	       readl_relaxed(host->ioaddr + CORE_DLL_STATUS),
+> >>+	       readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION));
+> >>+	pr_err("Vndr func: 0x%08x | Vndr adma err : addr0: 0x%08x addr1: 0x%08x\n",
+> >>+	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC),
+> >>+	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_ADMA_ERR_ADDR0),
+> >>+	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_ADMA_ERR_ADDR1));
+> >>+	pr_err("Vndr func2: 0x%08x\n",
+> >>+	       readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC_FUNC2));
+> >>+}
+> >>+
+> >
+> >Why did you omit the printing of CORE_TESTBUS_CONFIG like that of
+> >https://patchwork.kernel.org/patch/9442449/
+> Actually testbus registers aren't something we analyze every-time.
+> So I have skipped it for now. We can add it later if and when required.
+> 
 
-On Fri, Jan 13, 2017 at 7:05 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Regressions for not being able to detect an eMMC HS DDR mode card has been
-> reported for the sdhci-esdhc-imx driver, but potentially other sdhci
-> variants may suffer from the similar problem.
->
-> The commit e173f8911f09 ("mmc: core: Update CMD13 polling policy when
-> switch to HS DDR mode"), is causing the problem. It seems that change moved
-> one step to far, regarding changing the host's timing before polling for a
-> busy card.
->
-> To fix this, let's move back to the behaviour when the host's timing is
-> updated after the polling, but before the switch status is fetched and
-> validated.
->
-> In cases when polling with CMD13, we keep validating the switch status at
-> each attempt. However, to align with the other card busy detections
-> mechanism, let's fetch and validate the switch status also after the host's
-> timing is updated.
->
-> Reported-by: Clemens Gruber <clemens.gruber@pqgruber.com>
-> Reported-by: Gary Bisson <gary.bisson@boundarydevices.com>
-> Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch..")
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Dong Aisheng <aisheng.dong@nxp.com>
-> Cc: Haibo Chen <haibo.chen@nxp.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Sounds reasonable.  
 
-Thanks for the fix.
+> 
+> >
+> >and sdhci_dump_state() was dropped too.  Being able to dump the rpm_info
+> >was very handy for issues I was running into.
+> Sure, let me add that info as well.
+> 
 
-Reviewed-by: Dong Aisheng <aisheng.dong@nxp.com>
+Great, as it was useful when I was debugging SDHCI enablement. 
 
-BTW, i wonder if we could then remove the CMD13 Polling method or give a
-temporarily WARN_ONCE to indicate OBSOLETED using and force all hosts
-to provide card_busy() callback.
-Then we can permanently fix the potential timing mismatch issue.
+-jeremy
 
-Regards
-Dong Aisheng
-
-> ---
->  drivers/mmc/core/mmc_ops.c | 25 ++++++++++++-------------
->  1 file changed, 12 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index db2969f..fe80f26 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -506,9 +506,6 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
->                 }
->         } while (busy);
->
-> -       if (host->ops->card_busy && send_status)
-> -               return mmc_switch_status(card);
-> -
->         return 0;
->  }
->
-> @@ -577,24 +574,26 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->         if (!use_busy_signal)
->                 goto out;
->
-> -       /* Switch to new timing before poll and check switch status. */
-> -       if (timing)
-> -               mmc_set_timing(host, timing);
-> -
->         /*If SPI or used HW busy detection above, then we don't need to poll. */
->         if (((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp) ||
-> -               mmc_host_is_spi(host)) {
-> -               if (send_status)
-> -                       err = mmc_switch_status(card);
-> +               mmc_host_is_spi(host))
->                 goto out_tim;
-> -       }
->
->         /* Let's try to poll to find out when the command is completed. */
->         err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
-> +       if (err)
-> +               goto out;
->
->  out_tim:
-> -       if (err && timing)
-> -               mmc_set_timing(host, old_timing);
-> +       /* Switch to new timing before check switch status. */
-> +       if (timing)
-> +               mmc_set_timing(host, timing);
-> +
-> +       if (send_status) {
-> +               err = mmc_switch_status(card);
-> +               if (err && timing)
-> +                       mmc_set_timing(host, old_timing);
-> +       }
->  out:
->         mmc_retune_release(host);
->
-> --
-> 1.9.1
->
+> >
+> >-jeremy
+> >
+> >> static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+> >> {
+> >> 	int tuning_seq_cnt = 3;
+> >>@@ -1035,6 +1068,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+> >> 	.set_bus_width = sdhci_set_bus_width,
+> >> 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+> >> 	.voltage_switch = sdhci_msm_voltage_switch,
+> >>+	.platform_dumpregs = sdhci_msm_dumpregs,
+> >> };
+> >>
+> >> static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+> >>--
+> >>The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+> >>a Linux Foundation Collaborative Project.
+> >>
+> 
+> -- 
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+> a Linux Foundation Collaborative Project
