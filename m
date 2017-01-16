@@ -1,235 +1,106 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3 2/2] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Mon, 16 Jan 2017 10:35:21 +0800
-Message-ID: <0a49ba8d-e749-8462-fa48-7d8a17cecc75@rock-chips.com>
-References: <20170113052937.12538-1-matt@ranostay.consulting>
- <20170113052937.12538-3-matt@ranostay.consulting>
- <cd669d08-0db4-57e4-478b-2b200ccef6f1@rock-chips.com>
- <CAJ_EiSQtPUwv9K7CbM5e_wnre6=qR=+hgtq-oVFub2phijvXgA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Restore parts of the polling policy when
+ switch to HS/HS DDR
+Date: Mon, 16 Jan 2017 10:38:27 +0800
+Message-ID: <c828e654-2efc-4e3c-d7d8-c3bb3fc89a15@rock-chips.com>
+References: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:49618 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:50571 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751246AbdAPCgY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:36:24 -0500
-In-Reply-To: <CAJ_EiSQtPUwv9K7CbM5e_wnre6=qR=+hgtq-oVFub2phijvXgA@mail.gmail.com>
+        with ESMTP id S1751246AbdAPCjS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:39:18 -0500
+In-Reply-To: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: shawn.lin@rock-chips.com, linux-wireless@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Clemens Gruber <clemens.gruber@pqgruber.com>, Gary Bisson <gary.bisson@boundarydevices.com>, Dong Aisheng <dongas86@gmail.com>, Fabio Estevam <festevam@gmail.com>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@nxp.com>
 
-On 2017/1/16 5:41, Matt Ranostay wrote:
-> On Thu, Jan 12, 2017 at 11:16 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> On 2017/1/13 13:29, Matt Ranostay wrote:
->>>
->>> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
->>> This can be abstracted to other chipsets if needed in the future.
->>>
->>> Cc: Tony Lindgren <tony@atomide.com>
->>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
->>> ---
->>>  drivers/mmc/core/Kconfig         |  10 ++++
->>>  drivers/mmc/core/Makefile        |   1 +
->>>  drivers/mmc/core/pwrseq_sd8787.c | 117
->>> +++++++++++++++++++++++++++++++++++++++
->>>  3 files changed, 128 insertions(+)
->>>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
->>>
->>> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
->>> index cdfa8520a4b1..fc1ecdaaa9ca 100644
->>> --- a/drivers/mmc/core/Kconfig
->>> +++ b/drivers/mmc/core/Kconfig
->>> @@ -12,6 +12,16 @@ config PWRSEQ_EMMC
->>>           This driver can also be built as a module. If so, the module
->>>           will be called pwrseq_emmc.
->>>
->>> +config PWRSEQ_SD8787
->>> +       tristate "HW reset support for SD8787 BT + Wifi module"
->>> +       depends on OF && (MWIFIEX || BT_MRVL_SDIO)
->>> +       help
->>> +         This selects hardware reset support for the SD8787 BT + Wifi
->>> +         module. By default this option is set to n.
->>> +
->>> +         This driver can also be built as a module. If so, the module
->>> +         will be called pwrseq_sd8787.
->>> +
->>
->>
->> I don't like this way, as we have a chance to list lots
->> configure options here. wifi A,B,C,D...Z, all of them need a
->> new section here if needed?
->>
->> Instead, could you just extent pwrseq_simple.c and add you
->> .compatible = "mmc-pwrseq-sd8787", "mmc-pwrseq-simple"?
+On 2017/1/13 19:05, Ulf Hansson wrote:
+> Regressions for not being able to detect an eMMC HS DDR mode card has been
+> reported for the sdhci-esdhc-imx driver, but potentially other sdhci
+> variants may suffer from the similar problem.
 >
-> You mean all the chipset pwrseqs linked into the pwrseq-simple module?
+> The commit e173f8911f09 ("mmc: core: Update CMD13 polling policy when
+> switch to HS DDR mode"), is causing the problem. It seems that change moved
+> one step to far, regarding changing the host's timing before polling for a
+> busy card.
+>
+> To fix this, let's move back to the behaviour when the host's timing is
+> updated after the polling, but before the switch status is fetched and
+> validated.
+>
+> In cases when polling with CMD13, we keep validating the switch status at
+> each attempt. However, to align with the other card busy detections
+> mechanism, let's fetch and validate the switch status also after the host's
+> timing is updated.
+>
 
-What I mean was if you just extent the pwrseq-simple a bit, you could
-just add your chipset pwrseqs linked into the pwrseq-simple. But if you
-need a different *pattern* of pwrseqs, you should need a new name, for
-instance, pwrseq-sdio.c etc... But please don't use the name of
-sd8787? So if I use a wifi named ABC but using the same pwrseq pattenr,
-should I include your "mmc-pwrseq- sd8787" for that or I need a new
-mmc-pwrseq-ABC.c?
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
+> Reported-by: Clemens Gruber <clemens.gruber@pqgruber.com>
+> Reported-by: Gary Bisson <gary.bisson@boundarydevices.com>
+> Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch..")
+> Cc: Shawn Lin <shawn.lin@rock-chips.com>
+> Cc: Dong Aisheng <aisheng.dong@nxp.com>
+> Cc: Haibo Chen <haibo.chen@nxp.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 25 ++++++++++++-------------
+>  1 file changed, 12 insertions(+), 13 deletions(-)
 >
-> Ulf your thoughts on this?
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index db2969f..fe80f26 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -506,9 +506,6 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>  		}
+>  	} while (busy);
 >
->>
->>
->>
->>>  config PWRSEQ_SIMPLE
->>>         tristate "Simple HW reset support for MMC"
->>>         default y
->>> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
->>> index b2a257dc644f..0f81464fa824 100644
->>> --- a/drivers/mmc/core/Makefile
->>> +++ b/drivers/mmc/core/Makefile
->>> @@ -10,6 +10,7 @@ mmc_core-y                    := core.o bus.o host.o \
->>>                                    quirks.o slot-gpio.o
->>>  mmc_core-$(CONFIG_OF)          += pwrseq.o
->>>  obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
->>> +obj-$(CONFIG_PWRSEQ_SD8787)    += pwrseq_sd8787.o
->>>  obj-$(CONFIG_PWRSEQ_EMMC)      += pwrseq_emmc.o
->>>  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
->>>  obj-$(CONFIG_MMC_BLOCK)                += mmc_block.o
->>> diff --git a/drivers/mmc/core/pwrseq_sd8787.c
->>> b/drivers/mmc/core/pwrseq_sd8787.c
->>> new file mode 100644
->>> index 000000000000..f4080fe6439e
->>> --- /dev/null
->>> +++ b/drivers/mmc/core/pwrseq_sd8787.c
->>> @@ -0,0 +1,117 @@
->>> +/*
->>> + * pwrseq_sd8787.c - power sequence support for Marvell SD8787 BT + Wifi
->>> chip
->>> + *
->>> + * Copyright (C) 2016 Matt Ranostay <matt@ranostay.consulting>
->>> + *
->>> + * Based on the original work pwrseq_simple.c
->>> + *  Copyright (C) 2014 Linaro Ltd
->>> + *  Author: Ulf Hansson <ulf.hansson@linaro.org>
->>> + *
->>> + * This program is free software; you can redistribute it and/or modify
->>> + * it under the terms of the GNU General Public License as published by
->>> + * the Free Software Foundation; either version 2 of the License, or
->>> + * (at your option) any later version.
->>> + *
->>> + * This program is distributed in the hope that it will be useful,
->>> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
->>> + * GNU General Public License for more details.
->>> + *
->>> + */
->>> +
->>> +#include <linux/delay.h>
->>> +#include <linux/init.h>
->>> +#include <linux/kernel.h>
->>> +#include <linux/platform_device.h>
->>> +#include <linux/module.h>
->>> +#include <linux/slab.h>
->>> +#include <linux/device.h>
->>> +#include <linux/err.h>
->>> +#include <linux/gpio/consumer.h>
->>> +
->>> +#include <linux/mmc/host.h>
->>> +
->>> +#include "pwrseq.h"
->>> +
->>> +struct mmc_pwrseq_sd8787 {
->>> +       struct mmc_pwrseq pwrseq;
->>> +       struct gpio_desc *reset_gpio;
->>> +       struct gpio_desc *pwrdn_gpio;
->>> +};
->>> +
->>> +#define to_pwrseq_sd8787(p) container_of(p, struct mmc_pwrseq_sd8787,
->>> pwrseq)
->>> +
->>> +static void mmc_pwrseq_sd8787_pre_power_on(struct mmc_host *host)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
->>> +
->>> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
->>> +
->>> +       msleep(300);
->>> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 1);
->>> +}
->>> +
->>> +static void mmc_pwrseq_sd8787_power_off(struct mmc_host *host)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
->>> +
->>> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 0);
->>> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
->>> +}
->>> +
->>> +static const struct mmc_pwrseq_ops mmc_pwrseq_sd8787_ops = {
->>> +       .pre_power_on = mmc_pwrseq_sd8787_pre_power_on,
->>> +       .power_off = mmc_pwrseq_sd8787_power_off,
->>> +};
->>> +
->>> +static const struct of_device_id mmc_pwrseq_sd8787_of_match[] = {
->>> +       { .compatible = "mmc-pwrseq-sd8787",},
->>> +       {/* sentinel */},
->>> +};
->>> +MODULE_DEVICE_TABLE(of, mmc_pwrseq_sd8787_of_match);
->>> +
->>> +static int mmc_pwrseq_sd8787_probe(struct platform_device *pdev)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq;
->>> +       struct device *dev = &pdev->dev;
->>> +
->>> +       pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
->>> +       if (!pwrseq)
->>> +               return -ENOMEM;
->>> +
->>> +       pwrseq->pwrdn_gpio = devm_gpiod_get(dev, "pwrdn", GPIOD_OUT_LOW);
->>> +       if (IS_ERR(pwrseq->pwrdn_gpio))
->>> +               return PTR_ERR(pwrseq->pwrdn_gpio);
->>> +
->>> +       pwrseq->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
->>> +       if (IS_ERR(pwrseq->reset_gpio))
->>> +               return PTR_ERR(pwrseq->reset_gpio);
->>> +
->>> +       pwrseq->pwrseq.dev = dev;
->>> +       pwrseq->pwrseq.ops = &mmc_pwrseq_sd8787_ops;
->>> +       pwrseq->pwrseq.owner = THIS_MODULE;
->>> +       platform_set_drvdata(pdev, pwrseq);
->>> +
->>> +       return mmc_pwrseq_register(&pwrseq->pwrseq);
->>> +}
->>> +
->>> +static int mmc_pwrseq_sd8787_remove(struct platform_device *pdev)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq = platform_get_drvdata(pdev);
->>> +
->>> +       mmc_pwrseq_unregister(&pwrseq->pwrseq);
->>> +
->>> +       return 0;
->>> +}
->>> +
->>> +static struct platform_driver mmc_pwrseq_sd8787_driver = {
->>> +       .probe = mmc_pwrseq_sd8787_probe,
->>> +       .remove = mmc_pwrseq_sd8787_remove,
->>> +       .driver = {
->>> +               .name = "pwrseq_sd8787",
->>> +               .of_match_table = mmc_pwrseq_sd8787_of_match,
->>> +       },
->>> +};
->>> +
->>> +module_platform_driver(mmc_pwrseq_sd8787_driver);
->>> +MODULE_LICENSE("GPL v2");
->>>
->>
->>
->> --
->> Best Regards
->> Shawn Lin
->>
+> -	if (host->ops->card_busy && send_status)
+> -		return mmc_switch_status(card);
+> -
+>  	return 0;
+>  }
 >
+> @@ -577,24 +574,26 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  	if (!use_busy_signal)
+>  		goto out;
+>
+> -	/* Switch to new timing before poll and check switch status. */
+> -	if (timing)
+> -		mmc_set_timing(host, timing);
+> -
+>  	/*If SPI or used HW busy detection above, then we don't need to poll. */
+>  	if (((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp) ||
+> -		mmc_host_is_spi(host)) {
+> -		if (send_status)
+> -			err = mmc_switch_status(card);
+> +		mmc_host_is_spi(host))
+>  		goto out_tim;
+> -	}
+>
+>  	/* Let's try to poll to find out when the command is completed. */
+>  	err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
+> +	if (err)
+> +		goto out;
+>
+>  out_tim:
+> -	if (err && timing)
+> -		mmc_set_timing(host, old_timing);
+> +	/* Switch to new timing before check switch status. */
+> +	if (timing)
+> +		mmc_set_timing(host, timing);
+> +
+> +	if (send_status) {
+> +		err = mmc_switch_status(card);
+> +		if (err && timing)
+> +			mmc_set_timing(host, old_timing);
+> +	}
+>  out:
+>  	mmc_retune_release(host);
 >
 >
 
