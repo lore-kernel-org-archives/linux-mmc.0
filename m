@@ -1,106 +1,118 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: Restore parts of the polling policy when
- switch to HS/HS DDR
-Date: Mon, 16 Jan 2017 10:38:27 +0800
-Message-ID: <c828e654-2efc-4e3c-d7d8-c3bb3fc89a15@rock-chips.com>
-References: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 1/2] mmc: dw_mmc: silent verbose log when calling from
+ PM context
+Date: Mon, 16 Jan 2017 10:43:21 +0800
+Message-ID: <28587a11-fd3e-31da-bc50-d63252cf3a78@rock-chips.com>
+References: <1484276362-44984-1-git-send-email-shawn.lin@rock-chips.com>
+ <e300d9fe-d410-815d-8615-0d319fcabc5d@soulik.info>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:50571 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.134]:45257 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751246AbdAPCjS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:39:18 -0500
-In-Reply-To: <1484305503-30723-1-git-send-email-ulf.hansson@linaro.org>
+        with ESMTP id S1751246AbdAPCoN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:44:13 -0500
+In-Reply-To: <e300d9fe-d410-815d-8615-0d319fcabc5d@soulik.info>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Clemens Gruber <clemens.gruber@pqgruber.com>, Gary Bisson <gary.bisson@boundarydevices.com>, Dong Aisheng <dongas86@gmail.com>, Fabio Estevam <festevam@gmail.com>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@nxp.com>
+To: ayaka <ayaka@soulik.info>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, sgilles@math.umd.edu, linux-rockchip@lists.infradead.org
 
-On 2017/1/13 19:05, Ulf Hansson wrote:
-> Regressions for not being able to detect an eMMC HS DDR mode card has been
-> reported for the sdhci-esdhc-imx driver, but potentially other sdhci
-> variants may suffer from the similar problem.
+On 2017/1/15 11:50, ayaka wrote:
 >
-> The commit e173f8911f09 ("mmc: core: Update CMD13 polling policy when
-> switch to HS DDR mode"), is causing the problem. It seems that change moved
-> one step to far, regarding changing the host's timing before polling for a
-> busy card.
 >
-> To fix this, let's move back to the behaviour when the host's timing is
-> updated after the polling, but before the switch status is fetched and
-> validated.
->
-> In cases when polling with CMD13, we keep validating the switch status at
-> each attempt. However, to align with the other card busy detections
-> mechanism, let's fetch and validate the switch status also after the host's
-> timing is updated.
->
+> On 01/13/2017 10:59 AM, Shawn Lin wrote:
+>> When deploying runtime PM, it's quite verbose to print the
+>> log of ios setting. Also it's useless to print it from system
+>> PM as it should be the same with booting time. We also have
+>> sysfs to get all these information from ios attribute, so let's
+>> skip this print from PM context.
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>> ---
+>>
+>> Changes in v5: None
+>> Changes in v4: None
+>> Changes in v3: None
+>> Changes in v2: None
+>>
+>>   drivers/mmc/host/dw_mmc.c | 21 ++++++++++++---------
+>>   1 file changed, 12 insertions(+), 9 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 3d213e7..dc58ec3 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1153,7 +1153,8 @@ static void mci_send_cmd(struct dw_mci_slot
+>> *slot, u32 cmd, u32 arg)
+>>           cmd, arg, cmd_status);
+>>   }
+>>   -static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool
+>> force_clkinit)
+>> +static void dw_mci_setup_bus(struct dw_mci_slot *slot,
+>> +                 bool force_clkinit, bool pm_context)
+>>   {
+>>       struct dw_mci *host = slot->host;
+>>       unsigned int clock = slot->clock;
+>> @@ -1182,11 +1183,13 @@ static void dw_mci_setup_bus(struct
+>> dw_mci_slot *slot, bool force_clkinit)
+>>           if ((clock != slot->__clk_old &&
+>>               !test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
+>>               force_clkinit) {
+>> -            dev_info(&slot->mmc->class_dev,
+>> -                 "Bus speed (slot %d) = %dHz (slot req %dHz, actual
+>> %dHZ div = %d)\n",
+>> -                 slot->id, host->bus_hz, clock,
+>> -                 div ? ((host->bus_hz / div) >> 1) :
+>> -                 host->bus_hz, div);
+>> +            /* Silent the verbose log if calling from PM context */
+>> +            if (!pm_context)
+>> +                dev_info(&slot->mmc->class_dev,
+>> +                     "Bus speed (slot %d) = %dHz (slot req %dHz,
+>> actual %dHZ div = %d)\n",
+>> +                     slot->id, host->bus_hz, clock,
+>> +                     div ? ((host->bus_hz / div) >> 1) :
+>> +                     host->bus_hz, div);
+>>                 /*
+>>                * If card is polling, display the message only
+>> @@ -1434,12 +1437,12 @@ static void dw_mci_set_ios(struct mmc_host
+>> *mmc, struct mmc_ios *ios)
+>>           }
+>>             /* Adjust clock / bus width after power is up */
+>> -        dw_mci_setup_bus(slot, false);
+>> +        dw_mci_setup_bus(slot, false, false);
+>>             break;
+>>       case MMC_POWER_OFF:
+>>           /* Turn clock off before power goes down */
+>> -        dw_mci_setup_bus(slot, false);
+>> +        dw_mci_setup_bus(slot, false, false);
+>>             if (!IS_ERR(mmc->supply.vmmc))
+>>               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>> @@ -3366,7 +3369,7 @@ int dw_mci_runtime_resume(struct device *dev)
+>>               continue;
+>>           if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+>>               dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+>> -            dw_mci_setup_bus(slot, true);
+>> +            dw_mci_setup_bus(slot, true, true);
+> Sadness, it seems not work for firefly reload, maybe there is some
+> problems with the card detect in that board.
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+This patch is intended to prevent the spamming log from pm context but
+your firefly-reload board should have a another problem. So IIRC you
+still see the spamming log with polling mode, we need to dig that later
+but we need this two patches(at least 2/2) merged into 4.10-rc cycle to
+fix the boot problem.
 
-> Reported-by: Clemens Gruber <clemens.gruber@pqgruber.com>
-> Reported-by: Gary Bisson <gary.bisson@boundarydevices.com>
-> Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch..")
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Dong Aisheng <aisheng.dong@nxp.com>
-> Cc: Haibo Chen <haibo.chen@nxp.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/mmc_ops.c | 25 ++++++++++++-------------
->  1 file changed, 12 insertions(+), 13 deletions(-)
+
+
+
+
+>>           }
+>>       }
+>>
 >
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index db2969f..fe80f26 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -506,9 +506,6 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
->  		}
->  	} while (busy);
 >
-> -	if (host->ops->card_busy && send_status)
-> -		return mmc_switch_status(card);
-> -
->  	return 0;
->  }
->
-> @@ -577,24 +574,26 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  	if (!use_busy_signal)
->  		goto out;
->
-> -	/* Switch to new timing before poll and check switch status. */
-> -	if (timing)
-> -		mmc_set_timing(host, timing);
-> -
->  	/*If SPI or used HW busy detection above, then we don't need to poll. */
->  	if (((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp) ||
-> -		mmc_host_is_spi(host)) {
-> -		if (send_status)
-> -			err = mmc_switch_status(card);
-> +		mmc_host_is_spi(host))
->  		goto out_tim;
-> -	}
->
->  	/* Let's try to poll to find out when the command is completed. */
->  	err = mmc_poll_for_busy(card, timeout_ms, send_status, retry_crc_err);
-> +	if (err)
-> +		goto out;
->
->  out_tim:
-> -	if (err && timing)
-> -		mmc_set_timing(host, old_timing);
-> +	/* Switch to new timing before check switch status. */
-> +	if (timing)
-> +		mmc_set_timing(host, timing);
-> +
-> +	if (send_status) {
-> +		err = mmc_switch_status(card);
-> +		if (err && timing)
-> +			mmc_set_timing(host, old_timing);
-> +	}
->  out:
->  	mmc_retune_release(host);
 >
 >
 
