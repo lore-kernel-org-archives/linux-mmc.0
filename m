@@ -1,97 +1,67 @@
-From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [RFC PATCH 1/3] mmc: sdhci: Add platform_dumpregs callback
- support to sdhci_ops.
-Date: Sun, 15 Jan 2017 21:21:18 -0800
-Message-ID: <20170116052118.GB623@mini-rhel.redhat.com>
-References: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
- <1483097531-9991-2-git-send-email-riteshh@codeaurora.org>
- <20170113222125.GA22862@mini-rhel.redhat.com>
- <111ae8a1-c626-9285-5704-0af45f4b510d@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <111ae8a1-c626-9285-5704-0af45f4b510d@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
+From: Andrea Merello <andrea.merello@gmail.com>
+Subject: [PATCH v3 0/9] mmc: mmci: add support for STM32 SD controller
+Date: Mon, 16 Jan 2017 08:37:09 +0100
+Message-ID: <1484552238-23171-1-git-send-email-andrea.merello@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34630 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750845AbdAPHhg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2017 02:37:36 -0500
+Received: by mail-wm0-f66.google.com with SMTP id c85so28593958wmi.1
+        for <linux-mmc@vger.kernel.org>; Sun, 15 Jan 2017 23:37:36 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, mcoquelin.stm32@gmail.com, alexandre.torgue@st.com
+Cc: linux-mmc@vger.kernel.org, bruherrera@gmail.com, Andrea Merello <andrea.merello@gmail.com>
 
-On Mon, Jan 16, 2017 at 07:45:48AM +0530, Ritesh Harjani wrote:
-> Hi Jeremy,
-> 
-> Thanks for the review.
-> 
-> On 1/14/2017 3:51 AM, Jeremy McNicoll wrote:
-> >On Fri, Dec 30, 2016 at 05:02:09PM +0530, Ritesh Harjani wrote:
-> >>From: Sahitya Tummala <stummala@codeaurora.org>
-> >>
-> >>Add new host operation ->platform_dumpregs to provide a
-> >>mechanism through which host drivers can dump platform
-> >>specific registers in addition to SDHC registers
-> >>during error conditions.
-> >>
-> >>Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> >>Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> >>---
-> >> drivers/mmc/host/sdhci.c | 3 +++
-> >> drivers/mmc/host/sdhci.h | 1 +
-> >> 2 files changed, 4 insertions(+)
-> >>
-> >
-> >This change and 2/3 look like they can be squished together into
-> >one patch.  At least that is how I did it,
-> 
-> I felt it is better this way to keep sdhci and sdhci-msm patches separate.
-> This patch provides mechanism and patch 3/3 provides
-> implementation of ->platform_dumpregs in sdhci-msm.
->
+The SD controller found in STM32 MCUs happens to be yet another variant
+of the ARM PrimeCell PL18x SD host controller, for which the mmci driver
+exists.
 
-Alright, lets go with that approach.  
+This series adds support for it to the mmci driver.
 
--jeremy
+As other variants, this one need some specific quirks, that this series
+address. Most notably this variant has not AMBA PrimeCell id registers,
+so we can't probe it using the AMBA PrimeCell generic "compatible" and
+mechanism; rather this series adds support to the mmci driver for
+register itself also as platform driver, so that specific "compatible"
+strings can also be used.
 
-> Regards
-> Ritesh
-> 
-> 
-> >
-> >https://patchwork.kernel.org/patch/9442449/
-> >
-> >-jeremy
-> >
-> >
-> >>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >>index 2390980..73a8918 100644
-> >>--- a/drivers/mmc/host/sdhci.c
-> >>+++ b/drivers/mmc/host/sdhci.c
-> >>@@ -101,6 +101,9 @@ static void sdhci_dumpregs(struct sdhci_host *host)
-> >> 			       readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
-> >> 	}
-> >>
-> >>+	if (host->ops->platform_dumpregs)
-> >>+		host->ops->platform_dumpregs(host);
-> >>+
-> >> 	pr_err(DRIVER_NAME ": ===========================================\n");
-> >> }
-> >>
-> >>diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> >>index 0b66f21..400f3a1 100644
-> >>--- a/drivers/mmc/host/sdhci.h
-> >>+++ b/drivers/mmc/host/sdhci.h
-> >>@@ -564,6 +564,7 @@ struct sdhci_ops {
-> >> 					 struct mmc_card *card,
-> >> 					 unsigned int max_dtr, int host_drv,
-> >> 					 int card_drv, int *drv_type);
-> >>+	void	(*platform_dumpregs)(struct sdhci_host *host);
-> >> };
-> >>
-> >> #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> >>--
-> >>The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> >>a Linux Foundation Collaborative Project.
-> >>
-> 
-> -- 
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> a Linux Foundation Collaborative Project
+I tested this on my STM32F469-disco board, that is able to boot from an
+SD card, and write/read to/from it.
+
+RFT for other variants (to check I didn't broke anything) and with MMC
+cards. In particular I tried to implement also support for open-collector
+communication mode, that AFAICT is used only on MMC cards, but I couldn't
+test it.
+
+Changes since v1:
+- fixed compile failure when CONFIG_ARM_AMBA is enabled
+- fixed mmc CD pin claimed two times
+- trivial whitespace and newline fixes
+
+Changes since v2:
+- dropped pinmux cfg for CD pin: it is handled by MMC layer using gpiolib
+
+Andrea Merello (9):
+  mmc: mmci: don't pretend IP variants with only one IRQ to have two
+    mask regs
+  mmc: mmci: add support for not-amba, but still compatible, variants
+  mmc: mmci: don't pretend all variants to have MCI_STARBITERR flag
+  mmc: mmci: add support for setting pad type via pinctrl
+  mmc: mmci: add STM32 variant
+  ARM: DTS: stm32: add pin map for SDIO controller on stm32f429
+  ARM: DTS: stm32: add node for SDIO controller on stm32f429
+  ARM: DTS: enable SDIO controller on stm32f469 disco board
+  Documentation: document mmci STM32 DT binding
+
+ Documentation/devicetree/bindings/mmc/mmci.txt |   2 +-
+ arch/arm/boot/dts/stm32f429.dtsi               |  47 ++-
+ arch/arm/boot/dts/stm32f469-disco.dts          |  18 ++
+ drivers/mmc/host/Kconfig                       |   8 +-
+ drivers/mmc/host/mmci.c                        | 398 +++++++++++++++++++------
+ drivers/mmc/host/mmci.h                        |   7 +-
+ 6 files changed, 385 insertions(+), 95 deletions(-)
+
+--
+2.7.4
