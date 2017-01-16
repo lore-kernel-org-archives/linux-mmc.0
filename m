@@ -1,66 +1,71 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v3 7/13] mmc: sunxi: Add more debug messages
-Date: Mon, 16 Jan 2017 17:56:57 +0100
-Message-ID: <102ea884b296dae38ab28369ce14aa7a7998dc80.1484585798.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v3 4/13] mmc: sunxi: Enable the new timings for the A64 MMC
+ controllers
+Date: Mon, 16 Jan 2017 17:56:54 +0100
+Message-ID: <b8621ba45fe2f2d8ba70f11bf141998fe98a9962.1484585798.git-series.maxime.ripard@free-electrons.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
+Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add a bit more debug messages that can be helpful when debugging the clock
-setup.
+The A64 MMC controllers need to set a "new timings" bit when a new rate is
+set.
+
+The actual meaning of that bit is not clear yet, but not setting it leads
+to some corner-case issues, like the CMD53 failing, which is used to
+implement SDIO packet aggregation.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 6 ++++++
+ 1 file changed, 6 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index f0f6922bca8a..40ed287ceb1c 100644
+index b9c8a62bc212..51d6388a194e 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -661,6 +661,9 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	unsigned long expire = jiffies + msecs_to_jiffies(750);
- 	u32 rval;
+@@ -253,6 +253,8 @@ struct sunxi_mmc_cfg {
  
-+	dev_dbg(mmc_dev(host->mmc), "%sabling the clock\n",
-+		oclk_en ? "en" : "dis");
+ 	/* does the IP block support autocalibration? */
+ 	bool can_calibrate;
 +
- 	rval = mmc_readl(host, REG_CLKCR);
- 	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON | SDXC_MASK_DATA0);
++	bool needs_new_timings;
+ };
  
-@@ -737,6 +740,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
- 			index = SDXC_CLK_50M_DDR;
- 		}
- 	} else {
-+		dev_dbg(mmc_dev(host->mmc), "Invalid clock... returning\n");
- 		return -EINVAL;
+ struct sunxi_mmc_host {
+@@ -779,6 +781,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
  	}
+ 	mmc_writel(host, REG_CLKCR, rval);
  
-@@ -753,6 +757,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	u32 rval, clock = ios->clock;
- 	int ret;
- 
-+	dev_dbg(mmc_dev(host->mmc), "setting clk to %u (requested %u)\n",
-+		clock, ios->clock);
++	if (host->cfg->needs_new_timings)
++		mmc_writel(host, REG_SD_NTSR, SDXC_2X_TIMING_MODE);
 +
- 	ret = sunxi_mmc_oclk_onoff(host, 0);
+ 	ret = sunxi_mmc_clk_set_phase(host, ios, rate);
  	if (ret)
  		return ret;
-@@ -771,8 +778,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 			clock, rate);
- 		return rate;
- 	}
--	dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %ld\n",
--		clock, rate);
-+	dev_dbg(mmc_dev(host->mmc), "Rounded clk to %ld\n", rate);
+@@ -1076,6 +1081,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
+ 	.idma_des_size_bits = 16,
+ 	.clk_delays = NULL,
+ 	.can_calibrate = true,
++	.needs_new_timings = true,
+ };
  
- 	/* setting clock rate */
- 	ret = clk_set_rate(host->clk_mmc, rate);
+ static const struct of_device_id sunxi_mmc_of_match[] = {
 -- 
 git-series 0.8.11
