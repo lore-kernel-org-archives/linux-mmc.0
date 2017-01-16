@@ -1,71 +1,53 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v3 4/13] mmc: sunxi: Enable the new timings for the A64 MMC
- controllers
-Date: Mon, 16 Jan 2017 17:56:54 +0100
-Message-ID: <b8621ba45fe2f2d8ba70f11bf141998fe98a9962.1484585798.git-series.maxime.ripard@free-electrons.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: [PATCH v3 12/13] arm64: allwinner: a64: add UART1 pin nodes
+Date: Mon, 16 Jan 2017 17:57:02 +0100
+Message-ID: <a0dd27c08182f0a8c6d76bab80fb82ac5a9a09f9.1484585798.git-series.maxime.ripard@free-electrons.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The A64 MMC controllers need to set a "new timings" bit when a new rate is
-set.
+From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 
-The actual meaning of that bit is not clear yet, but not setting it leads
-to some corner-case issues, like the CMD53 failing, which is used to
-implement SDIO packet aggregation.
+On many boards UART1 connects to a Bluetooth chip, so add the pinctrl
+nodes for the only pins providing access to that UART. That includes
+those pins for hardware flow control (RTS/CTS).
 
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- drivers/mmc/host/sunxi-mmc.c | 6 ++++++
- 1 file changed, 6 insertions(+), 0 deletions(-)
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 10 ++++++++++
+ 1 file changed, 10 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index b9c8a62bc212..51d6388a194e 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -253,6 +253,8 @@ struct sunxi_mmc_cfg {
- 
- 	/* does the IP block support autocalibration? */
- 	bool can_calibrate;
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+index b371fccc234b..8ffdc24f92ca 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+@@ -234,6 +234,16 @@
+ 				pins = "PB8", "PB9";
+ 				function = "uart0";
+ 			};
 +
-+	bool needs_new_timings;
- };
- 
- struct sunxi_mmc_host {
-@@ -779,6 +781,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	}
- 	mmc_writel(host, REG_CLKCR, rval);
- 
-+	if (host->cfg->needs_new_timings)
-+		mmc_writel(host, REG_SD_NTSR, SDXC_2X_TIMING_MODE);
++			uart1_pins: uart1_pins {
++				pins = "PG6", "PG7";
++				function = "uart1";
++			};
 +
- 	ret = sunxi_mmc_clk_set_phase(host, ios, rate);
- 	if (ret)
- 		return ret;
-@@ -1076,6 +1081,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
- 	.can_calibrate = true,
-+	.needs_new_timings = true,
- };
++			uart1_rts_cts_pins: uart1_rts_cts_pins {
++				pins = "PG8", "PG9";
++				function = "uart1";
++			};
+ 		};
  
- static const struct of_device_id sunxi_mmc_of_match[] = {
+ 		uart0: serial@1c28000 {
 -- 
 git-series 0.8.11
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
