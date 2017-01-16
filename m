@@ -1,262 +1,154 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3 06/15] mmc: core: First step in cleaning up private mmc
- header files
-Date: Mon, 16 Jan 2017 10:56:46 +0800
-Message-ID: <f6e6dbc9-3186-b98a-eb2d-aa02cbab677e@rock-chips.com>
+Subject: Re: [PATCH v3 07/15] mmc: core: Move public functions from core.h to
+ private headers
+Date: Mon, 16 Jan 2017 11:01:11 +0800
+Message-ID: <87e14348-b6fa-4962-ef3b-ac9a35d37da3@rock-chips.com>
 References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
- <1484313256-25993-7-git-send-email-ulf.hansson@linaro.org>
+ <1484313256-25993-8-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:49183 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:57823 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751431AbdAPC5f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:57:35 -0500
-In-Reply-To: <1484313256-25993-7-git-send-email-ulf.hansson@linaro.org>
+        with ESMTP id S1751246AbdAPDB7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 22:01:59 -0500
+In-Reply-To: <1484313256-25993-8-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
 On 2017/1/13 21:14, Ulf Hansson wrote:
-> This is the first step in cleaning up the private mmc header files. In this
-> change we makes sure each header file builds standalone, as that helps to
-> resolve dependencies.
+> A significant amount of functions are available through the public mmc
+> core.h header file. Let's slim down this public mmc interface, as to
+> prevent users from abusing it, by moving some of the functions to private
+> mmc header files.
 >
-> While changing this, it also seems reasonable to stop including other
-> headers from inside a header itself which it don't depend upon.
-> Additionally, in some cases such dependencies are better resolved by
-> forward declaring the needed struct.
+> This change concentrates on moving the functions into private mmc headers,
+> following changes may continue with additional clean-ups, as an example
+> some functions can be turned into static.
 >
+
+[...]
+
+> @@ -16,6 +16,7 @@
+>  #include <linux/mmc/sdio_func.h>
+>
+>  #include "sdio_ops.h"
+> +#include "core.h"
+>
+
+Should we need move it before sdio_ops.h to
+slightly keep the order? The same for sdio_orq.c change :)
+
+Otherwise,
 
 Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/block.h     | 8 ++++++++
->  drivers/mmc/core/bus.h       | 4 ++++
->  drivers/mmc/core/core.h      | 4 ++++
->  drivers/mmc/core/host.h      | 3 ++-
->  drivers/mmc/core/mmc_ops.h   | 5 +++++
->  drivers/mmc/core/pwrseq.h    | 6 +++++-
->  drivers/mmc/core/queue.h     | 6 +++++-
->  drivers/mmc/core/sd.h        | 5 ++++-
->  drivers/mmc/core/sd_ops.h    | 5 +++++
->  drivers/mmc/core/sdio_bus.h  | 3 +++
->  drivers/mmc/core/sdio_cis.h  | 3 +++
->  drivers/mmc/core/sdio_ops.h  | 4 ++++
->  drivers/mmc/core/slot-gpio.h | 2 ++
->  13 files changed, 54 insertions(+), 4 deletions(-)
+>  /**
+>   *	sdio_claim_host - exclusively claim a bus for a certain SDIO function
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index f1faf9a..d084635 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -27,6 +27,7 @@
+>  #include <linux/mmc/sdio_func.h>
 >
-> diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
-> index cdabb2e..00b7483 100644
-> --- a/drivers/mmc/core/block.h
-> +++ b/drivers/mmc/core/block.h
-> @@ -1 +1,9 @@
-> +#ifndef _MMC_CORE_BLOCK_H
-> +#define _MMC_CORE_BLOCK_H
-> +
-> +struct mmc_queue;
-> +struct request;
-> +
->  int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
-> +
-> +#endif
-> diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
-> index 00a1971..93b516a 100644
-> --- a/drivers/mmc/core/bus.h
-> +++ b/drivers/mmc/core/bus.h
-> @@ -11,6 +11,10 @@
->  #ifndef _MMC_CORE_BUS_H
->  #define _MMC_CORE_BUS_H
+>  #include "sdio_ops.h"
+> +#include "core.h"
 >
-> +struct mmc_host;
-> +struct mmc_card;
-> +struct device_type;
-> +
->  #define MMC_DEV_ATTR(name, fmt, args...)					\
->  static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)	\
->  {										\
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 0fa86a2..29b91ae 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -12,6 +12,10 @@
->  #define _MMC_CORE_CORE_H
->
->  #include <linux/delay.h>
-> +#include <linux/sched.h>
-> +
-> +struct mmc_host;
-> +struct mmc_card;
->
->  #define MMC_CMD_RETRIES        3
->
-> diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-> index 992bf53..366ce79 100644
-> --- a/drivers/mmc/core/host.h
-> +++ b/drivers/mmc/core/host.h
-> @@ -10,7 +10,8 @@
->   */
->  #ifndef _MMC_CORE_HOST_H
->  #define _MMC_CORE_HOST_H
-> -#include <linux/mmc/host.h>
-> +
-> +struct mmc_host;
->
->  int mmc_register_host_class(void);
->  void mmc_unregister_host_class(void);
-> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-> index abd525e..e76365a 100644
-> --- a/drivers/mmc/core/mmc_ops.h
-> +++ b/drivers/mmc/core/mmc_ops.h
-> @@ -12,6 +12,11 @@
->  #ifndef _MMC_MMC_OPS_H
->  #define _MMC_MMC_OPS_H
->
-> +#include <linux/types.h>
-> +
-> +struct mmc_host;
-> +struct mmc_card;
-> +
->  int mmc_select_card(struct mmc_card *card);
->  int mmc_deselect_cards(struct mmc_host *host);
->  int mmc_set_dsr(struct mmc_host *host);
-> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-> index d69e751..39c911a 100644
-> --- a/drivers/mmc/core/pwrseq.h
-> +++ b/drivers/mmc/core/pwrseq.h
-> @@ -8,7 +8,11 @@
->  #ifndef _MMC_CORE_PWRSEQ_H
->  #define _MMC_CORE_PWRSEQ_H
->
-> -#include <linux/mmc/host.h>
-> +#include <linux/types.h>
-> +
-> +struct mmc_host;
-> +struct device;
-> +struct module;
->
->  struct mmc_pwrseq_ops {
->  	void (*pre_power_on)(struct mmc_host *host);
-> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-> index dac8c3d..0cea02a 100644
-> --- a/drivers/mmc/core/queue.h
-> +++ b/drivers/mmc/core/queue.h
-> @@ -1,6 +1,11 @@
->  #ifndef MMC_QUEUE_H
->  #define MMC_QUEUE_H
->
-> +#include <linux/types.h>
-> +#include <linux/blkdev.h>
-> +#include <linux/mmc/core.h>
-> +#include <linux/mmc/host.h>
-> +
->  static inline bool mmc_req_is_special(struct request *req)
+>  static int process_sdio_pending_irqs(struct mmc_host *host)
 >  {
->  	return req &&
-> @@ -9,7 +14,6 @@ static inline bool mmc_req_is_special(struct request *req)
->  		 req_op(req) == REQ_OP_SECURE_ERASE);
->  }
->
-> -struct request;
->  struct task_struct;
->  struct mmc_blk_data;
->
-> diff --git a/drivers/mmc/core/sd.h b/drivers/mmc/core/sd.h
-> index aab824a..1ada980 100644
-> --- a/drivers/mmc/core/sd.h
-> +++ b/drivers/mmc/core/sd.h
-> @@ -1,10 +1,13 @@
->  #ifndef _MMC_CORE_SD_H
->  #define _MMC_CORE_SD_H
->
-> -#include <linux/mmc/card.h>
-> +#include <linux/types.h>
->
->  extern struct device_type sd_type;
->
-> +struct mmc_host;
-> +struct mmc_card;
-> +
->  int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr);
->  int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card);
->  void mmc_decode_cid(struct mmc_card *card);
-> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> index ffc2305..ac7223c 100644
-> --- a/drivers/mmc/core/sd_ops.h
-> +++ b/drivers/mmc/core/sd_ops.h
-> @@ -12,6 +12,11 @@
->  #ifndef _MMC_SD_OPS_H
->  #define _MMC_SD_OPS_H
->
-> +#include <linux/types.h>
-> +
-> +struct mmc_card;
-> +struct mmc_host;
-> +
->  int mmc_app_set_bus_width(struct mmc_card *card, int width);
->  int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
->  int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
-> diff --git a/drivers/mmc/core/sdio_bus.h b/drivers/mmc/core/sdio_bus.h
-> index 567a768..b69a254 100644
-> --- a/drivers/mmc/core/sdio_bus.h
-> +++ b/drivers/mmc/core/sdio_bus.h
-> @@ -11,6 +11,9 @@
->  #ifndef _MMC_CORE_SDIO_BUS_H
->  #define _MMC_CORE_SDIO_BUS_H
->
-> +struct mmc_card;
-> +struct sdio_func;
-> +
->  struct sdio_func *sdio_alloc_func(struct mmc_card *card);
->  int sdio_add_func(struct sdio_func *func);
->  void sdio_remove_func(struct sdio_func *func);
-> diff --git a/drivers/mmc/core/sdio_cis.h b/drivers/mmc/core/sdio_cis.h
-> index 4d903c2..16aa563 100644
-> --- a/drivers/mmc/core/sdio_cis.h
-> +++ b/drivers/mmc/core/sdio_cis.h
-> @@ -14,6 +14,9 @@
->  #ifndef _MMC_SDIO_CIS_H
->  #define _MMC_SDIO_CIS_H
->
-> +struct mmc_card;
-> +struct sdio_func;
-> +
->  int sdio_read_common_cis(struct mmc_card *card);
->  void sdio_free_common_cis(struct mmc_card *card);
->
 > diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-> index 5660c7f..e1c36d6 100644
+> index e1c36d6..bed8a83 100644
 > --- a/drivers/mmc/core/sdio_ops.h
 > +++ b/drivers/mmc/core/sdio_ops.h
-> @@ -12,8 +12,12 @@
->  #ifndef _MMC_SDIO_OPS_H
->  #define _MMC_SDIO_OPS_H
+> @@ -24,6 +24,7 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+>  int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>  	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
+>  int sdio_reset(struct mmc_host *host);
+> +unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz);
 >
-> +#include <linux/types.h>
->  #include <linux/mmc/sdio.h>
+>  static inline bool mmc_is_io_op(u32 opcode)
+>  {
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 64e2ddf..e679a86 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -158,25 +158,13 @@ struct mmc_request {
+>  struct mmc_card;
+>  struct mmc_async_req;
 >
-> +struct mmc_host;
-> +struct mmc_card;
-> +
->  int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
->  int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
->  	unsigned addr, u8 in, u8* out);
-> diff --git a/drivers/mmc/core/slot-gpio.h b/drivers/mmc/core/slot-gpio.h
-> index 8c1854d..a06fd84 100644
-> --- a/drivers/mmc/core/slot-gpio.h
-> +++ b/drivers/mmc/core/slot-gpio.h
-> @@ -8,6 +8,8 @@
->  #ifndef _MMC_CORE_SLOTGPIO_H
->  #define _MMC_CORE_SLOTGPIO_H
+> -extern int mmc_stop_bkops(struct mmc_card *);
+> -extern int mmc_read_bkops_status(struct mmc_card *);
+>  extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+>  					   struct mmc_async_req *,
+>  					   enum mmc_blk_status *);
+> -extern int mmc_interrupt_hpi(struct mmc_card *);
+>  extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+> -extern void mmc_wait_for_req_done(struct mmc_host *host,
+> -				  struct mmc_request *mrq);
+> -extern bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+>  extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+> -extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+> -extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+> -	struct mmc_command *, int);
+> -extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+> -extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+>  extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+>  extern int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+> -extern int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
 >
-> +struct mmc_host;
-> +
->  int mmc_gpio_alloc(struct mmc_host *host);
+>  #define MMC_ERASE_ARG		0x00000000
+>  #define MMC_SECURE_ERASE_ARG	0x80000000
+> @@ -188,46 +176,8 @@ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+>  #define MMC_SECURE_ARGS		0x80000000
+>  #define MMC_TRIM_ARGS		0x00008001
 >
->  #endif
+> -extern int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+> -		     unsigned int arg);
+> -extern int mmc_can_erase(struct mmc_card *card);
+> -extern int mmc_can_trim(struct mmc_card *card);
+> -extern int mmc_can_discard(struct mmc_card *card);
+> -extern int mmc_can_sanitize(struct mmc_card *card);
+> -extern int mmc_can_secure_erase_trim(struct mmc_card *card);
+> -extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+> -				   unsigned int nr);
+> -extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
+> -
+> -extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+> -extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+> -			      bool is_rel_write);
+>  extern int mmc_hw_reset(struct mmc_host *host);
+> -extern int mmc_can_reset(struct mmc_card *card);
+> -
+>  extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
+> -extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
+> -
+> -extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
+> -extern void mmc_release_host(struct mmc_host *host);
+> -
+> -extern void mmc_get_card(struct mmc_card *card);
+> -extern void mmc_put_card(struct mmc_card *card);
+> -
+> -extern int mmc_flush_cache(struct mmc_card *);
+> -
+> -extern int mmc_detect_card_removed(struct mmc_host *host);
+> -
+> -/**
+> - *	mmc_claim_host - exclusively claim a host
+> - *	@host: mmc host to claim
+> - *
+> - *	Claim a host for a set of operations.
+> - */
+> -static inline void mmc_claim_host(struct mmc_host *host)
+> -{
+> -	__mmc_claim_host(host, NULL);
+> -}
+>
+>  struct device_node;
+>  extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
 >
 
 
