@@ -1,119 +1,151 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v5 1/2] mmc: dw_mmc: silent verbose log when calling from
- PM context
-Date: Mon, 16 Jan 2017 10:43:21 +0800
-Message-ID: <28587a11-fd3e-31da-bc50-d63252cf3a78@rock-chips.com>
-References: <1484276362-44984-1-git-send-email-shawn.lin@rock-chips.com>
- <e300d9fe-d410-815d-8615-0d319fcabc5d@soulik.info>
+Subject: Re: [PATCH v3 05/15] mmc: core: First step in cleaning up public mmc
+ header files
+Date: Mon, 16 Jan 2017 10:54:49 +0800
+Message-ID: <4b267a82-ace4-ba77-a69d-f4a8ea454c67@rock-chips.com>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+ <1484313256-25993-6-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:45257 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:39060 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751246AbdAPCoN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:44:13 -0500
-In-Reply-To: <e300d9fe-d410-815d-8615-0d319fcabc5d@soulik.info>
+        with ESMTP id S1751662AbdAPCzp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2017 21:55:45 -0500
+In-Reply-To: <1484313256-25993-6-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ayaka <ayaka@soulik.info>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, sgilles@math.umd.edu, linux-rockchip@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 2017/1/15 11:50, ayaka wrote:
+On 2017/1/13 21:14, Ulf Hansson wrote:
+> This is the first step in cleaning up the public mmc header files. In this
+> change we makes sure each header file builds standalone, as that helps to
+> resolve dependencies.
 >
+> While changing this, it also seems reasonable to stop including other
+> headers from inside a header itself which it don't depend upon.
+> Additionally, in some cases such dependencies are better resolved by
+> forward declaring the needed struct.
 >
-> On 01/13/2017 10:59 AM, Shawn Lin wrote:
->> When deploying runtime PM, it's quite verbose to print the
->> log of ios setting. Also it's useless to print it from system
->> PM as it should be the same with booting time. We also have
->> sysfs to get all these information from ios attribute, so let's
->> skip this print from PM context.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->> Changes in v5: None
->> Changes in v4: None
->> Changes in v3: None
->> Changes in v2: None
->>
->>   drivers/mmc/host/dw_mmc.c | 21 ++++++++++++---------
->>   1 file changed, 12 insertions(+), 9 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 3d213e7..dc58ec3 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1153,7 +1153,8 @@ static void mci_send_cmd(struct dw_mci_slot
->> *slot, u32 cmd, u32 arg)
->>           cmd, arg, cmd_status);
->>   }
->>   -static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool
->> force_clkinit)
->> +static void dw_mci_setup_bus(struct dw_mci_slot *slot,
->> +                 bool force_clkinit, bool pm_context)
->>   {
->>       struct dw_mci *host = slot->host;
->>       unsigned int clock = slot->clock;
->> @@ -1182,11 +1183,13 @@ static void dw_mci_setup_bus(struct
->> dw_mci_slot *slot, bool force_clkinit)
->>           if ((clock != slot->__clk_old &&
->>               !test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
->>               force_clkinit) {
->> -            dev_info(&slot->mmc->class_dev,
->> -                 "Bus speed (slot %d) = %dHz (slot req %dHz, actual
->> %dHZ div = %d)\n",
->> -                 slot->id, host->bus_hz, clock,
->> -                 div ? ((host->bus_hz / div) >> 1) :
->> -                 host->bus_hz, div);
->> +            /* Silent the verbose log if calling from PM context */
->> +            if (!pm_context)
->> +                dev_info(&slot->mmc->class_dev,
->> +                     "Bus speed (slot %d) = %dHz (slot req %dHz,
->> actual %dHZ div = %d)\n",
->> +                     slot->id, host->bus_hz, clock,
->> +                     div ? ((host->bus_hz / div) >> 1) :
->> +                     host->bus_hz, div);
->>                 /*
->>                * If card is polling, display the message only
->> @@ -1434,12 +1437,12 @@ static void dw_mci_set_ios(struct mmc_host
->> *mmc, struct mmc_ios *ios)
->>           }
->>             /* Adjust clock / bus width after power is up */
->> -        dw_mci_setup_bus(slot, false);
->> +        dw_mci_setup_bus(slot, false, false);
->>             break;
->>       case MMC_POWER_OFF:
->>           /* Turn clock off before power goes down */
->> -        dw_mci_setup_bus(slot, false);
->> +        dw_mci_setup_bus(slot, false, false);
->>             if (!IS_ERR(mmc->supply.vmmc))
->>               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->> @@ -3366,7 +3369,7 @@ int dw_mci_runtime_resume(struct device *dev)
->>               continue;
->>           if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
->>               dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
->> -            dw_mci_setup_bus(slot, true);
->> +            dw_mci_setup_bus(slot, true, true);
-> Sadness, it seems not work for firefly reload, maybe there is some
-> problems with the card detect in that board.
 
-This patch is intended to prevent the spamming log from pm context but
-your firefly-reload board should have a another problem. So IIRC you
-still see the spamming log with polling mode, we need to dig that later
-but we need this two patches(at least 2/2) merged into 4.10-rc cycle to
-fix the boot problem.
+Look nice,
 
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-
-
-
->>           }
->>       }
->>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  include/linux/mmc/card.h      | 2 --
+>  include/linux/mmc/core.h      | 3 +--
+>  include/linux/mmc/host.h      | 9 ++-------
+>  include/linux/mmc/mmc.h       | 2 ++
+>  include/linux/mmc/slot-gpio.h | 3 +++
+>  5 files changed, 8 insertions(+), 11 deletions(-)
 >
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 00449e5..ca64f5b 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -11,7 +11,6 @@
+>  #define LINUX_MMC_CARD_H
 >
+>  #include <linux/device.h>
+> -#include <linux/mmc/core.h>
+>  #include <linux/mod_devicetable.h>
 >
+>  struct mmc_cid {
+> @@ -206,7 +205,6 @@ struct sdio_cis {
+>  };
+>
+>  struct mmc_host;
+> -struct mmc_ios;
+>  struct sdio_func;
+>  struct sdio_func_tuple;
+>
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index e33cc74..64e2ddf 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -8,10 +8,9 @@
+>  #ifndef LINUX_MMC_CORE_H
+>  #define LINUX_MMC_CORE_H
+>
+> -#include <linux/interrupt.h>
+>  #include <linux/completion.h>
+> +#include <linux/types.h>
+>
+> -struct request;
+>  struct mmc_data;
+>  struct mmc_request;
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 8bc8841..8d38c76 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -10,16 +10,12 @@
+>  #ifndef LINUX_MMC_HOST_H
+>  #define LINUX_MMC_HOST_H
+>
+> -#include <linux/leds.h>
+> -#include <linux/mutex.h>
+> -#include <linux/timer.h>
+>  #include <linux/sched.h>
+>  #include <linux/device.h>
+>  #include <linux/fault-inject.h>
+>
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/card.h>
+> -#include <linux/mmc/mmc.h>
+>  #include <linux/mmc/pm.h>
+>
+>  struct mmc_ios {
+> @@ -82,6 +78,8 @@ struct mmc_ios {
+>  	bool enhanced_strobe;			/* hs400es selection */
+>  };
+>
+> +struct mmc_host;
+> +
+>  struct mmc_host_ops {
+>  	/*
+>  	 * It is optional for the host to implement pre_req and post_req in
+> @@ -162,9 +160,6 @@ struct mmc_host_ops {
+>  				  unsigned int direction, int blk_size);
+>  };
+>
+> -struct mmc_card;
+> -struct device;
+> -
+>  struct mmc_async_req {
+>  	/* active mmc request */
+>  	struct mmc_request	*mrq;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index a074082..261772e 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -24,6 +24,8 @@
+>  #ifndef LINUX_MMC_MMC_H
+>  #define LINUX_MMC_MMC_H
+>
+> +#include <linux/types.h>
+> +
+>  /* Standard MMC commands (4.1)           type  argument     response */
+>     /* class 1 */
+>  #define MMC_GO_IDLE_STATE         0   /* bc                          */
+> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+> index a7972cd..82f0d28 100644
+> --- a/include/linux/mmc/slot-gpio.h
+> +++ b/include/linux/mmc/slot-gpio.h
+> @@ -11,6 +11,9 @@
+>  #ifndef MMC_SLOT_GPIO_H
+>  #define MMC_SLOT_GPIO_H
+>
+> +#include <linux/types.h>
+> +#include <linux/irqreturn.h>
+> +
+>  struct mmc_host;
+>
+>  int mmc_gpio_get_ro(struct mmc_host *host);
 >
 
 
