@@ -1,53 +1,76 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v3 2/13] mmc: sunxi: Gate the clock when rate is 0
-Date: Mon, 16 Jan 2017 17:56:52 +0100
-Message-ID: <1f006fd86d1d9ad5eab0c0c9e435003055466a54.1484585798.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v3 11/13] arm64: allwinner: pine64: add MMC support
+Date: Mon, 16 Jan 2017 17:57:01 +0100
+Message-ID: <42711bdf28d26d68f5ac6cc47d3f03d76a8ecff6.1484585798.git-series.maxime.ripard@free-electrons.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:58765 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751038AbdAPQ5H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2017 11:57:07 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
+List-Id: linux-mmc@vger.kernel.org
 
-The MMC core assumes that the code will gate the clock when the bus
-frequency is set to 0, which we've been ignoring so far.
+From: Andre Przywara <andre.przywara@arm.com>
 
-Handle that.
+All Pine64 boards connect an micro-SD card slot to the first MMC
+controller.
+Enable the respective DT node and specify the (always-on) regulator
+and card-detect pin.
+As a micro-SD slot does not feature a write-protect switch, we disable
+this feature.
 
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts | 20 ++++++++++++++-
+ 1 file changed, 20 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index ab4324e6eb74..019f95e8e7c5 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -765,6 +765,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
+index cf9105179bcb..c680ed385da3 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
+@@ -44,6 +44,8 @@
  
-+	if (!ios->clock)
-+		return 0;
+ #include "sun50i-a64.dtsi"
+ 
++#include <dt-bindings/gpio/gpio.h>
 +
- 	/* 8 bit DDR requires a higher module clock */
- 	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
- 	    ios->bus_width == MMC_BUS_WIDTH_8)
-@@ -882,7 +885,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mmc_writel(host, REG_GCTRL, rval);
+ / {
+ 	model = "Pine64";
+ 	compatible = "pine64,pine64", "allwinner,sun50i-a64";
+@@ -55,6 +57,13 @@
+ 	chosen {
+ 		stdout-path = "serial0:115200n8";
+ 	};
++
++	reg_vcc3v3: vcc3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
+ };
  
- 	/* set up clock */
--	if (ios->clock && ios->power_mode) {
-+	if (ios->power_mode) {
- 		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
- 		/* Android code had a usleep_range(50000, 55000); here */
- 	}
+ &ehci1 {
+@@ -71,6 +80,17 @@
+ 	bias-pull-up;
+ };
+ 
++&mmc0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc0_pins>;
++	vmmc-supply = <&reg_vcc3v3>;
++	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
++	cd-inverted;
++	disable-wp;
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &ohci1 {
+ 	status = "okay";
+ };
 -- 
 git-series 0.8.11
