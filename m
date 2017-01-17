@@ -1,71 +1,57 @@
-From: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v2 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
-Date: Tue, 17 Jan 2017 14:59:38 -0500
-Message-ID: <20170117195940.25092-2-chris.brandt@renesas.com>
+From: Chris Brandt <chris.brandt@renesas.com>
+Subject: [PATCH v2 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Tue, 17 Jan 2017 14:59:39 -0500
+Message-ID: <20170117195940.25092-3-chris.brandt@renesas.com>
 References: <20170117195940.25092-1-chris.brandt@renesas.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170117195940.25092-1-chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170117195940.25092-1-chris.brandt@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Some controllers have 2 clock sources instead of 1, so they both need
-to be turned on/off.
+In the case of a single clock source, you don't need names. However,
+if the controller has 2 clock sources, you need to name them correctly
+so the driver can find the 2nd one.
 
-Signed-off-by: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 59db14b..5ad5744 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -143,6 +143,7 @@ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index a1650ed..258b98c 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -25,8 +25,29 @@ Required properties:
+ 		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+ 		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
  
- struct sh_mobile_sdhi {
- 	struct clk *clk;
-+	struct clk *clk2;
- 	struct tmio_mmc_data mmc_data;
- 	struct tmio_mmc_dma dma_priv;
- 	struct pinctrl *pinctrl;
-@@ -190,6 +191,10 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
- 	if (ret < 0)
- 		return ret;
- 
-+	ret = clk_prepare_enable(priv->clk2);
-+	if (ret < 0)
-+		return ret;
++- clocks: Most controllers only have 1 clock source per cahnnel. However, some
++	  have 2. If 2 clocks are specified, you must name them as "core" and
++	  "carddetect". If the controller only has 1 clock, naming is not
++	  required.
 +
- 	/*
- 	 * The clock driver may not know what maximum frequency
- 	 * actually works, so it should be set with the max-frequency
-@@ -255,6 +260,8 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	struct sh_mobile_sdhi *priv = host_to_priv(host);
- 
- 	clk_disable_unprepare(priv->clk);
-+	if (priv->clk2)
-+		clk_disable_unprepare(priv->clk2);
- }
- 
- static int sh_mobile_sdhi_card_busy(struct mmc_host *mmc)
-@@ -572,6 +579,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eprobe;
- 	}
- 
-+	priv->clk2 = devm_clk_get(&pdev->dev, "carddetect");
-+	if (IS_ERR(priv->clk2))
-+		priv->clk2 = NULL;
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+ - pinctrl-names: should be "default", "state_uhs"
+ - pinctrl-0: should contain default/high speed pin ctrl
+ - pinctrl-1: should contain uhs mode pin ctrl
 +
- 	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
- 	if (!IS_ERR(priv->pinctrl)) {
- 		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
++Example showing 2 clocks:
++	sdhi0: sd@e804e000 {
++		compatible = "renesas,sdhi-r7s72100";
++		reg = <0xe804e000 0x100>;
++		interrupts = <GIC_SPI 270 IRQ_TYPE_LEVEL_HIGH
++			      GIC_SPI 271 IRQ_TYPE_LEVEL_HIGH
++			      GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
++
++		clocks = <&mstp12_clks R7S72100_CLK_SDHI00>,
++			 <&mstp12_clks R7S72100_CLK_SDHI01>;
++		clock-names = "core", "carddetect";
++		cap-sd-highspeed;
++		cap-sdio-irq;
++		status = "disabled";
++	};
 -- 
 2.10.1
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
