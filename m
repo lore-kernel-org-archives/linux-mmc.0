@@ -1,37 +1,44 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
-Date: Tue, 17 Jan 2017 21:30:18 +0100
-Message-ID: <20170117203017.r3g43scvrkwpe6kt@ninjato>
-References: <20170117195940.25092-1-chris.brandt@renesas.com>
- <20170117195940.25092-2-chris.brandt@renesas.com>
+Subject: Re: [PATCH] mmc: tmio: Remove redundant check of mmc->slot.cd_irq
+Date: Tue, 17 Jan 2017 21:53:47 +0100
+Message-ID: <20170117205347.7kihefzza5lf54fy@ninjato>
+References: <1484061052-25334-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:34210 "EHLO pokefinder.org"
+Received: from sauhun.de ([89.238.76.85]:34364 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751042AbdAQUj5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Jan 2017 15:39:57 -0500
+        id S1750866AbdAQVE3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Jan 2017 16:04:29 -0500
 Content-Disposition: inline
-In-Reply-To: <20170117195940.25092-2-chris.brandt@renesas.com>
+In-Reply-To: <1484061052-25334-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 
-Hi Chris,
+On Tue, Jan 10, 2017 at 04:10:52PM +0100, Ulf Hansson wrote:
+> To validate whether native hotplug needs to be used, the tmio driver checks
+> whether the mmc->slot.cd_irq has been successfully assigned.
+> 
+> This check is redundant at its current place in tmio_mmc_host_probe(), as
+> the mmc core assigns mmc->slot.cd_irq a valid value first when
+> mmc_gpiod_request_cd_irq() is called. Therefore, let's just remove the
+> check for now, as that also removes a layering violation of the tmio driver
+> accessing core specific data via ->slot.cd_irq.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-> +	struct clk *clk2;
+Agreed. This is a layering violation and can be safely removed since it
+is a no-op currently.
 
-I'd vote for 'clk_cd' since we are explicitly requesting that clock for
-it.
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-> +	ret = clk_prepare_enable(priv->clk2);
-> +	if (ret < 0)
-> +		return ret;
+Besides card eject still works on my M3-W. I will test on my H2 tomorrow
+or the day after that.
 
-You need to disable clk when failing.
-
-Regards,
+Thanks,
 
    Wolfram
 
