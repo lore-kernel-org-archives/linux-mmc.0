@@ -1,260 +1,205 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH V2 1/4] clk: gcc: Updates for SDHCI enablement
-Date: Tue, 17 Jan 2017 15:25:42 -0800
-Message-ID: <20170117232542.GV17126@codeaurora.org>
-References: <1484614729-26751-1-git-send-email-jeremymc@redhat.com>
- <1484614729-26751-2-git-send-email-jeremymc@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1484614729-26751-2-git-send-email-jeremymc@redhat.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Jeremy McNicoll <jeremymc@redhat.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, andy.gross@linaro.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com
+From: Paul Cercueil <paul@crapouillou.net>
+Subject: [PATCH 01/13] Documentation: dt/bindings: Document pinctrl-ingenic
+Date: Wed, 18 Jan 2017 00:14:09 +0100
+Message-ID: <20170117231421.16310-2-paul@crapouillou.net>
+References: <20170117231421.16310-1-paul@crapouillou.net>
+Return-path: <linux-pwm-owner@vger.kernel.org>
+In-Reply-To: <20170117231421.16310-1-paul@crapouillou.net>
+Sender: linux-pwm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>
+Cc: linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com, Paul Cercueil <paul@crapouillou.net>
 List-Id: linux-mmc@vger.kernel.org
 
-On 01/16, Jeremy McNicoll wrote:
-> Global clock updates to enable onboard SDHCI / MMC.
-> Re-tabify dt-bindings to align correctly in vim.
+From: Paul Burton <paul.burton@imgtec.com>
 
-We need much more words here on what's going on in this patch.
+This commit adds documentation for the devicetree bidings of the
+pinctrl-ingenic driver, which handles pin configuration, pin muxing
+and GPIOs of the Ingenic SoCs currently supported by the Linux kernel.
 
-> 
-> Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
-> ---
->  drivers/clk/qcom/gcc-msm8994.c               | 108 +++++++++++++++++++++------
->  include/dt-bindings/clock/qcom,gcc-msm8994.h |  32 ++++----
->  2 files changed, 106 insertions(+), 34 deletions(-)
-> 
-> diff --git a/drivers/clk/qcom/gcc-msm8994.c b/drivers/clk/qcom/gcc-msm8994.c
-> index 8afd830..2bf8d1b 100644
-> --- a/drivers/clk/qcom/gcc-msm8994.c
-> +++ b/drivers/clk/qcom/gcc-msm8994.c
-> @@ -24,6 +24,7 @@
->  
->  #include "common.h"
->  #include "clk-regmap.h"
-> +#include "clk-pll.h"
+Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+---
+ .../bindings/pinctrl/ingenic,pinctrl.txt           | 173 +++++++++++++++++++++
+ 1 file changed, 173 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
 
-Why?
-
->  #include "clk-alpha-pll.h"
->  #include "clk-rcg.h"
->  #include "clk-branch.h"
-> @@ -54,7 +55,7 @@ static const struct parent_map gcc_xo_gpll0_gpll4_map[] = {
->  static const char * const gcc_xo_gpll0_gpll4[] = {
->  	"xo",
->  	"gpll0",
-> -	"gpll4",
-> +	"gpll4_vote",
->  };
->  
->  #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
-> @@ -97,29 +98,65 @@ static struct clk_alpha_pll_postdiv gpll0 = {
->  	},
->  };
->  
-> -static struct clk_alpha_pll gpll4_early = {
-> -	.offset = 0x1dc0,
-> -	.clkr = {
-> -		.enable_reg = 0x1480,
-> -		.enable_mask = BIT(4),
-
-This is doing PLL voting.
-
-> -		.hw.init = &(struct clk_init_data)
-> -		{
-> -			.name = "gpll4_early",
-> -			.parent_names = (const char *[]) { "xo" },
-> -			.num_parents = 1,
-> -			.ops = &clk_alpha_pll_ops,
-> -		},
-> +
-> +static struct clk_rcg2 config_noc_clk_src = {
-> +	.cmd_rcgr = 0x0150,
-> +	.hid_width = 5,
-> +	.parent_map = gcc_xo_gpll0_map,
-> +	.clkr.hw.init = &(struct clk_init_data) {
-> +		.name = "config_noc_clk_src",
-> +		.parent_names = gcc_xo_gpll0,
-> +		.num_parents = 2,
-> +		.ops = &clk_rcg2_ops,
-> +	},
-> +};
-> +
-> +static struct clk_rcg2 periph_noc_clk_src = {
-> +	.cmd_rcgr = 0x0190,
-> +	.hid_width = 5,
-> +	.mnd_width = 8,
-> +	.parent_map = gcc_xo_gpll0_map,
-> +	.clkr.hw.init = &(struct clk_init_data) {
-> +		.name = "periph_noc_clk_src",
-> +		.parent_names = gcc_xo_gpll0,
-> +		.num_parents = 2,
-> +		.ops = &clk_rcg2_ops,
-> +	},
-> +};
-> +
-> +static struct clk_rcg2 system_noc_clk_src = {
-> +	.cmd_rcgr = 0x0120, //TODO
-
-This is right.
-
-> +	.hid_width = 5,
-> +	.parent_map = gcc_xo_gpll0_map,
-> +	.clkr.hw.init = &(struct clk_init_data) {
-> +		.name = "system_noc_clk_src",
-> +		.parent_names = gcc_xo_gpll0,
-> +		.num_parents = 2,
-> +		.ops = &clk_rcg2_ops,
->  	},
->  };
->  
-> -static struct clk_alpha_pll_postdiv gpll4 = {
-> -	.offset = 0x1dc0,
-> +static struct clk_pll gpll4 = {
-
-gpll4 is an alpha PLL though.
-
-> +	.status_reg = 0x1dc0,
-> +	.status_bit = 30,
->  	.clkr.hw.init = &(struct clk_init_data)
->  	{
->  		.name = "gpll4",
-> -		.parent_names = (const char *[]) { "gpll4_early" },
-> +		.parent_names = (const char *[]) { "xo" },
->  		.num_parents = 1,
-> -		.ops = &clk_alpha_pll_postdiv_ops,
-> +		.ops = &clk_pll_ops,
-> +	},
-> +};
-> +
-> +static struct clk_regmap gpll4_vote = {
-> +	.enable_reg = 0x1480,
-> +	.enable_mask = BIT(4),
-> +	.hw.init = &(struct clk_init_data)
-
-This part is rather confusing.
-
-> +	{
-> +		.name = "gpll4_vote",
-> +		.parent_names = (const char *[]) { "gpll4" },
-> +		.num_parents = 1,
-> +		.ops = &clk_pll_vote_ops,
->  	},
->  };
->  
-> @@ -896,8 +933,8 @@ static struct freq_tbl ftbl_sdcc1_apps_clk_src[] = {
->  	F(25000000, P_GPLL0, 12, 1, 2),
->  	F(50000000, P_GPLL0, 12, 0, 0),
->  	F(100000000, P_GPLL0, 6, 0, 0),
-> -	F(192000000, P_GPLL4, 2, 0, 0),
-> -	F(384000000, P_GPLL4, 1, 0, 0),
-> +	F(172000000, P_GPLL4, 2, 0, 0),
-> +	F(344000000, P_GPLL4, 1, 0, 0),
-
-It seems that gpll4 runs at slightly different speeds on 8994 and
-8992. You'll need to differentiate which SoC it is and update the
-frequency table appropriately. That can be done with the gcc
-node's compatible string. That also means gcc-msm8992 needs to be
-added and used as a compatible string.
-
->  	{ }
->  };
->  
-> @@ -1057,6 +1094,10 @@ static struct clk_branch gcc_blsp1_ahb_clk = {
->  		.hw.init = &(struct clk_init_data)
->  		{
->  			.name = "gcc_blsp1_ahb_clk",
-> +			.parent_names = (const char *[]){
-> +				"periph_noc_clk_src",
-> +			},
-> +			.num_parents = 1,
->  			.ops = &clk_branch2_ops,
->  		},
->  	},
-> @@ -1872,6 +1913,7 @@ static struct clk_branch gcc_pdm2_clk = {
->  
->  static struct clk_branch gcc_sdcc1_apps_clk = {
->  	.halt_reg = 0x04c4,
-> +	.halt_check = BRANCH_HALT_VOTED,
->  	.clkr = {
->  		.enable_reg = 0x04c4,
->  		.enable_mask = BIT(0),
-> @@ -1888,6 +1930,26 @@ static struct clk_branch gcc_sdcc1_apps_clk = {
->  	},
->  };
->  
-> +
-> +static struct clk_branch gcc_sdcc1_ahb_clk = {
-> +	.halt_reg = 0x04c8,
-> +	.halt_check = BRANCH_HALT_VOTED,
-
-Why voted?
-
-> diff --git a/include/dt-bindings/clock/qcom,gcc-msm8994.h b/include/dt-bindings/clock/qcom,gcc-msm8994.h
-> index 8fa535b..e4063d5 100644
-> --- a/include/dt-bindings/clock/qcom,gcc-msm8994.h
-> +++ b/include/dt-bindings/clock/qcom,gcc-msm8994.h
-> @@ -15,10 +15,10 @@
->  #ifndef _DT_BINDINGS_CLK_MSM_GCC_8994_H
->  #define _DT_BINDINGS_CLK_MSM_GCC_8994_H
->  
-> -#define GPLL0_EARLY				0
->  #define GPLL0					1
-> -#define GPLL4_EARLY				2
-> -#define GPLL4					3
-> +#define GPLL0_VOTE				0
-
-Please keep the numbers ordered.
-
-> +#define GPLL4					2
-> +#define GPLL4_VOTE				3
->  #define UFS_AXI_CLK_SRC				4
->  #define USB30_MASTER_CLK_SRC			5
->  #define BLSP1_QUP1_I2C_APPS_CLK_SRC		6
-> @@ -123,15 +123,21 @@
->  #define GCC_SDCC2_APPS_CLK			105
->  #define GCC_SDCC3_APPS_CLK			106
->  #define GCC_SDCC4_APPS_CLK			107
-> -#define GCC_SYS_NOC_UFS_AXI_CLK			108
-> -#define GCC_SYS_NOC_USB3_AXI_CLK		109
-> -#define GCC_TSIF_REF_CLK			110
-> -#define GCC_UFS_AXI_CLK				111
-> -#define GCC_UFS_RX_CFG_CLK			112
-> -#define GCC_UFS_TX_CFG_CLK			113
-> -#define GCC_USB30_MASTER_CLK			114
-> -#define GCC_USB30_MOCK_UTMI_CLK			115
-> -#define GCC_USB3_PHY_AUX_CLK			116
-> -#define GCC_USB_HS_SYSTEM_CLK			117
-> +#define GCC_SDCC1_AHB_CLK			108
-> +#define GCC_SDCC2_AHB_CLK			109
-
-There should be an ahb clk for sdcc3 and sdcc4 too. Please just
-add the defines even if they're not used.
-
-> +
-> +#define GCC_SYS_NOC_UFS_AXI_CLK			110
-
-And don't change the numbering randomly. This should still be
-108.
-
-> +#define GCC_SYS_NOC_USB3_AXI_CLK		111
-> +#define GCC_TSIF_REF_CLK			112
-> +#define GCC_UFS_AXI_CLK				113
-> +#define GCC_UFS_RX_CFG_CLK			114
-> +#define GCC_UFS_TX_CFG_CLK			115
-> +#define GCC_USB30_MASTER_CLK			116
-> +#define GCC_USB30_MOCK_UTMI_CLK			117
-> +#define GCC_USB3_PHY_AUX_CLK			118
-> +#define GCC_USB_HS_SYSTEM_CLK			119
-> +#define SYSTEM_NOC_CLK_SRC			120
-> +#define PERIPH_NOC_CLK_SRC			121
-> +#define CONFIG_NOC_CLK_SRC			122
-
-And then the diff will be understandable.
-
+diff --git a/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+new file mode 100644
+index 000000000000..e59f7e7b6a49
+--- /dev/null
++++ b/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+@@ -0,0 +1,173 @@
++Ingenic jz47xx pin controller
++
++Please refer to pinctrl-bindings.txt in this directory for details of the
++common pinctrl bindings used by client devices, including the meaning of the
++phrase "pin configuration node".
++
++For the jz47xx SoCs, pin control is tightly bound with GPIO ports. All pins may
++be used as GPIOs, multiplexed device functions are configured within the
++GPIO port configuration registers and it is typical to refer to pins using the
++naming scheme "PxN" where x is a character identifying the GPIO port with
++which the pin is associated and N is an integer from 0 to 31 identifying the
++pin within that GPIO port. For example PA0 is the first pin in GPIO port A, and
++PB31 is the last pin in GPIO port B. The jz4740 contains 4 GPIO ports, PA to
++PD, for a total of 128 pins. The jz4780 contains 6 GPIO ports, PA to PF, for a
++total of 192 pins.
++
++
++##### Pin controller node #####
++
++Required properties:
++- compatible: One of:
++  - "ingenic,jz4740-pinctrl"
++  - "ingenic,jz4780-pinctrl"
++- #address-cells: Should contain the integer 1.
++- #size-cells: Should contain the integer 1.
++- ranges: Should be empty.
++
++Required sub-nodes:
++  - gpio-chips (see below)
++  - functions (see below)
++
++The pin controller node must have two sub-nodes, 'gpio-chips' and 'functions'.
++
++
++##### 'gpio-chips' sub-node #####
++
++The gpio-chips node will contain sub-nodes that correspond to GPIO controllers
++(one sub-node per GPIO controller).
++
++Required properties:
++- #address-cells: Should contain the integer 1.
++- #size-cells: Should contain the integer 1.
++- ranges: Should be empty.
++
++
++##### 'functions' sub-node #####
++
++The "functions" node will contain sub-nodes that correspond to pin function
++nodes.
++
++Required properties:
++- None.
++
++
++##### GPIO controller node #####
++
++Each subnode of the 'gpio-chips' node is a GPIO controller node.
++
++Required properties:
++- gpio-controller: Identifies this node as a GPIO controller.
++- #gpio-cells: Should contain the integer 2.
++- reg: Should contain the physical address and length of the GPIO controller's
++  configuration registers.
++
++Optional properties:
++- interrupt-controller: The GPIO controllers can optionally configure the
++  GPIOs as interrupt sources. In this case, the 'interrupt-controller'
++  standalone property should be supplied.
++- #interrupt-cells: Required if 'interrupt-controller' is also specified.
++  In that case, it should contain the integer 2.
++- interrupts: Required if 'interrupt-controller' is also specified.
++  In that case, it should contain the IRQ number of this GPIO controller.
++- ingenic,pull-ups: A bit mask identifying the pins associated with this GPIO
++  port which feature a pull-up resistor. The default mask is 0x0.
++- ingenic,pull-downs: A bit mask identifying the pins associated with this GPIO
++  port which feature a pull-down resistor. The default mask is 0x0.
++  Each pin of the jz47xx SoCs may feature a single bias resistor, thus there
++  should be no bits which are set in both ingenic,pull-ups & ingenic,pull-downs.
++
++
++##### Pin function node #####
++
++Each subnode of the 'functions' node is a pin function node.
++
++These subnodes represent a functionality of the SoC which may be exposed
++through one or more groups of pins, represented as subnodes of the pin
++function node. For example a function may be uart0, which may be exposed
++through the group of pins PF0 to PF3.
++
++Required pin function node properties:
++- None.
++
++
++##### Pin group node #####
++
++Each subnode of a pin function node is a pin group node.
++
++Required pin group node properties:
++- ingenic,pins: A set of values representing the pins within this pin group and
++  their configuration. Four values should be provided for each pin:
++  - The phandle of the GPIO controller node for the GPIO port within which the
++    pin is found.
++  - The index of the pin within its GPIO port (an integer in the range 0 to 31
++    inclusive).
++  - The index of the shared function port to be programmed in the GPIO port
++    registers for this pin.
++    Tables of these may be found in the jz4740 and jz4780 programming
++    manuals within the "General-Purpose I/O Ports" -> "Overview" section.
++    The value can either be supplied directly (0 for function 0, 1 for
++    function 1, etc.) or using the macros present in
++    <dt-bindings/pinctrl/ingenic.h>.
++    The special macro JZ_PIN_MODE_GPIO can be used to specify that the pin is
++    to be used as a GPIO. This is useful, for instance, when you just want to
++    set the electrical configuration of a pin used as GPIO.
++  - The phandle of a pin configuration node specifying the electrical
++    configuration that should be applied to the pin.
++
++For example the function 'msc0' may be exposed through 2 different pin groups,
++one in GPIO port A and one in GPIO port E:
++
++  bias-configs {
++    nobias: nobias {
++      bias-disable;
++    };
++  };
++
++  functions {
++    pinfunc_msc0: msc0 {
++      pins_msc0_pa: msc0-pa {
++        ingenic,pins = <&gpa  4 1 &nobias   /* d4 */
++                        &gpa  5 1 &nobias   /* d5 */
++                        &gpa  6 1 &nobias   /* d6 */
++                        &gpa  7 1 &nobias   /* d7 */
++                        &gpa 18 1 &nobias   /* clk */
++                        &gpa 19 1 &nobias   /* cmd */
++                        &gpa 20 1 &nobias   /* d0 */
++                        &gpa 21 1 &nobias   /* d1 */
++                        &gpa 22 1 &nobias   /* d2 */
++                        &gpa 23 1 &nobias   /* d3 */
++                        &gpa 24 1 &nobias>; /* rst */
++      };
++
++      pins_msc0_pe: msc0-pe {
++        ingenic,pins = <&gpe 20 0 &nobias   /* d0 */
++                        &gpe 21 0 &nobias   /* d1 */
++                        &gpe 22 0 &nobias   /* d2 */
++                        &gpe 23 0 &nobias   /* d3 */
++                        &gpe 28 0 &nobias   /* clk */
++                        &gpe 29 0 &nobias>; /* cmd */
++      };
++    };
++  };
++
++
++##### Pin configuration node #####
++
++The pin configuration nodes are referenced by phandle, and can be placed
++anywhere in the device tree (including in the pin controller node, or in a
++sub-node that is not 'gpio-chips' or 'functions').
++
++Pin configuration nodes use generic pinconf properties to specify an electrical
++configuration of a pin. The only configurable property for a pin of the jz47xx
++SoCs is whether to enable its bias resistor. Thus the only supported pinconf
++properties are:
++
++- bias-disable
++- bias-pull-up
++- bias-pull-down
++
++No arguments are supported for any of these properties.
++
++For more information about generic pinconfig properties, see
++Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.11.0
