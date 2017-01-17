@@ -1,99 +1,65 @@
-From: Corentin Labbe <clabbe.montjoie@gmail.com>
-Subject: Re: [PATCH v3 8/13] arm64: allwinner: a64: Add MMC nodes
-Date: Mon, 16 Jan 2017 20:16:41 +0100
-Message-ID: <20170116191641.GA11718@Red>
-References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
- <ac77b9e25e7633886822cd1f1ebafd5985751ae4.1484585798.git-series.maxime.ripard@free-electrons.com>
+From: =?UTF-8?Q?Andreas_F=c3=a4rber?= <afaerber@suse.de>
+Subject: Re: brcmfmac: add support for BCM43455 with modalias
+ sdio:c00v02D0dA9BF
+Date: Tue, 17 Jan 2017 01:19:24 +0100
+Message-ID: <05c41a09-c7d3-f53e-f19d-88b480f2b4c3@suse.de>
+References: <20170116101757.20483-1-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <ac77b9e25e7633886822cd1f1ebafd5985751ae4.1484585798.git-series.maxime.ripard@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:39208 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750888AbdAQA4T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Jan 2017 19:56:19 -0500
+In-Reply-To: <20170116101757.20483-1-martin.blumenstingl@googlemail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, linux-mmc@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com, linux-wireless@vger.kernel.org, kvalo@codeaurora.org, ulf.hansson@linaro.org
+Cc: arend.vanspriel@broadcom.com, franky.lin@broadcom.com, hante.meuleman@broadcom.com
 
-On Mon, Jan 16, 2017 at 05:56:58PM +0100, Maxime Ripard wrote:
-> From: Andre Przywara <andre.przywara@arm.com>
+Hi Martin,
+
+Am 16.01.2017 um 11:17 schrieb Martin Blumenstingl:
+> BCM43455 is a more recent revision of the BCM4345. Some of the BCM43455
+> got a dedicated SDIO device ID which is currently not supported by
+> brcmfmac.
+> Adding the new sdio_device_id to brcmfmac is enough to get the BCM43455
+> supported because the chip itself is already supported (due to BCM4345
+> support in the driver).
 > 
-> The A64 has 3 MMC controllers, one of them being especially targeted to
-> eMMC. Among other things, it has a data strobe signal and a 8 bits data
-> width.
-> 
-> The two other are more usual controllers that will have a 4 bits width at
-> most and no data strobe signal, which limits it to more usual SD or MMC
-> peripherals.
-> 
-> Signed-off-by: Andre Przywara <andre.przywara@arm.com>
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Acked-by: Arend van Spriel <arend.vanspriel@broadcom.com>
 > ---
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 39 ++++++++++++++++++++-
->  1 file changed, 39 insertions(+), 0 deletions(-)
+> This is the proper patch following the (short) discussion from [0]
 > 
-> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> index 99b6bb1e141c..143e9706438f 100644
-> --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> @@ -299,6 +299,45 @@
->  			#size-cells = <0>;
->  		};
->  
-> +		mmc0: mmc@1c0f000 {
-> +			compatible = "allwinner,sun50i-a64-mmc";
-> +			reg = <0x01c0f000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC0>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
-> +
-> +		mmc1: mmc@1c10000 {
-> +			compatible = "allwinner,sun50i-a64-mmc";
-> +			reg = <0x01c10000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC1>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
-> +
-> +		mmc2: mmc@1c11000 {
-> +			compatible = "allwinner,sun50i-a64-emmc";
-> +			reg = <0x01c11000 0x1000>;
-> +			clocks = <&ccu CLK_BUS_MMC2>, <&ccu CLK_MMC2>;
-> +			clock-names = "ahb", "mmc";
-> +			resets = <&ccu RST_BUS_MMC2>;
-> +			reset-names = "ahb";
-> +			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-> +			status = "disabled";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +		};
-> +
->  		gic: interrupt-controller@1c81000 {
->  			compatible = "arm,gic-400";
->  			reg = <0x01c81000 0x1000>,
+> [0] https://marc.info/?l=linux-wireless&m=148455981002310&w=2
+> 
+>  drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c | 1 +
+>  include/linux/mmc/sdio_ids.h                              | 1 +
+>  2 files changed, 2 insertions(+)
 
-Hello
+Reviewed-by: Andreas Färber <afaerber@suse.de>
 
-It seems that mmc node is after i2c@1c2b400 so not in address order.
+I encountered the same ID on my R-Box Pro 3G and tested the exact same
+patch based on [0] there:
 
-Regards
-Corentin Labbe
+[  +0,130866] brcmfmac: brcmf_c_preinit_dcmds: Firmware version = wl0:
+Mar  1 2015 07:29:38 version 7.45.18 (r538002) FWID 01-6a2c8ad4
+...
+[  +0,156118] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code
+(0x30 0x30)
+...
+[  +1,790419] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code
+(0x30 0x30)
+
+Tested-by: Andreas Färber <afaerber@suse.de>
+
+Thanks,
+
+Andreas
+
+-- 
+SUSE Linux GmbH, Maxfeldstr. 5, 90409 Nürnberg, Germany
+GF: Felix Imendörffer, Jane Smithard, Graham Norton
+HRB 21284 (AG Nürnberg)
