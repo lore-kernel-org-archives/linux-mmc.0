@@ -1,7 +1,7 @@
 From: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH V2 2/4] sdhci: Add quirk for delayed IRQ ACK
-Date: Mon, 16 Jan 2017 16:58:47 -0800
-Message-ID: <1484614729-26751-3-git-send-email-jeremymc@redhat.com>
+Subject: [PATCH V2 4/4] dts: doc: rename rpm_requests to respect DT naming conventions
+Date: Mon, 16 Jan 2017 16:58:49 -0800
+Message-ID: <1484614729-26751-5-git-send-email-jeremymc@redhat.com>
 References: <1484614729-26751-1-git-send-email-jeremymc@redhat.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1484614729-26751-1-git-send-email-jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -10,73 +10,185 @@ To: linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-soc-u79uwXL29TY
 Cc: andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, git-LJ92rlH3Dns@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On msm8992 it has been observed that IRQs were not getting
-ACK'd correctly when clocked at speeds greater than 400KHz.
+Node names cannot have an underscore '_' in the name.
+Simply rename 'rpm_request' nodes to 'rpm-request'.
 
 Signed-off-by: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-msm.c |  7 +++++++
- drivers/mmc/host/sdhci.c     | 12 ++++++++++--
- drivers/mmc/host/sdhci.h     |  2 ++
- 3 files changed, 19 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/clock/qcom,rpmcc.txt              | 2 +-
+ .../devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt        | 2 +-
+ Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt         | 6 +++---
+ Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt             | 2 +-
+ arch/arm/boot/dts/qcom-apq8074-dragonboard.dts                      | 2 +-
+ arch/arm/boot/dts/qcom-apq8084.dtsi                                 | 2 +-
+ arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts            | 2 +-
+ arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts               | 2 +-
+ arch/arm/boot/dts/qcom-msm8974.dtsi                                 | 2 +-
+ arch/arm64/boot/dts/qcom/msm8916.dtsi                               | 2 +-
+ arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi                       | 2 +-
+ 11 files changed, 13 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index ee01d95..25dc9cb 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1224,6 +1224,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 			       CORE_VENDOR_SPEC_CAPABILITIES0);
- 	}
+diff --git a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
+index a7235e9..845dd57 100644
+--- a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
++++ b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
+@@ -25,7 +25,7 @@ Example:
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
  
-+	/* Enable delayed IRQ handling workaround on 8992 */
-+	if (core_major == 1 && core_minor == 0x3e) {
-+		/* Add 40us delay in interrupt handler when operating
-+		 * at initialization frequency of 400KHz. */
-+		host->quirks2 |= SDHCI_QUIRK2_SLOW_INT_CLR;
-+	}
-+
- 	/* Setup IRQ for handling power/voltage tasks with PMIC */
- 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
- 	if (msm_host->pwr_irq < 0) {
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 71654b9..b685b2a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2678,11 +2678,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 			result = IRQ_WAKE_THREAD;
- 		}
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8916";
+ 				qcom,smd-channels = "rpm_requests";
  
--		if (intmask & SDHCI_INT_CMD_MASK)
-+		if (intmask & SDHCI_INT_CMD_MASK) {
-+			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
-+				udelay(40);
-+			}
- 			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
-+		}
+diff --git a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
+index 126989b..e4799a4 100644
+--- a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
++++ b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
+@@ -171,7 +171,7 @@ see regulator.txt.
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
  
--		if (intmask & SDHCI_INT_DATA_MASK)
-+		if (intmask & SDHCI_INT_DATA_MASK) {
-+			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
-+				udelay(40);
-+			}
- 			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
-+		}
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8974";
+ 				qcom,smd-channels = "rpm_requests";
  
- 		if (intmask & SDHCI_INT_BUS_POWER)
- 			pr_err("%s: Card is consuming too much power!\n",
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 766df17..89a10e7 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -24,6 +24,8 @@
-  * Controller registers
-  */
+diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
+index a48049c..30e1c75 100644
+--- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
++++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
+@@ -11,7 +11,7 @@ RPM node itself.
  
-+#define SDHCI_QUIRK2_SLOW_INT_CLR	(1<<5)
-+
- #define SDHCI_DMA_ADDRESS	0x00
- #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+ = SUBDEVICES
  
+-The RPM exposes resources to its subnodes.  The rpm_requests node must be
++The RPM exposes resources to its subnodes.  The rpm-requests node must be
+ present and this subnode may contain children that designate regulator
+ resources.
+ 
+@@ -29,7 +29,7 @@ resources.
+ 	Definition: must be "rpm_requests"
+ 
+ Refer to Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
+-for information on the regulator subnodes that can exist under the rpm_requests.
++for information on the regulator subnodes that can exist under the rpm-requests.
+ 
+ Example:
+ 
+@@ -48,7 +48,7 @@ Example:
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
+ 
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8974";
+ 				qcom,smd-channels = "rpm_requests";
+ 
+diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
+index 97d9b3e..34b05c3 100644
+--- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
++++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
+@@ -75,7 +75,7 @@ The following example represents a smd node, with one edge representing the
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
+ 
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8974";
+ 				qcom,smd-channels = "rpm_requests";
+ 
+diff --git a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
+index ad51df2..ccae434 100644
+--- a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
++++ b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
+@@ -126,7 +126,7 @@
+ 
+ 	smd {
+ 		rpm {
+-			rpm_requests {
++			rpm-requests {
+ 				pm8841-regulators {
+ 					s1 {
+ 						regulator-min-microvolt = <675000>;
+diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+index 39eb7a4..ac3ec7d 100644
+--- a/arch/arm/boot/dts/qcom-apq8084.dtsi
++++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+@@ -457,7 +457,7 @@
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
+ 
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-apq8084";
+ 				qcom,smd-channels = "rpm_requests";
+ 
+diff --git a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
+index c0fb4a6..890566b 100644
+--- a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
++++ b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
+@@ -19,7 +19,7 @@
+ 
+ 	smd {
+ 		rpm {
+-			rpm_requests {
++			rpm-requests {
+ 				pm8841-regulators {
+ 					s1 {
+ 						regulator-min-microvolt = <675000>;
+diff --git a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
+index e7c1577..ec937c9 100644
+--- a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
++++ b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
+@@ -60,7 +60,7 @@
+ 
+ 	smd {
+ 		rpm {
+-			rpm_requests {
++			rpm-requests {
+ 				pm8841-regulators {
+ 					s1 {
+ 						regulator-min-microvolt = <675000>;
+diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
+index d210947..cb9cd53 100644
+--- a/arch/arm/boot/dts/qcom-msm8974.dtsi
++++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
+@@ -668,7 +668,7 @@
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
+ 
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8974";
+ 				qcom,smd-channels = "rpm_requests";
+ 
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index ed15e87..247fc51 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -812,7 +812,7 @@
+ 			qcom,ipc = <&apcs 8 0>;
+ 			qcom,smd-edge = <15>;
+ 
+-			rpm_requests {
++			rpm-requests {
+ 				compatible = "qcom,rpm-msm8916";
+ 				qcom,smd-channels = "rpm_requests";
+ 
+diff --git a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
+index d556aae..36fc582 100644
+--- a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
+@@ -13,7 +13,7 @@
+ 
+ &smd-rpm {
+ 	rpm {
+-		rpm_requests {
++		rpm-requests {
+ 			pm8994-regulators {
+ 
+ 				vdd_l1-supply = <&pm8994_s1>;
 -- 
 2.6.1
 
