@@ -1,84 +1,49 @@
 From: Jeremy McNicoll <jmcnicol@redhat.com>
-Subject: Re: [RESEND PATCHv1 0/8] mmc: sdhci-msm: Provide support for
- enhanced strobe
-Date: Mon, 16 Jan 2017 17:07:51 -0800
-Message-ID: <20170117010751.GA25703@mini-rhel.redhat.com>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+Subject: Re: [RFC PATCH 0/3] mmc: sdhci: sdhci-msm: Add more debug logs
+Date: Mon, 16 Jan 2017 17:09:41 -0800
+Message-ID: <20170117010940.GB25703@mini-rhel.redhat.com>
+References: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45280 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750782AbdAQBIF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Jan 2017 20:08:05 -0500
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1483097531-9991-1-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, stummala@codeaurora.org, georgi.djakov@linaro.org, linux-arm-msm@vger.kernel.org, pramod.gurav@linaro.org, jeremymc@redhat.com, venkatg@codeaurora.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 10, 2017 at 12:30:44PM +0530, Ritesh Harjani wrote:
-> Hi, 
+On Fri, Dec 30, 2016 at 05:02:08PM +0530, Ritesh Harjani wrote:
+> Below is a small set of patches which provide useful info for
+> debugging issues.
 > 
-> Resending this patch series, as no one could review it -possibly due to
-> holidays during that time.
+> Patch 1 :- This provide callback mechanism for platform drivers
+> to dump their necessary register info at the time of sdhci_dumpregs.
 > 
-> This patch series mainly provides enhanced strobe support to sdhci-msm driver
-> along with some additions of HW recommended sequence. This has been tested on
-> 8996 based internal target & on db410c.
+> Patch 2 :- This implements this callback (->platform_dumpregs)
+> for sdhci-msm.
 > 
-> Patches 1-3 :- Factors out few functions to be re-used again.
-> 	       To also simplify large functions and makes it more readable.
+> Patch 3 :- Adds more logs for data errors to aid debugging.
 > 
-> Patches 4-5 :- Few recommendations based on HW prog. guide.
+> Ritesh Harjani (1):
+>   mmc: sdhci: Add more debug info in case of data error
 > 
-> Patches 6 :- Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
-> 	     so that ->platform_execute_tuning (underlying platform driver) can
-> 	     know about HS400 tuning.
+> Sahitya Tummala (2):
+>   mmc: sdhci: Add platform_dumpregs callback support to sdhci_ops.
+>   mmc: sdhci-msm: Implement platform_dumpregs callback in sdhci-msm
 > 
-> Patch 7 :- Implements an additional step as per HPG for HS400 tuning.
-> 
-> Patch 8 :- Implements enhanced strobe functionality in sdhci-msm driver.
-> 
+>  drivers/mmc/host/sdhci-msm.c | 34 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c     | 24 ++++++++++++++++++++++--
+>  drivers/mmc/host/sdhci.h     |  1 +
+>  3 files changed, 57 insertions(+), 2 deletions(-)
 >
 
-I have included this series in my tree while testing my SDHCI V2 series.
-
-One message did occur which looks new or unfamilar and relatively
-harmless,
-
-"sdhci_msm f9824900.mmc: TCXO clk not present (-2) "
-
-Is that something I am missing on my side?  
-
-In anycase,
+This series was part of my SDHCI enablement on my Nexus 5X and
+everything still seems to work ok.
 
 Tested-by: Jeremy McNicoll <jeremymc@redhat.com>
 
--jeremy
 
-
-> Ritesh Harjani (6):
->   mmc: sdhci-msm: Factor out sdhci_msm_hc_select_mode
->   mmc: sdhci-msm: Factor out function to set/get msm clock rate
->   mmc: sdhci-msm: Factor out sdhci_msm_hs400
->   mmc: sdhci: Clear SDHCI_HS400_TUNING flag after
->     platform_execute_tuning
->   mmc: sdhci-msm: Make HS400 tuning follow as per recommeneded HW
->     sequence
->   mmc: sdhci-msm: Provide enhanced_strobe mode feature support
-> 
-> Subhash Jadavani (1):
->   mmc: sdhci-msm: configure CORE_CSR_CDC_DELAY_CFG to recommended value
-> 
-> Venkat Gopalakrishnan (1):
->   mmc: sdhci-msm: Reset vendor specific func register on probe
-> 
->  drivers/mmc/host/sdhci-msm.c | 356 ++++++++++++++++++++++++++-----------------
->  drivers/mmc/host/sdhci.c     |   6 +-
->  2 files changed, 224 insertions(+), 138 deletions(-)
-> 
 > -- 
 > The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 > a Linux Foundation Collaborative Project.
