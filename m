@@ -1,44 +1,59 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: tmio: Remove redundant check of mmc->slot.cd_irq
-Date: Tue, 17 Jan 2017 21:53:47 +0100
-Message-ID: <20170117205347.7kihefzza5lf54fy@ninjato>
-References: <1484061052-25334-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:34364 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750866AbdAQVE3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Jan 2017 16:04:29 -0500
-Content-Disposition: inline
-In-Reply-To: <1484061052-25334-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Paul Cercueil <paul@crapouillou.net>
+Subject: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
+Date: Wed, 18 Jan 2017 00:14:08 +0100
+Message-ID: <20170117231421.16310-1-paul@crapouillou.net>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>
+Cc: linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
 
-On Tue, Jan 10, 2017 at 04:10:52PM +0100, Ulf Hansson wrote:
-> To validate whether native hotplug needs to be used, the tmio driver checks
-> whether the mmc->slot.cd_irq has been successfully assigned.
-> 
-> This check is redundant at its current place in tmio_mmc_host_probe(), as
-> the mmc core assigns mmc->slot.cd_irq a valid value first when
-> mmc_gpiod_request_cd_irq() is called. Therefore, let's just remove the
-> check for now, as that also removes a layering violation of the tmio driver
-> accessing core specific data via ->slot.cd_irq.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Hi,
 
-Agreed. This is a layering violation and can be safely removed since it
-is a no-op currently.
+This set of patches introduces a new pinctrl driver for the Ingenic
+JZ4740 and JZ4780, which handles pin configuration, pin muxing and
+GPIO config for those MIPS SoCs.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+The initial driver was developed by to Paul Burton, so I'll expect his
+Signed-Off-By to be added to each patch. It has been severely modified
+and improved by myself, notably to add support for the JZ4740 (the
+initial non-upstream driver only handled the JZ4780).
 
-Besides card eject still works on my M3-W. I will test on my H2 tomorrow
-or the day after that.
+I successfully tested it on Imagination Technologies' CI20 board (JZ4780),
+as well as on the Dingoo A320 chinese handheld console (JZ4740).
 
-Thanks,
+One patch in this series add a pinctrl configuration for some drivers
+instanciated in the QI LB60 devicetree. Since I don't own this device,
+this one patch was not tested.
 
-   Wolfram
+Some words about the driver itself:
+- pinctrl-ingenic.c contains the core functions that can be shared
+  across all Ingenic SoCs,
+- pinctrl-jz4740.c contains the JZ4740-specific low-level functions and
+  the jz4740-pinctrl driver,
+- pinctrl-jz4780.c contains the JZ4780-specific low-level functions and
+  the jz4780-pinctrl driver.
 
+The reason behind using a common file sharing core functions and backend
+ops for each SoC version, is that the pin/GPIO controllers of the Ingenic
+SoCs are extremely similar across SoC versions, except that some have the
+registers shuffled around. Making a distinct separation permits the reuse
+of large parts of the driver to support the two SoC versions.
+
+One problem still unresolved: the pinctrl framework does not allow us to
+configure each pin on demand (someone please prove me wrong), when the
+various PWM channels are requested or released. For instance, the PWM
+channels can be configured from sysfs, which would require all PWM pins
+to be configured properly beforehand for the PWM function, eventually
+causing conflicts with other platform or board drivers.
+
+The proper solution here would be to modify the pwm-jz4740 driver to
+handle only one PWM channel, and create an instance of this driver
+for each one of the 8 PWM channels. Then, it could use the pinctrl
+framework to dynamically configure the PWM pin it controls.
+
+Until this can be done, the only jz4740 board supported upstream
+(Qi lb60) could configure all of its connected PWM pins in PWM function
+mode, if those are not used by other drivers nor by GPIOs on the
+board. The only jz4780 board upstream (CI20) does not yet support the
+PWM driver.
