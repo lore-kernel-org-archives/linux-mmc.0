@@ -1,13 +1,11 @@
 From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v2 1/3] mmc: dt-bindings: update Mediatek MMC bindings
-Date: Tue, 17 Jan 2017 20:55:01 +0800
-Message-ID: <1484657703-5861-2-git-send-email-yong.mao@mediatek.com>
-References: <1484657703-5861-1-git-send-email-yong.mao@mediatek.com>
+Subject: [PATCH v2 0/3] mmc: mediatek: Use data tune for CMD line tune
+Date: Tue, 17 Jan 2017 20:55:00 +0800
+Message-ID: <1484657703-5861-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1484657703-5861-1-git-send-email-yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
  <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
@@ -21,38 +19,15 @@ To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+yong mao (3):
+  mmc: dt-bindings: update Mediatek MMC bindings
+  dts: mediatek: configure some fixed mmc parameters
+  mmc: mediatek: Use data tune for CMD line tune
 
-Add description for hs200-cmd-int-delay
-Add description for hs400-cmd-int-delay
-Add description for cmd-resp-sel
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |   6 +
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |   3 +
+ drivers/mmc/host/mtk-sd.c                        | 169 ++++++++++++++++++++---
+ 3 files changed, 161 insertions(+), 17 deletions(-)
 
-Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- Documentation/devicetree/bindings/mmc/mtk-sd.txt |    6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-index 0120c7f..2dbb3b0 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -21,6 +21,9 @@ Optional properties:
- - assigned-clocks: PLL of the source clock
- - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
- - hs400-ds-delay: HS400 DS delay setting
-+- hs200-cmd-int-delay: HS200 command internal delay setting
-+- hs400-cmd-int-delay: HS400 command internal delay setting
-+- cmd-resp-sel: command response sample selection
- 
- Examples:
- mmc0: mmc@11230000 {
-@@ -38,4 +41,7 @@ mmc0: mmc@11230000 {
- 	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
- 	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
- 	hs400-ds-delay = <0x14015>;
-+	hs200-cmd-int-delay = <26>;
-+	hs400-cmd-int-delay = <14>;
-+	cmd-resp-sel = <0>; /* 0: rising, 1: falling */
- };
 -- 
-1.7.9.5
+1.8.1.1
