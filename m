@@ -1,42 +1,64 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Tue, 17 Jan 2017 21:33:40 +0100
-Message-ID: <20170117203340.dx6k4zof2omcbz4y@ninjato>
-References: <20170117195940.25092-1-chris.brandt@renesas.com>
- <20170117195940.25092-3-chris.brandt@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170117195940.25092-3-chris.brandt@renesas.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: [PATCH] mmc: host: tmio: disable clocks when unbinding
+Date: Tue, 17 Jan 2017 21:26:01 +0100
+Message-ID: <20170117202601.3742-1-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:34191 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751381AbdAQUe3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Jan 2017 15:34:29 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert@linux-m68k.org>, Chris Brandt <chris.brandt@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On Tue, Jan 17, 2017 at 02:59:39PM -0500, Chris Brandt wrote:
-> In the case of a single clock source, you don't need names. However,
-> if the controller has 2 clock sources, you need to name them correctly
-> so the driver can find the 2nd one.
-> 
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index a1650ed..258b98c 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -25,8 +25,29 @@ Required properties:
->  		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->  		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
->  
-> +- clocks: Most controllers only have 1 clock source per cahnnel. However, some
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-channel.
+Create a helper function to disable clocks and use it in remove(), too.
+Now, clk_summary in debugfs reports the clocks as disabled and
+unprepared after unbinding.
 
-> +	  have 2. If 2 clocks are specified, you must name them as "core" and
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/tmio_mmc_pio.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
-Maybe "However, some have a second clock dedicated to card detection."?
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index ddba7b833f2c52..db3bde716b3eed 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -947,6 +947,12 @@ static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+ 	return host->clk_enable(host);
+ }
+ 
++static void tmio_mmc_clk_disable(struct tmio_mmc_host *host)
++{
++	if (host->clk_disable)
++		host->clk_disable(host);
++}
++
+ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+@@ -1332,6 +1338,8 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 
+ 	pm_runtime_put_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
++
++	tmio_mmc_clk_disable(host);
+ }
+ EXPORT_SYMBOL(tmio_mmc_host_remove);
+ 
+@@ -1346,8 +1354,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+ 	if (host->clk_cache)
+ 		tmio_mmc_clk_stop(host);
+ 
+-	if (host->clk_disable)
+-		host->clk_disable(host);
++	tmio_mmc_clk_disable(host);
+ 
+ 	return 0;
+ }
+-- 
+2.11.0
+
