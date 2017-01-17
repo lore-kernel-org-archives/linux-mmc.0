@@ -1,116 +1,92 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v2, 2/2] mmc: sdhci-of-esdhc: avoid clock glitch when frequency
- is changing
-Date: Tue, 17 Jan 2017 16:07:21 +0100
-Message-ID: <CAPDyKFoxGPtJnCB45jRQMzVYVmpHmY_B7FtKuRns8BRg8C3TKw@mail.gmail.com>
-References: <1482745590-29718-1-git-send-email-yangbo.lu@nxp.com> <1482745590-29718-2-git-send-email-yangbo.lu@nxp.com>
+Subject: Re: [PATCH] [linux-next] Docs: DT: MMC: Fix typo in mmc
+Date: Tue, 17 Jan 2017 16:07:29 +0100
+Message-ID: <CAPDyKFoij-en9ntD-7pkXcZvFXYSvQGZ+YBBkyLbETY+hRSEwg@mail.gmail.com>
+References: <20170106145043.4859-1-standby24x7@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:37910 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751055AbdAQPHW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2017 10:07:22 -0500
-Received: by mail-it0-f47.google.com with SMTP id c7so44043678itd.1
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Jan 2017 07:07:22 -0800 (PST)
-In-Reply-To: <1482745590-29718-2-git-send-email-yangbo.lu@nxp.com>
+Received: from mail-io0-f175.google.com ([209.85.223.175]:36122 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750995AbdAQPHb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2017 10:07:31 -0500
+Received: by mail-io0-f175.google.com with SMTP id j13so116429585iod.3
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Jan 2017 07:07:31 -0800 (PST)
+In-Reply-To: <20170106145043.4859-1-standby24x7@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Masanari Iida <standby24x7@gmail.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kevin Hilman <khilman@baylibre.com>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 26 December 2016 at 10:46, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> The eSDHC_PRSSTAT[SDSTB] bit indicates whether the internal card clock is
-> stable. This bit is for the host driver to poll clock status when changing
-> the clock frequency. It is recommended to clear eSDHC_SYSCTL[SDCLKEN]
-> to remove glitch on the card clock when the frequency is changing. This
-> patch is to disable SDCLKEN bit before changing frequency and enable it
-> after SDSTB bit is set.
+On 6 January 2017 at 15:50, Masanari Iida <standby24x7@gmail.com> wrote:
+> This patch fix some spelling typo found in devicetree/bindings/mmc.
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Signed-off-by: Masanari Iida <standby24x7@gmail.com>
 
-Thanks, applied for next!
+Thanks, applied for next with a change in commit message prefix.
 
 Kind regards
 Uffe
 
 > ---
-> Changes for v2:
->         - added Adrian into to list
-> ---
->  drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
->  drivers/mmc/host/sdhci-of-esdhc.c | 21 ++++++++++++++++++---
->  2 files changed, 23 insertions(+), 3 deletions(-)
+>  Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt | 2 +-
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt         | 2 +-
+>  Documentation/devicetree/bindings/mmc/sdhci.txt            | 2 +-
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 2 +-
+>  4 files changed, 4 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> index 8cd8449..ece8b37 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -31,6 +31,10 @@
->   * eSDHC register definition
->   */
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> index 7f95ec400863..50bf611a4d2c 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> @@ -17,7 +17,7 @@ Required properties:
+>         "core" - Main peripheral bus clock
+>         "clkin0" - Parent clock of internal mux
+>         "clkin1" - Other parent clock of internal mux
+> -  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
+> +  The driver has an internal mux clock which switches between clkin0 and clkin1 depending on the
+>    clock rate requested by the MMC core.
 >
-> +/* Present State Register */
-> +#define ESDHC_PRSSTAT                  0x24
-> +#define ESDHC_CLOCK_STABLE             0x00000008
-> +
->  /* Protocol Control Register */
->  #define ESDHC_PROCTL                   0x28
->  #define ESDHC_CTRL_4BITBUS             (0x1 << 1)
-> @@ -43,6 +47,7 @@
->  #define ESDHC_CLOCK_MASK               0x0000fff0
->  #define ESDHC_PREDIV_SHIFT             8
->  #define ESDHC_DIVIDER_SHIFT            4
-> +#define ESDHC_CLOCK_SDCLKEN            0x00000008
->  #define ESDHC_CLOCK_PEREN              0x00000004
->  #define ESDHC_CLOCK_HCKEN              0x00000002
->  #define ESDHC_CLOCK_IPGEN              0x00000001
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 9a6eb44..0849885 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -431,6 +431,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->         struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
->         int pre_div = 1;
->         int div = 1;
-> +       u32 timeout;
->         u32 temp;
+>  Example:
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> index 3cd4c43a3260..230fd696eb92 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> @@ -38,7 +38,7 @@ Optional properties:
+>  - bus-width:           Number of data lines.
+>                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
 >
->         host->mmc->actual_clock = 0;
-> @@ -451,8 +452,8 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->         }
+> -- max-frequency:       Can be 200MHz, 100Mz or 50MHz (default) and used for
+> +- max-frequency:       Can be 200MHz, 100MHz or 50MHz (default) and used for
+>                         configuring the CCONFIG3 in the mmcss.
+>                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
 >
->         temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-> -       temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-> -               | ESDHC_CLOCK_MASK);
-> +       temp &= ~(ESDHC_CLOCK_SDCLKEN | ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN |
-> +                 ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
->         sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci.txt b/Documentation/devicetree/bindings/mmc/sdhci.txt
+> index 1c95a1a555c3..0e9923a64024 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci.txt
+> @@ -5,7 +5,7 @@ host controllers refer to the mmc[1] bindings.
 >
->         while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-> @@ -472,7 +473,21 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->                 | (div << ESDHC_DIVIDER_SHIFT)
->                 | (pre_div << ESDHC_PREDIV_SHIFT));
->         sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-> -       mdelay(1);
-> +
-> +       /* Wait max 20 ms */
-> +       timeout = 20;
-> +       while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
-> +               if (timeout == 0) {
-> +                       pr_err("%s: Internal clock never stabilised.\n",
-> +                               mmc_hostname(host->mmc));
-> +                       return;
-> +               }
-> +               timeout--;
-> +               mdelay(1);
-> +       }
-> +
-> +       temp |= ESDHC_CLOCK_SDCLKEN;
-> +       sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
->  }
+>  Optional properties:
+>  - sdhci-caps-mask: The sdhci capabilities register is incorrect. This 64bit
+> -  property corresponds to the bits in the sdhci capabilty register. If the bit
+> +  property corresponds to the bits in the sdhci capability register. If the bit
+>    is on in the mask then the bit is incorrect in the register and should be
+>    turned off, before applying sdhci-caps.
+>  - sdhci-caps: The sdhci capabilities register is incorrect. This 64bit
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index 7fd17c3da116..40b94a5369a1 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -16,7 +16,7 @@ Required Properties:
+>    each child-node representing a supported slot. There should be atleast one
+>    child node representing a card slot. The name of the child node representing
+>    the slot is recommended to be slot@n where n is the unique number of the slot
+> -  connnected to the controller. The following are optional properties which
+> +  connected to the controller. The following are optional properties which
+>    can be included in the slot child node.
 >
->  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+>         * reg: specifies the physical slot number. The valid values of this
 > --
-> 2.1.0.27.g96db324
+> 2.11.0.161.g6610af872f64
 >
