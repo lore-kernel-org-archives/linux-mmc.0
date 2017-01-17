@@ -1,41 +1,42 @@
-From: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v2 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
-Date: Tue, 17 Jan 2017 14:59:37 -0500
-Message-ID: <20170117195940.25092-1-chris.brandt@renesas.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Tue, 17 Jan 2017 21:33:40 +0100
+Message-ID: <20170117203340.dx6k4zof2omcbz4y@ninjato>
+References: <20170117195940.25092-1-chris.brandt@renesas.com>
+ <20170117195940.25092-3-chris.brandt@renesas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170117195940.25092-3-chris.brandt@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-At first this started out as a simple typo fix, until I realized
-that the SDHI in the RZ/A1 has 2 clocks per channel and both need
-to be turned on/off.
+On Tue, Jan 17, 2017 at 02:59:39PM -0500, Chris Brandt wrote:
+> In the case of a single clock source, you don't need names. However,
+> if the controller has 2 clock sources, you need to name them correctly
+> so the driver can find the 2nd one.
+> 
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
+>  1 file changed, 21 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> index a1650ed..258b98c 100644
+> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -25,8 +25,29 @@ Required properties:
+>  		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+>  		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
+>  
+> +- clocks: Most controllers only have 1 clock source per cahnnel. However, some
 
-This patch series adds the ability to specify 2 clocks instead of
-just 1, and does so for the RZ/A1 r7s72100.
+channel.
 
-This patch has been tested on an RZ/A1 RSK board. Card detect works
-fine as well as bind/unbind.
+> +	  have 2. If 2 clocks are specified, you must name them as "core" and
 
-
-
-Chris Brandt (3):
-  mmc: sh_mobile_sdhi: add support for 2 clocks
-  mmc: sh_mobile_sdhi: explain clock bindings
-  ARM: dts: r7s72100: update sdhi clock bindings
-
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
- arch/arm/boot/dts/r7s72100.dtsi                    | 17 ++++++++++++-----
- drivers/mmc/host/sh_mobile_sdhi.c                  | 11 +++++++++++
- include/dt-bindings/clock/r7s72100-clock.h         |  6 ++++--
- 4 files changed, 48 insertions(+), 7 deletions(-)
-
--- 
-2.10.1
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Maybe "However, some have a second clock dedicated to card detection."?
