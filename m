@@ -1,129 +1,59 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: sdio: don't allow vmalloc area buffer to use sdio API
-Date: Tue, 17 Jan 2017 15:45:44 +0800
-Message-ID: <1484639144-7176-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:43077 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750817AbdAQHrZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2017 02:47:25 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: Dropping device tree pinmux nodes for GPIO usage
+ (Was: [PATCH 3/5] arm64: dts: sun50i: add MMC nodes)
+Date: Tue, 17 Jan 2017 09:33:51 +0100
+Message-ID: <20170117083351.jy7jsdpi2zvufq5q@lukather>
+References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
+ <1483398226-29321-4-git-send-email-andre.przywara@arm.com>
+ <CAGb2v65GJFTnQZtWHCS7CAtA+Dry94o77aakPLr938BpQksLog@mail.gmail.com>
+ <20170115155931.l5tjcdhbz6sj3wke@localhost>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="ibjbuieytilcvimr"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBB6VN67BQKGQEWZ7WNTA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20170115155931.l5tjcdhbz6sj3wke@localhost>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Rask Ingemann Lambertsen <rask-SivP7zSAdNDZaaYASwVUlg@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-It's fine if the host driver use PIO mode to transfer the
-vmalloc area buffer but not for DMA mode. The sdio APIs haven't
-provide the capability to tell the caller whether it will use DMA
-to finish the IO transfer or not, so don't give the randomly
-insmoded sdio function driver the possibility to break the kernel.
-Also the APIs shouldn't take the liberty to do a copy for these
-cases and just kick out these requests should be enough.
 
-This issue is observed by doing insmod a downloaded wifi module
-driver and the kernel panic right away. Unfortunately we don't have
-the source code but adding this patch that it proves that the module
-driver was passing on a vmalloc area buffer for sdio APIs.
+--ibjbuieytilcvimr
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
 
-It could very easy to be reproduced by writing a simple function
-module driver and insmod it, and panic log looks like:
+On Sun, Jan 15, 2017 at 04:59:32PM +0100, Rask Ingemann Lambertsen wrote:
+> On Tue, Jan 03, 2017 at 10:52:12AM +0800, Chen-Yu Tsai wrote:
+> > On Tue, Jan 3, 2017 at 7:03 AM, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> wrote:
+> > > +
+> > > +                       mmc0_default_cd_pin: mmc0_cd_pin@0 {
+> > > +                               pins = "PF6";
+> > > +                               function = "gpio_in";
+> > > +                               bias-pull-up;
+> > > +                       };
+> > 
+> > We are starting to drop pinmux nodes for gpio usage.
+> 
+> How do we get the equivalent of bias-pull-up/down and drive-strength if we
+> run across a pin that needs it?
 
-unsigned u8 __aligned(32) buf[PAGE_SIZE];
+Hmm, that's actually a very good question...
 
-static int wifi_probe(struct sdio_func *func, const struct
-sdio_device_id *id)
-{
-	sdio_claim_host(func);
-	sdio_enable_func(func);
-	sdio_memcpy_toio(func, 0x0, buf, 0x200);
-}
+For those cases, leave the pinctrl node for now, we'll deal with that
+in due time
 
-[  236.748210] wifi_probe: buf = 0xffffff8000a40b80
-[  236.748258] swiotlb_tbl_map_single: orig_addr = 0xfffffffff8c40b80,
-tlb_addr = 0xf7eae000 //I added log here
-[  236.748276] Unable to handle kernel paging request at virtual address
-fffffffff8c40b80
-[  236.776486] pgd = ffffffc0b3417000
-[  236.776789] [fffffffff8c40b80] *pgd=00000000b3427003,
-*pud=00000000b3427003, *pmd=0000000000000000
-[  236.777601] Internal error: Oops: 96000005 [#1] PREEMPT SMP
-[  236.778093] Modules linked in: drvtst(O+)
-[  236.778463] CPU: 0 PID: 1918 Comm: insmod Tainted: G           O
-4.4.36 #25
-[  236.779096] Hardware name: Rockchip RK3399 Evaluation Board v3 edp
-(Android) (DT)
-[  236.779753] task: ffffffc0e3db0c40 ti: ffffffc0b342c000 task.ti:
-ffffffc0b342c000
-[  236.780418] PC is at __memcpy+0x100/0x180
-[  236.780777] LR is at swiotlb_tbl_map_single+0x254/0x274
-[  236.781237] pc : [<ffffff80083579c0>] lr : [<ffffff800837cf70>]
-...
+Maxime
 
-[  236.941392] f460: 3d20726464615f67 6666666666783020
-[  236.941826] [<ffffff80083579c0>] __memcpy+0x100/0x180
-[  236.942274] [<ffffff800837dc18>] swiotlb_map_sg_attrs+0xa8/0x170
-[  236.942810] [<ffffff800809359c>] __swiotlb_map_sg_attrs+0x24/0x8c
-[  236.943353] [<ffffff800871113c>]
-dw_mci_pre_dma_transfer.isra.16+0xf0/0x11c
-[  236.943967] [<ffffff80087129cc>] __dw_mci_start_request+0x17c/0x4d0
-[  236.944520] [<ffffff80087132e0>] dw_mci_request+0xb8/0xf0
-[  236.945002] [<ffffff80086f8b44>] __mmc_start_request+0x9c/0xc0
-[  236.945520] [<ffffff80087ae0e8>]
-mmc_start_request.part.17+0x100/0x11c
-[  236.946097] [<ffffff80086f9c74>] mmc_wait_for_req+0x78/0x1a8
-[  236.946600] [<ffffff800870421c>] mmc_io_rw_extended+0x27c/0x2fc
-[  236.947124] [<ffffff8008705800>] sdio_io_rw_ext_helper+0x1e4/0x238
-[  236.947670] [<ffffff8008705954>] sdio_memcpy_toio+0x24/0x2c
-[  236.948169] [<ffffff8000a40108>] wifi_probe+0xa8/0x198 [drvtst]
-[  236.948708] [<ffffff8008704734>] sdio_bus_probe+0xb0/0x140
-[  236.949195] [<ffffff80084bfd6c>] driver_probe_device+0x118/0x2b0
-[  236.949724] [<ffffff80084bff68>] __driver_attach+0x64/0x90
-[  236.950212] [<ffffff80084bee18>] bus_for_each_dev+0x80/0xb0
-[  236.950706] [<ffffff80084bf8ac>] driver_attach+0x20/0x28
-[  236.951176] [<ffffff80084bf45c>] bus_add_driver+0xe8/0x1ec
-[  236.951661] [<ffffff80084c0afc>] driver_register+0x98/0xe4
-[  236.952147] [<ffffff8008704580>] sdio_register_driver+0x24/0x2c
-[  236.952675] [<ffffff8000a40228>] wifi_sdio_init+0x30/0x68 [drvtst]
-[  236.953241] [<ffffff8000a4400c>] wifi_drv_init+0xc/0x38 [drvtst]
-[  236.953789] [<ffffff8008082ba4>] do_one_initcall+0x17c/0x198
-[  236.954293] [<ffffff800815e564>] do_init_module+0x60/0x1b8
-[  236.954779] [<ffffff80081150f0>] load_module+0x1660/0x1a50
-[  236.955264] [<ffffff800811562c>] SyS_init_module+0x14c/0x180
-[  236.955765] [<ffffff80080826f0>] el0_svc_naked+0x24/0x28
-
-So the kernel crash since the vmalloc area buffer isn't physical
-continuous and swiotlb couldn't find the correct mapping address
-in fact. Anyway, don't give the chance to panic kernel by using
-sdio APIs.
-
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
- drivers/mmc/core/sdio_io.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 406e5f0..cf00805 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -10,6 +10,7 @@
-  */
- 
- #include <linux/export.h>
-+#include <linux/mm.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/sdio.h>
-@@ -307,7 +308,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
- 	unsigned max_blocks;
- 	int ret;
- 
--	if (!func || (func->num > 7))
-+	if (!func || (func->num > 7) || is_vmalloc_addr(buf))
- 		return -EINVAL;
- 
- 	/* Do the bulk of the transfer using block mode (if supported). */
 -- 
-1.9.1
-
-
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+--ibjbuieytilcvimr--
