@@ -1,78 +1,49 @@
-From: Uri Yanai <uri.yanai@sandisk.com>
-Subject: [PATCH 2/3] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
-Date: Tue, 17 Jan 2017 14:15:36 +0200
-Message-ID: <1484655337-32562-3-git-send-email-uri.yanai@sandisk.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
+From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v2 2/3] dts: mediatek: configure some fixed mmc parameters
+Date: Tue, 17 Jan 2017 20:55:02 +0800
+Message-ID: <1484657703-5861-3-git-send-email-yong.mao@mediatek.com>
+References: <1484657703-5861-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0042.outbound.protection.outlook.com ([104.47.37.42]:23577
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750922AbdAQMQG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Jan 2017 07:16:06 -0500
-In-Reply-To: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1484657703-5861-1-git-send-email-yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, alex.lemberg@sandisk.com, Uri Yanai <uri.yanai@sandisk.com>
 
-Read from the device EXT_CSD and set to the card->ext_csd structure
+From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 
-Change-Id: I940b1612f5bac078c330ad3829d7aa5f0ba0989e
-Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+configure some fixed mmc parameters
+
+Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- drivers/mmc/core/mmc.c   | 10 ++++++++--
- include/linux/mmc/card.h |  1 +
- include/linux/mmc/mmc.h  |  1 +
- 3 files changed, 10 insertions(+), 2 deletions(-)
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index c0e2507..f70f6a1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -530,8 +530,14 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 						EXT_CSD_MANUAL_BKOPS_MASK);
- 			card->ext_csd.raw_bkops_status =
- 				ext_csd[EXT_CSD_BKOPS_STATUS];
--			if (!card->ext_csd.man_bkops_en)
--				pr_debug("%s: MAN_BKOPS_EN bit is not set\n",
-+			if (card->ext_csd.man_bkops_en)
-+				pr_debug("%s: MAN_BKOPS_EN bit is set\n",
-+					mmc_hostname(card->host));
-+			card->ext_csd.auto_bkops_en =
-+					(ext_csd[EXT_CSD_BKOPS_EN] &
-+						EXT_CSD_AUTO_BKOPS_MASK);
-+			if (card->ext_csd.auto_bkops_en)
-+				pr_debug("%s: AUTO_BKOPS_EN bit is set\n",
- 					mmc_hostname(card->host));
- 		}
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 00449e5..e3f1031 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -84,6 +84,7 @@ struct mmc_ext_csd {
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
- 	bool			bkops;		/* background support bit */
- 	bool			man_bkops_en;	/* manual bkops enable bit */
-+	bool			auto_bkops_en;	/* auto bkops enable bit */
- 	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
- 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
- 	unsigned int		boot_ro_lock;		/* ro lock support */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index a074082..126b8d5 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -449,6 +449,7 @@ struct _mmc_csd {
-  * BKOPS modes
-  */
- #define EXT_CSD_MANUAL_BKOPS_MASK	0x01
-+#define EXT_CSD_AUTO_BKOPS_MASK		0x02
- 
- /*
-  * Command Queue
+diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+index 0ecaad4..7356a32 100644
+--- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
++++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+@@ -134,6 +134,9 @@
+ 	bus-width = <8>;
+ 	max-frequency = <50000000>;
+ 	cap-mmc-highspeed;
++	hs200-cmd-int-delay=<26>;
++	hs400-cmd-int-delay=<14>;
++	cmd-resp-sel=<0>; /* 0:rising, 1:falling */
+ 	vmmc-supply = <&mt6397_vemc_3v3_reg>;
+ 	vqmmc-supply = <&mt6397_vio18_reg>;
+ 	non-removable;
 -- 
-1.9.1
-
+1.7.9.5
