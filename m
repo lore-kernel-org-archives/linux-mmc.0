@@ -1,98 +1,86 @@
-From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V2 0/4] Enable onboard SDHCI for Nexus 5X (msm8992)
-Date: Mon, 16 Jan 2017 16:58:45 -0800
-Message-ID: <1484614729-26751-1-git-send-email-jeremymc@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43312 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750933AbdAQA7D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Jan 2017 19:59:03 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH V2 2/4] sdhci: Add quirk for delayed IRQ ACK
+Date: Mon, 16 Jan 2017 16:58:47 -0800
+Message-ID: <1484614729-26751-3-git-send-email-jeremymc@redhat.com>
+References: <1484614729-26751-1-git-send-email-jeremymc@redhat.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1484614729-26751-1-git-send-email-jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, git-LJ92rlH3Dns@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com, jeremymc@redhat.com
 
+On msm8992 it has been observed that IRQs were not getting
+ACK'd correctly when clocked at speeds greater than 400KHz.
 
-V2->V1
-------
+Signed-off-by: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-msm.c |  7 +++++++
+ drivers/mmc/host/sdhci.c     | 12 ++++++++++--
+ drivers/mmc/host/sdhci.h     |  2 ++
+ 3 files changed, 19 insertions(+), 2 deletions(-)
 
-* Removed SMD macro to define packet size
-* Dropped "sdhci: dump vendor state and regs" as Ritesh has agreed to deal
-  with it as part of [https://lkml.org/lkml/2016/12/30/102] . 
-* Didn't include RobH's ACK as I stripped out the smd_rpm node from
-   msm8992-bullhead-rev-101.dts and created msm8994-smd-rpm.dtsi to share
-   between 8992 & 8994.  All feedback from RobH was applied prior to making
-   this change.
-
-
-All testing was performed with the inclusion of:
-  RESEND v1 -> http://www.spinics.net/lists/linux-arm-msm/msg25484.html
-  RESEND RFC -> http://www.spinics.net/lists/linux-arm-msm/msg25481.html
-
-
-In V1 it was stated that
-"Without the workaround (patch 5/5) mmc/sdhci didn't get detected 8/20
-times.  When including the afore mentioned workaround MMC detection is
-100% (35 boots) ."
-It turns out we weren't waiting long enough for detection.  (see statement
-below)
-
-The following test results were obtained upon removing
-the SDHCI workaround (patch 2/4):
-
-  -50 iterations
-  -100% successfully detected onboard storage
-  -2 times SDHCI detection took over 4+ min
-  -Sample size 1 (I only have 1 Nexus 5X)
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index ee01d95..25dc9cb 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1224,6 +1224,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 			       CORE_VENDOR_SPEC_CAPABILITIES0);
+ 	}
  
-General observations regarding workaround removal:
-  -detection of onboard storage is generally slower without
-   the workaround.  No hard numbers to back this up just
-   a general observation.  It may be because the author has
-   consumed far more caffeinated beverages compared to the 
-   previous time V1.
-  -the failures observed in V1 were because my test script
-   did not wait long enough to declare failure.  Previously
-   I was waiting 4 min to declare the SDHCI as missing.
-   This round I increased the duration to 10min.
-
-NOTE to SDHCI maintainers:
-   "sdhci: Add quirk for delayed IRQ ACK" (patch 2/4) was
-   included, if there is no interest in including this change
-   feel free to drop it or provide guidance on how this type
-   of issue is generally dealt with.  
-
-
-
-Jeremy McNicoll (4):
-  clk: gcc: Updates for SDHCI enablement
-  sdhci: Add quirk for delayed IRQ ACK
-  arm64: dts: Enable SDHCI for Nexus 5X (msm8992)
-  dts: doc: rename rpm_requests to respect DT naming conventions
-
- .../devicetree/bindings/clock/qcom,rpmcc.txt       |   2 +-
- .../bindings/regulator/qcom,smd-rpm-regulator.txt  |  42 +++-
- .../devicetree/bindings/soc/qcom/qcom,smd-rpm.txt  |   6 +-
- .../devicetree/bindings/soc/qcom/qcom,smd.txt      |   2 +-
- arch/arm/boot/dts/qcom-apq8074-dragonboard.dts     |   2 +-
- arch/arm/boot/dts/qcom-apq8084.dtsi                |   2 +-
- .../dts/qcom-msm8974-lge-nexus5-hammerhead.dts     |   2 +-
- .../boot/dts/qcom-msm8974-sony-xperia-honami.dts   |   2 +-
- arch/arm/boot/dts/qcom-msm8974.dtsi                |   2 +-
- arch/arm64/boot/dts/qcom/msm8916.dtsi              |   2 +-
- .../boot/dts/qcom/msm8992-bullhead-rev-101.dts     |   2 +
- arch/arm64/boot/dts/qcom/msm8992-pins.dtsi         |  82 ++++++
- arch/arm64/boot/dts/qcom/msm8992.dtsi              | 153 ++++++++++++
- arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi      | 276 +++++++++++++++++++++
- drivers/clk/qcom/gcc-msm8994.c                     | 108 ++++++--
- drivers/mmc/host/sdhci-msm.c                       |   7 +
- drivers/mmc/host/sdhci.c                           |  12 +-
- drivers/mmc/host/sdhci.h                           |   2 +
- drivers/regulator/qcom_smd-regulator.c             |  49 ++++
- include/dt-bindings/clock/qcom,gcc-msm8994.h       |  32 ++-
- 20 files changed, 739 insertions(+), 48 deletions(-)
- create mode 100644 arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-
++	/* Enable delayed IRQ handling workaround on 8992 */
++	if (core_major == 1 && core_minor == 0x3e) {
++		/* Add 40us delay in interrupt handler when operating
++		 * at initialization frequency of 400KHz. */
++		host->quirks2 |= SDHCI_QUIRK2_SLOW_INT_CLR;
++	}
++
+ 	/* Setup IRQ for handling power/voltage tasks with PMIC */
+ 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
+ 	if (msm_host->pwr_irq < 0) {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 71654b9..b685b2a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2678,11 +2678,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 			result = IRQ_WAKE_THREAD;
+ 		}
+ 
+-		if (intmask & SDHCI_INT_CMD_MASK)
++		if (intmask & SDHCI_INT_CMD_MASK) {
++			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
++				udelay(40);
++			}
+ 			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
++		}
+ 
+-		if (intmask & SDHCI_INT_DATA_MASK)
++		if (intmask & SDHCI_INT_DATA_MASK) {
++			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
++				udelay(40);
++			}
+ 			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
++		}
+ 
+ 		if (intmask & SDHCI_INT_BUS_POWER)
+ 			pr_err("%s: Card is consuming too much power!\n",
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 766df17..89a10e7 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -24,6 +24,8 @@
+  * Controller registers
+  */
+ 
++#define SDHCI_QUIRK2_SLOW_INT_CLR	(1<<5)
++
+ #define SDHCI_DMA_ADDRESS	0x00
+ #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+ 
 -- 
 2.6.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
