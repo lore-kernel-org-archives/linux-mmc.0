@@ -1,61 +1,122 @@
 From: Uri Yanai <uri.yanai@sandisk.com>
-Subject: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
-Date: Tue, 17 Jan 2017 14:15:35 +0200
-Message-ID: <1484655337-32562-2-git-send-email-uri.yanai@sandisk.com>
+Subject: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Tue, 17 Jan 2017 14:15:37 +0200
+Message-ID: <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
 References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0052.outbound.protection.outlook.com ([104.47.37.52]:42725
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+Received: from mail-co1nam03on0055.outbound.protection.outlook.com ([104.47.40.55]:28672
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750967AbdAQMPz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Jan 2017 07:15:55 -0500
+        id S1751069AbdAQMQH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Jan 2017 07:16:07 -0500
 In-Reply-To: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, chris@printf.net, alex.lemberg@sandisk.com, Uri Yanai <uri.yanai@sandisk.com>
 
-Adds define MMC_RUNTIME_SUSPEND_DELAY_MS for setting delay
-time(in milliseconds) before entering device runtime suspend.
-Setting the default to 3000 milliseconds.
+If asked to do device Runtime Suspend while
+in BKOPS and auto BKOPS is enabled return –EBUSY
 
-Change-Id: Ifab084cc01d8dff8c79606f8de0858f0821e98bc
+Change-Id: Ie4b38a32fe98179f0bca5b57edaaa47a02d0a389
 Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
 Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 ---
- drivers/mmc/core/block.c | 3 ++-
- include/linux/mmc/host.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/core/mmc.c  | 35 ++++++++++++++++++++++++++++-------
+ include/linux/mmc/mmc.h |  2 ++
+ 2 files changed, 30 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 6648a17..7954f15 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2202,7 +2202,8 @@ static int mmc_blk_probe(struct mmc_card *card)
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index f70f6a1..21f5851 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
+ 	}
+ }
+ 
+-static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
++static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
++	bool is_runtime_pm)
+ {
+ 	int err = 0;
+ 	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+@@ -1953,10 +1954,30 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (mmc_card_suspended(host->card))
+ 		goto out;
+ 
+-	if (mmc_card_doing_bkops(host->card)) {
+-		err = mmc_stop_bkops(host->card);
+-		if (err)
++	if (mmc_card_doing_bkops(host->card) ||
++		host->card->ext_csd.auto_bkops_en) {
++		err = mmc_read_bkops_status(host->card);
++		if (err) {
++			pr_err("%s: error %d reading BKOPS Status\n",
++				mmc_hostname(host), err);
  			goto out;
++		}
++		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
++				EXT_CSD_BKOPS_LEVEL_PM_SUSPEND) {
++			/*
++			 * We don’t allow Runtime Suspend while device still
++			 * needs time to complete internal BKOPS, returning
++			 * -EBUSY while BKOPS level is above
++			 *  EXT_CSD_BKOPS_LEVEL_PM_SUSPEND
++			 */
++			err = -EBUSY;
++			goto out;
++		}
++		if (mmc_card_doing_bkops(host->card)) {
++			err = mmc_stop_bkops(host->card);
++			if (err)
++				goto out;
++		}
  	}
  
--	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
-+	pm_runtime_set_autosuspend_delay(&card->dev,
-+			MMC_RUNTIME_SUSPEND_DELAY_MS);
- 	pm_runtime_use_autosuspend(&card->dev);
+ 	err = mmc_flush_cache(host->card);
+@@ -1987,7 +2008,7 @@ static int mmc_suspend(struct mmc_host *host)
+ {
+ 	int err;
  
- 	/*
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8bc8841..4a0b30f 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -22,6 +22,8 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/pm.h>
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, true, false);
+ 	if (!err) {
+ 		pm_runtime_disable(&host->card->dev);
+ 		pm_runtime_set_suspended(&host->card->dev);
+@@ -2034,7 +2055,7 @@ static int mmc_shutdown(struct mmc_host *host)
+ 		err = _mmc_resume(host);
  
-+#define MMC_RUNTIME_SUSPEND_DELAY_MS	3000
+ 	if (!err)
+-		err = _mmc_suspend(host, false);
++		err = _mmc_suspend(host, false, false);
+ 
+ 	return err;
+ }
+@@ -2058,7 +2079,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, true, true);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggressive suspend\n",
+ 			mmc_hostname(host), err);
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 126b8d5..2633274 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -445,6 +445,8 @@ struct _mmc_csd {
+  */
+ #define EXT_CSD_BKOPS_LEVEL_2		0x2
+ 
++#define EXT_CSD_BKOPS_LEVEL_PM_SUSPEND	EXT_CSD_BKOPS_LEVEL_2
 +
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
- 	unsigned short	vdd;
+ /*
+  * BKOPS modes
+  */
 -- 
 1.9.1
 
