@@ -1,59 +1,65 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: Dropping device tree pinmux nodes for GPIO usage
- (Was: [PATCH 3/5] arm64: dts: sun50i: add MMC nodes)
-Date: Tue, 17 Jan 2017 09:33:51 +0100
-Message-ID: <20170117083351.jy7jsdpi2zvufq5q@lukather>
-References: <1483398226-29321-1-git-send-email-andre.przywara@arm.com>
- <1483398226-29321-4-git-send-email-andre.przywara@arm.com>
- <CAGb2v65GJFTnQZtWHCS7CAtA+Dry94o77aakPLr938BpQksLog@mail.gmail.com>
- <20170115155931.l5tjcdhbz6sj3wke@localhost>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+From: Niklas =?iso-8859-1?Q?S=F6derlund?=
+        <niklas.soderlund@ragnatech.se>
+Subject: Re: [PATCH v8 6/6] mmc: sh_mobile_sdhi: Add tuning support
+Date: Tue, 17 Jan 2017 12:29:30 +0100
+Message-ID: <20170117112930.GQ25542@bigcity.dyn.berto.se>
+References: <20170110210848.GA25542@bigcity.dyn.berto.se>
+ <20170110223043.GA2710@katana>
+ <20170111083541.GB25542@bigcity.dyn.berto.se>
+ <20170111150521.GA1486@katana>
+ <20170111155723.GE25542@bigcity.dyn.berto.se>
+ <CAMuHMdV5pY+nRC8yd4iVmEJAZkcBgWC2-wDr6UgpmxZSsoPHcA@mail.gmail.com>
+ <20170111173432.GB1486@katana>
+ <20170112111711.GF25542@bigcity.dyn.berto.se>
+ <CAMuHMdW4r1gmJDgFxcHNNys70xipMb7BKsv_7ZZNPQAX+SV6pQ@mail.gmail.com>
+ <20170112130324.GA3328@katana>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="ibjbuieytilcvimr"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBB6VN67BQKGQEWZ7WNTA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170115155931.l5tjcdhbz6sj3wke@localhost>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Rask Ingemann Lambertsen <rask-SivP7zSAdNDZaaYASwVUlg@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hans De Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20170112130324.GA3328@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
---ibjbuieytilcvimr
-Content-Type: text/plain; charset=UTF-8
-Content-Disposition: inline
-
-On Sun, Jan 15, 2017 at 04:59:32PM +0100, Rask Ingemann Lambertsen wrote:
-> On Tue, Jan 03, 2017 at 10:52:12AM +0800, Chen-Yu Tsai wrote:
-> > On Tue, Jan 3, 2017 at 7:03 AM, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org> wrote:
-> > > +
-> > > +                       mmc0_default_cd_pin: mmc0_cd_pin@0 {
-> > > +                               pins = "PF6";
-> > > +                               function = "gpio_in";
-> > > +                               bias-pull-up;
-> > > +                       };
-> > 
-> > We are starting to drop pinmux nodes for gpio usage.
+On 2017-01-12 14:03:24 +0100, Wolfram Sang wrote:
 > 
-> How do we get the equivalent of bias-pull-up/down and drive-strength if we
-> run across a pin that needs it?
+> > I'll bring my Koelsch.
+> 
+> Great. I *think* one Koelsch will do, but if it is not too much of a
+> problem, double-checking with a second board won't hurt. So, since Geert
+> will probably bring all necessary cables and supplies, maybe you can
+> pack the board nonetheless? But having one Koelsch already is really
+> good!
 
-Hmm, that's actually a very good question...
+If it fits in my luggage I will bring it then (I think it will), but I 
+won't throw out my laptop to make room for it then since Geert will 
+bring his :-)
 
-For those cases, leave the pinctrl node for now, we'll deal with that
-in due time
+> 
+> > AFAIK, Wolfram is interested in "as many SD cards", not "as many Koelsch
+> > boards".
+> 
+> 1st: as many Gen2 boards as possible (one per Gen2 SoC version would be
+> awesome!) Gose, Alt anyone?
+> 
+> For those, I'll bring my SanDisk card which causes issues when ejecting
+> on all my boards. This is my main target.
+> 
+> 2nd: as many SD cards as possible
+> 
+> This is a secondary target, but trying to find other issues/other type
+> of cards with same issues will be helpful, too.
+> 
+> Thanks,
+> 
+>    Wolfram
+> 
 
-Maxime
+
 
 -- 
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
---ibjbuieytilcvimr--
+Regards,
+Niklas Söderlund
