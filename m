@@ -1,98 +1,105 @@
 From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 12/13] pwm: jz4740: Let the pinctrl driver configure the
- pins
-Date: Wed, 18 Jan 2017 08:20:18 +0100
-Message-ID: <20170118072018.GB18989@ulmo.ba.sec>
+Subject: Re: [PATCH 13/13] MIPS: jz4740: Remove custom GPIO code
+Date: Wed, 18 Jan 2017 08:27:51 +0100
+Message-ID: <20170118072751.GC18989@ulmo.ba.sec>
 References: <20170117231421.16310-1-paul@crapouillou.net>
- <20170117231421.16310-13-paul@crapouillou.net>
+ <20170117231421.16310-14-paul@crapouillou.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="aVD9QWMuhilNxW9f"
-Return-path: <linux-mips-bounce@linux-mips.org>
-Content-Disposition: inline
-In-Reply-To: <20170117231421.16310-13-paul@crapouillou.net>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
+Content-Type: multipart/mixed; boundary="===============5335441250778327517=="
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <20170117231421.16310-14-paul@crapouillou.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Paul Cercueil <paul@crapouillou.net>, Ralf Baechle <ralf@linux-mips.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Lars-Peter Clausen <lars@metafoo.de>, james.hogan@imgtec.com, Paul Burton <paul.burton@imgtec.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pwm@vger.kernel.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Maarten ter Huurne <maarten@treewalker.org>, linux-mtd@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---aVD9QWMuhilNxW9f
+--===============5335441250778327517==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="yVhtmJPUSI46BTXb"
+Content-Disposition: inline
+
+
+--yVhtmJPUSI46BTXb
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jan 18, 2017 at 12:14:20AM +0100, Paul Cercueil wrote:
-> Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-> the pins being properly configured before the driver probes.
->=20
-> One inherent problem of this new approach is that the pinctrl framework
-> does not allow us to configure each pin on demand, when the various PWM
-> channels are requested or released. For instance, the PWM channels can
-> be configured from sysfs, which would require all PWM pins to be configur=
-ed
-> properly beforehand for the PWM function, eventually causing conflicts
-> with other platform or board drivers.
->=20
-> The proper solution here would be to modify the pwm-jz4740 driver to
-> handle only one PWM channel, and create an instance of this driver
-> for each one of the 8 PWM channels. Then, it could use the pinctrl
-> framework to dynamically configure the PWM pin it controls.
->=20
-> Until this can be done, the only jz4740 board supported upstream
-> (Qi lb60) could configure all of its connected PWM pins in PWM function
-> mode, if those are not used by other drivers nor by GPIOs on the
-> board.
+On Wed, Jan 18, 2017 at 12:14:21AM +0100, Paul Cercueil wrote:
+> All the drivers for the various hardware elements of the jz4740 SoC have
+> been modified to use the pinctrl framework for their pin configuration
+> needs.
+> As such, this platform code is now unused and can be deleted.
 >=20
 > Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 > ---
->  drivers/pwm/pwm-jz4740.c | 29 -----------------------------
->  1 file changed, 29 deletions(-)
->=20
-> diff --git a/drivers/pwm/pwm-jz4740.c b/drivers/pwm/pwm-jz4740.c
-> index 76d13150283f..a75ff3622450 100644
-> --- a/drivers/pwm/pwm-jz4740.c
-> +++ b/drivers/pwm/pwm-jz4740.c
-> @@ -21,22 +21,10 @@
->  #include <linux/platform_device.h>
->  #include <linux/pwm.h>
-> =20
-> -#include <asm/mach-jz4740/gpio.h>
+>  arch/mips/include/asm/mach-jz4740/gpio.h | 371 ----------------------
+>  arch/mips/jz4740/Makefile                |   2 -
+>  arch/mips/jz4740/gpio.c                  | 519 -------------------------=
+------
+>  3 files changed, 892 deletions(-)
+>  delete mode 100644 arch/mips/jz4740/gpio.c
 
-What about the linux/gpio.h header? It seems to me like that would be no
-longer needed after this patch either.
+Have you considered how this could best be merged? It's probably easiest
+to take all of this through the MIPS tree because we have an addition of
+the pinctrl that would be a replacement for the GPIO code, while at the
+same time a bunch of drivers rely on the JZ4740 GPIO code for successful
+compilation.
 
-Other than that this looks like the patch I'd expect if the pinmux was
-configured statically, based on board design.
+That's slightly complicated by the number of drivers, so needs a lot of
+coordination, but it's not the worst I've seen.
+
+Maybe one other solution that would make the transition easier would be
+to stub out the GPIO functions if the pinctrl driver is enabled, and do
+the removal of the mach-jz4740/gpio.h after all drivers have been merged
+through their corresponding subsystem trees. That way all drivers should
+remain compilable and functional at runtime, while still having the
+possibility to merge through the subsystem trees.
+
+That said, the whole series is fairly simple, so merging everything
+through the MIPS tree sounds like the easiest way to go.
 
 Thierry
 
---aVD9QWMuhilNxW9f
+--yVhtmJPUSI46BTXb
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlh/FzEACgkQ3SOs138+
-s6Fc2g//dBxUhoJLEIycA+khYQpD62rjvdJT1q5wLLQ+Den0WbIVJPY25Pq1mJof
-YfyYtNPRxPxJ0bnrjG1Zg0zbdv2SH/L85r7mDgp5KBkX6iOZejnDlhP687KF8Vre
-VEsTgdd33zu9HJAYNjLgD/J+SIJ+5GM2nl1N4unmondfMt1HVCyMPwGwKqYoxoWC
-wpqdz/wY7kLoU4Q+CDa5Dbois4xy3rsVNgtPDwSsMdzxmHOuKs8R68Bb4fP4K76u
-KxJpzS6sumat3i0TDNmuuk3e0IgsalqiB9NVH08ptil/kkTzQspQ/ajZZQuhnpl6
-av5PSr+15+HCK5dSFpCWdH0SEUYGDAd/PSlIjzx2BU07y/izHI55ww7af2WtPzZK
-RDzsmK9DBln26Nek9G5EggcvNhiUcKDibaZ2uog5jYfPSOgESJwfomp1auoD/b3h
-B8XsuTAK11eMAbyRshFmuRo9uLVnJJCJeO5SG+3gnXBxOZzHE8cxvwL3Lw1VvMvb
-50842gN0fX5dKGO+2KOimOJ/Koov4wmBXVY1buvW4YWU9JkeU439jgiLb16jB1UR
-JnEFOblWuKCVpZNuzib/bNOwfv4xP5YaQfm1uNgVZMNwIzYBxKa8tGllTIQQaY+v
-xej1u4K0SR8CiPc2tw81+HQp9SV/xxIxa4/otXWhORsO//+CR2c=
-=py/u
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlh/GPcACgkQ3SOs138+
+s6HJuA/8DBbCWXiobPupHIJkfkobmKLcWcDTCHrFnZvAFle+RTPeoANQQYkJ75pW
+qHYVgHTL0x3n4NBLFvYl1Twl+fGLQNxEKbg87WBSj5jeAyTK3y4KA0P79OAfnkee
+nSWeP8v+TluNV7gWSnFpUgFffHif24BbwtIsuLYxxn/awM2ZPQEx3CxDr5jvJD4E
+2lTp4sYoRLmgHQb7Q7YH6b8JSibxXFEafzIfuSC42ySLXThDqY2TiMcQproKxfXl
+/lruvG7w89INCAQOlXHG81sX0XGcbFYW0Cv1M5c0E3hk7DkbgFL3A5Q6IpnHjHdO
+tOXg+DMjByeZMy9H3PP2vVnVva+fg5oMCWJHIP2Ih3d+CIBJdo6YlI/TvGH+Gh4h
+4HKGiO83F+JljR5/ver0BBue9gyxCGs9sUO3B3TVAiunrS+hgfw/Wv+hcQ1IsubU
+wnxXDrj54QxeP9O1T84yPD98e75O4tD1DHltfPZOI+bkxiQmvOGFYarcATKS0Edk
+uJdWdEbfV/gB+1ckUpq0QEoTDdx7YEwuQCVn7dcS2hwyD4qEEc86j9Z+hkvk2+zg
+cGHxOJ54wGqgIUMQM9/ohreFUPpifTWo6afe4tlos4V9BhA+1/dj29d0EmBJ2gON
+TmNKjvYGHnilhT2uGMYDx6xfaXLGq8QG8o1kVlfRhCBWnGEyqzc=
+=/Oal
 -----END PGP SIGNATURE-----
 
---aVD9QWMuhilNxW9f--
+--yVhtmJPUSI46BTXb--
+
+
+--===============5335441250778327517==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
+
+--===============5335441250778327517==--
