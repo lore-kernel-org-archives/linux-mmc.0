@@ -1,208 +1,59 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
-Date: Wed, 18 Jan 2017 14:28:13 +0200
-Message-ID: <fd755979-2d57-3527-9d81-0ef6c917f013@linaro.org>
-References: <20161128173920.25334-1-georgi.djakov@linaro.org>
- <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
- <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
- <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
- <2a63a412-ce5d-eb96-ac66-e6f73806c00f@codeaurora.org>
- <7e6b3af0-5266-7288-7e3a-54f34c00c3e5@codeaurora.org>
+From: Uri Yanai <Uri.Yanai@sandisk.com>
+Subject: RE: [PATCH 0/3] Auto BKOPS PM suspend
+Date: Wed, 18 Jan 2017 14:12:53 +0000
+Message-ID: <037111DC0C584A4DB9F38021EA3CBDA506103CD3@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
+References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
+ <30196abc-e340-2b7f-0ad2-d644a0d78b49@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7e6b3af0-5266-7288-7e3a-54f34c00c3e5@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-cys01nam02on0065.outbound.protection.outlook.com ([104.47.37.65]:49099
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752370AbdAROOq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Jan 2017 09:14:46 -0500
+In-Reply-To: <30196abc-e340-2b7f-0ad2-d644a0d78b49@rock-chips.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-On 01/18/2017 01:47 PM, Ritesh Harjani wrote:
-> Hi Georgi,
->
-> I checked this patch again on internal msm8996 target which has more
-> than 1 core. And I can still see below issue with this patch. Please
-> check the dmesg log snip. (I enabled card runtime suspend/resume to
-> reproduce this more frequently).
->
-> In that case we still need to work over this issue.
-
-Hi Ritesh,
-
-Thanks for checking this. I will submit a new version.
-
-BR,
-Georgi
-
->
->
-> <dmesg snip>
-> # [    5.854979] mmc0: mmc_runtime_suspend
-> [    5.854982] mmc1: mmc_runtime_suspend
-> [    5.957925] mmc1: Reset 0x1 never completed.
-> [    6.071244] mmc0: Reset 0x1 never completed.
->
->
-> Regards
-> Ritesh
->
->
-> On 1/18/2017 2:46 PM, Ritesh Harjani wrote:
->> Hi Georgi,
->>
->> Sorry for delaying this.
->> I did check with HW folks here, but it seems like we still don't have
->> confirmation. In case if I get any new updates later, we can revisit it.
->>
->> Also I see that we have the same implementation in current driver for
->> changing IO voltage. In that case I think this patch should be fine to
->> avoid the error message on reboot.
->>
->>
->> On 12/3/2016 2:24 PM, Ritesh Harjani wrote:
->>>
->>>
->>> On 12/1/2016 11:38 PM, Georgi Djakov wrote:
->>>> On 11/29/2016 05:40 AM, Ritesh Harjani wrote:
->>>>> Hi Georgi,
->>>>>
->>>>> On 11/28/2016 11:09 PM, Georgi Djakov wrote:
->>>>>> On apq8016, apq8084 and apq8074 platforms, writing to the software
->>>>>> reset register triggers the "power irq". We need to ack and handle
->>>>>> the irq, otherwise the following message appears:
->>>>>>
->>>>>> mmc0: Reset 0x1 never completed.
->>>>>> sdhci: =========== REGISTER DUMP (mmc0)===========
->>>>>> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
->>>>>> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
->>>>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
->>>>>> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
->>>>>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
->>>>>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
->>>>>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
->>>>>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
->>>>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
->>>>>> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
->>>>>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
->>>>>> sdhci: Host ctl2: 0x00000000
->>>>>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
->>>>>> sdhci: ===========================================
->>>>>>
->>>>>> Fix it by implementing the custom sdhci_reset() function,
->>>>>> which performs the software reset and then handles the irq.
->>>>>>
->>>>>> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
->>>>>> ---
->> Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
->>
->>
->>>>>>
->>>>>> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
->>>>>>  * Perform the software reset by just writing to the
->>>>>> SDHCI_SOFTWARE_RESET
->>>>>>    register and then check for the irq.
->>>>> I am still not sure about this change. Below change will trigger the
->>>>> IRQ, once this call is completed (say on a single core system) -since
->>>>> this is called while holding spin_lock_irqsave.
->>>>>
->>>>> But you will be end up calling sdhci_msm_voltage_switch twice,
->>>>> which to me does not seems correct.
->>>>> 1. 1st time you are directly calling it in sdhci_msm_reset.
->>>>> 2. 2nd time will be called from within pwr_irq to handle the same
->>>>> case.
->>>>
->>>> Yes, that would be the behavior. This function actually is not doing
->>>> anything much than to check irq status and ack it. Testing the patch
->>> Ok.
->>>
->>>> on a few different platforms does not show any side effects, however i
->>>> could not be 100% sure as i have limited information about the
->>>> hardware.
->>> what about the case when say the IRQ is delayed because of some other
->>> overheads in the system. Will this approach still works?
->>> I understand this would require some HW knowledge to understand the
->>> functioning/importance of this pwr_irq. I will try and get in touch with
->>> HW folk here.
->>>
->>> Regards
->>> Ritesh
->>>
->>>
->>>>
->>>> Thanks,
->>>> Georgi
->>>>
->>>>>
->>>>> Please let me know your thoughts on this ?
->>>>>
->>>>> Regards
->>>>> Ritesh
->>>>>
->>>>>>
->>>>>>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
->>>>>>  1 file changed, 28 insertions(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c
->>>>>> b/drivers/mmc/host/sdhci-msm.c
->>>>>> index 32879b845b75..157ae07f9309 100644
->>>>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>>>> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct
->>>>>> sdhci_host *host, unsigned int clock)
->>>>>>      __sdhci_msm_set_clock(host, clock);
->>>>>>  }
->>>>>>
->>>>>> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
->>>>>> +{
->>>>>> +    unsigned long timeout = 100;
->>>>>> +
->>>>>> +    sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
->>>>>> +
->>>>>> +    if (mask & SDHCI_RESET_ALL) {
->>>>>> +        host->clock = 0;
->>>>>> +
->>>>>> +        /*
->>>>>> +         * SDHCI_RESET_ALL triggers the PWR IRQ and we need
->>>>>> +         * to handle it here.
->>>>>> +         */
->>>>>> +        sdhci_msm_voltage_switch(host);
->>>>>> +    }
->>>>>> +
->>>>>> +    while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
->>>>>> +        if (timeout == 0) {
->>>>>> +            pr_err("%s: Reset 0x%x never completed.\n",
->>>>>> +                   mmc_hostname(host->mmc), (int)mask);
->>>>>> +            return;
->>>>>> +        }
->>>>>> +        timeout--;
->>>>>> +        mdelay(1);
->>>>>> +    }
->>>>>> +}
->>>>>> +
->>>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
->>>>>>      { .compatible = "qcom,sdhci-msm-v4" },
->>>>>>      {},
->>>>>> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
->>>>>>
->>>>>>  static const struct sdhci_ops sdhci_msm_ops = {
->>>>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
->>>>>> -    .reset = sdhci_reset,
->>>>>> +    .reset = sdhci_msm_reset,
->>>>>>      .set_clock = sdhci_msm_set_clock,
->>>>>>      .get_min_clock = sdhci_msm_get_min_clock,
->>>>>>      .get_max_clock = sdhci_msm_get_max_clock,
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>> linux-mmc" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->
+SGkgU2hhd24NCg0KVGhhbmtzIGZvciB0aGUgcmV2aWV3LCBBcyB5b3UgcmVxdWVzdCBJIHdpbGwg
+YWRkIGNoYW5nZWxvZyBhbmQgcmVtb3ZlIHRoZSBDaGFuZ2UtSWQuDQpJIGFtIGFmcmFpZCBJIGRp
+ZG4ndCBxdWl0ZSB1bmRlcnN0YW5kIHlvdXIgcmVtYXJrIGFib3V0IGF1dGhvcnNoaXAgYW5kICB0
+aGUgU09CIHBhdGgsIGFwcHJlY2lhdGUgaWYgeW91IGNhbiBlbGFib3JhdGUgb24gdGhpcy4NCg0K
+VGhhbmtzDQpVcmkNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNoYXduIExp
+biBbbWFpbHRvOnNoYXduLmxpbkByb2NrLWNoaXBzLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIEph
+bnVhcnkgMTgsIDIwMTcgMzo1NCBBTQ0KVG86IFVyaSBZYW5haQ0KQ2M6IHVsZi5oYW5zc29uQGxp
+bmFyby5vcmc7IHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVs
+Lm9yZzsgY2hyaXNAcHJpbnRmLm5ldDsgQWxleCBMZW1iZXJnDQpTdWJqZWN0OiBSZTogW1BBVENI
+IDAvM10gQXV0byBCS09QUyBQTSBzdXNwZW5kDQoNCkhpIFVyaSwNCg0KT24gMjAxNy8xLzE3IDIw
+OjE1LCBVcmkgWWFuYWkgd3JvdGU6DQo+IEhpIFVsZg0KPiBSZXN1Ym1pdHRpbmcgdGhyZWUgcGF0
+Y2hlcyBmb3IgYXBwcm92YWwsIG9yaWdpbmFsbHkgc3VibWl0dGVkIGJ5IEFsZXggTGVtYmVyZyA8
+YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPg0KPiBbMS8zXSBtbWM6IHJlcGxhY2luZyBoYXJkY29k
+ZWQgdmFsdWUgZm9yIHJ1bnRpbWUgUE0gc3VzcGVuZCAgCQlNZXNzYWdlIElEOjwxNDcyNzM5ODkw
+LTMzODQtMi1naXQtc2VuZC1lbWFpbC1hbGV4LmxlbWJlcmdAc2FuZGlzay5jb20+DQo+IFsyLzNd
+IG1tYzogQWRkaW5nIEFVVE9fQktPUFNfRU4gYml0IHNldCBmb3IgQXV0byBCS09QUyBzdXBwb3J0
+CQlNZXNzYWdlIElEOjwxNDcyNzM5ODkwLTMzODQtMy1naXQtc2VuZC1lbWFpbC1hbGV4LmxlbWJl
+cmdAc2FuZGlzay5jb20+DQo+IFszLzNdIG1tYzogQ2hlY2tpbmcgQktPUFMgc3RhdHVzIHByaW9y
+IHRvIFN1c3BlbmQgCQkJTWVzc2FnZSBJRDo8MTQ3MjczOTg5MC0zMzg0LTQtZ2l0LXNlbmQtZW1h
+aWwtYWxleC5sZW1iZXJnQHNhbmRpc2suY29tPg0KPg0KPiBUaGFua3MNCj4gVXJpIFlhbmFpDQoN
+CkZpcnN0bHksIHRoZSBhdXRob3JzaGlwIGlzbid0IGNvcnJlY3QgYW5kIG9mIGNvdXJzZSB0aGUg
+U09CIHBhdGguDQpUaGVuLCBpdCdkIGJldHRlciB0byBhZGQgYSBjaGFuZ2Vsb2cgc2luY2UgeW91
+IGRvIGltcHJvdmUgQWxleCdzIHBhdGNoZXMsIGFuZCBpdCB3b3VsZCBoZWxwIHVzIHRvIGJldHRl
+ciB1bmRlcnN0YW5kIHdoYXQgd2FzIGNoYW5nZWQuIDopDQoNCkFsc28geW91IHNob3VsZCByZW1v
+dmUgQ2hhbmdlLUlkIHdoZW4gZmV0Y2hpbmcgcGF0Y2hlcyBmcm9tIHlvdXIgaW50ZXJuYWwgY29k
+ZSByZXZpZXcgc3lzdGVtLg0KDQpBbnl3YXksIGxldCdzIHRhbGsgYWJvdXQgdGhlIHBhdGNoZXMg
+dGhlbXNlbGYsIEkgaGF2ZSBhIHF1ZXN0aW9uIGZvciB5b3VyIHBhdGNoIDMvMyB0aGVyZS4NCg0K
+DQo+DQo+IFVyaSBZYW5haSAoMyk6DQo+ICAgbW1jOiByZXBsYWNpbmcgaGFyZGNvZGVkIHZhbHVl
+IGZvciBydW50aW1lIFBNIHN1c3BlbmQNCj4gICBtbWM6IEFkZGluZyBBVVRPX0JLT1BTX0VOIGJp
+dCBzZXQgZm9yIEF1dG8gQktPUFMgc3VwcG9ydA0KPiAgIG1tYzogQ2hlY2tpbmcgQktPUFMgc3Rh
+dHVzIHByaW9yIHRvIFN1c3BlbmQNCj4NCj4gIGRyaXZlcnMvbW1jL2NvcmUvYmxvY2suYyB8ICAz
+ICsrLQ0KPiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyAgIHwgNDUgKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+ICBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgg
+fCAgMSArDQo+ICBpbmNsdWRlL2xpbnV4L21tYy9ob3N0LmggfCAgMiArKw0KPiAgaW5jbHVkZS9s
+aW51eC9tbWMvbW1jLmggIHwgIDMgKysrDQo+ICA1IGZpbGVzIGNoYW5nZWQsIDQ0IGluc2VydGlv
+bnMoKyksIDEwIGRlbGV0aW9ucygtKQ0KPg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMNClNoYXduIExp
+bg0KDQo=
