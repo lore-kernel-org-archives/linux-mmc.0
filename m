@@ -1,174 +1,111 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
-Date: Wed, 18 Jan 2017 14:46:06 +0530
-Message-ID: <2a63a412-ce5d-eb96-ac66-e6f73806c00f@codeaurora.org>
-References: <20161128173920.25334-1-georgi.djakov@linaro.org>
- <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
- <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
- <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
+From: Zhang Rui <rui.zhang@intel.com>
+Subject: Re: [PATCH v3] mmc: sdhci-acpi: support deferred probe
+Date: Wed, 18 Jan 2017 17:45:21 +0800
+Message-ID: <1484732721.2387.22.camel@intel.com>
+References: <1484305415.2221.45.camel@intel.com>
+         <CAPDyKFq0sVGjaw3E+VQiHckHB6=nCQzGJTOmzhho0byM5AuHrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Georgi Djakov <georgi.djakov@linaro.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:50817 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752451AbdARJp2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Jan 2017 04:45:28 -0500
+In-Reply-To: <CAPDyKFq0sVGjaw3E+VQiHckHB6=nCQzGJTOmzhho0byM5AuHrw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jonas =?ISO-8859-1?Q?=C5berg?= <cja@gmx.net>, darcari@redhat.com, adrain <adrian.hunter@intel.com>
 
-Hi Georgi,
+Hi, Uffe,
 
-Sorry for delaying this.
-I did check with HW folks here, but it seems like we still don't have 
-confirmation. In case if I get any new updates later, we can revisit it.
+On Tue, 2017-01-17 at 15:23 +0100, Ulf Hansson wrote:
+> On 13 January 2017 at 12:03, Zhang Rui <rui.zhang@intel.com> wrote:
+> > 
+> > From c889f737322b797b743c63eda241d0283696d3f5 Mon Sep 17 00:00:00
+> > 2001
+> > From: Zhang Rui <rui.zhang@intel.com>
+> > Date: Wed, 7 Dec 2016 13:13:31 +0800
+> > Subject: [PATCH v3] mmc: sdhci-acpi: support deferred probe
+> > 
+> > With commit 67bf5156edc4 ("gpio / ACPI: fix returned error from
+> > acpi_dev_gpio_irq_get()"), mmc_gpiod_request_cd() returns
+> > -EPROBE_DEFER if
+> > GPIO is not ready when sdhci-acpi driver is probed, and sdhci-acpi
+> > driver
+> > should be probed again later in this case.
+> > 
+> > This fixes an order issue when both GPIO and sdhci-acpi drivers are
+> > built
+> > as modules.
+> > 
+> > CC: stable@vger.kernel.org # v4.9
+> > Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=177101
+> > Tested-by: Jonas Aaberg <cja@gmx.net>
+> > Signed-off-by: Zhang Rui <rui.zhang@intel.com>
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> I strongly encourage you to run checkpatch of all your change before
+> submitting patches.
+>  Below is the output, it gave me. It prevents me
+> from applying the change. Please fix and re-spin!
+> 
+Sorry for bring the trouble.
+In fact, I indeed run checkpatch before sending it out.
 
-Also I see that we have the same implementation in current driver for 
-changing IO voltage. In that case I think this patch should be fine to 
-avoid the error message on reboot.
+> ERROR: Please use git commit description style 'commit <12+ chars of
+> sha1> ("<title line>")' - ie: 'commit fatal: bad o
+> ("da241d0283696d3f5")'
+> #14:
+> > 
+> > From c889f737322b797b743c63eda241d0283696d3f5 Mon Sep 17 00:00:00
+> > 2001
+> ERROR: patch seems to be corrupt (line wrapped?)
+> #49: FILE: drivers/mmc/host/sdhci-acpi.c:465:
+>      if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
+> 
+> total: 2 errors, 0 warnings, 11 lines checked
+> 
+I tried to resend the patch to myself, and find out the patch is
+corrupted when it's sent via evolution. Although I have not used
+evolution to send patch for a long time, but it indeed works for me
+before.
 
+Patch resent. Sorry again for the noise.
 
-On 12/3/2016 2:24 PM, Ritesh Harjani wrote:
->
->
-> On 12/1/2016 11:38 PM, Georgi Djakov wrote:
->> On 11/29/2016 05:40 AM, Ritesh Harjani wrote:
->>> Hi Georgi,
->>>
->>> On 11/28/2016 11:09 PM, Georgi Djakov wrote:
->>>> On apq8016, apq8084 and apq8074 platforms, writing to the software
->>>> reset register triggers the "power irq". We need to ack and handle
->>>> the irq, otherwise the following message appears:
->>>>
->>>> mmc0: Reset 0x1 never completed.
->>>> sdhci: =========== REGISTER DUMP (mmc0)===========
->>>> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
->>>> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
->>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
->>>> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
->>>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
->>>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
->>>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
->>>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
->>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
->>>> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
->>>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
->>>> sdhci: Host ctl2: 0x00000000
->>>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
->>>> sdhci: ===========================================
->>>>
->>>> Fix it by implementing the custom sdhci_reset() function,
->>>> which performs the software reset and then handles the irq.
->>>>
->>>> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
->>>> ---
-Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
+thanks,
+rui
 
-
->>>>
->>>> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
->>>>  * Perform the software reset by just writing to the
->>>> SDHCI_SOFTWARE_RESET
->>>>    register and then check for the irq.
->>> I am still not sure about this change. Below change will trigger the
->>> IRQ, once this call is completed (say on a single core system) -since
->>> this is called while holding spin_lock_irqsave.
->>>
->>> But you will be end up calling sdhci_msm_voltage_switch twice,
->>> which to me does not seems correct.
->>> 1. 1st time you are directly calling it in sdhci_msm_reset.
->>> 2. 2nd time will be called from within pwr_irq to handle the same case.
->>
->> Yes, that would be the behavior. This function actually is not doing
->> anything much than to check irq status and ack it. Testing the patch
-> Ok.
->
->> on a few different platforms does not show any side effects, however i
->> could not be 100% sure as i have limited information about the hardware.
-> what about the case when say the IRQ is delayed because of some other
-> overheads in the system. Will this approach still works?
-> I understand this would require some HW knowledge to understand the
-> functioning/importance of this pwr_irq. I will try and get in touch with
-> HW folk here.
->
-> Regards
-> Ritesh
->
->
->>
->> Thanks,
->> Georgi
->>
->>>
->>> Please let me know your thoughts on this ?
->>>
->>> Regards
->>> Ritesh
->>>
->>>>
->>>>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
->>>>  1 file changed, 28 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-msm.c
->>>> b/drivers/mmc/host/sdhci-msm.c
->>>> index 32879b845b75..157ae07f9309 100644
->>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct
->>>> sdhci_host *host, unsigned int clock)
->>>>      __sdhci_msm_set_clock(host, clock);
->>>>  }
->>>>
->>>> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
->>>> +{
->>>> +    unsigned long timeout = 100;
->>>> +
->>>> +    sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
->>>> +
->>>> +    if (mask & SDHCI_RESET_ALL) {
->>>> +        host->clock = 0;
->>>> +
->>>> +        /*
->>>> +         * SDHCI_RESET_ALL triggers the PWR IRQ and we need
->>>> +         * to handle it here.
->>>> +         */
->>>> +        sdhci_msm_voltage_switch(host);
->>>> +    }
->>>> +
->>>> +    while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
->>>> +        if (timeout == 0) {
->>>> +            pr_err("%s: Reset 0x%x never completed.\n",
->>>> +                   mmc_hostname(host->mmc), (int)mask);
->>>> +            return;
->>>> +        }
->>>> +        timeout--;
->>>> +        mdelay(1);
->>>> +    }
->>>> +}
->>>> +
->>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
->>>>      { .compatible = "qcom,sdhci-msm-v4" },
->>>>      {},
->>>> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
->>>>
->>>>  static const struct sdhci_ops sdhci_msm_ops = {
->>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
->>>> -    .reset = sdhci_reset,
->>>> +    .reset = sdhci_msm_reset,
->>>>      .set_clock = sdhci_msm_set_clock,
->>>>      .get_min_clock = sdhci_msm_get_min_clock,
->>>>      .get_max_clock = sdhci_msm_get_max_clock,
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> Kind regards
+> Uffe
+> 
+> > 
+> > ---
+> >  drivers/mmc/host/sdhci-acpi.c | 5 ++++-
+> >  1 file changed, 4 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-acpi.c
+> > b/drivers/mmc/host/sdhci-acpi.c
+> > index 160f695cc09c..5440323894ee 100644
+> > --- a/drivers/mmc/host/sdhci-acpi.c
+> > +++ b/drivers/mmc/host/sdhci-acpi.c
+> > @@ -466,7 +466,10 @@ static int sdhci_acpi_probe(struct
+> > platform_device *pdev)
+> >         if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
+> >                 bool v = sdhci_acpi_flag(c,
+> > SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
+> > 
+> > -               if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0,
+> > NULL)) {
+> > +               err = mmc_gpiod_request_cd(host->mmc, NULL, 0, v,
+> > 0, NULL);
+> > +               if (err) {
+> > +                       if (err == -EPROBE_DEFER)
+> > +                               goto err_free;
+> >                         dev_warn(dev, "failed to setup card detect
+> > gpio\n");
+> >                         c->use_runtime_pm = false;
+> >                 }
+> > --
+> > 2.7.4
+> > 
