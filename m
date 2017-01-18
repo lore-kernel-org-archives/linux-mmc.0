@@ -1,502 +1,199 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 02/13] pinctrl-jz4740: add a pinctrl driver for the
- Ingenic jz4740 SoC
-Date: Wed, 18 Jan 2017 11:16:32 +0100
-Message-ID: <CACRpkdYK7PAUZL9btuOM-FUvtWoHFi9juXaBUBhAhgncUUegXA@mail.gmail.com>
-References: <20170117231421.16310-1-paul@crapouillou.net> <20170117231421.16310-3-paul@crapouillou.net>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
+Date: Wed, 18 Jan 2017 17:17:13 +0530
+Message-ID: <7e6b3af0-5266-7288-7e3a-54f34c00c3e5@codeaurora.org>
+References: <20161128173920.25334-1-georgi.djakov@linaro.org>
+ <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
+ <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
+ <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
+ <2a63a412-ce5d-eb96-ac66-e6f73806c00f@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <20170117231421.16310-3-paul@crapouillou.net>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, linux-p
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <2a63a412-ce5d-eb96-ac66-e6f73806c00f@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-n Wed, Jan 18, 2017 at 12:14 AM, Paul Cercueil <paul@crapouillou.net> wrote:
+Hi Georgi,
 
-> From: Paul Burton <paul.burton@imgtec.com>
+I checked this patch again on internal msm8996 target which has more 
+than 1 core. And I can still see below issue with this patch. Please 
+check the dmesg log snip. (I enabled card runtime suspend/resume to 
+reproduce this more frequently).
+
+In that case we still need to work over this issue.
+
+
+<dmesg snip>
+# [    5.854979] mmc0: mmc_runtime_suspend
+[    5.854982] mmc1: mmc_runtime_suspend
+[    5.957925] mmc1: Reset 0x1 never completed.
+[    6.071244] mmc0: Reset 0x1 never completed.
+
+
+Regards
+Ritesh
+
+
+On 1/18/2017 2:46 PM, Ritesh Harjani wrote:
+> Hi Georgi,
 >
-> This driver handles pin configuration, pin muxing, and GPIOs of the
-> jz4740 SoC from Ingenic.
+> Sorry for delaying this.
+> I did check with HW folks here, but it seems like we still don't have
+> confirmation. In case if I get any new updates later, we can revisit it.
 >
-> It is separated into two files:
-> - pinctrl-ingenic.c, which contains the core functions that can be
->   shared across all Ingenic SoCs,
-> - pinctrl-jz4740.c, which contains the jz4740-pinctrl driver.
+> Also I see that we have the same implementation in current driver for
+> changing IO voltage. In that case I think this patch should be fine to
+> avoid the error message on reboot.
 >
-> The reason behind separating some functions out of the jz4740-pinctrl
-> driver, is that the pin/GPIO controllers of the Ingenic SoCs are
-> extremely similar across SoC versions, except that some have the
-> registers shuffled around. Making a distinct separation will permit the
-> reuse of large parts of the driver to support the other SoCs from
-> Ingenic.
 >
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-
-> diff --git a/drivers/pinctrl/ingenic/Kconfig b/drivers/pinctrl/ingenic/Kconfig
-> new file mode 100644
-> index 000000000000..9923ce127183
-> --- /dev/null
-> +++ b/drivers/pinctrl/ingenic/Kconfig
-> @@ -0,0 +1,14 @@
-> +#
-> +# Ingenic SoCs pin control drivers
-> +#
-> +config PINCTRL_INGENIC
-> +       bool
-> +       select PINMUX
-> +       select GPIOLIB_IRQCHIP
-> +       select GENERIC_PINCONF
-
-I like it already when it looks like that :D
-
-> +#include <linux/compiler.h>
-> +#include <linux/gpio.h>
-
-For drivers, just
-#include <linux/gpio/driver.h>
-
-> +struct ingenic_gpio_chip {
-> +       char name[3];
-> +       unsigned int idx;
-> +       void __iomem *base;
-> +       struct gpio_chip gc;
-> +       struct irq_chip irq_chip;
-> +       struct ingenic_pinctrl *pinctrl;
-> +       const struct ingenic_pinctrl_ops *ops;
-> +       uint32_t pull_ups;
-> +       uint32_t pull_downs;
-> +       unsigned int irq;
-> +       struct pinctrl_gpio_range grange;
-
-Usually we add GPIO ranges from the device tree for device tree
-drivers, look at the syntax in:
-Documentation/devicetree/bindings/gpio/gpio.txt
-
-git grep gpio-ranges arch/arm/boot/dts/
-gives you a few examples.
-
-> +#define gc_to_jzgc(gpiochip) \
-> +       container_of(gpiochip, struct ingenic_gpio_chip, gc)
-
-Unless you must have this, please switch to using
-struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-and use [devm_]gpiochip_add_data() in the probe so
-you can get the data from the gpiochip directly.
-
-> +static void ingenic_gpio_set(struct gpio_chip *gc,
-> +               unsigned int offset, int value)
-> +{
-> +       struct ingenic_gpio_chip *jzgc = gc_to_jzgc(gc);
-> +
-> +       jzgc->ops->gpio_set_value(jzgc->base, offset, value);
-> +}
-
-struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-etc everywhere.
-
-> +static void ingenic_gpio_irq_ack(struct irq_data *irqd)
-> +{
-> +       struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +       struct ingenic_gpio_chip *jzgc = gc_to_jzgc(gc);
-> +       unsigned int high;
-> +       int irq = irqd->hwirq;
-> +
-> +       if (irqd_get_trigger_type(irqd) == IRQ_TYPE_EDGE_BOTH) {
-> +               /*
-> +                * Switch to an interrupt for the opposite edge to the one that
-> +                * triggered the interrupt being ACKed.
-> +                */
-> +               high = jzgc->ops->gpio_get_value(jzgc->base, irq);
-> +               if (high)
-> +                       jzgc->ops->irq_set_type(jzgc->base, irq,
-> +                                       IRQ_TYPE_EDGE_FALLING);
-> +               else
-> +                       jzgc->ops->irq_set_type(jzgc->base, irq,
-> +                                       IRQ_TYPE_EDGE_RISING);
-
-Neat hack. This is often how you have to do it indeed.
-
-> +static int ingenic_gpio_irq_set_type(struct irq_data *irqd, unsigned int type)
-> +{
-> +       struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +       struct ingenic_gpio_chip *jzgc = gc_to_jzgc(gc);
-> +
-> +       switch (type) {
-> +       case IRQ_TYPE_EDGE_BOTH:
-> +       case IRQ_TYPE_EDGE_RISING:
-> +       case IRQ_TYPE_EDGE_FALLING:
-> +       case IRQ_TYPE_LEVEL_HIGH:
-> +       case IRQ_TYPE_LEVEL_LOW:
-> +               break;
-> +       default:
-> +               pr_err("unsupported external interrupt type\n");
-
-Should you set the irq handlet to handle_bad_irq() in this case?
-That's what I usually do.
-
-> +               return -EINVAL;
-> +       }
-> +
-> +       if (type & IRQ_TYPE_EDGE_BOTH)
-> +               irq_set_handler_locked(irqd, handle_edge_irq);
-> +       else
-> +               irq_set_handler_locked(irqd, handle_level_irq);
-
-Nice.
-
-> +       jzgc->ops->irq_set_type(jzgc->base, irqd->hwirq, type);
-
-Getting a bit of feeling that it's a bit much indirection vtable
-business going on here, but depends on the series as a whole.
-
-> +static int ingenic_gpio_irq_set_wake(struct irq_data *irqd, unsigned int on)
-> +{
-> +       struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +       struct ingenic_gpio_chip *jzgc = gc_to_jzgc(gc);
-> +
-> +       return irq_set_irq_wake(jzgc->irq, on);
-> +}
-
-I'm uncertain with these. Allright I guess, I'm just too bad at understanding
-wakeup IRQs.
-
-> +static void ingenic_gpio_irq_handler(struct irq_desc *desc)
-> +{
-> +       struct gpio_chip *gc = irq_desc_get_handler_data(desc);
-> +       struct ingenic_gpio_chip *jzgc = gc_to_jzgc(gc);
-> +       struct irq_chip *irq_chip = irq_data_get_irq_chip(&desc->irq_data);
-> +       unsigned long flag, i;
-> +
-> +       chained_irq_enter(irq_chip, desc);
-> +       flag = jzgc->ops->irq_read(jzgc->base);
-> +
-> +       for_each_set_bit(i, &flag, 32)
-> +               generic_handle_irq(irq_linear_revmap(gc->irqdomain, i));
-> +       chained_irq_exit(irq_chip, desc);
-> +}
-
-Clean & nice.
-
-> +static int ingenic_pinctrl_dt_node_to_map(
-> +               struct pinctrl_dev *pctldev, struct device_node *np,
-> +               struct pinctrl_map **map, unsigned int *num_maps)
-> +{
-> +       struct ingenic_pinctrl *jzpc = pinctrl_dev_get_drvdata(pctldev);
-> +       struct ingenic_pinctrl_func *func;
-> +       struct ingenic_pinctrl_group *group;
-> +       struct pinctrl_map *new_map;
-> +       unsigned int map_num, i;
-> +
-> +       group = find_group_by_of_node(jzpc, np);
-> +       if (!group)
-> +               return -EINVAL;
-> +
-> +       func = find_func_by_of_node(jzpc, of_get_parent(np));
-> +       if (!func)
-> +               return -EINVAL;
-> +
-> +       map_num = 1 + group->num_pins;
-> +       new_map = devm_kzalloc(jzpc->dev,
-> +                               sizeof(*new_map) * map_num, GFP_KERNEL);
-> +       if (!new_map)
-> +               return -ENOMEM;
-> +
-> +       new_map[0].type = PIN_MAP_TYPE_MUX_GROUP;
-> +       new_map[0].data.mux.function = func->name;
-> +       new_map[0].data.mux.group = group->name;
-> +
-> +       for (i = 0; i < group->num_pins; i++) {
-> +               new_map[i + 1].type = PIN_MAP_TYPE_CONFIGS_PIN;
-> +               new_map[i + 1].data.configs.group_or_pin =
-> +                       jzpc->pdesc[group->pins[i].idx].name;
-> +               new_map[i + 1].data.configs.configs = group->pins[i].configs;
-> +               new_map[i + 1].data.configs.num_configs =
-> +                       group->pins[i].num_configs;
-> +       }
-> +
-> +       *map = new_map;
-> +       *num_maps = map_num;
-> +       return 0;
-> +}
-
-This may change due to DT bindings reviews. I would prefer if you use
-generic functions.
-
-> +static int ingenic_pinctrl_parse_dt_gpio(struct ingenic_pinctrl *jzpc,
-> +               struct ingenic_gpio_chip *jzgc, struct device_node *np)
-
-Naming here: parse or probe or init. This function is certainly not just
-parsing the DT. init() or probe() is better.
-
-> +       jzgc->gc.base = jzpc->base + (jzgc->idx * PINS_PER_GPIO_PORT);
-
-No. No hard-coded GPIO bases on new GPIO driver.
-Set this to -1 so it uses dynamic allocation of GPIO numbers.
-
-> +       if (of_property_read_u32_index(np, "ingenic,pull-ups", 0,
-> +                               &jzgc->pull_ups))
-> +               jzgc->pull_ups = 0;
-> +       if (of_property_read_u32_index(np, "ingenic,pull-downs", 0,
-> +                               &jzgc->pull_downs))
-> +               jzgc->pull_downs = 0;
-> +
-> +       if (jzgc->pull_ups & jzgc->pull_downs) {
-> +               dev_err(jzpc->dev, "GPIO port %c has overlapping pull ups & pull downs\n",
-> +                       'A' + jzgc->idx);
-> +               return -EINVAL;
-> +       }
-
-These bindings look suspicious. But I will review them in the binding
-document.
-
-> +static int ingenic_pinctrl_parse_dt_pincfg(struct ingenic_pinctrl *jzpc,
-> +               struct ingenic_pinctrl_pin *pin, phandle cfg_handle)
-> +{
-> +       struct device_node *cfg_node;
-> +       int err;
-> +
-> +       cfg_node = of_find_node_by_phandle(cfg_handle);
-> +       if (!cfg_node)
-> +               return -EINVAL;
-> +
-> +       err = pinconf_generic_parse_dt_config(cfg_node, NULL,
-> +                       &pin->configs, &pin->num_configs);
-> +       if (err)
-> +               return err;
-> +
-> +       err = devm_add_action(jzpc->dev, (void (*)(void *))kfree, pin->configs);
-
-That looks very clever.
-
-But when we have pinctrl_utils_free_map() and other helpers already
-this free:ing looks like some reinvented wheel.
-
-Can we create something that free:s the maps from
-pinctrl_utils_reserve_map() in a similar way and use that?
-Just thinking aloud.
-
-> +static int ingenic_pinctrl_parse_dt_func(struct ingenic_pinctrl *jzpc,
-> +               struct device_node *np, unsigned int *ifunc,
-> +               unsigned int *igroup)
-> +{
-> +       struct ingenic_pinctrl_func *func;
-> +       struct ingenic_pinctrl_group *grp;
-> +       struct device_node *group_node, *gpio_node;
-> +       struct gpio_chip *gpio_chip;
-> +       phandle gpio_handle, cfg_handle;
-> +       struct property *pp;
-> +       __be32 *plist;
-> +       unsigned int i, j;
-> +       int err;
-> +       const unsigned int vals_per_pin = 4;
-> +
-> +       func = &jzpc->funcs[(*ifunc)++];
-> +       func->of_node = np;
-> +       func->name = np->name;
-> +
-> +       func->num_groups = of_get_child_count(np);
-> +       func->groups = devm_kzalloc(jzpc->dev, sizeof(*func->groups) *
-> +                       func->num_groups, GFP_KERNEL);
-> +       func->group_names = devm_kzalloc(jzpc->dev,
-> +                       sizeof(*func->group_names) * func->num_groups,
-> +                       GFP_KERNEL);
-> +       if (!func->groups || !func->group_names)
-> +               return -ENOMEM;
-> +
-> +       i = 0;
-> +       for_each_child_of_node(np, group_node) {
-> +               pp = of_find_property(group_node, "ingenic,pins", NULL);
-> +               if (!pp)
-> +                       return -EINVAL;
-> +               if ((pp->length / sizeof(__be32)) % vals_per_pin)
-> +                       return -EINVAL;
-> +
-> +               grp = &jzpc->groups[(*igroup)++];
-> +               grp->of_node = group_node;
-> +               grp->name = group_node->name;
-> +               grp->num_pins = (pp->length / sizeof(__be32)) / vals_per_pin;
-> +               grp->pins = devm_kzalloc(jzpc->dev, sizeof(*grp->pins) *
-> +                               grp->num_pins, GFP_KERNEL);
-> +               grp->pin_indices = devm_kzalloc(jzpc->dev,
-> +                               sizeof(*grp->pin_indices) * grp->num_pins,
-> +                               GFP_KERNEL);
-> +               if (!grp->pins)
-> +                       return -EINVAL;
-> +
-> +               plist = pp->value;
-> +               for (j = 0; j < grp->num_pins; j++) {
-> +                       gpio_handle = be32_to_cpup(plist++);
-> +                       grp->pins[j].idx = be32_to_cpup(plist++);
-> +                       grp->pins[j].func = be32_to_cpup(plist++);
-> +                       cfg_handle = be32_to_cpup(plist++);
-> +
-> +                       gpio_node = of_find_node_by_phandle(gpio_handle);
-> +                       if (!gpio_node)
-> +                               return -EINVAL;
-> +
-> +                       gpio_chip = gpiochip_find(gpio_node,
-> +                                       find_gpio_chip_by_of_node);
-> +                       if (!gpio_chip)
-> +                               return -EINVAL;
-> +
-> +                       grp->pins[j].gpio_chip = gc_to_jzgc(gpio_chip);
-> +
-> +                       err = ingenic_pinctrl_parse_dt_pincfg(jzpc,
-> +                                       &grp->pins[j], cfg_handle);
-> +                       if (err)
-> +                               return err;
-> +
-> +                       grp->pins[j].idx += grp->pins[j].gpio_chip->idx *
-> +                               PINS_PER_GPIO_PORT;
-> +                       grp->pin_indices[j] = grp->pins[j].idx;
-> +               }
-> +
-> +               func->groups[i] = grp;
-> +               func->group_names[i] = grp->name;
-> +               i++;
-> +       }
-> +
-> +       return 0;
-> +}
-
-Tony Lindgren has added generic function and group parsing for drivers
-that keep functions and groups in the device tree. This code is committed
-and available in the pinctrl git tree.
-
-Look at commits:
-commit c7059c5ac70aea194b07b2d811df433eb0ca81b5
-pinctrl: core: Add generic pinctrl functions for managing groups
-commit a76edc89b100e4fefb2a5c00cd8cd557437659e7
-pinctrl: core: Add generic pinctrl functions for managing groups
-commit caeb774ea3b1bc25dc2f24681c27543aba6ca7ae
-pinctrl: single: Use generic pinctrl helpers for managing groups
-commit 571aec4df5b72a80f80d1e524da8fbd7ff525c98
-pinctrl: single: Use generic pinmux helpers for managing functions
-commit 3fd6d6ad73af90522321451a2d10b0a8967d47d1
-pinctrl: imx: use generic pinmux helpers for managing functions
-
-So two drivers already switch to generic code handling this.
-
-Please investigate and try out the above.
-
-> +int ingenic_pinctrl_probe(struct platform_device *pdev,
-> +               const struct ingenic_pinctrl_ops *ops)
-> +{
-> +       struct device *dev = &pdev->dev;
-> +       struct ingenic_pinctrl *jzpc;
-> +       struct ingenic_gpio_chip *jzgc;
-> +       struct pinctrl_desc *pctl_desc;
-> +       struct device_node *np, *chips_node, *functions_node;
-> +       unsigned int i, j;
-> +       int err;
-> +
-> +       if (!dev->of_node) {
-> +               dev_err(dev, "device tree node not found\n");
-> +               return -ENODEV;
-> +       }
-
-I think this check is not necessary since you only probe from device tree.
-We usually skip it these days.
-
-> +       jzpc->base = 0;
-> +       of_property_read_u32(dev->of_node, "base", &jzpc->base);
-
-If this is the Linux GPIO number base then NACK, we don't define
-Linux-specific things in the device tree.
-
-Please use dynamic allocation of GPIO base anyways, as stated
-above.
-
-> +       chips_node = of_find_node_by_name(dev->of_node, "gpio-chips");
-
-This looks like a very dubious new DT bindings. Will review in that
-document.
-
-> +       jzpc->num_gpio_chips = of_get_available_child_count(chips_node);
-> +       if (!jzpc->num_gpio_chips) {
-> +               dev_err(dev, "No GPIO chips found\n");
-> +               return -EINVAL;
-> +       }
-
-Usually it is better to create one device per gpiochip.
-
-> +       /* register pinctrl GPIO ranges */
-> +       for (i = 0; i < jzpc->num_gpio_chips; i++) {
-> +               jzgc = &jzpc->gpio_chips[i];
-> +
-> +               jzgc->grange.name = jzgc->name;
-> +               jzgc->grange.id = jzgc->idx;
-> +               jzgc->grange.pin_base = jzgc->idx * PINS_PER_GPIO_PORT;
-> +               jzgc->grange.base = jzgc->gc.base;
-> +               jzgc->grange.npins = jzgc->gc.ngpio;
-> +               jzgc->grange.gc = &jzgc->gc;
-> +               pinctrl_add_gpio_range(jzpc->pctl, &jzgc->grange);
-> +       }
-
-I strongly recommend defining the GPIO ranges in the device tree
-and if not possible, to add the GPIO range from the gpiochip
-side and not the pinctrl side.
-
-> +struct ingenic_pinctrl_ops {
-> +       unsigned int nb_functions;
-> +
-> +       void (*set_function)(void __iomem *base,
-> +                       unsigned int offset, unsigned int function);
-> +       void (*set_gpio)(void __iomem *base, unsigned int offset, bool output);
-> +       int  (*get_bias)(void __iomem *base, unsigned int offset);
-> +       void (*set_bias)(void __iomem *base, unsigned int offset, bool enable);
-> +       void (*gpio_set_value)(void __iomem *base,
-> +                       unsigned int offset, int value);
-> +       int  (*gpio_get_value)(void __iomem *base, unsigned int offset);
-> +       u32  (*irq_read)(void __iomem *base);
-> +       void (*irq_mask)(void __iomem *base, unsigned int irq, bool mask);
-> +       void (*irq_ack)(void __iomem *base, unsigned int irq);
-> +       void (*irq_set_type)(void __iomem *base,
-> +                       unsigned int irq, unsigned int type);
-> +};
-
-This is a *lot* of vtable indirections. Are you sure this is a good
-idea?
-
-> +static void jz4740_set_gpio(void __iomem *base,
-> +               unsigned int offset, bool output)
-> +{
-> +       writel(1 << offset, base + GPIO_FUNCC);
-> +       writel(1 << offset, base + GPIO_SELECTC);
-> +       writel(1 << offset, base + GPIO_TRIGC);
-> +
-> +       if (output)
-> +               writel(1 << offset, base + GPIO_DIRS);
-> +       else
-> +               writel(1 << offset, base + GPIO_DIRC);
-> +}
-
-Replace all (1 << offset) things with:
-
-#include <linux/bitops.h>
-
-BIT(offset)
-
-Simple and clean.
-
-> +static int jz4740_get_bias(void __iomem *base, unsigned int offset)
-> +{
-> +       return !((readl(base + GPIO_PULL_DIS) >> offset) & 0x1);
-> +}
-
-Similarly:
-return !((readl(base + GPIO_PULL_DIR) & BIT(offset));
-
-Follow these patterns everywhere.
-
-> +static int jz4740_gpio_get_value(void __iomem *base, unsigned int offset)
-> +{
-> +       return (readl(base + GPIO_DATA) >> offset) & 0x1;
-> +}
-
-return !!(readl(base + GPIO_DATA) & BIT(offset));
-
-Yours,
-Linus Walleij
+> On 12/3/2016 2:24 PM, Ritesh Harjani wrote:
+>>
+>>
+>> On 12/1/2016 11:38 PM, Georgi Djakov wrote:
+>>> On 11/29/2016 05:40 AM, Ritesh Harjani wrote:
+>>>> Hi Georgi,
+>>>>
+>>>> On 11/28/2016 11:09 PM, Georgi Djakov wrote:
+>>>>> On apq8016, apq8084 and apq8074 platforms, writing to the software
+>>>>> reset register triggers the "power irq". We need to ack and handle
+>>>>> the irq, otherwise the following message appears:
+>>>>>
+>>>>> mmc0: Reset 0x1 never completed.
+>>>>> sdhci: =========== REGISTER DUMP (mmc0)===========
+>>>>> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
+>>>>> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
+>>>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+>>>>> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
+>>>>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+>>>>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
+>>>>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+>>>>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+>>>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+>>>>> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
+>>>>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
+>>>>> sdhci: Host ctl2: 0x00000000
+>>>>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+>>>>> sdhci: ===========================================
+>>>>>
+>>>>> Fix it by implementing the custom sdhci_reset() function,
+>>>>> which performs the software reset and then handles the irq.
+>>>>>
+>>>>> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+>>>>> ---
+> Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
+>
+>
+>>>>>
+>>>>> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
+>>>>>  * Perform the software reset by just writing to the
+>>>>> SDHCI_SOFTWARE_RESET
+>>>>>    register and then check for the irq.
+>>>> I am still not sure about this change. Below change will trigger the
+>>>> IRQ, once this call is completed (say on a single core system) -since
+>>>> this is called while holding spin_lock_irqsave.
+>>>>
+>>>> But you will be end up calling sdhci_msm_voltage_switch twice,
+>>>> which to me does not seems correct.
+>>>> 1. 1st time you are directly calling it in sdhci_msm_reset.
+>>>> 2. 2nd time will be called from within pwr_irq to handle the same case.
+>>>
+>>> Yes, that would be the behavior. This function actually is not doing
+>>> anything much than to check irq status and ack it. Testing the patch
+>> Ok.
+>>
+>>> on a few different platforms does not show any side effects, however i
+>>> could not be 100% sure as i have limited information about the hardware.
+>> what about the case when say the IRQ is delayed because of some other
+>> overheads in the system. Will this approach still works?
+>> I understand this would require some HW knowledge to understand the
+>> functioning/importance of this pwr_irq. I will try and get in touch with
+>> HW folk here.
+>>
+>> Regards
+>> Ritesh
+>>
+>>
+>>>
+>>> Thanks,
+>>> Georgi
+>>>
+>>>>
+>>>> Please let me know your thoughts on this ?
+>>>>
+>>>> Regards
+>>>> Ritesh
+>>>>
+>>>>>
+>>>>>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
+>>>>>  1 file changed, 28 insertions(+), 1 deletion(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c
+>>>>> b/drivers/mmc/host/sdhci-msm.c
+>>>>> index 32879b845b75..157ae07f9309 100644
+>>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>>> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct
+>>>>> sdhci_host *host, unsigned int clock)
+>>>>>      __sdhci_msm_set_clock(host, clock);
+>>>>>  }
+>>>>>
+>>>>> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+>>>>> +{
+>>>>> +    unsigned long timeout = 100;
+>>>>> +
+>>>>> +    sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+>>>>> +
+>>>>> +    if (mask & SDHCI_RESET_ALL) {
+>>>>> +        host->clock = 0;
+>>>>> +
+>>>>> +        /*
+>>>>> +         * SDHCI_RESET_ALL triggers the PWR IRQ and we need
+>>>>> +         * to handle it here.
+>>>>> +         */
+>>>>> +        sdhci_msm_voltage_switch(host);
+>>>>> +    }
+>>>>> +
+>>>>> +    while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+>>>>> +        if (timeout == 0) {
+>>>>> +            pr_err("%s: Reset 0x%x never completed.\n",
+>>>>> +                   mmc_hostname(host->mmc), (int)mask);
+>>>>> +            return;
+>>>>> +        }
+>>>>> +        timeout--;
+>>>>> +        mdelay(1);
+>>>>> +    }
+>>>>> +}
+>>>>> +
+>>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>>      { .compatible = "qcom,sdhci-msm-v4" },
+>>>>>      {},
+>>>>> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>>>>
+>>>>>  static const struct sdhci_ops sdhci_msm_ops = {
+>>>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
+>>>>> -    .reset = sdhci_reset,
+>>>>> +    .reset = sdhci_msm_reset,
+>>>>>      .set_clock = sdhci_msm_set_clock,
+>>>>>      .get_min_clock = sdhci_msm_get_min_clock,
+>>>>>      .get_max_clock = sdhci_msm_get_max_clock,
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>> linux-mmc" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
