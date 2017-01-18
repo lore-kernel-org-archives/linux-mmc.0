@@ -1,55 +1,174 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Wed, 18 Jan 2017 09:44:49 +0100
-Message-ID: <CAMuHMdVqgrfPVCz68z9vqX_5GhKVbF-FndraTk40UrBdMMKwYw@mail.gmail.com>
-References: <20170117195940.25092-1-chris.brandt@renesas.com> <20170117195940.25092-3-chris.brandt@renesas.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Add sdhci_reset() implementation
+Date: Wed, 18 Jan 2017 14:46:06 +0530
+Message-ID: <2a63a412-ce5d-eb96-ac66-e6f73806c00f@codeaurora.org>
+References: <20161128173920.25334-1-georgi.djakov@linaro.org>
+ <27e95224-ff32-954d-443a-2310c1225ca0@codeaurora.org>
+ <7f35faac-7c04-8024-3111-9d4742ad2154@linaro.org>
+ <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170117195940.25092-3-chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <bfd9c9eb-37c1-4dee-927c-2d6ae5111c3a@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chris,
+Hi Georgi,
 
-On Tue, Jan 17, 2017 at 8:59 PM, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> In the case of a single clock source, you don't need names. However,
-> if the controller has 2 clock sources, you need to name them correctly
-> so the driver can find the 2nd one.
+Sorry for delaying this.
+I did check with HW folks here, but it seems like we still don't have 
+confirmation. In case if I get any new updates later, we can revisit it.
+
+Also I see that we have the same implementation in current driver for 
+changing IO voltage. In that case I think this patch should be fine to 
+avoid the error message on reboot.
+
+
+On 12/3/2016 2:24 PM, Ritesh Harjani wrote:
 >
-> Signed-off-by: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index a1650ed..258b98c 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -25,8 +25,29 @@ Required properties:
->                 "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->                 "renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
+> On 12/1/2016 11:38 PM, Georgi Djakov wrote:
+>> On 11/29/2016 05:40 AM, Ritesh Harjani wrote:
+>>> Hi Georgi,
+>>>
+>>> On 11/28/2016 11:09 PM, Georgi Djakov wrote:
+>>>> On apq8016, apq8084 and apq8074 platforms, writing to the software
+>>>> reset register triggers the "power irq". We need to ack and handle
+>>>> the irq, otherwise the following message appears:
+>>>>
+>>>> mmc0: Reset 0x1 never completed.
+>>>> sdhci: =========== REGISTER DUMP (mmc0)===========
+>>>> sdhci: Sys addr: 0x00000000 | Version:  0x00002e02
+>>>> sdhci: Blk size: 0x00004000 | Blk cnt:  0x00000000
+>>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+>>>> sdhci: Present:  0x01f80000 | Host ctl: 0x00000000
+>>>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+>>>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000003
+>>>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+>>>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+>>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+>>>> sdhci: Caps:     0x322dc8b2 | Caps_1:   0x00008007
+>>>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000000
+>>>> sdhci: Host ctl2: 0x00000000
+>>>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+>>>> sdhci: ===========================================
+>>>>
+>>>> Fix it by implementing the custom sdhci_reset() function,
+>>>> which performs the software reset and then handles the irq.
+>>>>
+>>>> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+>>>> ---
+Reviewed-by: Ritesh Harjani <riteshh@codeaurora.org>
+
+
+>>>>
+>>>> Changes since v1: (https://lkml.org/lkml/2016/11/22/411)
+>>>>  * Perform the software reset by just writing to the
+>>>> SDHCI_SOFTWARE_RESET
+>>>>    register and then check for the irq.
+>>> I am still not sure about this change. Below change will trigger the
+>>> IRQ, once this call is completed (say on a single core system) -since
+>>> this is called while holding spin_lock_irqsave.
+>>>
+>>> But you will be end up calling sdhci_msm_voltage_switch twice,
+>>> which to me does not seems correct.
+>>> 1. 1st time you are directly calling it in sdhci_msm_reset.
+>>> 2. 2nd time will be called from within pwr_irq to handle the same case.
+>>
+>> Yes, that would be the behavior. This function actually is not doing
+>> anything much than to check irq status and ack it. Testing the patch
+> Ok.
 >
-> +- clocks: Most controllers only have 1 clock source per cahnnel. However, some
-> +         have 2. If 2 clocks are specified, you must name them as "core" and
-> +         "carddetect". If the controller only has 1 clock, naming is not
+>> on a few different platforms does not show any side effects, however i
+>> could not be 100% sure as i have limited information about the hardware.
+> what about the case when say the IRQ is delayed because of some other
+> overheads in the system. Will this approach still works?
+> I understand this would require some HW knowledge to understand the
+> functioning/importance of this pwr_irq. I will try and get in touch with
+> HW folk here.
+>
+> Regards
+> Ritesh
+>
+>
+>>
+>> Thanks,
+>> Georgi
+>>
+>>>
+>>> Please let me know your thoughts on this ?
+>>>
+>>> Regards
+>>> Ritesh
+>>>
+>>>>
+>>>>  drivers/mmc/host/sdhci-msm.c | 29 ++++++++++++++++++++++++++++-
+>>>>  1 file changed, 28 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c
+>>>> b/drivers/mmc/host/sdhci-msm.c
+>>>> index 32879b845b75..157ae07f9309 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -1019,6 +1019,33 @@ static void sdhci_msm_set_clock(struct
+>>>> sdhci_host *host, unsigned int clock)
+>>>>      __sdhci_msm_set_clock(host, clock);
+>>>>  }
+>>>>
+>>>> +void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
+>>>> +{
+>>>> +    unsigned long timeout = 100;
+>>>> +
+>>>> +    sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+>>>> +
+>>>> +    if (mask & SDHCI_RESET_ALL) {
+>>>> +        host->clock = 0;
+>>>> +
+>>>> +        /*
+>>>> +         * SDHCI_RESET_ALL triggers the PWR IRQ and we need
+>>>> +         * to handle it here.
+>>>> +         */
+>>>> +        sdhci_msm_voltage_switch(host);
+>>>> +    }
+>>>> +
+>>>> +    while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+>>>> +        if (timeout == 0) {
+>>>> +            pr_err("%s: Reset 0x%x never completed.\n",
+>>>> +                   mmc_hostname(host->mmc), (int)mask);
+>>>> +            return;
+>>>> +        }
+>>>> +        timeout--;
+>>>> +        mdelay(1);
+>>>> +    }
+>>>> +}
+>>>> +
+>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>      { .compatible = "qcom,sdhci-msm-v4" },
+>>>>      {},
+>>>> @@ -1028,7 +1055,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>>>
+>>>>  static const struct sdhci_ops sdhci_msm_ops = {
+>>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
+>>>> -    .reset = sdhci_reset,
+>>>> +    .reset = sdhci_msm_reset,
+>>>>      .set_clock = sdhci_msm_set_clock,
+>>>>      .get_min_clock = sdhci_msm_get_min_clock,
+>>>>      .get_max_clock = sdhci_msm_get_max_clock,
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Perhaps this clock should just be called "cd", as that's already an
-established abbreviation for card detect in MMC DT bindings?
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
