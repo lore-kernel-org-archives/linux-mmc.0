@@ -1,104 +1,84 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 1/2] devicetree: document new marvell-8xxx and
- pwrseq-sd8787 options
-Date: Wed, 18 Jan 2017 16:02:07 -0600
-Message-ID: <20170118220207.3zhbavk2uo4xui34@rob-hp-laptop>
-References: <20170113052937.12538-1-matt@ranostay.consulting>
- <20170113052937.12538-2-matt@ranostay.consulting>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: add DT binding for S3C24XX
+ MMC/SD/SDIO controller
+Date: Wed, 18 Jan 2017 16:38:16 -0600
+Message-ID: <20170118223816.nccyc7aoa7succsi@rob-hp-laptop>
+References: <1484319953-6479-1-git-send-email-sergio.prado@e-labworks.com>
+ <1484319953-6479-2-git-send-email-sergio.prado@e-labworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f68.google.com ([209.85.218.68]:34316 "EHLO
-        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752570AbdARWCK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2017 17:02:10 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20170113052937.12538-2-matt@ranostay.consulting>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1484319953-6479-2-git-send-email-sergio.prado@e-labworks.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Sergio Prado <sergio.prado@e-labworks.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, tony@atomide.com
 
-On Thu, Jan 12, 2017 at 09:29:36PM -0800, Matt Ranostay wrote:
-
-Changelog?
-
-> Cc: devicetree@vger.kernel.org
-> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
-> ---
->  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt          | 14 ++++++++++++++
->  .../devicetree/bindings/net/wireless/marvell-8xxx.txt      |  7 ++++++-
->  2 files changed, 20 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+On Fri, Jan 13, 2017 at 01:05:52PM -0200, Sergio Prado wrote:
+> Adds the device tree bindings description for Samsung S3C24XX
+> MMC/SD/SDIO controller, used as a connectivity interface with external
+> MMC, SD and SDIO storage mediums.
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
+> ---
+>  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 34 ++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
 > new file mode 100644
-> index 000000000000..1b658351629b
+> index 000000000000..d09dbf4b3824
 > --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
-> @@ -0,0 +1,14 @@
-> +* Marvell SD8787 power sequence provider
+> +++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+> @@ -0,0 +1,34 @@
+> +* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
 > +
-> +Required properties:
-> +- compatible: must be "mmc-pwrseq-sd8787".
-> +- pwndn-gpio: contains a power down GPIO specifier.
+> +Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
+> +with external MMC, SD and SDIO storage mediums.
+> +
+> +This file documents differences between the core mmc properties described by
+> +mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
+> +implementation.
+> +
+> +Required SoC Specific Properties:
+> +- compatible: should be one of the following
+> +  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
+> +  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
+> +  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
+> +- clocks: Should reference the controller clock
+> +- clock-names: Should contain "sdi"
 
-powerdown-gpios
-
-> +- reset-gpio: contains a reset GPIO specifier.
-
-reset-gpios
-
-And state the active state for both.
+You are missing things from the example.
 
 > +
 > +Example:
+> +	mmc0: mmc@5a000000 {
+> +		compatible = "samsung,s3c2440-sdi";
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&sdi_pins>;
+> +		reg = <0x5a000000 0x100000>;
+> +		interrupts = <0 0 21 3>;
+> +		clocks = <&clocks PCLK_SDI>;
+> +		clock-names = "sdi";
+> +		bus-width = <4>;
+> +		cd-gpios = <&gpg 8 GPIO_ACTIVE_LOW>;
+> +		wp-gpios = <&gph 8 GPIO_ACTIVE_LOW>;
+> +	};
 > +
-> +	wifi_pwrseq: wifi_pwrseq {
-> +		compatible = "mmc-pwrseq-sd8787";
-> +		pwrdn-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
-> +		reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
-> +	}
-> diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-> index 980b16df74c3..0854451ff91d 100644
-> --- a/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-> +++ b/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-> @@ -1,4 +1,4 @@
-> -Marvell 8897/8997 (sd8897/sd8997/pcie8997) SDIO/PCIE devices
-> +Marvell 8787/8897/8997 (sd8787/sd8897/sd8997/pcie8997) SDIO/PCIE devices
->  ------
->  
->  This node provides properties for controlling the Marvell SDIO/PCIE wireless device.
-> @@ -8,6 +8,7 @@ connects the device to the system.
->  Required properties:
->  
->    - compatible : should be one of the following:
-> +	* "marvell,sd8787"
->  	* "marvell,sd8897"
->  	* "marvell,sd8997"
->  	* "pci11ab,2b42"
-> @@ -34,6 +35,9 @@ Optional properties:
->  		 so that the wifi chip can wakeup host platform under certain condition.
->  		 during system resume, the irq will be disabled to make sure
->  		 unnecessary interrupt is not received.
-> +  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
-> +  - mmc-pwrseq:  phandle to the MMC power sequence node. See "mmc-pwrseq-*"
-> +		 for documentation of MMC power sequence bindings.
->  
->  Example:
->  
-> @@ -46,6 +50,7 @@ so that firmware can wakeup host using this device side pin.
->  &mmc3 {
->  	status = "okay";
->  	vmmc-supply = <&wlan_en_reg>;
-> +	mmc-pwrseq = <&wifi_pwrseq>;
->  	bus-width = <4>;
->  	cap-power-off-card;
->  	keep-power-in-suspend;
-> -- 
-> 2.10.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe devicetree" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +	Note: This example shows both SoC specific and board specific properties
+> +	in a single device node. The properties can be actually be separated
+> +	into SoC specific node and board specific node.
+
+The source structure is not relavent to the binding.
+
+Rob
