@@ -1,59 +1,42 @@
-From: Uri Yanai <Uri.Yanai@sandisk.com>
-Subject: RE: [PATCH 0/3] Auto BKOPS PM suspend
-Date: Wed, 18 Jan 2017 14:12:53 +0000
-Message-ID: <037111DC0C584A4DB9F38021EA3CBDA506103CD3@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <30196abc-e340-2b7f-0ad2-d644a0d78b49@rock-chips.com>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v2 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Wed, 18 Jan 2017 14:53:35 +0000
+Message-ID: <SG2PR06MB116502E2943B5A23E56F65A58A7F0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170117195940.25092-1-chris.brandt@renesas.com>
+ <20170117195940.25092-2-chris.brandt@renesas.com>
+ <20170117203017.r3g43scvrkwpe6kt@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0065.outbound.protection.outlook.com ([104.47.37.65]:49099
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752370AbdAROOq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Jan 2017 09:14:46 -0500
-In-Reply-To: <30196abc-e340-2b7f-0ad2-d644a0d78b49@rock-chips.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170117203017.r3g43scvrkwpe6kt@ninjato>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-SGkgU2hhd24NCg0KVGhhbmtzIGZvciB0aGUgcmV2aWV3LCBBcyB5b3UgcmVxdWVzdCBJIHdpbGwg
-YWRkIGNoYW5nZWxvZyBhbmQgcmVtb3ZlIHRoZSBDaGFuZ2UtSWQuDQpJIGFtIGFmcmFpZCBJIGRp
-ZG4ndCBxdWl0ZSB1bmRlcnN0YW5kIHlvdXIgcmVtYXJrIGFib3V0IGF1dGhvcnNoaXAgYW5kICB0
-aGUgU09CIHBhdGgsIGFwcHJlY2lhdGUgaWYgeW91IGNhbiBlbGFib3JhdGUgb24gdGhpcy4NCg0K
-VGhhbmtzDQpVcmkNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFNoYXduIExp
-biBbbWFpbHRvOnNoYXduLmxpbkByb2NrLWNoaXBzLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIEph
-bnVhcnkgMTgsIDIwMTcgMzo1NCBBTQ0KVG86IFVyaSBZYW5haQ0KQ2M6IHVsZi5oYW5zc29uQGxp
-bmFyby5vcmc7IHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVs
-Lm9yZzsgY2hyaXNAcHJpbnRmLm5ldDsgQWxleCBMZW1iZXJnDQpTdWJqZWN0OiBSZTogW1BBVENI
-IDAvM10gQXV0byBCS09QUyBQTSBzdXNwZW5kDQoNCkhpIFVyaSwNCg0KT24gMjAxNy8xLzE3IDIw
-OjE1LCBVcmkgWWFuYWkgd3JvdGU6DQo+IEhpIFVsZg0KPiBSZXN1Ym1pdHRpbmcgdGhyZWUgcGF0
-Y2hlcyBmb3IgYXBwcm92YWwsIG9yaWdpbmFsbHkgc3VibWl0dGVkIGJ5IEFsZXggTGVtYmVyZyA8
-YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPg0KPiBbMS8zXSBtbWM6IHJlcGxhY2luZyBoYXJkY29k
-ZWQgdmFsdWUgZm9yIHJ1bnRpbWUgUE0gc3VzcGVuZCAgCQlNZXNzYWdlIElEOjwxNDcyNzM5ODkw
-LTMzODQtMi1naXQtc2VuZC1lbWFpbC1hbGV4LmxlbWJlcmdAc2FuZGlzay5jb20+DQo+IFsyLzNd
-IG1tYzogQWRkaW5nIEFVVE9fQktPUFNfRU4gYml0IHNldCBmb3IgQXV0byBCS09QUyBzdXBwb3J0
-CQlNZXNzYWdlIElEOjwxNDcyNzM5ODkwLTMzODQtMy1naXQtc2VuZC1lbWFpbC1hbGV4LmxlbWJl
-cmdAc2FuZGlzay5jb20+DQo+IFszLzNdIG1tYzogQ2hlY2tpbmcgQktPUFMgc3RhdHVzIHByaW9y
-IHRvIFN1c3BlbmQgCQkJTWVzc2FnZSBJRDo8MTQ3MjczOTg5MC0zMzg0LTQtZ2l0LXNlbmQtZW1h
-aWwtYWxleC5sZW1iZXJnQHNhbmRpc2suY29tPg0KPg0KPiBUaGFua3MNCj4gVXJpIFlhbmFpDQoN
-CkZpcnN0bHksIHRoZSBhdXRob3JzaGlwIGlzbid0IGNvcnJlY3QgYW5kIG9mIGNvdXJzZSB0aGUg
-U09CIHBhdGguDQpUaGVuLCBpdCdkIGJldHRlciB0byBhZGQgYSBjaGFuZ2Vsb2cgc2luY2UgeW91
-IGRvIGltcHJvdmUgQWxleCdzIHBhdGNoZXMsIGFuZCBpdCB3b3VsZCBoZWxwIHVzIHRvIGJldHRl
-ciB1bmRlcnN0YW5kIHdoYXQgd2FzIGNoYW5nZWQuIDopDQoNCkFsc28geW91IHNob3VsZCByZW1v
-dmUgQ2hhbmdlLUlkIHdoZW4gZmV0Y2hpbmcgcGF0Y2hlcyBmcm9tIHlvdXIgaW50ZXJuYWwgY29k
-ZSByZXZpZXcgc3lzdGVtLg0KDQpBbnl3YXksIGxldCdzIHRhbGsgYWJvdXQgdGhlIHBhdGNoZXMg
-dGhlbXNlbGYsIEkgaGF2ZSBhIHF1ZXN0aW9uIGZvciB5b3VyIHBhdGNoIDMvMyB0aGVyZS4NCg0K
-DQo+DQo+IFVyaSBZYW5haSAoMyk6DQo+ICAgbW1jOiByZXBsYWNpbmcgaGFyZGNvZGVkIHZhbHVl
-IGZvciBydW50aW1lIFBNIHN1c3BlbmQNCj4gICBtbWM6IEFkZGluZyBBVVRPX0JLT1BTX0VOIGJp
-dCBzZXQgZm9yIEF1dG8gQktPUFMgc3VwcG9ydA0KPiAgIG1tYzogQ2hlY2tpbmcgQktPUFMgc3Rh
-dHVzIHByaW9yIHRvIFN1c3BlbmQNCj4NCj4gIGRyaXZlcnMvbW1jL2NvcmUvYmxvY2suYyB8ICAz
-ICsrLQ0KPiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyAgIHwgNDUgKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+ICBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgg
-fCAgMSArDQo+ICBpbmNsdWRlL2xpbnV4L21tYy9ob3N0LmggfCAgMiArKw0KPiAgaW5jbHVkZS9s
-aW51eC9tbWMvbW1jLmggIHwgIDMgKysrDQo+ICA1IGZpbGVzIGNoYW5nZWQsIDQ0IGluc2VydGlv
-bnMoKyksIDEwIGRlbGV0aW9ucygtKQ0KPg0KDQoNCi0tDQpCZXN0IFJlZ2FyZHMNClNoYXduIExp
-bg0KDQo=
+Hi Wolfram,
+
+On Tuesday, January 17, 2017, Wolfram Sang wrote:
+> Hi Chris,
+>=20
+> > +	struct clk *clk2;
+>=20
+> I'd vote for 'clk_cd' since we are explicitly requesting that clock for i=
+t.
+>=20
+> > +	ret =3D clk_prepare_enable(priv->clk2);
+> > +	if (ret < 0)
+> > +		return ret;
+>=20
+> You need to disable clk when failing.
+>=20
+> Regards,
+>=20
+>    Wolfram
+
+
+Thanks for the feedback. I will make those changes.
+
+Chris
