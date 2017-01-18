@@ -1,105 +1,86 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: Re: [PATCH 13/13] MIPS: jz4740: Remove custom GPIO code
-Date: Wed, 18 Jan 2017 08:27:51 +0100
-Message-ID: <20170118072751.GC18989@ulmo.ba.sec>
-References: <20170117231421.16310-1-paul@crapouillou.net>
- <20170117231421.16310-14-paul@crapouillou.net>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [RESEND PATCHv1 0/8] mmc: sdhci-msm: Provide support for enhanced
+ strobe
+Date: Wed, 18 Jan 2017 13:24:25 +0530
+Message-ID: <1a747499-7c47-0feb-ac6b-c229e78e10a4@codeaurora.org>
+References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+ <20170117010751.GA25703@mini-rhel.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5335441250778327517=="
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <20170117231421.16310-14-paul@crapouillou.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Paul Cercueil <paul@crapouillou.net>, Ralf Baechle <ralf@linux-mips.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Lars-Peter Clausen <lars@metafoo.de>, james.hogan@imgtec.com, Paul Burton <paul.burton@imgtec.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pwm@vger.kernel.org, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-mips@linux-mips.org, linux-fbdev@vger.kernel.org, Maarten ter Huurne <maarten@treewalker.org>, linux-mtd@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
-
-
---===============5335441250778327517==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="yVhtmJPUSI46BTXb"
-Content-Disposition: inline
-
-
---yVhtmJPUSI46BTXb
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, Jan 18, 2017 at 12:14:21AM +0100, Paul Cercueil wrote:
-> All the drivers for the various hardware elements of the jz4740 SoC have
-> been modified to use the pinctrl framework for their pin configuration
-> needs.
-> As such, this platform code is now unused and can be deleted.
->=20
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-> ---
->  arch/mips/include/asm/mach-jz4740/gpio.h | 371 ----------------------
->  arch/mips/jz4740/Makefile                |   2 -
->  arch/mips/jz4740/gpio.c                  | 519 -------------------------=
-------
->  3 files changed, 892 deletions(-)
->  delete mode 100644 arch/mips/jz4740/gpio.c
-
-Have you considered how this could best be merged? It's probably easiest
-to take all of this through the MIPS tree because we have an addition of
-the pinctrl that would be a replacement for the GPIO code, while at the
-same time a bunch of drivers rely on the JZ4740 GPIO code for successful
-compilation.
-
-That's slightly complicated by the number of drivers, so needs a lot of
-coordination, but it's not the worst I've seen.
-
-Maybe one other solution that would make the transition easier would be
-to stub out the GPIO functions if the pinctrl driver is enabled, and do
-the removal of the mach-jz4740/gpio.h after all drivers have been merged
-through their corresponding subsystem trees. That way all drivers should
-remain compilable and functional at runtime, while still having the
-possibility to merge through the subsystem trees.
-
-That said, the whole series is fairly simple, so merging everything
-through the MIPS tree sounds like the easiest way to go.
-
-Thierry
-
---yVhtmJPUSI46BTXb
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAlh/GPcACgkQ3SOs138+
-s6HJuA/8DBbCWXiobPupHIJkfkobmKLcWcDTCHrFnZvAFle+RTPeoANQQYkJ75pW
-qHYVgHTL0x3n4NBLFvYl1Twl+fGLQNxEKbg87WBSj5jeAyTK3y4KA0P79OAfnkee
-nSWeP8v+TluNV7gWSnFpUgFffHif24BbwtIsuLYxxn/awM2ZPQEx3CxDr5jvJD4E
-2lTp4sYoRLmgHQb7Q7YH6b8JSibxXFEafzIfuSC42ySLXThDqY2TiMcQproKxfXl
-/lruvG7w89INCAQOlXHG81sX0XGcbFYW0Cv1M5c0E3hk7DkbgFL3A5Q6IpnHjHdO
-tOXg+DMjByeZMy9H3PP2vVnVva+fg5oMCWJHIP2Ih3d+CIBJdo6YlI/TvGH+Gh4h
-4HKGiO83F+JljR5/ver0BBue9gyxCGs9sUO3B3TVAiunrS+hgfw/Wv+hcQ1IsubU
-wnxXDrj54QxeP9O1T84yPD98e75O4tD1DHltfPZOI+bkxiQmvOGFYarcATKS0Edk
-uJdWdEbfV/gB+1ckUpq0QEoTDdx7YEwuQCVn7dcS2hwyD4qEEc86j9Z+hkvk2+zg
-cGHxOJ54wGqgIUMQM9/ohreFUPpifTWo6afe4tlos4V9BhA+1/dj29d0EmBJ2gON
-TmNKjvYGHnilhT2uGMYDx6xfaXLGq8QG8o1kVlfRhCBWnGEyqzc=
-=/Oal
------END PGP SIGNATURE-----
-
---yVhtmJPUSI46BTXb--
-
-
---===============5335441250778327517==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:33656 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751090AbdARHz2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2017 02:55:28 -0500
+In-Reply-To: <20170117010751.GA25703@mini-rhel.redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Jeremy McNicoll <jmcnicol@redhat.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
 
---===============5335441250778327517==--
+
+On 1/17/2017 6:37 AM, Jeremy McNicoll wrote:
+> On Tue, Jan 10, 2017 at 12:30:44PM +0530, Ritesh Harjani wrote:
+>> Hi,
+>>
+>> Resending this patch series, as no one could review it -possibly due to
+>> holidays during that time.
+>>
+>> This patch series mainly provides enhanced strobe support to sdhci-msm driver
+>> along with some additions of HW recommended sequence. This has been tested on
+>> 8996 based internal target & on db410c.
+>>
+>> Patches 1-3 :- Factors out few functions to be re-used again.
+>> 	       To also simplify large functions and makes it more readable.
+>>
+>> Patches 4-5 :- Few recommendations based on HW prog. guide.
+>>
+>> Patches 6 :- Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
+>> 	     so that ->platform_execute_tuning (underlying platform driver) can
+>> 	     know about HS400 tuning.
+>>
+>> Patch 7 :- Implements an additional step as per HPG for HS400 tuning.
+>>
+>> Patch 8 :- Implements enhanced strobe functionality in sdhci-msm driver.
+>>
+>>
+>
+> I have included this series in my tree while testing my SDHCI V2 series.
+>
+> One message did occur which looks new or unfamilar and relatively
+> harmless,
+>
+> "sdhci_msm f9824900.mmc: TCXO clk not present (-2) "
+This should be ok.
+
+>
+> Is that something I am missing on my side?
+You should provide this in your DT.
+@@ -463,8 +463,9 @@
+                         interrupts = <0 141 0>, <0 134 0>;
+                         interrupt-names = "hc_irq", "pwr_irq";
+                         clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+-                                <&gcc GCC_SDCC1_AHB_CLK>;
+-                       clock-names = "core", "iface";
++                                <&gcc GCC_SDCC1_AHB_CLK>,
++                                <&xo_board>;
++                       clock-names = "core", "iface", "xo";
+
+
+
+>
+> In anycase,
+>
+> Tested-by: Jeremy McNicoll <jeremymc@redhat.com>
+Thanks for testing this series.
+
+Hi Adrian/Ulf,
+In case if we dont have any other comments, can we please include this 
+series in next ?
+
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
