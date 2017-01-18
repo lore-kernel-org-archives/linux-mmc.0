@@ -1,84 +1,34 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: add DT binding for S3C24XX
- MMC/SD/SDIO controller
-Date: Wed, 18 Jan 2017 16:38:16 -0600
-Message-ID: <20170118223816.nccyc7aoa7succsi@rob-hp-laptop>
-References: <1484319953-6479-1-git-send-email-sergio.prado@e-labworks.com>
- <1484319953-6479-2-git-send-email-sergio.prado@e-labworks.com>
+From: Jeremy McNicoll <jmcnicol-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 1/4] clk: gcc: Updates for SDHCI enablement
+Date: Wed, 18 Jan 2017 15:14:02 -0500
+Message-ID: <5b4bf98d-acb7-c58b-0c9d-28867f4523b3@redhat.com>
+References: <1484614729-26751-1-git-send-email-jeremymc@redhat.com>
+ <1484614729-26751-2-git-send-email-jeremymc@redhat.com>
+ <20170117232542.GV17126@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1484319953-6479-2-git-send-email-sergio.prado@e-labworks.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sergio Prado <sergio.prado@e-labworks.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170117232542.GV17126-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, git-LJ92rlH3Dns@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jan 13, 2017 at 01:05:52PM -0200, Sergio Prado wrote:
-> Adds the device tree bindings description for Samsung S3C24XX
-> MMC/SD/SDIO controller, used as a connectivity interface with external
-> MMC, SD and SDIO storage mediums.
-> 
-> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
-> ---
->  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 34 ++++++++++++++++++++++
->  1 file changed, 34 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> new file mode 100644
-> index 000000000000..d09dbf4b3824
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-> @@ -0,0 +1,34 @@
-> +* Samsung's S3C24XX MMC/SD/SDIO controller device tree bindings
-> +
-> +Samsung's S3C24XX MMC/SD/SDIO controller is used as a connectivity interface
-> +with external MMC, SD and SDIO storage mediums.
-> +
-> +This file documents differences between the core mmc properties described by
-> +mmc.txt and the properties used by the Samsung S3C24XX MMC/SD/SDIO controller
-> +implementation.
-> +
-> +Required SoC Specific Properties:
-> +- compatible: should be one of the following
-> +  - "samsung,s3c2410-sdi": for controllers compatible with s3c2410
-> +  - "samsung,s3c2412-sdi": for controllers compatible with s3c2412
-> +  - "samsung,s3c2440-sdi": for controllers compatible with s3c2440
-> +- clocks: Should reference the controller clock
-> +- clock-names: Should contain "sdi"
+On 2017-01-17 6:25 PM, Stephen Boyd wrote:
+> On 01/16, Jeremy McNicoll wrote:
+>> Global clock updates to enable onboard SDHCI / MMC.
+>> Re-tabify dt-bindings to align correctly in vim.
+>
+> We need much more words here on what's going on in this patch.
+>
 
-You are missing things from the example.
+Reword and redo alot of this.  Thanks for the clarifications and answers
+on IRC.
 
-> +
-> +Example:
-> +	mmc0: mmc@5a000000 {
-> +		compatible = "samsung,s3c2440-sdi";
-> +		pinctrl-names = "default";
-> +		pinctrl-0 = <&sdi_pins>;
-> +		reg = <0x5a000000 0x100000>;
-> +		interrupts = <0 0 21 3>;
-> +		clocks = <&clocks PCLK_SDI>;
-> +		clock-names = "sdi";
-> +		bus-width = <4>;
-> +		cd-gpios = <&gpg 8 GPIO_ACTIVE_LOW>;
-> +		wp-gpios = <&gph 8 GPIO_ACTIVE_LOW>;
-> +	};
-> +
-> +	Note: This example shows both SoC specific and board specific properties
-> +	in a single device node. The properties can be actually be separated
-> +	into SoC specific node and board specific node.
+-jeremy
 
-The source structure is not relavent to the binding.
-
-Rob
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
