@@ -1,41 +1,39 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [RESEND RFC 1/3] mmc: sdhci: Add platform_dumpregs callback
- support to sdhci_ops.
-Date: Wed, 18 Jan 2017 13:27:53 +0530
-Message-ID: <d8e5b1fe-1f4e-f6f9-6f94-f5c7adc027f3@codeaurora.org>
-References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
- <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
- <7cfc2b6c-fa3f-a8cb-d684-472c3dbacf2f@rock-chips.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: host: tmio: disable clocks when unbinding
+Date: Wed, 18 Jan 2017 09:29:18 +0100
+Message-ID: <CAMuHMdVU5jARZSC_EMaqPo9BAz+PG_OPevuF9VTzAVJPoF2UsQ@mail.gmail.com>
+References: <20170117202601.3742-1-wsa@the-dreams.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7cfc2b6c-fa3f-a8cb-d684-472c3dbacf2f@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f193.google.com ([209.85.223.193]:36473 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751510AbdARIgk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2017 03:36:40 -0500
+In-Reply-To: <20170117202601.3742-1-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Chris Brandt <chris.brandt@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Hi Shawn,
-
-On 1/10/2017 2:45 PM, Shawn Lin wrote:
-> On 2017/1/10 14:41, Ritesh Harjani wrote:
->> From: Sahitya Tummala <stummala@codeaurora.org>
->>
->> Add new host operation ->platform_dumpregs to provide a
->> mechanism through which host drivers can dump platform
->> specific registers in addition to SDHC registers
->> during error conditions.
->>
+On Tue, Jan 17, 2017 at 9:26 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> Although we have been preventing from adding new callback
-> for sdhci core, this one makes sense as there are more and more
-> vendor registers outside the scope of SDHCI spec.
-Sure thanks, shall I add your Reviewed-by on this patch 1/3.
-Would you be able to review other as well?
+> Create a helper function to disable clocks and use it in remove(), too.
+> Now, clk_summary in debugfs reports the clocks as disabled and
+> unprepared after unbinding.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
+Gr{oetje,eeting}s,
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
