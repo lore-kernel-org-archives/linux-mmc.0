@@ -1,68 +1,71 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND PATCHv1 4/8] mmc: sdhci-msm: Reset vendor specific func
- register on probe
-Date: Thu, 19 Jan 2017 12:05:18 +0200
-Message-ID: <a6ee2c0a-5840-b0eb-03d9-d221ea317313@intel.com>
+Subject: Re: [RESEND PATCHv1 6/8] mmc: sdhci: Clear SDHCI_HS400_TUNING flag
+ after platform_execute_tuning
+Date: Thu, 19 Jan 2017 12:10:26 +0200
+Message-ID: <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
 References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-5-git-send-email-riteshh@codeaurora.org>
+ <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1484031652-12059-5-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 List-Id: linux-mmc@vger.kernel.org
 
 On 10/01/17 09:00, Ritesh Harjani wrote:
-> From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
+> so that platform_execute_tuning may use it if needed.
+
+Sorry for the slow reply.
+
+platform_execute_tuning() should not really exist because it doesn't do
+anything useful.
+
+If it is not too much trouble please consider just hooking
+->execute_tuning() directly i.e.
+
+	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+
+Then you can use and clear the flag in sdhci_msm_execute_tuning().
+
 > 
-> The vendor specific func register doesn't get reset when using the
-> software reset register. The various bootloader's could leave this
-> in an unknown state, hence reset this register to it's power on reset
-> value during probe.
-> 
-> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 > Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
 > ---
->  drivers/mmc/host/sdhci-msm.c | 15 ++++-----------
->  1 file changed, 4 insertions(+), 11 deletions(-)
+>  drivers/mmc/host/sdhci.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 5a37c29..a028568 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -69,6 +69,7 @@
->  #define CORE_DLL_CLOCK_DISABLE	BIT(21)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2390980..2658f89 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2114,7 +2114,6 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	spin_lock_irqsave(&host->lock, flags);
 >  
->  #define CORE_VENDOR_SPEC	0x10c
-> +#define CORE_VENDOR_SPEC_POR_VAL	0xa1c
->  #define CORE_CLK_PWRSAVE	BIT(1)
->  #define CORE_HC_MCLK_SEL_DFLT	(2 << 8)
->  #define CORE_HC_MCLK_SEL_HS400	(3 << 8)
-> @@ -1197,17 +1198,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  		goto clk_disable;
+>  	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
+> -	host->flags &= ~SDHCI_HS400_TUNING;
+>  
+>  	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+>  		tuning_count = host->tuning_count;
+> @@ -2156,7 +2155,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  
+>  	if (host->ops->platform_execute_tuning) {
+>  		spin_unlock_irqrestore(&host->lock, flags);
+> -		return host->ops->platform_execute_tuning(host, opcode);
+> +		err = host->ops->platform_execute_tuning(host, opcode);
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		goto out_unlock;
 >  	}
 >  
-> -	config = readl_relaxed(msm_host->core_mem + CORE_POWER);
-> -	config |= CORE_SW_RST;
-> -	writel_relaxed(config, msm_host->core_mem + CORE_POWER);
-> -
-> -	/* SW reset can take upto 10HCLK + 15MCLK cycles. (min 40us) */
-> -	usleep_range(1000, 5000);
-> -	if (readl(msm_host->core_mem + CORE_POWER) & CORE_SW_RST) {
-> -		dev_err(&pdev->dev, "Stuck in reset\n");
-> -		ret = -ETIMEDOUT;
-> -		goto clk_disable;
-> -	}
-> +	/* Reset the vendor spec register to power on reset state */
-> +	writel_relaxed(CORE_VENDOR_SPEC_POR_VAL,
-> +		       host->ioaddr + CORE_VENDOR_SPEC);
+>  	host->mmc->retune_period = tuning_count;
+> @@ -2167,6 +2168,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >  
->  	/* Set HC_MODE_EN bit in HC_MODE register */
->  	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
+>  	sdhci_end_tuning(host);
+>  out_unlock:
+> +	host->flags &= ~SDHCI_HS400_TUNING;
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+>  	return err;
 > 
