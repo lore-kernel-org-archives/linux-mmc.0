@@ -1,75 +1,145 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: tmio: disable clocks when unbinding
-Date: Thu, 19 Jan 2017 22:19:57 +0100
-Message-ID: <CAPDyKFob1cN_yRdFd846UpX5CQ2a-Cv=93KJ41GAJY2AeRidjQ@mail.gmail.com>
-References: <20170117202601.3742-1-wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: sdio: don't allow vmalloc area buffer to use sdio API
+Date: Thu, 19 Jan 2017 22:29:24 +0100
+Message-ID: <CAPDyKFoqwuEdK8XRrGwmpwLhwR2Npq-zgBZmLKq9i_ohW-twvQ@mail.gmail.com>
+References: <1484639144-7176-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170117202601.3742-1-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Geert Uytterhoeven <geert@linux-m68k.org>, Chris Brandt <chris.brandt@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:36204 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751220AbdASV31 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 16:29:27 -0500
+Received: by mail-wm0-f41.google.com with SMTP id c85so11969385wmi.1
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 13:29:26 -0800 (PST)
+In-Reply-To: <1484639144-7176-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 17 January 2017 at 21:26, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 17 January 2017 at 08:45, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> It's fine if the host driver use PIO mode to transfer the
+> vmalloc area buffer but not for DMA mode. The sdio APIs haven't
+> provide the capability to tell the caller whether it will use DMA
+> to finish the IO transfer or not, so don't give the randomly
+> insmoded sdio function driver the possibility to break the kernel.
+> Also the APIs shouldn't take the liberty to do a copy for these
+> cases and just kick out these requests should be enough.
 >
-> Create a helper function to disable clocks and use it in remove(), too.
-> Now, clk_summary in debugfs reports the clocks as disabled and
-> unprepared after unbinding.
+> This issue is observed by doing insmod a downloaded wifi module
+> driver and the kernel panic right away. Unfortunately we don't have
+> the source code but adding this patch that it proves that the module
+> driver was passing on a vmalloc area buffer for sdio APIs.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> It could very easy to be reproduced by writing a simple function
+> module driver and insmod it, and panic log looks like:
+>
+> unsigned u8 __aligned(32) buf[PAGE_SIZE];
+>
+> static int wifi_probe(struct sdio_func *func, const struct
+> sdio_device_id *id)
+> {
+>         sdio_claim_host(func);
+>         sdio_enable_func(func);
+>         sdio_memcpy_toio(func, 0x0, buf, 0x200);
+> }
+>
+> [  236.748210] wifi_probe: buf = 0xffffff8000a40b80
+> [  236.748258] swiotlb_tbl_map_single: orig_addr = 0xfffffffff8c40b80,
+> tlb_addr = 0xf7eae000 //I added log here
+> [  236.748276] Unable to handle kernel paging request at virtual address
+> fffffffff8c40b80
+> [  236.776486] pgd = ffffffc0b3417000
+> [  236.776789] [fffffffff8c40b80] *pgd=00000000b3427003,
+> *pud=00000000b3427003, *pmd=0000000000000000
+> [  236.777601] Internal error: Oops: 96000005 [#1] PREEMPT SMP
+> [  236.778093] Modules linked in: drvtst(O+)
+> [  236.778463] CPU: 0 PID: 1918 Comm: insmod Tainted: G           O
+> 4.4.36 #25
+> [  236.779096] Hardware name: Rockchip RK3399 Evaluation Board v3 edp
+> (Android) (DT)
+> [  236.779753] task: ffffffc0e3db0c40 ti: ffffffc0b342c000 task.ti:
+> ffffffc0b342c000
+> [  236.780418] PC is at __memcpy+0x100/0x180
+> [  236.780777] LR is at swiotlb_tbl_map_single+0x254/0x274
+> [  236.781237] pc : [<ffffff80083579c0>] lr : [<ffffff800837cf70>]
+> ...
+>
+> [  236.941392] f460: 3d20726464615f67 6666666666783020
+> [  236.941826] [<ffffff80083579c0>] __memcpy+0x100/0x180
+> [  236.942274] [<ffffff800837dc18>] swiotlb_map_sg_attrs+0xa8/0x170
+> [  236.942810] [<ffffff800809359c>] __swiotlb_map_sg_attrs+0x24/0x8c
+> [  236.943353] [<ffffff800871113c>]
+> dw_mci_pre_dma_transfer.isra.16+0xf0/0x11c
+> [  236.943967] [<ffffff80087129cc>] __dw_mci_start_request+0x17c/0x4d0
+> [  236.944520] [<ffffff80087132e0>] dw_mci_request+0xb8/0xf0
+> [  236.945002] [<ffffff80086f8b44>] __mmc_start_request+0x9c/0xc0
+> [  236.945520] [<ffffff80087ae0e8>]
+> mmc_start_request.part.17+0x100/0x11c
+> [  236.946097] [<ffffff80086f9c74>] mmc_wait_for_req+0x78/0x1a8
+> [  236.946600] [<ffffff800870421c>] mmc_io_rw_extended+0x27c/0x2fc
+> [  236.947124] [<ffffff8008705800>] sdio_io_rw_ext_helper+0x1e4/0x238
+> [  236.947670] [<ffffff8008705954>] sdio_memcpy_toio+0x24/0x2c
+> [  236.948169] [<ffffff8000a40108>] wifi_probe+0xa8/0x198 [drvtst]
+> [  236.948708] [<ffffff8008704734>] sdio_bus_probe+0xb0/0x140
+> [  236.949195] [<ffffff80084bfd6c>] driver_probe_device+0x118/0x2b0
+> [  236.949724] [<ffffff80084bff68>] __driver_attach+0x64/0x90
+> [  236.950212] [<ffffff80084bee18>] bus_for_each_dev+0x80/0xb0
+> [  236.950706] [<ffffff80084bf8ac>] driver_attach+0x20/0x28
+> [  236.951176] [<ffffff80084bf45c>] bus_add_driver+0xe8/0x1ec
+> [  236.951661] [<ffffff80084c0afc>] driver_register+0x98/0xe4
+> [  236.952147] [<ffffff8008704580>] sdio_register_driver+0x24/0x2c
+> [  236.952675] [<ffffff8000a40228>] wifi_sdio_init+0x30/0x68 [drvtst]
+> [  236.953241] [<ffffff8000a4400c>] wifi_drv_init+0xc/0x38 [drvtst]
+> [  236.953789] [<ffffff8008082ba4>] do_one_initcall+0x17c/0x198
+> [  236.954293] [<ffffff800815e564>] do_init_module+0x60/0x1b8
+> [  236.954779] [<ffffff80081150f0>] load_module+0x1660/0x1a50
+> [  236.955264] [<ffffff800811562c>] SyS_init_module+0x14c/0x180
+> [  236.955765] [<ffffff80080826f0>] el0_svc_naked+0x24/0x28
+>
+> So the kernel crash since the vmalloc area buffer isn't physical
+> continuous and swiotlb couldn't find the correct mapping address
+> in fact. Anyway, don't give the chance to panic kernel by using
+> sdio APIs.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+>
+>  drivers/mmc/core/sdio_io.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 406e5f0..cf00805 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -10,6 +10,7 @@
+>   */
+>
+>  #include <linux/export.h>
+> +#include <linux/mm.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/sdio.h>
+> @@ -307,7 +308,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+>         unsigned max_blocks;
+>         int ret;
+>
+> -       if (!func || (func->num > 7))
+> +       if (!func || (func->num > 7) || is_vmalloc_addr(buf))
+>                 return -EINVAL;
+>
+>         /* Do the bulk of the transfer using block mode (if supported). */
+> --
+> 1.9.1
+>
+>
 
-Thanks, applied for next!
+Actually we need kmalloced buffers. We can't cope with stack buffers either.
+Could you please extend the check above to cover this as well.
+
+Moreover we also have those requests going via mmc_io_rw_direct(), we
+should validate the buffers for these as well.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/tmio_mmc_pio.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index ddba7b833f2c52..db3bde716b3eed 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -947,6 +947,12 @@ static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
->         return host->clk_enable(host);
->  }
->
-> +static void tmio_mmc_clk_disable(struct tmio_mmc_host *host)
-> +{
-> +       if (host->clk_disable)
-> +               host->clk_disable(host);
-> +}
-> +
->  static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
->  {
->         struct mmc_host *mmc = host->mmc;
-> @@ -1332,6 +1338,8 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
->
->         pm_runtime_put_sync(&pdev->dev);
->         pm_runtime_disable(&pdev->dev);
-> +
-> +       tmio_mmc_clk_disable(host);
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_remove);
->
-> @@ -1346,8 +1354,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
->         if (host->clk_cache)
->                 tmio_mmc_clk_stop(host);
->
-> -       if (host->clk_disable)
-> -               host->clk_disable(host);
-> +       tmio_mmc_clk_disable(host);
->
->         return 0;
->  }
-> --
-> 2.11.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
