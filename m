@@ -1,12 +1,12 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 05/13] MIPS: jz4740: DTS: Add node for the jz4740-pinctrl driver
-Date: Thu, 19 Jan 2017 00:50:29 +0100
-Message-ID: <CACRpkdZ-2-mOiEwiRUoMU+X4RG1jik7edPK0nsu_kYy5Pi7N1g@mail.gmail.com>
-References: <20170117231421.16310-1-paul@crapouillou.net> <20170117231421.16310-6-paul@crapouillou.net>
+Subject: Re: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
+Date: Thu, 19 Jan 2017 07:38:57 +0100
+Message-ID: <CACRpkdYJFsgVN4Q+7XbMcNC1topUan7+o6PCBWBC4aifM8sq-g@mail.gmail.com>
+References: <20170117231421.16310-1-paul@crapouillou.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <20170117231421.16310-6-paul@crapouillou.net>
+In-Reply-To: <20170117231421.16310-1-paul@crapouillou.net>
 Sender: linux-mips-bounce@linux-mips.org
 Errors-to: linux-mips-bounce@linux-mips.org
 List-help: <mailto:ecartis@linux-mips.org?Subject=help>
@@ -22,99 +22,22 @@ List-Id: linux-mmc@vger.kernel.org
 
 On Wed, Jan 18, 2017 at 12:14 AM, Paul Cercueil <paul@crapouillou.net> wrote:
 
-> For a description of the devicetree node, please read
-> Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
->
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+> One problem still unresolved: the pinctrl framework does not allow us to
+> configure each pin on demand (someone please prove me wrong), when the
+> various PWM channels are requested or released. For instance, the PWM
+> channels can be configured from sysfs, which would require all PWM pins
+> to be configured properly beforehand for the PWM function, eventually
+> causing conflicts with other platform or board drivers.
 
-(...)
+Why do you think this?
 
-> +       pinctrl: ingenic-pinctrl@10010000 {
-> +               compatible = "ingenic,jz4740-pinctrl";
-> +               #address-cells = <1>;
-> +               #size-cells = <1>;
-> +               ranges;
-> +
-> +               gpio-chips {
-> +                       #address-cells = <1>;
-> +                       #size-cells = <1>;
-> +                       ranges;
-> +
-> +                       gpa: gpa {
-> +                               reg = <0x10010000 0x100>;
-> +
-> +                               gpio-controller;
-> +                               #gpio-cells = <2>;
-> +
-> +                               interrupt-controller;
-> +                               #interrupt-cells = <2>;
-> +
-> +                               interrupt-parent = <&intc>;
-> +                               interrupts = <28>;
-> +
-> +                               ingenic,pull-ups = <0xffffffff>;
-> +                       };
-> +
-> +                       gpb: gpb {
-> +                               reg = <0x10010100 0x100>;
-> +
-> +                               gpio-controller;
-> +                               #gpio-cells = <2>;
-> +
-> +                               interrupt-controller;
-> +                               #interrupt-cells = <2>;
-> +
-> +                               interrupt-parent = <&intc>;
-> +                               interrupts = <27>;
-> +
-> +                               ingenic,pull-ups = <0xffffffff>;
-> +                       };
-> +
-> +                       gpc: gpc {
-> +                               reg = <0x10010200 0x100>;
-> +
-> +                               gpio-controller;
-> +                               #gpio-cells = <2>;
-> +
-> +                               interrupt-controller;
-> +                               #interrupt-cells = <2>;
-> +
-> +                               interrupt-parent = <&intc>;
-> +                               interrupts = <26>;
-> +
-> +                               ingenic,pull-ups = <0xffffffff>;
-> +                       };
-> +
-> +                       gpd: gpd {
-> +                               reg = <0x10010300 0x100>;
-> +
-> +                               gpio-controller;
-> +                               #gpio-cells = <2>;
-> +
-> +                               interrupt-controller;
-> +                               #interrupt-cells = <2>;
-> +
-> +                               interrupt-parent = <&intc>;
-> +                               interrupts = <25>;
-> +
-> +                               ingenic,pull-ups = <0xdfffffff>;
-> +                       };
-> +               };
+- Pincontrol handles can be obtained at runtime.
+- Pincontrol states can be changed at runtime.
 
-Just pull all these down two levels and make them one device
-each instead of having them inside the pin controller node
-like this.
+The fact that a the handle is retrived by the device core and set to
+the states named "init" or "default" during boot is just a convenience.
 
-Then make a pin controller node separately, it can reference the
-pin controller by phandles if necessary, and use the standard
-gpio-ranges property to cross make GPIO and pin control.
+You can have as many and as fine-grained states as you want. They
+can pertain to just one pin too.
 
-It seems you driver is similar to for example the
-drivers/pinctrl/nomadik/* pin controller.
-
-Look in arch/arm/boot/dts/ste-dbx500.dtsi for examples,
-NB: I'm not fully using standard bindings in it, because they
-were not invented at the time.
-
-Yours,
 Linus Walleij
