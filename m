@@ -1,57 +1,41 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
-Date: Thu, 19 Jan 2017 12:28:26 +0200
-Message-ID: <de8e1567-0392-6de7-9669-0f7ace327d56@intel.com>
-References: <20170116142342.21283-1-krisman@collabora.co.uk>
+Subject: Re: [RESEND RFC 1/3] mmc: sdhci: Add platform_dumpregs callback
+ support to sdhci_ops.
+Date: Thu, 19 Jan 2017 12:43:01 +0200
+Message-ID: <79ff44d2-c20d-2dc7-9a0a-d77fb00df46d@intel.com>
+References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
+ <1484030515-16722-2-git-send-email-riteshh@codeaurora.org>
+ <7cfc2b6c-fa3f-a8cb-d684-472c3dbacf2f@rock-chips.com>
+ <d8e5b1fe-1f4e-f6f9-6f94-f5c7adc027f3@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:18740 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751727AbdASKdo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 19 Jan 2017 05:33:44 -0500
-In-Reply-To: <20170116142342.21283-1-krisman@collabora.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <d8e5b1fe-1f4e-f6f9-6f94-f5c7adc027f3@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
 
-On 16/01/17 16:23, Gabriel Krisman Bertazi wrote:
-> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
-> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
-> reads, which are not allowed for SD devices.  This adds a sanity check
-> to the interruption path, preventing that illegal command from getting
-> sent if the CARD_INT interruption should be disabled.
+On 18/01/17 09:57, Ritesh Harjani wrote:
+> Hi Shawn,
 > 
-> This quirk allows that particular machine to resume boot despite the
-> faulty hardware, instead of getting hung dealing with thousands of
-> mishandled interrupts.
-> 
-> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
-> CC: linux-mmc@vger.kernel.org
+> On 1/10/2017 2:45 PM, Shawn Lin wrote:
+>> On 2017/1/10 14:41, Ritesh Harjani wrote:
+>>> From: Sahitya Tummala <stummala@codeaurora.org>
+>>>
+>>> Add new host operation ->platform_dumpregs to provide a
+>>> mechanism through which host drivers can dump platform
+>>> specific registers in addition to SDHC registers
+>>> during error conditions.
+>>>
+>>
+>> Although we have been preventing from adding new callback
+>> for sdhci core, this one makes sense as there are more and more
+>> vendor registers outside the scope of SDHCI spec.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+We are not prevented from adding new callbacks, but they have to represent
+logical functions not quirks.
 
-> ---
->  drivers/mmc/host/sdhci.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 51cd4f0e973f..a2efa25c7f3b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2733,7 +2733,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  		if (intmask & SDHCI_INT_RETUNE)
->  			mmc_retune_needed(host->mmc);
->  
-> -		if (intmask & SDHCI_INT_CARD_INT) {
-> +		if ((intmask & SDHCI_INT_CARD_INT) &&
-> +		    (host->ier & SDHCI_INT_CARD_INT)) {
->  			sdhci_enable_sdio_irq_nolock(host, false);
->  			host->thread_isr |= SDHCI_INT_CARD_INT;
->  			result = IRQ_WAKE_THREAD;
-> 
-
+This patch seems fine to me except the name "platform_dumpregs" because
+"platform" doesn't mean "platform" here.  Just plain "dumpregs" is better.
