@@ -1,150 +1,260 @@
-From: Yong Mao <yong.mao@mediatek.com>
-Subject: Re: [PATCH v2 1/2] mmc: core: Fix CMD6 timeout issue
-Date: Thu, 19 Jan 2017 17:06:55 +0800
-Message-ID: <1484816815.19281.49.camel@mhfsdcap03>
-References: <1483433397-11756-1-git-send-email-yong.mao@mediatek.com>
-         <1483433397-11756-2-git-send-email-yong.mao@mediatek.com>
-         <CAPDyKFrkehvdnYgau1zFmgcHUniMbcat_NOLkB7bSGWF+b=c9Q@mail.gmail.com>
-         <b6efb075-226a-c7c8-2c6d-7d61d78eced1@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND PATCHv1 1/8] mmc: sdhci-msm: Factor out
+ sdhci_msm_hc_select_mode
+Date: Thu, 19 Jan 2017 12:04:05 +0200
+Message-ID: <91ec4e55-8f95-f6ee-1991-458f38916cfe@intel.com>
+References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+ <1484031652-12059-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([218.249.47.111]:33609 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751199AbdASJHO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 04:07:14 -0500
-In-Reply-To: <b6efb075-226a-c7c8-2c6d-7d61d78eced1@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1484031652-12059-2-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mediatek@lists.infradead.org
 
-On Fri, 2017-01-13 at 11:35 +0800, Shawn Lin wrote:
-> On 2017/1/12 23:21, Ulf Hansson wrote:
-> > - trimmed cc-list
-> >
-> > On 3 January 2017 at 09:49, Yong Mao <yong.mao@mediatek.com> wrote:
-> >> From: yong mao <yong.mao@mediatek.com>
-> >>
-> >> When initializing EMMC, after switch to HS400,
-> >> it will issue CMD6 to change ext_csd,
-> >> if first CMD6 got CRC error,
-> >> the repeat CMD6 may get timeout,
-> >> that's because card is not back to transfer state immediately.
-> >>
-> >> For resolving this issue, it need check if card is busy
-> >> before sending repeat CMD6.
-> >
-> > I agree that doing retries in this path might may not be correctly
-> > done, but currently we do it as best effort.
-> >
-> > We should probably change this to *not* retry the CMD6 command, in
-> > cases when we have a MMC_RSP_R1B response, because of the reasons you
-> > describe.
-> > I get the feeling that these retry attempts for CMD6, may instead hide
-> > other real issues and making it harder to narrow them down. Don't you
-> > think?
-> >
-> > This leads to my following question:
-> > Why do you get a CRC error at the first CMD6 attempt? That shouldn't
-> > happen, right?
-> >
-> > Perhaps you can elaborate on what of the CMD6 commands in the HS400
-> > enabling sequence that fails. It may help us to understand, perhaps
-> > there may be something in that sequence that should be changed.
-> >
-> >>
-> >> Not only CMD6 here has this issue, but also other R1B CMD has
-> >> the same issue.
-> >
-> > Yes, agree!
-> >
-> > However, can you please try to point out some other commands than CM6
-> > that you see uses *retries*, has R1B response, and which you believe
-> > may not be properly managed.
-> >
-> > Dealing with R1B responses isn't always straight forward. Therefore I
-> > am wondering whether we perhaps should just not allow "automatic
-> > retries" in cases when R1B responses is used.
-> >
-> > The reason why I think that is easier, is because of the complexity we
-> > have when dealing with R1B responses.
-> >
+On 10/01/17 09:00, Ritesh Harjani wrote:
+> This factors out sdhci_msm_hc_select_mode to later use
+> it during enhanced_strobe mode select.
+> It also further breaks sdhci_msm_hc_select_mode
+> into separate functions for configuring HS400 mode
+> or other modes.
 > 
-> I'm just thinking a interesting question: What will happen if someone
-> uses a userspace tool to switch the partition to RPMB when we are in
-> command queue mode? It will fails to finish CMD6 and the emmc should be
-> busy for a while. So now we shouldn't retry CMD6 but need to send a
-> CMD13 to make sure it's back to transfer state OR a HPI to break it. We
-> should be able to cover these cases not only from kernel context but
-> also the interaction between user and kernel.
-> 
-Specification can ensure that your question will not occur.
-"NOTE if hosts need to access RPMB partition, the host should disable
-the Command Queue mechanism and access RPMB partition not through the
-command queue."
-"General Purpose partitions may be accessed when command queuing is
-enabled.The queue must be empty when CMD6 is sent(to switch partitions
-or to disable command queuing). Sending CMD6 while the queue is not
-empty shall be regarded as illegal command(see 6.6.39.9, Supported
-Commands)."
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 
-> > As for example the timeout may differ depending on the command, so
-> > just guessing that 500 ms might work, isn't good enough. Moreover we
-> > would need to deal with MMC_CAP_WAIT_WHILE_BUSY, etc. Currently I am
-> > not saying that we shouldn't do this, but then I first need to
-> > understand how big of problem this is.
-> >
-> >>
-> >> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> >> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> >> ---
-> >>  drivers/mmc/core/core.c |   19 +++++++++++++++++++
-> >>  1 file changed, 19 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >> index 1076b9d..8674dbb 100644
-> >> --- a/drivers/mmc/core/core.c
-> >> +++ b/drivers/mmc/core/core.c
-> >> @@ -566,6 +566,25 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
-> >>
-> >>                 mmc_retune_recheck(host);
-> >>
-> >> +               /*
-> >> +                * If a R1B CMD such as CMD6 occur CRC error,
-> >> +                * it will retry 3 times here.
-> >> +                * But before retrying, it must ensure card is in
-> >> +                * transfer state.
-> >> +                * Otherwise, the next retried CMD will got TMO error.
-> >> +                */
-> >> +               if (mmc_resp_type(cmd) == MMC_RSP_R1B && host->ops->card_busy) {
-> >> +                       int tries = 500; /* Wait aprox 500ms at maximum */
-> >> +
-> >> +                       while (host->ops->card_busy(host) && --tries)
-> >> +                               mmc_delay(1);
-> >> +
-> >> +                       if (tries == 0) {
-> >> +                               cmd->error = -EBUSY;
-> >> +                               break;
-> >> +                       }
-> >> +               }
-> >> +
-> >>                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
-> >>                          mmc_hostname(host), cmd->opcode, cmd->error);
-> >>                 cmd->retries--;
-> >> --
-> >> 1.7.9.5
-> >>
-> >
-> > Kind regards
-> > Uffe
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> 
-> 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 201 ++++++++++++++++++++++++-------------------
+>  1 file changed, 114 insertions(+), 87 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 32879b8..1e42647 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -464,6 +464,119 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+>  	return 0;
+>  }
+>  
+> +static void msm_hc_select_default(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	u32 config;
+> +
+> +	if (!msm_host->use_cdclp533) {
+> +		config = readl_relaxed(host->ioaddr +
+> +				CORE_VENDOR_SPEC3);
+> +		config &= ~CORE_PWRSAVE_DLL;
+> +		writel_relaxed(config, host->ioaddr +
+> +				CORE_VENDOR_SPEC3);
+> +	}
+> +
+> +	config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> +	config &= ~CORE_HC_MCLK_SEL_MASK;
+> +	config |= CORE_HC_MCLK_SEL_DFLT;
+> +	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> +
+> +	/*
+> +	 * Disable HC_SELECT_IN to be able to use the UHS mode select
+> +	 * configuration from Host Control2 register for all other
+> +	 * modes.
+> +	 * Write 0 to HC_SELECT_IN and HC_SELECT_IN_EN field
+> +	 * in VENDOR_SPEC_FUNC
+> +	 */
+> +	config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> +	config &= ~CORE_HC_SELECT_IN_EN;
+> +	config &= ~CORE_HC_SELECT_IN_MASK;
+> +	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> +
+> +	/*
+> +	 * Make sure above writes impacting free running MCLK are completed
+> +	 * before changing the clk_rate at GCC.
+> +	 */
+> +	wmb();
+> +}
+> +
+> +static void msm_hc_select_hs400(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	u32 config, dll_lock;
+> +	int rc;
+> +
+> +	/* Select the divided clock (free running MCLK/2) */
+> +	config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> +	config &= ~CORE_HC_MCLK_SEL_MASK;
+> +	config |= CORE_HC_MCLK_SEL_HS400;
+> +
+> +	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> +	/*
+> +	 * Select HS400 mode using the HC_SELECT_IN from VENDOR SPEC
+> +	 * register
+> +	 */
+> +	if (msm_host->tuning_done && !msm_host->calibration_done) {
+> +		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> +		config |= CORE_HC_SELECT_IN_HS400;
+> +		config |= CORE_HC_SELECT_IN_EN;
+> +		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> +	}
+> +	if (!msm_host->clk_rate && !msm_host->use_cdclp533) {
+> +		/*
+> +		 * Poll on DLL_LOCK or DDR_DLL_LOCK bits in
+> +		 * CORE_DLL_STATUS to be set.  This should get set
+> +		 * within 15 us at 200 MHz.
+> +		 */
+> +		rc = readl_relaxed_poll_timeout(host->ioaddr +
+> +						CORE_DLL_STATUS,
+> +						dll_lock,
+> +						(dll_lock &
+> +						(CORE_DLL_LOCK |
+> +						CORE_DDR_DLL_LOCK)), 10,
+> +						1000);
+> +		if (rc == -ETIMEDOUT)
+> +			pr_err("%s: Unable to get DLL_LOCK/DDR_DLL_LOCK, dll_status: 0x%08x\n",
+> +			       mmc_hostname(host->mmc), dll_lock);
+> +	}
+> +	/*
+> +	 * Make sure above writes impacting free running MCLK are completed
+> +	 * before changing the clk_rate at GCC.
+> +	 */
+> +	wmb();
+> +}
+> +
+> +/*
+> + * sdhci_msm_hc_select_mode :- In general all timing modes are
+> + * controlled via UHS mode select in Host Control2 register.
+> + * eMMC specific HS200/HS400 doesn't have their respective modes
+> + * defined here, hence we use these values.
+> + *
+> + * HS200 - SDR104 (Since they both are equivalent in functionality)
+> + * HS400 - This involves multiple configurations
+> + *		Initially SDR104 - when tuning is required as HS200
+> + *		Then when switching to DDR @ 400MHz (HS400) we use
+> + *		the vendor specific HC_SELECT_IN to control the mode.
+> + *
+> + * In addition to controlling the modes we also need to select the
+> + * correct input clock for DLL depending on the mode.
+> + *
+> + * HS400 - divided clock (free running MCLK/2)
+> + * All other modes - default (free running MCLK)
+> + */
+> +void sdhci_msm_hc_select_mode(struct sdhci_host *host)
+> +{
+> +	struct mmc_ios ios = host->mmc->ios;
+> +
+> +	if (ios.timing == MMC_TIMING_MMC_HS400)
+> +		msm_hc_select_hs400(host);
+> +	else
+> +		msm_hc_select_default(host);
+> +}
+> +
+>  static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -894,7 +1007,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>  	struct mmc_ios curr_ios = host->mmc->ios;
+> -	u32 config, dll_lock;
+>  	int rc;
+>  
+>  	if (!clock) {
+> @@ -913,93 +1025,8 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	    curr_ios.timing == MMC_TIMING_MMC_DDR52 ||
+>  	    curr_ios.timing == MMC_TIMING_MMC_HS400)
+>  		clock *= 2;
+> -	/*
+> -	 * In general all timing modes are controlled via UHS mode select in
+> -	 * Host Control2 register. eMMC specific HS200/HS400 doesn't have
+> -	 * their respective modes defined here, hence we use these values.
+> -	 *
+> -	 * HS200 - SDR104 (Since they both are equivalent in functionality)
+> -	 * HS400 - This involves multiple configurations
+> -	 *		Initially SDR104 - when tuning is required as HS200
+> -	 *		Then when switching to DDR @ 400MHz (HS400) we use
+> -	 *		the vendor specific HC_SELECT_IN to control the mode.
+> -	 *
+> -	 * In addition to controlling the modes we also need to select the
+> -	 * correct input clock for DLL depending on the mode.
+> -	 *
+> -	 * HS400 - divided clock (free running MCLK/2)
+> -	 * All other modes - default (free running MCLK)
+> -	 */
+> -	if (curr_ios.timing == MMC_TIMING_MMC_HS400) {
+> -		/* Select the divided clock (free running MCLK/2) */
+> -		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> -		config &= ~CORE_HC_MCLK_SEL_MASK;
+> -		config |= CORE_HC_MCLK_SEL_HS400;
+>  
+> -		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> -		/*
+> -		 * Select HS400 mode using the HC_SELECT_IN from VENDOR SPEC
+> -		 * register
+> -		 */
+> -		if (msm_host->tuning_done && !msm_host->calibration_done) {
+> -			/*
+> -			 * Write 0x6 to HC_SELECT_IN and 1 to HC_SELECT_IN_EN
+> -			 * field in VENDOR_SPEC_FUNC
+> -			 */
+> -			config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> -			config |= CORE_HC_SELECT_IN_HS400;
+> -			config |= CORE_HC_SELECT_IN_EN;
+> -			writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> -		}
+> -		if (!msm_host->clk_rate && !msm_host->use_cdclp533) {
+> -			/*
+> -			 * Poll on DLL_LOCK or DDR_DLL_LOCK bits in
+> -			 * CORE_DLL_STATUS to be set.  This should get set
+> -			 * within 15 us at 200 MHz.
+> -			 */
+> -			rc = readl_relaxed_poll_timeout(host->ioaddr +
+> -							CORE_DLL_STATUS,
+> -							dll_lock,
+> -							(dll_lock &
+> -							(CORE_DLL_LOCK |
+> -							CORE_DDR_DLL_LOCK)), 10,
+> -							1000);
+> -			if (rc == -ETIMEDOUT)
+> -				pr_err("%s: Unable to get DLL_LOCK/DDR_DLL_LOCK, dll_status: 0x%08x\n",
+> -				       mmc_hostname(host->mmc), dll_lock);
+> -		}
+> -	} else {
+> -		if (!msm_host->use_cdclp533) {
+> -			config = readl_relaxed(host->ioaddr +
+> -					CORE_VENDOR_SPEC3);
+> -			config &= ~CORE_PWRSAVE_DLL;
+> -			writel_relaxed(config, host->ioaddr +
+> -					CORE_VENDOR_SPEC3);
+> -		}
+> -
+> -		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> -		config &= ~CORE_HC_MCLK_SEL_MASK;
+> -		config |= CORE_HC_MCLK_SEL_DFLT;
+> -		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> -
+> -		/*
+> -		 * Disable HC_SELECT_IN to be able to use the UHS mode select
+> -		 * configuration from Host Control2 register for all other
+> -		 * modes.
+> -		 * Write 0 to HC_SELECT_IN and HC_SELECT_IN_EN field
+> -		 * in VENDOR_SPEC_FUNC
+> -		 */
+> -		config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
+> -		config &= ~CORE_HC_SELECT_IN_EN;
+> -		config &= ~CORE_HC_SELECT_IN_MASK;
+> -		writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+> -	}
+> -
+> -	/*
+> -	 * Make sure above writes impacting free running MCLK are completed
+> -	 * before changing the clk_rate at GCC.
+> -	 */
+> -	wmb();
+> +	sdhci_msm_hc_select_mode(host);
+>  
+>  	rc = clk_set_rate(msm_host->clk, clock);
+>  	if (rc) {
+> 
