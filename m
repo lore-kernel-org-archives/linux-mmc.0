@@ -1,66 +1,97 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND RFC 3/3] mmc: sdhci: Add more debug info in case of data
- error
-Date: Thu, 19 Jan 2017 13:54:04 +0200
-Message-ID: <74840dea-18b6-3b51-67ae-e1ce3bb7fb58@intel.com>
-References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
- <1484030515-16722-4-git-send-email-riteshh@codeaurora.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/2] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Thu, 19 Jan 2017 13:50:02 +0100
+Message-ID: <CAPDyKFqWrzh7pr+TLwjoCWxu8g9ANrNnETeVoE0MCqo-q7YsSA@mail.gmail.com>
+References: <20170113052937.12538-1-matt@ranostay.consulting>
+ <20170113052937.12538-3-matt@ranostay.consulting> <cd669d08-0db4-57e4-478b-2b200ccef6f1@rock-chips.com>
+ <CAJ_EiSQtPUwv9K7CbM5e_wnre6=qR=+hgtq-oVFub2phijvXgA@mail.gmail.com>
+ <0a49ba8d-e749-8462-fa48-7d8a17cecc75@rock-chips.com> <CAJ_EiSSQF_2pRaYdUBbKzbHt=1pn3NBrz8C5B7Dta9x7xqZ8oA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1484030515-16722-4-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAJ_EiSSQF_2pRaYdUBbKzbHt=1pn3NBrz8C5B7Dta9x7xqZ8oA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Cc: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/01/17 08:41, Ritesh Harjani wrote:
-> print error log message and dump sdhc registers for debugging
-> purpose in case of data errors (except when tuning commands
-> generate CRC/timeout/end bit errors).
+On 18 January 2017 at 08:50, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org> wrote:
+> On Sun, Jan 15, 2017 at 6:35 PM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+>> On 2017/1/16 5:41, Matt Ranostay wrote:
+>>>
+>>> On Thu, Jan 12, 2017 at 11:16 PM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>>> wrote:
+>>>>
+>>>> On 2017/1/13 13:29, Matt Ranostay wrote:
+>>>>>
+>>>>>
+>>>>> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
+>>>>> This can be abstracted to other chipsets if needed in the future.
+>>>>>
+>>>>> Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+>>>>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>>> Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+>>>>> ---
+>>>>>  drivers/mmc/core/Kconfig         |  10 ++++
+>>>>>  drivers/mmc/core/Makefile        |   1 +
+>>>>>  drivers/mmc/core/pwrseq_sd8787.c | 117
+>>>>> +++++++++++++++++++++++++++++++++++++++
+>>>>>  3 files changed, 128 insertions(+)
+>>>>>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+>>>>> index cdfa8520a4b1..fc1ecdaaa9ca 100644
+>>>>> --- a/drivers/mmc/core/Kconfig
+>>>>> +++ b/drivers/mmc/core/Kconfig
+>>>>> @@ -12,6 +12,16 @@ config PWRSEQ_EMMC
+>>>>>           This driver can also be built as a module. If so, the module
+>>>>>           will be called pwrseq_emmc.
+>>>>>
+>>>>> +config PWRSEQ_SD8787
+>>>>> +       tristate "HW reset support for SD8787 BT + Wifi module"
+>>>>> +       depends on OF && (MWIFIEX || BT_MRVL_SDIO)
+>>>>> +       help
+>>>>> +         This selects hardware reset support for the SD8787 BT + Wifi
+>>>>> +         module. By default this option is set to n.
+>>>>> +
+>>>>> +         This driver can also be built as a module. If so, the module
+>>>>> +         will be called pwrseq_sd8787.
+>>>>> +
+>>>>
+>>>>
+>>>>
+>>>> I don't like this way, as we have a chance to list lots
+>>>> configure options here. wifi A,B,C,D...Z, all of them need a
+>>>> new section here if needed?
+>>>>
+>>>> Instead, could you just extent pwrseq_simple.c and add you
+>>>> .compatible = "mmc-pwrseq-sd8787", "mmc-pwrseq-simple"?
+>>>
+>>>
+>>> You mean all the chipset pwrseqs linked into the pwrseq-simple module?
+>>
+>>
+>> What I mean was if you just extent the pwrseq-simple a bit, you could
+>> just add your chipset pwrseqs linked into the pwrseq-simple. But if you
+>> need a different *pattern* of pwrseqs, you should need a new name, for
+>> instance, pwrseq-sdio.c etc... But please don't use the name of
+>> sd8787? So if I use a wifi named ABC but using the same pwrseq pattenr,
+>> should I include your "mmc-pwrseq- sd8787" for that or I need a new
+>> mmc-pwrseq-ABC.c?
+>
+> Ah so pwrseq-sdio.c seems reasonable and having chipsets functions
+> defined in a structure. That could be abstracted out for other
+> chipsets that could needed in the future.
 
-It is a bit ugly and probably only useful during driver development, so I am
-not at all enthusiastic about this.
+I think get the idea and it seems reasonable. With that in mind, I
+have looked at the code once more and I got some new ideas on how to
+adopt pwrseq-simple for your case.
 
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci.c | 21 +++++++++++++++++++--
->  1 file changed, 19 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 73a8918..2e51e49 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2616,9 +2616,26 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  			host->ops->adma_workaround(host, intmask);
->  	}
->  
-> -	if (host->data->error)
-> +	if (host->data->error) {
-> +		bool pr_msg = true;
-> +
-> +		if (intmask & (SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
-> +		    SDHCI_INT_DATA_END_BIT)) {
-> +			command = SDHCI_GET_CMD(sdhci_readw(host,
-> +							    SDHCI_COMMAND));
-> +			if (command == MMC_SEND_TUNING_BLOCK_HS200 ||
-> +			    command == MMC_SEND_TUNING_BLOCK)
-> +				pr_msg = false;
-> +		}
-> +		if (pr_msg) {
-> +			pr_err("%s: data txfr (0x%08x) error: %d\n",
-> +			       mmc_hostname(host->mmc), intmask,
-> +			       host->data->error);
-> +			sdhci_dumpregs(host);
-> +		}
-> +
->  		sdhci_finish_data(host);
-> -	else {
-> +	} else {
->  		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
->  			sdhci_transfer_pio(host);
->  
-> 
+I post the comments separately.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
