@@ -1,71 +1,52 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND PATCHv1 6/8] mmc: sdhci: Clear SDHCI_HS400_TUNING flag
- after platform_execute_tuning
-Date: Thu, 19 Jan 2017 12:10:26 +0200
-Message-ID: <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: [PATCH v3 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Thu, 19 Jan 2017 18:19:14 +0800
+Message-ID: <1484821156-20565-2-git-send-email-yong.mao@mediatek.com>
+References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
+In-Reply-To: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, yong mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, linux-mmc@vger.kernel.org, srv_heupstream@mediatek.com, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/01/17 09:00, Ritesh Harjani wrote:
-> Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
-> so that platform_execute_tuning may use it if needed.
+From: yong mao <yong.mao@mediatek.com>
 
-Sorry for the slow reply.
+Add description for mtk-hs200-cmd-int-delay
+Add description for mtk-hs400-cmd-int-delay
+Add description for mtk-hs400-cmd-resp-sel
 
-platform_execute_tuning() should not really exist because it doesn't do
-anything useful.
+Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-If it is not too much trouble please consider just hooking
-->execute_tuning() directly i.e.
-
-	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
-
-Then you can use and clear the flag in sdhci_msm_execute_tuning().
-
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2390980..2658f89 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2114,7 +2114,6 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	spin_lock_irqsave(&host->lock, flags);
->  
->  	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
-> -	host->flags &= ~SDHCI_HS400_TUNING;
->  
->  	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->  		tuning_count = host->tuning_count;
-> @@ -2156,7 +2155,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  
->  	if (host->ops->platform_execute_tuning) {
->  		spin_unlock_irqrestore(&host->lock, flags);
-> -		return host->ops->platform_execute_tuning(host, opcode);
-> +		err = host->ops->platform_execute_tuning(host, opcode);
-> +		spin_lock_irqsave(&host->lock, flags);
-> +		goto out_unlock;
->  	}
->  
->  	host->mmc->retune_period = tuning_count;
-> @@ -2167,6 +2168,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  
->  	sdhci_end_tuning(host);
->  out_unlock:
-> +	host->flags &= ~SDHCI_HS400_TUNING;
->  	spin_unlock_irqrestore(&host->lock, flags);
->  
->  	return err;
-> 
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 0120c7f..149f472 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -21,6 +21,12 @@ Optional properties:
+ - assigned-clocks: PLL of the source clock
+ - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
+ - hs400-ds-delay: HS400 DS delay setting
++- mtk-hs200-cmd-int-delay: HS200 command internal delay setting.
++			   The value is an integer from 0 to 31
++- mtk-hs400-cmd-int-delay: HS400 command internal delay setting
++			   The value is an integer from 0 to 31
++- mtk-hs400-cmd-resp-sel:  HS400 command response sample selection
++			   The value is an integer from 0 to 1
+ 
+ Examples:
+ mmc0: mmc@11230000 {
+@@ -38,4 +44,7 @@ mmc0: mmc@11230000 {
+ 	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
+ 	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
+ 	hs400-ds-delay = <0x14015>;
++	mtk-hs200-cmd-int-delay = <26>;
++	mtk-hs400-cmd-int-delay = <14>;
++	mtk-hs400-cmd-resp-sel = <0>; /* 0: rising, 1: falling */
+ };
+-- 
+1.7.9.5
