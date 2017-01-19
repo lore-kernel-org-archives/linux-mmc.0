@@ -1,147 +1,146 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH v10 0/8] Cavium MMC driver
-Date: Thu, 19 Jan 2017 15:50:41 +0100
-Message-ID: <20170119145041.GA11757@hardcore>
-References: <20161219121552.18316-1-jglauber@cavium.com>
- <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 1/9] mmc: mmci: don't pretend IP variants with only one
+ IRQ to have two mask regs
+Date: Thu, 19 Jan 2017 17:44:21 +0100
+Message-ID: <CAPDyKFozzCGjyxSDv7ZPVZVsD8iMseF9aMUNT1yqOiuFEx7uiQ@mail.gmail.com>
+References: <1484552238-23171-1-git-send-email-andrea.merello@gmail.com> <1484552238-23171-2-git-send-email-andrea.merello@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37306 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753516AbdASQoY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 11:44:24 -0500
+Received: by mail-wm0-f47.google.com with SMTP id c206so1805138wme.0
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 08:44:23 -0800 (PST)
+In-Reply-To: <1484552238-23171-2-git-send-email-andrea.merello@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrea Merello <andrea.merello@gmail.com>
+Cc: mcoquelin.stm32@gmail.com, alexandre.torgue@st.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, bruherrera@gmail.com
 
-On Tue, Dec 20, 2016 at 01:10:56PM +0100, Ulf Hansson wrote:
-> Hi Jan,
-> 
-> On 19 December 2016 at 13:15, Jan Glauber <jglauber@cavium.com> wrote:
-> > While this patch series seems to be somehow overdue, in the meantime the
-> > same MMC unit was re-used on Cavium's ThunderX SOC so our interest in making
-> > progress upstreaming this driver has doubled now...
-> >
-> > Glancing over the history of the series I think most of the high-level
-> > comments should be adressed by now (like DTS representation of the
-> > multiple slots). I've added some new features for the ARM64 port
-> > and in the process re-wrote parts of the driver and split it into smaller,
-> > hopefully easier to review parts.
-> 
-> I only had a quick review, but the overall impression is that it's
-> getting far better. Here follows my summary.
-> 
-> 1) I intend to especially look at DTS representation for the slot
-> nodes, to make sure we have a good solution. Allow me to get back on
-> this.
-> 
-> 2) I don't like how you have named files, as it doesn't express the
-> obvious relationship between the core library and the drivers. I would
-> rather see something similar to dw_mmc or sdhci.
+On 16 January 2017 at 08:37, Andrea Merello <andrea.merello@gmail.com> wrote:
+> Currently the driver supports both devices with one and two IRQ lines.
+>
+> Two mask registers are used in order to select which events have to
+> actually generate an interrupt on each IRQ line.
+>
+> It seems that in the single-IRQ case it's assumed that the IRQs lines
+> are simply OR-ed, while the two mask registers are still present. The
+> driver still programs the two mask registers separately.
+>
+> However the STM32 variant has only one IRQ, and also has only one mask
+> register.
+>
+> This patch prepares for STM32 variant support by making the driver using
+> only one mask register when only one IRQ is available.
 
-I've prefixed all files with "cavium" and adjusted names, incl. Kconfig
-names.
+The approach as such seems okay to try out!
 
-> 3) Related to 2), I would also like to have a prefix of the commit
-> messages which express the relationships. Again follow dw_mmc/sdhci.
+However, I think a minor re-work is needed, but in the end achieving
+the same goal. Some more comments below.
 
-OK.
+>
+> Tested only on STM32 variant. RFT for variants other than STM32
+>
+> Signed-off-by: Andrea Merello <andrea.merello@gmail.com>
+> ---
+>  drivers/mmc/host/mmci.c | 17 ++++++++---------
+>  1 file changed, 8 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 01a8047..597fab8 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -404,9 +404,9 @@ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+>                 mask0 |= mask;
+>
+>                 writel(mask0, base + MMCIMASK0);
+> +       } else {
+> +               writel(mask, base + MMCIMASK1);
+>         }
+> -
+> -       writel(mask, base + MMCIMASK1);
+>  }
+>
+>  static void mmci_stop_data(struct mmci_host *host)
+> @@ -1274,12 +1274,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>
+>         do {
+>                 status = readl(host->base + MMCISTATUS);
+> +               status &= readl(host->base + MMCIMASK0);
+>                 if (host->singleirq) {
+> -                       if (status & readl(host->base + MMCIMASK1))
+> -                               mmci_pio_irq(irq, dev_id);
 
-> 4) GPIO powers should be modelled as GPIO regulators. I believe we
-> have discussed this earlier as well (I don't really recall in detail
-> about the last things). It gives us the opportunity to via the
-> regulator framework to find out the supported voltage levels. This is
-> the generic method which is used by mmc drivers, you need to adopt to
-> this as well.
+We want to enter mmci_pio_irq(), *only* when some of those bits are
+set, which we have written to in MMCIMASK1.
 
-I've added a fixed regulator to DT:
+This changes this behaviour, which I don't think is a good idea!
 
-        vcc_3v3: regulator-vcc_3v3 {
-                compatible = "regulator-fixed";
-                regulator-name = "VCC_3V3";
-                regulator-min-microvolt = <3300000>;
-                regulator-max-microvolt = <3300000>;
+> -
+> -                       status &= ~MCI_IRQ1MASK;
+> +                       mmci_pio_irq(irq, dev_id);
+>                 }
+>
+>                 /*
+> @@ -1287,7 +1285,6 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+>                  * enabled) since the HW seems to be triggering the IRQ on both
+>                  * edges while monitoring DAT0 for busy completion.
+>                  */
+> -               status &= readl(host->base + MMCIMASK0);
+>                 writel(status, host->base + MMCICLEAR);
+>
+>                 dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+> @@ -1710,7 +1707,8 @@ static int mmci_probe(struct amba_device *dev,
+>         spin_lock_init(&host->lock);
+>
+>         writel(0, host->base + MMCIMASK0);
+> -       writel(0, host->base + MMCIMASK1);
+> +       if (!host->singleirq)
+> +               writel(0, host->base + MMCIMASK1);
 
-                gpio = <&gpio_6_0 8 0>;
-                /* enable-gpio = <&gpio_6_0 8 0>; */
-                enable-active-high;
-        };
+No, this is wrong.
 
-This seems to enable the gpio. Is this sufficient or do I need the
-gpio-regulator?
+In the case when we use only a single IRQ, we also need to clear
+MMCIMASK1, as to make sure it don't contains some "garbage" and thus
+triggers spurious IRQs.
 
-> 5) Please reorder the series so the DT bindings doc change comes
-> first. I need an ack from the DT maintainer for it.
+>         writel(0xfff, host->base + MMCICLEAR);
+>
+>         /*
+> @@ -1800,7 +1798,8 @@ static int mmci_remove(struct amba_device *dev)
+>                 mmc_remove_host(mmc);
+>
+>                 writel(0, host->base + MMCIMASK0);
+> -               writel(0, host->base + MMCIMASK1);
+> +               if (!host->singleirq)
+> +                       writel(0, host->base + MMCIMASK1);
 
-OK.
+Ditto.
 
-> 6) The most important feedback:
-> This driver has been posted in many versions by now. Perhaps I could
-> have been more responsive throughout the attempts, I apologize for
-> that. On the other hand, you seems to have a round robin schedule for
-> whom that sends a new version. :-) That makes me wonder about your
-> support in the maintenance phase. I hope my concern is wrong, but how
-> about that you point out a responsible maintainer? Especially since
-> this seems to become a family of Cavium variants, it would help me if
-> I could rely on someone providing acks for future changes. Would you
-> be able to accept that role?
-> 
-> >
-> > In porting the driver to arm64 I run into some issues.
-> >
-> > 1. mmc_parse_of is not capable of supporting multiple slots behind one
-> >    controller. On arm64 the host controller is presented as one PCI device.
-> >    There are no devices per slot as with the platform variant, so I
-> >    needed to create dummy devices to make mmc_parse_of work.
-> >    IMHO it would be cleaner if mmc_parse_of could be extended to cover
-> >    the multiple slots case.
-> 
-> Yes. I agree that this make sense!
-> Seems like we could try to make use of the struct device_node instead
-> of the struct device.
-> 
-> I will try to come up with an idea, I keep you posted.
-> 
-> >
-> > 2. Without setting MMC_CAP_1_8V_DDR DDR mode is not usable for eMMC.
-> >    I would prefer to introduce a new cap flag, MMC_CAP_3_3V_DDR,
-> >    if possible. Currently I need to add "mmc-ddr-1_8v" to DTS,
-> >    which seems odd for a 3.3v only host controller.
-> 
-> This keep coming back. Both DT bindings and changing to the mmc core
-> has been posted.
-> 
-> Allow me to help out and re-post a new series. You can build on top of
-> them - I will keep you on cc.
+>
+>                 writel(0, host->base + MMCICOMMAND);
+>                 writel(0, host->base + MMCIDATACTRL);
+> --
+> 2.7.4
+>
 
-Any news here? Can you give me a pointer?
+Overall, by looking at this change I think an alternative approach
+would be start with some clean-up/micro-optimizations for how the
+driver deals with the MMCIMASK1 and MMCIMASK0.
 
-> >
-> > 3. Because the slots share the host controller using the
-> >    "full-pwr-cycle" attribute turned out to not work well.
-> >    I'm not 100% sure just ignoring the attribute is correct.
-> 
-> The full-pwr-cycle shall be set whether you are able to power cycle
-> the *card*. So this binding should be a part of each slot/child node -
-> if the host supports it.
-> 
-> >
-> > For the driver to work GPIO support is required, the GPIO driver is
-> > not yet available upstream. Therefore, for the time being I removed
-> > the GPIO dependency from Kconfig.
-> 
-> Is this is about the GPIO powers or also GPIO card detect?
-> 
-> Anyway, I am fine with not depending on GPIO Kconfig.
-> 
+More precisely, add two new variables in the mmci host struct, used
+for containg a cache of these two registers. The cache needs to be
+updated when new values are written, but more importantly, we don't
+need to go and read the corresponding registers to know their content,
+when masking/unmasking bits. Instead we can use the cache, which is
+more optimal.
 
-Meanwhile the GPIO driver was posted here:
-https://lkml.org/lkml/2017/1/6/985
+Following patches, similar to what you suggested in $subject patch,
+can then make use of the cached values. Depending on whether
+"singleirq" is set or not, the cached values can be used to write the
+correct mask(s).
 
-> [...]
-> 
-> Kind regards
-> Uffe
-
-Thanks for the review,
-Jan
+Kind regards
+Uffe
