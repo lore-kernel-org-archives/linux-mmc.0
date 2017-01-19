@@ -1,89 +1,86 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [RESEND PATCHv1 6/8] mmc: sdhci: Clear SDHCI_HS400_TUNING flag
- after platform_execute_tuning
-Date: Thu, 19 Jan 2017 17:07:36 +0530
-Message-ID: <3aeac9e4-d707-ffaf-181b-386ef98813ef@codeaurora.org>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
- <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH RFC] mmc: mxs-mmc: Implement CMD23 support
+Date: Thu, 19 Jan 2017 12:46:50 +0100
+Message-ID: <CAPDyKFp8ooKfMBYj_fDmpvSeg1ANNRHRudTOtaTzYhSXA7t3gA@mail.gmail.com>
+References: <1484414958-2665-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:35226 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752264AbdASLqx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 06:46:53 -0500
+Received: by mail-wm0-f41.google.com with SMTP id r126so285968169wmr.0
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 03:46:53 -0800 (PST)
+In-Reply-To: <1484414958-2665-1-git-send-email-stefan.wahren@i2se.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: =?UTF-8?B?SsO2cmcgS3JhdXNl?= <joerg.krause@embedded.rocks>, Marek Vasut <marex@denx.de>, =?UTF-8?Q?Lothar_Wa=C3=9Fmann?= <lw@karo-electronics.de>, Fabio Estevam <fabio.estevam@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
+On 14 January 2017 at 18:29, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> This patch implements support for multiblock transfers bounded
+> by SET_BLOCK_COUNT (CMD23) on the MXS MMC host driver.
+>
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 
-Thanks for reviewing.
+Thanks, applied for next!
 
-On 1/19/2017 3:40 PM, Adrian Hunter wrote:
-> On 10/01/17 09:00, Ritesh Harjani wrote:
->> Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
->> so that platform_execute_tuning may use it if needed.
->
-> Sorry for the slow reply.
->
-> platform_execute_tuning() should not really exist because it doesn't do
-> anything useful.
->
-> If it is not too much trouble please consider just hooking
-> ->execute_tuning() directly i.e.
->
-> 	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
->
-> Then you can use and clear the flag in sdhci_msm_execute_tuning().
-Sure, this seems fine. I will try it and re-submit based on your above 
-suggestion.
+Kind regards
+Uffe
 
-Regards
-Ritesh
-
-
+> ---
+>  drivers/mmc/host/mxs-mmc.c |   16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
 >
->>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> ---
->>  drivers/mmc/host/sdhci.c | 6 ++++--
->>  1 file changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 2390980..2658f89 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2114,7 +2114,6 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>  	spin_lock_irqsave(&host->lock, flags);
->>
->>  	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
->> -	host->flags &= ~SDHCI_HS400_TUNING;
->>
->>  	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->>  		tuning_count = host->tuning_count;
->> @@ -2156,7 +2155,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>
->>  	if (host->ops->platform_execute_tuning) {
->>  		spin_unlock_irqrestore(&host->lock, flags);
->> -		return host->ops->platform_execute_tuning(host, opcode);
->> +		err = host->ops->platform_execute_tuning(host, opcode);
->> +		spin_lock_irqsave(&host->lock, flags);
->> +		goto out_unlock;
->>  	}
->>
->>  	host->mmc->retune_period = tuning_count;
->> @@ -2167,6 +2168,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>
->>  	sdhci_end_tuning(host);
->>  out_unlock:
->> +	host->flags &= ~SDHCI_HS400_TUNING;
->>  	spin_unlock_irqrestore(&host->lock, flags);
->>
->>  	return err;
->>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index c8b8ac6..add1e70 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -153,7 +153,11 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
+>                 }
+>         }
 >
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> -       if (data) {
+> +       if (cmd == mrq->sbc) {
+> +               /* Finished CMD23, now send actual command. */
+> +               mxs_mmc_start_cmd(host, mrq->cmd);
+> +               return;
+> +       } else if (data) {
+>                 dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+>                              data->sg_len, ssp->dma_dir);
+>                 /*
+> @@ -166,7 +170,7 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
+>                         data->bytes_xfered = 0;
+>
+>                 host->data = NULL;
+> -               if (mrq->stop) {
+> +               if (data->stop && (data->error || !mrq->sbc)) {
+>                         mxs_mmc_start_cmd(host, mrq->stop);
+>                         return;
+>                 }
+> @@ -495,7 +499,11 @@ static void mxs_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>
+>         WARN_ON(host->mrq != NULL);
+>         host->mrq = mrq;
+> -       mxs_mmc_start_cmd(host, mrq->cmd);
+> +
+> +       if (mrq->sbc)
+> +               mxs_mmc_start_cmd(host, mrq->sbc);
+> +       else
+> +               mxs_mmc_start_cmd(host, mrq->cmd);
+>  }
+>
+>  static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> @@ -642,7 +650,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         /* set mmc core parameters */
+>         mmc->ops = &mxs_mmc_ops;
+>         mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> -                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
+> +                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
+>
+>         host->broken_cd = of_property_read_bool(np, "broken-cd");
+>
+> --
+> 1.7.9.5
+>
