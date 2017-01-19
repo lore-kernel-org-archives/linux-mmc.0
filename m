@@ -1,28 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC] mmc: mxs-mmc: Implement CMD23 support
-Date: Thu, 19 Jan 2017 12:46:50 +0100
-Message-ID: <CAPDyKFp8ooKfMBYj_fDmpvSeg1ANNRHRudTOtaTzYhSXA7t3gA@mail.gmail.com>
-References: <1484414958-2665-1-git-send-email-stefan.wahren@i2se.com>
+Subject: Re: [PATCH] mmc: wbsd: safer check if dma_addr is valid DMA address
+Date: Thu, 19 Jan 2017 12:23:19 +0100
+Message-ID: <CAPDyKFow-fa_tePQ7VO9SsapgMj_TQqc-v7XNOnGNtPXr7TRtg@mail.gmail.com>
+References: <1484347971-30829-1-git-send-email-khoroshilov@ispras.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:35226 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752264AbdASLqx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 06:46:53 -0500
-Received: by mail-wm0-f41.google.com with SMTP id r126so285968169wmr.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 03:46:53 -0800 (PST)
-In-Reply-To: <1484414958-2665-1-git-send-email-stefan.wahren@i2se.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:34864 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752230AbdASLuf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 06:50:35 -0500
+Received: by mail-wm0-f46.google.com with SMTP id r126so286086202wmr.0
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 03:50:32 -0800 (PST)
+In-Reply-To: <1484347971-30829-1-git-send-email-khoroshilov@ispras.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: =?UTF-8?B?SsO2cmcgS3JhdXNl?= <joerg.krause@embedded.rocks>, Marek Vasut <marex@denx.de>, =?UTF-8?Q?Lothar_Wa=C3=9Fmann?= <lw@karo-electronics.de>, Fabio Estevam <fabio.estevam@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Cc: Pierre Ossman <pierre@ossman.eu>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
 
-On 14 January 2017 at 18:29, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> This patch implements support for multiblock transfers bounded
-> by SET_BLOCK_COUNT (CMD23) on the MXS MMC host driver.
+On 13 January 2017 at 23:52, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
+> host->dma_addr can store a value that is not returned by the DMA API,
+> so it is safer to check if is a valid DMA address indirectly.
 >
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
 
 Thanks, applied for next!
 
@@ -30,57 +30,30 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mxs-mmc.c |   16 ++++++++++++----
->  1 file changed, 12 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/wbsd.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index c8b8ac6..add1e70 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -153,7 +153,11 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
->                 }
+> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
+> index 80a3b11f3217..bd04e8bae010 100644
+> --- a/drivers/mmc/host/wbsd.c
+> +++ b/drivers/mmc/host/wbsd.c
+> @@ -1437,11 +1437,14 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
+>
+>  static void wbsd_release_dma(struct wbsd_host *host)
+>  {
+> -       if (!dma_mapping_error(mmc_dev(host->mmc), host->dma_addr)) {
+> +       /*
+> +        * host->dma_addr is valid here iff host->dma_buffer is not NULL.
+> +        */
+> +       if (host->dma_buffer) {
+>                 dma_unmap_single(mmc_dev(host->mmc), host->dma_addr,
+>                         WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
+> +               kfree(host->dma_buffer);
 >         }
->
-> -       if (data) {
-> +       if (cmd == mrq->sbc) {
-> +               /* Finished CMD23, now send actual command. */
-> +               mxs_mmc_start_cmd(host, mrq->cmd);
-> +               return;
-> +       } else if (data) {
->                 dma_unmap_sg(mmc_dev(host->mmc), data->sg,
->                              data->sg_len, ssp->dma_dir);
->                 /*
-> @@ -166,7 +170,7 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
->                         data->bytes_xfered = 0;
->
->                 host->data = NULL;
-> -               if (mrq->stop) {
-> +               if (data->stop && (data->error || !mrq->sbc)) {
->                         mxs_mmc_start_cmd(host, mrq->stop);
->                         return;
->                 }
-> @@ -495,7 +499,11 @@ static void mxs_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->
->         WARN_ON(host->mrq != NULL);
->         host->mrq = mrq;
-> -       mxs_mmc_start_cmd(host, mrq->cmd);
-> +
-> +       if (mrq->sbc)
-> +               mxs_mmc_start_cmd(host, mrq->sbc);
-> +       else
-> +               mxs_mmc_start_cmd(host, mrq->cmd);
->  }
->
->  static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> @@ -642,7 +650,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->         /* set mmc core parameters */
->         mmc->ops = &mxs_mmc_ops;
->         mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-> -                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
-> +                   MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL | MMC_CAP_CMD23;
->
->         host->broken_cd = of_property_read_bool(np, "broken-cd");
+> -       kfree(host->dma_buffer);
+>         if (host->dma >= 0)
+>                 free_dma(host->dma);
 >
 > --
-> 1.7.9.5
+> 2.7.4
 >
