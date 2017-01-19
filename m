@@ -1,87 +1,59 @@
-From: Bruno Herrera <bruherrera@gmail.com>
-Subject: Re: [PATCH v3 2/9] mmc: mmci: add support for not-amba, but still
- compatible, variants
-Date: Thu, 19 Jan 2017 16:36:35 -0200
-Message-ID: <CAF3+TqdvNtJnK5Y3V3M1i0EREg-10HLyDBzTW=+Ucw_en-nH_A@mail.gmail.com>
-References: <1484552238-23171-1-git-send-email-andrea.merello@gmail.com>
- <1484552238-23171-3-git-send-email-andrea.merello@gmail.com>
- <CAPDyKFqX+_ZPWm__FQqNqBDxWnmVCHTBaMN=Tbbeh+E=kuGMMg@mail.gmail.com>
- <20170119171132.GI27312@n2100.armlinux.org.uk> <CAN8YU5MMjt0fsM+ZjGAKKhHZoD_2t+6kzEAugN-iYZAN5Y0R5g@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Thu, 19 Jan 2017 20:02:17 +0100
+Message-ID: <20170119190217.GB1439@katana>
+References: <20170118172502.13876-1-chris.brandt@renesas.com>
+ <20170118172502.13876-3-chris.brandt@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="6sX45UoQRIJXqkqR"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:35195 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754149AbdASSpx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 13:45:53 -0500
-Received: by mail-io0-f194.google.com with SMTP id m98so5899567iod.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 10:45:07 -0800 (PST)
-In-Reply-To: <CAN8YU5MMjt0fsM+ZjGAKKhHZoD_2t+6kzEAugN-iYZAN5Y0R5g@mail.gmail.com>
+Received: from www.zeus03.de ([194.117.254.33]:60930 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754225AbdASTCe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 19 Jan 2017 14:02:34 -0500
+Content-Disposition: inline
+In-Reply-To: <20170118172502.13876-3-chris.brandt@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Merello <andrea.merello@gmail.com>
-Cc: Russell King - ARM Linux <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Alexandre Torgue <alexandre.torgue@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
-On Thu, Jan 19, 2017 at 3:40 PM, Andrea Merello
-<andrea.merello@gmail.com> wrote:
-> On Thu, Jan 19, 2017 at 6:11 PM, Russell King - ARM Linux
-> <linux@armlinux.org.uk> wrote:
->> On Thu, Jan 19, 2017 at 05:58:10PM +0100, Ulf Hansson wrote:
->>> + Russell
->>>
->>> On 16 January 2017 at 08:37, Andrea Merello <andrea.merello@gmail.com> wrote:
->>> > The STM32F4xx family contain a SDIO IP that looks like a variant of
->>> > the PL180, however, inspite it's actually attached to a APB bus, it
->>> > cannot be handled by the AMBA bus code, because it lacks of the ID
->>> > registers that AMBA primecell IPs have.
->>> >
->>> > This patch prepares for supporting the STM32 variant by letting the
->>> > driver register also as a platform driver, that can be matched from
->>> > the OF with specific "compatible" strings
->>>
->>> NAK!
->>
->> Also NAK.
->>
->>> Too much code are depending on the amba bus in the driver. I sincerely
->>> hope you haven't tried this approach for other amba drivers, because
->>> it will screw them up and they will become a nightmare to maintain!
->
-> It's almost only probe/remove code.. Nothing in the core of the driver
-> gets involved here.. What about splitting the driver in three files
-> (mmci.c, mmci_amba.c and mmci_plat.c) and compile them conditionally?
->
-> BTW This approach is not my invention; there is at least another
-> driver in mainline kernel that does that: amba-pl011.c
->
->>> Moreover, there is a way to override the use of the AMBA IDs
->>> registers. I think you can use that instead! No?
->>
->
-> I'm aware of it; I used it as a quick hack to get the driver probed,
-> but that looked just like as an hack to me..
 
-I did the same hackish approach and it works, but a first moment
-rather than changing the code I would suggest to get this ID from ST.
-Does not mean that as we cannot query from the IP core, it does not
-exist (my guess).
+--6sX45UoQRIJXqkqR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
->> Exactly right.  Nothing wrong with creating an amba device in response
->> to probing a platform device - which becomes a shim which keeps the
->> main driver clean and maintanable.  The shim could also be used to
->> create amba device for other AMBA drivers too, it doesn't have to be
->> MMCI specific.
->
-> If we ovverride the amba regs from DT (is this what you meant?) then
-> we just take a random number, prentend it to be an amba ID (hoping for
-> it to be spare), and use it to force the amba bus layer to probe our
-> driver. How can we make this common for other drivers/devices ? We
-> need it to be unique, since it's used by the amba layer to probe the
-> correct driver (given the generic "arm,primecell" compatible DT
-> property), or am I missing something ?
->
->> --
->> RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
->> FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
->> according to speedtest.net.
+On Wed, Jan 18, 2017 at 12:25:01PM -0500, Chris Brandt wrote:
+> In the case of a single clock source, you don't need names. However,
+> if the controller has 2 clock sources, you need to name them correctly
+> so the driver can find the 2nd one.
+>=20
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--6sX45UoQRIJXqkqR
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYgQ04AAoJEBQN5MwUoCm2t7QP/RIS0PAurhJ17FcbYaJfZFdX
+Ca3VEk47s0Z7ij8fgXlHE79GmSL4eWdNqexgYcvlCFrWHaGoVvxlKmy50n7pNkDs
+jHxLs5Z6pwPwiSl3f0/MkwRXA2M7T5eWjyUSGdyit2m43qef1ucHG3MgWarWU4C6
+aon+qMAidF3OxuT4vbH/7Yk6QMADq72kSEiXqvulgZK5RBeyxeVOhSgJkwOof5nd
+1Z/f9IEHBIz6XijKTfcbynjm/87/dTotYRHrzF6zAdIMSgIf2uWjvyjexsgvft+O
+bUJTjuP3ohlXGMNjJfyvPGoNr7tyVuJns6j32+PgJskyYgT9LQUfnDgWtS+e5sbE
+eAY+oOYJrDwBgJbNgkZB+fOnoCUjkmrAN3xzOSimGTHF0UWYGs6F1RcLv36WEtzF
+OJH0wTaGYQtWng8V2KnX1mf9c4FFBGKo/RlQJQS9fD26Zl7tLupoWk3x4nYc4ETI
+bRTVck8AIb0KJXwALcqRCUJB2WTFgtlLBcirSLpQN4yqUs32CWa0mEDZfdJwFODx
+O6ihp4bbfGJNMk6M2I1qhimtK11whbcQl8T2S8+cPkDM9H5k2nzMV12l2oGrv/V3
+BkKU+dvpp5/DNPYnnTb6l9tg/3dAehsOG9ZnSp7iKmx2WGvsKFKOYaUHM07XCGMe
+anmD4Bdv6h/aNmVlAPIX
+=4ReP
+-----END PGP SIGNATURE-----
+
+--6sX45UoQRIJXqkqR--
