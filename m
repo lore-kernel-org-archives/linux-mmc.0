@@ -1,72 +1,89 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH 13/13] MIPS: jz4740: Remove custom GPIO code
-Date: Thu, 19 Jan 2017 12:24:54 +0100
-Message-ID: <b88d4818b42ae6b0853e5c01d4121c47@mail.crapouillou.net>
-References: <20170117231421.16310-1-paul@crapouillou.net>
- <20170117231421.16310-14-paul@crapouillou.net>
- <20170118072751.GC18989@ulmo.ba.sec>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [RESEND PATCHv1 6/8] mmc: sdhci: Clear SDHCI_HS400_TUNING flag
+ after platform_execute_tuning
+Date: Thu, 19 Jan 2017 17:07:36 +0530
+Message-ID: <3aeac9e4-d707-ffaf-181b-386ef98813ef@codeaurora.org>
+References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+ <1484031652-12059-7-git-send-email-riteshh@codeaurora.org>
+ <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <20170118072751.GC18989@ulmo.ba.sec>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Ralf Baechle <ralf@linux-mips.org>, Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <540a0163-f6ea-494d-b90f-f818f8030153@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 List-Id: linux-mmc@vger.kernel.org
 
-Le 2017-01-18 08:27, Thierry Reding a écrit :
+Hi Adrian,
 
-> On Wed, Jan 18, 2017 at 12:14:21AM +0100, Paul Cercueil wrote:
-> 
->> All the drivers for the various hardware elements of the jz4740 SoC 
->> have been modified to use the pinctrl framework for their pin 
->> configuration needs. As such, this platform code is now unused and can 
->> be deleted. Signed-off-by: Paul Cercueil <paul@crapouillou.net> --- 
->> arch/mips/include/asm/mach-jz4740/gpio.h | 371 ---------------------- 
->> arch/mips/jz4740/Makefile | 2 - arch/mips/jz4740/gpio.c | 519 
->> ------------------------------- 3 files changed, 892 deletions(-) 
->> delete mode 100644 arch/mips/jz4740/gpio.c
-> 
-> Have you considered how this could best be merged? It's probably 
-> easiest
-> to take all of this through the MIPS tree because we have an addition 
-> of
-> the pinctrl that would be a replacement for the GPIO code, while at the
-> same time a bunch of drivers rely on the JZ4740 GPIO code for 
-> successful
-> compilation.
-> 
-> That's slightly complicated by the number of drivers, so needs a lot of
-> coordination, but it's not the worst I've seen.
-> 
-> Maybe one other solution that would make the transition easier would be
-> to stub out the GPIO functions if the pinctrl driver is enabled, and do
-> the removal of the mach-jz4740/gpio.h after all drivers have been 
-> merged
-> through their corresponding subsystem trees. That way all drivers 
-> should
-> remain compilable and functional at runtime, while still having the
-> possibility to merge through the subsystem trees.
-> 
-> That said, the whole series is fairly simple, so merging everything
-> through the MIPS tree sounds like the easiest way to go.
-> 
-> Thierry
+Thanks for reviewing.
 
-I think it would make sense to merge it through the MIPS tree, yes,
-considering that the patches for the drivers in the other subsystems are
-quite small, and that they just remove code (well, except the pinctrl
-driver itself). Besides, the files modified are not touched very often
-so the chances of breakage are pretty low.
+On 1/19/2017 3:40 PM, Adrian Hunter wrote:
+> On 10/01/17 09:00, Ritesh Harjani wrote:
+>> Clear SDHCI_HS400_TUNING flag after platform_execute_tuning
+>> so that platform_execute_tuning may use it if needed.
+>
+> Sorry for the slow reply.
+>
+> platform_execute_tuning() should not really exist because it doesn't do
+> anything useful.
+>
+> If it is not too much trouble please consider just hooking
+> ->execute_tuning() directly i.e.
+>
+> 	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+>
+> Then you can use and clear the flag in sdhci_msm_execute_tuning().
+Sure, this seems fine. I will try it and re-submit based on your above 
+suggestion.
 
--Paul
+Regards
+Ritesh
+
+
+>
+>>
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 6 ++++--
+>>  1 file changed, 4 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 2390980..2658f89 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2114,7 +2114,6 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>  	spin_lock_irqsave(&host->lock, flags);
+>>
+>>  	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
+>> -	host->flags &= ~SDHCI_HS400_TUNING;
+>>
+>>  	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+>>  		tuning_count = host->tuning_count;
+>> @@ -2156,7 +2155,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>
+>>  	if (host->ops->platform_execute_tuning) {
+>>  		spin_unlock_irqrestore(&host->lock, flags);
+>> -		return host->ops->platform_execute_tuning(host, opcode);
+>> +		err = host->ops->platform_execute_tuning(host, opcode);
+>> +		spin_lock_irqsave(&host->lock, flags);
+>> +		goto out_unlock;
+>>  	}
+>>
+>>  	host->mmc->retune_period = tuning_count;
+>> @@ -2167,6 +2168,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>
+>>  	sdhci_end_tuning(host);
+>>  out_unlock:
+>> +	host->flags &= ~SDHCI_HS400_TUNING;
+>>  	spin_unlock_irqrestore(&host->lock, flags);
+>>
+>>  	return err;
+>>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
