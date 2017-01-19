@@ -1,34 +1,50 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/3] mmc: host: tmio: sdio irq improvements
-Date: Thu, 19 Jan 2017 21:07:15 +0100
-Message-ID: <20170119200718.8115-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:49377 "EHLO pokefinder.org"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1754494AbdASUPo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 19 Jan 2017 15:15:44 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v2 1/3] mmc: host: tmio: refactor calls to sdio irq
+Date: Thu, 19 Jan 2017 21:07:16 +0100
+Message-ID: <20170119200718.8115-2-wsa+renesas@sang-engineering.com>
+References: <20170119200718.8115-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170119200718.8115-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
+List-Id: linux-mmc@vger.kernel.org
 
-Here is a small series with two minor improvements (patches 1+2) and one bigger
-change (patch 3) for SDIO handling with TMIO/SDHI. Since RFC, I addressed all
-comments (Thanks Simon!) and since it is needed for the WLAN cards, I think it
-should go in now.
+tmio_mmc_sdio_irq() is not used as a seperate irq handler anymore, so we
+can make it similar to the other irq helper functions, namely:
 
+* only give the host as argument function which is what it really needs
+* prefix function name with __
 
-Wolfram Sang (3):
-  mmc: host: tmio: refactor calls to sdio irq
-  mmc: host: tmio: SDIO_STATUS_QUIRK is rather SDIO_STATUS_SETBITS
-  mmc: tmio: discard obsolete SDIO irqs before enabling irqs
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Acked-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/tmio_mmc_pio.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
- drivers/mmc/host/sh_mobile_sdhi.c |  6 ++----
- drivers/mmc/host/tmio_mmc.h       |  2 ++
- drivers/mmc/host/tmio_mmc_pio.c   | 20 ++++++++++++++------
- include/linux/mfd/tmio.h          |  6 ++----
- 4 files changed, 20 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index a140848049ed81..6ab43892c132a9 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -756,9 +756,8 @@ static bool __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
+ 	return false;
+ }
+ 
+-static void tmio_mmc_sdio_irq(int irq, void *devid)
++static void __tmio_mmc_sdio_irq(struct tmio_mmc_host *host)
+ {
+-	struct tmio_mmc_host *host = devid;
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct tmio_mmc_data *pdata = host->pdata;
+ 	unsigned int ireg, status;
+@@ -799,7 +798,7 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 	if (__tmio_mmc_sdcard_irq(host, ireg, status))
+ 		return IRQ_HANDLED;
+ 
+-	tmio_mmc_sdio_irq(irq, devid);
++	__tmio_mmc_sdio_irq(host);
+ 
+ 	return IRQ_HANDLED;
+ }
 -- 
 2.11.0
-
