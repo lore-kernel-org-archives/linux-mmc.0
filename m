@@ -1,59 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: wbsd: safer check if dma_addr is valid DMA address
-Date: Thu, 19 Jan 2017 12:23:19 +0100
-Message-ID: <CAPDyKFow-fa_tePQ7VO9SsapgMj_TQqc-v7XNOnGNtPXr7TRtg@mail.gmail.com>
-References: <1484347971-30829-1-git-send-email-khoroshilov@ispras.ru>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND RFC 3/3] mmc: sdhci: Add more debug info in case of data
+ error
+Date: Thu, 19 Jan 2017 13:54:04 +0200
+Message-ID: <74840dea-18b6-3b51-67ae-e1ce3bb7fb58@intel.com>
+References: <1484030515-16722-1-git-send-email-riteshh@codeaurora.org>
+ <1484030515-16722-4-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:34864 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752230AbdASLuf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 06:50:35 -0500
-Received: by mail-wm0-f46.google.com with SMTP id r126so286086202wmr.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 03:50:32 -0800 (PST)
-In-Reply-To: <1484347971-30829-1-git-send-email-khoroshilov@ispras.ru>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1484030515-16722-4-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
-To: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Cc: Pierre Ossman <pierre@ossman.eu>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
 
-On 13 January 2017 at 23:52, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
-> host->dma_addr can store a value that is not returned by the DMA API,
-> so it is safer to check if is a valid DMA address indirectly.
->
-> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+On 10/01/17 08:41, Ritesh Harjani wrote:
+> print error log message and dump sdhc registers for debugging
+> purpose in case of data errors (except when tuning commands
+> generate CRC/timeout/end bit errors).
 
-Thanks, applied for next!
+It is a bit ugly and probably only useful during driver development, so I am
+not at all enthusiastic about this.
 
-Kind regards
-Uffe
-
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
 > ---
->  drivers/mmc/host/wbsd.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-> index 80a3b11f3217..bd04e8bae010 100644
-> --- a/drivers/mmc/host/wbsd.c
-> +++ b/drivers/mmc/host/wbsd.c
-> @@ -1437,11 +1437,14 @@ static void wbsd_request_dma(struct wbsd_host *host, int dma)
->
->  static void wbsd_release_dma(struct wbsd_host *host)
->  {
-> -       if (!dma_mapping_error(mmc_dev(host->mmc), host->dma_addr)) {
-> +       /*
-> +        * host->dma_addr is valid here iff host->dma_buffer is not NULL.
-> +        */
-> +       if (host->dma_buffer) {
->                 dma_unmap_single(mmc_dev(host->mmc), host->dma_addr,
->                         WBSD_DMA_SIZE, DMA_BIDIRECTIONAL);
-> +               kfree(host->dma_buffer);
->         }
-> -       kfree(host->dma_buffer);
->         if (host->dma >= 0)
->                 free_dma(host->dma);
->
-> --
-> 2.7.4
->
+>  drivers/mmc/host/sdhci.c | 21 +++++++++++++++++++--
+>  1 file changed, 19 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 73a8918..2e51e49 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2616,9 +2616,26 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>  			host->ops->adma_workaround(host, intmask);
+>  	}
+>  
+> -	if (host->data->error)
+> +	if (host->data->error) {
+> +		bool pr_msg = true;
+> +
+> +		if (intmask & (SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
+> +		    SDHCI_INT_DATA_END_BIT)) {
+> +			command = SDHCI_GET_CMD(sdhci_readw(host,
+> +							    SDHCI_COMMAND));
+> +			if (command == MMC_SEND_TUNING_BLOCK_HS200 ||
+> +			    command == MMC_SEND_TUNING_BLOCK)
+> +				pr_msg = false;
+> +		}
+> +		if (pr_msg) {
+> +			pr_err("%s: data txfr (0x%08x) error: %d\n",
+> +			       mmc_hostname(host->mmc), intmask,
+> +			       host->data->error);
+> +			sdhci_dumpregs(host);
+> +		}
+> +
+>  		sdhci_finish_data(host);
+> -	else {
+> +	} else {
+>  		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
+>  			sdhci_transfer_pio(host);
+>  
+> 
