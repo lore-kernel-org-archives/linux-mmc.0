@@ -1,52 +1,52 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND PATCHv1 5/8] mmc: sdhci-msm: configure
- CORE_CSR_CDC_DELAY_CFG to recommended value
-Date: Thu, 19 Jan 2017 12:05:39 +0200
-Message-ID: <a1970005-949d-a08d-d0d5-da0cc2ac618c@intel.com>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
+From: Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
+Date: Thu, 19 Jan 2017 12:19:36 +0100
+Message-ID: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+References: <20170117231421.16310-1-paul@crapouillou.net>
+ <20170118071530.GA18989@ulmo.ba.sec>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:19129 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751375AbdASKLn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 19 Jan 2017 05:11:43 -0500
-In-Reply-To: <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170118071530.GA18989@ulmo.ba.sec>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Subhash Jadavani <subhashj@codeaurora.org>
 
-On 10/01/17 09:00, Ritesh Harjani wrote:
-> From: Subhash Jadavani <subhashj@codeaurora.org>
-> 
-> Program CORE_CSR_CDC_DELAY_CFG for hardware recommended 1.25ns delay.
-> We may see data CRC errors if it's programmed for any other delay
-> value.
-> 
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+Le 2017-01-18 08:15, Thierry Reding a écrit :
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-msm.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> On Wed, Jan 18, 2017 at 12:14:08AM +0100, Paul Cercueil wrote:
+> [...]
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index a028568..84d29dd 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -679,7 +679,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
->  	writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
->  	writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
->  	writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
-> -	writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
-> +	writel_relaxed(0x4E2, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
->  	writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
->  	writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
->  
+>> One problem still unresolved: the pinctrl framework does not allow us 
+>> to configure each pin on demand (someone please prove me wrong), when 
+>> the various PWM channels are requested or released. For instance, the 
+>> PWM channels can be configured from sysfs, which would require all PWM 
+>> pins to be configured properly beforehand for the PWM function, 
+>> eventually causing conflicts with other platform or board drivers.
 > 
+> Still catching up on a lot of email, so I haven't gone through the
+> entire series. But I don't think the above is true.
+> 
+> My understanding is that you can have separate pin groups for each
+> pin (provided the hardware supports that) and then control each of
+> these groups dynamically at runtime.
+> 
+> That is you could have the PWM driver's ->request() and ->free()
+> call into the pinctrl framework to select the correct pinmux
+> configuration as necessary.
 
+Thanks for the feedback.
+
+The problem with pinctrl and PWM, is that the pinctrl API works by 
+"states".
+A default state, sleep state, and basically any custom state that the 
+devicetree
+provides. This works well until you need to control individually each 
+pin; with
+8 pins, you would need 2^8 states, each one corresponding to a given 
+configuration.
+
+-Paul
