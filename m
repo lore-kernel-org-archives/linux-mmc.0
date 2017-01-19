@@ -1,211 +1,147 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/2] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Thu, 19 Jan 2017 15:13:12 +0100
-Message-ID: <CAPDyKFpcKuybQmhqCkaAkOM5d+ubU8O8=adLm+PXwc=+N87vng@mail.gmail.com>
-References: <20170113052937.12538-1-matt@ranostay.consulting> <20170113052937.12538-3-matt@ranostay.consulting>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH v10 0/8] Cavium MMC driver
+Date: Thu, 19 Jan 2017 15:50:41 +0100
+Message-ID: <20170119145041.GA11757@hardcore>
+References: <20161219121552.18316-1-jglauber@cavium.com>
+ <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:37979 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752793AbdASOWK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2017 09:22:10 -0500
-Received: by mail-wm0-f51.google.com with SMTP id r144so79470291wme.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 06:21:27 -0800 (PST)
-In-Reply-To: <20170113052937.12538-3-matt@ranostay.consulting>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Ranostay <matt@ranostay.consulting>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-+Shawn
+On Tue, Dec 20, 2016 at 01:10:56PM +0100, Ulf Hansson wrote:
+> Hi Jan,
+> 
+> On 19 December 2016 at 13:15, Jan Glauber <jglauber@cavium.com> wrote:
+> > While this patch series seems to be somehow overdue, in the meantime the
+> > same MMC unit was re-used on Cavium's ThunderX SOC so our interest in making
+> > progress upstreaming this driver has doubled now...
+> >
+> > Glancing over the history of the series I think most of the high-level
+> > comments should be adressed by now (like DTS representation of the
+> > multiple slots). I've added some new features for the ARM64 port
+> > and in the process re-wrote parts of the driver and split it into smaller,
+> > hopefully easier to review parts.
+> 
+> I only had a quick review, but the overall impression is that it's
+> getting far better. Here follows my summary.
+> 
+> 1) I intend to especially look at DTS representation for the slot
+> nodes, to make sure we have a good solution. Allow me to get back on
+> this.
+> 
+> 2) I don't like how you have named files, as it doesn't express the
+> obvious relationship between the core library and the drivers. I would
+> rather see something similar to dw_mmc or sdhci.
 
-On 13 January 2017 at 06:29, Matt Ranostay <matt@ranostay.consulting> wrote:
-> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
-> This can be abstracted to other chipsets if needed in the future.
->
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
-> ---
->  drivers/mmc/core/Kconfig         |  10 ++++
->  drivers/mmc/core/Makefile        |   1 +
->  drivers/mmc/core/pwrseq_sd8787.c | 117 +++++++++++++++++++++++++++++++++++++++
->  3 files changed, 128 insertions(+)
->  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
->
-> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-> index cdfa8520a4b1..fc1ecdaaa9ca 100644
-> --- a/drivers/mmc/core/Kconfig
-> +++ b/drivers/mmc/core/Kconfig
-> @@ -12,6 +12,16 @@ config PWRSEQ_EMMC
->           This driver can also be built as a module. If so, the module
->           will be called pwrseq_emmc.
->
-> +config PWRSEQ_SD8787
-> +       tristate "HW reset support for SD8787 BT + Wifi module"
-> +       depends on OF && (MWIFIEX || BT_MRVL_SDIO)
-> +       help
-> +         This selects hardware reset support for the SD8787 BT + Wifi
-> +         module. By default this option is set to n.
-> +
-> +         This driver can also be built as a module. If so, the module
-> +         will be called pwrseq_sd8787.
-> +
->  config PWRSEQ_SIMPLE
->         tristate "Simple HW reset support for MMC"
->         default y
-> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-> index b2a257dc644f..0f81464fa824 100644
-> --- a/drivers/mmc/core/Makefile
-> +++ b/drivers/mmc/core/Makefile
-> @@ -10,6 +10,7 @@ mmc_core-y                    := core.o bus.o host.o \
->                                    quirks.o slot-gpio.o
->  mmc_core-$(CONFIG_OF)          += pwrseq.o
->  obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
-> +obj-$(CONFIG_PWRSEQ_SD8787)    += pwrseq_sd8787.o
->  obj-$(CONFIG_PWRSEQ_EMMC)      += pwrseq_emmc.o
->  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
->  obj-$(CONFIG_MMC_BLOCK)                += mmc_block.o
-> diff --git a/drivers/mmc/core/pwrseq_sd8787.c b/drivers/mmc/core/pwrseq_sd8787.c
-> new file mode 100644
-> index 000000000000..f4080fe6439e
-> --- /dev/null
-> +++ b/drivers/mmc/core/pwrseq_sd8787.c
-> @@ -0,0 +1,117 @@
-> +/*
-> + * pwrseq_sd8787.c - power sequence support for Marvell SD8787 BT + Wifi chip
-> + *
-> + * Copyright (C) 2016 Matt Ranostay <matt@ranostay.consulting>
-> + *
-> + * Based on the original work pwrseq_simple.c
-> + *  Copyright (C) 2014 Linaro Ltd
-> + *  Author: Ulf Hansson <ulf.hansson@linaro.org>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-> + * GNU General Public License for more details.
-> + *
-> + */
-> +
-> +#include <linux/delay.h>
-> +#include <linux/init.h>
-> +#include <linux/kernel.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/module.h>
-> +#include <linux/slab.h>
-> +#include <linux/device.h>
-> +#include <linux/err.h>
-> +#include <linux/gpio/consumer.h>
-> +
-> +#include <linux/mmc/host.h>
-> +
-> +#include "pwrseq.h"
-> +
-> +struct mmc_pwrseq_sd8787 {
-> +       struct mmc_pwrseq pwrseq;
-> +       struct gpio_desc *reset_gpio;
-> +       struct gpio_desc *pwrdn_gpio;
-> +};
-> +
-> +#define to_pwrseq_sd8787(p) container_of(p, struct mmc_pwrseq_sd8787, pwrseq)
-> +
-> +static void mmc_pwrseq_sd8787_pre_power_on(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
-> +
-> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
-> +
-> +       msleep(300);
-> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 1);
-> +}
-> +
-> +static void mmc_pwrseq_sd8787_power_off(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
-> +
-> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 0);
-> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
-> +}
-> +
-> +static const struct mmc_pwrseq_ops mmc_pwrseq_sd8787_ops = {
-> +       .pre_power_on = mmc_pwrseq_sd8787_pre_power_on,
-> +       .power_off = mmc_pwrseq_sd8787_power_off,
-> +};
-> +
-> +static const struct of_device_id mmc_pwrseq_sd8787_of_match[] = {
-> +       { .compatible = "mmc-pwrseq-sd8787",},
-> +       {/* sentinel */},
-> +};
-> +MODULE_DEVICE_TABLE(of, mmc_pwrseq_sd8787_of_match);
-> +
-> +static int mmc_pwrseq_sd8787_probe(struct platform_device *pdev)
-> +{
-> +       struct mmc_pwrseq_sd8787 *pwrseq;
-> +       struct device *dev = &pdev->dev;
-> +
-> +       pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
-> +       if (!pwrseq)
-> +               return -ENOMEM;
-> +
-> +       pwrseq->pwrdn_gpio = devm_gpiod_get(dev, "pwrdn", GPIOD_OUT_LOW);
-> +       if (IS_ERR(pwrseq->pwrdn_gpio))
-> +               return PTR_ERR(pwrseq->pwrdn_gpio);
-> +
-> +       pwrseq->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
-> +       if (IS_ERR(pwrseq->reset_gpio))
-> +               return PTR_ERR(pwrseq->reset_gpio);
-> +
-> +       pwrseq->pwrseq.dev = dev;
-> +       pwrseq->pwrseq.ops = &mmc_pwrseq_sd8787_ops;
-> +       pwrseq->pwrseq.owner = THIS_MODULE;
-> +       platform_set_drvdata(pdev, pwrseq);
-> +
-> +       return mmc_pwrseq_register(&pwrseq->pwrseq);
-> +}
-> +
-> +static int mmc_pwrseq_sd8787_remove(struct platform_device *pdev)
-> +{
-> +       struct mmc_pwrseq_sd8787 *pwrseq = platform_get_drvdata(pdev);
-> +
-> +       mmc_pwrseq_unregister(&pwrseq->pwrseq);
-> +
-> +       return 0;
-> +}
-> +
-> +static struct platform_driver mmc_pwrseq_sd8787_driver = {
-> +       .probe = mmc_pwrseq_sd8787_probe,
-> +       .remove = mmc_pwrseq_sd8787_remove,
-> +       .driver = {
-> +               .name = "pwrseq_sd8787",
-> +               .of_match_table = mmc_pwrseq_sd8787_of_match,
-> +       },
-> +};
-> +
-> +module_platform_driver(mmc_pwrseq_sd8787_driver);
-> +MODULE_LICENSE("GPL v2");
-> --
-> 2.10.2
->
+I've prefixed all files with "cavium" and adjusted names, incl. Kconfig
+names.
 
-Twisting my head around how this could be integrated smoothly into
-pwrseq simple. No, I just can find a good way forward without messing
-up pwrseq simple itself.
+> 3) Related to 2), I would also like to have a prefix of the commit
+> messages which express the relationships. Again follow dw_mmc/sdhci.
 
-So, for now I decided (once more :-), that let's keep this as separate driver!
+OK.
 
-Perhaps, following device specific mmc pwrseq drivers will needs
-something similar, but in such case we can look into that then.
-Thinking about cw1200 for example.
+> 4) GPIO powers should be modelled as GPIO regulators. I believe we
+> have discussed this earlier as well (I don't really recall in detail
+> about the last things). It gives us the opportunity to via the
+> regulator framework to find out the supported voltage levels. This is
+> the generic method which is used by mmc drivers, you need to adopt to
+> this as well.
 
-Let's get Rob's ack for the DT bindings, seems almost there, then I
-will queue this.
+I've added a fixed regulator to DT:
 
-Kind regards
-Uffe
+        vcc_3v3: regulator-vcc_3v3 {
+                compatible = "regulator-fixed";
+                regulator-name = "VCC_3V3";
+                regulator-min-microvolt = <3300000>;
+                regulator-max-microvolt = <3300000>;
+
+                gpio = <&gpio_6_0 8 0>;
+                /* enable-gpio = <&gpio_6_0 8 0>; */
+                enable-active-high;
+        };
+
+This seems to enable the gpio. Is this sufficient or do I need the
+gpio-regulator?
+
+> 5) Please reorder the series so the DT bindings doc change comes
+> first. I need an ack from the DT maintainer for it.
+
+OK.
+
+> 6) The most important feedback:
+> This driver has been posted in many versions by now. Perhaps I could
+> have been more responsive throughout the attempts, I apologize for
+> that. On the other hand, you seems to have a round robin schedule for
+> whom that sends a new version. :-) That makes me wonder about your
+> support in the maintenance phase. I hope my concern is wrong, but how
+> about that you point out a responsible maintainer? Especially since
+> this seems to become a family of Cavium variants, it would help me if
+> I could rely on someone providing acks for future changes. Would you
+> be able to accept that role?
+> 
+> >
+> > In porting the driver to arm64 I run into some issues.
+> >
+> > 1. mmc_parse_of is not capable of supporting multiple slots behind one
+> >    controller. On arm64 the host controller is presented as one PCI device.
+> >    There are no devices per slot as with the platform variant, so I
+> >    needed to create dummy devices to make mmc_parse_of work.
+> >    IMHO it would be cleaner if mmc_parse_of could be extended to cover
+> >    the multiple slots case.
+> 
+> Yes. I agree that this make sense!
+> Seems like we could try to make use of the struct device_node instead
+> of the struct device.
+> 
+> I will try to come up with an idea, I keep you posted.
+> 
+> >
+> > 2. Without setting MMC_CAP_1_8V_DDR DDR mode is not usable for eMMC.
+> >    I would prefer to introduce a new cap flag, MMC_CAP_3_3V_DDR,
+> >    if possible. Currently I need to add "mmc-ddr-1_8v" to DTS,
+> >    which seems odd for a 3.3v only host controller.
+> 
+> This keep coming back. Both DT bindings and changing to the mmc core
+> has been posted.
+> 
+> Allow me to help out and re-post a new series. You can build on top of
+> them - I will keep you on cc.
+
+Any news here? Can you give me a pointer?
+
+> >
+> > 3. Because the slots share the host controller using the
+> >    "full-pwr-cycle" attribute turned out to not work well.
+> >    I'm not 100% sure just ignoring the attribute is correct.
+> 
+> The full-pwr-cycle shall be set whether you are able to power cycle
+> the *card*. So this binding should be a part of each slot/child node -
+> if the host supports it.
+> 
+> >
+> > For the driver to work GPIO support is required, the GPIO driver is
+> > not yet available upstream. Therefore, for the time being I removed
+> > the GPIO dependency from Kconfig.
+> 
+> Is this is about the GPIO powers or also GPIO card detect?
+> 
+> Anyway, I am fine with not depending on GPIO Kconfig.
+> 
+
+Meanwhile the GPIO driver was posted here:
+https://lkml.org/lkml/2017/1/6/985
+
+> [...]
+> 
+> Kind regards
+> Uffe
+
+Thanks for the review,
+Jan
