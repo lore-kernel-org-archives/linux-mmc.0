@@ -1,45 +1,37 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] dw-mmc controller fixes
-Date: Fri, 20 Jan 2017 17:26:22 +0900
-Message-ID: <4082c88e-de72-9e18-7b9a-c37551bda610@samsung.com>
-References: <CGME20170120082622epcas5p2e3db3b067b3a1cce2e30f074175cb469@epcas5p2.samsung.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
+Date: Fri, 20 Jan 2017 09:40:30 +0100
+Message-ID: <CACRpkdaeu9OxaSPeOrkKtKNQGUQh4puCFw8A2h=xhqVdDWgoow@mail.gmail.com>
+References: <20170117231421.16310-1-paul@crapouillou.net> <20170118071530.GA18989@ulmo.ba.sec>
+ <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:52646 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751383AbdATIh0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:37:26 -0500
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OK201NTFKRZGN80@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jan 2017 17:26:23 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: Thierry Reding <thierry.reding@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, linux-p
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Dear Ulf,
+On Thu, Jan 19, 2017 at 12:19 PM, Paul Cercueil <paul@crapouillou.net> wrote:
 
-Could you pull this patch on your fixes branch?
+> The problem with pinctrl and PWM, is that the pinctrl API works by "states".
+> A default state, sleep state, and basically any custom state that the
+> devicetree
+> provides. This works well until you need to control individually each pin;
+> with
+> 8 pins, you would need 2^8 states, each one corresponding to a given
+> configuration.
 
-The following changes since commit ee6ff743e3a4b697e8286054667d7e4e1b56510d:
+I do not really understand, do you really use all 2^8 states in a given
+system?
 
-  mmc: core: Restore parts of the polling policy when switch to HS/HS DDR (2017-01-16 16:17:42 +0100)
+The pin control states are to be used for practical situations, not
+for all theoretical situations.
 
-are available in the git repository at:
+You should define in your device tree the states that your
+particular system will use. Not all possible states on all possible
+systems.
 
-  https://github.com/jh80chung/dw-mmc.git fixes
-
-for you to fetch changes up to c9ea1acefff02aeb080b427d79cedeb446b28317:
-
-  mmc: dw_mmc: force setup bus if active slots exist (2017-01-20 17:17:43 +0900)
-
-----------------------------------------------------------------
-Ziyuan Xu (1):
-      mmc: dw_mmc: force setup bus if active slots exist
-
- drivers/mmc/host/dw_mmc.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Yours,
+Linus Walleij
