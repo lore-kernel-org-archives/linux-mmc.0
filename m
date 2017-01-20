@@ -1,85 +1,31 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Fri, 20 Jan 2017 12:02:36 +0100
-Message-ID: <CAPDyKFq9psGMnKUx+SM_QGt6OKoMHgNFop6ANagtLOLwsMTT8w@mail.gmail.com>
-References: <20170118172502.13876-1-chris.brandt@renesas.com> <20170118172502.13876-3-chris.brandt@renesas.com>
+From: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
+Subject: Re: [PATCH 09/13] mmc: jz4740: Let the pinctrl driver configure the  pins
+Date: Fri, 20 Jan 2017 12:59:07 +0100
+Message-ID: <81c24244706ce24a678a3d05bbf6b17c@mail.crapouillou.net>
+References: <20170117231421.16310-1-paul@crapouillou.net>
+ <20170117231421.16310-10-paul@crapouillou.net>
+ <CAPDyKFp4idZx+ynQByz22zwsiK+reBcvt3OdHm1kR2QUy+sUhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38467 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751763AbdATLCi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 06:02:38 -0500
-Received: by mail-wm0-f42.google.com with SMTP id r144so37775020wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2017 03:02:38 -0800 (PST)
-In-Reply-To: <20170118172502.13876-3-chris.brandt@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFp4idZx+ynQByz22zwsiK+reBcvt3OdHm1kR2QUy+sUhw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Fbdev development list <linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Hogan <james.hogan-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 18 January 2017 at 18:25, Chris Brandt <chris.brandt@renesas.com> wrote:
-> In the case of a single clock source, you don't need names. However,
-> if the controller has 2 clock sources, you need to name them correctly
-> so the driver can find the 2nd one.
->
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> ---
-> v2:
-> * fix spelling and change wording
-> * changed clock name from "carddetect" to "cd"
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index a1650ed..90370cd 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -25,8 +25,29 @@ Required properties:
->                 "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->                 "renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
->
-> +- clocks: Most controllers only have 1 clock source per channel. However, some
-> +         have a second clock dedicated to card detection. If 2 clocks are
-> +         specified, you must name them as "core" and "cd". If the controller
-> +         only has 1 clock, naming is not required.
+Le 2017-01-19 11:55, Ulf Hansson a écrit :
 
-Could you please elaborate a bit on the card detection clock?
+> Shouldn't this be replaced with a call to:
+> pinctrl_pm_select_sleep_state();
 
-I guess that there is some kind of internal card detection logic
-(native card detect) in the SDHI IP, which requires a separate clock
-for it to work? Perhaps you can state that somehow?
+You're totally right. I'll change it.
 
-> +
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
->  - pinctrl-names: should be "default", "state_uhs"
->  - pinctrl-0: should contain default/high speed pin ctrl
->  - pinctrl-1: should contain uhs mode pin ctrl
-> +
-> +Example showing 2 clocks:
-> +       sdhi0: sd@e804e000 {
-> +               compatible = "renesas,sdhi-r7s72100";
-> +               reg = <0xe804e000 0x100>;
-> +               interrupts = <GIC_SPI 270 IRQ_TYPE_LEVEL_HIGH
-> +                             GIC_SPI 271 IRQ_TYPE_LEVEL_HIGH
-> +                             GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
-> +
-> +               clocks = <&mstp12_clks R7S72100_CLK_SDHI00>,
-> +                        <&mstp12_clks R7S72100_CLK_SDHI01>;
-> +               clock-names = "core", "cd";
-> +               cap-sd-highspeed;
-> +               cap-sdio-irq;
-> +               status = "disabled";
-
-The last line seems a bit odd to include in an example.
-
-> +       };
-> --
-> 2.10.1
->
->
-
-Kind regards
-Uffe
+Thanks,
+-Paul
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
