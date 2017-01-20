@@ -1,58 +1,42 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v3 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Fri, 20 Jan 2017 18:51:57 +0000
-Message-ID: <SG2PR06MB11658D687A148E596A835B688A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170118172502.13876-1-chris.brandt@renesas.com>
- <20170118172502.13876-3-chris.brandt@renesas.com>
- <CAPDyKFq9psGMnKUx+SM_QGt6OKoMHgNFop6ANagtLOLwsMTT8w@mail.gmail.com>
- <SG2PR06MB1165B5BF4296DB866F3D418B8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <CAPDyKFqCa_evsr3a_xHNy2joodgP9xiOQ1jdD0=nY-cGTWd_Hg@mail.gmail.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to include leds.h
+Date: Fri, 20 Jan 2017 20:34:29 +0100
+Message-ID: <87a8aleda2.fsf@belgarion.home>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+        <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
+        <87efzydusi.fsf@belgarion.home>
+        <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqCa_evsr3a_xHNy2joodgP9xiOQ1jdD0=nY-cGTWd_Hg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp03.smtpout.orange.fr ([80.12.242.125]:32011 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751497AbdATTef (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 14:34:35 -0500
+In-Reply-To: <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
+        (Ulf Hansson's message of "Fri, 20 Jan 2017 09:27:29 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-SGVsbG8gVWZmZSwNCg0KT24gRnJpZGF5LCBKYW51YXJ5IDIwLCAyMDE3LCBVbGYgSGFuc3NvbiB3
-cm90ZToNCj4gPiBUaGUgcmVhbGl0eSBpcyB0aGF0IHRoZSBjaGlwIGd1eXMgY3V0IHVwIHRoZSBz
-dGFuZGFyZCBTREhJIElQIHRvIGFkZCBhDQo+ID4gJ2Nvb2wgbmV3IGZlYXR1cmUnLCBidXQgYWxs
-IEkgd2FudCB0byBkbyBpcyBwdXQgaXQgYmFjayB0aGUgd2F5IGl0IHdhcy4NCj4gPg0KPiA+IE5P
-VEU6IFRoZSBkZXNpZ24gZ3V5cyBsaWtlIHRvIHJldXNlIElQIGJsb2NrcyBmcm9tIHByZXZpb3Vz
-IGRlc2lnbnMNCj4gPiB0aGF0IHRoZXkga25vdyB3b3JrZWQgYW5kIGRpZG4ndCBoYXZlIGJ1Z3Mu
-IFNvLCB0aGVyZSBpcyBhIGdvb2QgY2hhbmNlDQo+ID4geW91IHdpbGwgc2VlIHRoaXMgY2hhbmdl
-IGluIGZ1dHVyZSBSWi9BIGRldmljZXMgKG9yIGV2ZW4gb3RoZXIgZnV0dXJlDQo+IFJlbmVzYXMg
-U29DIGRldmljZXMpLg0KPiA+IFRvIHJlbW92ZSBhbiB1bndhbnRlZCBmZWF0dXJlIGFkZHMgYWRk
-aXRpb25hbCBkZXNpZ24gcmlzayBvZiBicmVha2luZw0KPiA+IHNvbWV0aGluZyBlbHNlLi4uLmFu
-ZCBnaXZlbiB0aGUgY29zdCBvZiByZWRvaW5nIHNpbGljb24gbWFzaw0KPiA+IGxheWVycy4uLm5v
-IGVuZ2luZWVyIHdhbnRzIHRoYXQgbWlzdGFrZSBvbiB0aGVpciBoYW5kcy4NCj4gDQo+IFNvLCBv
-bmUgc2hvdWxkIGJlIGF3YXJlIG9mIHRoYXQgcnVudGltZSBQTSBzdXBwb3J0IGluIHRoZXNlIGNh
-c2UgaXMgZ29pbmcNCj4gdG8gYmUgc3Vib3B0aW1hbC4NCj4gRm9yIGV4YW1wbGUsIHdoZW4gdXNp
-bmcgdGhpcyBuYXRpdmUgY2FyZCBkZXRlY3QsIHlvdSB3aWxsIG5lZWQgdG8ga2VlcCB0aGUNCj4g
-Y29udHJvbGxlciBydW50aW1lIFBNIHJlc3VtZWQgYXMgdGhlIGJlIGFibGUgdG8ga2VlcCB0aGUg
-Y2xvY2sgb24gYW5kIHRvDQo+IGJlIGFibGUgdG8gZmV0Y2ggdGhlIGlycS4gV2FzdGluZyBwb3dl
-ci4NCg0KDQpXb2xmcmFtIGFscmVhZHkgcG9pbnRlZCB0aGF0IG91dCBpbiBhIHJlcGx5IHRvIEdl
-ZXJ0Og0KDQpPbiBUdWVzZGF5LCBKYW51YXJ5IDE3LCAyMDE3LCBXb2xmcmFtIFNhbmcgd3JvdGU6
-DQo+ID4gSWYgd2UgaGFuZGxlIHRoZW0gYXMgb25lLCB3b24ndCB3ZSBtaXNzIGNhcmQgZGV0ZWN0
-IGV2ZW50cyBkdWUgdG8gdGhlDQo+ID4gY2FyZCBkZXRlY3QgY2xvY2sgYmVpbmcgZGlzYWJsZWQg
-d2hpbGUgU0RISSBpcyBpZGxlPw0KPiANCj4gWW91IG1lYW4gdGhpcz8NCj4gDQo+IDEyMDggICAg
-ICAgICAvKg0KPiAxMjA5ICAgICAgICAgICogV2hpbGUgdXNpbmcgaW50ZXJuYWwgdG1pbyBoYXJk
-d2FyZSBsb2dpYyBmb3IgY2FyZA0KPiBkZXRlY3Rpb24sIHdlIG5lZWQNCj4gMTIxMCAgICAgICAg
-ICAqIHRvIGVuc3VyZSBpdCBzdGF5cyBwb3dlcmVkIGZvciBpdCB0byB3b3JrLg0KPiAxMjExICAg
-ICAgICAgICovDQo+IDEyMTIgICAgICAgICBpZiAoX2hvc3QtPm5hdGl2ZV9ob3RwbHVnKQ0KPiAx
-MjEzICAgICAgICAgICAgICAgICBwbV9ydW50aW1lX2dldF9ub3Jlc3VtZSgmcGRldi0+ZGV2KTsN
-Cg0KDQpBcyBwZXIgeW91ciByZXF1ZXN0LCBJJ2xsIGdvIGJhY2sgYW5kIGFkZCBzb21lIHRleHQg
-dG8gZGVzY3JpYmluZyB0aGF0IGV2ZW4gdGhvdWdoDQp0aGlzIHNwZWNpZmljIEhXIGhhcyBhIHNl
-cGFyYXRlIGNsb2NrIGZvciBjYXJkIGRldGVjdCBmb3IgUE0sIHRoZSBleGlzdGluZyBkcml2ZXIN
-CmluZnJhc3RydWN0dXJlIGRvZXNuJ3QgaGFuZGxlIHRoYXQgc28gYm90aCBjbG9ja3MgbmVlZCB0
-byBiZSB0cmVhdGVkIGFzIG9uZS4NCg0KDQo+IE1vc3QgU29DIHZlbmRvcnMgYXJlIHRoZXJlZm9y
-ZSB1c2luZyBhIEdQSU8gY2FyZCBkZXRlY3QgaW5zdGVhZCwgYWx0aG91Z2gNCj4gSSBhc3N1bWUg
-eW91IGFscmVhZHkga25ldyB0aGF0LiA6LSkNCg0KTXkgZmlyc3Qgb2JqZWN0aXZlIGZvciB0aGUg
-UlovQTEgcGxhdGZvcm0gaXMgdG8gbW92ZSB0aGluZ3MgZnJvbSBhIGxvY2FsDQpjdXN0b20gQlNQ
-IGludG8gdXBzdHJlYW0gYW5kIGdldCB0aGluZ3MgJ3dvcmtpbmcnLiBMYXRlciBJIGNhbiBnbyBi
-YWNrDQphbmQgdHdlYWsgdGhpbmdzIGhlcmUgYW5kIHRoZXJlIGZvciBydW50aW1lIFBNIGFuZCBz
-dWNoLg0KDQoNClRoYW5rIHlvdSwNCkNocmlzDQoNCg==
+Ulf Hansson <ulf.hansson@linaro.org> writes:
+
+> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>> So I was wondering how you made the choice of which files you add the include to
+>> and which you don't touch ?
+>
+> By building the pxa_defconfig, see what errors it reports and then fix them.
+>
+> Isn't pxa_defconfig building all the variants?
+Euh actually it should, but it's not.
+
+The file was built from all _existing_ pxa defconfigs in arch/arm/configs/. The
+trick is that there were many pxa boards for which no defconfig file was
+available, and therefore they "escape" the pxa_defconfig coverage.
+
+Cheers.
+
+-- 
+Robert
