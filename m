@@ -1,85 +1,57 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] mmc: dt-bindings: update Mediatek MMC bindings
-Date: Fri, 20 Jan 2017 08:52:25 +0100
-Message-ID: <CAPDyKFpXA_fDDQi+gqf2f3dFxkjH6D+7drTPuimuJafWxoCirg@mail.gmail.com>
-References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com>
- <1484821156-20565-2-git-send-email-yong.mao@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 2/3] dts: mediatek: configure some fixed mmc parameters
+Date: Fri, 20 Jan 2017 08:59:08 +0100
+Message-ID: <CAPDyKFrHCy7bLb-wDRWpELAB5VxPc4tjyWKd31YufEZC_AQtVA@mail.gmail.com>
+References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com> <1484821156-20565-3-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1484821156-20565-2-git-send-email-yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:38345 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751392AbdATH74 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 02:59:56 -0500
+Received: by mail-wm0-f50.google.com with SMTP id r144so31124698wme.1
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 23:59:09 -0800 (PST)
+In-Reply-To: <1484821156-20565-3-git-send-email-yong.mao@mediatek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-+devicetree, Rob
+On 19 January 2017 at 11:19, Yong Mao <yong.mao@mediatek.com> wrote:
+> From: yong mao <yong.mao@mediatek.com>
+>
+> configure some fixed mmc parameters
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
-On 19 January 2017 at 11:19, Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
->
-> Add description for mtk-hs200-cmd-int-delay
-> Add description for mtk-hs400-cmd-int-delay
-> Add description for mtk-hs400-cmd-resp-sel
->
-> Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Please change the prefix of the commit message header to "ARM64: dts: mt8173:".
+
+Also make sure you send this to the ARM mailing list as well.
+
+In general, I think it's better DTS changes go via the ARM SoC tree,
+but I can pick it up if it's trivial and I get an ack from the SoC
+maintainer.
+
 > ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt |    9 +++++++++
->  1 file changed, 9 insertions(+)
+>  arch/arm64/boot/dts/mediatek/mt8173-evb.dts |    3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> index 0120c7f..149f472 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> @@ -21,6 +21,12 @@ Optional properties:
->  - assigned-clocks: PLL of the source clock
->  - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
->  - hs400-ds-delay: HS400 DS delay setting
-> +- mtk-hs200-cmd-int-delay: HS200 command internal delay setting.
-> +                          The value is an integer from 0 to 31
-
-Please change to:
-
-mediatek,hs200-cmd-delay
-
-... and if there is a unit, like ns or us, please add that a suffix.
-
-> +- mtk-hs400-cmd-int-delay: HS400 command internal delay setting
-> +                          The value is an integer from 0 to 31
-
-mediatek,hs400-cmd-delay and add unit if applicable.
-
-> +- mtk-hs400-cmd-resp-sel:  HS400 command response sample selection
-> +                          The value is an integer from 0 to 1
-
-mediatek,hs400-cmd-resp-sel
-
-And make it a boolean value instead!
-
->
->  Examples:
->  mmc0: mmc@11230000 {
-> @@ -38,4 +44,7 @@ mmc0: mmc@11230000 {
->         assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
->         assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
->         hs400-ds-delay = <0x14015>;
-> +       mtk-hs200-cmd-int-delay = <26>;
-> +       mtk-hs400-cmd-int-delay = <14>;
-> +       mtk-hs400-cmd-resp-sel = <0>; /* 0: rising, 1: falling */
-
-The rising/falling information belongs in description of the binding a
-few lines above. Please move it there.
-
->  };
+> diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> index 0ecaad4..403705e 100644
+> --- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> +++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+> @@ -134,6 +134,9 @@
+>         bus-width = <8>;
+>         max-frequency = <50000000>;
+>         cap-mmc-highspeed;
+> +       mtk-hs200-cmd-int-delay=<26>;
+> +       mtk-hs400-cmd-int-delay=<14>;
+> +       mtk-hs400-cmd-resp-sel=<0>; /* 0:rising, 1:falling */
+>         vmmc-supply = <&mt6397_vemc_3v3_reg>;
+>         vqmmc-supply = <&mt6397_vio18_reg>;
+>         non-removable;
 > --
 > 1.7.9.5
 >
