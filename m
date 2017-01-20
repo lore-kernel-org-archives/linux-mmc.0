@@ -1,66 +1,58 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [RESEND PATCHv1 5/8] mmc: sdhci-msm: configure
- CORE_CSR_CDC_DELAY_CFG to recommended value
-Date: Fri, 20 Jan 2017 09:42:11 -0800
-Message-ID: <e7b37b16-3d87-3766-6e03-9f67cd29b64a@codeaurora.org>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v3 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Fri, 20 Jan 2017 18:51:57 +0000
+Message-ID: <SG2PR06MB11658D687A148E596A835B688A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170118172502.13876-1-chris.brandt@renesas.com>
+ <20170118172502.13876-3-chris.brandt@renesas.com>
+ <CAPDyKFq9psGMnKUx+SM_QGt6OKoMHgNFop6ANagtLOLwsMTT8w@mail.gmail.com>
+ <SG2PR06MB1165B5BF4296DB866F3D418B8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <CAPDyKFqCa_evsr3a_xHNy2joodgP9xiOQ1jdD0=nY-cGTWd_Hg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Subhash Jadavani <subhashj@codeaurora.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqCa_evsr3a_xHNy2joodgP9xiOQ1jdD0=nY-cGTWd_Hg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 01/09/2017 11:00 PM, Ritesh Harjani wrote:
-> From: Subhash Jadavani <subhashj@codeaurora.org>
->
-> Program CORE_CSR_CDC_DELAY_CFG for hardware recommended 1.25ns delay.
-> We may see data CRC errors if it's programmed for any other delay
-> value.
->
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index a028568..84d29dd 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -679,7 +679,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
->  	writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
->  	writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
->  	writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
-> -	writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
-> +	writel_relaxed(0x4E2, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
->  	writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
->  	writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
->  
-
-There's a comment block above this set of writes that repeats what's
-happening in the code.
-
-        /*
-         * Perform CDC Register Initialization Sequence
-         *
-         * CORE_CSR_CDC_CTLR_CFG0       0x11800EC
-         * CORE_CSR_CDC_CTLR_CFG1       0x3011111
-         * CORE_CSR_CDC_CAL_TIMER_CFG0  0x1201000
-         * CORE_CSR_CDC_CAL_TIMER_CFG1  0x4
-         * CORE_CSR_CDC_REFCOUNT_CFG    0xCB732020
-         * CORE_CSR_CDC_COARSE_CAL_CFG  0xB19
-         * CORE_CSR_CDC_DELAY_CFG       0x3AC
-         * CORE_CDC_OFFSET_CFG          0x0
-         * CORE_CDC_SLAVE_DDA_CFG       0x16334
-         */
-
-Perhaps we should just delete those comments because they're incorrect now.
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+SGVsbG8gVWZmZSwNCg0KT24gRnJpZGF5LCBKYW51YXJ5IDIwLCAyMDE3LCBVbGYgSGFuc3NvbiB3
+cm90ZToNCj4gPiBUaGUgcmVhbGl0eSBpcyB0aGF0IHRoZSBjaGlwIGd1eXMgY3V0IHVwIHRoZSBz
+dGFuZGFyZCBTREhJIElQIHRvIGFkZCBhDQo+ID4gJ2Nvb2wgbmV3IGZlYXR1cmUnLCBidXQgYWxs
+IEkgd2FudCB0byBkbyBpcyBwdXQgaXQgYmFjayB0aGUgd2F5IGl0IHdhcy4NCj4gPg0KPiA+IE5P
+VEU6IFRoZSBkZXNpZ24gZ3V5cyBsaWtlIHRvIHJldXNlIElQIGJsb2NrcyBmcm9tIHByZXZpb3Vz
+IGRlc2lnbnMNCj4gPiB0aGF0IHRoZXkga25vdyB3b3JrZWQgYW5kIGRpZG4ndCBoYXZlIGJ1Z3Mu
+IFNvLCB0aGVyZSBpcyBhIGdvb2QgY2hhbmNlDQo+ID4geW91IHdpbGwgc2VlIHRoaXMgY2hhbmdl
+IGluIGZ1dHVyZSBSWi9BIGRldmljZXMgKG9yIGV2ZW4gb3RoZXIgZnV0dXJlDQo+IFJlbmVzYXMg
+U29DIGRldmljZXMpLg0KPiA+IFRvIHJlbW92ZSBhbiB1bndhbnRlZCBmZWF0dXJlIGFkZHMgYWRk
+aXRpb25hbCBkZXNpZ24gcmlzayBvZiBicmVha2luZw0KPiA+IHNvbWV0aGluZyBlbHNlLi4uLmFu
+ZCBnaXZlbiB0aGUgY29zdCBvZiByZWRvaW5nIHNpbGljb24gbWFzaw0KPiA+IGxheWVycy4uLm5v
+IGVuZ2luZWVyIHdhbnRzIHRoYXQgbWlzdGFrZSBvbiB0aGVpciBoYW5kcy4NCj4gDQo+IFNvLCBv
+bmUgc2hvdWxkIGJlIGF3YXJlIG9mIHRoYXQgcnVudGltZSBQTSBzdXBwb3J0IGluIHRoZXNlIGNh
+c2UgaXMgZ29pbmcNCj4gdG8gYmUgc3Vib3B0aW1hbC4NCj4gRm9yIGV4YW1wbGUsIHdoZW4gdXNp
+bmcgdGhpcyBuYXRpdmUgY2FyZCBkZXRlY3QsIHlvdSB3aWxsIG5lZWQgdG8ga2VlcCB0aGUNCj4g
+Y29udHJvbGxlciBydW50aW1lIFBNIHJlc3VtZWQgYXMgdGhlIGJlIGFibGUgdG8ga2VlcCB0aGUg
+Y2xvY2sgb24gYW5kIHRvDQo+IGJlIGFibGUgdG8gZmV0Y2ggdGhlIGlycS4gV2FzdGluZyBwb3dl
+ci4NCg0KDQpXb2xmcmFtIGFscmVhZHkgcG9pbnRlZCB0aGF0IG91dCBpbiBhIHJlcGx5IHRvIEdl
+ZXJ0Og0KDQpPbiBUdWVzZGF5LCBKYW51YXJ5IDE3LCAyMDE3LCBXb2xmcmFtIFNhbmcgd3JvdGU6
+DQo+ID4gSWYgd2UgaGFuZGxlIHRoZW0gYXMgb25lLCB3b24ndCB3ZSBtaXNzIGNhcmQgZGV0ZWN0
+IGV2ZW50cyBkdWUgdG8gdGhlDQo+ID4gY2FyZCBkZXRlY3QgY2xvY2sgYmVpbmcgZGlzYWJsZWQg
+d2hpbGUgU0RISSBpcyBpZGxlPw0KPiANCj4gWW91IG1lYW4gdGhpcz8NCj4gDQo+IDEyMDggICAg
+ICAgICAvKg0KPiAxMjA5ICAgICAgICAgICogV2hpbGUgdXNpbmcgaW50ZXJuYWwgdG1pbyBoYXJk
+d2FyZSBsb2dpYyBmb3IgY2FyZA0KPiBkZXRlY3Rpb24sIHdlIG5lZWQNCj4gMTIxMCAgICAgICAg
+ICAqIHRvIGVuc3VyZSBpdCBzdGF5cyBwb3dlcmVkIGZvciBpdCB0byB3b3JrLg0KPiAxMjExICAg
+ICAgICAgICovDQo+IDEyMTIgICAgICAgICBpZiAoX2hvc3QtPm5hdGl2ZV9ob3RwbHVnKQ0KPiAx
+MjEzICAgICAgICAgICAgICAgICBwbV9ydW50aW1lX2dldF9ub3Jlc3VtZSgmcGRldi0+ZGV2KTsN
+Cg0KDQpBcyBwZXIgeW91ciByZXF1ZXN0LCBJJ2xsIGdvIGJhY2sgYW5kIGFkZCBzb21lIHRleHQg
+dG8gZGVzY3JpYmluZyB0aGF0IGV2ZW4gdGhvdWdoDQp0aGlzIHNwZWNpZmljIEhXIGhhcyBhIHNl
+cGFyYXRlIGNsb2NrIGZvciBjYXJkIGRldGVjdCBmb3IgUE0sIHRoZSBleGlzdGluZyBkcml2ZXIN
+CmluZnJhc3RydWN0dXJlIGRvZXNuJ3QgaGFuZGxlIHRoYXQgc28gYm90aCBjbG9ja3MgbmVlZCB0
+byBiZSB0cmVhdGVkIGFzIG9uZS4NCg0KDQo+IE1vc3QgU29DIHZlbmRvcnMgYXJlIHRoZXJlZm9y
+ZSB1c2luZyBhIEdQSU8gY2FyZCBkZXRlY3QgaW5zdGVhZCwgYWx0aG91Z2gNCj4gSSBhc3N1bWUg
+eW91IGFscmVhZHkga25ldyB0aGF0LiA6LSkNCg0KTXkgZmlyc3Qgb2JqZWN0aXZlIGZvciB0aGUg
+UlovQTEgcGxhdGZvcm0gaXMgdG8gbW92ZSB0aGluZ3MgZnJvbSBhIGxvY2FsDQpjdXN0b20gQlNQ
+IGludG8gdXBzdHJlYW0gYW5kIGdldCB0aGluZ3MgJ3dvcmtpbmcnLiBMYXRlciBJIGNhbiBnbyBi
+YWNrDQphbmQgdHdlYWsgdGhpbmdzIGhlcmUgYW5kIHRoZXJlIGZvciBydW50aW1lIFBNIGFuZCBz
+dWNoLg0KDQoNClRoYW5rIHlvdSwNCkNocmlzDQoNCg==
