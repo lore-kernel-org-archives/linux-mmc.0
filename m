@@ -1,81 +1,113 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6 1/2] mmc: dw_mmc: silent verbose log when calling from
- PM context
-Date: Fri, 20 Jan 2017 17:20:00 +0900
-Message-ID: <5fdeb192-a1a6-dde1-648f-1852b596b281@samsung.com>
-References: <CGME20170117012441epcas4p40d9a54cd0fe293740e44e55fdae5b7d7@epcas4p4.samsung.com>
- <1484616176-1005-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 3/3] mmc: mediatek: Use data tune for CMD line tune
+Date: Fri, 20 Jan 2017 09:22:04 +0100
+Message-ID: <CAPDyKFrg1pgs9Kdx6Wia_Pb7fdBjO=mwfMTzicAOqx4CVrohLg@mail.gmail.com>
+References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com> <1484821156-20565-4-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:55284 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751544AbdATIUL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:20:11 -0500
-Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OK202NO8KHDI590@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jan 2017 17:20:01 +0900 (KST)
-In-reply-to: <1484616176-1005-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1484821156-20565-4-git-send-email-yong.mao@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>
 
-Hi Shawn,
+[...]
 
-On 01/17/2017 10:22 AM, Shawn Lin wrote:
-> When deploying runtime PM, it's quite verbose to print the
-> log of ios setting. Also it's useless to print it from system
-> PM as it should be the same with booting time. We also have
-> sysfs to get all these information from ios attribute, so let's
-> skip this print from PM context.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>  struct msdc_delay_phase {
+> @@ -331,6 +339,9 @@ struct msdc_host {
+>         unsigned char timing;
+>         bool vqmmc_enabled;
+>         u32 hs400_ds_delay;
+> +       u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
+> +       u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
+> +       u32 hs400_cmd_resp_sel;  /* cmd response sample selection for HS400 */
 
-Applied on my dwmmc repository. Thanks!
+When you converted the DT binding, this should become bool instead.
 
-Best Regards,
-Jaehoon Chung
+>         bool hs400_mode;        /* current eMMC will run at hs400 mode */
+>         struct msdc_save_para save_para; /* used when gate HCLK */
+>         struct msdc_tune_para def_tune_para; /* default tune setting */
 
-> 
-> ---
-> 
-> Changes in v6:
-> - reuse force_clkinit to skip the log
-> 
-> Changes in v5: None
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
-> 
->  drivers/mmc/host/dw_mmc.c | 12 +++++++-----
->  1 file changed, 7 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 3d213e7..972c779 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1182,11 +1182,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  		if ((clock != slot->__clk_old &&
->  			!test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
->  			force_clkinit) {
-> -			dev_info(&slot->mmc->class_dev,
-> -				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> -				 slot->id, host->bus_hz, clock,
-> -				 div ? ((host->bus_hz / div) >> 1) :
-> -				 host->bus_hz, div);
-> +			/* Silent the verbose log if calling from PM context */
-> +			if (!force_clkinit)
-> +				dev_info(&slot->mmc->class_dev,
-> +					 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> +					 slot->id, host->bus_hz, clock,
-> +					 div ? ((host->bus_hz / div) >> 1) :
-> +					 host->bus_hz, div);
->  
->  			/*
->  			 * If card is polling, display the message only
-> 
+[...]
 
+> +static void msdc_of_property_parse(struct platform_device *pdev,
+> +                                  struct msdc_host *host)
+> +{
+> +       if (!of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
+> +                                 &host->hs400_ds_delay))
+> +               dev_dbg(&pdev->dev, "hs400-ds-delay: %x\n",
+> +                       host->hs400_ds_delay);
+
+Writing a dev_dbg for each parsed DT property, seems a bit silly. Can
+you please remove that.
+
+> +
+> +       if (!of_property_read_u32(pdev->dev.of_node, "mtk-hs200-cmd-int-delay",
+> +                                 &host->hs200_cmd_int_delay))
+> +               dev_dbg(&pdev->dev, "host->hs200-cmd-int-delay: %x\n",
+> +                       host->hs200_cmd_int_delay);
+> +
+> +       if (!of_property_read_u32(pdev->dev.of_node, "mtk-hs400-cmd-int-delay",
+> +                                 &host->hs400_cmd_int_delay))
+> +               dev_dbg(&pdev->dev, "host->hs400-cmd-int-delay: %x\n",
+> +                       host->hs400_cmd_int_delay);
+> +
+> +       if (!of_property_read_u32(pdev->dev.of_node, "mtk-hs400-cmd-resp-sel",
+> +                                 &host->hs400_cmd_resp_sel))
+> +               dev_dbg(&pdev->dev, "host->hs200_cmd-resp-sel: %x\n",
+> +                       host->hs400_cmd_resp_sel);
+> +}
+> +
+>  static int msdc_drv_probe(struct platform_device *pdev)
+>  {
+>         struct mmc_host *mmc;
+> @@ -1497,7 +1635,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         ret = mmc_of_parse(mmc);
+>         if (ret)
+>                 goto host_free;
+> -
+
+Whitespace.
+
+>         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         host->base = devm_ioremap_resource(&pdev->dev, res);
+>         if (IS_ERR(host->base)) {
+> @@ -1548,10 +1685,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 goto host_free;
+>         }
+>
+> -       if (!of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
+> -                                 &host->hs400_ds_delay))
+> -               dev_dbg(&pdev->dev, "hs400-ds-delay: %x\n",
+> -                       host->hs400_ds_delay);
+> +       msdc_of_property_parse(pdev, host);
+>
+>         host->dev = &pdev->dev;
+>         host->mmc = mmc;
+> @@ -1663,6 +1797,7 @@ static void msdc_save_reg(struct msdc_host *host)
+>         host->save_para.patch_bit0 = readl(host->base + MSDC_PATCH_BIT);
+>         host->save_para.patch_bit1 = readl(host->base + MSDC_PATCH_BIT1);
+>         host->save_para.pad_ds_tune = readl(host->base + PAD_DS_TUNE);
+> +       host->save_para.pad_cmd_tune = readl(host->base + PAD_CMD_TUNE);
+>         host->save_para.emmc50_cfg0 = readl(host->base + EMMC50_CFG0);
+>  }
+>
+> @@ -1675,6 +1810,7 @@ static void msdc_restore_reg(struct msdc_host *host)
+>         writel(host->save_para.patch_bit0, host->base + MSDC_PATCH_BIT);
+>         writel(host->save_para.patch_bit1, host->base + MSDC_PATCH_BIT1);
+>         writel(host->save_para.pad_ds_tune, host->base + PAD_DS_TUNE);
+> +       writel(host->save_para.pad_cmd_tune, host->base + PAD_CMD_TUNE);
+>         writel(host->save_para.emmc50_cfg0, host->base + EMMC50_CFG0);
+>  }
+>
+> --
+> 1.7.9.5
+>
+
+Please also fold in the change suggested/reported by the kbuild test robot.
+
+Besides the minor things, this looks good to me!
+
+Kind regards
+Uffe
