@@ -1,31 +1,134 @@
-From: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
-Subject: Re: [PATCH 09/13] mmc: jz4740: Let the pinctrl driver configure the  pins
-Date: Fri, 20 Jan 2017 12:59:07 +0100
-Message-ID: <81c24244706ce24a678a3d05bbf6b17c@mail.crapouillou.net>
-References: <20170117231421.16310-1-paul@crapouillou.net>
- <20170117231421.16310-10-paul@crapouillou.net>
- <CAPDyKFp4idZx+ynQByz22zwsiK+reBcvt3OdHm1kR2QUy+sUhw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Fri, 20 Jan 2017 13:56:03 +0200
+Message-ID: <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
+References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
+ <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFp4idZx+ynQByz22zwsiK+reBcvt3OdHm1kR2QUy+sUhw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Fbdev development list <linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Hogan <james.hogan-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:62334 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751719AbdATMBZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 20 Jan 2017 07:01:25 -0500
+In-Reply-To: <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Uri Yanai <uri.yanai@sandisk.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, alex.lemberg@sandisk.com
 
-Le 2017-01-19 11:55, Ulf Hansson a Ã©crit :
+On 17/01/17 14:15, Uri Yanai wrote:
+> If asked to do device Runtime Suspend while
+> in BKOPS and auto BKOPS is enabled return –EBUSY
 
-> Shouldn't this be replaced with a call to:
-> pinctrl_pm_select_sleep_state();
+The spec also says
 
-You're totally right. I'll change it.
+"Before moving to Sleep state hosts may set the POWER_OFF_NOTIFICATION byte
+to SLEEP_NOTIFICATION (0x04) if aware that the device is capable of
+autonomously initiating background operations for possible performance
+improvements."
 
-Thanks,
--Paul
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Have you considered that?
+
+But I wonder if we shouldn't always use SLEEP_NOTIFICATION before sleep?
+
+> 
+> Change-Id: Ie4b38a32fe98179f0bca5b57edaaa47a02d0a389
+> Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
+> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> ---
+>  drivers/mmc/core/mmc.c  | 35 ++++++++++++++++++++++++++++-------
+>  include/linux/mmc/mmc.h |  2 ++
+>  2 files changed, 30 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f70f6a1..21f5851 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
+>  	}
+>  }
+>  
+> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +	bool is_runtime_pm)
+>  {
+>  	int err = 0;
+>  	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+> @@ -1953,10 +1954,30 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>  	if (mmc_card_suspended(host->card))
+>  		goto out;
+>  
+> -	if (mmc_card_doing_bkops(host->card)) {
+> -		err = mmc_stop_bkops(host->card);
+> -		if (err)
+> +	if (mmc_card_doing_bkops(host->card) ||
+> +		host->card->ext_csd.auto_bkops_en) {
+> +		err = mmc_read_bkops_status(host->card);
+> +		if (err) {
+> +			pr_err("%s: error %d reading BKOPS Status\n",
+> +				mmc_hostname(host), err);
+>  			goto out;
+> +		}
+> +		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
+> +				EXT_CSD_BKOPS_LEVEL_PM_SUSPEND) {
+> +			/*
+> +			 * We don’t allow Runtime Suspend while device still
+> +			 * needs time to complete internal BKOPS, returning
+> +			 * -EBUSY while BKOPS level is above
+> +			 *  EXT_CSD_BKOPS_LEVEL_PM_SUSPEND
+> +			 */
+> +			err = -EBUSY;
+> +			goto out;
+> +		}
+> +		if (mmc_card_doing_bkops(host->card)) {
+> +			err = mmc_stop_bkops(host->card);
+> +			if (err)
+> +				goto out;
+> +		}
+>  	}
+>  
+>  	err = mmc_flush_cache(host->card);
+> @@ -1987,7 +2008,7 @@ static int mmc_suspend(struct mmc_host *host)
+>  {
+>  	int err;
+>  
+> -	err = _mmc_suspend(host, true);
+> +	err = _mmc_suspend(host, true, false);
+>  	if (!err) {
+>  		pm_runtime_disable(&host->card->dev);
+>  		pm_runtime_set_suspended(&host->card->dev);
+> @@ -2034,7 +2055,7 @@ static int mmc_shutdown(struct mmc_host *host)
+>  		err = _mmc_resume(host);
+>  
+>  	if (!err)
+> -		err = _mmc_suspend(host, false);
+> +		err = _mmc_suspend(host, false, false);
+>  
+>  	return err;
+>  }
+> @@ -2058,7 +2079,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+>  	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+>  		return 0;
+>  
+> -	err = _mmc_suspend(host, true);
+> +	err = _mmc_suspend(host, true, true);
+>  	if (err)
+>  		pr_err("%s: error %d doing aggressive suspend\n",
+>  			mmc_hostname(host), err);
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 126b8d5..2633274 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -445,6 +445,8 @@ struct _mmc_csd {
+>   */
+>  #define EXT_CSD_BKOPS_LEVEL_2		0x2
+>  
+> +#define EXT_CSD_BKOPS_LEVEL_PM_SUSPEND	EXT_CSD_BKOPS_LEVEL_2
+> +
+>  /*
+>   * BKOPS modes
+>   */
+> 
+
