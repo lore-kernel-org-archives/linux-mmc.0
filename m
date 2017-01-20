@@ -1,52 +1,49 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
-Date: Thu, 19 Jan 2017 12:19:36 +0100
-Message-ID: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
-References: <20170117231421.16310-1-paul@crapouillou.net>
- <20170118071530.GA18989@ulmo.ba.sec>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] dw-mmc controller fixes
+Date: Fri, 20 Jan 2017 09:38:13 +0100
+Message-ID: <CAPDyKFpDB7_taAw=DoR8GicK19433O82Ho3Vb6xFoUNK7eZ0fg@mail.gmail.com>
+References: <CGME20170120082622epcas5p2e3db3b067b3a1cce2e30f074175cb469@epcas5p2.samsung.com>
+ <4082c88e-de72-9e18-7b9a-c37551bda610@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170118071530.GA18989@ulmo.ba.sec>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37155 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751738AbdATIiQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:38:16 -0500
+Received: by mail-wm0-f54.google.com with SMTP id c206so32618802wme.0
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2017 00:38:15 -0800 (PST)
+In-Reply-To: <4082c88e-de72-9e18-7b9a-c37551bda610@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Le 2017-01-18 08:15, Thierry Reding a écrit :
+On 20 January 2017 at 09:26, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Ulf,
+>
+> Could you pull this patch on your fixes branch?
+>
+> The following changes since commit ee6ff743e3a4b697e8286054667d7e4e1b56510d:
+>
+>   mmc: core: Restore parts of the polling policy when switch to HS/HS DDR (2017-01-16 16:17:42 +0100)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git fixes
+>
+> for you to fetch changes up to c9ea1acefff02aeb080b427d79cedeb446b28317:
+>
+>   mmc: dw_mmc: force setup bus if active slots exist (2017-01-20 17:17:43 +0900)
+>
+> ----------------------------------------------------------------
+> Ziyuan Xu (1):
+>       mmc: dw_mmc: force setup bus if active slots exist
+>
+>  drivers/mmc/host/dw_mmc.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
 
-> On Wed, Jan 18, 2017 at 12:14:08AM +0100, Paul Cercueil wrote:
-> [...]
-> 
->> One problem still unresolved: the pinctrl framework does not allow us 
->> to configure each pin on demand (someone please prove me wrong), when 
->> the various PWM channels are requested or released. For instance, the 
->> PWM channels can be configured from sysfs, which would require all PWM 
->> pins to be configured properly beforehand for the PWM function, 
->> eventually causing conflicts with other platform or board drivers.
-> 
-> Still catching up on a lot of email, so I haven't gone through the
-> entire series. But I don't think the above is true.
-> 
-> My understanding is that you can have separate pin groups for each
-> pin (provided the hardware supports that) and then control each of
-> these groups dynamically at runtime.
-> 
-> That is you could have the PWM driver's ->request() and ->free()
-> call into the pinctrl framework to select the correct pinmux
-> configuration as necessary.
+Thanks Jaehoon, pulled into fixes!
 
-Thanks for the feedback.
-
-The problem with pinctrl and PWM, is that the pinctrl API works by 
-"states".
-A default state, sleep state, and basically any custom state that the 
-devicetree
-provides. This works well until you need to control individually each 
-pin; with
-8 pins, you would need 2^8 states, each one corresponding to a given 
-configuration.
-
--Paul
+Kind regards
+Uffe
