@@ -1,58 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Fri, 20 Jan 2017 18:12:28 +0100
-Message-ID: <CAPDyKFqCa_evsr3a_xHNy2joodgP9xiOQ1jdD0=nY-cGTWd_Hg@mail.gmail.com>
-References: <20170118172502.13876-1-chris.brandt@renesas.com>
- <20170118172502.13876-3-chris.brandt@renesas.com> <CAPDyKFq9psGMnKUx+SM_QGt6OKoMHgNFop6ANagtLOLwsMTT8w@mail.gmail.com>
- <SG2PR06MB1165B5BF4296DB866F3D418B8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [RESEND PATCHv1 5/8] mmc: sdhci-msm: configure
+ CORE_CSR_CDC_DELAY_CFG to recommended value
+Date: Fri, 20 Jan 2017 09:42:11 -0800
+Message-ID: <e7b37b16-3d87-3766-6e03-9f67cd29b64a@codeaurora.org>
+References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
+ <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <SG2PR06MB1165B5BF4296DB866F3D418B8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Chris Brandt <Chris.Brandt@renesas.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 January 2017 at 17:05, Chris Brandt <Chris.Brandt@renesas.com> wrote:
-> Hello Ulf,
+On 01/09/2017 11:00 PM, Ritesh Harjani wrote:
+> From: Subhash Jadavani <subhashj@codeaurora.org>
 >
-> Friday, January 20, 2017, Ulf Hansson wrote:
->> > +- clocks: Most controllers only have 1 clock source per channel.
->> However, some
->> > +         have a second clock dedicated to card detection. If 2 clocks
->> are
->> > +         specified, you must name them as "core" and "cd". If the
->> controller
->> > +         only has 1 clock, naming is not required.
->>
->> Could you please elaborate a bit on the card detection clock?
->>
->> I guess that there is some kind of internal card detection logic (native
->> card detect) in the SDHI IP, which requires a separate clock for it to
->> work? Perhaps you can state that somehow?
+> Program CORE_CSR_CDC_DELAY_CFG for hardware recommended 1.25ns delay.
+> We may see data CRC errors if it's programmed for any other delay
+> value.
 >
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> The reality is that the chip guys cut up the standard SDHI IP to add a
-> 'cool new feature', but all I want to do is put it back the way it was.
->
-> NOTE: The design guys like to reuse IP blocks from previous designs that they
-> know worked and didn't have bugs. So, there is a good chance you will see this
-> change in future RZ/A devices (or even other future Renesas SoC devices).
-> To remove an unwanted feature adds additional design risk of breaking
-> something else....and given the cost of redoing silicon mask layers...no
-> engineer wants that mistake on their hands.
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index a028568..84d29dd 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -679,7 +679,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>  	writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
+>  	writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
+>  	writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
+> -	writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
+> +	writel_relaxed(0x4E2, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
+>  	writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
+>  	writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
+>  
 
-So, one should be aware of that runtime PM support in these case is
-going to be suboptimal.
-For example, when using this native card detect, you will need to keep
-the controller runtime PM resumed as the be able to keep the clock on
-and to be able to fetch the irq. Wasting power.
+There's a comment block above this set of writes that repeats what's
+happening in the code.
 
-Most SoC vendors are therefore using a GPIO card detect instead,
-although I assume you already knew that. :-)
+        /*
+         * Perform CDC Register Initialization Sequence
+         *
+         * CORE_CSR_CDC_CTLR_CFG0       0x11800EC
+         * CORE_CSR_CDC_CTLR_CFG1       0x3011111
+         * CORE_CSR_CDC_CAL_TIMER_CFG0  0x1201000
+         * CORE_CSR_CDC_CAL_TIMER_CFG1  0x4
+         * CORE_CSR_CDC_REFCOUNT_CFG    0xCB732020
+         * CORE_CSR_CDC_COARSE_CAL_CFG  0xB19
+         * CORE_CSR_CDC_DELAY_CFG       0x3AC
+         * CORE_CDC_OFFSET_CFG          0x0
+         * CORE_CDC_SLAVE_DDA_CFG       0x16334
+         */
 
-[...]
+Perhaps we should just delete those comments because they're incorrect now.
 
-Kind regards
-Uffe
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
