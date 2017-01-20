@@ -1,42 +1,38 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to include leds.h
-Date: Fri, 20 Jan 2017 20:34:29 +0100
-Message-ID: <87a8aleda2.fsf@belgarion.home>
-References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
-        <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
-        <87efzydusi.fsf@belgarion.home>
-        <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp03.smtpout.orange.fr ([80.12.242.125]:32011 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751497AbdATTef (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 14:34:35 -0500
-In-Reply-To: <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
-        (Ulf Hansson's message of "Fri, 20 Jan 2017 09:27:29 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chris Brandt <chris.brandt@renesas.com>
+Subject: [PATCH v4 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
+Date: Fri, 20 Jan 2017 14:43:29 -0500
+Message-ID: <20170120194332.1683-1-chris.brandt@renesas.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+At first this started out as a simple typo fix, until I realized
+that the SDHI in the RZ/A1 has 2 clocks per channel and both need
+to be turned on/off.
 
-> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
->> Ulf Hansson <ulf.hansson@linaro.org> writes:
->> So I was wondering how you made the choice of which files you add the include to
->> and which you don't touch ?
->
-> By building the pxa_defconfig, see what errors it reports and then fix them.
->
-> Isn't pxa_defconfig building all the variants?
-Euh actually it should, but it's not.
+This patch series adds the ability to specify 2 clocks instead of
+just 1, and does so for the RZ/A1 r7s72100.
 
-The file was built from all _existing_ pxa defconfigs in arch/arm/configs/. The
-trick is that there were many pxa boards for which no defconfig file was
-available, and therefore they "escape" the pxa_defconfig coverage.
+This patch has been tested on an RZ/A1 RSK board. Card detect works
+fine as well as bind/unbind.
 
-Cheers.
+v4:
+* No code changes, only text udpates to explain why there are 2 clocks
+  and why we need to treat them as 1 clock.
+
+
+Chris Brandt (3):
+  mmc: sh_mobile_sdhi: add support for 2 clocks
+  mmc: sh_mobile_sdhi: explain clock bindings
+  ARM: dts: r7s72100: update sdhi clock bindings
+
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 28 ++++++++++++++++++++++
+ arch/arm/boot/dts/r7s72100.dtsi                    | 17 +++++++++----
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 13 ++++++++++
+ include/dt-bindings/clock/r7s72100-clock.h         |  6 +++--
+ 4 files changed, 57 insertions(+), 7 deletions(-)
 
 -- 
-Robert
+2.10.1
