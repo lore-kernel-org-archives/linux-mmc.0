@@ -1,90 +1,80 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6 2/2] mmc: dw_mmc: force setup bus if active slots exist
-Date: Fri, 20 Jan 2017 17:19:15 +0900
-Message-ID: <ba8bcad2-aba4-efb1-986c-7dfd224e8a54@samsung.com>
-References: <1484616176-1005-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20170117012513epcas2p1a06202afac3ee9ce89057643d221c50f@epcas2p1.samsung.com>
- <1484616176-1005-2-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to
+ include leds.h
+Date: Fri, 20 Jan 2017 09:27:29 +0100
+Message-ID: <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+ <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org> <87efzydusi.fsf@belgarion.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:58313 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751467AbdATITS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:19:18 -0500
-In-reply-to: <1484616176-1005-2-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38769 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751324AbdATI2f (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:28:35 -0500
+Received: by mail-wm0-f42.google.com with SMTP id r144so32106020wme.1
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2017 00:27:31 -0800 (PST)
+In-Reply-To: <87efzydusi.fsf@belgarion.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, stable@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Shawn,
+On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>
+>> Some of the pxa platforms, balloon3, colibri-pxa270-income, corgi,
+>> trizeps4, vpac270, zeus and zylonite depends on leds.h. Explicitly include
+>> it instead of relying on the public mmc header host.h.
+>>
+>> Cc: Daniel Mack <daniel@zonque.org>
+>> Cc: Haojian Zhuang <haojian.zhuang@gmail.com>
+>> Cc: Robert Jarzmik <robert.jarzmik@free.fr>
+>> Cc: <linux-arm-kernel@lists.infradead.org>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>
+>> I am seeking an ack for this change as following changes for mmc in the
+>> series, has build-dependencies to it.
+> Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+>
+> Actually I already have a patch for arch/arm/mach-pxa/idp.c which adds this
+> include also in my -next tree, just in case you're tempted to modify this one,
+> which would conflict with my pxa tree.
+>
+> An other point, I checked which files don't have a leds.h :
+>  - grep -ls _led arch/arm/mach-pxa/*.c > /tmp/a
+>  - grep -ls 'linux/leds.h' arch/arm/mach-pxa/*.c > /tmp/b
+>  - sdiff -s /tmp/a /tmp/b
+> This gives me :
+>         balloon3.c
+>         colibri-pxa270-income.c
+>         corgi.c
+>         corgi_pm.c
+>         em-x270.c
+>         ezx.c
+>         hx4700.c
+>         magician.c
+>         palmld.c
+>         palmtc.c
+>         palmtreo.c
+>         palmz72.c
+>         spitz_pm.c
+>         tosa.c
+>         trizeps4.c
+>         vpac270.c
+>         z2.c
+>         zeus.c
+>         zylonite.c
+>         zylonite_pxa300.c
+>         zylonite_pxa320.c
+>
+> So I was wondering how you made the choice of which files you add the include to
+> and which you don't touch ?
 
-On 01/17/2017 10:22 AM, Shawn Lin wrote:
-> From: Ziyuan Xu <xzy.xu@rock-chips.com>
-> 
-> It's necessary to setup bus if any slots are present.
-> - update clock after ctrl reset
-> - if the host has genpd node, we can guarantee the clock is
->   available before starting request. Otherwies, the clock register
->   is reset once power off the pd, and host can't output the active
->   clock during communication.
-> 
-> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
-> Fixes: df9bcc2bc0a1 ("mmc: dw_mmc: add missing codes for runtime resume")
-> cc: <stable@vger.kernel.org>
-> Reported-by: Randy Li <randy.li@rock-chips.com>
-> Reported-by: S. Gilles <sgilles@math.umd.edu>
-> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+By building the pxa_defconfig, see what errors it reports and then fix them.
 
-Applied on my fixes branch. Thanks!
+Isn't pxa_defconfig building all the variants?
 
-Best Regards,
-Jaehoon Chung
-
-> 
-> ---
-> 
-> Changes in v6:
-> - reuse force_clkinit
-> 
-> Changes in v5:
-> - rebase in order to skip spamming log
-> 
-> Changes in v4:
-> - update commit message
-> - fix SD host rpm resume can't work
-> 
-> Changes in v3:
-> - only reset host with active slot.
-> 
-> Changes in v2:
-> - update the commit message
-> - use dw_mci_reset instead of dw_mci_ctrl_reset
-> 
->  drivers/mmc/host/dw_mmc.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 972c779..a9ac0b4 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3366,10 +3366,11 @@ int dw_mci_runtime_resume(struct device *dev)
->  
->  		if (!slot)
->  			continue;
-> -		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
-> +		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->  			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-> -			dw_mci_setup_bus(slot, true);
-> -		}
-> +
-> +		/* Force setup bus to guarantee available clock output */
-> +		dw_mci_setup_bus(slot, true);
->  	}
->  
->  	/* Now that slots are all setup, we can enable card detect */
-> 
-
+Kind regards
+Uffe
