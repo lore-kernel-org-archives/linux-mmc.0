@@ -1,239 +1,146 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/2] mmc: pwrseq: add support for Marvell SD8787 chip
-Date: Fri, 20 Jan 2017 08:31:59 +0100
-Message-ID: <CAPDyKFoiNfP8TxV_=zHYQzK2wE8Sf+vXAYcoUCzS5j=57TXU8A@mail.gmail.com>
-References: <20170113052937.12538-1-matt@ranostay.consulting>
- <20170113052937.12538-3-matt@ranostay.consulting> <CAPDyKFpcKuybQmhqCkaAkOM5d+ubU8O8=adLm+PXwc=+N87vng@mail.gmail.com>
- <68de9e67-a7f2-2cc4-26e6-0d3c0afd95db@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <68de9e67-a7f2-2cc4-26e6-0d3c0afd95db@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Matt Ranostay <matt@ranostay.consulting>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2] mmc: sdio: check the buffer address for sdio API
+Date: Fri, 20 Jan 2017 15:34:01 +0800
+Message-ID: <1484897641-216803-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.135]:43530 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751320AbdATHgj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 02:36:39 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 20 January 2017 at 03:42, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> On 2017/1/19 22:13, Ulf Hansson wrote:
->>
->> +Shawn
->>
->> On 13 January 2017 at 06:29, Matt Ranostay <matt@ranostay.consulting>
->> wrote:
->>>
->>> Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
->>> This can be abstracted to other chipsets if needed in the future.
->>>
->>> Cc: Tony Lindgren <tony@atomide.com>
->>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
->>> ---
->>>  drivers/mmc/core/Kconfig         |  10 ++++
->>>  drivers/mmc/core/Makefile        |   1 +
->>>  drivers/mmc/core/pwrseq_sd8787.c | 117
->>> +++++++++++++++++++++++++++++++++++++++
->>>  3 files changed, 128 insertions(+)
->>>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
->>>
->>> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
->>> index cdfa8520a4b1..fc1ecdaaa9ca 100644
->>> --- a/drivers/mmc/core/Kconfig
->>> +++ b/drivers/mmc/core/Kconfig
->>> @@ -12,6 +12,16 @@ config PWRSEQ_EMMC
->>>           This driver can also be built as a module. If so, the module
->>>           will be called pwrseq_emmc.
->>>
->>> +config PWRSEQ_SD8787
->>> +       tristate "HW reset support for SD8787 BT + Wifi module"
->>> +       depends on OF && (MWIFIEX || BT_MRVL_SDIO)
->>> +       help
->>> +         This selects hardware reset support for the SD8787 BT + Wifi
->>> +         module. By default this option is set to n.
->>> +
->>> +         This driver can also be built as a module. If so, the module
->>> +         will be called pwrseq_sd8787.
->>> +
->>>  config PWRSEQ_SIMPLE
->>>         tristate "Simple HW reset support for MMC"
->>>         default y
->>> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
->>> index b2a257dc644f..0f81464fa824 100644
->>> --- a/drivers/mmc/core/Makefile
->>> +++ b/drivers/mmc/core/Makefile
->>> @@ -10,6 +10,7 @@ mmc_core-y                    := core.o bus.o host.o \
->>>                                    quirks.o slot-gpio.o
->>>  mmc_core-$(CONFIG_OF)          += pwrseq.o
->>>  obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
->>> +obj-$(CONFIG_PWRSEQ_SD8787)    += pwrseq_sd8787.o
->>>  obj-$(CONFIG_PWRSEQ_EMMC)      += pwrseq_emmc.o
->>>  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
->>>  obj-$(CONFIG_MMC_BLOCK)                += mmc_block.o
->>> diff --git a/drivers/mmc/core/pwrseq_sd8787.c
->>> b/drivers/mmc/core/pwrseq_sd8787.c
->>> new file mode 100644
->>> index 000000000000..f4080fe6439e
->>> --- /dev/null
->>> +++ b/drivers/mmc/core/pwrseq_sd8787.c
->>> @@ -0,0 +1,117 @@
->>> +/*
->>> + * pwrseq_sd8787.c - power sequence support for Marvell SD8787 BT + Wifi
->>> chip
->>> + *
->>> + * Copyright (C) 2016 Matt Ranostay <matt@ranostay.consulting>
->>> + *
->>> + * Based on the original work pwrseq_simple.c
->>> + *  Copyright (C) 2014 Linaro Ltd
->>> + *  Author: Ulf Hansson <ulf.hansson@linaro.org>
->>> + *
->>> + * This program is free software; you can redistribute it and/or modify
->>> + * it under the terms of the GNU General Public License as published by
->>> + * the Free Software Foundation; either version 2 of the License, or
->>> + * (at your option) any later version.
->>> + *
->>> + * This program is distributed in the hope that it will be useful,
->>> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
->>> + * GNU General Public License for more details.
->>> + *
->>> + */
->>> +
->>> +#include <linux/delay.h>
->>> +#include <linux/init.h>
->>> +#include <linux/kernel.h>
->>> +#include <linux/platform_device.h>
->>> +#include <linux/module.h>
->>> +#include <linux/slab.h>
->>> +#include <linux/device.h>
->>> +#include <linux/err.h>
->>> +#include <linux/gpio/consumer.h>
->>> +
->>> +#include <linux/mmc/host.h>
->>> +
->>> +#include "pwrseq.h"
->>> +
->>> +struct mmc_pwrseq_sd8787 {
->>> +       struct mmc_pwrseq pwrseq;
->>> +       struct gpio_desc *reset_gpio;
->>> +       struct gpio_desc *pwrdn_gpio;
->>> +};
->>> +
->>> +#define to_pwrseq_sd8787(p) container_of(p, struct mmc_pwrseq_sd8787,
->>> pwrseq)
->>> +
->>> +static void mmc_pwrseq_sd8787_pre_power_on(struct mmc_host *host)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq =
->>> to_pwrseq_sd8787(host->pwrseq);
->>> +
->>> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
->>> +
->>> +       msleep(300);
->>> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 1);
->>> +}
->>> +
->>> +static void mmc_pwrseq_sd8787_power_off(struct mmc_host *host)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq =
->>> to_pwrseq_sd8787(host->pwrseq);
->>> +
->>> +       gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 0);
->>> +       gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
->>> +}
->>> +
->>> +static const struct mmc_pwrseq_ops mmc_pwrseq_sd8787_ops = {
->>> +       .pre_power_on = mmc_pwrseq_sd8787_pre_power_on,
->>> +       .power_off = mmc_pwrseq_sd8787_power_off,
->>> +};
->>> +
->>> +static const struct of_device_id mmc_pwrseq_sd8787_of_match[] = {
->>> +       { .compatible = "mmc-pwrseq-sd8787",},
->>> +       {/* sentinel */},
->>> +};
->>> +MODULE_DEVICE_TABLE(of, mmc_pwrseq_sd8787_of_match);
->>> +
->>> +static int mmc_pwrseq_sd8787_probe(struct platform_device *pdev)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq;
->>> +       struct device *dev = &pdev->dev;
->>> +
->>> +       pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
->>> +       if (!pwrseq)
->>> +               return -ENOMEM;
->>> +
->>> +       pwrseq->pwrdn_gpio = devm_gpiod_get(dev, "pwrdn", GPIOD_OUT_LOW);
->>> +       if (IS_ERR(pwrseq->pwrdn_gpio))
->>> +               return PTR_ERR(pwrseq->pwrdn_gpio);
->>> +
->>> +       pwrseq->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
->>> +       if (IS_ERR(pwrseq->reset_gpio))
->>> +               return PTR_ERR(pwrseq->reset_gpio);
->>> +
->>> +       pwrseq->pwrseq.dev = dev;
->>> +       pwrseq->pwrseq.ops = &mmc_pwrseq_sd8787_ops;
->>> +       pwrseq->pwrseq.owner = THIS_MODULE;
->>> +       platform_set_drvdata(pdev, pwrseq);
->>> +
->>> +       return mmc_pwrseq_register(&pwrseq->pwrseq);
->>> +}
->>> +
->>> +static int mmc_pwrseq_sd8787_remove(struct platform_device *pdev)
->>> +{
->>> +       struct mmc_pwrseq_sd8787 *pwrseq = platform_get_drvdata(pdev);
->>> +
->>> +       mmc_pwrseq_unregister(&pwrseq->pwrseq);
->>> +
->>> +       return 0;
->>> +}
->>> +
->>> +static struct platform_driver mmc_pwrseq_sd8787_driver = {
->>> +       .probe = mmc_pwrseq_sd8787_probe,
->>> +       .remove = mmc_pwrseq_sd8787_remove,
->>> +       .driver = {
->>> +               .name = "pwrseq_sd8787",
->>> +               .of_match_table = mmc_pwrseq_sd8787_of_match,
->>> +       },
->>> +};
->>> +
->>> +module_platform_driver(mmc_pwrseq_sd8787_driver);
->>> +MODULE_LICENSE("GPL v2");
->>> --
->>> 2.10.2
->>>
->>
->> Twisting my head around how this could be integrated smoothly into
->> pwrseq simple. No, I just can find a good way forward without messing
->> up pwrseq simple itself.
->>
->> So, for now I decided (once more :-), that let's keep this as separate
->> driver!
->
->
-> I still worry about if there will be more and more seperate drivers. :)
+It's fine if the host driver use PIO mode to transfer the
+vmalloc area buffer but not for DMA mode. The sdio APIs haven't
+provide the capability to tell the caller whether it will use DMA
+to finish the IO transfer or not, so don't give the randomly
+insmoded sdio function driver the possibility to break the kernel.
+Also the APIs shouldn't take the liberty to do a copy for these
+cases and just kick out these requests should be enough.
 
-Yes, me to. However, in some cases it's just going to be too device
-specific to make a generic pwrseq driver to deal with it.
+This issue is observed by doing insmod a downloaded wifi module
+driver and the kernel panic right away. Unfortunately we don't have
+the source code but adding this patch that it proves that the module
+driver was passing on a vmalloc area buffer for sdio APIs.
 
-Also, if we do see that the new Marvell driver can be used together
-with some other devices, we can always consider to make it more
-generic in a second step.
+It could very easy to be reproduced by writing a simple function
+module driver and insmod it, and panic log looks like:
 
->
-> IIRC Peter Chen was trying to move pwrseq out of mmc and use it
-> for USB stuff. It seems there is no follow-up plan there but should
-> we invent a new directory to fold in all the pweseq stuff there,
-> for instance, drivers/mmc/pweseqs/.
+unsigned u8 __aligned(32) buf[PAGE_SIZE];
 
-The problem with a new directory is that we need to export the mmc
-pwseq interface via a public mmc header. I would rather try to keep as
-close as possible to the mmc core.
+static int wifi_probe(struct sdio_func *func, const struct
+sdio_device_id *id)
+{
+	sdio_claim_host(func);
+	sdio_enable_func(func);
+	sdio_memcpy_toio(func, 0x0, buf, 0x200);
+}
 
-Although, I also think it's a good idea to look into how to convert
-existing mmc pwrseq into using the generic pwrseq instead. Although,
-we still need to keep the existing mmc DT bindings, even if we can
-mark them as deprecated.
+[  236.748210] wifi_probe: buf = 0xffffff8000a40b80
+[  236.748258] swiotlb_tbl_map_single: orig_addr = 0xfffffffff8c40b80,
+tlb_addr = 0xf7eae000 //I added log here
+[  236.748276] Unable to handle kernel paging request at virtual address
+fffffffff8c40b80
+[  236.776486] pgd = ffffffc0b3417000
+[  236.776789] [fffffffff8c40b80] *pgd=00000000b3427003,
+*pud=00000000b3427003, *pmd=0000000000000000
+[  236.777601] Internal error: Oops: 96000005 [#1] PREEMPT SMP
+[  236.778093] Modules linked in: drvtst(O+)
+[  236.778463] CPU: 0 PID: 1918 Comm: insmod Tainted: G           O
+4.4.36 #25
+[  236.779096] Hardware name: Rockchip RK3399 Evaluation Board v3 edp
+(Android) (DT)
+[  236.779753] task: ffffffc0e3db0c40 ti: ffffffc0b342c000 task.ti:
+ffffffc0b342c000
+[  236.780418] PC is at __memcpy+0x100/0x180
+[  236.780777] LR is at swiotlb_tbl_map_single+0x254/0x274
+[  236.781237] pc : [<ffffff80083579c0>] lr : [<ffffff800837cf70>]
+...
 
-[...]
+[  236.941392] f460: 3d20726464615f67 6666666666783020
+[  236.941826] [<ffffff80083579c0>] __memcpy+0x100/0x180
+[  236.942274] [<ffffff800837dc18>] swiotlb_map_sg_attrs+0xa8/0x170
+[  236.942810] [<ffffff800809359c>] __swiotlb_map_sg_attrs+0x24/0x8c
+[  236.943353] [<ffffff800871113c>]
+dw_mci_pre_dma_transfer.isra.16+0xf0/0x11c
+[  236.943967] [<ffffff80087129cc>] __dw_mci_start_request+0x17c/0x4d0
+[  236.944520] [<ffffff80087132e0>] dw_mci_request+0xb8/0xf0
+[  236.945002] [<ffffff80086f8b44>] __mmc_start_request+0x9c/0xc0
+[  236.945520] [<ffffff80087ae0e8>]
+mmc_start_request.part.17+0x100/0x11c
+[  236.946097] [<ffffff80086f9c74>] mmc_wait_for_req+0x78/0x1a8
+[  236.946600] [<ffffff800870421c>] mmc_io_rw_extended+0x27c/0x2fc
+[  236.947124] [<ffffff8008705800>] sdio_io_rw_ext_helper+0x1e4/0x238
+[  236.947670] [<ffffff8008705954>] sdio_memcpy_toio+0x24/0x2c
+[  236.948169] [<ffffff8000a40108>] wifi_probe+0xa8/0x198 [drvtst]
+[  236.948708] [<ffffff8008704734>] sdio_bus_probe+0xb0/0x140
+[  236.949195] [<ffffff80084bfd6c>] driver_probe_device+0x118/0x2b0
+[  236.949724] [<ffffff80084bff68>] __driver_attach+0x64/0x90
+[  236.950212] [<ffffff80084bee18>] bus_for_each_dev+0x80/0xb0
+[  236.950706] [<ffffff80084bf8ac>] driver_attach+0x20/0x28
+[  236.951176] [<ffffff80084bf45c>] bus_add_driver+0xe8/0x1ec
+[  236.951661] [<ffffff80084c0afc>] driver_register+0x98/0xe4
+[  236.952147] [<ffffff8008704580>] sdio_register_driver+0x24/0x2c
+[  236.952675] [<ffffff8000a40228>] wifi_sdio_init+0x30/0x68 [drvtst]
+[  236.953241] [<ffffff8000a4400c>] wifi_drv_init+0xc/0x38 [drvtst]
+[  236.953789] [<ffffff8008082ba4>] do_one_initcall+0x17c/0x198
+[  236.954293] [<ffffff800815e564>] do_init_module+0x60/0x1b8
+[  236.954779] [<ffffff80081150f0>] load_module+0x1660/0x1a50
+[  236.955264] [<ffffff800811562c>] SyS_init_module+0x14c/0x180
+[  236.955765] [<ffffff80080826f0>] el0_svc_naked+0x24/0x28
 
-Kind regards
-Uffe
+So the kernel crash since the vmalloc area buffer, on-stack buffer or
+the on-module buffer aren't physical continuous and swiotlb couldn't find
+the correct mapping address in fact. Anyway, don't give the chance to panic
+kernel by using sdio APIs.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+---
+
+Changes in v2:
+- add new function to check the addr of vmalloc/module/stack
+
+ drivers/mmc/core/sdio_io.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 406e5f0..5d0344a 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include <linux/export.h>
++#include <linux/mm.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/sdio.h>
+@@ -298,6 +299,12 @@ unsigned int sdio_align_size(struct sdio_func *func, unsigned int sz)
+ }
+ EXPORT_SYMBOL_GPL(sdio_align_size);
+ 
++static int sdio_io_addr_sanity_check(void *addr)
++{
++	return (is_vmalloc_or_module_addr(addr) ||
++		object_is_on_stack(addr));
++}
++
+ /* Split an arbitrarily sized data transfer into several
+  * IO_RW_EXTENDED commands. */
+ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+@@ -307,7 +314,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+ 	unsigned max_blocks;
+ 	int ret;
+ 
+-	if (!func || (func->num > 7))
++	if (!func || (func->num > 7) || sdio_io_addr_sanity_check(buf))
+ 		return -EINVAL;
+ 
+ 	/* Do the bulk of the transfer using block mode (if supported). */
+-- 
+1.9.1
+
+
