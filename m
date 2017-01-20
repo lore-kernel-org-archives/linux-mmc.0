@@ -1,60 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/3] dts: mediatek: configure some fixed mmc parameters
-Date: Fri, 20 Jan 2017 08:59:08 +0100
-Message-ID: <CAPDyKFrHCy7bLb-wDRWpELAB5VxPc4tjyWKd31YufEZC_AQtVA@mail.gmail.com>
-References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com> <1484821156-20565-3-git-send-email-yong.mao@mediatek.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to include leds.h
+Date: Fri, 20 Jan 2017 09:01:33 +0100
+Message-ID: <87efzydusi.fsf@belgarion.home>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+        <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38345 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751392AbdATH74 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 02:59:56 -0500
-Received: by mail-wm0-f50.google.com with SMTP id r144so31124698wme.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2017 23:59:09 -0800 (PST)
-In-Reply-To: <1484821156-20565-3-git-send-email-yong.mao@mediatek.com>
+Received: from smtp01.smtpout.orange.fr ([80.12.242.123]:31122 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751397AbdATIBi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:01:38 -0500
+In-Reply-To: <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org> (Ulf
+        Hansson's message of "Fri, 13 Jan 2017 14:14:02 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Mao <yong.mao@mediatek.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-arm-kernel@lists.infradead.org
 
-On 19 January 2017 at 11:19, Yong Mao <yong.mao@mediatek.com> wrote:
-> From: yong mao <yong.mao@mediatek.com>
+Ulf Hansson <ulf.hansson@linaro.org> writes:
+
+> Some of the pxa platforms, balloon3, colibri-pxa270-income, corgi,
+> trizeps4, vpac270, zeus and zylonite depends on leds.h. Explicitly include
+> it instead of relying on the public mmc header host.h.
 >
-> configure some fixed mmc parameters
->
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-
-Please change the prefix of the commit message header to "ARM64: dts: mt8173:".
-
-Also make sure you send this to the ARM mailing list as well.
-
-In general, I think it's better DTS changes go via the ARM SoC tree,
-but I can pick it up if it's trivial and I get an ack from the SoC
-maintainer.
-
+> Cc: Daniel Mack <daniel@zonque.org>
+> Cc: Haojian Zhuang <haojian.zhuang@gmail.com>
+> Cc: Robert Jarzmik <robert.jarzmik@free.fr>
+> Cc: <linux-arm-kernel@lists.infradead.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  arch/arm64/boot/dts/mediatek/mt8173-evb.dts |    3 +++
->  1 file changed, 3 insertions(+)
 >
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> index 0ecaad4..403705e 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> +++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-> @@ -134,6 +134,9 @@
->         bus-width = <8>;
->         max-frequency = <50000000>;
->         cap-mmc-highspeed;
-> +       mtk-hs200-cmd-int-delay=<26>;
-> +       mtk-hs400-cmd-int-delay=<14>;
-> +       mtk-hs400-cmd-resp-sel=<0>; /* 0:rising, 1:falling */
->         vmmc-supply = <&mt6397_vemc_3v3_reg>;
->         vqmmc-supply = <&mt6397_vio18_reg>;
->         non-removable;
-> --
-> 1.7.9.5
->
+> I am seeking an ack for this change as following changes for mmc in the
+> series, has build-dependencies to it.
+Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
 
-Kind regards
-Uffe
+Actually I already have a patch for arch/arm/mach-pxa/idp.c which adds this
+include also in my -next tree, just in case you're tempted to modify this one,
+which would conflict with my pxa tree.
+
+An other point, I checked which files don't have a leds.h :
+ - grep -ls _led arch/arm/mach-pxa/*.c > /tmp/a
+ - grep -ls 'linux/leds.h' arch/arm/mach-pxa/*.c > /tmp/b
+ - sdiff -s /tmp/a /tmp/b
+This gives me :
+	balloon3.c
+	colibri-pxa270-income.c
+	corgi.c
+	corgi_pm.c
+	em-x270.c
+	ezx.c
+	hx4700.c
+	magician.c
+	palmld.c
+	palmtc.c
+	palmtreo.c
+	palmz72.c
+	spitz_pm.c
+	tosa.c
+	trizeps4.c
+	vpac270.c
+	z2.c
+	zeus.c
+	zylonite.c
+	zylonite_pxa300.c
+	zylonite_pxa320.c
+
+So I was wondering how you made the choice of which files you add the include to
+and which you don't touch ?
+
+Cheers.
+
+--
+Robert
