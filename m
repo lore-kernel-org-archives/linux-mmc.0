@@ -1,75 +1,81 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to include leds.h
-Date: Fri, 20 Jan 2017 09:01:33 +0100
-Message-ID: <87efzydusi.fsf@belgarion.home>
-References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
-        <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v6 1/2] mmc: dw_mmc: silent verbose log when calling from
+ PM context
+Date: Fri, 20 Jan 2017 17:20:00 +0900
+Message-ID: <5fdeb192-a1a6-dde1-648f-1852b596b281@samsung.com>
+References: <CGME20170117012441epcas4p40d9a54cd0fe293740e44e55fdae5b7d7@epcas4p4.samsung.com>
+ <1484616176-1005-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp01.smtpout.orange.fr ([80.12.242.123]:31122 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751397AbdATIBi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:01:38 -0500
-In-Reply-To: <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org> (Ulf
-        Hansson's message of "Fri, 13 Jan 2017 14:14:02 +0100")
+Received: from mailout4.samsung.com ([203.254.224.34]:55284 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751544AbdATIUL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 03:20:11 -0500
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OK202NO8KHDI590@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 20 Jan 2017 17:20:01 +0900 (KST)
+In-reply-to: <1484616176-1005-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-arm-kernel@lists.infradead.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+Hi Shawn,
 
-> Some of the pxa platforms, balloon3, colibri-pxa270-income, corgi,
-> trizeps4, vpac270, zeus and zylonite depends on leds.h. Explicitly include
-> it instead of relying on the public mmc header host.h.
->
-> Cc: Daniel Mack <daniel@zonque.org>
-> Cc: Haojian Zhuang <haojian.zhuang@gmail.com>
-> Cc: Robert Jarzmik <robert.jarzmik@free.fr>
-> Cc: <linux-arm-kernel@lists.infradead.org>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+On 01/17/2017 10:22 AM, Shawn Lin wrote:
+> When deploying runtime PM, it's quite verbose to print the
+> log of ios setting. Also it's useless to print it from system
+> PM as it should be the same with booting time. We also have
+> sysfs to get all these information from ios attribute, so let's
+> skip this print from PM context.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+Applied on my dwmmc repository. Thanks!
+
+Best Regards,
+Jaehoon Chung
+
+> 
 > ---
->
-> I am seeking an ack for this change as following changes for mmc in the
-> series, has build-dependencies to it.
-Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> 
+> Changes in v6:
+> - reuse force_clkinit to skip the log
+> 
+> Changes in v5: None
+> Changes in v4: None
+> Changes in v3: None
+> Changes in v2: None
+> 
+>  drivers/mmc/host/dw_mmc.c | 12 +++++++-----
+>  1 file changed, 7 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 3d213e7..972c779 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1182,11 +1182,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  		if ((clock != slot->__clk_old &&
+>  			!test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
+>  			force_clkinit) {
+> -			dev_info(&slot->mmc->class_dev,
+> -				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
+> -				 slot->id, host->bus_hz, clock,
+> -				 div ? ((host->bus_hz / div) >> 1) :
+> -				 host->bus_hz, div);
+> +			/* Silent the verbose log if calling from PM context */
+> +			if (!force_clkinit)
+> +				dev_info(&slot->mmc->class_dev,
+> +					 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
+> +					 slot->id, host->bus_hz, clock,
+> +					 div ? ((host->bus_hz / div) >> 1) :
+> +					 host->bus_hz, div);
+>  
+>  			/*
+>  			 * If card is polling, display the message only
+> 
 
-Actually I already have a patch for arch/arm/mach-pxa/idp.c which adds this
-include also in my -next tree, just in case you're tempted to modify this one,
-which would conflict with my pxa tree.
-
-An other point, I checked which files don't have a leds.h :
- - grep -ls _led arch/arm/mach-pxa/*.c > /tmp/a
- - grep -ls 'linux/leds.h' arch/arm/mach-pxa/*.c > /tmp/b
- - sdiff -s /tmp/a /tmp/b
-This gives me :
-	balloon3.c
-	colibri-pxa270-income.c
-	corgi.c
-	corgi_pm.c
-	em-x270.c
-	ezx.c
-	hx4700.c
-	magician.c
-	palmld.c
-	palmtc.c
-	palmtreo.c
-	palmz72.c
-	spitz_pm.c
-	tosa.c
-	trizeps4.c
-	vpac270.c
-	z2.c
-	zeus.c
-	zylonite.c
-	zylonite_pxa300.c
-	zylonite_pxa320.c
-
-So I was wondering how you made the choice of which files you add the include to
-and which you don't touch ?
-
-Cheers.
-
---
-Robert
