@@ -1,134 +1,60 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Fri, 20 Jan 2017 13:56:03 +0200
-Message-ID: <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
+From: Chris Brandt <Chris.Brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [PATCH v3 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Fri, 20 Jan 2017 15:52:04 +0000
+Message-ID: <SG2PR06MB1165089B50C28BFD333299CB8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170118172502.13876-1-chris.brandt@renesas.com>
+ <20170118172502.13876-2-chris.brandt@renesas.com>
+ <CAPDyKFqO3YrDdKqOqJ=xKSH7uAiZ+rCPEDKMZ+c8Y5RKaVK4kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:62334 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751719AbdATMBZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Jan 2017 07:01:25 -0500
-In-Reply-To: <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFqO3YrDdKqOqJ=xKSH7uAiZ+rCPEDKMZ+c8Y5RKaVK4kg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Uri Yanai <uri.yanai@sandisk.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, alex.lemberg@sandisk.com
 
-On 17/01/17 14:15, Uri Yanai wrote:
-> If asked to do device Runtime Suspend while
-> in BKOPS and auto BKOPS is enabled return –EBUSY
-
-The spec also says
-
-"Before moving to Sleep state hosts may set the POWER_OFF_NOTIFICATION byte
-to SLEEP_NOTIFICATION (0x04) if aware that the device is capable of
-autonomously initiating background operations for possible performance
-improvements."
-
-Have you considered that?
-
-But I wonder if we shouldn't always use SLEEP_NOTIFICATION before sleep?
-
-> 
-> Change-Id: Ie4b38a32fe98179f0bca5b57edaaa47a02d0a389
-> Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-> ---
->  drivers/mmc/core/mmc.c  | 35 ++++++++++++++++++++++++++++-------
->  include/linux/mmc/mmc.h |  2 ++
->  2 files changed, 30 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f70f6a1..21f5851 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
->  	}
->  }
->  
-> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
-> +	bool is_runtime_pm)
->  {
->  	int err = 0;
->  	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
-> @@ -1953,10 +1954,30 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->  	if (mmc_card_suspended(host->card))
->  		goto out;
->  
-> -	if (mmc_card_doing_bkops(host->card)) {
-> -		err = mmc_stop_bkops(host->card);
-> -		if (err)
-> +	if (mmc_card_doing_bkops(host->card) ||
-> +		host->card->ext_csd.auto_bkops_en) {
-> +		err = mmc_read_bkops_status(host->card);
-> +		if (err) {
-> +			pr_err("%s: error %d reading BKOPS Status\n",
-> +				mmc_hostname(host), err);
->  			goto out;
-> +		}
-> +		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
-> +				EXT_CSD_BKOPS_LEVEL_PM_SUSPEND) {
-> +			/*
-> +			 * We don’t allow Runtime Suspend while device still
-> +			 * needs time to complete internal BKOPS, returning
-> +			 * -EBUSY while BKOPS level is above
-> +			 *  EXT_CSD_BKOPS_LEVEL_PM_SUSPEND
-> +			 */
-> +			err = -EBUSY;
-> +			goto out;
-> +		}
-> +		if (mmc_card_doing_bkops(host->card)) {
-> +			err = mmc_stop_bkops(host->card);
-> +			if (err)
-> +				goto out;
-> +		}
->  	}
->  
->  	err = mmc_flush_cache(host->card);
-> @@ -1987,7 +2008,7 @@ static int mmc_suspend(struct mmc_host *host)
->  {
->  	int err;
->  
-> -	err = _mmc_suspend(host, true);
-> +	err = _mmc_suspend(host, true, false);
->  	if (!err) {
->  		pm_runtime_disable(&host->card->dev);
->  		pm_runtime_set_suspended(&host->card->dev);
-> @@ -2034,7 +2055,7 @@ static int mmc_shutdown(struct mmc_host *host)
->  		err = _mmc_resume(host);
->  
->  	if (!err)
-> -		err = _mmc_suspend(host, false);
-> +		err = _mmc_suspend(host, false, false);
->  
->  	return err;
->  }
-> @@ -2058,7 +2079,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
->  	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
->  		return 0;
->  
-> -	err = _mmc_suspend(host, true);
-> +	err = _mmc_suspend(host, true, true);
->  	if (err)
->  		pr_err("%s: error %d doing aggressive suspend\n",
->  			mmc_hostname(host), err);
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 126b8d5..2633274 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -445,6 +445,8 @@ struct _mmc_csd {
->   */
->  #define EXT_CSD_BKOPS_LEVEL_2		0x2
->  
-> +#define EXT_CSD_BKOPS_LEVEL_PM_SUSPEND	EXT_CSD_BKOPS_LEVEL_2
-> +
->  /*
->   * BKOPS modes
->   */
-> 
-
+SGVsbG8gVWxmLA0KDQoNCk9uIEZyaWRheSwgSmFudWFyeSAyMCwgMjAxNywgVWxmIEhhbnNzb24g
+d3JvdGU6DQo+IE9uIDE4IEphbnVhcnkgMjAxNyBhdCAxODoyNSwgQ2hyaXMgQnJhbmR0IDxjaHJp
+cy5icmFuZHRAcmVuZXNhcy5jb20+DQo+IHdyb3RlOg0KPiA+IFNvbWUgY29udHJvbGxlcnMgaGF2
+ZSAyIGNsb2NrIHNvdXJjZXMgaW5zdGVhZCBvZiAxLCBzbyB0aGV5IGJvdGggbmVlZA0KPiA+IHRv
+IGJlIHR1cm5lZCBvbi9vZmYuDQo+IA0KPiBUaGlzIGRvZXNuJ3QgdGVsbCBtZSBlbm91Z2guIFBs
+ZWFzZSBlbGFib3JhdGUuDQo+IA0KPiBGb3IgZXhhbXBsZSwgdGVsbCBob3cgeW91IHRyZWF0IHRo
+ZSBjbG9ja3MsIHdoaWNoIG9mIHRoZW0gdGhhdCBpcyBvcHRpb25hbA0KPiBhbmQgd2h5Lg0KDQpC
+YXNpY2FsbHksIHRoZSBjaGlwIGRlc2lnbmVycyB3ZW50IGluIGFuZCBicm9rZSBvdXQgdGhlIGxv
+Z2ljIHRoYXQganVzdCBkb2VzDQp0aGUgY2FyZCBkZXRlY3QgKG1vcmUgb3IgbGVzcyBpdCdzIHBy
+b2JhYmx5IGp1c3Qgc29tZSBzaW1wbGUgSVJRIGxvZ2ljKSBzbw0KdGhhdCB5b3UgY291bGQgc2h1
+dCBvZmYgdGhlIElQIGJsb2NrLCBidXQgaWYgeW91IHB1dCBpbiBhIGNhcmQsIHRoZSBpbnRlcm5h
+bA0KaW50ZXJydXB0IHNpZ25hbCBzdGlsbCB3ZW50IHRvIHRoZSBpbnRlcnJ1cHQgY29udHJvbGxl
+ciBhbmQgcmVnaXN0ZXJlZCB0aGUNCmludGVycnVwdCBldmVuIHRob3VnaCB0aGUgcmVzdCBvZiB0
+aGUgSVAgYmxvY2sgKGluY2x1ZGluZyB0aGUgcmVnaXN0ZXIgc3BhY2UpDQp3YXMgZGVhZC4NCg0K
+VGhlIGlkZWEgc2VlbXMgdG8gYmUgdGhhdCB5b3UgY291bGQgcHV0IHRoZSBlbnRpcmUgY2hpcCBp
+bnRvIGxvdyBwb3dlciBtb2RlDQphbmQgd2FrZSBpdCB1cCBpZiB5b3Ugc3R1Y2sgYSBjYXJkIGlu
+Lg0KDQpNeSBndWVzcyBpcyB0aGF0IHRoaXMgd2FzIGZvciBzb21lIGN1c3RvbWVyIHJlcXVlc3Qg
+b3Igc29tZXRoaW5nLg0KDQpQZXJzb25hbGx5Li4ueW91IGNvdWxkIGhhdmUgZG9uZSB0aGUgc2Ft
+ZSB0aGluZyBpZiB5b3UgbGFpZCBvdXQgYSBib2FyZA0KYW5kIHRpZWQgb25lIG9mIHRoZSBleHRy
+YSBJUlEgbGluZXMgdG8gdGhlIGNkIHNpZ25hbC4uLmJ1dCBJJ20gbm90IHN1cmUgaWYNCmFueW9u
+ZSB0aG91Z2h0IGFib3V0IHRoYXQgYXQgdGhlIHRpbWUuDQoNCg0KU28gdG8geW91ciByZXF1ZXN0
+LCBJIGNvdWxkIHB1dCBhbGwgdGhpcyB1Z2x5IGluZm8gaW50byB0aGUgZG9jdW1lbnRhdGlvbiwN
+CmJ1dCBiYXNpY2FsbHkgYWxsIEknbSB0cnlpbmcgdG8gZG8gaXMgam9pbiB0aGUgMiBjbG9ja3Mg
+YmFjayB0b2dldGhlcg0KdG8gbWFrZSBpdCB3b3JrIGxpa2UgYWxsIHRoZSBvdGhlciBTb0NzIHNp
+bmNlIHRoaXMgbmV3ICdmZWF0dXJlJyBtaWdodA0Kbm90IHJlYWxseSBiZSBwcmFjdGljYWwgdG8g
+ZXZlcnkgdXNlIGluIHRoaXMgZW52aXJvbm1lbnQuDQoNCg0KDQo+ID4gIHN0YXRpYyBpbnQgc2hf
+bW9iaWxlX3NkaGlfY2FyZF9idXN5KHN0cnVjdCBtbWNfaG9zdCAqbW1jKSBAQCAtNTcyLDYNCj4g
+PiArNTgxLDEwIEBAIHN0YXRpYyBpbnQgc2hfbW9iaWxlX3NkaGlfcHJvYmUoc3RydWN0IHBsYXRm
+b3JtX2RldmljZSAqcGRldikNCj4gPiAgICAgICAgICAgICAgICAgZ290byBlcHJvYmU7DQo+ID4g
+ICAgICAgICB9DQo+ID4NCj4gPiArICAgICAgIHByaXYtPmNsa19jZCA9IGRldm1fY2xrX2dldCgm
+cGRldi0+ZGV2LCAiY2QiKTsNCj4gPiArICAgICAgIGlmIChJU19FUlIocHJpdi0+Y2xrX2NkKSkN
+Cj4gPiArICAgICAgICAgICAgICAgcHJpdi0+Y2xrX2NkID0gTlVMTDsNCj4gDQo+IElzIHRoaXMg
+Y2xvY2sgc29sZWx5IGFib3V0IGNhcmQgZGV0ZWN0aW9uPyBTbyBpbiBjYXNlcyB3aGVuIHlvdSBo
+YXZlIGENCj4gR1BJTyBjYXJkIGRldGVjdCwgdGhlIGNsb2NrIGlzbid0IG5lZWRlZD8NCj4gDQo+
+IEp1c3QgdHJ5aW5nIHRvIHVuZGVyc3RhbmQgdGhpbmdzIGEgYml0IGJldHRlci4uLg0KDQpBY2Nv
+cmRpbmcgdG8gdGhlIGhhcmR3YXJlIG1hbnVhbCwgZW5hYmxpbmcgdGhlICJjb3JlIiBjbG9jayBi
+dXQgbm90IHRoZQ0KImNkIiBjbG9jayBpcyBub3QgYSB2YWxpZCBzZXR0aW5nLiBTbyBpbiBvdXIg
+Y2FzZSwgaXQncyBhbHdheXMgYWxsIG9yDQpub3RoaW5nLg0KDQoNCkNocmlzDQo=
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
