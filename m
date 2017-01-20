@@ -1,45 +1,67 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: s3cmci: include linux/interrupt.h for tasklet_struct
-Date: Fri, 20 Jan 2017 21:08:12 +0100
-Message-ID: <20170120200822.3349092-1-arnd@arndb.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:52638 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751855AbdATUJN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2017 15:09:13 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Subject: Re: [PATCH v3 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Fri, 20 Jan 2017 22:32:38 +0100
+Message-ID: <20170120213238.GA1438@katana>
+References: <20170118172502.13876-1-chris.brandt@renesas.com>
+ <20170118172502.13876-2-chris.brandt@renesas.com>
+ <CAPDyKFqO3YrDdKqOqJ=xKSH7uAiZ+rCPEDKMZ+c8Y5RKaVK4kg@mail.gmail.com>
+ <SG2PR06MB1165089B50C28BFD333299CB8A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="+HP7ph2BbKc20aGI"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <SG2PR06MB1165089B50C28BFD333299CB8A710-ESzmfEwOt/xoAsOJh7vwSm0DtJ1/0DrXvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Brandt <Chris.Brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ben Dooks <ben-linux@fluff.org>, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-I got this new build error on today's linux-next
 
-drivers/mmc/host/s3cmci.h:69:24: error: field 'pio_tasklet' has incomplete type
-  struct tasklet_struct pio_tasklet;
-drivers/mmc/host/s3cmci.c: In function 's3cmci_enable_irq':
-drivers/mmc/host/s3cmci.c:390:4: error: implicit declaration of function 'enable_irq';did you mean 'enable_imask'? [-Werror=implicit-function-declaration]
+--+HP7ph2BbKc20aGI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-While I haven't found out why this happened now and not earlier, the
-solution is obvious, we should include the header that defines
-the structure.
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/s3cmci.c | 1 +
- 1 file changed, 1 insertion(+)
+> > Is this clock solely about card detection? So in cases when you have a
+> > GPIO card detect, the clock isn't needed?
+> >=20
+> > Just trying to understand things a bit better...
+>=20
+> According to the hardware manual, enabling the "core" clock but not the
+> "cd" clock is not a valid setting. So in our case, it's always all or
+> nothing.
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 932a4b1fed33..7a173f8c455b 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -21,6 +21,7 @@
- #include <linux/debugfs.h>
- #include <linux/seq_file.h>
- #include <linux/gpio.h>
-+#include <linux/interrupt.h>
- #include <linux/irq.h>
- #include <linux/io.h>
- 
--- 
-2.9.0
+It was my suggestion to either handle both clocks as "virtually" one
+clock so it simulates how other SDHI instances behave, or to implement
+proper and intended handling of the cd clock to save some power. Chris
+chose the first option and I have full understanding for that decision.
 
+
+--+HP7ph2BbKc20aGI
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJYgoH2AAoJEBQN5MwUoCm2fZ4P/1AST68reNnsv7ZoL7twznRP
+MRiNeJwI1aiE81vdBIu8/Du2ZNUK4sQjIo9cBz9jCy87I3kOQoFkOJfOhObdSD4Z
+cNoxFmkPgMg2iXeAz3dvmLmq/GxtqMGIAimLHGni55VJ1ldVz6ghREXgOmgg7EuB
+fpByuzsfO7WmvNxpsPuppMvj62AyYrEzRzVECPncBqs5O5E8qEvhk3Wkq58T32K3
+HuMnFKNAbsb4g067TxPd2wPtLuUkXBAtHyOmrCD8x4zxT2qweVla8dk9T0hAx1Gs
+7at1qfLtRX2mvZtU9Vwf5t/o8rg2FOqUAXcTrVfsJs+EmLD/l5S0UrQGH9qd2EOT
+w+ueJSBxh6JTfRYX/fto1CymYohCifV4q/2Gk3wCpp0CqxVpiaXE4WoB8bTpx9S+
+3pNdXZECy/17XiPelIG/sjQsXDP1cHKFCBoYWO+uORt1bimKYRyyPgQMiddBi0mC
+INH5EO74L/CU0kTXuB+RWVeqpLgwBqkHXP36jSyuVl7tvibCWCgGIh8rVXryntju
+7juoqqlPi1fyUBoBvrHJ5lAgOn7k2mf+a7Mq7VDid1j1SyrGLOHZnsePserFP0Se
+AJK7xm121A/vrxhjKhuXxHrd+Bbdzqi+Tb843iYH6CRcTbpNxYty7sseswinryYW
+UZlEBTyLqX4MNPAzOKKk
+=j5UC
+-----END PGP SIGNATURE-----
+
+--+HP7ph2BbKc20aGI--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
