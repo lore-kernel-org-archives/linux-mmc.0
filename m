@@ -1,37 +1,39 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 00/13] Ingenic JZ4740 / JZ4780 pinctrl driver
-Date: Fri, 20 Jan 2017 09:40:30 +0100
-Message-ID: <CACRpkdaeu9OxaSPeOrkKtKNQGUQh4puCFw8A2h=xhqVdDWgoow@mail.gmail.com>
-References: <20170117231421.16310-1-paul@crapouillou.net> <20170118071530.GA18989@ulmo.ba.sec>
- <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+From: Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: brcmfmac: add support for BCM43455 with modalias
+ sdio:c00v02D0dA9BF
+Date: Fri, 20 Jan 2017 09:48:14 +0000 (UTC)
+Message-ID: <20170120094814.E2D30607CD@smtp.codeaurora.org>
+References: <20170116101757.20483-1-martin.blumenstingl@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Thierry Reding <thierry.reding@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, linux-p
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170116101757.20483-1-martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, brcm80211-dev-list.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, franky.lin-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, hante.meuleman-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 19, 2017 at 12:19 PM, Paul Cercueil <paul@crapouillou.net> wrote:
+Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
+> BCM43455 is a more recent revision of the BCM4345. Some of the BCM43455
+> got a dedicated SDIO device ID which is currently not supported by
+> brcmfmac.
+> Adding the new sdio_device_id to brcmfmac is enough to get the BCM43455
+> supported because the chip itself is already supported (due to BCM4345
+> support in the driver).
+> 
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+> Acked-by: Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+> Reviewed-by: Andreas Färber <afaerber-l3A5Bk7waGM@public.gmane.org>
+> Tested-by: Andreas Färber <afaerber-l3A5Bk7waGM@public.gmane.org>
 
-> The problem with pinctrl and PWM, is that the pinctrl API works by "states".
-> A default state, sleep state, and basically any custom state that the
-> devicetree
-> provides. This works well until you need to control individually each pin;
-> with
-> 8 pins, you would need 2^8 states, each one corresponding to a given
-> configuration.
+Patch applied to wireless-drivers-next.git, thanks.
 
-I do not really understand, do you really use all 2^8 states in a given
-system?
+a62a77881b1b brcmfmac: add support for BCM43455 with modalias sdio:c00v02D0dA9BF
 
-The pin control states are to be used for practical situations, not
-for all theoretical situations.
+-- 
+https://patchwork.kernel.org/patch/9518447/
 
-You should define in your device tree the states that your
-particular system will use. Not all possible states on all possible
-systems.
+Documentation about submitting wireless patches and checking status
+from patchwork:
 
-Yours,
-Linus Walleij
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
