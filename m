@@ -1,91 +1,92 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH v10 0/8] Cavium MMC driver
-Date: Fri, 20 Jan 2017 11:37:58 +0100
-Message-ID: <20170120103758.GC3908@hardcore>
-References: <20161219121552.18316-1-jglauber@cavium.com>
- <CAPDyKFqXDt9zBphrSPqMpbzBJsj1zECGBb5DugOEj1eLs9-xPQ@mail.gmail.com>
- <20170119145041.GA11757@hardcore>
- <0f721117-24aa-cb69-56fe-0a48f9012852@caviumnetworks.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Fri, 20 Jan 2017 11:50:32 +0100
+Message-ID: <CAPDyKFqO3YrDdKqOqJ=xKSH7uAiZ+rCPEDKMZ+c8Y5RKaVK4kg@mail.gmail.com>
+References: <20170118172502.13876-1-chris.brandt@renesas.com> <20170118172502.13876-2-chris.brandt@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0049.outbound.protection.outlook.com ([104.47.34.49]:7632
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751906AbdATKiL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Jan 2017 05:38:11 -0500
-Content-Disposition: inline
-In-Reply-To: <0f721117-24aa-cb69-56fe-0a48f9012852@caviumnetworks.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170118172502.13876-2-chris.brandt@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Steven J . Hill" <Steven.Hill@cavium.com>
 
-On Thu, Jan 19, 2017 at 09:47:33AM -0800, David Daney wrote:
-> On 01/19/2017 06:50 AM, Jan Glauber wrote:
-> [...]
-> >
-> >>4) GPIO powers should be modelled as GPIO regulators. I believe we
-> >>have discussed this earlier as well (I don't really recall in detail
-> >>about the last things). It gives us the opportunity to via the
-> >>regulator framework to find out the supported voltage levels. This is
-> >>the generic method which is used by mmc drivers, you need to adopt to
-> >>this as well.
-> >
-> >I've added a fixed regulator to DT:
-> >
-> >        vcc_3v3: regulator-vcc_3v3 {
-> >                compatible = "regulator-fixed";
-> >                regulator-name = "VCC_3V3";
-> 
-> 
-> Very minor point not really directly related to the MMC driver:
-> "VCC_3V3" implies a general purpose supply for many things on the
-> board.  This is not the case for these boards.  The "regulator"
-> controls power only to eMMC and SD devices, so a name that conveys
-> that function should be invented.
+On 18 January 2017 at 18:25, Chris Brandt <chris.brandt@renesas.com> wrote:
+> Some controllers have 2 clock sources instead of 1, so they both need
+> to be turned on/off.
 
-OK, I'll rename it to:
+This doesn't tell me enough. Please elaborate.
 
-	mmc_supply_3v3: mmc_supply_3v3 {
-        	compatible = "regulator-fixed";
-		regulator-name = "mmc_supply_3v3";
-		[...]
+For example, tell how you treat the clocks, which of them that is
+optional and why.
 
+>
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+> ---
+> v2:
+> * changed clk2 to clk_cd
+> * disable clk if clk_cd enable fails
+> * changed clock name from "carddetect" to "cd"
+> ---
+>  drivers/mmc/host/sh_mobile_sdhi.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 59db14b..a3f995e 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -143,6 +143,7 @@ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+>
+>  struct sh_mobile_sdhi {
+>         struct clk *clk;
+> +       struct clk *clk_cd;
+>         struct tmio_mmc_data mmc_data;
+>         struct tmio_mmc_dma dma_priv;
+>         struct pinctrl *pinctrl;
+> @@ -190,6 +191,12 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+>         if (ret < 0)
+>                 return ret;
+>
+> +       ret = clk_prepare_enable(priv->clk_cd);
+> +       if (ret < 0) {
+> +               clk_disable_unprepare(priv->clk);
+> +               return ret;
+> +       }
+> +
+>         /*
+>          * The clock driver may not know what maximum frequency
+>          * actually works, so it should be set with the max-frequency
+> @@ -255,6 +262,8 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+>         struct sh_mobile_sdhi *priv = host_to_priv(host);
+>
+>         clk_disable_unprepare(priv->clk);
+> +       if (priv->clk_cd)
+> +               clk_disable_unprepare(priv->clk_cd);
+>  }
+>
+>  static int sh_mobile_sdhi_card_busy(struct mmc_host *mmc)
+> @@ -572,6 +581,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>                 goto eprobe;
+>         }
+>
+> +       priv->clk_cd = devm_clk_get(&pdev->dev, "cd");
+> +       if (IS_ERR(priv->clk_cd))
+> +               priv->clk_cd = NULL;
 
-> Actually on some boards GPIO 8 doesn't even control a regulator, but
-> instead only activates a bus isolator on the control and data
-> signals to the eMMC and SD devices.  In this case we would be using
-> the regulator framework only because the code is already there and
-> it happens to work, not because we actually have a regulator.
-> 
-> >                regulator-min-microvolt = <3300000>;
-> >                regulator-max-microvolt = <3300000>;
-> >
-> >                gpio = <&gpio_6_0 8 0>;
-> >                /* enable-gpio = <&gpio_6_0 8 0>; */
-> >                enable-active-high;
-> >        };
-> >
-> >This seems to enable the gpio. Is this sufficient or do I need the
-> >gpio-regulator?
-> >
-> 
-> Does the "regulator-fixed" allow us to properly turn it on and off?
+Is this clock solely about card detection? So in cases when you have a
+GPIO card detect, the clock isn't needed?
 
-Yes, I've disabled all gpio calls from our mmc driver, with only the gpio 
-settings in the regulator entry I get:
+Just trying to understand things a bit better...
 
-root@sff:~# cat /sys/kernel/debug/gpio 
-gpiochip0: GPIOs 464-511, parent: pci/0000:00:06.0, gpio_thunderx:
- gpio-472 (                    |mmc_supply_3v3      ) out hi 
+> +
+>         priv->pinctrl = devm_pinctrl_get(&pdev->dev);
+>         if (!IS_ERR(priv->pinctrl)) {
+>                 priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
+> --
+> 2.10.1
+>
+>
 
-So the regulator driver enables GPIO 8 as it should.
-
-> If not, we may have to switch to "gpio-regulator".  Which ever is
-> simplest should be used.
-
-"regulator-fixed" seems sufficient to me as we don't need the additional
-power states that "gpio-regulator" supports.
-
-> [...]
+Kind regards
+Uffe
