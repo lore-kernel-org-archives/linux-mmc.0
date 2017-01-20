@@ -1,94 +1,75 @@
-From: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v4 3/3] ARM: dts: r7s72100: update sdhi clock bindings
-Date: Fri, 20 Jan 2017 14:43:32 -0500
-Message-ID: <20170120194332.1683-4-chris.brandt@renesas.com>
+From: Chris Brandt <chris.brandt@renesas.com>
+Subject: [PATCH v4 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Fri, 20 Jan 2017 14:43:30 -0500
+Message-ID: <20170120194332.1683-2-chris.brandt@renesas.com>
 References: <20170120194332.1683-1-chris.brandt@renesas.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170120194332.1683-1-chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170120194332.1683-1-chris.brandt@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The SDHI controller in the RZ/A1 has 2 clock sources per channel and both
-need to be enabled/disabled for proper operation. This fixes the fact that
-the define for R7S72100_CLK_SDHI1 was not correct to begin with (typo), and
-that all 4 clock sources need to be defined an used.
+Some controllers have 2 clock sources instead of 1. The 2nd clock
+is for the internal card detect logic and must be enabled/disabled
+along with the main core clock for proper operation.
 
-Signed-off-by: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Reviewed-by: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
+Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
 ---
+v3:
+* add more clarification to the commit log
 v2:
-* add missing clock sources instead of just fixing typo
+* changed clk2 to clk_cd
+* disable clk if clk_cd enable fails
 * changed clock name from "carddetect" to "cd"
 ---
- arch/arm/boot/dts/r7s72100.dtsi            | 17 ++++++++++++-----
- include/dt-bindings/clock/r7s72100-clock.h |  6 ++++--
- 2 files changed, 16 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/arch/arm/boot/dts/r7s72100.dtsi b/arch/arm/boot/dts/r7s72100.dtsi
-index 3dd427d..9d0b8d0 100644
---- a/arch/arm/boot/dts/r7s72100.dtsi
-+++ b/arch/arm/boot/dts/r7s72100.dtsi
-@@ -153,9 +153,12 @@
- 			#clock-cells = <1>;
- 			compatible = "renesas,r7s72100-mstp-clocks", "renesas,cpg-mstp-clocks";
- 			reg = <0xfcfe0444 4>;
--			clocks = <&p1_clk>, <&p1_clk>;
--			clock-indices = <R7S72100_CLK_SDHI1 R7S72100_CLK_SDHI0>;
--			clock-output-names = "sdhi1", "sdhi0";
-+			clocks = <&p1_clk>, <&p1_clk>, <&p1_clk>, <&p1_clk>;
-+			clock-indices = <
-+				R7S72100_CLK_SDHI00 R7S72100_CLK_SDHI01
-+				R7S72100_CLK_SDHI10 R7S72100_CLK_SDHI11
-+			>;
-+			clock-output-names = "sdhi00", "sdhi01", "sdhi10", "sdhi11";
- 		};
- 	};
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 59db14b..a3f995e 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -143,6 +143,7 @@ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
  
-@@ -478,7 +481,9 @@
- 			      GIC_SPI 271 IRQ_TYPE_LEVEL_HIGH
- 			      GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
+ struct sh_mobile_sdhi {
+ 	struct clk *clk;
++	struct clk *clk_cd;
+ 	struct tmio_mmc_data mmc_data;
+ 	struct tmio_mmc_dma dma_priv;
+ 	struct pinctrl *pinctrl;
+@@ -190,6 +191,12 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+ 	if (ret < 0)
+ 		return ret;
  
--		clocks = <&mstp12_clks R7S72100_CLK_SDHI0>;
-+		clocks = <&mstp12_clks R7S72100_CLK_SDHI00>,
-+			 <&mstp12_clks R7S72100_CLK_SDHI01>;
-+		clock-names = "core", "cd";
- 		cap-sd-highspeed;
- 		cap-sdio-irq;
- 		status = "disabled";
-@@ -491,7 +496,9 @@
- 			      GIC_SPI 274 IRQ_TYPE_LEVEL_HIGH
- 			      GIC_SPI 275 IRQ_TYPE_LEVEL_HIGH>;
++	ret = clk_prepare_enable(priv->clk_cd);
++	if (ret < 0) {
++		clk_disable_unprepare(priv->clk);
++		return ret;
++	}
++
+ 	/*
+ 	 * The clock driver may not know what maximum frequency
+ 	 * actually works, so it should be set with the max-frequency
+@@ -255,6 +262,8 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+ 	struct sh_mobile_sdhi *priv = host_to_priv(host);
  
--		clocks = <&mstp12_clks R7S72100_CLK_SDHI1>;
-+		clocks = <&mstp12_clks R7S72100_CLK_SDHI10>,
-+			 <&mstp12_clks R7S72100_CLK_SDHI11>;
-+		clock-names = "core", "cd";
- 		cap-sd-highspeed;
- 		cap-sdio-irq;
- 		status = "disabled";
-diff --git a/include/dt-bindings/clock/r7s72100-clock.h b/include/dt-bindings/clock/r7s72100-clock.h
-index 29e01ed..f2d8428 100644
---- a/include/dt-bindings/clock/r7s72100-clock.h
-+++ b/include/dt-bindings/clock/r7s72100-clock.h
-@@ -45,7 +45,9 @@
- #define R7S72100_CLK_SPI4	3
+ 	clk_disable_unprepare(priv->clk);
++	if (priv->clk_cd)
++		clk_disable_unprepare(priv->clk_cd);
+ }
  
- /* MSTP12 */
--#define R7S72100_CLK_SDHI0	3
--#define R7S72100_CLK_SDHI1	2
-+#define R7S72100_CLK_SDHI00	3
-+#define R7S72100_CLK_SDHI01	2
-+#define R7S72100_CLK_SDHI10	1
-+#define R7S72100_CLK_SDHI11	0
+ static int sh_mobile_sdhi_card_busy(struct mmc_host *mmc)
+@@ -572,6 +581,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
  
- #endif /* __DT_BINDINGS_CLOCK_R7S72100_H__ */
++	priv->clk_cd = devm_clk_get(&pdev->dev, "cd");
++	if (IS_ERR(priv->clk_cd))
++		priv->clk_cd = NULL;
++
+ 	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
+ 	if (!IS_ERR(priv->pinctrl)) {
+ 		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
 -- 
 2.10.1
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
