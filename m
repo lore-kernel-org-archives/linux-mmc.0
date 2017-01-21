@@ -1,7 +1,7 @@
 From: Chris Brandt <chris.brandt@renesas.com>
-Subject: [PATCH v5 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
-Date: Fri, 20 Jan 2017 22:06:02 -0500
-Message-ID: <20170121030604.7672-2-chris.brandt@renesas.com>
+Subject: [PATCH v5 3/3] ARM: dts: r7s72100: update sdhi clock bindings
+Date: Fri, 20 Jan 2017 22:06:04 -0500
+Message-ID: <20170121030604.7672-4-chris.brandt@renesas.com>
 References: <20170121030604.7672-1-chris.brandt@renesas.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20170121030604.7672-1-chris.brandt@renesas.com>
@@ -10,79 +10,79 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark
 Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Some controllers have 2 clock sources instead of 1. The 2nd clock
-is for the internal card detect logic and must be enabled/disabled
-along with the main core clock for proper operation.
+The SDHI controller in the RZ/A1 has 2 clock sources per channel and both
+need to be enabled/disabled for proper operation. This fixes the fact that
+the define for R7S72100_CLK_SDHI1 was not correct to begin with (typo), and
+that all 4 clock sources need to be defined an used.
 
 Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
-v4:
-* add technical explanation within probe routine
-v3:
-* add more clarification to the commit log
 v2:
-* changed clk2 to clk_cd
-* disable clk if clk_cd enable fails
+* add missing clock sources instead of just fixing typo
 * changed clock name from "carddetect" to "cd"
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ arch/arm/boot/dts/r7s72100.dtsi            | 17 ++++++++++++-----
+ include/dt-bindings/clock/r7s72100-clock.h |  6 ++++--
+ 2 files changed, 16 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 59db14b..360d922 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -143,6 +143,7 @@ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+diff --git a/arch/arm/boot/dts/r7s72100.dtsi b/arch/arm/boot/dts/r7s72100.dtsi
+index 3dd427d..9d0b8d0 100644
+--- a/arch/arm/boot/dts/r7s72100.dtsi
++++ b/arch/arm/boot/dts/r7s72100.dtsi
+@@ -153,9 +153,12 @@
+ 			#clock-cells = <1>;
+ 			compatible = "renesas,r7s72100-mstp-clocks", "renesas,cpg-mstp-clocks";
+ 			reg = <0xfcfe0444 4>;
+-			clocks = <&p1_clk>, <&p1_clk>;
+-			clock-indices = <R7S72100_CLK_SDHI1 R7S72100_CLK_SDHI0>;
+-			clock-output-names = "sdhi1", "sdhi0";
++			clocks = <&p1_clk>, <&p1_clk>, <&p1_clk>, <&p1_clk>;
++			clock-indices = <
++				R7S72100_CLK_SDHI00 R7S72100_CLK_SDHI01
++				R7S72100_CLK_SDHI10 R7S72100_CLK_SDHI11
++			>;
++			clock-output-names = "sdhi00", "sdhi01", "sdhi10", "sdhi11";
+ 		};
+ 	};
  
- struct sh_mobile_sdhi {
- 	struct clk *clk;
-+	struct clk *clk_cd;
- 	struct tmio_mmc_data mmc_data;
- 	struct tmio_mmc_dma dma_priv;
- 	struct pinctrl *pinctrl;
-@@ -190,6 +191,12 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
- 	if (ret < 0)
- 		return ret;
+@@ -478,7 +481,9 @@
+ 			      GIC_SPI 271 IRQ_TYPE_LEVEL_HIGH
+ 			      GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
  
-+	ret = clk_prepare_enable(priv->clk_cd);
-+	if (ret < 0) {
-+		clk_disable_unprepare(priv->clk);
-+		return ret;
-+	}
-+
- 	/*
- 	 * The clock driver may not know what maximum frequency
- 	 * actually works, so it should be set with the max-frequency
-@@ -255,6 +262,8 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	struct sh_mobile_sdhi *priv = host_to_priv(host);
+-		clocks = <&mstp12_clks R7S72100_CLK_SDHI0>;
++		clocks = <&mstp12_clks R7S72100_CLK_SDHI00>,
++			 <&mstp12_clks R7S72100_CLK_SDHI01>;
++		clock-names = "core", "cd";
+ 		cap-sd-highspeed;
+ 		cap-sdio-irq;
+ 		status = "disabled";
+@@ -491,7 +496,9 @@
+ 			      GIC_SPI 274 IRQ_TYPE_LEVEL_HIGH
+ 			      GIC_SPI 275 IRQ_TYPE_LEVEL_HIGH>;
  
- 	clk_disable_unprepare(priv->clk);
-+	if (priv->clk_cd)
-+		clk_disable_unprepare(priv->clk_cd);
- }
+-		clocks = <&mstp12_clks R7S72100_CLK_SDHI1>;
++		clocks = <&mstp12_clks R7S72100_CLK_SDHI10>,
++			 <&mstp12_clks R7S72100_CLK_SDHI11>;
++		clock-names = "core", "cd";
+ 		cap-sd-highspeed;
+ 		cap-sdio-irq;
+ 		status = "disabled";
+diff --git a/include/dt-bindings/clock/r7s72100-clock.h b/include/dt-bindings/clock/r7s72100-clock.h
+index 29e01ed..f2d8428 100644
+--- a/include/dt-bindings/clock/r7s72100-clock.h
++++ b/include/dt-bindings/clock/r7s72100-clock.h
+@@ -45,7 +45,9 @@
+ #define R7S72100_CLK_SPI4	3
  
- static int sh_mobile_sdhi_card_busy(struct mmc_host *mmc)
-@@ -572,6 +581,21 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eprobe;
- 	}
+ /* MSTP12 */
+-#define R7S72100_CLK_SDHI0	3
+-#define R7S72100_CLK_SDHI1	2
++#define R7S72100_CLK_SDHI00	3
++#define R7S72100_CLK_SDHI01	2
++#define R7S72100_CLK_SDHI10	1
++#define R7S72100_CLK_SDHI11	0
  
-+	/*
-+	 * Some controllers provide a 2nd clock just to run the internal card
-+	 * detection logic. Unfortunately, the existing driver architecture does
-+	 * not support a separation of clocks for runtime PM usage. When
-+	 * native hotplug is used, the tmio driver assumes that the core
-+	 * must continue to run for card detect to stay active, so we cannot
-+	 * disable it.
-+	 * Additionally, it is prohibited to supply a clock to the core but not
-+	 * to the card detect circuit. That leaves us with if separate clocks
-+	 * are presented, we must treat them both as virtually 1 clock.
-+	 */
-+	priv->clk_cd = devm_clk_get(&pdev->dev, "cd");
-+	if (IS_ERR(priv->clk_cd))
-+		priv->clk_cd = NULL;
-+
- 	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
- 	if (!IS_ERR(priv->pinctrl)) {
- 		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
+ #endif /* __DT_BINDINGS_CLOCK_R7S72100_H__ */
 -- 
 2.10.1
