@@ -1,81 +1,57 @@
-From: Uri Yanai <uri.yanai@sandisk.com>
-Subject: [PATCH v2 1/2] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
-Date: Sun, 22 Jan 2017 11:15:34 +0200
-Message-ID: <1485076535-20572-2-git-send-email-uri.yanai@sandisk.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to
+ include leds.h
+Date: Sun, 22 Jan 2017 11:25:26 +0100
+Message-ID: <87y3y3crxl.fsf@belgarion.home>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+ <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
+ <87efzydusi.fsf@belgarion.home>
+ <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
+ <87a8aleda2.fsf@belgarion.home>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0045.outbound.protection.outlook.com ([104.47.40.45]:50954
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750735AbdAVJxv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 22 Jan 2017 04:53:51 -0500
-In-Reply-To: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87a8aleda2.fsf@belgarion.home> (Robert Jarzmik's message of
+ "Fri, 20 Jan 2017 20:34:29 +0100")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Daniel Mack <daniel@zonque.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, alex.lemberg@sandisk.com, Uri Yanai <uri.yanai@sandisk.com>
 
-Read from the device EXT_CSD and set to the card->ext_csd structure
+Robert Jarzmik <robert.jarzmik@free.fr> writes:
 
-Changes in v2:
-- inverse the logic for printing the debug message.
-  only print when bits are set.
+> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>
+>> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>> So I was wondering how you made the choice of which files you add the include to
+>>> and which you don't touch ?
+>>
+>> By building the pxa_defconfig, see what errors it reports and then fix them.
+>>
+>> Isn't pxa_defconfig building all the variants?
+> Euh actually it should, but it's not.
 
-Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
----
- drivers/mmc/core/mmc.c   | 10 ++++++++--
- include/linux/mmc/card.h |  1 +
- include/linux/mmc/mmc.h  |  1 +
- 3 files changed, 10 insertions(+), 2 deletions(-)
+And actually thanks to a suggestion from Russell to improve my search line, I
+came up with the command line bellow, and perhaps you could fix the others with
+one command line and respin the patch ?
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index c0e2507..f70f6a1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -530,8 +530,14 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 						EXT_CSD_MANUAL_BKOPS_MASK);
- 			card->ext_csd.raw_bkops_status =
- 				ext_csd[EXT_CSD_BKOPS_STATUS];
--			if (!card->ext_csd.man_bkops_en)
--				pr_debug("%s: MAN_BKOPS_EN bit is not set\n",
-+			if (card->ext_csd.man_bkops_en)
-+				pr_debug("%s: MAN_BKOPS_EN bit is set\n",
-+					mmc_hostname(card->host));
-+			card->ext_csd.auto_bkops_en =
-+					(ext_csd[EXT_CSD_BKOPS_EN] &
-+						EXT_CSD_AUTO_BKOPS_MASK);
-+			if (card->ext_csd.auto_bkops_en)
-+				pr_debug("%s: AUTO_BKOPS_EN bit is set\n",
- 					mmc_hostname(card->host));
- 		}
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 00449e5..e3f1031 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -84,6 +84,7 @@ struct mmc_ext_csd {
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
- 	bool			bkops;		/* background support bit */
- 	bool			man_bkops_en;	/* manual bkops enable bit */
-+	bool			auto_bkops_en;	/* auto bkops enable bit */
- 	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
- 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
- 	unsigned int		boot_ro_lock;		/* ro lock support */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index a074082..126b8d5 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -449,6 +449,7 @@ struct _mmc_csd {
-  * BKOPS modes
-  */
- #define EXT_CSD_MANUAL_BKOPS_MASK	0x01
-+#define EXT_CSD_AUTO_BKOPS_MASK		0x02
- 
- /*
-  * Command Queue
+Here it is :
+
+for f in $(grep -l _led arch/arm/mach-pxa/*.c | xargs grep -L linux/leds.h); do
+sed -i '0,/^#include <linux\/[l-m].*>$/{s/\(#include <linux\/[l-m].*\)/#include
+<linux\/leds.h>\n\1/}' $f; done
+
+Cheers.
+
 -- 
-1.9.1
-
+Robert
