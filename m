@@ -1,7 +1,7 @@
 From: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
-Subject: [PATCH v2 11/14] mtd: nand: jz4740: Let the pinctrl driver configure the pins
-Date: Sun, 22 Jan 2017 15:49:44 +0100
-Message-ID: <20170122144947.16158-12-paul@crapouillou.net>
+Subject: [PATCH v2 08/14] MIPS: JZ4740: Qi LB60: Add pinctrl configuration for several drivers
+Date: Sun, 22 Jan 2017 15:49:41 +0100
+Message-ID: <20170122144947.16158-9-paul@crapouillou.net>
 References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
  <20170122144947.16158-1-paul@crapouillou.net>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
@@ -11,95 +11,114 @@ To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob H
 Cc: Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, james.hogan-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org, Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Before, this NAND driver would set itself the configuration of the
-chip-select pins for the various NAND banks.
+We set the pin configuration for the jz4740-nand, jz4740-mmc,
+jz4740-fb, jz4740-pwm and jz4740-uart drivers.
 
-Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-the pins being properly configured before the driver probes.
+This will permit those drivers to be cleaned out of the custom GPIO code
+that they currently use.
 
 Signed-off-by: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
 ---
- drivers/mtd/nand/jz4740_nand.c | 23 +----------------------
- 1 file changed, 1 insertion(+), 22 deletions(-)
+ arch/mips/boot/dts/ingenic/qi_lb60.dts | 13 +++++++++++
+ arch/mips/jz4740/board-qi_lb60.c       | 42 ++++++++++++++++++++++++++--------
+ 2 files changed, 46 insertions(+), 9 deletions(-)
 
-v2: No changes
+v2: Changed the devicetree bindings to match the new driver
 
-diff --git a/drivers/mtd/nand/jz4740_nand.c b/drivers/mtd/nand/jz4740_nand.c
-index 5551c36adbdf..0d06a1f07d82 100644
---- a/drivers/mtd/nand/jz4740_nand.c
-+++ b/drivers/mtd/nand/jz4740_nand.c
-@@ -25,7 +25,6 @@
+diff --git a/arch/mips/boot/dts/ingenic/qi_lb60.dts b/arch/mips/boot/dts/ingenic/qi_lb60.dts
+index be1a7d3a3e1b..b715ee2ac2ee 100644
+--- a/arch/mips/boot/dts/ingenic/qi_lb60.dts
++++ b/arch/mips/boot/dts/ingenic/qi_lb60.dts
+@@ -17,3 +17,16 @@
+ &rtc_dev {
+ 	system-power-controller;
+ };
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart0>;
++};
++
++&pinctrl {
++	pins_uart0: uart0 {
++		function = "uart0";
++		groups = "uart0-data";
++		bias-disable;
++	};
++};
+diff --git a/arch/mips/jz4740/board-qi_lb60.c b/arch/mips/jz4740/board-qi_lb60.c
+index a5bd94b95263..bf3dcc9ee9f8 100644
+--- a/arch/mips/jz4740/board-qi_lb60.c
++++ b/arch/mips/jz4740/board-qi_lb60.c
+@@ -22,6 +22,8 @@
+ #include <linux/input/matrix_keypad.h>
+ #include <linux/spi/spi.h>
+ #include <linux/spi/spi_gpio.h>
++#include <linux/pinctrl/machine.h>
++#include <linux/pinctrl/pinconf-generic.h>
+ #include <linux/power_supply.h>
+ #include <linux/power/jz4740-battery.h>
+ #include <linux/power/gpio-charger.h>
+@@ -447,13 +449,36 @@ static struct platform_device *jz_platform_devices[] __initdata = {
+ 	&qi_lb60_audio_device,
+ };
  
- #include <linux/gpio.h>
+-static void __init board_gpio_setup(void)
+-{
+-	/* We only need to enable/disable pullup here for pins used in generic
+-	 * drivers. Everything else is done by the drivers themselves. */
+-	jz_gpio_disable_pullup(QI_LB60_GPIO_SD_VCC_EN_N);
+-	jz_gpio_disable_pullup(QI_LB60_GPIO_SD_CD);
+-}
++static unsigned long pin_cfg_bias_disable[] = {
++	    PIN_CONFIG_BIAS_DISABLE,
++};
++
++static struct pinctrl_map pin_map[] __initdata = {
++	/* NAND pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-nand",
++			"10010000.jz4740-pinctrl", "nand", "nand"),
++
++	/* fbdev pin configuration */
++	PIN_MAP_MUX_GROUP("jz4740-fb", PINCTRL_STATE_DEFAULT,
++			"10010000.jz4740-pinctrl", "lcd", "lcd-8bit"),
++	PIN_MAP_MUX_GROUP("jz4740-fb", PINCTRL_STATE_SLEEP,
++			"10010000.jz4740-pinctrl", "lcd", "lcd-no-pins"),
++
++	/* MMC pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "mmc", "mmc-1bit"),
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "mmc", "mmc-4bit"),
++	PIN_MAP_CONFIGS_PIN_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "PD0", pin_cfg_bias_disable),
++	PIN_MAP_CONFIGS_PIN_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "PD2", pin_cfg_bias_disable),
++
++	/* PWM pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-pwm",
++			"10010000.jz4740-pinctrl", "pwm4", "pwm4"),
++};
++
  
--#include <asm/mach-jz4740/gpio.h>
- #include <asm/mach-jz4740/jz4740_nand.h>
- 
- #define JZ_REG_NAND_CTRL	0x50
-@@ -310,34 +309,20 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
- 			       uint8_t *nand_dev_id)
+ static int __init qi_lb60_init_platform_devices(void)
  {
- 	int ret;
--	int gpio;
--	char gpio_name[9];
- 	char res_name[6];
- 	uint32_t ctrl;
- 	struct nand_chip *chip = &nand->chip;
- 	struct mtd_info *mtd = nand_to_mtd(chip);
+@@ -469,6 +494,7 @@ static int __init qi_lb60_init_platform_devices(void)
+ 				ARRAY_SIZE(qi_lb60_spi_board_info));
  
--	/* Request GPIO port. */
--	gpio = JZ_GPIO_MEM_CS0 + bank - 1;
--	sprintf(gpio_name, "NAND CS%d", bank);
--	ret = gpio_request(gpio, gpio_name);
--	if (ret) {
--		dev_warn(&pdev->dev,
--			"Failed to request %s gpio %d: %d\n",
--			gpio_name, gpio, ret);
--		goto notfound_gpio;
--	}
+ 	pwm_add_table(qi_lb60_pwm_lookup, ARRAY_SIZE(qi_lb60_pwm_lookup));
++	pinctrl_register_mappings(pin_map, ARRAY_SIZE(pin_map));
+ 
+ 	return platform_add_devices(jz_platform_devices,
+ 					ARRAY_SIZE(jz_platform_devices));
+@@ -479,8 +505,6 @@ static int __init qi_lb60_board_setup(void)
+ {
+ 	printk(KERN_INFO "Qi Hardware JZ4740 QI LB60 setup\n");
+ 
+-	board_gpio_setup();
 -
- 	/* Request I/O resource. */
- 	sprintf(res_name, "bank%d", bank);
- 	ret = jz_nand_ioremap_resource(pdev, res_name,
- 					&nand->bank_mem[bank - 1],
- 					&nand->bank_base[bank - 1]);
- 	if (ret)
--		goto notfound_resource;
-+		return ret;
- 
- 	/* Enable chip in bank. */
--	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_MEM_CS0);
- 	ctrl = readl(nand->base + JZ_REG_NAND_CTRL);
- 	ctrl |= JZ_NAND_CTRL_ENABLE_CHIP(bank - 1);
- 	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
-@@ -377,12 +362,8 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
- 	dev_info(&pdev->dev, "No chip found on bank %i\n", bank);
- 	ctrl &= ~(JZ_NAND_CTRL_ENABLE_CHIP(bank - 1));
- 	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
--	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_NONE);
- 	jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 				 nand->bank_base[bank - 1]);
--notfound_resource:
--	gpio_free(gpio);
--notfound_gpio:
- 	return ret;
- }
- 
-@@ -503,7 +484,6 @@ static int jz_nand_probe(struct platform_device *pdev)
- err_unclaim_banks:
- 	while (chipnr--) {
- 		unsigned char bank = nand->banks[chipnr];
--		gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
- 		jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 					 nand->bank_base[bank - 1]);
- 	}
-@@ -530,7 +510,6 @@ static int jz_nand_remove(struct platform_device *pdev)
- 		if (bank != 0) {
- 			jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 						 nand->bank_base[bank - 1]);
--			gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
- 		}
- 	}
+ 	if (qi_lb60_init_platform_devices())
+ 		panic("Failed to initialize platform devices");
  
 -- 
 2.11.0
