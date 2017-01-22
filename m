@@ -1,57 +1,28 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to
- include leds.h
-Date: Sun, 22 Jan 2017 11:25:26 +0100
-Message-ID: <87y3y3crxl.fsf@belgarion.home>
-References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
- <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
- <87efzydusi.fsf@belgarion.home>
- <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
- <87a8aleda2.fsf@belgarion.home>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87a8aleda2.fsf@belgarion.home> (Robert Jarzmik's message of
- "Fri, 20 Jan 2017 20:34:29 +0100")
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Daniel Mack <daniel@zonque.org>
+From: Paul Cercueil <paul@crapouillou.net>
+Subject: [PATCH v2 00/14] Ingenic JZ4740 / JZ4780 pinctrl driver
+Date: Sun, 22 Jan 2017 15:49:33 +0100
+Message-ID: <20170122144947.16158-1-paul@crapouillou.net>
+References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from outils.crapouillou.net ([89.234.176.41]:40656 "EHLO
+        outils.crapouillou.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751764AbdAVOu2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Jan 2017 09:50:28 -0500
+In-Reply-To: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
 
-Robert Jarzmik <robert.jarzmik@free.fr> writes:
+Hi,
 
-> Ulf Hansson <ulf.hansson@linaro.org> writes:
->
->> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
->>> Ulf Hansson <ulf.hansson@linaro.org> writes:
->>> So I was wondering how you made the choice of which files you add the include to
->>> and which you don't touch ?
->>
->> By building the pxa_defconfig, see what errors it reports and then fix them.
->>
->> Isn't pxa_defconfig building all the variants?
-> Euh actually it should, but it's not.
+This is the v2 of my ingenic pinctrl patch series.
+Huge changes in there, the pinctrl driver was completely rewritten, and the
+GPIO code was split into a separate driver.
 
-And actually thanks to a suggestion from Russell to improve my search line, I
-came up with the command line bellow, and perhaps you could fix the others with
-one command line and respin the patch ?
+It now uses the generic functions to handle pin groups, as well as generic
+devicetree bindings.
 
-Here it is :
+Best regards,
+- Paul
 
-for f in $(grep -l _led arch/arm/mach-pxa/*.c | xargs grep -L linux/leds.h); do
-sed -i '0,/^#include <linux\/[l-m].*>$/{s/\(#include <linux\/[l-m].*\)/#include
-<linux\/leds.h>\n\1/}' $f; done
-
-Cheers.
-
--- 
-Robert
