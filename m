@@ -1,90 +1,53 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Mon, 23 Jan 2017 10:55:23 -0600
-Message-ID: <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
-References: <20170121030604.7672-1-chris.brandt@renesas.com>
- <20170121030604.7672-3-chris.brandt@renesas.com>
+Subject: Re: [PATCH v3 1/2] devicetree: document new marvell-8xxx and
+ pwrseq-sd8787 options
+Date: Mon, 23 Jan 2017 11:04:09 -0600
+Message-ID: <20170123170409.rnmnf4ssjpd2yk3l@rob-hp-laptop>
+References: <20170121055039.10924-1-matt@ranostay.consulting>
+ <20170121055039.10924-2-matt@ranostay.consulting>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f68.google.com ([209.85.218.68]:34526 "EHLO
-        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750713AbdAWQzZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 11:55:25 -0500
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:34607 "EHLO
+        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750732AbdAWREM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 12:04:12 -0500
 Content-Disposition: inline
-In-Reply-To: <20170121030604.7672-3-chris.brandt@renesas.com>
+In-Reply-To: <20170121055039.10924-2-matt@ranostay.consulting>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Matt Ranostay <matt@ranostay.consulting>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org
 
-On Fri, Jan 20, 2017 at 10:06:03PM -0500, Chris Brandt wrote:
-> In the case of a single clock source, you don't need names. However,
-> if the controller has 2 clock sources, you need to name them correctly
-> so the driver can find the 2nd one. The 2nd clock is for the internal
-> card detect logic.
-> 
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+On Fri, Jan 20, 2017 at 09:50:38PM -0800, Matt Ranostay wrote:
+> Cc: devicetree@vger.kernel.org
+> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
 > ---
-> v4:
-> * just explain there might be 2 clocks, don't explain how
->   we will use them in the driver
-> v3:
-> * add more clarification about why there are sometimes 2 clocks
->   and what you should do with them.
-> * remove 'status = "disabled"' from example
-> v2:
-> * fix spelling and change wording
-> * changed clock name from "carddetect" to "cd"
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 24 ++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+>  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt          | 14 ++++++++++++++
+>  .../devicetree/bindings/net/wireless/marvell-8xxx.txt      |  7 ++++++-
+>  2 files changed, 20 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index a1650ed..1464c16 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -25,8 +25,32 @@ Required properties:
->  		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->  		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
->  
-> +- clocks: Most controllers only have 1 clock source per channel. However, on
-> +	  some variations of this controller, the internal card detection
-
-This should be explicit as to which compatible strings have 2 clocks and 
-which have 1 clock.
-
-> +	  logic that exists in this controller is sectioned off to be run by a
-> +	  separate second clock source to allow the main core clock to be turned
-> +	  off to save power.
-> +	  If 2 clocks are specified by the hardware, you must name them as
-> +	  "core" and "cd".
-> +	  If the controller only has 1 clock, naming is not required.
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> new file mode 100644
+> index 000000000000..4bb56766982e
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+> @@ -0,0 +1,14 @@
+> +* Marvell SD8787 power sequence provider
 > +
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
->  - pinctrl-names: should be "default", "state_uhs"
->  - pinctrl-0: should contain default/high speed pin ctrl
->  - pinctrl-1: should contain uhs mode pin ctrl
-> +
-> +Example showing 2 clocks:
-> +	sdhi0: sd@e804e000 {
+> +Required properties:
+> +- compatible: must be "mmc-pwrseq-sd8787".
+> +- powerdown-gpio: contains a power down GPIO specifier with active state
+> +- reset-gpio: contains a reset GPIO specifier with active state
 
-mmc@...
+My comments on the previous v3 still apply.
 
-> +		compatible = "renesas,sdhi-r7s72100";
-> +		reg = <0xe804e000 0x100>;
-> +		interrupts = <GIC_SPI 270 IRQ_TYPE_LEVEL_HIGH
-> +			      GIC_SPI 271 IRQ_TYPE_LEVEL_HIGH
-> +			      GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
 > +
-> +		clocks = <&mstp12_clks R7S72100_CLK_SDHI00>,
-> +			 <&mstp12_clks R7S72100_CLK_SDHI01>;
-> +		clock-names = "core", "cd";
-> +		cap-sd-highspeed;
-> +		cap-sdio-irq;
-> +	};
-> -- 
-> 2.10.1
-> 
-> 
+> +Example:
+> +
+> +	wifi_pwrseq: wifi_pwrseq {
+> +		compatible = "mmc-pwrseq-sd8787";
+> +		powerdown-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+> +		reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+> +	}
