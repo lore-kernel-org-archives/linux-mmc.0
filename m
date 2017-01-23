@@ -1,7 +1,7 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: John Keeping <john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org>
 Subject: Re: [PATCH] Revert "mmc: dw_mmc-rockchip: add runtime PM support"
-Date: Mon, 23 Jan 2017 21:53:02 +0900
-Message-ID: <845aea80-10a5-e8f9-5620-952bdcc37234@samsung.com>
+Date: Mon, 23 Jan 2017 13:22:01 +0000
+Message-ID: <20170123132201.30fc4dc1.john@metanate.com>
 References: <CGME20161228153516epcas2p253c6bc0371ab0df464573b63218795ef@epcas2p2.samsung.com>
  <1482939288-14950-1-git-send-email-ayaka@soulik.info>
  <e0cc8029-0155-4879-a643-ddc4239a55ab@samsung.com>
@@ -18,80 +18,86 @@ References: <CGME20161228153516epcas2p253c6bc0371ab0df464573b63218795ef@epcas2p2
  <2cdd0b6c-a099-595d-1c0b-be7933b0d4a6@collabora.com>
  <fba28eda-51c7-2012-03ca-48b6f94e4a18@samsung.com>
  <20170123112432.08337d26.john@metanate.com>
+ <845aea80-10a5-e8f9-5620-952bdcc37234@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:49098 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751016AbdAWMxG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 07:53:06 -0500
-In-reply-to: <20170123112432.08337d26.john@metanate.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <845aea80-10a5-e8f9-5620-952bdcc37234-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ayaka <ayaka-xPW3/0Ywev/iB9QmIjCX8w@public.gmane.org>, Jaehoon Chung <jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Randy Li <randy.li-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Romain Perier <romain.perier-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Romain Perier <romain.perier-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: John Keeping <john@metanate.com>
-Cc: Romain Perier <romain.perier@collabora.com>, Romain Perier <romain.perier@gmail.com>, ulf.hansson@linaro.org, xzy.xu@rock-chips.com, Jaehoon Chung <jh80.chung@gmail.com>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>, Randy Li <randy.li@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, ayaka <ayaka@soulik.info>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi John,
+On Mon, 23 Jan 2017 21:53:02 +0900, Jaehoon Chung wrote:
 
-On 01/23/2017 08:24 PM, John Keeping wrote:
-> Hi,
+> On 01/23/2017 08:24 PM, John Keeping wrote:
+> > Hi,
+> > 
+> > On Fri, 20 Jan 2017 15:08:57 +0900, Jaehoon Chung wrote:  
+> >> On 01/17/2017 10:38 PM, Romain Perier wrote:  
+> >>> In my case I can reproduce the issue on the rock2 and the firefly-rk3288. A workaround is to
+> >>>
+> >>> comment the line ".pm = <&pm_ops_foo>" .    
+> >>
+> >> Sorry for late. I'm checking runtime PM for this. 
+> >> After that, i will decide whether revert or not.  
+> > 
+> > I hit this problem on Rock2 when trying 4.10-rc4.  The following patch
+> > fixes it for me.  
 > 
-> On Fri, 20 Jan 2017 15:08:57 +0900, Jaehoon Chung wrote:
->> On 01/17/2017 10:38 PM, Romain Perier wrote:
->>> In my case I can reproduce the issue on the rock2 and the firefly-rk3288. A workaround is to
->>>
->>> comment the line ".pm = <&pm_ops_foo>" .  
->>
->> Sorry for late. I'm checking runtime PM for this. 
->> After that, i will decide whether revert or not.
+> Could you check with Ulf's repository?
 > 
-> I hit this problem on Rock2 when trying 4.10-rc4.  The following patch
-> fixes it for me.
+> https://git.kernel.org/cgit/linux/kernel/git/ulfh/mmc.git/commit/?h=next&id=e86738ac78c22956f1c787ebafefc83d43cab30a
+> 
+> Shawn's patch was applied. If also occurred the same issue, let me know, plz.
 
-Could you check with Ulf's repository?
+I missed that patch, it also fixes the issue for me.
 
-https://git.kernel.org/cgit/linux/kernel/git/ulfh/mmc.git/commit/?h=next&id=e86738ac78c22956f1c787ebafefc83d43cab30a
-
-Shawn's patch was applied. If also occurred the same issue, let me know, plz.
-
+> > I'm not sure if this is safe in general or whether it should be guarded
+> > by a quirk that is enabled for RK3288.
+> >   
+> > -- >8 --  
+> > Subject: [PATCH] mmc: dw_mmc: restore CIU state on resume
+> > 
+> > At least on RK3288, asserting SDMMC_CTRL_RESET causes the CIU to reset
+> > and disable the clock.  We need to send SDMMC_CMD_UPD_CLK after doing
+> > this in order to avoid the MMC host hanging.
+> > 
+> > Signed-off-by: John Keeping <john-HooS5bfzL4hWk0Htik3J/w@public.gmane.org>
+> > ---
+> >  drivers/mmc/host/dw_mmc.c | 4 ++++
+> >  1 file changed, 4 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index b44306b886cb..e7504dabcfb6 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -3311,6 +3311,7 @@ int dw_mci_runtime_resume(struct device *dev)
+> >  {
+> >  	int i, ret = 0;
+> >  	struct dw_mci *host = dev_get_drvdata(dev);
+> > +	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
+> >  
+> >  	if (host->cur_slot &&
+> >  	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
+> > @@ -3357,6 +3358,9 @@ int dw_mci_runtime_resume(struct device *dev)
+> >  		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+> >  			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+> >  			dw_mci_setup_bus(slot, true);
+> > +		} else {
+> > +			/* restore CIU */
+> > +			mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+> >  		}
+> >  	}
+> >  
+> >   
 > 
-> I'm not sure if this is safe in general or whether it should be guarded
-> by a quirk that is enabled for RK3288.
-> 
-> -- >8 --
-> Subject: [PATCH] mmc: dw_mmc: restore CIU state on resume
-> 
-> At least on RK3288, asserting SDMMC_CTRL_RESET causes the CIU to reset
-> and disable the clock.  We need to send SDMMC_CMD_UPD_CLK after doing
-> this in order to avoid the MMC host hanging.
-> 
-> Signed-off-by: John Keeping <john@metanate.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index b44306b886cb..e7504dabcfb6 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3311,6 +3311,7 @@ int dw_mci_runtime_resume(struct device *dev)
->  {
->  	int i, ret = 0;
->  	struct dw_mci *host = dev_get_drvdata(dev);
-> +	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
->  
->  	if (host->cur_slot &&
->  	    (mmc_can_gpio_cd(host->cur_slot->mmc) ||
-> @@ -3357,6 +3358,9 @@ int dw_mci_runtime_resume(struct device *dev)
->  		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
->  			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
->  			dw_mci_setup_bus(slot, true);
-> +		} else {
-> +			/* restore CIU */
-> +			mci_send_cmd(slot, sdmmc_cmd_bits, 0);
->  		}
->  	}
->  
-> 
-
