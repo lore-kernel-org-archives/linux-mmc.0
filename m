@@ -1,57 +1,63 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Mon, 23 Jan 2017 17:56:41 +0000
-Message-ID: <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170121030604.7672-1-chris.brandt@renesas.com>
- <20170121030604.7672-3-chris.brandt@renesas.com>
- <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
+From: Matt Ranostay <matt@ranostay.consulting>
+Subject: Re: [PATCH v3 1/2] devicetree: document new marvell-8xxx and
+ pwrseq-sd8787 options
+Date: Mon, 23 Jan 2017 13:00:21 -0800
+Message-ID: <CAJ_EiST4286EbMKDP3qVpYRw+i9L0aJUj40wQ3K8JhsvcQETZw@mail.gmail.com>
+References: <20170121055039.10924-1-matt@ranostay.consulting>
+ <20170121055039.10924-2-matt@ranostay.consulting> <20170123170409.rnmnf4ssjpd2yk3l@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
-Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:35891 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751082AbdAWVAX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 16:00:23 -0500
+Received: by mail-qt0-f170.google.com with SMTP id k15so146539403qtg.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2017 13:00:22 -0800 (PST)
+In-Reply-To: <20170123170409.rnmnf4ssjpd2yk3l@rob-hp-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org
 
-Hello Rob,
+On Mon, Jan 23, 2017 at 9:04 AM, Rob Herring <robh@kernel.org> wrote:
+> On Fri, Jan 20, 2017 at 09:50:38PM -0800, Matt Ranostay wrote:
+>> Cc: devicetree@vger.kernel.org
+>> Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
+>> ---
+>>  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt          | 14 ++++++++++++++
+>>  .../devicetree/bindings/net/wireless/marvell-8xxx.txt      |  7 ++++++-
+>>  2 files changed, 20 insertions(+), 1 deletion(-)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>> new file mode 100644
+>> index 000000000000..4bb56766982e
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>> @@ -0,0 +1,14 @@
+>> +* Marvell SD8787 power sequence provider
+>> +
+>> +Required properties:
+>> +- compatible: must be "mmc-pwrseq-sd8787".
+>> +- powerdown-gpio: contains a power down GPIO specifier with active state
+>> +- reset-gpio: contains a reset GPIO specifier with active state
+>
+> My comments on the previous v3 still apply.
 
+Ah yikes.. forgot to increment the patchset.  And noticed the gpio
+isn't gpios... will fixed in "v4"
 
-On Monday, January 23, 2017, Rob Herring wrote:
-> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> > @@ -25,8 +25,32 @@ Required properties:
-> >  		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
-> >  		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
-> >
-> > +- clocks: Most controllers only have 1 clock source per channel.
-> However, on
-> > +	  some variations of this controller, the internal card detection
->=20
-> This should be explicit as to which compatible strings have 2 clocks and
-> which have 1 clock.
+Thanks,
 
-OK. I'll make a list like I did for sh_mmcif:
+Matt
 
-https://patchwork.kernel.org/patch/9512091/
-
-
-
-> > +
-> > +Example showing 2 clocks:
-> > +	sdhi0: sd@e804e000 {
->=20
-> mmc@...
-
-I'm confused. I see that for all SDHI controllers, it either "sd@" or "sdhc=
-i@".
-
-$ grep sdhi $(find arch/arm/boot/dts -name "*.dtsi")
-
-$ grep sdhci $(find arch/arm/boot/dts -name "*.dtsi")
-
-
-Regards,
-Chris
+>
+>> +
+>> +Example:
+>> +
+>> +     wifi_pwrseq: wifi_pwrseq {
+>> +             compatible = "mmc-pwrseq-sd8787";
+>> +             powerdown-gpio = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+>> +             reset-gpio = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+>> +     }
