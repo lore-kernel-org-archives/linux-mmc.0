@@ -1,40 +1,57 @@
-From: Joyes Dadi <"YD."@biscuit.ocn.ne.jp>
-Subject: Urgent Please,,
-Date: Mon, 23 Jan 2017 23:07:49 +0900 (JST)
-Message-ID: <1028184183.25784289.1485180469689.JavaMail.root__45410.688504535$1485181327$gmane$org@biscuit.ocn.ne.jp>
-Reply-To: Joyes Dadi <joyesdadi767@citromail.hu>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v5 1/3] mmc: sh_mobile_sdhi: add support for 2 clocks
+Date: Mon, 23 Jan 2017 14:48:45 +0000
+Message-ID: <SG2PR06MB11656145E7F0EEA7117F09A08A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170121030604.7672-1-chris.brandt@renesas.com>
+ <20170121030604.7672-2-chris.brandt@renesas.com>
+ <CAMuHMdWwqa7CbNCRr8q60hDVsj243-ZjHCPp+o9R2a6Dg7YNWQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mbkd0331.ocn.ad.jp ([153.149.236.32]:32863 "EHLO
-        mbkd0331.ocn.ad.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751220AbdAWOUz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 09:20:55 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdWwqa7CbNCRr8q60hDVsj243-ZjHCPp+o9R2a6Dg7YNWQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Good Day Dear,
-
-My name is Ms. Joyes Dadi, I am glad you are reading this letter and I hope
-we will start our communication and I know that this message will look strange,
-surprising and probably unbelievable to you, but it is the reality. I want to
-make a donation of money to you.
-
-I contact you by the will of God. I am a firm German woman specialized in
-mining gold and diamonds in Africa. But now, I'm very sick of a cancer. My
-husband died in an accident two years ago with our two children and now I have
-cancer of the esophagus that damaged almost all the cells in my system/agencies
-and I'll die soon according to my doctor.
-
-My most concern now is, we grew up in the orphanage and were married in
-orphanage. If I die this deposited fund will soon be left alone in the hand of
-the bank, and I do want to it that  way. Please, if you can be reliable and
-sincere to accept my humble proposal; I have (10.5Millions Euro) in a fixed
-deposit account; I will order the Bank to transfer the money into your account
-in your country immediately, and then you will take the fund to  your country
-and invest it to the orphanage homes Please, answer as quickly as possible.
-
-God bless you.
-Ms. Joyes Dadi
-Email: joyesdadi767@citromail.hu
+SGkgR2VlcnQsDQoNCk9uIE1vbmRheSwgSmFudWFyeSAyMywgMjAxNywgR2VlcnQgVXl0dGVyaG9l
+dmVuOg0KPiA+IEBAIC0xOTAsNiArMTkxLDEyIEBAIHN0YXRpYyBpbnQgc2hfbW9iaWxlX3NkaGlf
+Y2xrX2VuYWJsZShzdHJ1Y3QNCj4gdG1pb19tbWNfaG9zdCAqaG9zdCkNCj4gPiAgICAgICAgIGlm
+IChyZXQgPCAwKQ0KPiA+ICAgICAgICAgICAgICAgICByZXR1cm4gcmV0Ow0KPiA+DQo+ID4gKyAg
+ICAgICByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUocHJpdi0+Y2xrX2NkKTsNCj4gPiArICAgICAg
+IGlmIChyZXQgPCAwKSB7DQo+ID4gKyAgICAgICAgICAgICAgIGNsa19kaXNhYmxlX3VucHJlcGFy
+ZShwcml2LT5jbGspOw0KPiA+ICsgICAgICAgICAgICAgICByZXR1cm4gcmV0Ow0KPiA+ICsgICAg
+ICAgfQ0KPiA+ICsNCj4gDQo+IEFzIGVuYWJsaW5nIHRoZSAiY29yZSIgY2xvY2sgYnV0IG5vdCB0
+aGUgImNkIiBjbG9jayBpcyBub3QgYSB2YWxpZCBzZXR0aW5nLA0KPiBzaG91bGRuJ3QgdGhlIGNk
+IGNsb2NrIGJlIGVuYWJsZWQgZmlyc3Q/DQoNCkknbSBwcmV0dHkgc3VyZSB0aGUgY2hpcCBkZXNp
+Z25lcnMganVzdCBkaWRuJ3Qgd2FudCB5b3UgdG8gJ3VzZScgdGhlDQpwZXJpcGhlcmFsIHdpdGgg
+dGhhdCBjbG9jayBjb25maWd1cmF0aW9uLCBhbmQgd2UgYXJlIG5vdCB1c2luZyBpdCBpbg0KYmV0
+d2VlbiB0aG9zZSAyIGxpbmVzIHNvIEkgcGVyc29uYWxseSB0aGluayBpdCdzIGZpbmUuDQoNCklm
+IEkgbmVlZCB0byBjaGFuZ2UgaXQgdG8gZ2V0IGl0IGFwcHJvdmVkLCBsZXQgbWUga25vdyBhbmQg
+SSdsbCBjaGFuZ2UNCnRoZSBjb2RlIGFyb3VuZC4NCg0KKEluIHJlYWxpdHksIEkgY2hlY2tlZCBh
+bmQgdGhlIFNESEkgZG9lcyB3b3JrIHdpdGggdGhlIGNkIGNsb2NrIG9mZiwNCmJ1dCBJIGRvbid0
+IGtub3cgaWYgdGhlIHJlc3RyaWN0aW9uIGluIHRoZSBzcGVjIHdhcyBiZWNhdXNlIHRoZXkgbmV2
+ZXINCmZ1bGx5IHRlc3RlZCB0aGUgdXNlIG9mIGl0IHRoYXQgd2F5IGJlY2F1c2UgaXQgd2Fzbid0
+IGEgZGVzaWduIGdvYWwgZm9yDQp0aGVtLikNCg0KDQoNCj4gPiAgICAgICAgIC8qDQo+ID4gICAg
+ICAgICAgKiBUaGUgY2xvY2sgZHJpdmVyIG1heSBub3Qga25vdyB3aGF0IG1heGltdW0gZnJlcXVl
+bmN5DQo+ID4gICAgICAgICAgKiBhY3R1YWxseSB3b3Jrcywgc28gaXQgc2hvdWxkIGJlIHNldCB3
+aXRoIHRoZSBtYXgtZnJlcXVlbmN5DQo+ID4gQEAgLTI1NSw2ICsyNjIsOCBAQCBzdGF0aWMgdm9p
+ZCBzaF9tb2JpbGVfc2RoaV9jbGtfZGlzYWJsZShzdHJ1Y3QNCj4gdG1pb19tbWNfaG9zdCAqaG9z
+dCkNCj4gPiAgICAgICAgIHN0cnVjdCBzaF9tb2JpbGVfc2RoaSAqcHJpdiA9IGhvc3RfdG9fcHJp
+dihob3N0KTsNCj4gPg0KPiA+ICAgICAgICAgY2xrX2Rpc2FibGVfdW5wcmVwYXJlKHByaXYtPmNs
+ayk7DQo+ID4gKyAgICAgICBpZiAocHJpdi0+Y2xrX2NkKQ0KPiANCj4gTm8gbmVlZCB0byBjaGVj
+ayBmb3IgYSBOVUxMIHBvaW50ZXIgZmlyc3QuDQoNCk9LLCBJIHNlZSB0aGF0IElTX0VSUl9PUl9O
+VUxMKGNsaykgaXMgZG9uZSBmb3IgY2xrX2Rpc2FibGVfdW5wcmVwYXJlIHNvDQpJJ2xsIHRha2Ug
+dGhlIGNoZWNrIG91dC4NClRoYW5rIHlvdS4NCg0KDQo+ID4gKyAgICAgICAgICAgICAgIGNsa19k
+aXNhYmxlX3VucHJlcGFyZShwcml2LT5jbGtfY2QpOw0KPiANCj4gRGlzYWJsaW5nIGlzIGFscmVh
+ZHkgZG9uZSBpbiB0aGUgY29ycmVjdCBvcmRlciA7LSkNCg0KSSBndWVzcyB5b3UgY291bGQgZ2V0
+IGludG8gc29tZSB0aGVvcmV0aWNhbCB0ZWNobmljYWwgZGlzY3Vzc2lvbiBhcm91bmQNCmlmIGl0
+IGlzIE9LIHRvIGVuYWJsZS9kaXNhYmxlIHRoZSBjbG9ja3MgaW4gYW55IG9yZGVyIChhcyBsb25n
+IGFzIHlvdQ0KZG9uJ3QgdXNlIHRoZSBTREhJIGluIGJldHdlZW4pLCB0aGVuIHlvdSB3b3VsZCB3
+YW50IHRvIGVuYWJsZSB0aGUgY2QNCmNpcmN1aXQgbGFzdCwgYW5kIGRpc2FibGUgaXQgZmlyc3Qg
+c28geW91IHdvdWxkIGVuc3VyZSB0aGF0IG5vIGNkDQppbnRlcnJ1cHRzIGFyZSBiZWluZyByZWdp
+c3RlcmVkIHdoZW4gdGhlIGNvcmUgY2xvY2sgaXMgb2ZmPw0KSW4gdGhhdCBjYXNlLCB0aGUgY3Vy
+cmVudCBlbmFibGUgb3JkZXIgc2hvdWxkIHJlbWFpbiBidXQgdGhlIGRpc2FibGUNCm9yZGVyIHNo
+b3VsZCBjaGFuZ2UuDQoNCk9waW5pb25zPz8/DQoNCg0KVGhhbmsgeW91LA0KQ2hyaXMNCg==
