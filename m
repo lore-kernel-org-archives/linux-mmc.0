@@ -1,148 +1,170 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 10/14] mmc: jz4740: Let the pinctrl driver configure
- the pins
-Date: Mon, 23 Jan 2017 11:40:12 +0100
-Message-ID: <CAPDyKFpqs+w4jsYNBeH3VuB08Yp72JPh7wcYZZHJKSKeuAGE2A@mail.gmail.com>
-References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
- <20170122144947.16158-1-paul@crapouillou.net> <20170122144947.16158-11-paul@crapouillou.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-s3c: remove the unnecessary defined values
+Date: Mon, 23 Jan 2017 19:50:17 +0900
+Message-ID: <07495593-f7f7-073b-10e2-61177b634626@samsung.com>
+References: <CGME20170120095012epcas5p436242f1882d319fe958f0084dea71628@epcas5p4.samsung.com>
+ <20170120095004.14509-1-jh80.chung@samsung.com>
+ <20170120095004.14509-3-jh80.chung@samsung.com>
+ <CAPDyKFq+-M3kHSEfdLcX_DiE=WSm2M1zgzxcPfRqfkstZW3wBg@mail.gmail.com>
+ <2b500b69-873b-9285-2466-97edb68dc6d6@samsung.com>
+ <CAPDyKFrTkkNMXVBb23WkATgtS8qbMaruL8qRz+F_L2GRT1=oaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170122144947.16158-11-paul@crapouillou.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mips@linux-mips.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, Linux
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:51796 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbdAWKuV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 05:50:21 -0500
+Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OK801VQNBFVBM70@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 23 Jan 2017 19:50:19 +0900 (KST)
+In-reply-to: <CAPDyKFrTkkNMXVBb23WkATgtS8qbMaruL8qRz+F_L2GRT1=oaQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 22 January 2017 at 15:49, Paul Cercueil <paul@crapouillou.net> wrote:
-> Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-> the pins being properly configured before the driver probes.
->
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+On 01/23/2017 06:12 PM, Ulf Hansson wrote:
+> On 23 January 2017 at 02:59, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi Ulf,
+>>
+>> On 01/20/2017 07:22 PM, Ulf Hansson wrote:
+>>> On 20 January 2017 at 10:50, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>> Some defined value don't use anywhere.
+>>>> It doesn't need to maintain anywhere.
+>>>> Just keeps the minimum values what is using and needs.
+>>>
+>>> I don't mind keeping them, even if they are unused. And perhaps, we
+>>> start to use them one day.
+>>>
+>>> Moreover, sometimes it helps to understand the HW, particularly if you
+>>> don't have the spec at hand.
+>>
+>> Agreed..Then how do you think about other patches?
+> 
+> Looks good. Do they apply as is or you need to rebase the series?
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+I will resend the patch v2.
 
-Kind regards
-Uffe
+Best Regards,
+Jaehoon Chung
 
-> ---
->  drivers/mmc/host/jz4740_mmc.c | 45 +++++--------------------------------------
->  1 file changed, 5 insertions(+), 40 deletions(-)
->
-> v2: Set pin sleep/default state in suspend/resume callbacks
->
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 819ad32964fc..b5fec5b7ee7b 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -20,14 +20,13 @@
->  #include <linux/irq.h>
->  #include <linux/interrupt.h>
->  #include <linux/module.h>
-> +#include <linux/pinctrl/consumer.h>
->  #include <linux/platform_device.h>
->  #include <linux/delay.h>
->  #include <linux/scatterlist.h>
->  #include <linux/clk.h>
->
->  #include <linux/bitops.h>
-> -#include <linux/gpio.h>
-> -#include <asm/mach-jz4740/gpio.h>
->  #include <asm/cacheflush.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/dmaengine.h>
-> @@ -906,15 +905,6 @@ static const struct mmc_host_ops jz4740_mmc_ops = {
->         .enable_sdio_irq = jz4740_mmc_enable_sdio_irq,
->  };
->
-> -static const struct jz_gpio_bulk_request jz4740_mmc_pins[] = {
-> -       JZ_GPIO_BULK_PIN(MSC_CMD),
-> -       JZ_GPIO_BULK_PIN(MSC_CLK),
-> -       JZ_GPIO_BULK_PIN(MSC_DATA0),
-> -       JZ_GPIO_BULK_PIN(MSC_DATA1),
-> -       JZ_GPIO_BULK_PIN(MSC_DATA2),
-> -       JZ_GPIO_BULK_PIN(MSC_DATA3),
-> -};
-> -
->  static int jz4740_mmc_request_gpio(struct device *dev, int gpio,
->         const char *name, bool output, int value)
->  {
-> @@ -978,15 +968,6 @@ static void jz4740_mmc_free_gpios(struct platform_device *pdev)
->                 gpio_free(pdata->gpio_power);
->  }
->
-> -static inline size_t jz4740_mmc_num_pins(struct jz4740_mmc_host *host)
-> -{
-> -       size_t num_pins = ARRAY_SIZE(jz4740_mmc_pins);
-> -       if (host->pdata && host->pdata->data_1bit)
-> -               num_pins -= 3;
-> -
-> -       return num_pins;
-> -}
-> -
->  static int jz4740_mmc_probe(struct platform_device* pdev)
->  {
->         int ret;
-> @@ -1027,15 +1008,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
->                 goto err_free_host;
->         }
->
-> -       ret = jz_gpio_bulk_request(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "Failed to request mmc pins: %d\n", ret);
-> -               goto err_free_host;
-> -       }
-> -
->         ret = jz4740_mmc_request_gpios(mmc, pdev);
->         if (ret)
-> -               goto err_gpio_bulk_free;
-> +               goto err_release_dma;
->
->         mmc->ops = &jz4740_mmc_ops;
->         mmc->f_min = JZ_MMC_CLK_RATE / 128;
-> @@ -1091,10 +1066,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
->         free_irq(host->irq, host);
->  err_free_gpios:
->         jz4740_mmc_free_gpios(pdev);
-> -err_gpio_bulk_free:
-> +err_release_dma:
->         if (host->use_dma)
->                 jz4740_mmc_release_dma_channels(host);
-> -       jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
->  err_free_host:
->         mmc_free_host(mmc);
->
-> @@ -1114,7 +1088,6 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
->         free_irq(host->irq, host);
->
->         jz4740_mmc_free_gpios(pdev);
-> -       jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
->
->         if (host->use_dma)
->                 jz4740_mmc_release_dma_channels(host);
-> @@ -1128,20 +1101,12 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
->
->  static int jz4740_mmc_suspend(struct device *dev)
->  {
-> -       struct jz4740_mmc_host *host = dev_get_drvdata(dev);
-> -
-> -       jz_gpio_bulk_suspend(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
-> -
-> -       return 0;
-> +       return pinctrl_pm_select_sleep_state(dev);
->  }
->
->  static int jz4740_mmc_resume(struct device *dev)
->  {
-> -       struct jz4740_mmc_host *host = dev_get_drvdata(dev);
-> -
-> -       jz_gpio_bulk_resume(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
-> -
-> -       return 0;
-> +       return pinctrl_pm_select_default_state(dev);
->  }
->
->  static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+> 
+> Kind regards
+> Uffe
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>>
+>>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-s3c.c | 50 ++------------------------------------------
+>>>>  1 file changed, 2 insertions(+), 48 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+>>>> index 7a230a1..e8b57cd 100644
+>>>> --- a/drivers/mmc/host/sdhci-s3c.c
+>>>> +++ b/drivers/mmc/host/sdhci-s3c.c
+>>>> @@ -34,74 +34,28 @@
+>>>>  #define MAX_BUS_CLK    (4)
+>>>>
+>>>>  #define S3C_SDHCI_CONTROL2                     (0x80)
+>>>> -#define S3C_SDHCI_CONTROL3                     (0x84)
+>>>> -#define S3C64XX_SDHCI_CONTROL4                 (0x8C)
+>>>> -
+>>>>  #define S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR      (1 << 31)
+>>>>  #define S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK                (1 << 30)
+>>>> -#define S3C_SDHCI_CTRL2_CDINVRXD3              (1 << 29)
+>>>> -#define S3C_SDHCI_CTRL2_SLCARDOUT              (1 << 28)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK         (0xf << 24)
+>>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT                (24)
+>>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x)          ((_x) << 24)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL2_LVLDAT_MASK            (0xff << 16)
+>>>> -#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT           (16)
+>>>> -#define S3C_SDHCI_CTRL2_LVLDAT(_x)             ((_x) << 16)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL2_ENFBCLKTX              (1 << 15)
+>>>>  #define S3C_SDHCI_CTRL2_ENFBCLKRX              (1 << 14)
+>>>> -#define S3C_SDHCI_CTRL2_SDCDSEL                        (1 << 13)
+>>>> -#define S3C_SDHCI_CTRL2_SDSIGPC                        (1 << 12)
+>>>> -#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART       (1 << 11)
+>>>> -
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_MASK             (0x3 << 9)
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_SHIFT            (9)
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_NONE             (0x0 << 9)
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_4SDCLK           (0x1 << 9)
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_16SDCLK          (0x2 << 9)
+>>>>  #define S3C_SDHCI_CTRL2_DFCNT_64SDCLK          (0x3 << 9)
+>>>> -
+>>>>  #define S3C_SDHCI_CTRL2_ENCLKOUTHOLD           (1 << 8)
+>>>> -#define S3C_SDHCI_CTRL2_RWAITMODE              (1 << 7)
+>>>> -#define S3C_SDHCI_CTRL2_DISBUFRD               (1 << 6)
+>>>>  #define S3C_SDHCI_CTRL2_SELBASECLK_MASK                (0x3 << 4)
+>>>>  #define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT       (4)
+>>>> -#define S3C_SDHCI_CTRL2_PWRSYNC                        (1 << 3)
+>>>> -#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON         (1 << 1)
+>>>> -#define S3C_SDHCI_CTRL2_HWINITFIN              (1 << 0)
+>>>>
+>>>> +#define S3C_SDHCI_CONTROL3                     (0x84)
+>>>>  #define S3C_SDHCI_CTRL3_FCSEL3                 (1 << 31)
+>>>>  #define S3C_SDHCI_CTRL3_FCSEL2                 (1 << 23)
+>>>>  #define S3C_SDHCI_CTRL3_FCSEL1                 (1 << 15)
+>>>>  #define S3C_SDHCI_CTRL3_FCSEL0                 (1 << 7)
+>>>>
+>>>> -#define S3C_SDHCI_CTRL3_FIA3_MASK              (0x7f << 24)
+>>>> -#define S3C_SDHCI_CTRL3_FIA3_SHIFT             (24)
+>>>> -#define S3C_SDHCI_CTRL3_FIA3(_x)               ((_x) << 24)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL3_FIA2_MASK              (0x7f << 16)
+>>>> -#define S3C_SDHCI_CTRL3_FIA2_SHIFT             (16)
+>>>> -#define S3C_SDHCI_CTRL3_FIA2(_x)               ((_x) << 16)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL3_FIA1_MASK              (0x7f << 8)
+>>>> -#define S3C_SDHCI_CTRL3_FIA1_SHIFT             (8)
+>>>> -#define S3C_SDHCI_CTRL3_FIA1(_x)               ((_x) << 8)
+>>>> -
+>>>> -#define S3C_SDHCI_CTRL3_FIA0_MASK              (0x7f << 0)
+>>>> -#define S3C_SDHCI_CTRL3_FIA0_SHIFT             (0)
+>>>> -#define S3C_SDHCI_CTRL3_FIA0(_x)               ((_x) << 0)
+>>>> -
+>>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_MASK      (0x3 << 16)
+>>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_SHIFT     (16)
+>>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_2mA       (0x0 << 16)
+>>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_4mA       (0x1 << 16)
+>>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_7mA       (0x2 << 16)
+>>>> +#define S3C64XX_SDHCI_CONTROL4                 (0x8C)
+>>>>  #define S3C64XX_SDHCI_CONTROL4_DRIVE_9mA       (0x3 << 16)
+>>>>
+>>>> -#define S3C64XX_SDHCI_CONTROL4_BUSY            (1)
+>>>> -
+>>>>  /**
+>>>>   * struct sdhci_s3c - S3C SDHCI instance
+>>>>   * @host: The SDHCI host created
+>>>> --
+>>>> 2.10.2
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>
 > --
-> 2.11.0
->
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
