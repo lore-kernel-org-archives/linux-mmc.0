@@ -1,131 +1,57 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Mon, 23 Jan 2017 17:07:17 +0000
-Message-ID: <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
- <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
- <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Mon, 23 Jan 2017 17:56:41 +0000
+Message-ID: <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170121030604.7672-1-chris.brandt@renesas.com>
+ <20170121030604.7672-3-chris.brandt@renesas.com>
+ <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0068.outbound.protection.outlook.com ([104.47.41.68]:31389
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751136AbdAWRHZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 23 Jan 2017 12:07:25 -0500
-In-Reply-To: <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
 Content-Language: en-US
-Content-ID: <8D9B47FB228B9E478245FE7BD719C501@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Uri Yanai <Uri.Yanai@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgQWRyaWFuLA0KDQpJIHdvdWxkIGxpa2UgdG8gYWRkIHNldmVyYWwgbm90ZXMgb24gdG9wIG9m
-IFVyaeKAmXMgYW5zd2VyLi4uDQpJIGFncmVlIHdpdGggeW91LCBieSB0aGUgc3BlYywgUE9OIFNs
-ZWVwX05vdGlmaWNhdGlvbiBzaG91bGQgYmUNCnNldCBiZWZvcmUgY2FsbGluZyBTbGVlcCBjb21t
-YW5kLg0KQXMgeW91IHByb2JhYmx5IHJlbWVtYmVyLCB3ZSBoYXZlIHRyaWVkIHRvIGltcGxlbWVu
-dCBpdA0KaW4gdGhlIHBhc3QgYW5kIGV2ZW4gc3VibWl0dGVkIGEgcGF0Y2gg4oCTIOKAnFtQQVRD
-SF0gbW1jOiBzbGVlcCBub3RpZmljYXRpb27igJ0NCmh0dHBzOi8vd3d3Lm1haWwtYXJjaGl2ZS5j
-b20vbGludXgtbW1jQHZnZXIua2VybmVsLm9yZy9tc2czMDkwNi5odG1sDQpBcyB5b3UgY2FuIHNl
-ZSBmcm9tIHRoZSB0aHJlYWQsIG9uZSBvZiB0aGUgbWFpbiBpc3N1ZXMgaW4gU2xlZXBfTm90aWZp
-Y2F0aW9uDQppcyBhIFNMRUVQX05PVElGSUNBVElPTl9USU1FIChkZWZpbmVkIGluIEVYVF9DU0Qg
-WzIxNl0pLCB3aGljaCBuZWVkIHRvIGJlDQpjb25zaWRlcmVkIGluIGltcGxlbWVudGF0aW9u4oCm
-DQpUaHVzLCBJIHRoaW5rIHBvc3Rwb25pbmcgU2xlZXAgZHVyaW5nIHN1c3BlbmQgcmVxdWlyZXMg
-YSBkaWZmZXJlbnQgZnJvbSBjdXJyZW50DQpBVVRPX0JLT1BTIGltcGxlbWVudGF0aW9uLCBhbmQg
-SSBzdWdnZXN0IHRvIGhhbmRsZSBpdCBpbiBzZXBhcmF0ZQ0KcGF0Y2hzZXQsIGlmIHBvc3NpYmxl
-Lg0KDQoNClRoYW5rcywNCkFsZXgNCg0KT24gMS8yMi8xNywgNTo1NSBQTSwgIlVyaSBZYW5haSIg
-PFVyaS5ZYW5haUBzYW5kaXNrLmNvbT4gd3JvdGU6DQoNCiAgICBIaSBBZHJpYW4NCiAgICANCiAg
-ICBUaGFua3MgZm9yIHlvdXIgcmV2aWV3Lg0KICAgIFVsZiByZWplY3RlZCBvdXIgYXBwcm9hY2gg
-aW4gdGhlIGZpcnN0IHBhdGNoIHN1Ym1pc3Npb24gY2FsbGluZyBwbV9zY2hlZHVsZV9zdXNwZW5k
-KCkNCiAgICANCiAgICAiIElmIEkgdW5kZXJzdGFuZCBjb3JyZWN0bHksIHlvdSB3b3VsZCBsaWtl
-IHRvIGFib3J0IHRoZSBydW50aW1lIHN1c3BlbmQNCiAgICBhbmQgYWxsb3cgdGhlIGJhY2tncm91
-bmQgb3BlcmF0aW9ucyB0byBjb21wbGV0ZS4gVGhhdCBzZWVtcw0KICAgIHJlYXNvbmFibGUsIGFs
-dGhvdWdoIGluIHN1Y2ggY2FzZSB5b3UgbmVlZCB0byByZXR1cm4gLUVCVVNZIGZyb20gdGhpcw0K
-ICAgIGZ1bmN0aW9uLiINCiAgICANCiAgICBJZiBJIHVuZGVyc3Rvb2QgVWxmIGNvcnJlY3RseSwg
-aW5zdGVhZCBvZiBzdXNwZW5kaW5nIGhlIHN1Z2dlc3QgYWJvcnRpbmcgdGhlIHN1c3BlbmQgYWx0
-b2dldGhlciByZXR1cm5pbmcgLUVCVVNZLg0KICAgIA0KICAgIElmIEkgdW5kZXJzdG9vZCB5b3Ug
-Y29ycmVjdGx5LCB5b3VyIGFwcHJvYWNoIGlzIHNpbWlsYXIgdG8gdGhlIG9uZSB0YWtlbiBpbiB0
-aGUgZmlyc3QgcGF0Y2ggc3VibWlzc2lvbi4NCiAgICBJbnN0ZWFkIG9mIGNhbGxpbmcgcG1fc2No
-ZWR1bGVfc3VzcGVuZCgpLCB5b3Ugc3VnZ2VzdCBjYWxsaW5nICBtbWNfcG93ZXJvZmZfbm90aWZ5
-KGhvc3QtPmNhcmQsIFNMRUVQX05PVElGSUNBVElPTikuDQogICAgDQogICAgUmVnYXJkcw0KICAg
-IFVyaQ0KICAgIA0KICAgIC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQogICAgRnJvbTogQWRy
-aWFuIEh1bnRlciBbbWFpbHRvOmFkcmlhbi5odW50ZXJAaW50ZWwuY29tXSANCiAgICBTZW50OiBG
-cmlkYXksIEphbnVhcnkgMjAsIDIwMTcgMTo1NiBQTQ0KICAgIFRvOiBVcmkgWWFuYWk7IHVsZi5o
-YW5zc29uQGxpbmFyby5vcmcNCiAgICBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgY2hy
-aXNAcHJpbnRmLm5ldDsgQWxleCBMZW1iZXJnDQogICAgU3ViamVjdDogUmU6IFtQQVRDSCAzLzNd
-IG1tYzogQ2hlY2tpbmcgQktPUFMgc3RhdHVzIHByaW9yIHRvIFN1c3BlbmQNCiAgICANCiAgICBP
-biAxNy8wMS8xNyAxNDoxNSwgVXJpIFlhbmFpIHdyb3RlOg0KICAgID4gSWYgYXNrZWQgdG8gZG8g
-ZGV2aWNlIFJ1bnRpbWUgU3VzcGVuZCB3aGlsZSBpbiBCS09QUyBhbmQgYXV0byBCS09QUyBpcyAN
-CiAgICA+IGVuYWJsZWQgcmV0dXJuIOKAk0VCVVNZDQogICAgDQogICAgVGhlIHNwZWMgYWxzbyBz
-YXlzDQogICAgDQogICAgIkJlZm9yZSBtb3ZpbmcgdG8gU2xlZXAgc3RhdGUgaG9zdHMgbWF5IHNl
-dCB0aGUgUE9XRVJfT0ZGX05PVElGSUNBVElPTiBieXRlIHRvIFNMRUVQX05PVElGSUNBVElPTiAo
-MHgwNCkgaWYgYXdhcmUgdGhhdCB0aGUgZGV2aWNlIGlzIGNhcGFibGUgb2YgYXV0b25vbW91c2x5
-IGluaXRpYXRpbmcgYmFja2dyb3VuZCBvcGVyYXRpb25zIGZvciBwb3NzaWJsZSBwZXJmb3JtYW5j
-ZSBpbXByb3ZlbWVudHMuIg0KICAgIA0KICAgIEhhdmUgeW91IGNvbnNpZGVyZWQgdGhhdD8NCiAg
-ICANCiAgICBCdXQgSSB3b25kZXIgaWYgd2Ugc2hvdWxkbid0IGFsd2F5cyB1c2UgU0xFRVBfTk9U
-SUZJQ0FUSU9OIGJlZm9yZSBzbGVlcD8NCiAgICANCiAgICA+IA0KICAgID4gQ2hhbmdlLUlkOiBJ
-ZTRiMzhhMzJmZTk4MTc5ZjBiY2E1YjU3ZWRhYWE0N2EwMmQwYTM4OQ0KICAgID4gU2lnbmVkLW9m
-Zi1ieTogVXJpIFlhbmFpIDx1cmkueWFuYWlAc2FuZGlzay5jb20+DQogICAgPiBTaWduZWQtb2Zm
-LWJ5OiBBbGV4IExlbWJlcmcgPGFsZXgubGVtYmVyZ0BzYW5kaXNrLmNvbT4NCiAgICA+IC0tLQ0K
-ICAgID4gIGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgIHwgMzUgKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKy0tLS0tLS0NCiAgICA+ICBpbmNsdWRlL2xpbnV4L21tYy9tbWMuaCB8ICAyICsrDQog
-ICAgPiAgMiBmaWxlcyBjaGFuZ2VkLCAzMCBpbnNlcnRpb25zKCspLCA3IGRlbGV0aW9ucygtKQ0K
-ICAgID4gDQogICAgPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBiL2RyaXZl
-cnMvbW1jL2NvcmUvbW1jLmMgaW5kZXggDQogICAgPiBmNzBmNmExLi4yMWY1ODUxIDEwMDY0NA0K
-ICAgID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KICAgID4gKysrIGIvZHJpdmVycy9t
-bWMvY29yZS9tbWMuYw0KICAgID4gQEAgLTE5NDIsNyArMTk0Miw4IEBAIHN0YXRpYyB2b2lkIG1t
-Y19kZXRlY3Qoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KICAgID4gIAl9DQogICAgPiAgfQ0KICAg
-ID4gIA0KICAgID4gLXN0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVjdCBtbWNfaG9zdCAqaG9z
-dCwgYm9vbCBpc19zdXNwZW5kKQ0KICAgID4gK3N0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVj
-dCBtbWNfaG9zdCAqaG9zdCwgYm9vbCBpc19zdXNwZW5kLA0KICAgID4gKwlib29sIGlzX3J1bnRp
-bWVfcG0pDQogICAgPiAgew0KICAgID4gIAlpbnQgZXJyID0gMDsNCiAgICA+ICAJdW5zaWduZWQg
-aW50IG5vdGlmeV90eXBlID0gaXNfc3VzcGVuZCA/IEVYVF9DU0RfUE9XRVJfT0ZGX1NIT1JUIDoN
-CiAgICA+IEBAIC0xOTUzLDEwICsxOTU0LDMwIEBAIHN0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0
-cnVjdCBtbWNfaG9zdCAqaG9zdCwgYm9vbCBpc19zdXNwZW5kKQ0KICAgID4gIAlpZiAobW1jX2Nh
-cmRfc3VzcGVuZGVkKGhvc3QtPmNhcmQpKQ0KICAgID4gIAkJZ290byBvdXQ7DQogICAgPiAgDQog
-ICAgPiAtCWlmIChtbWNfY2FyZF9kb2luZ19ia29wcyhob3N0LT5jYXJkKSkgew0KICAgID4gLQkJ
-ZXJyID0gbW1jX3N0b3BfYmtvcHMoaG9zdC0+Y2FyZCk7DQogICAgPiAtCQlpZiAoZXJyKQ0KICAg
-ID4gKwlpZiAobW1jX2NhcmRfZG9pbmdfYmtvcHMoaG9zdC0+Y2FyZCkgfHwNCiAgICA+ICsJCWhv
-c3QtPmNhcmQtPmV4dF9jc2QuYXV0b19ia29wc19lbikgew0KICAgID4gKwkJZXJyID0gbW1jX3Jl
-YWRfYmtvcHNfc3RhdHVzKGhvc3QtPmNhcmQpOw0KICAgID4gKwkJaWYgKGVycikgew0KICAgID4g
-KwkJCXByX2VycigiJXM6IGVycm9yICVkIHJlYWRpbmcgQktPUFMgU3RhdHVzXG4iLA0KICAgID4g
-KwkJCQltbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQogICAgPiAgCQkJZ290byBvdXQ7DQogICAg
-PiArCQl9DQogICAgPiArCQlpZiAoaXNfcnVudGltZV9wbSAmJiBob3N0LT5jYXJkLT5leHRfY3Nk
-LnJhd19ia29wc19zdGF0dXMgPj0NCiAgICA+ICsJCQkJRVhUX0NTRF9CS09QU19MRVZFTF9QTV9T
-VVNQRU5EKSB7DQogICAgPiArCQkJLyoNCiAgICA+ICsJCQkgKiBXZSBkb27igJl0IGFsbG93IFJ1
-bnRpbWUgU3VzcGVuZCB3aGlsZSBkZXZpY2Ugc3RpbGwNCiAgICA+ICsJCQkgKiBuZWVkcyB0aW1l
-IHRvIGNvbXBsZXRlIGludGVybmFsIEJLT1BTLCByZXR1cm5pbmcNCiAgICA+ICsJCQkgKiAtRUJV
-U1kgd2hpbGUgQktPUFMgbGV2ZWwgaXMgYWJvdmUNCiAgICA+ICsJCQkgKiAgRVhUX0NTRF9CS09Q
-U19MRVZFTF9QTV9TVVNQRU5EDQogICAgPiArCQkJICovDQogICAgPiArCQkJZXJyID0gLUVCVVNZ
-Ow0KICAgID4gKwkJCWdvdG8gb3V0Ow0KICAgID4gKwkJfQ0KICAgID4gKwkJaWYgKG1tY19jYXJk
-X2RvaW5nX2Jrb3BzKGhvc3QtPmNhcmQpKSB7DQogICAgPiArCQkJZXJyID0gbW1jX3N0b3BfYmtv
-cHMoaG9zdC0+Y2FyZCk7DQogICAgPiArCQkJaWYgKGVycikNCiAgICA+ICsJCQkJZ290byBvdXQ7
-DQogICAgPiArCQl9DQogICAgPiAgCX0NCiAgICA+ICANCiAgICA+ICAJZXJyID0gbW1jX2ZsdXNo
-X2NhY2hlKGhvc3QtPmNhcmQpOw0KICAgID4gQEAgLTE5ODcsNyArMjAwOCw3IEBAIHN0YXRpYyBp
-bnQgbW1jX3N1c3BlbmQoc3RydWN0IG1tY19ob3N0ICpob3N0KSAgew0KICAgID4gIAlpbnQgZXJy
-Ow0KICAgID4gIA0KICAgID4gLQllcnIgPSBfbW1jX3N1c3BlbmQoaG9zdCwgdHJ1ZSk7DQogICAg
-PiArCWVyciA9IF9tbWNfc3VzcGVuZChob3N0LCB0cnVlLCBmYWxzZSk7DQogICAgPiAgCWlmICgh
-ZXJyKSB7DQogICAgPiAgCQlwbV9ydW50aW1lX2Rpc2FibGUoJmhvc3QtPmNhcmQtPmRldik7DQog
-ICAgPiAgCQlwbV9ydW50aW1lX3NldF9zdXNwZW5kZWQoJmhvc3QtPmNhcmQtPmRldik7DQogICAg
-PiBAQCAtMjAzNCw3ICsyMDU1LDcgQEAgc3RhdGljIGludCBtbWNfc2h1dGRvd24oc3RydWN0IG1t
-Y19ob3N0ICpob3N0KQ0KICAgID4gIAkJZXJyID0gX21tY19yZXN1bWUoaG9zdCk7DQogICAgPiAg
-DQogICAgPiAgCWlmICghZXJyKQ0KICAgID4gLQkJZXJyID0gX21tY19zdXNwZW5kKGhvc3QsIGZh
-bHNlKTsNCiAgICA+ICsJCWVyciA9IF9tbWNfc3VzcGVuZChob3N0LCBmYWxzZSwgZmFsc2UpOw0K
-ICAgID4gIA0KICAgID4gIAlyZXR1cm4gZXJyOw0KICAgID4gIH0NCiAgICA+IEBAIC0yMDU4LDcg
-KzIwNzksNyBAQCBzdGF0aWMgaW50IG1tY19ydW50aW1lX3N1c3BlbmQoc3RydWN0IG1tY19ob3N0
-ICpob3N0KQ0KICAgID4gIAlpZiAoIShob3N0LT5jYXBzICYgTU1DX0NBUF9BR0dSRVNTSVZFX1BN
-KSkNCiAgICA+ICAJCXJldHVybiAwOw0KICAgID4gIA0KICAgID4gLQllcnIgPSBfbW1jX3N1c3Bl
-bmQoaG9zdCwgdHJ1ZSk7DQogICAgPiArCWVyciA9IF9tbWNfc3VzcGVuZChob3N0LCB0cnVlLCB0
-cnVlKTsNCiAgICA+ICAJaWYgKGVycikNCiAgICA+ICAJCXByX2VycigiJXM6IGVycm9yICVkIGRv
-aW5nIGFnZ3Jlc3NpdmUgc3VzcGVuZFxuIiwNCiAgICA+ICAJCQltbWNfaG9zdG5hbWUoaG9zdCks
-IGVycik7DQogICAgPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9tbWMvbW1jLmggYi9pbmNs
-dWRlL2xpbnV4L21tYy9tbWMuaCBpbmRleCANCiAgICA+IDEyNmI4ZDUuLjI2MzMyNzQgMTAwNjQ0
-DQogICAgPiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaA0KICAgID4gKysrIGIvaW5jbHVk
-ZS9saW51eC9tbWMvbW1jLmgNCiAgICA+IEBAIC00NDUsNiArNDQ1LDggQEAgc3RydWN0IF9tbWNf
-Y3NkIHsNCiAgICA+ICAgKi8NCiAgICA+ICAjZGVmaW5lIEVYVF9DU0RfQktPUFNfTEVWRUxfMgkJ
-MHgyDQogICAgPiAgDQogICAgPiArI2RlZmluZSBFWFRfQ1NEX0JLT1BTX0xFVkVMX1BNX1NVU1BF
-TkQJRVhUX0NTRF9CS09QU19MRVZFTF8yDQogICAgPiArDQogICAgPiAgLyoNCiAgICA+ICAgKiBC
-S09QUyBtb2Rlcw0KICAgID4gICAqLw0KICAgID4gDQogICAgDQogICAgDQoNCg==
+Hello Rob,
+
+
+On Monday, January 23, 2017, Rob Herring wrote:
+> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> > @@ -25,8 +25,32 @@ Required properties:
+> >  		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+> >  		"renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
+> >
+> > +- clocks: Most controllers only have 1 clock source per channel.
+> However, on
+> > +	  some variations of this controller, the internal card detection
+>=20
+> This should be explicit as to which compatible strings have 2 clocks and
+> which have 1 clock.
+
+OK. I'll make a list like I did for sh_mmcif:
+
+https://patchwork.kernel.org/patch/9512091/
+
+
+
+> > +
+> > +Example showing 2 clocks:
+> > +	sdhi0: sd@e804e000 {
+>=20
+> mmc@...
+
+I'm confused. I see that for all SDHI controllers, it either "sd@" or "sdhc=
+i@".
+
+$ grep sdhi $(find arch/arm/boot/dts -name "*.dtsi")
+
+$ grep sdhci $(find arch/arm/boot/dts -name "*.dtsi")
+
+
+Regards,
+Chris
