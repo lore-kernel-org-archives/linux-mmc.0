@@ -1,170 +1,80 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-s3c: remove the unnecessary defined values
-Date: Mon, 23 Jan 2017 19:50:17 +0900
-Message-ID: <07495593-f7f7-073b-10e2-61177b634626@samsung.com>
-References: <CGME20170120095012epcas5p436242f1882d319fe958f0084dea71628@epcas5p4.samsung.com>
- <20170120095004.14509-1-jh80.chung@samsung.com>
- <20170120095004.14509-3-jh80.chung@samsung.com>
- <CAPDyKFq+-M3kHSEfdLcX_DiE=WSm2M1zgzxcPfRqfkstZW3wBg@mail.gmail.com>
- <2b500b69-873b-9285-2466-97edb68dc6d6@samsung.com>
- <CAPDyKFrTkkNMXVBb23WkATgtS8qbMaruL8qRz+F_L2GRT1=oaQ@mail.gmail.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v3 0/13] arm64: allwinner: a64: Enable MMC support
+Date: Mon, 23 Jan 2017 11:58:42 +0100
+Message-ID: <20170123105842.37q23ecxecrjr6so@lukather>
+References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="cen64qteailglgvu"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:51796 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750703AbdAWKuV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 05:50:21 -0500
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OK801VQNBFVBM70@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 23 Jan 2017 19:50:19 +0900 (KST)
-In-reply-to: <CAPDyKFrTkkNMXVBb23WkATgtS8qbMaruL8qRz+F_L2GRT1=oaQ@mail.gmail.com>
+Received: from mail.free-electrons.com ([62.4.15.54]:56821 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbdAWK64 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 05:58:56 -0500
+Content-Disposition: inline
+In-Reply-To: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
 
-On 01/23/2017 06:12 PM, Ulf Hansson wrote:
-> On 23 January 2017 at 02:59, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Ulf,
->>
->> On 01/20/2017 07:22 PM, Ulf Hansson wrote:
->>> On 20 January 2017 at 10:50, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> Some defined value don't use anywhere.
->>>> It doesn't need to maintain anywhere.
->>>> Just keeps the minimum values what is using and needs.
->>>
->>> I don't mind keeping them, even if they are unused. And perhaps, we
->>> start to use them one day.
->>>
->>> Moreover, sometimes it helps to understand the HW, particularly if you
->>> don't have the spec at hand.
->>
->> Agreed..Then how do you think about other patches?
-> 
-> Looks good. Do they apply as is or you need to rebase the series?
 
-I will resend the patch v2.
+--cen64qteailglgvu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Best Regards,
-Jaehoon Chung
+Hi Ulf,
 
-> 
-> Kind regards
-> Uffe
-> 
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>> Kind regards
->>> Uffe
->>>
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci-s3c.c | 50 ++------------------------------------------
->>>>  1 file changed, 2 insertions(+), 48 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->>>> index 7a230a1..e8b57cd 100644
->>>> --- a/drivers/mmc/host/sdhci-s3c.c
->>>> +++ b/drivers/mmc/host/sdhci-s3c.c
->>>> @@ -34,74 +34,28 @@
->>>>  #define MAX_BUS_CLK    (4)
->>>>
->>>>  #define S3C_SDHCI_CONTROL2                     (0x80)
->>>> -#define S3C_SDHCI_CONTROL3                     (0x84)
->>>> -#define S3C64XX_SDHCI_CONTROL4                 (0x8C)
->>>> -
->>>>  #define S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR      (1 << 31)
->>>>  #define S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK                (1 << 30)
->>>> -#define S3C_SDHCI_CTRL2_CDINVRXD3              (1 << 29)
->>>> -#define S3C_SDHCI_CTRL2_SLCARDOUT              (1 << 28)
->>>> -
->>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK         (0xf << 24)
->>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT                (24)
->>>> -#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x)          ((_x) << 24)
->>>> -
->>>> -#define S3C_SDHCI_CTRL2_LVLDAT_MASK            (0xff << 16)
->>>> -#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT           (16)
->>>> -#define S3C_SDHCI_CTRL2_LVLDAT(_x)             ((_x) << 16)
->>>> -
->>>> -#define S3C_SDHCI_CTRL2_ENFBCLKTX              (1 << 15)
->>>>  #define S3C_SDHCI_CTRL2_ENFBCLKRX              (1 << 14)
->>>> -#define S3C_SDHCI_CTRL2_SDCDSEL                        (1 << 13)
->>>> -#define S3C_SDHCI_CTRL2_SDSIGPC                        (1 << 12)
->>>> -#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART       (1 << 11)
->>>> -
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_MASK             (0x3 << 9)
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_SHIFT            (9)
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_NONE             (0x0 << 9)
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_4SDCLK           (0x1 << 9)
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_16SDCLK          (0x2 << 9)
->>>>  #define S3C_SDHCI_CTRL2_DFCNT_64SDCLK          (0x3 << 9)
->>>> -
->>>>  #define S3C_SDHCI_CTRL2_ENCLKOUTHOLD           (1 << 8)
->>>> -#define S3C_SDHCI_CTRL2_RWAITMODE              (1 << 7)
->>>> -#define S3C_SDHCI_CTRL2_DISBUFRD               (1 << 6)
->>>>  #define S3C_SDHCI_CTRL2_SELBASECLK_MASK                (0x3 << 4)
->>>>  #define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT       (4)
->>>> -#define S3C_SDHCI_CTRL2_PWRSYNC                        (1 << 3)
->>>> -#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON         (1 << 1)
->>>> -#define S3C_SDHCI_CTRL2_HWINITFIN              (1 << 0)
->>>>
->>>> +#define S3C_SDHCI_CONTROL3                     (0x84)
->>>>  #define S3C_SDHCI_CTRL3_FCSEL3                 (1 << 31)
->>>>  #define S3C_SDHCI_CTRL3_FCSEL2                 (1 << 23)
->>>>  #define S3C_SDHCI_CTRL3_FCSEL1                 (1 << 15)
->>>>  #define S3C_SDHCI_CTRL3_FCSEL0                 (1 << 7)
->>>>
->>>> -#define S3C_SDHCI_CTRL3_FIA3_MASK              (0x7f << 24)
->>>> -#define S3C_SDHCI_CTRL3_FIA3_SHIFT             (24)
->>>> -#define S3C_SDHCI_CTRL3_FIA3(_x)               ((_x) << 24)
->>>> -
->>>> -#define S3C_SDHCI_CTRL3_FIA2_MASK              (0x7f << 16)
->>>> -#define S3C_SDHCI_CTRL3_FIA2_SHIFT             (16)
->>>> -#define S3C_SDHCI_CTRL3_FIA2(_x)               ((_x) << 16)
->>>> -
->>>> -#define S3C_SDHCI_CTRL3_FIA1_MASK              (0x7f << 8)
->>>> -#define S3C_SDHCI_CTRL3_FIA1_SHIFT             (8)
->>>> -#define S3C_SDHCI_CTRL3_FIA1(_x)               ((_x) << 8)
->>>> -
->>>> -#define S3C_SDHCI_CTRL3_FIA0_MASK              (0x7f << 0)
->>>> -#define S3C_SDHCI_CTRL3_FIA0_SHIFT             (0)
->>>> -#define S3C_SDHCI_CTRL3_FIA0(_x)               ((_x) << 0)
->>>> -
->>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_MASK      (0x3 << 16)
->>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_SHIFT     (16)
->>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_2mA       (0x0 << 16)
->>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_4mA       (0x1 << 16)
->>>> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_7mA       (0x2 << 16)
->>>> +#define S3C64XX_SDHCI_CONTROL4                 (0x8C)
->>>>  #define S3C64XX_SDHCI_CONTROL4_DRIVE_9mA       (0x3 << 16)
->>>>
->>>> -#define S3C64XX_SDHCI_CONTROL4_BUSY            (1)
->>>> -
->>>>  /**
->>>>   * struct sdhci_s3c - S3C SDHCI instance
->>>>   * @host: The SDHCI host created
->>>> --
->>>> 2.10.2
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Mon, Jan 16, 2017 at 05:56:50PM +0100, Maxime Ripard wrote:
+> Hi,
+>=20
+> Here is a new attempt at getting the MMC controllers running, following t=
+he
+> work done by Andre.
+>=20
+> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
+> and a Kingston eMMC with 1.8V IOs.
+>=20
+> For SDIO, the HS DDR mode works just fine. That serie also enables the
+> SDR104 mode to work on the devices that are capable of this.
+>=20
+> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
+> moment, but since it's significantly more complex, and at the same time
+> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
+> any benefits. If there's any at some point, this can be added later.
 
+Unless you have objections, I'd really like this to be in
+4.11. There's a bunch of things where I'm not entirely sure
+(especially the clock gating part), it would be great if you could
+have a look.
+
+Thanks!
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--cen64qteailglgvu
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCAAGBQJYheHdAAoJEBx+YmzsjxAgyQIQAKO+Cd2sHm89WDnMnWxoroP0
+QpMpRWV3uh97m+Ju2PjAHEn2+vds+L2/PJXHcnNgPgVtwZ2RtDg2uPfcWqPfJzuU
+MDYG1LwJJrew7mal8JKwrYA6OyEONTb9EWXQ1GZLsCOX2uVwkrnL+kfLDaUM4tFX
+wfFcuDbCMTiSJIKfTQFu+2VyEiWOG/9aFPLbH3HHEg2uHK86CQriutTBM7+lh3A3
+DFcaWtkJz4qFmZAOQVIQ1pPS97mASjRpaQhXovtIOME3n6WwEI7MYWLrCYepQCaj
+SocVeCahyWfe1HhasiDPXG9lpaXF7ZF8koTXtpeBzbYnKUlSO0zwkbUXtBUsqqfS
+Y2j18rjap5o/46DFlgWJ/Ttd0jWITcLmKk8ZMfPYeuxn/qEqfUJ2Rj2u0iqx5UOM
+tyFtegUn1ZnhveT2vbyboALYuboXzprR/ZHov26KFt6FLG9wG8IWuuHEYgKfehoa
+e89rkFSbjjzf0Zztmf92mFfARd7M+85m3k1voVJDSRfGEsNJA79IUI0kR5aok4Qj
+CCxZn3kutfbqLnPBD7D32rDiNdRRExZk7xP+a/qODR6K3NJ5SaEluhbbXI0iMxnd
+QDIMYyo/DJsbmGyuph4OV/vzPtuSyjbodVAgn7wC2wMqpa4yQswoGVA6co/02pOk
+YFtcP844EyuDqgUeYs6U
+=ip82
+-----END PGP SIGNATURE-----
+
+--cen64qteailglgvu--
