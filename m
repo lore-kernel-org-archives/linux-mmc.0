@@ -1,190 +1,93 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Tue, 24 Jan 2017 16:36:36 +0200
-Message-ID: <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
- <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
- <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
- <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to include leds.h
+Date: Tue, 24 Jan 2017 17:34:24 +0100
+Message-ID: <87d1fcct7z.fsf@belgarion.home>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+        <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
+        <87efzydusi.fsf@belgarion.home>
+        <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
+        <87a8aleda2.fsf@belgarion.home> <87y3y3crxl.fsf@belgarion.home>
+        <CAPDyKFrxD+62MaytiYn1ROM08+wWdTXT8vcmJRs5pMDELD574g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:59048 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750847AbdAXOmT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 24 Jan 2017 09:42:19 -0500
-In-Reply-To: <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
+Received: from smtp07.smtpout.orange.fr ([80.12.242.129]:49919 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750723AbdAXQew (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 11:34:52 -0500
+In-Reply-To: <CAPDyKFrxD+62MaytiYn1ROM08+wWdTXT8vcmJRs5pMDELD574g@mail.gmail.com>
+        (Ulf Hansson's message of "Tue, 24 Jan 2017 08:57:51 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 23/01/17 19:07, Alex Lemberg wrote:
-> Hi Adrian,
-> 
-> I would like to add several notes on top of Uri’s answer...
-> I agree with you, by the spec, PON Sleep_Notification should be
-> set before calling Sleep command.
-> As you probably remember, we have tried to implement it
-> in the past and even submitted a patch – “[PATCH] mmc: sleep notification”
-> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg30906.html
-> As you can see from the thread, one of the main issues in Sleep_Notification
-> is a SLEEP_NOTIFICATION_TIME (defined in EXT_CSD [216]), which need to be
-> considered in implementation…
+Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-Does it?  I would tend to assume SLEEP_NOTIFICATION_TIME will be acceptable
-during _suspend until proven otherwise.
+> On 22 January 2017 at 11:25, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>> Robert Jarzmik <robert.jarzmik@free.fr> writes:
+>>
+>>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>>
+>>>> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>>>>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>>>> So I was wondering how you made the choice of which files you add the include to
+>>>>> and which you don't touch ?
+>>>>
+>>>> By building the pxa_defconfig, see what errors it reports and then fix them.
+>>>>
+>>>> Isn't pxa_defconfig building all the variants?
+>>> Euh actually it should, but it's not.
+>>
+>> And actually thanks to a suggestion from Russell to improve my search line, I
+>> came up with the command line bellow, and perhaps you could fix the others with
+>> one command line and respin the patch ?
+>>
+>> Here it is :
+>>
+>> for f in $(grep -l _led arch/arm/mach-pxa/*.c | xargs grep -L linux/leds.h); do
+>> sed -i '0,/^#include <linux\/[l-m].*>$/{s/\(#include <linux\/[l-m].*\)/#include
+>> <linux\/leds.h>\n\1/}' $f; done
+>>
+>> Cheers.
+>
+> Robert, thanks for helping out!
+>
+> While running the above command-line, the following files becomes changed:
+>
+> arch/arm/mach-pxa/zylonite_pxa300.c
+> arch/arm/mach-pxa/zylonite_pxa320.c
+> arch/arm/mach-pxa/palmld.c
+> arch/arm/mach-pxa/palmtc.c
+> arch/arm/mach-pxa/ezx.c
+> arch/arm/mach-pxa/em-x270.c
+> arch/arm/mach-pxa/hx4700.c
+> arch/arm/mach-pxa/magician.c
+> arch/arm/mach-pxa/palmtreo.c
+> arch/arm/mach-pxa/corgi_pm.c
+> arch/arm/mach-pxa/spitz_pm.c
+> arch/arm/mach-pxa/tosa.c
+> arch/arm/mach-pxa/z2.c
+Indeed.
 
-> Thus, I think postponing Sleep during suspend requires a different from current
-> AUTO_BKOPS implementation, and I suggest to handle it in separate
-> patchset, if possible.
+> However, already by building pxa_defconfig, I have verified that these
+> files are being build successfully without any changes needed.
+Ha so for some (all ?) of them, another include is providing the leds.h,
+interesting. For many of them it is either :
+ - linux/power_supply.h
+ - linux/gpio_charger.h
+ - an mfd device (such as mfd/htc-pasic3.h)
+ - etc ...
 
-Not at all sure what you mean by "postponing Sleep"?
+> Because of that, I am not sure I would like to make any additional
+> changes as a part of this series. I think it's easier if you later on
+> deal with that as clean-ups via your pxa tree instead, does that make
+> sense to you as well?
+Yeah as you wish, after all you're removing the leds.h and you'r patch addresses
+that, it's beyond its scope to fix all pxa boards which don't include leds.h
+properly.
 
-> 
-> 
-> Thanks,
-> Alex
-> 
-> On 1/22/17, 5:55 PM, "Uri Yanai" <Uri.Yanai@sandisk.com> wrote:
-> 
->     Hi Adrian
->     
->     Thanks for your review.
->     Ulf rejected our approach in the first patch submission calling pm_schedule_suspend()
->     
->     " If I understand correctly, you would like to abort the runtime suspend
->     and allow the background operations to complete. That seems
->     reasonable, although in such case you need to return -EBUSY from this
->     function."
->     
->     If I understood Ulf correctly, instead of suspending he suggest aborting the suspend altogether returning -EBUSY.
->     
->     If I understood you correctly, your approach is similar to the one taken in the first patch submission.
->     Instead of calling pm_schedule_suspend(), you suggest calling  mmc_poweroff_notify(host->card, SLEEP_NOTIFICATION).
->     
->     Regards
->     Uri
->     
->     -----Original Message-----
->     From: Adrian Hunter [mailto:adrian.hunter@intel.com] 
->     Sent: Friday, January 20, 2017 1:56 PM
->     To: Uri Yanai; ulf.hansson@linaro.org
->     Cc: linux-mmc@vger.kernel.org; chris@printf.net; Alex Lemberg
->     Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
->     
->     On 17/01/17 14:15, Uri Yanai wrote:
->     > If asked to do device Runtime Suspend while in BKOPS and auto BKOPS is 
->     > enabled return –EBUSY
->     
->     The spec also says
->     
->     "Before moving to Sleep state hosts may set the POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04) if aware that the device is capable of autonomously initiating background operations for possible performance improvements."
->     
->     Have you considered that?
->     
->     But I wonder if we shouldn't always use SLEEP_NOTIFICATION before sleep?
->     
->     > 
->     > Change-Id: Ie4b38a32fe98179f0bca5b57edaaa47a02d0a389
->     > Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
->     > Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
->     > ---
->     >  drivers/mmc/core/mmc.c  | 35 ++++++++++++++++++++++++++++-------
->     >  include/linux/mmc/mmc.h |  2 ++
->     >  2 files changed, 30 insertions(+), 7 deletions(-)
->     > 
->     > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 
->     > f70f6a1..21f5851 100644
->     > --- a/drivers/mmc/core/mmc.c
->     > +++ b/drivers/mmc/core/mmc.c
->     > @@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
->     >  	}
->     >  }
->     >  
->     > -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->     > +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
->     > +	bool is_runtime_pm)
->     >  {
->     >  	int err = 0;
->     >  	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
->     > @@ -1953,10 +1954,30 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->     >  	if (mmc_card_suspended(host->card))
->     >  		goto out;
->     >  
->     > -	if (mmc_card_doing_bkops(host->card)) {
->     > -		err = mmc_stop_bkops(host->card);
->     > -		if (err)
->     > +	if (mmc_card_doing_bkops(host->card) ||
->     > +		host->card->ext_csd.auto_bkops_en) {
->     > +		err = mmc_read_bkops_status(host->card);
->     > +		if (err) {
->     > +			pr_err("%s: error %d reading BKOPS Status\n",
->     > +				mmc_hostname(host), err);
->     >  			goto out;
->     > +		}
->     > +		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
->     > +				EXT_CSD_BKOPS_LEVEL_PM_SUSPEND) {
->     > +			/*
->     > +			 * We don’t allow Runtime Suspend while device still
->     > +			 * needs time to complete internal BKOPS, returning
->     > +			 * -EBUSY while BKOPS level is above
->     > +			 *  EXT_CSD_BKOPS_LEVEL_PM_SUSPEND
->     > +			 */
->     > +			err = -EBUSY;
->     > +			goto out;
->     > +		}
->     > +		if (mmc_card_doing_bkops(host->card)) {
->     > +			err = mmc_stop_bkops(host->card);
->     > +			if (err)
->     > +				goto out;
->     > +		}
->     >  	}
->     >  
->     >  	err = mmc_flush_cache(host->card);
->     > @@ -1987,7 +2008,7 @@ static int mmc_suspend(struct mmc_host *host)  {
->     >  	int err;
->     >  
->     > -	err = _mmc_suspend(host, true);
->     > +	err = _mmc_suspend(host, true, false);
->     >  	if (!err) {
->     >  		pm_runtime_disable(&host->card->dev);
->     >  		pm_runtime_set_suspended(&host->card->dev);
->     > @@ -2034,7 +2055,7 @@ static int mmc_shutdown(struct mmc_host *host)
->     >  		err = _mmc_resume(host);
->     >  
->     >  	if (!err)
->     > -		err = _mmc_suspend(host, false);
->     > +		err = _mmc_suspend(host, false, false);
->     >  
->     >  	return err;
->     >  }
->     > @@ -2058,7 +2079,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
->     >  	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
->     >  		return 0;
->     >  
->     > -	err = _mmc_suspend(host, true);
->     > +	err = _mmc_suspend(host, true, true);
->     >  	if (err)
->     >  		pr_err("%s: error %d doing aggressive suspend\n",
->     >  			mmc_hostname(host), err);
->     > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index 
->     > 126b8d5..2633274 100644
->     > --- a/include/linux/mmc/mmc.h
->     > +++ b/include/linux/mmc/mmc.h
->     > @@ -445,6 +445,8 @@ struct _mmc_csd {
->     >   */
->     >  #define EXT_CSD_BKOPS_LEVEL_2		0x2
->     >  
->     > +#define EXT_CSD_BKOPS_LEVEL_PM_SUSPEND	EXT_CSD_BKOPS_LEVEL_2
->     > +
->     >  /*
->     >   * BKOPS modes
->     >   */
->     > 
->     
->     
-> 
+Cheers.
 
+-- 
+Robert
