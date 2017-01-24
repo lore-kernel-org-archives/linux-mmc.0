@@ -1,86 +1,190 @@
-From: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Subject: [PATCH v4 1/2] devicetree: document new marvell-8xxx and pwrseq-sd8787 options
-Date: Mon, 23 Jan 2017 19:08:29 -0800
-Message-ID: <20170124030830.21766-2-matt@ranostay.consulting>
+From: Matt Ranostay <matt@ranostay.consulting>
+Subject: [PATCH v4 2/2] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Mon, 23 Jan 2017 19:08:30 -0800
+Message-ID: <20170124030830.21766-3-matt@ranostay.consulting>
 References: <20170124030830.21766-1-matt@ranostay.consulting>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170124030830.21766-1-matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f48.google.com ([74.125.83.48]:34780 "EHLO
+        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbdAXDIk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2017 22:08:40 -0500
+Received: by mail-pg0-f48.google.com with SMTP id 14so50443283pgg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2017 19:08:40 -0800 (PST)
+In-Reply-To: <20170124030830.21766-1-matt@ranostay.consulting>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: tony@atomide.com, ulf.hansson@linaro.org, Matt Ranostay <matt@ranostay.consulting>
 
-Cc: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Signed-off-by: Matt Ranostay <matt-sk+viVC6FLCDq+mSdOJa79kegs52MxvZ@public.gmane.org>
+Allow power sequencing for the Marvell SD8787 Wifi/BT chip.
+This can be abstracted to other chipsets if needed in the future.
+
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Matt Ranostay <matt@ranostay.consulting>
 ---
- .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt        | 16 ++++++++++++++++
- .../devicetree/bindings/net/wireless/marvell-8xxx.txt    |  7 ++++++-
- 2 files changed, 22 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+ drivers/mmc/core/Kconfig         |  10 ++++
+ drivers/mmc/core/Makefile        |   1 +
+ drivers/mmc/core/pwrseq_sd8787.c | 117 +++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 128 insertions(+)
+ create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+index cdfa8520a4b1..fc1ecdaaa9ca 100644
+--- a/drivers/mmc/core/Kconfig
++++ b/drivers/mmc/core/Kconfig
+@@ -12,6 +12,16 @@ config PWRSEQ_EMMC
+ 	  This driver can also be built as a module. If so, the module
+ 	  will be called pwrseq_emmc.
+ 
++config PWRSEQ_SD8787
++	tristate "HW reset support for SD8787 BT + Wifi module"
++	depends on OF && (MWIFIEX || BT_MRVL_SDIO)
++	help
++	  This selects hardware reset support for the SD8787 BT + Wifi
++	  module. By default this option is set to n.
++
++	  This driver can also be built as a module. If so, the module
++	  will be called pwrseq_sd8787.
++
+ config PWRSEQ_SIMPLE
+ 	tristate "Simple HW reset support for MMC"
+ 	default y
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index b2a257dc644f..0f81464fa824 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -10,6 +10,7 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   quirks.o slot-gpio.o
+ mmc_core-$(CONFIG_OF)		+= pwrseq.o
+ obj-$(CONFIG_PWRSEQ_SIMPLE)	+= pwrseq_simple.o
++obj-$(CONFIG_PWRSEQ_SD8787)	+= pwrseq_sd8787.o
+ obj-$(CONFIG_PWRSEQ_EMMC)	+= pwrseq_emmc.o
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
+diff --git a/drivers/mmc/core/pwrseq_sd8787.c b/drivers/mmc/core/pwrseq_sd8787.c
 new file mode 100644
-index 000000000000..22e9340e4ba2
+index 000000000000..1a21e14458d3
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
-@@ -0,0 +1,16 @@
-+* Marvell SD8787 power sequence provider
++++ b/drivers/mmc/core/pwrseq_sd8787.c
+@@ -0,0 +1,117 @@
++/*
++ * pwrseq_sd8787.c - power sequence support for Marvell SD8787 BT + Wifi chip
++ *
++ * Copyright (C) 2016 Matt Ranostay <matt@ranostay.consulting>
++ *
++ * Based on the original work pwrseq_simple.c
++ *  Copyright (C) 2014 Linaro Ltd
++ *  Author: Ulf Hansson <ulf.hansson@linaro.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ */
 +
-+Required properties:
-+- compatible: must be "mmc-pwrseq-sd8787".
-+- powerdown-gpios: contains a power down GPIO specifier with the
-+		   default active state
-+- reset-gpios: contains a reset GPIO specifier with the default
-+		   active state
++#include <linux/delay.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/platform_device.h>
++#include <linux/module.h>
++#include <linux/slab.h>
++#include <linux/device.h>
++#include <linux/err.h>
++#include <linux/gpio/consumer.h>
 +
-+Example:
++#include <linux/mmc/host.h>
 +
-+	wifi_pwrseq: wifi_pwrseq {
-+		compatible = "mmc-pwrseq-sd8787";
-+		powerdown-gpios = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
-+		reset-gpios = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
-+	}
-diff --git a/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt b/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-index 980b16df74c3..0854451ff91d 100644
---- a/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-+++ b/Documentation/devicetree/bindings/net/wireless/marvell-8xxx.txt
-@@ -1,4 +1,4 @@
--Marvell 8897/8997 (sd8897/sd8997/pcie8997) SDIO/PCIE devices
-+Marvell 8787/8897/8997 (sd8787/sd8897/sd8997/pcie8997) SDIO/PCIE devices
- ------
- 
- This node provides properties for controlling the Marvell SDIO/PCIE wireless device.
-@@ -8,6 +8,7 @@ connects the device to the system.
- Required properties:
- 
-   - compatible : should be one of the following:
-+	* "marvell,sd8787"
- 	* "marvell,sd8897"
- 	* "marvell,sd8997"
- 	* "pci11ab,2b42"
-@@ -34,6 +35,9 @@ Optional properties:
- 		 so that the wifi chip can wakeup host platform under certain condition.
- 		 during system resume, the irq will be disabled to make sure
- 		 unnecessary interrupt is not received.
-+  - vmmc-supply: a phandle of a regulator, supplying VCC to the card
-+  - mmc-pwrseq:  phandle to the MMC power sequence node. See "mmc-pwrseq-*"
-+		 for documentation of MMC power sequence bindings.
- 
- Example:
- 
-@@ -46,6 +50,7 @@ so that firmware can wakeup host using this device side pin.
- &mmc3 {
- 	status = "okay";
- 	vmmc-supply = <&wlan_en_reg>;
-+	mmc-pwrseq = <&wifi_pwrseq>;
- 	bus-width = <4>;
- 	cap-power-off-card;
- 	keep-power-in-suspend;
++#include "pwrseq.h"
++
++struct mmc_pwrseq_sd8787 {
++	struct mmc_pwrseq pwrseq;
++	struct gpio_desc *reset_gpio;
++	struct gpio_desc *pwrdn_gpio;
++};
++
++#define to_pwrseq_sd8787(p) container_of(p, struct mmc_pwrseq_sd8787, pwrseq)
++
++static void mmc_pwrseq_sd8787_pre_power_on(struct mmc_host *host)
++{
++	struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
++
++	gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
++
++	msleep(300);
++	gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 1);
++}
++
++static void mmc_pwrseq_sd8787_power_off(struct mmc_host *host)
++{
++	struct mmc_pwrseq_sd8787 *pwrseq = to_pwrseq_sd8787(host->pwrseq);
++
++	gpiod_set_value_cansleep(pwrseq->pwrdn_gpio, 0);
++	gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
++}
++
++static const struct mmc_pwrseq_ops mmc_pwrseq_sd8787_ops = {
++	.pre_power_on = mmc_pwrseq_sd8787_pre_power_on,
++	.power_off = mmc_pwrseq_sd8787_power_off,
++};
++
++static const struct of_device_id mmc_pwrseq_sd8787_of_match[] = {
++	{ .compatible = "mmc-pwrseq-sd8787",},
++	{/* sentinel */},
++};
++MODULE_DEVICE_TABLE(of, mmc_pwrseq_sd8787_of_match);
++
++static int mmc_pwrseq_sd8787_probe(struct platform_device *pdev)
++{
++	struct mmc_pwrseq_sd8787 *pwrseq;
++	struct device *dev = &pdev->dev;
++
++	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
++	if (!pwrseq)
++		return -ENOMEM;
++
++	pwrseq->pwrdn_gpio = devm_gpiod_get(dev, "powerdown", GPIOD_OUT_LOW);
++	if (IS_ERR(pwrseq->pwrdn_gpio))
++		return PTR_ERR(pwrseq->pwrdn_gpio);
++
++	pwrseq->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
++	if (IS_ERR(pwrseq->reset_gpio))
++		return PTR_ERR(pwrseq->reset_gpio);
++
++	pwrseq->pwrseq.dev = dev;
++	pwrseq->pwrseq.ops = &mmc_pwrseq_sd8787_ops;
++	pwrseq->pwrseq.owner = THIS_MODULE;
++	platform_set_drvdata(pdev, pwrseq);
++
++	return mmc_pwrseq_register(&pwrseq->pwrseq);
++}
++
++static int mmc_pwrseq_sd8787_remove(struct platform_device *pdev)
++{
++	struct mmc_pwrseq_sd8787 *pwrseq = platform_get_drvdata(pdev);
++
++	mmc_pwrseq_unregister(&pwrseq->pwrseq);
++
++	return 0;
++}
++
++static struct platform_driver mmc_pwrseq_sd8787_driver = {
++	.probe = mmc_pwrseq_sd8787_probe,
++	.remove = mmc_pwrseq_sd8787_remove,
++	.driver = {
++		.name = "pwrseq_sd8787",
++		.of_match_table = mmc_pwrseq_sd8787_of_match,
++	},
++};
++
++module_platform_driver(mmc_pwrseq_sd8787_driver);
++MODULE_LICENSE("GPL v2");
 -- 
 2.10.2
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
