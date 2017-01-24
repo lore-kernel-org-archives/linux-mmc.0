@@ -1,216 +1,80 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 1/2] mmc: sdhci-s3c: remove the sdhci-s3c-regs header file
-Date: Tue, 24 Jan 2017 18:27:27 +0900
-Message-ID: <20170124092728.19874-2-jh80.chung@samsung.com>
-References: <20170124092728.19874-1-jh80.chung@samsung.com>
- <CGME20170124092731epcas5p2d475685e0403bfbcd81fa8b9e288db33@epcas5p2.samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:41993 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750728AbdAXJ1o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 04:27:44 -0500
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OKA02LB129W2430@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 24 Jan 2017 18:27:32 +0900 (KST)
-In-reply-to: <20170124092728.19874-1-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jeremy McNicoll <jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH V3 0/6] Enable onboard SDHCI for Nexus 5X (msm8992)
+Date: Tue, 24 Jan 2017 01:36:22 -0800
+Message-ID: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, git-LJ92rlH3Dns@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jeremymc-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-Remove the sdhci-s3c-regs.h file.
-Instead, it located those defined values into sdhci-s3c.c.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
-Changelog on V2:
-- None
+Here is a reference to V2:
+  http://www.spinics.net/lists/devicetree/msg158808.html [1]
 
- drivers/mmc/host/sdhci-s3c-regs.h | 87 ---------------------------------------
- drivers/mmc/host/sdhci-s3c.c      | 70 ++++++++++++++++++++++++++++++-
- 2 files changed, 69 insertions(+), 88 deletions(-)
- delete mode 100644 drivers/mmc/host/sdhci-s3c-regs.h
+V3->V2:
+ * stripped down clock changes to just the essential bits'N pieces
+ * split up clock changes between C and DT-binding changes
+ * addressed feedback from BjorneA. 
+ * Dropped RobH's ACK's as the patches aren't the same.  Sorry!  ;-(
+   
 
-diff --git a/drivers/mmc/host/sdhci-s3c-regs.h b/drivers/mmc/host/sdhci-s3c-regs.h
-deleted file mode 100644
-index e34049ad..0000000
---- a/drivers/mmc/host/sdhci-s3c-regs.h
-+++ /dev/null
-@@ -1,87 +0,0 @@
--/* linux/arch/arm/plat-s3c/include/plat/regs-sdhci.h
-- *
-- * Copyright 2008 Openmoko, Inc.
-- * Copyright 2008 Simtec Electronics
-- *	http://armlinux.simtec.co.uk/
-- *	Ben Dooks <ben@simtec.co.uk>
-- *
-- * S3C Platform - SDHCI (HSMMC) register definitions
-- *
-- * This program is free software; you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License version 2 as
-- * published by the Free Software Foundation.
--*/
--
--#ifndef __PLAT_S3C_SDHCI_REGS_H
--#define __PLAT_S3C_SDHCI_REGS_H __FILE__
--
--#define S3C_SDHCI_CONTROL2			(0x80)
--#define S3C_SDHCI_CONTROL3			(0x84)
--#define S3C64XX_SDHCI_CONTROL4			(0x8C)
--
--#define S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR	(1 << 31)
--#define S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK		(1 << 30)
--#define S3C_SDHCI_CTRL2_CDINVRXD3		(1 << 29)
--#define S3C_SDHCI_CTRL2_SLCARDOUT		(1 << 28)
--
--#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK		(0xf << 24)
--#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT		(24)
--#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x)		((_x) << 24)
--
--#define S3C_SDHCI_CTRL2_LVLDAT_MASK		(0xff << 16)
--#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT		(16)
--#define S3C_SDHCI_CTRL2_LVLDAT(_x)		((_x) << 16)
--
--#define S3C_SDHCI_CTRL2_ENFBCLKTX		(1 << 15)
--#define S3C_SDHCI_CTRL2_ENFBCLKRX		(1 << 14)
--#define S3C_SDHCI_CTRL2_SDCDSEL			(1 << 13)
--#define S3C_SDHCI_CTRL2_SDSIGPC			(1 << 12)
--#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART	(1 << 11)
--
--#define S3C_SDHCI_CTRL2_DFCNT_MASK		(0x3 << 9)
--#define S3C_SDHCI_CTRL2_DFCNT_SHIFT		(9)
--#define S3C_SDHCI_CTRL2_DFCNT_NONE		(0x0 << 9)
--#define S3C_SDHCI_CTRL2_DFCNT_4SDCLK		(0x1 << 9)
--#define S3C_SDHCI_CTRL2_DFCNT_16SDCLK		(0x2 << 9)
--#define S3C_SDHCI_CTRL2_DFCNT_64SDCLK		(0x3 << 9)
--
--#define S3C_SDHCI_CTRL2_ENCLKOUTHOLD		(1 << 8)
--#define S3C_SDHCI_CTRL2_RWAITMODE		(1 << 7)
--#define S3C_SDHCI_CTRL2_DISBUFRD		(1 << 6)
--#define S3C_SDHCI_CTRL2_SELBASECLK_MASK		(0x3 << 4)
--#define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT	(4)
--#define S3C_SDHCI_CTRL2_PWRSYNC			(1 << 3)
--#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON		(1 << 1)
--#define S3C_SDHCI_CTRL2_HWINITFIN		(1 << 0)
--
--#define S3C_SDHCI_CTRL3_FCSEL3			(1 << 31)
--#define S3C_SDHCI_CTRL3_FCSEL2			(1 << 23)
--#define S3C_SDHCI_CTRL3_FCSEL1			(1 << 15)
--#define S3C_SDHCI_CTRL3_FCSEL0			(1 << 7)
--
--#define S3C_SDHCI_CTRL3_FIA3_MASK		(0x7f << 24)
--#define S3C_SDHCI_CTRL3_FIA3_SHIFT		(24)
--#define S3C_SDHCI_CTRL3_FIA3(_x)		((_x) << 24)
--
--#define S3C_SDHCI_CTRL3_FIA2_MASK		(0x7f << 16)
--#define S3C_SDHCI_CTRL3_FIA2_SHIFT		(16)
--#define S3C_SDHCI_CTRL3_FIA2(_x)		((_x) << 16)
--
--#define S3C_SDHCI_CTRL3_FIA1_MASK		(0x7f << 8)
--#define S3C_SDHCI_CTRL3_FIA1_SHIFT		(8)
--#define S3C_SDHCI_CTRL3_FIA1(_x)		((_x) << 8)
--
--#define S3C_SDHCI_CTRL3_FIA0_MASK		(0x7f << 0)
--#define S3C_SDHCI_CTRL3_FIA0_SHIFT		(0)
--#define S3C_SDHCI_CTRL3_FIA0(_x)		((_x) << 0)
--
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_MASK	(0x3 << 16)
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_SHIFT	(16)
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_2mA	(0x0 << 16)
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_4mA	(0x1 << 16)
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_7mA	(0x2 << 16)
--#define S3C64XX_SDHCI_CONTROL4_DRIVE_9mA	(0x3 << 16)
--
--#define S3C64XX_SDHCI_CONTROL4_BUSY		(1)
--
--#endif /* __PLAT_S3C_SDHCI_REGS_H */
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index de219ca..7a230a1 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -29,11 +29,79 @@
- 
- #include <linux/mmc/host.h>
- 
--#include "sdhci-s3c-regs.h"
- #include "sdhci.h"
- 
- #define MAX_BUS_CLK	(4)
- 
-+#define S3C_SDHCI_CONTROL2			(0x80)
-+#define S3C_SDHCI_CONTROL3			(0x84)
-+#define S3C64XX_SDHCI_CONTROL4			(0x8C)
-+
-+#define S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR	(1 << 31)
-+#define S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK		(1 << 30)
-+#define S3C_SDHCI_CTRL2_CDINVRXD3		(1 << 29)
-+#define S3C_SDHCI_CTRL2_SLCARDOUT		(1 << 28)
-+
-+#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK		(0xf << 24)
-+#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT		(24)
-+#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x)		((_x) << 24)
-+
-+#define S3C_SDHCI_CTRL2_LVLDAT_MASK		(0xff << 16)
-+#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT		(16)
-+#define S3C_SDHCI_CTRL2_LVLDAT(_x)		((_x) << 16)
-+
-+#define S3C_SDHCI_CTRL2_ENFBCLKTX		(1 << 15)
-+#define S3C_SDHCI_CTRL2_ENFBCLKRX		(1 << 14)
-+#define S3C_SDHCI_CTRL2_SDCDSEL			(1 << 13)
-+#define S3C_SDHCI_CTRL2_SDSIGPC			(1 << 12)
-+#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART	(1 << 11)
-+
-+#define S3C_SDHCI_CTRL2_DFCNT_MASK		(0x3 << 9)
-+#define S3C_SDHCI_CTRL2_DFCNT_SHIFT		(9)
-+#define S3C_SDHCI_CTRL2_DFCNT_NONE		(0x0 << 9)
-+#define S3C_SDHCI_CTRL2_DFCNT_4SDCLK		(0x1 << 9)
-+#define S3C_SDHCI_CTRL2_DFCNT_16SDCLK		(0x2 << 9)
-+#define S3C_SDHCI_CTRL2_DFCNT_64SDCLK		(0x3 << 9)
-+
-+#define S3C_SDHCI_CTRL2_ENCLKOUTHOLD		(1 << 8)
-+#define S3C_SDHCI_CTRL2_RWAITMODE		(1 << 7)
-+#define S3C_SDHCI_CTRL2_DISBUFRD		(1 << 6)
-+#define S3C_SDHCI_CTRL2_SELBASECLK_MASK		(0x3 << 4)
-+#define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT	(4)
-+#define S3C_SDHCI_CTRL2_PWRSYNC			(1 << 3)
-+#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON		(1 << 1)
-+#define S3C_SDHCI_CTRL2_HWINITFIN		(1 << 0)
-+
-+#define S3C_SDHCI_CTRL3_FCSEL3			(1 << 31)
-+#define S3C_SDHCI_CTRL3_FCSEL2			(1 << 23)
-+#define S3C_SDHCI_CTRL3_FCSEL1			(1 << 15)
-+#define S3C_SDHCI_CTRL3_FCSEL0			(1 << 7)
-+
-+#define S3C_SDHCI_CTRL3_FIA3_MASK		(0x7f << 24)
-+#define S3C_SDHCI_CTRL3_FIA3_SHIFT		(24)
-+#define S3C_SDHCI_CTRL3_FIA3(_x)		((_x) << 24)
-+
-+#define S3C_SDHCI_CTRL3_FIA2_MASK		(0x7f << 16)
-+#define S3C_SDHCI_CTRL3_FIA2_SHIFT		(16)
-+#define S3C_SDHCI_CTRL3_FIA2(_x)		((_x) << 16)
-+
-+#define S3C_SDHCI_CTRL3_FIA1_MASK		(0x7f << 8)
-+#define S3C_SDHCI_CTRL3_FIA1_SHIFT		(8)
-+#define S3C_SDHCI_CTRL3_FIA1(_x)		((_x) << 8)
-+
-+#define S3C_SDHCI_CTRL3_FIA0_MASK		(0x7f << 0)
-+#define S3C_SDHCI_CTRL3_FIA0_SHIFT		(0)
-+#define S3C_SDHCI_CTRL3_FIA0(_x)		((_x) << 0)
-+
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_MASK	(0x3 << 16)
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_SHIFT	(16)
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_2mA	(0x0 << 16)
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_4mA	(0x1 << 16)
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_7mA	(0x2 << 16)
-+#define S3C64XX_SDHCI_CONTROL4_DRIVE_9mA	(0x3 << 16)
-+
-+#define S3C64XX_SDHCI_CONTROL4_BUSY		(1)
-+
- /**
-  * struct sdhci_s3c - S3C SDHCI instance
-  * @host: The SDHCI host created
+The SDHCI workaround has been included again in V3 just like V2, please see justification[1].
+ NOTE to SDHCI maintainers:
+   "sdhci: Add quirk for delayed IRQ ACK" (patch 2/4) was
+    included, if there is no interest in including this change
+    feel free to drop it or provide guidance on how this type
+    of issue is generally dealt with."
+
+Testing:
+  -both Nexus 5X & 6P behaviour was identical given the limited number of things / peripherals which
+    are  currently supported. 
+  -note to self or anyone reading this, see if there is some kind of cloud type automated testing
+    that could help identify breakage as manual testing takes far too much time. 
+
+
+This series has dependancies on:
+   -> "regulator: qcom-smd: Add PM8994 regulator support"   now merged in git://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git
+  -> https://lkml.org/lkml/2016/12/28/77 [SDHCI-msm support for enhanced strobe]
+  -> https://lkml.org/lkml/2016/12/30/102 [sdhci-msm: add more debug logs]
+
+
+
+
+Jeremy McNicoll (6):
+  dt-bindings: qcom: clk: Add missing binding for SDCHI enablement on
+    Nexus 5X/6P
+  sdhci: Add quirk for delayed IRQ ACK
+  arm64: dts: msm8992 add fixed regulator
+  arm64: dts: smem enablement for msm8992
+  dts: arm64: Enable onboard SDHCI on msm8992
+  dts: doc: rename rpm_requests to respect DT naming conventions
+
+ .../devicetree/bindings/clock/qcom,rpmcc.txt       |   2 +-
+ .../bindings/regulator/qcom,smd-rpm-regulator.txt  |   2 +-
+ .../devicetree/bindings/soc/qcom/qcom,smd-rpm.txt  |   6 +-
+ .../devicetree/bindings/soc/qcom/qcom,smd.txt      |   2 +-
+ arch/arm/boot/dts/qcom-apq8074-dragonboard.dts     |   2 +-
+ arch/arm/boot/dts/qcom-apq8084.dtsi                |   2 +-
+ .../dts/qcom-msm8974-lge-nexus5-hammerhead.dts     |   2 +-
+ .../boot/dts/qcom-msm8974-sony-xperia-honami.dts   |   2 +-
+ arch/arm/boot/dts/qcom-msm8974.dtsi                |   2 +-
+ arch/arm64/boot/dts/qcom/msm8916.dtsi              |   2 +-
+ .../boot/dts/qcom/msm8992-bullhead-rev-101.dts     |   2 +
+ arch/arm64/boot/dts/qcom/msm8992-pins.dtsi         |  60 +++++
+ arch/arm64/boot/dts/qcom/msm8992.dtsi              | 143 ++++++++++-
+ arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi      | 276 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-msm.c                       |   7 +
+ drivers/mmc/host/sdhci.c                           |  12 +-
+ drivers/mmc/host/sdhci.h                           |   2 +
+ include/dt-bindings/clock/qcom,gcc-msm8994.h       |   1 +
+ 18 files changed, 512 insertions(+), 15 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
+
 -- 
-2.10.2
+2.6.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
