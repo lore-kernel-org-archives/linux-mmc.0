@@ -1,81 +1,128 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [RESEND PATCHv1 5/8] mmc: sdhci-msm: configure
- CORE_CSR_CDC_DELAY_CFG to recommended value
-Date: Tue, 24 Jan 2017 14:29:39 +0530
-Message-ID: <9cd02cb7-2462-d2fd-2198-f46e2317ef4d@codeaurora.org>
-References: <1484031652-12059-1-git-send-email-riteshh@codeaurora.org>
- <1484031652-12059-6-git-send-email-riteshh@codeaurora.org>
- <e7b37b16-3d87-3766-6e03-9f67cd29b64a@codeaurora.org>
+From: Andre Przywara <andre.przywara@arm.com>
+Subject: Re: [PATCH v3 3/13] mmc: sunxi: Always set signal delay to 0 for A64
+Date: Tue, 24 Jan 2017 09:15:45 +0000
+Message-ID: <b09f2ee5-77b3-eb2e-d749-d76a310bf1b0@arm.com>
+References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
+ <67fd7dad745b49bb8edb7391655eaddf6f35160e.1484585798.git-series.maxime.ripard@free-electrons.com>
+ <CAPDyKFoatUWz0AwY6e73OCguDx70B1B5OAoPUYX-JDPsru+aZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:41028 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751285AbdAXJAB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 04:00:01 -0500
-In-Reply-To: <e7b37b16-3d87-3766-6e03-9f67cd29b64a@codeaurora.org>
+Received: from foss.arm.com ([217.140.101.70]:36348 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750710AbdAXJO1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 24 Jan 2017 04:14:27 -0500
+In-Reply-To: <CAPDyKFoatUWz0AwY6e73OCguDx70B1B5OAoPUYX-JDPsru+aZw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Subhash Jadavani <subhashj@codeaurora.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Stephen,
+Hi Ulf,
 
-On 1/20/2017 11:12 PM, Stephen Boyd wrote:
-> On 01/09/2017 11:00 PM, Ritesh Harjani wrote:
->> From: Subhash Jadavani <subhashj@codeaurora.org>
+On 24/01/17 08:16, Ulf Hansson wrote:
+> On 16 January 2017 at 17:56, Maxime Ripard
+> <maxime.ripard@free-electrons.com> wrote:
+>> Experience have shown that the using the  autocalibration could severely
+>> degrade the performances of the MMC bus.
 >>
->> Program CORE_CSR_CDC_DELAY_CFG for hardware recommended 1.25ns delay.
->> We may see data CRC errors if it's programmed for any other delay
->> value.
+>> Allwinner is using in its BSP a delay set to 0 for all the modes but HS400.
+>> Remove the calibration code for now, and add comments to document our
+>> findings.
+> 
+> So doesn't this break some platforms using HS400? Or are you saying
+> those are already broken?
+
+This is a sunxi specific calibration routine, which was introduced
+lately (e1b8dfd1b1c6) to be used by the Allwinner's enhanced MMC
+controller. This is only used by devices using the sun50i-a64-mmc
+compatible, of which this series introduces the first user.
+
+So there is no way this can regress in any way, since the code wasn't
+actually used before.
+
+Cheers,
+Andre.
+
+> 
 >>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> Reviewed-by: Andre Przywara <andre.przywara@arm.com>
+>> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 >> ---
->>  drivers/mmc/host/sdhci-msm.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>  drivers/mmc/host/sunxi-mmc.c | 50 ++++++++++++-------------------------
+>>  1 file changed, 17 insertions(+), 33 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index a028568..84d29dd 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -679,7 +679,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
->>  	writel_relaxed(0x4, host->ioaddr + CORE_CSR_CDC_CAL_TIMER_CFG1);
->>  	writel_relaxed(0xCB732020, host->ioaddr + CORE_CSR_CDC_REFCOUNT_CFG);
->>  	writel_relaxed(0xB19, host->ioaddr + CORE_CSR_CDC_COARSE_CAL_CFG);
->> -	writel_relaxed(0x3AC, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
->> +	writel_relaxed(0x4E2, host->ioaddr + CORE_CSR_CDC_DELAY_CFG);
->>  	writel_relaxed(0x0, host->ioaddr + CORE_CDC_OFFSET_CFG);
->>  	writel_relaxed(0x16334, host->ioaddr + CORE_CDC_SLAVE_DDA_CFG);
+>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+>> index 019f95e8e7c5..b9c8a62bc212 100644
+>> --- a/drivers/mmc/host/sunxi-mmc.c
+>> +++ b/drivers/mmc/host/sunxi-mmc.c
+>> @@ -683,41 +683,19 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
 >>
->
-> There's a comment block above this set of writes that repeats what's
-> happening in the code.
->
->         /*
->          * Perform CDC Register Initialization Sequence
->          *
->          * CORE_CSR_CDC_CTLR_CFG0       0x11800EC
->          * CORE_CSR_CDC_CTLR_CFG1       0x3011111
->          * CORE_CSR_CDC_CAL_TIMER_CFG0  0x1201000
->          * CORE_CSR_CDC_CAL_TIMER_CFG1  0x4
->          * CORE_CSR_CDC_REFCOUNT_CFG    0xCB732020
->          * CORE_CSR_CDC_COARSE_CAL_CFG  0xB19
->          * CORE_CSR_CDC_DELAY_CFG       0x3AC
->          * CORE_CDC_OFFSET_CFG          0x0
->          * CORE_CDC_SLAVE_DDA_CFG       0x16334
->          */
->
-> Perhaps we should just delete those comments because they're incorrect now.
->
-Thanks for the review. Yes, I have addressed this comment on top of this 
-series along with one other fix.
--named ("mmc: sdhci-msm: Addresses minor cleanups")
-
-Regards
-Ritesh
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+>>  static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
+>>  {
+>> -       u32 reg = readl(host->reg_base + reg_off);
+>> -       u32 delay;
+>> -       unsigned long timeout;
+>> -
+>>         if (!host->cfg->can_calibrate)
+>>                 return 0;
+>>
+>> -       reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
+>> -       reg &= ~SDXC_CAL_DL_SW_EN;
+>> -
+>> -       writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
+>> -
+>> -       dev_dbg(mmc_dev(host->mmc), "calibration started\n");
+>> -
+>> -       timeout = jiffies + HZ * SDXC_CAL_TIMEOUT;
+>> -
+>> -       while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE)) {
+>> -               if (time_before(jiffies, timeout))
+>> -                       cpu_relax();
+>> -               else {
+>> -                       reg &= ~SDXC_CAL_START;
+>> -                       writel(reg, host->reg_base + reg_off);
+>> -
+>> -                       return -ETIMEDOUT;
+>> -               }
+>> -       }
+>> -
+>> -       delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
+>> -
+>> -       reg &= ~SDXC_CAL_START;
+>> -       reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
+>> -
+>> -       writel(reg, host->reg_base + reg_off);
+>> -
+>> -       dev_dbg(mmc_dev(host->mmc), "calibration ended, reg is 0x%x\n", reg);
+>> +       /*
+>> +        * FIXME:
+>> +        * This is not clear how the calibration is supposed to work
+>> +        * yet. The best rate have been obtained by simply setting the
+>> +        * delay to 0, as Allwinner does in its BSP.
+>> +        *
+>> +        * The only mode that doesn't have such a delay is HS400, that
+>> +        * is in itself a TODO.
+>> +        */
+>> +       writel(SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
+>>
+>>         return 0;
+>>  }
+>> @@ -809,7 +787,13 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>>         if (ret)
+>>                 return ret;
+>>
+>> -       /* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
+>> +       /*
+>> +        * FIXME:
+>> +        *
+>> +        * In HS400 we'll also need to calibrate the data strobe
+>> +        * signal. This should only happen on the MMC2 controller (at
+>> +        * least on the A64).
+>> +        */
+>>
+>>         return sunxi_mmc_oclk_onoff(host, 1);
+>>  }
+>> --
+>> git-series 0.8.11
