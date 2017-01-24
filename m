@@ -1,76 +1,190 @@
-From: Matthias Brugger <matthias.bgg@gmail.com>
-Subject: Re: [PATCH v3 2/3] dts: mediatek: configure some fixed mmc parameters
-Date: Tue, 24 Jan 2017 11:36:48 +0100
-Message-ID: <e4fc97fa-b898-e838-56db-0dc5079a2e95@gmail.com>
-References: <1484821156-20565-1-git-send-email-yong.mao@mediatek.com>
- <1484821156-20565-3-git-send-email-yong.mao@mediatek.com>
- <CAPDyKFrHCy7bLb-wDRWpELAB5VxPc4tjyWKd31YufEZC_AQtVA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Tue, 24 Jan 2017 16:36:36 +0200
+Message-ID: <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
+References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
+ <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
+ <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
+ <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
+ <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f65.google.com ([209.85.215.65]:36448 "EHLO
-        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750713AbdAXKgx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 05:36:53 -0500
-In-Reply-To: <CAPDyKFrHCy7bLb-wDRWpELAB5VxPc4tjyWKd31YufEZC_AQtVA@mail.gmail.com>
+Received: from mga06.intel.com ([134.134.136.31]:59048 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750847AbdAXOmT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 24 Jan 2017 09:42:19 -0500
+In-Reply-To: <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Yong Mao <yong.mao@mediatek.com>
-Cc: srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Ulf,
+On 23/01/17 19:07, Alex Lemberg wrote:
+> Hi Adrian,
+> 
+> I would like to add several notes on top of Uri’s answer...
+> I agree with you, by the spec, PON Sleep_Notification should be
+> set before calling Sleep command.
+> As you probably remember, we have tried to implement it
+> in the past and even submitted a patch – “[PATCH] mmc: sleep notification”
+> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg30906.html
+> As you can see from the thread, one of the main issues in Sleep_Notification
+> is a SLEEP_NOTIFICATION_TIME (defined in EXT_CSD [216]), which need to be
+> considered in implementation…
 
-On 01/20/2017 08:59 AM, Ulf Hansson wrote:
-> On 19 January 2017 at 11:19, Yong Mao <yong.mao@mediatek.com> wrote:
->> From: yong mao <yong.mao@mediatek.com>
->>
->> configure some fixed mmc parameters
->>
->> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
->> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->
-> Please change the prefix of the commit message header to "ARM64: dts: mt8173:".
->
-> Also make sure you send this to the ARM mailing list as well.
->
-> In general, I think it's better DTS changes go via the ARM SoC tree,
-> but I can pick it up if it's trivial and I get an ack from the SoC
-> maintainer.
->
+Does it?  I would tend to assume SLEEP_NOTIFICATION_TIME will be acceptable
+during _suspend until proven otherwise.
 
-I can take them through my tree, let's wait at Rob's opinion of v4.
+> Thus, I think postponing Sleep during suspend requires a different from current
+> AUTO_BKOPS implementation, and I suggest to handle it in separate
+> patchset, if possible.
 
-Regards,
-Matthias
+Not at all sure what you mean by "postponing Sleep"?
 
->> ---
->>  arch/arm64/boot/dts/mediatek/mt8173-evb.dts |    3 +++
->>  1 file changed, 3 insertions(+)
->>
->> diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
->> index 0ecaad4..403705e 100644
->> --- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
->> +++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
->> @@ -134,6 +134,9 @@
->>         bus-width = <8>;
->>         max-frequency = <50000000>;
->>         cap-mmc-highspeed;
->> +       mtk-hs200-cmd-int-delay=<26>;
->> +       mtk-hs400-cmd-int-delay=<14>;
->> +       mtk-hs400-cmd-resp-sel=<0>; /* 0:rising, 1:falling */
->>         vmmc-supply = <&mt6397_vemc_3v3_reg>;
->>         vqmmc-supply = <&mt6397_vio18_reg>;
->>         non-removable;
->> --
->> 1.7.9.5
->>
->
-> Kind regards
-> Uffe
->
-> _______________________________________________
-> Linux-mediatek mailing list
-> Linux-mediatek@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-mediatek
->
+> 
+> 
+> Thanks,
+> Alex
+> 
+> On 1/22/17, 5:55 PM, "Uri Yanai" <Uri.Yanai@sandisk.com> wrote:
+> 
+>     Hi Adrian
+>     
+>     Thanks for your review.
+>     Ulf rejected our approach in the first patch submission calling pm_schedule_suspend()
+>     
+>     " If I understand correctly, you would like to abort the runtime suspend
+>     and allow the background operations to complete. That seems
+>     reasonable, although in such case you need to return -EBUSY from this
+>     function."
+>     
+>     If I understood Ulf correctly, instead of suspending he suggest aborting the suspend altogether returning -EBUSY.
+>     
+>     If I understood you correctly, your approach is similar to the one taken in the first patch submission.
+>     Instead of calling pm_schedule_suspend(), you suggest calling  mmc_poweroff_notify(host->card, SLEEP_NOTIFICATION).
+>     
+>     Regards
+>     Uri
+>     
+>     -----Original Message-----
+>     From: Adrian Hunter [mailto:adrian.hunter@intel.com] 
+>     Sent: Friday, January 20, 2017 1:56 PM
+>     To: Uri Yanai; ulf.hansson@linaro.org
+>     Cc: linux-mmc@vger.kernel.org; chris@printf.net; Alex Lemberg
+>     Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+>     
+>     On 17/01/17 14:15, Uri Yanai wrote:
+>     > If asked to do device Runtime Suspend while in BKOPS and auto BKOPS is 
+>     > enabled return –EBUSY
+>     
+>     The spec also says
+>     
+>     "Before moving to Sleep state hosts may set the POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04) if aware that the device is capable of autonomously initiating background operations for possible performance improvements."
+>     
+>     Have you considered that?
+>     
+>     But I wonder if we shouldn't always use SLEEP_NOTIFICATION before sleep?
+>     
+>     > 
+>     > Change-Id: Ie4b38a32fe98179f0bca5b57edaaa47a02d0a389
+>     > Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
+>     > Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+>     > ---
+>     >  drivers/mmc/core/mmc.c  | 35 ++++++++++++++++++++++++++++-------
+>     >  include/linux/mmc/mmc.h |  2 ++
+>     >  2 files changed, 30 insertions(+), 7 deletions(-)
+>     > 
+>     > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 
+>     > f70f6a1..21f5851 100644
+>     > --- a/drivers/mmc/core/mmc.c
+>     > +++ b/drivers/mmc/core/mmc.c
+>     > @@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
+>     >  	}
+>     >  }
+>     >  
+>     > -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>     > +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+>     > +	bool is_runtime_pm)
+>     >  {
+>     >  	int err = 0;
+>     >  	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+>     > @@ -1953,10 +1954,30 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>     >  	if (mmc_card_suspended(host->card))
+>     >  		goto out;
+>     >  
+>     > -	if (mmc_card_doing_bkops(host->card)) {
+>     > -		err = mmc_stop_bkops(host->card);
+>     > -		if (err)
+>     > +	if (mmc_card_doing_bkops(host->card) ||
+>     > +		host->card->ext_csd.auto_bkops_en) {
+>     > +		err = mmc_read_bkops_status(host->card);
+>     > +		if (err) {
+>     > +			pr_err("%s: error %d reading BKOPS Status\n",
+>     > +				mmc_hostname(host), err);
+>     >  			goto out;
+>     > +		}
+>     > +		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
+>     > +				EXT_CSD_BKOPS_LEVEL_PM_SUSPEND) {
+>     > +			/*
+>     > +			 * We don’t allow Runtime Suspend while device still
+>     > +			 * needs time to complete internal BKOPS, returning
+>     > +			 * -EBUSY while BKOPS level is above
+>     > +			 *  EXT_CSD_BKOPS_LEVEL_PM_SUSPEND
+>     > +			 */
+>     > +			err = -EBUSY;
+>     > +			goto out;
+>     > +		}
+>     > +		if (mmc_card_doing_bkops(host->card)) {
+>     > +			err = mmc_stop_bkops(host->card);
+>     > +			if (err)
+>     > +				goto out;
+>     > +		}
+>     >  	}
+>     >  
+>     >  	err = mmc_flush_cache(host->card);
+>     > @@ -1987,7 +2008,7 @@ static int mmc_suspend(struct mmc_host *host)  {
+>     >  	int err;
+>     >  
+>     > -	err = _mmc_suspend(host, true);
+>     > +	err = _mmc_suspend(host, true, false);
+>     >  	if (!err) {
+>     >  		pm_runtime_disable(&host->card->dev);
+>     >  		pm_runtime_set_suspended(&host->card->dev);
+>     > @@ -2034,7 +2055,7 @@ static int mmc_shutdown(struct mmc_host *host)
+>     >  		err = _mmc_resume(host);
+>     >  
+>     >  	if (!err)
+>     > -		err = _mmc_suspend(host, false);
+>     > +		err = _mmc_suspend(host, false, false);
+>     >  
+>     >  	return err;
+>     >  }
+>     > @@ -2058,7 +2079,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+>     >  	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+>     >  		return 0;
+>     >  
+>     > -	err = _mmc_suspend(host, true);
+>     > +	err = _mmc_suspend(host, true, true);
+>     >  	if (err)
+>     >  		pr_err("%s: error %d doing aggressive suspend\n",
+>     >  			mmc_hostname(host), err);
+>     > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index 
+>     > 126b8d5..2633274 100644
+>     > --- a/include/linux/mmc/mmc.h
+>     > +++ b/include/linux/mmc/mmc.h
+>     > @@ -445,6 +445,8 @@ struct _mmc_csd {
+>     >   */
+>     >  #define EXT_CSD_BKOPS_LEVEL_2		0x2
+>     >  
+>     > +#define EXT_CSD_BKOPS_LEVEL_PM_SUSPEND	EXT_CSD_BKOPS_LEVEL_2
+>     > +
+>     >  /*
+>     >   * BKOPS modes
+>     >   */
+>     > 
+>     
+>     
+> 
+
