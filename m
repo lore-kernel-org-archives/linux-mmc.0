@@ -1,194 +1,56 @@
-From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V3 6/6] dts: doc: rename rpm_requests to respect DT naming conventions
-Date: Tue, 24 Jan 2017 01:36:28 -0800
-Message-ID: <1485250588-24698-7-git-send-email-jeremymc@redhat.com>
-References: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com, jeremymc@redhat.com
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 0/2] mmc: pwrseq: add support for Marvell SD8787 chip
+Date: Tue, 24 Jan 2017 10:56:13 +0100
+Message-ID: <CAPDyKFpv0r8_O21=dMLXQm21PkF0oeFVogrE_pAYxcgy7B4BNA@mail.gmail.com>
+References: <20170124030830.21766-1-matt@ranostay.consulting>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:35743 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750734AbdAXJ4U (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 04:56:20 -0500
+Received: by mail-wm0-f44.google.com with SMTP id r126so173134326wmr.0
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Jan 2017 01:56:20 -0800 (PST)
+In-Reply-To: <20170124030830.21766-1-matt@ranostay.consulting>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Ranostay <matt@ranostay.consulting>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 
-Node names cannot have an underscore '_' in the name.
-Simply rename 'rpm_request' nodes to 'rpm-request' and
-adjust associated documentation to reflect reality.
+On 24 January 2017 at 04:08, Matt Ranostay <matt@ranostay.consulting> wrote:
+> Changes from v1:
+> * split devictree docs from pwrseq changes
+> * rebase devicetree documents due to filename change
+> * rebase pwrseq patchset
+>
+> Changes from v2:
+> * update device tree bindings to powerdown-gpios and document
+>   active state
+>
+> Changes from v3:
+> * actually update patchset series
+> * correct overlooked gpio to gpios renaming of properties
+>
+> Matt Ranostay (2):
+>   devicetree: document new marvell-8xxx and pwrseq-sd8787 options
+>   mmc: pwrseq: add support for Marvell SD8787 chip
+>
+>  .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt  |  16 +++
+>  .../bindings/net/wireless/marvell-8xxx.txt         |   7 +-
+>  drivers/mmc/core/Kconfig                           |  10 ++
+>  drivers/mmc/core/Makefile                          |   1 +
+>  drivers/mmc/core/pwrseq_sd8787.c                   | 117 +++++++++++++++++++++
+>  5 files changed, 150 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.txt
+>  create mode 100644 drivers/mmc/core/pwrseq_sd8787.c
+>
+> --
+> 2.10.2
+>
 
-Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
----
- Documentation/devicetree/bindings/clock/qcom,rpmcc.txt              | 2 +-
- .../devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt        | 2 +-
- Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt         | 6 +++---
- Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt             | 2 +-
- arch/arm/boot/dts/qcom-apq8074-dragonboard.dts                      | 2 +-
- arch/arm/boot/dts/qcom-apq8084.dtsi                                 | 2 +-
- arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts            | 2 +-
- arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts               | 2 +-
- arch/arm/boot/dts/qcom-msm8974.dtsi                                 | 2 +-
- arch/arm64/boot/dts/qcom/msm8916.dtsi                               | 2 +-
- arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi                       | 2 +-
- 11 files changed, 13 insertions(+), 13 deletions(-)
+As I am expecting an ack from Rob soonish, I have applied this for
+next to get it tested.
 
-diff --git a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-index 87d3714..7154858 100644
---- a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-+++ b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-@@ -24,7 +24,7 @@ Example:
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8916";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-index 4e3dfb5..6b984cc 100644
---- a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-+++ b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-@@ -187,7 +187,7 @@ see regulator.txt.
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-index a48049c..30e1c75 100644
---- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-+++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-@@ -11,7 +11,7 @@ RPM node itself.
- 
- = SUBDEVICES
- 
--The RPM exposes resources to its subnodes.  The rpm_requests node must be
-+The RPM exposes resources to its subnodes.  The rpm-requests node must be
- present and this subnode may contain children that designate regulator
- resources.
- 
-@@ -29,7 +29,7 @@ resources.
- 	Definition: must be "rpm_requests"
- 
- Refer to Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
--for information on the regulator subnodes that can exist under the rpm_requests.
-+for information on the regulator subnodes that can exist under the rpm-requests.
- 
- Example:
- 
-@@ -48,7 +48,7 @@ Example:
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-index ea1dc75..3d4a61c 100644
---- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-+++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-@@ -82,7 +82,7 @@ The following example represents a smd node, with one edge representing the
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-index ad51df2..ccae434 100644
---- a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-+++ b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-@@ -126,7 +126,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-index 80d4886..002fd69 100644
---- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-+++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-@@ -461,7 +461,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-apq8084";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-index 382bcc3..a24c6b4 100644
---- a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-+++ b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-@@ -19,7 +19,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-index e7c1577..ec937c9 100644
---- a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-+++ b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-@@ -60,7 +60,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
-index 49d579f..0c09049 100644
---- a/arch/arm/boot/dts/qcom-msm8974.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
-@@ -672,7 +672,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-index f8ff327..69eb846 100644
---- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-@@ -866,7 +866,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8916";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-index e9765e1..9b6ce50 100644
---- a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-@@ -13,7 +13,7 @@
- 
- &smd_rpm {
- 	rpm {
--		rpm_requests {
-+		rpm-requests {
- 			pm8994-regulators {
- 
- 				vdd_l1-supply = <&pm8994_s1>;
--- 
-2.6.1
+Kind regards
+Uffe
