@@ -1,18 +1,14 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to
- include leds.h
-Date: Tue, 24 Jan 2017 08:57:51 +0100
-Message-ID: <CAPDyKFrxD+62MaytiYn1ROM08+wWdTXT8vcmJRs5pMDELD574g@mail.gmail.com>
-References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
- <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
- <87efzydusi.fsf@belgarion.home>
- <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
- <87a8aleda2.fsf@belgarion.home> <87y3y3crxl.fsf@belgarion.home>
+Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Tue, 24 Jan 2017 09:02:32 +0100
+Message-ID: <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
+References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
+ <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87y3y3crxl.fsf@belgarion.home>
+In-Reply-To: <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,62 +18,59 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Daniel Mack <daniel@zonque.org>
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Rob Herring <robh@kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 January 2017 at 11:25, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
-> Robert Jarzmik <robert.jarzmik@free.fr> writes:
->
->> Ulf Hansson <ulf.hansson@linaro.org> writes:
->>
->>> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
->>>> Ulf Hansson <ulf.hansson@linaro.org> writes:
->>>> So I was wondering how you made the choice of which files you add the include to
->>>> and which you don't touch ?
->>>
->>> By building the pxa_defconfig, see what errors it reports and then fix them.
->>>
->>> Isn't pxa_defconfig building all the variants?
->> Euh actually it should, but it's not.
->
-> And actually thanks to a suggestion from Russell to improve my search line, I
-> came up with the command line bellow, and perhaps you could fix the others with
-> one command line and respin the patch ?
->
-> Here it is :
->
-> for f in $(grep -l _led arch/arm/mach-pxa/*.c | xargs grep -L linux/leds.h); do
-> sed -i '0,/^#include <linux\/[l-m].*>$/{s/\(#include <linux\/[l-m].*\)/#include
-> <linux\/leds.h>\n\1/}' $f; done
->
-> Cheers.
++Rob, devicetree
 
-Robert, thanks for helping out!
+On 21 January 2017 at 09:55, Yong Mao <yong.mao@mediatek.com> wrote:
+> From: yong mao <yong.mao@mediatek.com>
+>
+> Add description for mediatek,hs200-cmd-int-delay
+> Add description for mediatek,hs400-cmd-int-delay
+> Add description for mediatek,hs400-cmd-resp-sel-rising
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
 
-While running the above command-line, the following files becomes changed:
-
-arch/arm/mach-pxa/zylonite_pxa300.c
-arch/arm/mach-pxa/zylonite_pxa320.c
-arch/arm/mach-pxa/palmld.c
-arch/arm/mach-pxa/palmtc.c
-arch/arm/mach-pxa/ezx.c
-arch/arm/mach-pxa/em-x270.c
-arch/arm/mach-pxa/hx4700.c
-arch/arm/mach-pxa/magician.c
-arch/arm/mach-pxa/palmtreo.c
-arch/arm/mach-pxa/corgi_pm.c
-arch/arm/mach-pxa/spitz_pm.c
-arch/arm/mach-pxa/tosa.c
-arch/arm/mach-pxa/z2.c
-
-However, already by building pxa_defconfig, I have verified that these
-files are being build successfully without any changes needed.
-
-Because of that, I am not sure I would like to make any additional
-changes as a part of this series. I think it's easier if you later on
-deal with that as clean-ups via your pxa tree instead, does that make
-sense to you as well?
+You need an ack from a DT maintainer for this. I have added Rob and
+the devicetree list on cc.
 
 Kind regards
 Uffe
+
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt |   12 ++++++++++++
+>  1 file changed, 12 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> index 0120c7f..4182ea3 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> @@ -21,6 +21,15 @@ Optional properties:
+>  - assigned-clocks: PLL of the source clock
+>  - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
+>  - hs400-ds-delay: HS400 DS delay setting
+> +- mediatek,hs200-cmd-int-delay: HS200 command internal delay setting.
+> +                               This field has total 32 stages.
+> +                               The value is an integer from 0 to 31.
+> +- mediatek,hs400-cmd-int-delay: HS400 command internal delay setting
+> +                               This field has total 32 stages.
+> +                               The value is an integer from 0 to 31.
+> +- mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+> +                                      If present,HS400 command responses are sampled on rising edges.
+> +                                      If not present,HS400 command responses are sampled on falling edges.
+>
+>  Examples:
+>  mmc0: mmc@11230000 {
+> @@ -38,4 +47,7 @@ mmc0: mmc@11230000 {
+>         assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
+>         assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
+>         hs400-ds-delay = <0x14015>;
+> +       mediatek,hs200-cmd-int-delay = <26>;
+> +       mediatek,hs400-cmd-int-delay = <14>;
+> +       mediatek,hs400-cmd-resp-sel-rising;
+>  };
+> --
+> 1.7.9.5
+>
