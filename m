@@ -1,47 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: host: tmio: sdio irq improvements
-Date: Tue, 24 Jan 2017 10:56:20 +0100
-Message-ID: <CAPDyKFr_5kDLSOe-m6xCTLgcMebTjDNkiTYpuEjsBahcfJ6ZNQ@mail.gmail.com>
-References: <20170119200718.8115-1-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:36899 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750792AbdAXJ4W (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 04:56:22 -0500
-Received: by mail-wm0-f41.google.com with SMTP id c206so200026782wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Jan 2017 01:56:22 -0800 (PST)
-In-Reply-To: <20170119200718.8115-1-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 0/6] mmc: block: command issue cleanups
+Date: Tue, 24 Jan 2017 11:17:51 +0100
+Message-ID: <20170124101757.19676-1-linus.walleij@linaro.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+Sender: linux-block-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 
-On 19 January 2017 at 21:07, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Here is a small series with two minor improvements (patches 1+2) and one bigger
-> change (patch 3) for SDIO handling with TMIO/SDHI. Since RFC, I addressed all
-> comments (Thanks Simon!) and since it is needed for the WLAN cards, I think it
-> should go in now.
->
->
-> Wolfram Sang (3):
->   mmc: host: tmio: refactor calls to sdio irq
->   mmc: host: tmio: SDIO_STATUS_QUIRK is rather SDIO_STATUS_SETBITS
->   mmc: tmio: discard obsolete SDIO irqs before enabling irqs
->
->  drivers/mmc/host/sh_mobile_sdhi.c |  6 ++----
->  drivers/mmc/host/tmio_mmc.h       |  2 ++
->  drivers/mmc/host/tmio_mmc_pio.c   | 20 ++++++++++++++------
->  include/linux/mfd/tmio.h          |  6 ++----
->  4 files changed, 20 insertions(+), 14 deletions(-)
->
-> --
-> 2.11.0
->
+The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
+need to be refactored to it can be understood by humans.
 
-Thanks, applied for next!
+In the process I found some weird magic return values passed
+around for no good reason.
 
-Kind regards
-Uffe
+Things are more readable after this.
+
+This work is done towards the goal of breaking the function in
+two parts: one just submitting the requests and one checking the
+result and possibly resubmitting the command on error, so we
+can make the usual path (non-errorpath) smooth and quick, and
+be called directly when the driver completes a request.
+
+That in turn is a prerequisite for proper blk-mq integration
+with the MMC/SD stack.
+
+All that comes later.
+
+Linus Walleij (6):
+  mmc: block: break out mmc_blk_rw_cmd_abort()
+  mmc: block: break out mmc_blk_rw_start_new()
+  mmc: block: do not assign mq_rq when aborting command
+  mmc: block: inline command abortions
+  mmc: block: introduce new_areq and old_areq
+  mmc: block: stop passing around pointless return values
+
+ drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++---------------------
+ drivers/mmc/core/block.h |   2 +-
+ 2 files changed, 60 insertions(+), 50 deletions(-)
+
+-- 
+2.9.3
+
