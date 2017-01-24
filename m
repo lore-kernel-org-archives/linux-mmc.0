@@ -1,35 +1,72 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCHv1 0/2] mmc: sdhci-msm: Addresses minor cleanups
-Date: Tue, 24 Jan 2017 14:20:25 +0530
-Message-ID: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCHv1 1/2] mmc: sdhci-msm: Remove platform_execute_tuning from sdhci_msm_ops
+Date: Tue, 24 Jan 2017 14:20:26 +0530
+Message-ID: <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
+References: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf/Adrian, 
+platform_execute_tuning should not really exist as it does not
+do anything useful.
 
-I see that patch series at [1] was already taken by Ulf in next branch.
-So as requested by Ulf, please find the below two patch fixes/cleanup on
-top of next branch.
+So remove this ops and directly plug sdhci_msm_execute_tuning
+with mmc_host_ops.
 
-Patch 1:- Addresses comment from Adrian  [2]
-Patch 2:- Addresses comment from Stephen [3]
+Also in case of HS400 tuning clear SDHCI_HS400_TUNING flag once
+HS400 related mode selection is done.
 
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-links
-[1]:- https://lkml.org/lkml/2017/1/10/70
-[2]:- https://lkml.org/lkml/2017/1/19/153
-[3]:- https://lkml.org/lkml/2017/1/20/542
-
-Ritesh Harjani (2):
-  mmc: sdhci-msm: Remove platform_execute_tuning from sdhci_msm_ops
-  mmc: sdhci-msm: Remove unnecessary comments of CDC init sequence
-
- drivers/mmc/host/sdhci-msm.c | 21 +++++----------------
- 1 file changed, 5 insertions(+), 16 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index f958697..b3e8f44 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -827,12 +827,12 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+ 	return ret;
+ }
+ 
+-static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
++static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
++	struct sdhci_host *host = mmc_priv(mmc);
+ 	int tuning_seq_cnt = 3;
+ 	u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
+ 	int rc;
+-	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_ios ios = host->mmc->ios;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+@@ -855,6 +855,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	if (host->flags & SDHCI_HS400_TUNING) {
+ 		sdhci_msm_hc_select_mode(host);
+ 		msm_set_clock_rate_for_bus_mode(host, ios.clock);
++		host->flags &= ~SDHCI_HS400_TUNING;
+ 	}
+ 
+ retry:
+@@ -1119,7 +1120,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ 
+ static const struct sdhci_ops sdhci_msm_ops = {
+-	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+ 	.set_clock = sdhci_msm_set_clock,
+ 	.get_min_clock = sdhci_msm_get_min_clock,
+@@ -1294,6 +1294,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 					 MSM_MMC_AUTOSUSPEND_DELAY_MS);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+ 
++	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto pm_runtime_disable;
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
