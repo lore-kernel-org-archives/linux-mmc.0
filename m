@@ -1,7 +1,7 @@
 From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V3 1/6] dt-bindings: qcom: clk: Add missing binding for SDCHI enablement on Nexus 5X/6P
-Date: Tue, 24 Jan 2017 01:36:23 -0800
-Message-ID: <1485250588-24698-2-git-send-email-jeremymc@redhat.com>
+Subject: [PATCH V3 3/6] arm64: dts: msm8992 add fixed regulator
+Date: Tue, 24 Jan 2017 01:36:25 -0800
+Message-ID: <1485250588-24698-4-git-send-email-jeremymc@redhat.com>
 References: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
@@ -10,24 +10,36 @@ To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.ke
 Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com, jeremymc@redhat.com
 List-Id: linux-mmc@vger.kernel.org
 
-AHB clock branch is needed in order to enable SDHCI
-on msm899(2/4).
+This regulator is not moving anywhere.
 
 Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
 ---
- include/dt-bindings/clock/qcom,gcc-msm8994.h | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm64/boot/dts/qcom/msm8992.dtsi | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/include/dt-bindings/clock/qcom,gcc-msm8994.h b/include/dt-bindings/clock/qcom,gcc-msm8994.h
-index 8fa535b..df47da0 100644
---- a/include/dt-bindings/clock/qcom,gcc-msm8994.h
-+++ b/include/dt-bindings/clock/qcom,gcc-msm8994.h
-@@ -133,5 +133,6 @@
- #define GCC_USB30_MOCK_UTMI_CLK			115
- #define GCC_USB3_PHY_AUX_CLK			116
- #define GCC_USB_HS_SYSTEM_CLK			117
-+#define GCC_SDCC1_AHB_CLK			118
+diff --git a/arch/arm64/boot/dts/qcom/msm8992.dtsi b/arch/arm64/boot/dts/qcom/msm8992.dtsi
+index 44b2d37..0502d29 100644
+--- a/arch/arm64/boot/dts/qcom/msm8992.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8992.dtsi
+@@ -68,6 +68,19 @@
+ 		clock-frequency = <32768>;
+ 	};
  
- #endif
++
++	vreg_vph_pwr: vreg-vph-pwr {
++		compatible = "regulator-fixed";
++		status = "okay";
++		regulator-name = "vph-pwr";
++
++		regulator-min-microvolt = <3600000>;
++		regulator-max-microvolt = <3600000>;
++
++		regulator-always-on;
++	};
++
++
+ 	soc {
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
 -- 
 2.6.1
