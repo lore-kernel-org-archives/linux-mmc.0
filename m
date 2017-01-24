@@ -1,67 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: s3cmci: include linux/interrupt.h for tasklet_struct
-Date: Tue, 24 Jan 2017 08:31:17 +0100
-Message-ID: <CAPDyKFp1mqAFjQ3-YryqxH9bDrhe-w1r23DUWF6UNZeqGXjuHw@mail.gmail.com>
-References: <20170120200822.3349092-1-arnd@arndb.de>
+Subject: Re: [PATCH v3 01/15] ARM: pxa: Don't rely on public mmc header to
+ include leds.h
+Date: Tue, 24 Jan 2017 08:57:51 +0100
+Message-ID: <CAPDyKFrxD+62MaytiYn1ROM08+wWdTXT8vcmJRs5pMDELD574g@mail.gmail.com>
+References: <1484313256-25993-1-git-send-email-ulf.hansson@linaro.org>
+ <1484313256-25993-2-git-send-email-ulf.hansson@linaro.org>
+ <87efzydusi.fsf@belgarion.home>
+ <CAPDyKFo=tUu9D5zZnUME_+HFBPEnnjy2taTdFLO9H6jSSgKc5A@mail.gmail.com>
+ <87a8aleda2.fsf@belgarion.home> <87y3y3crxl.fsf@belgarion.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:36966 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750753AbdAXHbU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 02:31:20 -0500
-Received: by mail-wm0-f43.google.com with SMTP id c206so194197850wme.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2017 23:31:20 -0800 (PST)
-In-Reply-To: <20170120200822.3349092-1-arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87y3y3crxl.fsf@belgarion.home>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Daniel Mack <daniel@zonque.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ben Dooks <ben-linux@fluff.org>, Krzysztof Kozlowski <krzk@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 20 January 2017 at 21:08, Arnd Bergmann <arnd@arndb.de> wrote:
-> I got this new build error on today's linux-next
+On 22 January 2017 at 11:25, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+> Robert Jarzmik <robert.jarzmik@free.fr> writes:
 >
-> drivers/mmc/host/s3cmci.h:69:24: error: field 'pio_tasklet' has incomplete type
->   struct tasklet_struct pio_tasklet;
-> drivers/mmc/host/s3cmci.c: In function 's3cmci_enable_irq':
-> drivers/mmc/host/s3cmci.c:390:4: error: implicit declaration of function 'enable_irq';did you mean 'enable_imask'? [-Werror=implicit-function-declaration]
+>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>
+>>> On 20 January 2017 at 09:01, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>>>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>>> So I was wondering how you made the choice of which files you add the include to
+>>>> and which you don't touch ?
+>>>
+>>> By building the pxa_defconfig, see what errors it reports and then fix them.
+>>>
+>>> Isn't pxa_defconfig building all the variants?
+>> Euh actually it should, but it's not.
 >
-> While I haven't found out why this happened now and not earlier, the
-> solution is obvious, we should include the header that defines
-> the structure.
-
-Yes, it's a bit weird. Actually non of the automated build system have
-reported this.
-
-I have my own homebrewed makefiles, as to run a quick sanity test for
-mmc host drivers. However, my quick test didn't cover s3cmci, next
-time it will.
-
+> And actually thanks to a suggestion from Russell to improve my search line, I
+> came up with the command line bellow, and perhaps you could fix the others with
+> one command line and respin the patch ?
 >
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Here it is :
+>
+> for f in $(grep -l _led arch/arm/mach-pxa/*.c | xargs grep -L linux/leds.h); do
+> sed -i '0,/^#include <linux\/[l-m].*>$/{s/\(#include <linux\/[l-m].*\)/#include
+> <linux\/leds.h>\n\1/}' $f; done
+>
+> Cheers.
 
-Thanks for helping out! Applied for next and folded it in properly in
-my queue to avoid bisect issues!
+Robert, thanks for helping out!
+
+While running the above command-line, the following files becomes changed:
+
+arch/arm/mach-pxa/zylonite_pxa300.c
+arch/arm/mach-pxa/zylonite_pxa320.c
+arch/arm/mach-pxa/palmld.c
+arch/arm/mach-pxa/palmtc.c
+arch/arm/mach-pxa/ezx.c
+arch/arm/mach-pxa/em-x270.c
+arch/arm/mach-pxa/hx4700.c
+arch/arm/mach-pxa/magician.c
+arch/arm/mach-pxa/palmtreo.c
+arch/arm/mach-pxa/corgi_pm.c
+arch/arm/mach-pxa/spitz_pm.c
+arch/arm/mach-pxa/tosa.c
+arch/arm/mach-pxa/z2.c
+
+However, already by building pxa_defconfig, I have verified that these
+files are being build successfully without any changes needed.
+
+Because of that, I am not sure I would like to make any additional
+changes as a part of this series. I think it's easier if you later on
+deal with that as clean-ups via your pxa tree instead, does that make
+sense to you as well?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/s3cmci.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index 932a4b1fed33..7a173f8c455b 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -21,6 +21,7 @@
->  #include <linux/debugfs.h>
->  #include <linux/seq_file.h>
->  #include <linux/gpio.h>
-> +#include <linux/interrupt.h>
->  #include <linux/irq.h>
->  #include <linux/io.h>
->
-> --
-> 2.9.0
->
