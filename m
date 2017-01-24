@@ -1,62 +1,116 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 2/13] mmc: sunxi: Gate the clock when rate is 0
-Date: Tue, 24 Jan 2017 09:14:31 +0100
-Message-ID: <CAPDyKFrbg=SAGsTt3BoDSrfZGvOfu3sMxMfDy1n_w2xnnQ3-ng@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 3/13] mmc: sunxi: Always set signal delay to 0 for A64
+Date: Tue, 24 Jan 2017 09:16:12 +0100
+Message-ID: <CAPDyKFoatUWz0AwY6e73OCguDx70B1B5OAoPUYX-JDPsru+aZw@mail.gmail.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
- <1f006fd86d1d9ad5eab0c0c9e435003055466a54.1484585798.git-series.maxime.ripard@free-electrons.com>
+ <67fd7dad745b49bb8edb7391655eaddf6f35160e.1484585798.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1f006fd86d1d9ad5eab0c0c9e435003055466a54.1484585798.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:34930 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752224AbdAXIQP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 03:16:15 -0500
+Received: by mail-wm0-f41.google.com with SMTP id r126so169208046wmr.0
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Jan 2017 00:16:15 -0800 (PST)
+In-Reply-To: <67fd7dad745b49bb8edb7391655eaddf6f35160e.1484585798.git-series.maxime.ripard@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andre Przywara <andre.przywara@arm.com>
 
 On 16 January 2017 at 17:56, Maxime Ripard
-<maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> The MMC core assumes that the code will gate the clock when the bus
-> frequency is set to 0, which we've been ignoring so far.
+<maxime.ripard@free-electrons.com> wrote:
+> Experience have shown that the using the  autocalibration could severely
+> degrade the performances of the MMC bus.
 >
-> Handle that.
->
-> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> Allwinner is using in its BSP a delay set to 0 for all the modes but HS400.
+> Remove the calibration code for now, and add comments to document our
+> findings.
 
-Looks good!
+So doesn't this break some platforms using HS400? Or are you saying
+those are already broken?
 
 Kind regards
 Uffe
 
+>
+> Reviewed-by: Andre Przywara <andre.przywara@arm.com>
+> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sunxi-mmc.c | 50 ++++++++++++-------------------------
+>  1 file changed, 17 insertions(+), 33 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index ab4324e6eb74..019f95e8e7c5 100644
+> index 019f95e8e7c5..b9c8a62bc212 100644
 > --- a/drivers/mmc/host/sunxi-mmc.c
 > +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -765,6 +765,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+> @@ -683,41 +683,19 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+>
+>  static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
+>  {
+> -       u32 reg = readl(host->reg_base + reg_off);
+> -       u32 delay;
+> -       unsigned long timeout;
+> -
+>         if (!host->cfg->can_calibrate)
+>                 return 0;
+>
+> -       reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
+> -       reg &= ~SDXC_CAL_DL_SW_EN;
+> -
+> -       writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
+> -
+> -       dev_dbg(mmc_dev(host->mmc), "calibration started\n");
+> -
+> -       timeout = jiffies + HZ * SDXC_CAL_TIMEOUT;
+> -
+> -       while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE)) {
+> -               if (time_before(jiffies, timeout))
+> -                       cpu_relax();
+> -               else {
+> -                       reg &= ~SDXC_CAL_START;
+> -                       writel(reg, host->reg_base + reg_off);
+> -
+> -                       return -ETIMEDOUT;
+> -               }
+> -       }
+> -
+> -       delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
+> -
+> -       reg &= ~SDXC_CAL_START;
+> -       reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
+> -
+> -       writel(reg, host->reg_base + reg_off);
+> -
+> -       dev_dbg(mmc_dev(host->mmc), "calibration ended, reg is 0x%x\n", reg);
+> +       /*
+> +        * FIXME:
+> +        * This is not clear how the calibration is supposed to work
+> +        * yet. The best rate have been obtained by simply setting the
+> +        * delay to 0, as Allwinner does in its BSP.
+> +        *
+> +        * The only mode that doesn't have such a delay is HS400, that
+> +        * is in itself a TODO.
+> +        */
+> +       writel(SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
+>
+>         return 0;
+>  }
+> @@ -809,7 +787,13 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
 >         if (ret)
 >                 return ret;
 >
-> +       if (!ios->clock)
-> +               return 0;
-> +
->         /* 8 bit DDR requires a higher module clock */
->         if (ios->timing == MMC_TIMING_MMC_DDR52 &&
->             ios->bus_width == MMC_BUS_WIDTH_8)
-> @@ -882,7 +885,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         mmc_writel(host, REG_GCTRL, rval);
+> -       /* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
+> +       /*
+> +        * FIXME:
+> +        *
+> +        * In HS400 we'll also need to calibrate the data strobe
+> +        * signal. This should only happen on the MMC2 controller (at
+> +        * least on the A64).
+> +        */
 >
->         /* set up clock */
-> -       if (ios->clock && ios->power_mode) {
-> +       if (ios->power_mode) {
->                 host->ferror = sunxi_mmc_clk_set_rate(host, ios);
->                 /* Android code had a usleep_range(50000, 55000); here */
->         }
+>         return sunxi_mmc_oclk_onoff(host, 1);
+>  }
 > --
 > git-series 0.8.11
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
