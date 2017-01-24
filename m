@@ -1,75 +1,91 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 2/6] mmc: block: break out mmc_blk_rw_start_new()
-Date: Tue, 24 Jan 2017 11:17:53 +0100
-Message-ID: <20170124101757.19676-3-linus.walleij@linaro.org>
+Subject: [PATCH 4/6] mmc: block: inline command abortions
+Date: Tue, 24 Jan 2017 11:17:55 +0100
+Message-ID: <20170124101757.19676-5-linus.walleij@linaro.org>
 References: <20170124101757.19676-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:32843 "EHLO
-        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750843AbdAXKSO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2017 05:18:14 -0500
-Received: by mail-lf0-f47.google.com with SMTP id x1so21438760lff.0
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Jan 2017 02:18:13 -0800 (PST)
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170124101757.19676-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-block-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-As a step toward breaking apart the very complex function
-mmc_blk_issue_rw_rq() we break out the code to start a new
-request.
+Setting rqc to NULL followed by a goto to cmd_abort is just a way
+to do unconditional abort without starting any new command.
+Inline the calls to mmc_blk_rw_cmd_abort() and return immediately
+in those cases.
+
+As a result, mmc_blk_rw_start_new() is not called with NULL
+requests, and we can remove the NULL check in the beginning of
+this function.
+
+Add some comments to the code flow so it is clear that this is
+where the asynchronous requests come back in and the result of
+them gets handled.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c | 27 +++++++++++++++++----------
- 1 file changed, 17 insertions(+), 10 deletions(-)
+ drivers/mmc/core/block.c | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 14efe92a14ef..b60d1fb3a07a 100644
+index 13e6fe060f26..4bbb3d16c09b 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1609,6 +1609,22 @@ static void mmc_blk_rw_cmd_abort(struct mmc_card *card, struct request *req)
- 				      blk_rq_cur_bytes(req));
- }
- 
-+static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
-+				 struct request *req)
-+{
-+	if (!req)
-+		return;
-+
-+	if (mmc_card_removed(card)) {
-+		req->rq_flags |= RQF_QUIET;
-+		blk_end_request_all(req, -EIO);
-+	} else {
-+		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+		mmc_start_req(card->host,
-+			      &mq->mqrq_cur->mmc_active, NULL);
-+	}
-+}
-+
- static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+@@ -1612,9 +1612,6 @@ static void mmc_blk_rw_cmd_abort(struct mmc_card *card, struct request *req)
+ static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
+ 				 struct request *req)
  {
- 	struct mmc_blk_data *md = mq->blkdata;
-@@ -1751,16 +1767,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	mmc_blk_rw_cmd_abort(card, req);
+-	if (!req)
+-		return;
+-
+ 	if (mmc_card_removed(card)) {
+ 		req->rq_flags |= RQF_QUIET;
+ 		blk_end_request_all(req, -EIO);
+@@ -1649,9 +1646,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+ 					rqc->rq_disk->disk_name);
+-				req = rqc;
+-				rqc = NULL;
+-				goto cmd_abort;
++				mmc_blk_rw_cmd_abort(card, rqc);
++				return 0;
+ 			}
  
-  start_new_req:
--	if (rqc) {
--		if (mmc_card_removed(card)) {
--			rqc->rq_flags |= RQF_QUIET;
--			blk_end_request_all(rqc, -EIO);
--		} else {
--			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
--			mmc_start_req(card->host,
--				      &mq->mqrq_cur->mmc_active, NULL);
--		}
--	}
-+	mmc_blk_rw_start_new(mq, card, rqc);
+ 			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+@@ -1660,11 +1656,20 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, &status);
+ 		if (!areq) {
++			/*
++			 * We have just put the first request into the pipeline
++			 * and there is nothing more to do until it is
++			 * complete.
++			 */
+ 			if (status == MMC_BLK_NEW_REQUEST)
+ 				mq->flags |= MMC_QUEUE_NEW_REQUEST;
+ 			return 0;
+ 		}
  
- 	return 0;
- }
++		/*
++		 * An asynchronous request has been completed and we proceed
++		 * to handle the result of it.
++		 */
+ 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+ 		brq = &mq_rq->brq;
+ 		req = mq_rq->req;
+@@ -1691,8 +1696,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				pr_err("%s BUG rq_tot %d d_xfer %d\n",
+ 				       __func__, blk_rq_bytes(req),
+ 				       brq->data.bytes_xfered);
+-				rqc = NULL;
+-				goto cmd_abort;
++				mmc_blk_rw_cmd_abort(card, req);
++				return 0;
+ 			}
+ 			break;
+ 		case MMC_BLK_CMD_ERR:
 -- 
 2.9.3
 
