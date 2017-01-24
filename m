@@ -1,70 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/13] mmc: sunxi: Fix clock frequency change sequence
-Date: Tue, 24 Jan 2017 09:12:07 +0100
-Message-ID: <CAPDyKFp735=MMm02PKEt2iZmN0Afyp52_g-8hKxpW71hw2RyiQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/13] mmc: sunxi: Gate the clock when rate is 0
+Date: Tue, 24 Jan 2017 09:14:31 +0100
+Message-ID: <CAPDyKFrbg=SAGsTt3BoDSrfZGvOfu3sMxMfDy1n_w2xnnQ3-ng@mail.gmail.com>
 References: <cover.a06ce1672d7a72ee7f9bbca46fdd223edd6b2313.1484585798.git-series.maxime.ripard@free-electrons.com>
- <6f6b511bce9df86ee43486653ac55df0d135f198.1484585798.git-series.maxime.ripard@free-electrons.com>
+ <1f006fd86d1d9ad5eab0c0c9e435003055466a54.1484585798.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6f6b511bce9df86ee43486653ac55df0d135f198.1484585798.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andre Przywara <andre.przywara@arm.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1f006fd86d1d9ad5eab0c0c9e435003055466a54.1484585798.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On 16 January 2017 at 17:56, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> The MMC and SD specifications documents that the clock frequency should
-> only be changed once gated.
-
-Where?
-
+<maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> The MMC core assumes that the code will gate the clock when the bus
+> frequency is set to 0, which we've been ignoring so far.
 >
-> The current code first modifies the parent clock, gates it and then
-> modifies the internal divider. This means that since the parent clock rate
-> might be changed, the bus clock might be changed as well before it is
-> gated, which breaks the specification.
+> Handle that.
 >
-> Move the gating before the parent rate modification.
+> Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 
-This all makes perfect sense to me, however I am not sure you need to
-refer to the spec to justify these changes.
+Looks good!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sunxi-mmc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index b1d1303389a7..ab4324e6eb74 100644
+> index ab4324e6eb74..019f95e8e7c5 100644
 > --- a/drivers/mmc/host/sunxi-mmc.c
 > +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -761,6 +761,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->         u32 rval, clock = ios->clock;
->         int ret;
+> @@ -765,6 +765,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>         if (ret)
+>                 return ret;
 >
-> +       ret = sunxi_mmc_oclk_onoff(host, 0);
-> +       if (ret)
-> +               return ret;
+> +       if (!ios->clock)
+> +               return 0;
 > +
 >         /* 8 bit DDR requires a higher module clock */
 >         if (ios->timing == MMC_TIMING_MMC_DDR52 &&
 >             ios->bus_width == MMC_BUS_WIDTH_8)
-> @@ -783,10 +787,6 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 return ret;
->         }
+> @@ -882,7 +885,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         mmc_writel(host, REG_GCTRL, rval);
 >
-> -       ret = sunxi_mmc_oclk_onoff(host, 0);
-> -       if (ret)
-> -               return ret;
-> -
->         /* clear internal divider */
->         rval = mmc_readl(host, REG_CLKCR);
->         rval &= ~0xff;
+>         /* set up clock */
+> -       if (ios->clock && ios->power_mode) {
+> +       if (ios->power_mode) {
+>                 host->ferror = sunxi_mmc_clk_set_rate(host, ios);
+>                 /* Android code had a usleep_range(50000, 55000); here */
+>         }
 > --
 > git-series 0.8.11
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
