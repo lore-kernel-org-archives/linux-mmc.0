@@ -1,113 +1,49 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH V3 2/6] sdhci: Add quirk for delayed IRQ ACK
-Date: Wed, 25 Jan 2017 15:48:01 +0530
-Message-ID: <3ff707f3-4e5b-a19e-8c03-c9e9455d507a@codeaurora.org>
-References: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
- <1485250588-24698-3-git-send-email-jeremymc@redhat.com>
+From: Sean Straw <sstraw@enphaseenergy.com>
+Subject: Re: Question on mmc utils write reliability
+Date: Wed, 25 Jan 2017 10:52:45 +0000
+Message-ID: <BY2PR0201MB1927001DBD59D55F05E41DA8C3740@BY2PR0201MB1927.namprd02.prod.outlook.com>
+References: <SN1PR0201MB1934E741FB1C67BC01D0DBE2C3720@SN1PR0201MB1934.namprd02.prod.outlook.com>,<7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:52682 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751681AbdAYKSO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2017 05:18:14 -0500
-In-Reply-To: <1485250588-24698-3-git-send-email-jeremymc@redhat.com>
+Received: from mail-cys01nam02on0096.outbound.protection.outlook.com ([104.47.37.96]:60679
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751695AbdAYKwr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 25 Jan 2017 05:52:47 -0500
+In-Reply-To: <7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremy McNicoll <jeremymc@redhat.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Jeremy,
 
- From what I can see in codeaurora tree, quirk 
-(SDHCI_QUIRK2_SLOW_INT_CLR) is only required for sdhci-msm with minor 
-number 2B. I think this patch may not be relevant for msm8992 controller.
-And as you have also mentioned in your V2, that even without this 
-change, the detection is fine. The delay you are observing could be due 
-to something else unless we are sure.
+Thank you for the reply.
 
-On reading history of this quirk, I see that this patch was a SW 
-workaround for some HW issue in very initial controller.
-This was fixed for later controllers.
-For this reason, in my opinion we can drop this patch.
 
-But, as we discussed on IRC, let's investigate more on your issue before 
-finalizing on this patch for merging.
 
-Regards
-Ritesh
+git://git.kernel.org/pub/scm/linux/kernel.git/cjb/mmc-utils.git
+commit 2cb6695e8dec00d887bdd5309d1b57d836fcd214
 
-On 1/24/2017 3:06 PM, Jeremy McNicoll wrote:
-> On msm8992 it has been observed that IRQs were not getting
-> ACK'd correctly when clocked at speeds greater than 400KHz.
->
-> Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
-> ---
->  drivers/mmc/host/sdhci-msm.c |  7 +++++++
->  drivers/mmc/host/sdhci.c     | 12 ++++++++++--
->  drivers/mmc/host/sdhci.h     |  2 ++
->  3 files changed, 19 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index f3f3fb3..11dc389 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1304,6 +1304,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  			       CORE_VENDOR_SPEC_CAPABILITIES0);
->  	}
->
-> +	/* Enable delayed IRQ handling workaround on 8992 */
-> +	if (core_major == 1 && core_minor == 0x3e) {
-> +		/* Add 40us delay in interrupt handler when operating
-> +		 * at initialization frequency of 400KHz. */
-> +		host->quirks2 |= SDHCI_QUIRK2_SLOW_INT_CLR;
-> +	}
-> +
->  	/* Setup IRQ for handling power/voltage tasks with PMIC */
->  	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
->  	if (msm_host->pwr_irq < 0) {
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 06dfac2..68a21a3 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2742,11 +2742,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  			result = IRQ_WAKE_THREAD;
->  		}
->
-> -		if (intmask & SDHCI_INT_CMD_MASK)
-> +		if (intmask & SDHCI_INT_CMD_MASK) {
-> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
-> +				udelay(40);
-> +			}
->  			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
-> +		}
->
-> -		if (intmask & SDHCI_INT_DATA_MASK)
-> +		if (intmask & SDHCI_INT_DATA_MASK) {
-> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
-> +				udelay(40);
-> +			}
->  			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
-> +		}
->
->  		if (intmask & SDHCI_INT_BUS_POWER)
->  			pr_err("%s: Card is consuming too much power!\n",
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 400f3a1..7fa1004 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -24,6 +24,8 @@
->   * Controller registers
->   */
->
-> +#define SDHCI_QUIRK2_SLOW_INT_CLR	(1<<5)
-> +
->  #define SDHCI_DMA_ADDRESS	0x00
->  #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
->
->
+(which is the HEAD of origin/master for about 5 months now)
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+
+I was under the understanding that reliable write was throttling the eMMC t=
+o single block operations.  Unless I've misread the JESD84-B51, enh_area is=
+ pSLC mode, which results in halving usable flash capacity - providing more=
+ reliable operation, but being separate from the one-block-per-operation of=
+ reliable_write.  Is reliable write really not available for full capacity =
+MLC ?
+
+Section 6.2.4 of the above references JEDC document (although the 5.1 stand=
+ard) pertains to the partitioning sequence, and the flowchart there does no=
+t make reference to the write_reliability as part of partitioning itself.
+
+The information contained in this message may be privileged and confidentia=
+l. It is intended to be read only by the individual or entity to whom it is=
+ addressed or by their designee. If the reader of this message is not the i=
+ntended recipient, you are on notice that any distribution of this message,=
+ in any form, is strictly prohibited. If you have received this message in =
+error, please immediately notify the sender and delete or destroy any copy =
+of this message!
