@@ -1,138 +1,107 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 3/6] mmc: core: Rename __mmc_set_signal_voltage() to mmc_set_signal_voltage()
-Date: Wed, 25 Jan 2017 16:12:20 +0100
-Message-ID: <1485357143-23280-4-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 4/6] mmc: core: Invent MMC_CAP_3_3V_DDR
+Date: Wed, 25 Jan 2017 16:12:21 +0100
+Message-ID: <1485357143-23280-5-git-send-email-ulf.hansson@linaro.org>
 References: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:35072 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751064AbdAYPMi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2017 10:12:38 -0500
-Received: by mail-lf0-f49.google.com with SMTP id n124so130206696lfd.2
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2017 07:12:38 -0800 (PST)
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:33415 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751498AbdAYPMk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2017 10:12:40 -0500
+Received: by mail-lf0-f48.google.com with SMTP id x1so43803642lff.0
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2017 07:12:39 -0800 (PST)
 In-Reply-To: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
 
-Earlier the mmc_set_signal_voltage() existed, but since it has been renamed
-to mmc_set_uhs_voltage(), we can now use that name instead.
+According the JEDEC specification an eMMC card supporting 1.8V vccq in DDR
+mode should also be capable of 3.3V. However, it's been reported that some
+mmc hosts supports 3.3V, but not 1.8V.
+
+Currently the mmc core implements an error handling when the host fails to
+set 1.8V for vccq, by falling back to 3.3V. Unfortunate, this seems to be
+insufficient for some mmc hosts. To enable these to use eMMC DDR mode let's
+invent a new mmc cap, MMC_CAP_3_3V_DDR, which tells whether they support
+the eMMC 3.3V DDR mode.
+
+In case MMC_CAP_3_3V_DDR is set, but not MMC_CAP_1_8V_DDR, let's change to
+remain on the 3.3V, as it's the default voltage level for vccq, set by the
+earlier power up sequence.
+
+As this change introduces MMC_CAP_3_3V_DDR, let's take the opportunity to
+do some re-formatting of the related defines in the header file.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/core.c | 10 +++++-----
- drivers/mmc/core/core.h |  2 +-
- drivers/mmc/core/mmc.c  | 16 ++++++++--------
- 3 files changed, 14 insertions(+), 14 deletions(-)
+ drivers/mmc/core/mmc.c   | 11 +++++++----
+ include/linux/mmc/host.h | 21 ++++++++++-----------
+ 2 files changed, 17 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 82c1a02..1d44aa2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1631,7 +1631,7 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
- 	return ocr;
- }
- 
--int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
- {
- 	int err = 0;
- 	int old_signal_voltage = host->ios.signal_voltage;
-@@ -1691,7 +1691,7 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
- 	host->ios.clock = 0;
- 	mmc_set_ios(host);
- 
--	if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180)) {
-+	if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180)) {
- 		/*
- 		 * Voltages may not have been switched, but we've already
- 		 * sent CMD11, so a power cycle is required anyway
-@@ -1800,11 +1800,11 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	mmc_set_initial_state(host);
- 
- 	/* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
--	if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
-+	if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
- 		dev_dbg(mmc_dev(host), "Initial signal voltage of 3.3v\n");
--	else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0)
-+	else if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0)
- 		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.8v\n");
--	else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120) == 0)
-+	else if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120) == 0)
- 		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.2v\n");
- 
- 	/*
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index aee23f5..55f543f 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -49,7 +49,7 @@ struct device_node *mmc_of_find_child_device(struct mmc_host *host,
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
- u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
- int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr);
--int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
- void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
- int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index b91abe0..5844f29 100644
+index 5844f29..f1a451e 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1122,14 +1122,14 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
- 	 */
- 	err = -EINVAL;
- 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
- 	if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V))
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
- 
- 	/* make sure vccq is 3.3v after switching disaster */
- 	if (err)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
- 
- 	return err;
- }
-@@ -1296,10 +1296,10 @@ static int mmc_select_hs400es(struct mmc_card *card)
+@@ -213,7 +213,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+ 		avail_type |= EXT_CSD_CARD_TYPE_HS_52;
  	}
  
- 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_2V)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
+-	if (caps & MMC_CAP_1_8V_DDR &&
++	if (caps & (MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR) &&
+ 	    card_type & EXT_CSD_CARD_TYPE_DDR_1_8V) {
+ 		hs_max_dtr = MMC_HIGH_DDR_MAX_DTR;
+ 		avail_type |= EXT_CSD_CARD_TYPE_DDR_1_8V;
+@@ -1120,11 +1120,14 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+ 	 *
+ 	 * WARNING: eMMC rules are NOT the same as SD DDR
+ 	 */
+-	err = -EINVAL;
+-	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V) {
+ 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
++		if (!err)
++			return 0;
++	}
  
- 	if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_8V)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+-	if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V))
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V &&
++	    host->caps & MMC_CAP_1_8V_DDR)
+ 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
  
- 	/* If fails try again during next card power cycle */
- 	if (err)
-@@ -1405,10 +1405,10 @@ static int mmc_select_hs200(struct mmc_card *card)
- 
- 	old_signal_voltage = host->ios.signal_voltage;
- 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_2V)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
- 	if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_8V)
--		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
- 
- 	/* If fails try again during next card power cycle */
- 	if (err)
-@@ -1450,7 +1450,7 @@ static int mmc_select_hs200(struct mmc_card *card)
- err:
- 	if (err) {
- 		/* fall back to the old signal voltage, if fails report error */
--		if (__mmc_set_signal_voltage(host, old_signal_voltage))
-+		if (mmc_set_signal_voltage(host, old_signal_voltage))
- 			err = -EIO;
- 
- 		pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
+ 	/* make sure vccq is 3.3v after switching disaster */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 97699d5..83f1c4a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -259,17 +259,16 @@ struct mmc_host {
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
+ #define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
+-#define MMC_CAP_1_8V_DDR	(1 << 11)	/* can support */
+-						/* DDR mode at 1.8V */
+-#define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
+-						/* DDR mode at 1.2V */
+-#define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+-#define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
+-#define MMC_CAP_UHS_SDR12	(1 << 15)	/* Host supports UHS SDR12 mode */
+-#define MMC_CAP_UHS_SDR25	(1 << 16)	/* Host supports UHS SDR25 mode */
+-#define MMC_CAP_UHS_SDR50	(1 << 17)	/* Host supports UHS SDR50 mode */
+-#define MMC_CAP_UHS_SDR104	(1 << 18)	/* Host supports UHS SDR104 mode */
+-#define MMC_CAP_UHS_DDR50	(1 << 19)	/* Host supports UHS DDR50 mode */
++#define MMC_CAP_3_3V_DDR	(1 << 11)	/* Host supports eMMC DDR 3.3V */
++#define MMC_CAP_1_8V_DDR	(1 << 12)	/* Host supports eMMC DDR 1.8V */
++#define MMC_CAP_1_2V_DDR	(1 << 13)	/* Host supports eMMC DDR 1.2V */
++#define MMC_CAP_POWER_OFF_CARD	(1 << 14)	/* Can power off after boot */
++#define MMC_CAP_BUS_WIDTH_TEST	(1 << 15)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_UHS_SDR12	(1 << 16)	/* Host supports UHS SDR12 mode */
++#define MMC_CAP_UHS_SDR25	(1 << 17)	/* Host supports UHS SDR25 mode */
++#define MMC_CAP_UHS_SDR50	(1 << 18)	/* Host supports UHS SDR50 mode */
++#define MMC_CAP_UHS_SDR104	(1 << 19)	/* Host supports UHS SDR104 mode */
++#define MMC_CAP_UHS_DDR50	(1 << 20)	/* Host supports UHS DDR50 mode */
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+ #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
 -- 
 1.9.1
 
