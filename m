@@ -1,139 +1,135 @@
 From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v3 10/14] mmc: jz4740: Let the pinctrl driver configure the pins
-Date: Wed, 25 Jan 2017 19:52:03 +0100
-Message-ID: <20170125185207.23902-11-paul@crapouillou.net>
+Subject: [PATCH v3 09/14] MIPS: JZ4780: CI20: Add pinctrl configuration for several drivers
+Date: Wed, 25 Jan 2017 19:52:02 +0100
+Message-ID: <20170125185207.23902-10-paul@crapouillou.net>
 References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
  <20170125185207.23902-1-paul@crapouillou.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mips-bounce@linux-mips.org>
 In-Reply-To: <20170125185207.23902-1-paul@crapouillou.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
 To: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com, Paul Cercueil <paul@crapouillou.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-the pins being properly configured before the driver probes.
+We set the pin configuration for the jz4780-nand and jz4780-uart
+drivers.
 
 Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/jz4740_mmc.c | 45 +++++--------------------------------------
- 1 file changed, 5 insertions(+), 40 deletions(-)
+ arch/mips/boot/dts/ingenic/ci20.dts | 60 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
 
-v2: Set pin sleep/default state in suspend/resume callbacks
+v2: Changed the devicetree bindings to match the new driver
 v3: No changes
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 819ad32964fc..b5fec5b7ee7b 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -20,14 +20,13 @@
- #include <linux/irq.h>
- #include <linux/interrupt.h>
- #include <linux/module.h>
-+#include <linux/pinctrl/consumer.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
- #include <linux/scatterlist.h>
- #include <linux/clk.h>
+diff --git a/arch/mips/boot/dts/ingenic/ci20.dts b/arch/mips/boot/dts/ingenic/ci20.dts
+index 1652d8d60b1e..fd138d9978c1 100644
+--- a/arch/mips/boot/dts/ingenic/ci20.dts
++++ b/arch/mips/boot/dts/ingenic/ci20.dts
+@@ -29,18 +29,30 @@
  
- #include <linux/bitops.h>
--#include <linux/gpio.h>
--#include <asm/mach-jz4740/gpio.h>
- #include <asm/cacheflush.h>
- #include <linux/dma-mapping.h>
- #include <linux/dmaengine.h>
-@@ -906,15 +905,6 @@ static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.enable_sdio_irq = jz4740_mmc_enable_sdio_irq,
+ &uart0 {
+ 	status = "okay";
++
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart0>;
  };
  
--static const struct jz_gpio_bulk_request jz4740_mmc_pins[] = {
--	JZ_GPIO_BULK_PIN(MSC_CMD),
--	JZ_GPIO_BULK_PIN(MSC_CLK),
--	JZ_GPIO_BULK_PIN(MSC_DATA0),
--	JZ_GPIO_BULK_PIN(MSC_DATA1),
--	JZ_GPIO_BULK_PIN(MSC_DATA2),
--	JZ_GPIO_BULK_PIN(MSC_DATA3),
--};
--
- static int jz4740_mmc_request_gpio(struct device *dev, int gpio,
- 	const char *name, bool output, int value)
- {
-@@ -978,15 +968,6 @@ static void jz4740_mmc_free_gpios(struct platform_device *pdev)
- 		gpio_free(pdata->gpio_power);
- }
+ &uart1 {
+ 	status = "okay";
++
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart1>;
+ };
  
--static inline size_t jz4740_mmc_num_pins(struct jz4740_mmc_host *host)
--{
--	size_t num_pins = ARRAY_SIZE(jz4740_mmc_pins);
--	if (host->pdata && host->pdata->data_1bit)
--		num_pins -= 3;
--
--	return num_pins;
--}
--
- static int jz4740_mmc_probe(struct platform_device* pdev)
- {
- 	int ret;
-@@ -1027,15 +1008,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		goto err_free_host;
- 	}
+ &uart3 {
+ 	status = "okay";
++
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart2>;
+ };
  
--	ret = jz_gpio_bulk_request(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--	if (ret) {
--		dev_err(&pdev->dev, "Failed to request mmc pins: %d\n", ret);
--		goto err_free_host;
--	}
--
- 	ret = jz4740_mmc_request_gpios(mmc, pdev);
- 	if (ret)
--		goto err_gpio_bulk_free;
-+		goto err_release_dma;
+ &uart4 {
+ 	status = "okay";
++
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart4>;
+ };
  
- 	mmc->ops = &jz4740_mmc_ops;
- 	mmc->f_min = JZ_MMC_CLK_RATE / 128;
-@@ -1091,10 +1066,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	free_irq(host->irq, host);
- err_free_gpios:
- 	jz4740_mmc_free_gpios(pdev);
--err_gpio_bulk_free:
-+err_release_dma:
- 	if (host->use_dma)
- 		jz4740_mmc_release_dma_channels(host);
--	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- err_free_host:
- 	mmc_free_host(mmc);
+ &nemc {
+@@ -61,6 +73,13 @@
+ 		ingenic,nemc-tAW = <15>;
+ 		ingenic,nemc-tSTRV = <100>;
  
-@@ -1114,7 +1088,6 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 	free_irq(host->irq, host);
++		/*
++		 * Only CLE/ALE are needed for the devices that are connected, rather
++		 * than the full address line set.
++		 */
++		pinctrl-names = "default";
++		pinctrl-0 = <&pins_nemc>;
++
+ 		nand@1 {
+ 			reg = <1>;
  
- 	jz4740_mmc_free_gpios(pdev);
--	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
+@@ -69,6 +88,9 @@
+ 			nand-ecc-mode = "hw";
+ 			nand-on-flash-bbt;
  
- 	if (host->use_dma)
- 		jz4740_mmc_release_dma_channels(host);
-@@ -1128,20 +1101,12 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 
- static int jz4740_mmc_suspend(struct device *dev)
- {
--	struct jz4740_mmc_host *host = dev_get_drvdata(dev);
--
--	jz_gpio_bulk_suspend(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--
--	return 0;
-+	return pinctrl_pm_select_sleep_state(dev);
- }
- 
- static int jz4740_mmc_resume(struct device *dev)
- {
--	struct jz4740_mmc_host *host = dev_get_drvdata(dev);
--
--	jz_gpio_bulk_resume(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--
--	return 0;
-+	return pinctrl_pm_select_default_state(dev);
- }
- 
- static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
++			pinctrl-names = "default";
++			pinctrl-0 = <&pins_nemc_cs1>;
++
+ 			partitions {
+ 				compatible = "fixed-partitions";
+ 				#address-cells = <2>;
+@@ -106,3 +128,41 @@
+ &bch {
+ 	status = "okay";
+ };
++
++&pinctrl {
++	pins_uart0: uart0 {
++		function = "uart0";
++		groups = "uart0-data";
++		bias-disable;
++	};
++
++	pins_uart1: uart1 {
++		function = "uart1";
++		groups = "uart1-data";
++		bias-disable;
++	};
++
++	pins_uart2: uart2 {
++		function = "uart2";
++		groups = "uart2-data", "uart2-hwflow";
++		bias-disable;
++	};
++
++	pins_uart4: uart4 {
++		function = "uart4";
++		groups = "uart4-data";
++		bias-disable;
++	};
++
++	pins_nemc: nemc {
++		function = "nemc";
++		groups = "nemc-data", "nemc-cle-ale", "nemc-rd-we", "nemc-frd-fwe";
++		bias-disable;
++	};
++
++	pins_nemc_cs1: nemc-cs1 {
++		function = "nemc-cs1";
++		groups = "nemc-cs1";
++		bias-disable;
++	};
++};
 -- 
 2.11.0
