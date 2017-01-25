@@ -1,121 +1,48 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH] mmc: core: Pass node pointer to mmc_of_parse
-Date: Wed, 25 Jan 2017 14:47:48 +0100
-Message-ID: <20170125134748.GD3033@hardcore>
-References: <20170121105956.13020-1-jglauber@cavium.com>
- <CAPDyKFo+q=eT9fWOkBVFtyHD0Nw1YgH7x4MMTNn_9UPK+FDPww@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFo+q=eT9fWOkBVFtyHD0Nw1YgH7x4MMTNn_9UPK+FDPww@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 1/6] mmc: core: Remove redundant code in mmc_set_signal_voltage()
+Date: Wed, 25 Jan 2017 16:12:18 +0100
+Message-ID: <1485357143-23280-2-git-send-email-ulf.hansson@linaro.org>
+References: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:34239 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751073AbdAYPMd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2017 10:12:33 -0500
+Received: by mail-lf0-f47.google.com with SMTP id v186so130536002lfa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2017 07:12:32 -0800 (PST)
+In-Reply-To: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
 
-On Tue, Jan 24, 2017 at 09:56:55AM +0100, Ulf Hansson wrote:
-> On 21 January 2017 at 11:59, Jan Glauber <jglauber@cavium.com> wrote:
-> > Extend mmc_of_parse to get the device node pointer as an
-> > additional argument instead of using the device node of the
-> > mmc device.
-> >
-> > While this has no effect for the current users it allows
-> > mmc_of_parse to be used by mmc controllers with multiple slots
-> > per device. These controllers can then pass the child node of the
-> > slot.
-> >
-> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> > ---
-> >  drivers/mmc/core/host.c            | 8 +++-----
-> >  drivers/mmc/host/davinci_mmc.c     | 2 +-
-> >  drivers/mmc/host/dw_mmc.c          | 2 +-
-> >  drivers/mmc/host/meson-gx-mmc.c    | 2 +-
-> >  drivers/mmc/host/mmci.c            | 2 +-
-> >  drivers/mmc/host/moxart-mmc.c      | 2 +-
-> >  drivers/mmc/host/mtk-sd.c          | 2 +-
-> >  drivers/mmc/host/mvsdio.c          | 2 +-
-> >  drivers/mmc/host/mxcmmc.c          | 2 +-
-> >  drivers/mmc/host/mxs-mmc.c         | 2 +-
-> >  drivers/mmc/host/omap_hsmmc.c      | 2 +-
-> >  drivers/mmc/host/sdhci-bcm-kona.c  | 2 +-
-> >  drivers/mmc/host/sdhci-brcmstb.c   | 2 +-
-> >  drivers/mmc/host/sdhci-cadence.c   | 2 +-
-> >  drivers/mmc/host/sdhci-dove.c      | 2 +-
-> >  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
-> >  drivers/mmc/host/sdhci-iproc.c     | 2 +-
-> >  drivers/mmc/host/sdhci-msm.c       | 2 +-
-> >  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
-> >  drivers/mmc/host/sdhci-of-at91.c   | 2 +-
-> >  drivers/mmc/host/sdhci-of-esdhc.c  | 2 +-
-> >  drivers/mmc/host/sdhci-pic32.c     | 2 +-
-> >  drivers/mmc/host/sdhci-pxav3.c     | 2 +-
-> >  drivers/mmc/host/sdhci-s3c.c       | 2 +-
-> >  drivers/mmc/host/sdhci-st.c        | 2 +-
-> >  drivers/mmc/host/sdhci-tegra.c     | 2 +-
-> >  drivers/mmc/host/sdhci_f_sdh30.c   | 2 +-
-> >  drivers/mmc/host/sh_mmcif.c        | 2 +-
-> >  drivers/mmc/host/sunxi-mmc.c       | 2 +-
-> >  drivers/mmc/host/tmio_mmc_pio.c    | 2 +-
-> >  drivers/mmc/host/usdhi6rol0.c      | 2 +-
-> >  include/linux/mmc/host.h           | 2 +-
-> >  32 files changed, 34 insertions(+), 36 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index 98f25ff..444faac 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -171,25 +171,23 @@ static void mmc_retune_timer(unsigned long data)
-> >  /**
-> >   *     mmc_of_parse() - parse host's device-tree node
-> >   *     @host: host whose node should be parsed.
-> > + *     @np: node that should be parsed.
-> >   *
-> >   * To keep the rest of the MMC subsystem unaware of whether DT has been
-> >   * used to to instantiate and configure this host instance or not, we
-> >   * parse the properties and set respective generic mmc-host flags and
-> >   * parameters.
-> >   */
-> > -int mmc_of_parse(struct mmc_host *host)
-> > +int mmc_of_parse(struct mmc_host *host, struct device_node *np)
-> >  {
-> > -       struct device_node *np;
-> >         u32 bus_width;
-> >         int ret;
-> >         bool cd_cap_invert, cd_gpio_invert = false;
-> >         bool ro_cap_invert, ro_gpio_invert = false;
-> >
-> > -       if (!host->parent || !host->parent->of_node)
-> > +       if (!np)
-> >                 return 0;
-> >
-> > -       np = host->parent->of_node;
-> > -
-> 
-> This doesn't work because of mmc_of_parse() calls the below functions,
-> which uses the parent device associated with the mmc host.
-> 
-> 1) mmc_gpiod_request_cd()
-> 2) mmc_gpiod_request_ro()
-> 3) mmc_pwrseq_alloc()
-> 
-> Please have a look to see how we can change these first.
+The mmc_set_signal_voltage() function is used for SD/SDIO when switching to
+1.8V for UHS mode. Therefore let's remove the redundant code dealing with
+MMC_SIGNAL_VOLTAGE_330.
 
-Yes, I've missed these. While 3) would be easy to adopt
-I don't see how we can change 1) and 2) to parse the child nodes.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/core.c | 7 -------
+ 1 file changed, 7 deletions(-)
 
-Both functions call devm_gpiod_get_index() which is agnostic to
-DT nodes but uses the struct device *. So I think this kills my plan of
-adopting mmc_of_parse, looks like I really need to create one device per
-child node.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8c45825..bb819d4 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1654,13 +1654,6 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
+ 	u32 clock;
+ 
+ 	/*
+-	 * Send CMD11 only if the request is to switch the card to
+-	 * 1.8V signalling.
+-	 */
+-	if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+-		return __mmc_set_signal_voltage(host, signal_voltage);
+-
+-	/*
+ 	 * If we cannot switch voltages, return failure so the caller
+ 	 * can continue without UHS mode
+ 	 */
+-- 
+1.9.1
 
-thanks,
-Jan
-
-> One way that might help to simplify the implementation could be to
-> optionally store the of_node in the mmc host, while it's being
-> allocated. When it's set, it could indicate we have a child/slot-node.
-> Just an idea...
-> 
-> Kind regards
-> Uffe
