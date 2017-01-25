@@ -1,52 +1,113 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Wed, 25 Jan 2017 09:48:54 +0000
-Message-ID: <939E5C6D-D96B-4EF6-81F2-0DE61499E4B6@sandisk.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
- <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
- <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
- <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
- <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH V3 2/6] sdhci: Add quirk for delayed IRQ ACK
+Date: Wed, 25 Jan 2017 15:48:01 +0530
+Message-ID: <3ff707f3-4e5b-a19e-8c03-c9e9455d507a@codeaurora.org>
+References: <1485250588-24698-1-git-send-email-jeremymc@redhat.com>
+ <1485250588-24698-3-git-send-email-jeremymc@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0085.outbound.protection.outlook.com ([104.47.40.85]:59952
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751470AbdAYJtC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 25 Jan 2017 04:49:02 -0500
-In-Reply-To: <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
-Content-Language: en-US
-Content-ID: <06D84F4BC1188545B789B9712A1ED732@sandisk.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:52682 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751681AbdAYKSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2017 05:18:14 -0500
+In-Reply-To: <1485250588-24698-3-git-send-email-jeremymc@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jeremy McNicoll <jeremymc@redhat.com>
+Cc: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com
 
-DQoNCk9uIDEvMjQvMTcsIDQ6MzYgUE0sICJBZHJpYW4gSHVudGVyIiA8YWRyaWFuLmh1bnRlckBp
-bnRlbC5jb20+IHdyb3RlOg0KDQogICAgT24gMjMvMDEvMTcgMTk6MDcsIEFsZXggTGVtYmVyZyB3
-cm90ZToNCiAgICA+IEhpIEFkcmlhbiwNCiAgICA+IA0KICAgID4gSSB3b3VsZCBsaWtlIHRvIGFk
-ZCBzZXZlcmFsIG5vdGVzIG9uIHRvcCBvZiBVcmnigJlzIGFuc3dlci4uLg0KICAgID4gSSBhZ3Jl
-ZSB3aXRoIHlvdSwgYnkgdGhlIHNwZWMsIFBPTiBTbGVlcF9Ob3RpZmljYXRpb24gc2hvdWxkIGJl
-DQogICAgPiBzZXQgYmVmb3JlIGNhbGxpbmcgU2xlZXAgY29tbWFuZC4NCiAgICA+IEFzIHlvdSBw
-cm9iYWJseSByZW1lbWJlciwgd2UgaGF2ZSB0cmllZCB0byBpbXBsZW1lbnQgaXQNCiAgICA+IGlu
-IHRoZSBwYXN0IGFuZCBldmVuIHN1Ym1pdHRlZCBhIHBhdGNoIOKAkyDigJxbUEFUQ0hdIG1tYzog
-c2xlZXAgbm90aWZpY2F0aW9u4oCdDQogICAgPiBodHRwczovL3d3dy5tYWlsLWFyY2hpdmUuY29t
-L2xpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcvbXNnMzA5MDYuaHRtbA0KICAgID4gQXMgeW91IGNh
-biBzZWUgZnJvbSB0aGUgdGhyZWFkLCBvbmUgb2YgdGhlIG1haW4gaXNzdWVzIGluIFNsZWVwX05v
-dGlmaWNhdGlvbg0KICAgID4gaXMgYSBTTEVFUF9OT1RJRklDQVRJT05fVElNRSAoZGVmaW5lZCBp
-biBFWFRfQ1NEIFsyMTZdKSwgd2hpY2ggbmVlZCB0byBiZQ0KICAgID4gY29uc2lkZXJlZCBpbiBp
-bXBsZW1lbnRhdGlvbuKApg0KICAgIA0KICAgIERvZXMgaXQ/ICBJIHdvdWxkIHRlbmQgdG8gYXNz
-dW1lIFNMRUVQX05PVElGSUNBVElPTl9USU1FIHdpbGwgYmUgYWNjZXB0YWJsZQ0KICAgIGR1cmlu
-ZyBfc3VzcGVuZCB1bnRpbCBwcm92ZW4gb3RoZXJ3aXNlLg0KDQpQb3RlbnRpYWxseSwgYnkgdGhl
-IHNwZWMsIHRoZSBNYXggdmFsdWUgb2YgU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgY2FuIGJlIDgz
-Ljg4IHNlY29uZHMuDQpDYW4gd2UgYXNzdW1lIHRoYXQgdGhpcyB0aW1lIGlzIGFjY2VwdGFibGUg
-ZHVyaW5nIF9zdXNwZW5kPw0KICAgIA0KICAgID4gVGh1cywgSSB0aGluayBwb3N0cG9uaW5nIFNs
-ZWVwIGR1cmluZyBzdXNwZW5kIHJlcXVpcmVzIGEgZGlmZmVyZW50IGZyb20gY3VycmVudA0KICAg
-ID4gQVVUT19CS09QUyBpbXBsZW1lbnRhdGlvbiwgYW5kIEkgc3VnZ2VzdCB0byBoYW5kbGUgaXQg
-aW4gc2VwYXJhdGUNCiAgICA+IHBhdGNoc2V0LCBpZiBwb3NzaWJsZS4NCiAgICANCiAgICBOb3Qg
-YXQgYWxsIHN1cmUgd2hhdCB5b3UgbWVhbiBieSAicG9zdHBvbmluZyBTbGVlcCI/DQoNCkkgbWVh
-biBsZXR0aW5nIFNsZWVwX05vdGlmaWNhdGlvbiB0byBiZSBjb21wbGV0ZWQgYmVmb3JlIFNsZWVw
-Lg0KIA0KDQo=
+Hi Jeremy,
+
+ From what I can see in codeaurora tree, quirk 
+(SDHCI_QUIRK2_SLOW_INT_CLR) is only required for sdhci-msm with minor 
+number 2B. I think this patch may not be relevant for msm8992 controller.
+And as you have also mentioned in your V2, that even without this 
+change, the detection is fine. The delay you are observing could be due 
+to something else unless we are sure.
+
+On reading history of this quirk, I see that this patch was a SW 
+workaround for some HW issue in very initial controller.
+This was fixed for later controllers.
+For this reason, in my opinion we can drop this patch.
+
+But, as we discussed on IRC, let's investigate more on your issue before 
+finalizing on this patch for merging.
+
+Regards
+Ritesh
+
+On 1/24/2017 3:06 PM, Jeremy McNicoll wrote:
+> On msm8992 it has been observed that IRQs were not getting
+> ACK'd correctly when clocked at speeds greater than 400KHz.
+>
+> Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c |  7 +++++++
+>  drivers/mmc/host/sdhci.c     | 12 ++++++++++--
+>  drivers/mmc/host/sdhci.h     |  2 ++
+>  3 files changed, 19 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index f3f3fb3..11dc389 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1304,6 +1304,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  			       CORE_VENDOR_SPEC_CAPABILITIES0);
+>  	}
+>
+> +	/* Enable delayed IRQ handling workaround on 8992 */
+> +	if (core_major == 1 && core_minor == 0x3e) {
+> +		/* Add 40us delay in interrupt handler when operating
+> +		 * at initialization frequency of 400KHz. */
+> +		host->quirks2 |= SDHCI_QUIRK2_SLOW_INT_CLR;
+> +	}
+> +
+>  	/* Setup IRQ for handling power/voltage tasks with PMIC */
+>  	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
+>  	if (msm_host->pwr_irq < 0) {
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 06dfac2..68a21a3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2742,11 +2742,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  			result = IRQ_WAKE_THREAD;
+>  		}
+>
+> -		if (intmask & SDHCI_INT_CMD_MASK)
+> +		if (intmask & SDHCI_INT_CMD_MASK) {
+> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
+> +				udelay(40);
+> +			}
+>  			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
+> +		}
+>
+> -		if (intmask & SDHCI_INT_DATA_MASK)
+> +		if (intmask & SDHCI_INT_DATA_MASK) {
+> +			if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) && (host->clock <= 400000)) {
+> +				udelay(40);
+> +			}
+>  			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
+> +		}
+>
+>  		if (intmask & SDHCI_INT_BUS_POWER)
+>  			pr_err("%s: Card is consuming too much power!\n",
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 400f3a1..7fa1004 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -24,6 +24,8 @@
+>   * Controller registers
+>   */
+>
+> +#define SDHCI_QUIRK2_SLOW_INT_CLR	(1<<5)
+> +
+>  #define SDHCI_DMA_ADDRESS	0x00
+>  #define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+>
+>
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
