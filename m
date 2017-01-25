@@ -1,67 +1,121 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Wed, 25 Jan 2017 13:42:45 +0000
-Message-ID: <ED63E8D0-CD49-4662-906E-DEB4934A6D29@sandisk.com>
-References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
- <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
- <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
- <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
- <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
- <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
- <939E5C6D-D96B-4EF6-81F2-0DE61499E4B6@sandisk.com>
- <1d00199b-aaee-0363-0b85-b57b48f3ea40@intel.com>
- <2A84C54D-D96B-4728-BE25-BF082BF0C464@sandisk.com>
- <3dac8e2c-8a24-788b-bc29-8917c465b3e7@intel.com>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH] mmc: core: Pass node pointer to mmc_of_parse
+Date: Wed, 25 Jan 2017 14:47:48 +0100
+Message-ID: <20170125134748.GD3033@hardcore>
+References: <20170121105956.13020-1-jglauber@cavium.com>
+ <CAPDyKFo+q=eT9fWOkBVFtyHD0Nw1YgH7x4MMTNn_9UPK+FDPww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0046.outbound.protection.outlook.com ([104.47.40.46]:45344
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751714AbdAYNmw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 25 Jan 2017 08:42:52 -0500
-In-Reply-To: <3dac8e2c-8a24-788b-bc29-8917c465b3e7@intel.com>
-Content-Language: en-US
-Content-ID: <A6717430BB0EAE4AB6FC416BCCB52F62@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFo+q=eT9fWOkBVFtyHD0Nw1YgH7x4MMTNn_9UPK+FDPww@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-DQoNCk9uIDEvMjUvMTcsIDI6NDUgUE0sICJsaW51eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3Jn
-IG9uIGJlaGFsZiBvZiBBZHJpYW4gSHVudGVyIiA8bGludXgtbW1jLW93bmVyQHZnZXIua2VybmVs
-Lm9yZyBvbiBiZWhhbGYgb2YgYWRyaWFuLmh1bnRlckBpbnRlbC5jb20+IHdyb3RlOg0KDQogDQog
-ICAgPiAgICAgPiBQb3RlbnRpYWxseSwgYnkgdGhlIHNwZWMsIHRoZSBNYXggdmFsdWUgb2YgU0xF
-RVBfTk9USUZJQ0FUSU9OX1RJTUUgY2FuIGJlIDgzLjg4IHNlY29uZHMuDQogICAgPiAgICAgPiBD
-YW4gd2UgYXNzdW1lIHRoYXQgdGhpcyB0aW1lIGlzIGFjY2VwdGFibGUgZHVyaW5nIF9zdXNwZW5k
-Pw0KICAgID4gICAgIA0KICAgID4gICAgIERvIHlvdSBrbm93IG9mIGFueSBjYXJkcyB0aGF0IHRh
-a2UgdGhhdCBsb25nPw0KICAgID4gDQogICAgPiBZZXMgLSBmb3Igc29tZSBjYXJkcyBpdCBjYW4g
-dGFrZSBzZXZlcmFsIHNlY29uZHMgaW4gc29tZSBjb3JuZXIgY2FzZXMuDQogICAgDQogICAgV291
-bGRuJ3QgdGhhdCBtZWFuIFBPV0VSX09GRl9TSE9SVCBoYXMgdGhlIHNhbWUgcHJvYmxlbSBzaW5j
-ZSB0aGF0IGlzDQogICAgcHJlcGFyaW5nIGZvciAqYm90aCogVmNjIGFuZCBWY2NxIHRvIGdvIG9m
-Zj8NCg0KUE9XRVJfT0ZGX1NIT1JUIHNob3VsZCBiZSBjb21wbGV0ZWQgd2l0aGluIEdFTkVSSUNf
-Q01ENl9USU1FLA0Kd2hpY2ggaXMgYSBzdGFuZGFyZCBTd2l0Y2ggY29tbWFuZCB0aW1lLg0KIA0K
-ICAgID4gDQogICAgPiAgICAgQXMgSSB3cm90ZSwgSSB3b3VsZCBhc3N1bWUgaXQgaXMgYWNjZXB0
-YWJsZSB1bnRpbCB3ZSBrbm93IG90aGVyd2lzZS4NCiAgICA+IA0KICAgID4gSSB0aGluayBTbGVl
-cF9Ob3RpZmljYXRpb24gcmVxdWlyZXMgbW9yZSBkZXRhaWxlZCByZXZpZXcuIA0KICAgID4gU2lu
-Y2UgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiBpcyBhIGJsb2NraW5nIGNvbW1hbmQgKEJVU1kgYXNz
-ZXJ0ZWQpLA0KICAgID4gaW4gY2FzZSBvZiBnZXR0aW5nIG5ldyByZXF1ZXN0LCBkcml2ZXIgbmVl
-ZCB0byBzZW5kIEhQSSBjb21tYW5kIGluIG9yZGVyDQogICAgPiB0byBpbnRlcnJ1cHQgdGhlIFNs
-ZWVwX05vdGlmaWNhdGlvbiBwcm9jZXNzLg0KICAgID4gV2UgdHJpZWQgdG8gaGFuZGxlIHRoaXMg
-Y2FzZSBpbiBvdXIgU2xlZXBfTm90aWZpY2F0aW9uIHBhdGNoc2V04oCmDQogICAgPiBBbnl3YXks
-IEkgdGhpbmsgd2UgbmVlZCB0byBkaXNjdXNzIGl0IHNlcGFyYXRlbHksIG5vdCByZWxhdGVkIHRv
-DQogICAgPiB0aGUgQVVUT19CS09QUyBzdXBwb3J04oCmDQogICAgPiANCiAgICA+ICAgICA+ICAg
-ICANCiAgICA+ICAgICA+ICAgICA+IFRodXMsIEkgdGhpbmsgcG9zdHBvbmluZyBTbGVlcCBkdXJp
-bmcgc3VzcGVuZCByZXF1aXJlcyBhIGRpZmZlcmVudCBmcm9tIGN1cnJlbnQNCiAgICA+ICAgICA+
-ICAgICA+IEFVVE9fQktPUFMgaW1wbGVtZW50YXRpb24sIGFuZCBJIHN1Z2dlc3QgdG8gaGFuZGxl
-IGl0IGluIHNlcGFyYXRlDQogICAgPiAgICAgPiAgICAgPiBwYXRjaHNldCwgaWYgcG9zc2libGUu
-DQogICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAgTm90IGF0IGFsbCBzdXJlIHdoYXQg
-eW91IG1lYW4gYnkgInBvc3Rwb25pbmcgU2xlZXAiPw0KICAgID4gICAgID4gDQogICAgPiAgICAg
-PiBJIG1lYW4gbGV0dGluZyBTbGVlcF9Ob3RpZmljYXRpb24gdG8gYmUgY29tcGxldGVkIGJlZm9y
-ZSBTbGVlcC4NCiAgICA+ICAgICANCiAgICA+ICAgICBvb2suDQogICAgPiAgICAgDQogICAgPiAg
-ICAgDQogICAgPiANCiAgICANCiAgICAtLQ0KICAgIFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluDQogICAgdGhlIGJv
-ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCiAgICBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCiAgICANCg0K
+On Tue, Jan 24, 2017 at 09:56:55AM +0100, Ulf Hansson wrote:
+> On 21 January 2017 at 11:59, Jan Glauber <jglauber@cavium.com> wrote:
+> > Extend mmc_of_parse to get the device node pointer as an
+> > additional argument instead of using the device node of the
+> > mmc device.
+> >
+> > While this has no effect for the current users it allows
+> > mmc_of_parse to be used by mmc controllers with multiple slots
+> > per device. These controllers can then pass the child node of the
+> > slot.
+> >
+> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> > ---
+> >  drivers/mmc/core/host.c            | 8 +++-----
+> >  drivers/mmc/host/davinci_mmc.c     | 2 +-
+> >  drivers/mmc/host/dw_mmc.c          | 2 +-
+> >  drivers/mmc/host/meson-gx-mmc.c    | 2 +-
+> >  drivers/mmc/host/mmci.c            | 2 +-
+> >  drivers/mmc/host/moxart-mmc.c      | 2 +-
+> >  drivers/mmc/host/mtk-sd.c          | 2 +-
+> >  drivers/mmc/host/mvsdio.c          | 2 +-
+> >  drivers/mmc/host/mxcmmc.c          | 2 +-
+> >  drivers/mmc/host/mxs-mmc.c         | 2 +-
+> >  drivers/mmc/host/omap_hsmmc.c      | 2 +-
+> >  drivers/mmc/host/sdhci-bcm-kona.c  | 2 +-
+> >  drivers/mmc/host/sdhci-brcmstb.c   | 2 +-
+> >  drivers/mmc/host/sdhci-cadence.c   | 2 +-
+> >  drivers/mmc/host/sdhci-dove.c      | 2 +-
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+> >  drivers/mmc/host/sdhci-iproc.c     | 2 +-
+> >  drivers/mmc/host/sdhci-msm.c       | 2 +-
+> >  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
+> >  drivers/mmc/host/sdhci-of-at91.c   | 2 +-
+> >  drivers/mmc/host/sdhci-of-esdhc.c  | 2 +-
+> >  drivers/mmc/host/sdhci-pic32.c     | 2 +-
+> >  drivers/mmc/host/sdhci-pxav3.c     | 2 +-
+> >  drivers/mmc/host/sdhci-s3c.c       | 2 +-
+> >  drivers/mmc/host/sdhci-st.c        | 2 +-
+> >  drivers/mmc/host/sdhci-tegra.c     | 2 +-
+> >  drivers/mmc/host/sdhci_f_sdh30.c   | 2 +-
+> >  drivers/mmc/host/sh_mmcif.c        | 2 +-
+> >  drivers/mmc/host/sunxi-mmc.c       | 2 +-
+> >  drivers/mmc/host/tmio_mmc_pio.c    | 2 +-
+> >  drivers/mmc/host/usdhi6rol0.c      | 2 +-
+> >  include/linux/mmc/host.h           | 2 +-
+> >  32 files changed, 34 insertions(+), 36 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 98f25ff..444faac 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -171,25 +171,23 @@ static void mmc_retune_timer(unsigned long data)
+> >  /**
+> >   *     mmc_of_parse() - parse host's device-tree node
+> >   *     @host: host whose node should be parsed.
+> > + *     @np: node that should be parsed.
+> >   *
+> >   * To keep the rest of the MMC subsystem unaware of whether DT has been
+> >   * used to to instantiate and configure this host instance or not, we
+> >   * parse the properties and set respective generic mmc-host flags and
+> >   * parameters.
+> >   */
+> > -int mmc_of_parse(struct mmc_host *host)
+> > +int mmc_of_parse(struct mmc_host *host, struct device_node *np)
+> >  {
+> > -       struct device_node *np;
+> >         u32 bus_width;
+> >         int ret;
+> >         bool cd_cap_invert, cd_gpio_invert = false;
+> >         bool ro_cap_invert, ro_gpio_invert = false;
+> >
+> > -       if (!host->parent || !host->parent->of_node)
+> > +       if (!np)
+> >                 return 0;
+> >
+> > -       np = host->parent->of_node;
+> > -
+> 
+> This doesn't work because of mmc_of_parse() calls the below functions,
+> which uses the parent device associated with the mmc host.
+> 
+> 1) mmc_gpiod_request_cd()
+> 2) mmc_gpiod_request_ro()
+> 3) mmc_pwrseq_alloc()
+> 
+> Please have a look to see how we can change these first.
+
+Yes, I've missed these. While 3) would be easy to adopt
+I don't see how we can change 1) and 2) to parse the child nodes.
+
+Both functions call devm_gpiod_get_index() which is agnostic to
+DT nodes but uses the struct device *. So I think this kills my plan of
+adopting mmc_of_parse, looks like I really need to create one device per
+child node.
+
+thanks,
+Jan
+
+> One way that might help to simplify the implementation could be to
+> optionally store the of_node in the mmc host, while it's being
+> allocated. When it's set, it could indicate we have a child/slot-node.
+> Just an idea...
+> 
+> Kind regards
+> Uffe
