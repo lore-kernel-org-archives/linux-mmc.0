@@ -1,49 +1,70 @@
-From: Sean Straw <sstraw@enphaseenergy.com>
-Subject: Re: Question on mmc utils write reliability
-Date: Wed, 25 Jan 2017 10:52:45 +0000
-Message-ID: <BY2PR0201MB1927001DBD59D55F05E41DA8C3740@BY2PR0201MB1927.namprd02.prod.outlook.com>
-References: <SN1PR0201MB1934E741FB1C67BC01D0DBE2C3720@SN1PR0201MB1934.namprd02.prod.outlook.com>,<7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Wed, 25 Jan 2017 12:40:50 +0000
+Message-ID: <2A84C54D-D96B-4728-BE25-BF082BF0C464@sandisk.com>
+References: <1484655337-32562-1-git-send-email-uri.yanai@sandisk.com>
+ <1484655337-32562-4-git-send-email-uri.yanai@sandisk.com>
+ <7a21bfe1-9eef-0f6f-56ce-4fc34d628ac0@intel.com>
+ <037111DC0C584A4DB9F38021EA3CBDA506103F51@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
+ <5DA5AA2A-DC61-4CC6-9548-AB648657C732@sandisk.com>
+ <650522d8-dd54-6856-d50c-798d97a82001@intel.com>
+ <939E5C6D-D96B-4EF6-81F2-0DE61499E4B6@sandisk.com>
+ <1d00199b-aaee-0363-0b85-b57b48f3ea40@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0096.outbound.protection.outlook.com ([104.47.37.96]:60679
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+Received: from mail-dm3nam03on0073.outbound.protection.outlook.com ([104.47.41.73]:62659
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751695AbdAYKwr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 25 Jan 2017 05:52:47 -0500
-In-Reply-To: <7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
+        id S1751386AbdAYMk5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 25 Jan 2017 07:40:57 -0500
+In-Reply-To: <1d00199b-aaee-0363-0b85-b57b48f3ea40@intel.com>
 Content-Language: en-US
+Content-ID: <7D854EBE1071C342AF6512F84922304A@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-
-Thank you for the reply.
-
-
-
-git://git.kernel.org/pub/scm/linux/kernel.git/cjb/mmc-utils.git
-commit 2cb6695e8dec00d887bdd5309d1b57d836fcd214
-
-(which is the HEAD of origin/master for about 5 months now)
-
-
-I was under the understanding that reliable write was throttling the eMMC t=
-o single block operations.  Unless I've misread the JESD84-B51, enh_area is=
- pSLC mode, which results in halving usable flash capacity - providing more=
- reliable operation, but being separate from the one-block-per-operation of=
- reliable_write.  Is reliable write really not available for full capacity =
-MLC ?
-
-Section 6.2.4 of the above references JEDC document (although the 5.1 stand=
-ard) pertains to the partitioning sequence, and the flowchart there does no=
-t make reference to the write_reliability as part of partitioning itself.
-
-The information contained in this message may be privileged and confidentia=
-l. It is intended to be read only by the individual or entity to whom it is=
- addressed or by their designee. If the reader of this message is not the i=
-ntended recipient, you are on notice that any distribution of this message,=
- in any form, is strictly prohibited. If you have received this message in =
-error, please immediately notify the sender and delete or destroy any copy =
-of this message!
+DQoNCk9uIDEvMjUvMTcsIDEyOjMwIFBNLCAiQWRyaWFuIEh1bnRlciIgPGFkcmlhbi5odW50ZXJA
+aW50ZWwuY29tPiB3cm90ZToNCg0KICAgIE9uIDI1LzAxLzE3IDExOjQ4LCBBbGV4IExlbWJlcmcg
+d3JvdGU6DQogICAgPiANCiAgICA+IA0KICAgID4gT24gMS8yNC8xNywgNDozNiBQTSwgIkFkcmlh
+biBIdW50ZXIiIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4gd3JvdGU6DQogICAgPiANCiAgICA+
+ICAgICBPbiAyMy8wMS8xNyAxOTowNywgQWxleCBMZW1iZXJnIHdyb3RlOg0KICAgID4gICAgID4g
+SGkgQWRyaWFuLA0KICAgID4gICAgID4gDQogICAgPiAgICAgPiBJIHdvdWxkIGxpa2UgdG8gYWRk
+IHNldmVyYWwgbm90ZXMgb24gdG9wIG9mIFVyaeKAmXMgYW5zd2VyLi4uDQogICAgPiAgICAgPiBJ
+IGFncmVlIHdpdGggeW91LCBieSB0aGUgc3BlYywgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiBzaG91
+bGQgYmUNCiAgICA+ICAgICA+IHNldCBiZWZvcmUgY2FsbGluZyBTbGVlcCBjb21tYW5kLg0KICAg
+ID4gICAgID4gQXMgeW91IHByb2JhYmx5IHJlbWVtYmVyLCB3ZSBoYXZlIHRyaWVkIHRvIGltcGxl
+bWVudCBpdA0KICAgID4gICAgID4gaW4gdGhlIHBhc3QgYW5kIGV2ZW4gc3VibWl0dGVkIGEgcGF0
+Y2gg4oCTIOKAnFtQQVRDSF0gbW1jOiBzbGVlcCBub3RpZmljYXRpb27igJ0NCiAgICA+ICAgICA+
+IGh0dHBzOi8vd3d3Lm1haWwtYXJjaGl2ZS5jb20vbGludXgtbW1jQHZnZXIua2VybmVsLm9yZy9t
+c2czMDkwNi5odG1sDQogICAgPiAgICAgPiBBcyB5b3UgY2FuIHNlZSBmcm9tIHRoZSB0aHJlYWQs
+IG9uZSBvZiB0aGUgbWFpbiBpc3N1ZXMgaW4gU2xlZXBfTm90aWZpY2F0aW9uDQogICAgPiAgICAg
+PiBpcyBhIFNMRUVQX05PVElGSUNBVElPTl9USU1FIChkZWZpbmVkIGluIEVYVF9DU0QgWzIxNl0p
+LCB3aGljaCBuZWVkIHRvIGJlDQogICAgPiAgICAgPiBjb25zaWRlcmVkIGluIGltcGxlbWVudGF0
+aW9u4oCmDQogICAgPiAgICAgDQogICAgPiAgICAgRG9lcyBpdD8gIEkgd291bGQgdGVuZCB0byBh
+c3N1bWUgU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgd2lsbCBiZSBhY2NlcHRhYmxlDQogICAgPiAg
+ICAgZHVyaW5nIF9zdXNwZW5kIHVudGlsIHByb3ZlbiBvdGhlcndpc2UuDQogICAgPiANCiAgICA+
+IFBvdGVudGlhbGx5LCBieSB0aGUgc3BlYywgdGhlIE1heCB2YWx1ZSBvZiBTTEVFUF9OT1RJRklD
+QVRJT05fVElNRSBjYW4gYmUgODMuODggc2Vjb25kcy4NCiAgICA+IENhbiB3ZSBhc3N1bWUgdGhh
+dCB0aGlzIHRpbWUgaXMgYWNjZXB0YWJsZSBkdXJpbmcgX3N1c3BlbmQ/DQogICAgDQogICAgRG8g
+eW91IGtub3cgb2YgYW55IGNhcmRzIHRoYXQgdGFrZSB0aGF0IGxvbmc/DQoNClllcyAtIGZvciBz
+b21lIGNhcmRzIGl0IGNhbiB0YWtlIHNldmVyYWwgc2Vjb25kcyBpbiBzb21lIGNvcm5lciBjYXNl
+cy4NCg0KICAgIEFzIEkgd3JvdGUsIEkgd291bGQgYXNzdW1lIGl0IGlzIGFjY2VwdGFibGUgdW50
+aWwgd2Uga25vdyBvdGhlcndpc2UuDQoNCkkgdGhpbmsgU2xlZXBfTm90aWZpY2F0aW9uIHJlcXVp
+cmVzIG1vcmUgZGV0YWlsZWQgcmV2aWV3LiANClNpbmNlIFBPTiBTbGVlcF9Ob3RpZmljYXRpb24g
+aXMgYSBibG9ja2luZyBjb21tYW5kIChCVVNZIGFzc2VydGVkKSwNCmluIGNhc2Ugb2YgZ2V0dGlu
+ZyBuZXcgcmVxdWVzdCwgZHJpdmVyIG5lZWQgdG8gc2VuZCBIUEkgY29tbWFuZCBpbiBvcmRlcg0K
+dG8gaW50ZXJydXB0IHRoZSBTbGVlcF9Ob3RpZmljYXRpb24gcHJvY2Vzcy4NCldlIHRyaWVkIHRv
+IGhhbmRsZSB0aGlzIGNhc2UgaW4gb3VyIFNsZWVwX05vdGlmaWNhdGlvbiBwYXRjaHNldOKApg0K
+QW55d2F5LCBJIHRoaW5rIHdlIG5lZWQgdG8gZGlzY3VzcyBpdCBzZXBhcmF0ZWx5LCBub3QgcmVs
+YXRlZCB0bw0KdGhlIEFVVE9fQktPUFMgc3VwcG9ydOKApg0KDQogICAgPiAgICAgDQogICAgPiAg
+ICAgPiBUaHVzLCBJIHRoaW5rIHBvc3Rwb25pbmcgU2xlZXAgZHVyaW5nIHN1c3BlbmQgcmVxdWly
+ZXMgYSBkaWZmZXJlbnQgZnJvbSBjdXJyZW50DQogICAgPiAgICAgPiBBVVRPX0JLT1BTIGltcGxl
+bWVudGF0aW9uLCBhbmQgSSBzdWdnZXN0IHRvIGhhbmRsZSBpdCBpbiBzZXBhcmF0ZQ0KICAgID4g
+ICAgID4gcGF0Y2hzZXQsIGlmIHBvc3NpYmxlLg0KICAgID4gICAgIA0KICAgID4gICAgIE5vdCBh
+dCBhbGwgc3VyZSB3aGF0IHlvdSBtZWFuIGJ5ICJwb3N0cG9uaW5nIFNsZWVwIj8NCiAgICA+IA0K
+ICAgID4gSSBtZWFuIGxldHRpbmcgU2xlZXBfTm90aWZpY2F0aW9uIHRvIGJlIGNvbXBsZXRlZCBi
+ZWZvcmUgU2xlZXAuDQogICAgDQogICAgb29rLg0KICAgIA0KICAgIA0KDQo=
