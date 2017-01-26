@@ -1,105 +1,79 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 13/13] mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_finish_command
-Date: Fri, 27 Jan 2017 00:37:26 +0100
-Message-ID: <1485473846-24537-14-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 10/13] mmc: bcm2835: work queue is dead code now, zap
+Date: Fri, 27 Jan 2017 00:37:23 +0100
+Message-ID: <1485473846-24537-11-git-send-email-kraxel@redhat.com>
 References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, "maintainer:BROADCOM
-        BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "moderated list:BROADCOM BCM2835
-        ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Gerd Hoffmann <kraxel@redhat.com>, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835.c | 56 +---------------------------------------------
- 1 file changed, 1 insertion(+), 55 deletions(-)
+ drivers/mmc/host/bcm2835.c | 24 ------------------------
+ 1 file changed, 24 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 82caddc..64a2334 100644
+index 5c588d9..6a1fef3 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -152,7 +152,6 @@ struct bcm2835_host {
+@@ -148,7 +148,6 @@ struct bcm2835_host {
+ 	int			clock;		/* Current clock speed */
+ 	unsigned int		max_clk;	/* Max possible freq */
+ 	struct tasklet_struct	finish_tasklet;	/* Tasklet structures */
+-	struct work_struct	cmd_wait_wq;	/* Workqueue function */
+ 	struct timer_list	timer;		/* Timer for timeouts */
+ 	struct sg_mapping_iter	sg_miter;	/* SG state for PIO */
  	unsigned int		blocks;		/* remaining PIO blocks */
- 	int			irq;		/* Device IRQ */
+@@ -1301,27 +1300,6 @@ static void bcm2835_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	.hw_reset = bcm2835_reset,
+ };
  
--	u32			cmd_quick_poll_retries;
- 	u32			ns_per_fifo_word;
- 
- 	/* cached registers */
-@@ -782,62 +781,10 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
- 	struct device *dev = &host->pdev->dev;
- 	struct mmc_command *cmd = host->cmd;
- 	u32 sdcmd;
--	u32 retries;
- 
- 	dev_dbg(dev, "finish_command(%x)\n", readl(host->ioaddr + SDCMD));
- 
--	/* Poll quickly at first */
+-static void bcm2835_cmd_wait_work(struct work_struct *work)
+-{
+-	struct bcm2835_host *host;
 -
--	retries = host->cmd_quick_poll_retries;
--	if (!retries) {
--		/* Work out how many polls take 1us by timing 10us */
--		struct timeval start, now;
--		int us_diff;
+-	host = container_of(work, struct bcm2835_host, cmd_wait_wq);
 -
--		retries = 1;
--		do {
--			int i;
+-	mutex_lock(&host->mutex);
 -
--			retries *= 2;
--
--			do_gettimeofday(&start);
--
--			for (i = 0; i < retries; i++) {
--				cpu_relax();
--				sdcmd = readl(host->ioaddr + SDCMD);
--			}
--
--			do_gettimeofday(&now);
--			us_diff = (now.tv_sec - start.tv_sec) * 1000000 +
--				(now.tv_usec - start.tv_usec);
--		} while (us_diff < 10);
--
--		host->cmd_quick_poll_retries =
--			((retries * us_diff + 9) * CMD_DALLY_US) / 10 + 1;
--		retries = 1; /* We've already waited long enough this time */
+-	/* If this tasklet gets rescheduled while running, it will
+-	 * be run again afterwards but without any active request.
+-	 */
+-	if (!host->mrq) {
+-		mutex_unlock(&host->mutex);
+-		return;
 -	}
 -
--	retries = host->cmd_quick_poll_retries;
--	for (sdcmd = readl(host->ioaddr + SDCMD);
--	     (sdcmd & SDCMD_NEW_FLAG) && !(sdcmd & SDCMD_FAIL_FLAG) && retries;
--	     retries--) {
--		cpu_relax();
--		sdcmd = readl(host->ioaddr + SDCMD);
--	}
+-	bcm2835_finish_command(host);
 -
--	if (!retries) {
--		unsigned long wait_max;
+-	mutex_unlock(&host->mutex);
+-}
 -
--		/* Wait max 100 ms */
--		wait_max = jiffies + msecs_to_jiffies(100);
--		while (time_before(jiffies, wait_max)) {
--			usleep_range(1, 10);
--			sdcmd = readl(host->ioaddr + SDCMD);
--			if (!(sdcmd & SDCMD_NEW_FLAG) ||
--			    (sdcmd & SDCMD_FAIL_FLAG))
--				break;
--		}
--	}
-+	sdcmd = bcm2835_read_wait_sdcmd(host, 100, true);
+ static void bcm2835_tasklet_finish(unsigned long param)
+ {
+ 	struct bcm2835_host *host = (struct bcm2835_host *)param;
+@@ -1427,8 +1405,6 @@ int bcm2835_add_host(struct bcm2835_host *host)
+ 	tasklet_init(&host->finish_tasklet,
+ 		     bcm2835_tasklet_finish, (unsigned long)host);
  
- 	/* Check for errors */
- 	if (sdcmd & SDCMD_NEW_FLAG) {
-@@ -1435,7 +1382,6 @@ static int bcm2835_probe(struct platform_device *pdev)
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
- 	host->pdev = pdev;
--	host->cmd_quick_poll_retries = 0;
- 	host->pio_timeout = msecs_to_jiffies(500);
- 	host->pio_limit = 1;
- 	host->max_delay = 1; /* Warn if over 1ms */
+-	INIT_WORK(&host->cmd_wait_wq, bcm2835_cmd_wait_work);
+-
+ 	setup_timer(&host->timer, bcm2835_timeout,
+ 		    (unsigned long)host);
+ 
 -- 
 1.8.3.1
