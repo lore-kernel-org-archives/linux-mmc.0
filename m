@@ -1,80 +1,52 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH v4 11/13] arm64: allwinner: pine64: add MMC support
-Date: Thu, 26 Jan 2017 10:06:04 +0100
-Message-ID: <b11557dbfbfa706605359ba334ffd13ba48946d8.1485421557.git-series.maxime.ripard@free-electrons.com>
-References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v8 6/6] mmc: sh_mobile_sdhi: Add tuning support
+Date: Thu, 26 Jan 2017 10:58:45 +0100
+Message-ID: <20170126095845.GB21851@verge.net.au>
+References: <1478182564-18762-1-git-send-email-horms+renesas@verge.net.au>
+ <1478182564-18762-7-git-send-email-horms+renesas@verge.net.au>
+ <20170110210848.GA25542@bigcity.dyn.berto.se>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:46145 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753344AbdAZJ6y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2017 04:58:54 -0500
+Content-Disposition: inline
+In-Reply-To: <20170110210848.GA25542@bigcity.dyn.berto.se>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+On Tue, Jan 10, 2017 at 10:08:48PM +0100, Niklas Söderlund wrote:
+> Hi Simon,
+> 
+> I started to se errors when I was testing DMAC+IPMMU patches on top of 
+> v4.10-rc1 on Koelsch.
 
-All Pine64 boards connect an micro-SD card slot to the first MMC
-controller.
-Enable the respective DT node and specify the (always-on) regulator
-and card-detect pin.
-As a micro-SD slot does not feature a write-protect switch, we disable
-this feature.
+There has been some discussion in this thread already. I would like to
+provide some more information in case it is useful.
 
-Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
----
- arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts | 20 ++++++++++++++-
- 1 file changed, 20 insertions(+), 0 deletions(-)
+The 3.5.0 BSP appears to contain several that may be relevant to this
+discussion:
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-index cf9105179bcb..c680ed385da3 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-@@ -44,6 +44,8 @@
- 
- #include "sun50i-a64.dtsi"
- 
-+#include <dt-bindings/gpio/gpio.h>
-+
- / {
- 	model = "Pine64";
- 	compatible = "pine64,pine64", "allwinner,sun50i-a64";
-@@ -55,6 +57,13 @@
- 	chosen {
- 		stdout-path = "serial0:115200n8";
- 	};
-+
-+	reg_vcc3v3: vcc3v3 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
- };
- 
- &ehci1 {
-@@ -71,6 +80,17 @@
- 	bias-pull-up;
- };
- 
-+&mmc0 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc0_pins>;
-+	vmmc-supply = <&reg_vcc3v3>;
-+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
-+	cd-inverted;
-+	disable-wp;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
- &ohci1 {
- 	status = "okay";
- };
--- 
-git-series 0.8.11
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+383c4437846d mmc: sh_mobile_sdhi: Add detecting a change point of data to SCC tuning
+1823812e0937 mmc: tmio: Add detecting a change point of data to SCC tunin
+03935e9182d9 mmc: tmio: Fix tuning flow
+c711db03349c mmc: sh_mobile_sdhi: Fix sampling clock position selecting
+2838a2ff8ca7 mmc: tmio: fix soft lockup on CMD12 for R-Car SDHI
+
+
+Of these, so far I have looked into "mmc: tmio: Fix tuning flow".
+It seems to do several things:
+
+- Ensure tuning initialisation is called for each tuning procedure:
+  this seems a correct fix for a bug added by me
+- Do not terminate tuning on error:
+  this is not my reading of the documentation but may well be correct
+- Reset more:
+  I am least sure about this as it does not seem to have any explanation
+  in the changelog
+
