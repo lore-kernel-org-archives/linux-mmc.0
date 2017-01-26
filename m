@@ -1,37 +1,59 @@
-From: Chris Brandt <Chris.Brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH v6 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
-Date: Thu, 26 Jan 2017 12:53:10 +0000
-Message-ID: <SG2PR06MB1165AEC165D52358154B5EE38A770@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170125202810.16876-1-chris.brandt@renesas.com>
- <CAPDyKFq=K4ZwyMnM2twVHW6K43U+rADBX3KFyc5o0UzR2kb10w@mail.gmail.com>
- <20170126103013.GB27721@verge.net.au>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Thu, 26 Jan 2017 08:39:49 -0600
+Message-ID: <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+References: <20170121030604.7672-1-chris.brandt@renesas.com>
+ <20170121030604.7672-3-chris.brandt@renesas.com> <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
+ <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170126103013.GB27721-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon,
+On Mon, Jan 23, 2017 at 11:56 AM, Chris Brandt <Chris.Brandt@renesas.com> wrote:
+> Hello Rob,
+>
+>
+> On Monday, January 23, 2017, Rob Herring wrote:
+>> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+>> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+>> > @@ -25,8 +25,32 @@ Required properties:
+>> >             "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+>> >             "renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
+>> >
+>> > +- clocks: Most controllers only have 1 clock source per channel.
+>> However, on
+>> > +     some variations of this controller, the internal card detection
+>>
+>> This should be explicit as to which compatible strings have 2 clocks and
+>> which have 1 clock.
+>
+> OK. I'll make a list like I did for sh_mmcif:
+>
+> https://patchwork.kernel.org/patch/9512091/
+>
+>
+>
+>> > +
+>> > +Example showing 2 clocks:
+>> > +   sdhi0: sd@e804e000 {
+>>
+>> mmc@...
+>
+> I'm confused. I see that for all SDHI controllers, it either "sd@" or "sdhci@".
+>
+> $ grep sdhi $(find arch/arm/boot/dts -name "*.dtsi")
+>
+> $ grep sdhci $(find arch/arm/boot/dts -name "*.dtsi")
 
-On Thursday, January 26, 2017, Simon Horman wrote:
-> > Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
-> > guess!? (And I can add Rob's ack afterwards).
->=20
-> Thanks, I will take care of the 3rd patch.
->=20
-> Chris, is it safe to apply the 3rd patch without the first 2 patches
-> present?
+Yes, there's lots of variation. Node names are supposed to be generic
+for their class of device (e.g. ethernet, pci, usb,
+interrupt-controller, etc.). I'd be fine with "sd", but think "mmc" is
+more common. Either way, we should pick one moving forward. "sdhci"
+should not be used as that's a specific implementation.
 
-Yes, it is safe.
-
-Chris
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Rob
