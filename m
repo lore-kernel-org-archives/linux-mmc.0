@@ -1,7 +1,7 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 01/13] mmc: bcm2835: add bcm2835_read_wait_sdcmd
-Date: Fri, 27 Jan 2017 00:37:14 +0100
-Message-ID: <1485473846-24537-2-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 05/13] mmc: bcm2835: call bcm2835_block_irq from irqthread
+Date: Fri, 27 Jan 2017 00:37:18 +0100
+Message-ID: <1485473846-24537-6-git-send-email-kraxel@redhat.com>
 References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
@@ -14,49 +14,76 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+ drivers/mmc/host/bcm2835.c | 31 ++++++++++++++++++++++---------
+ 1 file changed, 22 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 9744517..ceee4cf 100644
+index d25b85a..8270c76 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -609,6 +609,36 @@ static void bcm2835_prepare_data(struct bcm2835_host *host,
- 	writel(data->blocks, host->ioaddr + SDHBLC);
+@@ -168,6 +168,9 @@ struct bcm2835_host {
+ 	bool			use_busy:1;	/* Wait for busy interrupt */
+ 	bool			use_sbc:1;	/* Send CMD23 */
+ 
++	/* for threaded irq handler */
++	bool                    irq_block;
++
+ 	/* DMA part */
+ 	struct dma_chan		*dma_chan_rx;
+ 	struct dma_chan		*dma_chan_tx;
+@@ -1035,18 +1038,13 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
+ 	}
  }
  
-+static u32 bcm2835_read_wait_sdcmd(struct bcm2835_host *host, u32 timeout,
-+				   bool check_fail)
-+{
-+	struct device *dev = &host->pdev->dev;
-+	unsigned long start = jiffies;
-+	unsigned long fastpoll = start + usecs_to_jiffies(10);
-+	unsigned long end = start + msecs_to_jiffies(timeout);
-+	u32 value;
-+
-+	for (;;) {
-+		value = readl(host->ioaddr + SDCMD);
-+		if (!(value & SDCMD_NEW_FLAG))
-+			break;
-+		if (check_fail && (value & SDCMD_FAIL_FLAG))
-+			break;
-+		if (time_after(jiffies, end)) {
-+			dev_err(dev, "%s: timeout (%d us)\n",
-+				__func__, timeout);
-+			break;
-+		}
-+
-+		/* if it takes longer reduce poll interval */
-+		if (time_after(jiffies, fastpoll))
-+			udelay(10);
-+		else
-+			cpu_relax();
-+	}
-+	return value;
-+}
-+
- bool bcm2835_send_command(struct bcm2835_host *host,
- 			  struct mmc_command *cmd)
+-static void bcm2835_block_irq(struct bcm2835_host *host, u32 intmask)
++static void bcm2835_block_irq(struct bcm2835_host *host)
  {
+-	if (!host->data) {
+-		dev_err(&host->pdev->dev,
+-			"got block interrupt 0x%08x even though no data operation was in progress.\n",
+-			(unsigned int)intmask);
++	if (WARN_ON(!host->data)) {
+ 		bcm2835_dumpregs(host);
+ 		return;
+ 	}
+ 
+-	bcm2835_check_data_error(host, intmask);
+-
+ 	if (!host->dma_desc) {
+ 		WARN_ON(!host->blocks);
+ 		if (host->data->error || (--host->blocks == 0))
+@@ -1075,8 +1073,9 @@ static irqreturn_t bcm2835_irq(int irq, void *dev_id)
+ 	       host->ioaddr + SDHSTS);
+ 
+ 	if (intmask & SDHSTS_BLOCK_IRPT) {
+-		bcm2835_block_irq(host, intmask);
+-		result = IRQ_HANDLED;
++		bcm2835_check_data_error(host, intmask);
++		host->irq_block = true;
++		result = IRQ_WAKE_THREAD;
+ 	}
+ 
+ 	if (intmask & SDHSTS_BUSY_IRPT) {
+@@ -1101,6 +1100,20 @@ static irqreturn_t bcm2835_irq(int irq, void *dev_id)
+ 
+ static irqreturn_t bcm2835_threaded_irq(int irq, void *dev_id)
+ {
++	struct bcm2835_host *host = dev_id;
++	unsigned long flags;
++	bool block;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	block = host->irq_block;
++	host->irq_block = false;
++
++	if (block)
++		bcm2835_block_irq(host);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	return IRQ_HANDLED;
+ }
+ 
 -- 
 1.8.3.1
