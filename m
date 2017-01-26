@@ -1,54 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
-Date: Thu, 26 Jan 2017 09:07:19 +0100
-Message-ID: <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
-References: <20170124101757.19676-1-linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v6 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
+Date: Thu, 26 Jan 2017 09:07:45 +0100
+Message-ID: <CAPDyKFq=K4ZwyMnM2twVHW6K43U+rADBX3KFyc5o0UzR2kb10w@mail.gmail.com>
+References: <20170125202810.16876-1-chris.brandt@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170124101757.19676-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170125202810.16876-1-chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 January 2017 at 11:17, Linus Walleij <linus.walleij@linaro.org> wrote:
-> The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
-> need to be refactored to it can be understood by humans.
+On 25 January 2017 at 21:28, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
+> At first this started out as a simple typo fix, until I realized
+> that the SDHI in the RZ/A1 has 2 clocks per channel and both need
+> to be turned on/off.
 >
-> In the process I found some weird magic return values passed
-> around for no good reason.
+> This patch series adds the ability to specify 2 clocks instead of
+> just 1, and does so for the RZ/A1 r7s72100.
 >
-> Things are more readable after this.
+> This patch has been tested on an RZ/A1 RSK board. Card detect works
+> fine as well as bind/unbind.
 >
-> This work is done towards the goal of breaking the function in
-> two parts: one just submitting the requests and one checking the
-> result and possibly resubmitting the command on error, so we
-> can make the usual path (non-errorpath) smooth and quick, and
-> be called directly when the driver completes a request.
+> v6:
+> * more detailed descritpion in tmio_mmc.txt
 >
-> That in turn is a prerequisite for proper blk-mq integration
-> with the MMC/SD stack.
+> v5:
+> * Take implementation details out of DT documentation and put into
+>   the driver code.
 >
-> All that comes later.
+> v4:
+> * No code changes, only text udpates to explain why there are 2 clocks
+>   and why we need to treat them as 1 clock.
 >
-> Linus Walleij (6):
->   mmc: block: break out mmc_blk_rw_cmd_abort()
->   mmc: block: break out mmc_blk_rw_start_new()
->   mmc: block: do not assign mq_rq when aborting command
->   mmc: block: inline command abortions
->   mmc: block: introduce new_areq and old_areq
->   mmc: block: stop passing around pointless return values
+> Chris Brandt (3):
+>   mmc: sh_mobile_sdhi: add support for 2 clocks
+>   mmc: sh_mobile_sdhi: explain clock bindings
+>   ARM: dts: r7s72100: update sdhi clock bindings
 >
->  drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++---------------------
->  drivers/mmc/core/block.h |   2 +-
->  2 files changed, 60 insertions(+), 50 deletions(-)
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 13 ++++++++++++
+>  arch/arm/boot/dts/r7s72100.dtsi                    | 17 +++++++++++-----
+>  drivers/mmc/host/sh_mobile_sdhi.c                  | 23 ++++++++++++++++++++++
+>  include/dt-bindings/clock/r7s72100-clock.h         |  6 ++++--
+>  4 files changed, 52 insertions(+), 7 deletions(-)
 >
 > --
-> 2.9.3
+> 2.10.1
+>
 >
 
-Thanks, applied for next!
+Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
+guess!? (And I can add Rob's ack afterwards).
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
