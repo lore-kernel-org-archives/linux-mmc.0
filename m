@@ -1,7 +1,7 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 02/13] mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_send_command
-Date: Fri, 27 Jan 2017 00:37:15 +0100
-Message-ID: <1485473846-24537-3-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 06/13] mmc: bcm2835: add bcm2835_check_cmd_error
+Date: Fri, 27 Jan 2017 00:37:19 +0100
+Message-ID: <1485473846-24537-7-git-send-email-kraxel@redhat.com>
 References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
@@ -14,54 +14,85 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835.c | 28 +++++++---------------------
- 1 file changed, 7 insertions(+), 21 deletions(-)
+ drivers/mmc/host/bcm2835.c | 58 ++++++++++++++++++++++++++++------------------
+ 1 file changed, 35 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index ceee4cf..ffb9140 100644
+index 8270c76..33eaebd 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -645,7 +645,6 @@ bool bcm2835_send_command(struct bcm2835_host *host,
- 	struct device *dev = &host->pdev->dev;
- 	u32 sdcmd, sdhsts;
- 	unsigned long timeout;
--	int delay;
+@@ -954,6 +954,38 @@ static void bcm2835_timeout(unsigned long data)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
  
- 	WARN_ON(host->cmd);
- 
-@@ -660,26 +659,13 @@ bool bcm2835_send_command(struct bcm2835_host *host,
- 			cmd->opcode, cmd->arg, cmd->flags);
- 	}
- 
--	/* Wait max 100 ms */
--	timeout = 10000;
--
--	while (readl(host->ioaddr + SDCMD) & SDCMD_NEW_FLAG) {
--		if (timeout == 0) {
--			dev_err(dev, "previous command never completed.\n");
--			bcm2835_dumpregs(host);
--			cmd->error = -EILSEQ;
--			tasklet_schedule(&host->finish_tasklet);
--			return false;
--		}
--		timeout--;
--		udelay(10);
--	}
--
--	delay = (10000 - timeout) / 100;
--	if (delay > host->max_delay) {
--		host->max_delay = delay;
--		dev_warn(dev, "controller hung for %d ms\n",
--			 host->max_delay);
-+	sdcmd = bcm2835_read_wait_sdcmd(host, 100, false);
-+	if (sdcmd & SDCMD_NEW_FLAG) {
-+		dev_err(dev, "previous command never completed.\n");
-+		bcm2835_dumpregs(host);
-+		cmd->error = -EILSEQ;
-+		tasklet_schedule(&host->finish_tasklet);
++static bool bcm2835_check_cmd_error(struct bcm2835_host *host, u32 intmask)
++{
++	struct device *dev = &host->pdev->dev;
++
++	if (!(intmask & SDHSTS_ERROR_MASK))
 +		return false;
++
++	if (!host->cmd)
++		return true;
++
++	dev_err(dev, "sdhost_busy_irq: intmask %x, data %p\n",
++		intmask, host->mrq->data);
++	if (intmask & SDHSTS_CRC7_ERROR) {
++		host->cmd->error = -EILSEQ;
++	} else if (intmask & (SDHSTS_CRC16_ERROR |
++			      SDHSTS_FIFO_ERROR)) {
++		if (host->mrq->data)
++			host->mrq->data->error = -EILSEQ;
++		else
++			host->cmd->error = -EILSEQ;
++	} else if (intmask & SDHSTS_REW_TIME_OUT) {
++		if (host->mrq->data)
++			host->mrq->data->error = -ETIMEDOUT;
++		else
++			host->cmd->error = -ETIMEDOUT;
++	} else if (intmask & SDHSTS_CMD_TIME_OUT) {
++		host->cmd->error = -ETIMEDOUT;
++	}
++	bcm2835_dumpregs(host);
++	return true;
++}
++
+ static void bcm2835_check_data_error(struct bcm2835_host *host, u32 intmask)
+ {
+ 	if (!host->data)
+@@ -983,30 +1015,10 @@ static void bcm2835_busy_irq(struct bcm2835_host *host, u32 intmask)
  	}
+ 	host->use_busy = false;
  
- 	timeout = jiffies;
+-	if (intmask & SDHSTS_ERROR_MASK) {
+-		dev_err(dev, "sdhost_busy_irq: intmask %x, data %p\n",
+-			intmask, host->mrq->data);
+-		if (intmask & SDHSTS_CRC7_ERROR) {
+-			host->cmd->error = -EILSEQ;
+-		} else if (intmask & (SDHSTS_CRC16_ERROR |
+-				    SDHSTS_FIFO_ERROR)) {
+-			if (host->mrq->data)
+-				host->mrq->data->error = -EILSEQ;
+-			else
+-				host->cmd->error = -EILSEQ;
+-		} else if (intmask & SDHSTS_REW_TIME_OUT) {
+-			if (host->mrq->data)
+-				host->mrq->data->error = -ETIMEDOUT;
+-			else
+-				host->cmd->error = -ETIMEDOUT;
+-		} else if (intmask & SDHSTS_CMD_TIME_OUT) {
+-			host->cmd->error = -ETIMEDOUT;
+-		}
++	if (bcm2835_check_cmd_error(host, intmask))
++		return;
+ 
+-		bcm2835_dumpregs(host);
+-	} else {
+-		bcm2835_finish_command(host, NULL);
+-	}
++	bcm2835_finish_command(host, NULL);
+ }
+ 
+ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
 -- 
 1.8.3.1
