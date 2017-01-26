@@ -1,192 +1,138 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-Date: Thu, 26 Jan 2017 11:50:38 +0100
-Message-ID: <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
+Subject: Re: [PATCH v5 07/12] mmc: sdhci-xenon: Add support to PHYs of Marvell
+ Xenon SDHC.
+Date: Thu, 26 Jan 2017 12:29:33 +0100
+Message-ID: <CAPDyKFpx23wio-QmDrx277+YO2Jt2S0ZrokZ2E4K+oVURSR1Hg@mail.gmail.com>
 References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
+ <130ccd5a0fe4f822b954e0256c9dccec0b6ca523.1484154449.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
+In-Reply-To: <130ccd5a0fe4f822b954e0256c9dccec0b6ca523.1484154449.git-series.gregory.clement@free-electrons.com>
 Sender: linux-clk-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj>
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 January 2017 at 18:19, Gregory CLEMENT
-<gregory.clement@free-electrons.com> wrote:
-> From: Hu Ziji <huziji@marvell.com>
->
-> Add Xenon eMMC/SD/SDIO host controller core functionality.
-> Add Xenon specific intialization process.
-> Add Xenon specific mmc_host_ops APIs.
-> Add Xenon specific register definitions.
->
-> Add CONFIG_MMC_SDHCI_XENON support in drivers/mmc/host/Kconfig.
->
-> Marvell Xenon SDHC conforms to SD Physical Layer Specification
-> Version 3.01 and is designed according to the guidelines provided
-> in the SD Host Controller Standard Specification Version 3.00.
->
-> Signed-off-by: Hu Ziji <huziji@marvell.com>
-> Tested-by: Russell King <rmk+kernel@armlinux.org.uk>
-> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
-> ---
->  drivers/mmc/host/Kconfig       |   9 +-
->  drivers/mmc/host/Makefile      |   3 +-
->  drivers/mmc/host/sdhci-xenon.c | 631 ++++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci-xenon.h |  70 ++++-
->  4 files changed, 713 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-xenon.c
->  create mode 100644 drivers/mmc/host/sdhci-xenon.h
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2eb97014dc3f..8d2d08de14a0 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -819,3 +819,12 @@ config MMC_SDHCI_BRCMSTB
->           Broadcom STB SoCs.
->
->           If unsure, say Y.
-> +
-> +config MMC_SDHCI_XENON
-> +       tristate "Marvell Xenon eMMC/SD/SDIO SDHCI driver"
-> +       depends on MMC_SDHCI && MMC_SDHCI_PLTFM
-
-Depending on MMC_SDHCI_PLTFM is enough.
-
 [...]
 
 > +
-> +static int xenon_start_signal_voltage_switch(struct mmc_host *mmc,
-> +                                            struct mmc_ios *ios)
+> +static inline bool temp_stage_hs200_to_hs400(struct sdhci_host *host,
+> +                                            struct sdhci_xenon_priv *priv)
 > +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +
 > +       /*
-> +        * Before SD/SDIO set signal voltage, SD bus clock should be
-> +        * disabled. However, sdhci_set_clock will also disable the Internal
-> +        * clock in mmc_set_signal_voltage().
-> +        * If Internal clock is disabled, the 3.3V/1.8V bit can not be updated.
-> +        * Thus here manually enable internal clock.
-> +        *
-> +        * After switch completes, it is unnecessary to disable internal clock,
-> +        * since keeping internal clock active obeys SD spec.
+> +        * Tmep stages from HS200 to HS400
+> +        * from HS200 to HS in 200MHz
+> +        * from 200MHz to 52MHz
 > +        */
-> +       enable_xenon_internal_clk(host);
+> +       if (((priv->timing == MMC_TIMING_MMC_HS200) &&
+> +            (host->timing == MMC_TIMING_MMC_HS)) ||
+> +           ((host->timing == MMC_TIMING_MMC_HS) &&
+> +            (priv->clock > host->clock)))
+> +               return true;
 > +
-> +       if (priv->init_card_type == MMC_TYPE_MMC)
-
-So, you need a specific voltage switch for eMMC.
-
-For that, I don't think you need to implement ->init_card(), as to set
-priv->init_card_type and then check it here.
-
-Instead you should be able to find out whether the card is an eMMC,
-only by the parsing of the child node for the "mmc-card" compatible.
-More about this below.
-
-> +               return xenon_emmc_signal_voltage_switch(mmc, ios);
-> +
-> +       return sdhci_start_signal_voltage_switch(mmc, ios);
+> +       return false;
 > +}
 > +
-> +/*
-
-[...]
-
-> + */
-> +static int xenon_child_node_of_parse(struct platform_device *pdev)
+> +static inline bool temp_stage_hs400_to_h200(struct sdhci_host *host,
+> +                                           struct sdhci_xenon_priv *priv)
 > +{
-> +       struct device_node *np = pdev->dev.of_node;
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct mmc_host *mmc = host->mmc;
+> +       /*
+> +        * Temp stages from HS400 t0 HS200:
+> +        * from 200MHz to 52MHz in HS400
+> +        * from HS400 to HS DDR in 52MHz
+> +        * from HS DDR to HS in 52MHz
+> +        * from HS to HS200 in 52MHz
+> +        */
+> +       if (((priv->timing == MMC_TIMING_MMC_HS400) &&
+> +            ((host->clock == MMC_HIGH_52_MAX_DTR) ||
+> +             (host->timing == MMC_TIMING_MMC_DDR52))) ||
+> +           ((priv->timing == MMC_TIMING_MMC_DDR52) &&
+> +            (host->timing == MMC_TIMING_MMC_HS)) ||
+> +           ((host->timing == MMC_TIMING_MMC_HS200) &&
+> +            (host->clock == MMC_HIGH_52_MAX_DTR)))
+> +               return true;
+> +
+> +       return false;
+> +}
+
+Both the above functions seems to be really fragile to use. If
+anything changes in the core layer related to these sequences, you may
+end up getting a wrong validated expression.
+
+Perhaps an option would be to add one or two new mmc host ops, which
+could be called during the related hs200/400 sequences that could make
+this less fragile for you? What do you think?
+
+> +
+> +/*
+> + * If eMMC PHY Slow Mode is required in lower speed mode in SDR mode
+> + * (SDLCK < 55MHz), enable Slow Mode to bypass eMMC PHY.
+> + * SDIO slower SDR mode also requires Slow Mode.
+> + *
+> + * If Slow Mode is enabled, return true.
+> + * Otherwise, return false.
+> + */
+> +static bool emmc_phy_slow_mode(struct sdhci_host *host,
+> +                              unsigned char timing)
+> +{
 > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 > +       struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +       struct device_node *child;
-> +       int nr_child;
+> +       struct emmc_phy_params *params = priv->phy_params;
+> +       struct xenon_emmc_phy_regs *phy_regs = priv->emmc_phy_regs;
+> +       u32 reg;
 > +
-> +       priv->init_card_type = XENON_CARD_TYPE_UNKNOWN;
+> +       /* Skip temp stages from HS200 to HS400 */
+> +       if (temp_stage_hs200_to_hs400(host, priv))
+> +               return false;
 > +
-> +       nr_child = of_get_child_count(np);
-> +       if (!nr_child)
-> +               return 0;
+> +       /* Skip temp stages from HS400 t0 HS200 */
+> +       if (temp_stage_hs400_to_h200(host, priv))
+> +               return false;
 > +
-> +       for_each_child_of_node(np, child) {
-> +               if (of_device_is_compatible(child, "mmc-card")) {
+> +       reg = sdhci_readl(host, phy_regs->timing_adj);
+> +       /* Enable Slow Mode for SDIO in slower SDR mode */
+> +       if ((priv->init_card_type == MMC_TYPE_SDIO) &&
 
-To avoid code from being duplicated, I would rather see the DT parsing
-of the child nodes for "mmc-card", to be done by the mmc core.
+Ah, noticed that there is some specific things going on here for SDIO
+here as well. So perhaps you do need to implement the ->init_card()
+ops anyway. Which I suggested not to, for patch6. :-)
 
-As a matter of fact it is already being done, but perhaps we need to
-change that a bit as to fit your case.
+Although, there is one problem with using ->init_card(). That is
+particularly for removable cards, as mmc_rescan() doesn't invoke
+->init_card() when it removes a card, which means, you may use old and
+thus wrong information about what kind of card in the next card
+detection attempt. So perhaps ->init_card() needs to be called from
+the core before it even figured out what kind of card it is trying to
+detect, as to allow the callbacks to reset some data.
 
-I suggest you have a look and see how to update this in the core,
-instead of doing it here in the host driver.
+Or perhaps you can think of another clever way!?
 
-> +                       priv->init_card_type = MMC_TYPE_MMC;
-> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +
-> +                       /*
-> +                        * Force to clear BUS_TEST to
-> +                        * skip bus_test_pre and bus_test_post
-> +                        */
-> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
-> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
 
-This cap is a bit strange. It was added several years ago by Adrian
-Hunter, but I am wondering about the reason to why it's needed.
-
-Should it be removed and instead enabled per default? If not, should
-we invent a new specific DT binding for it?
-
-I need Adrian's help here to understand the options.
-
-> +                                     MMC_CAP2_PACKED_CMD |
-
-The MMC_CAP2_PACKED_CMD cap has be removed.
-
-> +                                     MMC_CAP2_NO_SD |
-> +                                     MMC_CAP2_NO_SDIO;
-
-I think we need to update the DT documentation for mmc-card.
-Typically, we should explicitly state what kind of other existing mmc
-DT properties that will be automatically selected, when the mmc-card
-is specified.
-
-Can you please look into updating this DT doc as well.
-
-[...]
-
-> +       priv->sdhc_id = 0x0;
-> +       if (!of_property_read_u32(np, "marvell,xenon-sdhc-id", &sdhc_id)) {
-> +               nr_sdhc = sdhci_readl(host, XENON_SYS_CFG_INFO);
-> +               nr_sdhc &= XENON_NR_SUPPORTED_SLOT_MASK;
-> +               if (unlikely(sdhc_id > nr_sdhc)) {
-> +                       dev_err(mmc_dev(mmc), "SDHC Index %d exceeds Number of SDHCs %d\n",
-> +                               sdhc_id, nr_sdhc);
-> +                       return -EINVAL;
-> +               }
+> +           ((timing == MMC_TIMING_UHS_SDR25) ||
+> +            (timing == MMC_TIMING_UHS_SDR12) ||
+> +            (timing == MMC_TIMING_SD_HS) ||
+> +            (timing == MMC_TIMING_LEGACY))) {
+> +               reg |= XENON_TIMING_ADJUST_SLOW_MODE;
+> +               sdhci_writel(host, reg, phy_regs->timing_adj);
+> +               return true;
 > +       }
 > +
-> +       tuning_count = XENON_DEF_TUNING_COUNT;
-> +       if (!of_property_read_u32(np, "marvell,xenon-tun-count",
-> +                                 &tuning_count)) {
-> +               if (unlikely(tuning_count >= XENON_TMR_RETUN_NO_PRESENT)) {
-> +                       dev_err(mmc_dev(mmc), "Wrong Re-tuning Count. Set default value %d\n",
-> +                               XENON_DEF_TUNING_COUNT);
-> +                       tuning_count = XENON_DEF_TUNING_COUNT;
-> +               }
+> +       /* Check if Slow Mode is required in lower speed mode in SDR mode */
+> +       if (((timing == MMC_TIMING_UHS_SDR50) ||
+> +            (timing == MMC_TIMING_UHS_SDR25) ||
+> +            (timing == MMC_TIMING_UHS_SDR12) ||
+> +            (timing == MMC_TIMING_SD_HS) ||
+> +            (timing == MMC_TIMING_MMC_HS) ||
+> +            (timing == MMC_TIMING_LEGACY)) && params->slow_mode) {
+> +               reg |= XENON_TIMING_ADJUST_SLOW_MODE;
+> +               sdhci_writel(host, reg, phy_regs->timing_adj);
+> +               return true;
 > +       }
-
-I suggest you move the parsing of the xenon specific bindings into a
-separate function.
-
-> +       priv->tuning_count = tuning_count;
 > +
-> +       return err;
+> +       reg &= ~XENON_TIMING_ADJUST_SLOW_MODE;
+> +       sdhci_writel(host, reg, phy_regs->timing_adj);
+> +       return false;
 > +}
 > +
 
