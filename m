@@ -1,59 +1,79 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v4 4/13] mmc: sunxi: Enable the new timings for the A64 MMC controllers
-Date: Thu, 26 Jan 2017 10:05:57 +0100
-Message-ID: <d6dfbf595cb99709877e7e57595125ce0b783ff6.1485421557.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v4 10/13] arm64: allwinner: a64: Increase the MMC max frequency
+Date: Thu, 26 Jan 2017 10:06:03 +0100
+Message-ID: <dee0dc8e1d98698231738b10fbe79cdf6d5e4c36.1485421557.git-series.maxime.ripard@free-electrons.com>
 References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
 In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
 References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
+Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The A64 MMC controllers need to set a "new timings" bit when a new rate is
-set.
+The eMMC controller seem to have a maximum frequency of 200MHz, while the
+regular MMC controllers are capped at 150MHz.
 
-The actual meaning of that bit is not clear yet, but not setting it leads
-to some corner-case issues, like the CMD53 failing, which is used to
-implement SDIO packet aggregation.
+Since older SoCs cannot go that high, we cannot change the default maximum
+frequency, but fortunately for us we have a property for that in the DT.
+
+This also has the side effect of allowing to use the MMC HS200 and SD
+SDR104 modes for the boards that support it (with either 1.2v or 1.8v IOs).
+
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+
+arm64: allwinner: a64: Limit MMC0 and MMC1 rates to 150MHz
+
+Trying to set the bus to 200MHz on MMC1 when doing SDIO is failing.
+Allwinner sets the maximum for this bus to 150MHz, so enforce that limit.
+
+This hasn't been tested with MMC0, but the documented limit is the same,
+and I expect the behaviour to be the same.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- drivers/mmc/host/sunxi-mmc.c | 6 ++++++
- 1 file changed, 6 insertions(+), 0 deletions(-)
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 3 +++
+ 1 file changed, 3 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index b9c8a62bc212..51d6388a194e 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -253,6 +253,8 @@ struct sunxi_mmc_cfg {
- 
- 	/* does the IP block support autocalibration? */
- 	bool can_calibrate;
-+
-+	bool needs_new_timings;
- };
- 
- struct sunxi_mmc_host {
-@@ -779,6 +781,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	}
- 	mmc_writel(host, REG_CLKCR, rval);
- 
-+	if (host->cfg->needs_new_timings)
-+		mmc_writel(host, REG_SD_NTSR, SDXC_2X_TIMING_MODE);
-+
- 	ret = sunxi_mmc_clk_set_phase(host, ios, rate);
- 	if (ret)
- 		return ret;
-@@ -1076,6 +1081,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
- 	.can_calibrate = true,
-+	.needs_new_timings = true,
- };
- 
- static const struct of_device_id sunxi_mmc_of_match[] = {
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+index 7b79c319ad3c..cb3e0cf2191a 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+@@ -130,6 +130,7 @@
+ 			resets = <&ccu RST_BUS_MMC0>;
+ 			reset-names = "ahb";
+ 			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <150000000>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -143,6 +144,7 @@
+ 			resets = <&ccu RST_BUS_MMC1>;
+ 			reset-names = "ahb";
+ 			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <150000000>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -156,6 +158,7 @@
+ 			resets = <&ccu RST_BUS_MMC2>;
+ 			reset-names = "ahb";
+ 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <200000000>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
 -- 
 git-series 0.8.11
