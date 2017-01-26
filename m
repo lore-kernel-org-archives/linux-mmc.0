@@ -1,97 +1,110 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 12/13] mmc: bcm2835: move timeout to thread context
-Date: Fri, 27 Jan 2017 00:37:25 +0100
-Message-ID: <1485473846-24537-13-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 08/13] mmc: bcm2835: split bcm2835_data_irq
+Date: Fri, 27 Jan 2017 00:37:21 +0100
+Message-ID: <1485473846-24537-9-git-send-email-kraxel@redhat.com>
 References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52888 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752654AbdAZXhn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Jan 2017 18:37:43 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-rpi-kernel@lists.infradead.org
 Cc: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, "maintainer:BROADCOM
         BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "moderated list:BROADCOM BCM2835
         ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
+
+pio transfers stay in irq handler.
+handle finished xfers moved to threaded handler.
+most bcm2835 code runs in thread context now.
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835.c | 22 +++++++++++-----------
- 1 file changed, 11 insertions(+), 11 deletions(-)
+ drivers/mmc/host/bcm2835.c | 32 ++++++++++++++++++++++++++------
+ 1 file changed, 26 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index fc2d02f..82caddc 100644
+index 814812b..2bea4e0 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -147,7 +147,7 @@ struct bcm2835_host {
- 	u32			pio_timeout;	/* In jiffies */
- 	int			clock;		/* Current clock speed */
- 	unsigned int		max_clk;	/* Max possible freq */
--	struct timer_list	timer;		/* Timer for timeouts */
-+	struct delayed_work     timeout_work;   /* Timer for timeouts */
- 	struct sg_mapping_iter	sg_miter;	/* SG state for PIO */
- 	unsigned int		blocks;		/* remaining PIO blocks */
- 	int			irq;		/* Device IRQ */
-@@ -669,12 +669,11 @@ bool bcm2835_send_command(struct bcm2835_host *host,
- 		return false;
+@@ -171,6 +171,7 @@ struct bcm2835_host {
+ 	/* for threaded irq handler */
+ 	bool                    irq_block;
+ 	bool                    irq_busy;
++	bool                    irq_data;
+ 
+ 	/* DMA part */
+ 	struct dma_chan		*dma_chan_rx;
+@@ -1025,10 +1026,10 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
+ 		return;
+ 
+ 	bcm2835_check_data_error(host, intmask);
++	if (host->data->error)
++		goto finished;
+ 
+-	if (host->data->error) {
+-		bcm2835_finish_data(host);
+-	} else if (host->data->flags & MMC_DATA_WRITE) {
++	if (host->data->flags & MMC_DATA_WRITE) {
+ 		/* Use the block interrupt for writes after the first block */
+ 		host->hcfg &= ~(SDHCFG_DATA_IRPT_EN);
+ 		host->hcfg |= SDHCFG_BLOCK_IRPT_EN;
+@@ -1038,8 +1039,22 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
+ 		bcm2835_transfer_pio(host);
+ 		host->blocks--;
+ 		if ((host->blocks == 0) || host->data->error)
+-			bcm2835_finish_data(host);
++			goto finished;
  	}
- 
--	timeout = jiffies;
- 	if (!cmd->data && cmd->busy_timeout > 9000)
--		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
-+		timeout = DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
--		timeout += 10 * HZ;
--	mod_timer(&host->timer, timeout);
-+		timeout = 10 * HZ;
-+	schedule_delayed_work(&host->timeout_work, timeout);
- 
- 	host->cmd = cmd;
- 
-@@ -912,9 +911,11 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
- 	}
++	return;
++
++finished:
++	host->hcfg &= ~(SDHCFG_DATA_IRPT_EN | SDHCFG_BLOCK_IRPT_EN);
++	writel(host->hcfg, host->ioaddr + SDHCFG);
++	return;
++}
++
++static void bcm2835_data_threaded_irq(struct bcm2835_host *host)
++{
++	if (!host->data)
++		return;
++	if ((host->blocks == 0) || host->data->error)
++		bcm2835_finish_data(host);
  }
  
--static void bcm2835_timeout(unsigned long data)
-+static void bcm2835_timeout(struct work_struct *work)
+ static void bcm2835_block_irq(struct bcm2835_host *host)
+@@ -1098,7 +1113,8 @@ static irqreturn_t bcm2835_irq(int irq, void *dev_id)
+ 	if ((intmask & SDHSTS_DATA_FLAG) &&
+ 	    (host->hcfg & SDHCFG_DATA_IRPT_EN)) {
+ 		bcm2835_data_irq(host, intmask);
+-		result = IRQ_HANDLED;
++		host->irq_data = true;
++		result = IRQ_WAKE_THREAD;
+ 	}
+ 
+ 	spin_unlock(&host->lock);
+@@ -1110,19 +1126,23 @@ static irqreturn_t bcm2835_threaded_irq(int irq, void *dev_id)
  {
--	struct bcm2835_host *host = (struct bcm2835_host *)data;
-+	struct delayed_work *d = to_delayed_work(work);
-+	struct bcm2835_host *host =
-+		container_of(d, struct bcm2835_host, timeout_work);
- 	struct device *dev = &host->pdev->dev;
+ 	struct bcm2835_host *host = dev_id;
+ 	unsigned long flags;
+-	bool block, busy;
++	bool block, busy, data;
  
- 	mutex_lock(&host->mutex);
-@@ -1303,7 +1304,7 @@ static void bcm2835_finish_request(struct bcm2835_host *host)
- 	struct dma_chan *terminate_chan = NULL;
- 	struct mmc_request *mrq;
+ 	spin_lock_irqsave(&host->lock, flags);
  
--	del_timer(&host->timer);
-+	cancel_delayed_work(&host->timeout_work);
+ 	block = host->irq_block;
+ 	busy  = host->irq_busy;
++	data  = host->irq_data;
+ 	host->irq_block = false;
+ 	host->irq_busy  = false;
++	host->irq_data  = false;
  
- 	mrq = host->mrq;
+ 	if (block)
+ 		bcm2835_block_irq(host);
+ 	if (busy)
+ 		bcm2835_busy_irq(host);
++	if (data)
++		bcm2835_data_threaded_irq(host);
  
-@@ -1387,8 +1388,7 @@ int bcm2835_add_host(struct bcm2835_host *host)
- 	/* report supported voltage ranges */
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
--	setup_timer(&host->timer, bcm2835_timeout,
--		    (unsigned long)host);
-+	INIT_DELAYED_WORK(&host->timeout_work, bcm2835_timeout);
- 
- 	/* Set interrupt enables */
- 	host->hcfg = SDHCFG_BUSY_IRPT_EN;
-@@ -1523,7 +1523,7 @@ static int bcm2835_remove(struct platform_device *pdev)
- 
- 	free_irq(host->irq, host);
- 
--	del_timer_sync(&host->timer);
-+	cancel_delayed_work_sync(&host->timeout_work);
- 
- 	mmc_free_host(host->mmc);
- 	platform_set_drvdata(pdev, NULL);
 -- 
 1.8.3.1
-
