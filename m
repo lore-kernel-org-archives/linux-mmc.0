@@ -1,62 +1,70 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v6 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
-Date: Thu, 26 Jan 2017 11:30:13 +0100
-Message-ID: <20170126103013.GB27721@verge.net.au>
-References: <20170125202810.16876-1-chris.brandt@renesas.com>
- <CAPDyKFq=K4ZwyMnM2twVHW6K43U+rADBX3KFyc5o0UzR2kb10w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 05/12] dt: bindings: Add bindings for Marvell Xenon SD
+ Host Controller
+Date: Thu, 26 Jan 2017 11:49:52 +0100
+Message-ID: <CAPDyKFrCxk37uVZ4wM-=iwX3-Cn9j+uh1KneJoopVzia2nKTVA@mail.gmail.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+ <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFq=K4ZwyMnM2twVHW6K43U+rADBX3KFyc5o0UzR2kb10w@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Brandt <chris.brandt@renesas.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 26, 2017 at 09:07:45AM +0100, Ulf Hansson wrote:
-> On 25 January 2017 at 21:28, Chris Brandt <chris.brandt@renesas.com> wrote:
-> > At first this started out as a simple typo fix, until I realized
-> > that the SDHI in the RZ/A1 has 2 clocks per channel and both need
-> > to be turned on/off.
-> >
-> > This patch series adds the ability to specify 2 clocks instead of
-> > just 1, and does so for the RZ/A1 r7s72100.
-> >
-> > This patch has been tested on an RZ/A1 RSK board. Card detect works
-> > fine as well as bind/unbind.
-> >
-> > v6:
-> > * more detailed descritpion in tmio_mmc.txt
-> >
-> > v5:
-> > * Take implementation details out of DT documentation and put into
-> >   the driver code.
-> >
-> > v4:
-> > * No code changes, only text udpates to explain why there are 2 clocks
-> >   and why we need to treat them as 1 clock.
-> >
-> > Chris Brandt (3):
-> >   mmc: sh_mobile_sdhi: add support for 2 clocks
-> >   mmc: sh_mobile_sdhi: explain clock bindings
-> >   ARM: dts: r7s72100: update sdhi clock bindings
-> >
-> >  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 13 ++++++++++++
-> >  arch/arm/boot/dts/r7s72100.dtsi                    | 17 +++++++++++-----
-> >  drivers/mmc/host/sh_mobile_sdhi.c                  | 23 ++++++++++++++++++++++
-> >  include/dt-bindings/clock/r7s72100-clock.h         |  6 ++++--
-> >  4 files changed, 52 insertions(+), 7 deletions(-)
-> >
-> > --
-> > 2.10.1
-> >
-> >
-> 
-> Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
-> guess!? (And I can add Rob's ack afterwards).
+On 11 January 2017 at 18:19, Gregory CLEMENT
+<gregory.clement@free-electrons.com> wrote:
+> From: Hu Ziji <huziji@marvell.com>
+>
+> Marvell Xenon SDHC can support eMMC/SD/SDIO.
+> Add Xenon-specific properties.
+> Also add properties for Xenon PHY setting.
+>
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-Thanks, I will take care of the 3rd patch.
+An overall comment. Please run a spell-checking as I noticed some
+simple errors that needs to be fixed.
 
-Chris, is it safe to apply the 3rd patch without the first 2 patches
-present?
+Optional Properties:
+> +- mmccard:
+> +  mmccard child node must be provided when current SDHC is for eMMC.
+> +  Xenon SDHC often can support both SD and eMMC. This child node indicates that
+> +  current SDHC is for eMMC card. Thus Xenon eMMC specific configuration and
+> +  operations can be enabled prior to eMMC init sequence.
+> +  Please refer to Documentation/devicetree/bindings/mmc/mmc-card.txt.
+> +  This child node should not be set if current Xenon SDHC is for SD/SDIO.
+> +
+> +- bus-width:
+> +  When 8-bit data bus width is in use for eMMC, this property should be
+> +  explicitly provided and set as 8.
+> +  It is optional when data bus width is 4-bit or 1-bit.
+> +
+> +- mmc-ddr-1_8v:
+> +  Select this property when eMMC HS DDR is supported on SDHC side.
+> +
+> +- mmc-hs400-1_8v:
+> +  Select this property when eMMC HS400 is supported on SDHC side.
+
+All the above properties is already specified as common mmc bindings.
+Let's not do that again, but instead just refer to mmc.txt as how
+other documentations looks like.
+
+> +
+> +- no-1-8-v:
+> +  Select this property when 1.8V signaling voltage supply is unavailable.
+> +  When this property is enabled, both mmc-ddr-1_8v and mmc-hs400-1_8v should be
+> +  cleared.
+
+Please don't use this sdhci property, unless really needed.
+
+Perhaps you can elaborate exactly why it makes sense for your case. Or
+perhaps we already discussed this, in either case, please re-fresh my
+mind.
+
+[...]
+
+Kind regards
+Uffe
