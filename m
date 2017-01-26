@@ -1,50 +1,64 @@
-From: Sean Straw <sstraw@enphaseenergy.com>
-Subject: Re: Question on mmc utils write reliability
-Date: Thu, 26 Jan 2017 21:55:34 +0000
-Message-ID: <BY2PR0201MB192750E01D75A4C5994CE3D0C3770@BY2PR0201MB1927.namprd02.prod.outlook.com>
-References: <SN1PR0201MB1934E741FB1C67BC01D0DBE2C3720@SN1PR0201MB1934.namprd02.prod.outlook.com>,<7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: [PATCH 00/13] mmc: bcm2835: more cleanups
+Date: Fri, 27 Jan 2017 00:37:13 +0100
+Message-ID: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0123.outbound.protection.outlook.com ([104.47.38.123]:61256
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753067AbdAZWLc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Jan 2017 17:11:32 -0500
-In-Reply-To: <7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:58544 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752332AbdAZXhn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Jan 2017 18:37:43 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-rpi-kernel@lists.infradead.org
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
 
+  Hi folks,
 
-Thank you for the reply.
+Continuing bcm283x mmc driver cleanup.  Changes:
 
+ * switch to threaded irq handler.
+ * handle timeouts using delayed work instead of timers.
 
-git://git.kernel.org/pub/scm/linux/kernel.git/cjb/mmc-utils.git
-commit 2cb6695e8dec00d887bdd5309d1b57d836fcd214
+With these changes most of the driver code runs in
+thread context, which in turn allows to remove the
+work queue and the tasklet.  Also some wait loops can
+be simplified because almost all driver code is allowed
+to sleep now.
 
-(which is the HEAD of origin/master for about 5 months now)
+Code is also available here:
+  git://git.kraxel.org/linux bcm2837-sdhost-cleanup
 
+Baseline for the patch series is this:
+  git://git.kraxel.org/linux bcm2837-wifi
 
-I was under the understanding that reliable write was throttling the eMMC t=
-o single block operations.  Unless I've misread the JESD84-B51, enh_area is=
- pSLC mode, which results in halving usable flash capacity - providing more=
- reliable operation, but being separate from the one-block-per-operation of=
- reliable_write.  Is reliable write really not available for full capacity =
-MLC ?
+Tested on raspberry pi 2b only so far.
+PIO mode only, didn't try to enable DMA.
 
-Section 6.2.4 of the above references JEDC document (although the 5.1 stand=
-ard) pertains to the partitioning sequence, and the flowchart there does no=
-t make reference to the write_reliability as part of partitioning itself.
+Lots of baby patches for now, to make review
+and (if needed) bisecting easier.  Will all be
+squashed into the bcm283x mmc driver patch later.
 
-(my first reply early yesterday morning apparently went into the bitbucket)=
-.
-The information contained in this message may be privileged and confidentia=
-l. It is intended to be read only by the individual or entity to whom it is=
- addressed or by their designee. If the reader of this message is not the i=
-ntended recipient, you are on notice that any distribution of this message,=
- in any form, is strictly prohibited. If you have received this message in =
-error, please immediately notify the sender and delete or destroy any copy =
-of this message!
+cheers,
+  Gerd
+
+Gerd Hoffmann (13):
+  mmc: bcm2835: add bcm2835_read_wait_sdcmd
+  mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_send_command
+  mmc: bcm2835: add bcm2835_threaded_irq
+  mmc: bcm2835: add bcm2835_check_data_error
+  mmc: bcm2835: call bcm2835_block_irq from irqthread
+  mmc: bcm2835: add bcm2835_check_cmd_error
+  mmc: bcm2835: call bcm2835_busy_irq from irqthread
+  mmc: bcm2835: split bcm2835_data_irq
+  mmc: bcm2835: switch locking to mutex
+  mmc: bcm2835: work queue is dead code now, zap
+  mmc: bcm2835: kill tasklet
+  mmc: bcm2835: move timeout to thread context
+  mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_finish_command
+
+ drivers/mmc/host/bcm2835.c | 448 ++++++++++++++++++++-------------------------
+ 1 file changed, 197 insertions(+), 251 deletions(-)
+
+-- 
+1.8.3.1
+
