@@ -1,79 +1,97 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 10/13] mmc: bcm2835: work queue is dead code now, zap
-Date: Fri, 27 Jan 2017 00:37:23 +0100
-Message-ID: <1485473846-24537-11-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 12/13] mmc: bcm2835: move timeout to thread context
+Date: Fri, 27 Jan 2017 00:37:25 +0100
+Message-ID: <1485473846-24537-13-git-send-email-kraxel@redhat.com>
 References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:52888 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752654AbdAZXhn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Jan 2017 18:37:43 -0500
 In-Reply-To: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Gerd Hoffmann <kraxel@redhat.com>, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, "maintainer:BROADCOM
+        BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "moderated list:BROADCOM BCM2835
+        ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835.c | 24 ------------------------
- 1 file changed, 24 deletions(-)
+ drivers/mmc/host/bcm2835.c | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 5c588d9..6a1fef3 100644
+index fc2d02f..82caddc 100644
 --- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -148,7 +148,6 @@ struct bcm2835_host {
+@@ -147,7 +147,7 @@ struct bcm2835_host {
+ 	u32			pio_timeout;	/* In jiffies */
  	int			clock;		/* Current clock speed */
  	unsigned int		max_clk;	/* Max possible freq */
- 	struct tasklet_struct	finish_tasklet;	/* Tasklet structures */
--	struct work_struct	cmd_wait_wq;	/* Workqueue function */
- 	struct timer_list	timer;		/* Timer for timeouts */
+-	struct timer_list	timer;		/* Timer for timeouts */
++	struct delayed_work     timeout_work;   /* Timer for timeouts */
  	struct sg_mapping_iter	sg_miter;	/* SG state for PIO */
  	unsigned int		blocks;		/* remaining PIO blocks */
-@@ -1301,27 +1300,6 @@ static void bcm2835_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	.hw_reset = bcm2835_reset,
- };
+ 	int			irq;		/* Device IRQ */
+@@ -669,12 +669,11 @@ bool bcm2835_send_command(struct bcm2835_host *host,
+ 		return false;
+ 	}
  
--static void bcm2835_cmd_wait_work(struct work_struct *work)
--{
--	struct bcm2835_host *host;
--
--	host = container_of(work, struct bcm2835_host, cmd_wait_wq);
--
--	mutex_lock(&host->mutex);
--
--	/* If this tasklet gets rescheduled while running, it will
--	 * be run again afterwards but without any active request.
--	 */
--	if (!host->mrq) {
--		mutex_unlock(&host->mutex);
--		return;
--	}
--
--	bcm2835_finish_command(host);
--
--	mutex_unlock(&host->mutex);
--}
--
- static void bcm2835_tasklet_finish(unsigned long param)
+-	timeout = jiffies;
+ 	if (!cmd->data && cmd->busy_timeout > 9000)
+-		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
++		timeout = DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+ 	else
+-		timeout += 10 * HZ;
+-	mod_timer(&host->timer, timeout);
++		timeout = 10 * HZ;
++	schedule_delayed_work(&host->timeout_work, timeout);
+ 
+ 	host->cmd = cmd;
+ 
+@@ -912,9 +911,11 @@ static void bcm2835_finish_command(struct bcm2835_host *host)
+ 	}
+ }
+ 
+-static void bcm2835_timeout(unsigned long data)
++static void bcm2835_timeout(struct work_struct *work)
  {
- 	struct bcm2835_host *host = (struct bcm2835_host *)param;
-@@ -1427,8 +1405,6 @@ int bcm2835_add_host(struct bcm2835_host *host)
- 	tasklet_init(&host->finish_tasklet,
- 		     bcm2835_tasklet_finish, (unsigned long)host);
+-	struct bcm2835_host *host = (struct bcm2835_host *)data;
++	struct delayed_work *d = to_delayed_work(work);
++	struct bcm2835_host *host =
++		container_of(d, struct bcm2835_host, timeout_work);
+ 	struct device *dev = &host->pdev->dev;
  
--	INIT_WORK(&host->cmd_wait_wq, bcm2835_cmd_wait_work);
--
- 	setup_timer(&host->timer, bcm2835_timeout,
- 		    (unsigned long)host);
+ 	mutex_lock(&host->mutex);
+@@ -1303,7 +1304,7 @@ static void bcm2835_finish_request(struct bcm2835_host *host)
+ 	struct dma_chan *terminate_chan = NULL;
+ 	struct mmc_request *mrq;
  
+-	del_timer(&host->timer);
++	cancel_delayed_work(&host->timeout_work);
+ 
+ 	mrq = host->mrq;
+ 
+@@ -1387,8 +1388,7 @@ int bcm2835_add_host(struct bcm2835_host *host)
+ 	/* report supported voltage ranges */
+ 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 
+-	setup_timer(&host->timer, bcm2835_timeout,
+-		    (unsigned long)host);
++	INIT_DELAYED_WORK(&host->timeout_work, bcm2835_timeout);
+ 
+ 	/* Set interrupt enables */
+ 	host->hcfg = SDHCFG_BUSY_IRPT_EN;
+@@ -1523,7 +1523,7 @@ static int bcm2835_remove(struct platform_device *pdev)
+ 
+ 	free_irq(host->irq, host);
+ 
+-	del_timer_sync(&host->timer);
++	cancel_delayed_work_sync(&host->timeout_work);
+ 
+ 	mmc_free_host(host->mmc);
+ 	platform_set_drvdata(pdev, NULL);
 -- 
 1.8.3.1
+
