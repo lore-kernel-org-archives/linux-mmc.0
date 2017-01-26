@@ -1,40 +1,50 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Thu, 26 Jan 2017 15:20:31 +0000
-Message-ID: <SG2PR06MB116507C6DC4A8F13A5B913BF8A770@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170121030604.7672-1-chris.brandt@renesas.com>
- <20170121030604.7672-3-chris.brandt@renesas.com>
- <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
- <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+From: Sean Straw <sstraw@enphaseenergy.com>
+Subject: Re: Question on mmc utils write reliability
+Date: Thu, 26 Jan 2017 21:55:34 +0000
+Message-ID: <BY2PR0201MB192750E01D75A4C5994CE3D0C3770@BY2PR0201MB1927.namprd02.prod.outlook.com>
+References: <SN1PR0201MB1934E741FB1C67BC01D0DBE2C3720@SN1PR0201MB1934.namprd02.prod.outlook.com>,<7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2nam02on0123.outbound.protection.outlook.com ([104.47.38.123]:61256
+        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753067AbdAZWLc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Jan 2017 17:11:32 -0500
+In-Reply-To: <7a5ff950-017c-5c87-9a14-bbf22a445771@vaisala.com>
 Content-Language: en-US
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-T24gVGh1cnNkYXksIEphbnVhcnkgMjYsIDIwMTcsIFJvYiBIZXJyaW5nIHdyb3RlOg0KPiA+PiA+
-ICsNCj4gPj4gPiArRXhhbXBsZSBzaG93aW5nIDIgY2xvY2tzOg0KPiA+PiA+ICsgICBzZGhpMDog
-c2RAZTgwNGUwMDAgew0KPiA+Pg0KPiA+PiBtbWNALi4uDQo+ID4NCj4gPiBJJ20gY29uZnVzZWQu
-IEkgc2VlIHRoYXQgZm9yIGFsbCBTREhJIGNvbnRyb2xsZXJzLCBpdCBlaXRoZXIgInNkQCIgb3IN
-Cj4gInNkaGNpQCIuDQo+ID4NCj4gPiAkIGdyZXAgc2RoaSAkKGZpbmQgYXJjaC9hcm0vYm9vdC9k
-dHMgLW5hbWUgIiouZHRzaSIpDQo+ID4NCj4gPiAkIGdyZXAgc2RoY2kgJChmaW5kIGFyY2gvYXJt
-L2Jvb3QvZHRzIC1uYW1lICIqLmR0c2kiKQ0KPiANCj4gWWVzLCB0aGVyZSdzIGxvdHMgb2YgdmFy
-aWF0aW9uLiBOb2RlIG5hbWVzIGFyZSBzdXBwb3NlZCB0byBiZSBnZW5lcmljIGZvcg0KPiB0aGVp
-ciBjbGFzcyBvZiBkZXZpY2UgKGUuZy4gZXRoZXJuZXQsIHBjaSwgdXNiLCBpbnRlcnJ1cHQtY29u
-dHJvbGxlciwNCj4gZXRjLikuIEknZCBiZSBmaW5lIHdpdGggInNkIiwgYnV0IHRoaW5rICJtbWMi
-IGlzIG1vcmUgY29tbW9uLiBFaXRoZXIgd2F5LA0KPiB3ZSBzaG91bGQgcGljayBvbmUgbW92aW5n
-IGZvcndhcmQuICJzZGhjaSINCj4gc2hvdWxkIG5vdCBiZSB1c2VkIGFzIHRoYXQncyBhIHNwZWNp
-ZmljIGltcGxlbWVudGF0aW9uLg0KPiANCj4gUm9iDQoNCkZvciBub3csIEkgdG9vayB0aGUgZXhh
-bXBsZSBiYWNrIG91dCBvZiB0bWlvX21tYy50eHQgc2luY2UgSSBmaWd1cmVkDQpwZW9wbGUgY2Fu
-IHJlZmVyIGJhY2sgdG8gbW1jLnR4dCBmb3Igd2hhdCB0aGUgbmFtaW5nIHNob3VsZCBiZSAoc2lu
-Y2UNCnRoZSBkaXJlY3RvcnkgbmFtZSBpcyBtbWMsIHlvdSB3b3VsZCB0aGluayB0aGUgZ29sZGVu
-IHJ1bGVzIHdlcmUgaW4NCm1tYy50eHQpDQoNCg0KPiBJJ2QgYmUgZmluZSB3aXRoICJzZCIsIGJ1
-dCB0aGluayAibW1jIiBpcyBtb3JlIGNvbW1vbi4NCg0KTk9URTogbW1jLnR4dCBjdXJyZW50bHkg
-aGFzIDIgZXhhbXBsZXM6DQoNCglzZGhjaUBhYjAwMDAwMCB7DQoNCgltbWMzOiBtbWNAMDFjMTIw
-MDAgew0KDQpDaHJpcw0KDQo=
+
+Thank you for the reply.
+
+
+git://git.kernel.org/pub/scm/linux/kernel.git/cjb/mmc-utils.git
+commit 2cb6695e8dec00d887bdd5309d1b57d836fcd214
+
+(which is the HEAD of origin/master for about 5 months now)
+
+
+I was under the understanding that reliable write was throttling the eMMC t=
+o single block operations.  Unless I've misread the JESD84-B51, enh_area is=
+ pSLC mode, which results in halving usable flash capacity - providing more=
+ reliable operation, but being separate from the one-block-per-operation of=
+ reliable_write.  Is reliable write really not available for full capacity =
+MLC ?
+
+Section 6.2.4 of the above references JEDC document (although the 5.1 stand=
+ard) pertains to the partitioning sequence, and the flowchart there does no=
+t make reference to the write_reliability as part of partitioning itself.
+
+(my first reply early yesterday morning apparently went into the bitbucket)=
+.
+The information contained in this message may be privileged and confidentia=
+l. It is intended to be read only by the individual or entity to whom it is=
+ addressed or by their designee. If the reader of this message is not the i=
+ntended recipient, you are on notice that any distribution of this message,=
+ in any form, is strictly prohibited. If you have received this message in =
+error, please immediately notify the sender and delete or destroy any copy =
+of this message!
