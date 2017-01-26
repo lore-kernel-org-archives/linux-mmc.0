@@ -1,119 +1,40 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 6/6] mmc: queue: turn queue flags into bools
-Date: Thu, 26 Jan 2017 16:04:33 +0100
-Message-ID: <20170126150433.14038-6-linus.walleij@linaro.org>
-References: <20170126150433.14038-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:34560 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753220AbdAZPFD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2017 10:05:03 -0500
-Received: by mail-lf0-f48.google.com with SMTP id v186so146965807lfa.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Jan 2017 07:05:02 -0800 (PST)
-In-Reply-To: <20170126150433.14038-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
+Date: Thu, 26 Jan 2017 15:20:31 +0000
+Message-ID: <SG2PR06MB116507C6DC4A8F13A5B913BF8A770@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170121030604.7672-1-chris.brandt@renesas.com>
+ <20170121030604.7672-3-chris.brandt@renesas.com>
+ <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
+ <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-Instead of masking and setting two bits in the "flags" field
-for the mmc_queue, just use two bools named "suspended" and
-"new_request".
-
-The masking and setting would likely have race conditions
-anyways, it is better to use a simple member like this.
-
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/core/block.c |  6 +++---
- drivers/mmc/core/queue.c | 12 ++++++------
- drivers/mmc/core/queue.h |  5 ++---
- 3 files changed, 11 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 04c7162f444e..7be50ebf300f 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1665,7 +1665,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
- 			 * complete.
- 			 */
- 			if (status == MMC_BLK_NEW_REQUEST)
--				mq->flags |= MMC_QUEUE_NEW_REQUEST;
-+				mq->new_request = true;
- 			return;
- 		}
- 
-@@ -1804,7 +1804,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-+	mq->new_request = false;
- 	if (req && req_op(req) == REQ_OP_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
-@@ -1825,7 +1825,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
--	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) || req_is_special)
-+	if ((!req && !mq->new_request) || req_is_special)
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 611f5c6d1950..5cb369c2664b 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -86,8 +86,8 @@ static int mmc_queue_thread(void *d)
- 			set_current_state(TASK_RUNNING);
- 			mmc_blk_issue_rq(mq, req);
- 			cond_resched();
--			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
--				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-+			if (mq->new_request) {
-+				mq->new_request = false;
- 				continue; /* fetch again */
- 			}
- 
-@@ -401,8 +401,8 @@ void mmc_queue_suspend(struct mmc_queue *mq)
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
- 
--	if (!(mq->flags & MMC_QUEUE_SUSPENDED)) {
--		mq->flags |= MMC_QUEUE_SUSPENDED;
-+	if (!mq->suspended) {
-+		mq->suspended |= true;
- 
- 		spin_lock_irqsave(q->queue_lock, flags);
- 		blk_stop_queue(q);
-@@ -421,8 +421,8 @@ void mmc_queue_resume(struct mmc_queue *mq)
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
- 
--	if (mq->flags & MMC_QUEUE_SUSPENDED) {
--		mq->flags &= ~MMC_QUEUE_SUSPENDED;
-+	if (mq->suspended) {
-+		mq->suspended = false;
- 
- 		up(&mq->thread_sem);
- 
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index e0cd5b1f40ee..e298f100101b 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -40,9 +40,8 @@ struct mmc_queue {
- 	struct mmc_card		*card;
- 	struct task_struct	*thread;
- 	struct semaphore	thread_sem;
--	unsigned int		flags;
--#define MMC_QUEUE_SUSPENDED	(1 << 0)
--#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
-+	bool			new_request;
-+	bool			suspended;
- 	bool			asleep;
- 	struct mmc_blk_data	*blkdata;
- 	struct request_queue	*queue;
--- 
-2.9.3
-
+T24gVGh1cnNkYXksIEphbnVhcnkgMjYsIDIwMTcsIFJvYiBIZXJyaW5nIHdyb3RlOg0KPiA+PiA+
+ICsNCj4gPj4gPiArRXhhbXBsZSBzaG93aW5nIDIgY2xvY2tzOg0KPiA+PiA+ICsgICBzZGhpMDog
+c2RAZTgwNGUwMDAgew0KPiA+Pg0KPiA+PiBtbWNALi4uDQo+ID4NCj4gPiBJJ20gY29uZnVzZWQu
+IEkgc2VlIHRoYXQgZm9yIGFsbCBTREhJIGNvbnRyb2xsZXJzLCBpdCBlaXRoZXIgInNkQCIgb3IN
+Cj4gInNkaGNpQCIuDQo+ID4NCj4gPiAkIGdyZXAgc2RoaSAkKGZpbmQgYXJjaC9hcm0vYm9vdC9k
+dHMgLW5hbWUgIiouZHRzaSIpDQo+ID4NCj4gPiAkIGdyZXAgc2RoY2kgJChmaW5kIGFyY2gvYXJt
+L2Jvb3QvZHRzIC1uYW1lICIqLmR0c2kiKQ0KPiANCj4gWWVzLCB0aGVyZSdzIGxvdHMgb2YgdmFy
+aWF0aW9uLiBOb2RlIG5hbWVzIGFyZSBzdXBwb3NlZCB0byBiZSBnZW5lcmljIGZvcg0KPiB0aGVp
+ciBjbGFzcyBvZiBkZXZpY2UgKGUuZy4gZXRoZXJuZXQsIHBjaSwgdXNiLCBpbnRlcnJ1cHQtY29u
+dHJvbGxlciwNCj4gZXRjLikuIEknZCBiZSBmaW5lIHdpdGggInNkIiwgYnV0IHRoaW5rICJtbWMi
+IGlzIG1vcmUgY29tbW9uLiBFaXRoZXIgd2F5LA0KPiB3ZSBzaG91bGQgcGljayBvbmUgbW92aW5n
+IGZvcndhcmQuICJzZGhjaSINCj4gc2hvdWxkIG5vdCBiZSB1c2VkIGFzIHRoYXQncyBhIHNwZWNp
+ZmljIGltcGxlbWVudGF0aW9uLg0KPiANCj4gUm9iDQoNCkZvciBub3csIEkgdG9vayB0aGUgZXhh
+bXBsZSBiYWNrIG91dCBvZiB0bWlvX21tYy50eHQgc2luY2UgSSBmaWd1cmVkDQpwZW9wbGUgY2Fu
+IHJlZmVyIGJhY2sgdG8gbW1jLnR4dCBmb3Igd2hhdCB0aGUgbmFtaW5nIHNob3VsZCBiZSAoc2lu
+Y2UNCnRoZSBkaXJlY3RvcnkgbmFtZSBpcyBtbWMsIHlvdSB3b3VsZCB0aGluayB0aGUgZ29sZGVu
+IHJ1bGVzIHdlcmUgaW4NCm1tYy50eHQpDQoNCg0KPiBJJ2QgYmUgZmluZSB3aXRoICJzZCIsIGJ1
+dCB0aGluayAibW1jIiBpcyBtb3JlIGNvbW1vbi4NCg0KTk9URTogbW1jLnR4dCBjdXJyZW50bHkg
+aGFzIDIgZXhhbXBsZXM6DQoNCglzZGhjaUBhYjAwMDAwMCB7DQoNCgltbWMzOiBtbWNAMDFjMTIw
+MDAgew0KDQpDaHJpcw0KDQo=
