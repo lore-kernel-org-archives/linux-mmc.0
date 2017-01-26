@@ -1,61 +1,76 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v6 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
-Date: Thu, 26 Jan 2017 09:07:45 +0100
-Message-ID: <CAPDyKFq=K4ZwyMnM2twVHW6K43U+rADBX3KFyc5o0UzR2kb10w@mail.gmail.com>
-References: <20170125202810.16876-1-chris.brandt@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170125202810.16876-1-chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: [PATCH v4 0/13] arm64: allwinner: a64: Enable MMC support
+Date: Thu, 26 Jan 2017 10:05:53 +0100
+Message-ID: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.free-electrons.com ([62.4.15.54]:45947 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752940AbdAZJGK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2017 04:06:10 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
 
-On 25 January 2017 at 21:28, Chris Brandt <chris.brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> At first this started out as a simple typo fix, until I realized
-> that the SDHI in the RZ/A1 has 2 clocks per channel and both need
-> to be turned on/off.
->
-> This patch series adds the ability to specify 2 clocks instead of
-> just 1, and does so for the RZ/A1 r7s72100.
->
-> This patch has been tested on an RZ/A1 RSK board. Card detect works
-> fine as well as bind/unbind.
->
-> v6:
-> * more detailed descritpion in tmio_mmc.txt
->
-> v5:
-> * Take implementation details out of DT documentation and put into
->   the driver code.
->
-> v4:
-> * No code changes, only text udpates to explain why there are 2 clocks
->   and why we need to treat them as 1 clock.
->
-> Chris Brandt (3):
->   mmc: sh_mobile_sdhi: add support for 2 clocks
->   mmc: sh_mobile_sdhi: explain clock bindings
->   ARM: dts: r7s72100: update sdhi clock bindings
->
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 13 ++++++++++++
->  arch/arm/boot/dts/r7s72100.dtsi                    | 17 +++++++++++-----
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 23 ++++++++++++++++++++++
->  include/dt-bindings/clock/r7s72100-clock.h         |  6 ++++--
->  4 files changed, 52 insertions(+), 7 deletions(-)
->
-> --
-> 2.10.1
->
->
+Hi,
 
-Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
-guess!? (And I can add Rob's ack afterwards).
+Here is a new attempt at getting the MMC controllers running, following the
+work done by Andre.
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This has been tested on a board with one SDIO device (a Marvell WiFi chip)
+and a Kingston eMMC with 1.8V IOs.
+
+For SDIO, the HS DDR mode works just fine. That serie also enables the
+SDR104 mode to work on the devices that are capable of this.
+
+For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
+moment, but since it's significantly more complex, and at the same time
+Allwinner recommends to limit its frequency to 100MHz, this doesn't have
+any benefits. If there's any at some point, this can be added later.
+
+Let me know what you think,
+Maxime
+
+Changes from v3:
+  - Reordered the MMC nodes
+  - Added the specification section the first commit log
+  - Supported mmc->actual_rate
+  - Clarified a bit what we (don't) know about DATA0
+
+Changes from v2:
+  - Enabled SDR104, limited the frequency to 150MHz. 200MHz was too high.
+  - Added more fixes to the gating and frequency rate change sequence
+  - Added one more patch to mask DATA0 when updating the clock that was
+    needed to get SDR104 to run
+  - Added the patches to enable it on a few boards done by Andre
+  - Amended the comments as suggested by Andre.
+  - Added some tags
+
+Andre Przywara (4):
+  arm64: allwinner: a64: Add MMC nodes
+  arm64: allwinner: pine64: add MMC support
+  arm64: allwinner: a64: add UART1 pin nodes
+  arm64: allwinner: add BananaPi-M64 support
+
+Maxime Ripard (9):
+  mmc: sunxi: Fix clock frequency change sequence
+  mmc: sunxi: Gate the clock when rate is 0
+  mmc: sunxi: Always set signal delay to 0 for A64
+  mmc: sunxi: Enable the new timings for the A64 MMC controllers
+  mmc: sunxi: Mask DATA0 when updating the clock
+  mmc: sunxi: Add EMMC (MMC2) controller compatible
+  mmc: sunxi: Add more debug informations
+  arm64: allwinner: a64: Add MMC pinctrl nodes
+  arm64: allwinner: a64: Increase the MMC max frequency
+
+ arch/arm64/boot/dts/allwinner/Makefile                    |   1 +-
+ arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 120 +++++++-
+ arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts       |  20 +-
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi             |  77 ++++-
+ drivers/mmc/host/sunxi-mmc.c                              | 114 ++++---
+ 5 files changed, 289 insertions(+), 43 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
+
+base-commit: bc34c1af0a280e27eafe3f86b9ad87fe0c9ea715
+-- 
+git-series 0.8.11
