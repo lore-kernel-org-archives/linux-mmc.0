@@ -1,17 +1,14 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH v5 05/12] dt: bindings: Add bindings for Marvell Xenon SD
- Host Controller
-Date: Fri, 27 Jan 2017 11:04:57 +0100
-Message-ID: <87fuk4yg1i.fsf@free-electrons.com>
-References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrCxk37uVZ4wM-=iwX3-Cn9j+uh1KneJoopVzia2nKTVA@mail.gmail.com>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: Re: [PATCH 01/13] mmc: bcm2835: add bcm2835_read_wait_sdcmd
+Date: Fri, 27 Jan 2017 11:28:32 +0100
+Message-ID: <1485512912.19754.60.camel@redhat.com>
+References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+ <1485473846-24537-2-git-send-email-kraxel@redhat.com>
+ <ff0170ef-2566-1c12-0b27-dccb3bff2e7e@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="=-cnJZ8YYRGRgSb3bxl1mh"
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrCxk37uVZ4wM-=iwX3-Cn9j+uh1KneJoopVzia2nKTVA@mail.gmail.com>
- (Ulf Hansson's message of "Thu, 26 Jan 2017 11:49:52 +0100")
+In-Reply-To: <ff0170ef-2566-1c12-0b27-dccb3bff2e7e@rock-chips.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,93 +18,107 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Ma rcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@li>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX
+ ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, linux-rpi-kernel@lists.infradead.org, "moderated
+ list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
- 
- On jeu., janv. 26 2017, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-> On 11 January 2017 at 18:19, Gregory CLEMENT
-> <gregory.clement@free-electrons.com> wrote:
->> From: Hu Ziji <huziji@marvell.com>
->>
->> Marvell Xenon SDHC can support eMMC/SD/SDIO.
->> Add Xenon-specific properties.
->> Also add properties for Xenon PHY setting.
->>
->> Signed-off-by: Hu Ziji <huziji@marvell.com>
->> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
->
-> An overall comment. Please run a spell-checking as I noticed some
-> simple errors that needs to be fixed.
+--=-cnJZ8YYRGRgSb3bxl1mh
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I though I already run a spell-checking before submitting the patch, but
-I will do it again.
+  Hi,
 
->
-> Optional Properties:
->> +- mmccard:
->> +  mmccard child node must be provided when current SDHC is for eMMC.
->> +  Xenon SDHC often can support both SD and eMMC. This child node indicates that
->> +  current SDHC is for eMMC card. Thus Xenon eMMC specific configuration and
->> +  operations can be enabled prior to eMMC init sequence.
->> +  Please refer to Documentation/devicetree/bindings/mmc/mmc-card.txt.
->> +  This child node should not be set if current Xenon SDHC is for SD/SDIO.
->> +
->> +- bus-width:
->> +  When 8-bit data bus width is in use for eMMC, this property should be
->> +  explicitly provided and set as 8.
->> +  It is optional when data bus width is 4-bit or 1-bit.
->> +
->> +- mmc-ddr-1_8v:
->> +  Select this property when eMMC HS DDR is supported on SDHC side.
->> +
->> +- mmc-hs400-1_8v:
->> +  Select this property when eMMC HS400 is supported on SDHC side.
->
-> All the above properties is already specified as common mmc bindings.
-> Let's not do that again, but instead just refer to mmc.txt as how
-> other documentations looks like.
+> > +	for (;;) {
+> > +		value =3D readl(host->ioaddr + SDCMD);
+> > +		if (!(value & SDCMD_NEW_FLAG))
+> > +			break;
+> > +		if (check_fail && (value & SDCMD_FAIL_FLAG))
+> > +			break;
+> > +		if (time_after(jiffies, end)) {
+> > +			dev_err(dev, "%s: timeout (%d us)\n",
+> > +				__func__, timeout);
+> > +			break;
+> > +		}
+> > +
+> > +		/* if it takes longer reduce poll interval */
+> > +		if (time_after(jiffies, fastpoll))
+> > +			udelay(10);
+> > +		else
+> > +			cpu_relax();
+> > +	}
+>=20
+> Use readl_poll_timeout intead of open-coding them..
 
-OK, but maybe we could keep the part about the mmcard for the eMMC to
-emphasize that we need to setup this option for the controller.
+Cool.  Didn't know this exists.  Incremental fixup attached.
 
->> +
->> +- no-1-8-v:
->> +  Select this property when 1.8V signaling voltage supply is unavailable.
->> +  When this property is enabled, both mmc-ddr-1_8v and mmc-hs400-1_8v should be
->> +  cleared.
->
-> Please don't use this sdhci property, unless really needed.
+thanks,
+  Gerd
 
-Actually this is a mmc property, at least it is described in this the
-mmc binding:
-Documentation/devicetree/bindings/mmc/mmc.txt
 
-The description of this optional property is:
-"no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-  this system, even if the controller claims it is."
+--=-cnJZ8YYRGRgSb3bxl1mh
+Content-Description: 
+Content-Disposition: inline;
+	filename*0=0001-mmc-bcm2835-use-readl_poll_timeout-in-bcm2835_read_w.pat;
+	filename*1=ch
+Content-Type: text/x-patch;
+	name="0001-mmc-bcm2835-use-readl_poll_timeout-in-bcm2835_read_w.patch";
+	charset="UTF-8"
+Content-Transfer-Encoding: base64
 
-So as it is also part of the mmc binding we can remove it from our
-bindings as we are going to do it for the other mmc property.
+RnJvbSBkZTYwZDczODQ5ZDgzYjBkZGY0ZWU4YmQ2YTdlMTc1YzY5MTU3YTkwIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBHZXJkIEhvZmZtYW5uIDxrcmF4ZWxAcmVkaGF0LmNvbT4KRGF0
+ZTogRnJpLCAyNyBKYW4gMjAxNyAxMToyNTo1NCArMDEwMApTdWJqZWN0OiBbUEFUQ0hdIG1tYzog
+YmNtMjgzNTogdXNlIHJlYWRsX3BvbGxfdGltZW91dCBpbgogYmNtMjgzNV9yZWFkX3dhaXRfc2Rj
+bWQKClNpZ25lZC1vZmYtYnk6IEdlcmQgSG9mZm1hbm4gPGtyYXhlbEByZWRoYXQuY29tPgotLS0K
+IGRyaXZlcnMvbW1jL2hvc3QvYmNtMjgzNS5jIHwgMzcgKysrKysrKysrKysrKysrKy0tLS0tLS0t
+LS0tLS0tLS0tLS0tLQogMSBmaWxlIGNoYW5nZWQsIDE2IGluc2VydGlvbnMoKyksIDIxIGRlbGV0
+aW9ucygtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvYmNtMjgzNS5jIGIvZHJpdmVy
+cy9tbWMvaG9zdC9iY20yODM1LmMKaW5kZXggNjRhMjMzNC4uZThhM2Y2ZSAxMDA2NDQKLS0tIGEv
+ZHJpdmVycy9tbWMvaG9zdC9iY20yODM1LmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9iY20yODM1
+LmMKQEAgLTMxLDYgKzMxLDcgQEAKICNpbmNsdWRlIDxsaW51eC9lcnIuaD4KICNpbmNsdWRlIDxs
+aW51eC9oaWdobWVtLmg+CiAjaW5jbHVkZSA8bGludXgvaW8uaD4KKyNpbmNsdWRlIDxsaW51eC9p
+b3BvbGwuaD4KICNpbmNsdWRlIDxsaW51eC9tb2R1bGUuaD4KICNpbmNsdWRlIDxsaW51eC9vZl9h
+ZGRyZXNzLmg+CiAjaW5jbHVkZSA8bGludXgvb2ZfaXJxLmg+CkBAIC02MDksMzMgKzYxMCwyNyBA
+QCBzdGF0aWMgdm9pZCBiY20yODM1X3ByZXBhcmVfZGF0YShzdHJ1Y3QgYmNtMjgzNV9ob3N0ICpo
+b3N0LAogCXdyaXRlbChkYXRhLT5ibG9ja3MsIGhvc3QtPmlvYWRkciArIFNESEJMQyk7CiB9CiAK
+LXN0YXRpYyB1MzIgYmNtMjgzNV9yZWFkX3dhaXRfc2RjbWQoc3RydWN0IGJjbTI4MzVfaG9zdCAq
+aG9zdCwgdTMyIHRpbWVvdXQsCitzdGF0aWMgdTMyIGJjbTI4MzVfcmVhZF93YWl0X3NkY21kKHN0
+cnVjdCBiY20yODM1X2hvc3QgKmhvc3QsIHUzMiBtYXhfbXMsCiAJCQkJICAgYm9vbCBjaGVja19m
+YWlsKQogewogCXN0cnVjdCBkZXZpY2UgKmRldiA9ICZob3N0LT5wZGV2LT5kZXY7Ci0JdW5zaWdu
+ZWQgbG9uZyBzdGFydCA9IGppZmZpZXM7Ci0JdW5zaWduZWQgbG9uZyBmYXN0cG9sbCA9IHN0YXJ0
+ICsgdXNlY3NfdG9famlmZmllcygxMCk7Ci0JdW5zaWduZWQgbG9uZyBlbmQgPSBzdGFydCArIG1z
+ZWNzX3RvX2ppZmZpZXModGltZW91dCk7CiAJdTMyIHZhbHVlOworCWludCByZXQ7CiAKLQlmb3Ig
+KDs7KSB7Ci0JCXZhbHVlID0gcmVhZGwoaG9zdC0+aW9hZGRyICsgU0RDTUQpOwotCQlpZiAoISh2
+YWx1ZSAmIFNEQ01EX05FV19GTEFHKSkKLQkJCWJyZWFrOwotCQlpZiAoY2hlY2tfZmFpbCAmJiAo
+dmFsdWUgJiBTRENNRF9GQUlMX0ZMQUcpKQotCQkJYnJlYWs7Ci0JCWlmICh0aW1lX2FmdGVyKGpp
+ZmZpZXMsIGVuZCkpIHsKLQkJCWRldl9lcnIoZGV2LCAiJXM6IHRpbWVvdXQgKCVkIHVzKVxuIiwK
+LQkJCQlfX2Z1bmNfXywgdGltZW91dCk7Ci0JCQlicmVhazsKLQkJfQorCXJldCA9IHJlYWRsX3Bv
+bGxfdGltZW91dChob3N0LT5pb2FkZHIgKyBTRENNRCwgdmFsdWUsCisJCQkJICghKHZhbHVlICYg
+U0RDTURfTkVXX0ZMQUcpKSB8fAorCQkJCSAoY2hlY2tfZmFpbCAmJiAodmFsdWUgJiBTRENNRF9G
+QUlMX0ZMQUcpKSwKKwkJCQkgMSwgMTApOworCWlmIChyZXQgPT0gLUVUSU1FRE9VVCkKKwkJLyog
+aWYgaXQgdGFrZXMgYSB3aGlsZSBtYWtlIHBvbGwgaW50ZXJ2YWwgYmlnZ2VyICovCisJCXJldCA9
+IHJlYWRsX3BvbGxfdGltZW91dChob3N0LT5pb2FkZHIgKyBTRENNRCwgdmFsdWUsCisJCQkJCSAo
+ISh2YWx1ZSAmIFNEQ01EX05FV19GTEFHKSkgfHwKKwkJCQkJIChjaGVja19mYWlsICYmICh2YWx1
+ZSAmIFNEQ01EX0ZBSUxfRkxBRykpLAorCQkJCQkgMTAsIG1heF9tcyAqIDEwMDApOworCWlmIChy
+ZXQgPT0gLUVUSU1FRE9VVCkKKwkJZGV2X2VycihkZXYsICIlczogdGltZW91dCAoJWQgbXMpXG4i
+LAorCQkJX19mdW5jX18sIG1heF9tcyk7CiAKLQkJLyogaWYgaXQgdGFrZXMgbG9uZ2VyIHJlZHVj
+ZSBwb2xsIGludGVydmFsICovCi0JCWlmICh0aW1lX2FmdGVyKGppZmZpZXMsIGZhc3Rwb2xsKSkK
+LQkJCXVkZWxheSgxMCk7Ci0JCWVsc2UKLQkJCWNwdV9yZWxheCgpOwotCX0KIAlyZXR1cm4gdmFs
+dWU7CiB9CiAKLS0gCjEuOC4zLjEKCg==
 
-But I am curious to know why do you think we could use it without any
-need. Are you aware of some abuse of this property?
 
->
-> Perhaps you can elaborate exactly why it makes sense for your case. Or
-> perhaps we already discussed this, in either case, please re-fresh my
-> mind.
+--=-cnJZ8YYRGRgSb3bxl1mh
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-For instance we need it now on the 7040DB board which does not have the
-1.8V signal voltage available.
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
-Gregory
-
--- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+--=-cnJZ8YYRGRgSb3bxl1mh--
