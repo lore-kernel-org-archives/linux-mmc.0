@@ -1,59 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6] mmc: core: Enable mmc hosts to specify support for
- eMMC DDR 3.3V
-Date: Fri, 27 Jan 2017 15:58:08 +0100
-Message-ID: <CAPDyKFrGucJMje3fMdZRPX1qqLHLLn+OdduoMgGrf_ZWBK4_wQ@mail.gmail.com>
-References: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
+Date: Fri, 27 Jan 2017 16:12:24 +0100
+Message-ID: <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+ <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com> <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36436 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754954AbdA0O6K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 09:58:10 -0500
-Received: by mail-wm0-f47.google.com with SMTP id c85so120425681wmi.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jan 2017 06:58:10 -0800 (PST)
-In-Reply-To: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvel>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
 
-On 25 January 2017 at 16:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> It's been reported that some mmc hosts don't support a VCCQ (signal voltage) of
-> 1.8V for eMMC DDR mode, but instead only 3.3V. According to the JEDEC spec, an
-> eMMC card must support both if any, which makes the mmc host being the
-> potential limitation. Therefore, let's invent a new mmc cap, MMC_CAP_3_3V_DDR,
-> and a new corresponding DT binding, which tells whether 3.3V is supported for
-> the VCCQ.
+On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 26/01/17 12:50, Ulf Hansson wrote:
+>> On 11 January 2017 at 18:19, Gregory CLEMENT
+>> <gregory.clement@free-electrons.com> wrote:
+>>> +                       priv->init_card_type = MMC_TYPE_MMC;
+>>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
+>>> +
+>>> +                       /*
+>>> +                        * Force to clear BUS_TEST to
+>>> +                        * skip bus_test_pre and bus_test_post
+>>> +                        */
+>>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
+>>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
+>>
+>> This cap is a bit strange. It was added several years ago by Adrian
+>> Hunter, but I am wondering about the reason to why it's needed.
+>>
 >
-> In the context of these changes, I took the opportunity to make some clean-ups
-> of some related code.
+> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
 >
-> Ulf Hansson (6):
->   mmc: core: Remove redundant code in mmc_set_signal_voltage()
->   mmc: core: Clarify usage of mmc_set_signal_voltage()
->   mmc: core: Rename __mmc_set_signal_voltage() to
->     mmc_set_signal_voltage()
->   mmc: core: Invent MMC_CAP_3_3V_DDR
->   mmc: dt: Document binding for eMMC DDR 3.3V I/O voltage support
->   mmc: core: Extend mmc_of_parse() to check for mmc-ddr-3_3v
->
->  Documentation/devicetree/bindings/mmc/mmc.txt |  1 +
->  drivers/mmc/core/core.c                       | 19 ++++++-------------
->  drivers/mmc/core/core.h                       |  4 ++--
->  drivers/mmc/core/host.c                       |  2 ++
->  drivers/mmc/core/mmc.c                        | 27 +++++++++++++++------------
->  drivers/mmc/core/sd.c                         |  3 +--
->  drivers/mmc/core/sdio.c                       |  3 +--
->  include/linux/mmc/host.h                      | 21 ++++++++++-----------
->  8 files changed, 38 insertions(+), 42 deletions(-)
->
-> --
-> 1.9.1
+> I think it was added to enable people to choose whether they wanted a large
+> or small erase granularity.  That probably doesn't matter if the card
+> supports TRIM.
 >
 
-Applied for next, amended patch 3/6 according to suggestions by Shawn.
+Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
+
+In mmc_calc_max_discard() the following code/comment exists:
+
+/*
+ * Without erase_group_def set, MMC erase timeout depends on clock
+ * frequence which can change.  In that case, the best choice is
+ * just the preferred erase size.
+ */
+if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
+     return card->pref_erase;
+
+
+This makes me wonder.
+
+So, when we haven't enabled the high capacity erase groups in the
+EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
+size.
+
+In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
+set ext_csd.erase_group_def),  we will instead  do some calculations
+to find out the max discards.
+
+Are you saying that these calculations doesn't matter much - or are
+you saying that we always want to do them?
 
 Kind regards
 Uffe
