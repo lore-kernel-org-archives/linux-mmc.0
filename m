@@ -1,93 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
-Date: Fri, 27 Jan 2017 08:58:16 +0100
-Message-ID: <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
-References: <20170124101757.19676-1-linus.walleij@linaro.org> <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: Re: [PATCH 01/13] mmc: bcm2835: add bcm2835_read_wait_sdcmd
+Date: Fri, 27 Jan 2017 09:04:10 +0100
+Message-ID: <1485504250.19754.22.camel@redhat.com>
+References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+ <1485473846-24537-2-git-send-email-kraxel@redhat.com>
+ <30bf98f0-c893-d306-ab79-3ba741790919@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:33471 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754187AbdA0H6S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 02:58:18 -0500
-Received: by mail-wm0-f43.google.com with SMTP id d140so11511063wmd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Jan 2017 23:58:18 -0800 (PST)
-In-Reply-To: <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <30bf98f0-c893-d306-ab79-3ba741790919@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Florian Fainelli <f.fainelli@gmail.com>
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Scott Branden <sbranden@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, linux-rpi-kernel@lists.infradead.org, "moderated
+ list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-+Maxime
+On Do, 2017-01-26 at 15:51 -0800, Florian Fainelli wrote:
+> On 01/26/2017 03:37 PM, Gerd Hoffmann wrote:
+> > Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+> 
+> Few things with your submission:
+> 
+> - if you send more than one patch, a cover letter is a welcome to
+> explain your changes
 
-On 26 January 2017 at 09:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 24 January 2017 at 11:17, Linus Walleij <linus.walleij@linaro.org> wrote:
->> The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
->> need to be refactored to it can be understood by humans.
->>
->> In the process I found some weird magic return values passed
->> around for no good reason.
->>
->> Things are more readable after this.
->>
->> This work is done towards the goal of breaking the function in
->> two parts: one just submitting the requests and one checking the
->> result and possibly resubmitting the command on error, so we
->> can make the usual path (non-errorpath) smooth and quick, and
->> be called directly when the driver completes a request.
->>
->> That in turn is a prerequisite for proper blk-mq integration
->> with the MMC/SD stack.
->>
->> All that comes later.
->>
->> Linus Walleij (6):
->>   mmc: block: break out mmc_blk_rw_cmd_abort()
->>   mmc: block: break out mmc_blk_rw_start_new()
->>   mmc: block: do not assign mq_rq when aborting command
->>   mmc: block: inline command abortions
->>   mmc: block: introduce new_areq and old_areq
->>   mmc: block: stop passing around pointless return values
->>
->>  drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++---------------------
->>  drivers/mmc/core/block.h |   2 +-
->>  2 files changed, 60 insertions(+), 50 deletions(-)
->>
->> --
->> 2.9.3
->>
->
-> Thanks, applied for next!
+There actually is a cover letter.  The git-send-email "cccmd =
+scripts/get_maintainer.pl" hook doesn't work for the cover letter though
+because it isn't a patch.  I've hand-picked some people who
+touched/reviewed the driver before to the git-send-email command line,
+but everybody else got the patches only.
 
-Linus,
+Anyone has a good solution for this btw?
 
-Seems like this series may have issues. I have looked at boot reports
-from kernelci, and particular the reports for
-https://kernelci.org/boot/sun7i-a20-bananapi/job/ulfh/ are
-interesting.
+> - try to provide commit messages for things that are not obvious (in
+> fact, most maintainers actually request commit messages even for trivial
+> things)
 
-Apparently, this board has an SD card attached. There have been errors
-reported in the log for a while when doing data transfers, although
-none of these errors have triggered the kernelci to report a boot
-error.
+The driver is out of tree still, these are cleanups Ulf Hansson asked
+for last time the driver was submitted.
 
-However, I suspect that some of the changes in this series make it
-worse. Perhaps because of a changed error handling the mmc block
-layer!?
+Full set of patches:
+  https://www.kraxel.org/cgit/linux/log/?h=bcm2837-sdhost-cleanup
 
-Particular, look at the difference between these [1] boot logs, it
-might give you some hints. I have also added Maxime to this thread,
-perhaps he can help out with the sunxi mmc driver.
+Plan for upstream merge is to actually squash all the incremental
+cleanups, but for now I kept them as separate changes.  I think this
+makes it easier to spot mistakes and it'll also help in case there are
+regressions b/c you can bisect things.
 
-Kind regards
-Uffe
+> - have not we switched to the iproc SDHCI driver, or is this for the
+> other SDIO connected peripherals here?
 
-[1]
-Successful boot - sun7i-a20-bananapi:
-https://storage.kernelci.org/ulfh/v4.10-rc5-86-g2ed14a2aac8a/arm-sunxi_defconfig/lab-baylibre-seattle/boot-sun7i-a20-bananapi.txt
+The 2835 has two SD controllers: The Arasan SDHCI controller that we
+currently use (iproc drives that one), and a custom SD controller.
 
-Failing boot - sun7i-a20-bananapi:
-https://storage.kernelci.org/ulfh/v4.10-rc5-97-ge1defa2da4d3/arm-sunxi_defconfig/lab-baylibre-seattle/boot-sun7i-a20-bananapi.txt
+This is a driver for the custom one.  Has better performance than the
+sdhci controller (according to Eric Anholt).  For the rpi3 switching to
+this driver has the additional advantage that we can use the iproc
+driver driver to handle the wifi.
 
-Kind regards
-Uffe
+cheers,
+  Gerd
