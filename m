@@ -1,89 +1,44 @@
-From: Florian Vaussard <florian.vaussard@heig-vd.ch>
-Subject: Re: [PATCH v4 10/13] arm64: allwinner: a64: Increase the MMC max
- frequency
-Date: Fri, 27 Jan 2017 11:29:53 +0100
-Message-ID: <6c6bf169-4b2e-6b55-54db-d21da73a8f6e@heig-vd.ch>
-References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
- <dee0dc8e1d98698231738b10fbe79cdf6d5e4c36.1485421557.git-series.maxime.ripard@free-electrons.com>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: Re: [PATCH 04/13] mmc: bcm2835: add bcm2835_check_data_error
+Date: Fri, 27 Jan 2017 11:31:01 +0100
+Message-ID: <1485513061.19754.62.camel@redhat.com>
+References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+         <1485473846-24537-5-git-send-email-kraxel@redhat.com>
+         <3876dea7-cd61-e7cf-e838-8bab6927c8fb@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <dee0dc8e1d98698231738b10fbe79cdf6d5e4c36.1485421557.git-series.maxime.ripard@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3876dea7-cd61-e7cf-e838-8bab6927c8fb@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-rpi-kernel@lists.infradead.org, Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Maxime,
+  Hi,
 
-On 01/26/2017 10:06 AM, Maxime Ripard wrote:
-> The eMMC controller seem to have a maximum frequency of 200MHz, while the
-> regular MMC controllers are capped at 150MHz.
+> > @@ -1007,15 +1017,7 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
+> >  	if (!host->data)
+> >  		return;
+> >
 > 
-> Since older SoCs cannot go that high, we cannot change the default maximum
-> frequency, but fortunately for us we have a property for that in the DT.
-> 
-> This also has the side effect of allowing to use the MMC HS200 and SD
-> SDR104 modes for the boards that support it (with either 1.2v or 1.8v IOs).
-> 
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> 
-> arm64: allwinner: a64: Limit MMC0 and MMC1 rates to 150MHz
-> 
-> Trying to set the bus to 200MHz on MMC1 when doing SDIO is failing.
-> Allwinner sets the maximum for this bus to 150MHz, so enforce that limit.
-> 
-> This hasn't been tested with MMC0, but the documented limit is the same,
-> and I expect the behaviour to be the same.
-> 
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> remove this check, !host->data, as well.
 
-I suspect that you are trying to increase your number of Signed-off-by tags by
-using unfair means :) Otherwise the squashed commit message is probably worth
-some cleaning.
+There is a comment in the code saying it is needed, here is more
+context:
 
-Best,
-Florian
+static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
+{
+	/* There are no dedicated data/space available interrupt
+	 * status bits, so it is necessary to use the single shared
+	 * data/space available FIFO status bits. It is therefore not
+	 * an error to get here when there is no data transfer in
+	 * progress.
+	 */
+	if (!host->data)
+		return;
 
-> ---
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 3 +++
->  1 file changed, 3 insertions(+), 0 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> index 7b79c319ad3c..cb3e0cf2191a 100644
-> --- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> +++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-> @@ -130,6 +130,7 @@
->  			resets = <&ccu RST_BUS_MMC0>;
->  			reset-names = "ahb";
->  			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <150000000>;
->  			status = "disabled";
->  			#address-cells = <1>;
->  			#size-cells = <0>;
-> @@ -143,6 +144,7 @@
->  			resets = <&ccu RST_BUS_MMC1>;
->  			reset-names = "ahb";
->  			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <150000000>;
->  			status = "disabled";
->  			#address-cells = <1>;
->  			#size-cells = <0>;
-> @@ -156,6 +158,7 @@
->  			resets = <&ccu RST_BUS_MMC2>;
->  			reset-names = "ahb";
->  			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <200000000>;
->  			status = "disabled";
->  			#address-cells = <1>;
->  			#size-cells = <0>;
-> 
+	bcm2835_check_data_error(host, intmask);
+
+cheers,
+  Gerd
