@@ -1,66 +1,93 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 0/6] mmc: core: Enable mmc hosts to specify support for
- eMMC DDR 3.3V
-Date: Fri, 27 Jan 2017 10:27:29 +0800
-Message-ID: <2d3a5129-1514-1969-89df-1972427f7856@rock-chips.com>
-References: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
+Date: Fri, 27 Jan 2017 08:58:16 +0100
+Message-ID: <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
+References: <20170124101757.19676-1-linus.walleij@linaro.org> <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:34459 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753001AbdA0C2B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2017 21:28:01 -0500
-In-Reply-To: <1485357143-23280-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:33471 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754187AbdA0H6S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 02:58:18 -0500
+Received: by mail-wm0-f43.google.com with SMTP id d140so11511063wmd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Jan 2017 23:58:18 -0800 (PST)
+In-Reply-To: <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-On 2017/1/25 23:12, Ulf Hansson wrote:
-> It's been reported that some mmc hosts don't support a VCCQ (signal voltage) of
-> 1.8V for eMMC DDR mode, but instead only 3.3V. According to the JEDEC spec, an
-> eMMC card must support both if any, which makes the mmc host being the
-> potential limitation. Therefore, let's invent a new mmc cap, MMC_CAP_3_3V_DDR,
-> and a new corresponding DT binding, which tells whether 3.3V is supported for
-> the VCCQ.
++Maxime
+
+On 26 January 2017 at 09:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 24 January 2017 at 11:17, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
+>> need to be refactored to it can be understood by humans.
+>>
+>> In the process I found some weird magic return values passed
+>> around for no good reason.
+>>
+>> Things are more readable after this.
+>>
+>> This work is done towards the goal of breaking the function in
+>> two parts: one just submitting the requests and one checking the
+>> result and possibly resubmitting the command on error, so we
+>> can make the usual path (non-errorpath) smooth and quick, and
+>> be called directly when the driver completes a request.
+>>
+>> That in turn is a prerequisite for proper blk-mq integration
+>> with the MMC/SD stack.
+>>
+>> All that comes later.
+>>
+>> Linus Walleij (6):
+>>   mmc: block: break out mmc_blk_rw_cmd_abort()
+>>   mmc: block: break out mmc_blk_rw_start_new()
+>>   mmc: block: do not assign mq_rq when aborting command
+>>   mmc: block: inline command abortions
+>>   mmc: block: introduce new_areq and old_areq
+>>   mmc: block: stop passing around pointless return values
+>>
+>>  drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++---------------------
+>>  drivers/mmc/core/block.h |   2 +-
+>>  2 files changed, 60 insertions(+), 50 deletions(-)
+>>
+>> --
+>> 2.9.3
+>>
 >
-> In the context of these changes, I took the opportunity to make some clean-ups
-> of some related code.
->
+> Thanks, applied for next!
 
-This patchset looks good. Just a nit, maybe we could take this chance
-to improve the patch 3 as we touch it now:)
+Linus,
 
-s/mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0/
-!mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180), and so on:)
+Seems like this series may have issues. I have looked at boot reports
+from kernelci, and particular the reports for
+https://kernelci.org/boot/sun7i-a20-bananapi/job/ulfh/ are
+interesting.
 
-Anyway,
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Apparently, this board has an SD card attached. There have been errors
+reported in the log for a while when doing data transfers, although
+none of these errors have triggered the kernelci to report a boot
+error.
 
-> Ulf Hansson (6):
->   mmc: core: Remove redundant code in mmc_set_signal_voltage()
->   mmc: core: Clarify usage of mmc_set_signal_voltage()
->   mmc: core: Rename __mmc_set_signal_voltage() to
->     mmc_set_signal_voltage()
->   mmc: core: Invent MMC_CAP_3_3V_DDR
->   mmc: dt: Document binding for eMMC DDR 3.3V I/O voltage support
->   mmc: core: Extend mmc_of_parse() to check for mmc-ddr-3_3v
->
->  Documentation/devicetree/bindings/mmc/mmc.txt |  1 +
->  drivers/mmc/core/core.c                       | 19 ++++++-------------
->  drivers/mmc/core/core.h                       |  4 ++--
->  drivers/mmc/core/host.c                       |  2 ++
->  drivers/mmc/core/mmc.c                        | 27 +++++++++++++++------------
->  drivers/mmc/core/sd.c                         |  3 +--
->  drivers/mmc/core/sdio.c                       |  3 +--
->  include/linux/mmc/host.h                      | 21 ++++++++++-----------
->  8 files changed, 38 insertions(+), 42 deletions(-)
->
+However, I suspect that some of the changes in this series make it
+worse. Perhaps because of a changed error handling the mmc block
+layer!?
 
+Particular, look at the difference between these [1] boot logs, it
+might give you some hints. I have also added Maxime to this thread,
+perhaps he can help out with the sunxi mmc driver.
 
--- 
-Best Regards
-Shawn Lin
+Kind regards
+Uffe
 
+[1]
+Successful boot - sun7i-a20-bananapi:
+https://storage.kernelci.org/ulfh/v4.10-rc5-86-g2ed14a2aac8a/arm-sunxi_defconfig/lab-baylibre-seattle/boot-sun7i-a20-bananapi.txt
+
+Failing boot - sun7i-a20-bananapi:
+https://storage.kernelci.org/ulfh/v4.10-rc5-97-ge1defa2da4d3/arm-sunxi_defconfig/lab-baylibre-seattle/boot-sun7i-a20-bananapi.txt
+
+Kind regards
+Uffe
