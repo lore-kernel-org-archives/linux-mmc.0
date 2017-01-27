@@ -1,12 +1,13 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 0/4] mmc: bcm2835: Add new driver for the internal SD
- controller.
-Date: Fri, 27 Jan 2017 12:36:25 +0100
-Message-ID: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 1/4] dt-bindings: Add binding for brcm,bcm2835-sdhost.
+Date: Fri, 27 Jan 2017 12:36:26 +0100
+Message-ID: <1485516989-1072-2-git-send-email-kraxel@redhat.com>
+References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -17,42 +18,49 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, linux-mmc@vger.kernel.org, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, linux-mmc@vger.kernel.org, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-  Hi,
+From: Eric Anholt <eric@anholt.net>
 
-Here comes the bcm2835 sdhost driver, with all cleanups squashed in, so
-you see just the final result without all the inividual cleanup steps.
+This is the other SD controller on the platform, which can be swapped
+to the role of SD card host using pin muxing.
 
-Patch #2 is the actual driver, commit message has some more info on the
-driver.  Patches 1+3 add the device tree bits.
-
-Patch #4 is the big red switch which activates the driver.
-
-Tested on a rpi2 so far, and in PIO mode only.  Will looking at enabling
-DMA next, and fixing whatever comes up in review of course.
-
-please review & test,
-  Gerd
-
-Eric Anholt (2):
-  dt-bindings: Add binding for brcm,bcm2835-sdhost.
-  mmc: bcm2835: Add new driver for the internal SD controller.
-
-Gerd Hoffmann (2):
-  mmc: bcm2835: add internal SD controller to devicetree
-  ARM: dts: bcm283x: switch from &sdhci to &sdhost
-
- .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   24 +
- arch/arm/boot/dts/bcm2835-rpi.dtsi                 |    6 +
- arch/arm/boot/dts/bcm283x.dtsi                     |    8 +
- drivers/mmc/host/Kconfig                           |    9 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/bcm2835.c                         | 1495 ++++++++++++++++++++
- 6 files changed, 1543 insertions(+)
+Signed-off-by: Eric Anholt <eric@anholt.net>
+---
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt           | 24 ++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
- create mode 100644 drivers/mmc/host/bcm2835.c
 
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+new file mode 100644
+index 0000000..f9f5982
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+@@ -0,0 +1,24 @@
++Broadcom BCM2835 SDHOST controller
++
++This file documents differences between the core properties described
++by mmc.txt and the properties that represent the BCM2835 controller.
++
++Required properties:
++- compatible: Should be "brcm,bcm2835-sdhost".
++- clocks: The clock feeding the SDHOST controller.
++
++Optional properties:
++- dmas: DMA channels for read and write.
++          See Documentation/devicetree/bindings/dma/dma.txt for details
++
++Example:
++
++sdhost: sdhost@7e202000 {
++	compatible = "brcm,bcm2835-sdhost";
++	reg = <0x7e202000 0x100>;
++	interrupts = <2 24>;
++	clocks = <&clocks BCM2835_CLOCK_VPU>;
++	dmas = <&dma 13>,
++	       <&dma 13>;
++	dma-names = "tx", "rx";
++};
 -- 
 1.8.3.1
