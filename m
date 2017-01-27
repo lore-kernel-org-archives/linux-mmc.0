@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 7/13] mmc: sunxi: Add more debug informations
-Date: Fri, 27 Jan 2017 22:38:39 +0100
-Message-ID: <b73d3b355cd937d572d2ca3292b4dfb2bea217e4.1485553113.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v5 9/13] arm64: allwinner: a64: Add MMC pinctrl nodes
+Date: Fri, 27 Jan 2017 22:38:41 +0100
+Message-ID: <18766b8a8c93e83953593c209af3be04f6c7aac4.1485553113.git-series.maxime.ripard@free-electrons.com>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,94 +23,51 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add a bit more debug messages that can be helpful when debugging the clock
-setup.
+The A64 only has a single set of pins for each MMC controller. Since we
+already have boards that require all of them, let's add them to the DTSI.
 
-Also fill the actual_clock field in struct mmc_host to report properly the
-current frequency in debugfs.
-
+Reviewed-by: Andre Przywara <andre.przywara@arm.com>
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
 ---
- drivers/mmc/host/sunxi-mmc.c | 23 +++++++++++++++++++----
- 1 file changed, 19 insertions(+), 4 deletions(-)
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 25 ++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index f0f6922bca8a..6ffcd2838272 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -661,6 +661,9 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	unsigned long expire = jiffies + msecs_to_jiffies(750);
- 	u32 rval;
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+index d06a4dc93e93..acc7071a7540 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+@@ -243,6 +243,31 @@
+ 				function = "i2c1";
+ 			};
  
-+	dev_dbg(mmc_dev(host->mmc), "%sabling the clock\n",
-+		oclk_en ? "en" : "dis");
++			mmc0_pins: mmc0-pins {
++				pins = "PF0", "PF1", "PF2", "PF3",
++				       "PF4", "PF5";
++				function = "mmc0";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
- 	rval = mmc_readl(host, REG_CLKCR);
- 	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON | SDXC_MASK_DATA0);
- 
-@@ -737,6 +740,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
- 			index = SDXC_CLK_50M_DDR;
- 		}
- 	} else {
-+		dev_dbg(mmc_dev(host->mmc), "Invalid clock... returning\n");
- 		return -EINVAL;
- 	}
- 
-@@ -749,6 +753,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
- static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 				  struct mmc_ios *ios)
- {
-+	struct mmc_host *mmc = host->mmc;
- 	long rate;
- 	u32 rval, clock = ios->clock;
- 	int ret;
-@@ -757,6 +762,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
- 
-+	/* Our clock is gated now */
-+	mmc->actual_clock = 0;
++			mmc1_pins: mmc1-pins {
++				pins = "PG0", "PG1", "PG2", "PG3",
++				       "PG4", "PG5";
++				function = "mmc1";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
- 	if (!ios->clock)
- 		return 0;
- 
-@@ -767,17 +775,17 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 
- 	rate = clk_round_rate(host->clk_mmc, clock);
- 	if (rate < 0) {
--		dev_err(mmc_dev(host->mmc), "error rounding clk to %d: %ld\n",
-+		dev_err(mmc_dev(mmc), "error rounding clk to %d: %ld\n",
- 			clock, rate);
- 		return rate;
- 	}
--	dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %ld\n",
-+	dev_dbg(mmc_dev(mmc), "setting clk to %d, rounded %ld\n",
- 		clock, rate);
- 
- 	/* setting clock rate */
- 	ret = clk_set_rate(host->clk_mmc, rate);
- 	if (ret) {
--		dev_err(mmc_dev(host->mmc), "error setting clk to %ld: %d\n",
-+		dev_err(mmc_dev(mmc), "error setting clk to %ld: %d\n",
- 			rate, ret);
- 		return ret;
- 	}
-@@ -812,7 +820,14 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	 * least on the A64).
- 	 */
- 
--	return sunxi_mmc_oclk_onoff(host, 1);
-+	ret = sunxi_mmc_oclk_onoff(host, 1);
-+	if (ret)
-+		return ret;
++			mmc2_pins: mmc2-pins {
++				pins = "PC1", "PC5", "PC6", "PC8", "PC9",
++				       "PC10","PC11", "PC12", "PC13",
++				       "PC14", "PC15", "PC16";
++				function = "mmc2";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
-+	/* And we just enabled our clock back */
-+	mmc->actual_clock = rate;
-+
-+	return 0;
- }
- 
- static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			uart0_pins_a: uart0@0 {
+ 				pins = "PB8", "PB9";
+ 				function = "uart0";
 -- 
 git-series 0.8.11
