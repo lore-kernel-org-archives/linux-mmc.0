@@ -1,205 +1,126 @@
-From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V4 6/6] dts: doc: rename rpm_requests to respect DT naming conventions
-Date: Fri, 27 Jan 2017 01:10:05 -0800
-Message-ID: <1485508205-1904-7-git-send-email-jeremymc@redhat.com>
-References: <1485508205-1904-1-git-send-email-jeremymc@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45692 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754770AbdA0JKd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 27 Jan 2017 04:10:33 -0500
-In-Reply-To: <1485508205-1904-1-git-send-email-jeremymc@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
+Date: Fri, 27 Jan 2017 10:46:36 +0100
+Message-ID: <20170127094635.uxuhh5vcexdx4i5h@lukather>
+References: <20170124101757.19676-1-linus.walleij@linaro.org>
+ <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
+ <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="mst7ckrlkdvdljgj"
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org
-Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com, jeremymc@redhat.com
-
-Node names cannot have an underscore '_' in the name.
-Simply rename 'rpm_request' nodes to 'rpm-request' and
-adjust associated documentation to reflect reality.
-
-Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
----
-
- Note:
-   Kept bindings and dts together as this is a simple search
-   and replace.
 
 
- Documentation/devicetree/bindings/clock/qcom,rpmcc.txt              | 2 +-
- .../devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt        | 2 +-
- Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt         | 6 +++---
- Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt             | 2 +-
- arch/arm/boot/dts/qcom-apq8074-dragonboard.dts                      | 2 +-
- arch/arm/boot/dts/qcom-apq8084.dtsi                                 | 2 +-
- arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts            | 2 +-
- arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts               | 2 +-
- arch/arm/boot/dts/qcom-msm8974.dtsi                                 | 2 +-
- arch/arm64/boot/dts/qcom/msm8916.dtsi                               | 2 +-
- arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi                       | 2 +-
- 11 files changed, 13 insertions(+), 13 deletions(-)
+--mst7ckrlkdvdljgj
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-index 87d3714..7154858 100644
---- a/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-+++ b/Documentation/devicetree/bindings/clock/qcom,rpmcc.txt
-@@ -24,7 +24,7 @@ Example:
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8916";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-index 4e3dfb5..6b984cc 100644
---- a/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-+++ b/Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
-@@ -187,7 +187,7 @@ see regulator.txt.
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-index a48049c..30e1c75 100644
---- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-+++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd-rpm.txt
-@@ -11,7 +11,7 @@ RPM node itself.
- 
- = SUBDEVICES
- 
--The RPM exposes resources to its subnodes.  The rpm_requests node must be
-+The RPM exposes resources to its subnodes.  The rpm-requests node must be
- present and this subnode may contain children that designate regulator
- resources.
- 
-@@ -29,7 +29,7 @@ resources.
- 	Definition: must be "rpm_requests"
- 
- Refer to Documentation/devicetree/bindings/regulator/qcom,smd-rpm-regulator.txt
--for information on the regulator subnodes that can exist under the rpm_requests.
-+for information on the regulator subnodes that can exist under the rpm-requests.
- 
- Example:
- 
-@@ -48,7 +48,7 @@ Example:
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-index ea1dc75..3d4a61c 100644
---- a/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-+++ b/Documentation/devicetree/bindings/soc/qcom/qcom,smd.txt
-@@ -82,7 +82,7 @@ The following example represents a smd node, with one edge representing the
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-index ad51df2..ccae434 100644
---- a/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-+++ b/arch/arm/boot/dts/qcom-apq8074-dragonboard.dts
-@@ -126,7 +126,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-index 80d4886..002fd69 100644
---- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-+++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-@@ -461,7 +461,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-apq8084";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-index 382bcc3..a24c6b4 100644
---- a/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-+++ b/arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
-@@ -19,7 +19,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-index e7c1577..ec937c9 100644
---- a/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-+++ b/arch/arm/boot/dts/qcom-msm8974-sony-xperia-honami.dts
-@@ -60,7 +60,7 @@
- 
- 	smd {
- 		rpm {
--			rpm_requests {
-+			rpm-requests {
- 				pm8841-regulators {
- 					s1 {
- 						regulator-min-microvolt = <675000>;
-diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
-index 49d579f..0c09049 100644
---- a/arch/arm/boot/dts/qcom-msm8974.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
-@@ -672,7 +672,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8974";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-index f8ff327..69eb846 100644
---- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-@@ -866,7 +866,7 @@
- 			qcom,ipc = <&apcs 8 0>;
- 			qcom,smd-edge = <15>;
- 
--			rpm_requests {
-+			rpm-requests {
- 				compatible = "qcom,rpm-msm8916";
- 				qcom,smd-channels = "rpm_requests";
- 
-diff --git a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-index 47ebd16..0a8d7e4 100644
---- a/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-@@ -13,7 +13,7 @@
- 
- &smd_rpm {
- 	rpm {
--		rpm_requests {
-+		rpm-requests {
- 			pm8994-regulators {
- 
- 				vdd_l1-supply = <&pm8994_s1>;
--- 
-2.6.1
+Hi Ulf,
 
+On Fri, Jan 27, 2017 at 08:58:16AM +0100, Ulf Hansson wrote:
+> On 26 January 2017 at 09:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On 24 January 2017 at 11:17, Linus Walleij <linus.walleij@linaro.org> w=
+rote:
+> >> The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
+> >> need to be refactored to it can be understood by humans.
+> >>
+> >> In the process I found some weird magic return values passed
+> >> around for no good reason.
+> >>
+> >> Things are more readable after this.
+> >>
+> >> This work is done towards the goal of breaking the function in
+> >> two parts: one just submitting the requests and one checking the
+> >> result and possibly resubmitting the command on error, so we
+> >> can make the usual path (non-errorpath) smooth and quick, and
+> >> be called directly when the driver completes a request.
+> >>
+> >> That in turn is a prerequisite for proper blk-mq integration
+> >> with the MMC/SD stack.
+> >>
+> >> All that comes later.
+> >>
+> >> Linus Walleij (6):
+> >>   mmc: block: break out mmc_blk_rw_cmd_abort()
+> >>   mmc: block: break out mmc_blk_rw_start_new()
+> >>   mmc: block: do not assign mq_rq when aborting command
+> >>   mmc: block: inline command abortions
+> >>   mmc: block: introduce new_areq and old_areq
+> >>   mmc: block: stop passing around pointless return values
+> >>
+> >>  drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++------------=
+---------
+> >>  drivers/mmc/core/block.h |   2 +-
+> >>  2 files changed, 60 insertions(+), 50 deletions(-)
+> >>
+> >> --
+> >> 2.9.3
+> >>
+> >
+> > Thanks, applied for next!
+>=20
+> Linus,
+>=20
+> Seems like this series may have issues. I have looked at boot reports
+> from kernelci, and particular the reports for
+> https://kernelci.org/boot/sun7i-a20-bananapi/job/ulfh/ are
+> interesting.
+>=20
+> Apparently, this board has an SD card attached. There have been errors
+> reported in the log for a while when doing data transfers, although
+> none of these errors have triggered the kernelci to report a boot
+> error.
+>=20
+> However, I suspect that some of the changes in this series make it
+> worse. Perhaps because of a changed error handling the mmc block
+> layer!?
+>=20
+> Particular, look at the difference between these [1] boot logs, it
+> might give you some hints. I have also added Maxime to this thread,
+> perhaps he can help out with the sunxi mmc driver.
+
+We also had a patch on the pinctrl side in 4.10, whose side effects
+would be to disable the pull ups on some boards that have not been
+configuring their pins properly (while the previous behaviour was to
+keep what the bootloader set).
+
+That board seems to fall in that category.
+
+That behaviour has been reverted, and Linus merged it already, so it
+might be entirely unrelated to that serie.
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--mst7ckrlkdvdljgj
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCAAGBQJYixb7AAoJEBx+YmzsjxAgqg0P/AuPFT9H6XGT4GL3r2CJDfFk
+BDkeQjUlqgTKv0MDEt55GrtDLHSBdkHr+5zSEMmCOa/YxPZ20lYWOQHt8WjGVBuT
+sqlIME68tfF8Ghwc7CwFZW4CXo8k3XlUa9gLRiMzVrhsIvzgi3+vN9hEhMaoTGrQ
+XAiYCQPS0sxnsjT9z6F/O6mInOV+ItN5266OlWOvuIcUbwWkF1XwbAk8BUjF1TgR
+gTbuVf+Ti5w5T2IkXCoqcg2SUp/Onw8GAe59s8H8jihSoJNcKU/jtMhc4UNa+fWD
+QPKIDMVp/q0+RC70M/nkk+UoS0QtGYdU1mqPfPcY7JBm1BKxpsNTfnduQ7xwFlqI
+OqkQUW/DnX8VfUOfLxXdWgMk/721GzTMuw3nWB38hWRWXzPBF3bw2LgAtstwH35m
+ZRCUIJ5XSmcmF3ssYjugjFCwSz5H1qF0Y+NVi1s5X+PU+tbgM1UP2GBsH9C8xSK2
+tsqTqi7e/GnMzqHE3Yu1VaWTwN6/Y5pS1ne9wBrMI80/fKXM36j2AqYQrgNmzSeW
+qYlkylQuuH1WDqq9IxoISPEYqcrm1Uxs4ucmwcubkCT4vcmSl1zpc52OAowFfL/J
+37vmg4ybpnc/oQAmImilBJ5TeKirePGoNgPs8NDhESuHkXckxuQozaXEKg9whffT
+1LyLeBeNqb2SQaHmiKGS
+=jSRQ
+-----END PGP SIGNATURE-----
+
+--mst7ckrlkdvdljgj--
