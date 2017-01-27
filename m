@@ -1,24 +1,27 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Subject: Re: [PATCH] mmc: core/mmci: restore pre/post_req behaviour
-Date: Fri, 27 Jan 2017 15:18:27 +0100
-Message-ID: <CAPDyKFomNHTPMDUT_CUjQuG-goTuQoXqzn+vOgdP9njUTWjGXg@mail.gmail.com>
+Date: Fri, 27 Jan 2017 14:44:32 +0000
+Message-ID: <1f63461b-e4c0-93fb-f30f-73147c72e33b@linaro.org>
 References: <20170127140454.7990-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38756 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932285AbdA0OSa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 09:18:30 -0500
-Received: by mail-wm0-f45.google.com with SMTP id r144so139939214wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jan 2017 06:18:29 -0800 (PST)
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35020 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754814AbdA0Oof (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 09:44:35 -0500
+Received: by mail-wm0-f43.google.com with SMTP id r126so120206623wmr.0
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Jan 2017 06:44:34 -0800 (PST)
 In-Reply-To: <20170127140454.7990-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>
+To: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>
 
-On 27 January 2017 at 15:04, Linus Walleij <linus.walleij@linaro.org> wrote:
+
+
+On 27/01/17 14:04, Linus Walleij wrote:
 > commit 64b12a68a9f74bb32d8efd7af1ad8a2ba02fc884
 > "mmc: core: fix prepared requests while doing bkops"
 > is fixing a bug in the wrong way. A bug in the MMCI
@@ -64,109 +67,13 @@ On 27 January 2017 at 15:04, Linus Walleij <linus.walleij@linaro.org> wrote:
 > After this we can keep the request prepared during the
 > BKOPS and we need not unprepare/reprepare it.
 
-Thanks for the detailed explanation! This makes perfect sense to me.
+Thanks for detailed explanation and fixing it properly.
+
+Tested it on IFC6410.
 
 >
 > Fixes: 64b12a68a9f7 ("mmc: core: fix prepared requests while doing bkops")
 > Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Do you think this is material for stable, or we could just see it as
-an improved behaviour of the core and mmci?
-
-Kind regards
-Uffe
-
-> ---
-> This was found when trying to refactor the stack to complete
-> requests from the mmc_request_done() call: pretty tricky to
-> do this when you don't have the previous and next-to-run
-> asynchronous request available. Luckily I think it is just
-> a bug fix done the wrong way.
->
-> I will build further patches on this one.
-> ---
->  drivers/mmc/core/core.c | 9 ---------
->  drivers/mmc/host/mmci.c | 7 ++++++-
->  drivers/mmc/host/mmci.h | 3 ++-
->  3 files changed, 8 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index ed1768cf464a..a160c3a7777a 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -676,16 +676,7 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
->                     ((mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1) ||
->                      (mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1B)) &&
->                     (host->areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT)) {
-> -
-> -                       /* Cancel the prepared request */
-> -                       if (areq)
-> -                               mmc_post_req(host, areq->mrq, -EINVAL);
-> -
->                         mmc_start_bkops(host->card, true);
-> -
-> -                       /* prepare the request again */
-> -                       if (areq)
-> -                               mmc_pre_req(host, areq->mrq);
->                 }
->         }
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 01a804792f30..bc5fd04acd0f 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -507,6 +507,7 @@ static void mmci_dma_data_error(struct mmci_host *host)
->  {
->         dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
->         dmaengine_terminate_all(host->dma_current);
-> +       host->dma_in_progress = false;
->         host->dma_current = NULL;
->         host->dma_desc_current = NULL;
->         host->data->host_cookie = 0;
-> @@ -565,6 +566,7 @@ static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
->                 mmci_dma_release(host);
->         }
->
-> +       host->dma_in_progress = false;
->         host->dma_current = NULL;
->         host->dma_desc_current = NULL;
->  }
-> @@ -665,6 +667,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
->         dev_vdbg(mmc_dev(host->mmc),
->                  "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
->                  data->sg_len, data->blksz, data->blocks, data->flags);
-> +       host->dma_in_progress = true;
->         dmaengine_submit(host->dma_desc_current);
->         dma_async_issue_pending(host->dma_current);
->
-> @@ -740,8 +743,10 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
->                 if (host->dma_desc_current == next->dma_desc)
->                         host->dma_desc_current = NULL;
->
-> -               if (host->dma_current == next->dma_chan)
-> +               if (host->dma_current == next->dma_chan) {
-> +                       host->dma_in_progress = false;
->                         host->dma_current = NULL;
-> +               }
->
->                 next->dma_desc = NULL;
->                 next->dma_chan = NULL;
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 56322c6afba4..4a8bef1aac8f 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -245,8 +245,9 @@ struct mmci_host {
->         struct dma_chan         *dma_tx_channel;
->         struct dma_async_tx_descriptor  *dma_desc_current;
->         struct mmci_host_next   next_data;
-> +       bool                    dma_in_progress;
->
-> -#define dma_inprogress(host)   ((host)->dma_current)
-> +#define dma_inprogress(host)   ((host)->dma_in_progress)
->  #else
->  #define dma_inprogress(host)   (0)
->  #endif
-> --
-> 2.9.3
->
+Tested-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
