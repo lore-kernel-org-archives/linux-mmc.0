@@ -1,44 +1,98 @@
-From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: Re: [PATCH 04/13] mmc: bcm2835: add bcm2835_check_data_error
-Date: Fri, 27 Jan 2017 11:31:01 +0100
-Message-ID: <1485513061.19754.62.camel@redhat.com>
-References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
-         <1485473846-24537-5-git-send-email-kraxel@redhat.com>
-         <3876dea7-cd61-e7cf-e838-8bab6927c8fb@rock-chips.com>
+From: Florian Vaussard <florian.vaussard@heig-vd.ch>
+Subject: Re: [PATCH v4 0/13] arm64: allwinner: a64: Enable MMC support
+Date: Fri, 27 Jan 2017 11:37:27 +0100
+Message-ID: <e4133504-8bc7-a9ac-209d-3d8cba119fed@heig-vd.ch>
+References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3876dea7-cd61-e7cf-e838-8bab6927c8fb@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-rpi-kernel@lists.infradead.org, Stefan Wahren <stefan.wahren@i2se.com>, Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-  Hi,
+Hi Maxime,
 
-> > @@ -1007,15 +1017,7 @@ static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
-> >  	if (!host->data)
-> >  		return;
-> >
+On 01/26/2017 10:05 AM, Maxime Ripard wrote:
+> Hi,
 > 
-> remove this check, !host->data, as well.
+> Here is a new attempt at getting the MMC controllers running, following the
+> work done by Andre.
+> 
+> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
+> and a Kingston eMMC with 1.8V IOs.
+> 
+> For SDIO, the HS DDR mode works just fine. That serie also enables the
+> SDR104 mode to work on the devices that are capable of this.
+> 
+> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
+> moment, but since it's significantly more complex, and at the same time
+> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
+> any benefits. If there's any at some point, this can be added later.
+> 
+> Let me know what you think,
+> Maxime
+> 
 
-There is a comment in the code saying it is needed, here is more
-context:
+FWIW I tested this series and got decent throughput (190 Mbps in UDP) with a
+Marvell SDIO Wifi chip. The board becomes unresponsive between 30 to 60 minutes
+of iperf torture, but I strongly suspect a hardware issue underneath. Feel free
+to add my Tested-by on the MMC patches if you need it.
 
-static void bcm2835_data_irq(struct bcm2835_host *host, u32 intmask)
-{
-	/* There are no dedicated data/space available interrupt
-	 * status bits, so it is necessary to use the single shared
-	 * data/space available FIFO status bits. It is therefore not
-	 * an error to get here when there is no data transfer in
-	 * progress.
-	 */
-	if (!host->data)
-		return;
+Thank you for your work.
 
-	bcm2835_check_data_error(host, intmask);
+Best,
+Florian
 
-cheers,
-  Gerd
+> Changes from v3:
+>   - Reordered the MMC nodes
+>   - Added the specification section the first commit log
+>   - Supported mmc->actual_rate
+>   - Clarified a bit what we (don't) know about DATA0
+> 
+> Changes from v2:
+>   - Enabled SDR104, limited the frequency to 150MHz. 200MHz was too high.
+>   - Added more fixes to the gating and frequency rate change sequence
+>   - Added one more patch to mask DATA0 when updating the clock that was
+>     needed to get SDR104 to run
+>   - Added the patches to enable it on a few boards done by Andre
+>   - Amended the comments as suggested by Andre.
+>   - Added some tags
+> 
+> Andre Przywara (4):
+>   arm64: allwinner: a64: Add MMC nodes
+>   arm64: allwinner: pine64: add MMC support
+>   arm64: allwinner: a64: add UART1 pin nodes
+>   arm64: allwinner: add BananaPi-M64 support
+> 
+> Maxime Ripard (9):
+>   mmc: sunxi: Fix clock frequency change sequence
+>   mmc: sunxi: Gate the clock when rate is 0
+>   mmc: sunxi: Always set signal delay to 0 for A64
+>   mmc: sunxi: Enable the new timings for the A64 MMC controllers
+>   mmc: sunxi: Mask DATA0 when updating the clock
+>   mmc: sunxi: Add EMMC (MMC2) controller compatible
+>   mmc: sunxi: Add more debug informations
+>   arm64: allwinner: a64: Add MMC pinctrl nodes
+>   arm64: allwinner: a64: Increase the MMC max frequency
+> 
+>  arch/arm64/boot/dts/allwinner/Makefile                    |   1 +-
+>  arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 120 +++++++-
+>  arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts       |  20 +-
+>  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi             |  77 ++++-
+>  drivers/mmc/host/sunxi-mmc.c                              | 114 ++++---
+>  5 files changed, 289 insertions(+), 43 deletions(-)
+>  create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
+> 
+> base-commit: bc34c1af0a280e27eafe3f86b9ad87fe0c9ea715
+> 
