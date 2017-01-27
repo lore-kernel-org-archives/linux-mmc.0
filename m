@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 2/13] mmc: sunxi: Gate the clock when rate is 0
-Date: Fri, 27 Jan 2017 22:38:34 +0100
-Message-ID: <3f1556a50a445a3a87d0758a5a6f3a0a5cde70b2.1485553113.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v5 3/13] mmc: sunxi: Always set signal delay to 0 for A64
+Date: Fri, 27 Jan 2017 22:38:35 +0100
+Message-ID: <0665483546d0e671dcb3398cfc9dd617355198b2.1485553113.git-series.maxime.ripard@free-electrons.com>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,39 +23,90 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The MMC core assumes that the code will gate the clock when the bus
-frequency is set to 0, which we've been ignoring so far.
+Experience have shown that the using the  autocalibration could severely
+degrade the performances of the MMC bus.
 
-Handle that.
+Allwinner is using in its BSP a delay set to 0 for all the modes but HS400.
+Remove the calibration code for now, and add comments to document our
+findings.
 
+Reviewed-by: Andre Przywara <andre.przywara@arm.com>
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
 ---
- drivers/mmc/host/sunxi-mmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sunxi-mmc.c | 50 ++++++++++++-------------------------
+ 1 file changed, 17 insertions(+), 33 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index ab4324e6eb74..019f95e8e7c5 100644
+index 019f95e8e7c5..b9c8a62bc212 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -765,6 +765,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+@@ -683,41 +683,19 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 
+ static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
+ {
+-	u32 reg = readl(host->reg_base + reg_off);
+-	u32 delay;
+-	unsigned long timeout;
+-
+ 	if (!host->cfg->can_calibrate)
+ 		return 0;
+ 
+-	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
+-	reg &= ~SDXC_CAL_DL_SW_EN;
+-
+-	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
+-
+-	dev_dbg(mmc_dev(host->mmc), "calibration started\n");
+-
+-	timeout = jiffies + HZ * SDXC_CAL_TIMEOUT;
+-
+-	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE)) {
+-		if (time_before(jiffies, timeout))
+-			cpu_relax();
+-		else {
+-			reg &= ~SDXC_CAL_START;
+-			writel(reg, host->reg_base + reg_off);
+-
+-			return -ETIMEDOUT;
+-		}
+-	}
+-
+-	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
+-
+-	reg &= ~SDXC_CAL_START;
+-	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
+-
+-	writel(reg, host->reg_base + reg_off);
+-
+-	dev_dbg(mmc_dev(host->mmc), "calibration ended, reg is 0x%x\n", reg);
++	/*
++	 * FIXME:
++	 * This is not clear how the calibration is supposed to work
++	 * yet. The best rate have been obtained by simply setting the
++	 * delay to 0, as Allwinner does in its BSP.
++	 *
++	 * The only mode that doesn't have such a delay is HS400, that
++	 * is in itself a TODO.
++	 */
++	writel(SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
+ 
+ 	return 0;
+ }
+@@ -809,7 +787,13 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
  	if (ret)
  		return ret;
  
-+	if (!ios->clock)
-+		return 0;
-+
- 	/* 8 bit DDR requires a higher module clock */
- 	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
- 	    ios->bus_width == MMC_BUS_WIDTH_8)
-@@ -882,7 +885,7 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mmc_writel(host, REG_GCTRL, rval);
+-	/* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
++	/*
++	 * FIXME:
++	 *
++	 * In HS400 we'll also need to calibrate the data strobe
++	 * signal. This should only happen on the MMC2 controller (at
++	 * least on the A64).
++	 */
  
- 	/* set up clock */
--	if (ios->clock && ios->power_mode) {
-+	if (ios->power_mode) {
- 		host->ferror = sunxi_mmc_clk_set_rate(host, ios);
- 		/* Android code had a usleep_range(50000, 55000); here */
- 	}
+ 	return sunxi_mmc_oclk_onoff(host, 1);
+ }
 -- 
 git-series 0.8.11
