@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 12/13] arm64: allwinner: a64: add UART1 pin nodes
-Date: Fri, 27 Jan 2017 22:38:44 +0100
-Message-ID: <5141797c4627d1d152f02dd3b43e7c5fef996ef6.1485553113.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v5 1/13] mmc: sunxi: Fix clock frequency change sequence
+Date: Fri, 27 Jan 2017 22:38:33 +0100
+Message-ID: <7a6cea2cb855613fd7fb3d029e92be00c34b252d.1485553113.git-series.maxime.ripard@free-electrons.com>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,38 +23,47 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Andre Przywara <andre.przywara@arm.com>
+The SD specification documents that the clock frequency should only be
+changed once gated (Section 3.2.3 - SD Clock Frequency Change Sequence).
 
-On many boards UART1 connects to a Bluetooth chip, so add the pinctrl
-nodes for the only pins providing access to that UART. That includes
-those pins for hardware flow control (RTS/CTS).
+The current code first modifies the parent clock, gates it and then
+modifies the internal divider. This means that since the parent clock rate
+might be changed, the bus clock might be changed as well before it is
+gated, which breaks the specification.
 
-Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Move the gating before the parent rate modification.
+
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
 ---
- arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi | 10 ++++++++++
- 1 file changed, 10 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-index 9ae4f589fb1c..1c64ea2d23f9 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-@@ -275,6 +275,16 @@
- 				pins = "PB8", "PB9";
- 				function = "uart0";
- 			};
-+
-+			uart1_pins: uart1_pins {
-+				pins = "PG6", "PG7";
-+				function = "uart1";
-+			};
-+
-+			uart1_rts_cts_pins: uart1_rts_cts_pins {
-+				pins = "PG8", "PG9";
-+				function = "uart1";
-+			};
- 		};
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index b1d1303389a7..ab4324e6eb74 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -761,6 +761,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	u32 rval, clock = ios->clock;
+ 	int ret;
  
- 		uart0: serial@1c28000 {
++	ret = sunxi_mmc_oclk_onoff(host, 0);
++	if (ret)
++		return ret;
++
+ 	/* 8 bit DDR requires a higher module clock */
+ 	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
+ 	    ios->bus_width == MMC_BUS_WIDTH_8)
+@@ -783,10 +787,6 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 		return ret;
+ 	}
+ 
+-	ret = sunxi_mmc_oclk_onoff(host, 0);
+-	if (ret)
+-		return ret;
+-
+ 	/* clear internal divider */
+ 	rval = mmc_readl(host, REG_CLKCR);
+ 	rval &= ~0xff;
 -- 
 git-series 0.8.11
