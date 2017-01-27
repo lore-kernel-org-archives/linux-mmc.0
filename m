@@ -1,77 +1,63 @@
 From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V4 0/6] Enable onboard SDHCI for Nexus 5X (msm8992)
-Date: Fri, 27 Jan 2017 01:09:59 -0800
-Message-ID: <1485508205-1904-1-git-send-email-jeremymc@redhat.com>
+Subject: [PATCH V4 1/6] clk: qcom: SDHCI enablement on Nexus 5X / 6P
+Date: Fri, 27 Jan 2017 01:10:00 -0800
+Message-ID: <1485508205-1904-2-git-send-email-jeremymc@redhat.com>
+References: <1485508205-1904-1-git-send-email-jeremymc@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46136 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60216 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754536AbdA0JKP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 27 Jan 2017 04:10:15 -0500
+        id S1754766AbdA0JKT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 27 Jan 2017 04:10:19 -0500
+In-Reply-To: <1485508205-1904-1-git-send-email-jeremymc@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org
 Cc: andy.gross@linaro.org, sboyd@codeaurora.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com, jeremymc@redhat.com
 
-Here links to previous versions:
+Add missing clock branch to enable onboard storage
+for msm899(2/4).
 
-[V1]
-   https://www.spinics.net/lists/devicetree/msg151845.html
+Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
+---
+ drivers/clk/qcom/gcc-msm8994.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-[V2]
-  http://www.spinics.net/lists/devicetree/msg158808.html 
-
-[V3]
-  http://www.spinics.net/lists/devicetree/msg160644.html
+diff --git a/drivers/clk/qcom/gcc-msm8994.c b/drivers/clk/qcom/gcc-msm8994.c
+index 8afd830..7983288 100644
+--- a/drivers/clk/qcom/gcc-msm8994.c
++++ b/drivers/clk/qcom/gcc-msm8994.c
+@@ -1888,6 +1888,23 @@ static struct clk_branch gcc_sdcc1_apps_clk = {
+ 	},
+ };
  
-What changed V3->V4:
-
-  * Dropped [V3] (2/6) Add quirk for delayed IRQ ACK as this
-    workaround was improving detection time but masking another
-    issue with rpm-smd specific to msm899(2/4).  
-
-  * Including the C code to enable/add missing clock branch.
-    In V3 this change was split up between dt-bindings and C
-    but the C part didn't get sent to the mailing list.
-    Its in my inbox and tree ;-)
-
-Note:
-  -only the AHB clock was added for SDCC1 as it was tested.
-   SDCC[2->4] ADB_CLK will be added once these branches are
-   investigated against downstream.  ie) are they all clock
-   branches the same as SDCC1_AHB ?
-
-  6/6 was not separated out into dt-bindings and devicetree
-      as it was just a simple search and replace.
-
-
-Jeremy McNicoll (6):
-  clk: qcom: SDHCI enablement on Nexus 5X / 6P
-  dt-bindings: qcom: clk: Add missing binding for SDCHI enablement on
-    Nexus 5X/6P
-  arm64: dts: msm8992 add fixed regulator
-  arm64: dts: smem enablement for msm8992
-  dts: arm64: Enable onboard SDHCI on msm8992
-  dts: doc: rename rpm_requests to respect DT naming conventions
-
- .../devicetree/bindings/clock/qcom,rpmcc.txt       |   2 +-
- .../bindings/regulator/qcom,smd-rpm-regulator.txt  |   2 +-
- .../devicetree/bindings/soc/qcom/qcom,smd-rpm.txt  |   6 +-
- .../devicetree/bindings/soc/qcom/qcom,smd.txt      |   2 +-
- arch/arm/boot/dts/qcom-apq8074-dragonboard.dts     |   2 +-
- arch/arm/boot/dts/qcom-apq8084.dtsi                |   2 +-
- .../dts/qcom-msm8974-lge-nexus5-hammerhead.dts     |   2 +-
- .../boot/dts/qcom-msm8974-sony-xperia-honami.dts   |   2 +-
- arch/arm/boot/dts/qcom-msm8974.dtsi                |   2 +-
- arch/arm64/boot/dts/qcom/msm8916.dtsi              |   2 +-
- .../boot/dts/qcom/msm8992-bullhead-rev-101.dts     |   2 +
- arch/arm64/boot/dts/qcom/msm8992-pins.dtsi         |  60 +++++
- arch/arm64/boot/dts/qcom/msm8992.dtsi              | 143 ++++++++++-
- arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi      | 276 +++++++++++++++++++++
- drivers/clk/qcom/gcc-msm8994.c                     |  18 ++
- include/dt-bindings/clock/qcom,gcc-msm8994.h       |   1 +
- 16 files changed, 511 insertions(+), 13 deletions(-)
- create mode 100644 arch/arm64/boot/dts/qcom/msm8994-smd-rpm.dtsi
-
++static struct clk_branch gcc_sdcc1_ahb_clk = {
++	.halt_reg = 0x04c8,
++	.clkr = {
++		.enable_reg = 0x04c8,
++		.enable_mask = BIT(0),
++		.hw.init = &(struct clk_init_data)
++		{
++			.name = "gcc_sdcc1_ahb_clk",
++			.parent_names = (const char *[]){
++				"periph_noc_clk_src",
++			},
++			.num_parents = 1,
++			.ops = &clk_branch2_ops,
++		},
++	},
++};
++
+ static struct clk_branch gcc_sdcc2_apps_clk = {
+ 	.halt_reg = 0x0504,
+ 	.clkr = {
+@@ -2231,6 +2248,7 @@ static struct clk_regmap *gcc_msm8994_clocks[] = {
+ 	[GCC_SDCC2_APPS_CLK] = &gcc_sdcc2_apps_clk.clkr,
+ 	[GCC_SDCC3_APPS_CLK] = &gcc_sdcc3_apps_clk.clkr,
+ 	[GCC_SDCC4_APPS_CLK] = &gcc_sdcc4_apps_clk.clkr,
++	[GCC_SDCC1_AHB_CLK] = &gcc_sdcc1_ahb_clk.clkr,
+ 	[GCC_SYS_NOC_UFS_AXI_CLK] = &gcc_sys_noc_ufs_axi_clk.clkr,
+ 	[GCC_SYS_NOC_USB3_AXI_CLK] = &gcc_sys_noc_usb3_axi_clk.clkr,
+ 	[GCC_TSIF_REF_CLK] = &gcc_tsif_ref_clk.clkr,
 -- 
 2.6.1
 
