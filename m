@@ -1,7 +1,7 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 3/13] mmc: sunxi: Always set signal delay to 0 for A64
-Date: Fri, 27 Jan 2017 22:38:35 +0100
-Message-ID: <0665483546d0e671dcb3398cfc9dd617355198b2.1485553113.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v5 7/13] mmc: sunxi: Add more debug informations
+Date: Fri, 27 Jan 2017 22:38:39 +0100
+Message-ID: <b73d3b355cd937d572d2ca3292b4dfb2bea217e4.1485553113.git-series.maxime.ripard@free-electrons.com>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,90 +23,94 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Experience have shown that the using the  autocalibration could severely
-degrade the performances of the MMC bus.
+Add a bit more debug messages that can be helpful when debugging the clock
+setup.
 
-Allwinner is using in its BSP a delay set to 0 for all the modes but HS400.
-Remove the calibration code for now, and add comments to document our
-findings.
+Also fill the actual_clock field in struct mmc_host to report properly the
+current frequency in debugfs.
 
-Reviewed-by: Andre Przywara <andre.przywara@arm.com>
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
 ---
- drivers/mmc/host/sunxi-mmc.c | 50 ++++++++++++-------------------------
- 1 file changed, 17 insertions(+), 33 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 019f95e8e7c5..b9c8a62bc212 100644
+index f0f6922bca8a..6ffcd2838272 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -683,41 +683,19 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+@@ -661,6 +661,9 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 	unsigned long expire = jiffies + msecs_to_jiffies(750);
+ 	u32 rval;
  
- static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
++	dev_dbg(mmc_dev(host->mmc), "%sabling the clock\n",
++		oclk_en ? "en" : "dis");
++
+ 	rval = mmc_readl(host, REG_CLKCR);
+ 	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON | SDXC_MASK_DATA0);
+ 
+@@ -737,6 +740,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
+ 			index = SDXC_CLK_50M_DDR;
+ 		}
+ 	} else {
++		dev_dbg(mmc_dev(host->mmc), "Invalid clock... returning\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -749,6 +753,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
+ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 				  struct mmc_ios *ios)
  {
--	u32 reg = readl(host->reg_base + reg_off);
--	u32 delay;
--	unsigned long timeout;
--
- 	if (!host->cfg->can_calibrate)
- 		return 0;
- 
--	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
--	reg &= ~SDXC_CAL_DL_SW_EN;
--
--	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
--
--	dev_dbg(mmc_dev(host->mmc), "calibration started\n");
--
--	timeout = jiffies + HZ * SDXC_CAL_TIMEOUT;
--
--	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE)) {
--		if (time_before(jiffies, timeout))
--			cpu_relax();
--		else {
--			reg &= ~SDXC_CAL_START;
--			writel(reg, host->reg_base + reg_off);
--
--			return -ETIMEDOUT;
--		}
--	}
--
--	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
--
--	reg &= ~SDXC_CAL_START;
--	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
--
--	writel(reg, host->reg_base + reg_off);
--
--	dev_dbg(mmc_dev(host->mmc), "calibration ended, reg is 0x%x\n", reg);
-+	/*
-+	 * FIXME:
-+	 * This is not clear how the calibration is supposed to work
-+	 * yet. The best rate have been obtained by simply setting the
-+	 * delay to 0, as Allwinner does in its BSP.
-+	 *
-+	 * The only mode that doesn't have such a delay is HS400, that
-+	 * is in itself a TODO.
-+	 */
-+	writel(SDXC_CAL_DL_SW_EN, host->reg_base + reg_off);
- 
- 	return 0;
- }
-@@ -809,7 +787,13 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
++	struct mmc_host *mmc = host->mmc;
+ 	long rate;
+ 	u32 rval, clock = ios->clock;
+ 	int ret;
+@@ -757,6 +762,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
  	if (ret)
  		return ret;
  
--	/* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
-+	/*
-+	 * FIXME:
-+	 *
-+	 * In HS400 we'll also need to calibrate the data strobe
-+	 * signal. This should only happen on the MMC2 controller (at
-+	 * least on the A64).
-+	 */
++	/* Our clock is gated now */
++	mmc->actual_clock = 0;
++
+ 	if (!ios->clock)
+ 		return 0;
  
- 	return sunxi_mmc_oclk_onoff(host, 1);
+@@ -767,17 +775,17 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 
+ 	rate = clk_round_rate(host->clk_mmc, clock);
+ 	if (rate < 0) {
+-		dev_err(mmc_dev(host->mmc), "error rounding clk to %d: %ld\n",
++		dev_err(mmc_dev(mmc), "error rounding clk to %d: %ld\n",
+ 			clock, rate);
+ 		return rate;
+ 	}
+-	dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %ld\n",
++	dev_dbg(mmc_dev(mmc), "setting clk to %d, rounded %ld\n",
+ 		clock, rate);
+ 
+ 	/* setting clock rate */
+ 	ret = clk_set_rate(host->clk_mmc, rate);
+ 	if (ret) {
+-		dev_err(mmc_dev(host->mmc), "error setting clk to %ld: %d\n",
++		dev_err(mmc_dev(mmc), "error setting clk to %ld: %d\n",
+ 			rate, ret);
+ 		return ret;
+ 	}
+@@ -812,7 +820,14 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	 * least on the A64).
+ 	 */
+ 
+-	return sunxi_mmc_oclk_onoff(host, 1);
++	ret = sunxi_mmc_oclk_onoff(host, 1);
++	if (ret)
++		return ret;
++
++	/* And we just enabled our clock back */
++	mmc->actual_clock = rate;
++
++	return 0;
  }
+ 
+ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 -- 
 git-series 0.8.11
