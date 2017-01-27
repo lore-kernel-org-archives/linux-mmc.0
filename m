@@ -1,79 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 2/3] mmc: sh_mobile_sdhi: explain clock bindings
-Date: Fri, 27 Jan 2017 09:36:27 +0100
-Message-ID: <CAPDyKFrx+mLNH-DEt90g9tutgpHUoTYzv3-Zt8GoSFEuPeqM+A@mail.gmail.com>
-References: <20170121030604.7672-1-chris.brandt@renesas.com>
- <20170121030604.7672-3-chris.brandt@renesas.com> <20170123165523.fnavkx263ifvss4p@rob-hp-laptop>
- <SG2PR06MB1165F465C5802912ED62820C8A720@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
+From: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+Subject: Re: [PATCH v6 0/3] mmc: sh_mobile_sdhi: fix missing r7s72100 clocks
+Date: Fri, 27 Jan 2017 09:40:38 +0100
+Message-ID: <20170127084038.GI21195@verge.net.au>
+References: <1485443632-22612-1-git-send-email-vladimir.barinov@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:36059 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754360AbdA0IhI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jan 2017 03:37:08 -0500
-Received: by mail-it0-f41.google.com with SMTP id c7so146218226itd.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jan 2017 00:36:28 -0800 (PST)
-In-Reply-To: <CAL_Jsq+uit6rVcqsJjxmbtYfYdCvyRLCgDbp9RZd-B8SJo0+yg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1485443632-22612-1-git-send-email-vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+ <1485442486-18427-1-git-send-email-vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+ <1485442469-18378-1-git-send-email-vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+ <1485442460-18339-1-git-send-email-vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+ <1485442449-18300-1-git-send-email-vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+ <SG2PR06MB1165AEC165D52358154B5EE38A770-ESzmfEwOt/xoAsOJh7vwSm0DtJ1/0DrXvxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
+ <20170126101211.GB1435@katana>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Brandt <Chris.Brandt-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Vladimir Barinov <vladimir.barinov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Chris Brandt <Chris.Brandt@renesas.com>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-On 26 January 2017 at 15:39, Rob Herring <robh@kernel.org> wrote:
-> On Mon, Jan 23, 2017 at 11:56 AM, Chris Brandt <Chris.Brandt@renesas.com> wrote:
->> Hello Rob,
->>
->>
->> On Monday, January 23, 2017, Rob Herring wrote:
->>> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
->>> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
->>> > @@ -25,8 +25,32 @@ Required properties:
->>> >             "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->>> >             "renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
->>> >
->>> > +- clocks: Most controllers only have 1 clock source per channel.
->>> However, on
->>> > +     some variations of this controller, the internal card detection
->>>
->>> This should be explicit as to which compatible strings have 2 clocks and
->>> which have 1 clock.
->>
->> OK. I'll make a list like I did for sh_mmcif:
->>
->> https://patchwork.kernel.org/patch/9512091/
->>
->>
->>
->>> > +
->>> > +Example showing 2 clocks:
->>> > +   sdhi0: sd@e804e000 {
->>>
->>> mmc@...
->>
->> I'm confused. I see that for all SDHI controllers, it either "sd@" or "sdhci@".
->>
->> $ grep sdhi $(find arch/arm/boot/dts -name "*.dtsi")
->>
->> $ grep sdhci $(find arch/arm/boot/dts -name "*.dtsi")
->
-> Yes, there's lots of variation. Node names are supposed to be generic
-> for their class of device (e.g. ethernet, pci, usb,
-> interrupt-controller, etc.). I'd be fine with "sd", but think "mmc" is
-> more common. Either way, we should pick one moving forward. "sdhci"
-> should not be used as that's a specific implementation.
+On Thu, Jan 26, 2017 at 11:12:11AM +0100, Wolfram Sang wrote:
+> 
+> > Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
+> > guess!? (And I can add Rob's ack afterwards).
+> 
+> Can you add my tags as well. They got dropped somehow:
+> 
+> Reviewed-by: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
 
-I think we discussed this earlier. The problem with these devices is
-that it covers several type of devices, so it's hard to find a generic
-node name.
+On Thu, Jan 26, 2017 at 12:53:10PM +0000, Chris Brandt wrote:
+> Hi Simon,
+> 
+> On Thursday, January 26, 2017, Simon Horman wrote:
+> > > Thanks, applied patch1 and patch2 for next. Patch3 is for Simon, I
+> > > guess!? (And I can add Rob's ack afterwards).
+> > 
+> > Thanks, I will take care of the 3rd patch.
+> > 
+> > Chris, is it safe to apply the 3rd patch without the first 2 patches
+> > present?
+> 
+> Yes, it is safe.
 
-The devices are: MMC, eMMC, SD, SDIO. I don't have strong opinions on
-whether to chose a generic node name, and perhaps "mmc" is the best we
-can get?
-
-Whatever we decide, we should update all mmc DTS docs, to avoid future
-confusion.
-
-Kind regards
-Uffe
+Thanks, I have queued this up for v4.12 with Wolfram's tag.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
