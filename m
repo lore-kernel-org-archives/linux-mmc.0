@@ -1,119 +1,133 @@
-From: Boris Brezillon <boris.brezillon@free-electrons.com>
-Subject: Re: [PATCH 10/13] mtd: nand: jz4740: Let the pinctrl driver
- configure the pins
-Date: Fri, 27 Jan 2017 18:33:11 +0100
-Message-ID: <20170127183311.132b5661@bbrezillon>
-References: <20170117231421.16310-1-paul@crapouillou.net>
-        <20170117231421.16310-11-paul@crapouillou.net>
+From: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+Subject: Re: [PATCH 00/13] mmc: bcm2835: more cleanups
+Date: Fri, 27 Jan 2017 09:52:37 -0800
+Message-ID: <87o9ysjspm.fsf@eliezer.anholt.net>
+References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+ <CAPDyKFoOShjQC8MbaxEuPG9m5FiSEfEd55qph3UDRHXH7C6VWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <20170117231421.16310-11-paul@crapouillou.net>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
+Content-Type: multipart/mixed; boundary="===============8549449249136899396=="
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFoOShjQC8MbaxEuPG9m5FiSEfEd55qph3UDRHXH7C6VWA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 18 Jan 2017 00:14:18 +0100
-Paul Cercueil <paul@crapouillou.net> wrote:
+--===============8549449249136899396==
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha512; protocol="application/pgp-signature"
 
-> Before, this NAND driver would set itself the configuration of the
-> chip-select pins for the various NAND banks.
-> 
-> Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-> the pins being properly configured before the driver probes.
-> 
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+--=-=-=
+Content-Type: text/plain
 
-Acked-by: Boris Brezillon <boris.brezillon@free-electrons.com>
+Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
 
-> ---
->  drivers/mtd/nand/jz4740_nand.c | 23 +----------------------
->  1 file changed, 1 insertion(+), 22 deletions(-)
-> 
-> diff --git a/drivers/mtd/nand/jz4740_nand.c b/drivers/mtd/nand/jz4740_nand.c
-> index 5551c36adbdf..0d06a1f07d82 100644
-> --- a/drivers/mtd/nand/jz4740_nand.c
-> +++ b/drivers/mtd/nand/jz4740_nand.c
-> @@ -25,7 +25,6 @@
->  
->  #include <linux/gpio.h>
->  
-> -#include <asm/mach-jz4740/gpio.h>
->  #include <asm/mach-jz4740/jz4740_nand.h>
->  
->  #define JZ_REG_NAND_CTRL	0x50
-> @@ -310,34 +309,20 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
->  			       uint8_t *nand_dev_id)
->  {
->  	int ret;
-> -	int gpio;
-> -	char gpio_name[9];
->  	char res_name[6];
->  	uint32_t ctrl;
->  	struct nand_chip *chip = &nand->chip;
->  	struct mtd_info *mtd = nand_to_mtd(chip);
->  
-> -	/* Request GPIO port. */
-> -	gpio = JZ_GPIO_MEM_CS0 + bank - 1;
-> -	sprintf(gpio_name, "NAND CS%d", bank);
-> -	ret = gpio_request(gpio, gpio_name);
-> -	if (ret) {
-> -		dev_warn(&pdev->dev,
-> -			"Failed to request %s gpio %d: %d\n",
-> -			gpio_name, gpio, ret);
-> -		goto notfound_gpio;
-> -	}
-> -
->  	/* Request I/O resource. */
->  	sprintf(res_name, "bank%d", bank);
->  	ret = jz_nand_ioremap_resource(pdev, res_name,
->  					&nand->bank_mem[bank - 1],
->  					&nand->bank_base[bank - 1]);
->  	if (ret)
-> -		goto notfound_resource;
-> +		return ret;
->  
->  	/* Enable chip in bank. */
-> -	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_MEM_CS0);
->  	ctrl = readl(nand->base + JZ_REG_NAND_CTRL);
->  	ctrl |= JZ_NAND_CTRL_ENABLE_CHIP(bank - 1);
->  	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
-> @@ -377,12 +362,8 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
->  	dev_info(&pdev->dev, "No chip found on bank %i\n", bank);
->  	ctrl &= ~(JZ_NAND_CTRL_ENABLE_CHIP(bank - 1));
->  	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
-> -	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_NONE);
->  	jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
->  				 nand->bank_base[bank - 1]);
-> -notfound_resource:
-> -	gpio_free(gpio);
-> -notfound_gpio:
->  	return ret;
->  }
->  
-> @@ -503,7 +484,6 @@ static int jz_nand_probe(struct platform_device *pdev)
->  err_unclaim_banks:
->  	while (chipnr--) {
->  		unsigned char bank = nand->banks[chipnr];
-> -		gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
->  		jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
->  					 nand->bank_base[bank - 1]);
->  	}
-> @@ -530,7 +510,6 @@ static int jz_nand_remove(struct platform_device *pdev)
->  		if (bank != 0) {
->  			jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
->  						 nand->bank_base[bank - 1]);
-> -			gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
->  		}
->  	}
->  
+> On 27 January 2017 at 00:37, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>   Hi folks,
+>>
+>> Continuing bcm283x mmc driver cleanup.  Changes:
+>>
+>>  * switch to threaded irq handler.
+>>  * handle timeouts using delayed work instead of timers.
+>>
+>> With these changes most of the driver code runs in
+>> thread context, which in turn allows to remove the
+>> work queue and the tasklet.  Also some wait loops can
+>> be simplified because almost all driver code is allowed
+>> to sleep now.
+>>
+>> Code is also available here:
+>>   git://git.kraxel.org/linux bcm2837-sdhost-cleanup
+>>
+>> Baseline for the patch series is this:
+>>   git://git.kraxel.org/linux bcm2837-wifi
+>>
+>> Tested on raspberry pi 2b only so far.
+>> PIO mode only, didn't try to enable DMA.
+>>
+>> Lots of baby patches for now, to make review
+>> and (if needed) bisecting easier.  Will all be
+>> squashed into the bcm283x mmc driver patch later.
+>>
+>> cheers,
+>>   Gerd
+>>
+>> Gerd Hoffmann (13):
+>>   mmc: bcm2835: add bcm2835_read_wait_sdcmd
+>>   mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_send_command
+>>   mmc: bcm2835: add bcm2835_threaded_irq
+>>   mmc: bcm2835: add bcm2835_check_data_error
+>>   mmc: bcm2835: call bcm2835_block_irq from irqthread
+>>   mmc: bcm2835: add bcm2835_check_cmd_error
+>>   mmc: bcm2835: call bcm2835_busy_irq from irqthread
+>>   mmc: bcm2835: split bcm2835_data_irq
+>>   mmc: bcm2835: switch locking to mutex
+>>   mmc: bcm2835: work queue is dead code now, zap
+>>   mmc: bcm2835: kill tasklet
+>>   mmc: bcm2835: move timeout to thread context
+>>   mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_finish_command
+>>
+>>  drivers/mmc/host/bcm2835.c | 448 ++++++++++++++++++++-------------------------
+>>  1 file changed, 197 insertions(+), 251 deletions(-)
+>>
+>> --
+>> 1.8.3.1
+>>
+>
+> So, I think these kind of incremental changes on top of an old posted
+> series are just confusing. Please just create a new version of the
+> original series - and add a nice history of what changes have been
+> made for each step.
+>
+> Moreover, I know I have asked before why sdhci-iproc can be extended
+> for this controller. However, from the responses to some of the
+> changes in this series it sounds like the controllers are related? Or
+> are the controllers completely independent designed HW? Please clarify
+> this once more.
+
+There are two completely separate, unrelated controllers.  We also have
+two devices we need to drive.  Thus we need to pinmux one controller to
+one device, and the other controller to the other device.
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAliLiOUACgkQtdYpNtH8
+nugYCxAArvoQFieLA8gG2/P4meuCM2THC+y4d04sR1Y3xwM9MjYmwoEExNEZz6uB
+ujKbYNDow4prKrd0yEnanATxINbsDAd2M9Vh4ge7J/BeRadYZ31LufEVVfXbb7gR
+fNr2HD2Tu2WYBaMv/vDAQxnblF5kPmf6pWE8BvPps3WFvpXuHZ5UYSUXy5qBAv2d
+60iA/nWbvdiSseoGPdgCyXi82iz0stmHdwiwMfE9lrdkl+kmgdaNpFz2Xq589/nQ
+VwkqYJM1n1kDFGmHK5eyF5mmEwVT3l98Xzd0WvNgkUCskb/mMyMGVIFmuMvxc9Pj
+6y2MVQ0IBsY6A/ax3G1ndzo7CixXEHFlH+ac7Ex/Y1OwPYKtogl/j/dbBMtGKQ9p
+c5ylwj6KmV3nfGy97/R3cwDe+mxL803zufT1RfZEqYnxLq12sE/I9lGR3FXYG70E
+1KwKCxndlNJ4k8QMVKIA8HDokCEOwKZXZCge0gI3u2PxxffeMqdqO7XDwbD25LGk
+SfsOyEtZ6cucpbfiszty+LYTH+YpdI30mFdpgvL610DoAu/6EZ1a57YliFPXvok5
+ylFgzUhb8hv43okPcuGf+H04l0K2Fl7jSKcXwSjma3zLtx7hsw3erckQvFYeVLVY
+o1zBloPsKd9bHvBnnJi+c9ckj8ryVgsfUxprdFUK39oqlaKPET0=
+=BKXF
+-----END PGP SIGNATURE-----
+--=-=-=--
+
+
+--===============8549449249136899396==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-rpi-kernel mailing list
+linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel
+
+--===============8549449249136899396==--
