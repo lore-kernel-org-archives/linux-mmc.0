@@ -1,126 +1,113 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
-Date: Fri, 27 Jan 2017 10:46:36 +0100
-Message-ID: <20170127094635.uxuhh5vcexdx4i5h@lukather>
-References: <20170124101757.19676-1-linus.walleij@linaro.org>
- <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
- <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: Re: [PATCH v5 05/12] dt: bindings: Add bindings for Marvell Xenon SD
+ Host Controller
+Date: Fri, 27 Jan 2017 11:04:57 +0100
+Message-ID: <87fuk4yg1i.fsf@free-electrons.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+ <89c95d0084da6ad7132caa54ca66eb619d8a5090.1484154449.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFrCxk37uVZ4wM-=iwX3-Cn9j+uh1KneJoopVzia2nKTVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="mst7ckrlkdvdljgj"
-Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFrCxk37uVZ4wM-=iwX3-Cn9j+uh1KneJoopVzia2nKTVA@mail.gmail.com>
+ (Ulf Hansson's message of "Thu, 26 Jan 2017 11:49:52 +0100")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
+Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Ma rcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@li>
 List-Id: linux-mmc@vger.kernel.org
 
-
---mst7ckrlkdvdljgj
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
 Hi Ulf,
+ 
+ On jeu., janv. 26 2017, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-On Fri, Jan 27, 2017 at 08:58:16AM +0100, Ulf Hansson wrote:
-> On 26 January 2017 at 09:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On 24 January 2017 at 11:17, Linus Walleij <linus.walleij@linaro.org> w=
-rote:
-> >> The function mmc_blk_issue_rw_rq() is hopelessly convoluted and
-> >> need to be refactored to it can be understood by humans.
-> >>
-> >> In the process I found some weird magic return values passed
-> >> around for no good reason.
-> >>
-> >> Things are more readable after this.
-> >>
-> >> This work is done towards the goal of breaking the function in
-> >> two parts: one just submitting the requests and one checking the
-> >> result and possibly resubmitting the command on error, so we
-> >> can make the usual path (non-errorpath) smooth and quick, and
-> >> be called directly when the driver completes a request.
-> >>
-> >> That in turn is a prerequisite for proper blk-mq integration
-> >> with the MMC/SD stack.
-> >>
-> >> All that comes later.
-> >>
-> >> Linus Walleij (6):
-> >>   mmc: block: break out mmc_blk_rw_cmd_abort()
-> >>   mmc: block: break out mmc_blk_rw_start_new()
-> >>   mmc: block: do not assign mq_rq when aborting command
-> >>   mmc: block: inline command abortions
-> >>   mmc: block: introduce new_areq and old_areq
-> >>   mmc: block: stop passing around pointless return values
-> >>
-> >>  drivers/mmc/core/block.c | 108 ++++++++++++++++++++++++++------------=
----------
-> >>  drivers/mmc/core/block.h |   2 +-
-> >>  2 files changed, 60 insertions(+), 50 deletions(-)
-> >>
-> >> --
-> >> 2.9.3
-> >>
-> >
-> > Thanks, applied for next!
->=20
-> Linus,
->=20
-> Seems like this series may have issues. I have looked at boot reports
-> from kernelci, and particular the reports for
-> https://kernelci.org/boot/sun7i-a20-bananapi/job/ulfh/ are
-> interesting.
->=20
-> Apparently, this board has an SD card attached. There have been errors
-> reported in the log for a while when doing data transfers, although
-> none of these errors have triggered the kernelci to report a boot
-> error.
->=20
-> However, I suspect that some of the changes in this series make it
-> worse. Perhaps because of a changed error handling the mmc block
-> layer!?
->=20
-> Particular, look at the difference between these [1] boot logs, it
-> might give you some hints. I have also added Maxime to this thread,
-> perhaps he can help out with the sunxi mmc driver.
+> On 11 January 2017 at 18:19, Gregory CLEMENT
+> <gregory.clement@free-electrons.com> wrote:
+>> From: Hu Ziji <huziji@marvell.com>
+>>
+>> Marvell Xenon SDHC can support eMMC/SD/SDIO.
+>> Add Xenon-specific properties.
+>> Also add properties for Xenon PHY setting.
+>>
+>> Signed-off-by: Hu Ziji <huziji@marvell.com>
+>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>
+> An overall comment. Please run a spell-checking as I noticed some
+> simple errors that needs to be fixed.
 
-We also had a patch on the pinctrl side in 4.10, whose side effects
-would be to disable the pull ups on some boards that have not been
-configuring their pins properly (while the previous behaviour was to
-keep what the bootloader set).
+I though I already run a spell-checking before submitting the patch, but
+I will do it again.
 
-That board seems to fall in that category.
+>
+> Optional Properties:
+>> +- mmccard:
+>> +  mmccard child node must be provided when current SDHC is for eMMC.
+>> +  Xenon SDHC often can support both SD and eMMC. This child node indicates that
+>> +  current SDHC is for eMMC card. Thus Xenon eMMC specific configuration and
+>> +  operations can be enabled prior to eMMC init sequence.
+>> +  Please refer to Documentation/devicetree/bindings/mmc/mmc-card.txt.
+>> +  This child node should not be set if current Xenon SDHC is for SD/SDIO.
+>> +
+>> +- bus-width:
+>> +  When 8-bit data bus width is in use for eMMC, this property should be
+>> +  explicitly provided and set as 8.
+>> +  It is optional when data bus width is 4-bit or 1-bit.
+>> +
+>> +- mmc-ddr-1_8v:
+>> +  Select this property when eMMC HS DDR is supported on SDHC side.
+>> +
+>> +- mmc-hs400-1_8v:
+>> +  Select this property when eMMC HS400 is supported on SDHC side.
+>
+> All the above properties is already specified as common mmc bindings.
+> Let's not do that again, but instead just refer to mmc.txt as how
+> other documentations looks like.
 
-That behaviour has been reverted, and Linus merged it already, so it
-might be entirely unrelated to that serie.
+OK, but maybe we could keep the part about the mmcard for the eMMC to
+emphasize that we need to setup this option for the controller.
 
-Maxime
+>> +
+>> +- no-1-8-v:
+>> +  Select this property when 1.8V signaling voltage supply is unavailable.
+>> +  When this property is enabled, both mmc-ddr-1_8v and mmc-hs400-1_8v should be
+>> +  cleared.
+>
+> Please don't use this sdhci property, unless really needed.
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
+Actually this is a mmc property, at least it is described in this the
+mmc binding:
+Documentation/devicetree/bindings/mmc/mmc.txt
+
+The description of this optional property is:
+"no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+  this system, even if the controller claims it is."
+
+So as it is also part of the mmc binding we can remove it from our
+bindings as we are going to do it for the other mmc property.
+
+But I am curious to know why do you think we could use it without any
+need. Are you aware of some abuse of this property?
+
+>
+> Perhaps you can elaborate exactly why it makes sense for your case. Or
+> perhaps we already discussed this, in either case, please re-fresh my
+> mind.
+
+For instance we need it now on the 7040DB board which does not have the
+1.8V signal voltage available.
+
+Gregory
+
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
 http://free-electrons.com
-
---mst7ckrlkdvdljgj
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBCAAGBQJYixb7AAoJEBx+YmzsjxAgqg0P/AuPFT9H6XGT4GL3r2CJDfFk
-BDkeQjUlqgTKv0MDEt55GrtDLHSBdkHr+5zSEMmCOa/YxPZ20lYWOQHt8WjGVBuT
-sqlIME68tfF8Ghwc7CwFZW4CXo8k3XlUa9gLRiMzVrhsIvzgi3+vN9hEhMaoTGrQ
-XAiYCQPS0sxnsjT9z6F/O6mInOV+ItN5266OlWOvuIcUbwWkF1XwbAk8BUjF1TgR
-gTbuVf+Ti5w5T2IkXCoqcg2SUp/Onw8GAe59s8H8jihSoJNcKU/jtMhc4UNa+fWD
-QPKIDMVp/q0+RC70M/nkk+UoS0QtGYdU1mqPfPcY7JBm1BKxpsNTfnduQ7xwFlqI
-OqkQUW/DnX8VfUOfLxXdWgMk/721GzTMuw3nWB38hWRWXzPBF3bw2LgAtstwH35m
-ZRCUIJ5XSmcmF3ssYjugjFCwSz5H1qF0Y+NVi1s5X+PU+tbgM1UP2GBsH9C8xSK2
-tsqTqi7e/GnMzqHE3Yu1VaWTwN6/Y5pS1ne9wBrMI80/fKXM36j2AqYQrgNmzSeW
-qYlkylQuuH1WDqq9IxoISPEYqcrm1Uxs4ucmwcubkCT4vcmSl1zpc52OAowFfL/J
-37vmg4ybpnc/oQAmImilBJ5TeKirePGoNgPs8NDhESuHkXckxuQozaXEKg9whffT
-1LyLeBeNqb2SQaHmiKGS
-=jSRQ
------END PGP SIGNATURE-----
-
---mst7ckrlkdvdljgj--
