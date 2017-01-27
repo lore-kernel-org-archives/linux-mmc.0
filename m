@@ -1,69 +1,57 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-Date: Fri, 27 Jan 2017 16:12:24 +0100
-Message-ID: <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
-References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com> <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
+From: Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [PATCH v2 01/14] Documentation: dt/bindings: Document  pinctrl-ingenic
+Date: Fri, 27 Jan 2017 16:27:56 +0100
+Message-ID: <08e9505d2d366557950f8e6a4e81f57a@mail.crapouillou.net>
+References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+ <20170122144947.16158-1-paul@crapouillou.net>
+ <20170122144947.16158-2-paul@crapouillou.net>
+ <CACRpkdZFRH84c4x7HBwgmY3fH+=Qq4q167c9oPhvrJ70MQkjaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvel>
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <CACRpkdZFRH84c4x7HBwgmY3fH+=Qq4q167c9oPhvrJ70MQkjaA@mail.gmail.com>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Linux MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, James Hogan <james.hogan@imgtec.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 26/01/17 12:50, Ulf Hansson wrote:
->> On 11 January 2017 at 18:19, Gregory CLEMENT
->> <gregory.clement@free-electrons.com> wrote:
->>> +                       priv->init_card_type = MMC_TYPE_MMC;
->>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
->>> +
->>> +                       /*
->>> +                        * Force to clear BUS_TEST to
->>> +                        * skip bus_test_pre and bus_test_post
->>> +                        */
->>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
->>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
->>
->> This cap is a bit strange. It was added several years ago by Adrian
->> Hunter, but I am wondering about the reason to why it's needed.
->>
->
-> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
->
-> I think it was added to enable people to choose whether they wanted a large
-> or small erase granularity.  That probably doesn't matter if the card
-> supports TRIM.
->
+Hi,
 
-Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
+> So I still don't understand these properties.
+> 
+> Does this mean that there is a pull-up *inside* the SoC or *outside*
+> on the board where it is mounted?
 
-In mmc_calc_max_discard() the following code/comment exists:
+The pull-up resistors are inside the SoCs.
 
-/*
- * Without erase_group_def set, MMC erase timeout depends on clock
- * frequence which can change.  In that case, the best choice is
- * just the preferred erase size.
- */
-if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
-     return card->pref_erase;
+> In the former case, if this pertains to the *inside* of the SoC:
+> is it just different between jz4740 and jz4780?
+> In that case, just code this into the driver as .data to the 
+> .compatible
+> in the DT match. No special DT properties needed.
 
+Well, I've been taught that devicetree is for describing the hardware, 
+and
+the driver code is for functionality. So that's why I put it in 
+devicetree.
 
-This makes me wonder.
+That's also the reason why I put the list of functions and groups in
+devicetree and not in the driver code.
 
-So, when we haven't enabled the high capacity erase groups in the
-EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
-size.
+> Standard bindings use just "pins". Why the custom ingenic,
+> prefix?
 
-In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
-set ext_csd.erase_group_def),  we will instead  do some calculations
-to find out the max discards.
+I can change that.
 
-Are you saying that these calculations doesn't matter much - or are
-you saying that we always want to do them?
-
-Kind regards
-Uffe
+Regards,
+-Paul
