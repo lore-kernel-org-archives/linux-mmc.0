@@ -1,7 +1,7 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 1/4] dt-bindings: Add binding for brcm,bcm2835-sdhost.
-Date: Fri, 27 Jan 2017 12:36:26 +0100
-Message-ID: <1485516989-1072-2-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 3/4] mmc: bcm2835: add internal SD controller to devicetree
+Date: Fri, 27 Jan 2017 12:36:28 +0100
+Message-ID: <1485516989-1072-4-git-send-email-kraxel@redhat.com>
 References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,49 +18,50 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, linux-mmc@vger.kernel.org, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-arm-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, linux-mmc@vger.kernel.org, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Eric Anholt <eric@anholt.net>
-
-This is the other SD controller on the platform, which can be swapped
-to the role of SD card host using pin muxing.
-
-Signed-off-by: Eric Anholt <eric@anholt.net>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- .../bindings/mmc/brcm,bcm2835-sdhost.txt           | 24 ++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+ arch/arm/boot/dts/bcm2835-rpi.dtsi | 6 ++++++
+ arch/arm/boot/dts/bcm283x.dtsi     | 8 ++++++++
+ 2 files changed, 14 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
-new file mode 100644
-index 0000000..f9f5982
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
-@@ -0,0 +1,24 @@
-+Broadcom BCM2835 SDHOST controller
-+
-+This file documents differences between the core properties described
-+by mmc.txt and the properties that represent the BCM2835 controller.
-+
-+Required properties:
-+- compatible: Should be "brcm,bcm2835-sdhost".
-+- clocks: The clock feeding the SDHOST controller.
-+
-+Optional properties:
-+- dmas: DMA channels for read and write.
-+          See Documentation/devicetree/bindings/dma/dma.txt for details
-+
-+Example:
-+
-+sdhost: sdhost@7e202000 {
-+	compatible = "brcm,bcm2835-sdhost";
-+	reg = <0x7e202000 0x100>;
-+	interrupts = <2 24>;
-+	clocks = <&clocks BCM2835_CLOCK_VPU>;
-+	dmas = <&dma 13>,
-+	       <&dma 13>;
-+	dma-names = "tx", "rx";
+diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+index 0b73f9c..7d89af2 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
++++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+@@ -69,6 +69,12 @@
+ 	bus-width = <4>;
+ };
+ 
++&sdhost {
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdhost_gpio48>;
++	bus-width = <4>;
 +};
++
+ &pwm {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
+diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
+index a3106aa..2024f9b 100644
+--- a/arch/arm/boot/dts/bcm283x.dtsi
++++ b/arch/arm/boot/dts/bcm283x.dtsi
+@@ -450,6 +450,14 @@
+ 			status = "disabled";
+ 		};
+ 
++		sdhost: sdhost@7e202000 {
++			compatible = "brcm,bcm2835-sdhost";
++			reg = <0x7e202000 0x100>;
++			interrupts = <2 24>;
++			clocks = <&clocks BCM2835_CLOCK_VPU>;
++			status = "disabled";
++		};
++
+ 		hvs@7e400000 {
+ 			compatible = "brcm,bcm2835-hvs";
+ 			reg = <0x7e400000 0x6000>;
 -- 
 1.8.3.1
