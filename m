@@ -1,88 +1,39 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 00/13] mmc: bcm2835: more cleanups
-Date: Fri, 27 Jan 2017 09:25:43 +0100
-Message-ID: <CAPDyKFoOShjQC8MbaxEuPG9m5FiSEfEd55qph3UDRHXH7C6VWA@mail.gmail.com>
-References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 2/2] arm64: dts: h3ulcb: enable HS200 for eMMC
+Date: Fri, 27 Jan 2017 09:29:35 +0100
+Message-ID: <20170127082935.GH21195@verge.net.au>
+References: <1485443606-22566-1-git-send-email-vladimir.barinov@cogentembedded.com>
+ <1485443640-22651-1-git-send-email-vladimir.barinov@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1485473846-24537-1-git-send-email-kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1485443640-22651-1-git-send-email-vladimir.barinov@cogentembedded.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 January 2017 at 00:37, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->   Hi folks,
->
-> Continuing bcm283x mmc driver cleanup.  Changes:
->
->  * switch to threaded irq handler.
->  * handle timeouts using delayed work instead of timers.
->
-> With these changes most of the driver code runs in
-> thread context, which in turn allows to remove the
-> work queue and the tasklet.  Also some wait loops can
-> be simplified because almost all driver code is allowed
-> to sleep now.
->
-> Code is also available here:
->   git://git.kraxel.org/linux bcm2837-sdhost-cleanup
->
-> Baseline for the patch series is this:
->   git://git.kraxel.org/linux bcm2837-wifi
->
-> Tested on raspberry pi 2b only so far.
-> PIO mode only, didn't try to enable DMA.
->
-> Lots of baby patches for now, to make review
-> and (if needed) bisecting easier.  Will all be
-> squashed into the bcm283x mmc driver patch later.
->
-> cheers,
->   Gerd
->
-> Gerd Hoffmann (13):
->   mmc: bcm2835: add bcm2835_read_wait_sdcmd
->   mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_send_command
->   mmc: bcm2835: add bcm2835_threaded_irq
->   mmc: bcm2835: add bcm2835_check_data_error
->   mmc: bcm2835: call bcm2835_block_irq from irqthread
->   mmc: bcm2835: add bcm2835_check_cmd_error
->   mmc: bcm2835: call bcm2835_busy_irq from irqthread
->   mmc: bcm2835: split bcm2835_data_irq
->   mmc: bcm2835: switch locking to mutex
->   mmc: bcm2835: work queue is dead code now, zap
->   mmc: bcm2835: kill tasklet
->   mmc: bcm2835: move timeout to thread context
->   mmc: bcm2835: use bcm2835_read_wait_sdcmd in bcm2835_finish_command
->
->  drivers/mmc/host/bcm2835.c | 448 ++++++++++++++++++++-------------------------
->  1 file changed, 197 insertions(+), 251 deletions(-)
->
-> --
-> 1.8.3.1
->
+[CC Wolfram, linux-mmc]
 
-So, I think these kind of incremental changes on top of an old posted
-series are just confusing. Please just create a new version of the
-original series - and add a nice history of what changes have been
-made for each step.
+On Thu, Jan 26, 2017 at 06:14:00PM +0300, Vladimir Barinov wrote:
+> From: Vladimir Barinov <vladimir.barinov+renesas@cogentembedded.com>
+> 
+> This supports HS200 mode for eMMC on H3ULCB board
+> 
+> Signed-off-by: Vladimir Barinov <vladimir.barinov+renesas@cogentembedded.com>
 
-Moreover, I know I have asked before why sdhci-iproc can be extended
-for this controller. However, from the responses to some of the
-changes in this series it sounds like the controllers are related? Or
-are the controllers completely independent designed HW? Please clarify
-this once more.
+Hi Vladimir,
 
-Kind regards
-Uffe
+Please resend this change once the relevant driver changes hit an rc
+release.
+
+I believe that means the following changes which are present in mmc/next.
+
+8c81459fa8ad mmc: sh_mobile_sdhi: enable HS200
+60f215caef3f mmc: sh_mobile_sdhi: remove superfluous check in SCC error check
+f7c68068fb27 mmc: sh_mobile_sdhi: remove superfluous check in init_tuning
+4cf3ecd2e097 mmc: sh_mobile_sdhi: remove superfluous check in hw_reset
+bdba200138a9 mmc: sh_mobile_sdhi: improve prerequisites for tuning
+a7f2c661cca9 mmc: sh_mobile_sdhi: improve prerequisite for hw_reset
+59c21074b582 mmc: sh_mobile_sdhi: simplify accessing DT data
