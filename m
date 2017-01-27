@@ -1,15 +1,11 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 11/13] arm64: allwinner: pine64: add MMC support
-Date: Fri, 27 Jan 2017 22:38:43 +0100
-Message-ID: <f5f71a373a789314c64baf7b6d7bbce9fb2d68c8.1485553113.git-series.maxime.ripard@free-electrons.com>
-References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
+Subject: [PATCH v5 0/13] arm64: allwinner: a64: Enable MMC support
+Date: Fri, 27 Jan 2017 22:38:32 +0100
+Message-ID: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -23,65 +19,69 @@ To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.co
 Cc: devicetree@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Andre Przywara <andre.przywara@arm.com>
+Hi,
 
-All Pine64 boards connect an micro-SD card slot to the first MMC
-controller.
-Enable the respective DT node and specify the (always-on) regulator
-and card-detect pin.
-As a micro-SD slot does not feature a write-protect switch, we disable
-this feature.
+Here is a new attempt at getting the MMC controllers running, following the
+work done by Andre.
 
-Signed-off-by: Andre Przywara <andre.przywara@arm.com>
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
----
- arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts | 20 ++++++++++++++-
- 1 file changed, 20 insertions(+), 0 deletions(-)
+This has been tested on a board with one SDIO device (a Marvell WiFi chip)
+and a Kingston eMMC with 1.8V IOs.
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-index cf9105179bcb..c680ed385da3 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts
-@@ -44,6 +44,8 @@
- 
- #include "sun50i-a64.dtsi"
- 
-+#include <dt-bindings/gpio/gpio.h>
-+
- / {
- 	model = "Pine64";
- 	compatible = "pine64,pine64", "allwinner,sun50i-a64";
-@@ -55,6 +57,13 @@
- 	chosen {
- 		stdout-path = "serial0:115200n8";
- 	};
-+
-+	reg_vcc3v3: vcc3v3 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
- };
- 
- &ehci1 {
-@@ -71,6 +80,17 @@
- 	bias-pull-up;
- };
- 
-+&mmc0 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc0_pins>;
-+	vmmc-supply = <&reg_vcc3v3>;
-+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
-+	cd-inverted;
-+	disable-wp;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
- &ohci1 {
- 	status = "okay";
- };
+For SDIO, the HS DDR mode works just fine. That serie also enables the
+SDR104 mode to work on the devices that are capable of this.
+
+For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
+moment, but since it's significantly more complex, and at the same time
+Allwinner recommends to limit its frequency to 100MHz, this doesn't have
+any benefits. If there's any at some point, this can be added later.
+
+Let me know what you think,
+Maxime
+
+Changes from v4:
+  - Added Florian Tested-by
+  - Removed duplicate commit log
+
+Changes from v3:
+  - Reordered the MMC nodes
+  - Added the specification section the first commit log
+  - Supported mmc->actual_rate
+  - Clarified a bit what we (don't) know about DATA0
+
+Changes from v2:
+  - Enabled SDR104, limited the frequency to 150MHz. 200MHz was too high.
+  - Added more fixes to the gating and frequency rate change sequence
+  - Added one more patch to mask DATA0 when updating the clock that was
+    needed to get SDR104 to run
+  - Added the patches to enable it on a few boards done by Andre
+  - Amended the comments as suggested by Andre.
+  - Added some tags
+
+Andre Przywara (4):
+  arm64: allwinner: a64: Add MMC nodes
+  arm64: allwinner: pine64: add MMC support
+  arm64: allwinner: a64: add UART1 pin nodes
+  arm64: allwinner: add BananaPi-M64 support
+
+Maxime Ripard (9):
+  mmc: sunxi: Fix clock frequency change sequence
+  mmc: sunxi: Gate the clock when rate is 0
+  mmc: sunxi: Always set signal delay to 0 for A64
+  mmc: sunxi: Enable the new timings for the A64 MMC controllers
+  mmc: sunxi: Mask DATA0 when updating the clock
+  mmc: sunxi: Add EMMC (MMC2) controller compatible
+  mmc: sunxi: Add more debug informations
+  arm64: allwinner: a64: Add MMC pinctrl nodes
+  arm64: allwinner: a64: Increase the MMC max frequency
+
+ arch/arm64/boot/dts/allwinner/Makefile                    |   1 +-
+ arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 120 +++++++-
+ arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts       |  20 +-
+ arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi             |  77 ++++-
+ drivers/mmc/host/sunxi-mmc.c                              | 114 ++++---
+ 5 files changed, 289 insertions(+), 43 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
+
+base-commit: c94f7962e97c2ba0a612656bc456d979f20cb382
 -- 
 git-series 0.8.11
