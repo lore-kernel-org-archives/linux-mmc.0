@@ -1,98 +1,66 @@
-From: Florian Vaussard <florian.vaussard@heig-vd.ch>
-Subject: Re: [PATCH v4 0/13] arm64: allwinner: a64: Enable MMC support
-Date: Fri, 27 Jan 2017 11:37:27 +0100
-Message-ID: <e4133504-8bc7-a9ac-209d-3d8cba119fed@heig-vd.ch>
-References: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 01/14] Documentation: dt/bindings: Document pinctrl-ingenic
+Date: Fri, 27 Jan 2017 12:18:39 +0100
+Message-ID: <CACRpkdZFRH84c4x7HBwgmY3fH+=Qq4q167c9oPhvrJ70MQkjaA@mail.gmail.com>
+References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+ <20170122144947.16158-1-paul@crapouillou.net> <20170122144947.16158-2-paul@crapouillou.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.8d42a39b7bd5143e709979dc42cc47862ebe3728.1485421557.git-series.maxime.ripard@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Andre Przywara <andre.przywara@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <20170122144947.16158-2-paul@crapouillou.net>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, linux-p
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Maxime,
+On Sun, Jan 22, 2017 at 3:49 PM, Paul Cercueil <paul@crapouillou.net> wrote:
 
-On 01/26/2017 10:05 AM, Maxime Ripard wrote:
-> Hi,
-> 
-> Here is a new attempt at getting the MMC controllers running, following the
-> work done by Andre.
-> 
-> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
-> and a Kingston eMMC with 1.8V IOs.
-> 
-> For SDIO, the HS DDR mode works just fine. That serie also enables the
-> SDR104 mode to work on the devices that are capable of this.
-> 
-> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
-> moment, but since it's significantly more complex, and at the same time
-> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
-> any benefits. If there's any at some point, this can be added later.
-> 
-> Let me know what you think,
-> Maxime
-> 
 
-FWIW I tested this series and got decent throughput (190 Mbps in UDP) with a
-Marvell SDIO Wifi chip. The board becomes unresponsive between 30 to 60 minutes
-of iperf torture, but I strongly suspect a hardware issue underneath. Feel free
-to add my Tested-by on the MMC patches if you need it.
+> +Required properties:
+> +- compatible: One of:
+> +  - "ingenic,jz4740-pinctrl"
+> +  - "ingenic,jz4780-pinctrl"
+> +
+> +Optional properties:
+> +- ingenic,pull-ups: A list of 32-bit bit fields, where each bit set tells the
+> +  driver that a pull-up resistor is available for this pin.
+> +  By default, the driver considers that all pins feature a pull-up resistor.
+> +- ingenic,pull-downs: A list of 32-bit bit fields, where each bit set tells
+> +  the driver that a pull-down resistor is available for this pin.
+> +  By default, the driver considers that all pins feature a pull-down
+> +  resistor.
 
-Thank you for your work.
+So I still don't understand these properties.
 
-Best,
-Florian
+Does this mean that there is a pull-up *inside* the SoC or *outside*
+on the board where it is mounted?
 
-> Changes from v3:
->   - Reordered the MMC nodes
->   - Added the specification section the first commit log
->   - Supported mmc->actual_rate
->   - Clarified a bit what we (don't) know about DATA0
-> 
-> Changes from v2:
->   - Enabled SDR104, limited the frequency to 150MHz. 200MHz was too high.
->   - Added more fixes to the gating and frequency rate change sequence
->   - Added one more patch to mask DATA0 when updating the clock that was
->     needed to get SDR104 to run
->   - Added the patches to enable it on a few boards done by Andre
->   - Amended the comments as suggested by Andre.
->   - Added some tags
-> 
-> Andre Przywara (4):
->   arm64: allwinner: a64: Add MMC nodes
->   arm64: allwinner: pine64: add MMC support
->   arm64: allwinner: a64: add UART1 pin nodes
->   arm64: allwinner: add BananaPi-M64 support
-> 
-> Maxime Ripard (9):
->   mmc: sunxi: Fix clock frequency change sequence
->   mmc: sunxi: Gate the clock when rate is 0
->   mmc: sunxi: Always set signal delay to 0 for A64
->   mmc: sunxi: Enable the new timings for the A64 MMC controllers
->   mmc: sunxi: Mask DATA0 when updating the clock
->   mmc: sunxi: Add EMMC (MMC2) controller compatible
->   mmc: sunxi: Add more debug informations
->   arm64: allwinner: a64: Add MMC pinctrl nodes
->   arm64: allwinner: a64: Increase the MMC max frequency
-> 
->  arch/arm64/boot/dts/allwinner/Makefile                    |   1 +-
->  arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 120 +++++++-
->  arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts       |  20 +-
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi             |  77 ++++-
->  drivers/mmc/host/sunxi-mmc.c                              | 114 ++++---
->  5 files changed, 289 insertions(+), 43 deletions(-)
->  create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
-> 
-> base-commit: bc34c1af0a280e27eafe3f86b9ad87fe0c9ea715
-> 
+If it is *outside* the SoC, on the board, the pulls should be set on
+the consumers, not on the controller.
+
+In the former case, if this pertains to the *inside* of the SoC:
+is it just different between jz4740 and jz4780?
+In that case, just code this into the driver as .data to the .compatible
+in the DT match. No special DT properties needed.
+
+If it is different between e.g. different versions of jz4740, why not
+make different compatible-properties? If there are different versions
+of the circuit, with different hard-wired hardware configuration, they
+are different devices and should have different compatible strings.
+
+> +                               /* CLK, CMD, D0 */
+> +                               ingenic,pins = <0x69 0 0x68 0 0x6a 0>;
+
+Standard bindings use just "pins". Why the custom ingenic,
+prefix?
+
+Yours,
+Linus Walleij
