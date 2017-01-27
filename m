@@ -1,66 +1,52 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2 01/14] Documentation: dt/bindings: Document pinctrl-ingenic
-Date: Fri, 27 Jan 2017 12:18:39 +0100
-Message-ID: <CACRpkdZFRH84c4x7HBwgmY3fH+=Qq4q167c9oPhvrJ70MQkjaA@mail.gmail.com>
-References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
- <20170122144947.16158-1-paul@crapouillou.net> <20170122144947.16158-2-paul@crapouillou.net>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: [PATCH 4/4] ARM: dts: bcm283x: switch from &sdhci to &sdhost
+Date: Fri, 27 Jan 2017 12:36:29 +0100
+Message-ID: <1485516989-1072-5-git-send-email-kraxel@redhat.com>
+References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <20170122144947.16158-2-paul@crapouillou.net>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Paul Cercueil <paul@crapouillou.net>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, linux-p
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, linux-mmc@vger.kernel.org, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Jan 22, 2017 at 3:49 PM, Paul Cercueil <paul@crapouillou.net> wrote:
+This flips the switch from (iproc-driven) sdhci controller to the custom
+sdhost controller.
 
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ arch/arm/boot/dts/bcm2835-rpi.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> +Required properties:
-> +- compatible: One of:
-> +  - "ingenic,jz4740-pinctrl"
-> +  - "ingenic,jz4780-pinctrl"
-> +
-> +Optional properties:
-> +- ingenic,pull-ups: A list of 32-bit bit fields, where each bit set tells the
-> +  driver that a pull-up resistor is available for this pin.
-> +  By default, the driver considers that all pins feature a pull-up resistor.
-> +- ingenic,pull-downs: A list of 32-bit bit fields, where each bit set tells
-> +  the driver that a pull-down resistor is available for this pin.
-> +  By default, the driver considers that all pins feature a pull-down
-> +  resistor.
-
-So I still don't understand these properties.
-
-Does this mean that there is a pull-up *inside* the SoC or *outside*
-on the board where it is mounted?
-
-If it is *outside* the SoC, on the board, the pulls should be set on
-the consumers, not on the controller.
-
-In the former case, if this pertains to the *inside* of the SoC:
-is it just different between jz4740 and jz4780?
-In that case, just code this into the driver as .data to the .compatible
-in the DT match. No special DT properties needed.
-
-If it is different between e.g. different versions of jz4740, why not
-make different compatible-properties? If there are different versions
-of the circuit, with different hard-wired hardware configuration, they
-are different devices and should have different compatible strings.
-
-> +                               /* CLK, CMD, D0 */
-> +                               ingenic,pins = <0x69 0 0x68 0 0x6a 0>;
-
-Standard bindings use just "pins". Why the custom ingenic,
-prefix?
-
-Yours,
-Linus Walleij
+diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+index 7d89af2..e6beecb 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
++++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+@@ -65,13 +65,13 @@
+ &sdhci {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_gpio48>;
+-	status = "okay";
+ 	bus-width = <4>;
+ };
+ 
+ &sdhost {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdhost_gpio48>;
++	status = "okay";
+ 	bus-width = <4>;
+ };
+ 
+-- 
+1.8.3.1
