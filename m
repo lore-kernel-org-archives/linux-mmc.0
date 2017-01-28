@@ -1,85 +1,77 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v5 5/13] mmc: sunxi: Mask DATA0 when updating the clock
-Date: Fri, 27 Jan 2017 22:38:37 +0100
-Message-ID: <a6930bfcfcd651247b1b9d6a3b6175f4c220bb59.1485553113.git-series.maxime.ripard@free-electrons.com>
-References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
+ functionality
+Date: Sat, 28 Jan 2017 10:16:46 +0200
+Message-ID: <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
+References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
+ <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
+ <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
+ <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvel>
 List-Id: linux-mmc@vger.kernel.org
 
-The A64 MMC controllers need DATA0 to be masked while updating the clock,
-otherwise any subsequent command will result in a timeout.
+On 27/01/2017 5:12 p.m., Ulf Hansson wrote:
+> On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 26/01/17 12:50, Ulf Hansson wrote:
+>>> On 11 January 2017 at 18:19, Gregory CLEMENT
+>>> <gregory.clement@free-electrons.com> wrote:
+>>>> +                       priv->init_card_type = MMC_TYPE_MMC;
+>>>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
+>>>> +
+>>>> +                       /*
+>>>> +                        * Force to clear BUS_TEST to
+>>>> +                        * skip bus_test_pre and bus_test_post
+>>>> +                        */
+>>>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
+>>>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
+>>>
+>>> This cap is a bit strange. It was added several years ago by Adrian
+>>> Hunter, but I am wondering about the reason to why it's needed.
+>>>
+>>
+>> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
+>>
+>> I think it was added to enable people to choose whether they wanted a large
+>> or small erase granularity.  That probably doesn't matter if the card
+>> supports TRIM.
+>>
+>
+> Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
+>
+> In mmc_calc_max_discard() the following code/comment exists:
+>
+> /*
+>  * Without erase_group_def set, MMC erase timeout depends on clock
+>  * frequence which can change.  In that case, the best choice is
+>  * just the preferred erase size.
+>  */
+> if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
+>      return card->pref_erase;
+>
+>
+> This makes me wonder.
+>
+> So, when we haven't enabled the high capacity erase groups in the
+> EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
+> size.
+>
+> In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
+> set ext_csd.erase_group_def),  we will instead  do some calculations
+> to find out the max discards.
+>
+> Are you saying that these calculations doesn't matter much - or are
+> you saying that we always want to do them?
 
-It's not really clear at this point what DATA0 is exactly, but this
-behaviour is present in Allwinner's tree, and has been suggested by
-Allwinner engineers as fixes for the timeout.
+No, I was saying that if you have TRIM then TRIM is preferred to ERASE so 
+the erase group size does not come into play when discarding, since ERASE 
+granularity is erase groups whereas TRIM granularity is sectors.
 
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
----
- drivers/mmc/host/sunxi-mmc.c | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 51d6388a194e..6bbe61397b7c 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -101,6 +101,7 @@
- 	(SDXC_SOFT_RESET | SDXC_FIFO_RESET | SDXC_DMA_RESET)
- 
- /* clock control bits */
-+#define SDXC_MASK_DATA0			BIT(31)
- #define SDXC_CARD_CLOCK_ON		BIT(16)
- #define SDXC_LOW_POWER_ON		BIT(17)
- 
-@@ -254,6 +255,9 @@ struct sunxi_mmc_cfg {
- 	/* does the IP block support autocalibration? */
- 	bool can_calibrate;
- 
-+	/* Does DATA0 needs to be masked while the clock is updated */
-+	bool mask_data0;
-+
- 	bool needs_new_timings;
- };
- 
-@@ -657,10 +661,12 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	u32 rval;
- 
- 	rval = mmc_readl(host, REG_CLKCR);
--	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON);
-+	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON | SDXC_MASK_DATA0);
- 
- 	if (oclk_en)
- 		rval |= SDXC_CARD_CLOCK_ON;
-+	if (host->cfg->mask_data0)
-+		rval |= SDXC_MASK_DATA0;
- 
- 	mmc_writel(host, REG_CLKCR, rval);
- 
-@@ -680,6 +686,11 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 		return -EIO;
- 	}
- 
-+	if (host->cfg->mask_data0) {
-+		rval = mmc_readl(host, REG_CLKCR);
-+		mmc_writel(host, REG_CLKCR, rval & ~SDXC_MASK_DATA0);
-+	}
-+
- 	return 0;
- }
- 
-@@ -1081,6 +1092,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
- 	.can_calibrate = true,
-+	.mask_data0 = true,
- 	.needs_new_timings = true,
- };
- 
--- 
-git-series 0.8.11
+However ERASE_GROUP_DEF also affects the size of write protect groups.
