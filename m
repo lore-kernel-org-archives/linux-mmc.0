@@ -1,55 +1,79 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCHv1 2/2] mmc: sdhci-msm: Remove unnecessary comments of CDC
- init sequence
-Date: Mon, 30 Jan 2017 11:04:34 +0200
-Message-ID: <13695c9e-e818-59a1-2c1c-27ed2d376085@intel.com>
+Subject: Re: [PATCHv1 1/2] mmc: sdhci-msm: Remove platform_execute_tuning from
+ sdhci_msm_ops
+Date: Mon, 30 Jan 2017 11:04:09 +0200
+Message-ID: <70dce604-ffb9-eefb-dbd8-b287aef5ff0c@intel.com>
 References: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org>
- <1485247827-12898-3-git-send-email-riteshh@codeaurora.org>
+ <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1485247827-12898-3-git-send-email-riteshh@codeaurora.org>
+In-Reply-To: <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 List-Id: linux-mmc@vger.kernel.org
 
 On 24/01/17 10:50, Ritesh Harjani wrote:
-> This removes CDC init sequence comments which are
-> not useful anyway.
+> platform_execute_tuning should not really exist as it does not
+> do anything useful.
+> 
+> So remove this ops and directly plug sdhci_msm_execute_tuning
+> with mmc_host_ops.
+> 
+> Also in case of HS400 tuning clear SDHCI_HS400_TUNING flag once
+> HS400 related mode selection is done.
 > 
 > Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-msm.c | 14 +-------------
->  1 file changed, 1 insertion(+), 13 deletions(-)
+>  drivers/mmc/host/sdhci-msm.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index b3e8f44..10cdc84 100644
+> index f958697..b3e8f44 100644
 > --- a/drivers/mmc/host/sdhci-msm.c
 > +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -664,19 +664,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
->  	config &= ~CORE_START_CDC_TRAFFIC;
->  	writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+> @@ -827,12 +827,12 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+>  	return ret;
+>  }
 >  
-> -	/*
-> -	 * Perform CDC Register Initialization Sequence
-> -	 *
-> -	 * CORE_CSR_CDC_CTLR_CFG0	0x11800EC
-> -	 * CORE_CSR_CDC_CTLR_CFG1	0x3011111
-> -	 * CORE_CSR_CDC_CAL_TIMER_CFG0	0x1201000
-> -	 * CORE_CSR_CDC_CAL_TIMER_CFG1	0x4
-> -	 * CORE_CSR_CDC_REFCOUNT_CFG	0xCB732020
-> -	 * CORE_CSR_CDC_COARSE_CAL_CFG	0xB19
-> -	 * CORE_CSR_CDC_DELAY_CFG	0x3AC
-> -	 * CORE_CDC_OFFSET_CFG		0x0
-> -	 * CORE_CDC_SLAVE_DDA_CFG	0x16334
-> -	 */
-> +	/* Perform CDC Register Initialization Sequence */
+> -static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+> +static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+> +	struct sdhci_host *host = mmc_priv(mmc);
+>  	int tuning_seq_cnt = 3;
+>  	u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
+>  	int rc;
+> -	struct mmc_host *mmc = host->mmc;
+>  	struct mmc_ios ios = host->mmc->ios;
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> @@ -855,6 +855,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  	if (host->flags & SDHCI_HS400_TUNING) {
+>  		sdhci_msm_hc_select_mode(host);
+>  		msm_set_clock_rate_for_bus_mode(host, ios.clock);
+> +		host->flags &= ~SDHCI_HS400_TUNING;
+>  	}
 >  
->  	writel_relaxed(0x11800EC, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
->  	writel_relaxed(0x3011111, host->ioaddr + CORE_CSR_CDC_CTLR_CFG1);
+>  retry:
+> @@ -1119,7 +1120,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>  
+>  static const struct sdhci_ops sdhci_msm_ops = {
+> -	.platform_execute_tuning = sdhci_msm_execute_tuning,
+>  	.reset = sdhci_reset,
+>  	.set_clock = sdhci_msm_set_clock,
+>  	.get_min_clock = sdhci_msm_get_min_clock,
+> @@ -1294,6 +1294,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  					 MSM_MMC_AUTOSUSPEND_DELAY_MS);
+>  	pm_runtime_use_autosuspend(&pdev->dev);
+>  
+> +	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+>  	ret = sdhci_add_host(host);
+>  	if (ret)
+>  		goto pm_runtime_disable;
 > 
