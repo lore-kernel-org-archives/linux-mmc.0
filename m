@@ -1,33 +1,42 @@
-From: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
-Date: Mon, 30 Jan 2017 11:40:36 -0200
-Message-ID: <874m0gll7v.fsf@dilma.collabora.co.uk>
-References: <20170116142342.21283-1-krisman@collabora.co.uk>
-        <CAPDyKFpowPmbwvHL9NL60zAABfW53sDKkp0Ag5aXs4jZZLC=Dg@mail.gmail.com>
-        <87wpdg9uob.fsf@dilma.collabora.co.uk>
-        <CAPDyKFq2aUkk4qzcLNoityHbOYTHCq_OiO9HVLuWjcGSJX0aWw@mail.gmail.com>
-        <87poj4loa5.fsf@dilma.collabora.co.uk>
-        <2b37a0fa-46e3-ec4e-3f9c-9e1bb7dcda1e@intel.com>
+From: Jan Glauber <jglauber@cavium.com>
+Subject: mmc_card_blockaddr() now private
+Date: Mon, 30 Jan 2017 14:52:19 +0100
+Message-ID: <20170130135219.GA10099@wintermute>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:38652 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753374AbdA3Nk4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 08:40:56 -0500
-In-Reply-To: <2b37a0fa-46e3-ec4e-3f9c-9e1bb7dcda1e@intel.com> (Adrian Hunter's
-        message of "Mon, 30 Jan 2017 14:40:30 +0200")
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33353 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753508AbdA3NwX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 08:52:23 -0500
+Received: by mail-wm0-f67.google.com with SMTP id v77so16303417wmv.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 05:52:22 -0800 (PST)
+Received: from wintermute (HSI-KBW-109-193-044-188.hsi7.kabel-badenwuerttemberg.de. [109.193.44.188])
+        by smtp.gmail.com with ESMTPSA id l10sm23024882wrb.44.2017.01.30.05.52.20
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Mon, 30 Jan 2017 05:52:20 -0800 (PST)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gustavo Padovan <gustavo.padovan@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+To: linux-mmc@vger.kernel.org
 
-Adrian Hunter <adrian.hunter@intel.com> writes:
-> Did you test normal SDIO operation was unaffected?  Please do that before
-> sending it to stable.
+Hi,
 
-I don't have any SDIO card in hand to confirm it right now.  would you
-or Ulf be able to give it a try?  I'll keep looking for one.
+preparing mmc patches against linux-next I noticed that
+mmc_card_blockaddr is now private to the mmc core.
 
--- 
-Gabriel Krisman Bertazi
+We've been using that in the (not yet upstream) Cavium mmc driver like this:
+
+static void prepare_ext_dma(struct mmc_host *mmc, ...
+	...
+	emm_dma->s.sector = mmc_card_blockaddr(mmc->card) ? 1 : 0;
+	
+
+So the hardware controller needs to know if we use 512 byte blocks
+or not which seems to be dependent on the medium size.
+
+Any ideas on how I can implement this without mmc_card_blockaddr() ?
+
+thanks,
+Jan
