@@ -1,13 +1,14 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/13] arm64: allwinner: a64: Enable MMC support
-Date: Mon, 30 Jan 2017 11:05:53 +0100
-Message-ID: <CAPDyKFrb9HJ0KG5rAkVJVjxOdywOTRM6Nu9w+9+OxOvDpJFAqQ@mail.gmail.com>
+Subject: Re: [PATCH v5 6/13] mmc: sunxi: Add EMMC (MMC2) controller compatible
+Date: Mon, 30 Jan 2017 11:06:05 +0100
+Message-ID: <CAPDyKFr3cnFux4NRzZ9UAn93MOVb6RaQQ+PHDxGztciDHZSX9A@mail.gmail.com>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
+ <bcbeeb726c5638361590bd4c295279ef92d44209.1485553113.git-series.maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
+In-Reply-To: <bcbeeb726c5638361590bd4c295279ef92d44209.1485553113.git-series.maxime.ripard@free-electrons.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,77 +22,48 @@ To: Maxime Ripard <maxime.ripard@free-electrons.com>
 Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Andre Przywara <andre.przywara@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 January 2017 at 22:38, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> Hi,
->
-> Here is a new attempt at getting the MMC controllers running, following the
-> work done by Andre.
->
-> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
-> and a Kingston eMMC with 1.8V IOs.
->
-> For SDIO, the HS DDR mode works just fine. That serie also enables the
-> SDR104 mode to work on the devices that are capable of this.
->
-> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
-> moment, but since it's significantly more complex, and at the same time
-> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
-> any benefits. If there's any at some point, this can be added later.
->
-> Let me know what you think,
-> Maxime
->
-> Changes from v4:
->   - Added Florian Tested-by
->   - Removed duplicate commit log
->
-> Changes from v3:
->   - Reordered the MMC nodes
->   - Added the specification section the first commit log
->   - Supported mmc->actual_rate
->   - Clarified a bit what we (don't) know about DATA0
->
-> Changes from v2:
->   - Enabled SDR104, limited the frequency to 150MHz. 200MHz was too high.
->   - Added more fixes to the gating and frequency rate change sequence
->   - Added one more patch to mask DATA0 when updating the clock that was
->     needed to get SDR104 to run
->   - Added the patches to enable it on a few boards done by Andre
->   - Amended the comments as suggested by Andre.
->   - Added some tags
->
-> Andre Przywara (4):
->   arm64: allwinner: a64: Add MMC nodes
->   arm64: allwinner: pine64: add MMC support
->   arm64: allwinner: a64: add UART1 pin nodes
->   arm64: allwinner: add BananaPi-M64 support
->
-> Maxime Ripard (9):
->   mmc: sunxi: Fix clock frequency change sequence
->   mmc: sunxi: Gate the clock when rate is 0
->   mmc: sunxi: Always set signal delay to 0 for A64
->   mmc: sunxi: Enable the new timings for the A64 MMC controllers
->   mmc: sunxi: Mask DATA0 when updating the clock
->   mmc: sunxi: Add EMMC (MMC2) controller compatible
->   mmc: sunxi: Add more debug informations
->   arm64: allwinner: a64: Add MMC pinctrl nodes
->   arm64: allwinner: a64: Increase the MMC max frequency
->
->  arch/arm64/boot/dts/allwinner/Makefile                    |   1 +-
->  arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts | 120 +++++++-
->  arch/arm64/boot/dts/allwinner/sun50i-a64-pine64.dts       |  20 +-
->  arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi             |  77 ++++-
->  drivers/mmc/host/sunxi-mmc.c                              | 114 ++++---
->  5 files changed, 289 insertions(+), 43 deletions(-)
->  create mode 100644 arch/arm64/boot/dts/allwinner/sun50i-a64-bananapi-m64.dts
->
-> base-commit: c94f7962e97c2ba0a612656bc456d979f20cb382
-> --
-> git-series 0.8.11
-
-Thanks, applied patch 1 -> 7 for next! Although, please have a look at
-my comment for patch6.
-
-Kind regards
-Uffe
+T24gMjcgSmFudWFyeSAyMDE3IGF0IDIyOjM4LCBNYXhpbWUgUmlwYXJkCjxtYXhpbWUucmlwYXJk
+QGZyZWUtZWxlY3Ryb25zLmNvbT4gd3JvdGU6Cj4gVGhlIE1NQzIgY29udHJvbGxlciBvbiB0aGUg
+QTY0IGlzIGtpbmQgb2YgYSBzcGVjaWFsIGJlYXN0Lgo+Cj4gV2hpbGUgdGhlIGdlbmVyYWwgY29u
+dHJvbGxlciBkZXNpZ24gaXMgdGhlIHNhbWUgdGhhbiB0aGUgb3RoZXIgTU1DCj4gY29udHJvbGxl
+cnMgaW4gdGhlIFNvQywgaXQgYWxzbyBoYXMgYSBidW5jaCBvZiBmZWF0dXJlcyBhbmQgY2hhbmdl
+cyB0aGF0Cj4gcHJldmVudCBpdCB0byBiZSBkcml2ZW4gaW4gdGhlIHNhbWUgd2F5Lgo+Cj4gSXQg
+aGFzIGZvciBleGFtcGxlIGEgZGlmZmVyZW50IGJ1cyB3aWR0aCBsaW1pdCwgYSBkaWZmZXJlbnQg
+bWF4aW11bQo+IGZyZXF1ZW5jeSwgYW5kLCBmb3Igc29tZSByZWFzb24sIHRoZSBtYXhpbXVtIGJ1
+ZmZlciBzaXplIG9mIGEgRE1BCj4gZGVzY3JpcHRvci4KPgo+IEFkZCBhIG5ldyBjb21wYXRpYmxl
+IHNwZWNpZmljYWxseSBmb3IgdGhpcyBjb250cm9sbGVyLgo+Cj4gQWNrZWQtYnk6IFJvYiBIZXJy
+aW5nIDxyb2JoQGtlcm5lbC5vcmc+Cj4gU2lnbmVkLW9mZi1ieTogTWF4aW1lIFJpcGFyZCA8bWF4
+aW1lLnJpcGFyZEBmcmVlLWVsZWN0cm9ucy5jb20+Cj4gVGVzdGVkLWJ5OiBGbG9yaWFuIFZhdXNz
+YXJkIDxmbG9yaWFuLnZhdXNzYXJkQGhlaWctdmQuY2g+Cj4gLS0tCj4gIGRyaXZlcnMvbW1jL2hv
+c3Qvc3VueGktbW1jLmMgfCA4ICsrKysrKysrCj4gIDEgZmlsZSBjaGFuZ2VkLCA4IGluc2VydGlv
+bnMoKyksIDAgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9z
+dW54aS1tbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMKPiBpbmRleCA2YmJlNjEz
+OTdiN2MuLmYwZjY5MjJiY2E4YSAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3N1bnhp
+LW1tYy5jCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYwo+IEBAIC01LDYgKzUs
+NyBAQAo+ICAgKiAoQykgQ29weXJpZ2h0IDIwMTMtMjAxNCBPMlMgR21iSCA8d3d3Lm8ycy5jaD4K
+PiAgICogKEMpIENvcHlyaWdodCAyMDEzLTIwMTQgRGF2aWQgTGFuemVuZO+/vXJmZXIgPGRhdmlk
+LmxhbnplbmRvZXJmZXJAbzJzLmNoPgo+ICAgKiAoQykgQ29weXJpZ2h0IDIwMTMtMjAxNCBIYW5z
+IGRlIEdvZWRlIDxoZGVnb2VkZUByZWRoYXQuY29tPgo+ICsgKiAoQykgQ29weXJpZ2h0IDIwMTcg
+U29vdGVjaCBTQQo+ICAgKgo+ICAgKiBUaGlzIHByb2dyYW0gaXMgZnJlZSBzb2Z0d2FyZTsgeW91
+IGNhbiByZWRpc3RyaWJ1dGUgaXQgYW5kL29yCj4gICAqIG1vZGlmeSBpdCB1bmRlciB0aGUgdGVy
+bXMgb2YgdGhlIEdOVSBHZW5lcmFsIFB1YmxpYyBMaWNlbnNlIGFzCj4gQEAgLTEwOTYsMTIgKzEw
+OTcsMTkgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBzdW54aV9tbWNfY2ZnIHN1bjUwaV9hNjRfY2Zn
+ID0gewo+ICAgICAgICAgLm5lZWRzX25ld190aW1pbmdzID0gdHJ1ZSwKPiAgfTsKPgo+ICtzdGF0
+aWMgY29uc3Qgc3RydWN0IHN1bnhpX21tY19jZmcgc3VuNTBpX2E2NF9lbW1jX2NmZyA9IHsKPiAr
+ICAgICAgIC5pZG1hX2Rlc19zaXplX2JpdHMgPSAxMywKPiArICAgICAgIC5jbGtfZGVsYXlzID0g
+TlVMTCwKPiArICAgICAgIC5jYW5fY2FsaWJyYXRlID0gdHJ1ZSwKPiArfTsKPiArCj4gIHN0YXRp
+YyBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIHN1bnhpX21tY19vZl9tYXRjaFtdID0gewo+ICAg
+ICAgICAgeyAuY29tcGF0aWJsZSA9ICJhbGx3aW5uZXIsc3VuNGktYTEwLW1tYyIsIC5kYXRhID0g
+JnN1bjRpX2ExMF9jZmcgfSwKPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAiYWxsd2lubmVyLHN1
+bjVpLWExMy1tbWMiLCAuZGF0YSA9ICZzdW41aV9hMTNfY2ZnIH0sCj4gICAgICAgICB7IC5jb21w
+YXRpYmxlID0gImFsbHdpbm5lcixzdW43aS1hMjAtbW1jIiwgLmRhdGEgPSAmc3VuN2lfYTIwX2Nm
+ZyB9LAo+ICAgICAgICAgeyAuY29tcGF0aWJsZSA9ICJhbGx3aW5uZXIsc3VuOWktYTgwLW1tYyIs
+IC5kYXRhID0gJnN1bjlpX2E4MF9jZmcgfSwKPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAiYWxs
+d2lubmVyLHN1bjUwaS1hNjQtbW1jIiwgLmRhdGEgPSAmc3VuNTBpX2E2NF9jZmcgfSwKPiArICAg
+ICAgIHsgLmNvbXBhdGlibGUgPSAiYWxsd2lubmVyLHN1bjUwaS1hNjQtZW1tYyIsIC5kYXRhID0g
+JnN1bjUwaV9hNjRfZW1tY19jZmcgfSwKClRoaXMgc2hvdWxkIGJlIGRvY3VtZW50ZWQgaW4gdGhl
+IERUUyBkb2NzIGZvciBzdW54aSBhcyB3ZWxsLiBJIGV4cGVjdAp5b3UgdG8gc2VuZCBhIHBhdGNo
+IG9uIHRvcCB0byB0YWtlIGNhcmUgb2YgdGhhdC4KCktpbmQgcmVnYXJkcwpVZmZlCgpfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVs
+IG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDov
+L2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
