@@ -1,60 +1,31 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/4] mmc: bcm2835: Add new driver for the internal SD controller.
-Date: Mon, 30 Jan 2017 09:22:23 +0100
-Message-ID: <CAPDyKFr=x9KkzWxaeTJsJgonGMPY_RV6i2HRLLsqB9zZgYiy5A@mail.gmail.com>
-References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
- <1485516989-1072-3-git-send-email-kraxel@redhat.com> <CAPDyKFoWyZaRLhuBnFfJupxRnUvq-JWczS7ObjAGat056MCEyw@mail.gmail.com>
- <ec09cd58-6613-82d7-60a9-7a7c2d9ae673@i2se.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core/mmci: restore pre/post_req behaviour
+Date: Mon, 30 Jan 2017 09:26:56 +0100
+Message-ID: <CACRpkdadrTRkfq06Q+WQ=tQtb4WRicE62E4ahzzdmgPCcNbW5g@mail.gmail.com>
+References: <20170127140454.7990-1-linus.walleij@linaro.org> <CAPDyKFomNHTPMDUT_CUjQuG-goTuQoXqzn+vOgdP9njUTWjGXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <ec09cd58-6613-82d7-60a9-7a7c2d9ae673-eS4NqCHxEME@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Cc: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f173.google.com ([209.85.223.173]:33076 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752621AbdA3I1D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 03:27:03 -0500
+Received: by mail-io0-f173.google.com with SMTP id v96so5861902ioi.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 00:26:58 -0800 (PST)
+In-Reply-To: <CAPDyKFomNHTPMDUT_CUjQuG-goTuQoXqzn+vOgdP9njUTWjGXg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>
 
-On 27 January 2017 at 17:04, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> wrote:
-> Am 27.01.2017 um 16:27 schrieb Ulf Hansson:
->> On 27 January 2017 at 12:36, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>> From: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
->>>
->>> The 2835 has two SD controllers:  The Arasan SDHCI controller (supported
->>> by the iproc driver) and a custom SD controller.  This patch adds a
->>> driver for the custom SD controller.
->>>
->>> The custom controller runs faster, and driving the sdcard with the
->>> custom controller also allows to drive the rpi3 wifi with the iproc
->>> driver.
->>>
->> I don't understand this relationship. Is this somewhat configurable in runtime?
->
-> The configuration is done by devicetree via pin muxing. AFAIK both SD
-> controller are available on the same pins (2 pin groups = pin 22 to 27 +
-> pin 48 to 53). So it's possible to use both SD controllers at the same
-> time with different pin groups. This is necessary to use Wifi via SDIO
-> on the RPi 3 while the other controller handles SD card with the rootfs.
->
->>
->> Is the WIFI module a removable SDIO card?
->
-> No
->
->>  So you can decide which
->> controller that is best suited to use?
->
-> Yes, but it requires also both drivers.
->
+On Fri, Jan 27, 2017 at 3:18 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Okay, thanks for clarifying - I will go on with the review.
+> Do you think this is material for stable, or we could just see it as
+> an improved behaviour of the core and mmci?
 
-If a re-spin of the series is needed, please make sure to update the
-coverletter with some information from above, so I don't get confused
-again. :-)
+It's not regressing anything so just put it in for next, no hurry.
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The important thing is to get rid of it from core for the future.
+
+Yours,
+Linus Walleij
