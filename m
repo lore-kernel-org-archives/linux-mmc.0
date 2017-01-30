@@ -1,117 +1,78 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
- functionality
-Date: Mon, 30 Jan 2017 11:40:48 +0200
-Message-ID: <1f0cc488-75f0-cff3-1386-070717aa7220@intel.com>
-References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
- <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com>
- <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
- <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
- <CAPDyKFoF2QsTxKC7=PjHqOk106USQ-j9MtiyfC=Sqks8DnPDYQ@mail.gmail.com>
+From: Ravikumar Kattekola <rk@ti.com>
+Subject: [PATCH 2/3] mmc: host: omap_hsmmc: use generic_cmd6_time to program timeout value for CMD6
+Date: Mon, 30 Jan 2017 15:41:57 +0530
+Message-ID: <1485771118-13748-3-git-send-email-rk@ti.com>
+References: <1485771118-13748-1-git-send-email-rk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoF2QsTxKC7=PjHqOk106USQ-j9MtiyfC=Sqks8DnPDYQ@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infra>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lelnx194.ext.ti.com ([198.47.27.80]:19213 "EHLO
+        lelnx194.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751208AbdA3KJy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 05:09:54 -0500
+In-Reply-To: <1485771118-13748-1-git-send-email-rk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, peter.ujfalusi@ti.com, nsekhar@ti.com, tony@atomide.com, afenkart@gmail.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: kishon@ti.com, rk@ti.com
 
-On 30/01/17 11:10, Ulf Hansson wrote:
-> On 28 January 2017 at 09:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 27/01/2017 5:12 p.m., Ulf Hansson wrote:
->>>
->>> On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com>
->>> wrote:
->>>>
->>>> On 26/01/17 12:50, Ulf Hansson wrote:
->>>>>
->>>>> On 11 January 2017 at 18:19, Gregory CLEMENT
->>>>> <gregory.clement@free-electrons.com> wrote:
->>>>>>
->>>>>> +                       priv->init_card_type = MMC_TYPE_MMC;
->>>>>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
->>>>>> +
->>>>>> +                       /*
->>>>>> +                        * Force to clear BUS_TEST to
->>>>>> +                        * skip bus_test_pre and bus_test_post
->>>>>> +                        */
->>>>>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
->>>>>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
->>>>>
->>>>>
->>>>> This cap is a bit strange. It was added several years ago by Adrian
->>>>> Hunter, but I am wondering about the reason to why it's needed.
->>>>>
->>>>
->>>> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
->>>>
->>>> I think it was added to enable people to choose whether they wanted a
->>>> large
->>>> or small erase granularity.  That probably doesn't matter if the card
->>>> supports TRIM.
->>>>
->>>
->>> Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
->>>
->>> In mmc_calc_max_discard() the following code/comment exists:
->>>
->>> /*
->>>  * Without erase_group_def set, MMC erase timeout depends on clock
->>>  * frequence which can change.  In that case, the best choice is
->>>  * just the preferred erase size.
->>>  */
->>> if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
->>>      return card->pref_erase;
->>>
->>>
->>> This makes me wonder.
->>>
->>> So, when we haven't enabled the high capacity erase groups in the
->>> EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
->>> size.
->>>
->>> In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
->>> set ext_csd.erase_group_def),  we will instead  do some calculations
->>> to find out the max discards.
->>>
->>> Are you saying that these calculations doesn't matter much - or are
->>> you saying that we always want to do them?
->>
->>
->> No, I was saying that if you have TRIM then TRIM is preferred to ERASE so
->> the erase group size does not come into play when discarding, since ERASE
->> granularity is erase groups whereas TRIM granularity is sectors.
-> 
-> Right. Thanks for clarifying.
-> 
->>
->> However ERASE_GROUP_DEF also affects the size of write protect groups.
-> 
-> In either case.
-> 
-> What do you think of removing MMC_CAP2_HC_ERASE_SZ? I don't like these
-> kind of soft polices, it's better if we can decide on a common
-> behaviour - whatever that is.
+From: Kishon Vijay Abraham I <kishon@ti.com>
 
-Changing the value of ERASE_GROUP_DEF could be a problem, for example the
-spec. says:
+commit e2bf08d643a244ccb ("omap_hsmmc: set a large data timeout for
+commands with busy signal") sets an arbitrary timeout value (100ms) for
+commands like CMD6 (MMC SWITCH). However extended CSD register defined
+in the eMMC standard has a field for GENERIC_CMD6_TIME which indicates
+the default maximum timeout for a SWITCH command.
+Use busy_timeout of cmd structure (populated with GENERIC_CMD6_TIME
+in the case of SWITCH command) to program the data timeout value in
+omap_hsmmc driver.
+SWITCH command to turn the cache on took more than 100ms to complete
+with MICRON eMMC card present in AM572x IDK REV 1.3A resulting in
+timeout and failed enumeration. It is fixed here by programming the
+timeout with the value advertised in GENERIC_CMD6_TIME.
 
-"Similarly if the host set ERASE_GROUP_DEF bit for a device that the default
-write protect was already set in some of the area in the previous power
-cycle, then the device may show unknown behavior when host issue write
-or erase commands to the device. In application, it is mandatory for host to
-use same ERASE GROUP DEF value to the device all the time."
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Signed-off-by: Ravikumar Kattekola <rk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
 
-Whether or not there is anyone that would actually be affected is hard to know.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 0ee5650..51ca3d7 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1527,16 +1527,24 @@ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host)
+ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
+ {
+ 	int ret;
++	unsigned int timeout;
++
+ 	host->data = req->data;
+ 
+ 	if (req->data == NULL) {
+ 		OMAP_HSMMC_WRITE(host->base, BLK, 0);
+-		/*
+-		 * Set an arbitrary 100ms data timeout for commands with
+-		 * busy signal.
+-		 */
+-		if (req->cmd->flags & MMC_RSP_BUSY)
+-			set_data_timeout(host, 100000000U, 0);
++		if (req->cmd->flags & MMC_RSP_BUSY) {
++			timeout = req->cmd->busy_timeout * NSEC_PER_MSEC;
++
++			/*
++			 * Set an arbitrary 100ms data timeout for commands with
++			 * busy signal and no indication of busy_timeout.
++			 */
++			if (!timeout)
++				timeout = 100000000U;
++
++			set_data_timeout(host, timeout, 0);
++		}
+ 		return 0;
+ 	}
+ 
+-- 
+1.9.1
+
