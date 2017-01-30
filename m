@@ -1,107 +1,67 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 02/14] Documentation: dt/bindings: Document
- pinctrl-gpio
-Date: Mon, 30 Jan 2017 14:33:12 -0600
-Message-ID: <20170130203312.xsvu6rk2sz66m43a@rob-hp-laptop>
+Subject: Re: [PATCH v3 01/14] Documentation: dt/bindings: Document
+ pinctrl-ingenic
+Date: Mon, 30 Jan 2017 14:36:17 -0600
+Message-ID: <20170130203617.hpljtcmzava3rq2n@rob-hp-laptop>
 References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
  <20170125185207.23902-1-paul@crapouillou.net>
- <20170125185207.23902-3-paul@crapouillou.net>
+ <20170125185207.23902-2-paul@crapouillou.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ot0-f196.google.com ([74.125.82.196]:33640 "EHLO
-        mail-ot0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752816AbdA3UdO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 15:33:14 -0500
+Return-path: <linux-mips-bounce@linux-mips.org>
 Content-Disposition: inline
-In-Reply-To: <20170125185207.23902-3-paul@crapouillou.net>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <20170125185207.23902-2-paul@crapouillou.net>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
 To: Paul Cercueil <paul@crapouillou.net>
 Cc: Linus Walleij <linus.walleij@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
+List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jan 25, 2017 at 07:51:55PM +0100, Paul Cercueil wrote:
+On Wed, Jan 25, 2017 at 07:51:54PM +0100, Paul Cercueil wrote:
 > This commit adds documentation for the devicetree bidings of the
-
-s/biding/bindings/
-
-> pinctrl-gpio driver, which handles GPIOs of the Ingenic SoCs
-> currently supported by the Linux kernel.
-
-The subject makes no reference that this binding is for Ingenic GPIO. 
-Also, drop the "Documentation: " part. It's redundant.
-
+> pinctrl-ingenic driver, which handles pin configuration and pin
+> muxing of the Ingenic SoCs currently supported by the Linux kernel.
 > 
 > Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 > ---
->  .../devicetree/bindings/gpio/ingenic,gpio.txt      | 45 ++++++++++++++++++++++
->  1 file changed, 45 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
+>  .../bindings/pinctrl/ingenic,pinctrl.txt           | 77 ++++++++++++++++++++++
+>  1 file changed, 77 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
 > 
-> v2: New patch
+> v2: Rewrote the documentation for the new pinctrl-ingenic driver
 > v3: No changes
 > 
-> diff --git a/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt b/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
+> diff --git a/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
 > new file mode 100644
-> index 000000000000..b2eb20494365
+> index 000000000000..ead5b01ad471
 > --- /dev/null
-> +++ b/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
-> @@ -0,0 +1,45 @@
-> +Ingenic jz47xx GPIO controller
+> +++ b/Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+> @@ -0,0 +1,77 @@
+> +Ingenic jz47xx pin controller
 > +
-> +Required properties:
-> +  - compatible:
-> +    - "ingenic,jz4740-gpio" for the JZ4740 SoC
-> +    - "ingenic,jz4780-gpio" for the JZ4780 SoC
+> +Please refer to pinctrl-bindings.txt in this directory for details of the
+> +common pinctrl bindings used by client devices, including the meaning of the
+> +phrase "pin configuration node".
 > +
-> +  - reg: Base address and length of each memory resource used by the GPIO
-> +    controller hardware module.
-> +
-> +  - gpio-controller: Marks the device node as a GPIO controller.
-> +  - #gpio-cells: Should be 2. The first cell is the GPIO number and the second
-> +    cell specifies GPIO flags, as defined in <dt-bindings/gpio/gpio.h>. Only the
-> +    GPIO_ACTIVE_HIGH and GPIO_ACTIVE_LOW flags are supported.
-> +  - gpio-ranges: Range of pins managed by the GPIO controller.
-> +
-> +Optional properties:
-> +  - base: The GPIO number to use as the base for this driver.
+> +For the jz47xx SoCs, pin control is tightly bound with GPIO ports. All pins may
+> +be used as GPIOs, multiplexed device functions are configured within the
+> +GPIO port configuration registers and it is typical to refer to pins using the
+> +naming scheme "PxN" where x is a character identifying the GPIO port with
+> +which the pin is associated and N is an integer from 0 to 31 identifying the
+> +pin within that GPIO port. For example PA0 is the first pin in GPIO port A, and
+> +PB31 is the last pin in GPIO port B. The jz4740 contains 4 GPIO ports, PA to
+> +PD, for a total of 128 pins. The jz4780 contains 6 GPIO ports, PA to PF, for a
+> +total of 192 pins.
 
-Drop this please. This is a Linuxism.
+>From the overlapping register addresses in the examples and this 
+description, it looks like the pinctrlr and gpio controller are 1 block. 
+If so, then there should only be 1 node.
 
-> +  - interrupt-controller: Marks the device node as an interrupt controller.
-> +  - interrupts: Interrupt specifier for the controllers interrupt.
-> +    Required if 'interrupt-controller' is specified.
-
-Some h/w doesn't have interrupt capability? If not, this should not be 
-optional.
-
-> +
-> +Please refer to gpio.txt in this directory for details of gpio-ranges property
-> +and the common GPIO bindings used by client devices.
-> +
-> +The GPIO controller also acts as an interrupt controller. It uses the default
-> +two cells specifier as described in Documentation/devicetree/bindings/
-> +interrupt-controller/interrupts.txt.
-
-Just document #interrupt-cells and its value and drop this paragraph.
-
-> +
-> +Example:
-> +
-> +gpa: gpio-controller@10010000 {
-> +	compatible = "ingenic,jz4740-gpio";
-> +	reg = <0x10010000 0x100>;
-> +
-> +	gpio-controller;
-> +	gpio-ranges = <&pinctrl 0 0 32>;
-> +	#gpio-cells = <2>;
-> +
-> +	interrupt-controller;
-> +	#interrupt-cells = <2>;
-> +
-> +	interrupt-parent = <&intc>;
-> +	interrupts = <28>;
-> +};
-> -- 
-> 2.11.0
-> 
+Rob
