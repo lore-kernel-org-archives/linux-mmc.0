@@ -1,34 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv1 1/2] mmc: sdhci-msm: Remove platform_execute_tuning from sdhci_msm_ops
-Date: Mon, 30 Jan 2017 11:04:24 +0100
-Message-ID: <CAPDyKFrXjdx+9scxwo13V-SZ_zgePSMy6kmM+FydizU45zdRRQ@mail.gmail.com>
-References: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org> <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
+Subject: Re: [PATCH 1/2] mmc: core: simplify ida handling
+Date: Mon, 30 Jan 2017 11:04:37 +0100
+Message-ID: <CAPDyKFq5a4xJCoEb7gQQqL7ysUZ5JorNM4WrkvYX84s0TaWEew@mail.gmail.com>
+References: <4dae93b9-78f6-25c5-4836-4a70a5a00ab6@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38658 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751093AbdA3K3B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 05:29:01 -0500
-Received: by mail-wm0-f46.google.com with SMTP id r141so26517331wmg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 02:27:57 -0800 (PST)
-In-Reply-To: <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38697 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751399AbdA3KjV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 05:39:21 -0500
+Received: by mail-wm0-f45.google.com with SMTP id r141so26860166wmg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 02:37:26 -0800 (PST)
+In-Reply-To: <4dae93b9-78f6-25c5-4836-4a70a5a00ab6@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, jeremymc@redhat.com, git@kchr.de
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 24 January 2017 at 09:50, Ritesh Harjani <riteshh@codeaurora.org> wrote:
-> platform_execute_tuning should not really exist as it does not
-> do anything useful.
+On 28 January 2017 at 09:32, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+> ida handling can be simplified by switching to the ida_simple_
+> functions.
 >
-> So remove this ops and directly plug sdhci_msm_execute_tuning
-> with mmc_host_ops.
->
-> Also in case of HS400 tuning clear SDHCI_HS400_TUNING flag once
-> HS400 related mode selection is done.
->
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
 Thanks, applied for next!
 
@@ -36,53 +30,55 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-msm.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
+>  drivers/mmc/core/host.c | 20 ++++----------------
+>  1 file changed, 4 insertions(+), 16 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index f958697..b3e8f44 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -827,12 +827,12 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
->         return ret;
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 98f25ffb..0a26c8b6 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -34,14 +34,11 @@
+>  #define cls_dev_to_mmc_host(d) container_of(d, struct mmc_host, class_dev)
+>
+>  static DEFINE_IDA(mmc_host_ida);
+> -static DEFINE_SPINLOCK(mmc_host_lock);
+>
+>  static void mmc_host_classdev_release(struct device *dev)
+>  {
+>         struct mmc_host *host = cls_dev_to_mmc_host(dev);
+> -       spin_lock(&mmc_host_lock);
+> -       ida_remove(&mmc_host_ida, host->index);
+> -       spin_unlock(&mmc_host_lock);
+> +       ida_simple_remove(&mmc_host_ida, host->index);
+>         kfree(host);
 >  }
 >
-> -static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  {
-> +       struct sdhci_host *host = mmc_priv(mmc);
->         int tuning_seq_cnt = 3;
->         u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
->         int rc;
-> -       struct mmc_host *mmc = host->mmc;
->         struct mmc_ios ios = host->mmc->ios;
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> @@ -855,6 +855,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->         if (host->flags & SDHCI_HS400_TUNING) {
->                 sdhci_msm_hc_select_mode(host);
->                 msm_set_clock_rate_for_bus_mode(host, ios.clock);
-> +               host->flags &= ~SDHCI_HS400_TUNING;
+> @@ -354,22 +351,13 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         /* scanning will be enabled when we're ready */
+>         host->rescan_disable = 1;
+>
+> -again:
+> -       if (!ida_pre_get(&mmc_host_ida, GFP_KERNEL)) {
+> +       err = ida_simple_get(&mmc_host_ida, 0, 0, GFP_KERNEL);
+> +       if (err < 0) {
+>                 kfree(host);
+>                 return NULL;
 >         }
 >
->  retry:
-> @@ -1119,7 +1120,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+> -       spin_lock(&mmc_host_lock);
+> -       err = ida_get_new(&mmc_host_ida, &host->index);
+> -       spin_unlock(&mmc_host_lock);
+> -
+> -       if (err == -EAGAIN) {
+> -               goto again;
+> -       } else if (err) {
+> -               kfree(host);
+> -               return NULL;
+> -       }
+> +       host->index = err;
 >
->  static const struct sdhci_ops sdhci_msm_ops = {
-> -       .platform_execute_tuning = sdhci_msm_execute_tuning,
->         .reset = sdhci_reset,
->         .set_clock = sdhci_msm_set_clock,
->         .get_min_clock = sdhci_msm_get_min_clock,
-> @@ -1294,6 +1294,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->                                          MSM_MMC_AUTOSUSPEND_DELAY_MS);
->         pm_runtime_use_autosuspend(&pdev->dev);
+>         dev_set_name(&host->class_dev, "mmc%d", host->index);
 >
-> +       host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto pm_runtime_disable;
 > --
-> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> a Linux Foundation Collaborative Project.
+> 2.11.0
 >
