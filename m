@@ -1,67 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
-Date: Mon, 30 Jan 2017 09:19:07 +0100
-Message-ID: <CAPDyKFq2aUkk4qzcLNoityHbOYTHCq_OiO9HVLuWjcGSJX0aWw@mail.gmail.com>
-References: <20170116142342.21283-1-krisman@collabora.co.uk>
- <CAPDyKFpowPmbwvHL9NL60zAABfW53sDKkp0Ag5aXs4jZZLC=Dg@mail.gmail.com> <87wpdg9uob.fsf@dilma.collabora.co.uk>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/4] mmc: bcm2835: Add new driver for the internal SD controller.
+Date: Mon, 30 Jan 2017 09:22:23 +0100
+Message-ID: <CAPDyKFr=x9KkzWxaeTJsJgonGMPY_RV6i2HRLLsqB9zZgYiy5A@mail.gmail.com>
+References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
+ <1485516989-1072-3-git-send-email-kraxel@redhat.com> <CAPDyKFoWyZaRLhuBnFfJupxRnUvq-JWczS7ObjAGat056MCEyw@mail.gmail.com>
+ <ec09cd58-6613-82d7-60a9-7a7c2d9ae673@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:35514 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751230AbdA3ITJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 03:19:09 -0500
-Received: by mail-wm0-f42.google.com with SMTP id b65so21302183wmf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 00:19:08 -0800 (PST)
-In-Reply-To: <87wpdg9uob.fsf@dilma.collabora.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <ec09cd58-6613-82d7-60a9-7a7c2d9ae673-eS4NqCHxEME@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Cc: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gustavo Padovan <gustavo.padovan@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 
-On 27 January 2017 at 20:20, Gabriel Krisman Bertazi
-<krisman@collabora.co.uk> wrote:
-> Ulf Hansson <ulf.hansson@linaro.org> writes:
+On 27 January 2017 at 17:04, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> wrote:
+> Am 27.01.2017 um 16:27 schrieb Ulf Hansson:
+>> On 27 January 2017 at 12:36, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>> From: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+>>>
+>>> The 2835 has two SD controllers:  The Arasan SDHCI controller (supported
+>>> by the iproc driver) and a custom SD controller.  This patch adds a
+>>> driver for the custom SD controller.
+>>>
+>>> The custom controller runs faster, and driving the sdcard with the
+>>> custom controller also allows to drive the rpi3 wifi with the iproc
+>>> driver.
+>>>
+>> I don't understand this relationship. Is this somewhat configurable in runtime?
 >
->> On 16 January 2017 at 15:23, Gabriel Krisman Bertazi
->> <krisman@collabora.co.uk> wrote:
->>> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
->>> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
->>> reads, which are not allowed for SD devices.  This adds a sanity check
->>> to the interruption path, preventing that illegal command from getting
->>> sent if the CARD_INT interruption should be disabled.
->>>
->>> This quirk allows that particular machine to resume boot despite the
->>> faulty hardware, instead of getting hung dealing with thousands of
->>> mishandled interrupts.
->>>
->>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
->>> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
->>> CC: Ulf Hansson <ulf.hansson@linaro.org>
->>> CC: linux-mmc@vger.kernel.org
+> The configuration is done by devicetree via pin muxing. AFAIK both SD
+> controller are available on the same pins (2 pin groups = pin 22 to 27 +
+> pin 48 to 53). So it's possible to use both SD controllers at the same
+> time with different pin groups. This is necessary to use Wifi via SDIO
+> on the RPi 3 while the other controller handles SD card with the rootfs.
+>
 >>
->> Thanks, applied for next with update commit msg header and by removing
->> the CCs from the changelog.
+>> Is the WIFI module a removable SDIO card?
 >
-> Hi Ulf,
+> No
 >
-> Thanks for applying.  Although, I saw it got queued to the next merge
-> window, but I we believe it to be -rc material, since it fixes a hang
-> in our kernelCI boxes[1], and is preventing us from testing other features
-> in this box.  Can you consider submitting it to Linus for the next -rc?
-> it will be much appreciated!
+>>  So you can decide which
+>> controller that is best suited to use?
+>
+> Yes, but it requires also both drivers.
+>
 
-I can do that, but perhaps this should then be tagged for stable as well?
+Okay, thanks for clarifying - I will go on with the review.
 
-Or was this a regression in 4.10?
+If a re-spin of the series is needed, please make sure to update the
+coverletter with some information from above, so I don't get confused
+again. :-)
 
 Kind regards
 Uffe
-
->
-> [1]  <https://kernelci.org/boot/id/5881c81859b5140b59f6c3ae/>
->
-> Thanks.
->
-> --
-> Gabriel Krisman Bertazi
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
