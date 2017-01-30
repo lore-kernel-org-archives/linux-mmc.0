@@ -1,96 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-Date: Mon, 30 Jan 2017 10:10:05 +0100
-Message-ID: <CAPDyKFoF2QsTxKC7=PjHqOk106USQ-j9MtiyfC=Sqks8DnPDYQ@mail.gmail.com>
-References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
- <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com> <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
- <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCHv1 2/2] mmc: sdhci-msm: Remove unnecessary comments of CDC
+ init sequence
+Date: Mon, 30 Jan 2017 11:04:34 +0200
+Message-ID: <13695c9e-e818-59a1-2c1c-27ed2d376085@intel.com>
+References: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org>
+ <1485247827-12898-3-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvel>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1485247827-12898-3-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, asutoshd@codeaurora.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, git@kchr.de
 List-Id: linux-mmc@vger.kernel.org
 
-On 28 January 2017 at 09:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 27/01/2017 5:12 p.m., Ulf Hansson wrote:
->>
->> On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com>
->> wrote:
->>>
->>> On 26/01/17 12:50, Ulf Hansson wrote:
->>>>
->>>> On 11 January 2017 at 18:19, Gregory CLEMENT
->>>> <gregory.clement@free-electrons.com> wrote:
->>>>>
->>>>> +                       priv->init_card_type = MMC_TYPE_MMC;
->>>>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
->>>>> +
->>>>> +                       /*
->>>>> +                        * Force to clear BUS_TEST to
->>>>> +                        * skip bus_test_pre and bus_test_post
->>>>> +                        */
->>>>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
->>>>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
->>>>
->>>>
->>>> This cap is a bit strange. It was added several years ago by Adrian
->>>> Hunter, but I am wondering about the reason to why it's needed.
->>>>
->>>
->>> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
->>>
->>> I think it was added to enable people to choose whether they wanted a
->>> large
->>> or small erase granularity.  That probably doesn't matter if the card
->>> supports TRIM.
->>>
->>
->> Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
->>
->> In mmc_calc_max_discard() the following code/comment exists:
->>
->> /*
->>  * Without erase_group_def set, MMC erase timeout depends on clock
->>  * frequence which can change.  In that case, the best choice is
->>  * just the preferred erase size.
->>  */
->> if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
->>      return card->pref_erase;
->>
->>
->> This makes me wonder.
->>
->> So, when we haven't enabled the high capacity erase groups in the
->> EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
->> size.
->>
->> In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
->> set ext_csd.erase_group_def),  we will instead  do some calculations
->> to find out the max discards.
->>
->> Are you saying that these calculations doesn't matter much - or are
->> you saying that we always want to do them?
->
->
-> No, I was saying that if you have TRIM then TRIM is preferred to ERASE so
-> the erase group size does not come into play when discarding, since ERASE
-> granularity is erase groups whereas TRIM granularity is sectors.
+On 24/01/17 10:50, Ritesh Harjani wrote:
+> This removes CDC init sequence comments which are
+> not useful anyway.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 
-Right. Thanks for clarifying.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
->
-> However ERASE_GROUP_DEF also affects the size of write protect groups.
-
-In either case.
-
-What do you think of removing MMC_CAP2_HC_ERASE_SZ? I don't like these
-kind of soft polices, it's better if we can decide on a common
-behaviour - whatever that is.
-
-Kind regards
-Uffe
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 14 +-------------
+>  1 file changed, 1 insertion(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index b3e8f44..10cdc84 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -664,19 +664,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
+>  	config &= ~CORE_START_CDC_TRAFFIC;
+>  	writel_relaxed(config, host->ioaddr + CORE_DDR_200_CFG);
+>  
+> -	/*
+> -	 * Perform CDC Register Initialization Sequence
+> -	 *
+> -	 * CORE_CSR_CDC_CTLR_CFG0	0x11800EC
+> -	 * CORE_CSR_CDC_CTLR_CFG1	0x3011111
+> -	 * CORE_CSR_CDC_CAL_TIMER_CFG0	0x1201000
+> -	 * CORE_CSR_CDC_CAL_TIMER_CFG1	0x4
+> -	 * CORE_CSR_CDC_REFCOUNT_CFG	0xCB732020
+> -	 * CORE_CSR_CDC_COARSE_CAL_CFG	0xB19
+> -	 * CORE_CSR_CDC_DELAY_CFG	0x3AC
+> -	 * CORE_CDC_OFFSET_CFG		0x0
+> -	 * CORE_CDC_SLAVE_DDA_CFG	0x16334
+> -	 */
+> +	/* Perform CDC Register Initialization Sequence */
+>  
+>  	writel_relaxed(0x11800EC, host->ioaddr + CORE_CSR_CDC_CTLR_CFG0);
+>  	writel_relaxed(0x3011111, host->ioaddr + CORE_CSR_CDC_CTLR_CFG1);
+> 
