@@ -1,153 +1,213 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
- functionality
-Date: Mon, 30 Jan 2017 23:12:10 +0800
-Message-ID: <ed6e5125-85ef-5644-e589-bd5b4be4c84a@marvell.com>
-References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
- <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
- <461fd409-81e8-2c3f-3674-ec593e1c7383@marvell.com>
- <CAPDyKFoERET6Fzc7qEGWJ95t6GZir=XJWfTEoRSEROjPgJ95hg@mail.gmail.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH v3 12/14] fbdev: jz4740-fb: Let the pinctrl driver
+ configure the pins
+Date: Mon, 30 Jan 2017 17:10:59 +0100
+Message-ID: <4646116.fubHeuC3Nm@amdc3058>
+References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+ <CGME20170125185254epcas5p15b40cad57649dc77afe8d2fd316687ff@epcas5p1.samsung.com>
+ <20170125185207.23902-13-paul@crapouillou.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoERET6Fzc7qEGWJ95t6GZir=XJWfTEoRSEROjPgJ95hg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, linux-arm-kernel@lists.infradead.
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-reply-to: <20170125185207.23902-13-paul@crapouillou.net>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Paul Cercueil <paul@crapouillou.net>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, james.hogan@imgtec.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
 
-On 2017/1/30 16:41, Ulf Hansson wrote:
-> [...]
-> 
->>>> + */
->>>> +static int xenon_child_node_of_parse(struct platform_device *pdev)
->>>> +{
->>>> +       struct device_node *np = pdev->dev.of_node;
->>>> +       struct sdhci_host *host = platform_get_drvdata(pdev);
->>>> +       struct mmc_host *mmc = host->mmc;
->>>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>> +       struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>>> +       struct device_node *child;
->>>> +       int nr_child;
->>>> +
->>>> +       priv->init_card_type = XENON_CARD_TYPE_UNKNOWN;
->>>> +
->>>> +       nr_child = of_get_child_count(np);
->>>> +       if (!nr_child)
->>>> +               return 0;
->>>> +
->>>> +       for_each_child_of_node(np, child) {
->>>> +               if (of_device_is_compatible(child, "mmc-card")) {
->>>
->>> To avoid code from being duplicated, I would rather see the DT parsing
->>> of the child nodes for "mmc-card", to be done by the mmc core.
->>>
->>> As a matter of fact it is already being done, but perhaps we need to
->>> change that a bit as to fit your case.
->>>
->>> I suggest you have a look and see how to update this in the core,
->>> instead of doing it here in the host driver.
->>>
->>
->>     I understand your concern.
->>
->>     It seems that so far "mmc-card" is only used in our Xenon driver.
-> 
-> git grep "mmc-card" tells you more about where it's being parsed by
-> the mmc core.
-> 
->>     Besides, we set Xenon specific parameters and attributions when
->>     parsing "mmc-card" property.
-> 
-> I don't see any Xenon specific properties.
-> 
-> Instead I think it would make sense to update the generic
-> interpretation of the binding for mmc-card, as you have done here.
-> 
+Hi,
 
-   OK. I will merge it into core layer.
- 
-   Our Xenon driver requires to determine whether current SDHC is
-   for eMMC before card init. Thus I would like to implement a specific
-   function for mmc-card parsing in mmc.c and let mmc_of_parse() in host.c
-   to call it.
-   But there are some detailed issues then.
-   1. mmc_decode_ext_csd() also parses mmc-card to check broken-hpi.
-      So mmc-card parse will still be duplicated.
-      Shall we merge broken-hpi check into mmc-card parse?
-      It might require a new flag to indicate broken-hpi attribution in
-      mmc_host structure.
+On Wednesday, January 25, 2017 07:52:05 PM Paul Cercueil wrote:
+> Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
+> the pins being properly configured before the driver probes.
+> 
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
-   2. Structure mmc_card is not ready while parsing mmc-card.
-      Thus we are not able to indicate card type in mmc_card.
-      As a result, our Xenon specific parse function still has to
-      parse mmc-card again to check if eMMC card is in used.
-
-   Could you please help suggest any better place in core layer to
-   parse mmc-card?
-
-   Thank you.
+Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
 Best regards,
-Hu Ziji
+--
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
 
->>
->>     May I keep current implementation?
+> ---
+>  drivers/video/fbdev/jz4740_fb.c | 104 ++--------------------------------------
+>  1 file changed, 3 insertions(+), 101 deletions(-)
 > 
-> Rather not. Let's try to make the parsing of the child node for
-> mmc-card generic.
+> v2: No changes
+> v3: No changes
 > 
->>     In my very own opinion, moving it into core layer should be another
->>     independent patch.
-> 
-> Absolutely an independent patch. Whether it can be done as a part of
-> mmc_of_parse() or whether we need yet another new mmc_of* API, we can
-> discuss.
-> 
-> My point is that, I don't this to be specific for Xenon (unless there
-> are specific reason, which I don't see here).
-> 
->>     And it will also cost some more time. To be honest, it is difficult
->>     for me to bring up a generic core layer implementation to parse
->>     "mmc-card", since I'm not clear about other vendor's requirement.
-> 
-> Well, then you need to learn more about how the mmc core works. In
-> this case, it shouldn't be too hard to implement.
-> 
-> [...]
-> 
->>
->>>
->>>> +                                     MMC_CAP2_NO_SD |
->>>> +                                     MMC_CAP2_NO_SDIO;
->>>
->>> I think we need to update the DT documentation for mmc-card.
->>> Typically, we should explicitly state what kind of other existing mmc
->>> DT properties that will be automatically selected, when the mmc-card
->>> is specified.
->>>
->>> Can you please look into updating this DT doc as well.
->>>
->>
->>   Similar to above, may I keep it now and bring up another patch later
->>   to update mmc-card DT and parsing?
-> 
-> Please, no.
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
+> diff --git a/drivers/video/fbdev/jz4740_fb.c b/drivers/video/fbdev/jz4740_fb.c
+> index 87790e9644d0..b57df83fdbd3 100644
+> --- a/drivers/video/fbdev/jz4740_fb.c
+> +++ b/drivers/video/fbdev/jz4740_fb.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/module.h>
+>  #include <linux/mutex.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/pinctrl/consumer.h>
+>  
+>  #include <linux/clk.h>
+>  #include <linux/delay.h>
+> @@ -27,7 +28,6 @@
+>  #include <linux/dma-mapping.h>
+>  
+>  #include <asm/mach-jz4740/jz4740_fb.h>
+> -#include <asm/mach-jz4740/gpio.h>
+>  
+>  #define JZ_REG_LCD_CFG		0x00
+>  #define JZ_REG_LCD_VSYNC	0x04
+> @@ -146,93 +146,6 @@ static const struct fb_fix_screeninfo jzfb_fix = {
+>  	.accel		= FB_ACCEL_NONE,
+>  };
+>  
+> -static const struct jz_gpio_bulk_request jz_lcd_ctrl_pins[] = {
+> -	JZ_GPIO_BULK_PIN(LCD_PCLK),
+> -	JZ_GPIO_BULK_PIN(LCD_HSYNC),
+> -	JZ_GPIO_BULK_PIN(LCD_VSYNC),
+> -	JZ_GPIO_BULK_PIN(LCD_DE),
+> -	JZ_GPIO_BULK_PIN(LCD_PS),
+> -	JZ_GPIO_BULK_PIN(LCD_REV),
+> -	JZ_GPIO_BULK_PIN(LCD_CLS),
+> -	JZ_GPIO_BULK_PIN(LCD_SPL),
+> -};
+> -
+> -static const struct jz_gpio_bulk_request jz_lcd_data_pins[] = {
+> -	JZ_GPIO_BULK_PIN(LCD_DATA0),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA1),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA2),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA3),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA4),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA5),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA6),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA7),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA8),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA9),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA10),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA11),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA12),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA13),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA14),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA15),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA16),
+> -	JZ_GPIO_BULK_PIN(LCD_DATA17),
+> -};
+> -
+> -static unsigned int jzfb_num_ctrl_pins(struct jzfb *jzfb)
+> -{
+> -	unsigned int num;
+> -
+> -	switch (jzfb->pdata->lcd_type) {
+> -	case JZ_LCD_TYPE_GENERIC_16_BIT:
+> -		num = 4;
+> -		break;
+> -	case JZ_LCD_TYPE_GENERIC_18_BIT:
+> -		num = 4;
+> -		break;
+> -	case JZ_LCD_TYPE_8BIT_SERIAL:
+> -		num = 3;
+> -		break;
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_1:
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_2:
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_3:
+> -		num = 8;
+> -		break;
+> -	default:
+> -		num = 0;
+> -		break;
+> -	}
+> -	return num;
+> -}
+> -
+> -static unsigned int jzfb_num_data_pins(struct jzfb *jzfb)
+> -{
+> -	unsigned int num;
+> -
+> -	switch (jzfb->pdata->lcd_type) {
+> -	case JZ_LCD_TYPE_GENERIC_16_BIT:
+> -		num = 16;
+> -		break;
+> -	case JZ_LCD_TYPE_GENERIC_18_BIT:
+> -		num = 18;
+> -		break;
+> -	case JZ_LCD_TYPE_8BIT_SERIAL:
+> -		num = 8;
+> -		break;
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_1:
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_2:
+> -	case JZ_LCD_TYPE_SPECIAL_TFT_3:
+> -		if (jzfb->pdata->bpp == 18)
+> -			num = 18;
+> -		else
+> -			num = 16;
+> -		break;
+> -	default:
+> -		num = 0;
+> -		break;
+> -	}
+> -	return num;
+> -}
+> -
+>  /* Based on CNVT_TOHW macro from skeletonfb.c */
+>  static inline uint32_t jzfb_convert_color_to_hw(unsigned val,
+>  	struct fb_bitfield *bf)
+> @@ -487,8 +400,7 @@ static void jzfb_enable(struct jzfb *jzfb)
+>  
+>  	clk_prepare_enable(jzfb->ldclk);
+>  
+> -	jz_gpio_bulk_resume(jz_lcd_ctrl_pins, jzfb_num_ctrl_pins(jzfb));
+> -	jz_gpio_bulk_resume(jz_lcd_data_pins, jzfb_num_data_pins(jzfb));
+> +	pinctrl_pm_select_default_state(&jzfb->pdev->dev);
+>  
+>  	writel(0, jzfb->base + JZ_REG_LCD_STATE);
+>  
+> @@ -511,8 +423,7 @@ static void jzfb_disable(struct jzfb *jzfb)
+>  		ctrl = readl(jzfb->base + JZ_REG_LCD_STATE);
+>  	} while (!(ctrl & JZ_LCD_STATE_DISABLED));
+>  
+> -	jz_gpio_bulk_suspend(jz_lcd_ctrl_pins, jzfb_num_ctrl_pins(jzfb));
+> -	jz_gpio_bulk_suspend(jz_lcd_data_pins, jzfb_num_data_pins(jzfb));
+> +	pinctrl_pm_select_sleep_state(&jzfb->pdev->dev);
+>  
+>  	clk_disable_unprepare(jzfb->ldclk);
+>  }
+> @@ -701,9 +612,6 @@ static int jzfb_probe(struct platform_device *pdev)
+>  	fb->mode = NULL;
+>  	jzfb_set_par(fb);
+>  
+> -	jz_gpio_bulk_request(jz_lcd_ctrl_pins, jzfb_num_ctrl_pins(jzfb));
+> -	jz_gpio_bulk_request(jz_lcd_data_pins, jzfb_num_data_pins(jzfb));
+> -
+>  	ret = register_framebuffer(fb);
+>  	if (ret) {
+>  		dev_err(&pdev->dev, "Failed to register framebuffer: %d\n", ret);
+> @@ -715,9 +623,6 @@ static int jzfb_probe(struct platform_device *pdev)
+>  	return 0;
+>  
+>  err_free_devmem:
+> -	jz_gpio_bulk_free(jz_lcd_ctrl_pins, jzfb_num_ctrl_pins(jzfb));
+> -	jz_gpio_bulk_free(jz_lcd_data_pins, jzfb_num_data_pins(jzfb));
+> -
+>  	fb_dealloc_cmap(&fb->cmap);
+>  	jzfb_free_devmem(jzfb);
+>  err_framebuffer_release:
+> @@ -731,9 +636,6 @@ static int jzfb_remove(struct platform_device *pdev)
+>  
+>  	jzfb_blank(FB_BLANK_POWERDOWN, jzfb->fb);
+>  
+> -	jz_gpio_bulk_free(jz_lcd_ctrl_pins, jzfb_num_ctrl_pins(jzfb));
+> -	jz_gpio_bulk_free(jz_lcd_data_pins, jzfb_num_data_pins(jzfb));
+> -
+>  	fb_dealloc_cmap(&jzfb->fb->cmap);
+>  	jzfb_free_devmem(jzfb);
