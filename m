@@ -1,121 +1,96 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
- functionality
-Date: Mon, 30 Jan 2017 09:41:28 +0100
-Message-ID: <CAPDyKFoERET6Fzc7qEGWJ95t6GZir=XJWfTEoRSEROjPgJ95hg@mail.gmail.com>
+Subject: Re: [PATCH v5 06/12] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
+Date: Mon, 30 Jan 2017 10:10:05 +0100
+Message-ID: <CAPDyKFoF2QsTxKC7=PjHqOk106USQ-j9MtiyfC=Sqks8DnPDYQ@mail.gmail.com>
 References: <cover.8527229dae6c124f24c5e637430c2cdc86f80392.1484154449.git-series.gregory.clement@free-electrons.com>
  <3546f143091c121face8ecbcbf7f6a4c41d2cec7.1484154449.git-series.gregory.clement@free-electrons.com>
  <CAPDyKFrwxix4zY4a1x9u6jh_gPfKTsaLnD8b8crum=pc5CN3AA@mail.gmail.com>
- <461fd409-81e8-2c3f-3674-ec593e1c7383@marvell.com>
+ <2e67332d-d8c3-fd24-1f81-72675a09927a@intel.com> <CAPDyKFqbjeKCHp40PALydquxdF-qBk156+iOS9TYYsquJ7fK7w@mail.gmail.com>
+ <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <461fd409-81e8-2c3f-3674-ec593e1c7383@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ziji Hu <huziji@marvell.com>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, linux-arm-kernel@lists.infradead.
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <00e8d2dc-bc07-addc-a5d9-8604f143627f@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvel>
 List-Id: linux-mmc@vger.kernel.org
 
-[...]
-
->>> + */
->>> +static int xenon_child_node_of_parse(struct platform_device *pdev)
->>> +{
->>> +       struct device_node *np = pdev->dev.of_node;
->>> +       struct sdhci_host *host = platform_get_drvdata(pdev);
->>> +       struct mmc_host *mmc = host->mmc;
->>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>> +       struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>> +       struct device_node *child;
->>> +       int nr_child;
->>> +
->>> +       priv->init_card_type = XENON_CARD_TYPE_UNKNOWN;
->>> +
->>> +       nr_child = of_get_child_count(np);
->>> +       if (!nr_child)
->>> +               return 0;
->>> +
->>> +       for_each_child_of_node(np, child) {
->>> +               if (of_device_is_compatible(child, "mmc-card")) {
+On 28 January 2017 at 09:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 27/01/2017 5:12 p.m., Ulf Hansson wrote:
 >>
->> To avoid code from being duplicated, I would rather see the DT parsing
->> of the child nodes for "mmc-card", to be done by the mmc core.
+>> On 26 January 2017 at 13:39, Adrian Hunter <adrian.hunter@intel.com>
+>> wrote:
+>>>
+>>> On 26/01/17 12:50, Ulf Hansson wrote:
+>>>>
+>>>> On 11 January 2017 at 18:19, Gregory CLEMENT
+>>>> <gregory.clement@free-electrons.com> wrote:
+>>>>>
+>>>>> +                       priv->init_card_type = MMC_TYPE_MMC;
+>>>>> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
+>>>>> +
+>>>>> +                       /*
+>>>>> +                        * Force to clear BUS_TEST to
+>>>>> +                        * skip bus_test_pre and bus_test_post
+>>>>> +                        */
+>>>>> +                       mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
+>>>>> +                       mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ |
+>>>>
+>>>>
+>>>> This cap is a bit strange. It was added several years ago by Adrian
+>>>> Hunter, but I am wondering about the reason to why it's needed.
+>>>>
+>>>
+>>> MMC_CAP2_HC_ERASE_SZ relates to EXT-CSD ERASE_GROUP_DEF.
+>>>
+>>> I think it was added to enable people to choose whether they wanted a
+>>> large
+>>> or small erase granularity.  That probably doesn't matter if the card
+>>> supports TRIM.
+>>>
 >>
->> As a matter of fact it is already being done, but perhaps we need to
->> change that a bit as to fit your case.
+>> Huh, the erase/trim/discard code in the mmc core is really hairy. :-)
 >>
->> I suggest you have a look and see how to update this in the core,
->> instead of doing it here in the host driver.
+>> In mmc_calc_max_discard() the following code/comment exists:
 >>
+>> /*
+>>  * Without erase_group_def set, MMC erase timeout depends on clock
+>>  * frequence which can change.  In that case, the best choice is
+>>  * just the preferred erase size.
+>>  */
+>> if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
+>>      return card->pref_erase;
+>>
+>>
+>> This makes me wonder.
+>>
+>> So, when we haven't enabled the high capacity erase groups in the
+>> EXT_CSD register (ext_csd.erase_group_def), we will use the pref_erase
+>> size.
+>>
+>> In the other case, as when having MMC_CAP2_HC_ERASE_SZ set (which will
+>> set ext_csd.erase_group_def),  we will instead  do some calculations
+>> to find out the max discards.
+>>
+>> Are you saying that these calculations doesn't matter much - or are
+>> you saying that we always want to do them?
 >
->     I understand your concern.
 >
->     It seems that so far "mmc-card" is only used in our Xenon driver.
+> No, I was saying that if you have TRIM then TRIM is preferred to ERASE so
+> the erase group size does not come into play when discarding, since ERASE
+> granularity is erase groups whereas TRIM granularity is sectors.
 
-git grep "mmc-card" tells you more about where it's being parsed by
-the mmc core.
-
->     Besides, we set Xenon specific parameters and attributions when
->     parsing "mmc-card" property.
-
-I don't see any Xenon specific properties.
-
-Instead I think it would make sense to update the generic
-interpretation of the binding for mmc-card, as you have done here.
-
->
->     May I keep current implementation?
-
-Rather not. Let's try to make the parsing of the child node for
-mmc-card generic.
-
->     In my very own opinion, moving it into core layer should be another
->     independent patch.
-
-Absolutely an independent patch. Whether it can be done as a part of
-mmc_of_parse() or whether we need yet another new mmc_of* API, we can
-discuss.
-
-My point is that, I don't this to be specific for Xenon (unless there
-are specific reason, which I don't see here).
-
->     And it will also cost some more time. To be honest, it is difficult
->     for me to bring up a generic core layer implementation to parse
->     "mmc-card", since I'm not clear about other vendor's requirement.
-
-Well, then you need to learn more about how the mmc core works. In
-this case, it shouldn't be too hard to implement.
-
-[...]
+Right. Thanks for clarifying.
 
 >
->>
->>> +                                     MMC_CAP2_NO_SD |
->>> +                                     MMC_CAP2_NO_SDIO;
->>
->> I think we need to update the DT documentation for mmc-card.
->> Typically, we should explicitly state what kind of other existing mmc
->> DT properties that will be automatically selected, when the mmc-card
->> is specified.
->>
->> Can you please look into updating this DT doc as well.
->>
->
->   Similar to above, may I keep it now and bring up another patch later
->   to update mmc-card DT and parsing?
+> However ERASE_GROUP_DEF also affects the size of write protect groups.
 
-Please, no.
+In either case.
 
-[...]
+What do you think of removing MMC_CAP2_HC_ERASE_SZ? I don't like these
+kind of soft polices, it's better if we can decide on a common
+behaviour - whatever that is.
 
 Kind regards
 Uffe
