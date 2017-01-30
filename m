@@ -1,97 +1,48 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v5 6/13] mmc: sunxi: Add EMMC (MMC2) controller compatible
-Date: Mon, 30 Jan 2017 12:05:46 +0100
-Message-ID: <20170130110546.6q5xb3p2uvncrrmf@lukather>
+Subject: Re: [PATCH v5 0/13] arm64: allwinner: a64: Enable MMC support
+Date: Mon, 30 Jan 2017 12:06:29 +0100
+Message-ID: <20170130110629.i4q73p5svvd7nly2@lukather>
 References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
- <bcbeeb726c5638361590bd4c295279ef92d44209.1485553113.git-series.maxime.ripard@free-electrons.com>
- <CAPDyKFr3cnFux4NRzZ9UAn93MOVb6RaQQ+PHDxGztciDHZSX9A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="oblaussuvw2woeht"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:46546 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752906AbdA3LGL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 06:06:11 -0500
+        protocol="application/pgp-signature"; boundary="bi5wtywif5bmdxgc"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFr3cnFux4NRzZ9UAn93MOVb6RaQQ+PHDxGztciDHZSX9A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andre Przywara <andre.przywara@arm.com>
 
 
---oblaussuvw2woeht
-Content-Type: text/plain; charset=utf-8
+--bi5wtywif5bmdxgc
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jan 30, 2017 at 11:06:05AM +0100, Ulf Hansson wrote:
-> On 27 January 2017 at 22:38, Maxime Ripard
-> <maxime.ripard@free-electrons.com> wrote:
-> > The MMC2 controller on the A64 is kind of a special beast.
-> >
-> > While the general controller design is the same than the other MMC
-> > controllers in the SoC, it also has a bunch of features and changes that
-> > prevent it to be driven in the same way.
-> >
-> > It has for example a different bus width limit, a different maximum
-> > frequency, and, for some reason, the maximum buffer size of a DMA
-> > descriptor.
-> >
-> > Add a new compatible specifically for this controller.
-> >
-> > Acked-by: Rob Herring <robh@kernel.org>
-> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> > Tested-by: Florian Vaussard <florian.vaussard@heig-vd.ch>
-> > ---
-> >  drivers/mmc/host/sunxi-mmc.c | 8 ++++++++
-> >  1 file changed, 8 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> > index 6bbe61397b7c..f0f6922bca8a 100644
-> > --- a/drivers/mmc/host/sunxi-mmc.c
-> > +++ b/drivers/mmc/host/sunxi-mmc.c
-> > @@ -5,6 +5,7 @@
-> >   * (C) Copyright 2013-2014 O2S GmbH <www.o2s.ch>
-> >   * (C) Copyright 2013-2014 David Lanzend=EF=BF=BDrfer <david.lanzendoe=
-rfer@o2s.ch>
-> >   * (C) Copyright 2013-2014 Hans de Goede <hdegoede@redhat.com>
-> > + * (C) Copyright 2017 Sootech SA
-> >   *
-> >   * This program is free software; you can redistribute it and/or
-> >   * modify it under the terms of the GNU General Public License as
-> > @@ -1096,12 +1097,19 @@ static const struct sunxi_mmc_cfg sun50i_a64_cf=
-g =3D {
-> >         .needs_new_timings =3D true,
-> >  };
-> >
-> > +static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg =3D {
-> > +       .idma_des_size_bits =3D 13,
-> > +       .clk_delays =3D NULL,
-> > +       .can_calibrate =3D true,
-> > +};
-> > +
-> >  static const struct of_device_id sunxi_mmc_of_match[] =3D {
-> >         { .compatible =3D "allwinner,sun4i-a10-mmc", .data =3D &sun4i_a=
-10_cfg },
-> >         { .compatible =3D "allwinner,sun5i-a13-mmc", .data =3D &sun5i_a=
-13_cfg },
-> >         { .compatible =3D "allwinner,sun7i-a20-mmc", .data =3D &sun7i_a=
-20_cfg },
-> >         { .compatible =3D "allwinner,sun9i-a80-mmc", .data =3D &sun9i_a=
-80_cfg },
-> >         { .compatible =3D "allwinner,sun50i-a64-mmc", .data =3D &sun50i=
-_a64_cfg },
-> > +       { .compatible =3D "allwinner,sun50i-a64-emmc", .data =3D &sun50=
-i_a64_emmc_cfg },
+On Fri, Jan 27, 2017 at 10:38:32PM +0100, Maxime Ripard wrote:
+> Hi,
 >=20
-> This should be documented in the DTS docs for sunxi as well. I expect
-> you to send a patch on top to take care of that.
+> Here is a new attempt at getting the MMC controllers running, following t=
+he
+> work done by Andre.
+>=20
+> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
+> and a Kingston eMMC with 1.8V IOs.
+>=20
+> For SDIO, the HS DDR mode works just fine. That serie also enables the
+> SDR104 mode to work on the devices that are capable of this.
+>=20
+> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
+> moment, but since it's significantly more complex, and at the same time
+> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
+> any benefits. If there's any at some point, this can be added later.
+>=20
+> Let me know what you think,
+> Maxime
 
-You're right, I'll send a patch today.
+Applied the DT bits with Chen-Yu's Acked-by.
 
-Thanks!
 Maxime
 
 --=20
@@ -99,24 +50,24 @@ Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
 
---oblaussuvw2woeht
+--bi5wtywif5bmdxgc
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIcBAEBCAAGBQJYjx4FAAoJEBx+YmzsjxAgnrgQAL9WNqCgJS+ZEk/dtAw7w6du
-77+AhO2R9K4oovlZ5Fg3NcQDhahZ6ZUUg1rTI/P7YaTTuv/IjgNA8vIIzLRUnNo9
-+gMSJ4VIrrzPCWs4QCMkgZnNJ/d0aNlFdu23ODNI00j6J4s6Ka/n6gUChGf+hBZ2
-MxG94H9BRqcDFCUU/2UhjUsvFbiMoAQv5MSoEFyctZuNlRSJn41QvO6Squz7uPiw
-zTnVe9NNVcLnAhAJozr2sQ2ez5+FfPQSsSkCSnZxcA3kd0QTqgYkbunx6aWBbzA9
-FhftkRxrSt24Sl2Vqn/Qk4PNfC4gv5JZtkYQN3mjJVydRFs9huKEHL1pVHQHl0Rc
-nmYDQ2tNlVJiENguROy56XtOQf/pqSnO5upIyHWT/IxKOx/6ZG925UTSlPufQVnT
-hu7o+JXjU2qb4L3yVBOHOGDDIX+7NZHPYNmHe9o8KKOR7Y441TADQ06BDMVFca1R
-qZGKo+dIPr/jm6l4kp4jInv7i1zQ5J+4d6kVKcx0bDlGZxwHkW+d7HmOk7qX4fUI
-7EpMlPjrMimNSLnw/Q1XLUdcZR3zYlBJBHK9U74aQ5i8UJkUR8frA+LtrUwol5RI
-oT7zJEYb0v0juiqcxgtTD59D2kAL3UX6/Zq+dV62LgDCXYT14a0P/5XNMhoc0c7a
-CkGZOpbUXyVX1CrwaNT7
-=3xFx
+iQIcBAEBCAAGBQJYjx41AAoJEBx+YmzsjxAgQ6EP/RxQXfQC5HXfdQXN7aGpTTc1
+3rckLrjgL00SxHwjKw4jTTrBlWycGpmLO668z3xZ7dXkdPHkaR56161U78BqELop
+CYLGTjhPbZjvCvPugwZ/u7QlADiaTwVUhKwmkI5pxeU7ARtLRfhNYbyaUpZmyFXy
+rAPosMb1/D45dwvGC8pKxj1gHOB3O4c3gtr+1mpKkHFlKeJBa7VVsiUN6cBbNr3G
+rSWKzEHOD6+P7ICTvrv2Mxu6dgfE7TMX8fZH3dnYBAdFeN00XUCjVe6qZR+p7Ltf
+mr5Cf4WI/DKjOWubJnJaUSxkVqcc9TrndGpcHrXQfCzE+jpcuq3GuML9JTiKuZyD
+crjLG5i3X7p+Fcs+PZt63Ewca2K5/DggxCkYPBFIRalPlf/PidDTrCSFqFS5yere
+6Uo1QIVEDEITu1JLtfxMNaH6HWV/1T8NuALVGeKyJ3aVJGiGZocituYtPod6EkK8
+R8p1XxqPhvINHGJJ6eCdRcLa1Hzu3Y7DXHJnZFfkssQddutBM32uZsB1ePnrr4Iy
+VKh1iMCcHUVO/Nu4mmF9NrWXEdfm/W7eu2e5W8ldLj3rudFtxpXkdt+dgTfLwPxV
+CSx/011wP5XCELMCmPeUf10M2M/Oumiiy72D3DmulE5ekwasDQiduDbDFRaL/Srr
+NBDru2cOhgj7uYtTrGln
+=wzRI
 -----END PGP SIGNATURE-----
 
---oblaussuvw2woeht--
+--bi5wtywif5bmdxgc--
