@@ -1,43 +1,49 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH] dt-bindings: mmc: sunxi: Document A64 eMMC compatible
-Date: Mon, 30 Jan 2017 14:27:13 +0100
-Message-ID: <20170130132713.20750-1-maxime.ripard@free-electrons.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 0/6] mmc: block: command issue cleanups
+Date: Mon, 30 Jan 2017 14:30:12 +0100
+Message-ID: <CACRpkdbafkc-XSM+Ef4txKvWmYLThM1ptx1HJuD8prdM2fxXvw@mail.gmail.com>
+References: <20170124101757.19676-1-linus.walleij@linaro.org>
+ <CAPDyKFrB9UfkfGD08fTKegSB2W65pdWuDU=10mGukQmB=yhaqQ@mail.gmail.com>
+ <CAPDyKFq6wzw=_6oc=hyW3B_tBAGfqzrixoy-gr=ki=M2wyhiNg@mail.gmail.com> <CACRpkdaL0qNXKOp9J-yLAN3njPoViE7iGtCr=mhmPGHdY+9LBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:38194 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752272AbdA3NaO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 08:30:14 -0500
+Received: by mail-it0-f42.google.com with SMTP id c7so100820953itd.1
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 05:30:14 -0800 (PST)
+In-Reply-To: <CACRpkdaL0qNXKOp9J-yLAN3njPoViE7iGtCr=mhmPGHdY+9LBQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-We introduced recently a new compatible to deal with the A64 eMMC
-controller, let's document its binding.
+On Mon, Jan 30, 2017 at 2:05 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Fri, Jan 27, 2017 at 8:58 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
----
- Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
- 1 file changed, 1 insertion(+)
+> And now it is crashing at mmc_blk_rw_rq_prep() + 0x20 so I suspect it is one of
+> these:
+>
+> struct mmc_blk_request *brq = &mqrq->brq;
+> struct request *req = mqrq->req;
+> struct mmc_blk_data *md = mq->blkdata;
+>
+> I guess the first: mqrq is NULL.
+>
+> So I suspect the oneliner in commit 0ebd6e72b5ee2592625d5ae567a729345dfe07b6
+> "mmc: block: do not assign mq_rq when aborting command"
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-index 55cdd804cdba..7d53a799f140 100644
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -13,6 +13,7 @@ Required properties:
-    * "allwinner,sun5i-a13-mmc"
-    * "allwinner,sun7i-a20-mmc"
-    * "allwinner,sun9i-a80-mmc"
-+   * "allwinner,sun50i-a64-emmc"
-    * "allwinner,sun50i-a64-mmc"
-  - reg : mmc controller base registers
-  - clocks : a list with 4 phandle + clock specifier pairs
--- 
-2.11.0
+Bah looking closer at that it just doesn't make any logical sense at all.
+
+I now suspect the NULL check removed in mmc_blk_rw_start_new()
+to be behind this, so sent a patch to restore it.
+
+No idea how to test it or if it's the real problem.
+
+I had to rebase my further patches on top too, so if you merge this
+I need to resend the next series.
+
+Yours,
+Linus Walleij
