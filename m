@@ -1,65 +1,88 @@
-From: Ravikumar Kattekola <rk@ti.com>
-Subject: [PATCH 3/3] mmc: host: omap_hsmmc: avoid possible overflow of timeout value
-Date: Mon, 30 Jan 2017 15:41:58 +0530
-Message-ID: <1485771118-13748-4-git-send-email-rk@ti.com>
-References: <1485771118-13748-1-git-send-email-rk@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCHv1 1/2] mmc: sdhci-msm: Remove platform_execute_tuning from sdhci_msm_ops
+Date: Mon, 30 Jan 2017 11:04:24 +0100
+Message-ID: <CAPDyKFrXjdx+9scxwo13V-SZ_zgePSMy6kmM+FydizU45zdRRQ@mail.gmail.com>
+References: <1485247827-12898-1-git-send-email-riteshh@codeaurora.org> <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1485771118-13748-1-git-send-email-rk@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, peter.ujfalusi@ti.com, nsekhar@ti.com, tony@atomide.com, afenkart@gmail.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: kishon@ti.com, rk@ti.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38658 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751093AbdA3K3B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 05:29:01 -0500
+Received: by mail-wm0-f46.google.com with SMTP id r141so26517331wmg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 02:27:57 -0800 (PST)
+In-Reply-To: <1485247827-12898-2-git-send-email-riteshh@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Georgi Djakov <georgi.djakov@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, jeremymc@redhat.com, git@kchr.de
 
-Fixes: a45c6cb81647 ("[ARM] 5369/1: omap mmc: Add new omap
-hsmmc controller for 2430 and 34xx, v3")
+On 24 January 2017 at 09:50, Ritesh Harjani <riteshh@codeaurora.org> wrote:
+> platform_execute_tuning should not really exist as it does not
+> do anything useful.
+>
+> So remove this ops and directly plug sdhci_msm_execute_tuning
+> with mmc_host_ops.
+>
+> Also in case of HS400 tuning clear SDHCI_HS400_TUNING flag once
+> HS400 related mode selection is done.
+>
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 
-when using really large timeout (up to 4*60*1000 ms for bkops)
-there is a possibility of data overflow using
-unsigned int so use 64 bit unsigned long long.
+Thanks, applied for next!
 
-Signed-off-by: Ravikumar Kattekola <rk@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 51ca3d7..a58bd65 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1469,10 +1469,11 @@ static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
- }
- 
- static void set_data_timeout(struct omap_hsmmc_host *host,
--			     unsigned int timeout_ns,
-+			     unsigned long long timeout_ns,
- 			     unsigned int timeout_clks)
- {
--	unsigned int timeout, cycle_ns;
-+	unsigned long long timeout = timeout_ns;
-+	unsigned int cycle_ns;
- 	uint32_t reg, clkd, dto = 0;
- 
- 	reg = OMAP_HSMMC_READ(host->base, SYSCTL);
-@@ -1481,7 +1482,7 @@ static void set_data_timeout(struct omap_hsmmc_host *host,
- 		clkd = 1;
- 
- 	cycle_ns = 1000000000 / (host->clk_rate / clkd);
--	timeout = timeout_ns / cycle_ns;
-+	do_div(timeout, cycle_ns);
- 	timeout += timeout_clks;
- 	if (timeout) {
- 		while ((timeout & 0x80000000) == 0) {
-@@ -1527,7 +1528,7 @@ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host)
- omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
- {
- 	int ret;
--	unsigned int timeout;
-+	unsigned long long timeout;
- 
- 	host->data = req->data;
- 
--- 
-1.9.1
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index f958697..b3e8f44 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -827,12 +827,12 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
+>         return ret;
+>  }
+>
+> -static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+> +static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+> +       struct sdhci_host *host = mmc_priv(mmc);
+>         int tuning_seq_cnt = 3;
+>         u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
+>         int rc;
+> -       struct mmc_host *mmc = host->mmc;
+>         struct mmc_ios ios = host->mmc->ios;
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> @@ -855,6 +855,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>         if (host->flags & SDHCI_HS400_TUNING) {
+>                 sdhci_msm_hc_select_mode(host);
+>                 msm_set_clock_rate_for_bus_mode(host, ios.clock);
+> +               host->flags &= ~SDHCI_HS400_TUNING;
+>         }
+>
+>  retry:
+> @@ -1119,7 +1120,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>
+>  static const struct sdhci_ops sdhci_msm_ops = {
+> -       .platform_execute_tuning = sdhci_msm_execute_tuning,
+>         .reset = sdhci_reset,
+>         .set_clock = sdhci_msm_set_clock,
+>         .get_min_clock = sdhci_msm_get_min_clock,
+> @@ -1294,6 +1294,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                                          MSM_MMC_AUTOSUSPEND_DELAY_MS);
+>         pm_runtime_use_autosuspend(&pdev->dev);
+>
+> +       host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto pm_runtime_disable;
+> --
+> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+> a Linux Foundation Collaborative Project.
+>
