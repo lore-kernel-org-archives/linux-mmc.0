@@ -1,105 +1,67 @@
-From: Jeremy McNicoll <jeremymc@redhat.com>
-Subject: [PATCH V4 4/6] arm64: dts: smem enablement for msm8992
-Date: Sun, 29 Jan 2017 21:44:33 -0800
-Message-ID: <1485755073-6416-1-git-send-email-jeremymc@redhat.com>
-References: <20170127195831.GH8801@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
+Date: Mon, 30 Jan 2017 09:19:07 +0100
+Message-ID: <CAPDyKFq2aUkk4qzcLNoityHbOYTHCq_OiO9HVLuWjcGSJX0aWw@mail.gmail.com>
+References: <20170116142342.21283-1-krisman@collabora.co.uk>
+ <CAPDyKFpowPmbwvHL9NL60zAABfW53sDKkp0Ag5aXs4jZZLC=Dg@mail.gmail.com> <87wpdg9uob.fsf@dilma.collabora.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54312 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751604AbdA3Foy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 30 Jan 2017 00:44:54 -0500
-In-Reply-To: <20170127195831.GH8801@codeaurora.org>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35514 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751230AbdA3ITJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 03:19:09 -0500
+Received: by mail-wm0-f42.google.com with SMTP id b65so21302183wmf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 00:19:08 -0800 (PST)
+In-Reply-To: <87wpdg9uob.fsf@dilma.collabora.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: sboyd@codeaurora.org
-Cc: linux-arm-msm@vger.kernel.org, linux-soc@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, andy.gross@linaro.org, robh@kernel.org, arnd@arndb.de, bjorn.andersson@linaro.org, riteshh@codeaurora.org, git@kchr.de, ulf.hansson@linaro.org, jszhang@marvell.com
+To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gustavo Padovan <gustavo.padovan@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 
-SMEM allows various subsystems/processors to share
-memory/data (heap format) in order to enable various
-peripherals.
+On 27 January 2017 at 20:20, Gabriel Krisman Bertazi
+<krisman@collabora.co.uk> wrote:
+> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>
+>> On 16 January 2017 at 15:23, Gabriel Krisman Bertazi
+>> <krisman@collabora.co.uk> wrote:
+>>> One of our kernelCI boxes hanged at boot because a faulty eSDHC device
+>>> was triggering spurious CARD_INT interrupts for SD cards, causing CMD52
+>>> reads, which are not allowed for SD devices.  This adds a sanity check
+>>> to the interruption path, preventing that illegal command from getting
+>>> sent if the CARD_INT interruption should be disabled.
+>>>
+>>> This quirk allows that particular machine to resume boot despite the
+>>> faulty hardware, instead of getting hung dealing with thousands of
+>>> mishandled interrupts.
+>>>
+>>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+>>> CC: Ulf Hansson <ulf.hansson@linaro.org>
+>>> CC: linux-mmc@vger.kernel.org
+>>
+>> Thanks, applied for next with update commit msg header and by removing
+>> the CCs from the changelog.
+>
+> Hi Ulf,
+>
+> Thanks for applying.  Although, I saw it got queued to the next merge
+> window, but I we believe it to be -rc material, since it fixes a hang
+> in our kernelCI boxes[1], and is preventing us from testing other features
+> in this box.  Can you consider submitting it to Linus for the next -rc?
+> it will be much appreciated!
 
-Signed-off-by: Jeremy McNicoll <jeremymc@redhat.com>
----
+I can do that, but perhaps this should then be tagged for stable as well?
 
- [ Moved sfpb_mutex and smem outside sock as they didn't have
-  'reg' entries.  Everything else is exactly the same. ]
+Or was this a regression in 4.10?
 
- arch/arm64/boot/dts/qcom/msm8992.dtsi | 42 +++++++++++++++++++++++++++++++++++
- 1 file changed, 42 insertions(+)
+Kind regards
+Uffe
 
-diff --git a/arch/arm64/boot/dts/qcom/msm8992.dtsi b/arch/arm64/boot/dts/qcom/msm8992.dtsi
-index 13fb6f7..1715787 100644
---- a/arch/arm64/boot/dts/qcom/msm8992.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8992.dtsi
-@@ -79,6 +79,19 @@
- 		regulator-always-on;
- 	};
- 
-+	sfpb_mutex: hwmutex {
-+		compatible = "qcom,sfpb-mutex";
-+		syscon = <&sfpb_mutex_regs 0x0 0x100>;
-+		#hwlock-cells = <1>;
-+	};
-+
-+	smem {
-+		compatible = "qcom,smem";
-+		memory-region = <&smem_region>;
-+		qcom,rpm-msg-ram = <&rpm_msg_ram>;
-+		hwlocks = <&sfpb_mutex 3>;
-+	};
-+
- 	soc {
- 		#address-cells = <1>;
- 		#size-cells = <1>;
-@@ -93,6 +106,11 @@
- 				<0xf9002000 0x1000>;
- 		};
- 
-+		apcs: syscon@f900d000 {
-+			compatible = "syscon";
-+			reg = <0xf900d000 0x2000>;
-+		};
-+
- 		timer@f9020000 {
- 			#address-cells = <1>;
- 			#size-cells = <1>;
-@@ -183,12 +201,36 @@
- 			#power-domain-cells = <1>;
- 			reg = <0xfc400000 0x2000>;
- 		};
-+
-+		rpm_msg_ram: memory@fc428000 {
-+			compatible = "qcom,rpm-msg-ram";
-+			reg = <0xfc428000 0x4000>;
-+		};
-+
-+		sfpb_mutex_regs: syscon@fd484000 {
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			compatible = "syscon";
-+			reg = <0xfd484000 0x400>;
-+		};
- 	};
- 
- 	memory {
- 		device_type = "memory";
- 		reg = <0 0 0 0>; // bootloader will update
- 	};
-+
-+	reserved-memory {
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
-+
-+		smem_region: smem@6a00000 {
-+			reg = <0x0 0x6a00000 0x0 0x200000>;
-+			no-map;
-+		};
-+	};
-+
- };
- 
- 
--- 
-2.6.1
-
+>
+> [1]  <https://kernelci.org/boot/id/5881c81859b5140b59f6c3ae/>
+>
+> Thanks.
+>
+> --
+> Gabriel Krisman Bertazi
