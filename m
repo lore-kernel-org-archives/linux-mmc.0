@@ -1,51 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: core: fix error path in mmc_host_alloc
-Date: Mon, 30 Jan 2017 11:05:40 +0100
-Message-ID: <CAPDyKFrkj-OZtFr_fxJvFzwB73ugYX8Qz96rt15H5mFuEhnv_A@mail.gmail.com>
-References: <dfed7598-7c82-c7d4-1f0b-3c5548adb377@gmail.com> <92cb6f74-a354-d4ab-6e40-1d985526e68f@gmail.com>
+From: Marek Vasut <marex@denx.de>
+Subject: Re: [PATCH] Mmc: host - Fix possible NULL derefrence.
+Date: Mon, 30 Jan 2017 13:12:58 +0100
+Message-ID: <7439833a-e8cd-54b5-a020-4a16ac2d75a8@denx.de>
+References: <CGME20170130044838epcas1p43a1c58ae970b39909cfb67b2aa619a88@epcas1p4.samsung.com>
+ <1485751698-29036-1-git-send-email-shailendra.v@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:37981 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752892AbdA3Lvl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 06:51:41 -0500
-Received: by mail-wm0-f44.google.com with SMTP id r141so29537688wmg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 03:50:39 -0800 (PST)
-In-Reply-To: <92cb6f74-a354-d4ab-6e40-1d985526e68f@gmail.com>
+Received: from mail-out.m-online.net ([212.18.0.9]:54306 "EHLO
+        mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751701AbdA3MOF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 07:14:05 -0500
+In-Reply-To: <1485751698-29036-1-git-send-email-shailendra.v@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Shailendra Verma <shailendra.v@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fabio Estevam <fabio.estevam@nxp.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, p.shailesh@samsung.com, ashish.kalra@samsung.com, Shailendra Verma <shailendra.capricorn@gmail.com>
 
-On 28 January 2017 at 09:32, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> Properly reverse everything if mmc_gpio_alloc(host) fails.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
+On 01/30/2017 05:48 AM, Shailendra Verma wrote:
+> of_match_device could return NULL, and so can cause a NULL
+> pointer dereference later.
+> 
+> Signed-off-by: Shailendra Verma <shailendra.v@samsung.com>
 > ---
->  drivers/mmc/core/host.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 0a26c8b6..19c68bf2 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -369,6 +369,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->
->         if (mmc_gpio_alloc(host)) {
->                 put_device(&host->class_dev);
-> +               ida_simple_remove(&mmc_host_ida, host->index);
-> +               kfree(host);
->                 return NULL;
->         }
->
-> --
-> 2.11.0
->
->
+>  drivers/mmc/host/mxs-mmc.c |    5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 44ecebd..d12a5b7 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -581,6 +581,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	struct regulator *reg_vmmc;
+>  	struct mxs_ssp *ssp;
+>  
+> +	if (!of_id) {
+> +		dev_err(&pdev->dev, "Error: No device match found\n");
+> +		return -ENODEV;
+> +	}
+
+The probe won't be called if OF match doesn't happen in the first place,
+so this check is redundant, no ?
+
+>  	irq_err = platform_get_irq(pdev, 0);
+>  	if (irq_err < 0)
+>  		return irq_err;
+> 
+
+
+-- 
+Best regards,
+Marek Vasut
