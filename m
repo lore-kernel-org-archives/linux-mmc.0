@@ -1,73 +1,51 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v5 0/13] arm64: allwinner: a64: Enable MMC support
-Date: Mon, 30 Jan 2017 12:06:29 +0100
-Message-ID: <20170130110629.i4q73p5svvd7nly2@lukather>
-References: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: core: fix error path in mmc_host_alloc
+Date: Mon, 30 Jan 2017 11:05:40 +0100
+Message-ID: <CAPDyKFrkj-OZtFr_fxJvFzwB73ugYX8Qz96rt15H5mFuEhnv_A@mail.gmail.com>
+References: <dfed7598-7c82-c7d4-1f0b-3c5548adb377@gmail.com> <92cb6f74-a354-d4ab-6e40-1d985526e68f@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="bi5wtywif5bmdxgc"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <cover.6f3d82744628848e2182720c35f13e87e8b62258.1485553113.git-series.maxime.ripard@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:37981 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752892AbdA3Lvl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2017 06:51:41 -0500
+Received: by mail-wm0-f44.google.com with SMTP id r141so29537688wmg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2017 03:50:39 -0800 (PST)
+In-Reply-To: <92cb6f74-a354-d4ab-6e40-1d985526e68f@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+On 28 January 2017 at 09:32, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+> Properly reverse everything if mmc_gpio_alloc(host) fails.
+>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
---bi5wtywif5bmdxgc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thanks, applied for next!
 
-On Fri, Jan 27, 2017 at 10:38:32PM +0100, Maxime Ripard wrote:
-> Hi,
->=20
-> Here is a new attempt at getting the MMC controllers running, following t=
-he
-> work done by Andre.
->=20
-> This has been tested on a board with one SDIO device (a Marvell WiFi chip)
-> and a Kingston eMMC with 1.8V IOs.
->=20
-> For SDIO, the HS DDR mode works just fine. That serie also enables the
-> SDR104 mode to work on the devices that are capable of this.
->=20
-> For the eMMC, HS200 with the voltage switch works. HS400 doesn't at the
-> moment, but since it's significantly more complex, and at the same time
-> Allwinner recommends to limit its frequency to 100MHz, this doesn't have
-> any benefits. If there's any at some point, this can be added later.
->=20
-> Let me know what you think,
-> Maxime
+Kind regards
+Uffe
 
-Applied the DT bits with Chen-Yu's Acked-by.
-
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
-
---bi5wtywif5bmdxgc
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBCAAGBQJYjx41AAoJEBx+YmzsjxAgQ6EP/RxQXfQC5HXfdQXN7aGpTTc1
-3rckLrjgL00SxHwjKw4jTTrBlWycGpmLO668z3xZ7dXkdPHkaR56161U78BqELop
-CYLGTjhPbZjvCvPugwZ/u7QlADiaTwVUhKwmkI5pxeU7ARtLRfhNYbyaUpZmyFXy
-rAPosMb1/D45dwvGC8pKxj1gHOB3O4c3gtr+1mpKkHFlKeJBa7VVsiUN6cBbNr3G
-rSWKzEHOD6+P7ICTvrv2Mxu6dgfE7TMX8fZH3dnYBAdFeN00XUCjVe6qZR+p7Ltf
-mr5Cf4WI/DKjOWubJnJaUSxkVqcc9TrndGpcHrXQfCzE+jpcuq3GuML9JTiKuZyD
-crjLG5i3X7p+Fcs+PZt63Ewca2K5/DggxCkYPBFIRalPlf/PidDTrCSFqFS5yere
-6Uo1QIVEDEITu1JLtfxMNaH6HWV/1T8NuALVGeKyJ3aVJGiGZocituYtPod6EkK8
-R8p1XxqPhvINHGJJ6eCdRcLa1Hzu3Y7DXHJnZFfkssQddutBM32uZsB1ePnrr4Iy
-VKh1iMCcHUVO/Nu4mmF9NrWXEdfm/W7eu2e5W8ldLj3rudFtxpXkdt+dgTfLwPxV
-CSx/011wP5XCELMCmPeUf10M2M/Oumiiy72D3DmulE5ekwasDQiduDbDFRaL/Srr
-NBDru2cOhgj7uYtTrGln
-=wzRI
------END PGP SIGNATURE-----
-
---bi5wtywif5bmdxgc--
+> ---
+>  drivers/mmc/core/host.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 0a26c8b6..19c68bf2 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -369,6 +369,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>
+>         if (mmc_gpio_alloc(host)) {
+>                 put_device(&host->class_dev);
+> +               ida_simple_remove(&mmc_host_ida, host->index);
+> +               kfree(host);
+>                 return NULL;
+>         }
+>
+> --
+> 2.11.0
+>
+>
