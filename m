@@ -1,47 +1,43 @@
-From: Ravikumar <rk@ti.com>
-Subject: Re: [PATCH 0/3] mmc: host: omap_hsmmc: miscellaneous fixes
-Date: Tue, 31 Jan 2017 16:04:32 +0530
-Message-ID: <757e7b0d-d8ec-8c95-041a-46578cf45cf5@ti.com>
-References: <1485771118-13748-1-git-send-email-rk@ti.com>
- <CAPDyKFp2rda+DHS1CWRiXxdVNQVc=R3DjEaLmPhPzTzrjwsVpQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
+Date: Tue, 31 Jan 2017 11:35:13 +0100
+Message-ID: <CAPDyKFrN7=suCnnDHg43KchRf6wKhzijsBXW7TSP7ufh6DPwiQ@mail.gmail.com>
+References: <20170116142342.21283-1-krisman@collabora.co.uk>
+ <CAPDyKFpowPmbwvHL9NL60zAABfW53sDKkp0Ag5aXs4jZZLC=Dg@mail.gmail.com>
+ <87wpdg9uob.fsf@dilma.collabora.co.uk> <CAPDyKFq2aUkk4qzcLNoityHbOYTHCq_OiO9HVLuWjcGSJX0aWw@mail.gmail.com>
+ <87poj4loa5.fsf@dilma.collabora.co.uk> <2b37a0fa-46e3-ec4e-3f9c-9e1bb7dcda1e@intel.com>
+ <874m0gll7v.fsf@dilma.collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp2rda+DHS1CWRiXxdVNQVc=R3DjEaLmPhPzTzrjwsVpQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, Sekhar Nori <nsekhar@ti.com>, Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kishon <kishon@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:36639 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751004AbdAaKfP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2017 05:35:15 -0500
+Received: by mail-wm0-f50.google.com with SMTP id c85so254500841wmi.1
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 02:35:15 -0800 (PST)
+In-Reply-To: <874m0gll7v.fsf@dilma.collabora.co.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gustavo Padovan <gustavo.padovan@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 
-
-
-On Tuesday 31 January 2017 03:45 PM, Ulf Hansson wrote:
-> On 30 January 2017 at 11:11, Ravikumar Kattekola <rk@ti.com> wrote:
->> A few issues have been identified during mmc testing and following
->> set of patches fixes a couple of them related to
->> *timeout handling and ceb error handling*
->>
->> Tested on DRA75X PG 2.0 Rev H EVM
->>
->> Kishon Vijay Abraham I (1):
->>    mmc: host: omap_hsmmc: use generic_cmd6_time to program timeout value
->>      for CMD6
->>
->> Ravikumar Kattekola (2):
->>    mmc: host: omap_hsmmc: reset cmd line on ceb error
->>    mmc: host: omap_hsmmc: avoid possible overflow of timeout value
->>
->>   drivers/mmc/host/omap_hsmmc.c | 29 +++++++++++++++++++----------
->>   1 file changed, 19 insertions(+), 10 deletions(-)
->>
->> --
->> 1.9.1
->>
+On 30 January 2017 at 14:40, Gabriel Krisman Bertazi
+<krisman@collabora.co.uk> wrote:
+> Adrian Hunter <adrian.hunter@intel.com> writes:
+>> Did you test normal SDIO operation was unaffected?  Please do that before
+>> sending it to stable.
 >
-> Assuming that you target 4.10 rcs for this and you want me to add a stable tag?
-These are not critical fixes so can be queued for next , go to 4.11.
-> Kind regards
-> Uffe
-Thanks and Regards,
-RK
+> I don't have any SDIO card in hand to confirm it right now.  would you
+> or Ulf be able to give it a try?  I'll keep looking for one.
+
+Sorry, I don't have any SDIO cards at hand that is using sdhci.
+
+Still, as this has been tested for a while already in next, I decided
+to move this to my fixes branch. I also added a stable-tag #4.4+.
+
+If we see some issues, please report asap then I will drop the change.
+I plan to send it to Linus on Friday this week.
+
+Kind regards
+Uffe
