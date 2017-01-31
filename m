@@ -1,58 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: host: omap_hsmmc: miscellaneous fixes
-Date: Tue, 31 Jan 2017 11:51:13 +0100
-Message-ID: <CAPDyKFqxmpNNdZY8P6cY0GrJfmB3wmYCLH8Gu_r7eVOWVW-vjQ@mail.gmail.com>
-References: <1485771118-13748-1-git-send-email-rk@ti.com> <CAPDyKFp2rda+DHS1CWRiXxdVNQVc=R3DjEaLmPhPzTzrjwsVpQ@mail.gmail.com>
- <757e7b0d-d8ec-8c95-041a-46578cf45cf5@ti.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sunxi: Document A64 eMMC compatible
+Date: Tue, 31 Jan 2017 12:10:11 +0100
+Message-ID: <CAPDyKFp8OL7HfB5KK0r74hbfTTsjs5CZntpn3dR1BKJ6E+-6qQ@mail.gmail.com>
+References: <20170130132713.20750-1-maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:33876 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751394AbdAaKvP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2017 05:51:15 -0500
-Received: by mail-wm0-f45.google.com with SMTP id 196so15251348wmm.1
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 02:51:15 -0800 (PST)
-In-Reply-To: <757e7b0d-d8ec-8c95-041a-46578cf45cf5@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170130132713.20750-1-maxime.ripard@free-electrons.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>, Rob Herring <robh+dt@kernel.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ravikumar <rk@ti.com>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, Sekhar Nori <nsekhar@ti.com>, Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kishon <kishon@ti.com>
 
-On 31 January 2017 at 11:34, Ravikumar <rk@ti.com> wrote:
+On 30 January 2017 at 14:27, Maxime Ripard
+<maxime.ripard@free-electrons.com> wrote:
+> We introduced recently a new compatible to deal with the A64 eMMC
+> controller, let's document its binding.
 >
->
-> On Tuesday 31 January 2017 03:45 PM, Ulf Hansson wrote:
->>
->> On 30 January 2017 at 11:11, Ravikumar Kattekola <rk@ti.com> wrote:
->>>
->>> A few issues have been identified during mmc testing and following
->>> set of patches fixes a couple of them related to
->>> *timeout handling and ceb error handling*
->>>
->>> Tested on DRA75X PG 2.0 Rev H EVM
->>>
->>> Kishon Vijay Abraham I (1):
->>>    mmc: host: omap_hsmmc: use generic_cmd6_time to program timeout value
->>>      for CMD6
->>>
->>> Ravikumar Kattekola (2):
->>>    mmc: host: omap_hsmmc: reset cmd line on ceb error
->>>    mmc: host: omap_hsmmc: avoid possible overflow of timeout value
->>>
->>>   drivers/mmc/host/omap_hsmmc.c | 29 +++++++++++++++++++----------
->>>   1 file changed, 19 insertions(+), 10 deletions(-)
->>>
->>> --
->>> 1.9.1
->>>
->>
->> Assuming that you target 4.10 rcs for this and you want me to add a stable
->> tag?
->
-> These are not critical fixes so can be queued for next , go to 4.11.
+> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 
 Thanks, applied for next!
 
+I also added Rob's ack as he already acked the patch parsing the new
+compatible in the driver.
+
 Kind regards
 Uffe
+
+> ---
+>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> index 55cdd804cdba..7d53a799f140 100644
+> --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> @@ -13,6 +13,7 @@ Required properties:
+>     * "allwinner,sun5i-a13-mmc"
+>     * "allwinner,sun7i-a20-mmc"
+>     * "allwinner,sun9i-a80-mmc"
+> +   * "allwinner,sun50i-a64-emmc"
+>     * "allwinner,sun50i-a64-mmc"
+>   - reg : mmc controller base registers
+>   - clocks : a list with 4 phandle + clock specifier pairs
+> --
+> 2.11.0
+>
