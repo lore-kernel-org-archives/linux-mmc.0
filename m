@@ -1,34 +1,60 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH v3 04/14] GPIO: Add gpio-ingenic driver
-Date: Tue, 31 Jan 2017 16:29:58 +0100
-Message-ID: <699f0c63e95ecdafe6946fdcdbb97a37@mail.crapouillou.net>
-References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
- <20170125185207.23902-1-paul@crapouillou.net>
- <20170125185207.23902-5-paul@crapouillou.net>
- <CACRpkdbcO+1c7izYpn0sb1mkE1ORFETMq=xtzVi1hKbJz0EWfw@mail.gmail.com>
+From: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+Subject: Re: [PATCH 1/4] dt-bindings: Add binding for brcm,bcm2835-sdhost.
+Date: Tue, 31 Jan 2017 10:40:00 -0800
+Message-ID: <87zii7m5tr.fsf@eliezer.anholt.net>
+References: <1485516989-1072-1-git-send-email-kraxel@redhat.com> <1485516989-1072-2-git-send-email-kraxel@redhat.com> <2012885435.15821.1485812279271@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-pwm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdbcO+1c7izYpn0sb1mkE1ORFETMq=xtzVi1hKbJz0EWfw@mail.gmail.com>
-Sender: linux-pwm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Ulf Hansson <ulf.hansson@linaro.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Linux MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, James Hogan <james.hogan@imgtec.com>
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha512; protocol="application/pgp-signature"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <2012885435.15821.1485812279271-7tX72C7vayboQLBSYMtkGA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Le 2017-01-31 15:20, Linus Walleij a écrit :
+--=-=-=
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
->> + of_property_read_u32(dev->of_node, "base", &jzgc->gc.base);
-> 
-> Remove this. Dynamic allocation should be fine, if you're using the
-> new userspace ABI like tools/gpio/* or libgpiod and only that and 
-> in-kernel
-> consumers, dynamic numbers are just fine.
+Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> writes:
 
-The problem is that the QI_LB60 board code still have a lot of 
-references
-to global GPIO numbers. Just grep for JZ_GPIO_PORT in
-arch/mips/jz4740/board-qi_lb60.c to see what I mean...
+>> Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> hat am 27. Januar 2017 um 12:36 geschr=
+ieben:
+>>=20
+>>=20
+>> From: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+>>=20
+>> This is the other SD controller on the platform, which can be swapped
+>> to the role of SD card host using pin muxing.
+>
+> AFAIK the SDHOST controller isn't able to handle SDIO. Maybe we should me=
+ntion this in the binding document.
 
--Paul
+The binding should be documentation of the binding.  I'd love to see
+more explanation in the mmc/host/bcm2835.c, though.
+
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAliQ2gAACgkQtdYpNtH8
+nujbtA/+N1294o4WGpS97F9LW4hvN9AJ6cjvnj4lHhbxrFymvQs6YKKIJuNwy9qF
+EtaotTkmkmcn8aMh1c69VyB6oMnBpIMdb8l4JqLFll/n7tpY0IYumqEwzjhWtgwj
+QWABbdwXLccVvAg3dDBE4y43AXU2YmB/briHH6uTh72O6nASiPu/yyXUhyhQb2ue
+d0tAhikKzA8CVBJVder9Y5Dh7b/odieupVx4p4Ek5+UXp53JNwcIN9MjSSIjDE/x
+9sLgz3vO6FeVBIXrmgrIJ+H0xUS6toMS4SdA7EZCNSlsXLSblRwYcigQ3J9d03LB
+aLR1s9haYxgOV62mzRONVpgZB4g8bB/6VfgGKioLWVipRfX8YLgl7mjXlDgLr3Kd
+gFEwRIyq7k1BCcRrdYOb55HL8PGx10lenKdcjCjo/HNFfQmwfQeo054UgaqZB72Q
+hHhVyC2KtF5kwuDLMlMioX5pdJwhmsuiF8X/fjkjSbDZeGwrwWQ8jEoXr+naNwo4
+nHyS9blhuGxB7OoNZG0BKrB0yOit3ygAzaEVr7EHkLI7qc4rMZZH+lKGdA6n7N1F
+tZCdzfWYMDzBWz9fipenKmFfWA9MypWpyWfRmE4bx/oT5jEgdFHeJdkr7u4wSUJy
+FNKMarnzTe07ifthZcV9g0bHv73xZj/LzDnXHC44rbJlEdBg/IM=
+=J+dQ
+-----END PGP SIGNATURE-----
+--=-=-=--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
