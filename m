@@ -1,43 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 RESEND] sdhci: Ignore unexpected CARD_INT interrupts
-Date: Tue, 31 Jan 2017 11:35:13 +0100
-Message-ID: <CAPDyKFrN7=suCnnDHg43KchRf6wKhzijsBXW7TSP7ufh6DPwiQ@mail.gmail.com>
-References: <20170116142342.21283-1-krisman@collabora.co.uk>
- <CAPDyKFpowPmbwvHL9NL60zAABfW53sDKkp0Ag5aXs4jZZLC=Dg@mail.gmail.com>
- <87wpdg9uob.fsf@dilma.collabora.co.uk> <CAPDyKFq2aUkk4qzcLNoityHbOYTHCq_OiO9HVLuWjcGSJX0aWw@mail.gmail.com>
- <87poj4loa5.fsf@dilma.collabora.co.uk> <2b37a0fa-46e3-ec4e-3f9c-9e1bb7dcda1e@intel.com>
- <874m0gll7v.fsf@dilma.collabora.co.uk>
+Subject: Re: [GIT PULL] Updates dw-mmc controller for next
+Date: Tue, 31 Jan 2017 11:35:39 +0100
+Message-ID: <CAPDyKFrTVYM_9aV_A2wipXiaZVt4ft_HpB6VPwDrVAAy2Q+DFw@mail.gmail.com>
+References: <CGME20170131035834epcas1p1de000eab0012b2f755a934f5eb277f77@epcas1p1.samsung.com>
+ <640ec482-ddc0-fc21-b2eb-414ded64ad90@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:36639 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751004AbdAaKfP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2017 05:35:15 -0500
-Received: by mail-wm0-f50.google.com with SMTP id c85so254500841wmi.1
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 02:35:15 -0800 (PST)
-In-Reply-To: <874m0gll7v.fsf@dilma.collabora.co.uk>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35601 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751715AbdAaKfl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2017 05:35:41 -0500
+Received: by mail-wm0-f43.google.com with SMTP id b65so72662066wmf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 02:35:40 -0800 (PST)
+In-Reply-To: <640ec482-ddc0-fc21-b2eb-414ded64ad90@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gabriel Krisman Bertazi <krisman@collabora.co.uk>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gustavo Padovan <gustavo.padovan@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 30 January 2017 at 14:40, Gabriel Krisman Bertazi
-<krisman@collabora.co.uk> wrote:
-> Adrian Hunter <adrian.hunter@intel.com> writes:
->> Did you test normal SDIO operation was unaffected?  Please do that before
->> sending it to stable.
+On 31 January 2017 at 04:58, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Ulf,
 >
-> I don't have any SDIO card in hand to confirm it right now.  would you
-> or Ulf be able to give it a try?  I'll keep looking for one.
+> Could you pull this patch on your next branch?
+>
+> The following changes since commit 2fb4d2ecbaa8596ea74408c251121099167ff2e8:
+>
+>   mmc: core/mmci: restore pre/post_req behaviour (2017-01-30 11:11:30 +0100)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git for-ulf
+>
+> for you to fetch changes up to 77e565420cb4f0d305aceb5378039dfb9b98e2b0:
+>
+>   mmc: dw_mmc: silent verbose log when calling from PM context (2017-01-31 11:12:20 +0900)
+>
+> ----------------------------------------------------------------
+> Shawn Lin (1):
+>       mmc: dw_mmc: silent verbose log when calling from PM context
+>
+>  drivers/mmc/host/dw_mmc.c | 12 +++++++-----
+>  1 file changed, 7 insertions(+), 5 deletions(-)
+>
+> Best Regards,
+> Jaehoon Chung
 
-Sorry, I don't have any SDIO cards at hand that is using sdhci.
+Thanks Jaehoon, pulled into next!
 
-Still, as this has been tested for a while already in next, I decided
-to move this to my fixes branch. I also added a stable-tag #4.4+.
-
-If we see some issues, please report asap then I will drop the change.
-I plan to send it to Linus on Friday this week.
+BTW, I also added your sob-tag, as it seems like your forgotten that this time!?
 
 Kind regards
 Uffe
