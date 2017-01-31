@@ -1,57 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] dt-bindings: mmc: sunxi: Document A64 eMMC compatible
-Date: Tue, 31 Jan 2017 12:10:11 +0100
-Message-ID: <CAPDyKFp8OL7HfB5KK0r74hbfTTsjs5CZntpn3dR1BKJ6E+-6qQ@mail.gmail.com>
-References: <20170130132713.20750-1-maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH] RFT: mmc: block: restore NULL check when retrying
+Date: Tue, 31 Jan 2017 12:28:43 +0100
+Message-ID: <CAPDyKFpm5AxsnbX-UMGLntB4Z1KK2TzCcCmWFJqYwku-JkOwzw@mail.gmail.com>
+References: <20170130132625.18296-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170130132713.20750-1-maxime.ripard@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>, Rob Herring <robh+dt@kernel.org>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35567 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751482AbdAaL2q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2017 06:28:46 -0500
+Received: by mail-wm0-f46.google.com with SMTP id b65so74630236wmf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 03:28:45 -0800 (PST)
+In-Reply-To: <20170130132625.18296-1-linus.walleij@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-On 30 January 2017 at 14:27, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> We introduced recently a new compatible to deal with the A64 eMMC
-> controller, let's document its binding.
+On 30 January 2017 at 14:26, Linus Walleij <linus.walleij@linaro.org> wrote:
+> When retrying to send a request, we used to have a NULL
+> check on the request we try to resend.
 >
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> It was removed in commit
+> c659b878689c ("mmc: block: inline command abortions")
+> but maybe that was not such a good idea. Maybe it can
+> actually be NULL?
+>
+> This might be causeing regressions in errorpath behaviour
+> seen in kernelci boot tests on the sunxi.
+>
+> I'm not sure because this state machine has so many
+> entrances and exits that I can't wrap my head around it.
+>
+> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
+> Reported-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thanks, applied for next!
+I have applied this for next. Let's see what kernelci reports from the
+boot test of the sunxi boards.
 
-I also added Rob's ack as he already acked the patch parsing the new
-compatible in the driver.
+If it turns out to be a good fix, I am going to fold this change into
+"mmc: block: inline command abortions", but re-writing the changelog
+of that a bit.
+
+Please tell me if you don't think this is a good idea.
 
 Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/core/block.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> index 55cdd804cdba..7d53a799f140 100644
-> --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> @@ -13,6 +13,7 @@ Required properties:
->     * "allwinner,sun5i-a13-mmc"
->     * "allwinner,sun7i-a20-mmc"
->     * "allwinner,sun9i-a80-mmc"
-> +   * "allwinner,sun50i-a64-emmc"
->     * "allwinner,sun50i-a64-mmc"
->   - reg : mmc controller base registers
->   - clocks : a list with 4 phandle + clock specifier pairs
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ede759dda395..6c8be1a80551 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1606,6 +1606,9 @@ static void mmc_blk_rw_cmd_abort(struct mmc_card *card, struct request *req)
+>  static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
+>                                  struct request *req)
+>  {
+> +       if (!req)
+> +               return;
+> +
+>         if (mmc_card_removed(card)) {
+>                 req->rq_flags |= RQF_QUIET;
+>                 blk_end_request_all(req, -EIO);
 > --
-> 2.11.0
+> 2.9.3
 >
