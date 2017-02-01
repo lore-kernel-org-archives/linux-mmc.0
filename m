@@ -1,79 +1,69 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: How to print CMD18 read data
-Date: Wed, 01 Feb 2017 20:43:06 +0900
-Message-ID: <0f96cf1e-cd58-c02c-5746-11d52fe9bb7e@samsung.com>
-References: <CGME20170201072351epcas2p4b40fc91e204153ce57d510622ab021cc@epcas2p4.samsung.com>
- <CAMGZvfKXGwmrOSD-z_4F5aM5S7TPENmPkLKQ3ArQxJ+rEruhtg@mail.gmail.com>
- <e0fcedc7-58f4-7ee3-e182-db684c8748d6@samsung.com>
- <CAMGZvfJsuHFkRJVdp9npeUMP53vsCh4G4=Py1pZphZkaowsT9A@mail.gmail.com>
+Subject: Re: [PATCH 2/9] mmc: meson-gx: minor improvements in meson_mmc_set_ios
+Date: Wed, 01 Feb 2017 20:55:55 +0900
+Message-ID: <a32d463d-2af2-8d20-9585-f76af566d623@samsung.com>
+References: <24e8bf35-50ce-270d-c0aa-12bb90d2e3d8@gmail.com>
+ <CGME20170131210832epcas2p111e35a63c02a8e4ddc83354a691d92ee@epcas2p1.samsung.com>
+ <834a9dbd-9f6b-8dea-6713-e9bdcd09f9ed@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:57803 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751192AbdBALnT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 06:43:19 -0500
+Received: from mailout1.samsung.com ([203.254.224.24]:39257 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751192AbdBALz6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 06:55:58 -0500
 Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
- by mailout3.samsung.com
+ by mailout1.samsung.com
  (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OKP00AR81W47O80@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Feb 2017 20:43:16 +0900 (KST)
-In-reply-to: <CAMGZvfJsuHFkRJVdp9npeUMP53vsCh4G4=Py1pZphZkaowsT9A@mail.gmail.com>
+ with ESMTP id <0OKP02PPT2H8LC90@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 01 Feb 2017 20:55:56 +0900 (KST)
+In-reply-to: <834a9dbd-9f6b-8dea-6713-e9bdcd09f9ed@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: amit mahadik <amitmaddy@gmail.com>, linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org
 
-On 02/01/2017 05:48 PM, amit mahadik wrote:
-> Hi Jaehoon,
->                    Thanks for replying promptly. adding more debug
-> prints I see that CMD9(CSD) CMD51(SSR) values in case of SD and SPI
-> mode are the same. Only command that troubles is CMD18. My clock
-> setting is 25Mhz and the card is working at 3.3V.
+On 02/01/2017 05:57 AM, Heiner Kallweit wrote:
+> val isn't used in the switch clause and afterwards there's an
+> identical statement. So remove it.
+> 
+> In case of an unexpected bus width the error message indicates
+> the intention to set the bus width to 4 and to go on.
+> So remove the return statement. This return statement also
+> conflicts with "setting to 4" because nothing would be set
+> actually before returning.
+> 
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 2 --
+>  1 file changed, 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index da3cce31..38edc60d 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -379,7 +379,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	meson_mmc_clk_set(host, ios->clock);
+>  
+>  	/* Bus width */
+> -	val = readl(host->regs + SD_EMMC_CFG);
+>  	switch (ios->bus_width) {
+>  	case MMC_BUS_WIDTH_1:
+>  		bus_width = CFG_BUS_WIDTH_1;
+> @@ -394,7 +393,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		dev_err(host->dev, "Invalid ios->bus_width: %u.  Setting to 4.\n",
+>  			ios->bus_width);
+>  		bus_width = CFG_BUS_WIDTH_4;
+> -		return;
 
-I don't have a knowledge about SPI mode..it might have the difference initial sequence.
-How about checking "use_spi_crc"?..Someone might have much knowledge for SPI mode. :)
+It's a different question..why does meson-gx-mmc use 4bit buswidth for invalid bus-with? not using 1bit-buswidth?
 
 Best Regards,
 Jaehoon Chung
 
-> 
-> Regards,
-> Amit.
-> 
-> On Wed, Feb 1, 2017 at 1:38 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi,
->>
->> On 02/01/2017 04:23 PM, amit mahadik wrote:
->>> Hello,
->>>          I want to interface MMC card via SPI bus. However, I am
->>> getting CRC errors for CMD18. I tried reading partition table using
->>> CMD17 but still get errors.
->>> The same SDMMC card gets detected using SD interface. I want to
->>> compare the data of CMD18/CMD17 of SD and SPI modes. Please let me
->>> know how can I print the read data of the said commands in the block
->>> layer?
->>
->> In my experience, CRC error was timing issue..(clock, driver-strength, etc..)
->> You can check those things.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>> I tried using the following code but it didn't help
->>>
->>> sg_copy_to_buffer(brq->data.sg, brq->data.sg_len, buf, 4096); and printed buf.
->>>
->>> Regards,
->>> Amit.
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
-> 
+>  	}
+>  
+>  	val = readl(host->regs + SD_EMMC_CFG);
 > 
 
