@@ -1,57 +1,67 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/9] mmc: meson-gx: fix setting f_min
-Date: Wed, 01 Feb 2017 20:49:30 +0900
-Message-ID: <1e55512d-1dc3-bd57-82e1-888553ab3a9e@samsung.com>
-References: <CGME20170131210651epcas5p37ca57e71ecbab37efe9b0227e4449d30@epcas5p3.samsung.com>
- <476265c8-b7e8-acdb-1964-5663c629caa3@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] RFT: mmc: block: restore NULL check when retrying
+Date: Wed, 1 Feb 2017 13:11:52 +0100
+Message-ID: <CAPDyKFoK+fKU3HH9-1krmQJjJhZmx1gst41c4uGO+dbc6aaJnQ@mail.gmail.com>
+References: <20170130132625.18296-1-linus.walleij@linaro.org> <CAPDyKFpm5AxsnbX-UMGLntB4Z1KK2TzCcCmWFJqYwku-JkOwzw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:36697 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751319AbdBAMCi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:02:38 -0500
-Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OKP02QP82S7JV90@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Feb 2017 21:02:31 +0900 (KST)
-In-reply-to: <476265c8-b7e8-acdb-1964-5663c629caa3@gmail.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:37978 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751311AbdBAMLy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:11:54 -0500
+Received: by mail-wm0-f50.google.com with SMTP id r141so35635642wmg.1
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:11:53 -0800 (PST)
+In-Reply-To: <CAPDyKFpm5AxsnbX-UMGLntB4Z1KK2TzCcCmWFJqYwku-JkOwzw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-On 02/01/2017 05:57 AM, Heiner Kallweit wrote:
-> Currently f_min is set to 4 MHz whilst the comment states 400 MHz.
-> I think the itention is to set f_min to 400 kHz.
-> Change value and comment accordingly.
-> 
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 5eca88bc..da3cce31 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -268,7 +268,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->  	if (f_min != UINT_MAX)
->  		f_min = DIV_ROUND_UP(CLK_SRC_XTAL_RATE, CLK_DIV_MAX);
->  	else
-> -		f_min = 4000000;  /* default min: 400 MHz */
-> +		f_min = 400000;  /* default min: 400 kHz */
+On 31 January 2017 at 12:28, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 30 January 2017 at 14:26, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> When retrying to send a request, we used to have a NULL
+>> check on the request we try to resend.
+>>
+>> It was removed in commit
+>> c659b878689c ("mmc: block: inline command abortions")
+>> but maybe that was not such a good idea. Maybe it can
+>> actually be NULL?
+>>
+>> This might be causeing regressions in errorpath behaviour
+>> seen in kernelci boot tests on the sunxi.
+>>
+>> I'm not sure because this state machine has so many
+>> entrances and exits that I can't wrap my head around it.
+>>
+>> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
+>> Reported-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>
+> I have applied this for next. Let's see what kernelci reports from the
+> boot test of the sunxi boards.
 
-I'm not sure but f_min can be 100KHz by default, not 400KHz.
-Because mmc-core should be try to find frequency from 400KHz to "f_min" value.
+Seems like this fixed the problem. Kernelci no longer reports issues
+for the sunxi boards [1].
 
-Best Regards,
-Jaehoon Chung
+Regarding the existing sunxi mmc driver error messages, those are
+still there [2].
 
->  	host->mmc->f_min = f_min;
->  
->  	/* create the mux */
-> 
+>
+> If it turns out to be a good fix, I am going to fold this change into
+> "mmc: block: inline command abortions", but re-writing the changelog
+> of that a bit.
+>
+> Please tell me if you don't think this is a good idea.
+>
 
+Folding in this change into "mmc: block: inline command abortions"....
+
+Kind regards
+Uffe
+
+[1]
+https://kernelci.org/boot/all/job/ulfh/kernel/v4.10-rc6-120-g3e05469d6088/
+
+[2]
+https://storage.kernelci.org/ulfh/v4.10-rc6-120-g3e05469d6088/arm-multi_v7_defconfig/lab-baylibre-seattle/boot-sun7i-a20-bananapi.txt
