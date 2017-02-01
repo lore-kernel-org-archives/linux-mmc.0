@@ -1,38 +1,56 @@
-From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: Re: [PATCH 1/4] dt-bindings: Add binding for brcm,bcm2835-sdhost.
-Date: Wed, 01 Feb 2017 16:54:08 +0100
-Message-ID: <1485964448.1076.68.camel@redhat.com>
-References: <1485516989-1072-1-git-send-email-kraxel@redhat.com>
-         <1485516989-1072-2-git-send-email-kraxel@redhat.com>
-         <20170201150252.gvoqp3eprj5bosvu@rob-hp-laptop>
+From: David Haworth <dave@fen-net.de>
+Subject: Re: How to print CMD18 read data
+Date: Wed, 1 Feb 2017 19:00:21 +0100
+Message-ID: <20170201180021.GA3189@fen-net.de>
+References: <CGME20170201072351epcas2p4b40fc91e204153ce57d510622ab021cc@epcas2p4.samsung.com>
+ <CAMGZvfKXGwmrOSD-z_4F5aM5S7TPENmPkLKQ3ArQxJ+rEruhtg@mail.gmail.com>
+ <e0fcedc7-58f4-7ee3-e182-db684c8748d6@samsung.com>
+ <CAMGZvfJsuHFkRJVdp9npeUMP53vsCh4G4=Py1pZphZkaowsT9A@mail.gmail.com>
+ <0f96cf1e-cd58-c02c-5746-11d52fe9bb7e@samsung.com>
+ <CAMGZvfLeERvi5eavPc4gcoJr2dOpAe7XSe+zs9K9yOKv=eOoow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56882 "EHLO mx1.redhat.com"
+Received: from hermes.f3n.de ([212.204.115.44]:60450 "EHLO hermes.f3n.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751014AbdBAPyT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 1 Feb 2017 10:54:19 -0500
-In-Reply-To: <20170201150252.gvoqp3eprj5bosvu@rob-hp-laptop>
+        id S1750954AbdBASAd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 1 Feb 2017 13:00:33 -0500
+Content-Disposition: inline
+In-Reply-To: <CAMGZvfLeERvi5eavPc4gcoJr2dOpAe7XSe+zs9K9yOKv=eOoow@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: linux-rpi-kernel@lists.infradead.org, ulf.hansson@linaro.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, linux@armlinux.org.uk, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: amit mahadik <amitmaddy@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
 
-> > +++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+Hi Amit,
 
-> > +Example:
-> > +
-> > +sdhost: sdhost@7e202000 {
+I'm trying to access an SD card/reader using SPI on a
+Raspberry Pi. I've had a little success - some of my cards
+work, some don't. I get errors from time to time, but they
+appear harmless. I seem to have cured a spurious timeout
+problem.
+
+I'm using pr_info() to dump debug messages into /var/log/syslog.
+
+Maybe we can compare notes and come up with a solution.
+Contact me off-list of you prefer.
+
+Cheers,
+Dave
+
+
+On Wed, Feb 01, 2017 at 05:46:34PM +0530, amit mahadik wrote:
+> Hi Jaehoon,
+>                       I tried the use_spi_crc=0 option too. However,
+> if the data read is incorrect the block layer has no way of knowing
+> the contents of partition table. That is the reason it fails to detect
+> partitions of the connected SDMMC card.
 > 
-> Node names should be the generic type of device, so:
-> 
-> mmc@...
+> Regards,
+> Amit.
 
-Ok, done.
-
-I guess arch/arm/boot/dts/bcm283x.dtsi should get the same update?
-
-cheers,
-  Gerd
-
+-- 
+David Haworth
+Baiersdorf, Germany
+dave@fen-net.de                PGP key at https://keyserver.pgp.com/
+http://thelancashireman.org
