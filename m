@@ -1,134 +1,191 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 01/10] mmc: block: inline the command abort and start new goto:s
-Date: Wed,  1 Feb 2017 13:47:51 +0100
-Message-ID: <20170201124800.13865-2-linus.walleij@linaro.org>
+Subject: [PATCH 02/10] mmc: block: rename rqc and req
+Date: Wed,  1 Feb 2017 13:47:52 +0100
+Message-ID: <20170201124800.13865-3-linus.walleij@linaro.org>
 References: <20170201124800.13865-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f50.google.com ([209.85.215.50]:34775 "EHLO
-        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750936AbdBAMsj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:48:39 -0500
-Received: by mail-lf0-f50.google.com with SMTP id v186so227905821lfa.1
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:48:38 -0800 (PST)
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:34796 "EHLO
+        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750940AbdBAMsn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:48:43 -0500
+Received: by mail-lf0-f43.google.com with SMTP id v186so227906685lfa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:48:42 -0800 (PST)
 In-Reply-To: <20170201124800.13865-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-The goto statements sprinkled over the mmc_blk_issue_rw_rq()
-function has grown over the years and makes the code pretty hard
-to read.
+In the function mmc_blk_issue_rw_rq() the new request coming in
+from the block layer is called "rqc" and the old request that
+was potentially just returned back from the asynchronous
+mechanism is called "req".
 
-Inline the calls such that:
+This is really confusing when trying to analyze and understand
+the code, it becomes a perceptual nightmare to me. Maybe others
+have better parserheads but it is not working for me.
 
-goto cmd_abort; ->
-mmc_blk_rw_cmd_abort(card, req);
-mmc_blk_rw_start_new(mq, card, rqc);
-return;
-
-goto start_new_req; ->
-mmc_blk_rw_start_new(mq, card, rqc);
-return;
-
-After this it is more clear how we exit the do {} while
-loop in this function, and it gets possible to split the
-code apart.
+Rename "rqc" to "new_req" and "req" to "old_req" to reflect what
+is semantically going on into the syntax.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c | 46 +++++++++++++++++++++++++++-------------------
- 1 file changed, 27 insertions(+), 19 deletions(-)
+ drivers/mmc/core/block.c | 56 ++++++++++++++++++++++++------------------------
+ 1 file changed, 28 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 6c8be1a80551..0e23dba62613 100644
+index 0e23dba62613..e1479f114247 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1701,10 +1701,15 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+@@ -1619,7 +1619,7 @@ static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
+ 	}
+ }
+ 
+-static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
++static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+@@ -1627,24 +1627,24 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+-	struct request *req;
++	struct request *old_req;
+ 	struct mmc_async_req *new_areq;
+ 	struct mmc_async_req *old_areq;
+ 
+-	if (!rqc && !mq->mqrq_prev->req)
++	if (!new_req && !mq->mqrq_prev->req)
+ 		return;
+ 
+ 	do {
+-		if (rqc) {
++		if (new_req) {
+ 			/*
+ 			 * When 4KB native sector is enabled, only 8 blocks
+ 			 * multiple read or write is allowed
+ 			 */
+ 			if (mmc_large_sector(card) &&
+-				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
++				!IS_ALIGNED(blk_rq_sectors(new_req), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+-					rqc->rq_disk->disk_name);
+-				mmc_blk_rw_cmd_abort(card, rqc);
++					new_req->rq_disk->disk_name);
++				mmc_blk_rw_cmd_abort(card, new_req);
+ 				return;
+ 			}
+ 
+@@ -1671,8 +1671,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		 */
+ 		mq_rq =	container_of(old_areq, struct mmc_queue_req, mmc_active);
+ 		brq = &mq_rq->brq;
+-		req = mq_rq->req;
+-		type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
++		old_req = mq_rq->req;
++		type = rq_data_dir(old_req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+ 		mmc_queue_bounce_post(mq_rq);
+ 
+ 		switch (status) {
+@@ -1683,7 +1683,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			 */
+ 			mmc_blk_reset_success(md, type);
+ 
+-			ret = blk_end_request(req, 0,
++			ret = blk_end_request(old_req, 0,
+ 					brq->data.bytes_xfered);
+ 
+ 			/*
+@@ -1693,21 +1693,21 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			 */
+ 			if (status == MMC_BLK_SUCCESS && ret) {
+ 				pr_err("%s BUG rq_tot %d d_xfer %d\n",
+-				       __func__, blk_rq_bytes(req),
++				       __func__, blk_rq_bytes(old_req),
+ 				       brq->data.bytes_xfered);
+-				mmc_blk_rw_cmd_abort(card, req);
++				mmc_blk_rw_cmd_abort(card, old_req);
+ 				return;
+ 			}
  			break;
  		case MMC_BLK_CMD_ERR:
- 			ret = mmc_blk_cmd_err(md, card, brq, req, ret);
--			if (mmc_blk_reset(md, card->host, type))
--				goto cmd_abort;
--			if (!ret)
--				goto start_new_req;
-+			if (mmc_blk_reset(md, card->host, type)) {
-+				mmc_blk_rw_cmd_abort(card, req);
-+				mmc_blk_rw_start_new(mq, card, rqc);
-+				return;
-+			}
-+			if (!ret) {
-+				mmc_blk_rw_start_new(mq, card, rqc);
-+				return;
-+			}
+-			ret = mmc_blk_cmd_err(md, card, brq, req, ret);
++			ret = mmc_blk_cmd_err(md, card, brq, old_req, ret);
+ 			if (mmc_blk_reset(md, card->host, type)) {
+-				mmc_blk_rw_cmd_abort(card, req);
+-				mmc_blk_rw_start_new(mq, card, rqc);
++				mmc_blk_rw_cmd_abort(card, old_req);
++				mmc_blk_rw_start_new(mq, card, new_req);
+ 				return;
+ 			}
+ 			if (!ret) {
+-				mmc_blk_rw_start_new(mq, card, rqc);
++				mmc_blk_rw_start_new(mq, card, new_req);
+ 				return;
+ 			}
  			break;
- 		case MMC_BLK_RETRY:
- 			retune_retry_done = brq->retune_retry_done;
-@@ -1714,15 +1719,20 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+@@ -1719,8 +1719,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
  		case MMC_BLK_ABORT:
  			if (!mmc_blk_reset(md, card->host, type))
  				break;
--			goto cmd_abort;
-+			mmc_blk_rw_cmd_abort(card, req);
-+			mmc_blk_rw_start_new(mq, card, rqc);
-+			return;
+-			mmc_blk_rw_cmd_abort(card, req);
+-			mmc_blk_rw_start_new(mq, card, rqc);
++			mmc_blk_rw_cmd_abort(card, old_req);
++			mmc_blk_rw_start_new(mq, card, new_req);
+ 			return;
  		case MMC_BLK_DATA_ERR: {
  			int err;
- 
- 			err = mmc_blk_reset(md, card->host, type);
+@@ -1729,8 +1729,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
  			if (!err)
  				break;
--			if (err == -ENODEV)
--				goto cmd_abort;
-+			if (err == -ENODEV) {
-+				mmc_blk_rw_cmd_abort(card, req);
-+				mmc_blk_rw_start_new(mq, card, rqc);
-+				return;
-+			}
+ 			if (err == -ENODEV) {
+-				mmc_blk_rw_cmd_abort(card, req);
+-				mmc_blk_rw_start_new(mq, card, rqc);
++				mmc_blk_rw_cmd_abort(card, old_req);
++				mmc_blk_rw_start_new(mq, card, new_req);
+ 				return;
+ 			}
  			/* Fall through */
- 		}
- 		case MMC_BLK_ECC_ERR:
-@@ -1740,15 +1750,21 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+@@ -1739,7 +1739,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			if (brq->data.blocks > 1) {
+ 				/* Redo read one sector at a time */
+ 				pr_warn("%s: retrying using single block read\n",
+-					req->rq_disk->disk_name);
++					old_req->rq_disk->disk_name);
+ 				disable_multi = 1;
+ 				break;
+ 			}
+@@ -1748,22 +1748,22 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			 * time, so we only reach here after trying to
+ 			 * read a single sector.
  			 */
- 			ret = blk_end_request(req, -EIO,
+-			ret = blk_end_request(req, -EIO,
++			ret = blk_end_request(old_req, -EIO,
  						brq->data.blksz);
--			if (!ret)
--				goto start_new_req;
-+			if (!ret) {
-+				mmc_blk_rw_start_new(mq, card, rqc);
-+				return;
-+			}
+ 			if (!ret) {
+-				mmc_blk_rw_start_new(mq, card, rqc);
++				mmc_blk_rw_start_new(mq, card, new_req);
+ 				return;
+ 			}
  			break;
  		case MMC_BLK_NOMEDIUM:
--			goto cmd_abort;
-+			mmc_blk_rw_cmd_abort(card, req);
-+			mmc_blk_rw_start_new(mq, card, rqc);
-+			return;
+-			mmc_blk_rw_cmd_abort(card, req);
+-			mmc_blk_rw_start_new(mq, card, rqc);
++			mmc_blk_rw_cmd_abort(card, old_req);
++			mmc_blk_rw_start_new(mq, card, new_req);
+ 			return;
  		default:
  			pr_err("%s: Unhandled return value (%d)",
- 					req->rq_disk->disk_name, status);
--			goto cmd_abort;
-+			mmc_blk_rw_cmd_abort(card, req);
-+			mmc_blk_rw_start_new(mq, card, rqc);
-+			return;
+-					req->rq_disk->disk_name, status);
+-			mmc_blk_rw_cmd_abort(card, req);
+-			mmc_blk_rw_start_new(mq, card, rqc);
++					old_req->rq_disk->disk_name, status);
++			mmc_blk_rw_cmd_abort(card, old_req);
++			mmc_blk_rw_start_new(mq, card, new_req);
+ 			return;
  		}
  
- 		if (ret) {
-@@ -1763,14 +1779,6 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			mq_rq->brq.retune_retry_done = retune_retry_done;
- 		}
- 	} while (ret);
--
--	return;
--
-- cmd_abort:
--	mmc_blk_rw_cmd_abort(card, req);
--
-- start_new_req:
--	mmc_blk_rw_start_new(mq, card, rqc);
- }
- 
- void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 -- 
 2.9.3
 
