@@ -1,62 +1,112 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v2 2/9] mmc: meson-gx: minor improvements in meson_mmc_set_ios
-Date: Wed, 1 Feb 2017 07:48:28 +0100
-Message-ID: <6c3b7dbe-fb65-b40d-2625-342e2bd48776@gmail.com>
+Subject: [PATCH v2 3/9] mmc: meson-gx: improve meson_mmc_clk_set
+Date: Wed, 1 Feb 2017 07:48:39 +0100
+Message-ID: <6b6c81ab-a576-ca41-55df-7633dbbba8f6@gmail.com>
 References: <584e5061-d359-1436-05ee-3767a5a4b10f@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:35188 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751004AbdBAGtr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 01:49:47 -0500
-Received: by mail-wj0-f195.google.com with SMTP id i7so12152225wjf.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 22:49:47 -0800 (PST)
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35206 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751004AbdBAGtt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 01:49:49 -0500
+Received: by mail-wm0-f65.google.com with SMTP id u63so3591519wmu.2
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 22:49:48 -0800 (PST)
 In-Reply-To: <584e5061-d359-1436-05ee-3767a5a4b10f@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
-val isn't used in the switch clause and afterwards there's an
-identical statement. So remove it.
+The following changes are quite small, therefore I combined them in
+one patch.
 
-In case of an unexpected bus width the error message indicates
-the intention to set the bus width to 4 and to go on.
-So remove the return statement. This return statement also
-conflicts with "setting to 4" because nothing would be set
-actually before returning.
+- ret doesn't need to be initialized with 0
+- use standard !clk_rate notation to check for a zero value
+- If clk_rate is zero we return here. Therefore all further checks
+  in this function for clk_rate != 0 are not needed.
+- switch from dev_warn to dev_err if the clock can't be set
+- If due to clock source and available divider values the requested
+  frequency isn't matched exactly (always the case if requested
+  frequency is 52 MHz), then just print the differing values as
+  debug message and not as warning.
+- Also remove ret from the message as it is always 0.
+- In the case of actual frequency not exactly matching the requested
+  one set mmc->actual_clock to the requested frequency.
+  So far mmc->actual_clock wasn't set at all in this case.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-Acked-by: Kevin Hilman <khilman@baylibre.com>
+Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Tested-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v2:
-- added acked-by
+- added reviewed by, tested-by
 ---
- drivers/mmc/host/meson-gx-mmc.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 36 +++++++++++++++++++-----------------
+ 1 file changed, 19 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index da3cce31..38edc60d 100644
+index 38edc60d..529a4f22 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -379,7 +379,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	meson_mmc_clk_set(host, ios->clock);
+@@ -179,7 +179,7 @@ struct sd_emmc_desc {
+ static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+-	int ret = 0;
++	int ret;
+ 	u32 cfg;
  
- 	/* Bus width */
--	val = readl(host->regs + SD_EMMC_CFG);
- 	switch (ios->bus_width) {
- 	case MMC_BUS_WIDTH_1:
- 		bus_width = CFG_BUS_WIDTH_1;
-@@ -394,7 +393,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		dev_err(host->dev, "Invalid ios->bus_width: %u.  Setting to 4.\n",
- 			ios->bus_width);
- 		bus_width = CFG_BUS_WIDTH_4;
--		return;
+ 	if (clk_rate) {
+@@ -202,29 +202,31 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
+ 	dev_dbg(host->dev, "change clock rate %u -> %lu\n",
+ 		mmc->actual_clock, clk_rate);
+ 
+-	if (clk_rate == 0) {
++	if (!clk_rate) {
+ 		mmc->actual_clock = 0;
+ 		return 0;
  	}
  
- 	val = readl(host->regs + SD_EMMC_CFG);
+ 	ret = clk_set_rate(host->cfg_div_clk, clk_rate);
+-	if (ret)
+-		dev_warn(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
+-			 clk_rate, ret);
+-	else if (clk_rate && clk_rate != clk_get_rate(host->cfg_div_clk))
+-		dev_warn(host->dev, "divider requested rate %lu != actual rate %lu: ret=%d\n",
+-			 clk_rate, clk_get_rate(host->cfg_div_clk), ret);
+-	else
+-		mmc->actual_clock = clk_rate;
+-
+-	/* (re)start clock, if non-zero */
+-	if (!ret && clk_rate) {
+-		cfg = readl(host->regs + SD_EMMC_CFG);
+-		cfg &= ~CFG_STOP_CLOCK;
+-		writel(cfg, host->regs + SD_EMMC_CFG);
++	if (ret) {
++		dev_err(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
++			clk_rate, ret);
++		return ret;
+ 	}
+ 
+-	return ret;
++	if (clk_rate != clk_get_rate(host->cfg_div_clk))
++		dev_dbg(host->dev,
++			"divider requested rate %lu != actual rate %lu\n",
++			clk_rate, clk_get_rate(host->cfg_div_clk));
++
++	mmc->actual_clock = clk_rate;
++
++	/* (re)start clock */
++	cfg = readl(host->regs + SD_EMMC_CFG);
++	cfg &= ~CFG_STOP_CLOCK;
++	writel(cfg, host->regs + SD_EMMC_CFG);
++
++	return 0;
+ }
+ 
+ /*
 -- 
 2.11.0
 
