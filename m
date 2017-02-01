@@ -1,109 +1,72 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v2 3/9] mmc: meson-gx: improve meson_mmc_clk_set
-Date: Wed, 1 Feb 2017 07:48:39 +0100
-Message-ID: <6b6c81ab-a576-ca41-55df-7633dbbba8f6@gmail.com>
+Subject: [PATCH v2 4/9] mmc: meson-gx: improve meson_mmc_irq_thread
+Date: Wed, 1 Feb 2017 07:48:49 +0100
+Message-ID: <460d2337-7865-6c9c-21b6-98c2ea070926@gmail.com>
 References: <584e5061-d359-1436-05ee-3767a5a4b10f@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35206 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751004AbdBAGtt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 01:49:49 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u63so3591519wmu.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 22:49:48 -0800 (PST)
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34331 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751004AbdBAGtu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 01:49:50 -0500
+Received: by mail-wm0-f67.google.com with SMTP id c85so3600143wmi.1
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2017 22:49:49 -0800 (PST)
 In-Reply-To: <584e5061-d359-1436-05ee-3767a5a4b10f@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
-The following changes are quite small, therefore I combined them in
-one patch.
-
-- ret doesn't need to be initialized with 0
-- use standard !clk_rate notation to check for a zero value
-- If clk_rate is zero we return here. Therefore all further checks
-  in this function for clk_rate != 0 are not needed.
-- switch from dev_warn to dev_err if the clock can't be set
-- If due to clock source and available divider values the requested
-  frequency isn't matched exactly (always the case if requested
-  frequency is 52 MHz), then just print the differing values as
-  debug message and not as warning.
-- Also remove ret from the message as it is always 0.
-- In the case of actual frequency not exactly matching the requested
-  one set mmc->actual_clock to the requested frequency.
-  So far mmc->actual_clock wasn't set at all in this case.
+Remove unneeded variable ret and simplify the if block.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
-Tested-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v2:
-- added reviewed by, tested-by
+- no changes
 ---
- drivers/mmc/host/meson-gx-mmc.c | 36 +++++++++++++++++++-----------------
- 1 file changed, 19 insertions(+), 17 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 15 ++++++---------
+ 1 file changed, 6 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 38edc60d..529a4f22 100644
+index 529a4f22..4ce4c640 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -179,7 +179,7 @@ struct sd_emmc_desc {
- static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
- {
- 	struct mmc_host *mmc = host->mmc;
--	int ret = 0;
-+	int ret;
- 	u32 cfg;
+@@ -670,7 +670,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	struct mmc_command *cmd = host->cmd;
+ 	struct mmc_data *data;
+ 	unsigned int xfer_bytes;
+-	int ret = IRQ_HANDLED;
  
- 	if (clk_rate) {
-@@ -202,29 +202,31 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
- 	dev_dbg(host->dev, "change clock rate %u -> %lu\n",
- 		mmc->actual_clock, clk_rate);
+ 	if (WARN_ON(!mrq))
+ 		return IRQ_NONE;
+@@ -679,14 +678,12 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 		return IRQ_NONE;
  
--	if (clk_rate == 0) {
-+	if (!clk_rate) {
- 		mmc->actual_clock = 0;
- 		return 0;
+ 	data = cmd->data;
+-	if (data) {
++	if (data && data->flags & MMC_DATA_READ) {
+ 		xfer_bytes = data->blksz * data->blocks;
+-		if (data->flags & MMC_DATA_READ) {
+-			WARN_ON(xfer_bytes > host->bounce_buf_size);
+-			sg_copy_from_buffer(data->sg, data->sg_len,
+-					    host->bounce_buf, xfer_bytes);
+-			data->bytes_xfered = xfer_bytes;
+-		}
++		WARN_ON(xfer_bytes > host->bounce_buf_size);
++		sg_copy_from_buffer(data->sg, data->sg_len,
++				    host->bounce_buf, xfer_bytes);
++		data->bytes_xfered = xfer_bytes;
  	}
  
- 	ret = clk_set_rate(host->cfg_div_clk, clk_rate);
--	if (ret)
--		dev_warn(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
--			 clk_rate, ret);
--	else if (clk_rate && clk_rate != clk_get_rate(host->cfg_div_clk))
--		dev_warn(host->dev, "divider requested rate %lu != actual rate %lu: ret=%d\n",
--			 clk_rate, clk_get_rate(host->cfg_div_clk), ret);
--	else
--		mmc->actual_clock = clk_rate;
--
--	/* (re)start clock, if non-zero */
--	if (!ret && clk_rate) {
--		cfg = readl(host->regs + SD_EMMC_CFG);
--		cfg &= ~CFG_STOP_CLOCK;
--		writel(cfg, host->regs + SD_EMMC_CFG);
-+	if (ret) {
-+		dev_err(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
-+			clk_rate, ret);
-+		return ret;
- 	}
+ 	meson_mmc_read_resp(host->mmc, cmd);
+@@ -695,7 +692,7 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	else
+ 		meson_mmc_start_cmd(host->mmc, data->stop);
  
 -	return ret;
-+	if (clk_rate != clk_get_rate(host->cfg_div_clk))
-+		dev_dbg(host->dev,
-+			"divider requested rate %lu != actual rate %lu\n",
-+			clk_rate, clk_get_rate(host->cfg_div_clk));
-+
-+	mmc->actual_clock = clk_rate;
-+
-+	/* (re)start clock */
-+	cfg = readl(host->regs + SD_EMMC_CFG);
-+	cfg &= ~CFG_STOP_CLOCK;
-+	writel(cfg, host->regs + SD_EMMC_CFG);
-+
-+	return 0;
++	return IRQ_HANDLED;
  }
  
  /*
