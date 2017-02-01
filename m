@@ -1,101 +1,73 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: switch to ida_simple_ functions in block.c
-Date: Wed, 1 Feb 2017 21:21:01 +0100
-Message-ID: <CAPDyKFqcTQEZS=sx4zqENM-wTST6dtXorQ3G4u+-96SH1QNeHg@mail.gmail.com>
-References: <9c4a989c-0962-0471-5e67-c405f5232efc@gmail.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH 2/9] mmc: meson-gx: minor improvements in
+ meson_mmc_set_ios
+Date: Wed, 1 Feb 2017 21:16:53 +0100
+Message-ID: <939d5c2d-e518-9388-0800-1be1948f8c65@gmail.com>
+References: <24e8bf35-50ce-270d-c0aa-12bb90d2e3d8@gmail.com>
+ <CGME20170131210832epcas2p111e35a63c02a8e4ddc83354a691d92ee@epcas2p1.samsung.com>
+ <834a9dbd-9f6b-8dea-6713-e9bdcd09f9ed@gmail.com>
+ <a32d463d-2af2-8d20-9585-f76af566d623@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:37785 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751840AbdBAUVD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 15:21:03 -0500
-Received: by mail-wm0-f48.google.com with SMTP id v77so54864675wmv.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 12:21:03 -0800 (PST)
-In-Reply-To: <9c4a989c-0962-0471-5e67-c405f5232efc@gmail.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33139 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751548AbdBAU32 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 15:29:28 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v77so8025477wmv.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 12:29:28 -0800 (PST)
+In-Reply-To: <a32d463d-2af2-8d20-9585-f76af566d623@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Kevin Hilman <khilman@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org
 
-On 1 February 2017 at 19:44, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> ida code in block.c can be significantly simplified by switching to
-> the ida_simple_ functions.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Am 01.02.2017 um 12:55 schrieb Jaehoon Chung:
+> On 02/01/2017 05:57 AM, Heiner Kallweit wrote:
+>> val isn't used in the switch clause and afterwards there's an
+>> identical statement. So remove it.
+>>
+>> In case of an unexpected bus width the error message indicates
+>> the intention to set the bus width to 4 and to go on.
+>> So remove the return statement. This return statement also
+>> conflicts with "setting to 4" because nothing would be set
+>> actually before returning.
+>>
+>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>> ---
+>>  drivers/mmc/host/meson-gx-mmc.c | 2 --
+>>  1 file changed, 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>> index da3cce31..38edc60d 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -379,7 +379,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  	meson_mmc_clk_set(host, ios->clock);
+>>  
+>>  	/* Bus width */
+>> -	val = readl(host->regs + SD_EMMC_CFG);
+>>  	switch (ios->bus_width) {
+>>  	case MMC_BUS_WIDTH_1:
+>>  		bus_width = CFG_BUS_WIDTH_1;
+>> @@ -394,7 +393,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  		dev_err(host->dev, "Invalid ios->bus_width: %u.  Setting to 4.\n",
+>>  			ios->bus_width);
+>>  		bus_width = CFG_BUS_WIDTH_4;
+>> -		return;
+> 
+> It's a different question..why does meson-gx-mmc use 4bit buswidth for invalid bus-with? not using 1bit-buswidth?
+> 
+I think this question is best addressed to Kevin as original author.
 
-Thanks, applied for next!
+> Best Regards,
+> Jaehoon Chung
+> 
+>>  	}
+>>  
+>>  	val = readl(host->regs + SD_EMMC_CFG);
+>>
+> 
+> 
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/block.c | 31 +++++--------------------------
->  1 file changed, 5 insertions(+), 26 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ede759dd..d5d8b0e6 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -90,7 +90,6 @@ static int max_devices;
->  #define MAX_DEVICES 256
->
->  static DEFINE_IDA(mmc_blk_ida);
-> -static DEFINE_SPINLOCK(mmc_blk_lock);
->
->  /*
->   * There is one mmc_blk_data per slot.
-> @@ -163,11 +162,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
->         if (md->usage == 0) {
->                 int devidx = mmc_get_devidx(md->disk);
->                 blk_cleanup_queue(md->queue.queue);
-> -
-> -               spin_lock(&mmc_blk_lock);
-> -               ida_remove(&mmc_blk_ida, devidx);
-> -               spin_unlock(&mmc_blk_lock);
-> -
-> +               ida_simple_remove(&mmc_blk_ida, devidx);
->                 put_disk(md->disk);
->                 kfree(md);
->         }
-> @@ -1836,23 +1831,9 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->         struct mmc_blk_data *md;
->         int devidx, ret;
->
-> -again:
-> -       if (!ida_pre_get(&mmc_blk_ida, GFP_KERNEL))
-> -               return ERR_PTR(-ENOMEM);
-> -
-> -       spin_lock(&mmc_blk_lock);
-> -       ret = ida_get_new(&mmc_blk_ida, &devidx);
-> -       spin_unlock(&mmc_blk_lock);
-> -
-> -       if (ret == -EAGAIN)
-> -               goto again;
-> -       else if (ret)
-> -               return ERR_PTR(ret);
-> -
-> -       if (devidx >= max_devices) {
-> -               ret = -ENOSPC;
-> -               goto out;
-> -       }
-> +       devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
-> +       if (devidx < 0)
-> +               return ERR_PTR(devidx);
->
->         md = kzalloc(sizeof(struct mmc_blk_data), GFP_KERNEL);
->         if (!md) {
-> @@ -1941,9 +1922,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->   err_kfree:
->         kfree(md);
->   out:
-> -       spin_lock(&mmc_blk_lock);
-> -       ida_remove(&mmc_blk_ida, devidx);
-> -       spin_unlock(&mmc_blk_lock);
-> +       ida_simple_remove(&mmc_blk_ida, devidx);
->         return ERR_PTR(ret);
->  }
->
-> --
-> 2.11.0
->
