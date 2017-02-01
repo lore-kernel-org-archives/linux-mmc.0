@@ -1,191 +1,164 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 02/10] mmc: block: rename rqc and req
-Date: Wed,  1 Feb 2017 13:47:52 +0100
-Message-ID: <20170201124800.13865-3-linus.walleij@linaro.org>
+Subject: [PATCH 03/10] mmc: core: rename mmc_start_req() to *areq()
+Date: Wed,  1 Feb 2017 13:47:53 +0100
+Message-ID: <20170201124800.13865-4-linus.walleij@linaro.org>
 References: <20170201124800.13865-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:34796 "EHLO
-        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750940AbdBAMsn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:48:43 -0500
-Received: by mail-lf0-f43.google.com with SMTP id v186so227906685lfa.1
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:48:42 -0800 (PST)
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33802 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750942AbdBAMst (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:48:49 -0500
+Received: by mail-lf0-f54.google.com with SMTP id v186so227908015lfa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:48:48 -0800 (PST)
 In-Reply-To: <20170201124800.13865-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-In the function mmc_blk_issue_rw_rq() the new request coming in
-from the block layer is called "rqc" and the old request that
-was potentially just returned back from the asynchronous
-mechanism is called "req".
+With the coexisting __mmc_start_request(), mmc_start_request()
+and __mmc_start_req() it is a bit confusing that mmc_start_req()
+actually does not start a normal request, but an asynchronous
+request.
 
-This is really confusing when trying to analyze and understand
-the code, it becomes a perceptual nightmare to me. Maybe others
-have better parserheads but it is not working for me.
-
-Rename "rqc" to "new_req" and "req" to "old_req" to reflect what
-is semantically going on into the syntax.
+Rename it to mmc_start_areq() to make it explicit what the
+function is doing, also fix the kerneldoc for this function
+while we're at it.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c | 56 ++++++++++++++++++++++++------------------------
- 1 file changed, 28 insertions(+), 28 deletions(-)
+ drivers/mmc/core/block.c    |  8 ++++----
+ drivers/mmc/core/core.c     | 14 +++++++-------
+ drivers/mmc/core/mmc_test.c |  8 ++++----
+ include/linux/mmc/core.h    |  2 +-
+ 4 files changed, 16 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0e23dba62613..e1479f114247 100644
+index e1479f114247..3246cd396c77 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1619,7 +1619,7 @@ static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
+@@ -1614,8 +1614,8 @@ static void mmc_blk_rw_start_new(struct mmc_queue *mq, struct mmc_card *card,
+ 		blk_end_request_all(req, -EIO);
+ 	} else {
+ 		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+-		mmc_start_req(card->host,
+-			      &mq->mqrq_cur->mmc_active, NULL);
++		mmc_start_areq(card->host,
++			       &mq->mqrq_cur->mmc_active, NULL);
  	}
  }
  
--static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
-+static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
- {
- 	struct mmc_blk_data *md = mq->blkdata;
- 	struct mmc_card *card = md->queue.card;
-@@ -1627,24 +1627,24 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
- 	struct mmc_queue_req *mq_rq;
--	struct request *req;
-+	struct request *old_req;
- 	struct mmc_async_req *new_areq;
- 	struct mmc_async_req *old_areq;
+@@ -1653,7 +1653,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		} else
+ 			new_areq = NULL;
  
--	if (!rqc && !mq->mqrq_prev->req)
-+	if (!new_req && !mq->mqrq_prev->req)
- 		return;
- 
- 	do {
--		if (rqc) {
-+		if (new_req) {
+-		old_areq = mmc_start_req(card->host, new_areq, &status);
++		old_areq = mmc_start_areq(card->host, new_areq, &status);
+ 		if (!old_areq) {
  			/*
- 			 * When 4KB native sector is enabled, only 8 blocks
- 			 * multiple read or write is allowed
+ 			 * We have just put the first request into the pipeline
+@@ -1774,7 +1774,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
  			 */
- 			if (mmc_large_sector(card) &&
--				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
-+				!IS_ALIGNED(blk_rq_sectors(new_req), 8)) {
- 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
--					rqc->rq_disk->disk_name);
--				mmc_blk_rw_cmd_abort(card, rqc);
-+					new_req->rq_disk->disk_name);
-+				mmc_blk_rw_cmd_abort(card, new_req);
- 				return;
- 			}
- 
-@@ -1671,8 +1671,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		 */
- 		mq_rq =	container_of(old_areq, struct mmc_queue_req, mmc_active);
- 		brq = &mq_rq->brq;
--		req = mq_rq->req;
--		type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
-+		old_req = mq_rq->req;
-+		type = rq_data_dir(old_req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
- 		mmc_queue_bounce_post(mq_rq);
- 
- 		switch (status) {
-@@ -1683,7 +1683,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			 */
- 			mmc_blk_reset_success(md, type);
- 
--			ret = blk_end_request(req, 0,
-+			ret = blk_end_request(old_req, 0,
- 					brq->data.bytes_xfered);
- 
- 			/*
-@@ -1693,21 +1693,21 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			 */
- 			if (status == MMC_BLK_SUCCESS && ret) {
- 				pr_err("%s BUG rq_tot %d d_xfer %d\n",
--				       __func__, blk_rq_bytes(req),
-+				       __func__, blk_rq_bytes(old_req),
- 				       brq->data.bytes_xfered);
--				mmc_blk_rw_cmd_abort(card, req);
-+				mmc_blk_rw_cmd_abort(card, old_req);
- 				return;
- 			}
- 			break;
- 		case MMC_BLK_CMD_ERR:
--			ret = mmc_blk_cmd_err(md, card, brq, req, ret);
-+			ret = mmc_blk_cmd_err(md, card, brq, old_req, ret);
- 			if (mmc_blk_reset(md, card->host, type)) {
--				mmc_blk_rw_cmd_abort(card, req);
--				mmc_blk_rw_start_new(mq, card, rqc);
-+				mmc_blk_rw_cmd_abort(card, old_req);
-+				mmc_blk_rw_start_new(mq, card, new_req);
- 				return;
- 			}
- 			if (!ret) {
--				mmc_blk_rw_start_new(mq, card, rqc);
-+				mmc_blk_rw_start_new(mq, card, new_req);
- 				return;
- 			}
- 			break;
-@@ -1719,8 +1719,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		case MMC_BLK_ABORT:
- 			if (!mmc_blk_reset(md, card->host, type))
- 				break;
--			mmc_blk_rw_cmd_abort(card, req);
--			mmc_blk_rw_start_new(mq, card, rqc);
-+			mmc_blk_rw_cmd_abort(card, old_req);
-+			mmc_blk_rw_start_new(mq, card, new_req);
- 			return;
- 		case MMC_BLK_DATA_ERR: {
- 			int err;
-@@ -1729,8 +1729,8 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			if (!err)
- 				break;
- 			if (err == -ENODEV) {
--				mmc_blk_rw_cmd_abort(card, req);
--				mmc_blk_rw_start_new(mq, card, rqc);
-+				mmc_blk_rw_cmd_abort(card, old_req);
-+				mmc_blk_rw_start_new(mq, card, new_req);
- 				return;
- 			}
- 			/* Fall through */
-@@ -1739,7 +1739,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			if (brq->data.blocks > 1) {
- 				/* Redo read one sector at a time */
- 				pr_warn("%s: retrying using single block read\n",
--					req->rq_disk->disk_name);
-+					old_req->rq_disk->disk_name);
- 				disable_multi = 1;
- 				break;
- 			}
-@@ -1748,22 +1748,22 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			 * time, so we only reach here after trying to
- 			 * read a single sector.
- 			 */
--			ret = blk_end_request(req, -EIO,
-+			ret = blk_end_request(old_req, -EIO,
- 						brq->data.blksz);
- 			if (!ret) {
--				mmc_blk_rw_start_new(mq, card, rqc);
-+				mmc_blk_rw_start_new(mq, card, new_req);
- 				return;
- 			}
- 			break;
- 		case MMC_BLK_NOMEDIUM:
--			mmc_blk_rw_cmd_abort(card, req);
--			mmc_blk_rw_start_new(mq, card, rqc);
-+			mmc_blk_rw_cmd_abort(card, old_req);
-+			mmc_blk_rw_start_new(mq, card, new_req);
- 			return;
- 		default:
- 			pr_err("%s: Unhandled return value (%d)",
--					req->rq_disk->disk_name, status);
--			mmc_blk_rw_cmd_abort(card, req);
--			mmc_blk_rw_start_new(mq, card, rqc);
-+					old_req->rq_disk->disk_name, status);
-+			mmc_blk_rw_cmd_abort(card, old_req);
-+			mmc_blk_rw_start_new(mq, card, new_req);
- 			return;
+ 			mmc_blk_rw_rq_prep(mq_rq, card,
+ 					disable_multi, mq);
+-			mmc_start_req(card->host,
++			mmc_start_areq(card->host,
+ 					&mq_rq->mmc_active, NULL);
+ 			mq_rq->brq.retune_retry_done = retune_retry_done;
  		}
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0faa2ee613be..a160c3a7777a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -631,10 +631,10 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
+ }
  
+ /**
+- *	mmc_start_req - start a non-blocking request
++ *	mmc_start_areq - start an asynchronous request
+  *	@host: MMC host to start command
+- *	@areq: async request to start
+- *	@error: out parameter returns 0 for success, otherwise non zero
++ *	@areq: asynchronous request to start
++ *	@ret_stat: out parameter for status
+  *
+  *	Start a new MMC custom command request for a host.
+  *	If there is on ongoing async request wait for completion
+@@ -646,9 +646,9 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
+  *	return the completed request. If there is no ongoing request, NULL
+  *	is returned without waiting. NULL is not an error condition.
+  */
+-struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+-				    struct mmc_async_req *areq,
+-				    enum mmc_blk_status *ret_stat)
++struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
++				     struct mmc_async_req *areq,
++				     enum mmc_blk_status *ret_stat)
+ {
+ 	enum mmc_blk_status status = MMC_BLK_SUCCESS;
+ 	int start_err = 0;
+@@ -699,7 +699,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 		*ret_stat = status;
+ 	return data;
+ }
+-EXPORT_SYMBOL(mmc_start_req);
++EXPORT_SYMBOL(mmc_start_areq);
+ 
+ /**
+  *	mmc_wait_for_req - start a request and wait for completion
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 83d193c09d98..f99ac3123fd2 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -853,7 +853,7 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 	for (i = 0; i < count; i++) {
+ 		mmc_test_prepare_mrq(test, cur_areq->mrq, sg, sg_len, dev_addr,
+ 				     blocks, blksz, write);
+-		done_areq = mmc_start_req(test->card->host, cur_areq, &status);
++		done_areq = mmc_start_areq(test->card->host, cur_areq, &status);
+ 
+ 		if (status != MMC_BLK_SUCCESS || (!done_areq && i > 0)) {
+ 			ret = RESULT_FAIL;
+@@ -872,7 +872,7 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 		dev_addr += blocks;
+ 	}
+ 
+-	done_areq = mmc_start_req(test->card->host, NULL, &status);
++	done_areq = mmc_start_areq(test->card->host, NULL, &status);
+ 	if (status != MMC_BLK_SUCCESS)
+ 		ret = RESULT_FAIL;
+ 
+@@ -2402,7 +2402,7 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 
+ 	/* Start ongoing data request */
+ 	if (use_areq) {
+-		mmc_start_req(host, &test_areq.areq, &blkstat);
++		mmc_start_areq(host, &test_areq.areq, &blkstat);
+ 		if (blkstat != MMC_BLK_SUCCESS) {
+ 			ret = RESULT_FAIL;
+ 			goto out_free;
+@@ -2440,7 +2440,7 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+ 
+ 	/* Wait for data request to complete */
+ 	if (use_areq) {
+-		mmc_start_req(host, NULL, &blkstat);
++		mmc_start_areq(host, NULL, &blkstat);
+ 		if (blkstat != MMC_BLK_SUCCESS)
+ 			ret = RESULT_FAIL;
+ 	} else {
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 6dcb339fcd45..a0c63ea28796 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -158,7 +158,7 @@ struct mmc_request {
+ struct mmc_card;
+ struct mmc_async_req;
+ 
+-struct mmc_async_req *mmc_start_req(struct mmc_host *host,
++struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+ 				struct mmc_async_req *areq,
+ 				enum mmc_blk_status *ret_stat);
+ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
 -- 
 2.9.3
 
