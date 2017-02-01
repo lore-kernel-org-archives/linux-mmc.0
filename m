@@ -1,119 +1,98 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 06/10] mmc: queue: turn queue flags into bools
-Date: Wed,  1 Feb 2017 13:47:56 +0100
-Message-ID: <20170201124800.13865-7-linus.walleij@linaro.org>
+Subject: [PATCH 07/10] mmc: block: return errorcode from mmc_sd_num_wr_blocks()
+Date: Wed,  1 Feb 2017 13:47:57 +0100
+Message-ID: <20170201124800.13865-8-linus.walleij@linaro.org>
 References: <20170201124800.13865-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:33867 "EHLO
-        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750956AbdBAMtC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:49:02 -0500
-Received: by mail-lf0-f41.google.com with SMTP id v186so227910954lfa.1
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:49:02 -0800 (PST)
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:33885 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750957AbdBAMtG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2017 07:49:06 -0500
+Received: by mail-lf0-f45.google.com with SMTP id v186so227911708lfa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2017 04:49:05 -0800 (PST)
 In-Reply-To: <20170201124800.13865-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
-Instead of masking and setting two bits in the "flags" field
-for the mmc_queue, just use two bools named "suspended" and
-"new_request".
+mmc_sd_num_wr_blocks() has an interesting construction that
+saves one return argument by casting (u32)-1 as error code
+if something goes wrong.
 
-The masking and setting would likely have race conditions
-anyways, it is better to use a simple member like this.
+This is however a bit confusing when the normal kernel
+pattern is to return an int error code on success.
+
+So instead pass a variable "blocks" that the function can
+fill in with the number of successfully transfered blocks
+and return an integer as error code.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c |  6 +++---
- drivers/mmc/core/queue.c | 12 ++++++------
- drivers/mmc/core/queue.h |  5 ++---
- 3 files changed, 11 insertions(+), 12 deletions(-)
+ drivers/mmc/core/block.c | 19 +++++++++++--------
+ 1 file changed, 11 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 7dcc27763381..1ac7fec03c97 100644
+index 1ac7fec03c97..91d506b37024 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1668,7 +1668,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
- 			 * complete.
- 			 */
- 			if (status == MMC_BLK_NEW_REQUEST)
--				mq->flags |= MMC_QUEUE_NEW_REQUEST;
-+				mq->new_request = true;
- 			return;
+@@ -768,7 +768,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 	return 0;
+ }
+ 
+-static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
++static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
+ {
+ 	int err;
+ 	u32 result;
+@@ -786,9 +786,9 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
+ 
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err)
+-		return (u32)-1;
++		return err;
+ 	if (!mmc_host_is_spi(card->host) && !(cmd.resp[0] & R1_APP_CMD))
+-		return (u32)-1;
++		return err;
+ 
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 
+@@ -808,7 +808,7 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
+ 
+ 	blocks = kmalloc(4, GFP_KERNEL);
+ 	if (!blocks)
+-		return (u32)-1;
++		return -ENOMEM;
+ 
+ 	sg_init_one(&sg, blocks, 4);
+ 
+@@ -818,9 +818,11 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
+ 	kfree(blocks);
+ 
+ 	if (cmd.error || data.error)
+-		result = (u32)-1;
++		return -EIO;
+ 
+-	return result;
++	*written_blocks = result;
++
++	return 0;
+ }
+ 
+ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+@@ -1581,9 +1583,10 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+ 	 */
+ 	if (mmc_card_sd(card)) {
+ 		u32 blocks;
++		int err;
+ 
+-		blocks = mmc_sd_num_wr_blocks(card);
+-		if (blocks != (u32)-1) {
++		err = mmc_sd_num_wr_blocks(card, &blocks);
++		if (!err) {
+ 			ret = blk_end_request(req, 0, blocks << 9);
  		}
- 
-@@ -1807,7 +1807,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-+	mq->new_request = false;
- 	if (req && req_op(req) == REQ_OP_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
-@@ -1828,7 +1828,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
--	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) || req_is_special)
-+	if ((!req && !mq->new_request) || req_is_special)
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 611f5c6d1950..5cb369c2664b 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -86,8 +86,8 @@ static int mmc_queue_thread(void *d)
- 			set_current_state(TASK_RUNNING);
- 			mmc_blk_issue_rq(mq, req);
- 			cond_resched();
--			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
--				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-+			if (mq->new_request) {
-+				mq->new_request = false;
- 				continue; /* fetch again */
- 			}
- 
-@@ -401,8 +401,8 @@ void mmc_queue_suspend(struct mmc_queue *mq)
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
- 
--	if (!(mq->flags & MMC_QUEUE_SUSPENDED)) {
--		mq->flags |= MMC_QUEUE_SUSPENDED;
-+	if (!mq->suspended) {
-+		mq->suspended |= true;
- 
- 		spin_lock_irqsave(q->queue_lock, flags);
- 		blk_stop_queue(q);
-@@ -421,8 +421,8 @@ void mmc_queue_resume(struct mmc_queue *mq)
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
- 
--	if (mq->flags & MMC_QUEUE_SUSPENDED) {
--		mq->flags &= ~MMC_QUEUE_SUSPENDED;
-+	if (mq->suspended) {
-+		mq->suspended = false;
- 
- 		up(&mq->thread_sem);
- 
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index e0cd5b1f40ee..e298f100101b 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -40,9 +40,8 @@ struct mmc_queue {
- 	struct mmc_card		*card;
- 	struct task_struct	*thread;
- 	struct semaphore	thread_sem;
--	unsigned int		flags;
--#define MMC_QUEUE_SUSPENDED	(1 << 0)
--#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
-+	bool			new_request;
-+	bool			suspended;
- 	bool			asleep;
- 	struct mmc_blk_data	*blkdata;
- 	struct request_queue	*queue;
+ 	} else {
 -- 
 2.9.3
 
