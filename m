@@ -1,101 +1,141 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
-Date: Thu, 2 Feb 2017 12:50:02 +0100
-Message-ID: <CAPDyKFpohgbC-ujr0EVpFdBkrhxYSpA_n2UCcvmV3+aS7YUUhA@mail.gmail.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com> <1485076535-20572-2-git-send-email-uri.yanai@sandisk.com>
+Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
+Date: Thu, 2 Feb 2017 13:49:37 +0100
+Message-ID: <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
+References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com> <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:36578 "EHLO
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:38338 "EHLO
         mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751377AbdBBLuE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2017 06:50:04 -0500
-Received: by mail-wm0-f41.google.com with SMTP id c85so86523481wmi.1
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2017 03:50:03 -0800 (PST)
-In-Reply-To: <1485076535-20572-2-git-send-email-uri.yanai@sandisk.com>
+        with ESMTP id S1751157AbdBBMtj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2017 07:49:39 -0500
+Received: by mail-wm0-f41.google.com with SMTP id r141so87690144wmg.1
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2017 04:49:38 -0800 (PST)
+In-Reply-To: <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Uri Yanai <uri.yanai@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
+
++ Adrian, Shawn-Lin, Jaehoon, Ritesh
 
 On 22 January 2017 at 10:15, Uri Yanai <uri.yanai@sandisk.com> wrote:
-> Read from the device EXT_CSD and set to the card->ext_csd structure
+> In case of Runtime Suspend, check the device BKOPS level.
+> Return =E2=80=93EBUSY if device need more time to complete its internal B=
+KOPS.
 >
-
-Please improve the change-log. Ask yourself the questions, what, how
-and why when you update it.
-
 > Changes in v2:
-> - inverse the logic for printing the debug message.
->   only print when bits are set.
-
-It's good that you provide the a revision history, although this shall
-not be apart of the change log.
-
-Instead use "patch notes". That is, add a newline after "---" below,
-type your text, add a new line and add "---".
-
+> - return =E2=80=93EBUSY instead of delaying suspend
+> - remove define EXT_CSD_BKOPS_LEVEL_1
 >
 > Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
 > Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 > ---
->  drivers/mmc/core/mmc.c   | 10 ++++++++--
->  include/linux/mmc/card.h |  1 +
->  include/linux/mmc/mmc.h  |  1 +
->  3 files changed, 10 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/mmc.c | 27 +++++++++++++++++++++++----
+>  1 file changed, 23 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c0e2507..f70f6a1 100644
+> index f70f6a1..211b726 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -530,8 +530,14 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->                                                 EXT_CSD_MANUAL_BKOPS_MASK);
->                         card->ext_csd.raw_bkops_status =
->                                 ext_csd[EXT_CSD_BKOPS_STATUS];
-> -                       if (!card->ext_csd.man_bkops_en)
-> -                               pr_debug("%s: MAN_BKOPS_EN bit is not set\n",
-> +                       if (card->ext_csd.man_bkops_en)
-> +                               pr_debug("%s: MAN_BKOPS_EN bit is set\n",
-> +                                       mmc_hostname(card->host));
-
-This change seem reasonable to me.
-
-However the change-log refers only to AUTO_BKOPS. So, I think it's
-better if you move this change into a separate patch, preceding
-@subject patch.
-
-> +                       card->ext_csd.auto_bkops_en =
-> +                                       (ext_csd[EXT_CSD_BKOPS_EN] &
-> +                                               EXT_CSD_AUTO_BKOPS_MASK);
-> +                       if (card->ext_csd.auto_bkops_en)
-> +                               pr_debug("%s: AUTO_BKOPS_EN bit is set\n",
->                                         mmc_hostname(card->host));
->                 }
+> @@ -1942,7 +1942,8 @@ static void mmc_detect(struct mmc_host *host)
+>         }
+>  }
 >
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 00449e5..e3f1031 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -84,6 +84,7 @@ struct mmc_ext_csd {
->         unsigned int            hpi_cmd;                /* cmd used as HPI */
->         bool                    bkops;          /* background support bit */
->         bool                    man_bkops_en;   /* manual bkops enable bit */
-> +       bool                    auto_bkops_en;  /* auto bkops enable bit */
->         unsigned int            data_sector_size;       /* 512 bytes or 4KB */
->         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->         unsigned int            boot_ro_lock;           /* ro lock support */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index a074082..126b8d5 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -449,6 +449,7 @@ struct _mmc_csd {
->   * BKOPS modes
->   */
->  #define EXT_CSD_MANUAL_BKOPS_MASK      0x01
-> +#define EXT_CSD_AUTO_BKOPS_MASK                0x02
+> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +       bool is_runtime_pm)
+>  {
+>         int err =3D 0;
+>         unsigned int notify_type =3D is_suspend ? EXT_CSD_POWER_OFF_SHORT=
+ :
+> @@ -1954,6 +1955,24 @@ static int _mmc_suspend(struct mmc_host *host, boo=
+l is_suspend)
+>                 goto out;
 >
->  /*
->   * Command Queue
+>         if (mmc_card_doing_bkops(host->card)) {
+> +               if (is_runtime_pm && host->card->ext_csd.auto_bkops_en) {
+
+This don't work. Primarily because mmc_card_doing_bkops(host->card)
+don't ever return true, unless manual BKOPS is enabled.
+
+I think you need to start with checking if *auto* BKOPS is enabled,
+then you can continue to read the BKOPS status to find out whether you
+should return -EBUSY.
+
+> +                       err =3D mmc_read_bkops_status(host->card);
+> +                       if (err) {
+> +                               pr_err("%s: error %d reading BKOPS Status=
+\n",
+> +                                               mmc_hostname(host), err);
+> +                               goto out;
+> +                       }
+> +
+> +                       if (host->card->ext_csd.raw_bkops_status >=3D
+> +                                       EXT_CSD_BKOPS_LEVEL_2) {
+> +                               /*
+> +                                * We don=E2=80=99t allow Runtime Suspend=
+ while device
+> +                                * still needs time to complete internal =
+BKOPS
+> +                                */
+
+Hmm.
+
+Shouldn't we abort (return -EBUSY) also in the system PM suspend case
+and not only for runtime PM suspend?
+
+I think we need to discuss this with some other mmc folkz as well,
+looping in Adrian, Shawn, Jaehoon and Ritesh.
+
+Of course, unless we are being clever, in could mean that the system
+will never enter system PM suspend state, due to a bad behaving eMMC
+always reporting EXT_CSD_BKOPS_LEVEL_2. So we need to be careful here.
+
+Now, assume we may want to abort in the system PM suspend case as
+well, then we consider to avoid the "Opportunistic sleep" from
+hammering us with new system PM suspend attempts. That can be avoided
+by activating a wakeup source (aka wakelock), via calling
+pm_wakeup_event(), using the struct device for the mmc_card as the
+parameter.
+
+> +                               err =3D -EBUSY;
+> +                               goto out;
+> +                       }
+> +               }
+>                 err =3D mmc_stop_bkops(host->card);
+>                 if (err)
+>                         goto out;
+> @@ -1987,7 +2006,7 @@ static int mmc_suspend(struct mmc_host *host)
+>  {
+>         int err;
+>
+> -       err =3D _mmc_suspend(host, true);
+> +       err =3D _mmc_suspend(host, true, false);
+>         if (!err) {
+>                 pm_runtime_disable(&host->card->dev);
+>                 pm_runtime_set_suspended(&host->card->dev);
+> @@ -2034,7 +2053,7 @@ static int mmc_shutdown(struct mmc_host *host)
+>                 err =3D _mmc_resume(host);
+>
+>         if (!err)
+> -               err =3D _mmc_suspend(host, false);
+> +               err =3D _mmc_suspend(host, false, false);
+>
+>         return err;
+>  }
+> @@ -2058,7 +2077,7 @@ static int mmc_runtime_suspend(struct mmc_host *hos=
+t)
+>         if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+>                 return 0;
+>
+> -       err =3D _mmc_suspend(host, true);
+> +       err =3D _mmc_suspend(host, true, true);
+>         if (err)
+>                 pr_err("%s: error %d doing aggressive suspend\n",
+>                         mmc_hostname(host), err);
 > --
 > 1.9.1
 >
