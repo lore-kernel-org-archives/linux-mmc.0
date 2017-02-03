@@ -1,58 +1,41 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH v2 3/8] mmc: bcm2835: add sdhost controller to devicetree
-Date: Fri,  3 Feb 2017 13:11:48 +0100
-Message-ID: <1486123913-31705-4-git-send-email-kraxel@redhat.com>
+Subject: [PATCH v2 5/8] arm: set CONFIG_MMC_BCM2835=y in multi_v7_defconfig
+Date: Fri,  3 Feb 2017 13:11:50 +0100
+Message-ID: <1486123913-31705-6-git-send-email-kraxel@redhat.com>
 References: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
- arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
- 2 files changed, 16 insertions(+)
+ arch/arm/configs/multi_v7_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-index 0b73f9c..7d89af2 100644
---- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
-+++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-@@ -69,6 +69,12 @@
- 	bus-width = <4>;
- };
- 
-+&sdhost {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&sdhost_gpio48>;
-+	bus-width = <4>;
-+};
-+
- &pwm {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
-diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-index a3106aa..180f359 100644
---- a/arch/arm/boot/dts/bcm283x.dtsi
-+++ b/arch/arm/boot/dts/bcm283x.dtsi
-@@ -450,6 +450,16 @@
- 			status = "disabled";
- 		};
- 
-+		sdhost: mmc@7e202000 {
-+			compatible = "brcm,bcm2835-sdhost";
-+			reg = <0x7e202000 0x100>;
-+			interrupts = <2 24>;
-+			clocks = <&clocks BCM2835_CLOCK_VPU>;
-+			dmas = <&dma 13>, <&dma 13>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
-+
- 		hvs@7e400000 {
- 			compatible = "brcm,bcm2835-hvs";
- 			reg = <0x7e400000 0x6000>;
+diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+index 028d2b7..5d13894 100644
+--- a/arch/arm/configs/multi_v7_defconfig
++++ b/arch/arm/configs/multi_v7_defconfig
+@@ -727,6 +727,7 @@ CONFIG_MMC_DW_EXYNOS=y
+ CONFIG_MMC_DW_ROCKCHIP=y
+ CONFIG_MMC_SH_MMCIF=y
+ CONFIG_MMC_SUNXI=y
++CONFIG_MMC_BCM2835=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_CLASS_FLASH=m
 -- 
 1.8.3.1
