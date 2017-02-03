@@ -1,70 +1,143 @@
-From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 04/14] GPIO: Add gpio-ingenic driver
-Date: Fri, 3 Feb 2017 14:58:50 +0100
-Message-ID: <CACRpkdZNodsRJ33wTJGgrAJpSs=_bXa0yv5ate_7XwjKR0xEnw@mail.gmail.com>
-References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
- <20170125185207.23902-1-paul@crapouillou.net> <20170125185207.23902-5-paul@crapouillou.net>
- <CACRpkdbcO+1c7izYpn0sb1mkE1ORFETMq=xtzVi1hKbJz0EWfw@mail.gmail.com> <699f0c63e95ecdafe6946fdcdbb97a37@mail.crapouillou.net>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
+Date: Fri, 3 Feb 2017 22:27:15 +0530
+Message-ID: <c00cb414-be2e-0f07-41e3-b9e88a0d4295@codeaurora.org>
+References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
+ <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
+ <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
+ <dc423c8d-ae55-2437-9f6e-b099a68c9d59@codeaurora.org>
+ <CAPDyKFqD00jmG=HesANpGv_=FP_cKodFkv2SdkX5DihLTbP_tA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <699f0c63e95ecdafe6946fdcdbb97a37-p8hskv8pF7lEPksTRSfcJOTW4wlIGRCZ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MIPS <linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-p
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:53616 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750972AbdBCQ5Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2017 11:57:24 -0500
+In-Reply-To: <CAPDyKFqD00jmG=HesANpGv_=FP_cKodFkv2SdkX5DihLTbP_tA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Uri Yanai <uri.yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Tue, Jan 31, 2017 at 4:29 PM, Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org> wrote=
-:
-> Le 2017-01-31 15:20, Linus Walleij a =C3=A9crit :
+
+
+On 2/3/2017 5:16 PM, Ulf Hansson wrote:
+> On 3 February 2017 at 10:33, Ritesh Harjani <riteshh@codeaurora.org> wrote:
+>> Hi,
+>>
+>> On 2/2/2017 6:19 PM, Ulf Hansson wrote:
+>>>
+>>> + Adrian, Shawn-Lin, Jaehoon, Ritesh
+>>>
+>>> On 22 January 2017 at 10:15, Uri Yanai <uri.yanai@sandisk.com> wrote:
+>>>>
+>>>> In case of Runtime Suspend, check the device BKOPS level.
+>>>> Return –EBUSY if device need more time to complete its internal BKOPS.
+>>
+>> Do we need to abort the runtime suspend at all even though we are using
+>> CMD5?
+>>
+>> From what I understood from the spec is as follows - (please correct me if I
+>> am wrong) -
+>> CMD7 -> CMD5 -> Busy line de-asserted by device(means autobkops execution is
+>> complete) -> Enter sleep mode.
+>>
+>> Is the above understanding correct? In that case we may not need to abort
+>> the runtime suspend right?
+>> Since CMD5 completion should ensure that background operation execution is
+>> complete (until then the busy line will be kept asserted).
+>>
+>> Opinion?
 >
->>> + of_property_read_u32(dev->of_node, "base", &jzgc->gc.base);
+> Unfortunate the eMMC spec isn't crystal clear on this point. Anyway,
+> my interpretation of it is not as yours. Let me elaborate on my view.
+>
+> In case we have enabled POWERED_ON bit (0x1) in POWER_OFF_NOTIFICATION
+> register byte, during the card initialization, and we later want to
+> put the device into sleep state by using CMD5. Then we need to follow
+> the below sequence:
+> 1) Using CMD6, write SLEEP_NOTIFICATION bits (0x4) to
+> POWER_OFF_NOTIFICATION register byte.
+> 2) Wait for busy! Maximum time specified in
+> SLEEP_NOTIFICATION_TIME[216] (worst case 83.88s).
+> 3) Put the card to sleep by send CMD5 and wait for busy (current
+> implemented method of issuing sleep).
+>
+> As we have enabled POWERED_ON for those cards that supports
+> POWER_OFF_NOTIFICATION (added in eMMC 4.5 spec), then we also need to
+> follow the above sequence for when sending sleep (CMD5).
+Thanks for clarifying. I initially misunderstood and missed 
+SLEEP_NOTIFICATION part.
+Yes, you are right, we do need to follow the above sequence you mentioned.
+
+>
+> This may become a severe problem, because the SLEEP_NOTIFICATION_TIME
+> may be ridiculously long and since it immediately affects the total
+> system suspend time for the platform.
+Do we know more card internal details on why this time could be long?
+Although POWER_OFF_SHORT time is within generic CMD6 response time.
+
+
+So enabling auto bkops *may* help reduce the sleep notification time to 
+some extent I guess.
+Since card may already would have completed it's background operations 
+while the card was idle, then sleep notification time may reduce, right?
+Although, someone who have more knowledge of card internals would know 
+better here.
+
+And in case where the bkops exception level is high, patch is anyway 
+aborting suspend by returning -EBUSY, giving enough time for card to 
+first complete it's background operations.
+
+>
+> We need to think of something clever here to avoid a long sleep
+> notification timeout from happen.
+>
+> [...]
+>
+>>>
+>>> Hmm.
+>>>
+>>> Shouldn't we abort (return -EBUSY) also in the system PM suspend case
+>>> and not only for runtime PM suspend?
 >>
 >>
->> Remove this. Dynamic allocation should be fine, if you're using the
->> new userspace ABI like tools/gpio/* or libgpiod and only that and
->> in-kernel
->> consumers, dynamic numbers are just fine.
+>> My opinion - Auto bkops generally is meant for device to autonomously
+>> initiate the background transfer whenever the device is idle -> in such
+>> cases, we expect the device to keep it's autobkops exception level under
+>> control.
+>> In that case will it be good idea to abort the suspend as well?
 >
+> I follow your reasoning and it seems reasonable. However, see my comment below.
 >
-> The problem is that the QI_LB60 board code still have a lot of references
-> to global GPIO numbers. Just grep for JZ_GPIO_PORT in
-> arch/mips/jz4740/board-qi_lb60.c to see what I mean...
+>>
+>> Off-course unless we would like to cover a case where device is not idle at
+>> all and during this heavy device usage suspend is getting triggered manually
+>> - which gives no time for device to do auto-bkops
+>> Please correct me if my understanding is wrong?
+>
+> This is the case that I thought off. Don't you think this could be a
+> valid scenario for an Android device?
+Yes, totally agree. This can be a valid use case on Android.
+There can be watchdog timer monitoring per device suspend time. So, if 
+we don't take care of mmc suspend case, it may result into watchdog 
+bark, since mmc_suspend may take longer.
 
-OK I understand we might need a compromise here to get the code moving.
+So as you mentioned, even suspend case needs to be taken care here.
 
-But we need to keep it out of the device tree.
 
-I think it's better to put a base table relative to the memory base in
-the driver in that case:
+>
+> [...]
+>
+> It seems like we are discussing several related things at the same
+> time. Perhaps this is the only way, as they are so closely related.
+>
+> Kind regards
+> Uffe
+>
 
-unsigned int gpio_global_base;
-
-switch (memory_base_address) {
-case 0x41000000:
-    gpio_global_base =3D 0x00;
-    break;
-case 0x42000000:
-    gpio_global_base =3D 0x20;
-
-(...)
-
-etc. (Those are not your base addresses but you get the idea).
-
-Include a few comments like:
-
-/*
- * DO NOT EXPAND THIS: FOR BACKWARD GPIO NUMBERSPACE
- * COMPATIBIBILITY ONLY: WORK TO TRANSITION CONSUMERS TO
- * USE THE GPIO DESCRIPTOR API IN <linux/gpio/consumer.h> INSTEAD.
- */
-
-Then I'll be happy :)
-
-Yours,
-Linus Walleij
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
