@@ -1,41 +1,40 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH v2 6/8] arm64: set CONFIG_MMC_BCM2835=y in defconfig
-Date: Fri,  3 Feb 2017 13:11:51 +0100
-Message-ID: <1486123913-31705-7-git-send-email-kraxel@redhat.com>
+Subject: [PATCH v2 7/8] ARM: dts: bcm283x: switch from &sdhci to &sdhost
+Date: Fri,  3 Feb 2017 13:11:52 +0100
+Message-ID: <1486123913-31705-8-git-send-email-kraxel@redhat.com>
 References: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
 List-Id: linux-mmc@vger.kernel.org
 
----
- arch/arm64/configs/defconfig | 1 +
- 1 file changed, 1 insertion(+)
+sdcard access with the sdhost controller is faster.
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 33b744d..75131a6 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -391,6 +391,7 @@ CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_K3=y
- CONFIG_MMC_DW_ROCKCHIP=y
- CONFIG_MMC_SUNXI=y
-+CONFIG_MMC_BCM2835=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_GPIO=y
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ arch/arm/boot/dts/bcm2835-rpi.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+index 7d89af2..e6beecb 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
++++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+@@ -65,13 +65,13 @@
+ &sdhci {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_gpio48>;
+-	status = "okay";
+ 	bus-width = <4>;
+ };
+ 
+ &sdhost {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdhost_gpio48>;
++	status = "okay";
+ 	bus-width = <4>;
+ };
+ 
 -- 
 1.8.3.1
