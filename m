@@ -1,61 +1,70 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 1/9] mmc: meson-gx: fix setting f_min
-Date: Fri, 03 Feb 2017 07:58:11 -0600
-Message-ID: <m2fujvl6ks.fsf@baylibre.com>
-References: <CGME20170131210651epcas5p37ca57e71ecbab37efe9b0227e4449d30@epcas5p3.samsung.com>
-        <476265c8-b7e8-acdb-1964-5663c629caa3@gmail.com>
-        <1e55512d-1dc3-bd57-82e1-888553ab3a9e@samsung.com>
-        <6085c3ea-0a85-458d-bf15-8dcdd2d83186@gmail.com>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 04/14] GPIO: Add gpio-ingenic driver
+Date: Fri, 3 Feb 2017 14:58:50 +0100
+Message-ID: <CACRpkdZNodsRJ33wTJGgrAJpSs=_bXa0yv5ate_7XwjKR0xEnw@mail.gmail.com>
+References: <27071da2f01d48141e8ac3dfaa13255d@mail.crapouillou.net>
+ <20170125185207.23902-1-paul@crapouillou.net> <20170125185207.23902-5-paul@crapouillou.net>
+ <CACRpkdbcO+1c7izYpn0sb1mkE1ORFETMq=xtzVi1hKbJz0EWfw@mail.gmail.com> <699f0c63e95ecdafe6946fdcdbb97a37@mail.crapouillou.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:35763 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752169AbdBCN6O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2017 08:58:14 -0500
-Received: by mail-io0-f176.google.com with SMTP id j18so17812020ioe.2
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Feb 2017 05:58:13 -0800 (PST)
-In-Reply-To: <6085c3ea-0a85-458d-bf15-8dcdd2d83186@gmail.com> (Heiner
-        Kallweit's message of "Wed, 1 Feb 2017 21:14:00 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <699f0c63e95ecdafe6946fdcdbb97a37-p8hskv8pF7lEPksTRSfcJOTW4wlIGRCZ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MIPS <linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-p
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+On Tue, Jan 31, 2017 at 4:29 PM, Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org> wrote=
+:
+> Le 2017-01-31 15:20, Linus Walleij a =C3=A9crit :
+>
+>>> + of_property_read_u32(dev->of_node, "base", &jzgc->gc.base);
+>>
+>>
+>> Remove this. Dynamic allocation should be fine, if you're using the
+>> new userspace ABI like tools/gpio/* or libgpiod and only that and
+>> in-kernel
+>> consumers, dynamic numbers are just fine.
+>
+>
+> The problem is that the QI_LB60 board code still have a lot of references
+> to global GPIO numbers. Just grep for JZ_GPIO_PORT in
+> arch/mips/jz4740/board-qi_lb60.c to see what I mean...
 
-> Am 01.02.2017 um 12:49 schrieb Jaehoon Chung:
->> On 02/01/2017 05:57 AM, Heiner Kallweit wrote:
->>> Currently f_min is set to 4 MHz whilst the comment states 400 MHz.
->>> I think the itention is to set f_min to 400 kHz.
->>> Change value and comment accordingly.
->>>
->>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
->>> ---
->>>  drivers/mmc/host/meson-gx-mmc.c | 2 +-
->>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->>> index 5eca88bc..da3cce31 100644
->>> --- a/drivers/mmc/host/meson-gx-mmc.c
->>> +++ b/drivers/mmc/host/meson-gx-mmc.c
->>> @@ -268,7 +268,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->>>  	if (f_min != UINT_MAX)
->>>  		f_min = DIV_ROUND_UP(CLK_SRC_XTAL_RATE, CLK_DIV_MAX);
->>>  	else
->>> -		f_min = 4000000;  /* default min: 400 MHz */
->>> +		f_min = 400000;  /* default min: 400 kHz */
->> 
->> I'm not sure but f_min can be 100KHz by default, not 400KHz.
->> Because mmc-core should be try to find frequency from 400KHz to "f_min" value.
->> 
-> Actually I wonder how we can ever reach this part of the if clause.
-> If at least one parent clock is defined and we can get its clock rate
-> then f_min != UINT_MAX.
-> Can we think of a case where no parent clock is defined?
-> And would it make sense at all to proceed in this case?
+OK I understand we might need a compromise here to get the code moving.
 
-This is actually common while adding a new board or SoC and is a useful
-fallback/safeguard.
+But we need to keep it out of the device tree.
 
-Kevin
+I think it's better to put a base table relative to the memory base in
+the driver in that case:
+
+unsigned int gpio_global_base;
+
+switch (memory_base_address) {
+case 0x41000000:
+    gpio_global_base =3D 0x00;
+    break;
+case 0x42000000:
+    gpio_global_base =3D 0x20;
+
+(...)
+
+etc. (Those are not your base addresses but you get the idea).
+
+Include a few comments like:
+
+/*
+ * DO NOT EXPAND THIS: FOR BACKWARD GPIO NUMBERSPACE
+ * COMPATIBIBILITY ONLY: WORK TO TRANSITION CONSUMERS TO
+ * USE THE GPIO DESCRIPTOR API IN <linux/gpio/consumer.h> INSTEAD.
+ */
+
+Then I'll be happy :)
+
+Yours,
+Linus Walleij
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
