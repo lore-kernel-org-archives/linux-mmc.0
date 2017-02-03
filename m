@@ -1,48 +1,78 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH v2 3/8] mmc: bcm2835: add sdhost controller to devicetree
-Date: Fri, 03 Feb 2017 09:31:35 -0800
-Message-ID: <87fujvp4eg.fsf@eliezer.anholt.net>
-References: <1486123913-31705-1-git-send-email-kraxel@redhat.com> <1486123913-31705-4-git-send-email-kraxel@redhat.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v2 4/9] mmc: meson-gx: improve meson_mmc_irq_thread
+Date: Fri, 03 Feb 2017 10:03:28 -0800
+Message-ID: <7h4m0bw3rj.fsf@baylibre.com>
+References: <584e5061-d359-1436-05ee-3767a5a4b10f@gmail.com>
+        <460d2337-7865-6c9c-21b6-98c2ea070926@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-        micalg=pgp-sha512; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1486123913-31705-4-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
-List-Id: linux-mmc@vger.kernel.org
-
---=-=-=
 Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:36861 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750877AbdBCSDb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2017 13:03:31 -0500
+Received: by mail-pf0-f176.google.com with SMTP id 189so7480072pfu.3
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Feb 2017 10:03:31 -0800 (PST)
+In-Reply-To: <460d2337-7865-6c9c-21b6-98c2ea070926@gmail.com> (Heiner
+        Kallweit's message of "Wed, 1 Feb 2017 07:48:49 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
 
-Gerd Hoffmann <kraxel@redhat.com> writes:
+Heiner Kallweit <hkallweit1@gmail.com> writes:
 
-> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+> Remove unneeded variable ret and simplify the if block.
+>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> ---
+> v2:
+> - no changes
 
-Patches 3, 7, 8 are:
+Acked-by: Kevin Hilman <khilman@baylibre.com>
 
-Acked-by: Eric Anholt <eric@anholt.net>
-
-waiting on Ulf for merging the driver now.
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAliUvngACgkQtdYpNtH8
-nugfbQ//WBBtVBDKCjYRRPeggS6dQzsvU1HcElOE/A0KRsYSSe1LNgIwvprsdw5C
-K7qWKrlMbkBdnqhfjZl6dO5snidFOglOjcT9GcTHLq6lTBrz/Rl6udi+m2RG/XOs
-i9+/2v3aXtaOhAi6k2vpk9u909lPq6aQVvGbIE3CY9GpF/vuF3eUXe3e0ko4yn1q
-GkLuIfopq8MHme4AIGNyAyoptIdZNSb+TdrQ7cD1OpsyHNRwZqOpjp2keEquGGo6
-loVOq+hG4EwfoaLIR/ywDwnw0wuyl48p2+a4otiWnay68ABwt6cvCiYbp834Opjj
-TUaadCy5OAM9sradvXqKYe67IATe3VQq1FqUvSowFoPvgOKtvTUbq8FDou6uJYKC
-AuK4DSJ4UPHkX/1OlreRDg4E/dCpyZV3XgrBuxc7NHaXAPvko65cW5P+ZjjcRvGR
-hWhJIWI+LNRpFGX4wv69KiBNg9q4v3UhS0C0Dj5Q1qL9wEBtgW2sDmtt3la2zP4n
-Ih1kSd6zTLJt5Bmfo8086gAybkzlKSHwb4UHMwrHaJq2Jr+5kZGnYcPEYDvKhMBQ
-/B9yUfdYfjDXsqISHjhUAGJLbIpiZbOi9L33cGr3wmvSpyBn875O/khMbGoEp4VM
-l15IO5HHGVRDCSSfnR/8P0UJ6gw2sf0LxE5cBCJbOOqe5yyHSww=
-=ZWyD
------END PGP SIGNATURE-----
---=-=-=--
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 15 ++++++---------
+>  1 file changed, 6 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 529a4f22..4ce4c640 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -670,7 +670,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>  	struct mmc_command *cmd = host->cmd;
+>  	struct mmc_data *data;
+>  	unsigned int xfer_bytes;
+> -	int ret = IRQ_HANDLED;
+>  
+>  	if (WARN_ON(!mrq))
+>  		return IRQ_NONE;
+> @@ -679,14 +678,12 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>  		return IRQ_NONE;
+>  
+>  	data = cmd->data;
+> -	if (data) {
+> +	if (data && data->flags & MMC_DATA_READ) {
+>  		xfer_bytes = data->blksz * data->blocks;
+> -		if (data->flags & MMC_DATA_READ) {
+> -			WARN_ON(xfer_bytes > host->bounce_buf_size);
+> -			sg_copy_from_buffer(data->sg, data->sg_len,
+> -					    host->bounce_buf, xfer_bytes);
+> -			data->bytes_xfered = xfer_bytes;
+> -		}
+> +		WARN_ON(xfer_bytes > host->bounce_buf_size);
+> +		sg_copy_from_buffer(data->sg, data->sg_len,
+> +				    host->bounce_buf, xfer_bytes);
+> +		data->bytes_xfered = xfer_bytes;
+>  	}
+>  
+>  	meson_mmc_read_resp(host->mmc, cmd);
+> @@ -695,7 +692,7 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>  	else
+>  		meson_mmc_start_cmd(host->mmc, data->stop);
+>  
+> -	return ret;
+> +	return IRQ_HANDLED;
+>  }
+>  
+>  /*
