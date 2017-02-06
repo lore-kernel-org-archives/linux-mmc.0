@@ -1,49 +1,79 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 08/10] mmc: block: respect bool returned from blk_end_request()
-Date: Mon, 6 Feb 2017 13:08:50 +0100
-Message-ID: <CAPDyKFq-Rd5pHLVMoCxCvN+0NTZKfg5DKm7pAQk3Y4uCX_+46g@mail.gmail.com>
-References: <20170201124800.13865-1-linus.walleij@linaro.org>
- <20170201124800.13865-9-linus.walleij@linaro.org> <CAPDyKFq8YygebEL7OSo0ApoeVXUk1tuu5k1K1ZuCWozd8yFsTg@mail.gmail.com>
- <CACRpkdZY6r+8DVETo5KYC6Ph=vDXKMfgHgmh6dg=yk2Gw=pMHQ@mail.gmail.com>
- <CAK8P3a05c25nVb4rhh2wkgn9o-W1R5j0kbPeMehN8ViYVA1t1w@mail.gmail.com>
- <CAPDyKFpgeqEf7u4==4u6YWidK+n59TX2CL+Hp4vSXyg5EanvHw@mail.gmail.com> <CACRpkdbb8ehG5Ci4EU0a6YKbeuukqYZsdoOxFsSic-c80afoOA@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
+Date: Mon, 6 Feb 2017 12:20:36 +0000
+Message-ID: <1FB1DA84-7E5A-4C0C-BDFE-4F4B406A4B78@sandisk.com>
+References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
+ <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
+ <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
+ <935e77c5-7e6a-00e0-9064-ea9dbcb4fef5@rock-chips.com>
+ <695B0367-2BA5-4B95-AF75-6BD43FE17528@sandisk.com>
+ <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38256 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751895AbdBFMIw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2017 07:08:52 -0500
-Received: by mail-wm0-f42.google.com with SMTP id r141so111144395wmg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Feb 2017 04:08:52 -0800 (PST)
-In-Reply-To: <CACRpkdbb8ehG5Ci4EU0a6YKbeuukqYZsdoOxFsSic-c80afoOA@mail.gmail.com>
+Received: from mail-sn1nam02on0074.outbound.protection.outlook.com ([104.47.36.74]:40864
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751617AbdBFMUp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 6 Feb 2017 07:20:45 -0500
+In-Reply-To: <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
+Content-Language: en-US
+Content-ID: <3E79C20417580941AD091E1FD51F9AFA@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Uri Yanai <Uri.Yanai@sandisk.com>, "ulf. org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
->> Perhaps something like this is the best?
->>
->> while (1) {
->>      ret = do_something();
->>      if (!ret)
->>          break;
->> }
->
-> Actually in this case the whole while() thing looks a bit bogus:
-> it is just hammering the block layer to end the request.
->
-> I guess since there is no way to return any unfinished status
-> upward.
->
-> True, I preserved that strange semantic, but what should we
-> really do? Timeout and complain in dmesg?
->
-> It just looks dangerous.
->
-> Anyways let's address any issues with follow-up patches...
 
-Agreed!
+> On Feb 6, 2017, at 8:46 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>=20
+> Hi Alex,
+>=20
+> On 2017/2/5 23:13, Alex Lemberg wrote:
+>> Hi Shawn,
+>>=20
+>> On 2/5/17, 3:43 AM, "Shawn Lin" <shawn.lin@rock-chips.com> wrote:
+>>=20
+>>=20
+>>    >
+>>    > Hmm.
+>>    >
+>>    > Shouldn't we abort (return -EBUSY) also in the system PM suspend ca=
+se
+>>    > and not only for runtime PM suspend?
+>>=20
+>>    I would rather we don't abort runtime PM, but do it for system PM
+>>    instead. What we do for runtime PM is just for saving power for
+>>    our hosts including manipulating clock and genpd etc.. Thus we don't
+>>    touch any power-supply for eMMC. If so, it could still be possible
+>>    for eMMC firmware to work on doing bkops in rpm context.
+>>=20
+>> If I understand correctly, you are suggesting do not send SLEEP command
+>> on Runtime Suspend?
+>=20
+> yes.
+>=20
+>> If so, and if mmc host does not touch any power supply for eMMC,
+>> the device can continue doing Auto BKOPS during Runtime Suspend.
+>> The question is why the Sleep command is sent now,
+>> in the original implementation?
+>> I assume it is sent for saving a power from the device side as well?
+>=20
+> right, it was invented with the cap of MMC_CAP_AGGRESSIVE_PM, so some pla=
+tforms ask for the aggressive power policy will send sleep command
+> to the cards in rpm context. So I assume they care power-saving more
+> than others.
+>=20
 
-Kind regards
-Uffe
+OK, I see the MMC_CAP_AGGRESSIVE_PM is already checked in the
+mmc_runtime_suspend() function, so your approach, do not send
+Sleep command on Runtime Suspend, is already supported.
+In case the MMC_CAP_AGGRESSIVE_PM is not set, Sleep command
+will not be sent, and the device will be able to perform its
+AUTO_BKOPS (if needed).
+
+However, as far as I see in modern mobile hosts,
+the Sleep is sent on every Suspend, so I assume the
+MMC_CAP_AGGRESSIVE_PM is enabled in most of the cases?
+
