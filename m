@@ -1,7 +1,7 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v11 9/9] MAINTAINERS: Add entry for Cavium MMC driver
-Date: Mon,  6 Feb 2017 14:39:52 +0100
-Message-ID: <20170206133953.8390-10-jglauber@cavium.com>
+Subject: [PATCH v11 8/9] mmc: cavium: Support DDR mode for eMMC devices
+Date: Mon,  6 Feb 2017 14:39:51 +0100
+Message-ID: <20170206133953.8390-9-jglauber@cavium.com>
 References: <20170206133953.8390-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170206133953.8390-1-jglauber@cavium.com>
@@ -10,31 +10,50 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Add support for switching to DDR mode for eMMC devices.
+Although the host controller only supports 3.3 Volt
+and DDR52 uses 1.8 Volt according to the specification
+it is possible to use DDR also with 3.3 Volt for eMMC chips.
+
+To switch to DDR mode MMC_CAP_1_8V_DDR is required.
+
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 Signed-off-by: David Daney <david.daney@cavium.com>
 Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
 ---
- MAINTAINERS | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ drivers/mmc/host/cavium-mmc.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 2c171ad..81afd78 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -2999,6 +2999,14 @@ S:	Supported
- F:	drivers/i2c/busses/i2c-octeon*
- F:	drivers/i2c/busses/i2c-thunderx*
+diff --git a/drivers/mmc/host/cavium-mmc.c b/drivers/mmc/host/cavium-mmc.c
+index 3d3c9c7..8fcb82a 100644
+--- a/drivers/mmc/host/cavium-mmc.c
++++ b/drivers/mmc/host/cavium-mmc.c
+@@ -858,6 +858,10 @@ static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 	}
  
-+CAVIUM MMC DRIVER
-+M:	Jan Glauber <jglauber@cavium.com>
-+M:	David Daney <david.daney@cavium.com>
-+M:	Steven J. Hill <Steven.Hill@cavium.com>
-+W:	http://www.cavium.com
-+S:	Supported
-+F:	drivers/mmc/host/cavium-*
++	/* DDR is available for 4/8 bit bus width */
++	if (ios->bus_width && ios->timing == MMC_TIMING_MMC_DDR52)
++		bus_width |= 4;
 +
- CAVIUM LIQUIDIO NETWORK DRIVER
- M:     Derek Chickles <derek.chickles@caviumnetworks.com>
- M:     Satanand Burla <satananda.burla@caviumnetworks.com>
+ 	slot->bus_width = bus_width;
+ 
+ 	if (!ios->clock)
+@@ -1091,8 +1095,14 @@ int cvm_mmc_slot_probe(struct device *dev, struct cvm_mmc_host *host)
+ 	/* Set up host parameters */
+ 	mmc->ops = &cvm_mmc_ops;
+ 
++	/*
++	 * We only have a 3.3v supply, we cannot support any
++	 * of the UHS modes. We do support the high speed DDR
++	 * modes up to 52MHz.
++	 */
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+-		     MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD;
++		     MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD |
++		     MMC_CAP_3_3V_DDR;
+ 
+ 	if (host->use_sg)
+ 		mmc->max_segs = 16;
 -- 
 2.9.0.rc0.21.g7777322
