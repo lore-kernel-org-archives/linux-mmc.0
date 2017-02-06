@@ -1,122 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
-Date: Mon, 6 Feb 2017 12:07:46 +0100
-Message-ID: <CAPDyKFqG8BvCSXUJjbT_CG-Hz3Rtu5m0Lg8D+Bi4npSyO9tpmg@mail.gmail.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
- <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com> <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
- <dc423c8d-ae55-2437-9f6e-b099a68c9d59@codeaurora.org> <CAPDyKFqD00jmG=HesANpGv_=FP_cKodFkv2SdkX5DihLTbP_tA@mail.gmail.com>
- <c00cb414-be2e-0f07-41e3-b9e88a0d4295@codeaurora.org>
+Subject: Re: [PATCH 08/10] mmc: block: respect bool returned from blk_end_request()
+Date: Mon, 6 Feb 2017 13:08:50 +0100
+Message-ID: <CAPDyKFq-Rd5pHLVMoCxCvN+0NTZKfg5DKm7pAQk3Y4uCX_+46g@mail.gmail.com>
+References: <20170201124800.13865-1-linus.walleij@linaro.org>
+ <20170201124800.13865-9-linus.walleij@linaro.org> <CAPDyKFq8YygebEL7OSo0ApoeVXUk1tuu5k1K1ZuCWozd8yFsTg@mail.gmail.com>
+ <CACRpkdZY6r+8DVETo5KYC6Ph=vDXKMfgHgmh6dg=yk2Gw=pMHQ@mail.gmail.com>
+ <CAK8P3a05c25nVb4rhh2wkgn9o-W1R5j0kbPeMehN8ViYVA1t1w@mail.gmail.com>
+ <CAPDyKFpgeqEf7u4==4u6YWidK+n59TX2CL+Hp4vSXyg5EanvHw@mail.gmail.com> <CACRpkdbb8ehG5Ci4EU0a6YKbeuukqYZsdoOxFsSic-c80afoOA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:33769 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750953AbdBFLHt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2017 06:07:49 -0500
-Received: by mail-wr0-f181.google.com with SMTP id i10so21539827wrb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Feb 2017 03:07:48 -0800 (PST)
-In-Reply-To: <c00cb414-be2e-0f07-41e3-b9e88a0d4295@codeaurora.org>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38256 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751895AbdBFMIw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2017 07:08:52 -0500
+Received: by mail-wm0-f42.google.com with SMTP id r141so111144395wmg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Feb 2017 04:08:52 -0800 (PST)
+In-Reply-To: <CACRpkdbb8ehG5Ci4EU0a6YKbeuukqYZsdoOxFsSic-c80afoOA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Uri Yanai <uri.yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-[...]
-
+>> Perhaps something like this is the best?
 >>
->> This may become a severe problem, because the SLEEP_NOTIFICATION_TIME
->> may be ridiculously long and since it immediately affects the total
->> system suspend time for the platform.
+>> while (1) {
+>>      ret = do_something();
+>>      if (!ret)
+>>          break;
+>> }
 >
-> Do we know more card internal details on why this time could be long?
-
-I think this will be hard to get an answer to, because it do varies
-depending on the eMMC vendor.
-
-> Although POWER_OFF_SHORT time is within generic CMD6 response time.
-
-Assuming you mean the case when sending a power off notification using
-POWER_OFF_SHORT, instead of sending sleep (CMD5) when suspending? This
-is the case for those mmc hosts using MMC_CAP2_FULL_PWR_CYCLE (DT
-binding "full-pwr-cycle", MMC_CAP2_FULL_PWR_CYCLE == host can power
-off both VCC and VCCQ). So these have no issues.
-
-However, the majority of platforms/hosts don't use
-MMC_CAP2_FULL_PWR_CYCLE, which means using sleep (CMD5) at suspend.
-For these cases and when the eMMC cards is a v5.0+ (eMMC v5.0 added
-sleep notification), the mmc core are currently violating the eMMC
-spec - because we don't write the SLEEP_NOTIFICATION bits.
-
+> Actually in this case the whole while() thing looks a bit bogus:
+> it is just hammering the block layer to end the request.
 >
+> I guess since there is no way to return any unfinished status
+> upward.
 >
-> So enabling auto bkops *may* help reduce the sleep notification time to some
-> extent I guess.
-> Since card may already would have completed it's background operations while
-> the card was idle, then sleep notification time may reduce, right?
-
-I agree, this seems like a reasonable conclusion we should make.
-Unless eMMC vendors tells us different.
-
-> Although, someone who have more knowledge of card internals would know
-> better here.
+> True, I preserved that strange semantic, but what should we
+> really do? Timeout and complain in dmesg?
 >
-> And in case where the bkops exception level is high, patch is anyway
-> aborting suspend by returning -EBUSY, giving enough time for card to first
-> complete it's background operations.
+> It just looks dangerous.
 >
->>
->> We need to think of something clever here to avoid a long sleep
->> notification timeout from happen.
->>
->> [...]
->>
->>>>
->>>> Hmm.
->>>>
->>>> Shouldn't we abort (return -EBUSY) also in the system PM suspend case
->>>> and not only for runtime PM suspend?
->>>
->>>
->>>
->>> My opinion - Auto bkops generally is meant for device to autonomously
->>> initiate the background transfer whenever the device is idle -> in such
->>> cases, we expect the device to keep it's autobkops exception level under
->>> control.
->>> In that case will it be good idea to abort the suspend as well?
->>
->>
->> I follow your reasoning and it seems reasonable. However, see my comment
->> below.
->>
->>>
->>> Off-course unless we would like to cover a case where device is not idle
->>> at
->>> all and during this heavy device usage suspend is getting triggered
->>> manually
->>> - which gives no time for device to do auto-bkops
->>> Please correct me if my understanding is wrong?
->>
->>
->> This is the case that I thought off. Don't you think this could be a
->> valid scenario for an Android device?
->
-> Yes, totally agree. This can be a valid use case on Android.
-> There can be watchdog timer monitoring per device suspend time. So, if we
-> don't take care of mmc suspend case, it may result into watchdog bark, since
-> mmc_suspend may take longer.
+> Anyways let's address any issues with follow-up patches...
 
-Yes, exactly.
-
-So, hopefully we can improve the situation for when we need to write
-the SLEEP_NOFITICATION bits, by first checking BKOPS status and
-returning -EBUSY.
-
->
-> So as you mentioned, even suspend case needs to be taken care here.
-
-Great, thanks for your input!
-
-[...]
+Agreed!
 
 Kind regards
 Uffe
