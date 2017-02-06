@@ -1,79 +1,95 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
-Date: Mon, 6 Feb 2017 12:20:36 +0000
-Message-ID: <1FB1DA84-7E5A-4C0C-BDFE-4F4B406A4B78@sandisk.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
- <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
- <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
- <935e77c5-7e6a-00e0-9064-ea9dbcb4fef5@rock-chips.com>
- <695B0367-2BA5-4B95-AF75-6BD43FE17528@sandisk.com>
- <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0074.outbound.protection.outlook.com ([104.47.36.74]:40864
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751617AbdBFMUp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 6 Feb 2017 07:20:45 -0500
-In-Reply-To: <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
-Content-Language: en-US
-Content-ID: <3E79C20417580941AD091E1FD51F9AFA@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jan Glauber <jglauber@cavium.com>
+Subject: [PATCH v11 1/9] dt-bindings: mmc: Add Cavium SOCs MMC bindings
+Date: Mon,  6 Feb 2017 14:39:44 +0100
+Message-ID: <20170206133953.8390-2-jglauber@cavium.com>
+References: <20170206133953.8390-1-jglauber@cavium.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170206133953.8390-1-jglauber@cavium.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Uri Yanai <Uri.Yanai@sandisk.com>, "ulf. org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
+Add description of Cavium Octeon and ThunderX SOC device tree bindings.
 
-> On Feb 6, 2017, at 8:46 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->=20
-> Hi Alex,
->=20
-> On 2017/2/5 23:13, Alex Lemberg wrote:
->> Hi Shawn,
->>=20
->> On 2/5/17, 3:43 AM, "Shawn Lin" <shawn.lin@rock-chips.com> wrote:
->>=20
->>=20
->>    >
->>    > Hmm.
->>    >
->>    > Shouldn't we abort (return -EBUSY) also in the system PM suspend ca=
-se
->>    > and not only for runtime PM suspend?
->>=20
->>    I would rather we don't abort runtime PM, but do it for system PM
->>    instead. What we do for runtime PM is just for saving power for
->>    our hosts including manipulating clock and genpd etc.. Thus we don't
->>    touch any power-supply for eMMC. If so, it could still be possible
->>    for eMMC firmware to work on doing bkops in rpm context.
->>=20
->> If I understand correctly, you are suggesting do not send SLEEP command
->> on Runtime Suspend?
->=20
-> yes.
->=20
->> If so, and if mmc host does not touch any power supply for eMMC,
->> the device can continue doing Auto BKOPS during Runtime Suspend.
->> The question is why the Sleep command is sent now,
->> in the original implementation?
->> I assume it is sent for saving a power from the device side as well?
->=20
-> right, it was invented with the cap of MMC_CAP_AGGRESSIVE_PM, so some pla=
-tforms ask for the aggressive power policy will send sleep command
-> to the cards in rpm context. So I assume they care power-saving more
-> than others.
->=20
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Rob Herring <robh+dt@kernel.org>
+CC: Mark Rutland <mark.rutland@arm.com>
+CC: devicetree@vger.kernel.org
 
-OK, I see the MMC_CAP_AGGRESSIVE_PM is already checked in the
-mmc_runtime_suspend() function, so your approach, do not send
-Sleep command on Runtime Suspend, is already supported.
-In case the MMC_CAP_AGGRESSIVE_PM is not set, Sleep command
-will not be sent, and the device will be able to perform its
-AUTO_BKOPS (if needed).
+Signed-off-by: Jan Glauber <jglauber@cavium.com>
+Signed-off-by: David Daney <david.daney@cavium.com>
+Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+---
+ .../devicetree/bindings/mmc/cavium-mmc.txt         | 60 ++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
 
-However, as far as I see in modern mobile hosts,
-the Sleep is sent on every Suspend, so I assume the
-MMC_CAP_AGGRESSIVE_PM is enabled in most of the cases?
-
+diff --git a/Documentation/devicetree/bindings/mmc/cavium-mmc.txt b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+new file mode 100644
+index 0000000..b79e356
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+@@ -0,0 +1,60 @@
++* Cavium Octeon & ThunderX MMC controller
++
++The highspeed MMC host controller on Caviums SoCs provides an interface
++for MMC and SD types of memory cards.
++
++Supported maximum speeds are the ones of the eMMC standard 4.41 as well
++as the speed of SD standard 4.0. Only 3.3 Volt is supported.
++
++Required properties:
++ - compatible : should be one of:
++   cavium,octeon-6130-mmc
++   cavium,octeon-6130-mmc-slot
++   cavium,octeon-7890-mmc
++   cavium,octeon-7890-mmc-slot
++   cavium,thunder-8190-mmc
++   cavium,thunder-8190-mmc-slot
++   cavium,thunder-8390-mmc
++   cavium,thunder-8390-mmc-slot
++ - reg : mmc controller base registers
++ - clocks : phandle
++
++Optional properties:
++ - for cd, bus-width and additional generic mmc parameters
++   please refer to mmc.txt within this directory
++ - cavium,cmd-clk-skew : number of coprocessor clocks before sampling command
++ - cavium,dat-clk-skew : number of coprocessor clocks before sampling data
++
++Deprecated properties:
++- spi-max-frequency : use max-frequency instead
++- cavium,bus-max-width : use bus-width instead
++
++Examples:
++	mmc_1_4: mmc@1,4 {
++		compatible = "cavium,thunder-8390-mmc";
++		reg = <0x0c00 0 0 0 0>;	/* DEVFN = 0x0c (1:4) */
++		#address-cells = <1>;
++		#size-cells = <0>;
++		clocks = <&sclk>;
++
++		mmc-slot@0 {
++			compatible = "cavium,thunder-8390-mmc-slot";
++			reg = <0>;
++			voltage-ranges = <3300 3300>;
++			vmmc-supply = <&mmc_supply_3v3>;
++			max-frequency = <42000000>;
++			bus-width = <4>;
++			cap-sd-highspeed;
++		};
++
++		mmc-slot@1 {
++			compatible = "cavium,thunder-8390-mmc-slot";
++			reg = <1>;
++			voltage-ranges = <3300 3300>;
++			vmmc-supply = <&mmc_supply_3v3>;
++			max-frequency = <42000000>;
++			bus-width = <8>;
++			cap-mmc-highspeed;
++			non-removable;
++		};
++	};
+-- 
+2.9.0.rc0.21.g7777322
