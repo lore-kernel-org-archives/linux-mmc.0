@@ -1,72 +1,76 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 5/9] mmc: meson-gx: improve interrupt handling
-Date: Tue, 7 Feb 2017 22:34:51 +0100
-Message-ID: <e3a3e5ef-2896-68e0-67d2-69a36e7892ee@gmail.com>
+Subject: [PATCH v3 4/9] mmc: meson-gx: improve meson_mmc_irq_thread
+Date: Tue, 7 Feb 2017 22:34:41 +0100
+Message-ID: <21f34e8d-471d-375b-cb9d-6b551d6b03fe@gmail.com>
 References: <0991d40b-e05b-2fcb-9ee4-7b529448de69@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34851 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932313AbdBGVn2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 16:43:28 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u63so30732630wmu.2
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Feb 2017 13:43:28 -0800 (PST)
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36823 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932313AbdBGVoE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 16:44:04 -0500
+Received: by mail-wm0-f65.google.com with SMTP id r18so30810907wmd.3
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Feb 2017 13:44:04 -0800 (PST)
 In-Reply-To: <0991d40b-e05b-2fcb-9ee4-7b529448de69@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Disabling and immediately re-enabling interrupts in meson_mmc_request
-doesn't provide a benefit. Instead enable interrupts in probe already.
-And disable interrupts in remove, this was missing so far.
+Remove unneeded variable ret and simplify the if block.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Acked-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v3:
-- in probe leave the original behavior to first disable all irqs and
-  then clear irq status bits
+- no changes
 ---
- drivers/mmc/host/meson-gx-mmc.c | 9 ++++-----
- 1 file changed, 4 insertions(+), 5 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 15 ++++++---------
+ 1 file changed, 6 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index dd7f936c..4c622ad2 100644
+index d6a4dfae..dd7f936c 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -542,11 +542,6 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
+@@ -666,7 +666,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	struct mmc_command *cmd = host->cmd;
+ 	struct mmc_data *data;
+ 	unsigned int xfer_bytes;
+-	int ret = IRQ_HANDLED;
  
--	/* clear, ack, enable all interrupts */
--	writel(0, host->regs + SD_EMMC_IRQ_EN);
--	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
--	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
--
- 	host->mrq = mrq;
+ 	if (WARN_ON(!mrq))
+ 		return IRQ_NONE;
+@@ -675,14 +674,12 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 		return IRQ_NONE;
  
- 	if (mrq->sbc)
-@@ -775,6 +770,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	/* clear, ack, enable all interrupts */
- 	writel(0, host->regs + SD_EMMC_IRQ_EN);
- 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
-+	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+ 	data = cmd->data;
+-	if (data) {
++	if (data && data->flags & MMC_DATA_READ) {
+ 		xfer_bytes = data->blksz * data->blocks;
+-		if (data->flags & MMC_DATA_READ) {
+-			WARN_ON(xfer_bytes > host->bounce_buf_size);
+-			sg_copy_from_buffer(data->sg, data->sg_len,
+-					    host->bounce_buf, xfer_bytes);
+-			data->bytes_xfered = xfer_bytes;
+-		}
++		WARN_ON(xfer_bytes > host->bounce_buf_size);
++		sg_copy_from_buffer(data->sg, data->sg_len,
++				    host->bounce_buf, xfer_bytes);
++		data->bytes_xfered = xfer_bytes;
+ 	}
  
- 	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
- 					meson_mmc_irq, meson_mmc_irq_thread,
-@@ -812,6 +808,9 @@ static int meson_mmc_remove(struct platform_device *pdev)
- 	if (WARN_ON(!host))
- 		return 0;
+ 	meson_mmc_read_resp(host->mmc, cmd);
+@@ -691,7 +688,7 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	else
+ 		meson_mmc_start_cmd(host->mmc, data->stop);
  
-+	/* disable interrupts */
-+	writel(0, host->regs + SD_EMMC_IRQ_EN);
-+
- 	if (host->bounce_buf)
- 		dma_free_coherent(host->dev, host->bounce_buf_size,
- 				  host->bounce_buf, host->bounce_dma_addr);
+-	return ret;
++	return IRQ_HANDLED;
+ }
+ 
+ /*
 -- 
 2.11.0
 
