@@ -1,228 +1,76 @@
-From: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
-Subject: [PATCH] mmc: mmci: avoid clearing ST Micro busy end interrupt mistakenly
-Date: Tue, 7 Feb 2017 12:12:41 +0100
-Message-ID: <1486465961-22942-1-git-send-email-jean-nicolas.graux@st.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
+Date: Tue, 7 Feb 2017 14:32:59 +0000
+Message-ID: <FCF1582E-775D-44B7-A8E8-2ED1C9C70804@sandisk.com>
+References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
+ <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
+ <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
+ <935e77c5-7e6a-00e0-9064-ea9dbcb4fef5@rock-chips.com>
+ <695B0367-2BA5-4B95-AF75-6BD43FE17528@sandisk.com>
+ <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
+ <1FB1DA84-7E5A-4C0C-BDFE-4F4B406A4B78@sandisk.com>
+ <d5d1e06e-439a-70fc-f879-4729205ef23e@rock-chips.com>
+ <CAPDyKFryoFBZK9fgif5-UpMFgm4AmMyKrcTSn4Nw9AHaBK5k5w@mail.gmail.com>
+ <721d35e5-590b-f4a3-ed25-c63ecb234484@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:46969 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1753230AbdBGLMw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 06:12:52 -0500
+Received: from esa1.hgst.iphmx.com ([68.232.141.245]:22214 "EHLO
+        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754167AbdBGOdH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 09:33:07 -0500
+In-Reply-To: <721d35e5-590b-f4a3-ed25-c63ecb234484@rock-chips.com>
+Content-Language: en-US
+Content-ID: <DC2773F0816496438081061C90B124FB@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, "ulf. org" <ulf.hansson@linaro.org>
+Cc: Uri Yanai <Uri.Yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-This fixes a race condition that may occur whenever ST micro busy end
-interrupt is raised just after being unmasked but before leaving mmci
-interrupt context.
-
-More in details:
-
-A dead-lock has been found if connecting mmci ST Micro variant whose
-amba id is 0x10480180 to some new eMMC that supports internal caches.
-Whenever mmci driver enables cache control by programming eMMC's EXT_CSD
-register, block driver may request to flush the eMMC internal caches
-causing mmci driver to send a MMC_SWITCH command to the card with
-FLUSH_CACHE operation. And because busy end interrupt may be mistakenly
-cleared while not yet processed, this mmc request may never complete.
-As a result, mmcqd task may be stuck forever.
-
-Here is an instance caught by lockup detector which shows that mmcqd task
-was hung while waiting for mmc_flush_cache command to complete:
-
->>>>
-..
-..
-[  240.251595] INFO: task mmcqd/1:52 blocked for more than 120 seconds.
-[  240.257973]       Not tainted 4.1.13-00510-g9d91424 #2
-[  240.263109] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-[  240.270955] mmcqd/1         D c047504c     0    52      2 0x00000000
-[  240.277359] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
-[  240.284418] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
-[  240.292191] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
-[  240.300491] [<c0476040>] (wait_for_common) from [<c02efc1c>] (mmc_wait_for_req_done+0x4c/0x13c)
-[  240.309224] [<c02efc1c>] (mmc_wait_for_req_done) from [<c02efd90>] (mmc_wait_for_cmd+0x64/0x84)
-[  240.317953] [<c02efd90>] (mmc_wait_for_cmd) from [<c02f5b14>] (__mmc_switch+0xa4/0x2a8)
-[  240.325964] [<c02f5b14>] (__mmc_switch) from [<c02f5d40>] (mmc_switch+0x28/0x30)
-[  240.333389] [<c02f5d40>] (mmc_switch) from [<c02f0984>] (mmc_flush_cache+0x54/0x80)
-[  240.341073] [<c02f0984>] (mmc_flush_cache) from [<c02ff0c4>] (mmc_blk_issue_rq+0x114/0x4e8)
-[  240.349459] [<c02ff0c4>] (mmc_blk_issue_rq) from [<c03008d4>] (mmc_queue_thread+0xc0/0x180)
-[  240.357844] [<c03008d4>] (mmc_queue_thread) from [<c003cf90>] (kthread+0xdc/0xf4)
-[  240.365339] [<c003cf90>] (kthread) from [<c0010068>] (ret_from_fork+0x14/0x2c)
-..
-..
-[  240.664311] INFO: task partprobe:564 blocked for more than 120 seconds.
-[  240.670943]       Not tainted 4.1.13-00510-g9d91424 #2
-[  240.676078] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-[  240.683922] partprobe       D c047504c     0   564    486 0x00000000
-[  240.690318] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
-[  240.697396] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
-[  240.705149] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
-[  240.713446] [<c0476040>] (wait_for_common) from [<c01f3300>] (submit_bio_wait+0x58/0x64)
-[  240.721571] [<c01f3300>] (submit_bio_wait) from [<c01fbbd8>] (blkdev_issue_flush+0x60/0x88)
-[  240.729957] [<c01fbbd8>] (blkdev_issue_flush) from [<c010ff84>] (blkdev_fsync+0x34/0x44)
-[  240.738083] [<c010ff84>] (blkdev_fsync) from [<c0109594>] (do_fsync+0x3c/0x64)
-[  240.745319] [<c0109594>] (do_fsync) from [<c000ffc0>] (ret_fast_syscall+0x0/0x3c)
-..
-..
-<<<<
-
-Here is the detailed sequence showing when this issue may happen:
-
-1) At probe time, mmci device is initialized and card busy detection
-based on DAT[0] monitoring is enabled.
-
-2) Later during run time, since card reported to support internal
-caches, a MMCI_SWITCH command is sent to eMMC device with FLUSH_CACHE
-operation. On receiving this command, eMMC may enter busy state
-(for a relatively short time in the case of the dead-lock).
-
-3) Then mmci interrupt is raised and mmci_irq() is called:
-
-MMCISTATUS register is read and is equal to 0x01000440. So the following
-status bits are set:
-- MCI_CMDRESPEND (= 6)
-- MCI_DATABLOCKEND (= 10)
-- MCI_ST_CARDBUSY (= 24)
-
-Since MMCIMASK0 register is 0x3FF, status variable is set to 0x00000040
-and BIT MCI_CMDRESPEND is cleared by writing MMCICLEAR register.
-
-Then mmci_cmd_irq() is called.
-Considering the following conditions:
-- host->busy_status is 0,
-- this is a "busy response",
-- reading again MMCISTATUS register gives 0x1000400,
-MMCIMASK0 is updated to unmask MCI_ST_BUSYEND bit.
-
-Thus, MMCIMASK0 is set to 0x010003FF and host->busy_status is set to wait
-for busy end completion.
-
-Back again in status loop of mmci_irq(), we quickly go through
-mmci_data_irq() as there are no data in that case.
-And we finally go through following test at the end of while(status) loop:
-
-/*
- * Don't poll for busy completion in irq context.
- */
-if (host->variant->busy_detect && host->busy_status)
-	status &= ~host->variant->busy_detect_flag;
-
-Because status variable is not yet null (is equal to 0x40),
-we do not leave interrupt context yet but we loop again into while(status)
-loop. So we run across following steps:
-
-a) MMCISTATUS register is read again and this time is equal to 0x01000400.
-
-So that following bits are set:
-- MCI_DATABLOCKEND (= 10)
-- MCI_ST_CARDBUSY (= 24)
-
-Since MMCIMASK0 register is equal to 0x010003FF:
-
-b) status variable is set to 0x01000000.
-c) MCI_ST_CARDBUSY bit is cleared by writing MMCICLEAR register.
-
-Then, mmci_cmd_irq() is called one more time. Since host->busy_status is
-set and that MCI_ST_CARDBUSY is set in status variable, we just return
-from this function.
-
-Back again in mmci_irq(), status variable is set to 0 and we finally
-leave the while(status) loop. As a result we leave interrupt context,
-waiting for busy end interrupt event.
-
-Now, consider that busy end completion is raised IN BETWEEN steps 3.a)
-and 3.c). In such a case, we may mistakenly clear busy end interrupt at
-step 3.c) while it has not yet been processed. This will result in mmc
-command to wait forever for a busy end completion that will never happen.
-
-This patch implements the following changes:
-
-Considering that the mmci seems to be triggering the IRQ on both edges while
-monitoring DAT0 for busy completion and that same status bit is used to
-monitor start and end of busy detection, special care must be taken
-to make sure that both start and end interrupts are always cleared one
-after the other. Thus:
-
-1) Clearing of card busy bit is moved in mmc_cmd_irq() function where
-unmasking of busy end bit is effectively handled.
-2) Just before unmasking busy end event, busy start event is cleared
-by writing card busy bit in MMCICLEAR register.
-3) Finally, once we are no more busy with a command, busy end event is
-cleared writing again card busy bit in MMCICLEAR register.
-
-This patch has been tested with the ST Accordo5 machine that is not
-upstreamed yet but that relies on mmci upstreamed driver.
-
-Signed-off-by: Sarang Mairal <sarang.mairal@garmin.com>
-Signed-off-by: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
----
- drivers/mmc/host/mmci.c | 32 +++++++++++++++++++++++++-------
- 1 file changed, 25 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 01a8047..b597244 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1023,7 +1023,12 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 		if (!host->busy_status && busy_resp &&
- 		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
- 		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
--			/* Unmask the busy IRQ */
-+
-+			/* Clear the busy start IRQ */
-+			writel(host->variant->busy_detect_mask,
-+			       host->base + MMCICLEAR);
-+
-+			/* Unmask the busy end IRQ */
- 			writel(readl(base + MMCIMASK0) |
- 			       host->variant->busy_detect_mask,
- 			       base + MMCIMASK0);
-@@ -1038,10 +1043,14 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 
- 		/*
- 		 * At this point we are not busy with a command, we have
--		 * not received a new busy request, mask the busy IRQ and
--		 * fall through to process the IRQ.
-+		 * not received a new busy request, clear and mask the busy
-+		 * end IRQ and fall through to process the IRQ.
- 		 */
- 		if (host->busy_status) {
-+
-+			writel(host->variant->busy_detect_mask,
-+			       host->base + MMCICLEAR);
-+
- 			writel(readl(base + MMCIMASK0) &
- 			       ~host->variant->busy_detect_mask,
- 			       base + MMCIMASK0);
-@@ -1283,12 +1292,21 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		}
- 
- 		/*
--		 * We intentionally clear the MCI_ST_CARDBUSY IRQ here (if it's
--		 * enabled) since the HW seems to be triggering the IRQ on both
--		 * edges while monitoring DAT0 for busy completion.
-+		 * We intentionally clear the MCI_ST_CARDBUSY IRQ (if it's
-+		 * enabled) in mmci_cmd_irq() function where ST Micro busy
-+		 * detection variant is handled. Considering the HW seems to be
-+		 * triggering the IRQ on both edges while monitoring DAT0 for
-+		 * busy completion and that same status bit is used to monitor
-+		 * start and end of busy detection, special care must be taken
-+		 * to make sure that both start and end interrupts are always
-+		 * cleared one after the other.
- 		 */
- 		status &= readl(host->base + MMCIMASK0);
--		writel(status, host->base + MMCICLEAR);
-+		if (host->variant->busy_detect)
-+			writel(status & ~host->variant->busy_detect_mask,
-+			       host->base + MMCICLEAR);
-+		else
-+			writel(status, host->base + MMCICLEAR);
- 
- 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
- 
--- 
-1.9.1
-
+DQo+IE9uIEZlYiA3LCAyMDE3LCBhdCAxMDoyNCBBTSwgU2hhd24gTGluIDxzaGF3bi5saW5Acm9j
+ay1jaGlwcy5jb20+IHdyb3RlOg0KPiANCj4gDQo+IA0KPiBPbiAyMDE3LzIvNyAxNTo1NCwgVWxm
+IEhhbnNzb24gd3JvdGU6DQo+PiBbLi4uXQ0KPj4gDQo+Pj4+IA0KPj4+PiBPSywgSSBzZWUgdGhl
+IE1NQ19DQVBfQUdHUkVTU0lWRV9QTSBpcyBhbHJlYWR5IGNoZWNrZWQgaW4gdGhlDQo+Pj4+IG1t
+Y19ydW50aW1lX3N1c3BlbmQoKSBmdW5jdGlvbiwgc28geW91ciBhcHByb2FjaCwgZG8gbm90IHNl
+bmQNCj4+Pj4gU2xlZXAgY29tbWFuZCBvbiBSdW50aW1lIFN1c3BlbmQsIGlzIGFscmVhZHkgc3Vw
+cG9ydGVkLg0KPj4+PiBJbiBjYXNlIHRoZSBNTUNfQ0FQX0FHR1JFU1NJVkVfUE0gaXMgbm90IHNl
+dCwgU2xlZXAgY29tbWFuZA0KPj4+PiB3aWxsIG5vdCBiZSBzZW50LCBhbmQgdGhlIGRldmljZSB3
+aWxsIGJlIGFibGUgdG8gcGVyZm9ybSBpdHMNCj4+Pj4gQVVUT19CS09QUyAoaWYgbmVlZGVkKS4N
+Cj4+Pj4gDQo+Pj4+IEhvd2V2ZXIsIGFzIGZhciBhcyBJIHNlZSBpbiBtb2Rlcm4gbW9iaWxlIGhv
+c3RzLA0KPj4+PiB0aGUgU2xlZXAgaXMgc2VudCBvbiBldmVyeSBTdXNwZW5kLCBzbyBJIGFzc3Vt
+ZSB0aGUNCj4+Pj4gTU1DX0NBUF9BR0dSRVNTSVZFX1BNIGlzIGVuYWJsZWQgaW4gbW9zdCBvZiB0
+aGUgY2FzZXM/DQo+Pj4gDQo+Pj4gDQo+Pj4gT25seSBJbnRlbCBwbGF0Zm9ybXMgYWRkIHRoaXMg
+Y2FwcyBvbiB1cHN0cmVhbWVkIGtlcm5lbCB0cmVlIGFuZA0KPj4+IG5vLCBBT1NQIGtlcm5lbCB0
+cmVlIGRpZG4ndCBjaGFuZ2UgdGhhdCBtdWNoIGVpdGhlci4gQnV0IEkgZ3Vlc3MNCj4+PiBzb21l
+IHZlbmRvcnMgd2FudCBhZ2dyZXNzaXZlIHBtIHBvbGljeSBmb3IgdGhlaXIgcHJvZHVjdGlvbj8N
+Cj4+PiANCj4+PiBJTUhPLCB0aGUgYmFzaWMgY29uY2VwdCBvZiBtbWMgc3RhY2sgaXMgdGhhdCB3
+ZSBjb3VsZCBwcm92aWRlDQo+Pj4gdGhlIHNvbHV0aW9ucyB0byBzdXBwb3J0IGRpZmZlcmVudCBw
+ZXJmICYgcG0gcG9saWN5IGZvciBmb2xrcyBidXQNCj4+PiBpdCdzIHRoZWlyIGNhbGwgdG8gZGVj
+aWRlIGl0IGJ5IGFkZGluZyB0aGVzZSBjYXBzIHRoZXJlLg0KPj4+IA0KPj4gDQo+PiBJIGFzc3Vt
+ZSB5b3Uga25vdyB0aGUgY29uc2VxdWVuY2VzIG9mIHVzaW5nIE1NQ19DQVBfQUdHUkVTU0lWRV9Q
+TSwNCj4+IHN0aWxsIGFsbG93IG1lIHRvIGVsYWJvcmF0ZSBhIGJpdCBvbiBteSB2aWV3Lg0KPj4g
+DQo+PiBTbywgTU1DX0NBUF9BR0dSRVNTSVZFX1BNIHRlbGxzIHJ1bnRpbWUgUE0gc3VzcGVuZCBv
+ZiB0aGUgY2FyZCB0byBwdXQNCj4+IGl0IGludG8gc2xlZXAvcG93ZXIgb2ZmLCBtZWFuaW5nIHNh
+dmluZyBwb3dlciEgSG93ZXZlciwgaXQgYWxzbyBtZWFucw0KPj4gcHJldmVudGluZyB0aGUgZU1N
+QyBmcm9tIHBlcmZvcm1pbmcgYW55IGJhY2tncm91bmQgb3BlcmF0aW9ucy4NCj4+IA0KPj4gVGhl
+IHNpbWlsYXIgYXBwbGllcyB0byB0aGUgc3lzdGVtIFBNIHN1c3BlbmQgY2FzZSwgbm8gbWF0dGVy
+IGlmIHlvdQ0KPj4gYXJlIHVzaW5nIE1NQ19DQVBfQUdHUkVTU0lWRV9QTSBvciBub3QuDQo+PiAN
+Cj4+IFRvIG1lIGl0IHNlZW1zIGxpa2Ugd2Ugc29tZWhvdyBuZWVkIHRvIHN0YXJ0IHRvIGNvbnNp
+ZGVyIHRoZSBlTU1DJ3NzDQo+PiBCS09QUyBzdGF0dXMgaW4gdGhlc2UgcGF0aHMuIERlcGVuZGlu
+ZyBvbiB0aGUgQktPUFMgc3RhdGUsIHdlIG1heQ0KPj4gYWJvcnQgdGhlIHNsZWVwL3Bvd2VyIG9m
+ZiB0aGluZ3MgdmlhIHJldHVybmluZyAtRUJVU1kgZXRjLCBhcw0KPj4gb3RoZXJ3aXNlIHdlIGNv
+dWxkIGVuZCB1cCB3aXRoIHBvb3IgcGVyZm9ybWluZyBlTU1DcywgY291bGRuJ3Qgd2UhPw0KPiAN
+Cj4gTm9wZSwgd2UgY291bGQuIEJ1dCBJIGp1c3Qgd29uZGVyIGhvdyAqYWdncmVzc2l2ZSogZm9s
+a3Mgd2FudGVkLi4gRG8NCj4gdGhleSB3b3VsZCByYXRoZXIgc2FjcmlmaWNpbmcgdGhlIHBlcmZv
+cm1hY2UgdG8gc2F2ZSBtb3JlIHBvd2VyIHdoZW4NCj4gYWRkaW5nIHRoaXMgY2FwcyBiZWZvcmU/
+DQo+IA0KPiBUbyBtZSwgdGhpbmdzIGxpa2UgdGhpcyBkaWRuJ3QgYWx3YXlzIGV4aXN0IHRoZSAi
+YmVzdCBjaG9pY2UiLCBidXQgd2UNCj4gY291bGQgZmluZCBhICJiZXR0ZXIgY2hvaWNlIi4gOikN
+Cj4gDQpJIHRoaW5rLCBieSBsZXR0aW5nIHRoZSBCS09QUyB0byBiZSBjb21wbGV0ZWQgYmVmb3Jl
+IHNlbmRpbmcgU2xlZXAgQ29tbWFuZCwNCndlIGFyZSBub3QgY2FuY2VsbGluZy9jaGFuZ2luZyB0
+aGUg4oCcYWdncmVzc2l2ZeKAnSBQTSBwb2xpY3kuDQpUaGUgU3VzcGVuZCBzdGlsbCB3aWxsIGJl
+IHJlY2FsbGVkIGFuZCBjb21wbGV0ZWQsIGFmdGVyIGdldHRpbmcgdGhlIHJpZ2h0DQpCS09QUyBs
+ZXZlbC4NCkRvZXMgdGhlIOKAnGFnZ3Jlc3NpdmXigJ0gbWVhbnMgaW1tZWRpYXRlPw0KSWYgeWVz
+LCBJIHRoaW5rIGl0IGhhcyB0byBiZSBjaGFuZ2VkLCBiZWNhdXNlIHNvbWUgbW9kZXJuIGVNTUMg
+ZGV2aWNlcyBuZWVkDQpCS09QUywgYW5kIHRoZSBwZXJmb3JtYW5jZSBpbXBhY3QgYWxzbyBuZWVk
+IHRvIGJlIGNvbnNpZGVyZWQuDQoNCg==
