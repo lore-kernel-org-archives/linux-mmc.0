@@ -1,76 +1,45 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
-Date: Tue, 7 Feb 2017 14:32:59 +0000
-Message-ID: <FCF1582E-775D-44B7-A8E8-2ED1C9C70804@sandisk.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
- <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
- <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
- <935e77c5-7e6a-00e0-9064-ea9dbcb4fef5@rock-chips.com>
- <695B0367-2BA5-4B95-AF75-6BD43FE17528@sandisk.com>
- <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
- <1FB1DA84-7E5A-4C0C-BDFE-4F4B406A4B78@sandisk.com>
- <d5d1e06e-439a-70fc-f879-4729205ef23e@rock-chips.com>
- <CAPDyKFryoFBZK9fgif5-UpMFgm4AmMyKrcTSn4Nw9AHaBK5k5w@mail.gmail.com>
- <721d35e5-590b-f4a3-ed25-c63ecb234484@rock-chips.com>
+From: Uri Yanai <uri.yanai@sandisk.com>
+Subject: [v3 0/3] Auto BKOPS PM suspend
+Date: Tue, 7 Feb 2017 17:59:59 +0200
+Message-ID: <1486483202-5515-1-git-send-email-uri.yanai@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa1.hgst.iphmx.com ([68.232.141.245]:22214 "EHLO
+Received: from esa1.hgst.iphmx.com ([68.232.141.245]:18411 "EHLO
         esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754167AbdBGOdH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 09:33:07 -0500
-In-Reply-To: <721d35e5-590b-f4a3-ed25-c63ecb234484@rock-chips.com>
-Content-Language: en-US
-Content-ID: <DC2773F0816496438081061C90B124FB@sandisk.com>
+        with ESMTP id S1755066AbdBGQBC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 11:01:02 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, "ulf. org" <ulf.hansson@linaro.org>
-Cc: Uri Yanai <Uri.Yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, Alex.Lemberg@sandisk.com, Uri Yanai <uri.yanai@sandisk.com>
 
-DQo+IE9uIEZlYiA3LCAyMDE3LCBhdCAxMDoyNCBBTSwgU2hhd24gTGluIDxzaGF3bi5saW5Acm9j
-ay1jaGlwcy5jb20+IHdyb3RlOg0KPiANCj4gDQo+IA0KPiBPbiAyMDE3LzIvNyAxNTo1NCwgVWxm
-IEhhbnNzb24gd3JvdGU6DQo+PiBbLi4uXQ0KPj4gDQo+Pj4+IA0KPj4+PiBPSywgSSBzZWUgdGhl
-IE1NQ19DQVBfQUdHUkVTU0lWRV9QTSBpcyBhbHJlYWR5IGNoZWNrZWQgaW4gdGhlDQo+Pj4+IG1t
-Y19ydW50aW1lX3N1c3BlbmQoKSBmdW5jdGlvbiwgc28geW91ciBhcHByb2FjaCwgZG8gbm90IHNl
-bmQNCj4+Pj4gU2xlZXAgY29tbWFuZCBvbiBSdW50aW1lIFN1c3BlbmQsIGlzIGFscmVhZHkgc3Vw
-cG9ydGVkLg0KPj4+PiBJbiBjYXNlIHRoZSBNTUNfQ0FQX0FHR1JFU1NJVkVfUE0gaXMgbm90IHNl
-dCwgU2xlZXAgY29tbWFuZA0KPj4+PiB3aWxsIG5vdCBiZSBzZW50LCBhbmQgdGhlIGRldmljZSB3
-aWxsIGJlIGFibGUgdG8gcGVyZm9ybSBpdHMNCj4+Pj4gQVVUT19CS09QUyAoaWYgbmVlZGVkKS4N
-Cj4+Pj4gDQo+Pj4+IEhvd2V2ZXIsIGFzIGZhciBhcyBJIHNlZSBpbiBtb2Rlcm4gbW9iaWxlIGhv
-c3RzLA0KPj4+PiB0aGUgU2xlZXAgaXMgc2VudCBvbiBldmVyeSBTdXNwZW5kLCBzbyBJIGFzc3Vt
-ZSB0aGUNCj4+Pj4gTU1DX0NBUF9BR0dSRVNTSVZFX1BNIGlzIGVuYWJsZWQgaW4gbW9zdCBvZiB0
-aGUgY2FzZXM/DQo+Pj4gDQo+Pj4gDQo+Pj4gT25seSBJbnRlbCBwbGF0Zm9ybXMgYWRkIHRoaXMg
-Y2FwcyBvbiB1cHN0cmVhbWVkIGtlcm5lbCB0cmVlIGFuZA0KPj4+IG5vLCBBT1NQIGtlcm5lbCB0
-cmVlIGRpZG4ndCBjaGFuZ2UgdGhhdCBtdWNoIGVpdGhlci4gQnV0IEkgZ3Vlc3MNCj4+PiBzb21l
-IHZlbmRvcnMgd2FudCBhZ2dyZXNzaXZlIHBtIHBvbGljeSBmb3IgdGhlaXIgcHJvZHVjdGlvbj8N
-Cj4+PiANCj4+PiBJTUhPLCB0aGUgYmFzaWMgY29uY2VwdCBvZiBtbWMgc3RhY2sgaXMgdGhhdCB3
-ZSBjb3VsZCBwcm92aWRlDQo+Pj4gdGhlIHNvbHV0aW9ucyB0byBzdXBwb3J0IGRpZmZlcmVudCBw
-ZXJmICYgcG0gcG9saWN5IGZvciBmb2xrcyBidXQNCj4+PiBpdCdzIHRoZWlyIGNhbGwgdG8gZGVj
-aWRlIGl0IGJ5IGFkZGluZyB0aGVzZSBjYXBzIHRoZXJlLg0KPj4+IA0KPj4gDQo+PiBJIGFzc3Vt
-ZSB5b3Uga25vdyB0aGUgY29uc2VxdWVuY2VzIG9mIHVzaW5nIE1NQ19DQVBfQUdHUkVTU0lWRV9Q
-TSwNCj4+IHN0aWxsIGFsbG93IG1lIHRvIGVsYWJvcmF0ZSBhIGJpdCBvbiBteSB2aWV3Lg0KPj4g
-DQo+PiBTbywgTU1DX0NBUF9BR0dSRVNTSVZFX1BNIHRlbGxzIHJ1bnRpbWUgUE0gc3VzcGVuZCBv
-ZiB0aGUgY2FyZCB0byBwdXQNCj4+IGl0IGludG8gc2xlZXAvcG93ZXIgb2ZmLCBtZWFuaW5nIHNh
-dmluZyBwb3dlciEgSG93ZXZlciwgaXQgYWxzbyBtZWFucw0KPj4gcHJldmVudGluZyB0aGUgZU1N
-QyBmcm9tIHBlcmZvcm1pbmcgYW55IGJhY2tncm91bmQgb3BlcmF0aW9ucy4NCj4+IA0KPj4gVGhl
-IHNpbWlsYXIgYXBwbGllcyB0byB0aGUgc3lzdGVtIFBNIHN1c3BlbmQgY2FzZSwgbm8gbWF0dGVy
-IGlmIHlvdQ0KPj4gYXJlIHVzaW5nIE1NQ19DQVBfQUdHUkVTU0lWRV9QTSBvciBub3QuDQo+PiAN
-Cj4+IFRvIG1lIGl0IHNlZW1zIGxpa2Ugd2Ugc29tZWhvdyBuZWVkIHRvIHN0YXJ0IHRvIGNvbnNp
-ZGVyIHRoZSBlTU1DJ3NzDQo+PiBCS09QUyBzdGF0dXMgaW4gdGhlc2UgcGF0aHMuIERlcGVuZGlu
-ZyBvbiB0aGUgQktPUFMgc3RhdGUsIHdlIG1heQ0KPj4gYWJvcnQgdGhlIHNsZWVwL3Bvd2VyIG9m
-ZiB0aGluZ3MgdmlhIHJldHVybmluZyAtRUJVU1kgZXRjLCBhcw0KPj4gb3RoZXJ3aXNlIHdlIGNv
-dWxkIGVuZCB1cCB3aXRoIHBvb3IgcGVyZm9ybWluZyBlTU1DcywgY291bGRuJ3Qgd2UhPw0KPiAN
-Cj4gTm9wZSwgd2UgY291bGQuIEJ1dCBJIGp1c3Qgd29uZGVyIGhvdyAqYWdncmVzc2l2ZSogZm9s
-a3Mgd2FudGVkLi4gRG8NCj4gdGhleSB3b3VsZCByYXRoZXIgc2FjcmlmaWNpbmcgdGhlIHBlcmZv
-cm1hY2UgdG8gc2F2ZSBtb3JlIHBvd2VyIHdoZW4NCj4gYWRkaW5nIHRoaXMgY2FwcyBiZWZvcmU/
-DQo+IA0KPiBUbyBtZSwgdGhpbmdzIGxpa2UgdGhpcyBkaWRuJ3QgYWx3YXlzIGV4aXN0IHRoZSAi
-YmVzdCBjaG9pY2UiLCBidXQgd2UNCj4gY291bGQgZmluZCBhICJiZXR0ZXIgY2hvaWNlIi4gOikN
-Cj4gDQpJIHRoaW5rLCBieSBsZXR0aW5nIHRoZSBCS09QUyB0byBiZSBjb21wbGV0ZWQgYmVmb3Jl
-IHNlbmRpbmcgU2xlZXAgQ29tbWFuZCwNCndlIGFyZSBub3QgY2FuY2VsbGluZy9jaGFuZ2luZyB0
-aGUg4oCcYWdncmVzc2l2ZeKAnSBQTSBwb2xpY3kuDQpUaGUgU3VzcGVuZCBzdGlsbCB3aWxsIGJl
-IHJlY2FsbGVkIGFuZCBjb21wbGV0ZWQsIGFmdGVyIGdldHRpbmcgdGhlIHJpZ2h0DQpCS09QUyBs
-ZXZlbC4NCkRvZXMgdGhlIOKAnGFnZ3Jlc3NpdmXigJ0gbWVhbnMgaW1tZWRpYXRlPw0KSWYgeWVz
-LCBJIHRoaW5rIGl0IGhhcyB0byBiZSBjaGFuZ2VkLCBiZWNhdXNlIHNvbWUgbW9kZXJuIGVNTUMg
-ZGV2aWNlcyBuZWVkDQpCS09QUywgYW5kIHRoZSBwZXJmb3JtYW5jZSBpbXBhY3QgYWxzbyBuZWVk
-IHRvIGJlIGNvbnNpZGVyZWQuDQoNCg==
+Flash based storage devices might need to perform the internal
+Background Operations (BKOPS) in order to insure better performance
+for the next coming IO.
+Following the discussion in the mmc thread:
+www.spinics.net/lists/linux-mmc/msg37779.html
+To let the device complete its BKOPS during Runtime Suspend,
+we suggest to check the BKOPS level.
+In case the device need to complete its BKOPS, reschedule the Runtime
+Suspend.
+
+This patches replaces original patches submitted by Alex Lemberg <alex.lemberg@sandisk.com>
+[1/3] mmc: replacing hardcoded value for runtime PM suspend(patch removed)
+[2/3] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support(made changes)
+[3/3] mmc: Checking BKOPS status prior to Suspend(made changes)
+
+Uri Yanai (3):
+  mmc: MAN_BKOPS_EN inverse debug message logic
+  mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
+  mmc: Checking BKOPS status prior to Suspend
+
+ drivers/mmc/core/mmc.c   | 40 +++++++++++++++++++++++++++++++++-------
+ include/linux/mmc/card.h |  1 +
+ include/linux/mmc/mmc.h  |  1 +
+ 3 files changed, 35 insertions(+), 7 deletions(-)
+
+-- 
+1.9.1
+
