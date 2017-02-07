@@ -1,47 +1,228 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC 3/4] mmc: host: tmio: don't BUG on unsupported stop commands
-Date: Tue,  7 Feb 2017 12:06:28 +0100
-Message-ID: <20170207110629.2441-4-wsa+renesas@sang-engineering.com>
-References: <20170207110629.2441-1-wsa+renesas@sang-engineering.com>
+From: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
+Subject: [PATCH] mmc: mmci: avoid clearing ST Micro busy end interrupt mistakenly
+Date: Tue, 7 Feb 2017 12:12:41 +0100
+Message-ID: <1486465961-22942-1-git-send-email-jean-nicolas.graux@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:40382 "EHLO pokefinder.org"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753832AbdBGLGl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 7 Feb 2017 06:06:41 -0500
-In-Reply-To: <20170207110629.2441-1-wsa+renesas@sang-engineering.com>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:46969 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753230AbdBGLMw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 06:12:52 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-Halting the kernel on an unsupported stop command seems overkill, report
-the error and say what we already did (due to autocmd12) instead.
+This fixes a race condition that may occur whenever ST micro busy end
+interrupt is raised just after being unmasked but before leaving mmci
+interrupt context.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+More in details:
+
+A dead-lock has been found if connecting mmci ST Micro variant whose
+amba id is 0x10480180 to some new eMMC that supports internal caches.
+Whenever mmci driver enables cache control by programming eMMC's EXT_CSD
+register, block driver may request to flush the eMMC internal caches
+causing mmci driver to send a MMC_SWITCH command to the card with
+FLUSH_CACHE operation. And because busy end interrupt may be mistakenly
+cleared while not yet processed, this mmc request may never complete.
+As a result, mmcqd task may be stuck forever.
+
+Here is an instance caught by lockup detector which shows that mmcqd task
+was hung while waiting for mmc_flush_cache command to complete:
+
+>>>>
+..
+..
+[  240.251595] INFO: task mmcqd/1:52 blocked for more than 120 seconds.
+[  240.257973]       Not tainted 4.1.13-00510-g9d91424 #2
+[  240.263109] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  240.270955] mmcqd/1         D c047504c     0    52      2 0x00000000
+[  240.277359] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
+[  240.284418] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
+[  240.292191] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
+[  240.300491] [<c0476040>] (wait_for_common) from [<c02efc1c>] (mmc_wait_for_req_done+0x4c/0x13c)
+[  240.309224] [<c02efc1c>] (mmc_wait_for_req_done) from [<c02efd90>] (mmc_wait_for_cmd+0x64/0x84)
+[  240.317953] [<c02efd90>] (mmc_wait_for_cmd) from [<c02f5b14>] (__mmc_switch+0xa4/0x2a8)
+[  240.325964] [<c02f5b14>] (__mmc_switch) from [<c02f5d40>] (mmc_switch+0x28/0x30)
+[  240.333389] [<c02f5d40>] (mmc_switch) from [<c02f0984>] (mmc_flush_cache+0x54/0x80)
+[  240.341073] [<c02f0984>] (mmc_flush_cache) from [<c02ff0c4>] (mmc_blk_issue_rq+0x114/0x4e8)
+[  240.349459] [<c02ff0c4>] (mmc_blk_issue_rq) from [<c03008d4>] (mmc_queue_thread+0xc0/0x180)
+[  240.357844] [<c03008d4>] (mmc_queue_thread) from [<c003cf90>] (kthread+0xdc/0xf4)
+[  240.365339] [<c003cf90>] (kthread) from [<c0010068>] (ret_from_fork+0x14/0x2c)
+..
+..
+[  240.664311] INFO: task partprobe:564 blocked for more than 120 seconds.
+[  240.670943]       Not tainted 4.1.13-00510-g9d91424 #2
+[  240.676078] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  240.683922] partprobe       D c047504c     0   564    486 0x00000000
+[  240.690318] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
+[  240.697396] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
+[  240.705149] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
+[  240.713446] [<c0476040>] (wait_for_common) from [<c01f3300>] (submit_bio_wait+0x58/0x64)
+[  240.721571] [<c01f3300>] (submit_bio_wait) from [<c01fbbd8>] (blkdev_issue_flush+0x60/0x88)
+[  240.729957] [<c01fbbd8>] (blkdev_issue_flush) from [<c010ff84>] (blkdev_fsync+0x34/0x44)
+[  240.738083] [<c010ff84>] (blkdev_fsync) from [<c0109594>] (do_fsync+0x3c/0x64)
+[  240.745319] [<c0109594>] (do_fsync) from [<c000ffc0>] (ret_fast_syscall+0x0/0x3c)
+..
+..
+<<<<
+
+Here is the detailed sequence showing when this issue may happen:
+
+1) At probe time, mmci device is initialized and card busy detection
+based on DAT[0] monitoring is enabled.
+
+2) Later during run time, since card reported to support internal
+caches, a MMCI_SWITCH command is sent to eMMC device with FLUSH_CACHE
+operation. On receiving this command, eMMC may enter busy state
+(for a relatively short time in the case of the dead-lock).
+
+3) Then mmci interrupt is raised and mmci_irq() is called:
+
+MMCISTATUS register is read and is equal to 0x01000440. So the following
+status bits are set:
+- MCI_CMDRESPEND (= 6)
+- MCI_DATABLOCKEND (= 10)
+- MCI_ST_CARDBUSY (= 24)
+
+Since MMCIMASK0 register is 0x3FF, status variable is set to 0x00000040
+and BIT MCI_CMDRESPEND is cleared by writing MMCICLEAR register.
+
+Then mmci_cmd_irq() is called.
+Considering the following conditions:
+- host->busy_status is 0,
+- this is a "busy response",
+- reading again MMCISTATUS register gives 0x1000400,
+MMCIMASK0 is updated to unmask MCI_ST_BUSYEND bit.
+
+Thus, MMCIMASK0 is set to 0x010003FF and host->busy_status is set to wait
+for busy end completion.
+
+Back again in status loop of mmci_irq(), we quickly go through
+mmci_data_irq() as there are no data in that case.
+And we finally go through following test at the end of while(status) loop:
+
+/*
+ * Don't poll for busy completion in irq context.
+ */
+if (host->variant->busy_detect && host->busy_status)
+	status &= ~host->variant->busy_detect_flag;
+
+Because status variable is not yet null (is equal to 0x40),
+we do not leave interrupt context yet but we loop again into while(status)
+loop. So we run across following steps:
+
+a) MMCISTATUS register is read again and this time is equal to 0x01000400.
+
+So that following bits are set:
+- MCI_DATABLOCKEND (= 10)
+- MCI_ST_CARDBUSY (= 24)
+
+Since MMCIMASK0 register is equal to 0x010003FF:
+
+b) status variable is set to 0x01000000.
+c) MCI_ST_CARDBUSY bit is cleared by writing MMCICLEAR register.
+
+Then, mmci_cmd_irq() is called one more time. Since host->busy_status is
+set and that MCI_ST_CARDBUSY is set in status variable, we just return
+from this function.
+
+Back again in mmci_irq(), status variable is set to 0 and we finally
+leave the while(status) loop. As a result we leave interrupt context,
+waiting for busy end interrupt event.
+
+Now, consider that busy end completion is raised IN BETWEEN steps 3.a)
+and 3.c). In such a case, we may mistakenly clear busy end interrupt at
+step 3.c) while it has not yet been processed. This will result in mmc
+command to wait forever for a busy end completion that will never happen.
+
+This patch implements the following changes:
+
+Considering that the mmci seems to be triggering the IRQ on both edges while
+monitoring DAT0 for busy completion and that same status bit is used to
+monitor start and end of busy detection, special care must be taken
+to make sure that both start and end interrupts are always cleared one
+after the other. Thus:
+
+1) Clearing of card busy bit is moved in mmc_cmd_irq() function where
+unmasking of busy end bit is effectively handled.
+2) Just before unmasking busy end event, busy start event is cleared
+by writing card busy bit in MMCICLEAR register.
+3) Finally, once we are no more busy with a command, busy end event is
+cleared writing again card busy bit in MMCICLEAR register.
+
+This patch has been tested with the ST Accordo5 machine that is not
+upstreamed yet but that relies on mmci upstreamed driver.
+
+Signed-off-by: Sarang Mairal <sarang.mairal@garmin.com>
+Signed-off-by: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c | 32 +++++++++++++++++++++++++-------
+ 1 file changed, 25 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index ad2840e1bfae51..b47dd9195fe3fe 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -553,10 +553,11 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 	}
- 
- 	if (stop) {
--		if (stop->opcode == MMC_STOP_TRANSMISSION && !stop->arg)
--			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0);
--		else
--			BUG();
-+		if (stop->opcode != MMC_STOP_TRANSMISSION || stop->arg)
-+			dev_err(&host->pdev->dev, "unsupported stop: CMD%u,0x%x. We did CMD12,0\n",
-+				stop->opcode, stop->arg);
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 01a8047..b597244 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1023,7 +1023,12 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 		if (!host->busy_status && busy_resp &&
+ 		    !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
+ 		    (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+-			/* Unmask the busy IRQ */
 +
-+		sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0);
- 	}
++			/* Clear the busy start IRQ */
++			writel(host->variant->busy_detect_mask,
++			       host->base + MMCICLEAR);
++
++			/* Unmask the busy end IRQ */
+ 			writel(readl(base + MMCIMASK0) |
+ 			       host->variant->busy_detect_mask,
+ 			       base + MMCIMASK0);
+@@ -1038,10 +1043,14 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
  
- 	schedule_work(&host->done);
+ 		/*
+ 		 * At this point we are not busy with a command, we have
+-		 * not received a new busy request, mask the busy IRQ and
+-		 * fall through to process the IRQ.
++		 * not received a new busy request, clear and mask the busy
++		 * end IRQ and fall through to process the IRQ.
+ 		 */
+ 		if (host->busy_status) {
++
++			writel(host->variant->busy_detect_mask,
++			       host->base + MMCICLEAR);
++
+ 			writel(readl(base + MMCIMASK0) &
+ 			       ~host->variant->busy_detect_mask,
+ 			       base + MMCIMASK0);
+@@ -1283,12 +1292,21 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 		}
+ 
+ 		/*
+-		 * We intentionally clear the MCI_ST_CARDBUSY IRQ here (if it's
+-		 * enabled) since the HW seems to be triggering the IRQ on both
+-		 * edges while monitoring DAT0 for busy completion.
++		 * We intentionally clear the MCI_ST_CARDBUSY IRQ (if it's
++		 * enabled) in mmci_cmd_irq() function where ST Micro busy
++		 * detection variant is handled. Considering the HW seems to be
++		 * triggering the IRQ on both edges while monitoring DAT0 for
++		 * busy completion and that same status bit is used to monitor
++		 * start and end of busy detection, special care must be taken
++		 * to make sure that both start and end interrupts are always
++		 * cleared one after the other.
+ 		 */
+ 		status &= readl(host->base + MMCIMASK0);
+-		writel(status, host->base + MMCICLEAR);
++		if (host->variant->busy_detect)
++			writel(status & ~host->variant->busy_detect_mask,
++			       host->base + MMCICLEAR);
++		else
++			writel(status, host->base + MMCICLEAR);
+ 
+ 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+ 
 -- 
-2.11.0
+1.9.1
 
