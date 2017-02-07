@@ -1,86 +1,114 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 2/2] mmc: Checking BKOPS status prior to Suspend
-Date: Tue, 7 Feb 2017 16:24:29 +0800
-Message-ID: <721d35e5-590b-f4a3-ed25-c63ecb234484@rock-chips.com>
-References: <1485076535-20572-1-git-send-email-uri.yanai@sandisk.com>
- <1485076535-20572-3-git-send-email-uri.yanai@sandisk.com>
- <CAPDyKFqiiWxUaYYkmPX_Zcym2fJ_muYM2WF2erd5LLd_OCY=5A@mail.gmail.com>
- <935e77c5-7e6a-00e0-9064-ea9dbcb4fef5@rock-chips.com>
- <695B0367-2BA5-4B95-AF75-6BD43FE17528@sandisk.com>
- <2a786eb3-d782-bb87-4ff5-29640b00ad2f@rock-chips.com>
- <1FB1DA84-7E5A-4C0C-BDFE-4F4B406A4B78@sandisk.com>
- <d5d1e06e-439a-70fc-f879-4729205ef23e@rock-chips.com>
- <CAPDyKFryoFBZK9fgif5-UpMFgm4AmMyKrcTSn4Nw9AHaBK5k5w@mail.gmail.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH v2 2/8] mmc: bcm2835: Add new driver for the sdhost
+ controller.
+Date: Tue, 7 Feb 2017 09:24:03 +0100
+Message-ID: <f495e10a-bb9b-ab23-e3af-47a000b28783@i2se.com>
+References: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
+ <1486123913-31705-3-git-send-email-kraxel@redhat.com>
+ <1708749883.208474.1486413240581@email.1und1.de>
+ <1486454575.24589.29.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:39580 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751164AbdBGIYg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 03:24:36 -0500
-In-Reply-To: <CAPDyKFryoFBZK9fgif5-UpMFgm4AmMyKrcTSn4Nw9AHaBK5k5w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1486454575.24589.29.camel@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Gerd Hoffmann <kraxel@redhat.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Uri Yanai <Uri.Yanai@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
+Hi Gerd,
 
+Am 07.02.2017 um 09:02 schrieb Gerd Hoffmann:
+> On Mo, 2017-02-06 at 21:34 +0100, Stefan Wahren wrote:
+>> Hi Gerd,
+>>
+>> first of all here my wishlist for the next round of this driver:
+>> * compile test the series with ARM and ARM64
+> It is tested on both arm and arm64 (rpi2 + rpi3).
 
-On 2017/2/7 15:54, Ulf Hansson wrote:
-> [...]
+i got implicite declaration for request_threaded_irq() and free_irq().
+After including linux/interrupt.h the issue is fixed (patch #1 of my
+series).
+
 >
+>> * add me in CC for all patches of the series
+> Oops.  /me should be more careful when reading names.  I thought I had
+> you on Cc:  Double-checked.  Turned out that was Stephen Warren ...
+
+No problem
+
+>
+>> * run checkpatch.pl before submission
+> Hmm?  Are there any issues?  /me has a pre-commit hook running
+> checkpatch to avoid anything slipping though.
+
+Just a single issue about a unnecessary return at the end of
+bcm2835_data_irq() (patch #4 of my series). Maybe this was a new rule.
+
+>
+>> * apply the patch series to your cgit repo
+> Branch pushed now: bcm2837-sdhost-squashed-v2
+
+Thanks
+
+>
+>>> The sdhci controller supports both sdcard and sdio.  The sdhost
+>>> controller supports the sdcard only, but has better performance.  Also
+>> Sorry, for the confusion. I was wrong. According to the registers the SDHOST should also support SDIO. It's a feature we could implement later.
+> Ok.
+>
+>>> note that the rpi3 has sdio wifi, so driving the sdcard with the sdhost
+>>> controller allows to use the sdhci controller for wifi support.
 >>>
->>> OK, I see the MMC_CAP_AGGRESSIVE_PM is already checked in the
->>> mmc_runtime_suspend() function, so your approach, do not send
->>> Sleep command on Runtime Suspend, is already supported.
->>> In case the MMC_CAP_AGGRESSIVE_PM is not set, Sleep command
->>> will not be sent, and the device will be able to perform its
->>> AUTO_BKOPS (if needed).
+>>> The configuration is done by devicetree via pin muxing.  Both SD
+>>> controller are available on the same pins (2 pin groups = pin 22 to 27 +
+>>> pin 48 to 53).  So it's possible to use both SD controllers at the same
+>>> time with different pin groups.
 >>>
->>> However, as far as I see in modern mobile hosts,
->>> the Sleep is sent on every Suspend, so I assume the
->>> MMC_CAP_AGGRESSIVE_PM is enabled in most of the cases?
+>>> The code was originally written by Phil Elwell in the downstream
+>>> Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
+>>> out of the original 2055) for inclusion.
+>> I think it would be helpful to known the downstream commit, because this commit [1]
+>> doesn't seem to be included.
 >>
+>> [1] - https://github.com/raspberrypi/linux/commit/ea4b1c5c2ddbb6caba43ab9b0103542a4ca7e1f0
+
+Sorry wrong link, this must be the right one
+
+https://github.com/raspberrypi/linux/commit/1131510a589ae7262b8861af8d2f4a000710d59c
+
 >>
->> Only Intel platforms add this caps on upstreamed kernel tree and
->> no, AOSP kernel tree didn't change that much either. But I guess
->> some vendors want aggressive pm policy for their production?
+>> I've found and fixed a lot of issues in this version and i think it would be better if i send you the patches for squashing them all together. Here is the preview for my patch series:
 >>
->> IMHO, the basic concept of mmc stack is that we could provide
->> the solutions to support different perf & pm policy for folks but
->> it's their call to decide it by adding these caps there.
+>> Stefan Wahren (15):
+>>   mmc: bcm2835: Add missing include for threaded irq
+>>   mmc: bcm2835: Remove CMD_DALLY_US
+>>   mmc: bcm2835: Fix pio_timeout handling
+>>   mmc: bcm2835: Remove unnecessary return in bcm2835_data_irq
+>>   mmc: bcm2835: Handle error cases during probe
+>>   mmc: bcm2835: Print clk_max as decimal
+>>   mmc: bcm2835: Downrate message in case of PIO fallback
+>>   mmc: bcm2835: Don't unveil the data pointer
+>>   mmc: bcm2835: remove unused host members
+>>   mmc: bcm2835: Avoid unnecessary linebreaks
+>>   mmc: bcm2835: Add leading zero to register dumps
+>>   mmc: bcm2835: Align struct members with tabs
+>>   mmc: bcm2835: Rearrange bcm2835_finish_request()
+>>   mmc: bcm2835: Rearrange bcm2835_dma_complete_work()
+>>   mmc: bcm2835: Rename Kconfig switch
 >>
+>> I'll send it after my tests. In the following review i will mention only the issues which aren't fixed in my patch series.
+> I'll pick up the patches and look at the remaining issues, new version
+> later this week (i hope).
 >
-> I assume you know the consequences of using MMC_CAP_AGGRESSIVE_PM,
-> still allow me to elaborate a bit on my view.
->
-> So, MMC_CAP_AGGRESSIVE_PM tells runtime PM suspend of the card to put
-> it into sleep/power off, meaning saving power! However, it also means
-> preventing the eMMC from performing any background operations.
->
-> The similar applies to the system PM suspend case, no matter if you
-> are using MMC_CAP_AGGRESSIVE_PM or not.
->
-> To me it seems like we somehow need to start to consider the eMMC'ss
-> BKOPS status in these paths. Depending on the BKOPS state, we may
-> abort the sleep/power off things via returning -EBUSY etc, as
-> otherwise we could end up with poor performing eMMCs, couldn't we!?
-
-Nope, we could. But I just wonder how *aggressive* folks wanted.. Do
-they would rather sacrificing the performace to save more power when
-adding this caps before?
-
-To me, things like this didn't always exist the "best choice", but we
-could find a "better choice". :)
-
-
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+> thanks,
+>   Gerd
