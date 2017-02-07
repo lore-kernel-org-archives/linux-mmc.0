@@ -1,114 +1,45 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH v2 2/8] mmc: bcm2835: Add new driver for the sdhost
- controller.
-Date: Tue, 7 Feb 2017 09:24:03 +0100
-Message-ID: <f495e10a-bb9b-ab23-e3af-47a000b28783@i2se.com>
-References: <1486123913-31705-1-git-send-email-kraxel@redhat.com>
- <1486123913-31705-3-git-send-email-kraxel@redhat.com>
- <1708749883.208474.1486413240581@email.1und1.de>
- <1486454575.24589.29.camel@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1486454575.24589.29.camel@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gerd Hoffmann <kraxel@redhat.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 0/5] Some small cleanup for quirks
+Date: Tue,  7 Feb 2017 16:27:20 +0800
+Message-ID: <1486456043-105954-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:38622 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752035AbdBGI3l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 03:29:41 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Gerd,
 
-Am 07.02.2017 um 09:02 schrieb Gerd Hoffmann:
-> On Mo, 2017-02-06 at 21:34 +0100, Stefan Wahren wrote:
->> Hi Gerd,
->>
->> first of all here my wishlist for the next round of this driver:
->> * compile test the series with ARM and ARM64
-> It is tested on both arm and arm64 (rpi2 + rpi3).
+I just see the we put them everywhere, so the legacy code
+should be improved a bit for maintainability, especially for
+the sdio quirks case. Just split them into small patches to be
+better reviewed but I don't mind to squash them up. :)
 
-i got implicite declaration for request_threaded_irq() and free_irq().
-After including linux/interrupt.h the issue is fixed (patch #1 of my
-series).
 
->
->> * add me in CC for all patches of the series
-> Oops.  /me should be more careful when reading names.  I thought I had
-> you on Cc:  Double-checked.  Turned out that was Stephen Warren ...
 
-No problem
+Shawn Lin (5):
+  mmc: core: change quirks.c to be a header file
+  mmc: core: move some sdio IDs out of quirks file
+  mmc: core: improve the quirks for sdio devices
+  mmc: core: move all quirks together into quirks.h
+  mmc: core: add mmc prefix for blk_fixups
 
->
->> * run checkpatch.pl before submission
-> Hmm?  Are there any issues?  /me has a pre-commit hook running
-> checkpatch to avoid anything slipping though.
+ drivers/mmc/core/Makefile    |   2 +-
+ drivers/mmc/core/block.c     |  77 +----------------------
+ drivers/mmc/core/card.h      |   2 -
+ drivers/mmc/core/mmc.c       |  12 +---
+ drivers/mmc/core/quirks.c    |  85 -------------------------
+ drivers/mmc/core/quirks.h    | 145 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio.c      |   3 +-
+ include/linux/mmc/sdio_ids.h |   7 +++
+ 8 files changed, 158 insertions(+), 175 deletions(-)
+ delete mode 100644 drivers/mmc/core/quirks.c
+ create mode 100644 drivers/mmc/core/quirks.h
 
-Just a single issue about a unnecessary return at the end of
-bcm2835_data_irq() (patch #4 of my series). Maybe this was a new rule.
+-- 
+1.9.1
 
->
->> * apply the patch series to your cgit repo
-> Branch pushed now: bcm2837-sdhost-squashed-v2
 
-Thanks
-
->
->>> The sdhci controller supports both sdcard and sdio.  The sdhost
->>> controller supports the sdcard only, but has better performance.  Also
->> Sorry, for the confusion. I was wrong. According to the registers the SDHOST should also support SDIO. It's a feature we could implement later.
-> Ok.
->
->>> note that the rpi3 has sdio wifi, so driving the sdcard with the sdhost
->>> controller allows to use the sdhci controller for wifi support.
->>>
->>> The configuration is done by devicetree via pin muxing.  Both SD
->>> controller are available on the same pins (2 pin groups = pin 22 to 27 +
->>> pin 48 to 53).  So it's possible to use both SD controllers at the same
->>> time with different pin groups.
->>>
->>> The code was originally written by Phil Elwell in the downstream
->>> Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
->>> out of the original 2055) for inclusion.
->> I think it would be helpful to known the downstream commit, because this commit [1]
->> doesn't seem to be included.
->>
->> [1] - https://github.com/raspberrypi/linux/commit/ea4b1c5c2ddbb6caba43ab9b0103542a4ca7e1f0
-
-Sorry wrong link, this must be the right one
-
-https://github.com/raspberrypi/linux/commit/1131510a589ae7262b8861af8d2f4a000710d59c
-
->>
->> I've found and fixed a lot of issues in this version and i think it would be better if i send you the patches for squashing them all together. Here is the preview for my patch series:
->>
->> Stefan Wahren (15):
->>   mmc: bcm2835: Add missing include for threaded irq
->>   mmc: bcm2835: Remove CMD_DALLY_US
->>   mmc: bcm2835: Fix pio_timeout handling
->>   mmc: bcm2835: Remove unnecessary return in bcm2835_data_irq
->>   mmc: bcm2835: Handle error cases during probe
->>   mmc: bcm2835: Print clk_max as decimal
->>   mmc: bcm2835: Downrate message in case of PIO fallback
->>   mmc: bcm2835: Don't unveil the data pointer
->>   mmc: bcm2835: remove unused host members
->>   mmc: bcm2835: Avoid unnecessary linebreaks
->>   mmc: bcm2835: Add leading zero to register dumps
->>   mmc: bcm2835: Align struct members with tabs
->>   mmc: bcm2835: Rearrange bcm2835_finish_request()
->>   mmc: bcm2835: Rearrange bcm2835_dma_complete_work()
->>   mmc: bcm2835: Rename Kconfig switch
->>
->> I'll send it after my tests. In the following review i will mention only the issues which aren't fixed in my patch series.
-> I'll pick up the patches and look at the remaining issues, new version
-> later this week (i hope).
->
-> thanks,
->   Gerd
