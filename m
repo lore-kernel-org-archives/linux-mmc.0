@@ -1,244 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: avoid clearing ST Micro busy end interrupt mistakenly
-Date: Wed, 8 Feb 2017 12:21:49 +0100
-Message-ID: <CAPDyKFpScjHuFu1xR=z_bvZksk09049qkTsscZBU=8e3PQbfgA@mail.gmail.com>
-References: <1486465961-22942-1-git-send-email-jean-nicolas.graux@st.com>
+Subject: Re: [v3 1/3] mmc: MAN_BKOPS_EN inverse debug message logic
+Date: Wed, 8 Feb 2017 12:54:40 +0100
+Message-ID: <CAPDyKFpzJkU0NxQyqTXzoMNKmrbJxhT286A=kJ_QWoDNsUJ_kg@mail.gmail.com>
+References: <1486483202-5515-1-git-send-email-uri.yanai@sandisk.com> <1486483202-5515-2-git-send-email-uri.yanai@sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:35820 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752404AbdBHLao (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2017 06:30:44 -0500
-Received: by mail-ua0-f173.google.com with SMTP id y9so107185685uae.2
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2017 03:30:09 -0800 (PST)
-In-Reply-To: <1486465961-22942-1-git-send-email-jean-nicolas.graux@st.com>
+Received: from mail-vk0-f44.google.com ([209.85.213.44]:36609 "EHLO
+        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751674AbdBHLym (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2017 06:54:42 -0500
+Received: by mail-vk0-f44.google.com with SMTP id t8so99002044vke.3
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2017 03:54:41 -0800 (PST)
+In-Reply-To: <1486483202-5515-2-git-send-email-uri.yanai@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
-Cc: Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Uri Yanai <uri.yanai@sandisk.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-On 7 February 2017 at 12:12, Jean-Nicolas Graux
-<jean-nicolas.graux@st.com> wrote:
-> This fixes a race condition that may occur whenever ST micro busy end
-> interrupt is raised just after being unmasked but before leaving mmci
-> interrupt context.
+On 7 February 2017 at 17:00, Uri Yanai <uri.yanai@sandisk.com> wrote:
+> Inverse the logic for printing the debug message.
+> In mmc_decode_ext_csd() print message when MAN_BKOPS_EN is set
 >
-> More in details:
->
-> A dead-lock has been found if connecting mmci ST Micro variant whose
-> amba id is 0x10480180 to some new eMMC that supports internal caches.
-> Whenever mmci driver enables cache control by programming eMMC's EXT_CSD
-> register, block driver may request to flush the eMMC internal caches
-> causing mmci driver to send a MMC_SWITCH command to the card with
-> FLUSH_CACHE operation. And because busy end interrupt may be mistakenly
-> cleared while not yet processed, this mmc request may never complete.
-> As a result, mmcqd task may be stuck forever.
->
-> Here is an instance caught by lockup detector which shows that mmcqd task
-> was hung while waiting for mmc_flush_cache command to complete:
->
->>>>>
-> ..
-> ..
-> [  240.251595] INFO: task mmcqd/1:52 blocked for more than 120 seconds.
-> [  240.257973]       Not tainted 4.1.13-00510-g9d91424 #2
-> [  240.263109] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> [  240.270955] mmcqd/1         D c047504c     0    52      2 0x00000000
-> [  240.277359] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
-> [  240.284418] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
-> [  240.292191] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
-> [  240.300491] [<c0476040>] (wait_for_common) from [<c02efc1c>] (mmc_wait_for_req_done+0x4c/0x13c)
-> [  240.309224] [<c02efc1c>] (mmc_wait_for_req_done) from [<c02efd90>] (mmc_wait_for_cmd+0x64/0x84)
-> [  240.317953] [<c02efd90>] (mmc_wait_for_cmd) from [<c02f5b14>] (__mmc_switch+0xa4/0x2a8)
-> [  240.325964] [<c02f5b14>] (__mmc_switch) from [<c02f5d40>] (mmc_switch+0x28/0x30)
-> [  240.333389] [<c02f5d40>] (mmc_switch) from [<c02f0984>] (mmc_flush_cache+0x54/0x80)
-> [  240.341073] [<c02f0984>] (mmc_flush_cache) from [<c02ff0c4>] (mmc_blk_issue_rq+0x114/0x4e8)
-> [  240.349459] [<c02ff0c4>] (mmc_blk_issue_rq) from [<c03008d4>] (mmc_queue_thread+0xc0/0x180)
-> [  240.357844] [<c03008d4>] (mmc_queue_thread) from [<c003cf90>] (kthread+0xdc/0xf4)
-> [  240.365339] [<c003cf90>] (kthread) from [<c0010068>] (ret_from_fork+0x14/0x2c)
-> ..
-> ..
-> [  240.664311] INFO: task partprobe:564 blocked for more than 120 seconds.
-> [  240.670943]       Not tainted 4.1.13-00510-g9d91424 #2
-> [  240.676078] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> [  240.683922] partprobe       D c047504c     0   564    486 0x00000000
-> [  240.690318] [<c047504c>] (__schedule) from [<c04754a0>] (schedule+0x40/0x98)
-> [  240.697396] [<c04754a0>] (schedule) from [<c0477d40>] (schedule_timeout+0x148/0x188)
-> [  240.705149] [<c0477d40>] (schedule_timeout) from [<c0476040>] (wait_for_common+0xa4/0x170)
-> [  240.713446] [<c0476040>] (wait_for_common) from [<c01f3300>] (submit_bio_wait+0x58/0x64)
-> [  240.721571] [<c01f3300>] (submit_bio_wait) from [<c01fbbd8>] (blkdev_issue_flush+0x60/0x88)
-> [  240.729957] [<c01fbbd8>] (blkdev_issue_flush) from [<c010ff84>] (blkdev_fsync+0x34/0x44)
-> [  240.738083] [<c010ff84>] (blkdev_fsync) from [<c0109594>] (do_fsync+0x3c/0x64)
-> [  240.745319] [<c0109594>] (do_fsync) from [<c000ffc0>] (ret_fast_syscall+0x0/0x3c)
-> ..
-> ..
-> <<<<
->
-> Here is the detailed sequence showing when this issue may happen:
->
-> 1) At probe time, mmci device is initialized and card busy detection
-> based on DAT[0] monitoring is enabled.
->
-> 2) Later during run time, since card reported to support internal
-> caches, a MMCI_SWITCH command is sent to eMMC device with FLUSH_CACHE
-> operation. On receiving this command, eMMC may enter busy state
-> (for a relatively short time in the case of the dead-lock).
->
-> 3) Then mmci interrupt is raised and mmci_irq() is called:
->
-> MMCISTATUS register is read and is equal to 0x01000440. So the following
-> status bits are set:
-> - MCI_CMDRESPEND (= 6)
-> - MCI_DATABLOCKEND (= 10)
-> - MCI_ST_CARDBUSY (= 24)
->
-> Since MMCIMASK0 register is 0x3FF, status variable is set to 0x00000040
-> and BIT MCI_CMDRESPEND is cleared by writing MMCICLEAR register.
->
-> Then mmci_cmd_irq() is called.
-> Considering the following conditions:
-> - host->busy_status is 0,
-> - this is a "busy response",
-> - reading again MMCISTATUS register gives 0x1000400,
-> MMCIMASK0 is updated to unmask MCI_ST_BUSYEND bit.
->
-> Thus, MMCIMASK0 is set to 0x010003FF and host->busy_status is set to wait
-> for busy end completion.
->
-> Back again in status loop of mmci_irq(), we quickly go through
-> mmci_data_irq() as there are no data in that case.
-> And we finally go through following test at the end of while(status) loop:
->
-> /*
->  * Don't poll for busy completion in irq context.
->  */
-> if (host->variant->busy_detect && host->busy_status)
->         status &= ~host->variant->busy_detect_flag;
->
-> Because status variable is not yet null (is equal to 0x40),
-> we do not leave interrupt context yet but we loop again into while(status)
-> loop. So we run across following steps:
->
-> a) MMCISTATUS register is read again and this time is equal to 0x01000400.
->
-> So that following bits are set:
-> - MCI_DATABLOCKEND (= 10)
-> - MCI_ST_CARDBUSY (= 24)
->
-> Since MMCIMASK0 register is equal to 0x010003FF:
->
-> b) status variable is set to 0x01000000.
-> c) MCI_ST_CARDBUSY bit is cleared by writing MMCICLEAR register.
->
-> Then, mmci_cmd_irq() is called one more time. Since host->busy_status is
-> set and that MCI_ST_CARDBUSY is set in status variable, we just return
-> from this function.
->
-> Back again in mmci_irq(), status variable is set to 0 and we finally
-> leave the while(status) loop. As a result we leave interrupt context,
-> waiting for busy end interrupt event.
->
-> Now, consider that busy end completion is raised IN BETWEEN steps 3.a)
-> and 3.c). In such a case, we may mistakenly clear busy end interrupt at
-> step 3.c) while it has not yet been processed. This will result in mmc
-> command to wait forever for a busy end completion that will never happen.
->
-> This patch implements the following changes:
->
-> Considering that the mmci seems to be triggering the IRQ on both edges while
-> monitoring DAT0 for busy completion and that same status bit is used to
-> monitor start and end of busy detection, special care must be taken
-> to make sure that both start and end interrupts are always cleared one
-> after the other. Thus:
->
-> 1) Clearing of card busy bit is moved in mmc_cmd_irq() function where
-> unmasking of busy end bit is effectively handled.
-> 2) Just before unmasking busy end event, busy start event is cleared
-> by writing card busy bit in MMCICLEAR register.
-> 3) Finally, once we are no more busy with a command, busy end event is
-> cleared writing again card busy bit in MMCICLEAR register.
->
-> This patch has been tested with the ST Accordo5 machine that is not
-> upstreamed yet but that relies on mmci upstreamed driver.
->
-> Signed-off-by: Sarang Mairal <sarang.mairal@garmin.com>
-> Signed-off-by: Jean-Nicolas Graux <jean-nicolas.graux@st.com>
+> Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
+> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 
-I tested this on my ux500 board, with some local hacks to make sure
-all three different options for busy detections works (->card_busy(),
-CMD13, MMC_CAP_WAIT_WHILE_BUSY).
-
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mmci.c | 32 +++++++++++++++++++++++++-------
->  1 file changed, 25 insertions(+), 7 deletions(-)
+>  drivers/mmc/core/mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 01a8047..b597244 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1023,7 +1023,12 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->                 if (!host->busy_status && busy_resp &&
->                     !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
->                     (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
-> -                       /* Unmask the busy IRQ */
-> +
-> +                       /* Clear the busy start IRQ */
-> +                       writel(host->variant->busy_detect_mask,
-> +                              host->base + MMCICLEAR);
-> +
-> +                       /* Unmask the busy end IRQ */
->                         writel(readl(base + MMCIMASK0) |
->                                host->variant->busy_detect_mask,
->                                base + MMCIMASK0);
-> @@ -1038,10 +1043,14 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->
->                 /*
->                  * At this point we are not busy with a command, we have
-> -                * not received a new busy request, mask the busy IRQ and
-> -                * fall through to process the IRQ.
-> +                * not received a new busy request, clear and mask the busy
-> +                * end IRQ and fall through to process the IRQ.
->                  */
->                 if (host->busy_status) {
-> +
-> +                       writel(host->variant->busy_detect_mask,
-> +                              host->base + MMCICLEAR);
-> +
->                         writel(readl(base + MMCIMASK0) &
->                                ~host->variant->busy_detect_mask,
->                                base + MMCIMASK0);
-> @@ -1283,12 +1292,21 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index c0e2507..9d1c149 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -530,8 +530,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, =
+u8 *ext_csd)
+>                                                 EXT_CSD_MANUAL_BKOPS_MASK=
+);
+>                         card->ext_csd.raw_bkops_status =3D
+>                                 ext_csd[EXT_CSD_BKOPS_STATUS];
+> -                       if (!card->ext_csd.man_bkops_en)
+> -                               pr_debug("%s: MAN_BKOPS_EN bit is not set=
+\n",
+> +                       if (card->ext_csd.man_bkops_en)
+> +                               pr_debug("%s: MAN_BKOPS_EN bit is set\n",
+>                                         mmc_hostname(card->host));
 >                 }
->
->                 /*
-> -                * We intentionally clear the MCI_ST_CARDBUSY IRQ here (if it's
-> -                * enabled) since the HW seems to be triggering the IRQ on both
-> -                * edges while monitoring DAT0 for busy completion.
-> +                * We intentionally clear the MCI_ST_CARDBUSY IRQ (if it's
-> +                * enabled) in mmci_cmd_irq() function where ST Micro busy
-> +                * detection variant is handled. Considering the HW seems to be
-> +                * triggering the IRQ on both edges while monitoring DAT0 for
-> +                * busy completion and that same status bit is used to monitor
-> +                * start and end of busy detection, special care must be taken
-> +                * to make sure that both start and end interrupts are always
-> +                * cleared one after the other.
->                  */
->                 status &= readl(host->base + MMCIMASK0);
-> -               writel(status, host->base + MMCICLEAR);
-> +               if (host->variant->busy_detect)
-> +                       writel(status & ~host->variant->busy_detect_mask,
-> +                              host->base + MMCICLEAR);
-> +               else
-> +                       writel(status, host->base + MMCICLEAR);
->
->                 dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
 >
 > --
 > 1.9.1
+>
+> Western Digital Corporation (and its subsidiaries) E-mail Confidentiality=
+ Notice & Disclaimer:
+>
+> This e-mail and any files transmitted with it may contain confidential or=
+ legally privileged information of WDC and/or its affiliates, and are inten=
+ded solely for the use of the individual or entity to which they are addres=
+sed. If you are not the intended recipient, any disclosure, copying, distri=
+bution or any action taken or omitted to be taken in reliance on it, is pro=
+hibited. If you have received this e-mail in error, please notify the sende=
+r immediately and delete the e-mail in its entirety from your system.
 >
