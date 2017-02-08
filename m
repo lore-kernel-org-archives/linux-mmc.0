@@ -1,84 +1,122 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 2/5] mmc: core: move some sdio IDs out of quirks file
-Date: Wed,  8 Feb 2017 09:15:43 +0800
-Message-ID: <1486516546-187771-3-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 1/5] mmc: core: change quirks.c to be a header file
+Date: Wed,  8 Feb 2017 09:15:42 +0800
+Message-ID: <1486516546-187771-2-git-send-email-shawn.lin@rock-chips.com>
 References: <1486516546-187771-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:54223 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:54213 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932282AbdBHBVt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 20:21:49 -0500
+        with ESMTP id S932077AbdBHBVs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2017 20:21:48 -0500
 In-Reply-To: <1486516546-187771-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Consolidate all the sdio devices' IDs into sdio_ids.
+Rename quirks.c to quirks.h, and include it for
+individual C files which need it.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 ---
 
-Changes in v2: None
+Changes in v2:
+- add __maybe_unused to make it cleanly compiled standalone
+  suggested by Ulf
+- add inline for mmc_fixup_device
 
- drivers/mmc/core/quirks.h    | 20 --------------------
- include/linux/mmc/sdio_ids.h |  7 +++++++
- 2 files changed, 7 insertions(+), 20 deletions(-)
+ drivers/mmc/core/Makefile               | 2 +-
+ drivers/mmc/core/block.c                | 1 +
+ drivers/mmc/core/card.h                 | 2 --
+ drivers/mmc/core/mmc.c                  | 1 +
+ drivers/mmc/core/{quirks.c => quirks.h} | 4 ++--
+ drivers/mmc/core/sdio.c                 | 1 +
+ 6 files changed, 6 insertions(+), 5 deletions(-)
+ rename drivers/mmc/core/{quirks.c => quirks.h} (95%)
 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index f3bbfcb7..253a9d5 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -17,26 +17,6 @@
- 
- #include "card.h"
- 
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x0097
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1271
--#define SDIO_DEVICE_ID_TI_WL1271	0x4076
--#endif
--
--#ifndef SDIO_VENDOR_ID_STE
--#define SDIO_VENDOR_ID_STE		0x0020
--#endif
--
--#ifndef SDIO_DEVICE_ID_STE_CW1200
--#define SDIO_DEVICE_ID_STE_CW1200	0x2280
--#endif
--
--#ifndef SDIO_DEVICE_ID_MARVELL_8797_F0
--#define SDIO_DEVICE_ID_MARVELL_8797_F0	0x9128
--#endif
--
- static const struct mmc_fixup mmc_fixup_methods[] = {
- 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
- 		   add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 71b113e..b733eb4 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 0f81464..7e3ed1a 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -7,7 +7,7 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+ 				   sdio_cis.o sdio_io.o sdio_irq.o \
+-				   quirks.o slot-gpio.o
++				   slot-gpio.o
+ mmc_core-$(CONFIG_OF)		+= pwrseq.o
+ obj-$(CONFIG_PWRSEQ_SIMPLE)	+= pwrseq_simple.o
+ obj-$(CONFIG_PWRSEQ_SD8787)	+= pwrseq_sd8787.o
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 985477c..ce5e2a2 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
 @@ -52,6 +52,7 @@
- #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
- #define SDIO_DEVICE_ID_MARVELL_8688WLAN		0x9104
- #define SDIO_DEVICE_ID_MARVELL_8688BT		0x9105
-+#define SDIO_DEVICE_ID_MARVELL_8797_F0		0x9128
+ #include "host.h"
+ #include "bus.h"
+ #include "mmc_ops.h"
++#include "quirks.h"
+ #include "sd_ops.h"
  
- #define SDIO_VENDOR_ID_SIANO			0x039a
- #define SDIO_DEVICE_ID_SIANO_NOVA_B0		0x0201
-@@ -61,4 +62,10 @@
- #define SDIO_DEVICE_ID_SIANO_NOVA_A0		0x1100
- #define SDIO_DEVICE_ID_SIANO_STELLAR 		0x5347
+ MODULE_ALIAS("mmc:block");
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 95e8fc5..f06cd91 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -218,6 +218,4 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_HPI;
+ }
  
-+#define SDIO_VENDOR_ID_TI			0x0097
-+#define SDIO_DEVICE_ID_TI_WL1271		0x4076
-+
-+#define SDIO_VENDOR_ID_STE			0x0020
-+#define SDIO_DEVICE_ID_STE_CW1200		0x2280
-+
- #endif /* LINUX_MMC_SDIO_IDS_H */
+-void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table);
+-
+ #endif
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index f1a451e..d0e6b6f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -25,6 +25,7 @@
+ #include "host.h"
+ #include "bus.h"
+ #include "mmc_ops.h"
++#include "quirks.h"
+ #include "sd_ops.h"
+ 
+ #define DEFAULT_CMD6_TIMEOUT_MS	500
+diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.h
+similarity index 95%
+rename from drivers/mmc/core/quirks.c
+rename to drivers/mmc/core/quirks.h
+index bf25a9c..f3bbfcb7 100644
+--- a/drivers/mmc/core/quirks.c
++++ b/drivers/mmc/core/quirks.h
+@@ -53,7 +53,8 @@
+ 	END_FIXUP
+ };
+ 
+-void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
++static inline void __maybe_unused
++mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+ {
+ 	const struct mmc_fixup *f;
+ 	u64 rev = cid_rev_card(card);
+@@ -82,4 +83,3 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+ 		}
+ 	}
+ }
+-EXPORT_SYMBOL(mmc_fixup_device);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index a64a870..f092a55 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -23,6 +23,7 @@
+ #include "card.h"
+ #include "host.h"
+ #include "bus.h"
++#include "quirks.h"
+ #include "sd.h"
+ #include "sdio_bus.h"
+ #include "mmc_ops.h"
 -- 
 1.9.1
 
