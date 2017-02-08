@@ -1,116 +1,111 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v3 2/3] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
-Date: Wed, 8 Feb 2017 12:55:03 +0100
-Message-ID: <CAPDyKFpfHYPe88aSf7d+FpE9MQjEeTvsy1A7zCRuw8Wf1MWf9A@mail.gmail.com>
-References: <1486483202-5515-1-git-send-email-uri.yanai@sandisk.com> <1486483202-5515-3-git-send-email-uri.yanai@sandisk.com>
+Subject: Re: [PATCH v3 1/9] mmc: meson: Assign the minimum clk rate as close
+ to 400KHz as possible
+Date: Wed, 8 Feb 2017 12:51:42 +0100
+Message-ID: <CAPDyKFr4_tNjuK=Aqsqm0A2bP2-=KtZ-66BtbP_E9QR0pxVRiQ@mail.gmail.com>
+References: <d24ae9fb-a4e3-50ab-0144-0ae39bf3ca1c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:36431 "EHLO
-        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753604AbdBHMBK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2017 07:01:10 -0500
-Received: by mail-ua0-f180.google.com with SMTP id 96so107423437uaq.3
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2017 04:01:10 -0800 (PST)
-In-Reply-To: <1486483202-5515-3-git-send-email-uri.yanai@sandisk.com>
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:34510 "EHLO
+        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932087AbdBHMUZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2017 07:20:25 -0500
+Received: by mail-vk0-f43.google.com with SMTP id r136so99329053vke.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2017 04:19:34 -0800 (PST)
+In-Reply-To: <d24ae9fb-a4e3-50ab-0144-0ae39bf3ca1c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Uri Yanai <uri.yanai@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-On 7 February 2017 at 17:00, Uri Yanai <uri.yanai@sandisk.com> wrote:
-> Adding dedicated flag for AUTO_BKOPS in card->ext_csd structure.
-> Read AUTO_BKOPS bit value from the device EXT_CSD and set to the
-> card->ext_csd structure.
-> In mmc_decode_ext_csd() add a print message in case the AUTO_BKOPS
-> is enabled
+On 7 February 2017 at 22:33, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+> The current code dealing with calculating mmc->f_min is a bit complicated.
+> Additionally, the attempt to set an initial clock rate should explicitly
+> use a rate between 100KHz to 400 KHz, according the (e)MMC/SD specs, which
+> it doesn't.
 >
-> Signed-off-by: Uri Yanai <uri.yanai@sandisk.com>
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> Fix the problem and clean up the code by using clk_round_rate() to pick the
+> nearest minimum rate to 400KHz (rounded down from 400kHz).
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
-Thanks, applied for next!
+I have applied the series for next.
 
-Kind regards
+However, I think I deserve to keep the authorship of $subject patch,
+so I re-claimed it. Instead I added a line in the change log of what
+you changed.
+
+Thanks and kind regards
 Uffe
 
-
 > ---
->
-> Changes in v3:
-> - move the code inversing manual bkops to a separate patch
->
-> Changes in v2:
-> - inverse the logic for printing the debug message.
->   only print when bits are set.
->
+> v3:
+> - remove now unused member mux_parent_rate from struct meson_host
+> - change target min rate from 100kHz to 400kHz because actual min rate
+>   on meson is 380kHz. Therefore 100kHz would be rounded down to 0.
 > ---
->  drivers/mmc/core/mmc.c   | 6 ++++++
->  include/linux/mmc/card.h | 1 +
->  include/linux/mmc/mmc.h  | 1 +
->  3 files changed, 8 insertions(+)
+>  drivers/mmc/host/meson-gx-mmc.c | 20 ++++++--------------
+>  1 file changed, 6 insertions(+), 14 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 9d1c149..f70f6a1 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -533,6 +533,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card,=
- u8 *ext_csd)
->                         if (card->ext_csd.man_bkops_en)
->                                 pr_debug("%s: MAN_BKOPS_EN bit is set\n",
->                                         mmc_hostname(card->host));
-> +                       card->ext_csd.auto_bkops_en =3D
-> +                                       (ext_csd[EXT_CSD_BKOPS_EN] &
-> +                                               EXT_CSD_AUTO_BKOPS_MASK);
-> +                       if (card->ext_csd.auto_bkops_en)
-> +                               pr_debug("%s: AUTO_BKOPS_EN bit is set\n"=
-,
-> +                                       mmc_hostname(card->host));
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 5eca88bc..ef2ce725 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -132,7 +132,6 @@ struct meson_host {
+>         struct clk_mux mux;
+>         struct clk *mux_clk;
+>         struct clk *mux_parent[MUX_CLK_NUM_PARENTS];
+> -       unsigned long mux_parent_rate[MUX_CLK_NUM_PARENTS];
+>
+>         struct clk_divider cfg_div;
+>         struct clk *cfg_div_clk;
+> @@ -240,7 +239,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>         const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
+>         unsigned int mux_parent_count = 0;
+>         const char *clk_div_parents[1];
+> -       unsigned int f_min = UINT_MAX;
+>         u32 clk_reg, cfg;
+>
+>         /* get the mux parents */
+> @@ -257,20 +255,10 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>                         return ret;
 >                 }
 >
->                 /* check whether the eMMC card supports HPI */
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 00449e5..e3f1031 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -84,6 +84,7 @@ struct mmc_ext_csd {
->         unsigned int            hpi_cmd;                /* cmd used as HP=
-I */
->         bool                    bkops;          /* background support bit=
- */
->         bool                    man_bkops_en;   /* manual bkops enable bi=
-t */
-> +       bool                    auto_bkops_en;  /* auto bkops enable bit =
-*/
->         unsigned int            data_sector_size;       /* 512 bytes or 4=
-KB */
->         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT =
-size */
->         unsigned int            boot_ro_lock;           /* ro lock suppor=
-t */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index a074082..126b8d5 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -449,6 +449,7 @@ struct _mmc_csd {
->   * BKOPS modes
->   */
->  #define EXT_CSD_MANUAL_BKOPS_MASK      0x01
-> +#define EXT_CSD_AUTO_BKOPS_MASK                0x02
+> -               host->mux_parent_rate[i] = clk_get_rate(host->mux_parent[i]);
+>                 mux_parent_names[i] = __clk_get_name(host->mux_parent[i]);
+>                 mux_parent_count++;
+> -               if (host->mux_parent_rate[i] < f_min)
+> -                       f_min = host->mux_parent_rate[i];
+>         }
 >
->  /*
->   * Command Queue
+> -       /* cacluate f_min based on input clocks, and max divider value */
+> -       if (f_min != UINT_MAX)
+> -               f_min = DIV_ROUND_UP(CLK_SRC_XTAL_RATE, CLK_DIV_MAX);
+> -       else
+> -               f_min = 4000000;  /* default min: 400 MHz */
+> -       host->mmc->f_min = f_min;
+> -
+>         /* create the mux */
+>         snprintf(clk_name, sizeof(clk_name), "%s#mux", dev_name(host->dev));
+>         init.name = clk_name;
+> @@ -325,9 +313,13 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>         writel(cfg, host->regs + SD_EMMC_CFG);
+>
+>         ret = clk_prepare_enable(host->cfg_div_clk);
+> -       if (!ret)
+> -               ret = meson_mmc_clk_set(host, f_min);
+> +       if (ret)
+> +               return ret;
+> +
+> +       /* Get the nearest minimum clock to 400KHz */
+> +       host->mmc->f_min = clk_round_rate(host->cfg_div_clk, 400000);
+>
+> +       ret = meson_mmc_clk_set(host, host->mmc->f_min);
+>         if (!ret)
+>                 clk_disable_unprepare(host->cfg_div_clk);
+>
 > --
-> 1.9.1
->
-> Western Digital Corporation (and its subsidiaries) E-mail Confidentiality=
- Notice & Disclaimer:
->
-> This e-mail and any files transmitted with it may contain confidential or=
- legally privileged information of WDC and/or its affiliates, and are inten=
-ded solely for the use of the individual or entity to which they are addres=
-sed. If you are not the intended recipient, any disclosure, copying, distri=
-bution or any action taken or omitted to be taken in reliance on it, is pro=
-hibited. If you have received this e-mail in error, please notify the sende=
-r immediately and delete the e-mail in its entirety from your system.
+> 2.11.0
 >
