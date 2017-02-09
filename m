@@ -1,120 +1,95 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 07/16] mmc: core: do away with is_done_rcv
-Date: Thu,  9 Feb 2017 16:33:54 +0100
-Message-ID: <20170209153403.9730-8-linus.walleij@linaro.org>
+Subject: [PATCH 05/16] mmc: core: add a kthread for completing requests
+Date: Thu,  9 Feb 2017 16:33:52 +0100
+Message-ID: <20170209153403.9730-6-linus.walleij@linaro.org>
 References: <20170209153403.9730-1-linus.walleij@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f52.google.com ([209.85.215.52]:33873 "EHLO
+        mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752162AbdBIPgI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2017 10:36:08 -0500
+Received: by mail-lf0-f52.google.com with SMTP id v186so4542444lfa.1
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2017 07:34:57 -0800 (PST)
 In-Reply-To: <20170209153403.9730-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
-The "is_done_rcv" in the context info for the host is no longer
-needed: it is clear from context (ha!) that as long as we are
-waiting for the asynchronous request to come to completion,
-we are not done receiving data, and when the finalization work
-has run and completed the completion, we are indeed done.
+As we want to complete requests autonomously from feeding the
+host with new requests, we create a worker thread to deal with
+this specifically in response to the callback from a host driver.
+
+This patch just adds the worker, later patches will make use of
+it.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/core.c  | 40 ++++++++++++++++------------------------
- include/linux/mmc/host.h |  2 --
- 2 files changed, 16 insertions(+), 26 deletions(-)
+ drivers/mmc/core/core.c  | 6 ++++++
+ drivers/mmc/core/host.c  | 2 +-
+ include/linux/mmc/host.h | 5 +++++
+ 3 files changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ecf61e51662..fcb40ade9b82 100644
+index 0972c649ea7a..663799240635 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -416,10 +416,8 @@ EXPORT_SYMBOL(mmc_start_bkops);
- static void mmc_wait_data_done(struct mmc_request *mrq)
- {
- 	struct mmc_host *host = mrq->host;
--	struct mmc_context_info *context_info = &host->context_info;
- 	struct mmc_async_req *areq = host->areq;
+@@ -2794,6 +2794,10 @@ void mmc_start_host(struct mmc_host *host)
+ 	host->f_init = max(freqs[0], host->f_min);
+ 	host->rescan_disable = 0;
+ 	host->ios.power_mode = MMC_POWER_UNDEFINED;
++	/* Worker for completing requests */
++	host->req_done_worker_task = kthread_run(kthread_worker_fn,
++				      &host->req_done_worker,
++				      "mmc%d-reqdone", host->index);
  
--	context_info->is_done_rcv = true;
- 	/* Schedule a work to deal with finalizing this request */
- 	kthread_queue_work(&host->req_done_worker, &areq->finalization_work);
- }
-@@ -551,7 +549,7 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
- bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq)
- {
- 	if (host->areq)
--		return host->context_info.is_done_rcv;
-+		return completion_done(&host->areq->complete);
- 	else
- 		return completion_done(&mrq->completion);
- }
-@@ -600,29 +598,24 @@ void mmc_finalize_areq(struct kthread_work *work)
- 	struct mmc_async_req *areq =
- 		container_of(work, struct mmc_async_req, finalization_work);
- 	struct mmc_host *host = areq->host;
--	struct mmc_context_info *context_info = &host->context_info;
- 	enum mmc_blk_status status = MMC_BLK_SUCCESS;
-+	struct mmc_command *cmd;
+ 	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
+ 		mmc_claim_host(host);
+@@ -2818,6 +2822,8 @@ void mmc_stop_host(struct mmc_host *host)
  
--	if (context_info->is_done_rcv) {
--		struct mmc_command *cmd;
+ 	host->rescan_disable = 1;
+ 	cancel_delayed_work_sync(&host->detect);
++	kthread_flush_worker(&host->req_done_worker);
++	kthread_stop(host->req_done_worker_task);
+ 
+ 	/* clear pm flags now and let card drivers set them as needed */
+ 	host->pm_flags = 0;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 98f25ffb4258..d33e2b260bf3 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -388,7 +388,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	setup_timer(&host->retune_timer, mmc_retune_timer, (unsigned long)host);
 -
--		context_info->is_done_rcv = false;
--		cmd = areq->mrq->cmd;
-+	cmd = areq->mrq->cmd;
- 
--		if (!cmd->error || !cmd->retries ||
--		    mmc_card_removed(host->card)) {
--			status = areq->err_check(host->card,
--						 areq);
--		} else {
--			mmc_retune_recheck(host);
--			pr_info("%s: req failed (CMD%u): %d, retrying...\n",
--				mmc_hostname(host),
--				cmd->opcode, cmd->error);
--			cmd->retries--;
--			cmd->error = 0;
--			__mmc_start_request(host, areq->mrq);
--			return; /* wait for done/new event again */
--		}
-+	if (!cmd->error || !cmd->retries ||
-+	    mmc_card_removed(host->card)) {
-+		status = areq->err_check(host->card,
-+					 areq);
-+	} else {
-+		mmc_retune_recheck(host);
-+		pr_info("%s: req failed (CMD%u): %d, retrying...\n",
-+			mmc_hostname(host),
-+			cmd->opcode, cmd->error);
-+		cmd->retries--;
-+		cmd->error = 0;
-+		__mmc_start_request(host, areq->mrq);
-+		return; /* wait for done/new event again */
- 	}
- 
- 	mmc_retune_release(host);
-@@ -2993,7 +2986,6 @@ void mmc_unregister_pm_notifier(struct mmc_host *host)
- void mmc_init_context_info(struct mmc_host *host)
- {
- 	host->context_info.is_new_req = false;
--	host->context_info.is_done_rcv = false;
- 	host->context_info.is_waiting_last_req = false;
- }
- 
++	kthread_init_worker(&host->req_done_worker);
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+ 	 * They have to set these according to their abilities.
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c5f61f2f2310..cbb40682024a 100644
+index 97699d55b2ae..b04f8cd51c82 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -194,12 +194,10 @@ struct mmc_slot {
+@@ -13,6 +13,7 @@
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
++#include <linux/kthread.h>
  
- /**
-  * mmc_context_info - synchronization details for mmc context
-- * @is_done_rcv		wake up reason was done request
-  * @is_new_req		wake up reason was new request
-  * @is_waiting_last_req	mmc context waiting for single running request
-  */
- struct mmc_context_info {
--	bool			is_done_rcv;
- 	bool			is_new_req;
- 	bool			is_waiting_last_req;
- };
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/card.h>
+@@ -375,6 +376,10 @@ struct mmc_host {
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 	struct mmc_context_info	context_info;	/* async synchronization info */
+ 
++	/* finalization work thread, handles finalizing requests */
++	struct kthread_worker	req_done_worker;
++	struct task_struct	*req_done_worker_task;
++
+ 	/* Ongoing data transfer that allows commands during transfer */
+ 	struct mmc_request	*ongoing_mrq;
+ 
 -- 
 2.9.3
+
