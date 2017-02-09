@@ -1,139 +1,63 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 02/16] mmc: core: refactor asynchronous request finalization
-Date: Thu,  9 Feb 2017 16:33:49 +0100
-Message-ID: <20170209153403.9730-3-linus.walleij@linaro.org>
+Subject: [PATCH 04/16] mmc: core: move the asynchronous post-processing
+Date: Thu,  9 Feb 2017 16:33:51 +0100
+Message-ID: <20170209153403.9730-5-linus.walleij@linaro.org>
 References: <20170209153403.9730-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:35993 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753215AbdBIQC3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2017 11:02:29 -0500
-Received: by mail-lf0-f49.google.com with SMTP id z134so4986455lff.3
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2017 08:01:33 -0800 (PST)
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170209153403.9730-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-block-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-mmc_wait_for_data_req_done() is called in exactly one place,
-and having it spread out is making things hard to oversee.
-Factor this function into mmc_finalize_areq().
+This moves the asynchronous post-processing of a request over
+to the finalization function.
+
+The patch has a slight semantic change:
+
+Both places will be in the code path for if (host->areq) and
+in the same sequence, but before this patch, the next request
+was started before performing post-processing.
+
+The effect is that whereas before, the post- and preprocessing
+happened after starting the next request, now the preprocessing
+will happen after the request is done and before the next has
+started which would cut half of the pre/post optimizations out.
+
+The idea is to later move the finalization to a worker started
+by mmc_request_done() and introduce a completion where the code
+now has a TODO comment so that we can push in a new request
+as soon as the host has completed the previous one.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/core.c | 86 +++++++++++++++++++------------------------------
- 1 file changed, 33 insertions(+), 53 deletions(-)
+ drivers/mmc/core/core.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 53065d1cebf7..b2e7a6dfcbf0 100644
+index 8dbed198750f..0972c649ea7a 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -485,56 +485,6 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
- 	return err;
+@@ -643,6 +643,9 @@ static enum mmc_blk_status mmc_finalize_areq(struct mmc_host *host)
+ 		mmc_start_bkops(host->card, true);
+ 	}
+ 
++	/* Successfully postprocess the old request at this point */
++	mmc_post_req(host, host->areq->mrq, 0);
++
+ 	return status;
  }
  
--/*
-- * mmc_wait_for_data_req_done() - wait for request completed
-- * @host: MMC host to prepare the command.
-- * @mrq: MMC request to wait for
-- *
-- * Blocks MMC context till host controller will ack end of data request
-- * execution or new request notification arrives from the block layer.
-- * Handles command retries.
-- *
-- * Returns enum mmc_blk_status after checking errors.
-- */
--static enum mmc_blk_status mmc_wait_for_data_req_done(struct mmc_host *host,
--						      struct mmc_request *mrq)
--{
--	struct mmc_command *cmd;
--	struct mmc_context_info *context_info = &host->context_info;
--	enum mmc_blk_status status;
--
--	while (1) {
--		wait_event_interruptible(context_info->wait,
--				(context_info->is_done_rcv ||
--				 context_info->is_new_req));
--
--		if (context_info->is_done_rcv) {
--			context_info->is_done_rcv = false;
--			cmd = mrq->cmd;
--
--			if (!cmd->error || !cmd->retries ||
--			    mmc_card_removed(host->card)) {
--				status = host->areq->err_check(host->card,
--							       host->areq);
--				break; /* return status */
--			} else {
--				mmc_retune_recheck(host);
--				pr_info("%s: req failed (CMD%u): %d, retrying...\n",
--					mmc_hostname(host),
--					cmd->opcode, cmd->error);
--				cmd->retries--;
--				cmd->error = 0;
--				__mmc_start_request(host, mrq);
--				continue; /* wait for done/new event again */
--			}
--		}
--
--		return MMC_BLK_NEW_REQUEST;
--	}
--	mmc_retune_release(host);
--	return status;
--}
--
- void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
- {
- 	struct mmc_command *cmd;
-@@ -639,14 +589,44 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
-  */
- static enum mmc_blk_status mmc_finalize_areq(struct mmc_host *host)
- {
-+	struct mmc_context_info *context_info = &host->context_info;
- 	enum mmc_blk_status status;
+@@ -687,10 +690,6 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+ 	if (status == MMC_BLK_SUCCESS && areq)
+ 		start_err = __mmc_start_data_req(host, areq->mrq);
  
- 	if (!host->areq)
- 		return MMC_BLK_SUCCESS;
- 
--	status = mmc_wait_for_data_req_done(host, host->areq->mrq);
--	if (status == MMC_BLK_NEW_REQUEST)
--		return status;
-+	while (1) {
-+		wait_event_interruptible(context_info->wait,
-+				(context_info->is_done_rcv ||
-+				 context_info->is_new_req));
-+
-+		if (context_info->is_done_rcv) {
-+			struct mmc_command *cmd;
-+
-+			context_info->is_done_rcv = false;
-+			cmd = host->areq->mrq->cmd;
-+
-+			if (!cmd->error || !cmd->retries ||
-+			    mmc_card_removed(host->card)) {
-+				status = host->areq->err_check(host->card,
-+							       host->areq);
-+				break; /* return status */
-+			} else {
-+				mmc_retune_recheck(host);
-+				pr_info("%s: req failed (CMD%u): %d, retrying...\n",
-+					mmc_hostname(host),
-+					cmd->opcode, cmd->error);
-+				cmd->retries--;
-+				cmd->error = 0;
-+				__mmc_start_request(host, host->areq->mrq);
-+				continue; /* wait for done/new event again */
-+			}
-+		}
-+
-+		return MMC_BLK_NEW_REQUEST;
-+	}
-+
-+	mmc_retune_release(host);
- 
- 	/*
- 	 * Check BKOPS urgency for each R1 response
+-	/* Postprocess the old request at this point */
+-	if (host->areq)
+-		mmc_post_req(host, host->areq->mrq, 0);
+-
+ 	/* Cancel a prepared request if it was not started. */
+ 	if ((status != MMC_BLK_SUCCESS || start_err) && areq)
+ 		mmc_post_req(host, areq->mrq, -EINVAL);
 -- 
 2.9.3
-
