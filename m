@@ -1,45 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.10 rc8
-Date: Fri, 10 Feb 2017 15:47:49 +0100
-Message-ID: <CAPDyKFqbXuLNmqg=CxghV5NmS-qe+ndV6BdvK=2GVXueGH14uA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH RFC 10/39] mmc: block: Change mmc_apply_rel_rw() to get block address from the request
+Date: Fri, 10 Feb 2017 14:55:23 +0200
+Message-ID: <1486731352-8018-11-git-send-email-adrian.hunter@intel.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:44064 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753187AbdBJOuu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Feb 2017 09:50:50 -0500
+In-Reply-To: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Linus,
+mmc_apply_rel_rw() will be used by Software Command Queuing also. In that
+case the command argument is not the block address so change
+mmc_apply_rel_rw() to get block address from the request.
 
-Here's one mmc fix intended for v4.10 rc8 (or final if no new rc).
-Based on v4.10-rc7.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Details are as usual found in the signed tag. Please pull this in!
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 1b1396e86c24..d6dfaebb84ee 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1314,7 +1314,7 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ {
+ 	if (!(card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)) {
+ 		/* Legacy mode imposes restrictions on transfers. */
+-		if (!IS_ALIGNED(brq->cmd.arg, card->ext_csd.rel_sectors))
++		if (!IS_ALIGNED(blk_rq_pos(req), card->ext_csd.rel_sectors))
+ 			brq->data.blocks = 1;
+ 
+ 		if (brq->data.blocks > card->ext_csd.rel_sectors)
+-- 
+1.9.1
 
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit d5adbfcd5f7bcc6fa58a41c5c5ada0e5c826ce2c:
-
-  Linux 4.10-rc7 (2017-02-05 15:10:58 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.10-rc7
-
-for you to fetch changes up to 5cad24d835772f9f709971a8d6fcf12afe53b2a7:
-
-  mmc: mmci: avoid clearing ST Micro busy end interrupt mistakenly
-(2017-02-08 12:22:27 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - mmci: Fix hang while waiting for busy-end interrupt
-
-----------------------------------------------------------------
-Jean-Nicolas Graux (1):
-      mmc: mmci: avoid clearing ST Micro busy end interrupt mistakenly
-
- drivers/mmc/host/mmci.c | 32 +++++++++++++++++++++++++-------
- 1 file changed, 25 insertions(+), 7 deletions(-)
