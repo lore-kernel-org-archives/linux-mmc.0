@@ -1,275 +1,260 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 36/39] mmc: sdhci-pci: Let suspend/resume callbacks replace default callbacks
-Date: Fri, 10 Feb 2017 14:55:49 +0200
-Message-ID: <1486731352-8018-37-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 32/39] mmc: sdhci: Add CQE support
+Date: Fri, 10 Feb 2017 14:55:45 +0200
+Message-ID: <1486731352-8018-33-git-send-email-adrian.hunter@intel.com>
 References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:19176 "EHLO mga05.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:45765 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752050AbdBJNYQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 10 Feb 2017 08:24:16 -0500
+        id S1752045AbdBJNYh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Feb 2017 08:24:37 -0500
 In-Reply-To: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-The suspend / resume callbacks lack the flexibility to allow a device to
-specify a different function entirely. Change them around so that device
-functions are called directly and they in turn can call the default
-implementations if needed.
+Add an interrupt hook and helper functions for enabling, disabling and
+delivering interrupts to a CQE.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c    | 158 +++++++++++++++++++++--------------
- drivers/mmc/host/sdhci-pci-o2micro.c |   2 +-
- drivers/mmc/host/sdhci-pci.h         |   4 +
- 3 files changed, 98 insertions(+), 66 deletions(-)
+ drivers/mmc/host/sdhci.c | 130 +++++++++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci.h |  19 +++++++
+ 2 files changed, 146 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 6ea6a5bce7ac..7c3c63a03dfc 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -41,6 +41,82 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
- 					   unsigned int max_dtr, int host_drv,
- 					   int card_drv, int *drv_type);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 79ab36a37484..865e0e278aa2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -252,6 +252,8 @@ static void sdhci_init(struct sdhci_host *host, int soft)
  
-+#ifdef CONFIG_PM_SLEEP
-+static int __sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-+{
-+	int i, ret;
+ 	sdhci_set_default_irqs(host);
+ 
++	host->cqe_on = false;
 +
-+	for (i = 0; i < chip->num_slots; i++) {
-+		struct sdhci_pci_slot *slot = chip->slots[i];
+ 	if (soft) {
+ 		/* force clock reconfiguration */
+ 		host->clock = 0;
+@@ -2696,13 +2698,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 	}
+ 
+ 	do {
++		DBG("IRQ status 0x%08x\n", intmask);
 +
-+		if (!slot)
-+			continue;
++		if (host->ops->irq) {
++			intmask = host->ops->irq(host, intmask);
++			if (!intmask)
++				goto cont;
++		}
 +
-+		ret = sdhci_suspend_host(slot->host);
-+		if (ret)
-+			goto err_pci_suspend;
-+
-+		if (slot->host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-+			sdhci_enable_irq_wakeups(slot->host);
-+	}
-+
-+	return 0;
-+
-+err_pci_suspend:
-+	while (--i >= 0)
-+		sdhci_resume_host(chip->slots[i]->host);
-+	return ret;
-+}
-+
-+static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
-+{
-+	mmc_pm_flag_t pm_flags = 0;
-+	int i;
-+
-+	for (i = 0; i < chip->num_slots; i++) {
-+		struct sdhci_pci_slot *slot = chip->slots[i];
-+
-+		if (slot)
-+			pm_flags |= slot->host->mmc->pm_flags;
-+	}
-+
-+	return device_init_wakeup(&chip->pdev->dev,
-+				  (pm_flags & MMC_PM_KEEP_POWER) &&
-+				  (pm_flags & MMC_PM_WAKE_SDIO_IRQ));
-+}
-+
-+static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-+{
-+	int ret;
-+
-+	ret = __sdhci_pci_suspend_host(chip);
-+	if (ret)
-+		return ret;
-+
-+	sdhci_pci_init_wakeup(chip);
-+
-+	return 0;
-+}
-+
-+int sdhci_pci_resume_host(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot;
-+	int i, ret;
-+
-+	for (i = 0; i < chip->num_slots; i++) {
-+		slot = chip->slots[i];
-+		if (!slot)
-+			continue;
-+
-+		ret = sdhci_resume_host(slot->host);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return 0;
-+}
-+#endif
-+
+ 		/* Clear selected interrupts. */
+ 		mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
+ 				  SDHCI_INT_BUS_POWER);
+ 		sdhci_writel(host, mask, SDHCI_INT_STATUS);
+ 
+-		DBG("IRQ status 0x%08x\n", intmask);
+-
+ 		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+ 			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+ 				      SDHCI_CARD_PRESENT;
+@@ -2762,7 +2770,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 			unexpected |= intmask;
+ 			sdhci_writel(host, intmask, SDHCI_INT_STATUS);
+ 		}
+-
++cont:
+ 		if (result == IRQ_NONE)
+ 			result = IRQ_HANDLED;
+ 
+@@ -2995,6 +3003,119 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 
  /*****************************************************************************\
   *                                                                           *
-  * Hardware specific quirk handling                                          *
-@@ -78,7 +154,7 @@ static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
- 	/* Otherwise it becomes confused if card state changed
- 		during suspend */
- 	msleep(500);
--	return 0;
-+	return sdhci_pci_resume_host(chip);
- }
- #endif
- 
-@@ -722,7 +798,11 @@ static void jmicron_remove_slot(struct sdhci_pci_slot *slot, int dead)
- #ifdef CONFIG_PM_SLEEP
- static int jmicron_suspend(struct sdhci_pci_chip *chip)
- {
--	int i;
-+	int i, ret;
++ * Command Queue Engine (CQE) helpers                                        *
++ *                                                                           *
++\*****************************************************************************/
 +
-+	ret = __sdhci_pci_suspend_host(chip);
-+	if (ret)
-+		return ret;
- 
- 	if (chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB38X_MMC ||
- 	    chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB388_ESD) {
-@@ -730,6 +810,8 @@ static int jmicron_suspend(struct sdhci_pci_chip *chip)
- 			jmicron_enable_mmc(chip->slots[i]->host, 0);
- 	}
- 
-+	sdhci_pci_init_wakeup(chip);
++void sdhci_cqe_enable(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	u8 ctrl;
 +
- 	return 0;
- }
- 
-@@ -749,7 +831,7 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
- 		return ret;
- 	}
- 
--	return 0;
-+	return sdhci_pci_resume_host(chip);
- }
- #endif
- 
-@@ -1657,83 +1739,29 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
- static int sdhci_pci_suspend(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
--	struct sdhci_pci_chip *chip;
--	struct sdhci_pci_slot *slot;
--	mmc_pm_flag_t slot_pm_flags;
--	mmc_pm_flag_t pm_flags = 0;
--	int i, ret;
-+	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
- 
--	chip = pci_get_drvdata(pdev);
- 	if (!chip)
- 		return 0;
- 
--	for (i = 0; i < chip->num_slots; i++) {
--		slot = chip->slots[i];
--		if (!slot)
--			continue;
--
--		ret = sdhci_suspend_host(slot->host);
-+	if (chip->fixes && chip->fixes->suspend)
-+		return chip->fixes->suspend(chip);
- 
--		if (ret)
--			goto err_pci_suspend;
--
--		slot_pm_flags = slot->host->mmc->pm_flags;
--		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
--			sdhci_enable_irq_wakeups(slot->host);
--
--		pm_flags |= slot_pm_flags;
--	}
--
--	if (chip->fixes && chip->fixes->suspend) {
--		ret = chip->fixes->suspend(chip);
--		if (ret)
--			goto err_pci_suspend;
--	}
--
--	if (pm_flags & MMC_PM_KEEP_POWER) {
--		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
--			device_init_wakeup(dev, true);
--		else
--			device_init_wakeup(dev, false);
--	} else
--		device_init_wakeup(dev, false);
--
--	return 0;
--
--err_pci_suspend:
--	while (--i >= 0)
--		sdhci_resume_host(chip->slots[i]->host);
--	return ret;
-+	return sdhci_pci_suspend_host(chip);
- }
- 
- static int sdhci_pci_resume(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
--	struct sdhci_pci_chip *chip;
--	struct sdhci_pci_slot *slot;
--	int i, ret;
-+	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
- 
--	chip = pci_get_drvdata(pdev);
- 	if (!chip)
- 		return 0;
- 
--	if (chip->fixes && chip->fixes->resume) {
--		ret = chip->fixes->resume(chip);
--		if (ret)
--			return ret;
--	}
--
--	for (i = 0; i < chip->num_slots; i++) {
--		slot = chip->slots[i];
--		if (!slot)
--			continue;
-+	if (chip->fixes && chip->fixes->resume)
-+		return chip->fixes->resume(chip);
- 
--		ret = sdhci_resume_host(slot->host);
--		if (ret)
--			return ret;
--	}
--
--	return 0;
-+	return sdhci_pci_resume_host(chip);
- }
- #endif
- 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 0ea34e2c7cba..14273ca00641 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -388,6 +388,6 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip)
- {
- 	sdhci_pci_o2_probe(chip);
--	return 0;
-+	return sdhci_pci_resume_host(chip);
- }
- #endif
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 47869bc20c59..182c95894768 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -106,4 +106,8 @@ struct sdhci_pci_chip {
- 	struct sdhci_pci_slot	*slots[MAX_SLOTS]; /* Pointers to host slots */
- };
- 
-+#ifdef CONFIG_PM_SLEEP
-+int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
-+#endif
++	spin_lock_irqsave(&host->lock, flags);
 +
- #endif /* __SDHCI_PCI_H */
++	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++	ctrl &= ~SDHCI_CTRL_DMA_MASK;
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		ctrl |= SDHCI_CTRL_ADMA64;
++	else
++		ctrl |= SDHCI_CTRL_ADMA32;
++	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++
++	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG, 512),
++		     SDHCI_BLOCK_SIZE);
++
++	/* Set maximum timeout */
++	sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
++
++	host->ier = host->cqe_ier;
++
++	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++
++	host->cqe_on = true;
++
++	pr_debug("%s: sdhci: CQE on, IRQ mask %#x, IRQ status %#x\n",
++		 mmc_hostname(mmc), host->ier,
++		 sdhci_readl(host, SDHCI_INT_STATUS));
++
++	mmiowb();
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++EXPORT_SYMBOL_GPL(sdhci_cqe_enable);
++
++void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	sdhci_set_default_irqs(host);
++
++	host->cqe_on = false;
++
++	if (recovery) {
++		sdhci_do_reset(host, SDHCI_RESET_CMD);
++		sdhci_do_reset(host, SDHCI_RESET_DATA);
++	}
++
++	pr_debug("%s: sdhci: CQE off, IRQ mask %#x, IRQ status %#x\n",
++		 mmc_hostname(mmc), host->ier,
++		 sdhci_readl(host, SDHCI_INT_STATUS));
++
++	mmiowb();
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++EXPORT_SYMBOL_GPL(sdhci_cqe_disable);
++
++bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
++		   int *data_error)
++{
++	u32 mask;
++
++	if (!host->cqe_on)
++		return false;
++
++	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
++		*cmd_error = -EILSEQ;
++	else if (intmask & SDHCI_INT_TIMEOUT)
++		*cmd_error = -ETIMEDOUT;
++	else
++		*cmd_error = 0;
++
++	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
++		*data_error = -EILSEQ;
++	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
++		*data_error = -ETIMEDOUT;
++	else if (intmask & SDHCI_INT_ADMA_ERROR)
++		*data_error = -EIO;
++	else
++		*data_error = 0;
++
++	/* Clear selected interrupts. */
++	mask = intmask & host->cqe_ier;
++	sdhci_writel(host, mask, SDHCI_INT_STATUS);
++
++	if (intmask & SDHCI_INT_BUS_POWER)
++		pr_err("%s: Card is consuming too much power!\n",
++		       mmc_hostname(host->mmc));
++
++	intmask &= ~(host->cqe_ier | SDHCI_INT_ERROR);
++	if (intmask) {
++		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
++		pr_err("%s: CQE: Unexpected interrupt 0x%08x.\n",
++		       mmc_hostname(host->mmc), intmask);
++		sdhci_dumpregs(host);
++	}
++
++	return true;
++}
++EXPORT_SYMBOL_GPL(sdhci_cqe_irq);
++
++/*****************************************************************************\
++ *                                                                           *
+  * Device allocation/registration                                            *
+  *                                                                           *
+ \*****************************************************************************/
+@@ -3018,6 +3139,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ 	host->flags = SDHCI_SIGNALING_330;
+ 
++	host->cqe_ier     = SDHCI_CQE_INT_MASK;
++	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
++
+ 	return host;
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index afa2cc394ae9..c50df362223f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -134,6 +134,7 @@
+ #define  SDHCI_INT_CARD_REMOVE	0x00000080
+ #define  SDHCI_INT_CARD_INT	0x00000100
+ #define  SDHCI_INT_RETUNE	0x00001000
++#define  SDHCI_INT_CQE		0x00004000
+ #define  SDHCI_INT_ERROR	0x00008000
+ #define  SDHCI_INT_TIMEOUT	0x00010000
+ #define  SDHCI_INT_CRC		0x00020000
+@@ -158,6 +159,13 @@
+ 		SDHCI_INT_BLK_GAP)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
++#define SDHCI_CQE_INT_ERR_MASK ( \
++	SDHCI_INT_ADMA_ERROR | SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT | \
++	SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX | \
++	SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)
++
++#define SDHCI_CQE_INT_MASK (SDHCI_CQE_INT_ERR_MASK | SDHCI_INT_CQE)
++
+ #define SDHCI_ACMD12_ERR	0x3C
+ 
+ #define SDHCI_HOST_CONTROL2		0x3E
+@@ -518,6 +526,10 @@ struct sdhci_host {
+ 	/* cached registers */
+ 	u32			ier;
+ 
++	bool			cqe_on;		/* CQE is operating */
++	u32			cqe_ier;	/* CQE interrupt mask */
++	u32			cqe_err_ier;	/* CQE error interrupt mask */
++
+ 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
+ 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
+ 
+@@ -544,6 +556,8 @@ struct sdhci_ops {
+ 	void	(*set_power)(struct sdhci_host *host, unsigned char mode,
+ 			     unsigned short vdd);
+ 
++	u32		(*irq)(struct sdhci_host *host, u32 intmask);
++
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+@@ -701,6 +715,11 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ int sdhci_runtime_resume_host(struct sdhci_host *host);
+ #endif
+ 
++void sdhci_cqe_enable(struct mmc_host *mmc);
++void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
++bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
++		   int *data_error);
++
+ void sdhci_dumpregs(struct sdhci_host *host);
+ 
+ #endif /* __SDHCI_HW_H */
 -- 
 1.9.1
 
