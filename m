@@ -1,59 +1,225 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 28/39] mmc: sdhci: Export sdhci_dumpregs
-Date: Fri, 10 Feb 2017 14:55:41 +0200
-Message-ID: <1486731352-8018-29-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 11/39] mmc: block: Factor out data preparation
+Date: Fri, 10 Feb 2017 14:55:24 +0200
+Message-ID: <1486731352-8018-12-git-send-email-adrian.hunter@intel.com>
 References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:33254 "EHLO mga01.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:51337 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751611AbdBJNts (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 10 Feb 2017 08:49:48 -0500
+        id S1751370AbdBJNvT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Feb 2017 08:51:19 -0500
 In-Reply-To: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Export sdhci_dumpregs so that it can be called by drivers.
+Factor out data preparation into a separate function mmc_blk_data_prep()
+which can be re-used for command queuing.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/core/block.c | 151 +++++++++++++++++++++++++----------------------
+ 1 file changed, 82 insertions(+), 69 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 91da20acd068..5aa96ada1314 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -51,7 +51,7 @@
- 
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
--static void sdhci_dumpregs(struct sdhci_host *host)
-+void sdhci_dumpregs(struct sdhci_host *host)
- {
- 	SDHCI_DUMP("============ SDHCI REGISTER DUMP ===========\n");
- 
-@@ -112,6 +112,7 @@ static void sdhci_dumpregs(struct sdhci_host *host)
- 
- 	SDHCI_DUMP("============================================\n");
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index d6dfaebb84ee..17c19387bf84 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1438,36 +1438,39 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 	return MMC_BLK_SUCCESS;
  }
-+EXPORT_SYMBOL_GPL(sdhci_dumpregs);
  
- /*****************************************************************************\
-  *                                                                           *
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index edf3adfbc213..61753492a8e8 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -702,4 +702,6 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
- extern int sdhci_runtime_resume_host(struct sdhci_host *host);
- #endif
+-static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+-			       struct mmc_card *card,
+-			       int disable_multi,
+-			       struct mmc_queue *mq)
++static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
++			      int disable_multi, bool *do_rel_wr,
++			      bool *do_data_tag)
+ {
+-	u32 readcmd, writecmd;
++	struct mmc_blk_data *md = mq->blkdata;
++	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+ 	struct request *req = mqrq->req;
+-	struct mmc_blk_data *md = mq->blkdata;
+-	bool do_data_tag;
  
-+void sdhci_dumpregs(struct sdhci_host *host);
+ 	/*
+ 	 * Reliable writes are used to implement Forced Unit Access and
+ 	 * are supported only on MMCs.
+ 	 */
+-	bool do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+-		(rq_data_dir(req) == WRITE) &&
+-		(md->flags & MMC_BLK_REL_WR);
++	*do_rel_wr = (req->cmd_flags & REQ_FUA) &&
++		     rq_data_dir(req) == WRITE &&
++		     (md->flags & MMC_BLK_REL_WR);
+ 
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+-	brq->mrq.cmd = &brq->cmd;
 +
- #endif /* __SDHCI_HW_H */
+ 	brq->mrq.data = &brq->data;
+ 
+-	brq->cmd.arg = blk_rq_pos(req);
+-	if (!mmc_card_blockaddr(card))
+-		brq->cmd.arg <<= 9;
+-	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+-	brq->data.blksz = 512;
+ 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+ 	brq->stop.arg = 0;
++
++	if (rq_data_dir(req) == READ) {
++		brq->data.flags = MMC_DATA_READ;
++		brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++	} else {
++		brq->data.flags = MMC_DATA_WRITE;
++		brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++	}
++
++	brq->data.blksz = 512;
+ 	brq->data.blocks = blk_rq_sectors(req);
+ 
+ 	/*
+@@ -1498,6 +1501,68 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
+ 	}
+ 
++	if (*do_rel_wr)
++		mmc_apply_rel_rw(brq, card, req);
++
++	/*
++	 * Data tag is used only during writing meta data to speed
++	 * up write and any subsequent read of this meta data
++	 */
++	*do_data_tag = card->ext_csd.data_tag_unit_size &&
++		       (req->cmd_flags & REQ_META) &&
++		       (rq_data_dir(req) == WRITE) &&
++		       ((brq->data.blocks * brq->data.blksz) >=
++			card->ext_csd.data_tag_unit_size);
++
++	mmc_set_data_timeout(&brq->data, card);
++
++	brq->data.sg = mqrq->sg;
++	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
++
++	/*
++	 * Adjust the sg list so it is the same size as the
++	 * request.
++	 */
++	if (brq->data.blocks != blk_rq_sectors(req)) {
++		int i, data_size = brq->data.blocks << 9;
++		struct scatterlist *sg;
++
++		for_each_sg(brq->data.sg, sg, brq->data.sg_len, i) {
++			data_size -= sg->length;
++			if (data_size <= 0) {
++				sg->length += data_size;
++				i++;
++				break;
++			}
++		}
++		brq->data.sg_len = i;
++	}
++
++	mqrq->areq.mrq = &brq->mrq;
++
++	mmc_queue_bounce_pre(mqrq);
++}
++
++static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
++			       struct mmc_card *card,
++			       int disable_multi,
++			       struct mmc_queue *mq)
++{
++	u32 readcmd, writecmd;
++	struct mmc_blk_request *brq = &mqrq->brq;
++	struct request *req = mqrq->req;
++	struct mmc_blk_data *md = mq->blkdata;
++	bool do_rel_wr, do_data_tag;
++
++	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
++
++	brq->mrq.cmd = &brq->cmd;
++
++	brq->cmd.arg = blk_rq_pos(req);
++	if (!mmc_card_blockaddr(card))
++		brq->cmd.arg <<= 9;
++	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++
+ 	if (brq->data.blocks > 1 || do_rel_wr) {
+ 		/* SPI multiblock writes terminate using a special
+ 		 * token, not a STOP_TRANSMISSION request.
+@@ -1512,32 +1577,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 		readcmd = MMC_READ_SINGLE_BLOCK;
+ 		writecmd = MMC_WRITE_BLOCK;
+ 	}
+-	if (rq_data_dir(req) == READ) {
+-		brq->cmd.opcode = readcmd;
+-		brq->data.flags = MMC_DATA_READ;
+-		if (brq->mrq.stop)
+-			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+-					MMC_CMD_AC;
+-	} else {
+-		brq->cmd.opcode = writecmd;
+-		brq->data.flags = MMC_DATA_WRITE;
+-		if (brq->mrq.stop)
+-			brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
+-					MMC_CMD_AC;
+-	}
+-
+-	if (do_rel_wr)
+-		mmc_apply_rel_rw(brq, card, req);
+-
+-	/*
+-	 * Data tag is used only during writing meta data to speed
+-	 * up write and any subsequent read of this meta data
+-	 */
+-	do_data_tag = (card->ext_csd.data_tag_unit_size) &&
+-		(req->cmd_flags & REQ_META) &&
+-		(rq_data_dir(req) == WRITE) &&
+-		((brq->data.blocks * brq->data.blksz) >=
+-		 card->ext_csd.data_tag_unit_size);
++	brq->cmd.opcode = rq_data_dir(req) == READ ? readcmd : writecmd;
+ 
+ 	/*
+ 	 * Pre-defined multi-block transfers are preferable to
+@@ -1568,34 +1608,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 		brq->mrq.sbc = &brq->sbc;
+ 	}
+ 
+-	mmc_set_data_timeout(&brq->data, card);
+-
+-	brq->data.sg = mqrq->sg;
+-	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
+-
+-	/*
+-	 * Adjust the sg list so it is the same size as the
+-	 * request.
+-	 */
+-	if (brq->data.blocks != blk_rq_sectors(req)) {
+-		int i, data_size = brq->data.blocks << 9;
+-		struct scatterlist *sg;
+-
+-		for_each_sg(brq->data.sg, sg, brq->data.sg_len, i) {
+-			data_size -= sg->length;
+-			if (data_size <= 0) {
+-				sg->length += data_size;
+-				i++;
+-				break;
+-			}
+-		}
+-		brq->data.sg_len = i;
+-	}
+-
+-	mqrq->areq.mrq = &brq->mrq;
+ 	mqrq->areq.err_check = mmc_blk_err_check;
+-
+-	mmc_queue_bounce_pre(mqrq);
+ }
+ 
+ static bool mmc_blk_rw_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
 -- 
 1.9.1
 
