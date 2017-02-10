@@ -1,86 +1,103 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 1/5] mmc: core: change quirks.c to be a header file
-Date: Fri, 10 Feb 2017 17:41:33 +0800
-Message-ID: <dbb5a0f4-b1cd-84cb-7ff2-adf59b0e0714@rock-chips.com>
-References: <1486516546-187771-1-git-send-email-shawn.lin@rock-chips.com>
- <1486516546-187771-2-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFrXkcXbcwiEbBzZJbpKL9-34C7jBap5rfBkpD0YtP+VUA@mail.gmail.com>
+From: Tomas Melin <tomas.melin@vaisala.com>
+Subject: Re: [RFC PATCH] mmc: block: Support the fixed index for mmcblk with
+ aliases nodes
+Date: Fri, 10 Feb 2017 13:35:18 +0200
+Message-ID: <e4c2e2ab-29bc-a32a-8da7-082f5ffbabd8@vaisala.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:41829 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750994AbdBJJz4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2017 04:55:56 -0500
-In-Reply-To: <CAPDyKFrXkcXbcwiEbBzZJbpKL9-34C7jBap5rfBkpD0YtP+VUA@mail.gmail.com>
+Received: from hel-mailgw-01.vaisala.com ([193.143.230.17]:46778 "EHLO
+        hel-mailgw-01.vaisala.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752705AbdBJLfr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2017 06:35:47 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, jszhang@marvell.com, shawn.lin@rock-chips.com, dianders@google.com
 
-On 2017/2/8 19:15, Ulf Hansson wrote:
-> [...]
->
->> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.h
->> similarity index 95%
->> rename from drivers/mmc/core/quirks.c
->> rename to drivers/mmc/core/quirks.h
->> index bf25a9c..f3bbfcb7 100644
->> --- a/drivers/mmc/core/quirks.c
->> +++ b/drivers/mmc/core/quirks.h
->
-> As you are rename this to become a header file, please also clean up
-> the included headers from the new quirks.h.
->
-> For example, you don't need these:
->
-> #include <linux/kernel.h>
-> #include <linux/export.h>
->
-> Instead you need:
-> #include <linux/device.h>
-> #include <linux/string.h>
->
+Hi,
 
-Sure.
+It looks as this RFC was never posted as a real patch.
+For embedded devices with several memory devices, some being removable,
+providing a way to define aliases for the nodes in the device tree is a benefit.
+I have tested the patch from Jaehoon and it works nicely.
 
->
->> @@ -53,7 +53,8 @@
->>         END_FIXUP
->>  };
+Could this be reposted and considered for inclusion?
+
+Found the original patch here: https://patchwork.kernel.org/patch/8685711/
+
+Best Regards
+Tomas
+
+
+On 04/04/2016 09:14 PM, Ulf Hansson wrote:
+> On 4 April 2016 at 04:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi All,
 >>
->> -void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
->> +static inline void __maybe_unused
+>> Are there any other opinion for this RFC patch?
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 03/30/2016 09:15 AM, Shawn Lin wrote:
+>>> åœ¨ 2016/3/29 18:49, Jisheng Zhang å†™é“:
+>>>> Hi Jaehoon,
+>>>>
+>>>> On Tue, 29 Mar 2016 19:43:34 +0900 Jaehoon Chung wrote:
+>>>>
+>>>>> This patch is just RFC. I want to know opinions.
+>>>>>
+>>>>> Now, index of mmcblk is allocated in accordance with probing time.
+>>>>> If want to use the mmcblk1 for some device, it can use alias.
+>>>>>
+>>>>> aliases {
+>>>>>     mmc0 = &mmc0;    /* mmcblk0 for eMMC */
+>>>>>     mmc1 = &mmc2;    /* mmcblk1 for SD */
+>>>>>     mmc2 = &mmc1;    /* mmcblk2 for SDIO*/
+>>>>> };
+>>>>
+>>>> I like this feature and we do need it. In the past, we have to put emmc dt node
+>>>> before the sd node, but on our platform, the register base of sdhc host for
+emmc
+>>>> is higher than the one for sd, putting emmc dt node before sd looks a bit
+>>>> strange, but we have no better solutions.
+>>>>
+>>>
+>>> :) That is also what I suffered currently. I have to prepare two
+>>> seperate firmware with two diff fstab files to assign the mount point
+>>> since sometime I need to boot from sd, but sometimes from emmc....
+>>> With this patch, I only need to dtc a new dtb... quite simple.
+>>>
+>>>> Thanks,
+>>>> Jisheng
 >
-> The "__maybe_unused" shouldn't be needed here, or is it?
+> I am not immediately opposed to this patch, although let me think a
+> bit more about it.
 >
+> What I would like to understand is why UUID/PARTUUID isn't working for
+> your case. Did you try to use that?
 
-I tried to keep a C file to include quirk.h to make sure it will
-be compiled standalone cleanly. Otherwise the gcc cast a warning
-with W=1 about "defined but not used"..
+I have used with UUID/PARTUUID/PARTLABEL and etc.. I think it's not problem.
+But that is why some guys wants to use the fixed index.
+(Almost all SoCs are still using "root=mmcblk0pX" in bootloader.)
 
+I'm considering more what is better. :)
 
->> +mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
->>  {
->>         const struct mmc_fixup *f;
->>         u64 rev = cid_rev_card(card);
->> @@ -82,4 +83,3 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
->>                 }
->>         }
->>  }
->> -EXPORT_SYMBOL(mmc_fixup_device);
->
-> [...]
+Best Regards,
+Jaehoon Chung
+
 >
 > Kind regards
 > Uffe
->
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 >
 
-
--- 
-Best Regards
-Shawn Lin
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
