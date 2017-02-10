@@ -1,260 +1,446 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 32/39] mmc: sdhci: Add CQE support
-Date: Fri, 10 Feb 2017 14:55:45 +0200
-Message-ID: <1486731352-8018-33-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 02/39] mmc: queue: Share mmc request array between partitions
+Date: Fri, 10 Feb 2017 14:55:15 +0200
+Message-ID: <1486731352-8018-3-git-send-email-adrian.hunter@intel.com>
 References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:45765 "EHLO mga01.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:64970 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752045AbdBJNYh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 10 Feb 2017 08:24:37 -0500
+        id S1752045AbdBJNYQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Feb 2017 08:24:16 -0500
 In-Reply-To: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Add an interrupt hook and helper functions for enabling, disabling and
-delivering interrupts to a CQE.
+eMMC can have multiple internal partitions that are represented as separate
+disks / queues. However switching between partitions is only done when the
+queue is empty. Consequently the array of mmc requests that are queued can
+be shared between partitions saving memory.
+
+Keep a pointer to the mmc request queue on the card, and use that instead
+of allocating a new one for each partition.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 130 +++++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |  19 +++++++
- 2 files changed, 146 insertions(+), 3 deletions(-)
+ drivers/mmc/core/block.c |  11 ++-
+ drivers/mmc/core/queue.c | 235 ++++++++++++++++++++++++++++-------------------
+ drivers/mmc/core/queue.h |   2 +
+ include/linux/mmc/card.h |   5 +
+ 4 files changed, 156 insertions(+), 97 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 79ab36a37484..865e0e278aa2 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -252,6 +252,8 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 061133f3b0b2..b6d1497c395f 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2187,6 +2187,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+ {
+ 	struct mmc_blk_data *md, *part_md;
+ 	char cap_str[10];
++	int ret;
  
- 	sdhci_set_default_irqs(host);
+ 	/*
+ 	 * Check that the card supports the command class(es) we need.
+@@ -2196,9 +2197,15 @@ static int mmc_blk_probe(struct mmc_card *card)
  
-+	host->cqe_on = false;
-+
- 	if (soft) {
- 		/* force clock reconfiguration */
- 		host->clock = 0;
-@@ -2696,13 +2698,19 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 	}
+ 	mmc_fixup_device(card, blk_fixups);
  
- 	do {
-+		DBG("IRQ status 0x%08x\n", intmask);
++	ret = mmc_queue_alloc_shared_queue(card);
++	if (ret)
++		return ret;
 +
-+		if (host->ops->irq) {
-+			intmask = host->ops->irq(host, intmask);
-+			if (!intmask)
-+				goto cont;
-+		}
-+
- 		/* Clear selected interrupts. */
- 		mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
- 				  SDHCI_INT_BUS_POWER);
- 		sdhci_writel(host, mask, SDHCI_INT_STATUS);
- 
--		DBG("IRQ status 0x%08x\n", intmask);
--
- 		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
- 			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
- 				      SDHCI_CARD_PRESENT;
-@@ -2762,7 +2770,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 			unexpected |= intmask;
- 			sdhci_writel(host, intmask, SDHCI_INT_STATUS);
- 		}
--
-+cont:
- 		if (result == IRQ_NONE)
- 			result = IRQ_HANDLED;
- 
-@@ -2995,6 +3003,119 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 
- /*****************************************************************************\
-  *                                                                           *
-+ * Command Queue Engine (CQE) helpers                                        *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+void sdhci_cqe_enable(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	u8 ctrl;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+	ctrl &= ~SDHCI_CTRL_DMA_MASK;
-+	if (host->flags & SDHCI_USE_64_BIT_DMA)
-+		ctrl |= SDHCI_CTRL_ADMA64;
-+	else
-+		ctrl |= SDHCI_CTRL_ADMA32;
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+
-+	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG, 512),
-+		     SDHCI_BLOCK_SIZE);
-+
-+	/* Set maximum timeout */
-+	sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
-+
-+	host->ier = host->cqe_ier;
-+
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+
-+	host->cqe_on = true;
-+
-+	pr_debug("%s: sdhci: CQE on, IRQ mask %#x, IRQ status %#x\n",
-+		 mmc_hostname(mmc), host->ier,
-+		 sdhci_readl(host, SDHCI_INT_STATUS));
-+
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_cqe_enable);
-+
-+void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	sdhci_set_default_irqs(host);
-+
-+	host->cqe_on = false;
-+
-+	if (recovery) {
-+		sdhci_do_reset(host, SDHCI_RESET_CMD);
-+		sdhci_do_reset(host, SDHCI_RESET_DATA);
+ 	md = mmc_blk_alloc(card);
+-	if (IS_ERR(md))
++	if (IS_ERR(md)) {
++		mmc_queue_free_shared_queue(card);
+ 		return PTR_ERR(md);
 +	}
-+
-+	pr_debug("%s: sdhci: CQE off, IRQ mask %#x, IRQ status %#x\n",
-+		 mmc_hostname(mmc), host->ier,
-+		 sdhci_readl(host, SDHCI_INT_STATUS));
-+
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_cqe_disable);
-+
-+bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
-+		   int *data_error)
-+{
-+	u32 mask;
-+
-+	if (!host->cqe_on)
-+		return false;
-+
-+	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
-+		*cmd_error = -EILSEQ;
-+	else if (intmask & SDHCI_INT_TIMEOUT)
-+		*cmd_error = -ETIMEDOUT;
-+	else
-+		*cmd_error = 0;
-+
-+	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
-+		*data_error = -EILSEQ;
-+	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
-+		*data_error = -ETIMEDOUT;
-+	else if (intmask & SDHCI_INT_ADMA_ERROR)
-+		*data_error = -EIO;
-+	else
-+		*data_error = 0;
-+
-+	/* Clear selected interrupts. */
-+	mask = intmask & host->cqe_ier;
-+	sdhci_writel(host, mask, SDHCI_INT_STATUS);
-+
-+	if (intmask & SDHCI_INT_BUS_POWER)
-+		pr_err("%s: Card is consuming too much power!\n",
-+		       mmc_hostname(host->mmc));
-+
-+	intmask &= ~(host->cqe_ier | SDHCI_INT_ERROR);
-+	if (intmask) {
-+		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
-+		pr_err("%s: CQE: Unexpected interrupt 0x%08x.\n",
-+		       mmc_hostname(host->mmc), intmask);
-+		sdhci_dumpregs(host);
-+	}
-+
-+	return true;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_cqe_irq);
-+
-+/*****************************************************************************\
-+ *                                                                           *
-  * Device allocation/registration                                            *
-  *                                                                           *
- \*****************************************************************************/
-@@ -3018,6 +3139,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
  
- 	host->flags = SDHCI_SIGNALING_330;
- 
-+	host->cqe_ier     = SDHCI_CQE_INT_MASK;
-+	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
-+
- 	return host;
+ 	string_get_size((u64)get_capacity(md->disk), 512, STRING_UNITS_2,
+ 			cap_str, sizeof(cap_str));
+@@ -2236,6 +2243,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+  out:
+ 	mmc_blk_remove_parts(card, md);
+ 	mmc_blk_remove_req(md);
++	mmc_queue_free_shared_queue(card);
+ 	return 0;
  }
  
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index afa2cc394ae9..c50df362223f 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -134,6 +134,7 @@
- #define  SDHCI_INT_CARD_REMOVE	0x00000080
- #define  SDHCI_INT_CARD_INT	0x00000100
- #define  SDHCI_INT_RETUNE	0x00001000
-+#define  SDHCI_INT_CQE		0x00004000
- #define  SDHCI_INT_ERROR	0x00008000
- #define  SDHCI_INT_TIMEOUT	0x00010000
- #define  SDHCI_INT_CRC		0x00020000
-@@ -158,6 +159,13 @@
- 		SDHCI_INT_BLK_GAP)
- #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+@@ -2253,6 +2261,7 @@ static void mmc_blk_remove(struct mmc_card *card)
+ 	pm_runtime_put_noidle(&card->dev);
+ 	mmc_blk_remove_req(md);
+ 	dev_set_drvdata(&card->dev, NULL);
++	mmc_queue_free_shared_queue(card);
+ }
  
-+#define SDHCI_CQE_INT_ERR_MASK ( \
-+	SDHCI_INT_ADMA_ERROR | SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT | \
-+	SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX | \
-+	SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)
+ static int _mmc_blk_suspend(struct mmc_card *card)
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 5cb369c2664b..031553c9be04 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -150,17 +150,13 @@ static void mmc_request_fn(struct request_queue *q)
+ 		wake_up_process(mq->thread);
+ }
+ 
+-static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
++static struct scatterlist *mmc_alloc_sg(int sg_len)
+ {
+ 	struct scatterlist *sg;
+ 
+ 	sg = kmalloc_array(sg_len, sizeof(*sg), GFP_KERNEL);
+-	if (!sg)
+-		*err = -ENOMEM;
+-	else {
+-		*err = 0;
++	if (sg)
+ 		sg_init_table(sg, sg_len);
+-	}
+ 
+ 	return sg;
+ }
+@@ -186,80 +182,164 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECERASE, q);
+ }
+ 
++static void mmc_queue_req_free_bufs(struct mmc_queue_req *mqrq)
++{
++	kfree(mqrq->bounce_sg);
++	mqrq->bounce_sg = NULL;
 +
-+#define SDHCI_CQE_INT_MASK (SDHCI_CQE_INT_ERR_MASK | SDHCI_INT_CQE)
++	kfree(mqrq->sg);
++	mqrq->sg = NULL;
 +
- #define SDHCI_ACMD12_ERR	0x3C
- 
- #define SDHCI_HOST_CONTROL2		0x3E
-@@ -518,6 +526,10 @@ struct sdhci_host {
- 	/* cached registers */
- 	u32			ier;
- 
-+	bool			cqe_on;		/* CQE is operating */
-+	u32			cqe_ier;	/* CQE interrupt mask */
-+	u32			cqe_err_ier;	/* CQE error interrupt mask */
++	kfree(mqrq->bounce_buf);
++	mqrq->bounce_buf = NULL;
++}
 +
- 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
- 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
- 
-@@ -544,6 +556,8 @@ struct sdhci_ops {
- 	void	(*set_power)(struct sdhci_host *host, unsigned char mode,
- 			     unsigned short vdd);
- 
-+	u32		(*irq)(struct sdhci_host *host, u32 intmask);
++static void mmc_queue_reqs_free_bufs(struct mmc_queue_req *mqrq, int qdepth)
++{
++	int i;
 +
- 	int		(*enable_dma)(struct sdhci_host *host);
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-@@ -701,6 +715,11 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
- int sdhci_runtime_resume_host(struct sdhci_host *host);
++	for (i = 0; i < qdepth; i++)
++		mmc_queue_req_free_bufs(&mqrq[i]);
++}
++
++static void mmc_queue_free_mqrqs(struct mmc_queue_req *mqrq, int qdepth)
++{
++	mmc_queue_reqs_free_bufs(mqrq, qdepth);
++	kfree(mqrq);
++}
++
+ #ifdef CONFIG_MMC_BLOCK_BOUNCE
+-static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
+-					unsigned int bouncesz)
++static int mmc_queue_alloc_bounce_bufs(struct mmc_queue_req *mqrq, int qdepth,
++				       unsigned int bouncesz)
+ {
+ 	int i;
+ 
+-	for (i = 0; i < mq->qdepth; i++) {
+-		mq->mqrq[i].bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-		if (!mq->mqrq[i].bounce_buf)
+-			goto out_err;
+-	}
++	for (i = 0; i < qdepth; i++) {
++		mqrq[i].bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++		if (!mqrq[i].bounce_buf)
++			return -ENOMEM;
+ 
+-	return true;
++		mqrq[i].sg = mmc_alloc_sg(1);
++		if (!mqrq[i].sg)
++			return -ENOMEM;
+ 
+-out_err:
+-	while (--i >= 0) {
+-		kfree(mq->mqrq[i].bounce_buf);
+-		mq->mqrq[i].bounce_buf = NULL;
++		mqrq[i].bounce_sg = mmc_alloc_sg(bouncesz / 512);
++		if (!mqrq[i].bounce_sg)
++			return -ENOMEM;
+ 	}
+-	pr_warn("%s: unable to allocate bounce buffers\n",
+-		mmc_card_name(mq->card));
+-	return false;
++
++	return 0;
+ }
+ 
+-static int mmc_queue_alloc_bounce_sgs(struct mmc_queue *mq,
+-				      unsigned int bouncesz)
++static bool mmc_queue_alloc_bounce(struct mmc_queue_req *mqrq, int qdepth,
++				   unsigned int bouncesz)
+ {
+-	int i, ret;
++	int ret;
+ 
+-	for (i = 0; i < mq->qdepth; i++) {
+-		mq->mqrq[i].sg = mmc_alloc_sg(1, &ret);
+-		if (ret)
+-			return ret;
++	ret = mmc_queue_alloc_bounce_bufs(mqrq, qdepth, bouncesz);
++	if (ret)
++		mmc_queue_reqs_free_bufs(mqrq, qdepth);
+ 
+-		mq->mqrq[i].bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
+-		if (ret)
+-			return ret;
+-	}
++	return !ret;
++}
++
++static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
++{
++	unsigned int bouncesz = MMC_QUEUE_BOUNCESZ;
++
++	if (host->max_segs != 1)
++		return 0;
++
++	if (bouncesz > host->max_req_size)
++		bouncesz = host->max_req_size;
++	if (bouncesz > host->max_seg_size)
++		bouncesz = host->max_seg_size;
++	if (bouncesz > host->max_blk_count * 512)
++		bouncesz = host->max_blk_count * 512;
++
++	if (bouncesz <= 512)
++		return 0;
++
++	return bouncesz;
++}
++#else
++static inline bool mmc_queue_alloc_bounce(struct mmc_queue_req *mqrq,
++					  int qdepth, unsigned int bouncesz)
++{
++	return false;
++}
+ 
++static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
++{
+ 	return 0;
+ }
  #endif
  
-+void sdhci_cqe_enable(struct mmc_host *mmc);
-+void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
-+bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
-+		   int *data_error);
-+
- void sdhci_dumpregs(struct sdhci_host *host);
+-static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
++static int mmc_queue_alloc_sgs(struct mmc_queue_req *mqrq, int qdepth,
++			       int max_segs)
+ {
+-	int i, ret;
++	int i;
  
- #endif /* __SDHCI_HW_H */
+-	for (i = 0; i < mq->qdepth; i++) {
+-		mq->mqrq[i].sg = mmc_alloc_sg(max_segs, &ret);
+-		if (ret)
+-			return ret;
++	for (i = 0; i < qdepth; i++) {
++		mqrq[i].sg = mmc_alloc_sg(max_segs);
++		if (!mqrq[i].sg)
++			return -ENOMEM;
+ 	}
+ 
+ 	return 0;
+ }
+ 
+-static void mmc_queue_req_free_bufs(struct mmc_queue_req *mqrq)
++void mmc_queue_free_shared_queue(struct mmc_card *card)
+ {
+-	kfree(mqrq->bounce_sg);
+-	mqrq->bounce_sg = NULL;
++	if (card->mqrq) {
++		mmc_queue_free_mqrqs(card->mqrq, card->qdepth);
++		card->mqrq = NULL;
++	}
++}
+ 
+-	kfree(mqrq->sg);
+-	mqrq->sg = NULL;
++static int __mmc_queue_alloc_shared_queue(struct mmc_card *card, int qdepth)
++{
++	struct mmc_host *host = card->host;
++	struct mmc_queue_req *mqrq;
++	unsigned int bouncesz;
++	int ret = 0;
+ 
+-	kfree(mqrq->bounce_buf);
+-	mqrq->bounce_buf = NULL;
++	if (card->mqrq)
++		return -EINVAL;
++
++	mqrq = kcalloc(qdepth, sizeof(*mqrq), GFP_KERNEL);
++	if (!mqrq)
++		return -ENOMEM;
++
++	card->mqrq = mqrq;
++	card->qdepth = qdepth;
++
++	bouncesz = mmc_queue_calc_bouncesz(host);
++
++	if (bouncesz && !mmc_queue_alloc_bounce(mqrq, qdepth, bouncesz)) {
++		bouncesz = 0;
++		pr_warn("%s: unable to allocate bounce buffers\n",
++			mmc_card_name(card));
++	}
++
++	card->bouncesz = bouncesz;
++
++	if (!bouncesz) {
++		ret = mmc_queue_alloc_sgs(mqrq, qdepth, host->max_segs);
++		if (ret)
++			goto out_err;
++	}
++
++	return ret;
++
++out_err:
++	mmc_queue_free_shared_queue(card);
++	return ret;
+ }
+ 
+-static void mmc_queue_reqs_free_bufs(struct mmc_queue *mq)
++int mmc_queue_alloc_shared_queue(struct mmc_card *card)
+ {
+-	int i;
+-
+-	for (i = 0; i < mq->qdepth; i++)
+-		mmc_queue_req_free_bufs(&mq->mqrq[i]);
++	return __mmc_queue_alloc_shared_queue(card, 2);
+ }
+ 
+ /**
+@@ -276,7 +356,6 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ {
+ 	struct mmc_host *host = card->host;
+ 	u64 limit = BLK_BOUNCE_HIGH;
+-	bool bounce = false;
+ 	int ret = -ENOMEM;
+ 
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+@@ -287,11 +366,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (!mq->queue)
+ 		return -ENOMEM;
+ 
+-	mq->qdepth = 2;
+-	mq->mqrq = kcalloc(mq->qdepth, sizeof(struct mmc_queue_req),
+-			   GFP_KERNEL);
+-	if (!mq->mqrq)
+-		goto blk_cleanup;
++	mq->mqrq = card->mqrq;
++	mq->qdepth = card->qdepth;
+ 	mq->mqrq_cur = &mq->mqrq[0];
+ 	mq->mqrq_prev = &mq->mqrq[1];
+ 	mq->queue->queuedata = mq;
+@@ -302,44 +378,17 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
+-#ifdef CONFIG_MMC_BLOCK_BOUNCE
+-	if (host->max_segs == 1) {
+-		unsigned int bouncesz;
+-
+-		bouncesz = MMC_QUEUE_BOUNCESZ;
+-
+-		if (bouncesz > host->max_req_size)
+-			bouncesz = host->max_req_size;
+-		if (bouncesz > host->max_seg_size)
+-			bouncesz = host->max_seg_size;
+-		if (bouncesz > (host->max_blk_count * 512))
+-			bouncesz = host->max_blk_count * 512;
+-
+-		if (bouncesz > 512 &&
+-		    mmc_queue_alloc_bounce_bufs(mq, bouncesz)) {
+-			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
+-			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
+-			blk_queue_max_segments(mq->queue, bouncesz / 512);
+-			blk_queue_max_segment_size(mq->queue, bouncesz);
+-
+-			ret = mmc_queue_alloc_bounce_sgs(mq, bouncesz);
+-			if (ret)
+-				goto cleanup_queue;
+-			bounce = true;
+-		}
+-	}
+-#endif
+-
+-	if (!bounce) {
++	if (card->bouncesz) {
++		blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
++		blk_queue_max_hw_sectors(mq->queue, card->bouncesz / 512);
++		blk_queue_max_segments(mq->queue, card->bouncesz / 512);
++		blk_queue_max_segment_size(mq->queue, card->bouncesz);
++	} else {
+ 		blk_queue_bounce_limit(mq->queue, limit);
+ 		blk_queue_max_hw_sectors(mq->queue,
+ 			min(host->max_blk_count, host->max_req_size / 512));
+ 		blk_queue_max_segments(mq->queue, host->max_segs);
+ 		blk_queue_max_segment_size(mq->queue, host->max_seg_size);
+-
+-		ret = mmc_queue_alloc_sgs(mq, host->max_segs);
+-		if (ret)
+-			goto cleanup_queue;
+ 	}
+ 
+ 	sema_init(&mq->thread_sem, 1);
+@@ -354,11 +403,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 
+ 	return 0;
+ 
+- cleanup_queue:
+-	mmc_queue_reqs_free_bufs(mq);
+-	kfree(mq->mqrq);
++cleanup_queue:
+ 	mq->mqrq = NULL;
+-blk_cleanup:
+ 	blk_cleanup_queue(mq->queue);
+ 	return ret;
+ }
+@@ -380,10 +426,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	blk_start_queue(q);
+ 	spin_unlock_irqrestore(q->queue_lock, flags);
+ 
+-	mmc_queue_reqs_free_bufs(mq);
+-	kfree(mq->mqrq);
+ 	mq->mqrq = NULL;
+-
+ 	mq->card = NULL;
+ }
+ EXPORT_SYMBOL(mmc_cleanup_queue);
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index e298f100101b..298ead2b4245 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -51,6 +51,8 @@ struct mmc_queue {
+ 	int			qdepth;
+ };
+ 
++extern int mmc_queue_alloc_shared_queue(struct mmc_card *card);
++extern void mmc_queue_free_shared_queue(struct mmc_card *card);
+ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+ 			  const char *);
+ extern void mmc_cleanup_queue(struct mmc_queue *);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 77e61e0a216a..119ef8f0155c 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -208,6 +208,7 @@ struct sdio_cis {
+ struct mmc_host;
+ struct sdio_func;
+ struct sdio_func_tuple;
++struct mmc_queue_req;
+ 
+ #define SDIO_MAX_FUNCS		7
+ 
+@@ -300,6 +301,10 @@ struct mmc_card {
+ 	struct dentry		*debugfs_root;
+ 	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
+ 	unsigned int    nr_parts;
++
++	struct mmc_queue_req	*mqrq;		/* Shared queue structure */
++	unsigned int		bouncesz;	/* Bounce buffer size */
++	int			qdepth;		/* Shared queue depth */
+ };
+ 
+ static inline bool mmc_large_sector(struct mmc_card *card)
 -- 
 1.9.1
 
