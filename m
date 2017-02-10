@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 14/39] mmc: core: Factor out debug prints from mmc_start_request()
-Date: Fri, 10 Feb 2017 14:55:27 +0200
-Message-ID: <1486731352-8018-15-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 15/39] mmc: core: Factor out mrq preparation from mmc_start_request()
+Date: Fri, 10 Feb 2017 14:55:28 +0200
+Message-ID: <1486731352-8018-16-git-send-email-adrian.hunter@intel.com>
 References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:4936 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:44362 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751233AbdBJNUN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1751203AbdBJNUN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Fri, 10 Feb 2017 08:20:13 -0500
 In-Reply-To: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,66 +18,79 @@ In preparation to reuse the code for CQE support.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 33 ++++++++++++++++++++-------------
- 1 file changed, 20 insertions(+), 13 deletions(-)
+ drivers/mmc/core/core.c | 40 +++++++++++++++++++++++++++-------------
+ 1 file changed, 27 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d97b8f2cf3cb..de6872010ec8 100644
+index de6872010ec8..7f2e75db93d4 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -262,26 +262,19 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	host->ops->request(host, mrq);
+@@ -292,23 +292,18 @@ static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
+ 	}
  }
  
 -static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-+static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
++static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
  {
--#ifdef CONFIG_MMC_DEBUG
--	unsigned int i, sz;
--	struct scatterlist *sg;
--#endif
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int i, sz;
+ 	struct scatterlist *sg;
+ #endif
 -	mmc_retune_hold(host);
 -
 -	if (mmc_card_removed(host->card))
 -		return -ENOMEDIUM;
 -
- 	if (mrq->sbc) {
- 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
- 			 mmc_hostname(host), mrq->sbc->opcode,
- 			 mrq->sbc->arg, mrq->sbc->flags);
- 	}
+-	mmc_mrq_pr_debug(host, mrq);
+-
+-	WARN_ON(!host->claimed);
  
--	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
--		 mmc_hostname(host), mrq->cmd->opcode,
--		 mrq->cmd->arg, mrq->cmd->flags);
+-	mrq->cmd->error = 0;
+-	mrq->cmd->mrq = mrq;
 +	if (mrq->cmd) {
-+		pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
-+			 mmc_hostname(host), mrq->cmd->opcode, mrq->cmd->arg,
-+			 mrq->cmd->flags);
++		mrq->cmd->error = 0;
++		mrq->cmd->mrq = mrq;
++		mrq->cmd->data = mrq->data;
 +	}
- 
- 	if (mrq->data) {
- 		pr_debug("%s:     blksz %d blocks %d flags %08x "
-@@ -297,6 +290,20 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 			 mmc_hostname(host), mrq->stop->opcode,
- 			 mrq->stop->arg, mrq->stop->flags);
+ 	if (mrq->sbc) {
+ 		mrq->sbc->error = 0;
+ 		mrq->sbc->mrq = mrq;
+@@ -325,8 +320,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		if (sz != mrq->data->blocks * mrq->data->blksz)
+ 			return -EINVAL;
+ #endif
+-
+-		mrq->cmd->data = mrq->data;
+ 		mrq->data->error = 0;
+ 		mrq->data->mrq = mrq;
+ 		if (mrq->stop) {
+@@ -335,6 +328,27 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 			mrq->stop->mrq = mrq;
+ 		}
  	}
++
++	return 0;
 +}
 +
 +static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 +{
-+#ifdef CONFIG_MMC_DEBUG
-+	unsigned int i, sz;
-+	struct scatterlist *sg;
-+#endif
++	int err;
++
 +	mmc_retune_hold(host);
 +
 +	if (mmc_card_removed(host->card))
 +		return -ENOMEDIUM;
 +
 +	mmc_mrq_pr_debug(host, mrq);
- 
- 	WARN_ON(!host->claimed);
++
++	WARN_ON(!host->claimed);
++
++	err = mmc_mrq_prep(host, mrq);
++	if (err)
++		return err;
++
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
  
 -- 
 1.9.1
