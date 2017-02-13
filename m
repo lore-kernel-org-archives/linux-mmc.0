@@ -1,42 +1,59 @@
-From: Andy Yan <andy.yan@rock-chips.com>
-Subject: [PATCH 1/7] dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
-Date: Mon, 13 Feb 2017 19:02:39 +0800
-Message-ID: <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
-References: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com>
+From: Anssi Hannula <anssi.hannula@bitwise.fi>
+Subject: [PATCH] mmc: core: fix multi-bit bus width without high-speed mode
+Date: Mon, 13 Feb 2017 13:46:41 +0200
+Message-ID: <20170213114641.372-1-anssi.hannula@bitwise.fi>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.141]:59314 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751023AbdBMLC6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2017 06:02:58 -0500
-In-Reply-To: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com>
+Received: from mail.bitwise.fi ([109.204.228.163]:38786 "EHLO mail.bitwise.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752207AbdBML4D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 13 Feb 2017 06:56:03 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, heiko@sntech.de, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, Andy Yan <andy.yan@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, stable@vger.kernel.org
 
-Rockchip finally named the SOC as RV1108, so change it.
+Commit 577fb13199b1 ("mmc: rework selection of bus speed mode")
+refactored bus width selection code to mmc_select_bus_width().
 
-Signed-off-by: Andy Yan <andy.yan@rock-chips.com>
+However, it also altered the behavior to not call the selection code in
+non-high-speed modes anymore.
 
+This causes 1-bit mode to always be used when the high-speed mode is not
+enabled, even though 4-bit and 8-bit bus are valid bus widths in the
+backwards-compatibility (legacy) mode as well (see e.g. 5.3.2 Bus Speed
+Modes in JEDEC 84-B50). This results in a significant regression in
+transfer speeds.
+
+Fix the code to allow 4-bit and 8-bit widths even without high-speed
+mode, as before.
+
+Tested with a Zynq-7000 PicoZed 7020 board.
+
+Signed-off-by: Anssi Hannula <anssi.hannula@bitwise.fi>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: <stable@vger.kernel.org>
+Fixes: 577fb13199b1 ("mmc: rework selection of bus speed mode")
 ---
+ drivers/mmc/core/mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index ea9c1c9..520d61d 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -13,7 +13,7 @@ Required Properties:
- 	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
- 							before RK3288
- 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
--	- "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
-+	- "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
- 	- "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
- 	- "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
- 	- "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index b61b52f9..0fccca0 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1706,10 +1706,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_select_hs400(card);
+ 		if (err)
+ 			goto free_card;
+-	} else if (mmc_card_hs(card)) {
++	} else {
+ 		/* Select the desired bus width optionally */
+ 		err = mmc_select_bus_width(card);
+-		if (err > 0) {
++		if (err > 0 && mmc_card_hs(card)) {
+ 			err = mmc_select_hs_ddr(card);
+ 			if (err)
+ 				goto free_card;
 -- 
-2.7.4
-
+2.8.3
 
