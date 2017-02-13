@@ -1,58 +1,50 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/4] mmc: host: tmio: fix minor typos in a comment
-Date: Mon, 13 Feb 2017 15:11:27 +0100
-Message-ID: <20170213141127.GB1445@katana>
-References: <20170212111227.1550-1-wsa+renesas@sang-engineering.com>
- <20170212111227.1550-3-wsa+renesas@sang-engineering.com>
- <20170213123943.GA29718@verge.net.au>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="VrqPEDrXMn8OVzN4"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170213123943.GA29718@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: block: return errorcode and not 0
+Date: Mon, 13 Feb 2017 15:40:38 +0100
+Message-ID: <20170213144038.975-1-linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f41.google.com ([209.85.215.41]:33948 "EHLO
+        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751626AbdBMOkr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2017 09:40:47 -0500
+Received: by mail-lf0-f41.google.com with SMTP id v186so51327908lfa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2017 06:40:46 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
 
+The function mmc_sd_num_wr_blocks() was changed in
+9a5e7ddc7954: "mmc: block: return errorcode from mmc_sd_num_wr_blocks()"
+to return err; but this was fixed in
+65f2da1ecb36: "mmc: block: return 0 where evident"
+as clearly err was anyways zero.
 
---VrqPEDrXMn8OVzN4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Well the first commit was wrong, we should have returned an
+errorcode all the time.
 
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Fixes: 65f2da1ecb36: ("mmc: block: return 0 where evident")
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+Ulf please apply this for fixes.
+---
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> > -/* Definitions for values the CTRL_STATUS register can take. */
-> > +/* Definitions for values the CTL_STATUS register can take */
-> >  #define TMIO_STAT_CMDRESPEND    BIT(0)
-> >  #define TMIO_STAT_DATAEND       BIT(2)
-> >  #define TMIO_STAT_CARD_REMOVE   BIT(3)
->=20
-> Is a similar update for CTRL_STATUS2 appropriate a few lines further down?
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 985477cdcb3e..cd909aecfded 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -783,7 +783,7 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
+ 	if (err)
+ 		return err;
+ 	if (!mmc_host_is_spi(card->host) && !(cmd.resp[0] & R1_APP_CMD))
+-		return 0;
++		return -EIO;
+ 
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 
+-- 
+2.9.3
 
-Yes, and SDIO_STATUS as well. Will fix and resend. Thanks!
-
-
---VrqPEDrXMn8OVzN4
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYob6PAAoJEBQN5MwUoCm2F8sQAIQMAUG8LhStvp5nY5Ng1lX6
-2Pkv7dDJINgPo7qpdYkM4A5u8n1Vlb/W44DmhLfhHX1TM36lCmIF+9mQud7R7OYA
-/hh2ew4xFhhJKqiOmbaYcVijaeIPOa88m8r+T7ADNVxGNdEwq65VZyirzeEq+3AZ
-AIxiUs28w/KHU6rTEou/GgRYcBcrNhwwp8PS1SCcG4GhAyHxTIxjRDN4FchykLqP
-7Z8NHpwG0cozp3Q9qyP8/1qDI7SzrYHictd7pYSbD9vDYCqGg8hi3mUZt0OSo4jH
-Hb+OCgLpltQEDt37a9cS7coLUK/GefMMBQFiA4FMBo+Sf4eoJMCxstxWFtHU8XNf
-chYGlREZhsS/Cilp4QIQENibiKgBQQH5+Ep3yC/wjPQZ/aN6q49CT4K9BgoCYgaO
-bCWaEnzQhiz0MJMftJeWBsVuuKevY2FXKKG4fD5neA28Q/cPLze+4v2GCwFAuqX6
-HbUcxUMzwjFfClqHX+ssRvtDXMNM99Fv8KPgOfVZPXFpClhK24cHQtuEBADBlqBD
-qIk/rh1yKIjD8M5uzne5q6GoAn1WrPeuoxo8hPQgzCeOxEqi48dAiJikfQHnzSH8
-OKQLFxdo+Ywje/81xr+rTLTuqAdWfDiieCs3ALF85yRIGSvuLuT9DHzhilX69xi2
-9huHjFJ6o0mGRJJv5SeK
-=V4Sh
------END PGP SIGNATURE-----
-
---VrqPEDrXMn8OVzN4--
