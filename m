@@ -1,52 +1,77 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/7] dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
-Date: Tue, 14 Feb 2017 09:51:26 +0100
-Message-ID: <CAPDyKFqcNNEnfgyLg9-+PamstuFJOQ5kEmEcZ3x97XC2qXC54g@mail.gmail.com>
-References: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com> <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 1/5] mmc: core: change quirks.c to be a header file
+Date: Tue, 14 Feb 2017 09:54:56 +0100
+Message-ID: <CAPDyKFrmSmqi8YbD7K05G9ZwosSBgSmWt2rDpqf01vBjwk0dKg@mail.gmail.com>
+References: <1486516546-187771-1-git-send-email-shawn.lin@rock-chips.com>
+ <1486516546-187771-2-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFrXkcXbcwiEbBzZJbpKL9-34C7jBap5rfBkpD0YtP+VUA@mail.gmail.com> <dbb5a0f4-b1cd-84cb-7ff2-adf59b0e0714@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1486983759-32337-1-git-send-email-andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:35716 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751453AbdBNIy5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2017 03:54:57 -0500
+Received: by mail-vk0-f45.google.com with SMTP id x75so76029885vke.2
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2017 00:54:57 -0800 (PST)
+In-Reply-To: <dbb5a0f4-b1cd-84cb-7ff2-adf59b0e0714@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 13 February 2017 at 12:02, Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> Rockchip finally named the SOC as RV1108, so change it.
+On 10 February 2017 at 10:41, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> On 2017/2/8 19:15, Ulf Hansson wrote:
+>>
+>> [...]
+>>
+>>> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.h
+>>> similarity index 95%
+>>> rename from drivers/mmc/core/quirks.c
+>>> rename to drivers/mmc/core/quirks.h
+>>> index bf25a9c..f3bbfcb7 100644
+>>> --- a/drivers/mmc/core/quirks.c
+>>> +++ b/drivers/mmc/core/quirks.h
+>>
+>>
+>> As you are rename this to become a header file, please also clean up
+>> the included headers from the new quirks.h.
+>>
+>> For example, you don't need these:
+>>
+>> #include <linux/kernel.h>
+>> #include <linux/export.h>
+>>
+>> Instead you need:
+>> #include <linux/device.h>
+>> #include <linux/string.h>
+>>
 >
-> Signed-off-by: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Sure.
 >
-> ---
+>>
+>>> @@ -53,7 +53,8 @@
+>>>         END_FIXUP
+>>>  };
+>>>
+>>> -void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup
+>>> *table)
+>>> +static inline void __maybe_unused
+>>
+>>
+>> The "__maybe_unused" shouldn't be needed here, or is it?
+>>
 >
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> index ea9c1c9..520d61d 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> @@ -13,7 +13,7 @@ Required Properties:
->         - "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
->                                                         before RK3288
->         - "rockchip,rk3288-dw-mshc": for Rockchip RK3288
-> -       - "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
-> +       - "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
->         - "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
->         - "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
->         - "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
-> --
-> 2.7.4
->
->
+> I tried to keep a C file to include quirk.h to make sure it will
+> be compiled standalone cleanly. Otherwise the gcc cast a warning
+> with W=1 about "defined but not used"..
 
-Seems like we didn't really start to use the previous compatible
-string, so I am fine with changing this. Anyway, I need an ack from
-Rob.
+I see.
+
+However those kind of warnings isn't relevant when compiling the
+header standalone.
+
+[...]
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
