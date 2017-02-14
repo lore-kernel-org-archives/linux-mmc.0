@@ -1,69 +1,75 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v6 05/14] mmc: sdhci: Export sdhci_start_signal_voltage_switch() in sdhci.c
-Date: Tue, 14 Feb 2017 18:01:45 +0100
-Message-ID: <ebab2ad6a83a91683c9589b976a6975141167296.1487091464.git-series.gregory.clement@free-electrons.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:52432 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754023AbdBNRCQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2017 12:02:16 -0500
-In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Russell King - ARM Linux <linux@armlinux.org.uk>
+Subject: Re: [PATCH v4] mmc: sdio: check the buffer address for sdio API
+Date: Tue, 14 Feb 2017 19:34:57 +0000
+Message-ID: <20170214193457.GZ27312@n2100.armlinux.org.uk>
+References: <1486428890-28187-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFqS+OgmweTySyer422TfkWZrXMrQeuiymQ0HjqiZAdJzg@mail.gmail.com>
+ <3ab69e5c-e661-3011-cab4-3066024ecf36@kernel.dk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <3ab69e5c-e661-3011-cab4-3066024ecf36@kernel.dk>
+Sender: linux-block-owner@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, linux-block@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda
 
-From: Hu Ziji <huziji@marvell.com>
+On Tue, Feb 14, 2017 at 09:18:43AM -0700, Jens Axboe wrote:
+> The current situation seems like a bit of a mess. Why don't you have two
+> entry points, one for DMA and one for PIO. If the caller doesn't know if
+> he can use DMA, he'd better call the PIO variant. Either that, or audit
+> all callers and ensure they do the right thing wrt having a dma capable
+> buffer.
 
-Export sdhci_start_signal_voltage_switch() from sdhci.c.
-Thus vendor sdhci driver can implement its own signal voltage
-switch routine.
+It really shouldn't matter.  MMC interfaces are just like USB - you
+have a host controller, which interfaces what is a multi-lane serial
+bus to the system.  The SDIO card shouldn't care one bit whether
+the host controller is using DMA or PIO.
 
-Signed-off-by: Hu Ziji <huziji@marvell.com>
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
----
- drivers/mmc/host/sdhci.c | 5 +++--
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 5 insertions(+), 2 deletions(-)
+However, I think that the DMA vs PIO thing is actually misleading here,
+that's really not the issue at all.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e9ed0fadff9..d2338dc362f4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1839,8 +1839,8 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
--					     struct mmc_ios *ios)
-+int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-+				      struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	u16 ctrl;
-@@ -1932,6 +1932,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 		return 0;
- 	}
- }
-+EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
- 
- static int sdhci_card_busy(struct mmc_host *mmc)
- {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 3563c0c384ca..e4a07543a12b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -692,6 +692,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask);
- void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
- int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-+int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-+				      struct mmc_ios *ios);
- 
- #ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host);
+Looking at the oops, I see it uses sdio_memcpy_toio().  Tracing that
+code leads me to here:
+
+                for_each_sg(data.sg, sg_ptr, data.sg_len, i) {
+                        sg_set_page(sg_ptr, virt_to_page(buf + (i * seg_size)),
+                                        min(seg_size, left_size),
+                                        offset_in_page(buf + (i * seg_size)));
+
+so the buffer that is passed into sdio_memcpy_toio() gets passed into
+virt_to_page().
+
+Firstly, the fact that it's passed to virt_to_page() means that "buf"
+must _only_ _ever_ be a lowmem address.  It can't ever be a vmalloc
+address (virt_to_page() is invalid on anything but lowmem.)  Just like
+certain kernel interfaces, passing pointers to memory of different types
+from the one intended by the interface produces invalid results, and
+that seems to be what's happening here.
+
+Secondly, it's a scatterlist, and scatterlists can be passed to DMA
+mapping operations, which also implies that _if_ a host driver decides
+to use DMA on it, the buffer better be DMA-able.
+
+Thirdly, while PIO may work (or even appear to work) because _maybe_
+converting a vmalloc address to a ficticious struct page + offset, and
+then converting that back again _might_ result in hitting the correct
+memory, but it's not guaranteed to.
+
+I suspect that virt_to_page() + kmap_atomic() is likely to try to
+dereference a struct page pointer that does not point at a legal entry
+in the memmap arrays, and result in scribbling over some random part
+of kernel memory.
+
+So every way I look at this, the binary driver that Shawn downloaded
+is buggy, whether the host controller uses PIO or DMA.
+
+I bet if Shawn tries running it against a modern kernel with
+CONFIG_DEBUG_VIRTUAL enabled, Shawn will get complaints backing up
+my claim.
+
 -- 
-git-series 0.9.1
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
