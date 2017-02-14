@@ -1,111 +1,74 @@
-From: Eddie Cai <eddie.cai.linux@gmail.com>
-Subject: Re: [PATCH v5 2/2] mmc: dw_mmc: force setup bus if active slots exist
-Date: Tue, 14 Feb 2017 10:12:44 +0800
-Message-ID: <CAJrj+DP02=vVz+SmiojkiuG5zVnMvvAQ==EFZ5CDzWNENCmdFg@mail.gmail.com>
-References: <1484276362-44984-1-git-send-email-shawn.lin@rock-chips.com>
- <1484276362-44984-2-git-send-email-shawn.lin@rock-chips.com>
- <CGME20170213063335epcas1p173d7e65a7819292bb31baecf28a70fda@epcas1p1.samsung.com>
- <CAJrj+DOcdpQ8EQLv=bMberrbmO3QmKj=kHWDOdjQmoonryhk3Q@mail.gmail.com> <0996c366-743a-a120-5be0-719c82539e8a@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: fix multi-bit bus width without high-speed mode
+Date: Tue, 14 Feb 2017 09:11:40 +0100
+Message-ID: <CAPDyKFrzzwKjvbB0HjnOyy06qJTCj2B+OPempovMQSrd-A9Nwg@mail.gmail.com>
+References: <20170213114641.372-1-anssi.hannula@bitwise.fi>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f195.google.com ([209.85.216.195]:36034 "EHLO
-        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751573AbdBNCMp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2017 21:12:45 -0500
-In-Reply-To: <0996c366-743a-a120-5be0-719c82539e8a@samsung.com>
+Received: from mail-vk0-f47.google.com ([209.85.213.47]:34708 "EHLO
+        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752418AbdBNILq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2017 03:11:46 -0500
+Received: by mail-vk0-f47.google.com with SMTP id r136so75695991vke.1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2017 00:11:46 -0800 (PST)
+In-Reply-To: <20170213114641.372-1-anssi.hannula@bitwise.fi>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, sgilles@math.umd.edu, linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, Randy Li <randy.li@rock-chips.com>, stable@vger.kernel.org, linux-rockchip@lists.infradead.org
+To: Anssi Hannula <anssi.hannula@bitwise.fi>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 
-Hi
+- Seungwon (due to bouncing email)
 
-2017-02-13 15:54 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> Hi,
+On 13 February 2017 at 12:46, Anssi Hannula <anssi.hannula@bitwise.fi> wrote:
+> Commit 577fb13199b1 ("mmc: rework selection of bus speed mode")
+> refactored bus width selection code to mmc_select_bus_width().
 >
-> On 02/13/2017 03:32 PM, Eddie Cai wrote:
->> Hi Heiko
->>
->> I guess you may lost this patch. We need it to prevent crash when boot
->> up RK3288.
->>
->> 2017-01-13 10:59 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
->>> From: Ziyuan Xu <xzy.xu@rock-chips.com>
->>>
->>> It's necessary to setup bus if any slots are present.
->>> - update clock after ctrl reset
->>> - if the host has genpd node, we can guarantee the clock is
->>>   available before starting request. Otherwies, the clock register
->>>   is reset once power off the pd, and host can't output the active
->>>   clock during communication.
+> However, it also altered the behavior to not call the selection code in
+> non-high-speed modes anymore.
 >
-> As i know, this patch was applied. Which kernel do you use?
-I just update the kernel and find it applied. Thanks for reminding.
+> This causes 1-bit mode to always be used when the high-speed mode is not
+> enabled, even though 4-bit and 8-bit bus are valid bus widths in the
+> backwards-compatibility (legacy) mode as well (see e.g. 5.3.2 Bus Speed
+> Modes in JEDEC 84-B50). This results in a significant regression in
+> transfer speeds.
 >
-> Best Regards,
-> Jaehoon Chung
+> Fix the code to allow 4-bit and 8-bit widths even without high-speed
+> mode, as before.
 >
->>>
->>> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
->>> Fixes: df9bcc2bc0a1 ("mmc: dw_mmc: add missing codes for runtime resume")
->>> cc: <stable@vger.kernel.org>
->>> Reported-by: Randy Li <randy.li@rock-chips.com>
->>> Reported-by: S. Gilles <sgilles@math.umd.edu>
->>> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>
->>> ---
->>>
->>> Changes in v5:
->>> - rebase in order to skip spamming log
->>>
->>> Changes in v4:
->>> - update commit message
->>> - fix SD host rpm resume can't work
->>>
->>> Changes in v3:
->>> - only reset host with active slot.
->>>
->>> Changes in v2:
->>> - update the commit message
->>> - use dw_mci_reset instead of dw_mci_ctrl_reset
->>>
->>>  drivers/mmc/host/dw_mmc.c | 7 ++++---
->>>  1 file changed, 4 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index dc58ec3..0914d53 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -3367,10 +3367,11 @@ int dw_mci_runtime_resume(struct device *dev)
->>>
->>>                 if (!slot)
->>>                         continue;
->>> -               if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
->>> +               if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->>>                         dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
->>> -                       dw_mci_setup_bus(slot, true, true);
->>> -               }
->>> +
->>> +               /* Force setup bus to guarantee available clock output */
->>> +               dw_mci_setup_bus(slot, true, true);
->>>         }
->>>
->>>         /* Now that slots are all setup, we can enable card detect */
->>> --
->>> 1.9.1
->>>
->>>
->>>
->>> _______________________________________________
->>> Linux-rockchip mailing list
->>> Linux-rockchip@lists.infradead.org
->>> http://lists.infradead.org/mailman/listinfo/linux-rockchip
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> Tested with a Zynq-7000 PicoZed 7020 board.
+>
+> Signed-off-by: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> Cc: <stable@vger.kernel.org>
+> Fixes: 577fb13199b1 ("mmc: rework selection of bus speed mode")
+
+Thanks, applied for fixes!
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/core/mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index b61b52f9..0fccca0 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1706,10 +1706,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>                 err = mmc_select_hs400(card);
+>                 if (err)
+>                         goto free_card;
+> -       } else if (mmc_card_hs(card)) {
+> +       } else {
+>                 /* Select the desired bus width optionally */
+>                 err = mmc_select_bus_width(card);
+> -               if (err > 0) {
+> +               if (err > 0 && mmc_card_hs(card)) {
+>                         err = mmc_select_hs_ddr(card);
+>                         if (err)
+>                                 goto free_card;
+> --
+> 2.8.3
 >
