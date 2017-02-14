@@ -1,8 +1,8 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v6 06/14] mmc: sdhci: Export sdhci_enable_sdio_irq() from
- sdhci.c
-Date: Tue, 14 Feb 2017 18:01:46 +0100
-Message-ID: <43d7894cb56bd69d7980cea12b12d56f509f4797.1487091464.git-series.gregory.clement@free-electrons.com>
+Subject: [PATCH v6 07/14] dt: bindings: Add bindings for Marvell Xenon SD Host
+ Controller
+Date: Tue, 14 Feb 2017 18:01:47 +0100
+Message-ID: <3a4ce2fd25ed812482b0fc96f50dd305c8f40fe9.1487091464.git-series.gregory.clement@free-electrons.com>
 References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -26,49 +26,194 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Hu Ziji <huziji@marvell.com>
 
-Export sdhci_enable_sdio_irq() from sdhci.c.
-Thus vendor SDHC driver can implement its specific SDIO irq
-control.
+Marvell Xenon SDHC can support eMMC/SD/SDIO.
+Add Xenon-specific properties.
+Also add properties for Xenon PHY setting.
 
 Signed-off-by: Hu Ziji <huziji@marvell.com>
 Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 172 +++++++-
+ 1 file changed, 172 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d2338dc362f4..9a4fda81ff81 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1824,7 +1824,7 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- 	}
- }
- 
--static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
-@@ -1838,6 +1838,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	sdhci_enable_sdio_irq_nolock(host, enable);
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
-+EXPORT_SYMBOL_GPL(sdhci_enable_sdio_irq);
- 
- int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 				      struct mmc_ios *ios)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index e4a07543a12b..609783364941 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -694,6 +694,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
- int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 				      struct mmc_ios *ios);
-+void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
- 
- #ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host);
+diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+new file mode 100644
+index 000000000000..eabee8b64db6
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+@@ -0,0 +1,172 @@
++Marvell Xenon SDHCI Controller device tree bindings
++This file documents differences between the core mmc properties
++described by mmc.txt and the properties used by the Xenon implementation.
++
++Multiple SDHCs might be put into a single Xenon IP, to save size and cost.
++Each SDHC is independent and owns independent resources, such as register sets,
++clock and PHY.
++Each SDHC should have an independent device tree node.
++
++Required Properties:
++- compatible: should be one of the following
++  - "marvell,armada-3700-sdhci": For controllers on Armada-3700 SoC.
++  Must provide a second register area and marvell,pad-type.
++  - "marvell,armada-ap806-sdhci": For controllers on Armada AP806.
++  - "marvell,armada-cp110-sdhci": For controllers on Armada CP110.
++
++- clocks:
++  Array of clocks required for SDHC.
++  Require at least input clock for Xenon IP core.
++
++- clock-names:
++  Array of names corresponding to clocks property.
++  The input clock for Xenon IP core should be named as "core".
++
++- reg:
++  * For "marvell,armada-3700-sdhci", two register areas.
++    The first one for Xenon IP register. The second one for the Armada 3700 SoC
++    PHY PAD Voltage Control register.
++    Please follow the examples with compatible "marvell,armada-3700-sdhci"
++    in below.
++    Please also check property marvell,pad-type in below.
++
++  * For other compatible strings, one register area for Xenon IP.
++
++Optional Properties:
++- marvell,xenon-sdhc-id:
++  Indicate the corresponding bit index of current SDHC in
++  SDHC System Operation Control Register Bit[7:0].
++  Set/clear the corresponding bit to enable/disable current SDHC.
++  If Xenon IP contains only one SDHC, this property is optional.
++
++- marvell,xenon-phy-type:
++  Xenon support multiple types of PHYs.
++  To select eMMC 5.1 PHY, set:
++  marvell,xenon-phy-type = "emmc 5.1 phy"
++  eMMC 5.1 PHY is the default choice if this property is not provided.
++  To select eMMC 5.0 PHY, set:
++  marvell,xenon-phy-type = "emmc 5.0 phy"
++
++  All those types of PHYs can support eMMC, SD and SDIO.
++  Please note that this property only presents the type of PHY.
++  It doesn't stand for the entire SDHC type or property.
++  For example, "emmc 5.1 phy" doesn't mean that this Xenon SDHC only
++  supports eMMC 5.1.
++
++- marvell,xenon-phy-znr:
++  Set PHY ZNR value.
++  Only available for eMMC PHY.
++  Valid range = [0:0x1F].
++  ZNR is set as 0xF by default if this property is not provided.
++
++- marvell,xenon-phy-zpr:
++  Set PHY ZPR value.
++  Only available for eMMC PHY.
++  Valid range = [0:0x1F].
++  ZPR is set as 0xF by default if this property is not provided.
++
++- marvell,xenon-phy-nr-success-tun:
++  Set the number of required consecutive successful sampling points
++  used to identify a valid sampling window, in tuning process.
++  Valid range = [1:7].
++  Set as 0x4 by default if this property is not provided.
++
++- marvell,xenon-phy-tun-step-divider:
++  Set the divider for calculating TUN_STEP.
++  Set as 64 by default if this property is not provided.
++
++- marvell,xenon-phy-slow-mode:
++  If this property is selected, transfers will bypass PHY.
++  Only available when bus frequency lower than 55MHz in SDR mode.
++  Disabled by default. Please only try this property if timing issues
++  always occur with PHY enabled in eMMC HS SDR, SD SDR12, SD SDR25,
++  SD Default Speed and HS mode and eMMC legacy speed mode.
++
++- marvell,xenon-tun-count:
++  Xenon SDHC SoC usually doesn't provide re-tuning counter in
++  Capabilities Register 3 Bit[11:8].
++  This property provides the re-tuning counter.
++  If this property is not set, default re-tuning counter will
++  be set as 0x9 in driver.
++
++- marvell,pad-type:
++  Type of Armada 3700 SoC PHY PAD Voltage Controller register.
++  Only valid when "marvell,armada-3700-sdhci" is selected.
++  Two types: "sd" and "fixed-1-8v".
++  If "sd" is selected, SoC PHY PAD is set as 3.3V at the beginning and is
++  switched to 1.8V when later in higher speed mode.
++  If "fixed-1-8v" is selected, SoC PHY PAD is fixed 1.8V, such as for eMMC.
++  Please follow the examples with compatible "marvell,armada-3700-sdhci"
++  in below.
++
++Example:
++- For eMMC:
++
++	sdhci@aa0000 {
++		compatible = "marvell,armada-ap806-sdhci";
++		reg = <0xaa0000 0x1000>;
++		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
++		clocks = <&emmc_clk>;
++		clock-names = "core";
++		bus-width = <4>;
++		marvell,xenon-phy-slow-mode;
++		marvell,xenon-tun-count = <11>;
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++		apm_mmccard: mmccard@0 {
++			compatible = "mmc-card";
++			reg = <0>;
++		};
++	};
++
++- For SD/SDIO:
++
++	sdhci@ab0000 {
++		compatible = "marvell,armada-cp110-sdhci";
++		reg = <0xab0000 0x1000>;
++		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
++		vqmmc-supply = <&sd_regulator>;
++		clocks = <&sdclk>;
++		clock-names = "core";
++		bus-width = <4>;
++		marvell,xenon-tun-count = <9>;
++	};
++
++- For eMMC with compatible "marvell,armada-3700-sdhci":
++
++	sdhci@aa0000 {
++		compatible = "marvell,armada-3700-sdhci";
++		reg = <0xaa0000 0x1000>,
++		      <phy_addr 0x4>;
++		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
++		clocks = <&emmcclk>;
++		clock-names = "core";
++		bus-width = <8>;
++		mmc-ddr-1_8v;
++		mmc-hs400-1_8v;
++
++		marvell,pad-type = "fixed-1-8v";
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++		mmccard: mmccard@0 {
++			compatible = "mmc-card";
++			reg = <0>;
++		};
++	};
++
++- For SD/SDIO with compatible "marvell,armada-3700-sdhci":
++
++	sdhci@ab0000 {
++		compatible = "marvell,armada-3700-sdhci";
++		reg = <0xab0000 0x1000>,
++		      <phy_addr 0x4>;
++		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
++		vqmmc-supply = <&sd_regulator>;
++		clocks = <&sdclk>;
++		clock-names = "core";
++		bus-width = <4>;
++
++		marvell,pad-type = "sd";
++	};
 -- 
 git-series 0.9.1
