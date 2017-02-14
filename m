@@ -1,72 +1,111 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 1/4] mmc: host: tmio: use defines for CTL_STOP_INTERNAL_ACTION values
-Date: Mon, 13 Feb 2017 19:03:39 +0100
-Message-ID: <20170213180342.26172-2-wsa+renesas@sang-engineering.com>
-References: <20170213180342.26172-1-wsa+renesas@sang-engineering.com>
+From: Eddie Cai <eddie.cai.linux@gmail.com>
+Subject: Re: [PATCH v5 2/2] mmc: dw_mmc: force setup bus if active slots exist
+Date: Tue, 14 Feb 2017 10:12:44 +0800
+Message-ID: <CAJrj+DP02=vVz+SmiojkiuG5zVnMvvAQ==EFZ5CDzWNENCmdFg@mail.gmail.com>
+References: <1484276362-44984-1-git-send-email-shawn.lin@rock-chips.com>
+ <1484276362-44984-2-git-send-email-shawn.lin@rock-chips.com>
+ <CGME20170213063335epcas1p173d7e65a7819292bb31baecf28a70fda@epcas1p1.samsung.com>
+ <CAJrj+DOcdpQ8EQLv=bMberrbmO3QmKj=kHWDOdjQmoonryhk3Q@mail.gmail.com> <0996c366-743a-a120-5be0-719c82539e8a@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:53478 "EHLO pokefinder.org"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752099AbdBMSD4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 13 Feb 2017 13:03:56 -0500
-In-Reply-To: <20170213180342.26172-1-wsa+renesas@sang-engineering.com>
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:36034 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751573AbdBNCMp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2017 21:12:45 -0500
+In-Reply-To: <0996c366-743a-a120-5be0-719c82539e8a@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, sgilles@math.umd.edu, linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, Randy Li <randy.li@rock-chips.com>, stable@vger.kernel.org, linux-rockchip@lists.infradead.org
 
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc.h     | 4 ++++
- drivers/mmc/host/tmio_mmc_pio.c | 6 +++---
- 2 files changed, 7 insertions(+), 3 deletions(-)
+Hi
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 2b349d48fb9a8a..b20b451ad90daa 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -50,6 +50,10 @@
- #define CTL_CLK_AND_WAIT_CTL 0x138
- #define CTL_RESET_SDIO 0x1e0
- 
-+/* Definitions for values the CTL_STOP_INTERNAL_ACTION register can take */
-+#define TMIO_STOP_STP		BIT(0)
-+#define TMIO_STOP_SEC		BIT(8)
-+
- /* Definitions for values the CTRL_STATUS register can take. */
- #define TMIO_STAT_CMDRESPEND    BIT(0)
- #define TMIO_STAT_DATAEND       BIT(2)
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 6b789a739d4dfe..ad2840e1bfae51 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -340,7 +340,7 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
- 
- 	/* CMD12 is handled by hardware */
- 	if (cmd->opcode == MMC_STOP_TRANSMISSION && !cmd->arg) {
--		sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0x001);
-+		sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, TMIO_STOP_STP);
- 		return 0;
- 	}
- 
-@@ -367,7 +367,7 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
- 	if (data) {
- 		c |= DATA_PRESENT;
- 		if (data->blocks > 1) {
--			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0x100);
-+			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, TMIO_STOP_SEC);
- 			c |= TRANSFER_MULTI;
- 
- 			/*
-@@ -554,7 +554,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 
- 	if (stop) {
- 		if (stop->opcode == MMC_STOP_TRANSMISSION && !stop->arg)
--			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0x000);
-+			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0);
- 		else
- 			BUG();
- 	}
--- 
-2.11.0
-
+2017-02-13 15:54 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
+> Hi,
+>
+> On 02/13/2017 03:32 PM, Eddie Cai wrote:
+>> Hi Heiko
+>>
+>> I guess you may lost this patch. We need it to prevent crash when boot
+>> up RK3288.
+>>
+>> 2017-01-13 10:59 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com>:
+>>> From: Ziyuan Xu <xzy.xu@rock-chips.com>
+>>>
+>>> It's necessary to setup bus if any slots are present.
+>>> - update clock after ctrl reset
+>>> - if the host has genpd node, we can guarantee the clock is
+>>>   available before starting request. Otherwies, the clock register
+>>>   is reset once power off the pd, and host can't output the active
+>>>   clock during communication.
+>
+> As i know, this patch was applied. Which kernel do you use?
+I just update the kernel and find it applied. Thanks for reminding.
+>
+> Best Regards,
+> Jaehoon Chung
+>
+>>>
+>>> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
+>>> Fixes: df9bcc2bc0a1 ("mmc: dw_mmc: add missing codes for runtime resume")
+>>> cc: <stable@vger.kernel.org>
+>>> Reported-by: Randy Li <randy.li@rock-chips.com>
+>>> Reported-by: S. Gilles <sgilles@math.umd.edu>
+>>> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>>
+>>> ---
+>>>
+>>> Changes in v5:
+>>> - rebase in order to skip spamming log
+>>>
+>>> Changes in v4:
+>>> - update commit message
+>>> - fix SD host rpm resume can't work
+>>>
+>>> Changes in v3:
+>>> - only reset host with active slot.
+>>>
+>>> Changes in v2:
+>>> - update the commit message
+>>> - use dw_mci_reset instead of dw_mci_ctrl_reset
+>>>
+>>>  drivers/mmc/host/dw_mmc.c | 7 ++++---
+>>>  1 file changed, 4 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index dc58ec3..0914d53 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -3367,10 +3367,11 @@ int dw_mci_runtime_resume(struct device *dev)
+>>>
+>>>                 if (!slot)
+>>>                         continue;
+>>> -               if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+>>> +               if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+>>>                         dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+>>> -                       dw_mci_setup_bus(slot, true, true);
+>>> -               }
+>>> +
+>>> +               /* Force setup bus to guarantee available clock output */
+>>> +               dw_mci_setup_bus(slot, true, true);
+>>>         }
+>>>
+>>>         /* Now that slots are all setup, we can enable card detect */
+>>> --
+>>> 1.9.1
+>>>
+>>>
+>>>
+>>> _______________________________________________
+>>> Linux-rockchip mailing list
+>>> Linux-rockchip@lists.infradead.org
+>>> http://lists.infradead.org/mailman/listinfo/linux-rockchip
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>
