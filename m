@@ -1,71 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: return errorcode and not 0
-Date: Tue, 14 Feb 2017 09:16:04 +0100
-Message-ID: <CAPDyKFqiNWyYdpCgU3TpRo-CFALjc97XFDC4yR+RyqPZDWeF+g@mail.gmail.com>
-References: <20170213144038.975-1-linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/7] dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
+Date: Tue, 14 Feb 2017 09:51:26 +0100
+Message-ID: <CAPDyKFqcNNEnfgyLg9-+PamstuFJOQ5kEmEcZ3x97XC2qXC54g@mail.gmail.com>
+References: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com> <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f174.google.com ([209.85.217.174]:34840 "EHLO
-        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751887AbdBNIQF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2017 03:16:05 -0500
-Received: by mail-ua0-f174.google.com with SMTP id y9so81701010uae.2
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2017 00:16:05 -0800 (PST)
-In-Reply-To: <20170213144038.975-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1486983759-32337-1-git-send-email-andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-On 13 February 2017 at 15:40, Linus Walleij <linus.walleij@linaro.org> wrote:
-> The function mmc_sd_num_wr_blocks() was changed in
-> 9a5e7ddc7954: "mmc: block: return errorcode from mmc_sd_num_wr_blocks()"
-> to return err; but this was fixed in
-> 65f2da1ecb36: "mmc: block: return 0 where evident"
-> as clearly err was anyways zero.
+On 13 February 2017 at 12:02, Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+> Rockchip finally named the SOC as RV1108, so change it.
 >
-> Well the first commit was wrong, we should have returned an
-> errorcode all the time.
-
-As both of the fixed commits is still only in my tree, I decided to
-fold this change into the first one ("mmc: block: return errorcode
-from mmc_sd_num_wr_blocks()" and the drop the second ("mmc: block:
-return 0 where evident"). In this way we get clean git history and
-avoid bisect issues.
-
-I also added a little information in the change-log of the amended
-commit about the update.
-
+> Signed-off-by: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 >
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Fixes: 65f2da1ecb36: ("mmc: block: return 0 where evident")
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index ea9c1c9..520d61d 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -13,7 +13,7 @@ Required Properties:
+>         - "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
+>                                                         before RK3288
+>         - "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+> -       - "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
+> +       - "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
+>         - "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
+>         - "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
+>         - "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
+> --
+> 2.7.4
+>
+>
 
-Applied for next!
+Seems like we didn't really start to use the previous compatible
+string, so I am fine with changing this. Anyway, I need an ack from
+Rob.
 
 Kind regards
 Uffe
-
-> ---
-> Ulf please apply this for fixes.
-> ---
->  drivers/mmc/core/block.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 985477cdcb3e..cd909aecfded 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -783,7 +783,7 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->         if (err)
->                 return err;
->         if (!mmc_host_is_spi(card->host) && !(cmd.resp[0] & R1_APP_CMD))
-> -               return 0;
-> +               return -EIO;
->
->         memset(&cmd, 0, sizeof(struct mmc_command));
->
-> --
-> 2.9.3
->
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
