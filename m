@@ -1,68 +1,41 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v6 13/14] arm64: dts: marvell: add sdhci support for Armada 7K/8K
-Date: Tue, 14 Feb 2017 18:01:53 +0100
-Message-ID: <9571ae6d12f2051c1457dc5fc34042b325d00b60.1487091464.git-series.gregory.clement@free-electrons.com>
+From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: [PATCH v6 12/14] arm64: dts: marvell: add eMMC support for Armada 37xx
+Date: Tue, 14 Feb 2017 18:01:52 +0100
+Message-ID: <b53e3c3c3fa792a95b48d1b46cc634dbe6ea0aff.1487091464.git-series.gregory.clement@free-electrons.com>
 References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+In-Reply-To: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Yehuda
 List-Id: linux-mmc@vger.kernel.org
 
-Also enable it on the Armada 7040 DB and Armada 8040 DB boards.
+Add the eMMC support for Armada 37xx SoC and enable it in the Armada 3720
+DB board.
 
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- arch/arm64/boot/dts/marvell/armada-7040-db.dts       | 14 +++++++++-
- arch/arm64/boot/dts/marvell/armada-8040-db.dts       | 20 +++++++++++++-
- arch/arm64/boot/dts/marvell/armada-ap806.dtsi        | 11 +++++++-
- arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi | 11 +++++++-
- 4 files changed, 56 insertions(+)
+ arch/arm64/boot/dts/marvell/armada-3720-db.dts | 16 ++++++++++++++++
+ arch/arm64/boot/dts/marvell/armada-37xx.dtsi   | 11 +++++++++++
+ 2 files changed, 27 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/marvell/armada-7040-db.dts b/arch/arm64/boot/dts/marvell/armada-7040-db.dts
-index 070b589680c5..6adbfcd26369 100644
---- a/arch/arm64/boot/dts/marvell/armada-7040-db.dts
-+++ b/arch/arm64/boot/dts/marvell/armada-7040-db.dts
-@@ -146,3 +146,17 @@
- &cpm_usb3_1 {
+diff --git a/arch/arm64/boot/dts/marvell/armada-3720-db.dts b/arch/arm64/boot/dts/marvell/armada-3720-db.dts
+index 89de0a751093..118796b325e5 100644
+--- a/arch/arm64/boot/dts/marvell/armada-3720-db.dts
++++ b/arch/arm64/boot/dts/marvell/armada-3720-db.dts
+@@ -72,6 +72,22 @@
  	status = "okay";
  };
-+
-+&ap_sdhci0 {
-+	status = "okay";
-+	bus-width = <4>;
-+	no-1-8-v;
+ 
++&sdhci0 {
 +	non-removable;
-+};
-+
-+&cpm_sdhci0 {
-+	status = "okay";
-+	bus-width = <4>;
-+	no-1-8-v;
-+	non-removable;
-+};
-diff --git a/arch/arm64/boot/dts/marvell/armada-8040-db.dts b/arch/arm64/boot/dts/marvell/armada-8040-db.dts
-index 6e6f182fb297..ab16082d9fbf 100644
---- a/arch/arm64/boot/dts/marvell/armada-8040-db.dts
-+++ b/arch/arm64/boot/dts/marvell/armada-8040-db.dts
-@@ -148,3 +148,23 @@
- &cps_usb3_1 {
- 	status = "okay";
- };
-+
-+&ap_sdhci0 {
-+	status = "okay";
-+	bus-width = <4>;
-+	non-removable;
-+};
-+
-+&cpm_sdhci0 {
-+	status = "okay";
 +	bus-width = <8>;
-+	non-removable;
++	mmc-ddr-1_8v;
++	mmc-hs400-1_8v;
++	marvell,pad-type = "fixed-1-8v";
++	status = "okay";
 +
 +	#address-cells = <1>;
 +	#size-cells = <0>;
@@ -70,51 +43,36 @@ index 6e6f182fb297..ab16082d9fbf 100644
 +		compatible = "mmc-card";
 +		reg = <0>;
 +	};
-+
 +};
-diff --git a/arch/arm64/boot/dts/marvell/armada-ap806.dtsi b/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
-index 5019c8f4acd0..fe41bf9c301e 100644
---- a/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
-+++ b/arch/arm64/boot/dts/marvell/armada-ap806.dtsi
-@@ -229,6 +229,17 @@
- 
++
+ /* CON31 */
+ &usb3 {
+ 	status = "okay";
+diff --git a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi b/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
+index bab5c6ff5745..966b6f030bfa 100644
+--- a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
++++ b/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
+@@ -184,6 +184,17 @@
+ 				};
  			};
  
-+			ap_sdhci0: sdhci@6e0000 {
-+				compatible = "marvell,armada-ap806-sdhci";
-+				reg = <0x6e0000 0x300>;
-+				interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
++			sdhci0: sdhci@d8000 {
++				compatible = "marvell,armada-3700-sdhci",
++				"marvell,sdhci-xenon";
++				reg = <0xd8000 0x300
++				       0x17808 0x4>;
++				interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
++				clocks = <&nb_periph_clk 0>;
 +				clock-names = "core";
-+				clocks = <&ap_syscon 4>;
-+				dma-coherent;
-+				marvell,xenon-phy-slow-mode;
 +				status = "disabled";
 +			};
 +
- 			ap_syscon: system-controller@6f4000 {
- 				compatible = "marvell,ap806-system-controller",
- 					     "syscon";
-diff --git a/arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi b/arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi
-index 05222f749a45..8ff545dc4195 100644
---- a/arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi
-+++ b/arch/arm64/boot/dts/marvell/armada-cp110-master.dtsi
-@@ -172,6 +172,17 @@
- 				clocks = <&cpm_syscon0 1 25>;
- 				status = "okay";
- 			};
-+
-+			cpm_sdhci0: sdhci@780000 {
-+				compatible = "marvell,armada-cp110-sdhci";
-+				reg = <0x780000 0x300>;
-+				interrupts = <GIC_SPI 69 IRQ_TYPE_LEVEL_HIGH>;
-+				clock-names = "core";
-+				clocks = <&cpm_syscon0 1 4>;
-+				dma-coherent;
-+				status = "disabled";
-+			};
-+
- 		};
- 
- 		cpm_pcie0: pcie@f2600000 {
+ 			sata: sata@e0000 {
+ 				compatible = "marvell,armada-3700-ahci";
+ 				reg = <0xe0000 0x2000>;
 -- 
 git-series 0.9.1
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
