@@ -1,211 +1,69 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC] mmc: host: tmio: ensure end of DMA and SD access are in sync
-Date: Wed, 15 Feb 2017 19:05:40 +0100
-Message-ID: <20170215180541.8614-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-renesas-soc@vger.kernel.org
-Cc: Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 11/18] mmc: meson-gx: remove unneeded variable in meson_mmc_clk_init
+Date: Wed, 15 Feb 2017 11:24:56 -0800
+Message-ID: <m2lgt78dfb.fsf@baylibre.com>
+References: <420b75a9-b8c2-b3d7-ae60-3ed8a5a18ead@gmail.com>
+        <d08aa734-0258-3d53-9726-f7d9f47b51eb@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:35564 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750719AbdBOTY7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 14:24:59 -0500
+Received: by mail-pg0-f53.google.com with SMTP id t188so174534pgt.2
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 11:24:59 -0800 (PST)
+In-Reply-To: <d08aa734-0258-3d53-9726-f7d9f47b51eb@gmail.com> (Heiner
+        Kallweit's message of "Tue, 14 Feb 2017 21:06:48 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-The current code assumes that DMA is finished before SD access end is
-flagged. Thus, it schedules the 'dma_complete' tasklet in the SD card
-interrupt routine when DATAEND is set. The assumption is not safe,
-though. Even by mounting an SD card, it can be seen that sometimes DMA
-complete is first, sometimes DATAEND. It seems they are usually close
-enough timewise to not cause problems. However, a customer reported that
-with CMD53 sometimes things really break apart. As a result, the BSP has
-a patch which introduces flags for both events and makes sure both flags
-are set before scheduling the tasklet. The customer accepted the patch,
-yet it doesn't seem a proper upstream solution to me.
+Heiner Kallweit <hkallweit1@gmail.com> writes:
 
-This patch refactors the code to replace the tasklet with already
-existing and more lightweight mechanisms. First of all, we set the
-callback in a DMA descriptor to automatically get notified when DMA is
-done. In the callback, we then use a completion to make sure the SD
-access has already ended. Then, we proceed as before.
+> Variable mux_parent_count can be replaced with constant
+> MUX_CLK_NUM_PARENTS, so remove it.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+Before the above sentence, add "Because the DT requires a fixed number
+of mux parent clocks, ..."
 
-I tried various synchronization approaches and liked this one best.
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
-There are a couple of reasons this patch is RFC:
+With that,
 
-The #ifdef's need to go but are handy for now.
+Acked-by: Kevin Hilman <khilman@baylibre.com>
 
-More testing is needed. While it worked fine for me writing terrabytes to
-different cards (still trying to break the wear-levelling), broader testing
-with different workloads and use-cases is largely welcome. I specifically
-couldn't test with CMD53 (SDIO) which originally caused the problem for the
-customer because that seems not working with my Gen2 board. I tried to fix SDIO
-on Gen2 as a side-task but didn't find anything obvious on a glimpse. SDIO
-works with my Gen3 boards but for that we don't have DMA upstream yet.
-Upstreaming Gen3 DMA will need some bigger DMA refactoring, so it might be
-worth waiting until the refactoring is done. In a nutshell, there are
-dependency issues currently.
-
-So, calling for early review here. And opinions how to proceed. I am not sure
-we want this in renesas-drivers until the SDIO functionality has been verified?
-Because it is the reason this patch exists in the first place :)
-
-The branch is here:
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-dma-sync
-
-The test description is here:
-
-http://elinux.org/Tests:SDHI-DMA-Sync
-
-Cheers and thanks,
-
-   Wolfram
-
-
- drivers/mmc/host/tmio_mmc.h     |  2 +-
- drivers/mmc/host/tmio_mmc_dma.c | 71 +++++++++++++++++++++++++++--------------
- drivers/mmc/host/tmio_mmc_pio.c |  4 +--
- 3 files changed, 50 insertions(+), 27 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 2b349d48fb9a8a..891d400d2a7cf2 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -137,7 +137,7 @@ struct tmio_mmc_host {
- 	bool			force_pio;
- 	struct dma_chan		*chan_rx;
- 	struct dma_chan		*chan_tx;
--	struct tasklet_struct	dma_complete;
-+	struct completion	dma_dataend;
- 	struct tasklet_struct	dma_issue;
- 	struct scatterlist	bounce_sg;
- 	u8			*bounce_buf;
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index fa8a936a3d9ba1..d2b6aed644f361 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -43,6 +44,43 @@ void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
- 	tmio_mmc_enable_dma(host, true);
- }
- 
-+static void tmio_mmc_dma_callback(void *arg)
-+{
-+	struct tmio_mmc_host *host = arg;
-+
-+#ifdef DEBUG
-+	u32 status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
-+
-+	dev_dbg(&host->pdev->dev, "DMA complete (0x%08x)\n", status);
-+#endif
-+
-+	wait_for_completion(&host->dma_dataend);
-+
-+#ifdef DEBUG
-+	status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
-+
-+	dev_dbg(&host->pdev->dev, "DATAEND complete (0x%08x)\n", status);
-+#endif
-+
-+	spin_lock_irq(&host->lock);
-+
-+	if (!host->data)
-+		goto out;
-+
-+	if (host->data->flags & MMC_DATA_READ)
-+		dma_unmap_sg(host->chan_rx->device->dev,
-+			     host->sg_ptr, host->sg_len,
-+			     DMA_FROM_DEVICE);
-+	else
-+		dma_unmap_sg(host->chan_tx->device->dev,
-+			     host->sg_ptr, host->sg_len,
-+			     DMA_TO_DEVICE);
-+
-+	tmio_mmc_do_data_irq(host);
-+out:
-+	spin_unlock_irq(&host->lock);
-+}
-+
- static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
-@@ -88,6 +126,10 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 			DMA_DEV_TO_MEM, DMA_CTRL_ACK);
- 
- 	if (desc) {
-+		reinit_completion(&host->dma_dataend);
-+		desc->callback = tmio_mmc_dma_callback;
-+		desc->callback_param = host;
-+
- 		cookie = dmaengine_submit(desc);
- 		if (cookie < 0) {
- 			desc = NULL;
-@@ -162,6 +204,10 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 			DMA_MEM_TO_DEV, DMA_CTRL_ACK);
- 
- 	if (desc) {
-+		reinit_completion(&host->dma_dataend);
-+		desc->callback = tmio_mmc_dma_callback;
-+		desc->callback_param = host;
-+
- 		cookie = dmaengine_submit(desc);
- 		if (cookie < 0) {
- 			desc = NULL;
-@@ -221,29 +267,6 @@ static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
- 		dma_async_issue_pending(chan);
- }
- 
--static void tmio_mmc_tasklet_fn(unsigned long arg)
--{
--	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
--
--	spin_lock_irq(&host->lock);
--
--	if (!host->data)
--		goto out;
--
--	if (host->data->flags & MMC_DATA_READ)
--		dma_unmap_sg(host->chan_rx->device->dev,
--			     host->sg_ptr, host->sg_len,
--			     DMA_FROM_DEVICE);
--	else
--		dma_unmap_sg(host->chan_tx->device->dev,
--			     host->sg_ptr, host->sg_len,
--			     DMA_TO_DEVICE);
--
--	tmio_mmc_do_data_irq(host);
--out:
--	spin_unlock_irq(&host->lock);
--}
--
- void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
- {
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
-@@ -306,7 +329,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (!host->bounce_buf)
- 			goto ebouncebuf;
- 
--		tasklet_init(&host->dma_complete, tmio_mmc_tasklet_fn, (unsigned long)host);
-+		init_completion(&host->dma_dataend);
- 		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
- 	}
- 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 6b789a739d4dfe..c41f2252945eb7 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -596,11 +596,11 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host, unsigned int stat)
- 
- 		if (done) {
- 			tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
--			tasklet_schedule(&host->dma_complete);
-+			complete(&host->dma_dataend);
- 		}
- 	} else if (host->chan_rx && (data->flags & MMC_DATA_READ) && !host->force_pio) {
- 		tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
--		tasklet_schedule(&host->dma_complete);
-+		complete(&host->dma_dataend);
- 	} else {
- 		tmio_mmc_do_data_irq(host);
- 		tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_READOP | TMIO_MASK_WRITEOP);
--- 
-2.11.0
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 159ee7b4..d05ffe8a 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -237,7 +237,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>  	char clk_name[32];
+>  	int i, ret = 0;
+>  	const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
+> -	unsigned int mux_parent_count = 0;
+>  	const char *clk_div_parents[1];
+>  	u32 clk_reg, cfg;
+>  
+> @@ -256,7 +255,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>  		}
+>  
+>  		mux_parent_names[i] = __clk_get_name(host->mux_parent[i]);
+> -		mux_parent_count++;
+>  	}
+>  
+>  	/* create the mux */
+> @@ -265,7 +263,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>  	init.ops = &clk_mux_ops;
+>  	init.flags = 0;
+>  	init.parent_names = mux_parent_names;
+> -	init.num_parents = mux_parent_count;
+> +	init.num_parents = MUX_CLK_NUM_PARENTS;
+>  
+>  	host->mux.reg = host->regs + SD_EMMC_CLOCK;
+>  	host->mux.shift = CLK_SRC_SHIFT;
