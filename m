@@ -1,19 +1,19 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 09/39] mmc: queue: Add a function to control wake-up
- on new requests
-Date: Wed, 15 Feb 2017 14:07:30 +0100
-Message-ID: <CACRpkdamiAJZWzMG2_zuwgcQvy02dD=tGiSD0E0d20E3YCGkag@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-10-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 10/39] mmc: block: Change mmc_apply_rel_rw() to get
+ block address from the request
+Date: Wed, 15 Feb 2017 14:09:43 +0100
+Message-ID: <CACRpkdY7ebc+=Rx6UK8P5eFux9OaCqRJuJDzHm+NArbQJrmEfw@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-11-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:35198 "EHLO
+Received: from mail-it0-f47.google.com ([209.85.214.47]:34953 "EHLO
         mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750782AbdBONHh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:07:37 -0500
-Received: by mail-it0-f47.google.com with SMTP id 203so64167354ith.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:07:37 -0800 (PST)
-In-Reply-To: <1486731352-8018-10-git-send-email-adrian.hunter@intel.com>
+        with ESMTP id S1751238AbdBONJp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:09:45 -0500
+Received: by mail-it0-f47.google.com with SMTP id 203so64200451ith.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:09:45 -0800 (PST)
+In-Reply-To: <1486731352-8018-11-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -21,42 +21,14 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Add a function to control wake-up on new requests. This will enable
-> Software Command Queuing to choose whether or not to queue new
-> requests immediately or wait for the current task to complete.
+> mmc_apply_rel_rw() will be used by Software Command Queuing also. In that
+> case the command argument is not the block address so change
+> mmc_apply_rel_rw() to get block address from the request.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I think my patch set killed off the context and this whole thing
-"just works" instead of needing more states and hacks like this.
-
-The proliferation of states is reaching a all time high here:
-
-+       if (cntx->is_waiting_last_req != wake_me) {
-+               spin_lock_irq(q->queue_lock);
-+               cntx->is_waiting_last_req = wake_me;
-+               cntx->is_new_req = wake_me && mq->is_new_req;
-(...)
-@@ -43,6 +43,7 @@ struct mmc_queue {
-(...)
-+       bool                    is_new_req;
-
-Now there is a is_new_req in the context AND an identically
-named state variable in struct mmc_queue, and when reading the
-code I suspect a reader would like to know the difference
-between the two .is_new_req variables, one in the state
-of the host and one in the state of the queue.
-
-This is a cognitive nightmare, sorry. At least this would have to
-have more specific names.
-
-I think all these states come from the polling loop construction
-and this constant spinning around and checking for errors, doing
-and undoing the pre/post/bounce stuff, and compulsively flushing
-the pipeline with NULL and so on. I was trying to
-get rid of that stuff, but this is expanding it instead.
-
-Hm, maybe I get a bit on the complainy side, sorry if so...
+This looks right. Isn't this something we can just apply right off?
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
