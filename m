@@ -1,77 +1,119 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH v11 6/9] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
-Date: Wed, 15 Feb 2017 14:54:23 +0100
-Message-ID: <20170215135423.GA3464@hardcore>
-References: <20170206133953.8390-7-jglauber@cavium.com>
- <201702120922.DE85ulq1%fengguang.wu@intel.com>
- <20170213152408.GB27339@hardcore>
- <CAPDyKFqMhwt120_J3y293bwMxOEz+LRz6oESfHU0vm8dN0wggQ@mail.gmail.com>
- <CAK8P3a2MT2yWaPvy3K9MoPAtjeqkUmGfSB3gxFk1YHdnReeRHQ@mail.gmail.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: [PATCH] Add HS400 enhanced strobe support
+Date: Wed, 15 Feb 2017 13:50:14 +0000
+Message-ID: <1487166614-12808-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0080.outbound.protection.outlook.com ([104.47.41.80]:9520
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750781AbdBONyg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Feb 2017 08:54:36 -0500
-Content-Disposition: inline
-In-Reply-To: <CAK8P3a2MT2yWaPvy3K9MoPAtjeqkUmGfSB3gxFk1YHdnReeRHQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "kbuild-all@01.org" <kbuild-all@01.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
 
-On Wed, Feb 15, 2017 at 01:34:40PM +0100, Arnd Bergmann wrote:
-> On Mon, Feb 13, 2017 at 4:45 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On 13 February 2017 at 16:24, Jan Glauber
-> > <jan.glauber@caviumnetworks.com> wrote:
-> >> On Sun, Feb 12, 2017 at 09:09:29AM +0800, kbuild test robot wrote:
-> >>> Hi Jan,
-> >>>
-> >>> [auto build test ERROR on linus/master]
-> >>> [also build test ERROR on v4.10-rc7 next-20170210]
-> >>> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
-> >>>
-> >>> url:    https://github.com/0day-ci/linux/commits/Jan-Glauber/Cavium-MMC-driver/20170206-214740
-> >>> config: arm64-allmodconfig (attached as .config)
-> >>> compiler: aarch64-linux-gnu-gcc (Debian 6.1.1-9) 6.1.1 20160705
-> >>> reproduce:
-> >>>         wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
-> >>>         chmod +x ~/bin/make.cross
-> >>>         # save the attached .config to linux build tree
-> >>>         make.cross ARCH=arm64
-> >>>
-> >>> All errors (new ones prefixed by >>):
-> >>>
-> >>>    In file included from drivers/mmc/host/cavium-mmc.c:28:0:
-> >>>    drivers/mmc/host/cavium-mmc.h:41:7: warning: "CONFIG_MMC_CAVIUM_THUNDERX" is not defined [-Wundef]
-> >>>     #elif CONFIG_MMC_CAVIUM_THUNDERX
-> >>>           ^~~~~~~~~~~~~~~~~~~~~~~~~~
-> >>
-> >> Hi Ulf,
-> >>
-> >> We are aware of this build error, the line above should be:
-> >> #elif IS_ENABLED(CONFIG_MMC_CAVIUM_THUNDERX)
-> >
-> > Please avoid using IS_ENABLED() - unless really needed.
-> >
-> > Doesn't "#ifdef" work here?
-> >
-> 
-> No, CONFIG_MMC_CAVIUM_THUNDERX is a tristate symbol and #ifdef won't
-> work for =m.
+Add support for HS400ES mode to Cadence SDHCI driver.
 
-Yes, that was the reason for using IS_ENABLED().
+Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+---
+ drivers/mmc/host/sdhci-cadence.c | 41 +++++++++++++++++++++++++++++++++-------
+ 1 file changed, 34 insertions(+), 7 deletions(-)
 
-> Ideally, the base driver would not have any such preprocessor checks at
-> all though, and just work either way. While I realize that octeon and thunderx
-> are mutually exclusive in practice, the patch as it is written here is somewhat
-> confusing as turning on both options (with COMPILE_TEST) will break
-> at least one of the two.
-
-I'll try to get rid of the preprocessor checks for the next version.
-
---Jan
-
->     Arnd
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 4b0ecb9..5296c7c 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -39,6 +39,7 @@
+ #define   SDHCI_CDNS_HRS06_MODE_MMC_DDR		0x3
+ #define   SDHCI_CDNS_HRS06_MODE_MMC_HS200	0x4
+ #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400	0x5
++#define   SDHCI_CDNS_HRS06_MODE_MMC_HS400ES	0x6
+ 
+ /* SRS - Slot Register Set (SDHCI-compatible) */
+ #define SDHCI_CDNS_SRS_BASE		0x200
+@@ -63,6 +64,7 @@
+ 
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
++	bool enhanced_strobe;
+ };
+ 
+ static void sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+@@ -107,11 +109,22 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+ 	return host->max_clk / 1000;
+ }
+ 
++static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
++{
++	u32 tmp;
++
++	/* The speed mode for eMMC is selected by HRS06 register */
++	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
++	tmp &= ~SDHCI_CDNS_HRS06_MODE_MASK;
++	tmp |= mode;
++	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++}
++
+ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+ 					 unsigned int timing)
+ {
+ 	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+-	u32 mode, tmp;
++	u32 mode;
+ 
+ 	switch (timing) {
+ 	case MMC_TIMING_MMC_HS:
+@@ -124,24 +137,35 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+ 		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS200;
+ 		break;
+ 	case MMC_TIMING_MMC_HS400:
+-		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
++		if (priv->enhanced_strobe)
++			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
++		else
++			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
+ 		break;
+ 	default:
+ 		mode = SDHCI_CDNS_HRS06_MODE_SD;
+ 		break;
+ 	}
+ 
+-	/* The speed mode for eMMC is selected by HRS06 register */
+-	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+-	tmp &= ~SDHCI_CDNS_HRS06_MODE_MASK;
+-	tmp |= mode;
+-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++	sdhci_cdns_set_emmc_mode(priv, mode);
+ 
+ 	/* For SD, fall back to the default handler */
+ 	if (mode == SDHCI_CDNS_HRS06_MODE_SD)
+ 		sdhci_set_uhs_signaling(host, timing);
+ }
+ 
++static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
++					     struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++
++	priv->enhanced_strobe = ios->enhanced_strobe;
++	if (ios->enhanced_strobe)
++		sdhci_cdns_set_emmc_mode(priv,
++					 SDHCI_CDNS_HRS06_MODE_MMC_HS400ES);
++}
++
+ static const struct sdhci_ops sdhci_cdns_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+@@ -239,8 +263,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 
+ 	priv = sdhci_cdns_priv(host);
+ 	priv->hrs_addr = host->ioaddr;
++	priv->enhanced_strobe = false;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+ 	host->mmc_host_ops.execute_tuning = sdhci_cdns_execute_tuning;
++	host->mmc_host_ops.hs400_enhanced_strobe =
++		sdhci_cdns_hs400_enhanced_strobe;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+-- 
+2.2.2
