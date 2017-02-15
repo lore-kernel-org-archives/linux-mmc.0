@@ -1,84 +1,137 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 04/39] mmc: core: Do not prepare a new request twice
-Date: Wed, 15 Feb 2017 13:49:02 +0100
-Message-ID: <CACRpkdZJ-ccYjMzdsf=z4uem6G=C9fopbV-1sUPeeEAJrJENiA@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-5-git-send-email-adrian.hunter@intel.com>
+From: Tomas Melin <tomas.melin@vaisala.com>
+Subject: Re: [RFC PATCH] mmc: block: Support the fixed index for mmcblk with
+ aliases nodes
+Date: Wed, 15 Feb 2017 14:50:06 +0200
+Message-ID: <353308bf-0276-791e-7739-29291601b3c9@vaisala.com>
+References: <CGME20170210113539epcas1p4ef88bafa36c5da229dc81a02c3924fa2@epcas1p4.samsung.com>
+ <e4c2e2ab-29bc-a32a-8da7-082f5ffbabd8@vaisala.com>
+ <eb4fde53-54a8-0581-e923-aca7ce45d7bb@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:35083 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750767AbdBOMtJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 07:49:09 -0500
-Received: by mail-it0-f48.google.com with SMTP id 203so63903390ith.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 04:49:09 -0800 (PST)
-In-Reply-To: <1486731352-8018-5-git-send-email-adrian.hunter@intel.com>
+Received: from hel-mailgw-01.vaisala.com ([193.143.230.17]:61746 "EHLO
+        hel-mailgw-01.vaisala.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750791AbdBOMuM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 07:50:12 -0500
+In-Reply-To: <eb4fde53-54a8-0581-e923-aca7ce45d7bb@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, jszhang@marvell.com, shawn.lin@rock-chips.com, dianders@google.com, CPGS <cpgs@samsung.com>
 
-On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+Hi Jaehoon,
 
-> mmc_start_req() assumes it is never called with the new request already
-> prepared. That is true if the queue consists of only 2 requests, but is not
-> true for a longer queue. e.g. mmc_start_req() has a current and previous
-> request but still exits to queue a new request if the queue size is
-> greater than 2. In that case, when mmc_start_req() is called again, the
-> current request will have been prepared already. Fix by flagging if the
-> request has been prepared.
->
-> That also means ensuring that struct mmc_async_req is always initialized
-> to zero, which wasn't the case in mmc_test.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
+On 02/13/2017 02:34 AM, Jaehoon Chung wrote:
+> Hi,
+> 
+> On 02/10/2017 08:35 PM, Tomas Melin wrote:
+>> Hi,
+>>
+>> It looks as this RFC was never posted as a real patch.
+>> For embedded devices with several memory devices, some being removable,
+>> providing a way to define aliases for the nodes in the device tree is a benefit.
+>> I have tested the patch from Jaehoon and it works nicely.
+> 
+> I'm not sure there is more better solution than this.
+The same approach to use aliases in DT and parse them is if I understand
+correctly also how serial ports are sorted in uart drivers.
 
-I disagree with this patch, because it makes things even more complex,
-with .pre_req_done:
+> But I guess it's useful to someone..
+> If someone want to use this, i will resend the patch based on latest mmc.
 
-> +       if (areq && !areq->pre_req_done) {
-> +               areq->pre_req_done = true;
-(...)
-> +       if (host->areq) {
-> +               host->areq->pre_req_done = false;
-(...)
-> +       if ((status != MMC_BLK_SUCCESS || start_err) && areq) {
-> +               areq->pre_req_done = false;
-> @@ -168,6 +168,7 @@ struct mmc_async_req {
-> +       bool pre_req_done;
+That would be great.
 
-We already have a crazy amount of states, which is something I try to
-address in my patch set where I kill off the context and instead model
-things in a different way:
+Tomas
 
-Today what happens is that we call mmc_pre_req(), wait for the
-previous request to complete, get the status, and if it happens
-to be bad, we call mmc_post_req() and return back to the block
-queue.
-
-But why do we do that? Why are we not just leaving the request
-prepared? After all it is just a cache flusg that happens in the
-mmc_pre_req()... so you are addressing that in the patch, which
-is nice in a way.
-
-But in my patch set, we get rid of the whole problem, because I
-just redefine things by introducing a completion in the areq.
-When that completion is complete, we can always issue a new
-request, because that completion is not done until all retry and
-trying with single writes and error handling etc is already done.
-
-What I don't like about this is that it takes the dataflow and states
-that I'm trying to simplify by removing the NULL flushing, and
-makes it even more complex with yet another state.
-
-I haven't read all patches yet, but I feel it is better to do
-command queueing on top of my patches, that is, except
-for the last one that switch to using blk-mq - it's just an RFC.
-
-Maybe I change my mind when I've read it all through, but I
-generally feel I simplify the data flow, while this complicates the
-data flow, but I admit that that position is a bit subjective.
-
-Yours,
-Linus Walleij
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+>>
+>> Could this be reposted and considered for inclusion?
+>>
+>> Found the original patch here: https://patchwork.kernel.org/patch/8685711/
+>>
+>> Best Regards
+>> Tomas
+>>
+>>
+>> On 04/04/2016 09:14 PM, Ulf Hansson wrote:
+>>> On 4 April 2016 at 04:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>> Hi All,
+>>>>
+>>>> Are there any other opinion for this RFC patch?
+>>>>
+>>>> Best Regards,
+>>>> Jaehoon Chung
+>>>>
+>>>> On 03/30/2016 09:15 AM, Shawn Lin wrote:
+>>>>> åœ¨ 2016/3/29 18:49, Jisheng Zhang å†™é“:
+>>>>>> Hi Jaehoon,
+>>>>>>
+>>>>>> On Tue, 29 Mar 2016 19:43:34 +0900 Jaehoon Chung wrote:
+>>>>>>
+>>>>>>> This patch is just RFC. I want to know opinions.
+>>>>>>>
+>>>>>>> Now, index of mmcblk is allocated in accordance with probing time.
+>>>>>>> If want to use the mmcblk1 for some device, it can use alias.
+>>>>>>>
+>>>>>>> aliases {
+>>>>>>>     mmc0 = &mmc0;    /* mmcblk0 for eMMC */
+>>>>>>>     mmc1 = &mmc2;    /* mmcblk1 for SD */
+>>>>>>>     mmc2 = &mmc1;    /* mmcblk2 for SDIO*/
+>>>>>>> };
+>>>>>>
+>>>>>> I like this feature and we do need it. In the past, we have to put emmc dt node
+>>>>>> before the sd node, but on our platform, the register base of sdhc host for
+>> emmc
+>>>>>> is higher than the one for sd, putting emmc dt node before sd looks a bit
+>>>>>> strange, but we have no better solutions.
+>>>>>>
+>>>>>
+>>>>> :) That is also what I suffered currently. I have to prepare two
+>>>>> seperate firmware with two diff fstab files to assign the mount point
+>>>>> since sometime I need to boot from sd, but sometimes from emmc....
+>>>>> With this patch, I only need to dtc a new dtb... quite simple.
+>>>>>
+>>>>>> Thanks,
+>>>>>> Jisheng
+>>>
+>>> I am not immediately opposed to this patch, although let me think a
+>>> bit more about it.
+>>>
+>>> What I would like to understand is why UUID/PARTUUID isn't working for
+>>> your case. Did you try to use that?
+>>
+>> I have used with UUID/PARTUUID/PARTLABEL and etc.. I think it's not problem.
+>> But that is why some guys wants to use the fixed index.
+>> (Almost all SoCs are still using "root=mmcblk0pX" in bootloader.)
+>>
+>> I'm considering more what is better. :)
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> Kind regards
+>>> Uffe
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
