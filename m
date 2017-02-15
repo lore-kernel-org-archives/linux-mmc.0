@@ -1,50 +1,125 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: Acer ES1-432 eMMC not detected, mmc_select_hs200 fails
-Date: Wed, 15 Feb 2017 09:00:49 +0200
-Message-ID: <ce5edf5a-40ba-eedd-2f93-7c941ca94134@intel.com>
-References: <CAD8Lp46nvb0cL-7gJXh1XPL0gvGM=-uRcm93dv1s2chks4gZuQ@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: fix incorrect timeout clock
+Date: Wed, 15 Feb 2017 15:51:01 +0800
+Message-ID: <387b1284-2968-51d5-24b2-13338ec114f6@rock-chips.com>
+References: <20170213120610.1385-1-anssi.hannula@bitwise.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:19367 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751556AbdBOHGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 15 Feb 2017 02:06:12 -0500
-In-Reply-To: <CAD8Lp46nvb0cL-7gJXh1XPL0gvGM=-uRcm93dv1s2chks4gZuQ@mail.gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.130]:44174 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750716AbdBOHvG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 02:51:06 -0500
+In-Reply-To: <20170213120610.1385-1-anssi.hannula@bitwise.fi>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <drake@endlessm.com>, linux-mmc@vger.kernel.org
-Cc: Chris Chiu <chiu@endlessm.com>, Linux Upstreaming Team <linux@endlessm.com>
+To: Anssi Hannula <anssi.hannula@bitwise.fi>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, stable@vger.kernel.org
 
-On 14/02/17 21:25, Daniel Drake wrote:
-> On the Acer ES1-432 (Apollo Lake), the eMMC storage is not detected.
-> Errors like these appear in dmesg:
-> 
->  mmc0: starting CMD13 arg 00010000 flags 00000195
->  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
->  mmc0: req failed (CMD13): -84, retrying...
->  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
->  mmc0: req failed (CMD13): -84, retrying...
->  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
->  mmc0: req failed (CMD13): -84, retrying...
->  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
->  mmc0: req done (CMD13): -84: 00000000 00000000 00000000 00000000
->  mmc0: mmc_select_hs200 failed, error -84
->  mmc0: error -84 whilst initialising MMC card
-> 
-> Full dmesg attached (with MMC_DEBUG logs).
-> 
-> We have reproduced this on Linux 4.8 and 4.9.
-> 
-> If we add a PCI quirk for SDHCI_QUIRK2_BROKEN_HS200 then the eMMC is usable.
-> 
-> Any ideas or debugging suggestions? We would like to get this fixed
-> and I don't think a PCI quirk is the right answer.
+Hi Anssi,
 
-Upstream we no longer check for CRC errors after the HS200 switch.
-Here is the relevant patch which will be in v4.10
+On 2017/2/13 20:06, Anssi Hannula wrote:
+> sdhci_arasan_get_timeout_clock() divides the frequency it has with (1 <<
+> (13 + divisor)).
+>
+> However, the divisor is not some Arasan-specific value, but instead is
+> just the Data Timeout Counter Value from the SDHCI Timeout Control
+> Register.
+>
 
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ef3d232245ab7a1bf361c52449e612e4c8b7c5ab
+The TRM looks really mess, but yes, it's just the same of
+SDHCI Timeout Control Register.
 
+As the max_busy_timeout is in ms, so the timeout_clk should be in KHz,
+thus the .get_timeout_clock should provide it in KHz.
+
+So the sdhci-cadence.c return it in KHz, but sdhci-bcm-kona return it in Hz!
+
+Now per you changes:
+(1) if the unit is KHz, the SDHCI core just take it.
+(2) if the unit is MHz, you code return it in Mhz and the SDHCI core
+will agin multiple 1000 there..to make it as KHz.
+
+The above looks correct to me , but other variant hosts do it in the
+wrong way. Did I miss something, Adrian?
+
+
+
+> Applying it here like this is wrong as the sdhci driver already takes
+> that value into account when calculating timeouts, and in fact it *sets*
+> that register value based on how long a timeout is wanted.
+>
+> Additionally, sdhci core interprets the .get_timeout_clock callback
+> return value as if it were read from hardware registers, i.e. the unit
+> should be kHz or MHz depending on SDHCI_TIMEOUT_CLK_UNIT capability bit.
+> This bit is set at least on the tested Zynq-7000 SoC.
+>
+> With the tested hardware (SDHCI_TIMEOUT_CLK_UNIT set) this results in
+> too high a timeout clock rate being reported, causing the core to use
+> longer-than-needed timeouts. Additionally, on a partitioned MMC
+> (therefore having erase_group_def bit set) mmc_calc_max_discard()
+> disables discard support as it looks like controller does not support
+> the long timeouts needed for that.
+>
+> Do not apply the extra divisor and return the timeout clock in the
+> expected unit.
+>
+> Tested with a Zynq-7000 SoC and a partitioned Toshiba THGBMAG5A1JBAWR
+> eMMC card.
+>
+> Signed-off-by: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Fixes: e3ec3a3d11ad ("mmc: arasan: Add driver for Arasan SDHCI")
+> Cc: <stable@vger.kernel.org>
+> ---
+>
+> The .get_timeout_clock situation seems rather messy altogether, but I
+> wasn't sure which direction to take it to and it is probably best to
+> have that separate from this bugfix, anyway, so I kept the scope
+> limited.
+>
+>
+>  drivers/mmc/host/sdhci-of-arasan.c | 14 +++++---------
+>  1 file changed, 5 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 410a55b..1cfd7f9 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -28,13 +28,9 @@
+>  #include "sdhci-pltfm.h"
+>  #include <linux/of.h>
+>
+> -#define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+>
+>  #define VENDOR_ENHANCED_STROBE		BIT(0)
+> -#define CLK_CTRL_TIMEOUT_SHIFT		16
+> -#define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
+> -#define CLK_CTRL_TIMEOUT_MIN_EXP	13
+>
+>  #define PHY_CLK_TOO_SLOW_HZ		400000
+>
+> @@ -163,15 +159,15 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
+>
+>  static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+>  {
+> -	u32 div;
+>  	unsigned long freq;
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>
+> -	div = readl(host->ioaddr + SDHCI_ARASAN_CLK_CTRL_OFFSET);
+> -	div = (div & CLK_CTRL_TIMEOUT_MASK) >> CLK_CTRL_TIMEOUT_SHIFT;
+> +	/* SDHCI timeout clock is in kHz */
+> +	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
+>
+> -	freq = clk_get_rate(pltfm_host->clk);
+> -	freq /= 1 << (CLK_CTRL_TIMEOUT_MIN_EXP + div);
+> +	/* or in MHz */
+> +	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> +		freq = DIV_ROUND_UP(freq, 1000);
+>
+>  	return freq;
+>  }
+>
 
