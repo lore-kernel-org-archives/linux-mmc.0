@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 13/39] mmc: mmc: Enable Software Command Queuing
-Date: Wed, 15 Feb 2017 14:35:44 +0100
-Message-ID: <CACRpkdbbm4PhQd4QHsm4eRGTpifv8J_w9JcHpe20bJvKNJPDXA@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-14-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 14/39] mmc: core: Factor out debug prints from mmc_start_request()
+Date: Wed, 15 Feb 2017 14:38:28 +0100
+Message-ID: <CACRpkdakuECqLyzqW5eBVgaj9NMSPGEMtZt_UNNAzu08xZVoZw@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-15-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:34192 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750773AbdBONfq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:35:46 -0500
-Received: by mail-it0-f49.google.com with SMTP id k200so25152841itb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:35:46 -0800 (PST)
-In-Reply-To: <1486731352-8018-14-git-send-email-adrian.hunter@intel.com>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:33683 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750781AbdBONi3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:38:29 -0500
+Received: by mail-io0-f176.google.com with SMTP id g18so11274337ioe.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:38:29 -0800 (PST)
+In-Reply-To: <1486731352-8018-15-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,14 +20,11 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Enable the Command Queue if the host controller supports Software Command
-> Queuing. It is not compatible with Packed Commands, so do not enable that
-> at the same time.
+> In preparation to reuse the code for CQE support.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-This looks right
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
