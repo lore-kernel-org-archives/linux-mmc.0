@@ -1,65 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/5] Some small cleanup for quirks
-Date: Wed, 15 Feb 2017 11:43:06 +0100
-Message-ID: <CAPDyKFqnVs=bwtGF0RrcW5-Xo_T9--DJfrkN4G7v4FYoVR0vxA@mail.gmail.com>
-References: <1487147732-81724-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:33410 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751609AbdBOKnM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 05:43:12 -0500
-Received: by mail-qk0-f177.google.com with SMTP id p22so55737210qka.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 02:43:12 -0800 (PST)
-In-Reply-To: <1487147732-81724-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jeremy McNicoll <jeremy@mcnicoll.ca>
+Subject: Re: [PATCH 01/13] mmc: bcm2835: add bcm2835_read_wait_sdcmd
+Date: Wed, 15 Feb 2017 02:59:41 -0800
+Message-ID: <BE66D4B0-E7A5-46CB-8FD2-574B90A6E799@mcnicoll.ca>
+References: <1485473846-24537-1-git-send-email-kraxel@redhat.com>
+ <1485473846-24537-2-git-send-email-kraxel@redhat.com>
+ <30bf98f0-c893-d306-ab79-3ba741790919@gmail.com>
+ <1485504250.19754.22.camel@redhat.com>
+ <b08c276b-706f-3bd3-828d-fe4ee0ae971b@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <b08c276b-706f-3bd3-828d-fe4ee0ae971b@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Florian Fainelli <f.fainelli@gmail.com>, Gerd Hoffmann <kraxel@redhat.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "maintainer:BROADCOM BCM281XX/BCM11XXX/BCM216XX ARM ARCHITE..." <bcm-kernel-feedback-list@broadcom.com>, linux-rpi-kernel@lists.infradead.org, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 15 February 2017 at 09:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> I just see the we put them everywhere, so the legacy code
-> should be improved a bit for maintainability, especially for
-> the sdio quirks case. Just split them into small patches to be
-> better reviewed but I don't mind to squash them up.:)
->
->
-> Changes in v3:
-> - remove __maybe_unused and clean up the header files
->
-> Changes in v2:
-> - add __maybe_unused to make it cleanly compiled standalone
->   suggested by Ulf
-> - add inline for mmc_fixup_device
-> - move INAND quirks together
->
-> Shawn Lin (5):
->   mmc: core: change quirks.c to be a header file
->   mmc: core: move some sdio IDs out of quirks file
->   mmc: core: improve the quirks for sdio devices
->   mmc: core: move all quirks together into quirks.h
->   mmc: core: add mmc prefix for blk_fixups
->
->  drivers/mmc/core/Makefile    |   2 +-
->  drivers/mmc/core/block.c     |  83 +-----------------------
->  drivers/mmc/core/card.h      |   2 -
->  drivers/mmc/core/mmc.c       |  12 +---
->  drivers/mmc/core/quirks.c    |  85 -------------------------
->  drivers/mmc/core/quirks.h    | 148 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/core/sdio.c      |   3 +-
->  include/linux/mmc/sdio_ids.h |   7 ++
->  8 files changed, 161 insertions(+), 181 deletions(-)
->  delete mode 100644 drivers/mmc/core/quirks.c
->  create mode 100644 drivers/mmc/core/quirks.h
->
-> --
-> 1.9.1
->
-
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
+Cj4gT24gSmFuIDI3LCAyMDE3LCBhdCAxMDoyMyBBTSwgRmxvcmlhbiBGYWluZWxsaSA8Zi5mYWlu
+ZWxsaUBnbWFpbC5jb20+IHdyb3RlOgo+IAo+IE9uIDAxLzI3LzIwMTcgMTI6MDQgQU0sIEdlcmQg
+SG9mZm1hbm4gd3JvdGU6Cj4+IE9uIERvLCAyMDE3LTAxLTI2IGF0IDE1OjUxIC0wODAwLCBGbG9y
+aWFuIEZhaW5lbGxpIHdyb3RlOgo+Pj4gT24gMDEvMjYvMjAxNyAwMzozNyBQTSwgR2VyZCBIb2Zm
+bWFubiB3cm90ZToKPj4+PiBTaWduZWQtb2ZmLWJ5OiBHZXJkIEhvZmZtYW5uIDxrcmF4ZWxAcmVk
+aGF0LmNvbT4KPj4+IAo+Pj4gRmV3IHRoaW5ncyB3aXRoIHlvdXIgc3VibWlzc2lvbjoKPj4+IAo+
+Pj4gLSBpZiB5b3Ugc2VuZCBtb3JlIHRoYW4gb25lIHBhdGNoLCBhIGNvdmVyIGxldHRlciBpcyBh
+IHdlbGNvbWUgdG8KPj4+IGV4cGxhaW4geW91ciBjaGFuZ2VzCj4+IAo+PiBUaGVyZSBhY3R1YWxs
+eSBpcyBhIGNvdmVyIGxldHRlci4gIFRoZSBnaXQtc2VuZC1lbWFpbCAiY2NjbWQgPQo+PiBzY3Jp
+cHRzL2dldF9tYWludGFpbmVyLnBsIiBob29rIGRvZXNuJ3Qgd29yayBmb3IgdGhlIGNvdmVyIGxl
+dHRlciB0aG91Z2gKPj4gYmVjYXVzZSBpdCBpc24ndCBhIHBhdGNoLiAgSSd2ZSBoYW5kLXBpY2tl
+ZCBzb21lIHBlb3BsZSB3aG8KPj4gdG91Y2hlZC9yZXZpZXdlZCB0aGUgZHJpdmVyIGJlZm9yZSB0
+byB0aGUgZ2l0LXNlbmQtZW1haWwgY29tbWFuZCBsaW5lLAo+PiBidXQgZXZlcnlib2R5IGVsc2Ug
+Z290IHRoZSBwYXRjaGVzIG9ubHkuCj4+IAo+PiBBbnlvbmUgaGFzIGEgZ29vZCBzb2x1dGlvbiBm
+b3IgdGhpcyBidHc/Cj4gCj4gRG8gYSBkcnkgcnVuIGFnYWluc3QgYWxsIHBhdGNoZXMsIGNvbGxl
+Y3QgdGhlIGNjbGlzdCBpbiBhIGZpbGUsIGFuZCBoYXZlCj4gYSBzY3JpcHQgdGhhdCBvdXRwdXRz
+IG9uZSBsaW5lLCBzb21ldGhpbmcgbGlrZSB0aGlzOgo+IAo+IC4vc2NyaXB0cy9nZXRfbWFpbnRh
+aW5lci5wbCBwYXRjaGVzLyoucGF0Y2ggPiBjY2xpc3QKPiAKPiBjY2xpc3Quc2g6Cj4gCj4gIyEv
+YmluL3NoCj4gY2F0ICQoZGlybmFtZSAkMCkvY2NsaXN0Cj4gCj4gZ2l0IHNlbmQtZW1haWwgLS1j
+Yy1jbWQ9Y2NsaXN0LnNoIHBhdGNoZXMvKi5wYXRjaAoKCkhvdyBpcyB0aGUgY292ZXIgbGV0dGVy
+IGJlaW5nIGNyZWF0ZWQ/ICAKCiQgZ2l0IHNlbmQtZW1haWwgLTEwIOKAlC1jb21wb3NlICAKCmRy
+b3BzIHlvdSBpbnRvIHlvdXIgZWRpdG9yIHRvIHdyaXRlIHRoZSBjb3ZlciBsZXR0ZXIgLyBsZWFk
+IGluLiAKCldoYXQgYWJvdXQgdGhpcz8KCiQgZ2l0IGZvcm1hdC1wYXRjaCAtbyAvdG1wL2JsYWgv
+IC0tY292ZXItbGV0dGVyIC0tc3ViamVjdC1wcmVmaXg9IltWMl0iIEhFQUR+MTAKCllvdXIgZmly
+c3QgcGF0Y2ggMDAwMC5wYXRjaCB3aWxsIGJlIHlvdXIgY292ZXIgbGV0dGVyIHRvIGZpbGwgaW4u
+IAoKQWRkIHRoaXMgdG8geW91ciB+Ly5naXRjb25maWcKICAgW3NlbmRtYWlsXSAKICAgICAgIOKA
+pi4KICAgICAgIGNvbmZpcm0gPSBhbHdheXMKCiQgZ2l0IGNvbmZpZyAtLWdsb2JhbCBzZW5kZW1h
+aWwuY29uZmlybSBhbHdheXMKCgpBcyB3ZWxsIHRoZXJlIGlzIGEg4oCY4oCULWRyeS1ydW7igJkg
+b3B0aW9uIHRvIGdpdCBzZW5kLWVtYWlsLiAKCkhUSAoKSXRzIGFsd2F5cyBnb29kIHRvIGN1dCB0
+d2ljZSBhbmQgbWVhc3VyZSBvbmNlIDstKQoKLWplcmVteQoKCgo+IAo+PiAKPj4+IC0gdHJ5IHRv
+IHByb3ZpZGUgY29tbWl0IG1lc3NhZ2VzIGZvciB0aGluZ3MgdGhhdCBhcmUgbm90IG9idmlvdXMg
+KGluCj4+PiBmYWN0LCBtb3N0IG1haW50YWluZXJzIGFjdHVhbGx5IHJlcXVlc3QgY29tbWl0IG1l
+c3NhZ2VzIGV2ZW4gZm9yIHRyaXZpYWwKPj4+IHRoaW5ncykKPj4gCj4+IFRoZSBkcml2ZXIgaXMg
+b3V0IG9mIHRyZWUgc3RpbGwsIHRoZXNlIGFyZSBjbGVhbnVwcyBVbGYgSGFuc3NvbiBhc2tlZAo+
+PiBmb3IgbGFzdCB0aW1lIHRoZSBkcml2ZXIgd2FzIHN1Ym1pdHRlZC4KPj4gCj4+IEZ1bGwgc2V0
+IG9mIHBhdGNoZXM6Cj4+ICBodHRwczovL3d3dy5rcmF4ZWwub3JnL2NnaXQvbGludXgvbG9nLz9o
+PWJjbTI4Mzctc2Rob3N0LWNsZWFudXAKPj4gCj4+IFBsYW4gZm9yIHVwc3RyZWFtIG1lcmdlIGlz
+IHRvIGFjdHVhbGx5IHNxdWFzaCBhbGwgdGhlIGluY3JlbWVudGFsCj4+IGNsZWFudXBzLCBidXQg
+Zm9yIG5vdyBJIGtlcHQgdGhlbSBhcyBzZXBhcmF0ZSBjaGFuZ2VzLiAgSSB0aGluayB0aGlzCj4+
+IG1ha2VzIGl0IGVhc2llciB0byBzcG90IG1pc3Rha2VzIGFuZCBpdCdsbCBhbHNvIGhlbHAgaW4g
+Y2FzZSB0aGVyZSBhcmUKPj4gcmVncmVzc2lvbnMgYi9jIHlvdSBjYW4gYmlzZWN0IHRoaW5ncy4K
+Pj4gCj4+PiAtIGhhdmUgbm90IHdlIHN3aXRjaGVkIHRvIHRoZSBpcHJvYyBTREhDSSBkcml2ZXIs
+IG9yIGlzIHRoaXMgZm9yIHRoZQo+Pj4gb3RoZXIgU0RJTyBjb25uZWN0ZWQgcGVyaXBoZXJhbHMg
+aGVyZT8KPj4gCj4+IFRoZSAyODM1IGhhcyB0d28gU0QgY29udHJvbGxlcnM6IFRoZSBBcmFzYW4g
+U0RIQ0kgY29udHJvbGxlciB0aGF0IHdlCj4+IGN1cnJlbnRseSB1c2UgKGlwcm9jIGRyaXZlcyB0
+aGF0IG9uZSksIGFuZCBhIGN1c3RvbSBTRCBjb250cm9sbGVyLgo+PiAKPj4gVGhpcyBpcyBhIGRy
+aXZlciBmb3IgdGhlIGN1c3RvbSBvbmUuICBIYXMgYmV0dGVyIHBlcmZvcm1hbmNlIHRoYW4gdGhl
+Cj4+IHNkaGNpIGNvbnRyb2xsZXIgKGFjY29yZGluZyB0byBFcmljIEFuaG9sdCkuICBGb3IgdGhl
+IHJwaTMgc3dpdGNoaW5nIHRvCj4+IHRoaXMgZHJpdmVyIGhhcyB0aGUgYWRkaXRpb25hbCBhZHZh
+bnRhZ2UgdGhhdCB3ZSBjYW4gdXNlIHRoZSBpcHJvYwo+PiBkcml2ZXIgZHJpdmVyIHRvIGhhbmRs
+ZSB0aGUgd2lmaS4KPiAKPiBPSwo+IC0tIAo+IEZsb3JpYW4KPiAKPiBfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+IGxpbnV4LXJwaS1rZXJuZWwgbWFpbGlu
+ZyBsaXN0Cj4gbGludXgtcnBpLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCj4gaHR0cDovL2xp
+c3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1ycGkta2VybmVsCgoKX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtl
+cm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0
+dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5l
+bAo=
