@@ -1,20 +1,20 @@
 From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 15/18] mmc: meson-gx: improve initial configuration
-Date: Wed, 15 Feb 2017 11:32:23 -0800
-Message-ID: <m237ff8d2w.fsf@baylibre.com>
+Subject: Re: [PATCH 16/18] mmc: meson-gx: improve response reading and sending stop command
+Date: Wed, 15 Feb 2017 11:34:49 -0800
+Message-ID: <m2y3x76yee.fsf@baylibre.com>
 References: <420b75a9-b8c2-b3d7-ae60-3ed8a5a18ead@gmail.com>
-        <651c407e-bc38-5adc-a388-5a45854808e1@gmail.com>
+        <bac15e8c-6f17-e96c-0f43-01db0df74a1b@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:32918 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750806AbdBOTc0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 14:32:26 -0500
-Received: by mail-pg0-f45.google.com with SMTP id 204so39280934pge.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 11:32:26 -0800 (PST)
-In-Reply-To: <651c407e-bc38-5adc-a388-5a45854808e1@gmail.com> (Heiner
-        Kallweit's message of "Tue, 14 Feb 2017 21:07:05 +0100")
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:36457 "EHLO
+        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750791AbdBOTew (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 14:34:52 -0500
+Received: by mail-pf0-f173.google.com with SMTP id 189so33638171pfu.3
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 11:34:52 -0800 (PST)
+In-Reply-To: <bac15e8c-6f17-e96c-0f43-01db0df74a1b@gmail.com> (Heiner
+        Kallweit's message of "Tue, 14 Feb 2017 21:07:09 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Heiner Kallweit <hkallweit1@gmail.com>
@@ -22,99 +22,81 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, "linu
 
 Heiner Kallweit <hkallweit1@gmail.com> writes:
 
-> Config values which are not changed during runtime we can set
-> in the probe function already.
-> The block size setting is overwritten later in
-> meson_mmc_start_cmd anyway if needed, so it doesn't harm if we
-> remove this setting in meson_mmc_set_ios.
+> Stopping execution at the beginning of command processing (again) is
+> not needed as reading SD_EMMC_CMD_RSP implicitely stops execution.
+> We just have to take care of the case that a command doesn't return a
+> response. Therefore read SD_EMMC_CMD_RSP always.
 >
-> In addition:
-> - write config register only if configuration changed
-> - Initialize clocks after other config registers have been initialized
+> In addition we can read the response in the main irq handler already,
+> we don't have to do this in the threaded handler.
 >
 > Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
 Acked-by: Kevin Hilman <khilman@baylibre.com>
 
+
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 37 +++++++++++++++++++++----------------
->  1 file changed, 21 insertions(+), 16 deletions(-)
+>  drivers/mmc/host/meson-gx-mmc.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
 >
 > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 806554b1..25b46d36 100644
+> index 25b46d36..6721aee2 100644
 > --- a/drivers/mmc/host/meson-gx-mmc.c
 > +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -385,15 +385,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	val &= ~(CFG_BUS_WIDTH_MASK << CFG_BUS_WIDTH_SHIFT);
->  	val |= bus_width << CFG_BUS_WIDTH_SHIFT;
+> @@ -510,9 +510,6 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >  
-> -	val &= ~(CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
-> -	val |= ilog2(SD_EMMC_CFG_BLK_SIZE) << CFG_BLK_LEN_SHIFT;
-> -
-> -	val &= ~(CFG_RESP_TIMEOUT_MASK << CFG_RESP_TIMEOUT_SHIFT);
-> -	val |= ilog2(SD_EMMC_CFG_RESP_TIMEOUT) << CFG_RESP_TIMEOUT_SHIFT;
-> -
-> -	val &= ~(CFG_RC_CC_MASK << CFG_RC_CC_SHIFT);
-> -	val |= ilog2(SD_EMMC_CFG_CMD_GAP) << CFG_RC_CC_SHIFT;
-> -
->  	val &= ~CFG_DDR;
->  	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
->  	    ios->timing == MMC_TIMING_MMC_DDR52 ||
-> @@ -404,11 +395,11 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	if (ios->timing == MMC_TIMING_MMC_HS400)
->  		val |= CFG_CHK_DS;
+>  	WARN_ON(host->mrq != NULL);
 >  
-> -	writel(val, host->regs + SD_EMMC_CFG);
+> -	/* Stop execution */
+> -	writel(0, host->regs + SD_EMMC_START);
 > -
-> -	if (val != orig)
-> +	if (val != orig) {
-> +		writel(val, host->regs + SD_EMMC_CFG);
->  		dev_dbg(host->dev, "%s: SD_EMMC_CFG: 0x%08x -> 0x%08x\n",
->  			__func__, orig, val);
-> +	}
+>  	host->mrq = mrq;
+>  	meson_mmc_start_cmd(mmc, mrq->cmd);
 >  }
+> @@ -521,12 +518,16 @@ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+>  {
+>  	struct meson_host *host = mmc_priv(mmc);
 >  
->  static void meson_mmc_request_done(struct mmc_host *mmc,
-> @@ -675,6 +666,17 @@ static int meson_mmc_get_cd(struct mmc_host *mmc)
->  	return status;
+> +	/*
+> +	 * reading SD_EMMC_CMD_RSP stops processing, therefore read
+> +	 * this register even if command has no response
+> +	 */
+>  	if (cmd->flags & MMC_RSP_136) {
+>  		cmd->resp[0] = readl(host->regs + SD_EMMC_CMD_RSP3);
+>  		cmd->resp[1] = readl(host->regs + SD_EMMC_CMD_RSP2);
+>  		cmd->resp[2] = readl(host->regs + SD_EMMC_CMD_RSP1);
+>  		cmd->resp[3] = readl(host->regs + SD_EMMC_CMD_RSP);
+> -	} else if (cmd->flags & MMC_RSP_PRESENT) {
+> +	} else {
+>  		cmd->resp[0] = readl(host->regs + SD_EMMC_CMD_RSP);
+>  	}
 >  }
+> @@ -564,6 +565,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>  		goto out;
+>  	}
 >  
-> +static void meson_mmc_cfg_init(struct meson_host *host)
-> +{
-> +	u32 cfg = 0;
+> +	meson_mmc_read_resp(host->mmc, cmd);
 > +
-> +	cfg |= ilog2(SD_EMMC_CFG_RESP_TIMEOUT) << CFG_RESP_TIMEOUT_SHIFT;
-> +	cfg |= ilog2(SD_EMMC_CFG_CMD_GAP) << CFG_RC_CC_SHIFT;
-> +	cfg |= ilog2(SD_EMMC_CFG_BLK_SIZE) << CFG_BLK_LEN_SHIFT;
-> +
-> +	writel(cfg, host->regs + SD_EMMC_CFG);
-> +}
-> +
->  static const struct mmc_host_ops meson_mmc_ops = {
->  	.request	= meson_mmc_request,
->  	.set_ios	= meson_mmc_set_ios,
-> @@ -735,10 +737,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto free_host;
+>  	cmd->error = 0;
+>  	if (status & IRQ_RXD_ERR_MASK) {
+>  		dev_dbg(host->dev, "Unhandled IRQ: RXD error\n");
+> @@ -610,10 +613,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>  	/* ack all (enabled) interrupts */
+>  	writel(status, host->regs + SD_EMMC_STATUS);
 >  
-> -	ret = meson_mmc_clk_init(host);
-> -	if (ret)
-> -		goto free_host;
-> -
->  	/* Stop execution */
->  	writel(0, host->regs + SD_EMMC_START);
+> -	if (ret == IRQ_HANDLED) {
+> -		meson_mmc_read_resp(host->mmc, cmd);
+> +	if (ret == IRQ_HANDLED)
+>  		meson_mmc_request_done(host->mmc, cmd->mrq);
+> -	}
 >  
-> @@ -747,6 +745,13 @@ static int meson_mmc_probe(struct platform_device *pdev)
->  	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
->  	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+>  	spin_unlock(&host->lock);
+>  	return ret;
+> @@ -643,7 +644,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>  		data->bytes_xfered = xfer_bytes;
+>  	}
 >  
-> +	/* set config to sane default */
-> +	meson_mmc_cfg_init(host);
-> +
-> +	ret = meson_mmc_clk_init(host);
-> +	if (ret)
-> +		goto free_host;
-> +
->  	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
->  					meson_mmc_irq_thread, IRQF_SHARED,
->  					dev_name(&pdev->dev), host);
+> -	meson_mmc_read_resp(host->mmc, cmd);
+>  	if (mmc_op_multi(cmd->opcode))
+>  		meson_mmc_start_cmd(host->mmc, data->stop);
+>  	else
