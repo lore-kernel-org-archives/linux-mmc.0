@@ -1,65 +1,50 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: use eMMC lifetime info to warn user
-Date: Wed, 15 Feb 2017 15:04:09 +0800
-Message-ID: <ba5d8572-23a0-3dd0-c8d3-d3dbbb83747f@rock-chips.com>
-References: <b3f67c2a-fbf7-b2fb-c05e-138fbdd77e39@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: Acer ES1-432 eMMC not detected, mmc_select_hs200 fails
+Date: Wed, 15 Feb 2017 09:00:49 +0200
+Message-ID: <ce5edf5a-40ba-eedd-2f93-7c941ca94134@intel.com>
+References: <CAD8Lp46nvb0cL-7gJXh1XPL0gvGM=-uRcm93dv1s2chks4gZuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:39608 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751663AbdBOHEM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 02:04:12 -0500
-In-Reply-To: <b3f67c2a-fbf7-b2fb-c05e-138fbdd77e39@gmail.com>
+Received: from mga06.intel.com ([134.134.136.31]:19367 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751556AbdBOHGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Feb 2017 02:06:12 -0500
+In-Reply-To: <CAD8Lp46nvb0cL-7gJXh1XPL0gvGM=-uRcm93dv1s2chks4gZuQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jungseung Lee <js07.lee@samsung.com>
+To: Daniel Drake <drake@endlessm.com>, linux-mmc@vger.kernel.org
+Cc: Chris Chiu <chiu@endlessm.com>, Linux Upstreaming Team <linux@endlessm.com>
 
-Hi Heiner,
+On 14/02/17 21:25, Daniel Drake wrote:
+> On the Acer ES1-432 (Apollo Lake), the eMMC storage is not detected.
+> Errors like these appear in dmesg:
+> 
+>  mmc0: starting CMD13 arg 00010000 flags 00000195
+>  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
+>  mmc0: req failed (CMD13): -84, retrying...
+>  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
+>  mmc0: req failed (CMD13): -84, retrying...
+>  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
+>  mmc0: req failed (CMD13): -84, retrying...
+>  sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x000a8001
+>  mmc0: req done (CMD13): -84: 00000000 00000000 00000000 00000000
+>  mmc0: mmc_select_hs200 failed, error -84
+>  mmc0: error -84 whilst initialising MMC card
+> 
+> Full dmesg attached (with MMC_DEBUG logs).
+> 
+> We have reproduced this on Linux 4.8 and 4.9.
+> 
+> If we add a PCI quirk for SDHCI_QUIRK2_BROKEN_HS200 then the eMMC is usable.
+> 
+> Any ideas or debugging suggestions? We would like to get this fixed
+> and I don't think a PCI quirk is the right answer.
 
-On 2017/2/15 4:53, Heiner Kallweit wrote:
-> Now that the new lifetime parameters are available in struct mmc_ext_csd
-> we can use this information to warn the user if card is close to or
-> beyond end of its lifetime.
->
+Upstream we no longer check for CRC errors after the HS200 switch.
+Here is the relevant patch which will be in v4.10
 
-This is really the user end argument that they could get it either from
-sysfs or whether user-space tools. I don't believe the user would look
-into the log but I assume you just add this for developers...
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ef3d232245ab7a1bf361c52449e612e4c8b7c5ab
 
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> ---
->  drivers/mmc/core/bus.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
->
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 30124651..ab20d242 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -345,6 +345,22 @@ int mmc_add_card(struct mmc_card *card)
->  			uhs_bus_speed_mode, type, card->rca);
->  	}
->
-> +	if (card->ext_csd.device_life_time_est_typ_a == 0xb ||
-> +	    card->ext_csd.device_life_time_est_typ_b == 0xb)
-> +		pr_err("%s: memory has exceeded its life time",
-> +			mmc_hostname(card->host));
-> +	else if (card->ext_csd.device_life_time_est_typ_a == 0xa ||
-> +		 card->ext_csd.device_life_time_est_typ_b == 0xa)
-> +		pr_warn("%s: memory has used more than 90%% of its life time\n",
-> +			mmc_hostname(card->host));
-> +
-> +	if (card->ext_csd.pre_eol_info == 3)
-> +		pr_err("%s: out of reserved blocks\n",
-> +			mmc_hostname(card->host));
-> +	else if (card->ext_csd.pre_eol_info == 2)
-> +		pr_warn("%s: more than 80%% of reserved blocks consumed\n",
-> +			mmc_hostname(card->host));
-> +
->  #ifdef CONFIG_DEBUG_FS
->  	mmc_add_card_debugfs(card);
->  #endif
->
 
