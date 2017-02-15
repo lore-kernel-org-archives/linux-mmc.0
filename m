@@ -1,62 +1,77 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
-Date: Wed, 15 Feb 2017 14:49:23 +0100
-Message-ID: <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH v11 6/9] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
+Date: Wed, 15 Feb 2017 14:54:23 +0100
+Message-ID: <20170215135423.GA3464@hardcore>
+References: <20170206133953.8390-7-jglauber@cavium.com>
+ <201702120922.DE85ulq1%fengguang.wu@intel.com>
+ <20170213152408.GB27339@hardcore>
+ <CAPDyKFqMhwt120_J3y293bwMxOEz+LRz6oESfHU0vm8dN0wggQ@mail.gmail.com>
+ <CAK8P3a2MT2yWaPvy3K9MoPAtjeqkUmGfSB3gxFk1YHdnReeRHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:35623 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750760AbdBONt0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:49:26 -0500
-Received: by mail-io0-f171.google.com with SMTP id j18so88598476ioe.2
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:49:25 -0800 (PST)
-In-Reply-To: <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
+Received: from mail-dm3nam03on0080.outbound.protection.outlook.com ([104.47.41.80]:9520
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750781AbdBONyg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 15 Feb 2017 08:54:36 -0500
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a2MT2yWaPvy3K9MoPAtjeqkUmGfSB3gxFk1YHdnReeRHQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "kbuild-all@01.org" <kbuild-all@01.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
 
-On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Wed, Feb 15, 2017 at 01:34:40PM +0100, Arnd Bergmann wrote:
+> On Mon, Feb 13, 2017 at 4:45 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On 13 February 2017 at 16:24, Jan Glauber
+> > <jan.glauber@caviumnetworks.com> wrote:
+> >> On Sun, Feb 12, 2017 at 09:09:29AM +0800, kbuild test robot wrote:
+> >>> Hi Jan,
+> >>>
+> >>> [auto build test ERROR on linus/master]
+> >>> [also build test ERROR on v4.10-rc7 next-20170210]
+> >>> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+> >>>
+> >>> url:    https://github.com/0day-ci/linux/commits/Jan-Glauber/Cavium-MMC-driver/20170206-214740
+> >>> config: arm64-allmodconfig (attached as .config)
+> >>> compiler: aarch64-linux-gnu-gcc (Debian 6.1.1-9) 6.1.1 20160705
+> >>> reproduce:
+> >>>         wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
+> >>>         chmod +x ~/bin/make.cross
+> >>>         # save the attached .config to linux build tree
+> >>>         make.cross ARCH=arm64
+> >>>
+> >>> All errors (new ones prefixed by >>):
+> >>>
+> >>>    In file included from drivers/mmc/host/cavium-mmc.c:28:0:
+> >>>    drivers/mmc/host/cavium-mmc.h:41:7: warning: "CONFIG_MMC_CAVIUM_THUNDERX" is not defined [-Wundef]
+> >>>     #elif CONFIG_MMC_CAVIUM_THUNDERX
+> >>>           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+> >>
+> >> Hi Ulf,
+> >>
+> >> We are aware of this build error, the line above should be:
+> >> #elif IS_ENABLED(CONFIG_MMC_CAVIUM_THUNDERX)
+> >
+> > Please avoid using IS_ENABLED() - unless really needed.
+> >
+> > Doesn't "#ifdef" work here?
+> >
+> 
+> No, CONFIG_MMC_CAVIUM_THUNDERX is a tristate symbol and #ifdef won't
+> work for =m.
 
-> Enhance mmc_blk_data_prep() to support CQE requests.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Yes, that was the reason for using IS_ENABLED().
 
-Hey:
+> Ideally, the base driver would not have any such preprocessor checks at
+> all though, and just work either way. While I realize that octeon and thunderx
+> are mutually exclusive in practice, the patch as it is written here is somewhat
+> confusing as turning on both options (with COMPILE_TEST) will break
+> at least one of the two.
 
-> +#include <linux/ioprio.h>
-(...)
-> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
-> +               brq->data.flags |= MMC_DATA_PRIO;
+I'll try to get rid of the preprocessor checks for the next version.
 
-What is this?
+--Jan
 
-Why are we not already doing this and why is it not a separate patch?
-
->         /*
->          * Data tag is used only during writing meta data to speed
->          * up write and any subsequent read of this meta data
->          */
-
-Is this comment still true?
-
-> -       *do_data_tag = card->ext_csd.data_tag_unit_size &&
-> -                      (req->cmd_flags & REQ_META) &&
-> -                      (rq_data_dir(req) == WRITE) &&
-> -                      ((brq->data.blocks * brq->data.blksz) >=
-> -                       card->ext_csd.data_tag_unit_size);
-> +       do_data_tag = card->ext_csd.data_tag_unit_size &&
-> +                     (req->cmd_flags & REQ_META) &&
-> +                     (rq_data_dir(req) == WRITE) &&
-> +                     ((brq->data.blocks * brq->data.blksz) >=
-> +                      card->ext_csd.data_tag_unit_size);
-> +
-> +       if (do_data_tag)
-> +               brq->data.flags |= MMC_DATA_DAT_TAG;
-
-Because it seems to be more unconditionally used now.
-
-Yours,
-Linus Walleij
+>     Arnd
