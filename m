@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 21/39] mmc: mmc: Enable CQE's
-Date: Wed, 15 Feb 2017 14:45:43 +0100
-Message-ID: <CACRpkda92ezADbU303s-fgfD-sv1tB4ieHO6tEsqjgDv6+eZ_g@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-22-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
+Date: Wed, 15 Feb 2017 14:49:23 +0100
+Message-ID: <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:38245 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750838AbdBONpp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:45:45 -0500
-Received: by mail-it0-f48.google.com with SMTP id c7so62997009itd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:45:45 -0800 (PST)
-In-Reply-To: <1486731352-8018-22-git-send-email-adrian.hunter@intel.com>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:35623 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbdBONt0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 08:49:26 -0500
+Received: by mail-io0-f171.google.com with SMTP id j18so88598476ioe.2
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 05:49:25 -0800 (PST)
+In-Reply-To: <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,11 +20,43 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Enable or disable CQE when a card is added or removed respectively.
+> Enhance mmc_blk_data_prep() to support CQE requests.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Hey:
+
+> +#include <linux/ioprio.h>
+(...)
+> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
+> +               brq->data.flags |= MMC_DATA_PRIO;
+
+What is this?
+
+Why are we not already doing this and why is it not a separate patch?
+
+>         /*
+>          * Data tag is used only during writing meta data to speed
+>          * up write and any subsequent read of this meta data
+>          */
+
+Is this comment still true?
+
+> -       *do_data_tag = card->ext_csd.data_tag_unit_size &&
+> -                      (req->cmd_flags & REQ_META) &&
+> -                      (rq_data_dir(req) == WRITE) &&
+> -                      ((brq->data.blocks * brq->data.blksz) >=
+> -                       card->ext_csd.data_tag_unit_size);
+> +       do_data_tag = card->ext_csd.data_tag_unit_size &&
+> +                     (req->cmd_flags & REQ_META) &&
+> +                     (rq_data_dir(req) == WRITE) &&
+> +                     ((brq->data.blocks * brq->data.blksz) >=
+> +                      card->ext_csd.data_tag_unit_size);
+> +
+> +       if (do_data_tag)
+> +               brq->data.flags |= MMC_DATA_DAT_TAG;
+
+Because it seems to be more unconditionally used now.
 
 Yours,
 Linus Walleij
