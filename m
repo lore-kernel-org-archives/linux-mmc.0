@@ -1,36 +1,57 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 01/39] mmc: block: Use local var for mqrq_cur
-Date: Wed, 15 Feb 2017 13:29:51 +0100
-Message-ID: <CACRpkdbMDUNqVSZYaAcu3rFSxd_cj7Fub4xMRHRLHKbOcudZ_g@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-2-git-send-email-adrian.hunter@intel.com>
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: Re: [PATCH 09/18] mmc: meson-gx: change interrupt name
+Date: Wed, 15 Feb 2017 12:34:02 +0000
+Message-ID: <7ccaed3c-199c-2897-5280-2790ce3676ea@codethink.co.uk>
+References: <420b75a9-b8c2-b3d7-ae60-3ed8a5a18ead@gmail.com>
+ <cbe84305-803a-5431-9246-0b30d6f135b0@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:38234 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751666AbdBOM3x (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 07:29:53 -0500
-Received: by mail-it0-f49.google.com with SMTP id c7so61915586itd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 04:29:53 -0800 (PST)
-In-Reply-To: <1486731352-8018-2-git-send-email-adrian.hunter@intel.com>
+Received: from imap0.codethink.co.uk ([185.43.218.159]:45561 "EHLO
+        imap0.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751359AbdBOMeN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2017 07:34:13 -0500
+In-Reply-To: <cbe84305-803a-5431-9246-0b30d6f135b0@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: Carlo Caione <carlo@caione.org>, linux-amlogic@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-
-> A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
-> assigning it to a local variable.
+On 14/02/17 20:06, Heiner Kallweit wrote:
+> So far the driver name is used for the interrupt. Therefore in
+> /proc/interrupts we can't tell which interrupt belongs to which
+> SD_EMMC port.
+> So let's use the device name instead (what is the OF node name).
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index a67c811e..1a76c925 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -757,9 +757,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>  	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
+>  	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+>
+> -	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
+> -					meson_mmc_irq, meson_mmc_irq_thread,
+> -					IRQF_SHARED, DRIVER_NAME, host);
+> +	ret = devm_request_threaded_irq(&pdev->dev, host->irq, meson_mmc_irq,
+> +					meson_mmc_irq_thread, IRQF_SHARED,
+> +					dev_name(&pdev->dev), host);
+>  	if (ret)
+>  		goto free_host;
+>
 
-My patch series also totally kill off mq->mqrq_cur and prev instead using
-a pool (with queue depth items) of pre-allocated struct mmc_queue_req, see
-"mmc: queue: get/put struct mmc_queue_req"
+I am surpised that the default is not to use dev_name(dev), I wonder if
+that should be something that devm_request_threaded_irq() could be
+updated to do.
 
-So I guess we agree that getting rid of the prev/cur thing is something we
-can agree to do as a first step?
 
-Yours,
-Linus Walleij
+-- 
+Ben Dooks				http://www.codethink.co.uk/
+Senior Engineer				Codethink - Providing Genius
