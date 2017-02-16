@@ -1,71 +1,59 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: SDIO bus hang on BayTrail machines
-Date: Thu, 16 Feb 2017 15:09:29 +0200
-Message-ID: <e2659959-ded2-1ea9-e859-6ce8a8172eab@intel.com>
-References: <CA+A7VXXmA1KGjPfnUmZPBKDXmUMYhjLeXbo=8Ho3CrCvt7rjbA@mail.gmail.com>
- <CAPDyKFrO4ajLw=TDsMa==fL_Q6BYxoO_x1OFODB7+oMJdJCr3w@mail.gmail.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: [PATCH 1/2] [1/2] mmc: sdhci-cadence: Fix writing PHY delay
+Date: Thu, 16 Feb 2017 13:06:52 +0000
+Message-ID: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:52339 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753526AbdBPNOx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Feb 2017 08:14:53 -0500
-In-Reply-To: <CAPDyKFrO4ajLw=TDsMa==fL_Q6BYxoO_x1OFODB7+oMJdJCr3w@mail.gmail.com>
+Received: from keymaster.Cadence.COM ([158.140.2.26]:53833 "EHLO
+        mx-sanjose5.cadence.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754374AbdBPNmO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 08:42:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?Q?Jo=c3=a3o_Paulo_Rechi_Vita?= <jprvita@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, =?UTF-8?Q?Jo=c3=a3o_Paulo_Rechi_Vita?= <jprvita@endlessm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux@endlessm.com
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
 
-On 11/01/17 17:42, Ulf Hansson wrote:
-> On 12 December 2016 at 23:55, João Paulo Rechi Vita <jprvita@gmail.com> wrote:
->> Hello Dong Adrian and Ulf,
->>
->> I'm working on enabling a BayTrail-based machine with very similar
->> hardware to one of the Intel Compute sticks, which is an Intel
->> BayTrail and has a RTL8723BS WiFi card on the SDIO bus. I'm using
->> Linux 4.8 with the driver from https://github.com/hadess/rtl8723bs,
->> and I was experiencing a complete machine hang when using the WiFi
->> card. Passing `intel_idle.max_cstate=1` together with the following
->> patch (with the sdhci_runtime_pm_get and sdhci_runtime_pm_put
->> implementations added back) makes the problem go away:
->> https://github.com/hadess/rtl8723bs/blob/master/patches_4.5/0002-mmc-sdhci-get-runtime-pm-when-sdio-irq-is-enabled.patch
-> 
-> It's been a while ago and I wasn't able to dig out some information
-> from earlier discussions/submissions.
-> 
->>
->> I could not find much information on why this was never sent upstream,
->> and would like to know if this approach would be acceptable, or if
->> there are any other better alternatives to solve this problem. I'm not
->> a runtime PM expert, but as I understand this keeps the device powered
->> on as long as interrupts are enabled, potentially increasing the power
->> consumption. As this kernel has to run several different machines
->> using the same code base and config, I would rather avoid something
->> that could have a negative impact on other platforms.
-> 
-> Unless the board/soc supports an option to re-configure the SDIO IRQ
-> as wakeup when entering runtime suspend state, there is no other way
-> but to keep the device runtime resumed.
-> 
-> For this specific case, I have seen two different solutions for how to
-> allow the device to be runtime suspended when using SDIO IRQ.
-> 1) Re-routing the SDIO IRQ DAT line as a GPIO IRQ at runtime suspend,
-> thus a wakeup becomes enabled.
-> 2) Using a completely separate line for SDIO IRQs and thus not a DAT
-> line, configured as a GPIO IRQ.
-> 
->>
->> Any ideas appreciated, and I'm happy to try a newer tree if you guys
->> think some other commit might have fixed the problem.
-> 
-> I think the best option right now, is something very similar to the
-> patch you point to at github above.
+Add polling for ACK to be sure that data are written to PHY register.
 
-Sorry for the *very* slow reply! :-(.  I need to find time to look at this,
-but although the patch is OK for Intel it is wrong for other SDHCI-based
-drivers which *do* runtime suspend with the clock (and perhaps the whole
-host controller) still on and thus expect SDIO interrupts *during* runtime
-suspend.
+Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+---
+ drivers/mmc/host/sdhci-cadence.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 4b0ecb9..c946e45 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -65,11 +65,12 @@ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
+ };
+ 
+-static void sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
++static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 				     u8 addr, u8 data)
+ {
+ 	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS04;
+ 	u32 tmp;
++	int ret;
+ 
+ 	tmp = (data << SDHCI_CDNS_HRS04_WDATA_SHIFT) |
+ 	      (addr << SDHCI_CDNS_HRS04_ADDR_SHIFT);
+@@ -78,8 +79,14 @@ static void sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 	tmp |= SDHCI_CDNS_HRS04_WR;
+ 	writel(tmp, reg);
+ 
++	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
++	if (ret)
++		return ret;
++
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+ 	writel(tmp, reg);
++
++	return 0;
+ }
+ 
+ static void sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
+-- 
+2.2.2
 
