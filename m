@@ -1,76 +1,60 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH 13/18] mmc: meson-gx: remove unneeded meson_mmc_clk_set in
- meson_mmc_clk_init
-Date: Thu, 16 Feb 2017 08:05:00 +0100
-Message-ID: <fcfcdd8c-14bb-5e17-3e21-eee7e219259a@gmail.com>
-References: <420b75a9-b8c2-b3d7-ae60-3ed8a5a18ead@gmail.com>
- <f891a0bd-62f3-8104-5658-5e8fb2d9e070@gmail.com>
- <m2bmu38dag.fsf@baylibre.com>
- <fc32a3da-35d3-1eb6-d88c-75c412508136@gmail.com>
- <m260kb6max.fsf@baylibre.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 4/4] mmc: host: tmio: fill in response from auto cmd12
+Date: Thu, 16 Feb 2017 08:57:36 +0100
+Message-ID: <CAPDyKFqkWYgDkrnG+VCtSHiXvhoGqRxYir3UGC9yx_4mDubhUQ@mail.gmail.com>
+References: <20170213180342.26172-1-wsa+renesas@sang-engineering.com>
+ <20170213180342.26172-5-wsa+renesas@sang-engineering.com> <HK2PR06MB05484A4141A1A9AC8BE54E00D8580@HK2PR06MB0548.apcprd06.prod.outlook.com>
+ <20170214105226.GB1453@katana> <CAPDyKFobQ07u_xUgpm7iQRJkCqVS9_6JvyoTDhqLM-R3qCFeGQ@mail.gmail.com>
+ <20170215150240.GA1430@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33522 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753148AbdBPHHi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 02:07:38 -0500
-Received: by mail-wr0-f195.google.com with SMTP id i10so898176wrb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2017 23:07:37 -0800 (PST)
-In-Reply-To: <m260kb6max.fsf@baylibre.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170215150240.GA1430@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Am 16.02.2017 um 00:56 schrieb Kevin Hilman:
-> Heiner Kallweit <hkallweit1@gmail.com> writes:
-> 
->> Am 15.02.2017 um 20:27 schrieb Kevin Hilman:
->>> Heiner Kallweit <hkallweit1@gmail.com> writes:
->>>
->>>> I don't think this clk_disable_unprepare is right here. We do this
->>>> in meson_mmc_remove what should be sufficient.
->>>
->>> I don't think so, because if _clk_init() fails, then _probe will fail,
->>> and the driver's ->remove() will not be called.
->>>
->> In general, then the condition should be "if (ret)", not "if (!ret)".
->> And if _clk_init() fails, then probe jumps to label free_host,
->> where we have exactly this clk_disable_unprepare(host->cfg_div_clk)
-> 
-> Then you need to update the changelog, which refers to remove, not the
-> cleanup in probe.
-> 
-Sure ..
+On 15 February 2017 at 16:02, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> > I see. Ulf, do you think it makes sense to extend the condition when to
+>> > call mmc_blk_cmd_recovery() with checking if stop.resp[0] has one of the
+>> > R1_* bits set which are marked with 'ex' (and probably 'erx', too)? I
+>> > agree with Shimoda-san, that the core is a good place to do it, since it
+>> > is about parsing the R1 and not the status bits of the host hardware.
+>>
+>> The method we use to indicate a stop command error to the mmc core, is
+>> to set ->stop.error in the host driver before completing the request.
+>> Perhaps set it to -EIO or -EILSEQ.
+>>
+>> In that way mmc_blk_err_check() sees the error and invokes the
+>> mmc_blk_cmd_recovery() to deal with it (response parsing etc).
+>>
+>> Does that work for you?
+>
+> It would work, yes. Since R1 response format is hardware independent, I
+> wondered if checking for ECC errors wouldn't be better suited in the
+> core. We roughly need something like this:
+>
+>         if (stop.resp[0] & R1_CARD_ECC_FAILED)
+>                 stop.error = -EIO;
+>
+> We can copy this into every driver, of course. Yet, I wondered if we
+> couldn't have a helper function mapping the R1 error bits to an
+> apropriate error value and call that just before the check in
+> mmc_blk_err_check().
+>
+> Do you get what I mean?
 
-> Kevin
-> 
->>> Kevin
->>>
->>>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
->>>> ---
->>>>  drivers/mmc/host/meson-gx-mmc.c | 6 +-----
->>>>  1 file changed, 1 insertion(+), 5 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->>>> index 74ceda75..39904fb5 100644
->>>> --- a/drivers/mmc/host/meson-gx-mmc.c
->>>> +++ b/drivers/mmc/host/meson-gx-mmc.c
->>>> @@ -315,11 +315,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->>>>  	/* Get the nearest minimum clock to 400KHz */
->>>>  	host->mmc->f_min = clk_round_rate(host->cfg_div_clk, 400000);
->>>>  
->>>> -	ret = meson_mmc_clk_set(host, host->mmc->f_min);
->>>> -	if (!ret)
->>>> -		clk_disable_unprepare(host->cfg_div_clk);
->>>> -
->>>> -	return ret;
->>>> +	return meson_mmc_clk_set(host, host->mmc->f_min);
->>>>  }
->>>>  
->>>>  static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>
-> 
+I get it - and yes you have a point.
 
+By looking at the code in mmc_blk_err_check() and
+mmc_blk_cmd_recovery(), it deserves a clean-up. That said, I don't
+want to treat R1_CARD_ECC_FAILED as a special case.
+
+So if you decide to add this check in the core (which I am open to),
+we should also add checks the other potential R1 errors, to be
+consistent.
+
+Kind regards
+Uffe
