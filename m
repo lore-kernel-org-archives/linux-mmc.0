@@ -1,112 +1,85 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [RFC] mmc: host: tmio: ensure end of DMA and SD access are in
- sync
-Date: Thu, 16 Feb 2017 09:44:07 +0100
-Message-ID: <20170216084406.GB1443@katana>
-References: <20170215180541.8614-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFotpgrUHtTYQ9QQfzQ0pY6=MtU2JEDAjPX=wh50k=qGjA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 4/4] mmc: host: tmio: fill in response from auto cmd12
+Date: Thu, 16 Feb 2017 09:57:12 +0100
+Message-ID: <CAPDyKFoPX5QHZBLV5+QBRe7XdefAt7HPgMBzf2pqYVPzLe6Nag@mail.gmail.com>
+References: <20170213180342.26172-1-wsa+renesas@sang-engineering.com>
+ <20170213180342.26172-5-wsa+renesas@sang-engineering.com> <HK2PR06MB05484A4141A1A9AC8BE54E00D8580@HK2PR06MB0548.apcprd06.prod.outlook.com>
+ <20170214105226.GB1453@katana> <CAPDyKFobQ07u_xUgpm7iQRJkCqVS9_6JvyoTDhqLM-R3qCFeGQ@mail.gmail.com>
+ <20170215150240.GA1430@katana> <CAPDyKFqkWYgDkrnG+VCtSHiXvhoGqRxYir3UGC9yx_4mDubhUQ@mail.gmail.com>
+ <20170216083724.GA1443@katana>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="yNb1oOkm5a9FJOVX"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFotpgrUHtTYQ9QQfzQ0pY6=MtU2JEDAjPX=wh50k=qGjA@mail.gmail.com>
+In-Reply-To: <20170216083724.GA1443@katana>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
+On 16 February 2017 at 09:37, Wolfram Sang <wsa@the-dreams.de> wrote:
+> Hi Ulf,
+>
+> On Thu, Feb 16, 2017 at 08:57:36AM +0100, Ulf Hansson wrote:
+>> On 15 February 2017 at 16:02, Wolfram Sang <wsa@the-dreams.de> wrote:
+>> >
+>> >> > I see. Ulf, do you think it makes sense to extend the condition when to
+>> >> > call mmc_blk_cmd_recovery() with checking if stop.resp[0] has one of the
+>> >> > R1_* bits set which are marked with 'ex' (and probably 'erx', too)? I
+>> >> > agree with Shimoda-san, that the core is a good place to do it, since it
+>> >> > is about parsing the R1 and not the status bits of the host hardware.
+>> >>
+>> >> The method we use to indicate a stop command error to the mmc core, is
+>> >> to set ->stop.error in the host driver before completing the request.
+>> >> Perhaps set it to -EIO or -EILSEQ.
+>> >>
+>> >> In that way mmc_blk_err_check() sees the error and invokes the
+>> >> mmc_blk_cmd_recovery() to deal with it (response parsing etc).
+>> >>
+>> >> Does that work for you?
+>> >
+>> > It would work, yes. Since R1 response format is hardware independent, I
+>> > wondered if checking for ECC errors wouldn't be better suited in the
+>> > core. We roughly need something like this:
+>> >
+>> >         if (stop.resp[0] & R1_CARD_ECC_FAILED)
+>> >                 stop.error = -EIO;
+>> >
+>> > We can copy this into every driver, of course. Yet, I wondered if we
+>> > couldn't have a helper function mapping the R1 error bits to an
+>> > apropriate error value and call that just before the check in
+>> > mmc_blk_err_check().
+>> >
+>> > Do you get what I mean?
+>>
+>> I get it - and yes you have a point.
+>
+> Cool.
+>
+>> By looking at the code in mmc_blk_err_check() and
+>> mmc_blk_cmd_recovery(), it deserves a clean-up. That said, I don't
+>
+> What do you mean with clean-up here? I would have just added the helper
 
---yNb1oOkm5a9FJOVX
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+...perhaps some re-factoring as the functions do lots of stuff.
 
-On Thu, Feb 16, 2017 at 09:28:24AM +0100, Ulf Hansson wrote:
-> On 15 February 2017 at 19:05, Wolfram Sang
-> <wsa+renesas@sang-engineering.com> wrote:
-> > The current code assumes that DMA is finished before SD access end is
-> > flagged. Thus, it schedules the 'dma_complete' tasklet in the SD card
-> > interrupt routine when DATAEND is set. The assumption is not safe,
-> > though. Even by mounting an SD card, it can be seen that sometimes DMA
-> > complete is first, sometimes DATAEND. It seems they are usually close
-> > enough timewise to not cause problems. However, a customer reported that
-> > with CMD53 sometimes things really break apart. As a result, the BSP has
-> > a patch which introduces flags for both events and makes sure both flags
-> > are set before scheduling the tasklet. The customer accepted the patch,
-> > yet it doesn't seem a proper upstream solution to me.
-> >
-> > This patch refactors the code to replace the tasklet with already
-> > existing and more lightweight mechanisms. First of all, we set the
-> > callback in a DMA descriptor to automatically get notified when DMA is
-> > done. In the callback, we then use a completion to make sure the SD
-> > access has already ended. Then, we proceed as before.
->=20
-> I have similar experience and a HW behaviour. Your reasoning seems
-> correct to me.
+> function checking R1 error bits and setting stop.error accordingly.
 
-Great. Thanks for the review!
+That's ok, I don't require you to do the clean up, but it would be nice. :-)
 
-> > So, calling for early review here. And opinions how to proceed. I am no=
-t sure
-> > we want this in renesas-drivers until the SDIO functionality has been v=
-erified?
-> > Because it is the reason this patch exists in the first place :)
->=20
-> If there are no regressions, we could consider this as a nice
-> clean-up, instead of waiting for the dependencies to be resolved.
+>
+>> want to treat R1_CARD_ECC_FAILED as a special case.
+>>
+>> So if you decide to add this check in the core (which I am open to),
+>> we should also add checks the other potential R1 errors, to be
+>> consistent.
+>
+> I agree. That's what I meant with "checking if stop.resp[0] has one of
+> the R1_* bits set which are marked with 'ex' (and probably 'erx',
+> too)?". I think these are the candidates we care about.
+>
+> Thanks,
+>
+>    Wolfram
 
-Fine with me. I feel much more comfortable with your experience backing
-up ours.
-
->=20
-> Did you run some performance test?
-
-The throughput numbers of 'dd' are exactly the same. But maybe I could
-run one or two more tests with specifically testing that.
-
-> > index 2b349d48fb9a8a..891d400d2a7cf2 100644
-> > --- a/drivers/mmc/host/tmio_mmc.h
-> > +++ b/drivers/mmc/host/tmio_mmc.h
-> > @@ -137,7 +137,7 @@ struct tmio_mmc_host {
-> >         bool                    force_pio;
-> >         struct dma_chan         *chan_rx;
-> >         struct dma_chan         *chan_tx;
-> > -       struct tasklet_struct   dma_complete;
-> > +       struct completion       dma_dataend;
-> >         struct tasklet_struct   dma_issue;
->=20
-> The next step would be to convert the driver to a use threaded IRQ
-> handler in favour of the dma_issue tasklet. That should also work,
-> right!? :-)
-
-I'll check. I also identified this tasklet as the next target but I
-haven't actually looked into it yet.
-
-Thanks for looking into it right away,
-
-   Wolfram
-
-
---yNb1oOkm5a9FJOVX
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJYpWZWAAoJEBQN5MwUoCm23XQQAKgdFalP3KL3OvJcEEkBdx/0
-mzcL4o/miDPlceC6yGXhrL8J8EkhY22NFdxZy37UbA/0OkoTg6hjLlwGwhX0MGQa
-CfMRLclSuSHP/4Z9duKXiAZxGOoo94Krj19YEDdpBaBg8ire3BXrI0cZUMgGGSr8
-gST9ZOdNHvgzPOl5wL2OSSMIDmG6DBQyTXzUAwzyvo56JM1q+/r3kakX6We5it4c
-bG9MWJzgm1C7vruk++r9Do/GKpIG7V4cBVQ1ZddctVxDnQtbuqMJFHh3Bw+b1Q8X
-ItUof0EIEn+Cc+Fpy98K+bV8sj0PDmVP0A61jf1/jIGb9o56lKyQuwVeHNw6mZ4g
-+AaIK3zxZi0u111xb0+eVdj9eV6kMMNI7IJ6wd/HHhNlehJFs5qWD4o09Tv2jurn
-/ROdQPI/utFijOxb+/9jnqr0M9qHoQVZ4wyMFkDvnShXe2rhq4j95YfHuVvU18xG
-5fyejkzeeNJENP54/J4b70S9puqx87XYmXWyDnuyZ3iFSVcPBO+VoQo41kOOq8Zp
-afuc7+IeXBges0fGEYMA2fobxbRzRSoEBsaDAY8vKXT5fTh4/Lay1nUUyq6DI4/c
-rjlkVjpLhKWOwbgEwTDkeaaK6lSolDJ0PzgPfpALsb5sl9HBLhKXRKyunQWGyt2Z
-M6kENOwez4Z9HSVyFk5Q
-=NZs1
------END PGP SIGNATURE-----
-
---yNb1oOkm5a9FJOVX--
+Kind regards
+Uffe
