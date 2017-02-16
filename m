@@ -1,222 +1,34 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: [PATCH 2/2] [2/2] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Thu, 16 Feb 2017 13:06:53 +0000
-Message-ID: <1487250413-5769-2-git-send-email-piotrs@cadence.com>
-References: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
+From: =?UTF-8?Q?Micha=c5=82_Zegan?= <webczat@webczatnet.pl>
+Subject: Re: [PATCH 0/2] mmc: meson-gx: fix mmc module unloading
+Date: Thu, 16 Feb 2017 15:48:00 +0100
+Message-ID: <7318e9b7-79cc-3703-074b-8d9ccb50fbd6@webczatnet.pl>
+References: <20170216143955.1233-1-webczat@webczatnet.pl>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from webczatnet.pl ([91.121.100.5]:59542 "EHLO webczatnet.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754664AbdBPOsE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Feb 2017 09:48:04 -0500
+In-Reply-To: <20170216143955.1233-1-webczat@webczatnet.pl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>
+Cc: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 
-DTS properties are used instead of fixed data
-because PHY settings can be different for different platforms.
-Configuration of new three PHY delays were added
+Sorry, did not send the whole patch series and have to resend.
 
-Signed-off-by: Piotr Sroka <piotrs@cadence.com>
----
- .../devicetree/bindings/mmc/sdhci-cadence.txt      | 54 ++++++++++++++
- drivers/mmc/host/sdhci-cadence.c                   | 83 +++++++++++++++++++---
- 2 files changed, 129 insertions(+), 8 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-index c0f37cb..221d3fe 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
-@@ -19,6 +19,59 @@ if supported.  See mmc.txt for details.
- - mmc-hs400-1_8v
- - mmc-hs400-1_2v
- 
-+- phy-input-delay-sd-hs:
-+  Value of the delay in the input path for High Speed work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-sd-default:
-+  Value of the delay in the input path for Default Speed work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-sd-sdr12:
-+  Value of the delay in the input path for SDR12 work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-sd-sdr25:
-+  Value of the delay in the input path for SDR25 work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-sd-sdr50:
-+  Value of the delay in the input path for SDR50 work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-sd-ddr50:
-+  Value of the delay in the input path for DDR50 work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-emmc-legacy:
-+  Value of the delay in the input path for eMMC legacy work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-emmc-sdr:
-+  Value of the delay in the input path for eMMC SDR work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-input-delay-emmc-ddr:
-+  Value of the delay in the input path for eMMC DDR work mode.
-+  Valid range = [0:0x1F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-dll-delay-sdclk:
-+  Value of the delay introduced on the sdclk output
-+  for all modes except HS200, HS400 and HS400_ES.
-+  Valid range = [0:0x7F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-dll-delay-sdclk-hsmmc:
-+  Value of the delay introduced on the sdclk output
-+  for HS200, HS400 and HS400_ES speed modes.
-+  Valid range = [0:0x7F].
-+  Delay configuration stay unchanged if this property is not provided.
-+- phy-dll-delay-strobe:
-+  Value of the delay introduced on the dat_strobe input
-+  used in HS400 / HS400_ES speed modes.
-+  Valid range = [0:0x7F].
-+  Delay configuration stay unchanged if this property is not provided.
-+
-+
- Example:
- 	emmc: sdhci@5a000000 {
- 		compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
-@@ -29,4 +82,5 @@ Example:
- 		mmc-ddr-1_8v;
- 		mmc-hs200-1_8v;
- 		mmc-hs400-1_8v;
-+		phy-input-delay-sd-hs = <0>;
- 	};
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index c946e45..6c338d2 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -17,6 +17,7 @@
- #include <linux/iopoll.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
-+#include <linux/of.h>
- 
- #include "sdhci-pltfm.h"
- 
-@@ -53,6 +54,9 @@
- #define SDHCI_CDNS_PHY_DLY_EMMC_LEGACY	0x06
- #define SDHCI_CDNS_PHY_DLY_EMMC_SDR	0x07
- #define SDHCI_CDNS_PHY_DLY_EMMC_DDR	0x08
-+#define SDHCI_CDNS_PHY_DLY_SDCLK	0x0b
-+#define SDHCI_CDNS_PHY_DLY_HSMMC	0x0c
-+#define SDHCI_CDNS_PHY_DLY_STROBE	0x0d
- 
- /*
-  * The tuned val register is 6 bit-wide, but not the whole of the range is
-@@ -89,13 +93,73 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
- 	return 0;
- }
- 
--static void sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-+static int sdhci_cdns_phy_parse_dt(struct device_node *np,
-+				   struct sdhci_cdns_priv *priv)
- {
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_SD_HS, 4);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_SD_DEFAULT, 4);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_LEGACY, 9);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_SDR, 2);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_DDR, 3);
-+	u32 tmp;
-+	int ret;
-+
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-hs", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_SD_HS, tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-default", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_SD_DEFAULT,
-+					       tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-sdr12", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_UHS_SDR12,
-+					       tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-sdr25", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_UHS_SDR25,
-+					       tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-sdr50", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_UHS_SDR50,
-+					       tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-input-delay-sd-ddr50", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_UHS_DDR50,
-+					       tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-dll-delay-sdclk", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_SDCLK, tmp);
-+
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-dll-delay-sdclk-hsmmc", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_HSMMC, tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	if (!of_property_read_u32(np, "phy-dll-delay-strobe", &tmp)) {
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       SDHCI_CDNS_PHY_DLY_STROBE, tmp);
-+		if (ret)
-+			return ret;
-+	}
-+	return 0;
- }
- 
- static inline void *sdhci_cdns_priv(struct sdhci_host *host)
-@@ -224,10 +288,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_cdns_priv *priv;
-+	struct device *dev = &pdev->dev;
- 	struct clk *clk;
- 	int ret;
- 
--	clk = devm_clk_get(&pdev->dev, NULL);
-+	clk = devm_clk_get(dev, NULL);
- 	if (IS_ERR(clk))
- 		return PTR_ERR(clk);
- 
-@@ -253,7 +318,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto free;
- 
--	sdhci_cdns_phy_init(priv);
-+	ret = sdhci_cdns_phy_parse_dt(dev->of_node, priv);
-+	if (ret)
-+		goto free;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
--- 
-2.2.2
+W dniu 16.02.2017 o 15:39, Michał Zegan pisze:
+> This patch series fixes mmc driver unloading.
+> Previously, unloading meson-gx-mmc module would trigger kernel warnings.
+>
+> Michał Zegan (2):
+>   mmc: meson-gx: prevent cfg_div_clk from being disabled on init
+>   mmc: meson-gx: remove mmc host on device removal
+>
+>  drivers/mmc/host/meson-gx-mmc.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+>
+
