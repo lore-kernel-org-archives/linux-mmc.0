@@ -1,90 +1,45 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 7/7] mmc: dw_mmc: improve dw_mci_reset a bit
-Date: Fri, 17 Feb 2017 10:59:52 +0800
-Message-ID: <1487300392-204037-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 0/4] fix some incorrect timeout clock getting from sdhci variant drivers
+Date: Fri, 17 Feb 2017 11:56:16 +0800
+Message-ID: <1487303780-234812-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:53502 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:53942 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755018AbdBQDCX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 22:02:23 -0500
-In-Reply-To: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
+        with ESMTP id S1754742AbdBQD7J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 22:59:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Too much condition iteration makes the code
-less readable. Slightly improve it.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+This was found by Anssi Hannula that the the timeout clock actually
+should be in KHz from the .get_timeout_clock callback. So patch 4
+is a slighlt improvement based on Anssi's patch[1]. More investigation
+shows that sdhci-bcm-kona also did it in the wrong way. So I decide to
+invent a new helper function, sdhci_pltfm_clk_get_timeout_clock,to be
+better reused.
 
----
+Please review and comment.
 
- drivers/mmc/host/dw_mmc.c | 38 ++++++++++++++++++++------------------
- 1 file changed, 20 insertions(+), 18 deletions(-)
+[1]: https://patchwork.kernel.org/patch/9569431/
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a4a43e6..e165db05 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1692,6 +1692,7 @@ static bool dw_mci_reset(struct dw_mci *host)
- {
- 	u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
- 	bool ret = false;
-+	u32 status = 0;
- 
- 	/*
- 	 * Resetting generates a block interrupt, hence setting
-@@ -1707,29 +1708,30 @@ static bool dw_mci_reset(struct dw_mci *host)
- 
- 	if (dw_mci_ctrl_reset(host, flags)) {
- 		/*
--		 * In all cases we clear the RAWINTS register to clear any
--		 * interrupts.
-+		 * In all cases we clear the RAWINTS
-+		 * register to clear any interrupts.
- 		 */
- 		mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 
--		/* if using dma we wait for dma_req to clear */
--		if (host->use_dma) {
--			u32 status;
--
--			if (readl_poll_timeout_atomic(host->regs + SDMMC_STATUS,
--						      status,
--						      !(status & SDMMC_STATUS_DMA_REQ),
--						      1, 500 * USEC_PER_MSEC)) {
--				dev_err(host->dev,
--					"%s: Timeout waiting for dma_req to clear during reset\n",
--					__func__);
--				goto ciu_out;
--			}
-+		if (!host->use_dma) {
-+			ret = true;
-+			goto ciu_out;
-+		}
- 
--			/* when using DMA next we reset the fifo again */
--			if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
--				goto ciu_out;
-+		/* Wait for dma_req to be cleared */
-+		if (readl_poll_timeout_atomic(host->regs + SDMMC_STATUS,
-+					      status,
-+					      !(status & SDMMC_STATUS_DMA_REQ),
-+					      1, 500 * USEC_PER_MSEC)) {
-+			dev_err(host->dev,
-+				"%s: Timeout waiting for dma_req to be cleared\n",
-+				__func__);
-+			goto ciu_out;
- 		}
-+
-+		/* when using DMA next we reset the fifo again */
-+		if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
-+			goto ciu_out;
- 	} else {
- 		/* if the controller reset bit did clear, then set clock regs */
- 		if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
+
+Anssi Hannula (1):
+  mmc: sdhci-of-arasan: fix incorrect timeout clock
+
+Shawn Lin (3):
+  mmc: sdhci: add comment for get_timeout_clock callback
+  mmc: sdhci: add new helper to get timeout clock
+  mmc: sdhci-bcm-kona: reuse sdhci_pltfm_clk_get_timeout_clock
+
+ drivers/mmc/host/sdhci-bcm-kona.c  |  2 +-
+ drivers/mmc/host/sdhci-of-arasan.c | 23 +----------------------
+ drivers/mmc/host/sdhci-pltfm.c     | 14 ++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.h     |  1 +
+ drivers/mmc/host/sdhci.h           |  1 +
+ 5 files changed, 18 insertions(+), 23 deletions(-)
+
 -- 
 1.9.1
 
