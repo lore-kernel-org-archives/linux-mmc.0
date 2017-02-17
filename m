@@ -1,13 +1,13 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 3/7] mmc: dw_mmc: move dw_mci_ctrl_reset forward to avoid declaration
-Date: Fri, 17 Feb 2017 10:56:41 +0800
-Message-ID: <1487300205-202825-4-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 4/7] mmc: dw_mmc: move dw_mci_get_cd forward to avoid declaration
+Date: Fri, 17 Feb 2017 10:56:42 +0800
+Message-ID: <1487300205-202825-5-git-send-email-shawn.lin@rock-chips.com>
 References: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:35609 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.133]:52227 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754293AbdBQDAP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 22:00:15 -0500
+        with ESMTP id S1755018AbdBQDBq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2017 22:01:46 -0500
 In-Reply-To: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,76 +19,117 @@ No functional change intended.
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/dw_mmc.c | 42 ++++++++++++++++++++----------------------
- 1 file changed, 20 insertions(+), 22 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 83 +++++++++++++++++++++++------------------------
+ 1 file changed, 41 insertions(+), 42 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 20fe96c8..e87fd95 100644
+index e87fd95..936de76 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -106,7 +106,6 @@ struct idmac_desc {
- /* Each descriptor can transfer up to 4KB of data in chained mode */
+@@ -107,7 +107,6 @@ struct idmac_desc {
  #define DW_MCI_DESC_DATA_LENGTH	0x1000
  
--static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
  static int dw_mci_card_busy(struct mmc_host *mmc);
- static int dw_mci_get_cd(struct mmc_host *mmc);
+-static int dw_mci_get_cd(struct mmc_host *mmc);
  
-@@ -234,6 +233,26 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
- #endif /* defined(CONFIG_DEBUG_FS) */
- 
- static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg);
-+static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
-+{
-+	u32 ctrl;
-+
-+	ctrl = mci_readl(host, CTRL);
-+	ctrl |= reset;
-+	mci_writel(host, CTRL, ctrl);
-+
-+	/* wait till resets clear */
-+	if (readl_poll_timeout_atomic(host->regs + SDMMC_CTRL, ctrl,
-+				      !(ctrl & reset),
-+				      1, 500 * USEC_PER_MSEC)) {
-+		dev_err(host->dev,
-+			"Timeout resetting block (ctrl reset %#x)\n",
-+			ctrl & reset);
-+		return false;
-+	}
-+
-+	return true;
-+}
- 
- static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- {
-@@ -2880,27 +2899,6 @@ static void dw_mci_init_dma(struct dw_mci *host)
- 	host->use_dma = TRANS_MODE_PIO;
+ #if defined(CONFIG_DEBUG_FS)
+ static int dw_mci_req_show(struct seq_file *s, void *v)
+@@ -933,6 +932,47 @@ static void dw_mci_post_req(struct mmc_host *mmc,
+ 	data->host_cookie = COOKIE_UNMAPPED;
  }
  
--static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
++static int dw_mci_get_cd(struct mmc_host *mmc)
++{
++	int present;
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct dw_mci *host = slot->host;
++	int gpio_cd = mmc_gpio_get_cd(mmc);
++
++	/* Use platform get_cd function, else try onboard card detect */
++	if (((mmc->caps & MMC_CAP_NEEDS_POLL)
++				|| !mmc_card_is_removable(mmc))) {
++		present = 1;
++
++		if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
++			if (mmc->caps & MMC_CAP_NEEDS_POLL) {
++				dev_info(&mmc->class_dev,
++					"card is polling.\n");
++			} else {
++				dev_info(&mmc->class_dev,
++					"card is non-removable.\n");
++			}
++			set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
++		}
++
++		return present;
++	} else if (gpio_cd >= 0)
++		present = gpio_cd;
++	else
++		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
++			== 0 ? 1 : 0;
++
++	spin_lock_bh(&host->lock);
++	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &slot->flags))
++		dev_dbg(&mmc->class_dev, "card is present\n");
++	else if (!present &&
++			!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
++		dev_dbg(&mmc->class_dev, "card is not present\n");
++	spin_unlock_bh(&host->lock);
++
++	return present;
++}
++
+ static void dw_mci_adjust_fifoth(struct dw_mci *host, struct mmc_data *data)
+ {
+ 	unsigned int blksz = data->blksz;
+@@ -1544,47 +1584,6 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+ 	return read_only;
+ }
+ 
+-static int dw_mci_get_cd(struct mmc_host *mmc)
 -{
--	u32 ctrl;
+-	int present;
+-	struct dw_mci_slot *slot = mmc_priv(mmc);
+-	struct dw_mci *host = slot->host;
+-	int gpio_cd = mmc_gpio_get_cd(mmc);
 -
--	ctrl = mci_readl(host, CTRL);
--	ctrl |= reset;
--	mci_writel(host, CTRL, ctrl);
+-	/* Use platform get_cd function, else try onboard card detect */
+-	if (((mmc->caps & MMC_CAP_NEEDS_POLL)
+-				|| !mmc_card_is_removable(mmc))) {
+-		present = 1;
 -
--	/* wait till resets clear */
--	if (readl_poll_timeout_atomic(host->regs + SDMMC_CTRL, ctrl,
--				      !(ctrl & reset),
--				      1, 500 * USEC_PER_MSEC)) {
--		dev_err(host->dev,
--			"Timeout resetting block (ctrl reset %#x)\n",
--			ctrl & reset);
--		return false;
--	}
+-		if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+-			if (mmc->caps & MMC_CAP_NEEDS_POLL) {
+-				dev_info(&mmc->class_dev,
+-					"card is polling.\n");
+-			} else {
+-				dev_info(&mmc->class_dev,
+-					"card is non-removable.\n");
+-			}
+-			set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-		}
 -
--	return true;
+-		return present;
+-	} else if (gpio_cd >= 0)
+-		present = gpio_cd;
+-	else
+-		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+-			== 0 ? 1 : 0;
+-
+-	spin_lock_bh(&host->lock);
+-	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+-		dev_dbg(&mmc->class_dev, "card is present\n");
+-	else if (!present &&
+-			!test_and_clear_bit(DW_MMC_CARD_PRESENT, &slot->flags))
+-		dev_dbg(&mmc->class_dev, "card is not present\n");
+-	spin_unlock_bh(&host->lock);
+-
+-	return present;
 -}
 -
- static void dw_mci_cmd11_timer(unsigned long arg)
+ static void dw_mci_hw_reset(struct mmc_host *mmc)
  {
- 	struct dw_mci *host = (struct dw_mci *)arg;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
 -- 
 1.9.1
 
