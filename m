@@ -1,127 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC 25/39] mmc: sdhci: Improve debug print format
-Date: Fri, 17 Feb 2017 13:30:33 +0100
-Message-ID: <CAPDyKFp3Xq0fCvwjCHEvyD6DX=TpU827y2=nD1RqF2PDO1nfsg@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com> <1486731352-8018-26-git-send-email-adrian.hunter@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: Some throughput tests with MQ and BFQ on MMC/SD
+Date: Fri, 17 Feb 2017 14:22:08 +0100
+Message-ID: <CACRpkda+p4erE9CdMUWi55-Ji8rj8TNOeJadHeOkHT7a1wbLmA@mail.gmail.com>
+References: <CACRpkdYXk_MKhaeQLqGA+8Q4g5qy-DkRymC0Ecf+_qsm+cBoBQ@mail.gmail.com>
+ <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:33645 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755445AbdBQMae (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 07:30:34 -0500
-Received: by mail-qt0-f181.google.com with SMTP id v23so38986216qtb.0
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2017 04:30:34 -0800 (PST)
-In-Reply-To: <1486731352-8018-26-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Ziji Hu <huziji@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, Avri Altman <Avri.Altman@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, =?UTF-8?Q?Per_F=C3=B6rlin?= <per.forlin@axis.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 10 February 2017 at 13:55, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Ensure all debug prints start with the mmc host name.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+On Fri, Feb 17, 2017 at 12:53 PM, Ziji Hu <huziji@marvell.com> wrote:
 
-There seems to be a bunch of sdhci improvements/cleanups, not closely
-relate to the CMDQ support. May suggest you send these in a separate
-series, so we can apply them first.
+>         I would like to suggest that you should try the multiple thread
+>         test mode of iozone, since you are testing *Multi* Queue.
 
-Like this one.
+Good point. This target has only 2 CPUs but still, maybe it performs!
 
-Kind regards
-Uffe
+>         Besides, it seems that your eMMC transfer speed is quite low.
+>         It is normal that read speed can reach more than 100MB/s in HS400.
+>         Could you try a higher speed mode? The test result might be
+>         limited by the bus clock frequency.
 
-> ---
->  drivers/mmc/host/sdhci.c | 28 ++++++++++++----------------
->  1 file changed, 12 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6fdd7a70f229..8aa8541a349a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -37,7 +37,7 @@
->  #define DRIVER_NAME "sdhci"
->
->  #define DBG(f, x...) \
-> -       pr_debug(DRIVER_NAME " [%s()]: " f, __func__,## x)
-> +       pr_debug("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
->
->  #define MAX_TUNING_LOOP 40
->
-> @@ -715,8 +715,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->         }
->
->         if (count >= 0xF) {
-> -               DBG("%s: Too large timeout 0x%x requested for CMD%d!\n",
-> -                   mmc_hostname(host->mmc), count, cmd->opcode);
-> +               DBG("Too large timeout 0x%x requested for CMD%d!\n",
-> +                   count, cmd->opcode);
->                 count = 0xE;
->         }
->
-> @@ -2509,7 +2509,6 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
->  #ifdef CONFIG_MMC_DEBUG
->  static void sdhci_adma_show_error(struct sdhci_host *host)
->  {
-> -       const char *name = mmc_hostname(host->mmc);
->         void *desc = host->adma_table;
->
->         sdhci_dumpregs(host);
-> @@ -2518,14 +2517,14 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
->                 struct sdhci_adma2_64_desc *dma_desc = desc;
->
->                 if (host->flags & SDHCI_USE_64_BIT_DMA)
-> -                       DBG("%s: %p: DMA 0x%08x%08x, LEN 0x%04x, Attr=0x%02x\n",
-> -                           name, desc, le32_to_cpu(dma_desc->addr_hi),
-> +                       DBG("%p: DMA 0x%08x%08x, LEN 0x%04x, Attr=0x%02x\n",
-> +                           desc, le32_to_cpu(dma_desc->addr_hi),
->                             le32_to_cpu(dma_desc->addr_lo),
->                             le16_to_cpu(dma_desc->len),
->                             le16_to_cpu(dma_desc->cmd));
->                 else
-> -                       DBG("%s: %p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
-> -                           name, desc, le32_to_cpu(dma_desc->addr_lo),
-> +                       DBG("%p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
-> +                           desc, le32_to_cpu(dma_desc->addr_lo),
->                             le16_to_cpu(dma_desc->len),
->                             le16_to_cpu(dma_desc->cmd));
->
-> @@ -2641,10 +2640,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->                                 ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
->                                 SDHCI_DEFAULT_BOUNDARY_SIZE;
->                         host->data->bytes_xfered = dmanow - dmastart;
-> -                       DBG("%s: DMA base 0x%08x, transferred 0x%06x bytes,"
-> -                               " next 0x%08x\n",
-> -                               mmc_hostname(host->mmc), dmastart,
-> -                               host->data->bytes_xfered, dmanow);
-> +                       DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
-> +                           dmastart, host->data->bytes_xfered, dmanow);
->                         sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
->                 }
->
-> @@ -2689,8 +2686,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->                                   SDHCI_INT_BUS_POWER);
->                 sdhci_writel(host, mask, SDHCI_INT_STATUS);
->
-> -               DBG("*** %s got interrupt: 0x%08x\n",
-> -                       mmc_hostname(host->mmc), intmask);
-> +               DBG("IRQ status 0x%08x\n", intmask);
->
->                 if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
->                         u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
-> @@ -3324,9 +3320,9 @@ int sdhci_setup_host(struct sdhci_host *host)
->              !(host->flags & SDHCI_USE_SDMA)) &&
->              !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
->                 host->flags |= SDHCI_AUTO_CMD23;
-> -               DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
-> +               DBG("Auto-CMD23 available\n");
->         } else {
-> -               DBG("%s: Auto-CMD23 unavailable\n", mmc_hostname(mmc));
-> +               DBG("Auto-CMD23 unavailable\n");
->         }
->
->         /*
-> --
-> 1.9.1
->
+The iozone tests are done on an SDcard. And I only did read tests on
+the eMMC I have.
+
+It's because I'm afriad of wearing out my eMMC :(
+
+But OK I'll just take the risk and run iozone on the eMMC.
+
+>         Actually I have been following your thread for some time.
+>         But currently I'm a little confused.
+>         May I know the purpose of your patch?
+
+Ulf describes it: we want to switch MMC/SD to MQ.
+
+To me, there are two reasons for that (no secret agendas...)
+
+1. To get away from the legacy codebase in the old block layer.
+   Christoph and Jens have been very clear stating that the old block
+   layer is in maintenance mode and should be phased out, and they
+   asked explicitly for out help to do so. Currently
+   MMC/SD is a big fat roadblock to these plans so it is win-win for
+   MMC/SD and the block layer if we can just switch over to MQ.
+
+2. My colleague Paolo Valente is working on the next generation
+  block scheduler BFQ which has very promising potential for
+  interactive loads. (Like taking a backup of your harddrive while
+  playing 1080p video let's say.) Since the
+  old block layer is no longer maintained, this scheduler will only
+  be merged and made available for systems deploying MQ. He's
+  already working full steam on that.
+
+I would like to make 1+2 happen in the next merge window
+ultimately, but yeah, maybe I'm overly optimistic. But I will sure
+try.
+
+Maybe I should add:
+
+3. MQ is a better and future-proof fit for command queueing.
+
+Yours,
+Linus Walleij
