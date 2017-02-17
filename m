@@ -1,59 +1,74 @@
 From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH v2 6/9] mmc: meson-gx: remove unneeded meson_mmc_clk_set in meson_mmc_clk_init
-Date: Fri, 17 Feb 2017 11:51:24 -0800
-Message-ID: <m2bmu061fn.fsf@baylibre.com>
-References: <7d5263e2-9325-dedb-a5f6-954c4a09e977@gmail.com>
-        <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: meson-gx: remove mmc host on device removal
+Date: Fri, 17 Feb 2017 15:03:34 -0800
+Message-ID: <m24lzs5sjd.fsf@baylibre.com>
+References: <20170216145222.1577-1-webczat@webczatnet.pl>
+        <20170216145222.1577-3-webczat@webczatnet.pl>
+        <m2fujc61mu.fsf@baylibre.com>
+        <171193cd-e82d-695a-22b3-c10d670baad7@webczatnet.pl>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:36838 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934472AbdBQTv1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 14:51:27 -0500
-Received: by mail-pg0-f48.google.com with SMTP id v184so17909320pgv.3
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2017 11:51:26 -0800 (PST)
-In-Reply-To: <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com> (Heiner
-        Kallweit's message of "Thu, 16 Feb 2017 20:42:06 +0100")
+Received: from mail-pg0-f49.google.com ([74.125.83.49]:35616 "EHLO
+        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964814AbdBQXDh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 18:03:37 -0500
+Received: by mail-pg0-f49.google.com with SMTP id 129so30818pgg.2
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2017 15:03:37 -0800 (PST)
+In-Reply-To: <171193cd-e82d-695a-22b3-c10d670baad7@webczatnet.pl>
+ (=?utf-8?Q?=22Micha=C5=82?=
+        Zegan"'s message of "Fri, 17 Feb 2017 20:50:55 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: =?utf-8?Q?Micha=C5=82?= Zegan <webczat@webczatnet.pl>
+Cc: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+Micha=C5=82 Zegan <webczat@webczatnet.pl> writes:
 
-> This clk_disable_unprepare isn't right here. At first the condition
-> should be "if (ret)" as the disable/unprepare is supposed to be
-> executed if the previous command fails.
-> And if the previous command fails and meson_mmc_clk_init returns
-> an error, then probe jumps to label free_host where we have this
-> disable/unprepare already.
+> W dniu 17.02.2017 o 20:47, Kevin Hilman pisze:
+>> Micha=C5=82 Zegan <webczat@webczatnet.pl> writes:
+>>
+>>> The mmc host was added in meson_mmc_probe, but never removed in meson_m=
+mc_remove.
+>>> Fix that by removing the host before deallocating other resources.
+>>>
+>>> Signed-off-by: Micha=C5=82 Zegan <webczat@webczatnet.pl>
+>> Reviewed-by: Kevin Hilman <khilman@baylibre.com>
 >
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> I do not know how the mmc driver looks like after Heiner's cleanup. Does
+> this patch get obsoleted by the prior cleanup, or conflict with it in
+> some way?
 
-Acked-by: Kevin Hilman <khilman@baylibre.com>
+It's not obsoleted, as I don't think Heiner's series fixes this problem,
+but it may have minor conflicts.
 
-> ---
-> v2:
-> - extended commit message
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 6 +-----
->  1 file changed, 1 insertion(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 68e76fa8..850b0152 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -320,11 +320,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->  	/* Get the nearest minimum clock to 400KHz */
->  	host->mmc->f_min = clk_round_rate(host->cfg_div_clk, 400000);
->  
-> -	ret = meson_mmc_clk_set(host, host->mmc->f_min);
-> -	if (!ret)
-> -		clk_disable_unprepare(host->cfg_div_clk);
-> -
-> -	return ret;
-> +	return meson_mmc_clk_set(host, host->mmc->f_min);
->  }
->  
->  static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+I suggest you rebase this patch on top of Heiner's v2 to double check,
+and resend if necessary, noting in the patch (after the '---') what it
+applies on top of so that the MMC maintainers don't have to figure it
+out.
+
+Thanks,
+
+Kevin
+
+>>
+>>> ---
+>>>  drivers/mmc/host/meson-gx-mmc.c | 2 ++
+>>>  1 file changed, 2 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-g=
+x-mmc.c
+>>> index d444b6bfa02b..bb83446118a3 100644
+>>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>>> @@ -818,6 +818,8 @@ static int meson_mmc_remove(struct platform_device =
+*pdev)
+>>>  	if (WARN_ON(!host))
+>>>  		return 0;
+>>>=20=20
+>>> +	mmc_remove_host(host->mmc);
+>>> +
+>>>  	if (host->bounce_buf)
+>>>  		dma_free_coherent(host->dev, host->bounce_buf_size,
+>>>  				  host->bounce_buf, host->bounce_dma_addr);
