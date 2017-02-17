@@ -1,80 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Some throughput tests with MQ and BFQ on MMC/SD
-Date: Fri, 17 Feb 2017 13:09:47 +0100
-Message-ID: <CAPDyKFo_-SykPX5LjUB2VMBVaa05EPJ0OYzpCLCpCO9Sug+Feg@mail.gmail.com>
-References: <CACRpkdYXk_MKhaeQLqGA+8Q4g5qy-DkRymC0Ecf+_qsm+cBoBQ@mail.gmail.com>
- <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
+Subject: Re: [PATCH RFC 05/39] mmc: mmc: Add functions to enable / disable the
+ Command Queue
+Date: Fri, 17 Feb 2017 13:21:14 +0100
+Message-ID: <CAPDyKFph+WPzrNT9_eeGuzDRoWsg+sg1+j2sthpP9+XAdwZ18w@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+ <1486731352-8018-6-git-send-email-adrian.hunter@intel.com> <CACRpkdbW4nDA=e6zM3095N9y_hy2Rsktzmuf8g8=xOaJCeLbGA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:36303 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933074AbdBQMJt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 07:09:49 -0500
-Received: by mail-qk0-f172.google.com with SMTP id 11so41706511qkl.3
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2017 04:09:49 -0800 (PST)
-In-Reply-To: <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:35781 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932941AbdBQMVQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 07:21:16 -0500
+Received: by mail-qk0-f173.google.com with SMTP id u25so42296370qki.2
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2017 04:21:15 -0800 (PST)
+In-Reply-To: <CACRpkdbW4nDA=e6zM3095N9y_hy2Rsktzmuf8g8=xOaJCeLbGA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ziji Hu <huziji@marvell.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, Avri Altman <Avri.Altman@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, =?UTF-8?Q?Per_F=C3=B6rlin?= <per.forlin@axis.com>
+To: Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-[...]
+On 15 February 2017 at 13:52, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+>> Add helper functions to enable or disable the Command Queue.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>
+> I think I asked this before but why?
+
+There are certain other requests, like for RPMB, which requires CMDQ
+to be "temporary" disabled.
+
+Seems like a little more information the change log would be
+appreciated to understand why we need to add these functions.
 
 >
->         I would like to suggest that you should try the multiple thread
->         test mode of iozone, since you are testing *Multi* Queue.
-
-Yes. That seems reasonable.
-
-However, the most important part here is the comparison between the
-different code bases.
-
+> If the card has this feature, certainly we should just exploit it?
 >
->         Besides, it seems that your eMMC transfer speed is quite low.
->         It is normal that read speed can reach more than 100MB/s in HS400.
->         Could you try a higher speed mode? The test result might be
->         limited by the bus clock frequency.
-
-Perhaps if Linus can share a branch of the code integrated for the
-different tests, we all can help out running them on those HW we have
-at hand. Would you be willing to help out here?
-
+> If some card has a problem with it, I guess it is broken and should
+> simply have this operation blacklisted.
 >
->>
->> As you can see there are no huge performance regressions with these
->> kinds of "raw" throughput tests.
->>
->> These iozone figures are unintuitive unless your head can
->> plot logarithmic, look at the charts here for a more visual presentation
->> of the iozone results:
->> https://docs.google.com/spreadsheets/d/1rm72TiGlTnzDeGLR__aqvjcJ2UkA-Ro3-XyKA8r1M-c
->>
->> Compare this to the performance change we got when first introducing
->> the asynchronous requests:
->> https://wiki.linaro.org/WorkingGroups/KernelArchived/Specs/StoragePerfMMC-async-req
->>
->> The patches need some issues fixed from the build server
->> complaints and some robustness hammering, but after that I
->> think they will be ripe for merging for v4.12.
->>
->
->         Actually I have been following your thread for some time.
->         But currently I'm a little confused.
->         May I know the purpose of your patch?
-
-I want MMC to move to the new BLKMQ interface and I want that because
-of several reasons, see below.
-
-1. It's new blk interface, all new development happens here. We should
-use it to benefit from that.
-2. The BLKMQ interface allow the MMC block device driver to be
-significantly cleaner implemented - and I need that to be able to
-maintain the code.
-3. We want to make use of Paolo's BFQ-MK I/O scheduler, which
-addresses provides guaranteed low latency. For example being able to
-play a video clip, while doing a disc backup without getting frame
-drops.
+> Yours,
+> Linus Walleij
 
 Kind regards
 Uffe
