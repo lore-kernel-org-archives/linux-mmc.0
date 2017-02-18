@@ -1,96 +1,86 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: Some throughput tests with MQ and BFQ on MMC/SD
-Date: Sat, 18 Feb 2017 12:57:20 +0800
-Message-ID: <631e1706-620e-0247-1d77-7c7d6374ce65@marvell.com>
-References: <CACRpkdYXk_MKhaeQLqGA+8Q4g5qy-DkRymC0Ecf+_qsm+cBoBQ@mail.gmail.com>
- <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
- <CACRpkda+p4erE9CdMUWi55-Ji8rj8TNOeJadHeOkHT7a1wbLmA@mail.gmail.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH v2 6/9] mmc: meson-gx: remove unneeded meson_mmc_clk_set
+ in meson_mmc_clk_init
+Date: Sat, 18 Feb 2017 11:49:22 +0100
+Message-ID: <b238ee08-66d5-59a1-4e1d-33078103291e@gmail.com>
+References: <7d5263e2-9325-dedb-a5f6-954c4a09e977@gmail.com>
+ <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
+ <ef2944b5-e04c-780b-6256-31af7ceb87dc@poczta.onet.pl>
+ <c8cdaef4-3de2-139d-5339-c5ad5c81fd4b@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkda+p4erE9CdMUWi55-Ji8rj8TNOeJadHeOkHT7a1wbLmA@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, Avri Altman <Avri.Altman@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, =?UTF-8?Q?Per_F=c3=b6rlin?= <per.forlin@axis.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:33417 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752158AbdBRKtz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 05:49:55 -0500
+Received: by mail-wr0-f195.google.com with SMTP id g51so368740wrg.0
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 02:49:38 -0800 (PST)
+In-Reply-To: <c8cdaef4-3de2-139d-5339-c5ad5c81fd4b@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?UTF-8?Q?Micha=c5=82_Zegan?= <webczat_200@poczta.onet.pl>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: linux-amlogic@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Linus,
+Am 18.02.2017 um 11:37 schrieb Heiner Kallweit:
+> Am 18.02.2017 um 04:44 schrieb Michał Zegan:
+>> Hello Heiner,
+>>
+>> W dniu 16.02.2017 o 20:42, Heiner Kallweit pisze:
+>>> This clk_disable_unprepare isn't right here. At first the condition
+>>> should be "if (ret)" as the disable/unprepare is supposed to be
+>>> executed if the previous command fails.
+>>> And if the previous command fails and meson_mmc_clk_init returns
+>>> an error, then probe jumps to label free_host where we have this
+>>> disable/unprepare already.
+>>>
+>>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>>> ---
+>>> v2:
+>>> - extended commit message
+>>> ---
+>>>  drivers/mmc/host/meson-gx-mmc.c | 6 +-----
+>>>  1 file changed, 1 insertion(+), 5 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>>> index 68e76fa8..850b0152 100644
+>>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>>> @@ -320,11 +320,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+>>>  	/* Get the nearest minimum clock to 400KHz */
+>>>  	host->mmc->f_min = clk_round_rate(host->cfg_div_clk, 400000);
+>>>  
+>>> -	ret = meson_mmc_clk_set(host, host->mmc->f_min);
+>>> -	if (!ret)
+>>> -		clk_disable_unprepare(host->cfg_div_clk);
+>>> -
+>>> -	return ret;
+>>> +	return meson_mmc_clk_set(host, host->mmc->f_min);
+>>>  }
+>>>  
+>>>  static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>
+>>
+>> I see one problem here.
+>> As you said, if the previous command (that is the meson_mmc_clk_set
+>> function call) fails, then the whole meson_mmc_clk_init returns an error
+>> value, and meson_mmc_probe jumps to free_host and disables the clock there.
+>> But what happens if the clk_prepare_enable is the line that fails? in
+>> this case, the function returns an error value too, and in the free_host
+>> meson_mmc_probe tries to disable the clock that is not enabled, and that
+>> probably results in a kernel warning because you tried to disable a
+>> disabled clock.
+>> I was preparing a patch to disable clocks in the probe function only if
+>> they were enabled before, but then the meson_mmc_clk_init function
+>> remains a problem, because we don't know if the clock was enabled
+>> successfully or not when it returns an error.
+>>
+> Thanks for pointing out, you're right. The solution however should be
+> quite easy. I meson_mmc_clk_init we just change the condition of
+> the disable/unprepare to "if (ret)" and in probe we remove this
+> disable/unprepare from the error path.
+> 
+This was a little too fast, it's not that easy. But I'll come up with
+a changed version.
 
-On 2017/2/17 21:22, Linus Walleij wrote:
-> On Fri, Feb 17, 2017 at 12:53 PM, Ziji Hu <huziji@marvell.com> wrote:
-> 
->>         I would like to suggest that you should try the multiple thread
->>         test mode of iozone, since you are testing *Multi* Queue.
-> 
-> Good point. This target has only 2 CPUs but still, maybe it performs!
->
-	In my very own opinion, (although I'm not the expert of marketing),
-	quad-core platforms will be more and more popular.
-	Quad-core might have a different result, especially when we are
-	testing multiple threads. 
-
->>         Besides, it seems that your eMMC transfer speed is quite low.
->>         It is normal that read speed can reach more than 100MB/s in HS400.
->>         Could you try a higher speed mode? The test result might be
->>         limited by the bus clock frequency.
-> 
-> The iozone tests are done on an SDcard. And I only did read tests on
-> the eMMC I have.
-> 
-> It's because I'm afriad of wearing out my eMMC :(
-> 
-> But OK I'll just take the risk and run iozone on the eMMC.
-> 
-	Actually, there is a parameter to limit the size of test file in iozone.
-	I'm not sure why you need to scan the whole eMMC. But I personally
-	believe it is unnecessary.
-
-	Sorry for delay reply. Hope your eMMC is not broken yet. :p
-	eMMC usually contains much more physical pages than the capacity
-	it shows. Thus I guess your eMMC should be fine unless you torture
-	it by entirely writing it again and again.
-
->>         Actually I have been following your thread for some time.
->>         But currently I'm a little confused.
->>         May I know the purpose of your patch?
-> 
-> Ulf describes it: we want to switch MMC/SD to MQ.
-> 
-> To me, there are two reasons for that (no secret agendas...)
-> 
-> 1. To get away from the legacy codebase in the old block layer.
->    Christoph and Jens have been very clear stating that the old block
->    layer is in maintenance mode and should be phased out, and they
->    asked explicitly for out help to do so. Currently
->    MMC/SD is a big fat roadblock to these plans so it is win-win for
->    MMC/SD and the block layer if we can just switch over to MQ.
-> 
-> 2. My colleague Paolo Valente is working on the next generation
->   block scheduler BFQ which has very promising potential for
->   interactive loads. (Like taking a backup of your harddrive while
->   playing 1080p video let's say.) Since the
->   old block layer is no longer maintained, this scheduler will only
->   be merged and made available for systems deploying MQ. He's
->   already working full steam on that.
-> 
-> I would like to make 1+2 happen in the next merge window
-> ultimately, but yeah, maybe I'm overly optimistic. But I will sure
-> try.
-	I see. Thank you for the details.
-> 
-> Maybe I should add:
-> 
-> 3. MQ is a better and future-proof fit for command queueing.
-	I strongly agree with you on it.
-
-	Thank you.
-
-Best regards,
-Hu Ziji
-
-
-> 
-> Yours,
-> Linus Walleij
-> 
