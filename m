@@ -1,119 +1,93 @@
-From: =?UTF-8?Q?Micha=c5=82_Zegan?= <webczat_200@poczta.onet.pl>
-Subject: Re: [PATCH v2 6/9] mmc: meson-gx: remove unneeded meson_mmc_clk_set
- in meson_mmc_clk_init
-Date: Sat, 18 Feb 2017 04:44:31 +0100
-Message-ID: <ef2944b5-e04c-780b-6256-31af7ceb87dc@poczta.onet.pl>
-References: <7d5263e2-9325-dedb-a5f6-954c4a09e977@gmail.com>
- <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
+From: Ziji Hu <huziji@marvell.com>
+Subject: Re: Some throughput tests with MQ and BFQ on MMC/SD
+Date: Sat, 18 Feb 2017 12:36:53 +0800
+Message-ID: <6c65cd92-117f-9d40-caaa-05163160923a@marvell.com>
+References: <CACRpkdYXk_MKhaeQLqGA+8Q4g5qy-DkRymC0Ecf+_qsm+cBoBQ@mail.gmail.com>
+ <e4836ece-d990-667c-27d0-4b19a2b4b160@marvell.com>
+ <CAPDyKFo_-SykPX5LjUB2VMBVaa05EPJ0OYzpCLCpCO9Sug+Feg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="pcqxk3RKqbCvbK1Ahog6v6j839ug4EB5q"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtpo35.poczta.onet.pl ([213.180.142.166]:33420 "EHLO
-        smtpo35.poczta.onet.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750794AbdBREEr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2017 23:04:47 -0500
-In-Reply-To: <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFo_-SykPX5LjUB2VMBVaa05EPJ0OYzpCLCpCO9Sug+Feg@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, Avri Altman <Avri.Altman@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, =?UTF-8?Q?Per_F=c3=b6rlin?= <per.forlin@axis.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: linux-amlogic@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---pcqxk3RKqbCvbK1Ahog6v6j839ug4EB5q
-Content-Type: multipart/mixed; boundary="JIqjKFHAMwghUSlaSrO7uxqUcuuvemIqF";
- protected-headers="v1"
-From: =?UTF-8?Q?Micha=c5=82_Zegan?= <webczat_200@poczta.onet.pl>
-To: Heiner Kallweit <hkallweit1@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: linux-amlogic@lists.infradead.org,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Message-ID: <ef2944b5-e04c-780b-6256-31af7ceb87dc@poczta.onet.pl>
-Subject: Re: [PATCH v2 6/9] mmc: meson-gx: remove unneeded meson_mmc_clk_set
- in meson_mmc_clk_init
-References: <7d5263e2-9325-dedb-a5f6-954c4a09e977@gmail.com>
- <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
-In-Reply-To: <fc824f91-f686-64ab-83e4-86b04fd512f0@gmail.com>
+Hi Ulf,
 
---JIqjKFHAMwghUSlaSrO7uxqUcuuvemIqF
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: quoted-printable
+On 2017/2/17 20:09, Ulf Hansson wrote:
+> [...]
+> 
+>>
+>>         I would like to suggest that you should try the multiple thread
+>>         test mode of iozone, since you are testing *Multi* Queue.
+> 
+> Yes. That seems reasonable.
+> 
+> However, the most important part here is the comparison between the
+> different code bases.
+> 
+>>
+>>         Besides, it seems that your eMMC transfer speed is quite low.
+>>         It is normal that read speed can reach more than 100MB/s in HS400.
+>>         Could you try a higher speed mode? The test result might be
+>>         limited by the bus clock frequency.
+> 
+> Perhaps if Linus can share a branch of the code integrated for the
+> different tests, we all can help out running them on those HW we have
+> at hand. Would you be willing to help out here?
+> 
+	I'm glad to.
+	But my available platforms all stay in Linux v4.4/v4.1.
+	I can help when my platforms can upgrade.
 
-Hello Heiner,
+>>
+>>>
+>>> As you can see there are no huge performance regressions with these
+>>> kinds of "raw" throughput tests.
+>>>
+>>> These iozone figures are unintuitive unless your head can
+>>> plot logarithmic, look at the charts here for a more visual presentation
+>>> of the iozone results:
+>>> https://docs.google.com/spreadsheets/d/1rm72TiGlTnzDeGLR__aqvjcJ2UkA-Ro3-XyKA8r1M-c
+>>>
+>>> Compare this to the performance change we got when first introducing
+>>> the asynchronous requests:
+>>> https://wiki.linaro.org/WorkingGroups/KernelArchived/Specs/StoragePerfMMC-async-req
+>>>
+>>> The patches need some issues fixed from the build server
+>>> complaints and some robustness hammering, but after that I
+>>> think they will be ripe for merging for v4.12.
+>>>
+>>
+>>         Actually I have been following your thread for some time.
+>>         But currently I'm a little confused.
+>>         May I know the purpose of your patch?
+> 
+> I want MMC to move to the new BLKMQ interface and I want that because
+> of several reasons, see below.
+> 
+> 1. It's new blk interface, all new development happens here. We should
+> use it to benefit from that.
+> 2. The BLKMQ interface allow the MMC block device driver to be
+> significantly cleaner implemented - and I need that to be able to
+> maintain the code.
+> 3. We want to make use of Paolo's BFQ-MK I/O scheduler, which
+> addresses provides guaranteed low latency. For example being able to
+> play a video clip, while doing a disc backup without getting frame
+> drops.
+> 
+	Got it. Thanks a lot for your detailed explanation.
+	If we focus on the low latency, we shall get a cleaner result
+	of IOPS in tests.
+	IOPS is a more common performance index in eMMC/SD.
 
-W dniu 16.02.2017 o 20:42, Heiner Kallweit pisze:
-> This clk_disable_unprepare isn't right here. At first the condition
-> should be "if (ret)" as the disable/unprepare is supposed to be
-> executed if the previous command fails.
-> And if the previous command fails and meson_mmc_clk_init returns
-> an error, then probe jumps to label free_host where we have this
-> disable/unprepare already.
->=20
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> ---
-> v2:
-> - extended commit message
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 6 +-----
->  1 file changed, 1 insertion(+), 5 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-g=
-x-mmc.c
-> index 68e76fa8..850b0152 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -320,11 +320,7 @@ static int meson_mmc_clk_init(struct meson_host *h=
-ost)
->  	/* Get the nearest minimum clock to 400KHz */
->  	host->mmc->f_min =3D clk_round_rate(host->cfg_div_clk, 400000);
-> =20
-> -	ret =3D meson_mmc_clk_set(host, host->mmc->f_min);
-> -	if (!ret)
-> -		clk_disable_unprepare(host->cfg_div_clk);
-> -
-> -	return ret;
-> +	return meson_mmc_clk_set(host, host->mmc->f_min);
->  }
-> =20
->  static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *io=
-s)
->=20
+	Thank you.
 
-I see one problem here.
-As you said, if the previous command (that is the meson_mmc_clk_set
-function call) fails, then the whole meson_mmc_clk_init returns an error
-value, and meson_mmc_probe jumps to free_host and disables the clock ther=
-e.
-But what happens if the clk_prepare_enable is the line that fails? in
-this case, the function returns an error value too, and in the free_host
-meson_mmc_probe tries to disable the clock that is not enabled, and that
-probably results in a kernel warning because you tried to disable a
-disabled clock.
-I was preparing a patch to disable clocks in the probe function only if
-they were enabled before, but then the meson_mmc_clk_init function
-remains a problem, because we don't know if the clock was enabled
-successfully or not when it returns an error.
-
-
---JIqjKFHAMwghUSlaSrO7uxqUcuuvemIqF--
-
---pcqxk3RKqbCvbK1Ahog6v6j839ug4EB5q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQFPBAEBCAA5FiEE8PeJXyv9t1Bfiq63mRxoPZnIFPkFAlinwyEbHHdlYmN6YXRf
-MjAwQHBvY3p0YS5vbmV0LnBsAAoJEJkcaD2ZyBT5IaIIALn/SYhtVTMMNoyaVgwx
-Dq0PipAMK5XGzVNYLtITk1Ey7GjmqDwXfp7LRRbDiVRiNI8GHO3BLVLwnrc0rRVr
-KeKJbzX4uI/Bx7DGqnsEawMe3B7oB0BVhR6oKiVCPm++6WljpTNAA/zkLr1nJ5d7
-YzLvaFy2o+RpOgVKbCngRU3sJrO2YZS43YxPlufK6iHOjm9RClVJEmQtipVZMRhH
-FtpLHm5hOO0Q9UPUANiaMbkmVk9ca4iPHcT9xbr3SKO3Ya4p0Ezmfrsm90HnplWb
-AlQbohbPd4PIPtl0sFviKJ/PGWe4tcb4M4kjIIcaBLXoS8AIqTWbf2KHAmdyMc2q
-ldU=
-=J22d
------END PGP SIGNATURE-----
-
---pcqxk3RKqbCvbK1Ahog6v6j839ug4EB5q--
+Best regards,
+Hu Ziji
+> Kind regards
+> Uffe
+> 
