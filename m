@@ -1,70 +1,123 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 4/10] mmc: meson-gx: remove unneeded variable in
- meson_mmc_clk_init
-Date: Sat, 18 Feb 2017 14:08:45 +0100
-Message-ID: <94e1a544-c24d-2e19-7971-731bac6aa29b@gmail.com>
+Subject: [PATCH v3 8/10] mmc: meson-gx: improve initial configuration
+Date: Sat, 18 Feb 2017 14:22:27 +0100
+Message-ID: <28e5119c-3779-4393-8bfb-38254c0761e0@gmail.com>
 References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36738 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752312AbdBRN1O (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36772 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753015AbdBRN1O (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 08:27:14 -0500
-Received: by mail-wm0-f67.google.com with SMTP id r18so6863993wmd.3
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:36 -0800 (PST)
+Received: by mail-wm0-f65.google.com with SMTP id r18so6864288wmd.3
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:42 -0800 (PST)
 In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Because the DT requires a fixed number of mux parent clocks,
-variable mux_parent_count can be replaced with constant
-MUX_CLK_NUM_PARENTS, so remove it.
+Config values which are not changed during runtime we can set
+in the probe function already.
+The block size setting is overwritten later in
+meson_mmc_start_cmd anyway if needed, so it doesn't harm if we
+remove this setting in meson_mmc_set_ios.
+
+In addition:
+- write config register only if configuration changed
+- Initialize clocks after other config registers have been initialized
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 Acked-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v2:
-- adjusted commit message
 - added acked-by
 v3:
-- no changes
+- rebased
 ---
- drivers/mmc/host/meson-gx-mmc.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 37 +++++++++++++++++++++----------------
+ 1 file changed, 21 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index b9de3d47..ea2db3ce 100644
+index 684cc088..e904b0a5 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -242,7 +242,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	char clk_name[32];
- 	int i, ret = 0;
- 	const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
--	unsigned int mux_parent_count = 0;
- 	const char *clk_div_parents[1];
- 	u32 clk_reg, cfg;
+@@ -394,15 +394,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	val &= ~(CFG_BUS_WIDTH_MASK << CFG_BUS_WIDTH_SHIFT);
+ 	val |= bus_width << CFG_BUS_WIDTH_SHIFT;
  
-@@ -261,7 +260,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 		}
+-	val &= ~(CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
+-	val |= ilog2(SD_EMMC_CFG_BLK_SIZE) << CFG_BLK_LEN_SHIFT;
+-
+-	val &= ~(CFG_RESP_TIMEOUT_MASK << CFG_RESP_TIMEOUT_SHIFT);
+-	val |= ilog2(SD_EMMC_CFG_RESP_TIMEOUT) << CFG_RESP_TIMEOUT_SHIFT;
+-
+-	val &= ~(CFG_RC_CC_MASK << CFG_RC_CC_SHIFT);
+-	val |= ilog2(SD_EMMC_CFG_CMD_GAP) << CFG_RC_CC_SHIFT;
+-
+ 	val &= ~CFG_DDR;
+ 	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
+ 	    ios->timing == MMC_TIMING_MMC_DDR52 ||
+@@ -413,11 +404,11 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->timing == MMC_TIMING_MMC_HS400)
+ 		val |= CFG_CHK_DS;
  
- 		mux_parent_names[i] = __clk_get_name(host->mux_parent[i]);
--		mux_parent_count++;
- 	}
+-	writel(val, host->regs + SD_EMMC_CFG);
+-
+-	if (val != orig)
++	if (val != orig) {
++		writel(val, host->regs + SD_EMMC_CFG);
+ 		dev_dbg(host->dev, "%s: SD_EMMC_CFG: 0x%08x -> 0x%08x\n",
+ 			__func__, orig, val);
++	}
+ }
  
- 	/* create the mux */
-@@ -270,7 +268,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	init.ops = &clk_mux_ops;
- 	init.flags = 0;
- 	init.parent_names = mux_parent_names;
--	init.num_parents = mux_parent_count;
-+	init.num_parents = MUX_CLK_NUM_PARENTS;
+ static void meson_mmc_request_done(struct mmc_host *mmc,
+@@ -695,6 +686,17 @@ static int meson_mmc_get_cd(struct mmc_host *mmc)
+ 	return status;
+ }
  
- 	host->mux.reg = host->regs + SD_EMMC_CLOCK;
- 	host->mux.shift = CLK_SRC_SHIFT;
++static void meson_mmc_cfg_init(struct meson_host *host)
++{
++	u32 cfg = 0;
++
++	cfg |= ilog2(SD_EMMC_CFG_RESP_TIMEOUT) << CFG_RESP_TIMEOUT_SHIFT;
++	cfg |= ilog2(SD_EMMC_CFG_CMD_GAP) << CFG_RC_CC_SHIFT;
++	cfg |= ilog2(SD_EMMC_CFG_BLK_SIZE) << CFG_BLK_LEN_SHIFT;
++
++	writel(cfg, host->regs + SD_EMMC_CFG);
++}
++
+ static const struct mmc_host_ops meson_mmc_ops = {
+ 	.request	= meson_mmc_request,
+ 	.set_ios	= meson_mmc_set_ios,
+@@ -755,10 +757,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto free_host;
+ 
+-	ret = meson_mmc_clk_init(host);
+-	if (ret)
+-		goto free_host;
+-
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+@@ -767,6 +765,13 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+ 
++	/* set config to sane default */
++	meson_mmc_cfg_init(host);
++
++	ret = meson_mmc_clk_init(host);
++	if (ret)
++		goto free_host;
++
+ 	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
+ 					meson_mmc_irq_thread, IRQF_SHARED,
+ 					DRIVER_NAME, host);
 -- 
 2.11.1
 
