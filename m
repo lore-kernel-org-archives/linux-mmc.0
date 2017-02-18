@@ -1,85 +1,132 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 6/10] mmc: meson-gx: fix error path in meson_mmc_clk_init /
- meson_mmc_probe
-Date: Sat, 18 Feb 2017 14:19:32 +0100
-Message-ID: <8419d592-1338-d7eb-3a75-342b64897922@gmail.com>
+Subject: [PATCH v3 9/10] mmc: meson-gx: remove member mrq from struct
+ meson_host
+Date: Sat, 18 Feb 2017 14:23:29 +0100
+Message-ID: <d54707b2-194a-ea91-f0a5-42c1d1928e8d@gmail.com>
 References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35778 "EHLO
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36777 "EHLO
         mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752824AbdBRN1O (ORCPT
+        with ESMTP id S1753035AbdBRN1O (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 08:27:14 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u63so6839445wmu.2
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:39 -0800 (PST)
+Received: by mail-wm0-f66.google.com with SMTP id r18so6864337wmd.3
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:44 -0800 (PST)
 In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org, =?UTF-8?Q?Micha=c5=82_Zegan?= <webczat_200@poczta.onet.pl>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-The condition should be "if (ret)" as the disable/unprepare is
-supposed to be executed if the previous command fails.
-In addition adjust the error path in probe to properly deal
-with the case that cfg_div_clk can be registered successfully
-but enable/prepare fails.
-In this case we shouldn't call clk_disable_unprepare.
+Struct mmc_command includes a reference to the related mmc_request.
+Therefore we don't have to store mrq separately in struct meson_host.
+And we can remove some now unneeded WARN_ON's.
 
-Reported-by: Michał Zegan <webczat_200@poczta.onet.pl>
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Acked-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v2:
 - extended commit message
+- added acked-by
 v3:
-- adjust error path in probe
+- rebased
 ---
- drivers/mmc/host/meson-gx-mmc.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 24 +++---------------------
+ 1 file changed, 3 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 68e76fa8..002e4aac 100644
+index e904b0a5..5281014e 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -321,7 +321,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	host->mmc->f_min = clk_round_rate(host->cfg_div_clk, 400000);
+@@ -122,7 +122,6 @@
+ struct meson_host {
+ 	struct	device		*dev;
+ 	struct	mmc_host	*mmc;
+-	struct	mmc_request	*mrq;
+ 	struct	mmc_command	*cmd;
  
- 	ret = meson_mmc_clk_set(host, host->mmc->f_min);
--	if (!ret)
-+	if (ret)
- 		clk_disable_unprepare(host->cfg_div_clk);
+ 	spinlock_t lock;
+@@ -416,9 +415,6 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
  
- 	return ret;
-@@ -771,7 +771,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 					meson_mmc_irq_thread, IRQF_SHARED,
- 					DRIVER_NAME, host);
- 	if (ret)
--		goto free_host;
-+		goto err_div_clk;
+-	WARN_ON(host->mrq != mrq);
+-
+-	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+ }
+@@ -525,13 +521,9 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
  
- 	mmc->max_blk_count = CMD_CFG_LENGTH_MASK;
- 	mmc->max_req_size = mmc->max_blk_count * mmc->max_blk_size;
-@@ -784,7 +784,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (host->bounce_buf == NULL) {
- 		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
- 		ret = -ENOMEM;
--		goto free_host;
-+		goto err_div_clk;
+-	WARN_ON(host->mrq != NULL);
+-
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+-	host->mrq = mrq;
+-
+ 	if (mrq->sbc)
+ 		meson_mmc_start_cmd(mmc, mrq->sbc);
+ 	else
+@@ -555,7 +547,6 @@ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ {
+ 	struct meson_host *host = dev_id;
+-	struct mmc_request *mrq;
+ 	struct mmc_command *cmd;
+ 	u32 irq_en, status, raw_status;
+ 	irqreturn_t ret = IRQ_HANDLED;
+@@ -565,11 +556,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 
+ 	cmd = host->cmd;
+ 
+-	mrq = host->mrq;
+-
+-	if (WARN_ON(!mrq))
+-		return IRQ_NONE;
+-
+ 	if (WARN_ON(!cmd))
+ 		return IRQ_NONE;
+ 
+@@ -616,7 +602,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	else  {
+ 		dev_warn(host->dev, "Unknown IRQ! status=0x%04x: MMC CMD%u arg=0x%08x flags=0x%08x stop=%d\n",
+ 			 status, cmd->opcode, cmd->arg,
+-			 cmd->flags, mrq->stop ? 1 : 0);
++			 cmd->flags, cmd->mrq->stop ? 1 : 0);
+ 		if (cmd->data) {
+ 			struct mmc_data *data = cmd->data;
+ 
+@@ -643,14 +629,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ {
+ 	struct meson_host *host = dev_id;
+-	struct mmc_request *mrq = host->mrq;
+ 	struct mmc_command *cmd = host->cmd;
+ 	struct mmc_data *data;
+ 	unsigned int xfer_bytes;
+ 
+-	if (WARN_ON(!mrq))
+-		return IRQ_NONE;
+-
+ 	if (WARN_ON(!cmd))
+ 		return IRQ_NONE;
+ 
+@@ -664,8 +646,8 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
  	}
  
- 	mmc->ops = &meson_mmc_ops;
-@@ -792,8 +792,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	meson_mmc_read_resp(host->mmc, cmd);
+-	if (!data || !data->stop || mrq->sbc)
+-		meson_mmc_request_done(host->mmc, mrq);
++	if (!data || !data->stop || cmd->mrq->sbc)
++		meson_mmc_request_done(host->mmc, cmd->mrq);
+ 	else
+ 		meson_mmc_start_cmd(host->mmc, data->stop);
  
- 	return 0;
- 
--free_host:
-+err_div_clk:
- 	clk_disable_unprepare(host->cfg_div_clk);
-+free_host:
- 	clk_disable_unprepare(host->core_clk);
- 	mmc_free_host(mmc);
- 	return ret;
 -- 
 2.11.1
 
