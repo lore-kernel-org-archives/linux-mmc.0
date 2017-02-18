@@ -1,85 +1,61 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 3/10] mmc: meson-gx: remove unused members irq, ocr_mask
- from struct meson_host
-Date: Sat, 18 Feb 2017 14:07:38 +0100
-Message-ID: <c7656b85-7c4c-322c-e4f6-97d45047e08b@gmail.com>
+Subject: [PATCH v3 10/10] mmc: meson-gx: replace magic timeout numbers with
+ constants
+Date: Sat, 18 Feb 2017 14:26:04 +0100
+Message-ID: <8dadc1fd-2612-48d4-f265-95501c83a124@gmail.com>
 References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35751 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752311AbdBRN1O (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36786 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753125AbdBRN1O (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 08:27:14 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u63so6839185wmu.2
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:35 -0800 (PST)
+Received: by mail-wm0-f65.google.com with SMTP id r18so6864401wmd.3
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:45 -0800 (PST)
 In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Member ocr_mask is never used and member irq we can replace with a
-local variable in meson_mmc_probe. So let's remove both members.
+Replace timeout magic numbers with proper constants.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-Acked-by: Kevin Hilman <khilman@baylibre.com>
 ---
-v2:
-- added acked-by
 v3:
-- no changes
+- added to patch series
 ---
- drivers/mmc/host/meson-gx-mmc.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index b99461ff..b9de3d47 100644
+index 5281014e..f244fcf9 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -127,8 +127,6 @@ struct meson_host {
+@@ -116,6 +116,8 @@
  
- 	spinlock_t lock;
- 	void __iomem *regs;
--	int irq;
--	u32 ocr_mask;
- 	struct clk *core_clk;
- 	struct clk_mux mux;
- 	struct clk *mux_clk;
-@@ -712,7 +710,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	struct meson_host *host;
- 	struct mmc_host *mmc;
--	int ret;
-+	int ret, irq;
+ #define SD_EMMC_CFG_BLK_SIZE 512 /* internal buffer max: 512 bytes */
+ #define SD_EMMC_CFG_RESP_TIMEOUT 256 /* in clock cycles */
++#define SD_EMMC_CMD_TIMEOUT 1024 /* in ms */
++#define SD_EMMC_CMD_TIMEOUT_DATA 4096 /* in ms */
+ #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+ #define MUX_CLK_NUM_PARENTS 2
  
- 	mmc = mmc_alloc_host(sizeof(struct meson_host), &pdev->dev);
- 	if (!mmc)
-@@ -744,8 +742,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 		goto free_host;
+@@ -498,10 +500,10 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 
+ 		desc->cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
+ 
+-		cmd_cfg_timeout = 12;
++		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
+ 	} else {
+ 		desc->cmd_cfg &= ~CMD_CFG_DATA_IO;
+-		cmd_cfg_timeout = 10;
++		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
  	}
- 
--	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq == 0) {
-+	irq = platform_get_irq(pdev, 0);
-+	if (!irq) {
- 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
- 		ret = -EINVAL;
- 		goto free_host;
-@@ -773,9 +771,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
- 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
- 
--	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
--					meson_mmc_irq, meson_mmc_irq_thread,
--					IRQF_SHARED, DRIVER_NAME, host);
-+	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
-+					meson_mmc_irq_thread, IRQF_SHARED,
-+					DRIVER_NAME, host);
- 	if (ret)
- 		goto free_host;
- 
+ 	desc->cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
+ 		CMD_CFG_TIMEOUT_SHIFT;
 -- 
 2.11.1
 
