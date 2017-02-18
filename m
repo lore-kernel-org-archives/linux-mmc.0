@@ -1,53 +1,79 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 7/10] mmc: meson-gx: remove unneeded devm_kstrdup in
- meson_mmc_clk_init
-Date: Sat, 18 Feb 2017 14:20:44 +0100
-Message-ID: <de024b46-9cc2-86e3-8654-db8ec37ba283@gmail.com>
+Subject: [PATCH v3 2/10] mmc: meson-gx: make two functions return void
+Date: Sat, 18 Feb 2017 14:06:29 +0100
+Message-ID: <df156d6f-3ea5-da37-e413-56862223460a@gmail.com>
 References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33762 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752971AbdBRN1O (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33732 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752088AbdBRN1O (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 08:27:14 -0500
-Received: by mail-wr0-f193.google.com with SMTP id g51so627280wrg.0
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:41 -0800 (PST)
+Received: by mail-wr0-f196.google.com with SMTP id g51so627017wrg.0
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:34 -0800 (PST)
 In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-CLK core does a deep copy of init.name, therefore it's fully ok to
-provide a local variable.
+The return value of meson_mmc_request_done and meson_mmc_read_resp
+isn't used, so make both functions return void.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 Acked-by: Kevin Hilman <khilman@baylibre.com>
 ---
 v2:
-- fixed commit message
 - added acked-by
 v3:
 - no changes
 ---
- drivers/mmc/host/meson-gx-mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/meson-gx-mmc.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 002e4aac..684cc088 100644
+index 07a7399c..b99461ff 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -281,7 +281,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+@@ -426,7 +426,8 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			__func__, orig, val);
+ }
  
- 	/* create the divider */
- 	snprintf(clk_name, sizeof(clk_name), "%s#div", dev_name(host->dev));
--	init.name = devm_kstrdup(host->dev, clk_name, GFP_KERNEL);
-+	init.name = clk_name;
- 	init.ops = &clk_divider_ops;
- 	init.flags = CLK_SET_RATE_PARENT;
- 	clk_div_parents[0] = __clk_get_name(host->mux_clk);
+-static int meson_mmc_request_done(struct mmc_host *mmc, struct mmc_request *mrq)
++static void meson_mmc_request_done(struct mmc_host *mmc,
++				   struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+ 
+@@ -435,8 +436,6 @@ static int meson_mmc_request_done(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+-
+-	return 0;
+ }
+ 
+ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+@@ -554,7 +553,7 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		meson_mmc_start_cmd(mmc, mrq->cmd);
+ }
+ 
+-static int meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
++static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+ 
+@@ -566,8 +565,6 @@ static int meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+ 	} else if (cmd->flags & MMC_RSP_PRESENT) {
+ 		cmd->resp[0] = readl(host->regs + SD_EMMC_CMD_RSP);
+ 	}
+-
+-	return 0;
+ }
+ 
+ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
 -- 
 2.11.1
 
