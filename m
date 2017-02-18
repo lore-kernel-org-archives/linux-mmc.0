@@ -1,27 +1,27 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH v3 5/10] mmc: meson-gx: remove member parent_mux from struct
- meson_host
-Date: Sat, 18 Feb 2017 14:09:48 +0100
-Message-ID: <04cf71f5-63c4-4bef-32fe-d0da8b65cfbc@gmail.com>
+Subject: [PATCH v3 3/10] mmc: meson-gx: remove unused members irq, ocr_mask
+ from struct meson_host
+Date: Sat, 18 Feb 2017 14:07:38 +0100
+Message-ID: <c7656b85-7c4c-322c-e4f6-97d45047e08b@gmail.com>
 References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33957 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752358AbdBRN1O (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35751 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752311AbdBRN1O (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Feb 2017 08:27:14 -0500
-Received: by mail-wr0-f195.google.com with SMTP id 89so1089661wrr.1
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:38 -0800 (PST)
+Received: by mail-wm0-f66.google.com with SMTP id u63so6839185wmu.2
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Feb 2017 05:26:35 -0800 (PST)
 In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Member mux_parent isn't used outside meson_mmc_clk_init. So remove it
-and replace it with a local variable in meson_mmc_clk_init.
+Member ocr_mask is never used and member irq we can replace with a
+local variable in meson_mmc_probe. So let's remove both members.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 Acked-by: Kevin Hilman <khilman@baylibre.com>
@@ -35,43 +35,51 @@ v3:
  1 file changed, 6 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index ea2db3ce..68e76fa8 100644
+index b99461ff..b9de3d47 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -130,7 +130,6 @@ struct meson_host {
+@@ -127,8 +127,6 @@ struct meson_host {
+ 
+ 	spinlock_t lock;
+ 	void __iomem *regs;
+-	int irq;
+-	u32 ocr_mask;
  	struct clk *core_clk;
  	struct clk_mux mux;
  	struct clk *mux_clk;
--	struct clk *mux_parent[MUX_CLK_NUM_PARENTS];
- 	unsigned long current_clock;
+@@ -712,7 +710,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	struct resource *res;
+ 	struct meson_host *host;
+ 	struct mmc_host *mmc;
+-	int ret;
++	int ret, irq;
  
- 	struct clk_divider cfg_div;
-@@ -247,19 +246,18 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 
- 	/* get the mux parents */
- 	for (i = 0; i < MUX_CLK_NUM_PARENTS; i++) {
-+		struct clk *clk;
- 		char name[16];
- 
- 		snprintf(name, sizeof(name), "clkin%d", i);
--		host->mux_parent[i] = devm_clk_get(host->dev, name);
--		if (IS_ERR(host->mux_parent[i])) {
--			ret = PTR_ERR(host->mux_parent[i]);
--			if (PTR_ERR(host->mux_parent[i]) != -EPROBE_DEFER)
-+		clk = devm_clk_get(host->dev, name);
-+		if (IS_ERR(clk)) {
-+			if (clk != ERR_PTR(-EPROBE_DEFER))
- 				dev_err(host->dev, "Missing clock %s\n", name);
--			host->mux_parent[i] = NULL;
--			return ret;
-+			return PTR_ERR(clk);
- 		}
- 
--		mux_parent_names[i] = __clk_get_name(host->mux_parent[i]);
-+		mux_parent_names[i] = __clk_get_name(clk);
+ 	mmc = mmc_alloc_host(sizeof(struct meson_host), &pdev->dev);
+ 	if (!mmc)
+@@ -744,8 +742,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 		goto free_host;
  	}
  
- 	/* create the mux */
+-	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq == 0) {
++	irq = platform_get_irq(pdev, 0);
++	if (!irq) {
+ 		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+ 		ret = -EINVAL;
+ 		goto free_host;
+@@ -773,9 +771,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+ 
+-	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
+-					meson_mmc_irq, meson_mmc_irq_thread,
+-					IRQF_SHARED, DRIVER_NAME, host);
++	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
++					meson_mmc_irq_thread, IRQF_SHARED,
++					DRIVER_NAME, host);
+ 	if (ret)
+ 		goto free_host;
+ 
 -- 
 2.11.1
 
