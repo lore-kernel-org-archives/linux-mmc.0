@@ -1,83 +1,83 @@
-From: =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>
-Subject: [PATCH 1/4] ARM64: Prepare Marvell IAP140 aka PXA1908
-Date: Sun, 19 Feb 2017 04:19:57 +0100
-Message-ID: <20170219032000.4674-2-afaerber@suse.de>
-References: <20170219032000.4674-1-afaerber@suse.de>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH 04/18] mmc: meson-gx: improve meson_mmc_start_cmd
+Date: Sun, 19 Feb 2017 20:41:28 +0100
+Message-ID: <aad14a82-135d-556c-866b-3879960e859f@gmail.com>
+References: <420b75a9-b8c2-b3d7-ae60-3ed8a5a18ead@gmail.com>
+ <df8da322-6a42-642c-2c80-55fca0dab3ef@gmail.com>
+ <m2h93vbd2b.fsf@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170219032000.4674-1-afaerber@suse.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Jisheng Zhang <jszhang@marvell.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Eric Miao <eric.y.miao@gmail.com>, info@andromedabox.org, linux-kernel@vger.kernel.org, =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-clk@vger.ke
+Content-Type: text/plain; charset=iso-8859-15
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33666 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750938AbdBSTlg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Feb 2017 14:41:36 -0500
+Received: by mail-wr0-f194.google.com with SMTP id s27so885852wrb.0
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Feb 2017 11:41:35 -0800 (PST)
+In-Reply-To: <m2h93vbd2b.fsf@baylibre.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Suppress COMMON_CLK_PXA and MMC_PXA for now as they don't build on arm64.
-Also suppress the deprecated SERIAL_PXA in favor of SERIAL_8250_PXA.
+Am 15.02.2017 um 18:04 schrieb Kevin Hilman:
+> Heiner Kallweit <hkallweit1@gmail.com> writes:
+> 
+>> Remove use of unneeded members cmd_arg and cmd_resp.
+>> Setting SD_EMMC_CMD_RSP is only needed if CMD_CFG_RESP_NUM is set,
+>> so don't write this register in all other cases.
+>>
+>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> 
+> I'm not sure I like this change.  This works now because there is only
+> one descriptor used, but one of the next things to work on in this
+> driver is taking advantage of the internal DMA capabilities, which means
+> having a chain of descriptorsall filled out in memory.
+> 
+I implemented the descriptor chain mode and tests (together with CMD23
+mode) resulted in 140 MB/s read performance (from a 128GB eMMC card).
+So I will submit this extension together with the CMD23 mode extension.
 
-Signed-off-by: Andreas Färber <afaerber@suse.de>
----
- arch/arm64/Kconfig.platforms | 5 +++++
- drivers/clk/Kconfig          | 2 +-
- drivers/mmc/host/Kconfig     | 2 +-
- drivers/tty/serial/Kconfig   | 2 +-
- 4 files changed, 8 insertions(+), 3 deletions(-)
+Heiner
 
-diff --git a/arch/arm64/Kconfig.platforms b/arch/arm64/Kconfig.platforms
-index 129cc5a..841b6c8 100644
---- a/arch/arm64/Kconfig.platforms
-+++ b/arch/arm64/Kconfig.platforms
-@@ -111,6 +111,11 @@ config ARCH_MVEBU
- 	   - Armada 7K SoC Family
- 	   - Armada 8K SoC Family
- 
-+config ARCH_PXA
-+	bool "Marvell PXA SoC Family"
-+	help
-+	  This enables support for the Marvell PXA family.
-+
- config ARCH_QCOM
- 	bool "Qualcomm Platforms"
- 	select GPIOLIB
-diff --git a/drivers/clk/Kconfig b/drivers/clk/Kconfig
-index 9356ab4..3d25f20 100644
---- a/drivers/clk/Kconfig
-+++ b/drivers/clk/Kconfig
-@@ -185,7 +185,7 @@ config COMMON_CLK_PWM
- 	  at 50% duty cycle.
- 
- config COMMON_CLK_PXA
--	def_bool COMMON_CLK && ARCH_PXA
-+	def_bool COMMON_CLK && ARCH_PXA && ARM
- 	---help---
- 	  Support for the Marvell PXA SoC.
- 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f08691a..a650eca 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -27,7 +27,7 @@ config MMC_QCOM_DML
- 
- config MMC_PXA
- 	tristate "Intel PXA25x/26x/27x Multimedia Card Interface support"
--	depends on ARCH_PXA
-+	depends on ARCH_PXA && ARM
- 	help
- 	  This selects the Intel(R) PXA(R) Multimedia card Interface.
- 	  If you have a PXA(R) platform with a Multimedia Card slot,
-diff --git a/drivers/tty/serial/Kconfig b/drivers/tty/serial/Kconfig
-index 6117ac8..0713a05 100644
---- a/drivers/tty/serial/Kconfig
-+++ b/drivers/tty/serial/Kconfig
-@@ -439,7 +439,7 @@ config SERIAL_MPSC_CONSOLE
- 
- config SERIAL_PXA
- 	bool "PXA serial port support (DEPRECATED)"
--	depends on ARCH_PXA || ARCH_MMP
-+	depends on (ARCH_PXA && ARM) || ARCH_MMP
- 	select SERIAL_CORE
- 	select SERIAL_8250_PXA if SERIAL_8250=y
- 	select SERIAL_PXA_NON8250 if !SERIAL_8250=y
--- 
-2.10.2
+> Kevin
+> 
+>> ---
+>>  drivers/mmc/host/meson-gx-mmc.c | 6 ++----
+>>  1 file changed, 2 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>> index ece38b44..630e0590 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -456,7 +456,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  	desc->cmd_cfg |= (cmd->opcode & CMD_CFG_CMD_INDEX_MASK)	<<
+>>  		CMD_CFG_CMD_INDEX_SHIFT;
+>>  	desc->cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
+>> -	desc->cmd_arg = cmd->arg;
+>>  
+>>  	/* Response */
+>>  	if (cmd->flags & MMC_RSP_PRESENT) {
+>> @@ -464,7 +463,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  		if (cmd->flags & MMC_RSP_136)
+>>  			desc->cmd_cfg |= CMD_CFG_RESP_128;
+>>  		desc->cmd_cfg |= CMD_CFG_RESP_NUM;
+>> -		desc->cmd_resp = 0;
+>> +		writel(0, host->regs + SD_EMMC_CMD_RSP);
+>>  
+>>  		if (!(cmd->flags & MMC_RSP_CRC))
+>>  			desc->cmd_cfg |= CMD_CFG_RESP_NOCRC;
+>> @@ -540,9 +539,8 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  	desc->cmd_cfg |= CMD_CFG_END_OF_CHAIN;
+>>  	writel(desc->cmd_cfg, host->regs + SD_EMMC_CMD_CFG);
+>>  	writel(desc->cmd_data, host->regs + SD_EMMC_CMD_DAT);
+>> -	writel(desc->cmd_resp, host->regs + SD_EMMC_CMD_RSP);
+>>  	wmb(); /* ensure descriptor is written before kicked */
+>> -	writel(desc->cmd_arg, host->regs + SD_EMMC_CMD_ARG);
+>> +	writel(cmd->arg, host->regs + SD_EMMC_CMD_ARG);
+>>  }
+>>  
+>>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> 
+
