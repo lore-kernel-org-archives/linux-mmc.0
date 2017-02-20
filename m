@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [RFC PATCH 3/4] mmc: mmc: add support for CMD5 awake
-Date: Mon, 20 Feb 2017 13:33:11 +0530
-Message-ID: <1487577792-12510-4-git-send-email-riteshh@codeaurora.org>
+Subject: [RFC PATCH 1/4] Documentation: mmc: add mmc-sleep-awake
+Date: Mon, 20 Feb 2017 13:33:09 +0530
+Message-ID: <1487577792-12510-2-git-send-email-riteshh@codeaurora.org>
 References: <1487577792-12510-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1487577792-12510-1-git-send-email-riteshh@codeaurora.org>
@@ -10,74 +10,28 @@ To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
 Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, linux-kernel@vger.kernel.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds CMD5 awake support for emmc.
-This will be used to awake emmc from suspend together
-with partial_init support to reduce resume latencies.
+mmc-sleep-awake enables CMD5 awake feature
+& partial_init which can help reduce resume
+latency on emmc.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/core/mmc.c | 26 +++++++++++++++++++++-----
- 1 file changed, 21 insertions(+), 5 deletions(-)
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7fd7228..83bcc86 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1827,7 +1827,7 @@ static int mmc_can_sleep(struct mmc_card *card)
- 	return (card && card->ext_csd.rev >= 3);
- }
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index c7f4a0e..b0df54c 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -53,6 +53,8 @@ Optional properties:
+ - no-sdio: controller is limited to send sdio cmd during initialization
+ - no-sd: controller is limited to send sd cmd during initialization
+ - no-mmc: controller is limited to send mmc cmd during initialization
++- mmc-sleep-awake: eMMC to support awake by CMD5 partial init to reduce resume
++  latency.
  
--static int mmc_sleep(struct mmc_host *host)
-+static int mmc_sleepawake(struct mmc_host *host, bool sleep)
- {
- 	struct mmc_command cmd = {};
- 	struct mmc_card *card = host->card;
-@@ -1837,13 +1837,16 @@ static int mmc_sleep(struct mmc_host *host)
- 	/* Re-tuning can't be done once the card is deselected */
- 	mmc_retune_hold(host);
- 
--	err = mmc_deselect_cards(host);
--	if (err)
--		goto out_release;
-+	if (sleep) {
-+		err = mmc_deselect_cards(host);
-+		if (err)
-+			goto out_release;
-+	}
- 
- 	cmd.opcode = MMC_SLEEP_AWAKE;
- 	cmd.arg = card->rca << 16;
--	cmd.arg |= 1 << 15;
-+	if (sleep)
-+		cmd.arg |= 1 << 15;
- 
- 	/*
- 	 * If the max_busy_timeout of the host is specified, validate it against
-@@ -1871,11 +1874,24 @@ static int mmc_sleep(struct mmc_host *host)
- 	if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
- 		mmc_delay(timeout_ms);
- 
-+	if (!sleep)
-+		err = mmc_select_card(card);
-+
- out_release:
- 	mmc_retune_release(host);
- 	return err;
- }
- 
-+static int mmc_sleep(struct mmc_host *host)
-+{
-+	return mmc_sleepawake(host, true);
-+}
-+
-+static int mmc_awake(struct mmc_host *host)
-+{
-+	return mmc_sleepawake(host, false);
-+}
-+
- static int mmc_can_poweroff_notify(const struct mmc_card *card)
- {
- 	return card &&
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
