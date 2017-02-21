@@ -1,64 +1,58 @@
-From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH v3 0/7] mmc: bcm2835: Add new driver for the sdhost controller
-Date: Tue, 21 Feb 2017 10:06:59 +0100
-Message-ID: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57956 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751771AbdBUJHU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 21 Feb 2017 04:07:20 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v3 4/7] arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and multi_v7_defconfig
+Date: Tue, 21 Feb 2017 10:07:03 +0100
+Message-ID: <1487668026-7100-5-git-send-email-kraxel@redhat.com>
+References: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1487668026-7100-1-git-send-email-kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>
 
-  Hi,
+We need to enable this controller so that we can switch the SD card's
+pinmux over to it by default, which will improve storage performance.
 
-Next version if the bcm2835 sdhost patch series.
+Read access (dd with 64k blocks on rpi2):
+  CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
+  CONFIG_MMC_BCM2835:     19-20 MB/s
 
-New in v3:
- * squashed in cleanups by Stefan.
- * use one dma channel only.
- * improve commit messages.
+Differences on write access are pretty much in the noise.
 
-New in v2:
- * DMA fixed.
- * updated docs (kconfig, file comment, commit message) clarifying
-   the two sd controller situation.
- * some code cleanups, as pointed out by Stefan.
- * dt bindings use mmc@... now.
- * added patches to update defconfigs.
- * added patch for rpi3 device tree, so wifi is actually enabled.
+Signed-off-by: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/arm/configs/bcm2835_defconfig  | 1 +
+ arch/arm/configs/multi_v7_defconfig | 1 +
+ 2 files changed, 2 insertions(+)
 
-please review & test,
-  Gerd
-
-Eric Anholt (2):
-  dt-bindings: Add binding for brcm,bcm2835-sdhost.
-  mmc: bcm2835: Add new driver for the sdhost controller.
-
-Gerd Hoffmann (5):
-  mmc: bcm2835: add sdhost controller to devicetree
-  arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and
-    multi_v7_defconfig
-  arm64: set CONFIG_MMC_BCM2835=y in defconfig
-  ARM: dts: bcm283x: switch from &sdhci to &sdhost
-  ARM: dts: bcm2837: add &sdhci and &sdhost
-
- .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   23 +
- arch/arm/boot/dts/bcm2835-rpi.dtsi                 |    6 +
- arch/arm/boot/dts/bcm283x.dtsi                     |   10 +
- arch/arm/configs/bcm2835_defconfig                 |    1 +
- arch/arm/configs/multi_v7_defconfig                |    1 +
- arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts   |   17 +
- arch/arm64/configs/defconfig                       |    1 +
- drivers/mmc/host/Kconfig                           |   14 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/bcm2835.c                         | 1471 ++++++++++++++++++++
- 10 files changed, 1545 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
- create mode 100644 drivers/mmc/host/bcm2835.c
-
+diff --git a/arch/arm/configs/bcm2835_defconfig b/arch/arm/configs/bcm2835_defconfig
+index 4b89f4e..3767c24 100644
+--- a/arch/arm/configs/bcm2835_defconfig
++++ b/arch/arm/configs/bcm2835_defconfig
+@@ -92,6 +92,7 @@ CONFIG_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SDHCI_IPROC=y
++CONFIG_MMC_BCM2835=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
+diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+index 028d2b7..5d13894 100644
+--- a/arch/arm/configs/multi_v7_defconfig
++++ b/arch/arm/configs/multi_v7_defconfig
+@@ -727,6 +727,7 @@ CONFIG_MMC_DW_EXYNOS=y
+ CONFIG_MMC_DW_ROCKCHIP=y
+ CONFIG_MMC_SH_MMCIF=y
+ CONFIG_MMC_SUNXI=y
++CONFIG_MMC_BCM2835=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_CLASS_FLASH=m
 -- 
 1.8.3.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
