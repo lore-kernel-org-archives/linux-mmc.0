@@ -1,26 +1,64 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 4/4] mmc: core: Implement mmc_partial_init during
- resume
-Date: Tue, 21 Feb 2017 09:40:52 +0200
-Message-ID: <42634177-bec7-4968-a313-26714bfa2594@intel.com>
-References: <1487577792-12510-1-git-send-email-riteshh@codeaurora.org>
- <1487577792-12510-5-git-send-email-riteshh@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1487577792-12510-5-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, linux-kernel@vger.kernel.org, Talel Shenhar <tatias@codeaurora.org>, Maya Erez <merez@codeaurora.org>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: [PATCH v3 3/7] mmc: bcm2835: add sdhost controller to devicetree
+Date: Tue, 21 Feb 2017 10:07:02 +0100
+Message-ID: <1487668026-7100-4-git-send-email-kraxel@redhat.com>
+References: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:34372 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751761AbdBUJHU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 21 Feb 2017 04:07:20 -0500
+In-Reply-To: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>
 
-On 20/02/17 10:03, Ritesh Harjani wrote:
-> This patch adds mmc_partial_init functionality
-> combining with CMD5 awake feature to reduce resume
-> latency for emmc.
-> 
-> This is not enabled for HS400 mode, since tuning
-> in HS400 is required to be done in HS200 timing.
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+Acked-by: Eric Anholt <eric@anholt.net>
+---
+ arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
+ arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
+ 2 files changed, 16 insertions(+)
 
-How does that matter?
+diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+index 0b73f9c..7d89af2 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
++++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+@@ -69,6 +69,12 @@
+ 	bus-width = <4>;
+ };
+ 
++&sdhost {
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdhost_gpio48>;
++	bus-width = <4>;
++};
++
+ &pwm {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
+diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
+index a3106aa..3f4fbff 100644
+--- a/arch/arm/boot/dts/bcm283x.dtsi
++++ b/arch/arm/boot/dts/bcm283x.dtsi
+@@ -450,6 +450,16 @@
+ 			status = "disabled";
+ 		};
+ 
++		sdhost: mmc@7e202000 {
++			compatible = "brcm,bcm2835-sdhost";
++			reg = <0x7e202000 0x100>;
++			interrupts = <2 24>;
++			clocks = <&clocks BCM2835_CLOCK_VPU>;
++			dmas = <&dma 13>;
++			dma-names = "rx-tx";
++			status = "disabled";
++		};
++
+ 		hvs@7e400000 {
+ 			compatible = "brcm,bcm2835-hvs";
+ 			reg = <0x7e400000 0x6000>;
+-- 
+1.8.3.1
+
