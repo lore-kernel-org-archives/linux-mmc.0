@@ -1,74 +1,36 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Wed, 22 Feb 2017 15:29:29 +0200
-Message-ID: <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
-References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-7-linus.walleij@linaro.org>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v6 07/14] dt: bindings: Add bindings for Marvell Xenon SD
+ Host Controller
+Date: Wed, 22 Feb 2017 15:44:47 -0600
+Message-ID: <20170222214447.bsa466vfiqa24kmw@rob-hp-laptop>
+References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
+ <3a4ce2fd25ed812482b0fc96f50dd305c8f40fe9.1487091464.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:28689 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932481AbdBVNe4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 22 Feb 2017 08:34:56 -0500
-In-Reply-To: <20170209153403.9730-7-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <3a4ce2fd25ed812482b0fc96f50dd305c8f40fe9.1487091464.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei@marvell.c>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
-Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
 
-On 09/02/17 17:33, Linus Walleij wrote:
-> The waitqueue in the host context is there to signal back from
-> mmc_request_done() through mmc_wait_data_done() that the hardware
-> is done with a command, and when the wait is over, the core
-> will typically submit the next asynchronous request that is pending
-> just waiting for the hardware to be available.
+On Tue, Feb 14, 2017 at 06:01:47PM +0100, Gregory CLEMENT wrote:
+> From: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 > 
-> This is in the way for letting the mmc_request_done() trigger the
-> report up to the block layer that a block request is finished.
+> Marvell Xenon SDHC can support eMMC/SD/SDIO.
+> Add Xenon-specific properties.
+> Also add properties for Xenon PHY setting.
 > 
-> Re-jig this as a first step, remvoving the waitqueue and introducing
-> a work that will run after a completed asynchronous request,
-> finalizing that request, including retransmissions, and eventually
-> reporting back with a completion and a status code to the
-> asynchronous issue method.
-> 
-> This had the upside that we can remove the MMC_BLK_NEW_REQUEST
-> status code and the "new_request" state in the request queue
-> that is only there to make the state machine spin out
-> the first time we send a request.
-> 
-> Introduce a workqueue in the host for handling just this, and
-> then a work and completion in the asynchronous request to deal
-> with this mechanism.
-> 
-> This is a central change that let us do many other changes since
-> we have broken the submit and complete code paths in two, and we
-> can potentially remove the NULL flushing of the asynchronous
-> pipeline and report block requests as finished directly from
-> the worker.
+> Signed-off-by: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 172 +++++++-
+>  1 file changed, 172 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
 
-This needs more thought.  The completion should go straight to the mmc block
-driver from the ->done() callback.  And from there straight back to the
-block layer if recovery is not needed.  We want to stop using
-mmc_start_areq() altogether because we never want to wait - we always want
-to issue (if possible) and return.
-
-The core API to use is __mmc_start_req() but the block driver should
-populate mrq->done with its own handler. i.e. change __mmc_start_req()
-
--	mrq->done = mmc_wait_done;
-+	if (!mrq->done)
-+		mrq->done = mmc_wait_done;
-
-mrq->done() would complete the request (e.g. via blk_complete_request()) if
-it has no errors (and doesn't need polling), and wake up the queue thread to
-finish up everything else and start the next request.
-
-For the blk-mq port, the queue thread should also be retained, partly
-because it solves some synchronization problems, but mostly because, at this
-stage, we anyway don't have solutions for all the different ways the driver
-can block.
-(as listed here https://marc.info/?l=linux-mmc&m=148336571720463&w=2 )
-
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
