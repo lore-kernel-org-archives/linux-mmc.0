@@ -1,106 +1,74 @@
-From: Avri Altman <Avri.Altman@sandisk.com>
-Subject: RE: SDIO bus hang on BayTrail machines
-Date: Wed, 22 Feb 2017 12:40:23 +0000
-Message-ID: <9BEFCB713C10BF4B91D714797ECA5EEA117EC576@ULS-OP-MBXIP04.sdcorp.global.sandisk.com>
-References: <CA+A7VXXmA1KGjPfnUmZPBKDXmUMYhjLeXbo=8Ho3CrCvt7rjbA@mail.gmail.com>
- <CAPDyKFrO4ajLw=TDsMa==fL_Q6BYxoO_x1OFODB7+oMJdJCr3w@mail.gmail.com>
- <e2659959-ded2-1ea9-e859-6ce8a8172eab@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
+Date: Wed, 22 Feb 2017 15:29:29 +0200
+Message-ID: <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
+References: <20170209153403.9730-1-linus.walleij@linaro.org>
+ <20170209153403.9730-7-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa1.hgst.iphmx.com ([68.232.141.245]:4748 "EHLO
-        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754170AbdBVMly (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2017 07:41:54 -0500
-In-Reply-To: <e2659959-ded2-1ea9-e859-6ce8a8172eab@intel.com>
-Content-Language: en-US
+Received: from mga01.intel.com ([192.55.52.88]:28689 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932481AbdBVNe4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 22 Feb 2017 08:34:56 -0500
+In-Reply-To: <20170209153403.9730-7-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, =?iso-8859-1?Q?Jo=E3o_Paulo_Rechi_Vita?= <jprvita@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, =?iso-8859-1?Q?Jo=E3o_Paulo_Rechi_Vita?= <jprvita@endlessm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux@endlessm.com" <linux@endlessm.com>
+To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>
+Cc: Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
 
+On 09/02/17 17:33, Linus Walleij wrote:
+> The waitqueue in the host context is there to signal back from
+> mmc_request_done() through mmc_wait_data_done() that the hardware
+> is done with a command, and when the wait is over, the core
+> will typically submit the next asynchronous request that is pending
+> just waiting for the hardware to be available.
+> 
+> This is in the way for letting the mmc_request_done() trigger the
+> report up to the block layer that a block request is finished.
+> 
+> Re-jig this as a first step, remvoving the waitqueue and introducing
+> a work that will run after a completed asynchronous request,
+> finalizing that request, including retransmissions, and eventually
+> reporting back with a completion and a status code to the
+> asynchronous issue method.
+> 
+> This had the upside that we can remove the MMC_BLK_NEW_REQUEST
+> status code and the "new_request" state in the request queue
+> that is only there to make the state machine spin out
+> the first time we send a request.
+> 
+> Introduce a workqueue in the host for handling just this, and
+> then a work and completion in the asynchronous request to deal
+> with this mechanism.
+> 
+> This is a central change that let us do many other changes since
+> we have broken the submit and complete code paths in two, and we
+> can potentially remove the NULL flushing of the asynchronous
+> pipeline and report block requests as finished directly from
+> the worker.
 
+This needs more thought.  The completion should go straight to the mmc block
+driver from the ->done() callback.  And from there straight back to the
+block layer if recovery is not needed.  We want to stop using
+mmc_start_areq() altogether because we never want to wait - we always want
+to issue (if possible) and return.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Adrian Hunter
-> Sent: Thursday, February 16, 2017 3:09 PM
-> To: Ulf Hansson <ulf.hansson@linaro.org>; Jo=E3o Paulo Rechi Vita
-> <jprvita@gmail.com>
-> Cc: Dong Aisheng <b29396@freescale.com>; Jo=E3o Paulo Rechi Vita
-> <jprvita@endlessm.com>; linux-mmc@vger.kernel.org; linux@endlessm.com
-> Subject: Re: SDIO bus hang on BayTrail machines
->=20
-> On 11/01/17 17:42, Ulf Hansson wrote:
-> > On 12 December 2016 at 23:55, Jo=E3o Paulo Rechi Vita <jprvita@gmail.co=
-m>
-> wrote:
-> >> Hello Dong Adrian and Ulf,
-> >>
-> >> I'm working on enabling a BayTrail-based machine with very similar
-> >> hardware to one of the Intel Compute sticks, which is an Intel
-> >> BayTrail and has a RTL8723BS WiFi card on the SDIO bus. I'm using
-> >> Linux 4.8 with the driver from https://github.com/hadess/rtl8723bs,
-> >> and I was experiencing a complete machine hang when using the WiFi
-> >> card. Passing `intel_idle.max_cstate=3D1` together with the following
-> >> patch (with the sdhci_runtime_pm_get and sdhci_runtime_pm_put
-> >> implementations added back) makes the problem go away:
-> >> https://github.com/hadess/rtl8723bs/blob/master/patches_4.5/0002-mmc-
-> >> sdhci-get-runtime-pm-when-sdio-irq-is-enabled.patch
-> >
-> > It's been a while ago and I wasn't able to dig out some information
-> > from earlier discussions/submissions.
-> >
-> >>
-> >> I could not find much information on why this was never sent
-> >> upstream, and would like to know if this approach would be
-> >> acceptable, or if there are any other better alternatives to solve
-> >> this problem. I'm not a runtime PM expert, but as I understand this
-> >> keeps the device powered on as long as interrupts are enabled,
-> >> potentially increasing the power consumption. As this kernel has to
-> >> run several different machines using the same code base and config, I
-> >> would rather avoid something that could have a negative impact on othe=
-r
-> platforms.
-> >
-> > Unless the board/soc supports an option to re-configure the SDIO IRQ
-> > as wakeup when entering runtime suspend state, there is no other way
-> > but to keep the device runtime resumed.
-> >
-> > For this specific case, I have seen two different solutions for how to
-> > allow the device to be runtime suspended when using SDIO IRQ.
-> > 1) Re-routing the SDIO IRQ DAT line as a GPIO IRQ at runtime suspend,
-> > thus a wakeup becomes enabled.
-> > 2) Using a completely separate line for SDIO IRQs and thus not a DAT
-> > line, configured as a GPIO IRQ.
-> >
-> >>
-> >> Any ideas appreciated, and I'm happy to try a newer tree if you guys
-> >> think some other commit might have fixed the problem.
-Did you look for possible wa on the wifi side?
-Maybe you can look into the wifi driver module params -=20
-can it be loaded with d0i3 disabled? Or even with power management disabled=
- (power scheme =3D CAM)?
-Also maybe try Intel's wifi card...
+The core API to use is __mmc_start_req() but the block driver should
+populate mrq->done with its own handler. i.e. change __mmc_start_req()
 
-Cheers,
-Avri
+-	mrq->done = mmc_wait_done;
++	if (!mrq->done)
++		mrq->done = mmc_wait_done;
 
-> >
-> > I think the best option right now, is something very similar to the
-> > patch you point to at github above.
->=20
-> Sorry for the *very* slow reply! :-(.  I need to find time to look at thi=
-s, but
-> although the patch is OK for Intel it is wrong for other SDHCI-based driv=
-ers
-> which *do* runtime suspend with the clock (and perhaps the whole host
-> controller) still on and thus expect SDIO interrupts *during* runtime sus=
-pend.
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
-he
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+mrq->done() would complete the request (e.g. via blk_complete_request()) if
+it has no errors (and doesn't need polling), and wake up the queue thread to
+finish up everything else and start the next request.
+
+For the blk-mq port, the queue thread should also be retained, partly
+because it solves some synchronization problems, but mostly because, at this
+stage, we anyway don't have solutions for all the different ways the driver
+can block.
+(as listed here https://marc.info/?l=linux-mmc&m=148336571720463&w=2 )
+
