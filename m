@@ -1,46 +1,30 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 05/39] mmc: mmc: Add functions to enable / disable the
- Command Queue
-Date: Thu, 23 Feb 2017 15:54:32 +0100
-Message-ID: <CACRpkdbDBNH=Mxp95X7dTU3TZiS=KPm5My4RMjOOxWrfkVZ+7A@mail.gmail.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
- <1486731352-8018-6-git-send-email-adrian.hunter@intel.com>
- <CACRpkdbW4nDA=e6zM3095N9y_hy2Rsktzmuf8g8=xOaJCeLbGA@mail.gmail.com> <CAPDyKFph+WPzrNT9_eeGuzDRoWsg+sg1+j2sthpP9+XAdwZ18w@mail.gmail.com>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 1/7] dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
+Date: Thu, 23 Feb 2017 15:59:49 +0100
+Message-ID: <4846582.IXrHj1lV7W@phil>
+References: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com>
+ <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:37907 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751126AbdBWOye (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2017 09:54:34 -0500
-Received: by mail-it0-f43.google.com with SMTP id y135so2471217itc.1
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Feb 2017 06:54:34 -0800 (PST)
-In-Reply-To: <CAPDyKFph+WPzrNT9_eeGuzDRoWsg+sg1+j2sthpP9+XAdwZ18w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1486983759-32337-1-git-send-email-andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-On Fri, Feb 17, 2017 at 1:21 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 15 February 2017 at 13:52, Linus Walleij <linus.walleij@linaro.org> wrote:
->> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->>> Add helper functions to enable or disable the Command Queue.
->>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> I think I asked this before but why?
->
-> There are certain other requests, like for RPMB, which requires CMDQ
-> to be "temporary" disabled.
+Am Montag, 13. Februar 2017, 19:02:39 CET schrieb Andy Yan:
+> Rockchip finally named the SOC as RV1108, so change it.
+> 
+> Signed-off-by: Andy Yan <andy.yan-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-Ah my comment is stupid.
-
-I specifically want to know why we should be able to disable
-it from sysfs.
-
-I don't see the point in that, just giving userspace another gun
-to shoot itself in the foot.
-
-Yours,
-Linus Walleij
+Reviewed-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
