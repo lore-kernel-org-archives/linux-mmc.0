@@ -1,158 +1,99 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH 2/2] [2/2] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Thu, 23 Feb 2017 20:47:10 +0900
-Message-ID: <CAK7LNARh=cNON0ufHKzcxs2C9Brw+_hSiFj-SUh3GCpRpGqjkw@mail.gmail.com>
-References: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
- <1487250413-5769-2-git-send-email-piotrs@cadence.com> <CAPDyKFqsuzT9NXARMJtey_kZ0y2GsdOxZGsjbodWA1EXw_ZSzw@mail.gmail.com>
- <MWHPR07MB308848FCAB0C9A6A7976B09BDD5D0@MWHPR07MB3088.namprd07.prod.outlook.com>
+Subject: Re: [PATCH] Add HS400 enhanced strobe support
+Date: Thu, 23 Feb 2017 21:49:41 +0900
+Message-ID: <CAK7LNATTsDDGrct5kBHjPCVi8MXjqi6V4_QdiUV8zKDwGeLyoA@mail.gmail.com>
+References: <1487166614-12808-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <MWHPR07MB308848FCAB0C9A6A7976B09BDD5D0@MWHPR07MB3088.namprd07.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conssluserg-04.nifty.com ([210.131.2.83]:43798 "EHLO
+        conssluserg-04.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751034AbdBWMuu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2017 07:50:50 -0500
+In-Reply-To: <1487166614-12808-1-git-send-email-piotrs@cadence.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Piotr Sroka <piotrs@cadence.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
 Hi.
 
-2017-02-17 23:12 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: 16 February, 2017 4:10 PM
->> Subject: Re: [PATCH 2/2] [2/2] mmc: sdhci-cadence: Update PHY delay
->> configuration
->>
->> On 16 February 2017 at 14:06, Piotr Sroka <piotrs@cadence.com> wrote:
->> > DTS properties are used instead of fixed data because PHY settings can
->> > be different for different platforms.
->> > Configuration of new three PHY delays were added
->> >
->> > Signed-off-by: Piotr Sroka <piotrs@cadence.com>
->> > ---
->> >  .../devicetree/bindings/mmc/sdhci-cadence.txt      | 54 ++++++++++++++
->>
->> Please split this patch.
->>
->> DT docs should be a separate patch and make sure it precedes the changes
->> where the new bindings are being parsed in the driver code.
->>
+
+2017-02-15 22:50 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
+> Add support for HS400ES mode to Cadence SDHCI driver.
 >
-> Ok I will do it in next version of patch.
->
->> >  drivers/mmc/host/sdhci-cadence.c                   | 83 +++++++++++++++++++-
->> --
->> >  2 files changed, 129 insertions(+), 8 deletions(-)
->> >
->> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
->> > b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
->> > index c0f37cb..221d3fe 100644
->> > --- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
->> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
->> > @@ -19,6 +19,59 @@ if supported.  See mmc.txt for details.
->> >  - mmc-hs400-1_8v
->> >  - mmc-hs400-1_2v
->> >
->> > +- phy-input-delay-sd-hs:
->> > +  Value of the delay in the input path for High Speed work mode.
->> > +  Valid range = [0:0x1F].
-
-Instead of bunch of new bindings,
-a data associated with an SoC specific compatible will do in most cases.
+> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
 
 
-static const struct of_device_id sdhci_cdns_match[] = {
-        {
-                .compatible = "socionext,uniphier-sd4hc",
-                .data = sdhci_cdns_uniphier_phy_data,
-        },
-        { .compatible = "cdns,sd4hc" },
-        { /* sentinel */ }
-};
-
-
-Strictly speaking, the DLL delays will depend on board design as well as SoC.
-So, DT bindings would be more flexible, though.
+Next time, please add "mmc: sdhci-cadence" to the patch subject.
+This will clarify which driver is being touched.
 
 
 
+> +static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+> +                                            struct mmc_ios *ios)
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+> +
+> +       priv->enhanced_strobe = ios->enhanced_strobe;
+> +       if (ios->enhanced_strobe)
+> +               sdhci_cdns_set_emmc_mode(priv,
+> +                                        SDHCI_CDNS_HRS06_MODE_MMC_HS400ES);
+> +}
 
 
->> Please specify what unit this in. And then also a suffix, like "-ns"
->> to the name of the binding.
->
-> The delay starts from 5ns (for delay parameter equal to 0), and it is increased by 2.5ns.
-> 0 - means 5ns, 1 means 7.5 ns etc.
+This function, if ios->enhanced_strobe is true, enables it immediately,
+but nothing happens if ios->enhanced_strobe is false.
+(it will be disabled at the next call of sdhci_cdns_set_uhs_signaling().)
+
+If you look at drivers/mmc/core/core.c,
+mmc_set_ios() is called immediately after
+host->ops->hs400_enhanced_strobe(host, &host->ios),
+but I am not quite sure if we should rely on that fact.
+
+I am just putting my untested code below.
 
 
-In short, all the DT values here are
-kind of mysterious register values for the PHY.
-
-
-
->
->> > +               if (ret)
->> > +                       return ret;
->> > +       }
->> > +       if (!of_property_read_u32(np, "phy-dll-delay-sdclk-hsmmc", &tmp)) {
->> > +               ret = sdhci_cdns_write_phy_reg(priv,
->> > +                                              SDHCI_CDNS_PHY_DLY_HSMMC, tmp);
->> > +               if (ret)
->> > +                       return ret;
->> > +       }
->> > +       if (!of_property_read_u32(np, "phy-dll-delay-strobe", &tmp)) {
->> > +               ret = sdhci_cdns_write_phy_reg(priv,
->> > +                                              SDHCI_CDNS_PHY_DLY_STROBE, tmp);
->> > +               if (ret)
->> > +                       return ret;
->> > +       }
->> > +       return 0;
-
-
-The repeat of the same pattern,
-"look up a DT property, then if it exists, set it to a register."
-
-
-Maybe, is it better to describe it with data array + loop, like this?
-
-
-struct sdhci_cdns_phy_cfg {
-        const char *property;
-        u8 addr;
-};
-
-static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] =  {
-        { "phy-input-delay-sd-hs", SDHCI_CDNS_PHY_DLY_SD_HS, },
-        { "phy-input-delay-sd-default", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
-        { "phy-input-delay-sd-sdr12", SDHCI_CDNS_PHY_DLY_UHS_SDR12, },
-        { "phy-input-delay-sd-sdr25", SDHCI_CDNS_PHY_DLY_UHS_SDR25, },
-        { "phy-input-delay-sd-sdr50", SDHCI_CDNS_PHY_DLY_UHS_SDR50, },
-        ...
-};
-
-static int sdhci_cdns_phy_init(struct device_node *np,
-                               struct sdhci_cdns_priv *priv)
+static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+                                             struct mmc_ios *ios)
 {
-        u32 val;
-        int i;
+        struct sdhci_host *host = mmc_priv(mmc);
+        struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+        u32 mode;
 
-        for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs), i++) {
-                ret = of_property_read_u32(np, sdhci_cdns_phy_cfgs[i].property,
-                                           &val);
-                if (ret)
-                        continue;
+        mode = readl(priv->hrs_addr + SDHCI_CDNS_HRS06) &
+               SDHCI_CDNS_HRS06_MODE_MASK;
 
-                ret = sdhci_cdns_write_phy_reg(priv,
-                                               sdhci_cdns_phy_cfgs[i].addr,
-                                               val);
-                if (ret)
-                        return ret;
+        switch (mode) {
+        case SDHCI_CDNS_HRS06_MODE_MMC_HS400:
+                if (ios->enhanced_strobe)
+                        mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
+                break;
+        case SDHCI_CDNS_HRS06_MODE_MMC_HS400ES:
+                if (!ios->enhanced_strobe)
+                        mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
+                break;
+        default:
+                break;
         }
+
+        sdhci_cdns_set_emmc_mode(priv, mode);
+
+        priv->enhanced_strobe = ios->enhanced_strobe;
 }
 
 
+BTW, I prefer sdhci_cdns_hs400_enhanced_strobe()
+is placed below sdhci_cdns_execute_tuning()
+because these two callbacks belong to the same group.
+
+These two are not members of sdhci_ops,
+but replacements for host->mmc_host_ops.
 
 
+
+The other parts look good to me.
 
 -- 
 Best Regards
