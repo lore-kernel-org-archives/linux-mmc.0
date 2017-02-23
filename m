@@ -1,100 +1,32 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] Add HS400 enhanced strobe support
-Date: Thu, 23 Feb 2017 21:49:41 +0900
-Message-ID: <CAK7LNATTsDDGrct5kBHjPCVi8MXjqi6V4_QdiUV8zKDwGeLyoA@mail.gmail.com>
-References: <1487166614-12808-1-git-send-email-piotrs@cadence.com>
+From: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [PATCH 1/2] [1/2] mmc: sdhci-cadence: Fix writing PHY delay
+Date: Thu, 23 Feb 2017 11:46:11 +0000
+Message-ID: <DM5PR07MB308274A027F287ABF4408F0ADD530@DM5PR07MB3082.namprd07.prod.outlook.com>
+References: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNARW4zQ2OutrAfzkigt8OgMbAMbaLvTB2ZNfwbApHT=TEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-04.nifty.com ([210.131.2.83]:43798 "EHLO
-        conssluserg-04.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751034AbdBWMuu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2017 07:50:50 -0500
-In-Reply-To: <1487166614-12808-1-git-send-email-piotrs@cadence.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAK7LNARW4zQ2OutrAfzkigt8OgMbAMbaLvTB2ZNfwbApHT=TEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi.
-
-
-2017-02-15 22:50 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> Add support for HS400ES mode to Cadence SDHCI driver.
->
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-
-
-Next time, please add "mmc: sdhci-cadence" to the patch subject.
-This will clarify which driver is being touched.
-
-
-
-> +static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-> +                                            struct mmc_ios *ios)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +
-> +       priv->enhanced_strobe = ios->enhanced_strobe;
-> +       if (ios->enhanced_strobe)
-> +               sdhci_cdns_set_emmc_mode(priv,
-> +                                        SDHCI_CDNS_HRS06_MODE_MMC_HS400ES);
-> +}
-
-
-This function, if ios->enhanced_strobe is true, enables it immediately,
-but nothing happens if ios->enhanced_strobe is false.
-(it will be disabled at the next call of sdhci_cdns_set_uhs_signaling().)
-
-If you look at drivers/mmc/core/core.c,
-mmc_set_ios() is called immediately after
-host->ops->hs400_enhanced_strobe(host, &host->ios),
-but I am not quite sure if we should rely on that fact.
-
-I am just putting my untested code below.
-
-
-static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-                                             struct mmc_ios *ios)
-{
-        struct sdhci_host *host = mmc_priv(mmc);
-        struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-        u32 mode;
-
-        mode = readl(priv->hrs_addr + SDHCI_CDNS_HRS06) &
-               SDHCI_CDNS_HRS06_MODE_MASK;
-
-        switch (mode) {
-        case SDHCI_CDNS_HRS06_MODE_MMC_HS400:
-                if (ios->enhanced_strobe)
-                        mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
-                break;
-        case SDHCI_CDNS_HRS06_MODE_MMC_HS400ES:
-                if (!ios->enhanced_strobe)
-                        mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
-                break;
-        default:
-                break;
-        }
-
-        sdhci_cdns_set_emmc_mode(priv, mode);
-
-        priv->enhanced_strobe = ios->enhanced_strobe;
-}
-
-
-BTW, I prefer sdhci_cdns_hs400_enhanced_strobe()
-is placed below sdhci_cdns_execute_tuning()
-because these two callbacks belong to the same group.
-
-These two are not members of sdhci_ops,
-but replacements for host->mmc_host_ops.
-
-
-
-The other parts look good to me.
-
--- 
-Best Regards
-Masahiro Yamada
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
+IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDIzIEZlYnJ1
+YXJ5LCAyMDE3IDEyOjI5IFBNDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8yXSBbMS8yXSBtbWM6
+IHNkaGNpLWNhZGVuY2U6IEZpeCB3cml0aW5nIFBIWSBkZWxheQ0KPiANCj4gSGkuDQo+IA0KPiA+
+IC1zdGF0aWMgdm9pZCBzZGhjaV9jZG5zX3dyaXRlX3BoeV9yZWcoc3RydWN0IHNkaGNpX2NkbnNf
+cHJpdiAqcHJpdiwNCj4gPiArc3RhdGljIGludCBzZGhjaV9jZG5zX3dyaXRlX3BoeV9yZWcoc3Ry
+dWN0IHNkaGNpX2NkbnNfcHJpdiAqcHJpdiwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgdTggYWRkciwgdTggZGF0YSkNCj4gDQo+IA0KPiBJZiB5b3UgaGF2ZSBhIGNo
+YW5jZSB0byBzdWJtaXQgdjIsDQo+IEkgd2FudCB0aGUgaW5kZW50IG9mIHRoZSBhYm92ZSBsaW5l
+IGFkanVzdGVkLg0KPiANCk9rIHRoYW5rcy4gSSB3aWxsIGZpeCB0aGUgaW5kZW50IGluIHYyLg0K
+DQpSZWdhcmRzDQpQaW90ciBTcm9rYQ0KDQo=
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
