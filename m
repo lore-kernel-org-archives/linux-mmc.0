@@ -1,32 +1,46 @@
-From: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH 1/2] [1/2] mmc: sdhci-cadence: Fix writing PHY delay
-Date: Thu, 23 Feb 2017 11:46:11 +0000
-Message-ID: <DM5PR07MB308274A027F287ABF4408F0ADD530@DM5PR07MB3082.namprd07.prod.outlook.com>
-References: <1487250413-5769-1-git-send-email-piotrs@cadence.com>
- <CAK7LNARW4zQ2OutrAfzkigt8OgMbAMbaLvTB2ZNfwbApHT=TEA@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RFC 05/39] mmc: mmc: Add functions to enable / disable the
+ Command Queue
+Date: Thu, 23 Feb 2017 15:54:32 +0100
+Message-ID: <CACRpkdbDBNH=Mxp95X7dTU3TZiS=KPm5My4RMjOOxWrfkVZ+7A@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+ <1486731352-8018-6-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdbW4nDA=e6zM3095N9y_hy2Rsktzmuf8g8=xOaJCeLbGA@mail.gmail.com> <CAPDyKFph+WPzrNT9_eeGuzDRoWsg+sg1+j2sthpP9+XAdwZ18w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAK7LNARW4zQ2OutrAfzkigt8OgMbAMbaLvTB2ZNfwbApHT=TEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f43.google.com ([209.85.214.43]:37907 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751126AbdBWOye (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2017 09:54:34 -0500
+Received: by mail-it0-f43.google.com with SMTP id y135so2471217itc.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Feb 2017 06:54:34 -0800 (PST)
+In-Reply-To: <CAPDyKFph+WPzrNT9_eeGuzDRoWsg+sg1+j2sthpP9+XAdwZ18w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
-IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDIzIEZlYnJ1
-YXJ5LCAyMDE3IDEyOjI5IFBNDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8yXSBbMS8yXSBtbWM6
-IHNkaGNpLWNhZGVuY2U6IEZpeCB3cml0aW5nIFBIWSBkZWxheQ0KPiANCj4gSGkuDQo+IA0KPiA+
-IC1zdGF0aWMgdm9pZCBzZGhjaV9jZG5zX3dyaXRlX3BoeV9yZWcoc3RydWN0IHNkaGNpX2NkbnNf
-cHJpdiAqcHJpdiwNCj4gPiArc3RhdGljIGludCBzZGhjaV9jZG5zX3dyaXRlX3BoeV9yZWcoc3Ry
-dWN0IHNkaGNpX2NkbnNfcHJpdiAqcHJpdiwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgdTggYWRkciwgdTggZGF0YSkNCj4gDQo+IA0KPiBJZiB5b3UgaGF2ZSBhIGNo
-YW5jZSB0byBzdWJtaXQgdjIsDQo+IEkgd2FudCB0aGUgaW5kZW50IG9mIHRoZSBhYm92ZSBsaW5l
-IGFkanVzdGVkLg0KPiANCk9rIHRoYW5rcy4gSSB3aWxsIGZpeCB0aGUgaW5kZW50IGluIHYyLg0K
-DQpSZWdhcmRzDQpQaW90ciBTcm9rYQ0KDQo=
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Feb 17, 2017 at 1:21 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 15 February 2017 at 13:52, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>>> Add helper functions to enable or disable the Command Queue.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>
+>> I think I asked this before but why?
+>
+> There are certain other requests, like for RPMB, which requires CMDQ
+> to be "temporary" disabled.
+
+Ah my comment is stupid.
+
+I specifically want to know why we should be able to disable
+it from sysfs.
+
+I don't see the point in that, just giving userspace another gun
+to shoot itself in the foot.
+
+Yours,
+Linus Walleij
