@@ -1,117 +1,81 @@
 From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v1] mmc: mediatek: Fixed bug where clock frequency could
- be set wrong
-Date: Fri, 24 Feb 2017 17:38:44 +0800
-Message-ID: <1487929124.22858.10.camel@mhfsdcap03>
-References: <1487924527-22584-1-git-send-email-yong.mao@mediatek.com>
- <1487924527-22584-2-git-send-email-yong.mao@mediatek.com>
- <CAGS+omDuPwXqTJ2CrLbLvSHdp3CL895qop1x6dLT1u7bG7XnVw@mail.gmail.com>
+Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Fri, 24 Feb 2017 17:59:36 +0800
+Message-ID: <1487930376.22858.14.camel@mhfsdcap03>
+References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
+         <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
+         <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAGS+omDuPwXqTJ2CrLbLvSHdp3CL895qop1x6dLT1u7bG7XnVw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Daniel Kurtz <djkurtz-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: 	Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-To: 	Daniel Kurtz <djkurtz-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: 	Re: [PATCH v1] mmc: mediatek: Fixed bug where clock frequency
-could be set wrong
-Date: 	Fri, 24 Feb 2017 17:33:37 +0800
+Dear Rob,
 
+Could you please help to make comments for this patch?
+Thanks.
 
-On Fri, 2017-02-24 at 17:52 +0900, Daniel Kurtz wrote:
-> On Fri, Feb 24, 2017 at 5:22 PM, Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-wrote:
-> >
+On Tue, 2017-01-24 at 09:02 +0100, Ulf Hansson wrote:
+> +Rob, devicetree
+> 
+> On 21 January 2017 at 09:55, Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
 > > From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 > >
-> > This patch can fix two issues:
-> >
-> > Issue 1:
-> > The maximum value of clock divider is 0xff.
-> > Because the type of div is u32, div may be larger than max_div.
-> > In this case, we should use max_div to set the clock frequency.
-> >
-> > Issue 2:
-> > In previous code, we can not set the correct clock frequency when
-> > div equals 0xff.
+> > Add description for mediatek,hs200-cmd-int-delay
+> > Add description for mediatek,hs400-cmd-int-delay
+> > Add description for mediatek,hs400-cmd-resp-sel-rising
 > >
 > > Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> > Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> 
+> You need an ack from a DT maintainer for this. I have added Rob and
+> the devicetree list on cc.
+> 
+> Kind regards
+> Uffe
+> 
 > > ---
-> >  drivers/mmc/host/mtk-sd.c |   13 ++++++++++++-
-> >  1 file changed, 12 insertions(+), 1 deletion(-)
+> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt |   12 ++++++++++++
+> >  1 file changed, 12 insertions(+)
 > >
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 07f3236..3174445 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -540,6 +540,7 @@ static void msdc_set_mclk(struct msdc_host
-*host, unsigned char timing, u32 hz)
-> >         u32 mode;
-> >         u32 flags;
-> >         u32 div;
-> > +       u32 max_div;
-> 
-> There's really no need for this variable.  Just use 0xff below.
-For all of our IC, max_div is not a constant.
-We will upstream another patch which max_div will get the different
-value depending on the IC.
-Therefore, we keep the max_div as a variable here.
-
-> 
-> >         u32 sclk;
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > index 0120c7f..4182ea3 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > @@ -21,6 +21,15 @@ Optional properties:
+> >  - assigned-clocks: PLL of the source clock
+> >  - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
+> >  - hs400-ds-delay: HS400 DS delay setting
+> > +- mediatek,hs200-cmd-int-delay: HS200 command internal delay setting.
+> > +                               This field has total 32 stages.
+> > +                               The value is an integer from 0 to 31.
+> > +- mediatek,hs400-cmd-int-delay: HS400 command internal delay setting
+> > +                               This field has total 32 stages.
+> > +                               The value is an integer from 0 to 31.
+> > +- mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
+> > +                                      If present,HS400 command responses are sampled on rising edges.
+> > +                                      If not present,HS400 command responses are sampled on falling edges.
 > >
-> >         if (!hz) {
-> > @@ -590,8 +591,18 @@ static void msdc_set_mclk(struct msdc_host
-*host, unsigned char timing, u32 hz)
-> >                         sclk = (host->src_clk_freq >> 2) / div;
-> >                 }
-> >         }
-> > +
-> > +       /**
-> > +        * The maximum value of div is 0xff.
-> > +        * Check if the div is larger than max_div.
-> > +        */
-> > +       max_div = 0xff;
-> > +       if (div > max_div) {
-> > +               div = max_div;
-> > +               sclk = (host->src_clk_freq >> 2) / div;
-> > +       }
-> >         sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD |
-MSDC_CFG_CKDIV,
-> > -                       (mode << 8) | (div % 0xff));
-> > +                     (mode << 8) | div);
-> 
-> Hmm, I don't know much about this sub-system, but should we even be
-> allowing requests to set a frequency that we can't actually achieve
-> with the divider?
-> 
-
-No. We can not get a frequency that we can't actually achieve with the
-divider. This patch is to solve this kind of issue.
-
-
-> >         sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
-> >         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
-> >                 cpu_relax();
+> >  Examples:
+> >  mmc0: mmc@11230000 {
+> > @@ -38,4 +47,7 @@ mmc0: mmc@11230000 {
+> >         assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
+> >         assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
+> >         hs400-ds-delay = <0x14015>;
+> > +       mediatek,hs200-cmd-int-delay = <26>;
+> > +       mediatek,hs400-cmd-int-delay = <14>;
+> > +       mediatek,hs400-cmd-resp-sel-rising;
+> >  };
 > > --
 > > 1.7.9.5
 > >
-> >
-> > _______________________________________________
-> > Linux-mediatek mailing list
-> > Linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> > http://lists.infradead.org/mailman/listinfo/linux-mediatek
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
