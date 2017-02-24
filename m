@@ -1,81 +1,61 @@
-From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
-Date: Fri, 24 Feb 2017 17:59:36 +0800
-Message-ID: <1487930376.22858.14.camel@mhfsdcap03>
-References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
-         <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
-         <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
+From: Anssi Hannula <anssi.hannula@bitwise.fi>
+Subject: Re: [RFC PATCH 1/4] mmc: sdhci: add comment for get_timeout_clock
+ callback
+Date: Fri, 24 Feb 2017 16:00:45 +0200
+Message-ID: <851f0dd1-09e5-b98e-0b89-7ce4c99fec1b@bitwise.fi>
+References: <1487303780-234812-1-git-send-email-shawn.lin@rock-chips.com>
+ <1487303780-234812-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chunfeng Yun <chunfeng.yun-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.bitwise.fi ([109.204.228.163]:51808 "EHLO mail.bitwise.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751285AbdBXOAx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Feb 2017 09:00:53 -0500
+In-Reply-To: <1487303780-234812-2-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>
 
-Dear Rob,
+On 17.2.2017 5:56, Shawn Lin wrote:
+> We need comment there to tell folks that we need this
+> callback to return the timeout clock rate in KHz.
 
-Could you please help to make comments for this patch?
-Thanks.
+Good idea, except that currently in some cases it should return the rate
+in MHz instead so the added comment is actually wrong.
 
-On Tue, 2017-01-24 at 09:02 +0100, Ulf Hansson wrote:
-> +Rob, devicetree
-> 
-> On 21 January 2017 at 09:55, Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> > From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> >
-> > Add description for mediatek,hs200-cmd-int-delay
-> > Add description for mediatek,hs400-cmd-int-delay
-> > Add description for mediatek,hs400-cmd-resp-sel-rising
-> >
-> > Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> 
-> You need an ack from a DT maintainer for this. I have added Rob and
-> the devicetree list on cc.
-> 
-> Kind regards
-> Uffe
-> 
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt |   12 ++++++++++++
-> >  1 file changed, 12 insertions(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > index 0120c7f..4182ea3 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > @@ -21,6 +21,15 @@ Optional properties:
-> >  - assigned-clocks: PLL of the source clock
-> >  - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
-> >  - hs400-ds-delay: HS400 DS delay setting
-> > +- mediatek,hs200-cmd-int-delay: HS200 command internal delay setting.
-> > +                               This field has total 32 stages.
-> > +                               The value is an integer from 0 to 31.
-> > +- mediatek,hs400-cmd-int-delay: HS400 command internal delay setting
-> > +                               This field has total 32 stages.
-> > +                               The value is an integer from 0 to 31.
-> > +- mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
-> > +                                      If present,HS400 command responses are sampled on rising edges.
-> > +                                      If not present,HS400 command responses are sampled on falling edges.
-> >
-> >  Examples:
-> >  mmc0: mmc@11230000 {
-> > @@ -38,4 +47,7 @@ mmc0: mmc@11230000 {
-> >         assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
-> >         assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
-> >         hs400-ds-delay = <0x14015>;
-> > +       mediatek,hs200-cmd-int-delay = <26>;
-> > +       mediatek,hs400-cmd-int-delay = <14>;
-> > +       mediatek,hs400-cmd-resp-sel-rising;
-> >  };
-> > --
-> > 1.7.9.5
-> >
+Otherwise the patchset seems correct to me, and the timeout clock
+situation would be better than before.
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+One option would be to just have the callback return Hz as that seems to
+be the most obvious unit. The callback would probably have to be renamed
+for that, though, to avoid any backporting etc. headaches later.
+
+
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+>
+>  drivers/mmc/host/sdhci.h | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index edf3adf..d5b4d57 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -547,6 +547,7 @@ struct sdhci_ops {
+>  	int		(*enable_dma)(struct sdhci_host *host);
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+> +	/* get_timeout_clock should return clk rate in KHz  */
+>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
+>  	void		(*set_timeout)(struct sdhci_host *host,
+
+
+-- 
+Anssi Hannula / Bitwise Oy
++358503803997
+
