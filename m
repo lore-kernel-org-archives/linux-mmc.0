@@ -1,69 +1,33 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 1/3] firmware: dmi_scan: Add dmi_product_name kernel cmdline option
-Date: Sat, 25 Feb 2017 18:23:55 +0100
-Message-ID: <20170225172357.26294-2-hdegoede@redhat.com>
-References: <20170225172357.26294-1-hdegoede@redhat.com>
+Subject: [PATCH 0/3] Allow setting dmi-product-name on the cmdline + dmi sdhci quirk
+Date: Sat, 25 Feb 2017 18:23:54 +0100
+Message-ID: <20170225172357.26294-1-hdegoede@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170225172357.26294-1-hdegoede@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jean Delvare <jdelvare@suse.com>
 Cc: Hans de Goede <hdegoede@redhat.com>, Takashi Iwai <tiwai@suse.de>, "russianneuromancer @ ya . ru" <russianneuromancer@ya.ru>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Unfortunately some firmware has all the DMI strings filled with:
-"Default String" (or something equally useless). This makes it impossible
-to apply DMI based quirks to certain machines.
+Hi All,
 
-This commit adds a dmi_product_name kernel cmdline option which can
-be used to override the DMI_PRODUCT_NAME string, so that DMI based
-quirks can still be used on such boards, there are 3 reasons for this:
+So patch 1/3 and 2+3/3 are only somewhat related and they can be merged
+independent of each other.
 
-1) Rather then add cmdline options for all things which can be DMI quirked
-and thus may need to be specified, this only requires adding code for
-a single extra cmdline option
+The catch is that the GPD win for which patch 3/3 adds a dmi based quirk
+does not have any usable dmi strings. I've contacted the manufacturer
+for a BIOS update (no clue how that will go) but even with the BIOS update
+I believe patch 1/3 will be useful for similar cases and for people who
+do not want to flash their BIOS.
 
-2) Some devices can be quite quirky, e.g. the GPD win mini laptop /
-clamshell x86 machine, needing several quirks in both kernel and userspace
-(udev hwdb) in this case being able to fake a unique dmi product name
-allows making these devices usable with a single kernel cmdline option
-rather then requiring multiple kernel cmdline options + manual userspace
-tweaking
+So if Jean is happy with patch 1/3 then 2+3/3 can be merged independently.
 
-3) In some case we may be able to successfully get the manufacturer to
-fix the DMI strings with a firmware update, but not all users may want
-to update, this will allow users to use DMI based quirks without forcing
-them to update their firmware
+Regards,
 
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Note the GPD win: http://www.gpd.hk/gpdwin.asp is the main reason I wrote
-this patch. I've requested the manufacturer to do a BIOS update fixing the
-DMI strings, but I cannot guarantee that that will happen.
----
- drivers/firmware/dmi_scan.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+Hans
 
-diff --git a/drivers/firmware/dmi_scan.c b/drivers/firmware/dmi_scan.c
-index 54be60e..c99e753 100644
---- a/drivers/firmware/dmi_scan.c
-+++ b/drivers/firmware/dmi_scan.c
-@@ -1047,3 +1047,17 @@ void dmi_memdev_name(u16 handle, const char **bank, const char **device)
- 	}
- }
- EXPORT_SYMBOL_GPL(dmi_memdev_name);
-+
-+static int __init dmi_parse_dmi_product_name(char *str)
-+{
-+	static char prod_name[32];
-+
-+	if (!str)
-+		return -EINVAL;
-+
-+	strlcpy(prod_name, str, sizeof(prod_name));
-+	dmi_ident[DMI_PRODUCT_NAME] = prod_name;
-+
-+	return 0;
-+}
-+early_param("dmi_product_name", dmi_parse_dmi_product_name);
--- 
-2.9.3
+p.s.
+
+Takashi this means that you can add a dmi based quirk for the headphone
+detection too, my goal is to make everything just work on the GPD win
+if the user supplies dmi_product_name=GPD-WINI55 on the kernel cmdline
+(we will also need a udev hwdb entry to fix the accelerometer orientation).
