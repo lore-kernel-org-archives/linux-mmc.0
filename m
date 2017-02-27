@@ -1,33 +1,55 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: block: Fix cmd error reset failure path
-Date: Mon, 27 Feb 2017 15:08:40 +0100
-Message-ID: <CACRpkdZMZFpSK7e3OSZFqFYmX1AR9bRq24AFeGY8Udu+XD3wAw@mail.gmail.com>
-References: <558473bd-9fea-6f95-4eb1-9d72b5a25234@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [RFC PATCH 1/4] Documentation: mmc: add mmc-sleep-awake
+Date: Mon, 27 Feb 2017 13:04:38 -0600
+Message-ID: <20170227190438.m2nnb24qnnjijp5p@rob-hp-laptop>
+References: <1487577792-12510-1-git-send-email-riteshh@codeaurora.org>
+ <1487577792-12510-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:36931 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751411AbdB0OIt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2017 09:08:49 -0500
-Received: by mail-it0-f50.google.com with SMTP id 203so65752072ith.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2017 06:08:41 -0800 (PST)
-In-Reply-To: <558473bd-9fea-6f95-4eb1-9d72b5a25234@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1487577792-12510-2-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, andy.gross@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Mon, Feb 27, 2017 at 8:36 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Mon, Feb 20, 2017 at 01:33:09PM +0530, Ritesh Harjani wrote:
+> mmc-sleep-awake enables CMD5 awake feature
+> & partial_init which can help reduce resume
+> latency on emmc.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index c7f4a0e..b0df54c 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -53,6 +53,8 @@ Optional properties:
+>  - no-sdio: controller is limited to send sdio cmd during initialization
+>  - no-sd: controller is limited to send sd cmd during initialization
+>  - no-mmc: controller is limited to send mmc cmd during initialization
+> +- mmc-sleep-awake: eMMC to support awake by CMD5 partial init to reduce resume
+> +  latency.
 
-> Commit 4e1f780032c5 ("mmc: block: break out mmc_blk_rw_cmd_abort()")
-> assumed the request had not completed, but in one case it had. Fix that.
->
-> Fixes: 4e1f780032c5 ("mmc: block: break out mmc_blk_rw_cmd_abort()")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+This is a feature of the controller or card? If a card, this should be 
+in a card node probably.
 
-Ouch.
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Is there a better name that matches the h/w feature?
 
-Yours,
-Linus Walleij
+Rob
+
+>  
+>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> -- 
+> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+> a Linux Foundation Collaborative Project.
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe devicetree" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
