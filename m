@@ -1,63 +1,59 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [PATCH v6 00/14] mmc: Add support to Marvell Xenon SD Host
- Controller
-Date: Mon, 27 Feb 2017 17:41:56 +0800
-Message-ID: <d1f1d71f-d0d4-d83e-04f6-5688dcbe01b9@marvell.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
- <87y3x0ajdv.fsf@free-electrons.com>
- <CAPDyKFqXQmuxWFZwcnTgQcKU_t5MKCtBj6s+tv5gzVWS11x0qA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 0/7] Some cleanup for dwmmc
+Date: Mon, 27 Feb 2017 20:41:07 +0900
+Message-ID: <b1683639-b11c-448d-70aa-2f60b3508cad@samsung.com>
+References: <CGME20170217025924epcas3p2fdf980ca678240d2dc0ece07472202b6@epcas3p2.samsung.com>
+ <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqXQmuxWFZwcnTgQcKU_t5MKCtBj6s+tv5gzVWS11x0qA@mail.gmail.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:50265 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751660AbdB0MOI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2017 07:14:08 -0500
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OM100HB574JEIB0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 27 Feb 2017 20:41:07 +0900 (KST)
+In-reply-to: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi Shawn,
 
-On 2017/2/21 3:32, Ulf Hansson wrote:
-> On 20 February 2017 at 17:59, Gregory CLEMENT
-> <gregory.clement@free-electrons.com> wrote:
->> Hi Ulf,
->>
->>  On mar., févr. 14 2017, Gregory CLEMENT <gregory.clement@free-electrons.com> wrote:
->>
->>> Hello,
->>>
->>> This the sixth version of the series adding support for the SDHCI
->>> Xenon controller. It can be currently found on the Armada 37xx and the
->>> Armada 7K/8K but will be also used in more Marvell SoC (and not only
->>> the mvebu ones actually).
->>>
->>> Most of the following changes had been discussed on the mailing list,
->>> except the new compatible string.
->>>
->>
->> I think that with this version we addressed all the concerns expressed
->> about the previous version. Do you think that you will be able to apply
->> this series for 4.11 or do you still see any issues?
->>
->> Thanks,
->>
->> Gregory
+On 02/17/2017 11:56 AM, Shawn Lin wrote:
+> Hi Jaehoon,
 > 
-> We are in the merge window for v4.11, so new material is out of the
-> question. I am preparing the PR to Linus as this very moment.
+> This is the first part of long term cleanup for dwmmc we need.
+> No functional changes here, but just to remove the unnecessary
+> function declare and improve the logic of dw_mci_reset for better
+> understood.
 > 
-> Anyway, I will look into the series as soon as I can.
 
-	Could you please take a look at our patch set?
-	Very sorry for pushing you, but your comment is very important to us.
+Thanks for sending patches. I'm doing the other things now..
+So i will apply on these patches within this week. After checking.
 
-	Thank you.
+I think this patches will be for 4.12..Sorry for late.
 
-Best regards,
-Hu Ziji
+Best Regards,
+Jaehoon Chung
 
 > 
-> Kind regards
-> Uffe
 > 
+> Shawn Lin (7):
+>   mmc: dw_mmc: improve the timeout polling code
+>   mmc: dw_mmc: move dw_mci_reset forward to avoid declaration
+>   mmc: dw_mmc: move dw_mci_ctrl_reset forward to avoid declaration
+>   mmc: dw_mmc: move dw_mci_get_cd forward to avoid declaration
+>   mmc: dw_mmc: remove declaration of dw_mci_card_busy
+>   mmc: dw_mmc: move mci_send_cmd forward to avoid declaration
+>   mmc: dw_mmc: improve dw_mci_reset a bit
+> 
+>  drivers/mmc/host/dw_mmc.c | 383 ++++++++++++++++++++++------------------------
+>  1 file changed, 182 insertions(+), 201 deletions(-)
+> 
+
