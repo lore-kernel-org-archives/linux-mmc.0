@@ -1,27 +1,50 @@
 From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Subject: Re: [PATCH 08/16] mmc: core: do away with is_new_req
-Date: Tue, 28 Feb 2017 17:11:01 +0100
-Message-ID: <14455059.4OdW27lnpJ@amdc3058>
+Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
+Date: Tue, 28 Feb 2017 17:10:20 +0100
+Message-ID: <2260559.bkoArrBzfR@amdc3058>
 References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-9-linus.walleij@linaro.org>
- <CGME20170228161102epcas5p25dc3b560013599fda6cc750f6d528595@epcas5p2.samsung.com>
+ <20170209153403.9730-7-linus.walleij@linaro.org>
+ <CGME20170228161023epcas5p3916c2e171d57b8c7814be7841fbab3aa@epcas5p3.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:48081 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751686AbdB1QLd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2017 11:11:33 -0500
-In-reply-to: <20170209153403.9730-9-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-reply-to: <20170209153403.9730-7-linus.walleij@linaro.org>
+Sender: linux-block-owner@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
+List-Id: linux-mmc@vger.kernel.org
 
-On Thursday, February 09, 2017 04:33:55 PM Linus Walleij wrote:
-> The host context member "is_new_req" is only assigned values,
-> never checked. Delete it.
+On Thursday, February 09, 2017 04:33:53 PM Linus Walleij wrote:
+> The waitqueue in the host context is there to signal back from
+> mmc_request_done() through mmc_wait_data_done() that the hardware
+> is done with a command, and when the wait is over, the core
+> will typically submit the next asynchronous request that is pending
+> just waiting for the hardware to be available.
+> 
+> This is in the way for letting the mmc_request_done() trigger the
+> report up to the block layer that a block request is finished.
+> 
+> Re-jig this as a first step, remvoving the waitqueue and introducing
+> a work that will run after a completed asynchronous request,
+> finalizing that request, including retransmissions, and eventually
+> reporting back with a completion and a status code to the
+> asynchronous issue method.
+> 
+> This had the upside that we can remove the MMC_BLK_NEW_REQUEST
+> status code and the "new_request" state in the request queue
+> that is only there to make the state machine spin out
+> the first time we send a request.
+> 
+> Introduce a workqueue in the host for handling just this, and
+> then a work and completion in the asynchronous request to deal
+> with this mechanism.
+> 
+> This is a central change that let us do many other changes since
+> we have broken the submit and complete code paths in two, and we
+> can potentially remove the NULL flushing of the asynchronous
+> pipeline and report block requests as finished directly from
+> the worker.
 > 
 > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
@@ -32,4 +55,3 @@ Best regards,
 Bartlomiej Zolnierkiewicz
 Samsung R&D Institute Poland
 Samsung Electronics
-
