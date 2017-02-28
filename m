@@ -1,142 +1,60 @@
-From: Daniel Kurtz <djkurtz@chromium.org>
-Subject: Re: [PATCH v1] mmc: mediatek: Fixed bug where clock frequency could
- be set wrong
-Date: Tue, 28 Feb 2017 14:56:00 +0800
-Message-ID: <CAGS+omCaP99xvpu-A-NVGwdCSKETgtDBxxcYxjTRkFCyzBNL-Q@mail.gmail.com>
-References: <1487924527-22584-1-git-send-email-yong.mao@mediatek.com>
- <1487924527-22584-2-git-send-email-yong.mao@mediatek.com>
- <CAGS+omDuPwXqTJ2CrLbLvSHdp3CL895qop1x6dLT1u7bG7XnVw@mail.gmail.com>
- <1487929124.22858.10.camel@mhfsdcap03>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav2: add error handling of
+ clk_prepare_enable()
+Date: Tue, 28 Feb 2017 13:55:31 +0200
+Message-ID: <4a7a61c9-fb1f-1c43-c018-af019576ccec@intel.com>
+References: <1486767286-3361-1-git-send-email-khoroshilov@ispras.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1487929124.22858.10.camel@mhfsdcap03>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Yong Mao <yong.mao@mediatek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:41466 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751625AbdB1MJ2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 28 Feb 2017 07:09:28 -0500
+In-Reply-To: <1486767286-3361-1-git-send-email-khoroshilov@ispras.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexey Khoroshilov <khoroshilov@ispras.ru>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ldv-project@linuxtesting.org, Jisheng Zhang <jszhang@marvell.com>
 
-On Fri, Feb 24, 2017 at 5:38 PM, Yong Mao <yong.mao@mediatek.com> wrote:
-> From:   Yong Mao <yong.mao@mediatek.com>
-> To:     Daniel Kurtz <djkurtz@chromium.org>
-> Subject:        Re: [PATCH v1] mmc: mediatek: Fixed bug where clock frequency
-> could be set wrong
-> Date:   Fri, 24 Feb 2017 17:33:37 +0800
->
->
-> On Fri, 2017-02-24 at 17:52 +0900, Daniel Kurtz wrote:
->> On Fri, Feb 24, 2017 at 5:22 PM, Yong Mao <yong.mao@mediatek.com>
-> wrote:
->> >
->> > From: yong mao <yong.mao@mediatek.com>
->> >
->> > This patch can fix two issues:
->> >
->> > Issue 1:
->> > The maximum value of clock divider is 0xff.
->> > Because the type of div is u32, div may be larger than max_div.
->> > In this case, we should use max_div to set the clock frequency.
->> >
->> > Issue 2:
->> > In previous code, we can not set the correct clock frequency when
->> > div equals 0xff.
->> >
->> > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
->> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->> > ---
->> >  drivers/mmc/host/mtk-sd.c |   13 ++++++++++++-
->> >  1 file changed, 12 insertions(+), 1 deletion(-)
->> >
->> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->> > index 07f3236..3174445 100644
->> > --- a/drivers/mmc/host/mtk-sd.c
->> > +++ b/drivers/mmc/host/mtk-sd.c
->> > @@ -540,6 +540,7 @@ static void msdc_set_mclk(struct msdc_host
-> *host, unsigned char timing, u32 hz)
->> >         u32 mode;
->> >         u32 flags;
->> >         u32 div;
->> > +       u32 max_div;
->>
->> There's really no need for this variable.  Just use 0xff below.
-> For all of our IC, max_div is not a constant.
-> We will upstream another patch which max_div will get the different
-> value depending on the IC.
-> Therefore, we keep the max_div as a variable here.
+On 11/02/17 00:54, Alexey Khoroshilov wrote:
+> There is no check if clk_prepare_enable() succeed in sdhci_pxav2_probe().
+> 
+> Found by Linux Driver Verification project (linuxtesting.org).
+> 
+> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
 
-Please add the variable in the patch that uses it as a variable.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
->
->>
->> >         u32 sclk;
->> >
->> >         if (!hz) {
->> > @@ -590,8 +591,18 @@ static void msdc_set_mclk(struct msdc_host
-> *host, unsigned char timing, u32 hz)
->> >                         sclk = (host->src_clk_freq >> 2) / div;
->> >                 }
->> >         }
->> > +
->> > +       /**
->> > +        * The maximum value of div is 0xff.
->> > +        * Check if the div is larger than max_div.
->> > +        */
->> > +       max_div = 0xff;
->> > +       if (div > max_div) {
->> > +               div = max_div;
->> > +               sclk = (host->src_clk_freq >> 2) / div;
->> > +       }
->> >         sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD |
-> MSDC_CFG_CKDIV,
->> > -                       (mode << 8) | (div % 0xff));
->> > +                     (mode << 8) | div);
->>
->> Hmm, I don't know much about this sub-system, but should we even be
->> allowing requests to set a frequency that we can't actually achieve
->> with the divider?
->>
->
-> No. We can not get a frequency that we can't actually achieve with the
-> divider. This patch is to solve this kind of issue.
+> ---
+>  drivers/mmc/host/sdhci-pxav2.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index 347eae2d7b6a..80513f54e9d4 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -185,7 +185,11 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>  		goto err_clk_get;
+>  	}
+>  	pltfm_host->clk = clk;
+> -	clk_prepare_enable(clk);
+> +	ret = clk_prepare_enable(clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "failed to enable io clock\n");
+> +		goto err_clk_enable;
+> +	}
+>  
+>  	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
+>  		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> @@ -228,6 +232,7 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>  
+>  err_add_host:
+>  	clk_disable_unprepare(clk);
+> +err_clk_enable:
+>  	clk_put(clk);
+>  err_clk_get:
+>  	sdhci_pltfm_free(pdev);
+> 
 
-Sorry, I am trying to understand why we need this patch.
-
-AFAICT, it looks like sometimes msdc_set_mclk() is being called with
-hz that cannot be generated by your hardware.  In particular,
-sometimes the original code computes "div > 255".
-To work around this problem, this patch just caps the divider value to
-255, which is the maximum divider provided by the hardware.  However,
-presumably this means that in this case we won't actually be
-generating the requested hz value.
-
-So, can you please explain in what exact scenario this patch is
-required, and justify why it is ok to generate a clock other than the
-requested in this case?
-
--Dan
-
->
->
->> >         sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
->> >         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->> >                 cpu_relax();
->> > --
->> > 1.7.9.5
->> >
->> >
->> > _______________________________________________
->> > Linux-mediatek mailing list
->> > Linux-mediatek@lists.infradead.org
->> > http://lists.infradead.org/mailman/listinfo/linux-mediatek
->
->
->
