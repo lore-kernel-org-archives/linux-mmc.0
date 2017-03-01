@@ -1,73 +1,63 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH v3 2/7] mmc: bcm2835: Add new driver for the sdhost controller.
-Date: Wed, 01 Mar 2017 10:00:55 -0800
-Message-ID: <87tw7c27xk.fsf@eliezer.anholt.net>
-References: <1487668026-7100-1-git-send-email-kraxel@redhat.com> <1487668026-7100-3-git-send-email-kraxel@redhat.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH v3 2/7] mmc: bcm2835: Add new driver for the sdhost
+ controller.
+Date: Wed, 1 Mar 2017 20:21:52 +0100 (CET)
+Message-ID: <68761051.37200.1488396112552@email.1und1.de>
+References: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
+ <1487668026-7100-3-git-send-email-kraxel@redhat.com>
+ <87tw7c27xk.fsf@eliezer.anholt.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-        micalg=pgp-sha512; protocol="application/pgp-signature"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from anholt.net ([50.246.234.109]:60476 "EHLO anholt.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750813AbdCASA6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 1 Mar 2017 13:00:58 -0500
-In-Reply-To: <1487668026-7100-3-git-send-email-kraxel@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87tw7c27xk.fsf@eliezer.anholt.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Gerd Hoffmann <kraxel@redhat.com>, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, swarren@wwwdotorg.org, lee@kernel.org, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>
 
---=-=-=
-Content-Type: text/plain
-
-Gerd Hoffmann <kraxel@redhat.com> writes:
-
-> From: Eric Anholt <eric@anholt.net>
->
-> The 2835 has two SD controllers: The Arasan sdhci controller (supported
-> by the iproc driver) and a custom sdhost controller.  This patch adds a
-> driver for the latter.
->
-> The sdhci controller supports both sdcard and sdio.  The sdhost
-> controller supports the sdcard only, but has better performance.  Also
-> note that the rpi3 has sdio wifi, so driving the sdcard with the sdhost
-> controller allows to use the sdhci controller for wifi support.
->
-> The configuration is done by devicetree via pin muxing.  Both SD
-> controller are available on the same pins (2 pin groups = pin 22 to 27 +
-> pin 48 to 53).  So it's possible to use both SD controllers at the same
-> time with different pin groups.
->
-> The code was originally written by Phil Elwell in the downstream
-> Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
-> out of the original 2055) for inclusion.
->
-> Signed-off-by: Eric Anholt <eric@anholt.net>
-
-Ulf, what do you need done to this driver patch before it can go in?
-The commit message seems like it could use some rewriting at this point
-(Personally I would drop the detailed changelogs from Stefan and Gerd,
-updating the last paragraph here to give them credit), but what's
-important to me is getting the driver in so that distros don't have to
-carry this patch for wifi support.
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAli3DFcACgkQtdYpNtH8
-nuhmQQ/+KcTfXLSfCfr5vKCaHOtvahSSA6uS8r4KOQ3Dvnjzc+j5riPHFGKNPnh4
-I44JjGJw0KlAacdF1gJZl0DUmJ6iTR/je55iP7Qad52m6XPNos9LHbpZGSc+YFUG
-vabRNCoR2i+tbsZqzafudkgrdo+iup4PUmGt6iYji0YdEl3GUMgID95Pfqt2SEwy
-1vWIghXcRF5GHTutYx0B76ncb3uGzpMWjw9Y+qqCTJfdfezPrW8TgTLNXb97jrgk
-ApQ8qoLTB7C7QOfCYT1EzWkR0THEHVWKyIoUGwri4usvgIvf+rLvAxBYxSJ8U9Gi
-e3k/SmM1YPvd0Roh7Ti/l77kLy7pbSRYXfpT8rvPxZdAQ1+u02TofoXarYnG6Jhk
-4cyp7xlzi7xj5DDEmHv9xcEe9txYOMTyJuPnTydRfihG6NifyM30naAvIXNbc8Ir
-+9MjC6+lbJCet1B5Np23k+KXADrgslGug1qQ5jswWzGigmSDaP1rSQxwqTEEg/Rk
-tcynIlKrBLpBNyFAoLJYlbV9hvb3ZQI3DzWuZSUBdNLclNwMlJNyHQfjYJ9RSDCs
-LTKrgkJtrh/YFjHwOT9liZcXD1ECjfREsFkenyJvBM6TeG/RTfnku6/XLD3w4cSu
-iXN7zlbv1XJlvGl9Uq0vQFu+DQrmv6PtZRJyUVwJ/h9eDXB3dKs=
-=Buu5
------END PGP SIGNATURE-----
---=-=-=--
+Cj4gRXJpYyBBbmhvbHQgPGVyaWNAYW5ob2x0Lm5ldD4gaGF0IGFtIDEuIE3DpHJ6IDIwMTcgdW0g
+MTk6MDAgZ2VzY2hyaWViZW46Cj4gCj4gCj4gR2VyZCBIb2ZmbWFubiA8a3JheGVsQHJlZGhhdC5j
+b20+IHdyaXRlczoKPiAKPiA+IEZyb206IEVyaWMgQW5ob2x0IDxlcmljQGFuaG9sdC5uZXQ+Cj4g
+Pgo+ID4gVGhlIDI4MzUgaGFzIHR3byBTRCBjb250cm9sbGVyczogVGhlIEFyYXNhbiBzZGhjaSBj
+b250cm9sbGVyIChzdXBwb3J0ZWQKPiA+IGJ5IHRoZSBpcHJvYyBkcml2ZXIpIGFuZCBhIGN1c3Rv
+bSBzZGhvc3QgY29udHJvbGxlci4gIFRoaXMgcGF0Y2ggYWRkcyBhCj4gPiBkcml2ZXIgZm9yIHRo
+ZSBsYXR0ZXIuCj4gPgo+ID4gVGhlIHNkaGNpIGNvbnRyb2xsZXIgc3VwcG9ydHMgYm90aCBzZGNh
+cmQgYW5kIHNkaW8uICBUaGUgc2Rob3N0Cj4gPiBjb250cm9sbGVyIHN1cHBvcnRzIHRoZSBzZGNh
+cmQgb25seSwgYnV0IGhhcyBiZXR0ZXIgcGVyZm9ybWFuY2UuICBBbHNvCj4gPiBub3RlIHRoYXQg
+dGhlIHJwaTMgaGFzIHNkaW8gd2lmaSwgc28gZHJpdmluZyB0aGUgc2RjYXJkIHdpdGggdGhlIHNk
+aG9zdAo+ID4gY29udHJvbGxlciBhbGxvd3MgdG8gdXNlIHRoZSBzZGhjaSBjb250cm9sbGVyIGZv
+ciB3aWZpIHN1cHBvcnQuCj4gPgo+ID4gVGhlIGNvbmZpZ3VyYXRpb24gaXMgZG9uZSBieSBkZXZp
+Y2V0cmVlIHZpYSBwaW4gbXV4aW5nLiAgQm90aCBTRAo+ID4gY29udHJvbGxlciBhcmUgYXZhaWxh
+YmxlIG9uIHRoZSBzYW1lIHBpbnMgKDIgcGluIGdyb3VwcyA9IHBpbiAyMiB0byAyNyArCj4gPiBw
+aW4gNDggdG8gNTMpLiAgU28gaXQncyBwb3NzaWJsZSB0byB1c2UgYm90aCBTRCBjb250cm9sbGVy
+cyBhdCB0aGUgc2FtZQo+ID4gdGltZSB3aXRoIGRpZmZlcmVudCBwaW4gZ3JvdXBzLgo+ID4KPiA+
+IFRoZSBjb2RlIHdhcyBvcmlnaW5hbGx5IHdyaXR0ZW4gYnkgUGhpbCBFbHdlbGwgaW4gdGhlIGRv
+d25zdHJlYW0KPiA+IFJhc2JwZXJyeSBQaSB0cmVlLCBhbmQgSSBkaWQgYSBtYWpvciBjbGVhbnVw
+IG9uIGl0ICgrMzE5LCAtNzA3IGxpbmVzCj4gPiBvdXQgb2YgdGhlIG9yaWdpbmFsIDIwNTUpIGZv
+ciBpbmNsdXNpb24uCj4gPgo+ID4gU2lnbmVkLW9mZi1ieTogRXJpYyBBbmhvbHQgPGVyaWNAYW5o
+b2x0Lm5ldD4KPiAKPiBVbGYsIHdoYXQgZG8geW91IG5lZWQgZG9uZSB0byB0aGlzIGRyaXZlciBw
+YXRjaCBiZWZvcmUgaXQgY2FuIGdvIGluPwo+IFRoZSBjb21taXQgbWVzc2FnZSBzZWVtcyBsaWtl
+IGl0IGNvdWxkIHVzZSBzb21lIHJld3JpdGluZyBhdCB0aGlzIHBvaW50Cj4gKFBlcnNvbmFsbHkg
+SSB3b3VsZCBkcm9wIHRoZSBkZXRhaWxlZCBjaGFuZ2Vsb2dzIGZyb20gU3RlZmFuIGFuZCBHZXJk
+LAo+IHVwZGF0aW5nIHRoZSBsYXN0IHBhcmFncmFwaCBoZXJlIHRvIGdpdmUgdGhlbSBjcmVkaXQp
+LCBidXQgd2hhdCdzCj4gaW1wb3J0YW50IHRvIG1lIGlzIGdldHRpbmcgdGhlIGRyaXZlciBpbiBz
+byB0aGF0IGRpc3Ryb3MgZG9uJ3QgaGF2ZSB0bwo+IGNhcnJ5IHRoaXMgcGF0Y2ggZm9yIHdpZmkg
+c3VwcG9ydC4KCkknbSBzdGlsbCB3b3JraW5nIG9uIDMgc21hbGwgcGF0Y2hlcyBmb3IgdGhpcyBk
+cml2ZXI6CgoxLiB0cml2aWFsIGVycm9yIGluIGEgcmVnaXN0ZXIgY29tbWVudAoyLiBpZ25vcmUg
+U0RDTURfRkFJTF9GTEFHIGR1cmluZyBiY20yODM1X2ZpbmlzaF9jb21tYW5kIChkb3duc3RyZWFt
+IFsxXSkKMy4gcmVtb3ZlIHVubmVjZXNzYXJ5IGNhbGwgdG8gYmNtMjgzNV9yZXNldF9pbnRlcm5h
+bAoKSSBwbGFuIHRvIHN1Ym1pdCB0aGVtIG9uIEZyaWRheS4KClsxXSAtIGh0dHBzOi8vZ2l0aHVi
+LmNvbS9yYXNwYmVycnlwaS9saW51eC9jb21taXQvNzExY2FkZTg2NmM5Zjg2NWY5YjI4M2M5MzY5
+ZTk0ODZmMjdkMWZlYwoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0
+cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGlu
+Zm8vbGludXgtYXJtLWtlcm5lbAo=
