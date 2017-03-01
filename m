@@ -1,62 +1,53 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
-Date: Wed, 1 Mar 2017 15:33:37 -0800
-Message-ID: <CAD=FV=WZ_qyNoQnMMxD-77e7cn+tQoroFW9CrPc0TBbHYivU0g@mail.gmail.com>
-References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH v3 1/10] mmc: meson-gx: simplify bounce buffer setting in
+ meson_mmc_start_cmd
+Date: Wed, 1 Mar 2017 21:20:19 +0100
+Message-ID: <9259ab6f-fc7e-bcb3-ddd0-5ff3da3b391a@gmail.com>
+References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
+ <m2d1e0zx5l.fsf@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36062 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753761AbdCBAWs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2017 19:22:48 -0500
+Received: by mail-wr0-f196.google.com with SMTP id l37so7479493wrc.3
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Mar 2017 16:22:32 -0800 (PST)
+In-Reply-To: <m2d1e0zx5l.fsf@baylibre.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Hi,
+Am 01.03.2017 um 19:09 schrieb Kevin Hilman:
+> Hi Heinar,
+> 
+> Heiner Kallweit <hkallweit1@gmail.com> writes:
+> 
+>> Core ensures that there are no commands with cmd->data being set and
+>> nothing to transfer. And we don't have to reset bit CMD_CFG_DATA_NUM
+>> because cmd_cfg was zero-initialized and this bit isn't set.
+>>
+>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>> Acked-by: Kevin Hilman <khilman@baylibre.com>
+> 
+> Could you send this series one more time, collecting the remaining tags
+> and including the patches from Michał Zegan?
+> 
+Patchwork tracks all the tags coming in for a patch, there it's visible
+that you acked my 10 patches + the two from Michal.
+So I would leave it up to Ulf whether he prefers to have the series
+re-sent (with just the few remaining acks as changes).
 
-On Wed, Mar 1, 2017 at 2:11 PM, Guenter Roeck <linux@roeck-us.net> wrote:
-> HS400-ES devices fail to initialize with the following error messages.
->
-> mmc1: power class selection to bus width 8 ddr 0 failed
-> mmc1: error -110 whilst initialising MMC card
->
-> This was seen on Samsung Chromebook Plus. Code analysis points to
-> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
-> high-speed mode"), which attempts to set the bus width for all but
-> HS200 devices unconditionally. However, for HS400-ES, the bus width
-> is already selected.
->
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Douglas Anderson <dianders@chromium.org>
-> Cc: Brian Norris <briannorris@chromium.org>
-> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 7fd722868875..b502601df228 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->                 err = mmc_select_hs400(card);
->                 if (err)
->                         goto free_card;
-> -       } else {
-> +       } else if (!mmc_card_hs400es(card)) {
->                 /* Select the desired bus width optionally */
->                 err = mmc_select_bus_width(card);
->                 if (err > 0 && mmc_card_hs(card)) {
+Heiner
 
-Right, so the key point here is that for normal hs400 we hit the
-"mmc_card_hs200()" check above because hs400 transitions through
-hs200.  ...but for hs400es we don't do that transition (we jump
-straight to hs400-es), so we need an extra case to avoid this
-problematic mmc_select_bus_width().
+> I think the MMC maintainers would appreciate one final batch with
+> everything collected together, and including a cover letter.
+> 
+> Thanks for all your great work on improving this driver,
+> 
+> Kevin
+> 
 
-
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
-
-
--Doug
