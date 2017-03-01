@@ -1,73 +1,49 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH v3 2/7] mmc: bcm2835: Add new driver for the sdhost
- controller.
-Date: Wed, 1 Mar 2017 20:41:16 +0100 (CET)
-Message-ID: <180442771.37741.1488397276709@email.1und1.de>
-References: <1487668026-7100-1-git-send-email-kraxel@redhat.com>
- <1487668026-7100-3-git-send-email-kraxel@redhat.com>
- <87tw7c27xk.fsf@eliezer.anholt.net>
- <68761051.37200.1488396112552@email.1und1.de>
- <87varsequk.fsf@eliezer.anholt.net>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 0/4] mmc: add pwrseq-based hw_reset
+Date: Wed, 01 Mar 2017 10:01:55 -0800
+Message-ID: <m2lgsozxik.fsf@baylibre.com>
+References: <db739bb8-2ad1-75bb-0b65-8246f84da7e8@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87varsequk.fsf@eliezer.anholt.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gerd Hoffmann <kraxel@redhat.com>, Eric Anholt <eric@anholt.net>, linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, swarren@wwwdotorg.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:33574 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750940AbdCATv0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2017 14:51:26 -0500
+Received: by mail-pf0-f178.google.com with SMTP id w189so13815766pfb.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Mar 2017 11:50:32 -0800 (PST)
+In-Reply-To: <db739bb8-2ad1-75bb-0b65-8246f84da7e8@gmail.com> (Heiner
+        Kallweit's message of "Wed, 8 Feb 2017 22:45:52 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Cj4gRXJpYyBBbmhvbHQgPGVyaWNAYW5ob2x0Lm5ldD4gaGF0IGFtIDEuIE3DpHJ6IDIwMTcgdW0g
-MjA6MzEgZ2VzY2hyaWViZW46Cj4gCj4gCj4gU3RlZmFuIFdhaHJlbiA8c3RlZmFuLndhaHJlbkBp
-MnNlLmNvbT4gd3JpdGVzOgo+IAo+ID4+IEVyaWMgQW5ob2x0IDxlcmljQGFuaG9sdC5uZXQ+IGhh
-dCBhbSAxLiBNw6RyeiAyMDE3IHVtIDE5OjAwIGdlc2NocmllYmVuOgo+ID4+IAo+ID4+IAo+ID4+
-IEdlcmQgSG9mZm1hbm4gPGtyYXhlbEByZWRoYXQuY29tPiB3cml0ZXM6Cj4gPj4gCj4gPj4gPiBG
-cm9tOiBFcmljIEFuaG9sdCA8ZXJpY0BhbmhvbHQubmV0Pgo+ID4+ID4KPiA+PiA+IFRoZSAyODM1
-IGhhcyB0d28gU0QgY29udHJvbGxlcnM6IFRoZSBBcmFzYW4gc2RoY2kgY29udHJvbGxlciAoc3Vw
-cG9ydGVkCj4gPj4gPiBieSB0aGUgaXByb2MgZHJpdmVyKSBhbmQgYSBjdXN0b20gc2Rob3N0IGNv
-bnRyb2xsZXIuICBUaGlzIHBhdGNoIGFkZHMgYQo+ID4+ID4gZHJpdmVyIGZvciB0aGUgbGF0dGVy
-Lgo+ID4+ID4KPiA+PiA+IFRoZSBzZGhjaSBjb250cm9sbGVyIHN1cHBvcnRzIGJvdGggc2RjYXJk
-IGFuZCBzZGlvLiAgVGhlIHNkaG9zdAo+ID4+ID4gY29udHJvbGxlciBzdXBwb3J0cyB0aGUgc2Rj
-YXJkIG9ubHksIGJ1dCBoYXMgYmV0dGVyIHBlcmZvcm1hbmNlLiAgQWxzbwo+ID4+ID4gbm90ZSB0
-aGF0IHRoZSBycGkzIGhhcyBzZGlvIHdpZmksIHNvIGRyaXZpbmcgdGhlIHNkY2FyZCB3aXRoIHRo
-ZSBzZGhvc3QKPiA+PiA+IGNvbnRyb2xsZXIgYWxsb3dzIHRvIHVzZSB0aGUgc2RoY2kgY29udHJv
-bGxlciBmb3Igd2lmaSBzdXBwb3J0Lgo+ID4+ID4KPiA+PiA+IFRoZSBjb25maWd1cmF0aW9uIGlz
-IGRvbmUgYnkgZGV2aWNldHJlZSB2aWEgcGluIG11eGluZy4gIEJvdGggU0QKPiA+PiA+IGNvbnRy
-b2xsZXIgYXJlIGF2YWlsYWJsZSBvbiB0aGUgc2FtZSBwaW5zICgyIHBpbiBncm91cHMgPSBwaW4g
-MjIgdG8gMjcgKwo+ID4+ID4gcGluIDQ4IHRvIDUzKS4gIFNvIGl0J3MgcG9zc2libGUgdG8gdXNl
-IGJvdGggU0QgY29udHJvbGxlcnMgYXQgdGhlIHNhbWUKPiA+PiA+IHRpbWUgd2l0aCBkaWZmZXJl
-bnQgcGluIGdyb3Vwcy4KPiA+PiA+Cj4gPj4gPiBUaGUgY29kZSB3YXMgb3JpZ2luYWxseSB3cml0
-dGVuIGJ5IFBoaWwgRWx3ZWxsIGluIHRoZSBkb3duc3RyZWFtCj4gPj4gPiBSYXNicGVycnkgUGkg
-dHJlZSwgYW5kIEkgZGlkIGEgbWFqb3IgY2xlYW51cCBvbiBpdCAoKzMxOSwgLTcwNyBsaW5lcwo+
-ID4+ID4gb3V0IG9mIHRoZSBvcmlnaW5hbCAyMDU1KSBmb3IgaW5jbHVzaW9uLgo+ID4+ID4KPiA+
-PiA+IFNpZ25lZC1vZmYtYnk6IEVyaWMgQW5ob2x0IDxlcmljQGFuaG9sdC5uZXQ+Cj4gPj4gCj4g
-Pj4gVWxmLCB3aGF0IGRvIHlvdSBuZWVkIGRvbmUgdG8gdGhpcyBkcml2ZXIgcGF0Y2ggYmVmb3Jl
-IGl0IGNhbiBnbyBpbj8KPiA+PiBUaGUgY29tbWl0IG1lc3NhZ2Ugc2VlbXMgbGlrZSBpdCBjb3Vs
-ZCB1c2Ugc29tZSByZXdyaXRpbmcgYXQgdGhpcyBwb2ludAo+ID4+IChQZXJzb25hbGx5IEkgd291
-bGQgZHJvcCB0aGUgZGV0YWlsZWQgY2hhbmdlbG9ncyBmcm9tIFN0ZWZhbiBhbmQgR2VyZCwKPiA+
-PiB1cGRhdGluZyB0aGUgbGFzdCBwYXJhZ3JhcGggaGVyZSB0byBnaXZlIHRoZW0gY3JlZGl0KSwg
-YnV0IHdoYXQncwo+ID4+IGltcG9ydGFudCB0byBtZSBpcyBnZXR0aW5nIHRoZSBkcml2ZXIgaW4g
-c28gdGhhdCBkaXN0cm9zIGRvbid0IGhhdmUgdG8KPiA+PiBjYXJyeSB0aGlzIHBhdGNoIGZvciB3
-aWZpIHN1cHBvcnQuCj4gPgo+ID4gSSdtIHN0aWxsIHdvcmtpbmcgb24gMyBzbWFsbCBwYXRjaGVz
-IGZvciB0aGlzIGRyaXZlcjoKPiA+Cj4gPiAxLiB0cml2aWFsIGVycm9yIGluIGEgcmVnaXN0ZXIg
-Y29tbWVudAo+ID4gMi4gaWdub3JlIFNEQ01EX0ZBSUxfRkxBRyBkdXJpbmcgYmNtMjgzNV9maW5p
-c2hfY29tbWFuZCAoZG93bnN0cmVhbSBbMV0pCj4gPiAzLiByZW1vdmUgdW5uZWNlc3NhcnkgY2Fs
-bCB0byBiY20yODM1X3Jlc2V0X2ludGVybmFsCj4gPgo+ID4gSSBwbGFuIHRvIHN1Ym1pdCB0aGVt
-IG9uIEZyaWRheS4KPiA+Cj4gPiBbMV0gLSBodHRwczovL2dpdGh1Yi5jb20vcmFzcGJlcnJ5cGkv
-bGludXgvY29tbWl0LzcxMWNhZGU4NjZjOWY4NjVmOWIyODNjOTM2OWU5NDg2ZjI3ZDFmZWMKPiAK
-PiBTaG91bGQgYW55IG9mIHRob3NlIGNoYW5nZXMgYmxvY2sgbWVyZ2luZyB0aGUgY3VycmVudCBj
-b2RlLCB0aG91Z2g/IAoKTm8sIGJ1dCB0aGUgcmVjdXJzaW9uIGFib3V0IGJjbTI4MzVfZmluaXNo
-X2NvbW1hbmQoKSBhbmQgYmNtMjgzNV90cmFuc2Zlcl9jb21wbGV0ZSgpIGlzIHN0aWxsIHRoZXJl
-LgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgt
-YXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQu
-b3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJt
-LWtlcm5lbAo=
+Ulf,
+
+Heiner Kallweit <hkallweit1@gmail.com> writes:
+
+> For implementing ops hw_reset in struct meson_host_ops often we can
+> use what is available in pwrseq already, just with a small extension.
+> For example all existing pwrseq drivers parse DT for a reset GPIO.
+
+Do you have any thoughts on this series?
+
+Kevin
+
+> Meson GX is the first user of this extension.
+>
+> Heiner Kallweit (4):
+>   mmc: pwrseq: add op reset to struct mmc_pwrseq_ops
+>   mmc: pwrseq: implement reset operation in pwrseq_emmc
+>   mmc: meson-gx: add pwrseq-based hw_reset
+>   ARM64: dts: meson-gxbb-odroidc2: add hw-reset capability flag for emmc port
+>
+>  arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 1 +
+>  drivers/mmc/core/core.c                             | 6 ++++++
+>  drivers/mmc/core/pwrseq.c                           | 8 ++++++++
+>  drivers/mmc/core/pwrseq.h                           | 3 +++
+>  drivers/mmc/core/pwrseq_emmc.c                      | 1 +
+>  drivers/mmc/host/meson-gx-mmc.c                     | 1 +
+>  include/linux/mmc/core.h                            | 1 +
+>  7 files changed, 21 insertions(+)
