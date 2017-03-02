@@ -1,15 +1,15 @@
 From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH 6/9] mmc: sdhci: add a quirk to restore delay in tuning
-Date: Thu, 2 Mar 2017 17:47:27 +0800
-Message-ID: <1488448050-7574-7-git-send-email-yangbo.lu@nxp.com>
+Subject: [PATCH 5/9] mmc: sdhci-of-esdhc: add tuning block support
+Date: Thu, 2 Mar 2017 17:47:26 +0800
+Message-ID: <1488448050-7574-6-git-send-email-yangbo.lu@nxp.com>
 References: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0063.outbound.protection.outlook.com ([104.47.34.63]:64704
+Received: from mail-by2nam01on0086.outbound.protection.outlook.com ([104.47.34.86]:65344
         "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750867AbdCBKEU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1750779AbdCBKEU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Thu, 2 Mar 2017 05:04:20 -0500
 In-Reply-To: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -17,46 +17,75 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-There was a mdelay between tuning cycles which is removed since
-eMMC spec didn't require that. However it's observed that eSDHC
-needed this delay for HS200 successful tuning. Maybe it's also
-needed for some other controllers. This patch is to add a quirk
-to fix it.
+Add tuning block support for eSDHC.
 
-Fixes: 197160d52e85 ("mmc: sdhci: remove mdelay in eMMC tuning")
 Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
+ drivers/mmc/host/sdhci-of-esdhc.c | 17 +++++++++++++++++
+ 2 files changed, 22 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 051b192..b1b6fd3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2100,7 +2100,8 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode,
- 		}
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index 6869567..c4bbd74 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -53,9 +53,14 @@
+ #define ESDHC_CLOCK_HCKEN		0x00000002
+ #define ESDHC_CLOCK_IPGEN		0x00000001
  
- 		/* eMMC spec does not require a delay between tuning cycles */
--		if (opcode == MMC_SEND_TUNING_BLOCK)
-+		if ((opcode == MMC_SEND_TUNING_BLOCK) ||
-+		    (host->quirks2 & SDHCI_QUIRK2_DELAY_BETWEEN_TUNING_CYCLES))
- 			mdelay(1);
++/* Tuning Block Control Register */
++#define ESDHC_TBCTL			0x120
++#define ESDHC_TB_EN			0x00000004
++
+ /* Control Register for DMA transfer */
+ #define ESDHC_DMA_SYSCTL		0x40c
+ #define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
++#define ESDHC_FLUSH_ASYNC_FIFO		0x00040000
+ #define ESDHC_DMA_SNOOP			0x00000040
+ 
+ #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index c2619f1..b26a780 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -622,6 +622,21 @@ static int esdhc_signal_voltage_switch(struct sdhci_host *host,
  	}
+ }
  
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d43519b..b6643bc 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -427,6 +427,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
- /* Broken Clock divider zero in controller */
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
-+/* Delay is needed between tuning cycles */
-+#define SDHCI_QUIRK2_DELAY_BETWEEN_TUNING_CYCLES	(1<<16)
++void esdhc_set_tuning_block(struct sdhci_host *host)
++{
++	u32 val;
++
++	esdhc_clock_enable(host, false);
++	val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
++	val |= ESDHC_FLUSH_ASYNC_FIFO;
++	sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
++
++	val = sdhci_readl(host, ESDHC_TBCTL);
++	val |= ESDHC_TB_EN;
++	sdhci_writel(host, val, ESDHC_TBCTL);
++	esdhc_clock_enable(host, true);
++}
++
+ #ifdef CONFIG_PM_SLEEP
+ static u32 esdhc_proctl;
+ static int esdhc_of_suspend(struct device *dev)
+@@ -667,6 +682,7 @@ static const struct sdhci_ops sdhci_esdhc_be_ops = {
+ 	.reset = esdhc_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.start_signal_voltage_switch = esdhc_signal_voltage_switch,
++	.set_tuning_block = esdhc_set_tuning_block,
+ };
  
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ static const struct sdhci_ops sdhci_esdhc_le_ops = {
+@@ -685,6 +701,7 @@ static const struct sdhci_ops sdhci_esdhc_le_ops = {
+ 	.reset = esdhc_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.start_signal_voltage_switch = esdhc_signal_voltage_switch,
++	.set_tuning_block = esdhc_set_tuning_block,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_esdhc_be_pdata = {
 -- 
 2.1.0.27.g96db324
 
