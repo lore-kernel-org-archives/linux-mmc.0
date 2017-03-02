@@ -1,68 +1,53 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
-Date: Thu, 2 Mar 2017 09:12:52 +0800
-Message-ID: <8b22ae13-f197-4642-53b7-d5fcc63c082f@rock-chips.com>
-References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+From: Sergio Prado <sergio.prado@e-labworks.com>
+Subject: [PATCH v4 0/2] mmc: host: s3cmci: add device tree support
+Date: Wed,  1 Mar 2017 22:18:54 -0300
+Message-ID: <1488417536-15110-1-git-send-email-sergio.prado@e-labworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Cc: Sergio Prado <sergio.prado@e-labworks.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2017/3/2 6:11, Guenter Roeck wrote:
-> HS400-ES devices fail to initialize with the following error messages.
->
-> mmc1: power class selection to bus width 8 ddr 0 failed
-> mmc1: error -110 whilst initialising MMC card
->
-> This was seen on Samsung Chromebook Plus. Code analysis points to
-> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
-> high-speed mode"), which attempts to set the bus width for all but
-> HS200 devices unconditionally. However, for HS400-ES, the bus width
-> is already selected.
->
+This series adds support for configuring Samsung's S3C24XX MMC/SD/SDIO
+controller via device tree.
 
-Thanks Guenter for catching this early!
+Tested on FriendlyARM mini2440, based on s3c2440 SoC.
 
-Well, I wasn't cc'ed for that patch and it was queued for just one day
-without fully reviewed. And Doug pointed out the key point here, so,
+Changes since v3 (as suggested by Rob Herring)
+- describing properties that wasn't documented and removing unnecessary
+  comment in the device tree binding
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chip.com>
+Changes since v2:
+- struct "s3cmci_drv_data" and flag "is2440" renamed
+- copying the whole driver data struct instead of only its member so
+  it will be easier to extend the information in the future
+- using mmc_of_parse() to read "cd-gpios" and "wp-gpios" properties
+  from device tree
 
-btw, I think kernelci need some rk3399 platforms with hs400es
-and CQ engine support for future test. I will try to find a way
-to help kernelci to get some boards if possible..
+Changes since v1:
+- pinctrl description removed from DT binding
+- unit and label on DT binding renamed to mmc
 
+Sergio Prado (2):
+  dt-bindings: mmc: add DT binding for S3C24XX MMC/SD/SDIO controller
+  mmc: host: s3cmci: allow probing from device tree
 
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Douglas Anderson <dianders@chromium.org>
-> Cc: Brian Norris <briannorris@chromium.org>
-> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 7fd722868875..b502601df228 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		err = mmc_select_hs400(card);
->  		if (err)
->  			goto free_card;
-> -	} else {
-> +	} else if (!mmc_card_hs400es(card)) {
->  		/* Select the desired bus width optionally */
->  		err = mmc_select_bus_width(card);
->  		if (err > 0 && mmc_card_hs(card)) {
->
-
+ .../devicetree/bindings/mmc/samsung,s3cmci.txt     |  42 +++
+ drivers/mmc/host/s3cmci.c                          | 298 +++++++++++----------
+ drivers/mmc/host/s3cmci.h                          |   3 +-
+ 3 files changed, 200 insertions(+), 143 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
 
 -- 
-Best Regards
-Shawn Lin
+1.9.1
