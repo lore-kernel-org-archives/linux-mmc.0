@@ -1,42 +1,39 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH v3 1/10] mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
-Date: Wed, 01 Mar 2017 10:09:42 -0800
-Message-ID: <m2d1e0zx5l.fsf@baylibre.com>
-References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: [PATCH] mmc: core: fix changing bus witdh in hs400es mode
+Date: Thu, 2 Mar 2017 13:47:34 +0000
+Message-ID: <1488462454-905-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:36723 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751457AbdCBM7u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2017 07:59:50 -0500
-Received: by mail-pg0-f42.google.com with SMTP id s67so32209193pgb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Mar 2017 04:59:18 -0800 (PST)
-In-Reply-To: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com> (Heiner
-        Kallweit's message of "Sat, 18 Feb 2017 12:50:31 +0100")
+Received: from keymaster.Cadence.COM ([158.140.2.26]:36312 "EHLO
+        mx-sanjose5.cadence.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751114AbdCBNsg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2017 08:48:36 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
 
-Hi Heinar,
+Fix the code to avoid changing bus width if HS400ES mode is selected.
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+---
+ drivers/mmc/core/mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Core ensures that there are no commands with cmd->data being set and
-> nothing to transfer. And we don't have to reset bit CMD_CFG_DATA_NUM
-> because cmd_cfg was zero-initialized and this bit isn't set.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> Acked-by: Kevin Hilman <khilman@baylibre.com>
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7fd7228..c7d9c9f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_select_hs400(card);
+ 		if (err)
+ 			goto free_card;
+-	} else {
++	} else if (!mmc_card_hs400(card)) {
+ 		/* Select the desired bus width optionally */
+ 		err = mmc_select_bus_width(card);
+ 		if (err > 0 && mmc_card_hs(card)) {
+-- 
+2.2.2
 
-Could you send this series one more time, collecting the remaining tags
-and including the patches from Micha=C5=82 Zegan?
-
-I think the MMC maintainers would appreciate one final batch with
-everything collected together, and including a cover letter.
-
-Thanks for all your great work on improving this driver,
-
-Kevin
