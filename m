@@ -1,11 +1,13 @@
 From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH 0/9] Add SD UHS-I and eMMC HS200 support for eSDHC
-Date: Thu, 2 Mar 2017 17:47:21 +0800
-Message-ID: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
+Subject: [PATCH 2/9] mmc: sdhci: add a callback for signal voltage switching
+Date: Thu, 2 Mar 2017 17:47:23 +0800
+Message-ID: <1488448050-7574-3-git-send-email-yangbo.lu@nxp.com>
+References: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,49 +22,44 @@ To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hun
 Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org, Yangbo Lu <yangbo.lu@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-It's complicated to support SD UHS-I and eMMC HS200 for eSDHC because there're
-many differences between eSDHC and SD/eMMC spec. Several differences as below
-must be considered:
-1. Peripheral clock must be used instead of platform clock.
-    - eSDHC could select peripheral clock or platform clock as its clock source.
-      According to RM, UHS-I/HS200 must use peripheral clock since it supports
-      higher frequency than platform clock.
-    - Patch 1 and patch 8 is to support this
-2. Signal voltage switching requires a control circuit out of eSDHC.
-    - eSDHC supports signal voltage switch from 3.3v to 1.8v by
-      eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
-      signal SDHC_VS, and there must be a control circuit out of eSDHC
-      to change the signal voltage according to SDHC_VS output signal.
-    - Patch 2 and patch 3 is to support this
-3. eSDHC uses tuning block for tuning procedure
-    - Tuning clock control register must be configured before tuning.
-    - Patch 4 and patch 5 is to support this
-4. Delay is needed between tuning cycles for HS200 tuning
-    - Once a patch removed mdelay between tuning cycles. But eSDHC needs it.
-    - Patch 6 and patch 7 is to support this
-5. UHS-I/HS200 modes could be enabled in dts node
-    - Patch 9 is to support this
+Add a callback for signal voltage switching to let host driver
+switch signal voltage in its own way.
 
-Please review and merge these patches on mmc git tree if no changes are required.
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+ drivers/mmc/host/sdhci.c | 6 ++++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 8 insertions(+)
 
-Yangbo Lu (9):
-  mmc: sdhci-of-esdhc: add peripheral clock support
-  mmc: sdhci: add a callback for signal voltage switching
-  mmc: sdhci-of-esdhc: add support for signal voltage switch
-  mmc: sdhci: add a callback for using tuning block
-  mmc: sdhci-of-esdhc: add tuning block support
-  mmc: sdhci: add a quirk to restore delay in tuning
-  mmc: sdhci-of-esdhc: add delay between tuning cycles
-  arm64: dts: ls1046a: add clocks property and compatible for eSDHC node
-  arm64: dts: ls1046ardb: add MMC HS200/UHS-1 modes support
-
- arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts |   8 ++
- arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi    |   3 +-
- drivers/mmc/host/sdhci-esdhc.h                    |   7 +
- drivers/mmc/host/sdhci-of-esdhc.c                 | 154 +++++++++++++++++++++-
- drivers/mmc/host/sdhci.c                          |  12 +-
- drivers/mmc/host/sdhci.h                          |   5 +
- 6 files changed, 185 insertions(+), 4 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6fdd7a7..3c9a924 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1852,6 +1852,12 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return 0;
+ 
++	if (host->ops->start_signal_voltage_switch) {
++		ret = host->ops->start_signal_voltage_switch(
++					host, ios->signal_voltage);
++		return ret;
++	}
++
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 
+ 	switch (ios->signal_voltage) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index edf3adf..04af687 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -566,6 +566,8 @@ struct sdhci_ops {
+ 					 struct mmc_card *card,
+ 					 unsigned int max_dtr, int host_drv,
+ 					 int card_drv, int *drv_type);
++	int	(*start_signal_voltage_switch)(struct sdhci_host *host,
++					       unsigned char signal_voltage);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 2.1.0.27.g96db324
