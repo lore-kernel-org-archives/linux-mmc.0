@@ -1,8 +1,7 @@
 From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH 8/9] arm64: dts: ls1046a: add clocks property and compatible
- for eSDHC node
-Date: Thu, 2 Mar 2017 17:47:29 +0800
-Message-ID: <1488448050-7574-9-git-send-email-yangbo.lu@nxp.com>
+Subject: [PATCH 9/9] arm64: dts: ls1046ardb: add MMC HS200/UHS-1 modes support
+Date: Thu, 2 Mar 2017 17:47:30 +0800
+Message-ID: <1488448050-7574-10-git-send-email-yangbo.lu@nxp.com>
 References: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,32 +22,32 @@ To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hun
 Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org, Yangbo Lu <yangbo.lu@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The eSDHC could select peripheral clock or platform clock as clock source.
-In default, we use platform clock. This patch is to add clocks property
-describing peripheral clock for eSDHC node. The driver could use common clk
-APIs to get peripheral clock. Also add a compatible for ls1046a eSDHC node.
+Add HS200/UHS-1 properties in eSDHC node to support these
+speed modes in driver.
 
 Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
-index 4a164b8..141a513 100644
---- a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
-+++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
-@@ -209,10 +209,11 @@
- 		};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
+index d1ccc00..08528c2 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
+@@ -64,6 +64,14 @@
+ 	};
+ };
  
- 		esdhc: esdhc@1560000 {
--			compatible = "fsl,esdhc";
-+			compatible = "fsl,ls1046a-esdhc", "fsl,esdhc";
- 			reg = <0x0 0x1560000 0x0 0x10000>;
- 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
- 			clock-frequency = <0>;
-+			clocks = <&clockgen 2 1>;
- 			voltage-ranges = <1800 1800 3300 3300>;
- 			sdhci,auto-cmd12;
- 			big-endian;
++&esdhc {
++	mmc-hs200-1_8v;
++	sd-uhs-sdr104;
++	sd-uhs-sdr50;
++	sd-uhs-sdr25;
++	sd-uhs-sdr12;
++};
++
+ &duart0 {
+ 	status = "okay";
+ };
 -- 
 2.1.0.27.g96db324
