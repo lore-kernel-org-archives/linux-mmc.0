@@ -1,39 +1,75 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: [PATCH] mmc: core: fix changing bus witdh in hs400es mode
-Date: Thu, 2 Mar 2017 13:47:34 +0000
-Message-ID: <1488462454-905-1-git-send-email-piotrs@cadence.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/9] mmc: sdhci: add a callback for signal voltage
+ switching
+Date: Thu, 2 Mar 2017 16:19:27 +0200
+Message-ID: <bf18ad90-e622-1b9f-d6f7-0becbe57ea76@intel.com>
+References: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
+ <1488448050-7574-3-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from keymaster.Cadence.COM ([158.140.2.26]:36312 "EHLO
-        mx-sanjose5.cadence.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751114AbdCBNsg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2017 08:48:36 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1488448050-7574-3-git-send-email-yangbo.lu@nxp.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Shawn Lin <shawn.lin@rock-chips.com>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
 
-Fix the code to avoid changing bus width if HS400ES mode is selected.
+On 02/03/17 11:47, Yangbo Lu wrote:
+> Add a callback for signal voltage switching to let host driver
+> switch signal voltage in its own way.
 
-Signed-off-by: Piotr Sroka <piotrs@cadence.com>
----
- drivers/mmc/core/mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+That is not how we do things now.  Please just replace the host operation
+instead e.g.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7fd7228..c7d9c9f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		err = mmc_select_hs400(card);
- 		if (err)
- 			goto free_card;
--	} else {
-+	} else if (!mmc_card_hs400(card)) {
- 		/* Select the desired bus width optionally */
- 		err = mmc_select_bus_width(card);
- 		if (err > 0 && mmc_card_hs(card)) {
--- 
-2.2.2
+host->mmc_host_ops.start_signal_voltage_switch =
+				esdhc_signal_voltage_switch;
 
+
+
+> 
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 6 ++++++
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 8 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6fdd7a7..3c9a924 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1852,6 +1852,12 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  	if (host->version < SDHCI_SPEC_300)
+>  		return 0;
+>  
+> +	if (host->ops->start_signal_voltage_switch) {
+> +		ret = host->ops->start_signal_voltage_switch(
+> +					host, ios->signal_voltage);
+> +		return ret;
+> +	}
+> +
+>  	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>  
+>  	switch (ios->signal_voltage) {
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index edf3adf..04af687 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -566,6 +566,8 @@ struct sdhci_ops {
+>  					 struct mmc_card *card,
+>  					 unsigned int max_dtr, int host_drv,
+>  					 int card_drv, int *drv_type);
+> +	int	(*start_signal_voltage_switch)(struct sdhci_host *host,
+> +					       unsigned char signal_voltage);
+>  };
+>  
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> 
