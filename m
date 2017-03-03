@@ -1,54 +1,90 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH v3 1/10] mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
-Date: Fri, 03 Mar 2017 10:17:07 -0800
-Message-ID: <m2y3wm2pjw.fsf@baylibre.com>
-References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
-        <m2d1e0zx5l.fsf@baylibre.com>
-        <9259ab6f-fc7e-bcb3-ddd0-5ff3da3b391a@gmail.com>
+From: Philippe Reynes <philippe.reynes@sagemcom.com>
+Subject: [PATCH] Add a commande extcsd write <offset> <value> <device>
+Date: Fri, 3 Mar 2017 18:57:20 +0100
+Message-ID: <faed2bbb-a1b9-4bcf-91d1-46b325d1457c@EXDCVYARSGC003.eq1sgc.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f170.google.com ([209.85.192.170]:35203 "EHLO
-        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752040AbdCCS1S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 13:27:18 -0500
-Received: by mail-pf0-f170.google.com with SMTP id j5so35743789pfb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2017 10:26:13 -0800 (PST)
-In-Reply-To: <9259ab6f-fc7e-bcb3-ddd0-5ff3da3b391a@gmail.com> (Heiner
-        Kallweit's message of "Wed, 1 Mar 2017 21:20:19 +0100")
+Received: from sgc-chev-fe1.sgc.gmessaging.net ([194.51.18.91]:49834 "EHLO
+        sgc-rueil-fe1.sgc.gmessaging.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751991AbdCCSwK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 13:52:10 -0500
+Received: from sgc-rueil-fe1.sgc.gmessaging.net (localhost.localdomain [127.0.0.1])
+        by localhost.sgc.gmessaging.net (Postfix) with SMTP id 3vZcNl1QNNz3BmJ5
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Mar 2017 18:58:15 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, Philippe Reynes <philippe.reynes@sagemcom.com>
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+There was a command to read the extcsd and some command
+to enable or configure feature, but not generic write in
+the extcsd. Such generic write may be usefull for the
+manufacturer registers.
 
-> Am 01.03.2017 um 19:09 schrieb Kevin Hilman:
->> Hi Heinar,
->>=20
->> Heiner Kallweit <hkallweit1@gmail.com> writes:
->>=20
->>> Core ensures that there are no commands with cmd->data being set and
->>> nothing to transfer. And we don't have to reset bit CMD_CFG_DATA_NUM
->>> because cmd_cfg was zero-initialized and this bit isn't set.
->>>
->>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
->>> Acked-by: Kevin Hilman <khilman@baylibre.com>
->>=20
->> Could you send this series one more time, collecting the remaining tags
->> and including the patches from Micha=C5=82 Zegan?
->>=20
-> Patchwork tracks all the tags coming in for a patch, there it's visible
-> that you acked my 10 patches + the two from Michal.
+Signed-off-by: Philippe Reynes <philippe.reynes@sagemcom.com>
+---
+ mmc.c      |    5 +++++
+ mmc_cmds.c |   30 ++++++++++++++++++++++++++++++
+ 2 files changed, 35 insertions(+)
 
-Yes, I'm well aware of how patchwork works, yet my request still stands.
+diff --git a/mmc.c b/mmc.c
+index 50c9c9e..de820eb 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -58,6 +58,11 @@ static struct Command commands[] = {
+ 		"Print extcsd data from <device>.",
+ 	  NULL
+ 	},
++	{ do_write_extcsd, -1,
++	  "extcsd write", "<offset> " "<value> " "<device>\n"
++		"Write <value> at offset <offset> to <device> extcsd.",
++	  NULL
++	},
+ 	{ do_writeprotect_boot_get, -1,
+ 	  "writeprotect boot get", "<device>\n"
+ 		"Print the boot partitions write protect status for <device>.",
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 6b86115..ba79ffe 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1750,6 +1750,36 @@ out_free:
+ 	return ret;
+ }
+ 
++int do_write_extcsd(int nargs, char **argv)
++{
++	int fd, ret;
++	int offset, value;
++	char *device;
++
++	CHECK(nargs != 4, "Usage: mmc extcsd write <offset> <value> </path/to/mmcblkX>\n",
++			  exit(1));
++
++	offset = strtol(argv[1], NULL, 0);
++	value  = strtol(argv[2], NULL, 0);
++	device = argv[3];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = write_extcsd_value(fd, offset, value);
++	if (ret) {
++		fprintf(stderr,
++			"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
++			value, offset, device);
++		exit(1);
++	}
++
++	return ret;
++}
++
+ int do_sanitize(int nargs, char **argv)
+ {
+ 	int fd, ret;
+-- 
+1.7.9.5
 
-> So I would leave it up to Ulf whether he prefers to have the series
-> re-sent (with just the few remaining acks as changes).
-
-That's your choice, but some friendly advice from a kernel maintainer:
-making things as easy as possible for maintainers/reviewers greatly
-improves speed your code will get merged.
-
-Kevin
