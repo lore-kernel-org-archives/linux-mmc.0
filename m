@@ -1,47 +1,51 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [v2, 5/7] mmc: sdhci-of-esdhc: add delay between tuning cycles
-Date: Fri, 3 Mar 2017 16:18:47 +0800
-Message-ID: <1488529129-23560-6-git-send-email-yangbo.lu@nxp.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: [v2, 7/7] arm64: dts: ls1046ardb: add MMC HS200/UHS-1 modes support
+Date: Fri, 3 Mar 2017 16:18:49 +0800
+Message-ID: <1488529129-23560-8-git-send-email-yangbo.lu@nxp.com>
 References: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0052.outbound.protection.outlook.com ([104.47.36.52]:27063
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751512AbdCCIeL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 3 Mar 2017 03:34:11 -0500
-In-Reply-To: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1488529129-23560-1-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-It's observed that eSDHC needed delay between tuning cycles for
-HS200 successful tuning. This patch is to add the quirk
-SDHCI_QUIRK2_DELAY_BETWEEN_TUNING_CYCLES to fix it.
+Add HS200/UHS-1 properties in eSDHC node to support these
+speed modes in driver.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+Signed-off-by: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 ---
 Changes for v2:
 	- None
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 2 ++
- 1 file changed, 2 insertions(+)
+ arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 8007188..7c4d8e8 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -836,6 +836,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
- 	}
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
+index d1ccc00..08528c2 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts
+@@ -64,6 +64,14 @@
+ 	};
+ };
  
-+	host->quirks2 |= SDHCI_QUIRK2_DELAY_BETWEEN_TUNING_CYCLES;
++&esdhc {
++	mmc-hs200-1_8v;
++	sd-uhs-sdr104;
++	sd-uhs-sdr50;
++	sd-uhs-sdr25;
++	sd-uhs-sdr12;
++};
 +
- 	/* call to generic mmc_of_parse to support additional capabilities */
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
+ &duart0 {
+ 	status = "okay";
+ };
 -- 
 2.1.0.27.g96db324
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
