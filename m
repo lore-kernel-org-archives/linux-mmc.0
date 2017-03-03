@@ -1,79 +1,60 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
-Date: Fri, 3 Mar 2017 14:22:14 +0200
-Message-ID: <e31765ec-3453-9c40-1710-bea881cd9dec@intel.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
- <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v3] mmc: sdhci: clarify the get_timeout_clock callback
+Date: Fri, 3 Mar 2017 23:31:00 +0900
+Message-ID: <CAK7LNARqFe+M-4RZ+rUU+1p0_CfbhA9MmGV+p=WCzkAF0KV_CQ@mail.gmail.com>
+References: <1488512252-8452-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:54855 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751310AbdCCOnt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 3 Mar 2017 09:43:49 -0500
-In-Reply-To: <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
+Received: from condef-01.nifty.com ([202.248.20.66]:29279 "EHLO
+        condef-01.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751553AbdCCOou (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 09:44:50 -0500
+Received: from conssluserg-05.nifty.com ([10.126.8.84])by condef-01.nifty.com with ESMTP id v23EW8hJ024148
+        for <linux-mmc@vger.kernel.org>; Fri, 3 Mar 2017 23:32:08 +0900
+Received: from mail-yw0-f179.google.com (mail-yw0-f179.google.com [209.85.161.179]) (authenticated)
+        by conssluserg-05.nifty.com with ESMTP id v23EV1NQ029561
+        for <linux-mmc@vger.kernel.org>; Fri, 3 Mar 2017 23:31:01 +0900
+Received: by mail-yw0-f179.google.com with SMTP id p77so81111116ywg.1
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2017 06:31:01 -0800 (PST)
+In-Reply-To: <1488512252-8452-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>
 
-On 15/02/17 15:49, Linus Walleij wrote:
-> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> 
->> Enhance mmc_blk_data_prep() to support CQE requests.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> Hey:
-> 
->> +#include <linux/ioprio.h>
-> (...)
->> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
->> +               brq->data.flags |= MMC_DATA_PRIO;
-> 
-> What is this?
-
-It is the command queue priority.
-
-The command queue supports 2 priorities: "high" (1) and "simple" (0).  The
-eMMC will give "high" priority tasks priority over "simple" priority tasks.
-
-So here we give priority to IOPRIO_CLASS_RT which seems appropriate.
-
-> 
-> Why are we not already doing this and why is it not a separate patch?
-
-I think adding a comment is better since it is a command queue feature.
-
-> 
->>         /*
->>          * Data tag is used only during writing meta data to speed
->>          * up write and any subsequent read of this meta data
->>          */
-> 
-> Is this comment still true?
-
-AFAIK
-
-> 
->> -       *do_data_tag = card->ext_csd.data_tag_unit_size &&
->> -                      (req->cmd_flags & REQ_META) &&
->> -                      (rq_data_dir(req) == WRITE) &&
->> -                      ((brq->data.blocks * brq->data.blksz) >=
->> -                       card->ext_csd.data_tag_unit_size);
->> +       do_data_tag = card->ext_csd.data_tag_unit_size &&
->> +                     (req->cmd_flags & REQ_META) &&
->> +                     (rq_data_dir(req) == WRITE) &&
->> +                     ((brq->data.blocks * brq->data.blksz) >=
->> +                      card->ext_csd.data_tag_unit_size);
->> +
->> +       if (do_data_tag)
->> +               brq->data.flags |= MMC_DATA_DAT_TAG;
-> 
-> Because it seems to be more unconditionally used now.
-
-The key ingredient is (req->cmd_flags & REQ_META) i.e. meta-data gets tagged.
+2017-03-03 12:37 GMT+09:00 Shawn Lin <shawn.lin@rock-chips.com>:
+> Currently the get_timeout_clock callabck doesn't clearly
+> have a statment that it needs the variant drivers to return
+> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
+> isn't present, otherwise the variant drivers should return it
+> in KHz. So actually sdhci-of-arasan return the wrong value found
+> by Anssi[1]. It's also very likely that further variant drivers which
+> are going to use this callback will be confused by this situation.
+> Given the fact that modem sdhci variant hosts are very prone to get
+> the timeout clock from common clock framework(actuall the only three
+> users did that), it's more nature to return the value in Hz and we
+> make a explicit comment there. Then we put the unit conversion inside
+> the sdhci core. Thus will improve the code and prevent further misues.
+>
+> [1]: https://patchwork.kernel.org/patch/9569431/
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
 
 
+For sdhci-cadence.c bit,
+
+Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+
+
+Thanks!
+
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
