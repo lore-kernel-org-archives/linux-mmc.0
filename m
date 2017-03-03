@@ -1,49 +1,76 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: fix changing bus witdh in hs400es mode
-Date: Fri, 3 Mar 2017 11:43:05 +0800
-Message-ID: <78c1d56c-5272-f6c6-bb55-447857acb6b8@rock-chips.com>
-References: <1488462454-905-1-git-send-email-piotrs@cadence.com>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Fri, 3 Mar 2017 11:49:55 +0800
+Message-ID: <1488512995.21451.16.camel@mhfsdcap03>
+References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
+ <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
+ <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
+ <1487930376.22858.14.camel@mhfsdcap03>
+ <CAL_Jsq+eo-Fy8Wf2yZpE3Ufp4V_7Gn+w9fTyjZDP6V7tY-=gdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488462454-905-1-git-send-email-piotrs@cadence.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAL_Jsq+eo-Fy8Wf2yZpE3Ufp4V_7Gn+w9fTyjZDP6V7tY-=gdw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Poitr,
+On Fri, 2017-02-24 at 16:47 -0600, Rob Herring wrote:
+> On Fri, Feb 24, 2017 at 3:59 AM, Yong Mao <yong.mao@mediatek.com> wrote:
+> > Dear Rob,
+> >
+> > Could you please help to make comments for this patch?
+> > Thanks.
+> 
+> I already did comment. It's still wrong as Ulf commented. So fix and
+> send a new version. It has to go to the DT list if you want to be in
+> my queue.
+> 
+> Rob
 
-On 2017/3/2 21:47, Piotr Sroka wrote:
-> Fix the code to avoid changing bus width if HS400ES mode is selected.
->
+After reviewing the history, We guess your mentioned Ulf's comments is as below.
+  
+"> +- mtk-hs200-cmd-int-delay: HS200 command internal delay setting.
+> + The value is an integer from 0 to 31
 
-Thanks for catching this, but Guenter posted a fix[1] already. :)
+Please change to:
 
-[1]: https://patchwork.kernel.org/patch/9599261/
+mediatek,hs200-cmd-delay
 
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 7fd7228..c7d9c9f 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		err = mmc_select_hs400(card);
->  		if (err)
->  			goto free_card;
-> -	} else {
-> +	} else if (!mmc_card_hs400(card)) {
->  		/* Select the desired bus width optionally */
->  		err = mmc_select_bus_width(card);
->  		if (err > 0 && mmc_card_hs(card)) {
->
+... and if there is a unit, like ns or us, please add that a suffix.
 
+> +- mtk-hs400-cmd-int-delay: HS400 command internal delay setting
+> + The value is an integer from 0 to 31
 
--- 
-Best Regards
-Shawn Lin
+mediatek,hs400-cmd-delay and add unit if applicable.
+
+> +- mtk-hs400-cmd-resp-sel: HS400 command response sample selection
+> + The value is an integer from 0 to 1
+
+mediatek,hs400-cmd-resp-sel
+
+And make it a boolean value instead!"
+
+==> We already fix this comment in v4. 
+We use "mediatek,hs200-cmd-int-delay" to replace "mtk-hs200-cmd-int-delay", 
+but not use "mediatek,hs200-cmd-delay". This is because "-int-" here means internal.
+We should not drop it.
+
+And this field does not have unit, it only have total 32 stages.
+We also change the description in v4.
+
+For comment about "mtk-hs400-cmd-resp-sel", we also make it a boolean value in v4.
+And re-name it as "mediatek,hs400-cmd-resp-rising".
+
+Please help to point out where we need to modify.
+Thanks.
