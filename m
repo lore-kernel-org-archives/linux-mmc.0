@@ -1,38 +1,44 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: add DT binding for S3C24XX
- MMC/SD/SDIO controller
-Date: Fri, 3 Mar 2017 00:21:47 -0600
-Message-ID: <20170303062147.gm5bl43zctztpadb@rob-hp-laptop>
-References: <1488417536-15110-1-git-send-email-sergio.prado@e-labworks.com>
- <1488417536-15110-2-git-send-email-sergio.prado@e-labworks.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: RE: [PATCH] mmc: core: fix changing bus witdh in hs400es mode
+Date: Fri, 3 Mar 2017 06:37:56 +0000
+Message-ID: <DM5PR07MB30824A7811869AF27D35EB36DD2B0@DM5PR07MB3082.namprd07.prod.outlook.com>
+References: <1488462454-905-1-git-send-email-piotrs@cadence.com>
+ <78c1d56c-5272-f6c6-bb55-447857acb6b8@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1488417536-15110-2-git-send-email-sergio.prado@e-labworks.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sergio Prado <sergio.prado@e-labworks.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <78c1d56c-5272-f6c6-bb55-447857acb6b8@rock-chips.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Mar 01, 2017 at 10:18:55PM -0300, Sergio Prado wrote:
-> Adds the device tree bindings description for Samsung S3C24XX
-> MMC/SD/SDIO controller, used as a connectivity interface with external
-> MMC, SD and SDIO storage mediums.
-> 
-> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
-> ---
->  .../devicetree/bindings/mmc/samsung,s3cmci.txt     | 42 ++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-
-Acked-by: Rob Herring <robh@kernel.org>
+SGkgU2hhd24NCg0KVGhhbmtzIGZvciB0aGUgaW5mb3JtYXRpb24uDQoNCkJlc3QgUmVnYXJkcw0K
+UGlvdHIgU3Jva2ENCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTaGF3
+biBMaW4gW21haWx0bzpzaGF3bi5saW5Acm9jay1jaGlwcy5jb21dDQo+IFNlbnQ6IDAzIE1hcmNo
+LCAyMDE3IDQ6NDMgQU0NCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBjb3JlOiBmaXggY2hh
+bmdpbmcgYnVzIHdpdGRoIGluIGhzNDAwZXMgbW9kZQ0KPiANCj4gSGkgUG9pdHIsDQo+IA0KPiBP
+biAyMDE3LzMvMiAyMTo0NywgUGlvdHIgU3Jva2Egd3JvdGU6DQo+ID4gRml4IHRoZSBjb2RlIHRv
+IGF2b2lkIGNoYW5naW5nIGJ1cyB3aWR0aCBpZiBIUzQwMEVTIG1vZGUgaXMgc2VsZWN0ZWQuDQo+
+ID4NCj4gDQo+IFRoYW5rcyBmb3IgY2F0Y2hpbmcgdGhpcywgYnV0IEd1ZW50ZXIgcG9zdGVkIGEg
+Zml4WzFdIGFscmVhZHkuIDopDQo+IA0KPiBbMV06IGh0dHBzOi8vdXJsZGVmZW5zZS5wcm9vZnBv
+aW50LmNvbS92Mi91cmw/dT1odHRwcy0NCj4gM0FfX3BhdGNod29yay5rZXJuZWwub3JnX3BhdGNo
+Xzk1OTkyNjFfJmQ9RHdJQ2JnJmM9YVVxOTgzTDJwdWUyRnFLRm9QNlBHSE1KUXlvSjdrbDNzM0da
+LQ0KPiBfaGFYcVkmcj1UR1p0TmZadTVDamh1Mks4QTBRaHNvdDRIbEtwU0owWG15Y19MOGhQd1NJ
+Jm09ejUzR3dpUHlhUnc5UDA5VmZPODR6aFY4Y1R3ZFlXVWhjYlpCUFRPVWJYRSZzPXZ0UGgtDQo+
+IDBnNy1PNlBaSk9kZ0ZwMGpaZU1ydmU4RUc2cUxEcHBoSk4xdnVNJmU9DQo+IA0KPiA+IFNpZ25l
+ZC1vZmYtYnk6IFBpb3RyIFNyb2thIDxwaW90cnNAY2FkZW5jZS5jb20+DQo+ID4gLS0tDQo+ID4g
+IGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgfCAyICstDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGlu
+c2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+bW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGluZGV4DQo+ID4gN2ZkNzIy
+OC4uYzdkOWM5ZiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4g
+KysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+IEBAIC0xNzMwLDcgKzE3MzAsNyBAQCBz
+dGF0aWMgaW50IG1tY19pbml0X2NhcmQoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLA0K
+PiA+ICAJCWVyciA9IG1tY19zZWxlY3RfaHM0MDAoY2FyZCk7DQo+ID4gIAkJaWYgKGVycikNCj4g
+PiAgCQkJZ290byBmcmVlX2NhcmQ7DQo+ID4gLQl9IGVsc2Ugew0KPiA+ICsJfSBlbHNlIGlmICgh
+bW1jX2NhcmRfaHM0MDAoY2FyZCkpIHsNCj4gPiAgCQkvKiBTZWxlY3QgdGhlIGRlc2lyZWQgYnVz
+IHdpZHRoIG9wdGlvbmFsbHkgKi8NCj4gPiAgCQllcnIgPSBtbWNfc2VsZWN0X2J1c193aWR0aChj
+YXJkKTsNCj4gPiAgCQlpZiAoZXJyID4gMCAmJiBtbWNfY2FyZF9ocyhjYXJkKSkgew0KPiA+DQo+
+IA0KPiANCj4gLS0NCj4gQmVzdCBSZWdhcmRzDQo+IFNoYXduIExpbg0KDQo=
