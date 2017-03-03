@@ -1,146 +1,68 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/2] mmc: tegra: Support module reset
-Date: Fri, 3 Mar 2017 09:36:02 +0200
-Message-ID: <e8780361-5c61-2c6f-c62b-974e04f859ac@intel.com>
-References: <20170223162342.15911-1-thierry.reding@gmail.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [v2, 0/7] Add SD UHS-I and eMMC HS200 support for eSDHC
+Date: Fri, 3 Mar 2017 16:18:42 +0800
+Message-ID: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:2186 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751409AbdCCHzs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 3 Mar 2017 02:55:48 -0500
-In-Reply-To: <20170223162342.15911-1-thierry.reding@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will
+ Deacon <will.deacon@arm.com>
+Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org, Yangbo Lu <yangbo.lu@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jon Hunter <jonathanh@nvidia.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-On 23/02/17 18:23, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
-> 
-> The device tree binding for the SDHCI controller found on Tegra SoCs
-> specifies that a reset control can be provided by the device tree. No
-> code was ever added to support the module reset, which can cause the
-> driver to try and access registers from a module that's in reset. On
-> most Tegra SoC generations doing so would cause a hang.
-> 
-> Note that it's unlikely to see this happen because on most platforms
-> these resets will have been deasserted by the bootloader. However the
-> portability can be improved by making sure the driver deasserts the
-> reset before accessing any registers.
-> 
-> Since resets are synchronous on Tegra SoCs, the platform driver needs
-> to implement a custom ->remove() callback now to make sure the clock
-> is disabled after the reset is asserted.
-> 
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+It's complicated to support SD UHS-I and eMMC HS200 for eSDHC because
+there're many differences between eSDHC and SD/eMMC spec. Several
+differences as below must be considered:
+1. Peripheral clock must be used instead of platform clock.
+    - eSDHC could select peripheral clock or platform clock as its clock
+      source. According to RM, UHS-I/HS200 must use peripheral clock since
+      it supports higher frequency than platform clock.
+    - Patch 1 and patch 6 is to support this.
+2. Signal voltage switching requires a control circuit out of eSDHC.
+    - eSDHC supports signal voltage switch from 3.3v to 1.8v by
+      eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
+      signal SDHC_VS, and there must be a control circuit out of eSDHC
+      to change the signal voltage according to SDHC_VS output signal.
+    - Patch 2 is to support this.
+3. eSDHC uses tuning block for tuning procedure.
+    - Tuning clock control register must be configured before tuning.
+    - Patch 3 is to support this.
+4. Delay is needed between tuning cycles for HS200 tuning.
+    - Once a patch removed mdelay between tuning cycles.
+      But eSDHC needs it.
+    - Patch 4 and patch 5 is to support this.
+5. UHS-I/HS200 modes could be enabled in dts node.
+    - Patch 7 is to support this.
 
-Apart from a nitpick below:
+Please review and merge these patches on mmc git tree if no changes
+are required.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Yangbo Lu (7):
+  mmc: sdhci-of-esdhc: add peripheral clock support
+  mmc: sdhci-of-esdhc: add support for signal voltage switch
+  mmc: sdhci-of-esdhc: add tuning support
+  mmc: sdhci: add a quirk to restore delay in tuning
+  mmc: sdhci-of-esdhc: add delay between tuning cycles
+  arm64: dts: ls1046a: add clocks property and compatible for eSDHC node
+  arm64: dts: ls1046ardb: add MMC HS200/UHS-1 modes support
 
-> ---
-> Changes in v2:
-> - assert reset in ->probe() error path
-> - remove unneeded PCI specific quirk
-> 
->  drivers/mmc/host/sdhci-tegra.c | 43 +++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 42 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 20b6ff5b4af1..9ae5895678e8 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -21,6 +21,7 @@
->  #include <linux/io.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/reset.h>
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
-> @@ -65,6 +66,8 @@ struct sdhci_tegra {
->  	struct gpio_desc *power_gpio;
->  	bool ddr_signaling;
->  	bool pad_calib_required;
-> +
-> +	struct reset_control *rst;
->  };
->  
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -489,6 +492,25 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	clk_prepare_enable(clk);
->  	pltfm_host->clk = clk;
->  
-> +	tegra_host->rst = devm_reset_control_get(&pdev->dev, "sdhci");
-> +	if (IS_ERR(tegra_host->rst)) {
-> +		rc = PTR_ERR(tegra_host->rst);
-> +		dev_err(&pdev->dev, "failed to get reset control: %d\n", rc);
-> +		goto err_rst_get;
-> +	}
-> +
-> +	rc = reset_control_assert(tegra_host->rst);
-> +	if (rc)
-> +		goto err_rst_get;
-> +
-> +	usleep_range(2000, 4000);
-> +
-> +	rc = reset_control_deassert(tegra_host->rst);
-> +	if (rc)
-> +		goto err_rst_get;
-> +
-> +	usleep_range(2000, 4000);
-> +
->  	rc = sdhci_add_host(host);
->  	if (rc)
->  		goto err_add_host;
-> @@ -496,6 +518,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	return 0;
->  
->  err_add_host:
-> +	reset_control_assert(tegra_host->rst);
-> +err_rst_get:
->  	clk_disable_unprepare(pltfm_host->clk);
->  err_clk_get:
->  err_power_req:
-> @@ -504,6 +528,23 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	return rc;
->  }
->  
-> +static int sdhci_tegra_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *platform = sdhci_priv(host);
-> +	struct sdhci_tegra *tegra = sdhci_pltfm_priv(platform);
+ arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts |   8 ++
+ arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi    |   3 +-
+ drivers/mmc/host/sdhci-esdhc.h                    |   7 +
+ drivers/mmc/host/sdhci-of-esdhc.c                 | 167 +++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c                          |   3 +-
+ drivers/mmc/host/sdhci.h                          |   2 +
+ 6 files changed, 186 insertions(+), 4 deletions(-)
 
-In other functions these are named 'pltfm_host' and 'tegra_host'.  Maybe
-change them to be consistent.
-
-> +
-> +	sdhci_remove_host(host, 0);
-> +
-> +	reset_control_assert(tegra->rst);
-> +	usleep_range(2000, 4000);
-> +	clk_disable_unprepare(platform->clk);
-> +
-> +	sdhci_pltfm_free(pdev);
-> +
-> +	return 0;
-> +}
-> +
->  static struct platform_driver sdhci_tegra_driver = {
->  	.driver		= {
->  		.name	= "sdhci-tegra",
-> @@ -511,7 +552,7 @@ static struct platform_driver sdhci_tegra_driver = {
->  		.pm	= &sdhci_pltfm_pmops,
->  	},
->  	.probe		= sdhci_tegra_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove		= sdhci_tegra_remove,
->  };
->  
->  module_platform_driver(sdhci_tegra_driver);
-> 
-
+-- 
+2.1.0.27.g96db324
