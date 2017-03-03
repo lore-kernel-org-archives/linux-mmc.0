@@ -1,60 +1,54 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v3] mmc: sdhci: clarify the get_timeout_clock callback
-Date: Fri, 3 Mar 2017 23:31:00 +0900
-Message-ID: <CAK7LNARqFe+M-4RZ+rUU+1p0_CfbhA9MmGV+p=WCzkAF0KV_CQ@mail.gmail.com>
-References: <1488512252-8452-1-git-send-email-shawn.lin@rock-chips.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v3 1/10] mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
+Date: Fri, 03 Mar 2017 10:17:07 -0800
+Message-ID: <m2y3wm2pjw.fsf@baylibre.com>
+References: <583f6496-68a9-b8e1-6b25-1f073f819a3c@gmail.com>
+        <m2d1e0zx5l.fsf@baylibre.com>
+        <9259ab6f-fc7e-bcb3-ddd0-5ff3da3b391a@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from condef-01.nifty.com ([202.248.20.66]:29279 "EHLO
-        condef-01.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751553AbdCCOou (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 09:44:50 -0500
-Received: from conssluserg-05.nifty.com ([10.126.8.84])by condef-01.nifty.com with ESMTP id v23EW8hJ024148
-        for <linux-mmc@vger.kernel.org>; Fri, 3 Mar 2017 23:32:08 +0900
-Received: from mail-yw0-f179.google.com (mail-yw0-f179.google.com [209.85.161.179]) (authenticated)
-        by conssluserg-05.nifty.com with ESMTP id v23EV1NQ029561
-        for <linux-mmc@vger.kernel.org>; Fri, 3 Mar 2017 23:31:01 +0900
-Received: by mail-yw0-f179.google.com with SMTP id p77so81111116ywg.1
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2017 06:31:01 -0800 (PST)
-In-Reply-To: <1488512252-8452-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-pf0-f170.google.com ([209.85.192.170]:35203 "EHLO
+        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752040AbdCCS1S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 13:27:18 -0500
+Received: by mail-pf0-f170.google.com with SMTP id j5so35743789pfb.2
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2017 10:26:13 -0800 (PST)
+In-Reply-To: <9259ab6f-fc7e-bcb3-ddd0-5ff3da3b391a@gmail.com> (Heiner
+        Kallweit's message of "Wed, 1 Mar 2017 21:20:19 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-2017-03-03 12:37 GMT+09:00 Shawn Lin <shawn.lin@rock-chips.com>:
-> Currently the get_timeout_clock callabck doesn't clearly
-> have a statment that it needs the variant drivers to return
-> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
-> isn't present, otherwise the variant drivers should return it
-> in KHz. So actually sdhci-of-arasan return the wrong value found
-> by Anssi[1]. It's also very likely that further variant drivers which
-> are going to use this callback will be confused by this situation.
-> Given the fact that modem sdhci variant hosts are very prone to get
-> the timeout clock from common clock framework(actuall the only three
-> users did that), it's more nature to return the value in Hz and we
-> make a explicit comment there. Then we put the unit conversion inside
-> the sdhci core. Thus will improve the code and prevent further misues.
->
-> [1]: https://patchwork.kernel.org/patch/9569431/
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
+Heiner Kallweit <hkallweit1@gmail.com> writes:
 
+> Am 01.03.2017 um 19:09 schrieb Kevin Hilman:
+>> Hi Heinar,
+>>=20
+>> Heiner Kallweit <hkallweit1@gmail.com> writes:
+>>=20
+>>> Core ensures that there are no commands with cmd->data being set and
+>>> nothing to transfer. And we don't have to reset bit CMD_CFG_DATA_NUM
+>>> because cmd_cfg was zero-initialized and this bit isn't set.
+>>>
+>>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>>> Acked-by: Kevin Hilman <khilman@baylibre.com>
+>>=20
+>> Could you send this series one more time, collecting the remaining tags
+>> and including the patches from Micha=C5=82 Zegan?
+>>=20
+> Patchwork tracks all the tags coming in for a patch, there it's visible
+> that you acked my 10 patches + the two from Michal.
 
-For sdhci-cadence.c bit,
+Yes, I'm well aware of how patchwork works, yet my request still stands.
 
-Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> So I would leave it up to Ulf whether he prefers to have the series
+> re-sent (with just the few remaining acks as changes).
 
+That's your choice, but some friendly advice from a kernel maintainer:
+making things as easy as possible for maintainers/reviewers greatly
+improves speed your code will get merged.
 
-Thanks!
-
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+Kevin
