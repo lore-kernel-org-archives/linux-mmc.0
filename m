@@ -1,84 +1,60 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [PATCH 4/9] mmc: sdhci: add a callback for using tuning block
-Date: Fri, 3 Mar 2017 07:39:11 +0000
-Message-ID: <DB6PR0401MB2536D85F7B3061194EAD7D74F82B0@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1488448050-7574-1-git-send-email-yangbo.lu@nxp.com>
- <1488448050-7574-5-git-send-email-yangbo.lu@nxp.com>
- <ffa07436-541f-5ad2-60f4-347847fd6104@intel.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] mmc: tegra: Add Tegra186 support
+Date: Fri, 3 Mar 2017 09:44:06 +0200
+Message-ID: <7893a54f-08fd-a8e6-308d-a388bb183434@intel.com>
+References: <20170223162342.15911-1-thierry.reding@gmail.com>
+ <20170223162342.15911-2-thierry.reding@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <ffa07436-541f-5ad2-60f4-347847fd6104@intel.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will
- Deacon <will.deacon@arm.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170223162342.15911-2-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
-> Sent: Thursday, March 02, 2017 10:26 PM
-> To: Y.B. Lu; linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Rob
-> Herring; Mark Rutland; Catalin Marinas; Will Deacon
-> Cc: devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> Xiaobo Xie
-> Subject: Re: [PATCH 4/9] mmc: sdhci: add a callback for using tuning
-> block
+On 23/02/17 18:23, Thierry Reding wrote:
+> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 > 
-> On 02/03/17 11:47, Yangbo Lu wrote:
-> > Some non-standard SD host controllers may use tuning block for
-> > executing tuning procedure.
+> The SDHCI controller found on NVIDIA Tegra186 SoCs is very similar to
+> the one on prior generations of Tegra and can be supported by the same
+> driver.
 > 
-> If you need to set something up before tuning, you should be able to do
-> that by hooking the host operation, for example see xenon_execute_tuning()
-> in sdhci-xenon.c
-> 
+> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-[Lu Yangbo-B47093] Hi Adrian, this is very helpful. I will generate the v2 patchset with this method.
-Thanks you very much!
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-> >
-> > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> > ---
-> >  drivers/mmc/host/sdhci.c | 3 +++
-> >  drivers/mmc/host/sdhci.h | 1 +
-> >  2 files changed, 4 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> > 3c9a924..051b192 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -2166,6 +2166,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc,
-> u32 opcode)
-> >  		goto out_unlock;
-> >  	}
-> >
-> > +	if (host->ops->set_tuning_block)
-> > +		host->ops->set_tuning_block(host);
-> > +
-> >  	host->mmc->retune_period = tuning_count;
-> >
-> >  	sdhci_start_tuning(host);
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index
-> > 04af687..d43519b 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -568,6 +568,7 @@ struct sdhci_ops {
-> >  					 int card_drv, int *drv_type);
-> >  	int	(*start_signal_voltage_switch)(struct sdhci_host *host,
-> >  					       unsigned char signal_voltage);
-> > +	void	(*set_tuning_block)(struct sdhci_host *host);
-> >  };
-> >
-> >  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> >
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 9ae5895678e8..9ef4afcf312c 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -434,7 +434,23 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>  	.pdata = &sdhci_tegra210_pdata,
+>  };
+>  
+> +static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+> +	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+> +		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> +		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+> +		  SDHCI_QUIRK_NO_HISPD_BIT |
+> +		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+> +		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	.ops  = &tegra114_sdhci_ops,
+> +};
+> +
+> +static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+> +	.pdata = &sdhci_tegra186_pdata,
+> +};
+> +
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+> +	{ .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
+>  	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+>  	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
+>  	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+> 
