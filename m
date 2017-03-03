@@ -1,54 +1,49 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 0/7] Some cleanup for dwmmc
-Date: Fri, 03 Mar 2017 11:01:12 +0900
-Message-ID: <78c7e572-55e8-1e61-9c0d-34dacd36508d@samsung.com>
-References: <CGME20170217025943epcas2p220d9ae88c0a8849e2c82da50339cec31@epcas2p2.samsung.com>
- <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: core: fix changing bus witdh in hs400es mode
+Date: Fri, 3 Mar 2017 11:43:05 +0800
+Message-ID: <78c1d56c-5272-f6c6-bb55-447857acb6b8@rock-chips.com>
+References: <1488462454-905-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51115 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750941AbdCCDPn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2017 22:15:43 -0500
-Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OM701EP8UY0PTE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 03 Mar 2017 11:01:12 +0900 (KST)
-In-reply-to: <1487300205-202825-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1488462454-905-1-git-send-email-piotrs@cadence.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Piotr Sroka <piotrs@cadence.com>
+Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 02/17/2017 11:56 AM, Shawn Lin wrote:
-> Hi Jaehoon,
-> 
-> This is the first part of long term cleanup for dwmmc we need.
-> No functional changes here, but just to remove the unnecessary
-> function declare and improve the logic of dw_mci_reset for better
-> understood.
-> 
+Hi Poitr,
 
-Applied on my repository. Thanks!
+On 2017/3/2 21:47, Piotr Sroka wrote:
+> Fix the code to avoid changing bus width if HS400ES mode is selected.
+>
 
-Best Regards,
-Jaehoon Chung
+Thanks for catching this, but Guenter posted a fix[1] already. :)
 
-> 
-> 
-> Shawn Lin (7):
->   mmc: dw_mmc: improve the timeout polling code
->   mmc: dw_mmc: move dw_mci_reset forward to avoid declaration
->   mmc: dw_mmc: move dw_mci_ctrl_reset forward to avoid declaration
->   mmc: dw_mmc: move dw_mci_get_cd forward to avoid declaration
->   mmc: dw_mmc: remove declaration of dw_mci_card_busy
->   mmc: dw_mmc: move mci_send_cmd forward to avoid declaration
->   mmc: dw_mmc: improve dw_mci_reset a bit
-> 
->  drivers/mmc/host/dw_mmc.c | 383 ++++++++++++++++++++++------------------------
->  1 file changed, 182 insertions(+), 201 deletions(-)
-> 
+[1]: https://patchwork.kernel.org/patch/9599261/
 
+> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 7fd7228..c7d9c9f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		err = mmc_select_hs400(card);
+>  		if (err)
+>  			goto free_card;
+> -	} else {
+> +	} else if (!mmc_card_hs400(card)) {
+>  		/* Select the desired bus width optionally */
+>  		err = mmc_select_bus_width(card);
+>  		if (err > 0 && mmc_card_hs(card)) {
+>
+
+
+-- 
+Best Regards
+Shawn Lin
