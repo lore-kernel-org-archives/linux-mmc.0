@@ -1,69 +1,43 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH v4 0/10] mmc: meson-gx: series with smaller improvements
-Date: Sat, 4 Mar 2017 10:56:34 +0100
-Message-ID: <22be7ab8-2e98-160b-cb5d-8ff9a247e266@gmail.com>
-References: <c1a6c969-2426-4069-6836-fcbe4f4bdebd@gmail.com>
+Subject: [PATCH v5 0/10] mmc: meson-gx: series with smaller improvements
+Date: Sat, 4 Mar 2017 13:17:55 +0100
+Message-ID: <a76c3483-2c86-85c1-446e-f2522bd28aa8@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34068 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750908AbdCDJ45 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Mar 2017 04:56:57 -0500
-Received: by mail-wm0-f65.google.com with SMTP id m70so6399723wma.1
-        for <linux-mmc@vger.kernel.org>; Sat, 04 Mar 2017 01:56:56 -0800 (PST)
-In-Reply-To: <c1a6c969-2426-4069-6836-fcbe4f4bdebd@gmail.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:36544 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751336AbdCDMSM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Mar 2017 07:18:12 -0500
+Received: by mail-wm0-f54.google.com with SMTP id n11so32964959wma.1
+        for <linux-mmc@vger.kernel.org>; Sat, 04 Mar 2017 04:18:11 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Helmut Klein <hgkr.klein@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Am 04.03.2017 um 10:30 schrieb Helmut Klein:
-> Hallo Heiner,
-> 
-> i had the same problem as mentioned from Kevin.
-> 
-> The solution for my box (netxeon MiniMX) was to partly revert your patch 8
-> 
-> --- meson-gx-mmc.c.heiner    2017-02-20 13:25:47.000000000 +0100
-> +++ meson-gx-mmc.c.helmut    2017-02-21 11:30:30.360445366 +0100
-> @@ -741,6 +742,10 @@ static int meson_mmc_probe(struct platfo
->      if (ret)
->          goto free_host;
-> 
-> +    ret = meson_mmc_clk_init(host);
-> +    if (ret)
-> +        goto err_core_clk;
-> +
->      /* Stop execution */
->      writel(0, host->regs + SD_EMMC_START);
-> 
-> @@ -751,11 +756,7 @@ static int meson_mmc_probe(struct platfo
-> 
->      /* set config to sane default */
->      meson_mmc_cfg_init(host);
-> -
-> -    ret = meson_mmc_clk_init(host);
-> -    if (ret)
-> -        goto free_host;
-> -
-> +
->      ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
->                      meson_mmc_irq_thread, IRQF_SHARED,
->                      DRIVER_NAME, host);
-> 
-> The rest of your patches are ok. Thank you for them.
-> 
-> Before applying the patches, i couldn't read the mmc (hs200 type) at all (got crc errors only). Now this is fixed.
-> 
-> regards
-> Helmut
-> 
-> ps: i hope, it is ok, to send this mail directly to you??
-> 
-Sure. I just think other people would consider your findings interesting too, so I cc Kevin and the lists.
-Let me check on my system, I'll come up with a corrected version of the patch set.
+New series is limited to smaller refactorings w/o functional changes.
 
-Rgds, Heiner
+v5:
+- fix a hang caused by patch "improve initial configuration"
+
+Heiner Kallweit (10):
+  mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
+  mmc: meson-gx: make two functions return void
+  mmc: meson-gx: remove unused members irq, ocr_mask from struct meson_host
+  mmc: meson-gx: remove unneeded variable in meson_mmc_clk_init
+  mmc: meson-gx: remove member parent_mux from struct meson_host
+  mmc: meson-gx: remove unneeded meson_mmc_clk_set in meson_mmc_clk_init
+  mmc: meson-gx: remove unneeded devm_kstrdup in meson_mmc_clk_init
+  mmc: meson-gx: improve initial configuration
+  mmc: meson-gx: remove member mrq from struct meson_host
+  mmc: meson-gx: replace magic timeout numbers with constants
+
+ drivers/mmc/host/meson-gx-mmc.c | 120 ++++++++++++++++------------------------
+ 1 file changed, 47 insertions(+), 73 deletions(-)
+
+-- 
+2.12.0
+
 
