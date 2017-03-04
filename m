@@ -1,109 +1,107 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [v2] mmc: sdhci-cadence: add HS400 enhanced strobe support
-Date: Sat, 4 Mar 2017 12:37:13 +0900
-Message-ID: <CAK7LNASx5jO8FdJv2e085A5BJ5V-sZjJjSsiM4vM8o6ofF+0KA@mail.gmail.com>
-References: <1488529893-6690-1-git-send-email-piotrs@cadence.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v4 0/10] mmc: meson-gx: series with smaller improvements
+Date: Fri, 03 Mar 2017 21:33:40 -0800
+Message-ID: <7hfuitvc5n.fsf@baylibre.com>
+References: <62912f3d-2307-cfff-3c69-c8b8ffaeb474@gmail.com>
+        <m2innq12j0.fsf@baylibre.com>
+        <d458c13f-f870-6dc4-95f7-e5c867bf6298@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-05.nifty.com ([210.131.2.90]:44509 "EHLO
-        conssluserg-05.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751560AbdCDDjA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2017 22:39:00 -0500
-In-Reply-To: <1488529893-6690-1-git-send-email-piotrs@cadence.com>
+Received: from mail-pg0-f54.google.com ([74.125.83.54]:35529 "EHLO
+        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750708AbdCDFdm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Mar 2017 00:33:42 -0500
+Received: by mail-pg0-f54.google.com with SMTP id b129so50436212pgc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2017 21:33:41 -0800 (PST)
+In-Reply-To: <d458c13f-f870-6dc4-95f7-e5c867bf6298@gmail.com> (Heiner
+        Kallweit's message of "Fri, 3 Mar 2017 23:54:02 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Hi Piotr,
+Heiner Kallweit <hkallweit1@gmail.com> writes:
 
-
-2017-03-03 17:31 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> Add support for HS400ES mode to Cadence SDHCI driver.
+> Am 03.03.2017 um 22:19 schrieb Kevin Hilman:
+>> Heiner Kallweit <hkallweit1@gmail.com> writes:
+>>=20
+>>> New series is limited to smaller refactorings w/o functional changes.
+>>=20
+>> I'd reviewed this series before, but hadn't actually tested it until
+>> today.  I applied this series onto today's linux-next, and tested on
+>> meson-gxbb-odroidc2 and the kernel hangs up right after:
+>>=20
+>>        meson-gx-mmc d0072000.mmc: Got CD GPIO
+>>=20
+>> with no error message or oops/backtrace etc.
+>>=20
+>> Could you clarify how you are testing this, on what tree/branch, on what
+>> hardware etc.?
+>>=20
+> I'm testing on Odroid C2 with a self-built uboot based on the latest
+> mainline uboot incl. an own eMMC driver which was submitted but is
+> not yet applied to mainline uboot.
+> The system is running headless with a serial console attached.
+> Storage is a 128 GB Hardkernel eMMC card.
 >
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-
-
-Thanks for your patch.  It looks almost good to me.
-My comments are about some coding style issues only.
-Please see below.
-
-
-
-
-> +static void sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv, u32 *mode)
-> +{
-> +       *mode = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
-> +       *mode = *mode & SDHCI_CDNS_HRS06_MODE_MASK;
-> +}
-> +
-
-Why doesn't this function simply return u32 value?
-
-
-
-
-
+> I use latest next kernel + the patches to test.
 >
-> +static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-> +                                            struct mmc_ios *ios)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +       u32 timingMode;
+> Does your system work w/o the current patch set?
 
-Could you avoid CamelCase, please?
-(perhaps does checkpatch.pl complain about this?).
+Yes.
 
-I guess "mode" could be enough.
+> And do you use HS200 or HS400 mode?
 
+I don't remember what kind of card is plugged in, and I'm away from the
+board currently.
 
+Since you have a custom uboot, with a custom MMC driver, I suspect that
+your uboot is initializing something that the kernel is not, so when a
+kernel is used that's not using your uboot, something goes wrong.
 
-> +       priv->enhanced_strobe = ios->enhanced_strobe;
-> +
-> +       sdhci_cdns_get_emmc_mode(priv, &timingMode);
-> +
-> +       if (timingMode == SDHCI_CDNS_HRS06_MODE_MMC_HS400 &&
-> +           ios->enhanced_strobe)
-> +               sdhci_cdns_set_emmc_mode(priv,
-> +                                        SDHCI_CDNS_HRS06_MODE_MMC_HS400ES);
-> +
-> +       if (timingMode == SDHCI_CDNS_HRS06_MODE_MMC_HS400ES &&
-> +           !ios->enhanced_strobe)
+Any chance you can try with the vendor uboot from Hardkernel?
 
-You could stretch this if-conditional within 80-col
-by renaming "timingMode" into "mode".
+I tested on odroid-c2 because someone on the #linux-amlogic IRC channel
+(webczat) reported the hang when testing your patches, so I tried to
+reproduce and got the same hang.
 
+Until we figure out what the hang is, this series should not be merged.
 
+Kevin
 
-
-
-> +       host->mmc_host_ops.hs400_enhanced_strobe =
-> +               sdhci_cdns_hs400_enhanced_strobe;
-
-I should not say this if this is the only matter,
-but can you move the 2nd line to the right by inserting some more tabs?
-
-
-
-FYI:
-If you have not checked the coding-style guideline yet, and you are interested,
-it is a good idea to read Documentation/process/coding-style.rst
-
-
-Some of my comments are based on the following statements in that document:
-
-  - "LOCAL variable names should be short, and to the point."
-  - "Descendants are always substantially shorter than the parent and
-     are placed substantially to the right."
-
-We need not too be nervous about the style,
-but generally speaking, it will be nice to keep the style consistent
-unless there is a specific reason.
-
-Thanks!
-
--- 
-Best Regards
-Masahiro Yamada
+> I also figured out that 200MHz w/o tuning is a little fragile and
+> reduced the clock to 60 MHz. This makes no difference in performance
+> as the driver currently is very slow anyway (only 10 - 15 MB/s).
+> When the clock is too high I see lots of CRC errors on the serial
+> console.
+>
+> This will change with further patches I have in my tree.
+> They allow stable HS200/HS400 with quite basic tuning resulting in
+> 140 MB/s read performance.
+> Stable configuration here is: 180=C2=B0 core clock phase, 0=C2=B0 tx clock
+> phase, 180=C2=B0 rx clock phase.
+>
+>> Also, in the cover letter, it's customary to include a summary of what
+>> changed since the previous version(s)
+>>=20
+>> Kevin
+>>=20
+>>> Heiner Kallweit (10):
+>>>   mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
+>>>   mmc: meson-gx: make two functions return void
+>>>   mmc: meson-gx: remove unused members irq, ocr_mask from struct meson_=
+host
+>>>   mmc: meson-gx: remove unneeded variable in meson_mmc_clk_init
+>>>   mmc: meson-gx: remove member parent_mux from struct meson_host
+>>>   mmc: meson-gx: remove unneeded meson_mmc_clk_set in meson_mmc_clk_init
+>>>   mmc: meson-gx: remove unneeded devm_kstrdup in meson_mmc_clk_init
+>>>   mmc: meson-gx: improve initial configuration
+>>>   mmc: meson-gx: remove member mrq from struct meson_host
+>>>   mmc: meson-gx: replace magic timeout numbers with constants
+>>>
+>>>  drivers/mmc/host/meson-gx-mmc.c | 126 ++++++++++++++++----------------=
+--------
+>>>  1 file changed, 50 insertions(+), 76 deletions(-)
+>>=20
