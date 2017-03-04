@@ -1,67 +1,69 @@
-From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH] mmc: mediatek: Fixed bug where clock frequency could be set
- wrong
-Date: Sat, 4 Mar 2017 15:10:03 +0800
-Message-ID: <1488611403-30186-2-git-send-email-yong.mao@mediatek.com>
-References: <1488611403-30186-1-git-send-email-yong.mao@mediatek.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH v4 0/10] mmc: meson-gx: series with smaller improvements
+Date: Sat, 4 Mar 2017 10:56:34 +0100
+Message-ID: <22be7ab8-2e98-160b-cb5d-8ff9a247e266@gmail.com>
+References: <c1a6c969-2426-4069-6836-fcbe4f4bdebd@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1488611403-30186-1-git-send-email-yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34068 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750908AbdCDJ45 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Mar 2017 04:56:57 -0500
+Received: by mail-wm0-f65.google.com with SMTP id m70so6399723wma.1
+        for <linux-mmc@vger.kernel.org>; Sat, 04 Mar 2017 01:56:56 -0800 (PST)
+In-Reply-To: <c1a6c969-2426-4069-6836-fcbe4f4bdebd@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Helmut Klein <hgkr.klein@gmail.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Am 04.03.2017 um 10:30 schrieb Helmut Klein:
+> Hallo Heiner,
+> 
+> i had the same problem as mentioned from Kevin.
+> 
+> The solution for my box (netxeon MiniMX) was to partly revert your patch 8
+> 
+> --- meson-gx-mmc.c.heiner    2017-02-20 13:25:47.000000000 +0100
+> +++ meson-gx-mmc.c.helmut    2017-02-21 11:30:30.360445366 +0100
+> @@ -741,6 +742,10 @@ static int meson_mmc_probe(struct platfo
+>      if (ret)
+>          goto free_host;
+> 
+> +    ret = meson_mmc_clk_init(host);
+> +    if (ret)
+> +        goto err_core_clk;
+> +
+>      /* Stop execution */
+>      writel(0, host->regs + SD_EMMC_START);
+> 
+> @@ -751,11 +756,7 @@ static int meson_mmc_probe(struct platfo
+> 
+>      /* set config to sane default */
+>      meson_mmc_cfg_init(host);
+> -
+> -    ret = meson_mmc_clk_init(host);
+> -    if (ret)
+> -        goto free_host;
+> -
+> +
+>      ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
+>                      meson_mmc_irq_thread, IRQF_SHARED,
+>                      DRIVER_NAME, host);
+> 
+> The rest of your patches are ok. Thank you for them.
+> 
+> Before applying the patches, i couldn't read the mmc (hs200 type) at all (got crc errors only). Now this is fixed.
+> 
+> regards
+> Helmut
+> 
+> ps: i hope, it is ok, to send this mail directly to you??
+> 
+Sure. I just think other people would consider your findings interesting too, so I cc Kevin and the lists.
+Let me check on my system, I'll come up with a corrected version of the patch set.
 
-This patch can fix two issues:
+Rgds, Heiner
 
-Issue 1:
-In previous code, div may be overflow when setting clock frequency
-as f_min. We can use DIV_ROUND_UP to fix this boundary related
-issue.
-
-Issue 2:
-In previous code, we can not set the correct clock frequency when
-div equals 0xff.
-
-Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- drivers/mmc/host/mtk-sd.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 07f3236..3ad5228 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -591,7 +591,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
- 		}
- 	}
- 	sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
--			(mode << 8) | (div % 0xff));
-+		      (mode << 8) | div);
- 	sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
- 	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
- 		cpu_relax();
-@@ -1692,7 +1692,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	host->src_clk_freq = clk_get_rate(host->src_clk);
- 	/* Set host parameters to mmc */
- 	mmc->ops = &mt_msdc_ops;
--	mmc->f_min = host->src_clk_freq / (4 * 255);
-+	mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
- 
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	/* MMC core transfer sizes tunable parameters */
--- 
-1.7.9.5
