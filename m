@@ -1,45 +1,66 @@
-From: Romain Perier <romain.perier@collabora.com>
-Subject: [PATCH v2 4/4] arm: dts: rockchip: Enable post_ios_power_on and pre-power-on-delay-ms
-Date: Mon,  6 Mar 2017 15:17:16 +0100
-Message-ID: <20170306141716.19120-5-romain.perier@collabora.com>
-References: <20170306141716.19120-1-romain.perier@collabora.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: [v2 PATCH 2/3] Documentation: bindings: add description of PHY delays for sdhci-cadence
+Date: Mon, 6 Mar 2017 13:39:36 +0000
+Message-ID: <1488807576-4571-1-git-send-email-piotrs@cadence.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:57611 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751378AbdCFORu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2017 09:17:50 -0500
-In-Reply-To: <20170306141716.19120-1-romain.perier@collabora.com>
+Received: from keymaster.Cadence.COM ([158.140.2.26]:33507 "EHLO
+        mx-sanjose5.cadence.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932318AbdCFOTs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2017 09:19:48 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, Heiko Stuebner <heiko@sntech.de>, Romain Perier <romain.perier@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Piotr Sroka <piotrs@cadence.com>
 
-This enables the property post_ios_power_on. With this property, the
-driver pwrseq_simple will do its entire power sequence at the end of the
-mmc_power_up() function. The property pre-power-on-delay-ms adds a delay
-of 1ms between the enablement of the clk and the assertion of the reset
-line.
+Add description of new DLL PHY delays.
 
-It fixes the power-up sequence for the Wifi chipset AP6335.
-
-Signed-off-by: Romain Perier <romain.perier@collabora.com>
+Signed-off-by: Piotr Sroka <piotrs@cadence.com>
 ---
- arch/arm/boot/dts/rk3288-rock2-square.dts | 2 ++
- 1 file changed, 2 insertions(+)
+Changes for v2:
+- file was created in v2. It was a part of driver source file patch.
+- most delays were moved from dts file 
+  to data associated with an SoC specific compatible
+- description of delays was updated to be more clearly
+---
+ .../devicetree/bindings/mmc/sdhci-cadence.txt          | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/arch/arm/boot/dts/rk3288-rock2-square.dts b/arch/arm/boot/dts/rk3288-rock2-square.dts
-index 818c4bf..9bf2991 100644
---- a/arch/arm/boot/dts/rk3288-rock2-square.dts
-+++ b/arch/arm/boot/dts/rk3288-rock2-square.dts
-@@ -106,6 +106,8 @@
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&wifi_enable>;
- 		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
-+		pre-power-on-delay-ms = <1>;
-+		post-ios-power-on;
- 	};
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+index c0f37cb..77c4b99 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+@@ -19,6 +19,23 @@ if supported.  See mmc.txt for details.
+ - mmc-hs400-1_8v
+ - mmc-hs400-1_2v
  
- 	vcc_usb_host: vcc-host-regulator {
++Some PHY delays can be configured by following properties.
++Each delay property represents the fraction of the clock period.
++The approximate delay value will be
++(<delay property value>/128)*sdmclk_clock_period.
++- phy-dll-delay-sdclk:
++  Value of the delay introduced on the sdclk output
++  for all modes except HS200, HS400 and HS400_ES.
++  Valid range = [0:0x7F].
++- phy-dll-delay-sdclk-hsmmc:
++  Value of the delay introduced on the sdclk output
++  for HS200, HS400 and HS400_ES speed modes.
++  Valid range = [0:0x7F].
++- phy-dll-delay-strobe:
++  Value of the delay introduced on the dat_strobe input
++  used in HS400 / HS400_ES speed modes.
++  Valid range = [0:0x7F].
++
+ Example:
+ 	emmc: sdhci@5a000000 {
+ 		compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+@@ -29,4 +46,5 @@ Example:
+ 		mmc-ddr-1_8v;
+ 		mmc-hs200-1_8v;
+ 		mmc-hs400-1_8v;
++		phy-dll-delay-sdclk = <0>;
+ 	};
 -- 
-2.9.3
+2.2.2
 
