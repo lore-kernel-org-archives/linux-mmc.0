@@ -1,14 +1,15 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
+From: Icenowy Zheng <icenowy@aosc.xyz>
 Subject: Re: [PATCH] mmc: sunxi: mask all Response Timeout error messages
-Date: Mon, 6 Mar 2017 16:53:13 +0100
-Message-ID: <20170306155313.nqxnhtsl4o5yrv33@lukather>
+Date: Tue, 07 Mar 2017 01:28:42 +0800
+Message-ID: <364721488821322@web5o.yandex.ru>
 References: <20170305164535.36259-1-icenowy@aosc.xyz>
  <20170306100437.sr7mrvssdwnt7aaz@lukather>
- <1597991488796361@web24m.yandex.ru>
+ <1597991488796361@web24m.yandex.ru> <20170306155313.nqxnhtsl4o5yrv33@lukather>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6212305526612579342=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1597991488796361@web24m.yandex.ru>
+In-Reply-To: <20170306155313.nqxnhtsl4o5yrv33@lukather>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,132 +19,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Icenowy Zheng <icenowy@aosc.xyz>
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
---===============6212305526612579342==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="uryps4l2lrenzfo6"
-Content-Disposition: inline
-
-
---uryps4l2lrenzfo6
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, Mar 06, 2017 at 06:32:41PM +0800, Icenowy Zheng wrote:
-> 06.03.2017, 18:04, "Maxime Ripard" <maxime.ripard@free-electrons.com>:
-> > Hi,
-> >
-> > On Mon, Mar 06, 2017 at 12:45:35AM +0800, Icenowy Zheng wrote:
-> >> =A0Response Timeout is very usual: it will happen when trying to run s=
-ome
-> >> =A0commands that do not belong to the card; it will happen when some S=
-DIO
-> >> =A0card transfer beyond its SDIO bandwidth; and when the MMC controlle=
-r is
-> >> =A0set to poll the card with "broken-cd" property (the Lichee Pi serie=
-s of
-> >> =A0boards do this), it will flood to the console and make the console
-> >> =A0unusable.
-> >>
-> >> =A0Mask all response-timeout-only error messages, only show it when an=
-other
-> >> =A0error happens.
-> >>
-> >> =A0Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
-> >> =A0---
-> >> =A0=A0drivers/mmc/host/sunxi-mmc.c | 13 +++++++++----
-> >> =A0=A01 file changed, 9 insertions(+), 4 deletions(-)
-> >>
-> >> =A0diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-=
-mmc.c
-> >> =A0index 6ffcd2838272..7828e1f57cf0 100644
-> >> =A0--- a/drivers/mmc/host/sunxi-mmc.c
-> >> =A0+++ b/drivers/mmc/host/sunxi-mmc.c
-> >> =A0@@ -483,10 +483,15 @@ static void sunxi_mmc_dump_errinfo(struct sun=
-xi_mmc_host *host)
-> >> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0struct mmc_command *cmd =3D host->mrq->c=
-md;
-> >> =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0struct mmc_data *data =3D host->mrq->dat=
-a;
-> >>
-> >> =A0- /* For some cmds timeout is normal with sd/mmc cards */
-> >> =A0- if ((host->int_sum & SDXC_INTERRUPT_ERROR_BIT) =3D=3D
-> >> =A0- SDXC_RESP_TIMEOUT && (cmd->opcode =3D=3D SD_IO_SEND_OP_COND ||
-> >> =A0- cmd->opcode =3D=3D SD_IO_RW_DIRECT))
-> >> =A0+ /*
-> >> =A0+ * Reading timeout is usually normal, especially when doing
-> >> =A0+ * card-polling with "broken-cd" in device tree.
-> >> =A0+ * If do not mask it, the RTO error message will flood the console
-> >> =A0+ * and even hide useful error messages.
-> >> =A0+ *
-> >> =A0+ * Some SDIO commands will also normally timeout with non-SDIO car=
-ds.
-> >> =A0+ */
-> >> =A0+ if ((host->int_sum & SDXC_INTERRUPT_ERROR_BIT) =3D=3D SDXC_RESP_T=
-IMEOUT)
-> >
-> > We really shouldn't silence legit errors.
-> >
-> > The actual problem here is that we log them as error, we could
-> > probably reduce it to debug.
->=20
-> Even if it's reduced to debug, it will still flush dmesg buffers.
-
-No, it will not even be compiled by default.
-
-> Or make it only visible when "debug" parameter is present in kernel
-> cmdline?
-
-debug messages are visible in dmesg only if DEBUG is defined, which is
-only happening if CONFIG_MMC_DEBUG is set. This won't affect the
-general case in any way.
-
-And it is output only if loglevel is set higher than 7.
-
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
-
---uryps4l2lrenzfo6
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBCAAGBQJYvYXlAAoJEBx+YmzsjxAgXRIQALbRDu75EaIt0pA/TnSA6uY9
-Smu/JPixxCLOM3AVfxM38a4VKO/1wAVBt17o/IM2IrC5w5KXlzK7kYrPX8ZPl2Af
-O+xTFps5I9uEJPm46PEOyvqbuciQiNr5KssBxhC3wrf6JlVCtzn2Tqd8c8mjUZJ0
-6vnjHH0ECvHonILCuXft/idmbvRM+t2I99bIpC+LIFK+dOcTMr3Owi3XhvIXD1DF
-uR6ojrnI+s/cRG0yyv87BXXarL8EvsjPjsDpC7lLEkHmvRR1mpHjYiUf9GgmDN4w
-jfHccl+g1w7wMWlTLZB0zZHuq+z4S+rt7ztYuJLsR/VLkg1HVxllWk2ycgCMj2KW
-wD4Iv3JsiCeYA+E7ixyB8XW57VKANEesWYz4BP+VkSDalEYXPb/xynXGEHlVp0Bk
-cI4ZM+qRFAMlK8mUBArI67LpxV2RBvOGxvpAQJlt8Wl0J0zskJdLN3EYdQLlZyIs
-FzK3TOhoVynNh6eEdxOVeT/vhSTSn7Azs6oVcihQTXMtlQyFBQSTXYwiZ25dwCN+
-lwgHC9P4nFwpNnmhYI/tbTS81CaVaJEzhCqiveGHqz1lgs12ioL/Jarn3+gaOtzd
-jfUroybKeETsZDgcqYx9J3ImSA7Ngjr8RBA52zKxUhZSzxNWVyulMSz+4P4qfO27
-9qqP7LG0bl2QD7+4IXbM
-=bs7Y
------END PGP SIGNATURE-----
-
---uryps4l2lrenzfo6--
-
-
---===============6212305526612579342==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============6212305526612579342==--
+CgowNi4wMy4yMDE3LCAyMzo1MywgIk1heGltZSBSaXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUt
+ZWxlY3Ryb25zLmNvbT46Cj4gT24gTW9uLCBNYXIgMDYsIDIwMTcgYXQgMDY6MzI6NDFQTSArMDgw
+MCwgSWNlbm93eSBaaGVuZyB3cm90ZToKPj4gwqAwNi4wMy4yMDE3LCAxODowNCwgIk1heGltZSBS
+aXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUtZWxlY3Ryb25zLmNvbT46Cj4+IMKgPiBIaSwKPj4g
+wqA+Cj4+IMKgPiBPbiBNb24sIE1hciAwNiwgMjAxNyBhdCAxMjo0NTozNUFNICswODAwLCBJY2Vu
+b3d5IFpoZW5nIHdyb3RlOgo+PiDCoD4+IMKgUmVzcG9uc2UgVGltZW91dCBpcyB2ZXJ5IHVzdWFs
+OiBpdCB3aWxsIGhhcHBlbiB3aGVuIHRyeWluZyB0byBydW4gc29tZQo+PiDCoD4+IMKgY29tbWFu
+ZHMgdGhhdCBkbyBub3QgYmVsb25nIHRvIHRoZSBjYXJkOyBpdCB3aWxsIGhhcHBlbiB3aGVuIHNv
+bWUgU0RJTwo+PiDCoD4+IMKgY2FyZCB0cmFuc2ZlciBiZXlvbmQgaXRzIFNESU8gYmFuZHdpZHRo
+OyBhbmQgd2hlbiB0aGUgTU1DIGNvbnRyb2xsZXIgaXMKPj4gwqA+PiDCoHNldCB0byBwb2xsIHRo
+ZSBjYXJkIHdpdGggImJyb2tlbi1jZCIgcHJvcGVydHkgKHRoZSBMaWNoZWUgUGkgc2VyaWVzIG9m
+Cj4+IMKgPj4gwqBib2FyZHMgZG8gdGhpcyksIGl0IHdpbGwgZmxvb2QgdG8gdGhlIGNvbnNvbGUg
+YW5kIG1ha2UgdGhlIGNvbnNvbGUKPj4gwqA+PiDCoHVudXNhYmxlLgo+PiDCoD4+Cj4+IMKgPj4g
+wqBNYXNrIGFsbCByZXNwb25zZS10aW1lb3V0LW9ubHkgZXJyb3IgbWVzc2FnZXMsIG9ubHkgc2hv
+dyBpdCB3aGVuIGFub3RoZXIKPj4gwqA+PiDCoGVycm9yIGhhcHBlbnMuCj4+IMKgPj4KPj4gwqA+
+PiDCoFNpZ25lZC1vZmYtYnk6IEljZW5vd3kgWmhlbmcgPGljZW5vd3lAYW9zYy54eXo+Cj4+IMKg
+Pj4gwqAtLS0KPj4gwqA+PiDCoMKgZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYyB8IDEzICsr
+KysrKysrKy0tLS0KPj4gwqA+PiDCoMKgMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKSwg
+NCBkZWxldGlvbnMoLSkKPj4gwqA+Pgo+PiDCoD4+IMKgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
+L2hvc3Qvc3VueGktbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKgPj4g
+wqBpbmRleCA2ZmZjZDI4MzgyNzIuLjc4MjhlMWY1N2NmMCAxMDA2NDQKPj4gwqA+PiDCoC0tLSBh
+L2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMKPj4gwqA+PiDCoCsrKyBiL2RyaXZlcnMvbW1j
+L2hvc3Qvc3VueGktbW1jLmMKPj4gwqA+PiDCoEBAIC00ODMsMTAgKzQ4MywxNSBAQCBzdGF0aWMg
+dm9pZCBzdW54aV9tbWNfZHVtcF9lcnJpbmZvKHN0cnVjdCBzdW54aV9tbWNfaG9zdCAqaG9zdCkK
+Pj4gwqA+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHN0cnVjdCBtbWNfY29tbWFuZCAqY21kID0gaG9z
+dC0+bXJxLT5jbWQ7Cj4+IMKgPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgbW1jX2RhdGEg
+KmRhdGEgPSBob3N0LT5tcnEtPmRhdGE7Cj4+IMKgPj4KPj4gwqA+PiDCoC0gLyogRm9yIHNvbWUg
+Y21kcyB0aW1lb3V0IGlzIG5vcm1hbCB3aXRoIHNkL21tYyBjYXJkcyAqLwo+PiDCoD4+IMKgLSBp
+ZiAoKGhvc3QtPmludF9zdW0gJiBTRFhDX0lOVEVSUlVQVF9FUlJPUl9CSVQpID09Cj4+IMKgPj4g
+wqAtIFNEWENfUkVTUF9USU1FT1VUICYmIChjbWQtPm9wY29kZSA9PSBTRF9JT19TRU5EX09QX0NP
+TkQgfHwKPj4gwqA+PiDCoC0gY21kLT5vcGNvZGUgPT0gU0RfSU9fUldfRElSRUNUKSkKPj4gwqA+
+PiDCoCsgLyoKPj4gwqA+PiDCoCsgKiBSZWFkaW5nIHRpbWVvdXQgaXMgdXN1YWxseSBub3JtYWws
+IGVzcGVjaWFsbHkgd2hlbiBkb2luZwo+PiDCoD4+IMKgKyAqIGNhcmQtcG9sbGluZyB3aXRoICJi
+cm9rZW4tY2QiIGluIGRldmljZSB0cmVlLgo+PiDCoD4+IMKgKyAqIElmIGRvIG5vdCBtYXNrIGl0
+LCB0aGUgUlRPIGVycm9yIG1lc3NhZ2Ugd2lsbCBmbG9vZCB0aGUgY29uc29sZQo+PiDCoD4+IMKg
+KyAqIGFuZCBldmVuIGhpZGUgdXNlZnVsIGVycm9yIG1lc3NhZ2VzLgo+PiDCoD4+IMKgKyAqCj4+
+IMKgPj4gwqArICogU29tZSBTRElPIGNvbW1hbmRzIHdpbGwgYWxzbyBub3JtYWxseSB0aW1lb3V0
+IHdpdGggbm9uLVNESU8gY2FyZHMuCj4+IMKgPj4gwqArICovCj4+IMKgPj4gwqArIGlmICgoaG9z
+dC0+aW50X3N1bSAmIFNEWENfSU5URVJSVVBUX0VSUk9SX0JJVCkgPT0gU0RYQ19SRVNQX1RJTUVP
+VVQpCj4+IMKgPgo+PiDCoD4gV2UgcmVhbGx5IHNob3VsZG4ndCBzaWxlbmNlIGxlZ2l0IGVycm9y
+cy4KPj4gwqA+Cj4+IMKgPiBUaGUgYWN0dWFsIHByb2JsZW0gaGVyZSBpcyB0aGF0IHdlIGxvZyB0
+aGVtIGFzIGVycm9yLCB3ZSBjb3VsZAo+PiDCoD4gcHJvYmFibHkgcmVkdWNlIGl0IHRvIGRlYnVn
+Lgo+Pgo+PiDCoEV2ZW4gaWYgaXQncyByZWR1Y2VkIHRvIGRlYnVnLCBpdCB3aWxsIHN0aWxsIGZs
+dXNoIGRtZXNnIGJ1ZmZlcnMuCj4KPiBObywgaXQgd2lsbCBub3QgZXZlbiBiZSBjb21waWxlZCBi
+eSBkZWZhdWx0Lgo+Cj4+IMKgT3IgbWFrZSBpdCBvbmx5IHZpc2libGUgd2hlbiAiZGVidWciIHBh
+cmFtZXRlciBpcyBwcmVzZW50IGluIGtlcm5lbAo+PiDCoGNtZGxpbmU/Cj4KPiBkZWJ1ZyBtZXNz
+YWdlcyBhcmUgdmlzaWJsZSBpbiBkbWVzZyBvbmx5IGlmIERFQlVHIGlzIGRlZmluZWQsIHdoaWNo
+IGlzCj4gb25seSBoYXBwZW5pbmcgaWYgQ09ORklHX01NQ19ERUJVRyBpcyBzZXQuIFRoaXMgd29u
+J3QgYWZmZWN0IHRoZQo+IGdlbmVyYWwgY2FzZSBpbiBhbnkgd2F5Lgo+Cj4gQW5kIGl0IGlzIG91
+dHB1dCBvbmx5IGlmIGxvZ2xldmVsIGlzIHNldCBoaWdoZXIgdGhhbiA3LgoKU2hvdWxkIEkgbWFr
+ZSBhbGwgZXJyb3IgbWVzc2FnZXMgZGVidWcgbGV2ZWwgb3Igb25seSBtYWtlICJSVE8iLW9ubHkK
+ZXJyb3IgdG8gZGVidWcgbGV2ZWwgbGlrZSBJIGN1cnJlbnRseSBkbz8KCj4KPiBNYXhpbWUKPgo+
+IC0tCj4gTWF4aW1lIFJpcGFyZCwgRnJlZSBFbGVjdHJvbnMKPiBFbWJlZGRlZCBMaW51eCBhbmQg
+S2VybmVsIGVuZ2luZWVyaW5nCj4gaHR0cDovL2ZyZWUtZWxlY3Ryb25zLmNvbQoKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBt
+YWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
+aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
