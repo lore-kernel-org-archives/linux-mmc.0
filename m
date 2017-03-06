@@ -1,82 +1,33 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: Re: [PATCH] mmc: sunxi: mask all Response Timeout error messages
-Date: Tue, 07 Mar 2017 01:28:42 +0800
-Message-ID: <364721488821322@web5o.yandex.ru>
-References: <20170305164535.36259-1-icenowy@aosc.xyz>
- <20170306100437.sr7mrvssdwnt7aaz@lukather>
- <1597991488796361@web24m.yandex.ru> <20170306155313.nqxnhtsl4o5yrv33@lukather>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v5 0/10] mmc: meson-gx: series with smaller improvements
+Date: Mon, 06 Mar 2017 10:24:59 -0800
+Message-ID: <m27f421cw4.fsf@baylibre.com>
+References: <a76c3483-2c86-85c1-446e-f2522bd28aa8@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170306155313.nqxnhtsl4o5yrv33@lukather>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f179.google.com ([209.85.223.179]:33077 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752709AbdCFSZp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2017 13:25:45 -0500
+Received: by mail-io0-f179.google.com with SMTP id f84so118170306ioj.0
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Mar 2017 10:25:01 -0800 (PST)
+In-Reply-To: <a76c3483-2c86-85c1-446e-f2522bd28aa8@gmail.com> (Heiner
+        Kallweit's message of "Sat, 4 Mar 2017 13:17:55 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-CgowNi4wMy4yMDE3LCAyMzo1MywgIk1heGltZSBSaXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUt
-ZWxlY3Ryb25zLmNvbT46Cj4gT24gTW9uLCBNYXIgMDYsIDIwMTcgYXQgMDY6MzI6NDFQTSArMDgw
-MCwgSWNlbm93eSBaaGVuZyB3cm90ZToKPj4gwqAwNi4wMy4yMDE3LCAxODowNCwgIk1heGltZSBS
-aXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUtZWxlY3Ryb25zLmNvbT46Cj4+IMKgPiBIaSwKPj4g
-wqA+Cj4+IMKgPiBPbiBNb24sIE1hciAwNiwgMjAxNyBhdCAxMjo0NTozNUFNICswODAwLCBJY2Vu
-b3d5IFpoZW5nIHdyb3RlOgo+PiDCoD4+IMKgUmVzcG9uc2UgVGltZW91dCBpcyB2ZXJ5IHVzdWFs
-OiBpdCB3aWxsIGhhcHBlbiB3aGVuIHRyeWluZyB0byBydW4gc29tZQo+PiDCoD4+IMKgY29tbWFu
-ZHMgdGhhdCBkbyBub3QgYmVsb25nIHRvIHRoZSBjYXJkOyBpdCB3aWxsIGhhcHBlbiB3aGVuIHNv
-bWUgU0RJTwo+PiDCoD4+IMKgY2FyZCB0cmFuc2ZlciBiZXlvbmQgaXRzIFNESU8gYmFuZHdpZHRo
-OyBhbmQgd2hlbiB0aGUgTU1DIGNvbnRyb2xsZXIgaXMKPj4gwqA+PiDCoHNldCB0byBwb2xsIHRo
-ZSBjYXJkIHdpdGggImJyb2tlbi1jZCIgcHJvcGVydHkgKHRoZSBMaWNoZWUgUGkgc2VyaWVzIG9m
-Cj4+IMKgPj4gwqBib2FyZHMgZG8gdGhpcyksIGl0IHdpbGwgZmxvb2QgdG8gdGhlIGNvbnNvbGUg
-YW5kIG1ha2UgdGhlIGNvbnNvbGUKPj4gwqA+PiDCoHVudXNhYmxlLgo+PiDCoD4+Cj4+IMKgPj4g
-wqBNYXNrIGFsbCByZXNwb25zZS10aW1lb3V0LW9ubHkgZXJyb3IgbWVzc2FnZXMsIG9ubHkgc2hv
-dyBpdCB3aGVuIGFub3RoZXIKPj4gwqA+PiDCoGVycm9yIGhhcHBlbnMuCj4+IMKgPj4KPj4gwqA+
-PiDCoFNpZ25lZC1vZmYtYnk6IEljZW5vd3kgWmhlbmcgPGljZW5vd3lAYW9zYy54eXo+Cj4+IMKg
-Pj4gwqAtLS0KPj4gwqA+PiDCoMKgZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYyB8IDEzICsr
-KysrKysrKy0tLS0KPj4gwqA+PiDCoMKgMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKSwg
-NCBkZWxldGlvbnMoLSkKPj4gwqA+Pgo+PiDCoD4+IMKgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2hvc3Qvc3VueGktbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKgPj4g
-wqBpbmRleCA2ZmZjZDI4MzgyNzIuLjc4MjhlMWY1N2NmMCAxMDA2NDQKPj4gwqA+PiDCoC0tLSBh
-L2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMKPj4gwqA+PiDCoCsrKyBiL2RyaXZlcnMvbW1j
-L2hvc3Qvc3VueGktbW1jLmMKPj4gwqA+PiDCoEBAIC00ODMsMTAgKzQ4MywxNSBAQCBzdGF0aWMg
-dm9pZCBzdW54aV9tbWNfZHVtcF9lcnJpbmZvKHN0cnVjdCBzdW54aV9tbWNfaG9zdCAqaG9zdCkK
-Pj4gwqA+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHN0cnVjdCBtbWNfY29tbWFuZCAqY21kID0gaG9z
-dC0+bXJxLT5jbWQ7Cj4+IMKgPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgbW1jX2RhdGEg
-KmRhdGEgPSBob3N0LT5tcnEtPmRhdGE7Cj4+IMKgPj4KPj4gwqA+PiDCoC0gLyogRm9yIHNvbWUg
-Y21kcyB0aW1lb3V0IGlzIG5vcm1hbCB3aXRoIHNkL21tYyBjYXJkcyAqLwo+PiDCoD4+IMKgLSBp
-ZiAoKGhvc3QtPmludF9zdW0gJiBTRFhDX0lOVEVSUlVQVF9FUlJPUl9CSVQpID09Cj4+IMKgPj4g
-wqAtIFNEWENfUkVTUF9USU1FT1VUICYmIChjbWQtPm9wY29kZSA9PSBTRF9JT19TRU5EX09QX0NP
-TkQgfHwKPj4gwqA+PiDCoC0gY21kLT5vcGNvZGUgPT0gU0RfSU9fUldfRElSRUNUKSkKPj4gwqA+
-PiDCoCsgLyoKPj4gwqA+PiDCoCsgKiBSZWFkaW5nIHRpbWVvdXQgaXMgdXN1YWxseSBub3JtYWws
-IGVzcGVjaWFsbHkgd2hlbiBkb2luZwo+PiDCoD4+IMKgKyAqIGNhcmQtcG9sbGluZyB3aXRoICJi
-cm9rZW4tY2QiIGluIGRldmljZSB0cmVlLgo+PiDCoD4+IMKgKyAqIElmIGRvIG5vdCBtYXNrIGl0
-LCB0aGUgUlRPIGVycm9yIG1lc3NhZ2Ugd2lsbCBmbG9vZCB0aGUgY29uc29sZQo+PiDCoD4+IMKg
-KyAqIGFuZCBldmVuIGhpZGUgdXNlZnVsIGVycm9yIG1lc3NhZ2VzLgo+PiDCoD4+IMKgKyAqCj4+
-IMKgPj4gwqArICogU29tZSBTRElPIGNvbW1hbmRzIHdpbGwgYWxzbyBub3JtYWxseSB0aW1lb3V0
-IHdpdGggbm9uLVNESU8gY2FyZHMuCj4+IMKgPj4gwqArICovCj4+IMKgPj4gwqArIGlmICgoaG9z
-dC0+aW50X3N1bSAmIFNEWENfSU5URVJSVVBUX0VSUk9SX0JJVCkgPT0gU0RYQ19SRVNQX1RJTUVP
-VVQpCj4+IMKgPgo+PiDCoD4gV2UgcmVhbGx5IHNob3VsZG4ndCBzaWxlbmNlIGxlZ2l0IGVycm9y
-cy4KPj4gwqA+Cj4+IMKgPiBUaGUgYWN0dWFsIHByb2JsZW0gaGVyZSBpcyB0aGF0IHdlIGxvZyB0
-aGVtIGFzIGVycm9yLCB3ZSBjb3VsZAo+PiDCoD4gcHJvYmFibHkgcmVkdWNlIGl0IHRvIGRlYnVn
-Lgo+Pgo+PiDCoEV2ZW4gaWYgaXQncyByZWR1Y2VkIHRvIGRlYnVnLCBpdCB3aWxsIHN0aWxsIGZs
-dXNoIGRtZXNnIGJ1ZmZlcnMuCj4KPiBObywgaXQgd2lsbCBub3QgZXZlbiBiZSBjb21waWxlZCBi
-eSBkZWZhdWx0Lgo+Cj4+IMKgT3IgbWFrZSBpdCBvbmx5IHZpc2libGUgd2hlbiAiZGVidWciIHBh
-cmFtZXRlciBpcyBwcmVzZW50IGluIGtlcm5lbAo+PiDCoGNtZGxpbmU/Cj4KPiBkZWJ1ZyBtZXNz
-YWdlcyBhcmUgdmlzaWJsZSBpbiBkbWVzZyBvbmx5IGlmIERFQlVHIGlzIGRlZmluZWQsIHdoaWNo
-IGlzCj4gb25seSBoYXBwZW5pbmcgaWYgQ09ORklHX01NQ19ERUJVRyBpcyBzZXQuIFRoaXMgd29u
-J3QgYWZmZWN0IHRoZQo+IGdlbmVyYWwgY2FzZSBpbiBhbnkgd2F5Lgo+Cj4gQW5kIGl0IGlzIG91
-dHB1dCBvbmx5IGlmIGxvZ2xldmVsIGlzIHNldCBoaWdoZXIgdGhhbiA3LgoKU2hvdWxkIEkgbWFr
-ZSBhbGwgZXJyb3IgbWVzc2FnZXMgZGVidWcgbGV2ZWwgb3Igb25seSBtYWtlICJSVE8iLW9ubHkK
-ZXJyb3IgdG8gZGVidWcgbGV2ZWwgbGlrZSBJIGN1cnJlbnRseSBkbz8KCj4KPiBNYXhpbWUKPgo+
-IC0tCj4gTWF4aW1lIFJpcGFyZCwgRnJlZSBFbGVjdHJvbnMKPiBFbWJlZGRlZCBMaW51eCBhbmQg
-S2VybmVsIGVuZ2luZWVyaW5nCj4gaHR0cDovL2ZyZWUtZWxlY3Ryb25zLmNvbQoKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBt
-YWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
-aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+Heiner Kallweit <hkallweit1@gmail.com> writes:
+
+> New series is limited to smaller refactorings w/o functional changes.
+>
+> v5:
+> - fix a hang caused by patch "improve initial configuration"
+
+Thanks, this version is booting fine now.
+
+Tested-by: Kevin Hilman <khilman@baylibre.com>
+
+Kevin
