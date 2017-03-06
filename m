@@ -1,144 +1,68 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: [v3] mmc: sdhci-cadence: add HS400 enhanced strobe support
-Date: Mon, 6 Mar 2017 08:28:41 +0000
-Message-ID: <1488788921-29260-1-git-send-email-piotrs@cadence.com>
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Subject: Re: [PATCH] mmc: sunxi: mask all Response Timeout error messages
+Date: Mon, 06 Mar 2017 18:32:41 +0800
+Message-ID: <1597991488796361@web24m.yandex.ru>
+References: <20170305164535.36259-1-icenowy@aosc.xyz>
+ <20170306100437.sr7mrvssdwnt7aaz@lukather>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Piotr Sroka <piotrs@cadence.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170306100437.sr7mrvssdwnt7aaz@lukather>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for HS400ES mode to Cadence SDHCI driver.
-
-Signed-off-by: Piotr Sroka <piotrs@cadence.com>
----
-Changes in v2:
-- Modify enhanced strobe function to handle disabling 
-  enhanced strobe inside the function. 
-  Do no relay on that mmc_set_ios() is called 
-  immediately after host->ops->hs400_enhanced_strobe(host, &host->ios).
-Changes in v3:
-- Few coding-style fixes were made.
----
- drivers/mmc/host/sdhci-cadence.c | 57 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 50 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 316cfec..48f6419 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -40,6 +40,7 @@
- #define   SDHCI_CDNS_HRS06_MODE_MMC_DDR		0x3
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS200	0x4
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400	0x5
-+#define   SDHCI_CDNS_HRS06_MODE_MMC_HS400ES	0x6
- 
- /* SRS - Slot Register Set (SDHCI-compatible) */
- #define SDHCI_CDNS_SRS_BASE		0x200
-@@ -64,6 +65,7 @@
- 
- struct sdhci_cdns_priv {
- 	void __iomem *hrs_addr;
-+	bool enhanced_strobe;
- };
- 
- static void sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
-@@ -108,11 +110,30 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
- 	return host->max_clk / 1000;
- }
- 
-+static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
-+{
-+	u32 tmp;
-+
-+	/* The speed mode for eMMC is selected by HRS06 register */
-+	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
-+	tmp &= ~SDHCI_CDNS_HRS06_MODE_MASK;
-+	tmp |= mode;
-+	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
-+}
-+
-+static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
-+{
-+	u32 tmp;
-+
-+	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
-+	return tmp & SDHCI_CDNS_HRS06_MODE_MASK;
-+}
-+
- static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
- 					 unsigned int timing)
- {
- 	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
--	u32 mode, tmp;
-+	u32 mode;
- 
- 	switch (timing) {
- 	case MMC_TIMING_MMC_HS:
-@@ -125,18 +146,17 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
- 		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS200;
- 		break;
- 	case MMC_TIMING_MMC_HS400:
--		mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
-+		if (priv->enhanced_strobe)
-+			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400ES;
-+		else
-+			mode = SDHCI_CDNS_HRS06_MODE_MMC_HS400;
- 		break;
- 	default:
- 		mode = SDHCI_CDNS_HRS06_MODE_SD;
- 		break;
- 	}
- 
--	/* The speed mode for eMMC is selected by HRS06 register */
--	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
--	tmp &= ~SDHCI_CDNS_HRS06_MODE_MASK;
--	tmp |= mode;
--	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
-+	sdhci_cdns_set_emmc_mode(priv, mode);
- 
- 	/* For SD, fall back to the default handler */
- 	if (mode == SDHCI_CDNS_HRS06_MODE_SD)
-@@ -213,6 +233,26 @@ static int sdhci_cdns_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return sdhci_cdns_set_tune_val(host, end_of_streak - max_streak / 2);
- }
- 
-+static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-+					     struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-+	u32 mode;
-+
-+	priv->enhanced_strobe = ios->enhanced_strobe;
-+
-+	mode = sdhci_cdns_get_emmc_mode(priv);
-+
-+	if (mode == SDHCI_CDNS_HRS06_MODE_MMC_HS400 && ios->enhanced_strobe)
-+		sdhci_cdns_set_emmc_mode(priv,
-+					 SDHCI_CDNS_HRS06_MODE_MMC_HS400ES);
-+
-+	if (mode == SDHCI_CDNS_HRS06_MODE_MMC_HS400ES && !ios->enhanced_strobe)
-+		sdhci_cdns_set_emmc_mode(priv,
-+					 SDHCI_CDNS_HRS06_MODE_MMC_HS400);
-+}
-+
- static int sdhci_cdns_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-@@ -240,8 +280,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 
- 	priv = sdhci_cdns_priv(host);
- 	priv->hrs_addr = host->ioaddr;
-+	priv->enhanced_strobe = false;
- 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
- 	host->mmc_host_ops.execute_tuning = sdhci_cdns_execute_tuning;
-+	host->mmc_host_ops.hs400_enhanced_strobe =
-+				sdhci_cdns_hs400_enhanced_strobe;
- 
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
--- 
-2.2.2
+CgowNi4wMy4yMDE3LCAxODowNCwgIk1heGltZSBSaXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUt
+ZWxlY3Ryb25zLmNvbT46Cj4gSGksCj4KPiBPbiBNb24sIE1hciAwNiwgMjAxNyBhdCAxMjo0NToz
+NUFNICswODAwLCBJY2Vub3d5IFpoZW5nIHdyb3RlOgo+PiDCoFJlc3BvbnNlIFRpbWVvdXQgaXMg
+dmVyeSB1c3VhbDogaXQgd2lsbCBoYXBwZW4gd2hlbiB0cnlpbmcgdG8gcnVuIHNvbWUKPj4gwqBj
+b21tYW5kcyB0aGF0IGRvIG5vdCBiZWxvbmcgdG8gdGhlIGNhcmQ7IGl0IHdpbGwgaGFwcGVuIHdo
+ZW4gc29tZSBTRElPCj4+IMKgY2FyZCB0cmFuc2ZlciBiZXlvbmQgaXRzIFNESU8gYmFuZHdpZHRo
+OyBhbmQgd2hlbiB0aGUgTU1DIGNvbnRyb2xsZXIgaXMKPj4gwqBzZXQgdG8gcG9sbCB0aGUgY2Fy
+ZCB3aXRoICJicm9rZW4tY2QiIHByb3BlcnR5ICh0aGUgTGljaGVlIFBpIHNlcmllcyBvZgo+PiDC
+oGJvYXJkcyBkbyB0aGlzKSwgaXQgd2lsbCBmbG9vZCB0byB0aGUgY29uc29sZSBhbmQgbWFrZSB0
+aGUgY29uc29sZQo+PiDCoHVudXNhYmxlLgo+Pgo+PiDCoE1hc2sgYWxsIHJlc3BvbnNlLXRpbWVv
+dXQtb25seSBlcnJvciBtZXNzYWdlcywgb25seSBzaG93IGl0IHdoZW4gYW5vdGhlcgo+PiDCoGVy
+cm9yIGhhcHBlbnMuCj4+Cj4+IMKgU2lnbmVkLW9mZi1ieTogSWNlbm93eSBaaGVuZyA8aWNlbm93
+eUBhb3NjLnh5ej4KPj4gwqAtLS0KPj4gwqDCoGRyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMg
+fCAxMyArKysrKysrKystLS0tCj4+IMKgwqAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCsp
+LCA0IGRlbGV0aW9ucygtKQo+Pgo+PiDCoGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3N1
+bnhpLW1tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYwo+PiDCoGluZGV4IDZmZmNk
+MjgzODI3Mi4uNzgyOGUxZjU3Y2YwIDEwMDY0NAo+PiDCoC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qv
+c3VueGktbW1jLmMKPj4gwqArKysgYi9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKg
+QEAgLTQ4MywxMCArNDgzLDE1IEBAIHN0YXRpYyB2b2lkIHN1bnhpX21tY19kdW1wX2VycmluZm8o
+c3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0KQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHN0cnVj
+dCBtbWNfY29tbWFuZCAqY21kID0gaG9zdC0+bXJxLT5jbWQ7Cj4+IMKgwqDCoMKgwqDCoMKgwqDC
+oMKgc3RydWN0IG1tY19kYXRhICpkYXRhID0gaG9zdC0+bXJxLT5kYXRhOwo+Pgo+PiDCoC0gLyog
+Rm9yIHNvbWUgY21kcyB0aW1lb3V0IGlzIG5vcm1hbCB3aXRoIHNkL21tYyBjYXJkcyAqLwo+PiDC
+oC0gaWYgKChob3N0LT5pbnRfc3VtICYgU0RYQ19JTlRFUlJVUFRfRVJST1JfQklUKSA9PQo+PiDC
+oC0gU0RYQ19SRVNQX1RJTUVPVVQgJiYgKGNtZC0+b3Bjb2RlID09IFNEX0lPX1NFTkRfT1BfQ09O
+RCB8fAo+PiDCoC0gY21kLT5vcGNvZGUgPT0gU0RfSU9fUldfRElSRUNUKSkKPj4gwqArIC8qCj4+
+IMKgKyAqIFJlYWRpbmcgdGltZW91dCBpcyB1c3VhbGx5IG5vcm1hbCwgZXNwZWNpYWxseSB3aGVu
+IGRvaW5nCj4+IMKgKyAqIGNhcmQtcG9sbGluZyB3aXRoICJicm9rZW4tY2QiIGluIGRldmljZSB0
+cmVlLgo+PiDCoCsgKiBJZiBkbyBub3QgbWFzayBpdCwgdGhlIFJUTyBlcnJvciBtZXNzYWdlIHdp
+bGwgZmxvb2QgdGhlIGNvbnNvbGUKPj4gwqArICogYW5kIGV2ZW4gaGlkZSB1c2VmdWwgZXJyb3Ig
+bWVzc2FnZXMuCj4+IMKgKyAqCj4+IMKgKyAqIFNvbWUgU0RJTyBjb21tYW5kcyB3aWxsIGFsc28g
+bm9ybWFsbHkgdGltZW91dCB3aXRoIG5vbi1TRElPIGNhcmRzLgo+PiDCoCsgKi8KPj4gwqArIGlm
+ICgoaG9zdC0+aW50X3N1bSAmIFNEWENfSU5URVJSVVBUX0VSUk9SX0JJVCkgPT0gU0RYQ19SRVNQ
+X1RJTUVPVVQpCj4KPiBXZSByZWFsbHkgc2hvdWxkbid0IHNpbGVuY2UgbGVnaXQgZXJyb3JzLgo+
+Cj4gVGhlIGFjdHVhbCBwcm9ibGVtIGhlcmUgaXMgdGhhdCB3ZSBsb2cgdGhlbSBhcyBlcnJvciwg
+d2UgY291bGQKPiBwcm9iYWJseSByZWR1Y2UgaXQgdG8gZGVidWcuCgpFdmVuIGlmIGl0J3MgcmVk
+dWNlZCB0byBkZWJ1ZywgaXQgd2lsbCBzdGlsbCBmbHVzaCBkbWVzZyBidWZmZXJzLgoKT3IgbWFr
+ZSBpdCBvbmx5IHZpc2libGUgd2hlbiAiZGVidWciIHBhcmFtZXRlciBpcyBwcmVzZW50IGluIGtl
+cm5lbApjbWRsaW5lPwoKPgo+IE1heGltZQo+Cj4gLS0KPiBNYXhpbWUgUmlwYXJkLCBGcmVlIEVs
+ZWN0cm9ucwo+IEVtYmVkZGVkIExpbnV4IGFuZCBLZXJuZWwgZW5naW5lZXJpbmcKPiBodHRwOi8v
+ZnJlZS1lbGVjdHJvbnMuY29tCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVs
+QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
+aXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
