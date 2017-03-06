@@ -1,17 +1,15 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4 2/2] mmc: host: s3cmci: allow probing from device tree
-Date: Mon, 06 Mar 2017 12:41:22 +0900
-Message-ID: <b13fb653-9449-8744-a30b-9634d46eff8b@samsung.com>
-References: <1488417536-15110-1-git-send-email-sergio.prado@e-labworks.com>
- <CGME20170302012845epcas4p3d7e48f13c80b2115cea89e914b067eeb@epcas4p3.samsung.com>
- <1488417536-15110-3-git-send-email-sergio.prado@e-labworks.com>
- <39c2b81b-6519-826b-2c8d-344725ce2882@samsung.com>
- <20170303113847.GA17377@sprado-desktop>
+From: Daniel Kurtz <djkurtz@chromium.org>
+Subject: Re: [PATCH] mmc: mediatek: Fixed bug where clock frequency could be
+ set wrong
+Date: Mon, 6 Mar 2017 15:06:37 +0800
+Message-ID: <CAGS+omCf1JH0EcuKp_GFKUaeQc1TJw8LDBgmxsuTtyzg9vBqLA@mail.gmail.com>
+References: <1488611403-30186-1-git-send-email-yong.mao@mediatek.com>
+ <1488611403-30186-2-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <20170303113847.GA17377@sprado-desktop>
+In-Reply-To: <1488611403-30186-2-git-send-email-yong.mao@mediatek.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,70 +19,57 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sergio Prado <sergio.prado@e-labworks.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, robh+dt@kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/03/2017 08:38 PM, Sergio Prado wrote:
-> On Fri, Mar 03, 2017 at 11:14:29AM +0900, Jaehoon Chung wrote:
->> On 03/02/2017 10:18 AM, Sergio Prado wrote:
->>> Allows configuring Samsung S3C24XX MMC/SD/SDIO controller using a device
->>> tree.
->>>
->>> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
->>> ---
->>>  drivers/mmc/host/s3cmci.c | 298 ++++++++++++++++++++++++----------------------
->>>  drivers/mmc/host/s3cmci.h |   3 +-
->>>  2 files changed, 158 insertions(+), 143 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
->>> index 7a173f8c455b..d066dbdb957c 100644
->>> --- a/drivers/mmc/host/s3cmci.c
->>> +++ b/drivers/mmc/host/s3cmci.c
->>> @@ -24,6 +24,10 @@
->>>  #include <linux/interrupt.h>
->>>  #include <linux/irq.h>
->>>  #include <linux/io.h>
->>> +#include <linux/of.h>
->>> +#include <linux/of_device.h>
->>> +#include <linux/of_gpio.h>
->>> +#include <linux/mmc/slot-gpio.h>
->>>  
->>>  #include <plat/gpio-cfg.h>
->>>  #include <mach/dma.h>
->>> @@ -128,6 +132,22 @@ enum dbg_channels {
->>>  	dbg_conf  = (1 << 8),
->>>  };
->>>  
->>> +struct s3cmci_variant_data {
->>> +	int s3c2440_compatible;
->>> +};
->>
->> I didn't understand why this structure needs.
->>
->> Before this patch,
->> host->is2440;
->>
->> After this patch,
->> host->variant->s3c2440_compatible;
->>
->> Just add the one pointer for checking s3c2400 compatible..
->> Is it really meaningful?
->> (I didn't read the previous comments fully.)
-> 
-> Although just a pointer would be enought, having a structure makes it
-> more flexible to extend it in the future.
+Hi Yong,
 
-If you will add the other members in this structure, it's ok.
-But if it's only for compatible, i don't agree this.
+On Sat, Mar 4, 2017 at 3:10 PM, Yong Mao <yong.mao@mediatek.com> wrote:
+> From: yong mao <yong.mao@mediatek.com>
+>
+> This patch can fix two issues:
+>
+> Issue 1:
+> In previous code, div may be overflow when setting clock frequency
+> as f_min. We can use DIV_ROUND_UP to fix this boundary related
+> issue.
+>
+> Issue 2:
+> In previous code, we can not set the correct clock frequency when
+> div equals 0xff.
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
-Best Regards,
-Jaehoon Chung
+Reviewed-by: Daniel Kurtz <djkurtz@chromium.org>
 
-> 
-> Best regards,
-> 
-> Sergio Prado
-> 
-> 
-> 
+> ---
+>  drivers/mmc/host/mtk-sd.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 07f3236..3ad5228 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -591,7 +591,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>                 }
+>         }
+>         sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> -                       (mode << 8) | (div % 0xff));
+> +                     (mode << 8) | div);
+>         sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
+>         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>                 cpu_relax();
+> @@ -1692,7 +1692,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         host->src_clk_freq = clk_get_rate(host->src_clk);
+>         /* Set host parameters to mmc */
+>         mmc->ops = &mt_msdc_ops;
+> -       mmc->f_min = host->src_clk_freq / (4 * 255);
+> +       mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+>
+>         mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+>         /* MMC core transfer sizes tunable parameters */
+> --
+> 1.7.9.5
+>
