@@ -1,11 +1,17 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: [PATCH] mmc: sunxi: mask all Response Timeout error messages
-Date: Mon,  6 Mar 2017 00:45:35 +0800
-Message-ID: <20170305164535.36259-1-icenowy@aosc.xyz>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4 2/2] mmc: host: s3cmci: allow probing from device tree
+Date: Mon, 06 Mar 2017 12:41:22 +0900
+Message-ID: <b13fb653-9449-8744-a30b-9634d46eff8b@samsung.com>
+References: <1488417536-15110-1-git-send-email-sergio.prado@e-labworks.com>
+ <CGME20170302012845epcas4p3d7e48f13c80b2115cea89e914b067eeb@epcas4p3.samsung.com>
+ <1488417536-15110-3-git-send-email-sergio.prado@e-labworks.com>
+ <39c2b81b-6519-826b-2c8d-344725ce2882@samsung.com>
+ <20170303113847.GA17377@sprado-desktop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-reply-to: <20170303113847.GA17377@sprado-desktop>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -15,48 +21,70 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Hans de Goede <hdegoede@redhat.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Icenowy Zheng <icenowy@aosc.xyz>
+To: Sergio Prado <sergio.prado@e-labworks.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, robh+dt@kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Response Timeout is very usual: it will happen when trying to run some
-commands that do not belong to the card; it will happen when some SDIO
-card transfer beyond its SDIO bandwidth; and when the MMC controller is
-set to poll the card with "broken-cd" property (the Lichee Pi series of
-boards do this), it will flood to the console and make the console
-unusable.
+On 03/03/2017 08:38 PM, Sergio Prado wrote:
+> On Fri, Mar 03, 2017 at 11:14:29AM +0900, Jaehoon Chung wrote:
+>> On 03/02/2017 10:18 AM, Sergio Prado wrote:
+>>> Allows configuring Samsung S3C24XX MMC/SD/SDIO controller using a device
+>>> tree.
+>>>
+>>> Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
+>>> ---
+>>>  drivers/mmc/host/s3cmci.c | 298 ++++++++++++++++++++++++----------------------
+>>>  drivers/mmc/host/s3cmci.h |   3 +-
+>>>  2 files changed, 158 insertions(+), 143 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+>>> index 7a173f8c455b..d066dbdb957c 100644
+>>> --- a/drivers/mmc/host/s3cmci.c
+>>> +++ b/drivers/mmc/host/s3cmci.c
+>>> @@ -24,6 +24,10 @@
+>>>  #include <linux/interrupt.h>
+>>>  #include <linux/irq.h>
+>>>  #include <linux/io.h>
+>>> +#include <linux/of.h>
+>>> +#include <linux/of_device.h>
+>>> +#include <linux/of_gpio.h>
+>>> +#include <linux/mmc/slot-gpio.h>
+>>>  
+>>>  #include <plat/gpio-cfg.h>
+>>>  #include <mach/dma.h>
+>>> @@ -128,6 +132,22 @@ enum dbg_channels {
+>>>  	dbg_conf  = (1 << 8),
+>>>  };
+>>>  
+>>> +struct s3cmci_variant_data {
+>>> +	int s3c2440_compatible;
+>>> +};
+>>
+>> I didn't understand why this structure needs.
+>>
+>> Before this patch,
+>> host->is2440;
+>>
+>> After this patch,
+>> host->variant->s3c2440_compatible;
+>>
+>> Just add the one pointer for checking s3c2400 compatible..
+>> Is it really meaningful?
+>> (I didn't read the previous comments fully.)
+> 
+> Although just a pointer would be enought, having a structure makes it
+> more flexible to extend it in the future.
 
-Mask all response-timeout-only error messages, only show it when another
-error happens.
+If you will add the other members in this structure, it's ok.
+But if it's only for compatible, i don't agree this.
 
-Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
----
- drivers/mmc/host/sunxi-mmc.c | 13 +++++++++----
- 1 file changed, 9 insertions(+), 4 deletions(-)
+Best Regards,
+Jaehoon Chung
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 6ffcd2838272..7828e1f57cf0 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -483,10 +483,15 @@ static void sunxi_mmc_dump_errinfo(struct sunxi_mmc_host *host)
- 	struct mmc_command *cmd = host->mrq->cmd;
- 	struct mmc_data *data = host->mrq->data;
- 
--	/* For some cmds timeout is normal with sd/mmc cards */
--	if ((host->int_sum & SDXC_INTERRUPT_ERROR_BIT) ==
--		SDXC_RESP_TIMEOUT && (cmd->opcode == SD_IO_SEND_OP_COND ||
--				      cmd->opcode == SD_IO_RW_DIRECT))
-+	/*
-+	 * Reading timeout is usually normal, especially when doing
-+	 * card-polling with "broken-cd" in device tree.
-+	 * If do not mask it, the RTO error message will flood the console
-+	 * and even hide useful error messages.
-+	 *
-+	 * Some SDIO commands will also normally timeout with non-SDIO cards.
-+	 */
-+	if ((host->int_sum & SDXC_INTERRUPT_ERROR_BIT) == SDXC_RESP_TIMEOUT)
- 		return;
- 
- 	dev_err(mmc_dev(host->mmc),
--- 
-2.11.1
+> 
+> Best regards,
+> 
+> Sergio Prado
+> 
+> 
+> 
