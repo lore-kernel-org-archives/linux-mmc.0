@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V1 09/18] mmc: core: Add mmc_retune_hold_now()
-Date: Mon,  6 Mar 2017 11:11:04 +0200
-Message-ID: <1488791473-24981-10-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V1 08/18] mmc: core: Factor out mrq preparation from mmc_start_request()
+Date: Mon,  6 Mar 2017 11:11:03 +0200
+Message-ID: <1488791473-24981-9-git-send-email-adrian.hunter@intel.com>
 References: <1488791473-24981-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:15177 "EHLO mga07.intel.com"
+Received: from mga07.intel.com ([134.134.136.100]:33527 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753472AbdCFJRp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1753195AbdCFJRp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Mon, 6 Mar 2017 04:17:45 -0500
 In-Reply-To: <1488791473-24981-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -14,43 +14,85 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-In preparation for CQE support.
+In preparation to reuse the code for CQE support.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/host.c | 6 ++++++
- drivers/mmc/core/host.h | 1 +
- 2 files changed, 7 insertions(+)
+ drivers/mmc/core/core.c | 40 +++++++++++++++++++++++++++-------------
+ 1 file changed, 27 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3f8c85d5aa09..2c8696d835ba 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -110,6 +110,12 @@ void mmc_retune_hold(struct mmc_host *host)
- 	host->hold_retune += 1;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6b063f0c2553..ffc263283f54 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -292,23 +292,18 @@ static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
+ 	}
  }
  
-+void mmc_retune_hold_now(struct mmc_host *host)
-+{
-+	host->retune_now = 0;
-+	host->hold_retune += 1;
+-static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
++static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int i, sz;
+ 	struct scatterlist *sg;
+ #endif
+-	mmc_retune_hold(host);
+-
+-	if (mmc_card_removed(host->card))
+-		return -ENOMEDIUM;
+-
+-	mmc_mrq_pr_debug(host, mrq);
+-
+-	WARN_ON(!host->claimed);
+ 
+-	mrq->cmd->error = 0;
+-	mrq->cmd->mrq = mrq;
++	if (mrq->cmd) {
++		mrq->cmd->error = 0;
++		mrq->cmd->mrq = mrq;
++		mrq->cmd->data = mrq->data;
++	}
+ 	if (mrq->sbc) {
+ 		mrq->sbc->error = 0;
+ 		mrq->sbc->mrq = mrq;
+@@ -325,8 +320,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		if (sz != mrq->data->blocks * mrq->data->blksz)
+ 			return -EINVAL;
+ #endif
+-
+-		mrq->cmd->data = mrq->data;
+ 		mrq->data->error = 0;
+ 		mrq->data->mrq = mrq;
+ 		if (mrq->stop) {
+@@ -335,6 +328,27 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 			mrq->stop->mrq = mrq;
+ 		}
+ 	}
++
++	return 0;
 +}
 +
- void mmc_retune_release(struct mmc_host *host)
- {
- 	if (host->hold_retune)
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index fb6a76a03833..77d6f60d1bf9 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -19,6 +19,7 @@
- void mmc_retune_enable(struct mmc_host *host);
- void mmc_retune_disable(struct mmc_host *host);
- void mmc_retune_hold(struct mmc_host *host);
-+void mmc_retune_hold_now(struct mmc_host *host);
- void mmc_retune_release(struct mmc_host *host);
- int mmc_retune(struct mmc_host *host);
- void mmc_retune_pause(struct mmc_host *host);
++static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
++{
++	int err;
++
++	mmc_retune_hold(host);
++
++	if (mmc_card_removed(host->card))
++		return -ENOMEDIUM;
++
++	mmc_mrq_pr_debug(host, mrq);
++
++	WARN_ON(!host->claimed);
++
++	err = mmc_mrq_prep(host, mrq);
++	if (err)
++		return err;
++
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
+ 
 -- 
 1.9.1
 
