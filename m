@@ -1,68 +1,118 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: Re: [PATCH] mmc: sunxi: mask all Response Timeout error messages
-Date: Mon, 06 Mar 2017 18:32:41 +0800
-Message-ID: <1597991488796361@web24m.yandex.ru>
-References: <20170305164535.36259-1-icenowy@aosc.xyz>
- <20170306100437.sr7mrvssdwnt7aaz@lukather>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH v11 1/9] dt-bindings: mmc: Add Cavium SOCs MMC bindings
+Date: Mon, 6 Mar 2017 12:09:59 +0100
+Message-ID: <20170306110959.GA5049@hardcore>
+References: <20170206133953.8390-1-jglauber@cavium.com>
+ <20170206133953.8390-2-jglauber@cavium.com>
+ <CAPDyKFrE546UMc3QBHw_C1a6Dz5mOQfURroiCBTOV3SbreR-EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170306100437.sr7mrvssdwnt7aaz@lukather>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrE546UMc3QBHw_C1a6Dz5mOQfURroiCBTOV3SbreR-EQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, David Daney <david.daney@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-CgowNi4wMy4yMDE3LCAxODowNCwgIk1heGltZSBSaXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUt
-ZWxlY3Ryb25zLmNvbT46Cj4gSGksCj4KPiBPbiBNb24sIE1hciAwNiwgMjAxNyBhdCAxMjo0NToz
-NUFNICswODAwLCBJY2Vub3d5IFpoZW5nIHdyb3RlOgo+PiDCoFJlc3BvbnNlIFRpbWVvdXQgaXMg
-dmVyeSB1c3VhbDogaXQgd2lsbCBoYXBwZW4gd2hlbiB0cnlpbmcgdG8gcnVuIHNvbWUKPj4gwqBj
-b21tYW5kcyB0aGF0IGRvIG5vdCBiZWxvbmcgdG8gdGhlIGNhcmQ7IGl0IHdpbGwgaGFwcGVuIHdo
-ZW4gc29tZSBTRElPCj4+IMKgY2FyZCB0cmFuc2ZlciBiZXlvbmQgaXRzIFNESU8gYmFuZHdpZHRo
-OyBhbmQgd2hlbiB0aGUgTU1DIGNvbnRyb2xsZXIgaXMKPj4gwqBzZXQgdG8gcG9sbCB0aGUgY2Fy
-ZCB3aXRoICJicm9rZW4tY2QiIHByb3BlcnR5ICh0aGUgTGljaGVlIFBpIHNlcmllcyBvZgo+PiDC
-oGJvYXJkcyBkbyB0aGlzKSwgaXQgd2lsbCBmbG9vZCB0byB0aGUgY29uc29sZSBhbmQgbWFrZSB0
-aGUgY29uc29sZQo+PiDCoHVudXNhYmxlLgo+Pgo+PiDCoE1hc2sgYWxsIHJlc3BvbnNlLXRpbWVv
-dXQtb25seSBlcnJvciBtZXNzYWdlcywgb25seSBzaG93IGl0IHdoZW4gYW5vdGhlcgo+PiDCoGVy
-cm9yIGhhcHBlbnMuCj4+Cj4+IMKgU2lnbmVkLW9mZi1ieTogSWNlbm93eSBaaGVuZyA8aWNlbm93
-eUBhb3NjLnh5ej4KPj4gwqAtLS0KPj4gwqDCoGRyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMg
-fCAxMyArKysrKysrKystLS0tCj4+IMKgwqAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCsp
-LCA0IGRlbGV0aW9ucygtKQo+Pgo+PiDCoGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3N1
-bnhpLW1tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYwo+PiDCoGluZGV4IDZmZmNk
-MjgzODI3Mi4uNzgyOGUxZjU3Y2YwIDEwMDY0NAo+PiDCoC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qv
-c3VueGktbW1jLmMKPj4gwqArKysgYi9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKg
-QEAgLTQ4MywxMCArNDgzLDE1IEBAIHN0YXRpYyB2b2lkIHN1bnhpX21tY19kdW1wX2VycmluZm8o
-c3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0KQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHN0cnVj
-dCBtbWNfY29tbWFuZCAqY21kID0gaG9zdC0+bXJxLT5jbWQ7Cj4+IMKgwqDCoMKgwqDCoMKgwqDC
-oMKgc3RydWN0IG1tY19kYXRhICpkYXRhID0gaG9zdC0+bXJxLT5kYXRhOwo+Pgo+PiDCoC0gLyog
-Rm9yIHNvbWUgY21kcyB0aW1lb3V0IGlzIG5vcm1hbCB3aXRoIHNkL21tYyBjYXJkcyAqLwo+PiDC
-oC0gaWYgKChob3N0LT5pbnRfc3VtICYgU0RYQ19JTlRFUlJVUFRfRVJST1JfQklUKSA9PQo+PiDC
-oC0gU0RYQ19SRVNQX1RJTUVPVVQgJiYgKGNtZC0+b3Bjb2RlID09IFNEX0lPX1NFTkRfT1BfQ09O
-RCB8fAo+PiDCoC0gY21kLT5vcGNvZGUgPT0gU0RfSU9fUldfRElSRUNUKSkKPj4gwqArIC8qCj4+
-IMKgKyAqIFJlYWRpbmcgdGltZW91dCBpcyB1c3VhbGx5IG5vcm1hbCwgZXNwZWNpYWxseSB3aGVu
-IGRvaW5nCj4+IMKgKyAqIGNhcmQtcG9sbGluZyB3aXRoICJicm9rZW4tY2QiIGluIGRldmljZSB0
-cmVlLgo+PiDCoCsgKiBJZiBkbyBub3QgbWFzayBpdCwgdGhlIFJUTyBlcnJvciBtZXNzYWdlIHdp
-bGwgZmxvb2QgdGhlIGNvbnNvbGUKPj4gwqArICogYW5kIGV2ZW4gaGlkZSB1c2VmdWwgZXJyb3Ig
-bWVzc2FnZXMuCj4+IMKgKyAqCj4+IMKgKyAqIFNvbWUgU0RJTyBjb21tYW5kcyB3aWxsIGFsc28g
-bm9ybWFsbHkgdGltZW91dCB3aXRoIG5vbi1TRElPIGNhcmRzLgo+PiDCoCsgKi8KPj4gwqArIGlm
-ICgoaG9zdC0+aW50X3N1bSAmIFNEWENfSU5URVJSVVBUX0VSUk9SX0JJVCkgPT0gU0RYQ19SRVNQ
-X1RJTUVPVVQpCj4KPiBXZSByZWFsbHkgc2hvdWxkbid0IHNpbGVuY2UgbGVnaXQgZXJyb3JzLgo+
-Cj4gVGhlIGFjdHVhbCBwcm9ibGVtIGhlcmUgaXMgdGhhdCB3ZSBsb2cgdGhlbSBhcyBlcnJvciwg
-d2UgY291bGQKPiBwcm9iYWJseSByZWR1Y2UgaXQgdG8gZGVidWcuCgpFdmVuIGlmIGl0J3MgcmVk
-dWNlZCB0byBkZWJ1ZywgaXQgd2lsbCBzdGlsbCBmbHVzaCBkbWVzZyBidWZmZXJzLgoKT3IgbWFr
-ZSBpdCBvbmx5IHZpc2libGUgd2hlbiAiZGVidWciIHBhcmFtZXRlciBpcyBwcmVzZW50IGluIGtl
-cm5lbApjbWRsaW5lPwoKPgo+IE1heGltZQo+Cj4gLS0KPiBNYXhpbWUgUmlwYXJkLCBGcmVlIEVs
-ZWN0cm9ucwo+IEVtYmVkZGVkIExpbnV4IGFuZCBLZXJuZWwgZW5naW5lZXJpbmcKPiBodHRwOi8v
-ZnJlZS1lbGVjdHJvbnMuY29tCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVs
-QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
-aXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+On Fri, Mar 03, 2017 at 12:47:06PM +0100, Ulf Hansson wrote:
+> On 6 February 2017 at 14:39, Jan Glauber <jglauber@cavium.com> wrote:
+> > Add description of Cavium Octeon and ThunderX SOC device tree bindings.
+> >
+> > CC: Ulf Hansson <ulf.hansson@linaro.org>
+> > CC: Rob Herring <robh+dt@kernel.org>
+> > CC: Mark Rutland <mark.rutland@arm.com>
+> > CC: devicetree@vger.kernel.org
+> >
+> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> > Signed-off-by: David Daney <david.daney@cavium.com>
+> > Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+> > ---
+> >  .../devicetree/bindings/mmc/cavium-mmc.txt         | 60 ++++++++++++++++++++++
+> >  1 file changed, 60 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/cavium-mmc.txt b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+> > new file mode 100644
+> > index 0000000..b79e356
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+> > @@ -0,0 +1,60 @@
+> > +* Cavium Octeon & ThunderX MMC controller
+> > +
+> > +The highspeed MMC host controller on Caviums SoCs provides an interface
+> > +for MMC and SD types of memory cards.
+> > +
+> > +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+> > +as the speed of SD standard 4.0. Only 3.3 Volt is supported.
+> > +
+> > +Required properties:
+> > + - compatible : should be one of:
+> > +   cavium,octeon-6130-mmc
+> > +   cavium,octeon-6130-mmc-slot
+> > +   cavium,octeon-7890-mmc
+> > +   cavium,octeon-7890-mmc-slot
+> > +   cavium,thunder-8190-mmc
+> > +   cavium,thunder-8190-mmc-slot
+> > +   cavium,thunder-8390-mmc
+> > +   cavium,thunder-8390-mmc-slot
+> > + - reg : mmc controller base registers
+> > + - clocks : phandle
+> > +
+> > +Optional properties:
+> > + - for cd, bus-width and additional generic mmc parameters
+> > +   please refer to mmc.txt within this directory
+> > + - cavium,cmd-clk-skew : number of coprocessor clocks before sampling command
+> > + - cavium,dat-clk-skew : number of coprocessor clocks before sampling data
+> > +
+> > +Deprecated properties:
+> > +- spi-max-frequency : use max-frequency instead
+> > +- cavium,bus-max-width : use bus-width instead
+> > +
+> > +Examples:
+> > +       mmc_1_4: mmc@1,4 {
+> > +               compatible = "cavium,thunder-8390-mmc";
+> > +               reg = <0x0c00 0 0 0 0>; /* DEVFN = 0x0c (1:4) */
+> > +               #address-cells = <1>;
+> > +               #size-cells = <0>;
+> > +               clocks = <&sclk>;
+> > +
+> > +               mmc-slot@0 {
+> > +                       compatible = "cavium,thunder-8390-mmc-slot";
+> > +                       reg = <0>;
+> > +                       voltage-ranges = <3300 3300>;
+> > +                       vmmc-supply = <&mmc_supply_3v3>;
+> 
+> The vmmc supply as a regulator provides you with the voltage range,
+> thus you don't need the "voltage-ranges" here. Please remove this.
+
+OK, I'll drop these.
+
+thanks,
+Jan
+
+> > +                       max-frequency = <42000000>;
+> > +                       bus-width = <4>;
+> > +                       cap-sd-highspeed;
+> > +               };
+> > +
+> > +               mmc-slot@1 {
+> > +                       compatible = "cavium,thunder-8390-mmc-slot";
+> > +                       reg = <1>;
+> > +                       voltage-ranges = <3300 3300>;
+> > +                       vmmc-supply = <&mmc_supply_3v3>;
+> 
+> Ditto.
+> 
+> > +                       max-frequency = <42000000>;
+> > +                       bus-width = <8>;
+> > +                       cap-mmc-highspeed;
+> > +                       non-removable;
+> > +               };
+> > +       };
+> > --
+> > 2.9.0.rc0.21.g7777322
+> >
+> 
+> Kind regards
+> Uffe
