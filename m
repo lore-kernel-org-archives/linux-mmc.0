@@ -1,76 +1,71 @@
 From: Romain Perier <romain.perier@collabora.com>
-Subject: [PATCH v2 2/4] mmc: pwrseq-simple: Add optional op. for post_ios_power_on callback
-Date: Mon,  6 Mar 2017 15:17:14 +0100
-Message-ID: <20170306141716.19120-3-romain.perier@collabora.com>
+Subject: [PATCH v2 3/4] mmc: pwrseq_simple: Add an optional pre-power-on-delay
+Date: Mon,  6 Mar 2017 15:17:15 +0100
+Message-ID: <20170306141716.19120-4-romain.perier@collabora.com>
 References: <20170306141716.19120-1-romain.perier@collabora.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:57603 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932194AbdCFORo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2017 09:17:44 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170306141716.19120-1-romain.perier@collabora.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, Heiko Stuebner <heiko@sntech.de>, Romain Perier <romain.perier@collabora.com>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-Some devices require to do their entire power sequence after that the
-power supply of the MMC has been powered on. This can be done by
-only implementing the optional post_ios_power_on() callback that rely on
-pre_power_on/post_power_on functions, other functions being NULL. Then
-we introduce a new DT property "post_ios_power_on", when this property
-is set the driver will use its post_ios_power_on operations, otherwise
-it fallbacks to the default operations with pre_power_on/post_power_on.
+Some devices need a while between the enablement of its clk and the time
+where the reset line is asserted. When this time happens between the
+pre_power_on and the post_power_on callbacks, there is a need to do an
+msleep at the end of the pre_power_on callback.
+
+This commit adds an optional DT property for such devices.
 
 Signed-off-by: Romain Perier <romain.perier@collabora.com>
 ---
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+ drivers/mmc/core/pwrseq_simple.c                            | 6 ++++++
+ 2 files changed, 8 insertions(+)
 
-Changes in v2:
- - Added missing power_off function in mmc_pwrseq_post_ios_ops
-
- drivers/mmc/core/pwrseq_simple.c | 16 +++++++++++++++-
- 1 file changed, 15 insertions(+), 1 deletion(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+index e254368..821feaaf 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+@@ -18,6 +18,8 @@ Optional properties:
+   "ext_clock" (External clock provided to the card).
+ - post-power-on-delay-ms : Delay in ms after powering the card and
+ 	de-asserting the reset-gpios (if any)
++- pre-power-on-delay-ms : Delay in ms before powering the card and
++	asserting the reset-gpios (if any)
+ 
+ Example:
+ 
 diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 1304160..e27019f 100644
+index e27019f..d8d7166 100644
 --- a/drivers/mmc/core/pwrseq_simple.c
 +++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -84,12 +84,23 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+@@ -27,6 +27,7 @@ struct mmc_pwrseq_simple {
+ 	struct mmc_pwrseq pwrseq;
+ 	bool clk_enabled;
+ 	u32 post_power_on_delay_ms;
++	u32 pre_power_on_delay_ms;
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
+ };
+@@ -60,6 +61,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
  	}
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
++
++	if (pwrseq->pre_power_on_delay_ms)
++		msleep(pwrseq->pre_power_on_delay_ms);
  }
  
-+static void mmc_pwrseq_simple_post_ios_power_on(struct mmc_host *host)
-+{
-+	mmc_pwrseq_simple_pre_power_on(host);
-+	mmc_pwrseq_simple_post_power_on(host);
-+}
-+
- static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
- 	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
- 	.post_power_on = mmc_pwrseq_simple_post_power_on,
- 	.power_off = mmc_pwrseq_simple_power_off,
- };
+ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+@@ -130,6 +134,8 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
  
-+static const struct mmc_pwrseq_ops mmc_pwrseq_post_ios_ops = {
-+	.post_ios_power_on = mmc_pwrseq_simple_post_ios_power_on,
-+	.power_off = mmc_pwrseq_simple_power_off,
-+};
-+
- static const struct of_device_id mmc_pwrseq_simple_of_match[] = {
- 	{ .compatible = "mmc-pwrseq-simple",},
- 	{/* sentinel */},
-@@ -121,7 +132,10 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 	device_property_read_u32(dev, "post-power-on-delay-ms",
  				 &pwrseq->post_power_on_delay_ms);
++	device_property_read_u32(dev, "pre-power-on-delay-ms",
++				 &pwrseq->pre_power_on_delay_ms);
  
  	pwrseq->pwrseq.dev = dev;
--	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
-+	if (device_property_read_bool(dev, "post-ios-power-on"))
-+		pwrseq->pwrseq.ops = &mmc_pwrseq_post_ios_ops;
-+	else
-+		pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
- 	pwrseq->pwrseq.owner = THIS_MODULE;
- 	platform_set_drvdata(pdev, pwrseq);
- 
+ 	if (device_property_read_bool(dev, "post-ios-power-on"))
 -- 
 2.9.3
-
