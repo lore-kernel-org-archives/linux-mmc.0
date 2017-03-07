@@ -1,43 +1,64 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [v3] mmc: sdhci-cadence: add HS400 enhanced strobe support
-Date: Tue, 7 Mar 2017 05:59:21 +0900
-Message-ID: <CAK7LNASidygSfmRZw7GWwG34W+kpaxvV5=OK=jrLcCSq_DOzLg@mail.gmail.com>
-References: <1488788921-29260-1-git-send-email-piotrs@cadence.com>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
+Date: Mon, 6 Mar 2017 19:42:53 -0800
+Message-ID: <20170307034253.GA32126@roeck-us.net>
+References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from condef-07.nifty.com ([202.248.20.72]:33147 "EHLO
-        condef-07.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753902AbdCFVG3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2017 16:06:29 -0500
-In-Reply-To: <1488788921-29260-1-git-send-email-piotrs@cadence.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Piotr,
+ping ...
 
-2017-03-06 17:28 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> Add support for HS400ES mode to Cadence SDHCI driver.
->
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+Ulf,
+
+I know it is early for a ping. However, the patch causing all HS400-ES
+devices to fail already made it into various stable releases, and I think
+it would be very desirable to get those back to working.
+
+Thanks,
+Guenter
+
+
+On Wed, Mar 01, 2017 at 02:11:47PM -0800, Guenter Roeck wrote:
+> HS400-ES devices fail to initialize with the following error messages.
+> 
+> mmc1: power class selection to bus width 8 ddr 0 failed
+> mmc1: error -110 whilst initialising MMC card
+> 
+> This was seen on Samsung Chromebook Plus. Code analysis points to
+> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
+> high-speed mode"), which attempts to set the bus width for all but
+> HS200 devices unconditionally. However, for HS400-ES, the bus width
+> is already selected.
+> 
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Douglas Anderson <dianders@chromium.org>
+> Cc: Brian Norris <briannorris@chromium.org>
+> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 > ---
-> Changes in v2:
-> - Modify enhanced strobe function to handle disabling
->   enhanced strobe inside the function.
->   Do no relay on that mmc_set_ios() is called
->   immediately after host->ops->hs400_enhanced_strobe(host, &host->ios).
-> Changes in v3:
-> - Few coding-style fixes were made.
-
-
-Thanks for the update, and it looks good to me.
-
-Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 7fd722868875..b502601df228 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		err = mmc_select_hs400(card);
+>  		if (err)
+>  			goto free_card;
+> -	} else {
+> +	} else if (!mmc_card_hs400es(card)) {
+>  		/* Select the desired bus width optionally */
+>  		err = mmc_select_bus_width(card);
+>  		if (err > 0 && mmc_card_hs(card)) {
+> -- 
+> 2.7.4
+> 
