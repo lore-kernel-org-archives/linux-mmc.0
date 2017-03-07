@@ -1,35 +1,86 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v3] mmc: sdhci-cadence: add HS400 enhanced strobe support
-Date: Tue, 7 Mar 2017 06:46:48 +0000
-Message-ID: <DM5PR07MB30826308A049735735D76CDADD2F0@DM5PR07MB3082.namprd07.prod.outlook.com>
-References: <1488788921-29260-1-git-send-email-piotrs@cadence.com>
- <CAK7LNASidygSfmRZw7GWwG34W+kpaxvV5=OK=jrLcCSq_DOzLg@mail.gmail.com>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Tue, 7 Mar 2017 16:05:07 +0800
+Message-ID: <1488873907.10538.3.camel@mhfsdcap03>
+References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
+ <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
+ <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
+ <1487930376.22858.14.camel@mhfsdcap03>
+ <CAL_Jsq+eo-Fy8Wf2yZpE3Ufp4V_7Gn+w9fTyjZDP6V7tY-=gdw@mail.gmail.com>
+ <1488512995.21451.16.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNASidygSfmRZw7GWwG34W+kpaxvV5=OK=jrLcCSq_DOzLg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1488512995.21451.16.camel@mhfsdcap03>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh@kernel.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgTWFzYWhpcm8sDQoNClRoYW5rcyBmb3IgYWxsIG9mIHlvdXIgcmV2aWV3cy4NCg0KQmVzdCBS
-ZWdhcmRzDQpQaW90ciBTcm9rYQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
-b206IE1hc2FoaXJvIFlhbWFkYSBbbWFpbHRvOnlhbWFkYS5tYXNhaGlyb0Bzb2Npb25leHQuY29t
-XQ0KPiBTZW50OiAwNiBNYXJjaCwgMjAxNyA5OjU5IFBNDQo+IFN1YmplY3Q6IFJlOiBbdjNdIG1t
-Yzogc2RoY2ktY2FkZW5jZTogYWRkIEhTNDAwIGVuaGFuY2VkIHN0cm9iZSBzdXBwb3J0DQo+IA0K
-PiBIaSBQaW90ciwNCj4gDQo+IDIwMTctMDMtMDYgMTc6MjggR01UKzA5OjAwIFBpb3RyIFNyb2th
-IDxwaW90cnNAY2FkZW5jZS5jb20+Og0KPiA+IEFkZCBzdXBwb3J0IGZvciBIUzQwMEVTIG1vZGUg
-dG8gQ2FkZW5jZSBTREhDSSBkcml2ZXIuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBQaW90ciBT
-cm9rYSA8cGlvdHJzQGNhZGVuY2UuY29tPg0KPiA+IC0tLQ0KPiA+IENoYW5nZXMgaW4gdjI6DQo+
-ID4gLSBNb2RpZnkgZW5oYW5jZWQgc3Ryb2JlIGZ1bmN0aW9uIHRvIGhhbmRsZSBkaXNhYmxpbmcN
-Cj4gPiAgIGVuaGFuY2VkIHN0cm9iZSBpbnNpZGUgdGhlIGZ1bmN0aW9uLg0KPiA+ICAgRG8gbm8g
-cmVsYXkgb24gdGhhdCBtbWNfc2V0X2lvcygpIGlzIGNhbGxlZA0KPiA+ICAgaW1tZWRpYXRlbHkg
-YWZ0ZXIgaG9zdC0+b3BzLT5oczQwMF9lbmhhbmNlZF9zdHJvYmUoaG9zdCwgJmhvc3QtPmlvcyku
-DQo+ID4gQ2hhbmdlcyBpbiB2MzoNCj4gPiAtIEZldyBjb2Rpbmctc3R5bGUgZml4ZXMgd2VyZSBt
-YWRlLg0KPiANCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHVwZGF0ZSwgYW5kIGl0IGxvb2tzIGdvb2Qg
-dG8gbWUuDQo+IA0KPiBSZXZpZXdlZC1ieTogTWFzYWhpcm8gWWFtYWRhIDx5YW1hZGEubWFzYWhp
-cm9Ac29jaW9uZXh0LmNvbT4NCj4gDQo+IC0tDQo+IEJlc3QgUmVnYXJkcw0KPiBNYXNhaGlybyBZ
-YW1hZGENCg==
+On Fri, 2017-03-03 at 11:49 +0800, Yong Mao wrote:
+> On Fri, 2017-02-24 at 16:47 -0600, Rob Herring wrote:
+> > On Fri, Feb 24, 2017 at 3:59 AM, Yong Mao <yong.mao@mediatek.com> wrote:
+> > > Dear Rob,
+> > >
+> > > Could you please help to make comments for this patch?
+> > > Thanks.
+> > 
+> > I already did comment. It's still wrong as Ulf commented. So fix and
+> > send a new version. It has to go to the DT list if you want to be in
+> > my queue.
+> > 
+> > Rob
+> 
+> After reviewing the history, We guess your mentioned Ulf's comments is as below.
+>   
+> "> +- mtk-hs200-cmd-int-delay: HS200 command internal delay setting.
+> > + The value is an integer from 0 to 31
+> 
+> Please change to:
+> 
+> mediatek,hs200-cmd-delay
+> 
+> ... and if there is a unit, like ns or us, please add that a suffix.
+> 
+> > +- mtk-hs400-cmd-int-delay: HS400 command internal delay setting
+> > + The value is an integer from 0 to 31
+> 
+> mediatek,hs400-cmd-delay and add unit if applicable.
+> 
+> > +- mtk-hs400-cmd-resp-sel: HS400 command response sample selection
+> > + The value is an integer from 0 to 1
+> 
+> mediatek,hs400-cmd-resp-sel
+> 
+> And make it a boolean value instead!"
+> 
+> ==> We already fix this comment in v4. 
+> We use "mediatek,hs200-cmd-int-delay" to replace "mtk-hs200-cmd-int-delay", 
+> but not use "mediatek,hs200-cmd-delay". This is because "-int-" here means internal.
+> We should not drop it.
+> 
+> And this field does not have unit, it only have total 32 stages.
+> We also change the description in v4.
+> 
+> For comment about "mtk-hs400-cmd-resp-sel", we also make it a boolean value in v4.
+> And re-name it as "mediatek,hs400-cmd-resp-rising".
+> 
+> Please help to point out where we need to modify.
+> Thanks.
+> 
+> 
+
+Please help to point out a bright way for this patch.
+We are anxiously waiting for your response.
+
+Best Regards,
+Yong Mao.
