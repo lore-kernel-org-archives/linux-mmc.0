@@ -1,86 +1,137 @@
-From: Yong Mao <yong.mao@mediatek.com>
-Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
-Date: Tue, 7 Mar 2017 16:05:07 +0800
-Message-ID: <1488873907.10538.3.camel@mhfsdcap03>
-References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
- <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
- <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
- <1487930376.22858.14.camel@mhfsdcap03>
- <CAL_Jsq+eo-Fy8Wf2yZpE3Ufp4V_7Gn+w9fTyjZDP6V7tY-=gdw@mail.gmail.com>
- <1488512995.21451.16.camel@mhfsdcap03>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [v2 PATCH 3/3] mmc: sdhci-cadence: Update PHY delay configuration
+Date: Tue, 7 Mar 2017 17:02:56 +0900
+Message-ID: <CAK7LNATAa7svo_DrotgM0XKMhLbZ2Qum8qe6fJxxf4Z+ouH_wA@mail.gmail.com>
+References: <1488807587-5375-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1488512995.21451.16.camel@mhfsdcap03>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh@kernel.org>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, srv_heupstream <srv_heupstream@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from condef-08.nifty.com ([202.248.20.73]:51333 "EHLO
+        condef-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752233AbdCGIHp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Mar 2017 03:07:45 -0500
+In-Reply-To: <1488807587-5375-1-git-send-email-piotrs@cadence.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Piotr Sroka <piotrs@cadence.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Fri, 2017-03-03 at 11:49 +0800, Yong Mao wrote:
-> On Fri, 2017-02-24 at 16:47 -0600, Rob Herring wrote:
-> > On Fri, Feb 24, 2017 at 3:59 AM, Yong Mao <yong.mao@mediatek.com> wrote:
-> > > Dear Rob,
-> > >
-> > > Could you please help to make comments for this patch?
-> > > Thanks.
-> > 
-> > I already did comment. It's still wrong as Ulf commented. So fix and
-> > send a new version. It has to go to the DT list if you want to be in
-> > my queue.
-> > 
-> > Rob
-> 
-> After reviewing the history, We guess your mentioned Ulf's comments is as below.
->   
-> "> +- mtk-hs200-cmd-int-delay: HS200 command internal delay setting.
-> > + The value is an integer from 0 to 31
-> 
-> Please change to:
-> 
-> mediatek,hs200-cmd-delay
-> 
-> ... and if there is a unit, like ns or us, please add that a suffix.
-> 
-> > +- mtk-hs400-cmd-int-delay: HS400 command internal delay setting
-> > + The value is an integer from 0 to 31
-> 
-> mediatek,hs400-cmd-delay and add unit if applicable.
-> 
-> > +- mtk-hs400-cmd-resp-sel: HS400 command response sample selection
-> > + The value is an integer from 0 to 1
-> 
-> mediatek,hs400-cmd-resp-sel
-> 
-> And make it a boolean value instead!"
-> 
-> ==> We already fix this comment in v4. 
-> We use "mediatek,hs200-cmd-int-delay" to replace "mtk-hs200-cmd-int-delay", 
-> but not use "mediatek,hs200-cmd-delay". This is because "-int-" here means internal.
-> We should not drop it.
-> 
-> And this field does not have unit, it only have total 32 stages.
-> We also change the description in v4.
-> 
-> For comment about "mtk-hs400-cmd-resp-sel", we also make it a boolean value in v4.
-> And re-name it as "mediatek,hs400-cmd-resp-rising".
-> 
-> Please help to point out where we need to modify.
-> Thanks.
-> 
-> 
+Hi Piotr,
 
-Please help to point out a bright way for this patch.
-We are anxiously waiting for your response.
+2017-03-06 22:39 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
+> PHY settings can be different for different platforms and SoCs.
+> Fixed PHY input delays was replaced with SoC specific compatible data.
+> DTS properties are used for configuration new PHY DLL delays.
 
-Best Regards,
-Yong Mao.
+
+Probably you are familiar with this IP.
+
+Please teach me this.
+
+With this patch, we will have two groups for PHY parameters.
+
+(A) specified via a data array associated with a compatible string
+SDHCI_CDNS_PHY_DLY_SD_HS
+SDHCI_CDNS_PHY_DLY_SD_DEFAULT
+SDHCI_CDNS_PHY_DLY_UHS_SDR12
+SDHCI_CDNS_PHY_DLY_UHS_SDR25
+SDHCI_CDNS_PHY_DLY_UHS_SDR50
+SDHCI_CDNS_PHY_DLY_UHS_DDR50
+SDHCI_CDNS_PHY_DLY_EMMC_LEGACY
+SDHCI_CDNS_PHY_DLY_EMMC_SDR
+SDHCI_CDNS_PHY_DLY_EMMC_DDR
+
+(B) specified with DT property
+SDHCI_CDNS_PHY_DLY_SDCLK
+SDHCI_CDNS_PHY_DLY_HSMMC
+SDHCI_CDNS_PHY_DLY_STROBE
+
+
+I am confused.
+What is the difference between (A) and (B)?
+
+
+A little more minor issues below.
+
+
+>
+>  /*
+>   * The tuned val register is 6 bit-wide, but not the whole of the range is
+> @@ -62,10 +66,24 @@
+>   */
+>  #define SDHCI_CDNS_MAX_TUNING_LOOP     40
+>
+> +static const struct of_device_id sdhci_cdns_match[];
+> +
+
+You need not add this declaration
+if you use of_device_get_match_data().
+(please see below)
+
+
+
+
+
+> @@ -90,13 +108,77 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+>         return 0;
+>  }
+>
+> -static void sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
+> +static int sdhci_cdns_phy_in_delay_init(struct sdhci_cdns_priv *priv,
+> +                                       const struct sdhci_cdns_config *config)
+> +{
+> +       int ret = 0;
+
+
+The initializer "= 0" is unneeded here
+because the variable is re-assigned with a return value of functions.
+
+
+
+
+> @@ -254,7 +338,16 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto free;
+>
+> -       sdhci_cdns_phy_init(priv);
+> +       match = of_match_node(sdhci_cdns_match, dev->of_node);
+> +       if (match && match->data) {
+> +               ret = sdhci_cdns_phy_in_delay_init(priv, match->data);
+> +               if (ret)
+> +                       goto free;
+> +       }
+
+You can simplify the code with of_device_get_match_data():
+
+     config = of_device_get_match_data(dev);
+     if (config) {
+             ret = sdhci_cdns_phy_in_delay_init(priv, config);
+             if (ret)
+                     goto free;
+     }
+
+
+
+
+>  static const struct of_device_id sdhci_cdns_match[] = {
+> -       { .compatible = "socionext,uniphier-sd4hc" },
+> +       {
+> +               .compatible = "socionext,uniphier-sd4hc",
+> +               .data = &sdhci_cdns_uniphier_config
+> +       },
+>         { .compatible = "cdns,sd4hc" },
+
+
+I prefer cdns,sd4hc indented in the same way:
+
+          {
+                  .compatible = "cdns,sd4hc",
+          },
+
+
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
