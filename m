@@ -1,64 +1,35 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
-Date: Mon, 6 Mar 2017 19:42:53 -0800
-Message-ID: <20170307034253.GA32126@roeck-us.net>
-References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: RE: [v3] mmc: sdhci-cadence: add HS400 enhanced strobe support
+Date: Tue, 7 Mar 2017 06:46:48 +0000
+Message-ID: <DM5PR07MB30826308A049735735D76CDADD2F0@DM5PR07MB3082.namprd07.prod.outlook.com>
+References: <1488788921-29260-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNASidygSfmRZw7GWwG34W+kpaxvV5=OK=jrLcCSq_DOzLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+In-Reply-To: <CAK7LNASidygSfmRZw7GWwG34W+kpaxvV5=OK=jrLcCSq_DOzLg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-ping ...
-
-Ulf,
-
-I know it is early for a ping. However, the patch causing all HS400-ES
-devices to fail already made it into various stable releases, and I think
-it would be very desirable to get those back to working.
-
-Thanks,
-Guenter
-
-
-On Wed, Mar 01, 2017 at 02:11:47PM -0800, Guenter Roeck wrote:
-> HS400-ES devices fail to initialize with the following error messages.
-> 
-> mmc1: power class selection to bus width 8 ddr 0 failed
-> mmc1: error -110 whilst initialising MMC card
-> 
-> This was seen on Samsung Chromebook Plus. Code analysis points to
-> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
-> high-speed mode"), which attempts to set the bus width for all but
-> HS200 devices unconditionally. However, for HS400-ES, the bus width
-> is already selected.
-> 
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Douglas Anderson <dianders@chromium.org>
-> Cc: Brian Norris <briannorris@chromium.org>
-> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 7fd722868875..b502601df228 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		err = mmc_select_hs400(card);
->  		if (err)
->  			goto free_card;
-> -	} else {
-> +	} else if (!mmc_card_hs400es(card)) {
->  		/* Select the desired bus width optionally */
->  		err = mmc_select_bus_width(card);
->  		if (err > 0 && mmc_card_hs(card)) {
-> -- 
-> 2.7.4
-> 
+SGkgTWFzYWhpcm8sDQoNClRoYW5rcyBmb3IgYWxsIG9mIHlvdXIgcmV2aWV3cy4NCg0KQmVzdCBS
+ZWdhcmRzDQpQaW90ciBTcm9rYQ0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
+b206IE1hc2FoaXJvIFlhbWFkYSBbbWFpbHRvOnlhbWFkYS5tYXNhaGlyb0Bzb2Npb25leHQuY29t
+XQ0KPiBTZW50OiAwNiBNYXJjaCwgMjAxNyA5OjU5IFBNDQo+IFN1YmplY3Q6IFJlOiBbdjNdIG1t
+Yzogc2RoY2ktY2FkZW5jZTogYWRkIEhTNDAwIGVuaGFuY2VkIHN0cm9iZSBzdXBwb3J0DQo+IA0K
+PiBIaSBQaW90ciwNCj4gDQo+IDIwMTctMDMtMDYgMTc6MjggR01UKzA5OjAwIFBpb3RyIFNyb2th
+IDxwaW90cnNAY2FkZW5jZS5jb20+Og0KPiA+IEFkZCBzdXBwb3J0IGZvciBIUzQwMEVTIG1vZGUg
+dG8gQ2FkZW5jZSBTREhDSSBkcml2ZXIuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBQaW90ciBT
+cm9rYSA8cGlvdHJzQGNhZGVuY2UuY29tPg0KPiA+IC0tLQ0KPiA+IENoYW5nZXMgaW4gdjI6DQo+
+ID4gLSBNb2RpZnkgZW5oYW5jZWQgc3Ryb2JlIGZ1bmN0aW9uIHRvIGhhbmRsZSBkaXNhYmxpbmcN
+Cj4gPiAgIGVuaGFuY2VkIHN0cm9iZSBpbnNpZGUgdGhlIGZ1bmN0aW9uLg0KPiA+ICAgRG8gbm8g
+cmVsYXkgb24gdGhhdCBtbWNfc2V0X2lvcygpIGlzIGNhbGxlZA0KPiA+ICAgaW1tZWRpYXRlbHkg
+YWZ0ZXIgaG9zdC0+b3BzLT5oczQwMF9lbmhhbmNlZF9zdHJvYmUoaG9zdCwgJmhvc3QtPmlvcyku
+DQo+ID4gQ2hhbmdlcyBpbiB2MzoNCj4gPiAtIEZldyBjb2Rpbmctc3R5bGUgZml4ZXMgd2VyZSBt
+YWRlLg0KPiANCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHVwZGF0ZSwgYW5kIGl0IGxvb2tzIGdvb2Qg
+dG8gbWUuDQo+IA0KPiBSZXZpZXdlZC1ieTogTWFzYWhpcm8gWWFtYWRhIDx5YW1hZGEubWFzYWhp
+cm9Ac29jaW9uZXh0LmNvbT4NCj4gDQo+IC0tDQo+IEJlc3QgUmVnYXJkcw0KPiBNYXNhaGlybyBZ
+YW1hZGENCg==
