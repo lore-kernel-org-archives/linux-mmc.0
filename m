@@ -1,65 +1,71 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 4/4] qxl: fix qxl_conn_get_modes
-Date: Wed,  8 Mar 2017 10:19:08 +0100
-Message-ID: <1488964751-22763-9-git-send-email-kraxel@redhat.com>
-References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, ulf.hansson@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, "open list:DRM DRIVERS" <dri-devel@lists.freedesktop.org>, "open list:DRM DRIVER FOR QXL VIRTUAL GPU" <virtualization@lists.linux-foundation.org>, Gerd Hoffmann <kraxel@redhat.com>, stefan.wahren@i2se.com, f.fainelli@gmail.com, lee@kernel.org, linux@armlinux.org.uk, bcm-kernel-feedback-list@broadcom.com, Dave Airlie <airlied@redhat.com>, devicetree@vger.kernel.org, rjui@broadcom.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, sbranden@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v4 0/7] mmc: bcm2835: Add new driver for the sdhost controller
+Date: Wed,  8 Mar 2017 10:19:00 +0100
+Message-ID: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41080 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750792AbdCHJUV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Mar 2017 04:20:21 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, lee@kernel.org, eric@anholt.net, stefan.wahren@i2se.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
 
-Q2FsbCBxeGxfYWRkX21vbml0b3JzX2NvbmZpZ19tb2RlcygpIHVuY29uZGl0aW9uYWxseS4gIERv
-IGFsbCBzYW5pdHkKY2hlY2tzIGluIHRoYXQgZnVuY3Rpb24uCgpGaXggc2FuaXR5IGNoZWNrcy4g
-IG1vbml0b3JzX2NvbmZpZyBpcyB0aGUgY3VycmVudCBtb25pdG9yCmNvbmZpZ3VyYXRpb24sIHdo
-ZXJlYXMgY2xpZW50X21vbml0b3JzX2NvbmZpZyBpcyB0aGUgY29uZmlndXJhdGlvbgpyZXF1ZXN0
-ZWQgYnkgdGhlIHNwaWNlIGNsaWVudC4gIFNvIHdoZW4gZmlsbGluZyB0aGUgbW9kZSBsaXN0LCBi
-YXNlZCBvbgp0aGUgc3BpY2UgY2xpZW50IHJlcXVlc3QsIHdlIG5lZWQgdG8gbG9vayBhdApjbGll
-bnRfbW9uaXRvcnNfY29uZmlnLT5jb3VudCBub3QgbW9uaXRvcnNfY29uZmlnLT5jb3VudC4KClNp
-Z25lZC1vZmYtYnk6IEdlcmQgSG9mZm1hbm4gPGtyYXhlbEByZWRoYXQuY29tPgotLS0KIGRyaXZl
-cnMvZ3B1L2RybS9xeGwvcXhsX2Rpc3BsYXkuYyB8IDIyICsrKysrKysrKysrKy0tLS0tLS0tLS0K
-IDEgZmlsZSBjaGFuZ2VkLCAxMiBpbnNlcnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkKCmRpZmYg
-LS1naXQgYS9kcml2ZXJzL2dwdS9kcm0vcXhsL3F4bF9kaXNwbGF5LmMgYi9kcml2ZXJzL2dwdS9k
-cm0vcXhsL3F4bF9kaXNwbGF5LmMKaW5kZXggY2Y5OWFjZS4uOTU0OGJiNSAxMDA2NDQKLS0tIGEv
-ZHJpdmVycy9ncHUvZHJtL3F4bC9xeGxfZGlzcGxheS5jCisrKyBiL2RyaXZlcnMvZ3B1L2RybS9x
-eGwvcXhsX2Rpc3BsYXkuYwpAQCAtMjAyLDkgKzIwMiwxNyBAQCBzdGF0aWMgaW50IHF4bF9hZGRf
-bW9uaXRvcnNfY29uZmlnX21vZGVzKHN0cnVjdCBkcm1fY29ubmVjdG9yICpjb25uZWN0b3IsCiAJ
-c3RydWN0IGRybV9kaXNwbGF5X21vZGUgKm1vZGUgPSBOVUxMOwogCXN0cnVjdCBxeGxfaGVhZCAq
-aGVhZDsKIAorCWlmICghcWRldi0+bW9uaXRvcnNfY29uZmlnKQorCQlyZXR1cm4gMDsKKwlpZiAo
-aCA+PSBxZGV2LT5tb25pdG9yc19jb25maWctPm1heF9hbGxvd2VkKQorCQlyZXR1cm4gMDsKIAlp
-ZiAoIXFkZXYtPmNsaWVudF9tb25pdG9yc19jb25maWcpCiAJCXJldHVybiAwOworCWlmIChoID49
-IHFkZXYtPmNsaWVudF9tb25pdG9yc19jb25maWctPmNvdW50KQorCQlyZXR1cm4gMDsKKwogCWhl
-YWQgPSAmcWRldi0+Y2xpZW50X21vbml0b3JzX2NvbmZpZy0+aGVhZHNbaF07CisJRFJNX0RFQlVH
-X0tNUygiaGVhZCAlZCBpcyAlZHglZFxuIiwgaCwgaGVhZC0+d2lkdGgsIGhlYWQtPmhlaWdodCk7
-CiAKIAltb2RlID0gZHJtX2N2dF9tb2RlKGRldiwgaGVhZC0+d2lkdGgsIGhlYWQtPmhlaWdodCwg
-NjAsIGZhbHNlLCBmYWxzZSwKIAkJCSAgICBmYWxzZSk7CkBAIC05MTEsMTkgKzkxOSwxMyBAQCBz
-dGF0aWMgdm9pZCBxeGxfZW5jX21vZGVfc2V0KHN0cnVjdCBkcm1fZW5jb2RlciAqZW5jb2RlciwK
-IAogc3RhdGljIGludCBxeGxfY29ubl9nZXRfbW9kZXMoc3RydWN0IGRybV9jb25uZWN0b3IgKmNv
-bm5lY3RvcikKIHsKLQlpbnQgcmV0ID0gMDsKLQlzdHJ1Y3QgcXhsX2RldmljZSAqcWRldiA9IGNv
-bm5lY3Rvci0+ZGV2LT5kZXZfcHJpdmF0ZTsKIAl1bnNpZ25lZCBwd2lkdGggPSAxMDI0OwogCXVu
-c2lnbmVkIHBoZWlnaHQgPSA3Njg7CisJaW50IHJldCA9IDA7CiAKLQlEUk1fREVCVUdfS01TKCJt
-b25pdG9yc19jb25maWc9JXBcbiIsIHFkZXYtPm1vbml0b3JzX2NvbmZpZyk7Ci0JLyogVE9ETzog
-d2hhdCBzaG91bGQgd2UgZG8gaGVyZT8gb25seSBzaG93IHRoZSBjb25maWd1cmVkIG1vZGVzIGZv
-ciB0aGUKLQkgKiBkZXZpY2UsIG9yIGFsbG93IHRoZSBmdWxsIGxpc3QsIG9yIGJvdGg/ICovCi0J
-aWYgKHFkZXYtPm1vbml0b3JzX2NvbmZpZyAmJiBxZGV2LT5tb25pdG9yc19jb25maWctPmNvdW50
-KSB7Ci0JCXJldCA9IHF4bF9hZGRfbW9uaXRvcnNfY29uZmlnX21vZGVzKGNvbm5lY3RvciwgJnB3
-aWR0aCwgJnBoZWlnaHQpOwotCQlpZiAocmV0IDwgMCkKLQkJCXJldHVybiByZXQ7Ci0JfQorCXJl
-dCA9IHF4bF9hZGRfbW9uaXRvcnNfY29uZmlnX21vZGVzKGNvbm5lY3RvciwgJnB3aWR0aCwgJnBo
-ZWlnaHQpOworCWlmIChyZXQgPCAwKQorCQlyZXR1cm4gcmV0OwogCXJldCArPSBxeGxfYWRkX2Nv
-bW1vbl9tb2Rlcyhjb25uZWN0b3IsIHB3aWR0aCwgcGhlaWdodCk7CiAJcmV0dXJuIHJldDsKIH0K
-LS0gCjEuOC4zLjEKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9y
-ZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZl
-bAo=
+  Hi,
+
+Next version if the bcm2835 sdhost patch series.
+
+New in v4:
+ * squashed in more cleanups by Stefan.
+ * removed the long cleanup patch list
+   from commit message (patch 2).
+ * rebased to (and tested with) 4.11-rc1.
+ * minor fixes pointed out in review.
+
+New in v3:
+ * squashed in cleanups by Stefan.
+ * use one dma channel only.
+ * improve commit messages.
+
+New in v2:
+ * DMA fixed.
+ * updated docs (kconfig, file comment, commit message) clarifying
+   the two sd controller situation.
+ * some code cleanups, as pointed out by Stefan.
+ * dt bindings use mmc@... now.
+ * added patches to update defconfigs.
+ * added patch for rpi3 device tree, so wifi is actually enabled.
+
+please review & test,
+  Gerd
+
+Eric Anholt (2):
+  dt-bindings: Add binding for brcm,bcm2835-sdhost.
+  mmc: bcm2835: Add new driver for the sdhost controller.
+
+Gerd Hoffmann (5):
+  mmc: bcm2835: add sdhost controller to devicetree
+  arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and
+    multi_v7_defconfig
+  arm64: set CONFIG_MMC_BCM2835=y in defconfig
+  arm: dts: bcm283x: switch from &sdhci to &sdhost
+  arm64: dts: bcm2837: add &sdhci and &sdhost
+
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   23 +
+ arch/arm/boot/dts/bcm2835-rpi.dtsi                 |    6 +
+ arch/arm/boot/dts/bcm283x.dtsi                     |   10 +
+ arch/arm/configs/bcm2835_defconfig                 |    1 +
+ arch/arm/configs/multi_v7_defconfig                |    1 +
+ arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts   |   17 +
+ arch/arm64/configs/defconfig                       |    1 +
+ drivers/mmc/host/Kconfig                           |   14 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/bcm2835.c                         | 1465 ++++++++++++++++++++
+ 10 files changed, 1539 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+ create mode 100644 drivers/mmc/host/bcm2835.c
+
+-- 
+1.8.3.1
+
