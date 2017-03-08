@@ -1,58 +1,56 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH v4 4/7] arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and multi_v7_defconfig
-Date: Wed,  8 Mar 2017 10:19:07 +0100
-Message-ID: <1488964751-22763-8-git-send-email-kraxel@redhat.com>
+Subject: [PATCH v4 1/7] dt-bindings: Add binding for brcm,bcm2835-sdhost.
+Date: Wed,  8 Mar 2017 10:19:01 +0100
+Message-ID: <1488964751-22763-2-git-send-email-kraxel@redhat.com>
 References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41154 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750888AbdCHJUV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 8 Mar 2017 04:20:21 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-rpi-kernel@lists.infradead.org
 Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, lee@kernel.org, eric@anholt.net, stefan.wahren@i2se.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
+List-Id: linux-mmc@vger.kernel.org
 
-We need to enable this controller so that we can switch the SD card's
-pinmux over to it by default, which will improve storage performance.
+From: Eric Anholt <eric@anholt.net>
 
-Read access (dd with 64k blocks on rpi2):
-  CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
-  CONFIG_MMC_BCM2835:     19-20 MB/s
+This is the other SD controller on the platform, which can be swapped
+to the role of SD card host using pin muxing.
 
-Differences on write access are pretty much in the noise.
-
+Signed-off-by: Eric Anholt <eric@anholt.net>
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+Acked-by: Rob Herring <robh@kernel.org>
 ---
- arch/arm/configs/bcm2835_defconfig  | 1 +
- arch/arm/configs/multi_v7_defconfig | 1 +
- 2 files changed, 2 insertions(+)
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt           | 23 ++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
 
-diff --git a/arch/arm/configs/bcm2835_defconfig b/arch/arm/configs/bcm2835_defconfig
-index 4b89f4e..3767c24 100644
---- a/arch/arm/configs/bcm2835_defconfig
-+++ b/arch/arm/configs/bcm2835_defconfig
-@@ -92,6 +92,7 @@ CONFIG_MMC=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_SDHCI_IPROC=y
-+CONFIG_MMC_BCM2835=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_GPIO=y
-diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
-index a94126f..63b94d0 100644
---- a/arch/arm/configs/multi_v7_defconfig
-+++ b/arch/arm/configs/multi_v7_defconfig
-@@ -730,6 +730,7 @@ CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_ROCKCHIP=y
- CONFIG_MMC_SH_MMCIF=y
- CONFIG_MMC_SUNXI=y
-+CONFIG_MMC_BCM2835=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_CLASS_FLASH=m
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+new file mode 100644
+index 0000000..d876580
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+@@ -0,0 +1,23 @@
++Broadcom BCM2835 SDHOST controller
++
++This file documents differences between the core properties described
++by mmc.txt and the properties that represent the BCM2835 controller.
++
++Required properties:
++- compatible: Should be "brcm,bcm2835-sdhost".
++- clocks: The clock feeding the SDHOST controller.
++
++Optional properties:
++- dmas: DMA channel for read and write.
++          See Documentation/devicetree/bindings/dma/dma.txt for details
++
++Example:
++
++sdhost: mmc@7e202000 {
++	compatible = "brcm,bcm2835-sdhost";
++	reg = <0x7e202000 0x100>;
++	interrupts = <2 24>;
++	clocks = <&clocks BCM2835_CLOCK_VPU>;
++	dmas = <&dma 13>;
++	dma-names = "rx-tx";
++};
 -- 
 1.8.3.1
-
