@@ -1,57 +1,77 @@
-From: Petr Cvek <petr.cvek@tul.cz>
-Subject: [BUG] dmaengine: pxa_dma: + mmc: pxamci: race condition with DMA
- error on tx channel
-Date: Wed, 8 Mar 2017 07:57:08 +0100
-Message-ID: <e749aff1-0ffc-c9ed-42b2-82397b4e8ba2@tul.cz>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: [PATCH 1/4] qxl: drop mode_info.modes & related code.
+Date: Wed,  8 Mar 2017 10:19:02 +0100
+Message-ID: <1488964751-22763-3-git-send-email-kraxel@redhat.com>
+References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>, vinod.koul@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>
-Cc: dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: linux-rpi-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, ulf.hansson@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, "open list:DRM DRIVERS" <dri-devel@lists.freedesktop.org>, "open list:DRM DRIVER FOR QXL VIRTUAL GPU" <virtualization@lists.linux-foundation.org>, Gerd Hoffmann <kraxel@redhat.com>, stefan.wahren@i2se.com, f.fainelli@gmail.com, lee@kernel.org, linux@armlinux.org.uk, bcm-kernel-feedback-list@broadcom.com, Dave Airlie <airlied@redhat.com>, devicetree@vger.kernel.org, rjui@broadcom.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, sbranden@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hello,
-
-PXA27x DMA changes between:
-
-	v4.7
-	d52bd54db8be8999df6df5a776f38c4f8b5e9cea
-and
-	v4.10-rc5
-	a4685d2f58e2230d4e27fb2ee581d7ea35e5d046
-
-seems to expose a race condition while using PXA MMC driver on a PXA27x (magician.c machine).
-
-The failure causes one line in the kernel log, after which the filesystem on SD card is inaccessible (and machine too).
-
-	mmc0: DMA error on tx channel
-
-I wasn't able to track the problem to a single patch as the problem occurs at random time (from the boot to like a half an hour) and it's maybe dependent on a level of a battery charge (maybe because of kernel log writes of charging messages).
-
-It seems that most occurrency is during writes on an SD card. Using an SDHC card decreases the time to fail. After failure the OS is unavailable (rootfs in on the card).
-
->From my poking in the kernel source code it seems there is a probability that pxamci_irq() takes longer to call and its subsequent call pxamci_data_done() isn't fast enough to set [1]
-	host->data = NULL;
->From the DMA side, the DMA done interrupt is generated:
-	pxad_chan_handler() -> vchan_cookie_complete()
-...where a tasklet for vchan_complete() is scheduled, where finally with interrupts enabled (can pxamci_irq() be called here?) the callback pxamci_dma_irq() is called.
-
->From my tests it seems at this point [2] the host->data is always NULL and rest of the callback is never called. It is called once with a nonempty host->data only just before the failure.
-
-During the testing I put udelay(100) at the start of pxamci_dma_irq() and fail occurred after like 2 hours (when I for the first time tapped the touchscreen - higher CPU usage and interrupts).
-
-[1] http://elixir.free-electrons.com/source/drivers/mmc/host/pxamci.c?v=4.10#L385
-[2] http://elixir.free-electrons.com/source/drivers/mmc/host/pxamci.c?v=4.10#L561
-
-Best regards,
-Petr
+dmVyeSBvbGQgcXhsIGhhcmR3YXJlIHJldmlzaW9ucyAocHJlZGF0aW5nIHF4bCBrc20gc3VwcG9y
+dCBieSBhIGZldwp5ZWFycykgc3VwcG9ydGVkIGEgZml4ZWQgbGlzdCBvZiB2aWRlbyBtb2RlcyBv
+bmx5LiAgVGhlIGxpc3QgaXMgc3RpbGwKcHJvdmlkZWQgYnkgdGhlIHZpcnR1YWwgaGFyZHdhcmUs
+IGZvciBiYWNrd2FyZCBjb21wYXRpYmlsaXR5IHJlYXNvbnMuCgpUaGUgcXhsIGttcyBkcml2ZXIg
+bmV2ZXIgZXZlciBsb29rcyBhdCBpdCwgZXhjZXB0IGZvciBkdW1waW5nIGl0IHRvCnRoZSBrZXJu
+ZWwgbG9nIGF0IGxvYWQgdGltZSBpbiBjYXNlIGRlYnVnIGxvZ2dpbmcgaXMgZW5hYmxlZC4gIERy
+b3AKdGhhdCBwb2ludGxlc3MgY29kZS4KClNpZ25lZC1vZmYtYnk6IEdlcmQgSG9mZm1hbm4gPGty
+YXhlbEByZWRoYXQuY29tPgotLS0KIGRyaXZlcnMvZ3B1L2RybS9xeGwvcXhsX2Rydi5oIHwgIDIg
+LS0KIGRyaXZlcnMvZ3B1L2RybS9xeGwvcXhsX2ttcy5jIHwgMjIgLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLQogMiBmaWxlcyBjaGFuZ2VkLCAyNCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2
+ZXJzL2dwdS9kcm0vcXhsL3F4bF9kcnYuaCBiL2RyaXZlcnMvZ3B1L2RybS9xeGwvcXhsX2Rydi5o
+CmluZGV4IDBjMzEzZTUuLmZlOTBiMzYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvZ3B1L2RybS9xeGwv
+cXhsX2Rydi5oCisrKyBiL2RyaXZlcnMvZ3B1L2RybS9xeGwvcXhsX2Rydi5oCkBAIC0xNjAsOCAr
+MTYwLDYgQEAgc3RydWN0IHF4bF9tbWFuIHsKIH07CiAKIHN0cnVjdCBxeGxfbW9kZV9pbmZvIHsK
+LQlpbnQgbnVtX21vZGVzOwotCXN0cnVjdCBxeGxfbW9kZSAqbW9kZXM7CiAJYm9vbCBtb2RlX2Nv
+bmZpZ19pbml0aWFsaXplZDsKIAogCS8qIHBvaW50ZXIgdG8gZmJkZXYgaW5mbyBzdHJ1Y3R1cmUg
+Ki8KZGlmZiAtLWdpdCBhL2RyaXZlcnMvZ3B1L2RybS9xeGwvcXhsX2ttcy5jIGIvZHJpdmVycy9n
+cHUvZHJtL3F4bC9xeGxfa21zLmMKaW5kZXggMmIxZTFmMy4uYTlhNzQxYyAxMDA2NDQKLS0tIGEv
+ZHJpdmVycy9ncHUvZHJtL3F4bC9xeGxfa21zLmMKKysrIGIvZHJpdmVycy9ncHUvZHJtL3F4bC9x
+eGxfa21zLmMKQEAgLTMxLDE5ICszMSw5IEBACiAKIGludCBxeGxfbG9nX2xldmVsOwogCi1zdGF0
+aWMgdm9pZCBxeGxfZHVtcF9tb2RlKHN0cnVjdCBxeGxfZGV2aWNlICpxZGV2LCB2b2lkICpwKQot
+ewotCXN0cnVjdCBxeGxfbW9kZSAqbSA9IHA7Ci0JRFJNX0RFQlVHX0tNUygiJWQ6ICVkeCVkICVk
+IGJpdHMsIHN0cmlkZSAlZCwgJWRtbSB4ICVkbW0sIG9yaWVudGF0aW9uICVkXG4iLAotCQkgICAg
+ICBtLT5pZCwgbS0+eF9yZXMsIG0tPnlfcmVzLCBtLT5iaXRzLCBtLT5zdHJpZGUsIG0tPnhfbWls
+aSwKLQkJICAgICAgbS0+eV9taWxpLCBtLT5vcmllbnRhdGlvbik7Ci19Ci0KIHN0YXRpYyBib29s
+IHF4bF9jaGVja19kZXZpY2Uoc3RydWN0IHF4bF9kZXZpY2UgKnFkZXYpCiB7CiAJc3RydWN0IHF4
+bF9yb20gKnJvbSA9IHFkZXYtPnJvbTsKLQlpbnQgbW9kZV9vZmZzZXQ7Ci0JaW50IGk7CiAKIAlp
+ZiAocm9tLT5tYWdpYyAhPSAweDRmNTI1ODUxKSB7CiAJCURSTV9FUlJPUigiYmFkIHJvbSBzaWdu
+YXR1cmUgJXhcbiIsIHJvbS0+bWFnaWMpOwpAQCAtNTMsOCArNDMsNiBAQCBzdGF0aWMgYm9vbCBx
+eGxfY2hlY2tfZGV2aWNlKHN0cnVjdCBxeGxfZGV2aWNlICpxZGV2KQogCURSTV9JTkZPKCJEZXZp
+Y2UgVmVyc2lvbiAlZC4lZFxuIiwgcm9tLT5pZCwgcm9tLT51cGRhdGVfaWQpOwogCURSTV9JTkZP
+KCJDb21wcmVzc2lvbiBsZXZlbCAlZCBsb2cgbGV2ZWwgJWRcbiIsIHJvbS0+Y29tcHJlc3Npb25f
+bGV2ZWwsCiAJCSByb20tPmxvZ19sZXZlbCk7Ci0JRFJNX0lORk8oIkN1cnJlbnRseSB1c2luZyBt
+b2RlICMlZCwgbGlzdCBhdCAweCV4XG4iLAotCQkgcm9tLT5tb2RlLCByb20tPm1vZGVzX29mZnNl
+dCk7CiAJRFJNX0lORk8oIiVkIGlvIHBhZ2VzIGF0IG9mZnNldCAweCV4XG4iLAogCQkgcm9tLT5u
+dW1faW9fcGFnZXMsIHJvbS0+cGFnZXNfb2Zmc2V0KTsKIAlEUk1fSU5GTygiJWQgYnl0ZSBkcmF3
+IGFyZWEgYXQgb2Zmc2V0IDB4JXhcbiIsCkBAIC02MiwxNCArNTAsNiBAQCBzdGF0aWMgYm9vbCBx
+eGxfY2hlY2tfZGV2aWNlKHN0cnVjdCBxeGxfZGV2aWNlICpxZGV2KQogCiAJcWRldi0+dnJhbV9z
+aXplID0gcm9tLT5zdXJmYWNlMF9hcmVhX3NpemU7CiAJRFJNX0lORk8oIlJBTSBoZWFkZXIgb2Zm
+c2V0OiAweCV4XG4iLCByb20tPnJhbV9oZWFkZXJfb2Zmc2V0KTsKLQotCW1vZGVfb2Zmc2V0ID0g
+cm9tLT5tb2Rlc19vZmZzZXQgLyA0OwotCXFkZXYtPm1vZGVfaW5mby5udW1fbW9kZXMgPSAoKHUz
+MiAqKXJvbSlbbW9kZV9vZmZzZXRdOwotCURSTV9JTkZPKCJyb20gbW9kZXMgb2Zmc2V0IDB4JXgg
+Zm9yICVkIG1vZGVzXG4iLCByb20tPm1vZGVzX29mZnNldCwKLQkJIHFkZXYtPm1vZGVfaW5mby5u
+dW1fbW9kZXMpOwotCXFkZXYtPm1vZGVfaW5mby5tb2RlcyA9ICh2b2lkICopKCh1aW50MzJfdCAq
+KXJvbSArIG1vZGVfb2Zmc2V0ICsgMSk7Ci0JZm9yIChpID0gMDsgaSA8IHFkZXYtPm1vZGVfaW5m
+by5udW1fbW9kZXM7IGkrKykKLQkJcXhsX2R1bXBfbW9kZShxZGV2LCBxZGV2LT5tb2RlX2luZm8u
+bW9kZXMgKyBpKTsKIAlyZXR1cm4gdHJ1ZTsKIH0KIApAQCAtMjgyLDcgKzI2Miw1IEBAIHZvaWQg
+cXhsX2RldmljZV9maW5pKHN0cnVjdCBxeGxfZGV2aWNlICpxZGV2KQogCWlvdW5tYXAocWRldi0+
+cmFtX2hlYWRlcik7CiAJaW91bm1hcChxZGV2LT5yb20pOwogCXFkZXYtPnJvbSA9IE5VTEw7Ci0J
+cWRldi0+bW9kZV9pbmZvLm1vZGVzID0gTlVMTDsKLQlxZGV2LT5tb2RlX2luZm8ubnVtX21vZGVz
+ID0gMDsKIAlxeGxfZGVidWdmc19yZW1vdmVfZmlsZXMocWRldik7CiB9Ci0tIAoxLjguMy4xCgpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkcmktZGV2ZWwg
+bWFpbGluZyBsaXN0CmRyaS1kZXZlbEBsaXN0cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0
+cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcmktZGV2ZWwK
