@@ -1,59 +1,51 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH v4 3/7] mmc: bcm2835: add sdhost controller to devicetree
-Date: Wed,  8 Mar 2017 10:19:05 +0100
-Message-ID: <1488964751-22763-6-git-send-email-kraxel@redhat.com>
+Subject: [PATCH v4 5/7] arm64: set CONFIG_MMC_BCM2835=y in defconfig
+Date: Wed,  8 Mar 2017 10:19:09 +0100
+Message-ID: <1488964751-22763-10-git-send-email-kraxel@redhat.com>
 References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, lee@kernel.org, eric@anholt.net, stefan.wahren@i2se.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
+Cc: mark.rutland@arm.com, stefan.wahren@i2se.com, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, devicetree@vger.kernel.org, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, Gerd Hoffmann <kraxel@redhat.com>, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
-Acked-by: Eric Anholt <eric@anholt.net>
----
- arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
- arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
- 2 files changed, 16 insertions(+)
+We need to enable this controller so that we can switch the SD card's
+pinmux over to it by default, which will improve storage performance.
 
-diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-index 1e00a28..8b95832 100644
---- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
-+++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-@@ -69,6 +69,12 @@
- 	bus-width = <4>;
- };
- 
-+&sdhost {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&sdhost_gpio48>;
-+	bus-width = <4>;
-+};
-+
- &pwm {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
-diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-index 9798bc9..19099a5 100644
---- a/arch/arm/boot/dts/bcm283x.dtsi
-+++ b/arch/arm/boot/dts/bcm283x.dtsi
-@@ -350,6 +350,16 @@
- 			arm,primecell-periphid = <0x00241011>;
- 		};
- 
-+		sdhost: mmc@7e202000 {
-+			compatible = "brcm,bcm2835-sdhost";
-+			reg = <0x7e202000 0x100>;
-+			interrupts = <2 24>;
-+			clocks = <&clocks BCM2835_CLOCK_VPU>;
-+			dmas = <&dma 13>;
-+			dma-names = "rx-tx";
-+			status = "disabled";
-+		};
-+
- 		i2s: i2s@7e203000 {
- 			compatible = "brcm,bcm2835-i2s";
- 			reg = <0x7e203000 0x20>,
+Read access (dd with 64k blocks on rpi2):
+  CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
+  CONFIG_MMC_BCM2835:     19-20 MB/s
+
+Differences on write access are pretty much in the noise.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ arch/arm64/configs/defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+index 7c48028..519a55c 100644
+--- a/arch/arm64/configs/defconfig
++++ b/arch/arm64/configs/defconfig
+@@ -398,6 +398,7 @@ CONFIG_MMC_DW_EXYNOS=y
+ CONFIG_MMC_DW_K3=y
+ CONFIG_MMC_DW_ROCKCHIP=y
+ CONFIG_MMC_SUNXI=y
++CONFIG_MMC_BCM2835=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
 -- 
 1.8.3.1
