@@ -1,74 +1,135 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH v4 3/7] mmc: bcm2835: add sdhost controller to devicetree
-Date: Wed, 8 Mar 2017 13:11:56 +0100
-Message-ID: <a0cc10b6-b03c-2b61-f31a-f266d39a0d80@i2se.com>
-References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
- <1488964751-22763-6-git-send-email-kraxel@redhat.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH V1 00/18] mmc: Add Command Queue support
+Date: Wed, 08 Mar 2017 22:27:31 +0900
+Message-ID: <9ca26b16-ffda-dc95-5a5c-958817e23f58@samsung.com>
+References: <CGME20170306091701epcas4p30ef050e2e5bd1616457a6347de9b6717@epcas4p3.samsung.com>
+ <1488791473-24981-1-git-send-email-adrian.hunter@intel.com>
+ <60109e5e-b1de-dc47-f6ce-d921d2a459ca@samsung.com>
+ <9d57e64f-2c58-dc2b-8e23-9ae69fba8300@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1488964751-22763-6-git-send-email-kraxel@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gerd Hoffmann <kraxel@redhat.com>, linux-rpi-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:56062 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753377AbdCHNim (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2017 08:38:42 -0500
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OMI0198J01WVY80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 08 Mar 2017 22:27:32 +0900 (KST)
+In-reply-to: <9d57e64f-2c58-dc2b-8e23-9ae69fba8300@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
+On 03/08/2017 05:08 PM, Adrian Hunter wrote:
+> On 08/03/17 07:18, Jaehoon Chung wrote:
+>> Hi Adrian,
+>>
+>> On 03/06/2017 06:10 PM, Adrian Hunter wrote:
+>>> Hi
+>>>
+>>> Here are the hardware command queue patches without the software command
+>>> queue patches or sdhci patches.
+>>
+>> I don't see your patches fully yet, but after applied your patches, dwmmc host doesn't work.
+>> So I'm finding what happen in dwmmc controller.
+>> After finding problem, i will share it.
+>> Well,.. maybe i missed something...
+> 
+> Thanks for trying these patches.
+> 
+> With no host controller yet using CQE, there isn't much changing in this
+> patch set, but bisecting should reveal the first bad commit.
 
-Am 08.03.2017 um 10:19 schrieb Gerd Hoffmann:
-> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
-> Acked-by: Eric Anholt <eric@anholt.net>
+https://patchwork.kernel.org/patch/9605315/
 
-Acked-by: Stefan Wahren <stefan.wahren@i2se.com>
+It seems that this patch has a problem...Tomorrow i will check in more detail.
+Because I saw the different error logs..
+Sometime occurred the NULL pointer dereference or I/O error..
 
-> ---
->   arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
->   arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
->   2 files changed, 16 insertions(+)
->
-> diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> index 1e00a28..8b95832 100644
-> --- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> +++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> @@ -69,6 +69,12 @@
->   	bus-width = <4>;
->   };
->   
-> +&sdhost {
-> +	pinctrl-names = "default";
-> +	pinctrl-0 = <&sdhost_gpio48>;
-> +	bus-width = <4>;
-> +};
-> +
->   &pwm {
->   	pinctrl-names = "default";
->   	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
-> diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-> index 9798bc9..19099a5 100644
-> --- a/arch/arm/boot/dts/bcm283x.dtsi
-> +++ b/arch/arm/boot/dts/bcm283x.dtsi
-> @@ -350,6 +350,16 @@
->   			arm,primecell-periphid = <0x00241011>;
->   		};
->   
-> +		sdhost: mmc@7e202000 {
-> +			compatible = "brcm,bcm2835-sdhost";
-> +			reg = <0x7e202000 0x100>;
-> +			interrupts = <2 24>;
-> +			clocks = <&clocks BCM2835_CLOCK_VPU>;
-> +			dmas = <&dma 13>;
-> +			dma-names = "rx-tx";
-> +			status = "disabled";
-> +		};
-> +
->   		i2s: i2s@7e203000 {
->   			compatible = "brcm,bcm2835-i2s";
->   			reg = <0x7e203000 0x20>,
+Didn't other guys see these problem?
+
+Best Regards,
+Jaehoon Chung
+
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>>
+>>> Changes since RFC:
+>>>
+>>> 	Re-based on next.
+>>> 	Added comment about command queue priority.
+>>> 	Added some acks and reviews.
+>>>
+>>>
+>>> Adrian Hunter (17):
+>>>       mmc: queue: Share mmc request array between partitions
+>>>       mmc: mmc: Add functions to enable / disable the Command Queue
+>>>       mmc: mmc_test: Disable Command Queue while mmc_test is used
+>>>       mmc: block: Disable Command Queue while RPMB is used
+>>>       mmc: block: Change mmc_apply_rel_rw() to get block address from the request
+>>>       mmc: block: Factor out data preparation
+>>>       mmc: core: Factor out debug prints from mmc_start_request()
+>>>       mmc: core: Factor out mrq preparation from mmc_start_request()
+>>>       mmc: core: Add mmc_retune_hold_now()
+>>>       mmc: core: Add members to mmc_request and mmc_data for CQE's
+>>>       mmc: host: Add CQE interface
+>>>       mmc: core: Turn off CQE before sending commands
+>>>       mmc: core: Add support for handling CQE requests
+>>>       mmc: mmc: Enable Command Queuing
+>>>       mmc: mmc: Enable CQE's
+>>>       mmc: block: Prepare CQE data
+>>>       mmc: block: Add CQE support
+>>>
+>>> Venkat Gopalakrishnan (1):
+>>>       mmc: cqhci: support for command queue enabled host
+>>>
+>>>  Documentation/mmc/mmc-dev-attrs.txt |    1 +
+>>>  drivers/mmc/core/block.c            |  435 ++++++++++---
+>>>  drivers/mmc/core/block.h            |    7 +
+>>>  drivers/mmc/core/bus.c              |    7 +
+>>>  drivers/mmc/core/core.c             |  203 ++++++-
+>>>  drivers/mmc/core/host.c             |    6 +
+>>>  drivers/mmc/core/host.h             |    1 +
+>>>  drivers/mmc/core/mmc.c              |   39 +-
+>>>  drivers/mmc/core/mmc_ops.c          |   28 +
+>>>  drivers/mmc/core/mmc_ops.h          |    2 +
+>>>  drivers/mmc/core/mmc_test.c         |   14 +
+>>>  drivers/mmc/core/queue.c            |  535 +++++++++++++---
+>>>  drivers/mmc/core/queue.h            |   45 +-
+>>>  drivers/mmc/host/Kconfig            |   13 +
+>>>  drivers/mmc/host/Makefile           |    1 +
+>>>  drivers/mmc/host/cqhci.c            | 1148 +++++++++++++++++++++++++++++++++++
+>>>  drivers/mmc/host/cqhci.h            |  240 ++++++++
+>>>  include/linux/mmc/card.h            |    8 +
+>>>  include/linux/mmc/core.h            |   19 +-
+>>>  include/linux/mmc/host.h            |   24 +
+>>>  include/trace/events/mmc.h          |   17 +-
+>>>  21 files changed, 2585 insertions(+), 208 deletions(-)
+>>>  create mode 100644 drivers/mmc/host/cqhci.c
+>>>  create mode 100644 drivers/mmc/host/cqhci.h
+>>>
+>>>
+>>> Regards
+>>> Adrian
+>>>
+>>>
+>>>
+>>
+>>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
