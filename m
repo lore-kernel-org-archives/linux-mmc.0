@@ -1,95 +1,74 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH resend 2/2] mmc: sdhci: sdio-intel: Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk
-Date: Wed,  8 Mar 2017 09:49:45 +0100
-Message-ID: <20170308084945.5084-3-hdegoede@redhat.com>
-References: <20170308084945.5084-1-hdegoede@redhat.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48434 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750752AbdCHKpB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 8 Mar 2017 05:45:01 -0500
-In-Reply-To: <20170308084945.5084-1-hdegoede@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH v4 3/7] mmc: bcm2835: add sdhost controller to devicetree
+Date: Wed, 8 Mar 2017 13:11:56 +0100
+Message-ID: <a0cc10b6-b03c-2b61-f31a-f266d39a0d80@i2se.com>
+References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
+ <1488964751-22763-6-git-send-email-kraxel@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1488964751-22763-6-git-send-email-kraxel@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Gerd Hoffmann <kraxel@redhat.com>, linux-rpi-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, f.fainelli@gmail.com, sbranden@broadcom.com, rjui@broadcom.com, lee@kernel.org, will.deacon@arm.com, linux@armlinux.org.uk, linux-kernel@vger.kernel.org, eric@anholt.net, robh+dt@kernel.org, bcm-kernel-feedback-list@broadcom.com, catalin.marinas@arm.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, Dong Aisheng <b29396@freescale.com>
 
-From: Dong Aisheng <b29396@freescale.com>
 
-SDIO cards may need clock to send the card interrupt to the host.
-Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON to prevent the clock resource
-being released.
+Am 08.03.2017 um 10:19 schrieb Gerd Hoffmann:
+> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+> Acked-by: Eric Anholt <eric@anholt.net>
 
-Hans de Goede:
+Acked-by: Stefan Wahren <stefan.wahren@i2se.com>
 
-It looks like we still need this patch, on a cherrytrail tablet with
-a RTL8723BS wifi chip, without this patch pinging the tablet results in:
-
-PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
-64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
-64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
-64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
-64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
-64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
-64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
-64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
-64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
-64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
-
-Where as with this patch I get:
-
-PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
-64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
-64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
-64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
-64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
-64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
-64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
-64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
-64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
-64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
-
-Signed-off-by: Dong Aisheng <b29396@freescale.com>
-[hdegoede@redhat.com: Updated commit msg with sdio wifi ping output]
-[hdegoede@redhat.com: Add quirk to both acpi and pci intel-sdio entries]
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Note an alternative approach would be to add a new flag for this and do
-a runtime_pm_get on sdio_irq_enable and runtime_pm_put on
-sdio_irq_disable, that would safe some power if the sdio-driver properly
-disables the irq when e.g. wifi is turned off, or an oob interrupt is
-used.
----
- drivers/mmc/host/sdhci-acpi.c     | 1 +
- drivers/mmc/host/sdhci-pci-core.c | 1 +
- 2 files changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 237f318..c107757 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+		   SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
- 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
- 		   MMC_CAP_WAIT_WHILE_BUSY,
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 982b3e3..7cb54b0 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
- 			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= byt_sdio_probe_slot,
--- 
-2.9.3
-
+> ---
+>   arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
+>   arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
+>   2 files changed, 16 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+> index 1e00a28..8b95832 100644
+> --- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
+> +++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+> @@ -69,6 +69,12 @@
+>   	bus-width = <4>;
+>   };
+>   
+> +&sdhost {
+> +	pinctrl-names = "default";
+> +	pinctrl-0 = <&sdhost_gpio48>;
+> +	bus-width = <4>;
+> +};
+> +
+>   &pwm {
+>   	pinctrl-names = "default";
+>   	pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
+> diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
+> index 9798bc9..19099a5 100644
+> --- a/arch/arm/boot/dts/bcm283x.dtsi
+> +++ b/arch/arm/boot/dts/bcm283x.dtsi
+> @@ -350,6 +350,16 @@
+>   			arm,primecell-periphid = <0x00241011>;
+>   		};
+>   
+> +		sdhost: mmc@7e202000 {
+> +			compatible = "brcm,bcm2835-sdhost";
+> +			reg = <0x7e202000 0x100>;
+> +			interrupts = <2 24>;
+> +			clocks = <&clocks BCM2835_CLOCK_VPU>;
+> +			dmas = <&dma 13>;
+> +			dma-names = "rx-tx";
+> +			status = "disabled";
+> +		};
+> +
+>   		i2s: i2s@7e203000 {
+>   			compatible = "brcm,bcm2835-i2s";
+>   			reg = <0x7e203000 0x20>,
