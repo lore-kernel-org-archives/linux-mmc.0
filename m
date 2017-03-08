@@ -1,23 +1,95 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH resend 0/2] mmc: sdhci-acpi quirks changes
-Date: Wed,  8 Mar 2017 09:49:43 +0100
-Message-ID: <20170308084945.5084-1-hdegoede@redhat.com>
+Subject: [PATCH resend 2/2] mmc: sdhci: sdio-intel: Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk
+Date: Wed,  8 Mar 2017 09:49:45 +0100
+Message-ID: <20170308084945.5084-3-hdegoede@redhat.com>
+References: <20170308084945.5084-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45814 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48434 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750745AbdCHKpB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1750752AbdCHKpB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 8 Mar 2017 05:45:01 -0500
+In-Reply-To: <20170308084945.5084-1-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, Dong Aisheng <b29396@freescale.com>
 
-Hi,
+From: Dong Aisheng <b29396@freescale.com>
 
-These 2 patches seem to have fallen through the crack, so I'm
-resending them. They have been rebased on top of 4.11-rc1 (trivial
-rebase).
+SDIO cards may need clock to send the card interrupt to the host.
+Set SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON to prevent the clock resource
+being released.
 
-Regards,
+Hans de Goede:
 
-Hans
+It looks like we still need this patch, on a cherrytrail tablet with
+a RTL8723BS wifi chip, without this patch pinging the tablet results in:
+
+PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
+64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
+64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
+64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
+64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
+64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
+64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
+64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
+64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
+64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
+
+Where as with this patch I get:
+
+PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
+64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
+64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
+64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
+64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
+64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
+64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
+64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
+64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
+64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
+
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+[hdegoede@redhat.com: Updated commit msg with sdio wifi ping output]
+[hdegoede@redhat.com: Add quirk to both acpi and pci intel-sdio entries]
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Note an alternative approach would be to add a new flag for this and do
+a runtime_pm_get on sdio_irq_enable and runtime_pm_put on
+sdio_irq_disable, that would safe some power if the sdio-driver properly
+disables the irq when e.g. wifi is turned off, or an oob interrupt is
+used.
+---
+ drivers/mmc/host/sdhci-acpi.c     | 1 +
+ drivers/mmc/host/sdhci-pci-core.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 237f318..c107757 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+ 		   MMC_CAP_WAIT_WHILE_BUSY,
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 982b3e3..7cb54b0 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
+ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++			SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+ 			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.allow_runtime_pm = true,
+ 	.probe_slot	= byt_sdio_probe_slot,
+-- 
+2.9.3
+
