@@ -1,121 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v11 2/9] mmc: cavium: Add core MMC driver for Cavium SOCs
-Date: Wed, 8 Mar 2017 10:45:19 +0100
-Message-ID: <CAPDyKFrc5T1A=bcYtDELmpxNuwbDCAKxjZP3=cx6N9s5RZ-JuA@mail.gmail.com>
-References: <20170206133953.8390-1-jglauber@cavium.com> <20170206133953.8390-3-jglauber@cavium.com>
- <CAPDyKFpZs-WZ32NQTc3zY6RdWJecZkUvbEbszAJfv4H2Rw2JCQ@mail.gmail.com> <20170307104922.GA19134@hardcore>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update DWMMC controller
+Date: Wed, 08 Mar 2017 18:59:56 +0900
+Message-ID: <e9fc24d7-69e5-6969-68b8-8168f7f1bf9a@samsung.com>
+References: <CGME20170308095956epcas1p43c9c1eafc3739eef039ac3be59c7d5b1@epcas1p4.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170307104922.GA19134@hardcore>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jan Glauber <jan.glauber@caviumnetworks.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:60181 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751962AbdCHKAA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2017 05:00:00 -0500
+Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0OMH00GMLQFYF4E0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 08 Mar 2017 18:59:58 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-[...]
+Dear Ulf,
 
->> > Voltage is limited to 3.3v and shared for all slots.
->>
->> What voltage? The I/O voltage or the voltage for the card?
->>
->> VMMC or VMMCQ?
->
-> From my understanding both, VMMC and VMMCQ are fixed at 3.3v.
+Could you pull these patches into your next repository?
 
-Okay, then make sure to explicitly state that here.
+The following changes since commit c1ae3cfa0e89fa1a7ecc4c99031f5e9ae99d9201:
 
-[...]
+  Linux 4.11-rc1 (2017-03-05 12:59:56 -0800)
 
->> > +       if (bad_status(&rsp_sts))
->> > +               req->cmd->error = -EILSEQ;
->>
->> I don't think you should treat all errors as -EILSEQ. Please assign a
->> proper error code, depending on the error.
->
-> Agreed, -ETIMEDOUT seems more appropriate for the timeouts. I'll go for
-> -EIO for the dbuf_err (buffer space missing). What should I use for the
-> CRC errors, -EILSEQ?
+are available in the git repository at:
 
-Yes, correct.
+  https://github.com/jh80chung/dw-mmc.git for-ulf
 
-[...]
+for you to fetch changes up to 3f7f0fe4662f23d34cd741221842a45f253200ef:
 
->> What does this really mean? Is this about HW support for better
->> dealing with data requests?
->
-> Did David's reponse answer your questions?
+  mmc: dw_mmc: improve dw_mci_reset a bit (2017-03-07 17:30:24 +0900)
 
-Yes.
+----------------------------------------------------------------
+Shawn Lin (7):
+      mmc: dw_mmc: improve the timeout polling code
+      mmc: dw_mmc: move dw_mci_reset forward to avoid declaration
+      mmc: dw_mmc: move dw_mci_ctrl_reset forward to avoid declaration
+      mmc: dw_mmc: move dw_mci_get_cd forward to avoid declaration
+      mmc: dw_mmc: remove declaration of dw_mci_card_busy
+      mmc: dw_mmc: move mci_send_cmd forward to avoid declaration
+      mmc: dw_mmc: improve dw_mci_reset a bit
 
-[...]
+ drivers/mmc/host/dw_mmc.c | 383 ++++++++++++++++++++++------------------------
+ 1 file changed, 182 insertions(+), 201 deletions(-)
 
->> > +       /*
->> > +        * Legacy platform doesn't support regulator but enables power gpio
->> > +        * directly during platform probe.
->> > +        */
->> > +       if (host->global_pwr_gpiod)
->> > +               /* Get a sane OCR mask for other parts of the MMC subsytem. */
->> > +               return mmc_of_parse_voltage(dev->of_node, &mmc->ocr_avail);
->>
->> Does really the legacy platforms use the mmc voltage range DT bindings!?
->
-> The legacy DT's use (in the mmc slot nodes):
->
-> voltage-ranges = <3300 3300>;
->
->> I would rather see that you assign a default value to mmc->ocr_avail,
->> than using this binding.
->
-> The volatage seems to be identical for all legacy bindings I can find,
-> so is it better to not parse it and use the 3.3 as default?
 
-Yes, I think so.
-
-[...]
-
->> > +union mio_emm_cmd {
->> > +       u64 val;
->> > +       struct mio_emm_cmd_s {
->> > +#ifdef __BIG_ENDIAN_BITFIELD
->>
->> Huh. Sorry, but this is a big nack from me.
->>
->> This isn't the common method for how we deal with endian issues in the
->> kernel. Please remove all use of the union types here and below. The
->> follow common patterns for how we deal with endian issues.
->
-> May I ask why you dislike the bitfields? Or maybe it is easier when I
-> explain why I decided to keep them:
-
-My main concern is that is different compared to how we deal with
-endian issues in the kernel.
-
-I just don't like homebrewed hacks, but prefers sticking to defacto
-standard methods.
-
->
-> - One drawback of bitfields is poor performance on some architectures.
->   That is not the case here, both MIPS64 and ARM64 have instructions
->   capable of using bitfields without performance impact.
->
-> - The used bitfield are all aligned to word size, usually the pattern in
->   the driver is to readq / writeq the whole word (therefore the union
->   val) and then set or read certain fields. That should avoid IMHO the
->   unspecified behaviour the C standard mentions.
->
-> - I prefer BIT_ULL and friends for single bits, but using macros for
->   more then one bit is (again IMHO) much less readable then using
->   bitfiels here. And all the endianess definitions are _only_ in the
->   header file.
->
-> Also, if I need to convert all of these I'll probably add some new bugs.
-> What we have currently works fine on both MIPS and ARM64.
-
-I understand that is will have an impact, however there are plenty of
-good references in the kernel for how to do this.
-
-[...]
-
-Kind regards
-Uffe
+Best Regards,
+Jaehoon Chung
