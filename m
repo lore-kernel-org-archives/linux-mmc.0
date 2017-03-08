@@ -1,55 +1,60 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] Update DWMMC controller
-Date: Wed, 08 Mar 2017 18:59:56 +0900
-Message-ID: <e9fc24d7-69e5-6969-68b8-8168f7f1bf9a@samsung.com>
-References: <CGME20170308095956epcas1p43c9c1eafc3739eef039ac3be59c7d5b1@epcas1p4.samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH resend 1/2] mmc: sdhci-acpi: Sync quirks with sdhci_intel_byt_* from sdhci-pci-core.c
+Date: Wed,  8 Mar 2017 09:49:44 +0100
+Message-ID: <20170308084945.5084-2-hdegoede@redhat.com>
+References: <20170308084945.5084-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:60181 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751962AbdCHKAA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2017 05:00:00 -0500
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OMH00GMLQFYF4E0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 08 Mar 2017 18:59:58 +0900 (KST)
+Received: from mx1.redhat.com ([209.132.183.28]:38610 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750853AbdCHKpB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 8 Mar 2017 05:45:01 -0500
+In-Reply-To: <20170308084945.5084-1-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
 
-Dear Ulf,
+The sdhci_intel_byt_* and the non _qcom_ sdhci_acpi_slot_ entries in
+sdhci-acpi.c are for the same mmc host in either pci or acpi mapped
+mode, so the flags should be the same.
 
-Could you pull these patches into your next repository?
+The syncing removes the SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk from
+sdhci_acpi_slot_int_sdio, this quirk is a nop as this slot also has
+MMC_CAP_NONREMOVABLE, and adds SDHCI_QUIRK2_PRESET_VALUE_BROKEN to
+sdhci_acpi_slot_int_sdio and sdhci_acpi_slot_int_sd. Note that
+sdhci_acpi_slot_int_mmc already has the SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+quirk, which is another indication that the others need it too.
 
-The following changes since commit c1ae3cfa0e89fa1a7ecc4c99031f5e9ae99d9201:
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-  Linux 4.11-rc1 (2017-03-05 12:59:56 -0800)
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 9dcb704..237f318 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -286,9 +286,9 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ };
+ 
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+-	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+-		   SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+-	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
++	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+ 		   MMC_CAP_WAIT_WHILE_BUSY,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+@@ -301,6 +301,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
+ 		   SDHCI_ACPI_RUNTIME_PM,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 		   SDHCI_QUIRK2_STOP_WITH_TC,
+ 	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
+ 	.probe_slot	= sdhci_acpi_sd_probe_slot,
+-- 
+2.9.3
 
-are available in the git repository at:
-
-  https://github.com/jh80chung/dw-mmc.git for-ulf
-
-for you to fetch changes up to 3f7f0fe4662f23d34cd741221842a45f253200ef:
-
-  mmc: dw_mmc: improve dw_mci_reset a bit (2017-03-07 17:30:24 +0900)
-
-----------------------------------------------------------------
-Shawn Lin (7):
-      mmc: dw_mmc: improve the timeout polling code
-      mmc: dw_mmc: move dw_mci_reset forward to avoid declaration
-      mmc: dw_mmc: move dw_mci_ctrl_reset forward to avoid declaration
-      mmc: dw_mmc: move dw_mci_get_cd forward to avoid declaration
-      mmc: dw_mmc: remove declaration of dw_mci_card_busy
-      mmc: dw_mmc: move mci_send_cmd forward to avoid declaration
-      mmc: dw_mmc: improve dw_mci_reset a bit
-
- drivers/mmc/host/dw_mmc.c | 383 ++++++++++++++++++++++------------------------
- 1 file changed, 182 insertions(+), 201 deletions(-)
-
-
-Best Regards,
-Jaehoon Chung
