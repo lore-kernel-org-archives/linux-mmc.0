@@ -1,68 +1,47 @@
-From: Romain Izard <romain.izard.pro@gmail.com>
-Subject: [PATCH] mmc: sdhci-of-at91: Support external regulators
-Date: Thu,  9 Mar 2017 16:18:20 +0100
-Message-ID: <20170309151820.7510-1-romain.izard.pro@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33114 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754933AbdCIPSe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2017 10:18:34 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jacek Anaszewski <jacek.anaszewski@gmail.com>
+Subject: Re: [regression] next-20170307: led trigger deferral breaks sdhci
+Date: Thu, 9 Mar 2017 21:30:13 +0100
+Message-ID: <6f75da43-3c26-e744-5ef1-432f18b769b4@gmail.com>
+References: <20246b21-4c00-e22e-232d-49596f5f275e@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-leds-owner@vger.kernel.org>
+In-Reply-To: <20246b21-4c00-e22e-232d-49596f5f275e@nvidia.com>
+Sender: linux-leds-owner@vger.kernel.org
+To: Jon Hunter <jonathanh@nvidia.com>, Richard Purdie <rpurdie@rpsys.net>, Pavel Machek <pavel@ucw.cz>, Adrian Hunter <adrian.hunter@intel.com>, Heiner Kallweit <hkallweit1@gmail.com>
+Cc: linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Romain Izard <romain.izard.pro@gmail.com>
 
-The SDHCI controller in the SAMA5D2 chip requires a valid voltage set
-in the power control register, otherwise commands will fail with a
-timeout error.
+Hi Joe,
 
-When using the regulator framework to specify the regulator used by the
-mmc device, the voltage is not configured, and it is not possible to use
-the connected device.
+On 03/08/2017 10:17 PM, Jon Hunter wrote:
+> Hello!
+> 
+> I noticed that sdhci is broken for me on yesterday's and today's -next
+> and the bisect is pointing to commit 3f1318e01bb4 ('leds: core: use
+> deferred probing if default trigger isn't available yet').
+> 
+> At first I thought that ok, the problem is that sdhci driver is first
+> registering the led and then the trigger. However, then I looked at the
+> led_trigger_register() function and it appears to allow you to register
+> the led first and the trigger sometime later and populate the default
+> trigger later on. So then I am not sure why the above commit is needed?
+> 
+> It is not clear to me from the commit message for the above commit what
+> actual problem was caused by not registering the trigger first.
 
-Implement a custom 'set_power' function for this specific hardware, that
-configures the voltage in the register in all cases.
+The problem was the case when the trigger that has been defined as
+"default-trigger" in DT is not registered at the moment of LED class
+driver probing. It is silently ignored by LED core.
 
-Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
----
- drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+It turned out that we accepted the commit too hastily, and in fact
+that case seems not to be critical to the extent justifying preventing
+LED class device registration.
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 2f9ad213377a..291a74955a4c 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -85,11 +85,30 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- }
- 
-+/*
-+ * In this specific implementation of the SDHCI contoller, the power register
-+ * needs to have a valid voltage set even when the power supply is managed by
-+ * an external regulator.
-+ */
-+static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
-+		     unsigned short vdd)
-+{
-+	if (!IS_ERR(host->mmc->supply.vmmc)) {
-+		struct mmc_host *mmc = host->mmc;
-+
-+		spin_unlock_irq(&host->lock);
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-+		spin_lock_irq(&host->lock);
-+	}
-+	sdhci_set_power_noreg(host, mode, vdd);
-+}
-+
- static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
- 	.set_clock		= sdhci_at91_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.reset			= sdhci_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-+	.set_power		= sdhci_at91_set_power,
- };
- 
- static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+Probably dev_warn() should be enough in this case. I've already dropped
+the commit. Sorry for making confusion.
+
 -- 
-2.9.3
-
+Best regards,
+Jacek Anaszewski
