@@ -1,327 +1,68 @@
-From: Tomas Winkler <tomasw@gmail.com>
-Subject: Re: [PATCH v3 4/5] mmc: core: move all quirks together into quirks.h
-Date: Thu, 9 Mar 2017 16:58:21 +0200
-Message-ID: <CA+i0qc4wwLqx-0Qy3q+uFD-SnTumLof22nUMRoA4OpXWAqKwCw@mail.gmail.com>
-References: <1487147732-81724-1-git-send-email-shawn.lin@rock-chips.com> <1487147732-81724-5-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: [PATCH] mmc: sdhci-of-at91: Support external regulators
+Date: Thu,  9 Mar 2017 16:18:20 +0100
+Message-ID: <20170309151820.7510-1-romain.izard.pro@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ot0-f193.google.com ([74.125.82.193]:34614 "EHLO
-        mail-ot0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754704AbdCIPGx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2017 10:06:53 -0500
-Received: by mail-ot0-f193.google.com with SMTP id x37so7259022ota.1
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2017 07:06:06 -0800 (PST)
-In-Reply-To: <1487147732-81724-5-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33114 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754933AbdCIPSe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2017 10:18:34 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Romain Izard <romain.izard.pro@gmail.com>
 
-On Wed, Feb 15, 2017 at 10:35 AM, Shawn Lin <shawn.lin@rock-chips.com> wrot=
-e:
-> It's not appreciated to place quirks everywhere, let's
-> put them together just like what we do for USB, PCI etc.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> ---
->
-> Changes in v3: None
-> Changes in v2:
-> - move INAND quirks together
->
->  drivers/mmc/core/block.c  | 80 -----------------------------------------
->  drivers/mmc/core/mmc.c    | 11 ------
->  drivers/mmc/core/quirks.h | 91 +++++++++++++++++++++++++++++++++++++++++=
-++++++
->  3 files changed, 91 insertions(+), 91 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ce5e2a2..c5116f4 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -61,12 +61,6 @@
->  #endif
->  #define MODULE_PARAM_PREFIX "mmcblk."
->
-> -#define INAND_CMD38_ARG_EXT_CSD  113
-> -#define INAND_CMD38_ARG_ERASE    0x00
-> -#define INAND_CMD38_ARG_TRIM     0x01
-> -#define INAND_CMD38_ARG_SECERASE 0x80
-> -#define INAND_CMD38_ARG_SECTRIM1 0x81
-> -#define INAND_CMD38_ARG_SECTRIM2 0x88
->  #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout=
- */
->  #define MMC_SANITIZE_REQ_TIMEOUT 240000
->  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
-> @@ -2108,80 +2102,6 @@ static int mmc_add_disk(struct mmc_blk_data *md)
->         return ret;
->  }
->
-> -static const struct mmc_fixup blk_fixups[] =3D
-> -{
-> -       MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> -                 MMC_QUIRK_INAND_CMD38),
-> -       MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> -                 MMC_QUIRK_INAND_CMD38),
-> -       MMC_FIXUP("SEM08G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> -                 MMC_QUIRK_INAND_CMD38),
-> -       MMC_FIXUP("SEM16G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> -                 MMC_QUIRK_INAND_CMD38),
-> -       MMC_FIXUP("SEM32G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> -                 MMC_QUIRK_INAND_CMD38),
-> -
-> -       /*
-> -        * Some MMC cards experience performance degradation with CMD23
-> -        * instead of CMD12-bounded multiblock transfers. For now we'll
-> -        * black list what's bad...
-> -        * - Certain Toshiba cards.
-> -        *
-> -        * N.B. This doesn't affect SD cards.
-> -        */
-> -       MMC_FIXUP("SDMB-32", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk=
-_mmc,
-> -                 MMC_QUIRK_BLK_NO_CMD23),
-> -       MMC_FIXUP("SDM032", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_BLK_NO_CMD23),
-> -       MMC_FIXUP("MMC08G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_BLK_NO_CMD23),
-> -       MMC_FIXUP("MMC16G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_BLK_NO_CMD23),
-> -       MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_BLK_NO_CMD23),
-> -
-> -       /*
-> -        * Some MMC cards need longer data read timeout than indicated in=
- CSD.
-> -        */
-> -       MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
-> -                 MMC_QUIRK_LONG_READ_TIME),
-> -       MMC_FIXUP("008GE0", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_LONG_READ_TIME),
-> -
-> -       /*
-> -        * On these Samsung MoviNAND parts, performing secure erase or
-> -        * secure trim can result in unrecoverable corruption due to a
-> -        * firmware bug.
-> -        */
-> -       MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -       MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> -                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> -
-> -       /*
-> -        *  On Some Kingston eMMCs, performing trim can result in
-> -        *  unrecoverable data conrruption occasionally due to a firmware=
- bug.
-> -        */
-> -       MMC_FIXUP("V10008", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk=
-_mmc,
-> -                 MMC_QUIRK_TRIM_BROKEN),
-> -       MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk=
-_mmc,
-> -                 MMC_QUIRK_TRIM_BROKEN),
-> -
-> -       END_FIXUP
-> -};
-> -
->  static int mmc_blk_probe(struct mmc_card *card)
->  {
->         struct mmc_blk_data *md, *part_md;
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index d0e6b6f..721bb01 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -49,17 +49,6 @@
->         35,     40,     45,     50,     55,     60,     70,     80,
->  };
->
-> -static const struct mmc_fixup mmc_ext_csd_fixups[] =3D {
-> -       /*
-> -        * Certain Hynix eMMC 4.41 cards might get broken when HPI featur=
-e
-> -        * is used so disable the HPI feature for such buggy cards.
-> -        */
-> -       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_HYNIX,
-> -                             0x014a, add_quirk, MMC_QUIRK_BROKEN_HPI, 5)=
-,
-> -
-> -       END_FIXUP
-> -};
-> -
->  #define UNSTUFF_BITS(resp,start,size)                                  \
->         ({                                                              \
->                 const int __size =3D size;                               =
- \
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index f6d7217..7c195e7 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -13,6 +13,97 @@
->
->  #include "card.h"
->
-> +static const struct mmc_fixup blk_fixups[] =3D {
-> +#define INAND_CMD38_ARG_EXT_CSD  113
-> +#define INAND_CMD38_ARG_ERASE    0x00
-> +#define INAND_CMD38_ARG_TRIM     0x01
-> +#define INAND_CMD38_ARG_SECERASE 0x80
-> +#define INAND_CMD38_ARG_SECTRIM1 0x81
-> +#define INAND_CMD38_ARG_SECTRIM2 0x88
-> +       /* CMD38 argument is passed through EXT_CSD[113] */
-> +       MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> +                 MMC_QUIRK_INAND_CMD38),
-> +       MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> +                 MMC_QUIRK_INAND_CMD38),
-> +       MMC_FIXUP("SEM08G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> +                 MMC_QUIRK_INAND_CMD38),
-> +       MMC_FIXUP("SEM16G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> +                 MMC_QUIRK_INAND_CMD38),
-> +       MMC_FIXUP("SEM32G", CID_MANFID_SANDISK, 0x100, add_quirk,
-> +                 MMC_QUIRK_INAND_CMD38),
-> +
-> +       /*
-> +        * Some MMC cards experience performance degradation with CMD23
-> +        * instead of CMD12-bounded multiblock transfers. For now we'll
-> +        * black list what's bad...
-> +        * - Certain Toshiba cards.
-> +        *
-> +        * N.B. This doesn't affect SD cards.
-> +        */
-> +       MMC_FIXUP("SDMB-32", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk=
-_mmc,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +       MMC_FIXUP("SDM032", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +       MMC_FIXUP("MMC08G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +       MMC_FIXUP("MMC16G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +       MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_BLK_NO_CMD23),
-> +
-> +       /*
-> +        * Some MMC cards need longer data read timeout than indicated in=
- CSD.
-> +        */
-> +       MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
-> +                 MMC_QUIRK_LONG_READ_TIME),
-> +       MMC_FIXUP("008GE0", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_LONG_READ_TIME),
-> +
-> +       /*
-> +        * On these Samsung MoviNAND parts, performing secure erase or
-> +        * secure trim can result in unrecoverable corruption due to a
-> +        * firmware bug.
-> +        */
-> +       MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +       MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_=
-mmc,
-> +                 MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +
-> +       /*
-> +        *  On Some Kingston eMMCs, performing trim can result in
-> +        *  unrecoverable data conrruption occasionally due to a firmware=
- bug.
-> +        */
-> +       MMC_FIXUP("V10008", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk=
-_mmc,
-> +                 MMC_QUIRK_TRIM_BROKEN),
-> +       MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk=
-_mmc,
-> +                 MMC_QUIRK_TRIM_BROKEN),
-> +
-> +       END_FIXUP
-> +};
-> +
-> +static const struct mmc_fixup mmc_ext_csd_fixups[] =3D {
-> +       /*
-> +        * Certain Hynix eMMC 4.41 cards might get broken when HPI featur=
-e
-> +        * is used so disable the HPI feature for such buggy cards.
-> +        */
-> +       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_HYNIX,
-> +                             0x014a, add_quirk, MMC_QUIRK_BROKEN_HPI, 5)=
-,
-> +
-> +       END_FIXUP
-> +};
-> +
->  static const struct mmc_fixup sdio_fixup_methods[] =3D {
->         SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
->                    add_quirk, MMC_QUIRK_NONSTD_FUNC_IF),
-> --
-> 1.9.1
->
+The SDHCI controller in the SAMA5D2 chip requires a valid voltage set
+in the power control register, otherwise commands will fail with a
+timeout error.
 
-In file included from drivers/mmc/core/mmc.c:28:0:
-drivers/mmc/core/quirks.h:107:31: warning: =E2=80=98sdio_fixup_methods=E2=
-=80=99
-defined but not used [-Wunused-const-variable=3D]
- static const struct mmc_fixup sdio_fixup_methods[] =3D {
-                               ^~~~~~~~~~~~~~~~~~
-drivers/mmc/core/quirks.h:16:31: warning: =E2=80=98mmc_blk_fixups=E2=80=99 =
-defined but
-not used [-Wunused-const-variable=3D]
- static const struct mmc_fixup mmc_blk_fixups[] =3D {
-                               ^~~~~~~~~~~~~~
+When using the regulator framework to specify the regulator used by the
+mmc device, the voltage is not configured, and it is not possible to use
+the connected device.
 
-Frankly I don't understand reasoning behind this change, not sure the
-compiler was anyhow smart  about it (e.g. --gc-sections) and anything
-was saved here.
-Maybe it makes more sense to split into individual modules c files..?
+Implement a custom 'set_power' function for this specific hardware, that
+configures the voltage in the register in all cases.
 
-Thanks
-Tomas
+Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 2f9ad213377a..291a74955a4c 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -85,11 +85,30 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ }
+ 
++/*
++ * In this specific implementation of the SDHCI contoller, the power register
++ * needs to have a valid voltage set even when the power supply is managed by
++ * an external regulator.
++ */
++static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
++		     unsigned short vdd)
++{
++	if (!IS_ERR(host->mmc->supply.vmmc)) {
++		struct mmc_host *mmc = host->mmc;
++
++		spin_unlock_irq(&host->lock);
++		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		spin_lock_irq(&host->lock);
++	}
++	sdhci_set_power_noreg(host, mode, vdd);
++}
++
+ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+ 	.set_clock		= sdhci_at91_set_clock,
+ 	.set_bus_width		= sdhci_set_bus_width,
+ 	.reset			= sdhci_reset,
+ 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
++	.set_power		= sdhci_at91_set_power,
+ };
+ 
+ static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+-- 
+2.9.3
+
