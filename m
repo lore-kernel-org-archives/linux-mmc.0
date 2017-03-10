@@ -1,48 +1,44 @@
-From: Patrice CHOTARD <patrice.chotard@st.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-st: remove unnecessary
- platform_set_drvdata() call
-Date: Fri, 10 Mar 2017 08:40:10 +0000
-Message-ID: <7e8b38e3-16a3-b00d-b30b-e24aa0f9d85a@st.com>
-References: <20170310031733.812-1-jszhang@marvell.com>
- <20170310031733.812-4-jszhang@marvell.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: mmc: core: Fix access to HS400-ES devices
+Date: Fri, 10 Mar 2017 09:46:08 +0100
+Message-ID: <7839966.gC4mPiIIyr@diego>
+References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
+Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170310031733.812-4-jszhang@marvell.com>
-Content-Language: en-US
-Content-ID: <9E5077E27187E349BE43C82B16391CFE@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@stlinux.com" <kernel@stlinux.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:48258 "EHLO gloria.sntech.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750981AbdCJIqN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Mar 2017 03:46:13 -0500
+In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
 
-Hi Jisheng
+Am Mittwoch, 1. März 2017, 14:11:47 CET schrieb Guenter Roeck:
+> HS400-ES devices fail to initialize with the following error messages.
+> 
+> mmc1: power class selection to bus width 8 ddr 0 failed
+> mmc1: error -110 whilst initialising MMC card
+> 
+> This was seen on Samsung Chromebook Plus. Code analysis points to
+> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
+> high-speed mode"), which attempts to set the bus width for all but
+> HS200 devices unconditionally. However, for HS400-ES, the bus width
+> is already selected.
+> 
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Douglas Anderson <dianders@chromium.org>
+> Cc: Brian Norris <briannorris@chromium.org>
+> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+> Reviewed-by: Douglas Anderson <dianders@chromium.org>
+> Reviewed-by: Shawn Lin <shawn.lin@rock-chip.com>
 
-On 03/10/2017 04:17 AM, Jisheng Zhang wrote:
-> sdhci_pltfm_init() has already set the platform drvdata for us, remove
-> the unnecessary platform_set_drvdata() call.
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> ---
->  drivers/mmc/host/sdhci-st.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index ed92ce729dde..7fff6490855c 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -418,8 +418,6 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  		goto err_out;
->  	}
->
-> -	platform_set_drvdata(pdev, host);
-> -
->  	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
->
->  	dev_info(&pdev->dev, "SDHCI ST Initialised: Host Version: 0x%x Vendor Version 0x%x\n",
->
+On a rk3399-kevin and the current mainline kernel from 20170309 it makes the 
+issue go away and the emmc work again, so
 
-Acked-by: Patrice Chotard <patrice.chotard@st.com>
+Tested-by: Heiko Stuebner <heiko@sntech.de>
 
-Thanks
