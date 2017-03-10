@@ -1,65 +1,48 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
-Date: Fri, 10 Mar 2017 10:29:36 +0200
-Message-ID: <f823dfb9-2acd-e9be-7132-a0b28659c316@intel.com>
-References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
- <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
- <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
- <e31765ec-3453-9c40-1710-bea881cd9dec@intel.com>
- <CACRpkdbjmUWw=ZPsVGGCS=6bsho=qw=OQVaE3p4AJWuccyGXag@mail.gmail.com>
+From: Patrice CHOTARD <patrice.chotard@st.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-st: remove unnecessary
+ platform_set_drvdata() call
+Date: Fri, 10 Mar 2017 08:40:10 +0000
+Message-ID: <7e8b38e3-16a3-b00d-b30b-e24aa0f9d85a@st.com>
+References: <20170310031733.812-1-jszhang@marvell.com>
+ <20170310031733.812-4-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdbjmUWw=ZPsVGGCS=6bsho=qw=OQVaE3p4AJWuccyGXag@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170310031733.812-4-jszhang@marvell.com>
+Content-Language: en-US
+Content-ID: <9E5077E27187E349BE43C82B16391CFE@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@stlinux.com" <kernel@stlinux.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/03/17 00:39, Linus Walleij wrote:
-> On Fri, Mar 3, 2017 at 1:22 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 15/02/17 15:49, Linus Walleij wrote:
->>> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>
->>>> Enhance mmc_blk_data_prep() to support CQE requests.
->>>>
->>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>
->>> Hey:
->>>
->>>> +#include <linux/ioprio.h>
->>> (...)
->>>> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
->>>> +               brq->data.flags |= MMC_DATA_PRIO;
->>>
->>> What is this?
->>
->> It is the command queue priority.
->>
->> The command queue supports 2 priorities: "high" (1) and "simple" (0).  The
->> eMMC will give "high" priority tasks priority over "simple" priority tasks.
->>
->> So here we give priority to IOPRIO_CLASS_RT which seems appropriate.
-> 
-> So if I understand correctly, you are obtaining the block layer scheduling
-> priorities, that can (only?) be set by ionice has from the command line?
+Hi Jisheng
 
-AFAICS it is the ioprio_set() system call .
+On 03/10/2017 04:17 AM, Jisheng Zhang wrote:
+> sdhci_pltfm_init() has already set the platform drvdata for us, remove
+> the unnecessary platform_set_drvdata() call.
+>
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> ---
+>  drivers/mmc/host/sdhci-st.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index ed92ce729dde..7fff6490855c 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -418,8 +418,6 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>  		goto err_out;
+>  	}
+>
+> -	platform_set_drvdata(pdev, host);
+> -
+>  	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+>
+>  	dev_info(&pdev->dev, "SDHCI ST Initialised: Host Version: 0x%x Vendor Version 0x%x\n",
+>
 
-> 
-> We need to discuss this with the block maintainers.
-> 
-> I'm not so sure about the future of this. The IOPRIO is only used with the CFQ
-> scheduler, only two other sites in the kernel use this and MQ and its schedulers
-> surely does not have ionice handling as far as I know.
-> 
-> The BFQ does not use it, AFAIK it is using different heuristics to prioritize
-> block traffic, and that does not include using ionice hints.
-> 
-> Is ionice:ing something we're really going to do going forward?
-> Should this be repurposed so that the block scheduler use this prio to
-> communicate to the driver layer to prioritize certain traffic?
+Acked-by: Patrice Chotard <patrice.chotard@st.com>
 
-That seems like a separate issue.  At the moment, I/O priorities are what we
-have, and giving priority to RT seems appropriate.
+Thanks
