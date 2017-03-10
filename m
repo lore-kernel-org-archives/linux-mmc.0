@@ -1,94 +1,226 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v12 0/9] Cavium MMC driver
-Date: Fri, 10 Mar 2017 14:24:58 +0100
-Message-ID: <20170310132507.32025-1-jglauber@cavium.com>
+Subject: [PATCH v12 5/9] mmc: cavium: Add support for Octeon cn7890
+Date: Fri, 10 Mar 2017 14:25:03 +0100
+Message-ID: <20170310132507.32025-6-jglauber@cavium.com>
+References: <20170310132507.32025-1-jglauber@cavium.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34178 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964969AbdCJNZb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2017 08:25:31 -0500
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33736 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934918AbdCJNZi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2017 08:25:38 -0500
+In-Reply-To: <20170310132507.32025-1-jglauber@cavium.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>
 
-Hi Ulf,
+The MMC unit on Octeon cn7890 differs in that it has multiple
+interrupts. Requires a lock for the interrupt handler. DMA addresses
+have a dedicated 64 bit register now, so use that when available.
 
-I've not heard back from you regarding the bitfields so I assume this
-means you're insisting on that point. I'd really like to make some
-progress with this series, so I'm reposting now. All comments should be
-addressed. Patches are on top of 4.11-rc1.
+Signed-off-by: Jan Glauber <jglauber@cavium.com>
+Signed-off-by: David Daney <david.daney@cavium.com>
+Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+---
+ drivers/mmc/host/cavium-mmc.c          | 16 ++++++-
+ drivers/mmc/host/cavium-mmc.h          |  7 +++
+ drivers/mmc/host/cavium-pltfm-octeon.c | 79 +++++++++++++++++++++++++++-------
+ 3 files changed, 85 insertions(+), 17 deletions(-)
 
-@Rob: I kept your ACK after the removal of the duplicate voltage line,
-please let me know if that is not OK.
-
-Changes to v11:
-- Fix build error and kill IS_ENABLED() by using an offset per arch
-- Added Rob's ACK for the DT bindings
-- Removed obsolete voltage-ranges from DT example
-- Replace pci_msix_enable() with pci_alloc_irq_vectors()
-- Remove superior hardware comment
-- Prefixed probe/removal functions with of_
-- Merged OF parsing code into one function, change order of property
-  lookup and simplify code
-- Removed slot->sclock, no need to store it there
-- Substituted now invisible mmc_card_blockaddr()
-- Use new 3.3V CAP for DDR
-- Update Copyright
-- Allow set_ios to set clock to zero
-- Converted bitfields to shift-n-mask logic
-- Improved error codes after receiving error interrupt
-- Added ifndef guards to header
-- Add meaningful interrupt names
-- Remove stale mmc_host_ops prototype
-
-Changes to v10:
-- Renamed files to get a common prefix
-- Select GPIO driver in Kconfig
-- Support a fixed regulator
-- dts: fixed quotes and re-ordered example
-- Use new MMC_CAP_3_3V_DDR instead of 1_8V hack
-- Use blksz instead of now internal mmc_card_blockaddr
-- Added some maintainers
-
-Previous versions:
-v10: https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1295316.html
-v9:  http://marc.info/?l=linux-mmc&m=147431759215233&w=2
-
-Cheers,
-Jan
-
--------
-
-Jan Glauber (9):
-  dt-bindings: mmc: Add Cavium SOCs MMC bindings
-  mmc: cavium: Add core MMC driver for Cavium SOCs
-  mmc: cavium: Add MMC platform driver for Octeon SOCs
-  mmc: cavium: Work-around hardware bug on cn6xxx and cnf7xxx
-  mmc: cavium: Add support for Octeon cn7890
-  mmc: cavium: Add MMC PCI driver for ThunderX SOCs
-  mmc: cavium: Add scatter-gather DMA support
-  mmc: cavium: Support DDR mode for eMMC devices
-  MAINTAINERS: Add entry for Cavium MMC driver
-
- .../devicetree/bindings/mmc/cavium-mmc.txt         |   58 +
- MAINTAINERS                                        |    8 +
- arch/mips/cavium-octeon/Makefile                   |    1 +
- arch/mips/cavium-octeon/octeon-mmc-l2c.c           |   98 ++
- drivers/mmc/host/Kconfig                           |   20 +
- drivers/mmc/host/Makefile                          |    4 +
- drivers/mmc/host/cavium-mmc.c                      | 1115 ++++++++++++++++++++
- drivers/mmc/host/cavium-mmc.h                      |  212 ++++
- drivers/mmc/host/cavium-pci-thunderx.c             |  201 ++++
- drivers/mmc/host/cavium-pltfm-octeon.c             |  260 +++++
- 10 files changed, 1977 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
- create mode 100644 arch/mips/cavium-octeon/octeon-mmc-l2c.c
- create mode 100644 drivers/mmc/host/cavium-mmc.c
- create mode 100644 drivers/mmc/host/cavium-mmc.h
- create mode 100644 drivers/mmc/host/cavium-pci-thunderx.c
- create mode 100644 drivers/mmc/host/cavium-pltfm-octeon.c
-
+diff --git a/drivers/mmc/host/cavium-mmc.c b/drivers/mmc/host/cavium-mmc.c
+index c1d3c65..c57abed 100644
+--- a/drivers/mmc/host/cavium-mmc.c
++++ b/drivers/mmc/host/cavium-mmc.c
+@@ -412,9 +412,15 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+ {
+ 	struct cvm_mmc_host *host = dev_id;
+ 	struct mmc_request *req;
++	unsigned long flags = 0;
+ 	u64 emm_int, rsp_sts;
+ 	bool host_done;
+ 
++	if (host->need_irq_handler_lock)
++		spin_lock_irqsave(&host->irq_handler_lock, flags);
++	else
++		__acquire(&host->irq_handler_lock);
++
+ 	/* Clear interrupt bits (write 1 clears ). */
+ 	emm_int = readq(host->base + MIO_EMM_INT(host));
+ 	writeq(emm_int, host->base + MIO_EMM_INT(host));
+@@ -473,6 +479,10 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+ 	if (host_done)
+ 		host->release_bus(host);
+ out:
++	if (host->need_irq_handler_lock)
++		spin_unlock_irqrestore(&host->irq_handler_lock, flags);
++	else
++		__release(&host->irq_handler_lock);
+ 	return IRQ_RETVAL(emm_int != 0);
+ }
+ 
+@@ -500,11 +510,15 @@ static u64 prepare_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
+ 			      (sg_dma_len(&data->sg[0]) / 8) - 1);
+ 
+ 	addr = sg_dma_address(&data->sg[0]);
+-	dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_ADR, addr);
++	if (!host->big_dma_addr)
++		dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_ADR, addr);
+ 	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
+ 
+ 	pr_debug("[%s] sg_dma_len: %u  total sg_elem: %d\n",
+ 		 (rw) ? "W" : "R", sg_dma_len(&data->sg[0]), count);
++
++	if (host->big_dma_addr)
++		writeq(addr, host->dma_base + MIO_EMM_DMA_ADR(host));
+ 	return addr;
+ }
+ 
+diff --git a/drivers/mmc/host/cavium-mmc.h b/drivers/mmc/host/cavium-mmc.h
+index 3ee6dae..4b22432 100644
+--- a/drivers/mmc/host/cavium-mmc.h
++++ b/drivers/mmc/host/cavium-mmc.h
+@@ -23,6 +23,7 @@
+ 
+ /* DMA register addresses */
+ #define MIO_EMM_DMA_CFG(x)	(0x00 + x->reg_off_dma)
++#define MIO_EMM_DMA_ADR(x)	(0x08 + x->reg_off_dma)
+ 
+ /* register addresses */
+ #define MIO_EMM_CFG(x)		(0x00 + x->reg_off)
+@@ -57,6 +58,12 @@ struct cvm_mmc_host {
+ 	struct sg_mapping_iter smi;
+ 	bool dma_active;
+ 
++	bool has_ciu3;
++	bool big_dma_addr;
++	bool need_irq_handler_lock;
++	spinlock_t irq_handler_lock;
++	struct semaphore mmc_serializer;
++
+ 	struct gpio_desc *global_pwr_gpiod;
+ 
+ 	struct cvm_mmc_slot *slot[CAVIUM_MAX_MMC];
+diff --git a/drivers/mmc/host/cavium-pltfm-octeon.c b/drivers/mmc/host/cavium-pltfm-octeon.c
+index 9dabfa4..e1fe78b 100644
+--- a/drivers/mmc/host/cavium-pltfm-octeon.c
++++ b/drivers/mmc/host/cavium-pltfm-octeon.c
+@@ -23,20 +23,28 @@ extern void l2c_unlock_mem_region(u64 start, u64 len);
+ 
+ static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
+ {
+-	/* Switch the MMC controller onto the bus. */
+-	down(&octeon_bootbus_sem);
+-	writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
++	if (!host->has_ciu3) {
++		/* Switch the MMC controller onto the bus. */
++		down(&octeon_bootbus_sem);
++		writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
++	} else {
++		down(&host->mmc_serializer);
++	}
+ }
+ 
+ static void octeon_mmc_release_bus(struct cvm_mmc_host *host)
+ {
+-	up(&octeon_bootbus_sem);
++	if (!host->has_ciu3)
++		up(&octeon_bootbus_sem);
++	else
++		up(&host->mmc_serializer);
+ }
+ 
+ static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
+ {
+ 	writeq(val, host->base + MIO_EMM_INT(host));
+-	writeq(val, host->base + MIO_EMM_INT_EN(host));
++	if (!host->dma_active || (host->dma_active && !host->has_ciu3))
++		writeq(val, host->base + MIO_EMM_INT_EN(host));
+ }
+ 
+ static void octeon_mmc_dmar_fixup(struct cvm_mmc_host *host,
+@@ -75,6 +83,9 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 	if (!host)
+ 		return -ENOMEM;
+ 
++	spin_lock_init(&host->irq_handler_lock);
++	sema_init(&host->mmc_serializer, 1);
++
+ 	host->dev = &pdev->dev;
+ 	host->acquire_bus = octeon_mmc_acquire_bus;
+ 	host->release_bus = octeon_mmc_release_bus;
+@@ -87,12 +98,34 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 
+ 	host->sys_freq = octeon_get_io_clock_rate();
+ 
+-	/* First one is EMM second DMA */
+-	for (i = 0; i < 2; i++) {
+-		mmc_irq[i] = platform_get_irq(pdev, i);
+-		if (mmc_irq[i] < 0)
+-			return mmc_irq[i];
++	if (of_device_is_compatible(node, "cavium,octeon-7890-mmc")) {
++		host->big_dma_addr = true;
++		host->need_irq_handler_lock = true;
++		host->has_ciu3 = true;
++		/*
++		 * First seven are the EMM_INT bits 0..6, then two for
++		 * the EMM_DMA_INT bits
++		 */
++		for (i = 0; i < 9; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
++
++			/* work around legacy u-boot device trees */
++			irq_set_irq_type(mmc_irq[i], IRQ_TYPE_EDGE_RISING);
++		}
++	} else {
++		host->big_dma_addr = false;
++		host->need_irq_handler_lock = false;
++		host->has_ciu3 = false;
++		/* First one is EMM second DMA */
++		for (i = 0; i < 2; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
++		}
+ 	}
++
+ 	host->last_slot = -1;
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -124,12 +157,26 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 	val = readq(host->base + MIO_EMM_INT(host));
+ 	writeq(val, host->base + MIO_EMM_INT(host));
+ 
+-	ret = devm_request_irq(&pdev->dev, mmc_irq[0],
+-			       cvm_mmc_interrupt, 0, KBUILD_MODNAME, host);
+-	if (ret < 0) {
+-		dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
+-			mmc_irq[0]);
+-		return ret;
++	if (host->has_ciu3) {
++		/* Only CMD_DONE, DMA_DONE, CMD_ERR, DMA_ERR */
++		for (i = 1; i <= 4; i++) {
++			ret = devm_request_irq(&pdev->dev, mmc_irq[i],
++					       cvm_mmc_interrupt,
++					       0, cvm_mmc_irq_names[i], host);
++			if (ret < 0) {
++				dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++					mmc_irq[i]);
++				return ret;
++			}
++		}
++	} else {
++		ret = devm_request_irq(&pdev->dev, mmc_irq[0],
++				       cvm_mmc_interrupt, 0, KBUILD_MODNAME, host);
++		if (ret < 0) {
++			dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++				mmc_irq[0]);
++			return ret;
++		}
+ 	}
+ 
+ 	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
 -- 
 2.9.0.rc0.21.g7777322
 
