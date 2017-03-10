@@ -1,249 +1,291 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v12 3/9] mmc: cavium: Add MMC platform driver for Octeon SOCs
-Date: Fri, 10 Mar 2017 14:25:01 +0100
-Message-ID: <20170310132507.32025-4-jglauber@cavium.com>
+Subject: [PATCH v12 6/9] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
+Date: Fri, 10 Mar 2017 14:25:04 +0100
+Message-ID: <20170310132507.32025-7-jglauber@cavium.com>
 References: <20170310132507.32025-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170310132507.32025-1-jglauber@cavium.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a platform driver for Octeon MIPS SOCs.
+Add a platform driver for ThunderX ARM SOCs.
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
-Signed-off-by: David Daney <david.daney@cavium.com>
-Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
 ---
  drivers/mmc/host/Kconfig               |  10 ++
  drivers/mmc/host/Makefile              |   2 +
- drivers/mmc/host/cavium-pltfm-octeon.c | 183 +++++++++++++++++++++++++++++++++
- 3 files changed, 195 insertions(+)
- create mode 100644 drivers/mmc/host/cavium-pltfm-octeon.c
+ drivers/mmc/host/cavium-mmc.h          |  10 +-
+ drivers/mmc/host/cavium-pci-thunderx.c | 198 +++++++++++++++++++++++++++++++++
+ 4 files changed, 218 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/mmc/host/cavium-pci-thunderx.c
 
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f08691a..68cc811 100644
+index 68cc811..3983dee 100644
 --- a/drivers/mmc/host/Kconfig
 +++ b/drivers/mmc/host/Kconfig
-@@ -622,6 +622,16 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
- 	help
- 	  If you say yes here SD-Cards may work on the EZkit.
+@@ -632,6 +632,16 @@ config MMC_CAVIUM_OCTEON
  
-+config MMC_CAVIUM_OCTEON
-+	tristate "Cavium OCTEON SD/MMC Card Interface support"
-+	depends on CAVIUM_OCTEON_SOC
+ 	  If unsure, say N.
+ 
++config MMC_CAVIUM_THUNDERX
++	tristate "Cavium ThunderX SD/MMC Card Interface support"
++	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
++	select GPIO_THUNDERX
 +	help
-+	  This selects Cavium OCTEON SD/MMC card Interface.
-+	  If you have an OCTEON board with a Multimedia Card slot,
-+	  say Y or M here.
-+
-+	  If unsure, say N.
++	  This selects Cavium ThunderX SD/MMC Card Interface.
++	  If you have an Cavium ARM64 board with a Multimedia Card slot
++	  or builtin eMMC chip say Y or M here. If built as a module
++	  the module will be called thunderx_mmc.ko.
 +
  config MMC_DW
  	tristate "Synopsys DesignWare Memory Card Interface"
  	depends on HAS_DMA
 diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 6d548c4..c7f0ccf 100644
+index c7f0ccf..0068610 100644
 --- a/drivers/mmc/host/Makefile
 +++ b/drivers/mmc/host/Makefile
-@@ -42,6 +42,8 @@ obj-$(CONFIG_MMC_SDHI)		+= sh_mobile_sdhi.o
- obj-$(CONFIG_MMC_CB710)		+= cb710-mmc.o
- obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
+@@ -44,6 +44,8 @@ obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
  obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
-+octeon-mmc-objs := cavium-mmc.o cavium-pltfm-octeon.o
-+obj-$(CONFIG_MMC_CAVIUM_OCTEON) += octeon-mmc.o
+ octeon-mmc-objs := cavium-mmc.o cavium-pltfm-octeon.o
+ obj-$(CONFIG_MMC_CAVIUM_OCTEON) += octeon-mmc.o
++thunderx-mmc-objs := cavium-mmc.o cavium-pci-thunderx.o
++obj-$(CONFIG_MMC_CAVIUM_THUNDERX) += thunderx-mmc.o
  obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
  obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
  obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
-diff --git a/drivers/mmc/host/cavium-pltfm-octeon.c b/drivers/mmc/host/cavium-pltfm-octeon.c
+diff --git a/drivers/mmc/host/cavium-mmc.h b/drivers/mmc/host/cavium-mmc.h
+index 4b22432..fb82aee 100644
+--- a/drivers/mmc/host/cavium-mmc.h
++++ b/drivers/mmc/host/cavium-mmc.h
+@@ -22,8 +22,12 @@
+ #define CAVIUM_MAX_MMC		4
+ 
+ /* DMA register addresses */
+-#define MIO_EMM_DMA_CFG(x)	(0x00 + x->reg_off_dma)
+-#define MIO_EMM_DMA_ADR(x)	(0x08 + x->reg_off_dma)
++#define MIO_EMM_DMA_CFG(x)	(0x20 + x->reg_off_dma)
++#define MIO_EMM_DMA_ADR(x)	(0x28 + x->reg_off_dma)
++#define MIO_EMM_DMA_INT(x)	(0x30 + x->reg_off_dma)
++#define MIO_EMM_DMA_INT_W1S(x)	(0x38 + x->reg_off_dma)
++#define MIO_EMM_DMA_INT_ENA_W1S(x) (0x40 + x->reg_off_dma)
++#define MIO_EMM_DMA_INT_ENA_W1C(x) (0x48 + x->reg_off_dma)
+ 
+ /* register addresses */
+ #define MIO_EMM_CFG(x)		(0x00 + x->reg_off)
+@@ -39,6 +43,8 @@
+ #define MIO_EMM_SAMPLE(x)	(0x90 + x->reg_off)
+ #define MIO_EMM_STS_MASK(x)	(0x98 + x->reg_off)
+ #define MIO_EMM_RCA(x)		(0xa0 + x->reg_off)
++#define MIO_EMM_INT_EN_SET(x)	(0xb0 + x->reg_off)
++#define MIO_EMM_INT_EN_CLR(x)	(0xb8 + x->reg_off)
+ #define MIO_EMM_BUF_IDX(x)	(0xe0 + x->reg_off)
+ #define MIO_EMM_BUF_DAT(x)	(0xe8 + x->reg_off)
+ 
+diff --git a/drivers/mmc/host/cavium-pci-thunderx.c b/drivers/mmc/host/cavium-pci-thunderx.c
 new file mode 100644
-index 0000000..e83d143
+index 0000000..6ad36b4
 --- /dev/null
-+++ b/drivers/mmc/host/cavium-pltfm-octeon.c
-@@ -0,0 +1,183 @@
++++ b/drivers/mmc/host/cavium-pci-thunderx.c
+@@ -0,0 +1,198 @@
 +/*
-+ * Driver for MMC and SSD cards for Cavium OCTEON SOCs.
++ * Driver for MMC and SSD cards for Cavium ThunderX SOCs.
 + *
 + * This file is subject to the terms and conditions of the GNU General Public
 + * License.  See the file "COPYING" in the main directory of this archive
 + * for more details.
 + *
-+ * Copyright (C) 2012-2017 Cavium Inc.
++ * Copyright (C) 2016 Cavium Inc.
 + */
++#include <linux/dma-mapping.h>
 +#include <linux/gpio/consumer.h>
 +#include <linux/interrupt.h>
 +#include <linux/mmc/mmc.h>
 +#include <linux/mmc/slot-gpio.h>
 +#include <linux/module.h>
 +#include <linux/of_platform.h>
-+#include <asm/octeon/octeon.h>
++#include <linux/pci.h>
 +#include "cavium-mmc.h"
 +
-+#define CVMX_MIO_BOOT_CTL CVMX_ADD_IO_SEG(0x00011800000000D0ull)
++struct platform_device *slot_pdev[2];
 +
-+static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
++static void thunder_mmc_acquire_bus(struct cvm_mmc_host *host)
 +{
-+	/* Switch the MMC controller onto the bus. */
-+	down(&octeon_bootbus_sem);
-+	writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
++	down(&host->mmc_serializer);
 +}
 +
-+static void octeon_mmc_release_bus(struct cvm_mmc_host *host)
++static void thunder_mmc_release_bus(struct cvm_mmc_host *host)
 +{
-+	up(&octeon_bootbus_sem);
++	up(&host->mmc_serializer);
 +}
 +
-+static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
++static void thunder_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
 +{
 +	writeq(val, host->base + MIO_EMM_INT(host));
-+	writeq(val, host->base + MIO_EMM_INT_EN(host));
++	writeq(val, host->base + MIO_EMM_INT_EN_SET(host));
 +}
 +
-+static int octeon_mmc_probe(struct platform_device *pdev)
++static int thunder_mmc_register_interrupts(struct cvm_mmc_host *host,
++					   struct pci_dev *pdev)
 +{
-+	struct device_node *cn, *node = pdev->dev.of_node;
-+	struct cvm_mmc_host *host;
-+	struct resource	*res;
-+	void __iomem *base;
-+	int mmc_irq[9];
-+	int i, ret = 0;
-+	u64 val;
++	int nvec, ret, i;
 +
-+	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
++	nvec = pci_alloc_irq_vectors(pdev, 1, 9, PCI_IRQ_MSIX);
++	if (nvec < 0)
++		return nvec;
 +
-+	host->dev = &pdev->dev;
-+	host->acquire_bus = octeon_mmc_acquire_bus;
-+	host->release_bus = octeon_mmc_release_bus;
-+	host->int_enable = octeon_mmc_int_enable;
-+
-+	host->sys_freq = octeon_get_io_clock_rate();
-+
-+	/* First one is EMM second DMA */
-+	for (i = 0; i < 2; i++) {
-+		mmc_irq[i] = platform_get_irq(pdev, i);
-+		if (mmc_irq[i] < 0)
-+			return mmc_irq[i];
-+	}
-+	host->last_slot = -1;
-+
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!res) {
-+		dev_err(&pdev->dev, "Platform resource[0] is missing\n");
-+		return -ENXIO;
-+	}
-+	base = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(base))
-+		return PTR_ERR(base);
-+	host->base = (void __iomem *)base;
-+	host->reg_off = 0;
-+
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-+	if (!res) {
-+		dev_err(&pdev->dev, "Platform resource[1] is missing\n");
-+		return -EINVAL;
-+	}
-+	base = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(base))
-+		return PTR_ERR(base);
-+	host->dma_base = (void __iomem *)base;
-+	host->reg_off_dma = 0;
-+
-+	/*
-+	 * Clear out any pending interrupts that may be left over from
-+	 * bootloader.
-+	 */
-+	val = readq(host->base + MIO_EMM_INT(host));
-+	writeq(val, host->base + MIO_EMM_INT(host));
-+
-+	ret = devm_request_irq(&pdev->dev, mmc_irq[0],
-+			       cvm_mmc_interrupt, 0, KBUILD_MODNAME, host);
-+	if (ret < 0) {
-+		dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
-+			mmc_irq[0]);
-+		return ret;
-+	}
-+
-+	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
-+							 GPIOD_OUT_HIGH);
-+	if (IS_ERR(host->global_pwr_gpiod)) {
-+		dev_err(&pdev->dev, "Invalid power GPIO\n");
-+		return PTR_ERR(host->global_pwr_gpiod);
-+	}
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	for_each_child_of_node(node, cn) {
-+		struct platform_device *slot_pdev;
-+
-+		slot_pdev = of_platform_device_create(cn, NULL, &pdev->dev);
-+		ret = cvm_mmc_of_slot_probe(&slot_pdev->dev, host);
-+		if (ret) {
-+			dev_err(&pdev->dev, "Error populating slots\n");
-+			gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
++	/* register interrupts */
++	for (i = 0; i < nvec; i++) {
++		ret = devm_request_irq(&pdev->dev, pci_irq_vector(pdev, i),
++				       cvm_mmc_interrupt,
++				       0, cvm_mmc_irq_names[i], host);
++		if (ret)
 +			return ret;
-+		}
 +	}
-+
 +	return 0;
 +}
 +
-+static int octeon_mmc_remove(struct platform_device *pdev)
++static int thunder_mmc_probe(struct pci_dev *pdev,
++			     const struct pci_device_id *id)
 +{
-+	struct cvm_mmc_host *host = platform_get_drvdata(pdev);
++	struct device_node *node = pdev->dev.of_node;
++	struct device *dev = &pdev->dev;
++	struct device_node *child_node;
++	struct cvm_mmc_host *host;
++	int ret, i = 0;
++
++	host = devm_kzalloc(dev, sizeof(*host), GFP_KERNEL);
++	if (!host)
++		return -ENOMEM;
++
++	pci_set_drvdata(pdev, host);
++	ret = pcim_enable_device(pdev);
++	if (ret)
++		return ret;
++
++	ret = pci_request_regions(pdev, KBUILD_MODNAME);
++	if (ret)
++		return ret;
++
++	host->base = pcim_iomap(pdev, 0, pci_resource_len(pdev, 0));
++	if (!host->base)
++		return -EINVAL;
++
++	/* On ThunderX these are identical */
++	host->dma_base = host->base;
++
++	host->reg_off = 0x2000;
++	host->reg_off_dma = 0x160;
++
++	host->clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(host->clk))
++		return PTR_ERR(host->clk);
++
++	ret = clk_prepare_enable(host->clk);
++	if (ret)
++		return ret;
++	host->sys_freq = clk_get_rate(host->clk);
++
++	spin_lock_init(&host->irq_handler_lock);
++	sema_init(&host->mmc_serializer, 1);
++
++	host->dev = dev;
++	host->acquire_bus = thunder_mmc_acquire_bus;
++	host->release_bus = thunder_mmc_release_bus;
++	host->int_enable = thunder_mmc_int_enable;
++
++	host->big_dma_addr = true;
++	host->need_irq_handler_lock = true;
++	host->last_slot = -1;
++
++	ret = dma_set_mask(dev, DMA_BIT_MASK(48));
++	if (ret)
++		goto error;
++
++	/*
++	 * Clear out any pending interrupts that may be left over from
++	 * bootloader. Writing 1 to the bits clears them.
++	 */
++	writeq(127, host->base + MIO_EMM_INT_EN(host));
++	writeq(3, host->base + MIO_EMM_DMA_INT_ENA_W1C(host));
++
++	ret = thunder_mmc_register_interrupts(host, pdev);
++	if (ret)
++		goto error;
++
++	for_each_child_of_node(node, child_node) {
++		/*
++		 * TODO: mmc_of_parse and devm* require one device per slot.
++		 * Create a dummy device per slot and set the node pointer to
++		 * the slot. The easiest way to get this is using
++		 * of_platform_device_create.
++		 */
++		if (!slot_pdev[i])
++			slot_pdev[i] = of_platform_device_create(child_node, NULL,
++						      &pdev->dev);
++		if (!slot_pdev[i])
++			continue;
++		ret = cvm_mmc_of_slot_probe(&slot_pdev[i]->dev, host);
++		if (ret)
++			goto error;
++		i++;
++	}
++	dev_info(dev, "probed\n");
++	return 0;
++
++error:
++	clk_disable_unprepare(host->clk);
++	return ret;
++}
++
++static void thunder_mmc_remove(struct pci_dev *pdev)
++{
++	struct cvm_mmc_host *host = pci_get_drvdata(pdev);
 +	u64 dma_cfg;
 +	int i;
 +
 +	for (i = 0; i < CAVIUM_MAX_MMC; i++)
-+		if (host->slot[i])
++		if (host->slot[i]) {
 +			cvm_mmc_of_slot_remove(host->slot[i]);
++			platform_device_del(slot_pdev[i]);
++		}
 +
 +	dma_cfg = readq(host->dma_base + MIO_EMM_DMA_CFG(host));
 +	dma_cfg &= ~MIO_EMM_DMA_CFG_EN;
 +	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
 +
-+	gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
-+
-+	return 0;
++	clk_disable_unprepare(host->clk);
 +}
 +
-+static const struct of_device_id octeon_mmc_match[] = {
-+	{
-+		.compatible = "cavium,octeon-6130-mmc",
-+	},
-+	{
-+		.compatible = "cavium,octeon-7890-mmc",
-+	},
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, octeon_mmc_match);
-+
-+static struct platform_driver octeon_mmc_driver = {
-+	.probe		= octeon_mmc_probe,
-+	.remove		= octeon_mmc_remove,
-+	.driver		= {
-+		.name	= KBUILD_MODNAME,
-+		.of_match_table = octeon_mmc_match,
-+	},
++static const struct pci_device_id thunder_mmc_id_table[] = {
++	{ PCI_DEVICE(PCI_VENDOR_ID_CAVIUM, 0xa010) },
++	{ 0, }  /* end of table */
 +};
 +
-+static int __init octeon_mmc_init(void)
++static struct pci_driver thunder_mmc_driver = {
++	.name = KBUILD_MODNAME,
++	.id_table = thunder_mmc_id_table,
++	.probe = thunder_mmc_probe,
++	.remove = thunder_mmc_remove,
++};
++
++static int __init thunder_mmc_init_module(void)
 +{
-+	return platform_driver_register(&octeon_mmc_driver);
++	return pci_register_driver(&thunder_mmc_driver);
 +}
 +
-+static void __exit octeon_mmc_cleanup(void)
++static void __exit thunder_mmc_exit_module(void)
 +{
-+	platform_driver_unregister(&octeon_mmc_driver);
++	pci_unregister_driver(&thunder_mmc_driver);
 +}
 +
-+module_init(octeon_mmc_init);
-+module_exit(octeon_mmc_cleanup);
++module_init(thunder_mmc_init_module);
++module_exit(thunder_mmc_exit_module);
 +
-+MODULE_AUTHOR("Cavium Inc. <support@cavium.com>");
-+MODULE_DESCRIPTION("Low-level driver for Cavium OCTEON MMC/SSD card");
++MODULE_AUTHOR("Cavium Inc.");
++MODULE_DESCRIPTION("Cavium ThunderX eMMC Driver");
 +MODULE_LICENSE("GPL");
++MODULE_DEVICE_TABLE(pci, thunder_mmc_id_table);
 -- 
 2.9.0.rc0.21.g7777322
