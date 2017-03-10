@@ -1,41 +1,65 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: eMMC initialisation fails: invalid UHS-I mode
-Date: Fri, 10 Mar 2017 09:30:04 +0100
-Message-ID: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
+Date: Fri, 10 Mar 2017 10:29:36 +0200
+Message-ID: <f823dfb9-2acd-e9be-7132-a0b28659c316@intel.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+ <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
+ <e31765ec-3453-9c40-1710-bea881cd9dec@intel.com>
+ <CACRpkdbjmUWw=ZPsVGGCS=6bsho=qw=OQVaE3p4AJWuccyGXag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exsmtp01.microchip.com ([198.175.253.37]:26102 "EHLO
-        email.microchip.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1755134AbdCJIaX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2017 03:30:23 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdbjmUWw=ZPsVGGCS=6bsho=qw=OQVaE3p4AJWuccyGXag@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Nicolas Ferre <nicolas.ferre@microchip.com>
 
-Hi,
+On 10/03/17 00:39, Linus Walleij wrote:
+> On Fri, Mar 3, 2017 at 1:22 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 15/02/17 15:49, Linus Walleij wrote:
+>>> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>
+>>>> Enhance mmc_blk_data_prep() to support CQE requests.
+>>>>
+>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>
+>>> Hey:
+>>>
+>>>> +#include <linux/ioprio.h>
+>>> (...)
+>>>> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
+>>>> +               brq->data.flags |= MMC_DATA_PRIO;
+>>>
+>>> What is this?
+>>
+>> It is the command queue priority.
+>>
+>> The command queue supports 2 priorities: "high" (1) and "simple" (0).  The
+>> eMMC will give "high" priority tasks priority over "simple" priority tasks.
+>>
+>> So here we give priority to IOPRIO_CLASS_RT which seems appropriate.
+> 
+> So if I understand correctly, you are obtaining the block layer scheduling
+> priorities, that can (only?) be set by ionice has from the command line?
 
-I have discovered a bit late that the eMMC on sama5d2_xplained board is 
-no longer working since the initialisation fails.
+AFAICS it is the ioprio_set() system call .
 
-It was working with 4.9. Doing a git bisect, the commit which causes my 
-issue is e173f891:
-mmc: core: Update CMD13 polling policy when switch to HS DDR mode
+> 
+> We need to discuss this with the block maintainers.
+> 
+> I'm not so sure about the future of this. The IOPRIO is only used with the CFQ
+> scheduler, only two other sites in the kernel use this and MQ and its schedulers
+> surely does not have ionice handling as far as I know.
+> 
+> The BFQ does not use it, AFAIK it is using different heuristics to prioritize
+> block traffic, and that does not include using ionice hints.
+> 
+> Is ionice:ing something we're really going to do going forward?
+> Should this be repurposed so that the block scheduler use this prio to
+> communicate to the driver layer to prioritize certain traffic?
 
-Here are the logs:
-mmc0: Invalid UHS-I mode selected
-mmc0: switch to bus width 8 ddr failed
-mmc0: error -110 whilst initialising MMC card
-
-I have not dig much yet. Did someone already report or experience the 
-same thing?
-
-It seems that switching to the new timing before checking the switch 
-status doesn't work so the timing is set back to MMC_TIMING_MMC_HS that 
-causes the invalid UHS-I mode when getting preset value.
-
-Regards
-
-Ludovic
+That seems like a separate issue.  At the moment, I/O priorities are what we
+have, and giving priority to RT seems appropriate.
