@@ -1,291 +1,94 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v12 6/9] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
-Date: Fri, 10 Mar 2017 14:25:04 +0100
-Message-ID: <20170310132507.32025-7-jglauber@cavium.com>
-References: <20170310132507.32025-1-jglauber@cavium.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170310132507.32025-1-jglauber@cavium.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v12 0/9] Cavium MMC driver
+Date: Fri, 10 Mar 2017 14:24:58 +0100
+Message-ID: <20170310132507.32025-1-jglauber@cavium.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34178 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964969AbdCJNZb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2017 08:25:31 -0500
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Add a platform driver for ThunderX ARM SOCs.
+Hi Ulf,
 
-Signed-off-by: Jan Glauber <jglauber@cavium.com>
----
- drivers/mmc/host/Kconfig               |  10 ++
- drivers/mmc/host/Makefile              |   2 +
- drivers/mmc/host/cavium-mmc.h          |  10 +-
- drivers/mmc/host/cavium-pci-thunderx.c | 198 +++++++++++++++++++++++++++++++++
- 4 files changed, 218 insertions(+), 2 deletions(-)
+I've not heard back from you regarding the bitfields so I assume this
+means you're insisting on that point. I'd really like to make some
+progress with this series, so I'm reposting now. All comments should be
+addressed. Patches are on top of 4.11-rc1.
+
+@Rob: I kept your ACK after the removal of the duplicate voltage line,
+please let me know if that is not OK.
+
+Changes to v11:
+- Fix build error and kill IS_ENABLED() by using an offset per arch
+- Added Rob's ACK for the DT bindings
+- Removed obsolete voltage-ranges from DT example
+- Replace pci_msix_enable() with pci_alloc_irq_vectors()
+- Remove superior hardware comment
+- Prefixed probe/removal functions with of_
+- Merged OF parsing code into one function, change order of property
+  lookup and simplify code
+- Removed slot->sclock, no need to store it there
+- Substituted now invisible mmc_card_blockaddr()
+- Use new 3.3V CAP for DDR
+- Update Copyright
+- Allow set_ios to set clock to zero
+- Converted bitfields to shift-n-mask logic
+- Improved error codes after receiving error interrupt
+- Added ifndef guards to header
+- Add meaningful interrupt names
+- Remove stale mmc_host_ops prototype
+
+Changes to v10:
+- Renamed files to get a common prefix
+- Select GPIO driver in Kconfig
+- Support a fixed regulator
+- dts: fixed quotes and re-ordered example
+- Use new MMC_CAP_3_3V_DDR instead of 1_8V hack
+- Use blksz instead of now internal mmc_card_blockaddr
+- Added some maintainers
+
+Previous versions:
+v10: https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1295316.html
+v9:  http://marc.info/?l=linux-mmc&m=147431759215233&w=2
+
+Cheers,
+Jan
+
+-------
+
+Jan Glauber (9):
+  dt-bindings: mmc: Add Cavium SOCs MMC bindings
+  mmc: cavium: Add core MMC driver for Cavium SOCs
+  mmc: cavium: Add MMC platform driver for Octeon SOCs
+  mmc: cavium: Work-around hardware bug on cn6xxx and cnf7xxx
+  mmc: cavium: Add support for Octeon cn7890
+  mmc: cavium: Add MMC PCI driver for ThunderX SOCs
+  mmc: cavium: Add scatter-gather DMA support
+  mmc: cavium: Support DDR mode for eMMC devices
+  MAINTAINERS: Add entry for Cavium MMC driver
+
+ .../devicetree/bindings/mmc/cavium-mmc.txt         |   58 +
+ MAINTAINERS                                        |    8 +
+ arch/mips/cavium-octeon/Makefile                   |    1 +
+ arch/mips/cavium-octeon/octeon-mmc-l2c.c           |   98 ++
+ drivers/mmc/host/Kconfig                           |   20 +
+ drivers/mmc/host/Makefile                          |    4 +
+ drivers/mmc/host/cavium-mmc.c                      | 1115 ++++++++++++++++++++
+ drivers/mmc/host/cavium-mmc.h                      |  212 ++++
+ drivers/mmc/host/cavium-pci-thunderx.c             |  201 ++++
+ drivers/mmc/host/cavium-pltfm-octeon.c             |  260 +++++
+ 10 files changed, 1977 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+ create mode 100644 arch/mips/cavium-octeon/octeon-mmc-l2c.c
+ create mode 100644 drivers/mmc/host/cavium-mmc.c
+ create mode 100644 drivers/mmc/host/cavium-mmc.h
  create mode 100644 drivers/mmc/host/cavium-pci-thunderx.c
+ create mode 100644 drivers/mmc/host/cavium-pltfm-octeon.c
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 68cc811..3983dee 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -632,6 +632,16 @@ config MMC_CAVIUM_OCTEON
- 
- 	  If unsure, say N.
- 
-+config MMC_CAVIUM_THUNDERX
-+	tristate "Cavium ThunderX SD/MMC Card Interface support"
-+	depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
-+	select GPIO_THUNDERX
-+	help
-+	  This selects Cavium ThunderX SD/MMC Card Interface.
-+	  If you have an Cavium ARM64 board with a Multimedia Card slot
-+	  or builtin eMMC chip say Y or M here. If built as a module
-+	  the module will be called thunderx_mmc.ko.
-+
- config MMC_DW
- 	tristate "Synopsys DesignWare Memory Card Interface"
- 	depends on HAS_DMA
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index c7f0ccf..0068610 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -44,6 +44,8 @@ obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
- obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
- octeon-mmc-objs := cavium-mmc.o cavium-pltfm-octeon.o
- obj-$(CONFIG_MMC_CAVIUM_OCTEON) += octeon-mmc.o
-+thunderx-mmc-objs := cavium-mmc.o cavium-pci-thunderx.o
-+obj-$(CONFIG_MMC_CAVIUM_THUNDERX) += thunderx-mmc.o
- obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
-diff --git a/drivers/mmc/host/cavium-mmc.h b/drivers/mmc/host/cavium-mmc.h
-index 4b22432..fb82aee 100644
---- a/drivers/mmc/host/cavium-mmc.h
-+++ b/drivers/mmc/host/cavium-mmc.h
-@@ -22,8 +22,12 @@
- #define CAVIUM_MAX_MMC		4
- 
- /* DMA register addresses */
--#define MIO_EMM_DMA_CFG(x)	(0x00 + x->reg_off_dma)
--#define MIO_EMM_DMA_ADR(x)	(0x08 + x->reg_off_dma)
-+#define MIO_EMM_DMA_CFG(x)	(0x20 + x->reg_off_dma)
-+#define MIO_EMM_DMA_ADR(x)	(0x28 + x->reg_off_dma)
-+#define MIO_EMM_DMA_INT(x)	(0x30 + x->reg_off_dma)
-+#define MIO_EMM_DMA_INT_W1S(x)	(0x38 + x->reg_off_dma)
-+#define MIO_EMM_DMA_INT_ENA_W1S(x) (0x40 + x->reg_off_dma)
-+#define MIO_EMM_DMA_INT_ENA_W1C(x) (0x48 + x->reg_off_dma)
- 
- /* register addresses */
- #define MIO_EMM_CFG(x)		(0x00 + x->reg_off)
-@@ -39,6 +43,8 @@
- #define MIO_EMM_SAMPLE(x)	(0x90 + x->reg_off)
- #define MIO_EMM_STS_MASK(x)	(0x98 + x->reg_off)
- #define MIO_EMM_RCA(x)		(0xa0 + x->reg_off)
-+#define MIO_EMM_INT_EN_SET(x)	(0xb0 + x->reg_off)
-+#define MIO_EMM_INT_EN_CLR(x)	(0xb8 + x->reg_off)
- #define MIO_EMM_BUF_IDX(x)	(0xe0 + x->reg_off)
- #define MIO_EMM_BUF_DAT(x)	(0xe8 + x->reg_off)
- 
-diff --git a/drivers/mmc/host/cavium-pci-thunderx.c b/drivers/mmc/host/cavium-pci-thunderx.c
-new file mode 100644
-index 0000000..6ad36b4
---- /dev/null
-+++ b/drivers/mmc/host/cavium-pci-thunderx.c
-@@ -0,0 +1,198 @@
-+/*
-+ * Driver for MMC and SSD cards for Cavium ThunderX SOCs.
-+ *
-+ * This file is subject to the terms and conditions of the GNU General Public
-+ * License.  See the file "COPYING" in the main directory of this archive
-+ * for more details.
-+ *
-+ * Copyright (C) 2016 Cavium Inc.
-+ */
-+#include <linux/dma-mapping.h>
-+#include <linux/gpio/consumer.h>
-+#include <linux/interrupt.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/slot-gpio.h>
-+#include <linux/module.h>
-+#include <linux/of_platform.h>
-+#include <linux/pci.h>
-+#include "cavium-mmc.h"
-+
-+struct platform_device *slot_pdev[2];
-+
-+static void thunder_mmc_acquire_bus(struct cvm_mmc_host *host)
-+{
-+	down(&host->mmc_serializer);
-+}
-+
-+static void thunder_mmc_release_bus(struct cvm_mmc_host *host)
-+{
-+	up(&host->mmc_serializer);
-+}
-+
-+static void thunder_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
-+{
-+	writeq(val, host->base + MIO_EMM_INT(host));
-+	writeq(val, host->base + MIO_EMM_INT_EN_SET(host));
-+}
-+
-+static int thunder_mmc_register_interrupts(struct cvm_mmc_host *host,
-+					   struct pci_dev *pdev)
-+{
-+	int nvec, ret, i;
-+
-+	nvec = pci_alloc_irq_vectors(pdev, 1, 9, PCI_IRQ_MSIX);
-+	if (nvec < 0)
-+		return nvec;
-+
-+	/* register interrupts */
-+	for (i = 0; i < nvec; i++) {
-+		ret = devm_request_irq(&pdev->dev, pci_irq_vector(pdev, i),
-+				       cvm_mmc_interrupt,
-+				       0, cvm_mmc_irq_names[i], host);
-+		if (ret)
-+			return ret;
-+	}
-+	return 0;
-+}
-+
-+static int thunder_mmc_probe(struct pci_dev *pdev,
-+			     const struct pci_device_id *id)
-+{
-+	struct device_node *node = pdev->dev.of_node;
-+	struct device *dev = &pdev->dev;
-+	struct device_node *child_node;
-+	struct cvm_mmc_host *host;
-+	int ret, i = 0;
-+
-+	host = devm_kzalloc(dev, sizeof(*host), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
-+
-+	pci_set_drvdata(pdev, host);
-+	ret = pcim_enable_device(pdev);
-+	if (ret)
-+		return ret;
-+
-+	ret = pci_request_regions(pdev, KBUILD_MODNAME);
-+	if (ret)
-+		return ret;
-+
-+	host->base = pcim_iomap(pdev, 0, pci_resource_len(pdev, 0));
-+	if (!host->base)
-+		return -EINVAL;
-+
-+	/* On ThunderX these are identical */
-+	host->dma_base = host->base;
-+
-+	host->reg_off = 0x2000;
-+	host->reg_off_dma = 0x160;
-+
-+	host->clk = devm_clk_get(dev, NULL);
-+	if (IS_ERR(host->clk))
-+		return PTR_ERR(host->clk);
-+
-+	ret = clk_prepare_enable(host->clk);
-+	if (ret)
-+		return ret;
-+	host->sys_freq = clk_get_rate(host->clk);
-+
-+	spin_lock_init(&host->irq_handler_lock);
-+	sema_init(&host->mmc_serializer, 1);
-+
-+	host->dev = dev;
-+	host->acquire_bus = thunder_mmc_acquire_bus;
-+	host->release_bus = thunder_mmc_release_bus;
-+	host->int_enable = thunder_mmc_int_enable;
-+
-+	host->big_dma_addr = true;
-+	host->need_irq_handler_lock = true;
-+	host->last_slot = -1;
-+
-+	ret = dma_set_mask(dev, DMA_BIT_MASK(48));
-+	if (ret)
-+		goto error;
-+
-+	/*
-+	 * Clear out any pending interrupts that may be left over from
-+	 * bootloader. Writing 1 to the bits clears them.
-+	 */
-+	writeq(127, host->base + MIO_EMM_INT_EN(host));
-+	writeq(3, host->base + MIO_EMM_DMA_INT_ENA_W1C(host));
-+
-+	ret = thunder_mmc_register_interrupts(host, pdev);
-+	if (ret)
-+		goto error;
-+
-+	for_each_child_of_node(node, child_node) {
-+		/*
-+		 * TODO: mmc_of_parse and devm* require one device per slot.
-+		 * Create a dummy device per slot and set the node pointer to
-+		 * the slot. The easiest way to get this is using
-+		 * of_platform_device_create.
-+		 */
-+		if (!slot_pdev[i])
-+			slot_pdev[i] = of_platform_device_create(child_node, NULL,
-+						      &pdev->dev);
-+		if (!slot_pdev[i])
-+			continue;
-+		ret = cvm_mmc_of_slot_probe(&slot_pdev[i]->dev, host);
-+		if (ret)
-+			goto error;
-+		i++;
-+	}
-+	dev_info(dev, "probed\n");
-+	return 0;
-+
-+error:
-+	clk_disable_unprepare(host->clk);
-+	return ret;
-+}
-+
-+static void thunder_mmc_remove(struct pci_dev *pdev)
-+{
-+	struct cvm_mmc_host *host = pci_get_drvdata(pdev);
-+	u64 dma_cfg;
-+	int i;
-+
-+	for (i = 0; i < CAVIUM_MAX_MMC; i++)
-+		if (host->slot[i]) {
-+			cvm_mmc_of_slot_remove(host->slot[i]);
-+			platform_device_del(slot_pdev[i]);
-+		}
-+
-+	dma_cfg = readq(host->dma_base + MIO_EMM_DMA_CFG(host));
-+	dma_cfg &= ~MIO_EMM_DMA_CFG_EN;
-+	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
-+
-+	clk_disable_unprepare(host->clk);
-+}
-+
-+static const struct pci_device_id thunder_mmc_id_table[] = {
-+	{ PCI_DEVICE(PCI_VENDOR_ID_CAVIUM, 0xa010) },
-+	{ 0, }  /* end of table */
-+};
-+
-+static struct pci_driver thunder_mmc_driver = {
-+	.name = KBUILD_MODNAME,
-+	.id_table = thunder_mmc_id_table,
-+	.probe = thunder_mmc_probe,
-+	.remove = thunder_mmc_remove,
-+};
-+
-+static int __init thunder_mmc_init_module(void)
-+{
-+	return pci_register_driver(&thunder_mmc_driver);
-+}
-+
-+static void __exit thunder_mmc_exit_module(void)
-+{
-+	pci_unregister_driver(&thunder_mmc_driver);
-+}
-+
-+module_init(thunder_mmc_init_module);
-+module_exit(thunder_mmc_exit_module);
-+
-+MODULE_AUTHOR("Cavium Inc.");
-+MODULE_DESCRIPTION("Cavium ThunderX eMMC Driver");
-+MODULE_LICENSE("GPL");
-+MODULE_DEVICE_TABLE(pci, thunder_mmc_id_table);
 -- 
 2.9.0.rc0.21.g7777322
+
