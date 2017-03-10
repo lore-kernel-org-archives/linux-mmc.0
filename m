@@ -1,94 +1,86 @@
-From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v12 1/9] dt-bindings: mmc: Add Cavium SOCs MMC bindings
-Date: Fri, 10 Mar 2017 14:24:59 +0100
-Message-ID: <20170310132507.32025-2-jglauber@cavium.com>
-References: <20170310132507.32025-1-jglauber@cavium.com>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: Support external regulators
+Date: Fri, 10 Mar 2017 14:29:48 +0100
+Message-ID: <95e69d5f-29c6-5283-7bd7-831a92081d7b@microchip.com>
+References: <20170309151820.7510-1-romain.izard.pro@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170310132507.32025-1-jglauber@cavium.com>
+In-Reply-To: <20170309151820.7510-1-romain.izard.pro@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, Jan Glauber <jglauber@cavium.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>
+To: Romain Izard <romain.izard.pro@gmail.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add description of Cavium Octeon and ThunderX SOC device tree bindings.
+Hi Romain,
 
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Rob Herring <robh+dt@kernel.org>
-CC: Mark Rutland <mark.rutland@arm.com>
-CC: devicetree@vger.kernel.org
+On 03/09/2017 04:18 PM, Romain Izard wrote:
+> The SDHCI controller in the SAMA5D2 chip requires a valid voltage set
+> in the power control register, otherwise commands will fail with a
+> timeout error.
+>
+> When using the regulator framework to specify the regulator used by the
+> mmc device, the voltage is not configured, and it is not possible to use
+> the connected device.
+>
 
-Signed-off-by: Jan Glauber <jglauber@cavium.com>
-Signed-off-by: David Daney <david.daney@cavium.com>
-Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
-Acked-by: Rob Herring <robh+dt@kernel.org>
----
- .../devicetree/bindings/mmc/cavium-mmc.txt         | 58 ++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+It's true, I proposed some patches long time ago to change a bit the 
+behavior of the sdhci_set_power function but we didn't agree and so I 
+didn't declare the regulator.
 
-diff --git a/Documentation/devicetree/bindings/mmc/cavium-mmc.txt b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-new file mode 100644
-index 0000000..225c2be
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-@@ -0,0 +1,58 @@
-+* Cavium Octeon & ThunderX MMC controller
-+
-+The highspeed MMC host controller on Caviums SoCs provides an interface
-+for MMC and SD types of memory cards.
-+
-+Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-+as the speed of SD standard 4.0. Only 3.3 Volt is supported.
-+
-+Required properties:
-+ - compatible : should be one of:
-+   cavium,octeon-6130-mmc
-+   cavium,octeon-6130-mmc-slot
-+   cavium,octeon-7890-mmc
-+   cavium,octeon-7890-mmc-slot
-+   cavium,thunder-8190-mmc
-+   cavium,thunder-8190-mmc-slot
-+   cavium,thunder-8390-mmc
-+   cavium,thunder-8390-mmc-slot
-+ - reg : mmc controller base registers
-+ - clocks : phandle
-+
-+Optional properties:
-+ - for cd, bus-width and additional generic mmc parameters
-+   please refer to mmc.txt within this directory
-+ - cavium,cmd-clk-skew : number of coprocessor clocks before sampling command
-+ - cavium,dat-clk-skew : number of coprocessor clocks before sampling data
-+
-+Deprecated properties:
-+- spi-max-frequency : use max-frequency instead
-+- cavium,bus-max-width : use bus-width instead
-+
-+Examples:
-+	mmc_1_4: mmc@1,4 {
-+		compatible = "cavium,thunder-8390-mmc";
-+		reg = <0x0c00 0 0 0 0>;	/* DEVFN = 0x0c (1:4) */
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&sclk>;
-+
-+		mmc-slot@0 {
-+			compatible = "cavium,thunder-8390-mmc-slot";
-+			reg = <0>;
-+			vmmc-supply = <&mmc_supply_3v3>;
-+			max-frequency = <42000000>;
-+			bus-width = <4>;
-+			cap-sd-highspeed;
-+		};
-+
-+		mmc-slot@1 {
-+			compatible = "cavium,thunder-8390-mmc-slot";
-+			reg = <1>;
-+			vmmc-supply = <&mmc_supply_3v3>;
-+			max-frequency = <42000000>;
-+			bus-width = <8>;
-+			cap-mmc-highspeed;
-+			non-removable;
-+		};
-+	};
--- 
-2.9.0.rc0.21.g7777322
+> Implement a custom 'set_power' function for this specific hardware, that
+> configures the voltage in the register in all cases.
+>
+
+I don't remember if the set_power ops was available at that time. If 
+yes, I would have thought about it. IMO it's a nice solution.
+
+> Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 2f9ad213377a..291a74955a4c 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -85,11 +85,30 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>  }
+>
+> +/*
+> + * In this specific implementation of the SDHCI contoller, the power register
+controller
+
+Regards
+
+Ludovic
+
+> + * needs to have a valid voltage set even when the power supply is managed by
+> + * an external regulator.
+> + */
+> +static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
+> +		     unsigned short vdd)
+> +{
+> +	if (!IS_ERR(host->mmc->supply.vmmc)) {
+> +		struct mmc_host *mmc = host->mmc;
+> +
+> +		spin_unlock_irq(&host->lock);
+> +		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> +		spin_lock_irq(&host->lock);
+> +	}
+> +	sdhci_set_power_noreg(host, mode, vdd);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>  	.set_clock		= sdhci_at91_set_clock,
+>  	.set_bus_width		= sdhci_set_bus_width,
+>  	.reset			= sdhci_reset,
+>  	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+> +	.set_power		= sdhci_at91_set_power,
+>  };
+>
+>  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+>
