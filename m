@@ -1,36 +1,36 @@
-From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Fri, 10 Mar 2017 15:05:13 -0700
-Message-ID: <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
-References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-7-linus.walleij@linaro.org>
- <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
- <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com>
- <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [v2 PATCH 1/3] mmc: sdhci-cadence: Fix writing PHY delay
+Date: Mon, 13 Mar 2017 00:37:35 +0900
+Message-ID: <CAK7LNATB-h+tM6ajb7q7Pb1gi+pXuXfinhCWw=EnH_utquhhMQ@mail.gmail.com>
+References: <1488807487-28442-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from conssluserg-01.nifty.com ([210.131.2.80]:20710 "EHLO
+        conssluserg-01.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755675AbdCLPht (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2017 11:37:49 -0400
+In-Reply-To: <1488807487-28442-1-git-send-email-piotrs@cadence.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Piotr Sroka <piotrs@cadence.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 03/10/2017 07:21 AM, Adrian Hunter wrote:
->> Essentially I take out that thread and replace it with this one worker
->> introduced in this very patch. I agree the driver can block in many ways
->> and that is why I need to have it running in process context, and this
->> is what the worker introduced here provides.
-> 
-> The last time I looked at the blk-mq I/O scheduler code, it pulled up to
-> qdepth requests from the I/O scheduler and left them on a local list while
-> running ->queue_rq().  That means blocking in ->queue_rq() leaves some
-> number of requests in limbo (not issued but also not in the I/O scheduler)
-> for that time.
+2017-03-06 22:38 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
+> Add polling for ACK to be sure that data are written to PHY register.
+>
+> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+> ---
+> Changes for v2:
+> - fix indent
+> ---
 
-Look again, if we're not handling the requeued dispatches, we pull one
-at the time from the scheduler.
+This one looks OK.
+
+Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+
+
 
 -- 
-Jens Axboe
+Best Regards
+Masahiro Yamada
