@@ -1,53 +1,42 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: timeout waiting for hardware interrupt CMD19
-Date: Mon, 13 Mar 2017 12:12:49 +0100
-Message-ID: <20170313111249.cslock3xcupvxmu7@ninjato>
-References: <CAMuHMdWHJvKv_Kva0LWL_hekGgkZdR=FHcOdoShpMtzQuXhD2g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="wradajgsrs53bgnt"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdWHJvKv_Kva0LWL_hekGgkZdR=FHcOdoShpMtzQuXhD2g@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Simon Horman <horms@verge.net.au>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+From: Johan Hovold <johan@kernel.org>
+Subject: [PATCH] mmc: ushc: fix NULL-deref at probe
+Date: Mon, 13 Mar 2017 13:40:22 +0100
+Message-ID: <20170313124022.28401-1-johan@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f66.google.com ([209.85.215.66]:36247 "EHLO
+        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750859AbdCMMku (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2017 08:40:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, linux-kernel@vger.kernel.org, Johan Hovold <johan@kernel.org>, stable <stable@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
 
+Make sure to check the number of endpoints to avoid dereferencing a
+NULL-pointer should a malicious device lack endpoints.
 
---wradajgsrs53bgnt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Fixes: 53f3a9e26ed5 ("mmc: USB SD Host Controller (USHC) driver")
+Cc: stable <stable@vger.kernel.org>	# 2.6.37
+Cc: David Vrabel <david.vrabel@csr.com>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+---
+ drivers/mmc/host/ushc.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index d2c386f09d69..1d843357422e 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -426,6 +426,9 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 	struct ushc_data *ushc;
+ 	int ret;
+ 
++	if (intf->cur_altsetting->desc.bNumEndpoints < 1)
++		return -ENODEV;
++
+ 	mmc = mmc_alloc_host(sizeof(struct ushc_data), &intf->dev);
+ 	if (mmc == NULL)
+ 		return -ENOMEM;
+-- 
+2.12.0
 
-> +sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
-> +sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
-> +sh_mobile_sdhi ee100000.sd: Tuning procedure failed
-> +mmc1: tuning execution failed: -110
-> +mmc1: error -110 whilst initialising SD card
-
-Thanks! We have some tuning fixes in the queue. Let's see if they help
-here...
-
-
---wradajgsrs53bgnt
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAljGfqoACgkQFA3kzBSg
-KbaEdg//dBIGFfcpzWcNQK6SGNnFoKm+k/V2ob3JJXR/eRDBhoebLxC9dU+WiDhN
-G0+ZGRNEjbI+puKlymnXCNHuj9KZSyGabIgXHn44TqQ3oAAjkMZrl2t9DtZ/pGM3
-9StEupEgvKp63HMJnl0XAg9GW7jbXeCnSisSzXckoC9vZtJOkla9WyB6omJth95Z
-WFLhF31OrHzg2rGsxiTpxx6qYfhsyobmFgQ5FO3o+viBhblxMz8iVqrAmjGwOqY6
-itVyxITEU6AdAWZamO+KCNbLymX1sArYVzZgzgqYEL/o/azR2s+y77V7K4fWInk4
-Vx3Ldv7SGFbwHRM0fkZ1G8BSbyV76a3x2t19j0AlEIItTWl8+r9C6/ppan9Z5XHo
-V31fQzqntlXvWPLQNuCJVBjZQwrlJt1LZucoshgsfgUR8oBxbQraey1GxQeOQ8S0
-04KNls2noZb1m/S+mdCJgPWSlxBD9+i1fqeSgCbrdTACfCyz+y7OcfmCIL2uoje9
-zHCTUWZ76lyAMpwDTfUEmLanQ9IEsOHwUm8kBuOuUjXMgn1MebtEE8MNhbiW7/Vo
-r2xYGuxjWAyz7Iz2SAkn953AsUK1iuKG/9OSDkmD5VH1bairPpF4XA91yai4ZXnC
-VZBFfY7fZAzF0sMwGf7bJaTGTQdnT77Pz55S0ENZCQMKoEcIMv0=
-=NmCz
------END PGP SIGNATURE-----
-
---wradajgsrs53bgnt--
