@@ -1,44 +1,53 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Mon, 13 Mar 2017 11:25:37 +0200
-Message-ID: <e4b2c4bc-8627-2234-354d-c986f69b220f@intel.com>
-References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-7-linus.walleij@linaro.org>
- <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
- <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com>
- <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com>
- <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: timeout waiting for hardware interrupt CMD19
+Date: Mon, 13 Mar 2017 12:12:49 +0100
+Message-ID: <20170313111249.cslock3xcupvxmu7@ninjato>
+References: <CAMuHMdWHJvKv_Kva0LWL_hekGgkZdR=FHcOdoShpMtzQuXhD2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
-Sender: linux-block-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>, Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="wradajgsrs53bgnt"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdWHJvKv_Kva0LWL_hekGgkZdR=FHcOdoShpMtzQuXhD2g@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Simon Horman <horms@verge.net.au>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/03/17 00:05, Jens Axboe wrote:
-> On 03/10/2017 07:21 AM, Adrian Hunter wrote:
->>> Essentially I take out that thread and replace it with this one worker
->>> introduced in this very patch. I agree the driver can block in many ways
->>> and that is why I need to have it running in process context, and this
->>> is what the worker introduced here provides.
->>
->> The last time I looked at the blk-mq I/O scheduler code, it pulled up to
->> qdepth requests from the I/O scheduler and left them on a local list while
->> running ->queue_rq().  That means blocking in ->queue_rq() leaves some
->> number of requests in limbo (not issued but also not in the I/O scheduler)
->> for that time.
-> 
-> Look again, if we're not handling the requeued dispatches, we pull one
-> at the time from the scheduler.
-> 
 
-That's good :-)
+--wradajgsrs53bgnt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Now the next thing ;-)
 
-It looks like we either set BLK_MQ_F_BLOCKING and miss the possibility of
-issuing synchronous requests immediately, or we don't set BLK_MQ_F_BLOCKING
-in which case we are never allowed to sleep in ->queue_rq().  Is that true?
+> +sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
+> +sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
+> +sh_mobile_sdhi ee100000.sd: Tuning procedure failed
+> +mmc1: tuning execution failed: -110
+> +mmc1: error -110 whilst initialising SD card
+
+Thanks! We have some tuning fixes in the queue. Let's see if they help
+here...
+
+
+--wradajgsrs53bgnt
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAljGfqoACgkQFA3kzBSg
+KbaEdg//dBIGFfcpzWcNQK6SGNnFoKm+k/V2ob3JJXR/eRDBhoebLxC9dU+WiDhN
+G0+ZGRNEjbI+puKlymnXCNHuj9KZSyGabIgXHn44TqQ3oAAjkMZrl2t9DtZ/pGM3
+9StEupEgvKp63HMJnl0XAg9GW7jbXeCnSisSzXckoC9vZtJOkla9WyB6omJth95Z
+WFLhF31OrHzg2rGsxiTpxx6qYfhsyobmFgQ5FO3o+viBhblxMz8iVqrAmjGwOqY6
+itVyxITEU6AdAWZamO+KCNbLymX1sArYVzZgzgqYEL/o/azR2s+y77V7K4fWInk4
+Vx3Ldv7SGFbwHRM0fkZ1G8BSbyV76a3x2t19j0AlEIItTWl8+r9C6/ppan9Z5XHo
+V31fQzqntlXvWPLQNuCJVBjZQwrlJt1LZucoshgsfgUR8oBxbQraey1GxQeOQ8S0
+04KNls2noZb1m/S+mdCJgPWSlxBD9+i1fqeSgCbrdTACfCyz+y7OcfmCIL2uoje9
+zHCTUWZ76lyAMpwDTfUEmLanQ9IEsOHwUm8kBuOuUjXMgn1MebtEE8MNhbiW7/Vo
+r2xYGuxjWAyz7Iz2SAkn953AsUK1iuKG/9OSDkmD5VH1bairPpF4XA91yai4ZXnC
+VZBFfY7fZAzF0sMwGf7bJaTGTQdnT77Pz55S0ENZCQMKoEcIMv0=
+=NmCz
+-----END PGP SIGNATURE-----
+
+--wradajgsrs53bgnt--
