@@ -1,42 +1,43 @@
-From: Johan Hovold <johan@kernel.org>
-Subject: [PATCH] mmc: ushc: fix NULL-deref at probe
-Date: Mon, 13 Mar 2017 13:40:22 +0100
-Message-ID: <20170313124022.28401-1-johan@kernel.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 01/22] mmc: block: Fix is_waiting_last_req set incorrectly
+Date: Mon, 13 Mar 2017 14:36:32 +0200
+Message-ID: <1489408613-26915-2-git-send-email-adrian.hunter@intel.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:36247 "EHLO
-        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750859AbdCMMku (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2017 08:40:50 -0400
+Received: from mga03.intel.com ([134.134.136.65]:5869 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752780AbdCMMmb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 13 Mar 2017 08:42:31 -0400
+In-Reply-To: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, linux-kernel@vger.kernel.org, Johan Hovold <johan@kernel.org>, stable <stable@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Make sure to check the number of endpoints to avoid dereferencing a
-NULL-pointer should a malicious device lack endpoints.
+Commit 15520111500c ("mmc: core: Further fix thread wake-up") allowed a
+queue to release the host with is_waiting_last_req set to true. A queue
+waiting to claim the host will not reset it, which can result in the
+queue getting stuck in a loop.
 
-Fixes: 53f3a9e26ed5 ("mmc: USB SD Host Controller (USHC) driver")
-Cc: stable <stable@vger.kernel.org>	# 2.6.37
-Cc: David Vrabel <david.vrabel@csr.com>
-Signed-off-by: Johan Hovold <johan@kernel.org>
+Fixes: 15520111500c ("mmc: core: Further fix thread wake-up")
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org # v4.10+
 ---
- drivers/mmc/host/ushc.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/core/block.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-index d2c386f09d69..1d843357422e 100644
---- a/drivers/mmc/host/ushc.c
-+++ b/drivers/mmc/host/ushc.c
-@@ -426,6 +426,9 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
- 	struct ushc_data *ushc;
- 	int ret;
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 1621fa08e206..e59107ca512a 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1817,6 +1817,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		mmc_blk_issue_flush(mq, req);
+ 	} else {
+ 		mmc_blk_issue_rw_rq(mq, req);
++		card->host->context_info.is_waiting_last_req = false;
+ 	}
  
-+	if (intf->cur_altsetting->desc.bNumEndpoints < 1)
-+		return -ENODEV;
-+
- 	mmc = mmc_alloc_host(sizeof(struct ushc_data), &intf->dev);
- 	if (mmc == NULL)
- 		return -ENOMEM;
+ out:
 -- 
-2.12.0
+1.9.1
 
