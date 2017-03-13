@@ -1,97 +1,112 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 12/22] mmc: core: Factor out mrq preparation from mmc_start_request()
-Date: Mon, 13 Mar 2017 14:36:43 +0200
-Message-ID: <1489408613-26915-13-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 08/22] mmc: block: Disable Command Queue while RPMB is used
+Date: Mon, 13 Mar 2017 14:36:39 +0200
+Message-ID: <1489408613-26915-9-git-send-email-adrian.hunter@intel.com>
 References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:21750 "EHLO mga04.intel.com"
+Received: from mga04.intel.com ([192.55.52.120]:33357 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753198AbdCMMnZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 13 Mar 2017 08:43:25 -0400
+        id S1753018AbdCMMnL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 13 Mar 2017 08:43:11 -0400
 In-Reply-To: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-In preparation to reuse the code for CQE support.
+RPMB does not allow Command Queue commands. Disable and re-enable the
+Command Queue when switching.
+
+Note that the driver only switches partitions when the queue is empty.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
 ---
- drivers/mmc/core/core.c | 40 +++++++++++++++++++++++++++-------------
- 1 file changed, 27 insertions(+), 13 deletions(-)
+ drivers/mmc/core/block.c | 46 ++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 38 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6b063f0c2553..ffc263283f54 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -292,23 +292,18 @@ static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
- 	}
- }
- 
--static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-+static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
- {
- #ifdef CONFIG_MMC_DEBUG
- 	unsigned int i, sz;
- 	struct scatterlist *sg;
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index b9890dcfb913..849b55654163 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -728,10 +728,41 @@ static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mode,
  #endif
--	mmc_retune_hold(host);
--
--	if (mmc_card_removed(host->card))
--		return -ENOMEDIUM;
--
--	mmc_mrq_pr_debug(host, mrq);
--
--	WARN_ON(!host->claimed);
+ };
  
--	mrq->cmd->error = 0;
--	mrq->cmd->mrq = mrq;
-+	if (mrq->cmd) {
-+		mrq->cmd->error = 0;
-+		mrq->cmd->mrq = mrq;
-+		mrq->cmd->data = mrq->data;
-+	}
- 	if (mrq->sbc) {
- 		mrq->sbc->error = 0;
- 		mrq->sbc->mrq = mrq;
-@@ -325,8 +320,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 		if (sz != mrq->data->blocks * mrq->data->blksz)
- 			return -EINVAL;
- #endif
--
--		mrq->cmd->data = mrq->data;
- 		mrq->data->error = 0;
- 		mrq->data->mrq = mrq;
- 		if (mrq->stop) {
-@@ -335,6 +328,27 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 			mrq->stop->mrq = mrq;
- 		}
- 	}
++static int mmc_blk_part_switch_pre(struct mmc_card *card,
++				   unsigned int part_type)
++{
++	int ret = 0;
 +
-+	return 0;
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		if (card->ext_csd.cmdq_en) {
++			ret = mmc_cmdq_disable(card);
++			if (ret)
++				return ret;
++		}
++		mmc_retune_pause(card->host);
++	}
++
++	return ret;
 +}
 +
-+static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
++static int mmc_blk_part_switch_post(struct mmc_card *card,
++				    unsigned int part_type)
 +{
-+	int err;
++	int ret = 0;
 +
-+	mmc_retune_hold(host);
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		mmc_retune_unpause(card->host);
++		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
++			ret = mmc_cmdq_enable(card);
++	}
 +
-+	if (mmc_card_removed(host->card))
-+		return -ENOMEDIUM;
++	return ret;
++}
 +
-+	mmc_mrq_pr_debug(host, mrq);
-+
-+	WARN_ON(!host->claimed);
-+
-+	err = mmc_mrq_prep(host, mrq);
-+	if (err)
-+		return err;
-+
- 	led_trigger_event(host->led, LED_FULL);
- 	__mmc_start_request(host, mrq);
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				      struct mmc_blk_data *md)
+ {
+-	int ret;
++	int ret = 0;
+ 	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
  
+ 	if (main_md->part_curr == md->part_type)
+@@ -740,8 +771,9 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 	if (mmc_card_mmc(card)) {
+ 		u8 part_config = card->ext_csd.part_config;
+ 
+-		if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_pause(card->host);
++		ret = mmc_blk_part_switch_pre(card, md->part_type);
++		if (ret)
++			return ret;
+ 
+ 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+ 		part_config |= md->part_type;
+@@ -750,19 +782,17 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				 EXT_CSD_PART_CONFIG, part_config,
+ 				 card->ext_csd.part_time);
+ 		if (ret) {
+-			if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-				mmc_retune_unpause(card->host);
++			mmc_blk_part_switch_post(card, md->part_type);
+ 			return ret;
+ 		}
+ 
+ 		card->ext_csd.part_config = part_config;
+ 
+-		if (main_md->part_curr == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_unpause(card->host);
++		ret = mmc_blk_part_switch_post(card, main_md->part_curr);
+ 	}
+ 
+ 	main_md->part_curr = md->part_type;
+-	return 0;
++	return ret;
+ }
+ 
+ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
 -- 
 1.9.1
 
