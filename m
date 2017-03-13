@@ -1,97 +1,44 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v2 PATCH 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Mon, 13 Mar 2017 07:57:11 +0000
-Message-ID: <MWHPR07MB3088821EDD127BD6BF1A1EDFDD250@MWHPR07MB3088.namprd07.prod.outlook.com>
-References: <1488807587-5375-1-git-send-email-piotrs@cadence.com>
- <CAK7LNATAa7svo_DrotgM0XKMhLbZ2Qum8qe6fJxxf4Z+ouH_wA@mail.gmail.com>
- <DM5PR07MB308240E2DC885342BA477D04DD2F0@DM5PR07MB3082.namprd07.prod.outlook.com>
- <CAK7LNAT_ATrohuDx0sCaPp+5GUc-hLvrUGKX921U2OKcqcCUZQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
+Date: Mon, 13 Mar 2017 11:25:37 +0200
+Message-ID: <e4b2c4bc-8627-2234-354d-c986f69b220f@intel.com>
+References: <20170209153403.9730-1-linus.walleij@linaro.org>
+ <20170209153403.9730-7-linus.walleij@linaro.org>
+ <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
+ <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com>
+ <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com>
+ <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0058.outbound.protection.outlook.com ([104.47.36.58]:59019
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750783AbdCMH5P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 13 Mar 2017 03:57:15 -0400
-In-Reply-To: <CAK7LNAT_ATrohuDx0sCaPp+5GUc-hLvrUGKX921U2OKcqcCUZQ@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
+Sender: linux-block-owner@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>, Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-SGkgTWFzYWhpcm8NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNYXNh
-aGlybyBZYW1hZGEgW21haWx0bzp5YW1hZGEubWFzYWhpcm9Ac29jaW9uZXh0LmNvbV0NCj4gU2Vu
-dDogMDkgTWFyY2gsIDIwMTcgMzozNyBBTQ0KPiBTdWJqZWN0OiBSZTogW3YyIFBBVENIIDMvM10g
-bW1jOiBzZGhjaS1jYWRlbmNlOiBVcGRhdGUgUEhZIGRlbGF5IGNvbmZpZ3VyYXRpb24NCj4gDQo+
-IEhpIFBpb3RyLA0KPiANCj4gMjAxNy0wMy0wNyAyMDowMCBHTVQrMDk6MDAgUGlvdHIgU3Jva2Eg
-PHBpb3Ryc0BjYWRlbmNlLmNvbT46DQo+ID4gSGkgTWFzYWhpcm8sDQo+ID4NCj4gPj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gU2VudDogMDcgTWFyY2gsIDIwMTcgOTowMyBBTQ0K
-PiA+PiBUbzogUGlvdHIgU3Jva2ENCj4gPj4gU3ViamVjdDogUmU6IFt2MiBQQVRDSCAzLzNdIG1t
-Yzogc2RoY2ktY2FkZW5jZTogVXBkYXRlIFBIWSBkZWxheQ0KPiA+PiBjb25maWd1cmF0aW9uDQo+
-ID4+DQo+ID4+DQo+ID4+IFdpdGggdGhpcyBwYXRjaCwgd2Ugd2lsbCBoYXZlIHR3byBncm91cHMg
-Zm9yIFBIWSBwYXJhbWV0ZXJzLg0KPiA+Pg0KPiA+PiAoQSkgc3BlY2lmaWVkIHZpYSBhIGRhdGEg
-YXJyYXkgYXNzb2NpYXRlZCB3aXRoIGEgY29tcGF0aWJsZSBzdHJpbmcNCj4gPj4NCj4gPj4gKEIp
-IHNwZWNpZmllZCB3aXRoIERUIHByb3BlcnR5DQo+ID4+DQo+ID4+IEkgYW0gY29uZnVzZWQuDQo+
-ID4+IFdoYXQgaXMgdGhlIGRpZmZlcmVuY2UgYmV0d2VlbiAoQSkgYW5kIChCKT8NCj4gPg0KPiA+
-IFRoZSBmaXJzdCBncm91cCBvZiBkZWxheXMgYXJlIGlucHV0IGRlbGF5cy4gVGhlc2UgZGVsYXlz
-IGFyZSBzZXQgaW4gY3VycmVudCB2ZXJzaW9uIG9mIHNkaGNpLWNhZGVuY2UgZHJpdmVyIGluIHNk
-aGNpX2NkbnNfcGh5X2luaXQNCj4gZnVuY3Rpb24uDQo+ID4gRm9sbG93aW5nIGJ5IHNwZWM6DQo+
-ID4gVGhleSBhcmUgcHJvdmlkZWQgdG8gaGVscCBpbiBtZWV0aW5nIHRpbWluZ3MgcmVsYXRpb25z
-IGJldHdlZW4gZGF0YSB3aW5kb3cgYW5kIHNhbXBsaW5nIGNsb2NrLg0KPiA+IFRoZSBjbG9jayBp
-cyBmaXhlZCBwb3NpdGlvbiBpbiByZXNwZWN0IHRvIHRoZSBTRENMSy4gQW5kIHRoZSBpZGVhIG9m
-IHNhbXBsaW5nIGlzIHRvIGRlbGF5IGFuZCBhbGlnbiB0aGUgZGF0YSB0byB0aGUgZGF0YSB3aW5k
-b3cuDQo+ID4gSWYgdGhlIGRlZmF1bHQgdmFsdWVzIG9mIHRoZSBkZWxheXMgYXJlIG5vdCBzdWZm
-aWNpZW50L2NvcnJlY3QgZm9yIHRoZQ0KPiA+IGNoaXAvYm9hcmQgaW1wbGVtZW50YXRpb24gdGhv
-c2UgY2FuIGJlIGFkanVzdGVkDQo+ID4NCj4gPiBUaGUgc2Vjb25kIGdyb3VwIGFyZSBETEwgZGVs
-YXlzLg0KPiA+IFRoZXJlIGFyZSB0aHJlZSBkZWxheXMNCj4gPiBTREhDSV9DRE5TX1BIWV9ETFlf
-U0RDTEsgIC0gc2RjbGsgZGVsYXkgbGluZSB1c2UgdG8gZGVsYXkgb3V0Z29pbmcNCj4gPiBzZGNs
-ayBzaWduYWwgU0RIQ0lfQ0ROU19QSFlfRExZX0hTTU1DIC0gc2RjbGsgZGVsYXkgbGluZSB1c2Ug
-dG8gZGVsYXkNCj4gPiBvdXRnb2luZyBzZGNsayBzaWduYWwgZm9yIGZvciBIUzIwMCwgSFM0MDAg
-YW5kIEhTNDAwRVMNCj4gPiBTREhDSV9DRE5TX1BIWV9ETFlfU1RST0JFIC0gRExMIHN0cm9iZSBk
-ZWxheSBmb3IgSFM0MDBFUyBGb2xsb3dpbmcgYnkgc3BlYzoNCj4gPiBUaGV5IGFsbG93cyB0byBz
-ZXR1cCBiYXNpYyBETEwgcGFyYW1ldGVycy4gSW4gZ2VuZXJhbCB0aGUgZGVmYXVsdCB2YWx1ZXMg
-YXJlIHN1ZmZpY2llbnQgdG8gc3RhcnQgd29ya2luZyBpbiBhbnkgc3BlZWQgbW9kZS4gVGhlDQo+
-IGRlZmF1bHQgdmFsdWVzIG9mIGRlbGF5cyBhbmQgcGhhc2UgZGV0ZWN0IHNlbGVjdCBjYW4gYmUg
-YWRqdXN0ZWQgZGVwZW5kaW5nIG9uIHRoZSBjaGlwL2JvYXJkIGltcGxlbWVudGF0aW9uLg0KPiAN
-Cj4gDQo+IA0KPiBJdCB3YXMgbm90IGNsZWFyIHdoYXQgbWFrZXMgb25lIGdyb3VwIGRpZmZlcmVu
-dCBmcm9tIHRoZSBvdGhlci4NCj4gDQo+IEFmdGVyIGFsbCwgcGFyYW1ldGVycyBmcm9tIGJvdGgg
-Z3JvdXBzDQo+IHNob3VsZCBiZSBhZGp1c3RlZCBkZXBlbmRpbmcgb24gY2hpcC9ib2FyZCBpbXBs
-ZW1lbnRhdGlvbi4NCj4gDQo+IA0KPiA+IEluIGdlbmVyYWwgYWxsIFBIWSBkZWxheXMgdmFsdWVz
-IGVpdGhlciBzaG91bGQgYmUgcHJvcGVybHkgaGFyZGNvZGVkIGluIEhXIG9yIHRoZXkgc2hvdWxk
-IGJlIHByb3Blcmx5IHNldCAgYnkgRlcgZGVwZW5kaW5nIG9uIHRoZQ0KPiBjaGlwL2JvYXJkLg0K
-PiA+IFNvIFBIWSBkcml2ZXIgc2hvdWxkIGRvIG5vdCB0b3VjaCBQSFkgZGVsYXlzIGF0IGFsbCBv
-ciBzaG91bGQgc2V0IHZhbHVlcyB3aGljaCBhcmUgcHJvcGVyIGZvciBzcGVjaWZpYyBjaGlwL2Jv
-YXJkLg0KPiA+DQo+ID4gSSBhbSBub3Qgc3VyZSB3aGVyZSBleGFjdGx5IHRoZXkgc2hvdWxkIGJl
-IHBsYWNlZCBpbiBkdHMgZmlsZSBvciBpbiBjb21wYXRpYmxlIGRhdGEuDQo+IA0KPiBJIGFtIG5v
-dCBxdWl0ZSBzdXJlLCBlaXRoZXIuDQo+IChjb21tZW50cyBhcmUgYXBwcmVjaWF0ZWQuKQ0KPiAN
-Cj4gDQo+IEZXSVc6DQo+IFRoZSBmaXJzdCBncm91cCAoZGF0YSBhc3NvY2lhdGVkIHdpdGggY29t
-cGF0aWJsZSkgYWxsb3dzIHBlci1jaGlwIGFkanVzdG1lbnQsDQo+IGJ1dCBub3QgcGVyLWJvYXJk
-LiAgIFByb3MgYXJlLCB3ZSB3aWxsIG5vdCBicmVhayBEVCBjb21wYXRpYmlsaXR5LA0KPiBhbmQg
-d2UgY2FuIGF2b2lkIGEgbGlzdCBvZiBwcm9wZXJ0aWVzIGRpZmZpY3VsdCB0byB1bmRlcnN0YW5k
-Lg0KPiBDb25zIGFyZSwgd2UgY2FuIG5vdCBtYWtlIGZpbmUtZ3JhaW5lZCBhZGp1c3RtZW50IGZv
-ciBlYWNoIGJvYXJkLg0KPiANCj4gDQo+IFRoZSBzZWNvbmQgZ3JvdXAgKERUIHByb3BlcnR5KSBn
-aXZlcyBtb3JlIGZsZXhpYmlsaXR5IGZvciBwZXItY2hpcCBhbmQgcGVyLWJvYXJkIGFkanVzdG1l
-bnQuDQo+IEEgYmFkIHRoaW5nIGlzIHdlIHdpbGwgZW5kIHVwIHdpdGggc3BlY2lmeWluZyBhIGJ1
-bmNoIG9mIG15c3RlcmlvdXMgcHJvcGVydGllcyBmcm9tIERULg0KPiANCj4gDQoNCkl0IGxvb2tz
-IHRoYXQgImlucHV0IGRlbGF5cyIgYW5kICJETEwgc2RjbGsgZGVsYXlzIiBzaG91bGQgYmUgZGVm
-aW5lZCBpbiBkdHMgZmlsZSBiZWNhdXNlIHRoZXkgZGVwZW5kIG9uIGEgY2hpcCBhbmQgYSBib2Fy
-ZCBpbXBsZW1lbnRhdGlvbi4gT24gdGhlIG90aGVyIGhhbmQgdGhlIGxlc3MgZHRzIHByb3BlcnRp
-ZXMgdGhlIGJldHRlci4NCg0KVGhlcmUgaXMgb25lIG1vcmUgd2F5IHRvIGhhbmRsZSBpbnB1dCBk
-ZWxheXMuIEl0IGNhbiBiZSBhY2hpZXZlZCBieSBQSFkgdHJhaW5pbmcuIFBIWSB0cmFpbmluZyBp
-cyBzaW1pbGFyIHRvIHRoZSB0dW5pbmcgYW5kIGl0IHNob3VsZCBiZSBkb25lIHdoZW4gcHJvcGVy
-IHRpbWluZyBtb2RlIGlzIHNlbGVjdGVkIGFuZCBjbG9jayBmcmVxdWVuY3kgaXMgc2V0Lg0KVG8g
-bWFrZSBpdCBwb3NzaWJsZSB0aGUgc2RoY2lfc2V0X2lvcyBmdW5jdGlvbiBuZWVkIHRvIGJlIGds
-b2JhbC4gVGhlbiBJIGNvdWxkIGNyZWF0ZSBzZGhjaV9jZG5zX3NldF9pb3MgZnVuY3Rpb24gYXMg
-Zm9sbG93czoNCnZvaWQgc2RoY2lfY2Ruc19zZXRfaW9zKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBz
-dHJ1Y3QgbW1jX2lvcyAqaW9zKQ0Kew0KCS4gLiAuDQoNCglzZGhjaV9zZXRfaW9zKG1tYywgaW9z
-KTsNCgkvKiBleGVjdXRlIFBIWSB0cmFpbmluZyBpZiBuZWVkZWQgKi8NCglzZGhjaV9jZG5zX2V4
-ZWNfcGh5X3RyYWluaW5nKGhvc3QpOw0KfQ0KDQpUaGUgbW1jIGZyYW1ld29yayBjb25maWd1cmVz
-IHRpbWluZyBhbmQgZnJlcXVlbmN5IHNlcGFyYXRlbHkgc28gUEhZIHRyYWluaW5nIHNob3VsZCBi
-ZSBleGVjdXRlZCBldmVyeSB0aW1lIGlmIHRpbWluZyBvciBjbG9jayBmcmVxdWVuY3kgaXMgY2hh
-bmdlZC4gSSBhbSBub3Qgc3VyZSBJZiBJIGNhbiBjaGFuZ2Ugc2RoY2lfc2V0X2lvcyB0byBnbG9i
-YWwgZnVuY3Rpb24uDQpTbyBtYXliZSBwdXQgYWxsIGRlbGF5cyB0byBkdHMgZmlsZSB3b3VsZCBi
-ZSBhIGJldHRlciBzb2x1dGlvbj8gV2hhdCBkbyB5b3UgdGhpbms/DQoNCkJlc3QgUmVnYXJkcw0K
-UGlvdHIgU3Jva2ENCg==
+On 11/03/17 00:05, Jens Axboe wrote:
+> On 03/10/2017 07:21 AM, Adrian Hunter wrote:
+>>> Essentially I take out that thread and replace it with this one worker
+>>> introduced in this very patch. I agree the driver can block in many ways
+>>> and that is why I need to have it running in process context, and this
+>>> is what the worker introduced here provides.
+>>
+>> The last time I looked at the blk-mq I/O scheduler code, it pulled up to
+>> qdepth requests from the I/O scheduler and left them on a local list while
+>> running ->queue_rq().  That means blocking in ->queue_rq() leaves some
+>> number of requests in limbo (not issued but also not in the I/O scheduler)
+>> for that time.
+> 
+> Look again, if we're not handling the requeued dispatches, we pull one
+> at the time from the scheduler.
+> 
+
+That's good :-)
+
+Now the next thing ;-)
+
+It looks like we either set BLK_MQ_F_BLOCKING and miss the possibility of
+issuing synchronous requests immediately, or we don't set BLK_MQ_F_BLOCKING
+in which case we are never allowed to sleep in ->queue_rq().  Is that true?
