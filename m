@@ -1,92 +1,58 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH] mmc: core: check also R1 response for stop commands
-Date: Tue, 14 Mar 2017 10:41:01 +0000
-Message-ID: <PS1PR06MB16924720592DB11B43DD5AF0D8240@PS1PR06MB1692.apcprd06.prod.outlook.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: core: check also R1 response for stop commands
+Date: Tue, 14 Mar 2017 11:49:04 +0100
+Message-ID: <20170314104904.4ig62cy2w6fkpqzm@ninjato>
 References: <20170314101501.25463-1-wsa+renesas@sang-engineering.com>
+ <PS1PR06MB16924720592DB11B43DD5AF0D8240@PS1PR06MB1692.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:53895 "EHLO
-        relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1750980AbdCNKlG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 06:41:06 -0400
-In-Reply-To: <20170314101501.25463-1-wsa+renesas@sang-engineering.com>
-Content-Language: ja-JP
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="cmml6os2oa7mb3ka"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <PS1PR06MB16924720592DB11B43DD5AF0D8240@PS1PR06MB1692.apcprd06.prod.outlook.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 
-Hi Wolfram-san,
 
-> From: Wolfram Sang
-> Sent: Tuesday, March 14, 2017 7:15 PM
->=20
-> Introduce a helper function to not only check the error value but also
-> error bits of a R1 response. Use the helper for the stop command.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->=20
-> Change since RFC:
-> * rebased to v4.11-rc2 and retested
->=20
-> So, since I got no complaints about the RFC, I'll declare it a PATCH now =
-:)
-> Shimoda-san, is it possible for you to test it with the SD tester you onc=
-e had
-> access to? I could only test it by setting the ECC bit in the driver manu=
-ally.
+--cmml6os2oa7mb3ka
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Sure. I am able to bring the SD tester from other department tomorrow.
-So, I will check this patch tomorrow.
 
-Best regards,
-Yoshihiro Shimoda
+> > So, since I got no complaints about the RFC, I'll declare it a PATCH no=
+w :)
+> > Shimoda-san, is it possible for you to test it with the SD tester you o=
+nce had
+> > access to? I could only test it by setting the ECC bit in the driver ma=
+nually.
+>=20
+> Sure. I am able to bring the SD tester from other department tomorrow.
+> So, I will check this patch tomorrow.
 
-> I guess the key question here is still if R1_CARD_ECC_FAILED can be that =
-easily
-> added to CMD_ERRORS without side-effects?
->=20
->  drivers/mmc/core/block.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 1621fa08e20692..0e838b03709eb8 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1287,9 +1287,18 @@ static inline void mmc_apply_rel_rw(struct mmc_blk=
-_request *brq,
->  	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
->  	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
->  	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
-> +	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
->  	 R1_CC_ERROR |		/* Card controller error */		\
->  	 R1_ERROR)		/* General/unknown error */
->=20
-> +static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
-> +{
-> +	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
-> +		cmd->error =3D -EIO;
-> +
-> +	return cmd->error;
-> +}
-> +
->  static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
->  					     struct mmc_async_req *areq)
->  {
-> @@ -1311,7 +1320,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct=
- mmc_card *card,
->  	 * stop.error indicates a problem with the stop command.  Data
->  	 * may have been transferred, or may still be transferring.
->  	 */
-> -	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
-> +	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop)=
- ||
->  	    brq->data.error) {
->  		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
->  		case ERR_RETRY:
-> --
-> 2.11.0
+Good news, thank you very much!
 
+
+--cmml6os2oa7mb3ka
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAljHyqAACgkQFA3kzBSg
+KbZGvw/+Jyhd93LOZmJXZd6waWXtxwg6vruQhMICOydAIkbMkIArYn0UJo5Mxloe
+Q5XXm3SxjNyoLDbMFnHXuChuqpTxaMRHK1HbN5YrlnUTdFW/ZpqNk0a2gWLlBZ8O
+u1sAsvW8FuMM8lWOxAGAYFWrmeuNSuq2FI3Cj2+2TVqw+90nlvwBzUpbWa5dGi3z
+Pmk/BYW9pmDo9dFt6j+3Own6Zg71JWiprYTn7Eb5mg6AMsETs+YytbbJip34Me9I
+eYiYK/KH4M1EI6+95556kbdi0Bg8e7BKO/CCgr+obSKoemKZWp8lie1gTNcd+Uxg
+x4qfjObpDuXLnYbcpXHm1LfQH7F1OO6YYb0Eq1Ww8DovcCVZFBcY8TfBSu5YDwxt
+hHrADDWCuJpHNrwwRO8i7VuwFHoEHrRuvRNuzhnnQ4B7mDt28TNjeDECjHe+sL0B
+BcYRNPtk56wESG71+WFn+FuBUdpw6uz9U205LNvqVcUPHsqPGFNp03Vk0K/ZxTA1
+54fNpdJ9WyMvifWEnJaBjXpkHXaEMsH6ZKVsTS5Jz+qrR9cxHHnaGFa1FYiojR83
+qw9y+YWx5OJK/yNwpcemqy8VxQ9pmvrIpWP+LpP4GYIgrXgFEK4mEMn/N1GPgmkm
+s++XK/qMfiGFDL2HNLbbKXwNQRemPy2Ag2l78AHREqBrBz7TyZ4=
+=nydd
+-----END PGP SIGNATURE-----
+
+--cmml6os2oa7mb3ka--
