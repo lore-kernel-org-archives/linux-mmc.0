@@ -1,46 +1,41 @@
-From: =?UTF-8?Q?Andreas_F=c3=a4rber?= <afaerber@suse.de>
-Subject: Re: [PATCH 1/4] ARM64: Prepare Marvell IAP140 aka PXA1908
-Date: Tue, 14 Mar 2017 19:10:29 +0100
-Message-ID: <9c1fe53f-d25a-6bba-c324-a08818431795@suse.de>
-References: <20170219032000.4674-1-afaerber@suse.de>
- <20170219032000.4674-2-afaerber@suse.de>
- <CAPDyKFoy-dKTk=t6cmwzbjyntZHrkSyZbtpJ0wAMUDJ5xz4viA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40928 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750768AbdCNSKe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Mar 2017 14:10:34 -0400
-In-Reply-To: <CAPDyKFoy-dKTk=t6cmwzbjyntZHrkSyZbtpJ0wAMUDJ5xz4viA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 2/2] dt-bindings: mmc: tegra: Document Tegra186 compatible string
+Date: Tue, 14 Mar 2017 20:01:52 +0100
+Message-ID: <20170314190152.9167-2-thierry.reding@gmail.com>
+References: <20170314190152.9167-1-thierry.reding@gmail.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170314190152.9167-1-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Jonathan Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Jisheng Zhang <jszhang@marvell.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Eric Miao <eric.y.miao@gmail.com>, info@andromedabox.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby>
 
-Am 14.03.2017 um 17:30 schrieb Ulf Hansson:
-> On 19 February 2017 at 04:19, Andreas Färber <afaerber@suse.de> wrote:
->> Suppress COMMON_CLK_PXA and MMC_PXA for now as they don't build on arm64.
->> Also suppress the deprecated SERIAL_PXA in favor of SERIAL_8250_PXA.
->>
->> Signed-off-by: Andreas Färber <afaerber@suse.de>
->> ---
->>  arch/arm64/Kconfig.platforms | 5 +++++
->>  drivers/clk/Kconfig          | 2 +-
->>  drivers/mmc/host/Kconfig     | 2 +-
->>  drivers/tty/serial/Kconfig   | 2 +-
->>  4 files changed, 8 insertions(+), 3 deletions(-)
-> 
-> Please try split this up so it can be applied on each subsystem independently.
+From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-I believe that comment is obsoleted by later versions of the patchset
-using ARCH_MMP instead?
+The SDHCI controller found on Tegra186 in very similar to the controller
+found on earlier generations of Tegra.
 
-Regards,
-Andreas
+Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+index c15aa22d4570..9bce57862ed6 100644
+--- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
+@@ -13,6 +13,7 @@ Required properties:
+   - "nvidia,tegra114-sdhci": for Tegra114
+   - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
+   - "nvidia,tegra210-sdhci": for Tegra210
++  - "nvidia,tegra186-sdhci": for Tegra186
+ - clocks : Must contain one entry, for the module clock.
+   See ../clocks/clock-bindings.txt for details.
+ - resets : Must contain an entry for each entry in reset-names.
 -- 
-SUSE Linux GmbH, Maxfeldstr. 5, 90409 Nürnberg, Germany
-GF: Felix Imendörffer, Jane Smithard, Graham Norton
-HRB 21284 (AG Nürnberg)
+2.12.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
