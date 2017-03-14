@@ -1,26 +1,40 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Tue, 14 Mar 2017 15:43:57 +0100
-Message-ID: <20170314144357.GA31043@lst.de>
-References: <20170209153403.9730-1-linus.walleij@linaro.org> <20170209153403.9730-7-linus.walleij@linaro.org> <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com> <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com> <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com> <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk> <e4b2c4bc-8627-2234-354d-c986f69b220f@intel.com> <97f2a4ea-0802-9f23-6ac7-b9d6c6afbfcc@kernel.dk> <a3571278-b30d-c3cb-bea6-d1776eb53025@intel.com> <a3216031-0801-45e2-320c-bfc88fa742b4@kernel.dk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Tue, 14 Mar 2017 15:51:21 +0100
+Message-ID: <CAPDyKFr0KczeWFP+=LtkpDWN6V+Pph4Cv_r+yzK9c46-sU_jjQ@mail.gmail.com>
+References: <1484988923-1543-1-git-send-email-yong.mao@mediatek.com>
+ <1484988923-1543-2-git-send-email-yong.mao@mediatek.com>
+ <CAPDyKFqo7fMTp3YPJwgoa4u3iAie2U884VUfTnMQ_js8neMqTQ@mail.gmail.com>
+ <1487930376.22858.14.camel@mhfsdcap03>
+ <CAL_Jsq+eo-Fy8Wf2yZpE3Ufp4V_7Gn+w9fTyjZDP6V7tY-=gdw@mail.gmail.com>
+ <1488512995.21451.16.camel@mhfsdcap03> <1488873907.10538.3.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.211]:58587 "EHLO newverein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751910AbdCNOoA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Mar 2017 10:44:00 -0400
-Content-Disposition: inline
-In-Reply-To: <a3216031-0801-45e2-320c-bfc88fa742b4@kernel.dk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1488873907.10538.3.camel@mhfsdcap03>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Rob Herring <robh@kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chunfeng Yun <chunfeng.yun@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
 
-On Tue, Mar 14, 2017 at 08:36:26AM -0600, Jens Axboe wrote:
-> There's one case that doesn't look like it was converted properly, but
-> that's a mistake. The general insert-and-run cases run inline if we can,
-> but the direct-issue needs a fixup, see below.
+[...]
 
-Note that blk_mq_try_issue_directly is only called for the multiple
-hardware queue case, so MMC would not hit it.
+>>
+>
+> Please help to point out a bright way for this patch.
+> We are anxiously waiting for your response.
+
+Yong, I suggest you make resend of the series. This time make sure you
+send to DT maintainers as well.
+
+Kind regards
+Uffe
