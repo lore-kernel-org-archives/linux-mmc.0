@@ -1,58 +1,54 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v3 2/4] mmc: host: tmio: fix minor typos in comments
-Date: Tue, 14 Mar 2017 11:09:17 +0100
-Message-ID: <20170314100919.25401-3-wsa+renesas@sang-engineering.com>
-References: <20170314100919.25401-1-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v3 0/4] mmc: tmio: properly report status from autocmd12
+Date: Tue, 14 Mar 2017 11:09:15 +0100
+Message-ID: <20170314100919.25401-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:56233 "EHLO pokefinder.org"
+Received: from sauhun.de ([88.99.104.3]:56238 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750749AbdCNKQB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1750812AbdCNKQB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 14 Mar 2017 06:16:01 -0400
-In-Reply-To: <20170314100919.25401-1-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Making sure we match the actual register names.
+New in V3:
 
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc.h | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+* rebased to v4.11-rc2 and retested
+* added one more tag from Simon
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index b20b451ad90daa..d192b562282bb2 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -54,7 +54,7 @@
- #define TMIO_STOP_STP		BIT(0)
- #define TMIO_STOP_SEC		BIT(8)
- 
--/* Definitions for values the CTRL_STATUS register can take. */
-+/* Definitions for values the CTL_STATUS register can take */
- #define TMIO_STAT_CMDRESPEND    BIT(0)
- #define TMIO_STAT_DATAEND       BIT(2)
- #define TMIO_STAT_CARD_REMOVE   BIT(3)
-@@ -65,7 +65,7 @@
- #define TMIO_STAT_CARD_INSERT_A BIT(9)
- #define TMIO_STAT_SIGSTATE_A    BIT(10)
- 
--/* These belong technically to CTRL_STATUS2, but the driver merges them */
-+/* These belong technically to CTL_STATUS2, but the driver merges them */
- #define TMIO_STAT_CMD_IDX_ERR   BIT(16)
- #define TMIO_STAT_CRCFAIL       BIT(17)
- #define TMIO_STAT_STOPBIT_ERR   BIT(18)
-@@ -89,7 +89,7 @@
- 
- #define TMIO_BBS		512		/* Boot block size */
- 
--/* Definitions for values the CTRL_SDIO_STATUS register can take. */
-+/* Definitions for values the CTL_SDIO_STATUS register can take */
- #define TMIO_SDIO_STAT_IOIRQ	0x0001
- #define TMIO_SDIO_STAT_EXPUB52	0x4000
- #define TMIO_SDIO_STAT_EXWT	0x8000
+New in V2:
+* Fix some more comments in patch 2.
+* Add Simon's tags
+
+SDHI automatically sends CMD12 when the desired amount of data was transferred
+after multi block commands. However, the response from that CMD12 was never
+reported back to the mmc core, so that errors like ECC might go unnoticed. This
+series aims to fix that and clean up minor issues on the way when dealing with
+the autocmd12 feature. Testing documentation can be found here [1] and thanks
+must go to Shimoda-san for additional testing. Actually handling the ECC errors
+in the core is a seperate issue and I'll post a patch for it right after this.
+
+The patches are based on mmc-next as of today. A branch can be found here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-autocmd12-resp-v3
+
+Thanks and all the best,
+
+   Wolfram
+
+[1] http://elinux.org/Tests:SDHI-autocmd12-responses
+
+Wolfram Sang (4):
+  mmc: host: tmio: use defines for CTL_STOP_INTERNAL_ACTION values
+  mmc: host: tmio: fix minor typos in comments
+  mmc: host: tmio: don't BUG on unsupported stop commands
+  mmc: host: tmio: fill in response from auto cmd12
+
+ drivers/mmc/host/tmio_mmc.h     | 10 +++++++---
+ drivers/mmc/host/tmio_mmc_pio.c | 16 ++++++++++------
+ 2 files changed, 17 insertions(+), 9 deletions(-)
+
 -- 
 2.11.0
 
