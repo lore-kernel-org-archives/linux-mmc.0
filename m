@@ -1,50 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/10] mmc: meson-gx: series with smaller improvements
-Date: Tue, 14 Mar 2017 17:21:02 +0100
-Message-ID: <CAPDyKFpZw7oK-WeSqPyYqTLU5GE+ZrrA7rL-FNn1+Um7h+E+4Q@mail.gmail.com>
-References: <a76c3483-2c86-85c1-446e-f2522bd28aa8@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav2: add error handling of clk_prepare_enable()
+Date: Tue, 14 Mar 2017 17:21:08 +0100
+Message-ID: <CAPDyKFoqoFpwwnneDsBD9Z16HEaTfaSPqeuFcUhf83djxA3u-A@mail.gmail.com>
+References: <1486767286-3361-1-git-send-email-khoroshilov@ispras.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f181.google.com ([209.85.217.181]:34701 "EHLO
-        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752946AbdCNQVE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 12:21:04 -0400
-Received: by mail-ua0-f181.google.com with SMTP id f54so168119067uaa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2017 09:21:03 -0700 (PDT)
-In-Reply-To: <a76c3483-2c86-85c1-446e-f2522bd28aa8@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1486767286-3361-1-git-send-email-khoroshilov@ispras.ru>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-On 4 March 2017 at 13:17, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> New series is limited to smaller refactorings w/o functional changes.
+On 10 February 2017 at 23:54, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
+> There is no check if clk_prepare_enable() succeed in sdhci_pxav2_probe().
 >
-> v5:
-> - fix a hang caused by patch "improve initial configuration"
+> Found by Linux Driver Verification project (linuxtesting.org).
 >
-> Heiner Kallweit (10):
->   mmc: meson-gx: simplify bounce buffer setting in meson_mmc_start_cmd
->   mmc: meson-gx: make two functions return void
->   mmc: meson-gx: remove unused members irq, ocr_mask from struct meson_host
->   mmc: meson-gx: remove unneeded variable in meson_mmc_clk_init
->   mmc: meson-gx: remove member parent_mux from struct meson_host
->   mmc: meson-gx: remove unneeded meson_mmc_clk_set in meson_mmc_clk_init
->   mmc: meson-gx: remove unneeded devm_kstrdup in meson_mmc_clk_init
->   mmc: meson-gx: improve initial configuration
->   mmc: meson-gx: remove member mrq from struct meson_host
->   mmc: meson-gx: replace magic timeout numbers with constants
->
->  drivers/mmc/host/meson-gx-mmc.c | 120 ++++++++++++++++------------------------
->  1 file changed, 47 insertions(+), 73 deletions(-)
->
-> --
-> 2.12.0
->
->
+> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pxav2.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index 347eae2d7b6a..80513f54e9d4 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -185,7 +185,11 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>                 goto err_clk_get;
+>         }
+>         pltfm_host->clk = clk;
+> -       clk_prepare_enable(clk);
+> +       ret = clk_prepare_enable(clk);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "failed to enable io clock\n");
+> +               goto err_clk_enable;
+> +       }
+>
+>         host->quirks = SDHCI_QUIRK_BROKEN_ADMA
+>                 | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> @@ -228,6 +232,7 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>
+>  err_add_host:
+>         clk_disable_unprepare(clk);
+> +err_clk_enable:
+>         clk_put(clk);
+>  err_clk_get:
+>         sdhci_pltfm_free(pdev);
+> --
+> 2.7.4
+>
