@@ -1,52 +1,60 @@
-From: Thierry Reding <thierry.reding@gmail.com>
-Subject: [PATCH 1/2] dt-bindings: mmc: tegra: Reformat compatible string list
-Date: Tue, 14 Mar 2017 20:01:51 +0100
-Message-ID: <20170314190152.9167-1-thierry.reding@gmail.com>
+From: =?UTF-8?q?Micha=C5=82=20Zegan?= <webczat@webczatnet.pl>
+Subject: [PATCH v2] mmc: meson-gx: fix error path when driver initialization fails before enabling clocks
+Date: Tue, 14 Mar 2017 21:05:20 +0100
+Message-ID: <20170314200520.6276-1-webczat@webczatnet.pl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35762 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751014AbdCNTCH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 15:02:07 -0400
+Received: from webczatnet.pl ([91.121.100.5]:46134 "EHLO webczatnet.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751822AbdCNUFj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 14 Mar 2017 16:05:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-tegra@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org, =?UTF-8?q?Micha=C5=82=20Zegan?= <webczat@webczatnet.pl>
 
-From: Thierry Reding <treding@nvidia.com>
+This patch fixes the case where meson_mmc_probe function fails before
+core_clk is enabled.
+Originally, that would result in a try to disable the core clock, and if
+it was not already enabled, it would result in a kernel warning.
+This issue is similar to the one with div_clk.
+Fix it by introducing another error path used only between successfully
+enabling the core clock, and successfully enabling the div clock.
+That would ensure that core clock is disabled only if it was enabled before.
 
-The list of compatible strings is somewhat difficult to read and extend.
-Reformat it into a list to make it more easily extensible.
-
-While at it, also remove the "plus one of the above" clause because it
-isn't actually valid.
-
-Signed-off-by: Thierry Reding <treding@nvidia.com>
+Signed-off-by: Michał Zegan <webczat@webczatnet.pl>
 ---
- .../devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt          | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
+changes since v1:
+cherry picked on top of mmc next branch
+ drivers/mmc/host/meson-gx-mmc.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-index 15b8368ee1f2..c15aa22d4570 100644
---- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-@@ -7,11 +7,12 @@ This file documents differences between the core properties described
- by mmc.txt and the properties used by the sdhci-tegra driver.
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index c574e1519623..bd075fef08d4 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -743,7 +743,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
  
- Required properties:
--- compatible : For Tegra20, must contain "nvidia,tegra20-sdhci".
--  For Tegra30, must contain "nvidia,tegra30-sdhci".  For Tegra114,
--  must contain "nvidia,tegra114-sdhci".  For Tegra124, must contain
--  "nvidia,tegra124-sdhci".  Otherwise, must contain "nvidia,<chip>-sdhci",
--  plus one of the above, where <chip> is tegra132 or tegra210.
-+- compatible : should be one of:
-+  - "nvidia,tegra20-sdhci": for Tegra20
-+  - "nvidia,tegra30-sdhci": for Tegra30
-+  - "nvidia,tegra114-sdhci": for Tegra114
-+  - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
-+  - "nvidia,tegra210-sdhci": for Tegra210
- - clocks : Must contain one entry, for the module clock.
-   See ../clocks/clock-bindings.txt for details.
- - resets : Must contain an entry for each entry in reset-names.
+ 	ret = meson_mmc_clk_init(host);
+ 	if (ret)
+-		goto free_host;
++		goto err_core_clk;
+ 
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+@@ -783,8 +783,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 
+ err_div_clk:
+ 	clk_disable_unprepare(host->cfg_div_clk);
+-free_host:
++err_core_clk:
+ 	clk_disable_unprepare(host->core_clk);
++free_host:
+ 	mmc_free_host(mmc);
+ 	return ret;
+ }
 -- 
 2.12.0
 
