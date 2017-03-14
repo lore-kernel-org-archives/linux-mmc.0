@@ -1,60 +1,35 @@
-From: =?UTF-8?q?Micha=C5=82=20Zegan?= <webczat@webczatnet.pl>
-Subject: [PATCH v2] mmc: meson-gx: fix error path when driver initialization fails before enabling clocks
-Date: Tue, 14 Mar 2017 21:05:20 +0100
-Message-ID: <20170314200520.6276-1-webczat@webczatnet.pl>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [BUG] dmaengine: pxa_dma: + mmc: pxamci: race condition with DMA error on tx channel
+Date: Tue, 14 Mar 2017 22:11:46 +0100
+Message-ID: <871stzh8bx.fsf@belgarion.home>
+References: <e749aff1-0ffc-c9ed-42b2-82397b4e8ba2@tul.cz>
+        <877f3zwwgo.fsf@belgarion.home>
+        <feb39d00-d40d-f935-751c-8119f40b4df4@tul.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from webczatnet.pl ([91.121.100.5]:46134 "EHLO webczatnet.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751822AbdCNUFj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Mar 2017 16:05:39 -0400
+Received: from smtp10.smtpout.orange.fr ([80.12.242.132]:29537 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750973AbdCNVLx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 17:11:53 -0400
+In-Reply-To: <feb39d00-d40d-f935-751c-8119f40b4df4@tul.cz> (Petr Cvek's
+        message of "Fri, 10 Mar 2017 01:49:12 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org, =?UTF-8?q?Micha=C5=82=20Zegan?= <webczat@webczatnet.pl>
+To: Petr Cvek <petr.cvek@tul.cz>
+Cc: vinod.koul@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org
 
-This patch fixes the case where meson_mmc_probe function fails before
-core_clk is enabled.
-Originally, that would result in a try to disable the core clock, and if
-it was not already enabled, it would result in a kernel warning.
-This issue is similar to the one with div_clk.
-Fix it by introducing another error path used only between successfully
-enabling the core clock, and successfully enabling the div clock.
-That would ensure that core clock is disabled only if it was enabled before.
+Petr Cvek <petr.cvek@tul.cz> writes:
 
-Signed-off-by: Michał Zegan <webczat@webczatnet.pl>
----
-changes since v1:
-cherry picked on top of mmc next branch
- drivers/mmc/host/meson-gx-mmc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+Ok Petr, I've been trying for days to reproduce without any luck.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index c574e1519623..bd075fef08d4 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -743,7 +743,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 
- 	ret = meson_mmc_clk_init(host);
- 	if (ret)
--		goto free_host;
-+		goto err_core_clk;
- 
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
-@@ -783,8 +783,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 
- err_div_clk:
- 	clk_disable_unprepare(host->cfg_div_clk);
--free_host:
-+err_core_clk:
- 	clk_disable_unprepare(host->core_clk);
-+free_host:
- 	mmc_free_host(mmc);
- 	return ret;
- }
--- 
-2.12.0
+I had a look at your traces, and I'd like something else when it happens :
+ 1) The patch I provided earlier applied
+ 2) This done (the 'cat' after the bug) :
+	mount -t debugfs none /sys/kernel/debug/
+	cat /sys/kernel/debug/pxa-dma.0/channels/4/[sd]*
 
+Cheers.
+
+--
+Robert
