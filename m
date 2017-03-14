@@ -1,47 +1,51 @@
-From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Tue, 14 Mar 2017 08:52:40 -0600
-Message-ID: <17cd4927-eb41-8eb3-9c06-ad7f4016a867@kernel.dk>
-References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-7-linus.walleij@linaro.org>
- <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
- <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com>
- <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com>
- <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
- <e4b2c4bc-8627-2234-354d-c986f69b220f@intel.com>
- <97f2a4ea-0802-9f23-6ac7-b9d6c6afbfcc@kernel.dk>
- <a3571278-b30d-c3cb-bea6-d1776eb53025@intel.com>
- <a3216031-0801-45e2-320c-bfc88fa742b4@kernel.dk>
- <20170314144357.GA31043@lst.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/7] dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
+Date: Tue, 14 Mar 2017 17:20:36 +0100
+Message-ID: <CAPDyKFoz_OuW+rWMji7G2D=MbANN+=YGrmtPgZFtYkDz6u5sug@mail.gmail.com>
+References: <1486983566-32265-1-git-send-email-andy.yan@rock-chips.com> <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:37584 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751455AbdCNOwo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 10:52:44 -0400
-Received: by mail-it0-f48.google.com with SMTP id g138so922091itb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2017 07:52:43 -0700 (PDT)
-In-Reply-To: <20170314144357.GA31043@lst.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1486983759-32337-1-git-send-email-andy.yan@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Yan <andy.yan@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On 03/14/2017 08:43 AM, Christoph Hellwig wrote:
-> On Tue, Mar 14, 2017 at 08:36:26AM -0600, Jens Axboe wrote:
->> There's one case that doesn't look like it was converted properly, but
->> that's a mistake. The general insert-and-run cases run inline if we can,
->> but the direct-issue needs a fixup, see below.
-> 
-> Note that blk_mq_try_issue_directly is only called for the multiple
-> hardware queue case, so MMC would not hit it.
+On 13 February 2017 at 12:02, Andy Yan <andy.yan@rock-chips.com> wrote:
+> Rockchip finally named the SOC as RV1108, so change it.
+>
+> Signed-off-by: Andy Yan <andy.yan@rock-chips.com>
 
-Right, which is why I said that the general case works fine, it's
-only the explicit issue-direct that currently does not. Not by
-design, just an error.
+Thanks, applied for fixes!
 
--- 
-Jens Axboe
+Kind regards
+Uffe
 
+>
+> ---
+>
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index ea9c1c9..520d61d 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -13,7 +13,7 @@ Required Properties:
+>         - "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
+>                                                         before RK3288
+>         - "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+> -       - "rockchip,rk1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK1108
+> +       - "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
+>         - "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
+>         - "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
+>         - "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
+> --
+> 2.7.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
