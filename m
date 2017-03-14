@@ -1,54 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 01/22] mmc: block: Fix is_waiting_last_req set incorrectly
-Date: Tue, 14 Mar 2017 17:22:15 +0100
-Message-ID: <CAPDyKFoAMei=B-9OFx0cKFrt2hjg6mg9o52P6XpB=uch=ad1RQ@mail.gmail.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <1489408613-26915-2-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
+Date: Tue, 14 Mar 2017 17:22:08 +0100
+Message-ID: <CAPDyKFq61A0AgO=P0yVCYFDwym=32yVRAJG9rT0tBnyNjXEyaw@mail.gmail.com>
+References: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:34167 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752644AbdCNQWW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 12:22:22 -0400
-Received: by mail-ua0-f172.google.com with SMTP id f54so168140455uaa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2017 09:22:21 -0700 (PDT)
-In-Reply-To: <1489408613-26915-2-git-send-email-adrian.hunter@intel.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:34578 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752644AbdCNQWZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 12:22:25 -0400
+Received: by mail-vk0-f49.google.com with SMTP id r136so54731933vke.1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2017 09:22:19 -0700 (PDT)
+In-Reply-To: <1488406307-8952-1-git-send-email-linux@roeck-us.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>
 
-On 13 March 2017 at 13:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Commit 15520111500c ("mmc: core: Further fix thread wake-up") allowed a
-> queue to release the host with is_waiting_last_req set to true. A queue
-> waiting to claim the host will not reset it, which can result in the
-> queue getting stuck in a loop.
+On 1 March 2017 at 23:11, Guenter Roeck <linux@roeck-us.net> wrote:
+> HS400-ES devices fail to initialize with the following error messages.
 >
-> Fixes: 15520111500c ("mmc: core: Further fix thread wake-up")
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: stable@vger.kernel.org # v4.10+
+> mmc1: power class selection to bus width 8 ddr 0 failed
+> mmc1: error -110 whilst initialising MMC card
+>
+> This was seen on Samsung Chromebook Plus. Code analysis points to
+> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
+> high-speed mode"), which attempts to set the bus width for all but
+> HS200 devices unconditionally. However, for HS400-ES, the bus width
+> is already selected.
+>
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Douglas Anderson <dianders@chromium.org>
+> Cc: Brian Norris <briannorris@chromium.org>
+> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 
-Thanks, applied for fixes!
+Sorry for the delay. Been traveling.
+
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/block.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 1621fa08e206..e59107ca512a 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1817,6 +1817,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->                 mmc_blk_issue_flush(mq, req);
->         } else {
->                 mmc_blk_issue_rw_rq(mq, req);
-> +               card->host->context_info.is_waiting_last_req = false;
->         }
->
->  out:
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 7fd722868875..b502601df228 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1730,7 +1730,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>                 err = mmc_select_hs400(card);
+>                 if (err)
+>                         goto free_card;
+> -       } else {
+> +       } else if (!mmc_card_hs400es(card)) {
+>                 /* Select the desired bus width optionally */
+>                 err = mmc_select_bus_width(card);
+>                 if (err > 0 && mmc_card_hs(card)) {
 > --
-> 1.9.1
+> 2.7.4
 >
