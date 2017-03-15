@@ -1,79 +1,64 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH] mmc: core: check also R1 response for stop commands
-Date: Wed, 15 Mar 2017 02:54:06 +0000
-Message-ID: <PS1PR06MB1692B56C7B571EBB02EB23C1D8270@PS1PR06MB1692.apcprd06.prod.outlook.com>
-References: <20170314101501.25463-1-wsa+renesas@sang-engineering.com>
- <PS1PR06MB16924720592DB11B43DD5AF0D8240@PS1PR06MB1692.apcprd06.prod.outlook.com>
- <20170314104904.4ig62cy2w6fkpqzm@ninjato>
+From: Yong Mao <yong.mao@mediatek.com>
+Subject: [PATCH v5 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Wed, 15 Mar 2017 15:26:38 +0800
+Message-ID: <1489562800-27431-2-git-send-email-yong.mao@mediatek.com>
+References: <1489562800-27431-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170314104904.4ig62cy2w6fkpqzm@ninjato>
-Content-Language: ja-JP
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1489562800-27431-1-git-send-email-yong.mao@mediatek.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>
+Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, srv_heupstream@mediatek.com, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yong mao <yong.mao@mediatek.com>, linux-mediatek@lists.infradead.org, Daniel Kurtz <djkurtz@chromium.org>, Eddie Huang <eddie.huang@mediatek.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,=20
+From: yong mao <yong.mao@mediatek.com>
 
-> From: Wolfram Sang, Sent: Tuesday, March 14, 2017 7:49 PM
->=20
-> > > So, since I got no complaints about the RFC, I'll declare it a PATCH =
-now :)
-> > > Shimoda-san, is it possible for you to test it with the SD tester you=
- once had
-> > > access to? I could only test it by setting the ECC bit in the driver =
-manually.
-> >
-> > Sure. I am able to bring the SD tester from other department tomorrow.
-> > So, I will check this patch tomorrow.
->=20
-> Good news, thank you very much!
+Add description for mediatek,hs200-cmd-int-delay
+Add description for mediatek,hs400-cmd-int-delay
+Add description for mediatek,hs400-cmd-resp-sel-rising
 
-I tested this patch with the SD tester. After I applied this patch, when th=
-e R1_CARD_ECC_FAILED
-is set, the following message appeared:
+Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-mmcblk1: error -5 sending stop command, original cmd response 0x900, card s=
-tatus 0x900
-
-However, I have a question about "ecc_err" in both mmc_blk_err_check() and =
-mmc_blk_cmd_recovery().
-Anyway, I tested this patch. And the mmc core said some error happened.
-I think this is suitable behavior. So,
-
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-< Question >
-In mmc_blk_cmd_recovery(), if "brq->stop.resp[0] & R1_CARD_ECC_FAILED" is t=
-rue, ecc_err is set to true.
-However, in mmc_blk_err_check(), ecc_err is only referred when brq->data.er=
-ror is true.
-So, I guess we need a patch like below as another patch. What do you think?
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0e838b0..99c937b 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1374,7 +1374,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct m=
-mc_ca
-                return MMC_BLK_RETRY;
-        }
-
--       if (brq->data.error) {
-+       if (brq->data.error || ecc_err) {
-                if (need_retune && !brq->retune_retry_done) {
-                        pr_debug("%s: retrying because a re-tune was needed=
-\n",
-                                 req->rq_disk->disk_name);
-
-After that, the mmc core also output the following message:
-
-mmcblk1: error 0 transferring data, sector 0, nr 128, cmd response 0x900, c=
-ard status 0x200b00
-mmcblk1: retrying using single block read
-
-Best regards,
-Yoshihiro Shimoda
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index 0120c7f..4182ea3 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -21,6 +21,15 @@ Optional properties:
+ - assigned-clocks: PLL of the source clock
+ - assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
+ - hs400-ds-delay: HS400 DS delay setting
++- mediatek,hs200-cmd-int-delay: HS200 command internal delay setting.
++				This field has total 32 stages.
++				The value is an integer from 0 to 31.
++- mediatek,hs400-cmd-int-delay: HS400 command internal delay setting
++				This field has total 32 stages.
++				The value is an integer from 0 to 31.
++- mediatek,hs400-cmd-resp-sel-rising:  HS400 command response sample selection
++				       If present,HS400 command responses are sampled on rising edges.
++				       If not present,HS400 command responses are sampled on falling edges.
+ 
+ Examples:
+ mmc0: mmc@11230000 {
+@@ -38,4 +47,7 @@ mmc0: mmc@11230000 {
+ 	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
+ 	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
+ 	hs400-ds-delay = <0x14015>;
++	mediatek,hs200-cmd-int-delay = <26>;
++	mediatek,hs400-cmd-int-delay = <14>;
++	mediatek,hs400-cmd-resp-sel-rising;
+ };
+-- 
+1.7.9.5
