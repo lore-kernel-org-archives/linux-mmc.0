@@ -1,75 +1,105 @@
-From: Philipp Zabel <p.zabel@pengutronix.de>
-Subject: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
-Date: Wed, 15 Mar 2017 12:31:39 +0100
-Message-ID: <20170315113139.17989-1-p.zabel@pengutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.4.pengutronix.de ([92.198.50.35]:47403 "EHLO
-        metis.ext.4.pengutronix.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753752AbdCOLbn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2017 07:31:43 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Nicolas Ferre <nicolas.ferre@microchip.com>
+Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
+ checking status
+Date: Wed, 15 Mar 2017 12:48:04 +0100
+Message-ID: <133e7fc9-2d01-79a2-8f1e-08ce2ebf835f@microchip.com>
+References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
+ <20170310142117.6060-1-ludovic.desroches@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170310142117.6060-1-ludovic.desroches@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>, Thorsten Leemhuis <regressions@leemhuis.info>, linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Philipp Zabel <p.zabel@pengutronix.de>
 
-As of commit bb475230b8e5 ("reset: make optional functions really
-optional"), the reset framework API calls use NULL pointers to describe
-optional, non-present reset controls.
+Le 10/03/2017 =E0 15:21, Ludovic Desroches a =E9crit :
+> From: Ludovic Desroches <ludovic.desroches@microchip.com>
+> =
 
-This allows to return errors from devm_reset_control_get_optional and to
-call reset_control_(de)assert unconditionally.
+> The commit e173f8911f09 mmc: core: Update CMD13 polling policy when
+> switch to HS DDR mode in addition to fix the management of CRC error,
+> changes the place where the DDR52 timing is set.
+> =
 
-Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
----
- drivers/mmc/host/dw_mmc.c | 14 +++++---------
- 1 file changed, 5 insertions(+), 9 deletions(-)
+> Before this commit, the sequence was:
+> - set width to 8 with MMC_HS timing
+> - send the switch command
+> - check the status
+> - set width to 8 with MMC_DDR52 timing
+> - send the switch command
+> - check the status
+> Now:
+> - set width to 8 with MMC_HS timing
+> - send the switch command
+> - set width to 8 with MMC_DDR52 timing
+> - check the status
+> =
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a9ac0b4573131..3d62b0a1f81cb 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2968,10 +2968,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 
- 	/* find reset controller when exist */
- 	pdata->rstc = devm_reset_control_get_optional(dev, "reset");
--	if (IS_ERR(pdata->rstc)) {
--		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
--			return ERR_PTR(-EPROBE_DEFER);
--	}
-+	if (IS_ERR(pdata->rstc))
-+		return ERR_CAST(pdata->rstc);
- 
- 	/* find out number of slots supported */
- 	of_property_read_u32(np, "num-slots", &pdata->num_slots);
-@@ -3100,7 +3098,7 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
- 	}
- 
--	if (!IS_ERR(host->pdata->rstc)) {
-+	if (host->pdata->rstc) {
- 		reset_control_assert(host->pdata->rstc);
- 		usleep_range(10, 50);
- 		reset_control_deassert(host->pdata->rstc);
-@@ -3257,8 +3255,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
--	if (!IS_ERR(host->pdata->rstc))
--		reset_control_assert(host->pdata->rstc);
-+	reset_control_assert(host->pdata->rstc);
- 
- err_clk_ciu:
- 	clk_disable_unprepare(host->ciu_clk);
-@@ -3290,8 +3287,7 @@ void dw_mci_remove(struct dw_mci *host)
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
--	if (!IS_ERR(host->pdata->rstc))
--		reset_control_assert(host->pdata->rstc);
-+	reset_control_assert(host->pdata->rstc);
- 
- 	clk_disable_unprepare(host->ciu_clk);
- 	clk_disable_unprepare(host->biu_clk);
--- 
-2.11.0
+> It may lead to get an error when checking the status with some devices.
+> =
 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+
+Tested-by: Nicolas Ferre <nicolas.ferre@microchip.com>
+
+On sama5d2 Xplained (eMMC on sdhci).
+
+Note that without this patch the system is unable to boot. Even if it
+was present on 4.10 but we didn't spot it, I see now this as a regression.
+
+We would also need to add the tags:
+Cc: stable <stable@vger.kernel.org> #4.10+
+Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch
+to HS DDR mode")
+
+
+Best regards,
+
+> ---
+>  drivers/mmc/core/mmc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> =
+
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 0fccca0..b837148 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1062,7 +1062,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>  			   EXT_CSD_BUS_WIDTH,
+>  			   ext_csd_bits,
+>  			   card->ext_csd.generic_cmd6_time,
+> -			   MMC_TIMING_MMC_DDR52,
+> +			   0,
+>  			   true, true, true);
+>  	if (err) {
+>  		pr_err("%s: switch to bus width %d ddr failed\n",
+> @@ -1106,6 +1106,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>  	if (err)
+>  		err =3D __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+>  =
+
+> +	if (!err)
+> +		mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+> +
+>  	return err;
+>  }
+>  =
+
+> =
+
+
+
+-- =
+
+Nicolas Ferre
