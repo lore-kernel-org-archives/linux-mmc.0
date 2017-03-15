@@ -1,35 +1,79 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [BUG] dmaengine: pxa_dma: + mmc: pxamci: race condition with DMA error on tx channel
-Date: Tue, 14 Mar 2017 22:11:46 +0100
-Message-ID: <871stzh8bx.fsf@belgarion.home>
-References: <e749aff1-0ffc-c9ed-42b2-82397b4e8ba2@tul.cz>
-        <877f3zwwgo.fsf@belgarion.home>
-        <feb39d00-d40d-f935-751c-8119f40b4df4@tul.cz>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: [PATCH] mmc: core: check also R1 response for stop commands
+Date: Wed, 15 Mar 2017 02:54:06 +0000
+Message-ID: <PS1PR06MB1692B56C7B571EBB02EB23C1D8270@PS1PR06MB1692.apcprd06.prod.outlook.com>
+References: <20170314101501.25463-1-wsa+renesas@sang-engineering.com>
+ <PS1PR06MB16924720592DB11B43DD5AF0D8240@PS1PR06MB1692.apcprd06.prod.outlook.com>
+ <20170314104904.4ig62cy2w6fkpqzm@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp10.smtpout.orange.fr ([80.12.242.132]:29537 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750973AbdCNVLx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2017 17:11:53 -0400
-In-Reply-To: <feb39d00-d40d-f935-751c-8119f40b4df4@tul.cz> (Petr Cvek's
-        message of "Fri, 10 Mar 2017 01:49:12 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170314104904.4ig62cy2w6fkpqzm@ninjato>
+Content-Language: ja-JP
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Petr Cvek <petr.cvek@tul.cz>
-Cc: vinod.koul@intel.com, Ulf Hansson <ulf.hansson@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org
 
-Petr Cvek <petr.cvek@tul.cz> writes:
+Hi Wolfram-san,=20
 
-Ok Petr, I've been trying for days to reproduce without any luck.
+> From: Wolfram Sang, Sent: Tuesday, March 14, 2017 7:49 PM
+>=20
+> > > So, since I got no complaints about the RFC, I'll declare it a PATCH =
+now :)
+> > > Shimoda-san, is it possible for you to test it with the SD tester you=
+ once had
+> > > access to? I could only test it by setting the ECC bit in the driver =
+manually.
+> >
+> > Sure. I am able to bring the SD tester from other department tomorrow.
+> > So, I will check this patch tomorrow.
+>=20
+> Good news, thank you very much!
 
-I had a look at your traces, and I'd like something else when it happens :
- 1) The patch I provided earlier applied
- 2) This done (the 'cat' after the bug) :
-	mount -t debugfs none /sys/kernel/debug/
-	cat /sys/kernel/debug/pxa-dma.0/channels/4/[sd]*
+I tested this patch with the SD tester. After I applied this patch, when th=
+e R1_CARD_ECC_FAILED
+is set, the following message appeared:
 
-Cheers.
+mmcblk1: error -5 sending stop command, original cmd response 0x900, card s=
+tatus 0x900
 
---
-Robert
+However, I have a question about "ecc_err" in both mmc_blk_err_check() and =
+mmc_blk_cmd_recovery().
+Anyway, I tested this patch. And the mmc core said some error happened.
+I think this is suitable behavior. So,
+
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+< Question >
+In mmc_blk_cmd_recovery(), if "brq->stop.resp[0] & R1_CARD_ECC_FAILED" is t=
+rue, ecc_err is set to true.
+However, in mmc_blk_err_check(), ecc_err is only referred when brq->data.er=
+ror is true.
+So, I guess we need a patch like below as another patch. What do you think?
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 0e838b0..99c937b 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1374,7 +1374,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct m=
+mc_ca
+                return MMC_BLK_RETRY;
+        }
+
+-       if (brq->data.error) {
++       if (brq->data.error || ecc_err) {
+                if (need_retune && !brq->retune_retry_done) {
+                        pr_debug("%s: retrying because a re-tune was needed=
+\n",
+                                 req->rq_disk->disk_name);
+
+After that, the mmc core also output the following message:
+
+mmcblk1: error 0 transferring data, sector 0, nr 128, cmd response 0x900, c=
+ard status 0x200b00
+mmcblk1: retrying using single block read
+
+Best regards,
+Yoshihiro Shimoda
