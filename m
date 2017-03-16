@@ -1,57 +1,166 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [PATCH v6 08/14] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
- functionality
-Date: Thu, 16 Mar 2017 10:24:17 +0800
-Message-ID: <20170316102417.0909bccc@xhacker>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
- <cb885ae19e7c467908cdaa1f1cc8d95a7217d663.1487091464.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFpH+RGAZGoVCuCOKJ2iEa+Y=cNNcM-uKhkYaTpmogXCKA@mail.gmail.com>
- <10855817-e693-e007-9499-c4e97936fadb@marvell.com>
+Subject: Re: [PATCH v4] mmc: sdhci: clarify the get_timeout_clock callback
+Date: Thu, 16 Mar 2017 13:25:36 +0800
+Message-ID: <20170316132536.7b644795@xhacker>
+References: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <10855817-e693-e007-9499-c4e97936fadb@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ziji Hu <huziji@marvell.com>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, linux-arm-kernel@lists.infradead
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:55224 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751568AbdCPFaa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 01:30:30 -0400
+In-Reply-To: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Hi Ziji
+On Thu, 16 Mar 2017 09:20:51 +0800 Shawn Lin wrote:
 
-On Wed, 15 Mar 2017 21:58:43 +0800 Ziji Hu wrote:
-
-> Hi Ulf,
+> Currently the get_timeout_clock callabck doesn't clearly
+> have a statment that it needs the variant drivers to return
+> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
+> isn't present, otherwise the variant drivers should return it
+> in KHz. So actually sdhci-of-arasan return the wrong value found
+> by Anssi[1]. It's also very likely that further variant drivers which
+> are going to use this callback will be confused by this situation.
+> Given the fact that modem sdhci variant hosts are very prone to get
+> the timeout clock from common clock framework(actuall the only three
+> users did that), it's more nature to return the value in Hz and we
+> make a explicit comment there. Then we put the unit conversion inside
+> the sdhci core. Thus will improve the code and prevent further misues.
 > 
-> On 2017/3/15 21:11, Ulf Hansson wrote:
-> > On 14 February 2017 at 18:01, Gregory CLEMENT
-> > <gregory.clement@free-electrons.com> wrote:  
-> >> From: Hu Ziji <huziji@marvell.com>  
-> <snip>
-> >> +config MMC_SDHCI_XENON
-> >> +       tristate "Marvell Xenon eMMC/SD/SDIO SDHCI driver"
-> >> +       depends on MMC_SDHCI_PLTFM
-> >> +       help
-> >> +         This selects Marvell Xenon eMMC/SD/SDIO SDHCI.
-> >> +         If you have a machine with integrated Marvell Xenon SDHC IP,  
-> > 
-> > /s/SDHC/SDHCI
-> >   
+> [1]: https://patchwork.kernel.org/patch/9569431/
+
+I think we need a blank line here
+
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+
+This blank line need to be removed.
+
+> Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> ---
 > 
-> 	Sorry. I don't get your point.
-> 	Could you please give more detailed comments?
+> Changes in v4:
+> - rebased on -next
+> - add Masahiro's ack for sdhci-cadence
+> 
+> Changes in v3:
+> - squash all the patches into one to keep bisectability
+> - fix wrong return value of sdhci-cadence
+> - slight improve the condition check to avoid the complaint of
+>   checkpatch
+> 
+> Changes in v2:
+> - fix the comment and make it return in Hz
+> 
+>  drivers/mmc/host/sdhci-cadence.c   |  4 ++--
+>  drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
+>  drivers/mmc/host/sdhci.c           | 16 +++++++++-------
+>  drivers/mmc/host/sdhci.h           |  1 +
+>  4 files changed, 13 insertions(+), 25 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 316cfec..7baeeaf 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+>  {
+>  	/*
+>  	 * Cadence's spec says the Timeout Clock Frequency is the same as the
+> -	 * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
+> +	 * Base Clock Frequency.
+>  	 */
+> -	return host->max_clk / 1000;
+> +	return host->max_clk;
+>  }
+>  
+>  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 1cfd7f9..c52f153 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
+>  	return ret;
+>  }
+>  
+> -static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+> -{
+> -	unsigned long freq;
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -
+> -	/* SDHCI timeout clock is in kHz */
+> -	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
+> -
+> -	/* or in MHz */
+> -	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> -		freq = DIV_ROUND_UP(freq, 1000);
+> -
+> -	return freq;
+> -}
+> -
+>  static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
+>  static struct sdhci_ops sdhci_arasan_ops = {
+>  	.set_clock = sdhci_arasan_set_clock,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> -	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_arasan_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6fdd7a7..f73494e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+>  		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
+>  					SDHCI_TIMEOUT_CLK_SHIFT;
+> +
+> +		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> +			host->timeout_clk *= 1000;
+> +
+>  		if (host->timeout_clk == 0) {
+> -			if (host->ops->get_timeout_clock) {
+> -				host->timeout_clk =
+> -					host->ops->get_timeout_clock(host);
+> -			} else {
+> +			if (unlikely(!host->ops->get_timeout_clock)) {
+>  				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
+>  					mmc_hostname(mmc));
+>  				ret = -ENODEV;
+>  				goto undma;
+>  			}
+> -		}
+>  
+> -		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> -			host->timeout_clk *= 1000;
+> +			host->timeout_clk =
+> +				DIV_ROUND_UP(host->ops->get_timeout_clock(host),
+> +					     1000);
+> +		}
+>  
+>  		if (override_timeout_clk)
+>  			host->timeout_clk = override_timeout_clk;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index edf3adf..27c252c 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -547,6 +547,7 @@ struct sdhci_ops {
+>  	int		(*enable_dma)(struct sdhci_host *host);
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+> +	/* get_timeout_clock should return clk rate in unit of Hz */
+>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
+>  	void		(*set_timeout)(struct sdhci_host *host,
 
-Ulf want you to s/SDHC/SDHCI in the line "If you have .....", I.E
-change the line to:
-If you have a machine with integrated Marvell Xenon SDHCI IP,
-
-Thanks,
-Jisheng
