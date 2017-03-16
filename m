@@ -1,166 +1,162 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [PATCH v4] mmc: sdhci: clarify the get_timeout_clock callback
-Date: Thu, 16 Mar 2017 13:25:36 +0800
-Message-ID: <20170316132536.7b644795@xhacker>
-References: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH 1/4] mmc: pwrseq: add op reset to struct mmc_pwrseq_ops
+Date: Thu, 16 Mar 2017 07:49:17 +0100
+Message-ID: <d029f887-4fd3-1319-fd01-a99ea9ede5c1@gmail.com>
+References: <75ad5eac-412b-fe73-ff53-3d8b975937e4@gmail.com>
+ <c75c3e5c-c4e1-3f2f-267b-1c781052c55e@gmail.com>
+ <CAPDyKFr6_Y3cSv5Q1WRSQBo7_bsyeVVQTYBQ01gykdMpVWNtXw@mail.gmail.com>
+ <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:55224 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751568AbdCPFaa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 01:30:30 -0400
-In-Reply-To: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33521 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751047AbdCPGtf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 02:49:35 -0400
+Received: by mail-wr0-f194.google.com with SMTP id g10so4596976wrg.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2017 23:49:34 -0700 (PDT)
+In-Reply-To: <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Masahiro Yamada <yamada.masahiro@socionext.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-On Thu, 16 Mar 2017 09:20:51 +0800 Shawn Lin wrote:
+Am 15.03.2017 um 22:42 schrieb Heiner Kallweit:
+> Am 15.03.2017 um 11:50 schrieb Ulf Hansson:
+>> On 8 February 2017 at 22:48, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+>>> Add an operation reset to struct mmc_pwrseq_ops and related wrappers.
+>>>
+>>> Don't expose the pwrseq-internal reset function directly to kernel
+>>> users but just to the mmc core.
+>>>
+>>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>>> ---
+>>>  drivers/mmc/core/core.c   | 6 ++++++
+>>>  drivers/mmc/core/pwrseq.c | 8 ++++++++
+>>>  drivers/mmc/core/pwrseq.h | 3 +++
+>>>  include/linux/mmc/core.h  | 1 +
+>>>  4 files changed, 18 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 926e0fde..5d5fe591 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -1869,6 +1869,12 @@ void mmc_power_cycle(struct mmc_host *host, u32 ocr)
+>>>         mmc_power_up(host, ocr);
+>>>  }
+>>>
+>>> +void mmc_hw_reset_pwrseq(struct mmc_host *host)
+>>> +{
+>>> +       mmc_pwrseq_reset(host);
+>>> +}
+>>> +EXPORT_SYMBOL(mmc_hw_reset_pwrseq);
+>>> +
+>>>  /*
+>>>   * Cleanup when the last reference to the bus operator is dropped.
+>>>   */
+>>> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+>>> index 9386c477..e3ad30fa 100644
+>>> --- a/drivers/mmc/core/pwrseq.c
+>>> +++ b/drivers/mmc/core/pwrseq.c
+>>> @@ -76,6 +76,14 @@ void mmc_pwrseq_power_off(struct mmc_host *host)
+>>>                 pwrseq->ops->power_off(host);
+>>>  }
+>>>
+>>> +void mmc_pwrseq_reset(struct mmc_host *host)
+>>> +{
+>>> +       struct mmc_pwrseq *pwrseq = host->pwrseq;
+>>> +
+>>> +       if (pwrseq && pwrseq->ops->reset)
+>>> +               pwrseq->ops->reset(host);
+>>> +}
+>>> +
+>>>  void mmc_pwrseq_free(struct mmc_host *host)
+>>>  {
+>>>         struct mmc_pwrseq *pwrseq = host->pwrseq;
+>>> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+>>> index 39c911aa..819386f4 100644
+>>> --- a/drivers/mmc/core/pwrseq.h
+>>> +++ b/drivers/mmc/core/pwrseq.h
+>>> @@ -18,6 +18,7 @@ struct mmc_pwrseq_ops {
+>>>         void (*pre_power_on)(struct mmc_host *host);
+>>>         void (*post_power_on)(struct mmc_host *host);
+>>>         void (*power_off)(struct mmc_host *host);
+>>> +       void (*reset)(struct mmc_host *host);
+>>>  };
+>>>
+>>>  struct mmc_pwrseq {
+>>> @@ -36,6 +37,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host);
+>>>  void mmc_pwrseq_pre_power_on(struct mmc_host *host);
+>>>  void mmc_pwrseq_post_power_on(struct mmc_host *host);
+>>>  void mmc_pwrseq_power_off(struct mmc_host *host);
+>>> +void mmc_pwrseq_reset(struct mmc_host *host);
+>>>  void mmc_pwrseq_free(struct mmc_host *host);
+>>>
+>>>  #else
+>>> @@ -49,6 +51,7 @@ static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
+>>>  static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
+>>>  static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
+>>>  static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
+>>> +static inline void mmc_pwrseq_reset(struct mmc_host *host) {}
+>>>  static inline void mmc_pwrseq_free(struct mmc_host *host) {}
+>>>
+>>>  #endif
+>>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>>> index a0c63ea2..8dbbd7a1 100644
+>>> --- a/include/linux/mmc/core.h
+>>> +++ b/include/linux/mmc/core.h
+>>> @@ -166,6 +166,7 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>>>                 int retries);
+>>>
+>>>  int mmc_hw_reset(struct mmc_host *host);
+>>> +void mmc_hw_reset_pwrseq(struct mmc_host *host);
+>>
+>> Don't you think we can make this transparent to mmc host drivers,
+>> instead of them having to assign their host_ops->hw_reset() callback
+>> to this new API? Because I guess that's the though!?
+>>
+>> In principle the mmc core already have all the information it needs,
+>> as to understand when the eMMC pwrseq should be invoked. Or perhaps
+>> the code may become a bit too messy for that?
+>>
+> The easiest way I could think of:
+> If host->ops->hw_reset is NULL overwrite it with pwrseq->ops->reset
+> in mmc_add_host. But host->ops is defined es being const, so the compiler
+> won't allow us to do this. Of course we could do some casting but usually
+> I try to avoid hacks like casting away const qualifiers.
+> 
+Other alternative:
 
-> Currently the get_timeout_clock callabck doesn't clearly
-> have a statment that it needs the variant drivers to return
-> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
-> isn't present, otherwise the variant drivers should return it
-> in KHz. So actually sdhci-of-arasan return the wrong value found
-> by Anssi[1]. It's also very likely that further variant drivers which
-> are going to use this callback will be confused by this situation.
-> Given the fact that modem sdhci variant hosts are very prone to get
-> the timeout clock from common clock framework(actuall the only three
-> users did that), it's more nature to return the value in Hz and we
-> make a explicit comment there. Then we put the unit conversion inside
-> the sdhci core. Thus will improve the code and prevent further misues.
-> 
-> [1]: https://patchwork.kernel.org/patch/9569431/
+typedef void (*hw_reset_t)(struct mmc_host *host);
 
-I think we need a blank line here
+hw_reset_t mmc_get_hw_reset(struct mmc_host *host)
+{
+       struct mmc_pwrseq *p = host->pwrseq;
 
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
+       if (host->ops->hw_reset)
+               return host->ops->hw_reset;
+       else if (p && p->ops->reset)
+               return p->ops->reset;
+       else
+               return NULL;
+}
 
-This blank line need to be removed.
+And then use what mmc_get_hw_reset returns instead of using
+host->ops->hw_reset directly.
 
-> Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> ---
+How do you like this one?
+
+>>>  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+>>>
+>>>  #endif /* LINUX_MMC_CORE_H */
+>>> --
+>>> 2.11.0
+>>>
+>>>
+>>
+>> Kind regards
+>> Uffe
+>>
 > 
-> Changes in v4:
-> - rebased on -next
-> - add Masahiro's ack for sdhci-cadence
-> 
-> Changes in v3:
-> - squash all the patches into one to keep bisectability
-> - fix wrong return value of sdhci-cadence
-> - slight improve the condition check to avoid the complaint of
->   checkpatch
-> 
-> Changes in v2:
-> - fix the comment and make it return in Hz
-> 
->  drivers/mmc/host/sdhci-cadence.c   |  4 ++--
->  drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
->  drivers/mmc/host/sdhci.c           | 16 +++++++++-------
->  drivers/mmc/host/sdhci.h           |  1 +
->  4 files changed, 13 insertions(+), 25 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 316cfec..7baeeaf 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
->  {
->  	/*
->  	 * Cadence's spec says the Timeout Clock Frequency is the same as the
-> -	 * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
-> +	 * Base Clock Frequency.
->  	 */
-> -	return host->max_clk / 1000;
-> +	return host->max_clk;
->  }
->  
->  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 1cfd7f9..c52f153 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
->  	return ret;
->  }
->  
-> -static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-> -{
-> -	unsigned long freq;
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -
-> -	/* SDHCI timeout clock is in kHz */
-> -	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
-> -
-> -	/* or in MHz */
-> -	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> -		freq = DIV_ROUND_UP(freq, 1000);
-> -
-> -	return freq;
-> -}
-> -
->  static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> -	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
-> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->  	.set_bus_width = sdhci_set_bus_width,
->  	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6fdd7a7..f73494e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
->  		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
->  					SDHCI_TIMEOUT_CLK_SHIFT;
-> +
-> +		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> +			host->timeout_clk *= 1000;
-> +
->  		if (host->timeout_clk == 0) {
-> -			if (host->ops->get_timeout_clock) {
-> -				host->timeout_clk =
-> -					host->ops->get_timeout_clock(host);
-> -			} else {
-> +			if (unlikely(!host->ops->get_timeout_clock)) {
->  				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
->  					mmc_hostname(mmc));
->  				ret = -ENODEV;
->  				goto undma;
->  			}
-> -		}
->  
-> -		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> -			host->timeout_clk *= 1000;
-> +			host->timeout_clk =
-> +				DIV_ROUND_UP(host->ops->get_timeout_clock(host),
-> +					     1000);
-> +		}
->  
->  		if (override_timeout_clk)
->  			host->timeout_clk = override_timeout_clk;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index edf3adf..27c252c 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -547,6 +547,7 @@ struct sdhci_ops {
->  	int		(*enable_dma)(struct sdhci_host *host);
->  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-> +	/* get_timeout_clock should return clk rate in unit of Hz */
->  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
->  	void		(*set_timeout)(struct sdhci_host *host,
 
