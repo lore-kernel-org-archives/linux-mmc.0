@@ -1,48 +1,71 @@
-From: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-Subject: [PATCH] mmc: sunxi: change controller error info to
- debug level
-Date: Thu, 16 Mar 2017 21:29:03 +0800
-Message-ID: <20170316132903.61246-1-icenowy@aosc.xyz>
-Reply-To: icenowy-ymACFijhrKM@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mediatek: Fixed bug where clock frequency could be
+ set wrong
+Date: Thu, 16 Mar 2017 15:45:53 +0100
+Message-ID: <CAPDyKFqzj-UT12rorqZ9536608=Zs37s1LhQb=4GpqV95QoNNw@mail.gmail.com>
+References: <1488611403-30186-1-git-send-email-yong.mao@mediatek.com> <1488611403-30186-2-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBCZLPFN5Q4OBBKNHVLDAKGQE42QV2RQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:36722 "EHLO
+        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753408AbdCPOpz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 10:45:55 -0400
+Received: by mail-ua0-f171.google.com with SMTP id 72so27519915uaf.3
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 07:45:54 -0700 (PDT)
+In-Reply-To: <1488611403-30186-2-git-send-email-yong.mao@mediatek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yong Mao <yong.mao@mediatek.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Daniel Kurtz <djkurtz@chromium.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-The controller's errors are usually normal (for example, for MMC or SDIO
-cards, some errors are expected to happen; and for boards without a
-dedicated card detect pin the error info will even flood console and
-hide other normal messages) and hard to understand.
+On 4 March 2017 at 08:10, Yong Mao <yong.mao@mediatek.com> wrote:
+> From: yong mao <yong.mao@mediatek.com>
+>
+> This patch can fix two issues:
+>
+> Issue 1:
+> In previous code, div may be overflow when setting clock frequency
+> as f_min. We can use DIV_ROUND_UP to fix this boundary related
+> issue.
+>
+> Issue 2:
+> In previous code, we can not set the correct clock frequency when
+> div equals 0xff.
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 07f3236..3ad5228 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -591,7 +591,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
+>                 }
+>         }
+>         sdr_set_field(host->base + MSDC_CFG, MSDC_CFG_CKMOD | MSDC_CFG_CKDIV,
+> -                       (mode << 8) | (div % 0xff));
+> +                     (mode << 8) | div);
+>         sdr_set_bits(host->base + MSDC_CFG, MSDC_CFG_CKPDN);
+>         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>                 cpu_relax();
+> @@ -1692,7 +1692,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         host->src_clk_freq = clk_get_rate(host->src_clk);
+>         /* Set host parameters to mmc */
+>         mmc->ops = &mt_msdc_ops;
+> -       mmc->f_min = host->src_clk_freq / (4 * 255);
+> +       mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 255);
+>
+>         mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+>         /* MMC core transfer sizes tunable parameters */
+> --
+> 1.7.9.5
+>
 
-Change their print level to debug, thus it won't be shown to generic
-users.
+Thanks, applied for fixes!
 
-Signed-off-by: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
----
- drivers/mmc/host/sunxi-mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 6ffcd2838272..0391c62cc99f 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -489,7 +489,7 @@ static void sunxi_mmc_dump_errinfo(struct sunxi_mmc_host *host)
- 				      cmd->opcode == SD_IO_RW_DIRECT))
- 		return;
- 
--	dev_err(mmc_dev(host->mmc),
-+	dev_dbg(mmc_dev(host->mmc),
- 		"smc %d err, cmd %d,%s%s%s%s%s%s%s%s%s%s !!\n",
- 		host->mmc->index, cmd->opcode,
- 		data ? (data->flags & MMC_DATA_WRITE ? " WR" : " RD") : "",
--- 
-2.12.0
+Kind regards
+Uffe
