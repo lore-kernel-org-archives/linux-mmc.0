@@ -1,120 +1,95 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: core: Add post_ios_power_on callback for power sequences
-Date: Thu, 16 Mar 2017 13:55:20 +0100
-Message-ID: <CAPDyKFo_OxMizZPmmiL8Uo3r35vfY9arJjoWisAJCvB7VTsUdA@mail.gmail.com>
-References: <20170301145310.22813-1-romain.perier@collabora.com> <20170301145310.22813-2-romain.perier@collabora.com>
+Subject: Re: [PATCH v2 3/4] mmc: pwrseq_simple: Add an optional pre-power-on-delay
+Date: Thu, 16 Mar 2017 14:01:19 +0100
+Message-ID: <CAPDyKFr90kj9QuCVromx5A24U0WDh1gwVjmdwDsr1JmQbt=DPQ@mail.gmail.com>
+References: <20170306141716.19120-1-romain.perier@collabora.com> <20170306141716.19120-4-romain.perier@collabora.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:33003 "EHLO
-        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752074AbdCPMz1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 08:55:27 -0400
-Received: by mail-vk0-f52.google.com with SMTP id d188so23287451vka.0
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 05:55:26 -0700 (PDT)
-In-Reply-To: <20170301145310.22813-2-romain.perier@collabora.com>
+Received: from mail-ua0-f180.google.com ([209.85.217.180]:32980 "EHLO
+        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752366AbdCPNBb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 09:01:31 -0400
+Received: by mail-ua0-f180.google.com with SMTP id u30so25713142uau.0
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 06:01:20 -0700 (PDT)
+In-Reply-To: <20170306141716.19120-4-romain.perier@collabora.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Romain Perier <romain.perier@collabora.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 
-On 1 March 2017 at 15:53, Romain Perier <romain.perier@collabora.com> wrote:
-> Currently, ->pre_power_on() callback is called at the beginning of the
-> mmc_power_up() function before MMC_POWER_UP and MMC_POWER_ON sequences.
-> The callback ->post_power_on() is called at the end of the
-> mmc_power_up() function. Some SDIO Chipsets require to gate the clock
-
-Just to make sure we get things right here. mmc_pwrseq_post_power_on()
-is actually called when MMC_POWER_UP is completed but before
-MMC_POWER_ON is done.
-
-When ->set_ios() host ops callback is invoked with MMC_POWER_ON state,
-the mmc core expects the mmc host to power on vqmmc (which is the I/O
-voltage for the interface bus).
-
-I would like to understand what clock you really are referring to here
-as well, is that the clock for SDIO interface or some other peripheral
-clock to SDIO chipset.
-
-> after than the vqmmc supply is powered on and then toggle the reset
-> line. Currently, there is no way for doing this.
-
-True.
-
-Let me just ask about vqmmc to be sure. This is about the I/O voltage
-to SDIO chipset?
-
+On 6 March 2017 at 15:17, Romain Perier <romain.perier@collabora.com> wrote:
+> Some devices need a while between the enablement of its clk and the time
+> where the reset line is asserted. When this time happens between the
+> pre_power_on and the post_power_on callbacks, there is a need to do an
+> msleep at the end of the pre_power_on callback.
 >
-> This commit introduces a new callback ->post_ios_power_on(), that is
-> called at the end of the mmc_power_up() function after the mmc_set_ios()
-> operation. In this way the entire power sequences can be done from this
-> function after the enablement of the power supply.
-
-This may be a way forward, however, first I want to be sure of what
-kind of clocks/regulators etc we have to deal with.
-
-Kind regards
-Uffe
-
+> This commit adds an optional DT property for such devices.
 >
 > Signed-off-by: Romain Perier <romain.perier@collabora.com>
 > ---
->  drivers/mmc/core/core.c   | 1 +
->  drivers/mmc/core/pwrseq.c | 8 ++++++++
->  drivers/mmc/core/pwrseq.h | 2 ++
->  3 files changed, 11 insertions(+)
+>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+
+Split DT documentation for code changes. And make sure DT maintainers
+are in the loop discussing new DT bindings.
+
+>  drivers/mmc/core/pwrseq_simple.c                            | 6 ++++++
+>  2 files changed, 8 insertions(+)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 1076b9d..d73a050 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1831,6 +1831,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
->          * time required to reach a stable voltage.
->          */
->         mmc_delay(10);
-> +       mmc_pwrseq_post_ios_power_on(host);
->  }
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> index e254368..821feaaf 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> @@ -18,6 +18,8 @@ Optional properties:
+>    "ext_clock" (External clock provided to the card).
+>  - post-power-on-delay-ms : Delay in ms after powering the card and
+>         de-asserting the reset-gpios (if any)
+> +- pre-power-on-delay-ms : Delay in ms before powering the card and
+> +       asserting the reset-gpios (if any)
+
+We have been thinking of adding this before. It seems reasonable to
+me, however in the earlier case we ended up adding a new mmc pwrseq
+variant.
+
+Let's see where we ends up here...
+
 >
->  void mmc_power_off(struct mmc_host *host)
-> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-> index 9386c47..98f50b7 100644
-> --- a/drivers/mmc/core/pwrseq.c
-> +++ b/drivers/mmc/core/pwrseq.c
-> @@ -68,6 +68,14 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host)
->                 pwrseq->ops->post_power_on(host);
->  }
+>  Example:
 >
-> +void mmc_pwrseq_post_ios_power_on(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq *pwrseq = host->pwrseq;
-> +
-> +       if (pwrseq && pwrseq->ops->post_ios_power_on)
-> +               pwrseq->ops->post_ios_power_on(host);
-> +}
-> +
->  void mmc_pwrseq_power_off(struct mmc_host *host)
->  {
->         struct mmc_pwrseq *pwrseq = host->pwrseq;
-> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-> index d69e751..2053ebd 100644
-> --- a/drivers/mmc/core/pwrseq.h
-> +++ b/drivers/mmc/core/pwrseq.h
-> @@ -13,6 +13,7 @@
->  struct mmc_pwrseq_ops {
->         void (*pre_power_on)(struct mmc_host *host);
->         void (*post_power_on)(struct mmc_host *host);
-> +       void (*post_ios_power_on)(struct mmc_host *host);
->         void (*power_off)(struct mmc_host *host);
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index e27019f..d8d7166 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -27,6 +27,7 @@ struct mmc_pwrseq_simple {
+>         struct mmc_pwrseq pwrseq;
+>         bool clk_enabled;
+>         u32 post_power_on_delay_ms;
+> +       u32 pre_power_on_delay_ms;
+>         struct clk *ext_clk;
+>         struct gpio_descs *reset_gpios;
 >  };
+> @@ -60,6 +61,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+>         }
 >
-> @@ -31,6 +32,7 @@ void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq);
->  int mmc_pwrseq_alloc(struct mmc_host *host);
->  void mmc_pwrseq_pre_power_on(struct mmc_host *host);
->  void mmc_pwrseq_post_power_on(struct mmc_host *host);
-> +void mmc_pwrseq_post_ios_power_on(struct mmc_host *host);
->  void mmc_pwrseq_power_off(struct mmc_host *host);
->  void mmc_pwrseq_free(struct mmc_host *host);
+>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+> +
+> +       if (pwrseq->pre_power_on_delay_ms)
+> +               msleep(pwrseq->pre_power_on_delay_ms);
+>  }
 >
+>  static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+> @@ -130,6 +134,8 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+>
+>         device_property_read_u32(dev, "post-power-on-delay-ms",
+>                                  &pwrseq->post_power_on_delay_ms);
+> +       device_property_read_u32(dev, "pre-power-on-delay-ms",
+> +                                &pwrseq->pre_power_on_delay_ms);
+>
+>         pwrseq->pwrseq.dev = dev;
+>         if (device_property_read_bool(dev, "post-ios-power-on"))
 > --
 > 2.9.3
 >
+
+Kind regards
+Uffe
