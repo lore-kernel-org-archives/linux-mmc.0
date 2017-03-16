@@ -1,69 +1,54 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: [PATCH 1/2] mmc: sdhci: Add support for setting parent clock
-Date: Thu, 16 Mar 2017 10:32:43 +0000
-Message-ID: <1489660364-17698-1-git-send-email-jonathanh@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Ritesh Harjani <riteshh@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC] mmc: tmio: always unmap DMA before waiting for interrupt
+Date: Thu, 16 Mar 2017 11:56:02 +0100
+Message-ID: <20170316105602.2581-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-It is common for SD/MMC host controllers to set the parent clock that
-drives the SD/MMC interface in order to support various operating
-speeds. Typically, this is performed by calling common clock framework
-APIs such as clk_set_rate(). The problem is that these APIs may sleep
-and must not be called from within atomic sections and therefore, these
-functions cannot be called within the existing 'set_clock' SDHCI
-operator because they are called from within the context of a spinlock.
-Add a new 'set_parent_clock' operator for the SDHCI driver that is
-called early during the SDHCI 'set_ios' before the spinlock is aquire to
-give the platform driver the opportunity to set the parent clock rate.
+In the (maybe academical) case, we don't get a DATAEND interrupt after
+DMA completed, we will wait endlessly for the completion to complete.
+This is not bad per se, since we have a more generic completion tracking
+a timeout. In that rare case, however, the DMA buffer will not get
+unmapped and we have a leak. Reorder the code, so unmapping will always
+take place.
 
-Please note that, unfortunately, the Tegra and MSM SDHCI drivers
-currently appear to mis-use the 'set_clock' operator by calling
-clk_set_rate(). In the case of Tegra, occasionally but not always,
-'scheduling while atomic' errors are reported (so most of the time we
-are getting lucky). In the of the MSM SDHCI driver, it is releasing and
-re-acquiring the spinlock which is bad.
-
-Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
 
-I have not attempted to fix the MSM driver in this seris, but I am
-copying hopefully, the right people to fix it.
+It's probably academical, still I think it is better to not have any leaks in
+favor of slightly more lock hazzling. Open for opionions, though, this is why
+I send out as RFC.
 
- drivers/mmc/host/sdhci.c | 3 +++
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 5 insertions(+)
+ drivers/mmc/host/tmio_mmc_dma.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6fdd7a70f229..b7f1521edbec 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1579,6 +1579,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->power_mode == MMC_POWER_UNDEFINED)
- 		return;
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index c7684fa91f1f9c..e2093db2b7ffce 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -47,8 +47,6 @@ static void tmio_mmc_dma_callback(void *arg)
+ {
+ 	struct tmio_mmc_host *host = arg;
  
-+	if (host->ops->set_parent_clock)
-+		host->ops->set_parent_clock(host, ios->power_mode);
+-	wait_for_completion(&host->dma_dataend);
+-
+ 	spin_lock_irq(&host->lock);
+ 
+ 	if (!host->data)
+@@ -63,6 +61,11 @@ static void tmio_mmc_dma_callback(void *arg)
+ 			     host->sg_ptr, host->sg_len,
+ 			     DMA_TO_DEVICE);
+ 
++	spin_unlock_irq(&host->lock);
 +
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	if (host->flags & SDHCI_DEVICE_DEAD) {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index edf3adfbc213..585fbcdab70c 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -541,6 +541,8 @@ struct sdhci_ops {
- #endif
- 
- 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
-+	void	(*set_parent_clock)(struct sdhci_host *host,
-+				    unsigned int clock);
- 	void	(*set_power)(struct sdhci_host *host, unsigned char mode,
- 			     unsigned short vdd);
- 
++	wait_for_completion(&host->dma_dataend);
++
++	spin_lock_irq(&host->lock);
+ 	tmio_mmc_do_data_irq(host);
+ out:
+ 	spin_unlock_irq(&host->lock);
 -- 
-2.7.4
+2.11.0
