@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
-Date: Thu, 16 Mar 2017 15:46:53 +0100
-Message-ID: <CAPDyKFpEM_JMY==ZzH1-XPqvdxk2pXMzJp09CieWPMGM-=0JGQ@mail.gmail.com>
-References: <20170315113139.17989-1-p.zabel@pengutronix.de>
+Subject: Re: [PATCH v2 07/14] mmc: sdhci-st: simplify optional reset handling
+Date: Thu, 16 Mar 2017 15:47:02 +0100
+Message-ID: <CAPDyKFqzwj6kDnYSigScW_58F60LstLbqN0RUr6uJYTbo3THdg@mail.gmail.com>
+References: <20170315113141.20238-1-p.zabel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170315113139.17989-1-p.zabel@pengutronix.de>
+In-Reply-To: <20170315113141.20238-1-p.zabel@pengutronix.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Patrice Chotard <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On 15 March 2017 at 12:31, Philipp Zabel <p.zabel@pengutronix.de> wrote:
@@ -27,56 +27,70 @@ Thanks, applied for next!
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/dw_mmc.c | 14 +++++---------
->  1 file changed, 5 insertions(+), 9 deletions(-)
+>  drivers/mmc/host/sdhci-st.c | 19 +++++++------------
+>  1 file changed, 7 insertions(+), 12 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index a9ac0b4573131..3d62b0a1f81cb 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2968,10 +2968,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index ed92ce729dde1..5a782b9bae381 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -371,11 +371,10 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>         if (IS_ERR(icnclk))
+>                 icnclk = NULL;
 >
->         /* find reset controller when exist */
->         pdata->rstc = devm_reset_control_get_optional(dev, "reset");
-> -       if (IS_ERR(pdata->rstc)) {
-> -               if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-> -                       return ERR_PTR(-EPROBE_DEFER);
-> -       }
-> +       if (IS_ERR(pdata->rstc))
-> +               return ERR_CAST(pdata->rstc);
+> -       rstc = devm_reset_control_get(&pdev->dev, NULL);
+> +       rstc = devm_reset_control_get_optional(&pdev->dev, NULL);
+>         if (IS_ERR(rstc))
+> -               rstc = NULL;
+> -       else
+> -               reset_control_deassert(rstc);
+> +               return PTR_ERR(rstc);
+> +       reset_control_deassert(rstc);
 >
->         /* find out number of slots supported */
->         of_property_read_u32(np, "num-slots", &pdata->num_slots);
-> @@ -3100,7 +3098,7 @@ int dw_mci_probe(struct dw_mci *host)
->                 }
->         }
+>         host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, sizeof(*pdata));
+>         if (IS_ERR(host)) {
+> @@ -435,8 +434,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>  err_of:
+>         sdhci_pltfm_free(pdev);
+>  err_pltfm_init:
+> -       if (rstc)
+> -               reset_control_assert(rstc);
+> +       reset_control_assert(rstc);
 >
-> -       if (!IS_ERR(host->pdata->rstc)) {
-> +       if (host->pdata->rstc) {
->                 reset_control_assert(host->pdata->rstc);
->                 usleep_range(10, 50);
->                 reset_control_deassert(host->pdata->rstc);
-> @@ -3257,8 +3255,7 @@ int dw_mci_probe(struct dw_mci *host)
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
+>         return ret;
+>  }
+> @@ -453,8 +451,7 @@ static int sdhci_st_remove(struct platform_device *pdev)
 >
-> -       if (!IS_ERR(host->pdata->rstc))
-> -               reset_control_assert(host->pdata->rstc);
-> +       reset_control_assert(host->pdata->rstc);
+>         clk_disable_unprepare(pdata->icnclk);
 >
->  err_clk_ciu:
->         clk_disable_unprepare(host->ciu_clk);
-> @@ -3290,8 +3287,7 @@ void dw_mci_remove(struct dw_mci *host)
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
+> -       if (rstc)
+> -               reset_control_assert(rstc);
+> +       reset_control_assert(rstc);
 >
-> -       if (!IS_ERR(host->pdata->rstc))
-> -               reset_control_assert(host->pdata->rstc);
-> +       reset_control_assert(host->pdata->rstc);
+>         return ret;
+>  }
+> @@ -470,8 +467,7 @@ static int sdhci_st_suspend(struct device *dev)
+>         if (ret)
+>                 goto out;
 >
->         clk_disable_unprepare(host->ciu_clk);
->         clk_disable_unprepare(host->biu_clk);
+> -       if (pdata->rstc)
+> -               reset_control_assert(pdata->rstc);
+> +       reset_control_assert(pdata->rstc);
+>
+>         clk_disable_unprepare(pdata->icnclk);
+>         clk_disable_unprepare(pltfm_host->clk);
+> @@ -489,8 +485,7 @@ static int sdhci_st_resume(struct device *dev)
+>         clk_prepare_enable(pltfm_host->clk);
+>         clk_prepare_enable(pdata->icnclk);
+>
+> -       if (pdata->rstc)
+> -               reset_control_deassert(pdata->rstc);
+> +       reset_control_deassert(pdata->rstc);
+>
+>         st_mmcss_cconfig(np, host);
+>
 > --
 > 2.11.0
 >
