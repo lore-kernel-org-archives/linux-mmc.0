@@ -1,30 +1,26 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: tegra: Document Tegra186 compatible string
-Date: Thu, 16 Mar 2017 15:46:37 +0100
-Message-ID: <CAPDyKFpfa0k35r0kS6C+Px_Tu4McUQKTJv7UMuRAvCzoaXnaKA@mail.gmail.com>
-References: <20170314190152.9167-1-thierry.reding@gmail.com> <20170314190152.9167-2-thierry.reding@gmail.com>
+Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
+Date: Thu, 16 Mar 2017 15:46:53 +0100
+Message-ID: <CAPDyKFpEM_JMY==ZzH1-XPqvdxk2pXMzJp09CieWPMGM-=0JGQ@mail.gmail.com>
+References: <20170315113139.17989-1-p.zabel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f169.google.com ([209.85.217.169]:36022 "EHLO
-        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754129AbdCPOqo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 10:46:44 -0400
-Received: by mail-ua0-f169.google.com with SMTP id 72so27534474uaf.3
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 07:46:43 -0700 (PDT)
-In-Reply-To: <20170314190152.9167-2-thierry.reding@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170315113139.17989-1-p.zabel@pengutronix.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Philipp Zabel <p.zabel@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-On 14 March 2017 at 20:01, Thierry Reding <thierry.reding@gmail.com> wrote:
-> From: Thierry Reding <treding@nvidia.com>
+On 15 March 2017 at 12:31, Philipp Zabel <p.zabel@pengutronix.de> wrote:
+> As of commit bb475230b8e5 ("reset: make optional functions really
+> optional"), the reset framework API calls use NULL pointers to describe
+> optional, non-present reset controls.
 >
-> The SDHCI controller found on Tegra186 in very similar to the controller
-> found on earlier generations of Tegra.
+> This allows to return errors from devm_reset_control_get_optional and to
+> call reset_control_(de)assert unconditionally.
 >
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+> Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 
 Thanks, applied for next!
 
@@ -32,21 +28,55 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/dw_mmc.c | 14 +++++---------
+>  1 file changed, 5 insertions(+), 9 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> index c15aa22d4570..9bce57862ed6 100644
-> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.txt
-> @@ -13,6 +13,7 @@ Required properties:
->    - "nvidia,tegra114-sdhci": for Tegra114
->    - "nvidia,tegra124-sdhci": for Tegra124 and Tegra132
->    - "nvidia,tegra210-sdhci": for Tegra210
-> +  - "nvidia,tegra186-sdhci": for Tegra186
->  - clocks : Must contain one entry, for the module clock.
->    See ../clocks/clock-bindings.txt for details.
->  - resets : Must contain an entry for each entry in reset-names.
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a9ac0b4573131..3d62b0a1f81cb 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2968,10 +2968,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>
+>         /* find reset controller when exist */
+>         pdata->rstc = devm_reset_control_get_optional(dev, "reset");
+> -       if (IS_ERR(pdata->rstc)) {
+> -               if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
+> -                       return ERR_PTR(-EPROBE_DEFER);
+> -       }
+> +       if (IS_ERR(pdata->rstc))
+> +               return ERR_CAST(pdata->rstc);
+>
+>         /* find out number of slots supported */
+>         of_property_read_u32(np, "num-slots", &pdata->num_slots);
+> @@ -3100,7 +3098,7 @@ int dw_mci_probe(struct dw_mci *host)
+>                 }
+>         }
+>
+> -       if (!IS_ERR(host->pdata->rstc)) {
+> +       if (host->pdata->rstc) {
+>                 reset_control_assert(host->pdata->rstc);
+>                 usleep_range(10, 50);
+>                 reset_control_deassert(host->pdata->rstc);
+> @@ -3257,8 +3255,7 @@ int dw_mci_probe(struct dw_mci *host)
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+>
+> -       if (!IS_ERR(host->pdata->rstc))
+> -               reset_control_assert(host->pdata->rstc);
+> +       reset_control_assert(host->pdata->rstc);
+>
+>  err_clk_ciu:
+>         clk_disable_unprepare(host->ciu_clk);
+> @@ -3290,8 +3287,7 @@ void dw_mci_remove(struct dw_mci *host)
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+>
+> -       if (!IS_ERR(host->pdata->rstc))
+> -               reset_control_assert(host->pdata->rstc);
+> +       reset_control_assert(host->pdata->rstc);
+>
+>         clk_disable_unprepare(host->ciu_clk);
+>         clk_disable_unprepare(host->biu_clk);
 > --
-> 2.12.0
+> 2.11.0
 >
