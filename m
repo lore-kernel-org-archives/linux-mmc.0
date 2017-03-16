@@ -1,197 +1,60 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
 Subject: Re: [PATCH v4] mmc: sdhci: clarify the get_timeout_clock callback
-Date: Thu, 16 Mar 2017 10:31:40 +0200
-Message-ID: <a436006c-6bd2-0243-8cb0-38b07ff46abc@intel.com>
-References: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
+Date: Thu, 16 Mar 2017 17:46:05 +0900
+Message-ID: <CAK7LNASF2nzSg=T5heRSOtkNNnxSNZX528_z3EuyN41pffgXJw@mail.gmail.com>
+References: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com> <a436006c-6bd2-0243-8cb0-38b07ff46abc@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:15889 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751483AbdCPIh7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Mar 2017 04:37:59 -0400
-In-Reply-To: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from conssluserg-03.nifty.com ([210.131.2.82]:59003 "EHLO
+        conssluserg-03.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751279AbdCPIqZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 04:46:25 -0400
+Received: from mail-yw0-f180.google.com (mail-yw0-f180.google.com [209.85.161.180]) (authenticated)
+        by conssluserg-03.nifty.com with ESMTP id v2G8k6HC013572
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 17:46:06 +0900
+Received: by mail-yw0-f180.google.com with SMTP id v76so26943857ywg.0
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 01:46:06 -0700 (PDT)
+In-Reply-To: <a436006c-6bd2-0243-8cb0-38b07ff46abc@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Masahiro Yamada <yamada.masahiro@socionext.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>
 
-On 16/03/17 03:20, Shawn Lin wrote:
-> Currently the get_timeout_clock callabck doesn't clearly
-
-callabck -> callback
-
-> have a statment that it needs the variant drivers to return
-
-statment -> statement
-
-> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
-
-KHz -> kHz
-
-> isn't present, otherwise the variant drivers should return it
-> in KHz. So actually sdhci-of-arasan return the wrong value found
-
-KHz -> MHz
+Hi Shawn,
 
 
-> by Anssi[1]. It's also very likely that further variant drivers which
-> are going to use this callback will be confused by this situation.
-> Given the fact that modem sdhci variant hosts are very prone to get
+>
+>> users did that), it's more nature to return the value in Hz and we
+>
+> nature -> natural
+>
+>> make a explicit comment there. Then we put the unit conversion inside
 
-modem -> modern
+While you are at it,
 
-> the timeout clock from common clock framework(actuall the only three
-
-framework( -> framework (
-
-actuall -> actually
+a explicit -> an explicit
 
 
-> users did that), it's more nature to return the value in Hz and we
 
-nature -> natural
+>> the sdhci core. Thus will improve the code and prevent further misues.
+>
+> misues -> misuses
+>
+>>
+>> [1]: https://patchwork.kernel.org/patch/9569431/
+>
+> + blank line
+>
+>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+>> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-> make a explicit comment there. Then we put the unit conversion inside
-> the sdhci core. Thus will improve the code and prevent further misues.
 
-misues -> misuses
+When applied, my Cc can be dropped
+because I had already given Acked-by.
 
-> 
-> [1]: https://patchwork.kernel.org/patch/9569431/
 
-+ blank line
-
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
-> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> 
-
-- blank line
-
-> Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> ---
-> 
-> Changes in v4:
-> - rebased on -next
-> - add Masahiro's ack for sdhci-cadence
-> 
-> Changes in v3:
-> - squash all the patches into one to keep bisectability
-> - fix wrong return value of sdhci-cadence
-> - slight improve the condition check to avoid the complaint of
->   checkpatch
-> 
-> Changes in v2:
-> - fix the comment and make it return in Hz
-> 
->  drivers/mmc/host/sdhci-cadence.c   |  4 ++--
->  drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
->  drivers/mmc/host/sdhci.c           | 16 +++++++++-------
->  drivers/mmc/host/sdhci.h           |  1 +
->  4 files changed, 13 insertions(+), 25 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 316cfec..7baeeaf 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
->  {
->  	/*
->  	 * Cadence's spec says the Timeout Clock Frequency is the same as the
-> -	 * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
-> +	 * Base Clock Frequency.
->  	 */
-> -	return host->max_clk / 1000;
-> +	return host->max_clk;
->  }
->  
->  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 1cfd7f9..c52f153 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
->  	return ret;
->  }
->  
-> -static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-> -{
-> -	unsigned long freq;
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -
-> -	/* SDHCI timeout clock is in kHz */
-> -	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
-> -
-> -	/* or in MHz */
-> -	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> -		freq = DIV_ROUND_UP(freq, 1000);
-> -
-> -	return freq;
-> -}
-> -
->  static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> -	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
-> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->  	.set_bus_width = sdhci_set_bus_width,
->  	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6fdd7a7..f73494e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
->  	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
->  		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
->  					SDHCI_TIMEOUT_CLK_SHIFT;
-> +
-> +		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> +			host->timeout_clk *= 1000;
-> +
->  		if (host->timeout_clk == 0) {
-> -			if (host->ops->get_timeout_clock) {
-> -				host->timeout_clk =
-> -					host->ops->get_timeout_clock(host);
-> -			} else {
-> +			if (unlikely(!host->ops->get_timeout_clock)) {
-
-This is not a CPU hot path, so I don't want to use 'likely' or 'unlikely'.
-
->  				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
->  					mmc_hostname(mmc));
->  				ret = -ENODEV;
->  				goto undma;
->  			}
-> -		}
->  
-> -		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-> -			host->timeout_clk *= 1000;
-> +			host->timeout_clk =
-> +				DIV_ROUND_UP(host->ops->get_timeout_clock(host),
-> +					     1000);
-> +		}
->  
->  		if (override_timeout_clk)
->  			host->timeout_clk = override_timeout_clk;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index edf3adf..27c252c 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -547,6 +547,7 @@ struct sdhci_ops {
->  	int		(*enable_dma)(struct sdhci_host *host);
->  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-> +	/* get_timeout_clock should return clk rate in unit of Hz */
->  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
->  	void		(*set_timeout)(struct sdhci_host *host,
-> 
-
+-- 
+Best Regards
+Masahiro Yamada
