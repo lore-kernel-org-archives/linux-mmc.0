@@ -1,81 +1,69 @@
-From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 2/2] mmc: tegra: Fix setting of Tegra SDHCI module clock
-Date: Thu, 16 Mar 2017 10:32:44 +0000
-Message-ID: <1489660364-17698-2-git-send-email-jonathanh@nvidia.com>
-References: <1489660364-17698-1-git-send-email-jonathanh@nvidia.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: [PATCH 1/2] mmc: sdhci: Add support for setting parent clock
+Date: Thu, 16 Mar 2017 10:32:43 +0000
+Message-ID: <1489660364-17698-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1489660364-17698-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Ritesh Harjani <riteshh@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit a8e326a911d3 ("mmc: tegra: implement module external clock change")
-implemented the SDHCI 'set_clock' handler for Tegra in order to change the
-module clock for the Tegra SDHCI controller by using the CCF API
-clk_set_rate(). The problem is the clk_set_rate() may sleep and the
-'set_clock' handler is always called from within the context of a spinlock.
-Hence, occasionally, 'scheduling while atomic' are seen. Fix this by moving
-the setting of the module clock to the new 'set_parent_clock' handler which
-is not called from within the context of a spinlock.
+It is common for SD/MMC host controllers to set the parent clock that
+drives the SD/MMC interface in order to support various operating
+speeds. Typically, this is performed by calling common clock framework
+APIs such as clk_set_rate(). The problem is that these APIs may sleep
+and must not be called from within atomic sections and therefore, these
+functions cannot be called within the existing 'set_clock' SDHCI
+operator because they are called from within the context of a spinlock.
+Add a new 'set_parent_clock' operator for the SDHCI driver that is
+called early during the SDHCI 'set_ios' before the spinlock is aquire to
+give the platform driver the opportunity to set the parent clock rate.
 
-Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
+Please note that, unfortunately, the Tegra and MSM SDHCI drivers
+currently appear to mis-use the 'set_clock' operator by calling
+clk_set_rate(). In the case of Tegra, occasionally but not always,
+'scheduling while atomic' errors are reported (so most of the time we
+are getting lucky). In the of the MSM SDHCI driver, it is releasing and
+re-acquiring the spinlock which is bad.
 
-Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 20b6ff5b4af1..048f84e615d3 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -217,18 +217,25 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
- 	sdhci_writel(host,val, SDHCI_TEGRA_AUTO_CAL_CONFIG);
- }
+I have not attempted to fix the MSM driver in this seris, but I am
+copying hopefully, the right people to fix it.
+
+ drivers/mmc/host/sdhci.c | 3 +++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6fdd7a70f229..b7f1521edbec 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1579,6 +1579,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->power_mode == MMC_POWER_UNDEFINED)
+ 		return;
  
--static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-+static void tegra_sdhci_set_parent_clock(struct sdhci_host *host,
-+					 unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	unsigned long host_clk;
- 
- 	if (!clock)
--		return sdhci_set_clock(host, clock);
-+		return;
- 
- 	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
--	clk_set_rate(pltfm_host->clk, host_clk);
-+	WARN_ON(clk_set_rate(pltfm_host->clk, host_clk));
- 	host->max_clk = clk_get_rate(pltfm_host->clk);
-+}
++	if (host->ops->set_parent_clock)
++		host->ops->set_parent_clock(host, ios->power_mode);
 +
-+static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	spin_lock_irqsave(&host->lock, flags);
  
- 	sdhci_set_clock(host, clock);
+ 	if (host->flags & SDHCI_DEVICE_DEAD) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index edf3adfbc213..585fbcdab70c 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -541,6 +541,8 @@ struct sdhci_ops {
+ #endif
  
-@@ -320,6 +327,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
- 	.read_w     = tegra_sdhci_readw,
- 	.write_l    = tegra_sdhci_writel,
- 	.set_clock  = tegra_sdhci_set_clock,
-+	.set_parent_clock = tegra_sdhci_set_parent_clock,
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
-@@ -368,6 +376,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
- 	.write_w    = tegra_sdhci_writew,
- 	.write_l    = tegra_sdhci_writel,
- 	.set_clock  = tegra_sdhci_set_clock,
-+	.set_parent_clock = tegra_sdhci_set_parent_clock,
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+ 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
++	void	(*set_parent_clock)(struct sdhci_host *host,
++				    unsigned int clock);
+ 	void	(*set_power)(struct sdhci_host *host, unsigned char mode,
+ 			     unsigned short vdd);
+ 
 -- 
 2.7.4
