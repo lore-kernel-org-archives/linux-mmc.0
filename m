@@ -1,89 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/4] mmc: pwrseq-simple: Add optional op. for
- post_ios_power_on callback
-Date: Thu, 16 Mar 2017 14:05:04 +0100
-Message-ID: <CAPDyKFo=0H_Uum3_ak7__C4g2oOOmqD-sxDgZP3O9zb5a_q4rw@mail.gmail.com>
-References: <20170306141716.19120-1-romain.perier@collabora.com> <20170306141716.19120-3-romain.perier@collabora.com>
+From: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+Subject: [PATCH] mmc: sunxi: change controller error info to
+ debug level
+Date: Thu, 16 Mar 2017 21:29:03 +0800
+Message-ID: <20170316132903.61246-1-icenowy@aosc.xyz>
+Reply-To: icenowy-ymACFijhrKM@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:34481 "EHLO
-        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751547AbdCPNFI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 09:05:08 -0400
-Received: by mail-vk0-f43.google.com with SMTP id r136so23492055vke.1
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 06:05:05 -0700 (PDT)
-In-Reply-To: <20170306141716.19120-3-romain.perier@collabora.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sunxi+bncBCZLPFN5Q4OBBKNHVLDAKGQE42QV2RQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Romain Perier <romain.perier@collabora.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 
-On 6 March 2017 at 15:17, Romain Perier <romain.perier@collabora.com> wrote:
-> Some devices require to do their entire power sequence after that the
-> power supply of the MMC has been powered on. This can be done by
-> only implementing the optional post_ios_power_on() callback that rely on
-> pre_power_on/post_power_on functions, other functions being NULL. Then
-> we introduce a new DT property "post_ios_power_on", when this property
-> is set the driver will use its post_ios_power_on operations, otherwise
-> it fallbacks to the default operations with pre_power_on/post_power_on.
->
-> Signed-off-by: Romain Perier <romain.perier@collabora.com>
-> ---
->
-> Changes in v2:
->  - Added missing power_off function in mmc_pwrseq_post_ios_ops
->
->  drivers/mmc/core/pwrseq_simple.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 1304160..e27019f 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -84,12 +84,23 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
->         }
->  }
->
-> +static void mmc_pwrseq_simple_post_ios_power_on(struct mmc_host *host)
-> +{
-> +       mmc_pwrseq_simple_pre_power_on(host);
-> +       mmc_pwrseq_simple_post_power_on(host);
-> +}
-> +
->  static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
->         .pre_power_on = mmc_pwrseq_simple_pre_power_on,
->         .post_power_on = mmc_pwrseq_simple_post_power_on,
->         .power_off = mmc_pwrseq_simple_power_off,
->  };
->
-> +static const struct mmc_pwrseq_ops mmc_pwrseq_post_ios_ops = {
-> +       .post_ios_power_on = mmc_pwrseq_simple_post_ios_power_on,
-> +       .power_off = mmc_pwrseq_simple_power_off,
-> +};
-> +
->  static const struct of_device_id mmc_pwrseq_simple_of_match[] = {
->         { .compatible = "mmc-pwrseq-simple",},
->         {/* sentinel */},
-> @@ -121,7 +132,10 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
->                                  &pwrseq->post_power_on_delay_ms);
->
->         pwrseq->pwrseq.dev = dev;
-> -       pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
-> +       if (device_property_read_bool(dev, "post-ios-power-on"))
-> +               pwrseq->pwrseq.ops = &mmc_pwrseq_post_ios_ops;
+The controller's errors are usually normal (for example, for MMC or SDIO
+cards, some errors are expected to happen; and for boards without a
+dedicated card detect pin the error info will even flood console and
+hide other normal messages) and hard to understand.
 
-No, this is not going to work "post-ios-power-on" is never going to be
-accepted as new mmc pwrseq DT binding.
+Change their print level to debug, thus it won't be shown to generic
+users.
 
-> +       else
-> +               pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
->         pwrseq->pwrseq.owner = THIS_MODULE;
->         platform_set_drvdata(pdev, pwrseq);
->
-> --
-> 2.9.3
->
+Signed-off-by: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+---
+ drivers/mmc/host/sunxi-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 6ffcd2838272..0391c62cc99f 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -489,7 +489,7 @@ static void sunxi_mmc_dump_errinfo(struct sunxi_mmc_host *host)
+ 				      cmd->opcode == SD_IO_RW_DIRECT))
+ 		return;
+ 
+-	dev_err(mmc_dev(host->mmc),
++	dev_dbg(mmc_dev(host->mmc),
+ 		"smc %d err, cmd %d,%s%s%s%s%s%s%s%s%s%s !!\n",
+ 		host->mmc->index, cmd->opcode,
+ 		data ? (data->flags & MMC_DATA_WRITE ? " WR" : " RD") : "",
+-- 
+2.12.0
