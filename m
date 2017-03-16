@@ -1,211 +1,81 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4] mmc: sdhci: clarify the get_timeout_clock callback
-Date: Thu, 16 Mar 2017 16:53:50 +0800
-Message-ID: <a59c458f-f2af-ddd4-4779-135d6d6ba27d@rock-chips.com>
-References: <1489627251-93539-1-git-send-email-shawn.lin@rock-chips.com>
- <a436006c-6bd2-0243-8cb0-38b07ff46abc@intel.com>
+From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 2/2] mmc: tegra: Fix setting of Tegra SDHCI module clock
+Date: Thu, 16 Mar 2017 10:32:44 +0000
+Message-ID: <1489660364-17698-2-git-send-email-jonathanh@nvidia.com>
+References: <1489660364-17698-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:54615 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751498AbdCPIy7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 04:54:59 -0400
-In-Reply-To: <a436006c-6bd2-0243-8cb0-38b07ff46abc@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1489660364-17698-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, Anssi Hannula <anssi.hannula@bitwise.fi>, Masahiro Yamada <yamada.masahiro@socionext.com>
 
-On 2017/3/16 16:31, Adrian Hunter wrote:
-> On 16/03/17 03:20, Shawn Lin wrote:
->> Currently the get_timeout_clock callabck doesn't clearly
->
-> callabck -> callback
->
->> have a statment that it needs the variant drivers to return
->
-> statment -> statement
->
->> the timeout clock rate in KHz if the SDHCI_TIMEOUT_CLK_UNIT
->
-> KHz -> kHz
->
->> isn't present, otherwise the variant drivers should return it
->> in KHz. So actually sdhci-of-arasan return the wrong value found
->
-> KHz -> MHz
->
->
->> by Anssi[1]. It's also very likely that further variant drivers which
->> are going to use this callback will be confused by this situation.
->> Given the fact that modem sdhci variant hosts are very prone to get
->
-> modem -> modern
->
->> the timeout clock from common clock framework(actuall the only three
->
-> framework( -> framework (
->
-> actuall -> actually
->
->
->> users did that), it's more nature to return the value in Hz and we
->
-> nature -> natural
->
->> make a explicit comment there. Then we put the unit conversion inside
->> the sdhci core. Thus will improve the code and prevent further misues.
->
-> misues -> misuses
->
->>
->> [1]: https://patchwork.kernel.org/patch/9569431/
->
-> + blank line
->
->> Cc: Adrian Hunter <adrian.hunter@intel.com>
->> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
->> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->
-> - blank line
->
->> Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->> ---
->>
->> Changes in v4:
->> - rebased on -next
->> - add Masahiro's ack for sdhci-cadence
->>
->> Changes in v3:
->> - squash all the patches into one to keep bisectability
->> - fix wrong return value of sdhci-cadence
->> - slight improve the condition check to avoid the complaint of
->>   checkpatch
->>
->> Changes in v2:
->> - fix the comment and make it return in Hz
->>
->>  drivers/mmc/host/sdhci-cadence.c   |  4 ++--
->>  drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
->>  drivers/mmc/host/sdhci.c           | 16 +++++++++-------
->>  drivers/mmc/host/sdhci.h           |  1 +
->>  4 files changed, 13 insertions(+), 25 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
->> index 316cfec..7baeeaf 100644
->> --- a/drivers/mmc/host/sdhci-cadence.c
->> +++ b/drivers/mmc/host/sdhci-cadence.c
->> @@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
->>  {
->>  	/*
->>  	 * Cadence's spec says the Timeout Clock Frequency is the same as the
->> -	 * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
->> +	 * Base Clock Frequency.
->>  	 */
->> -	return host->max_clk / 1000;
->> +	return host->max_clk;
->>  }
->>
->>  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
->> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
->> index 1cfd7f9..c52f153 100644
->> --- a/drivers/mmc/host/sdhci-of-arasan.c
->> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->> @@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
->>  	return ret;
->>  }
->>
->> -static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
->> -{
->> -	unsigned long freq;
->> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> -
->> -	/* SDHCI timeout clock is in kHz */
->> -	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
->> -
->> -	/* or in MHz */
->> -	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
->> -		freq = DIV_ROUND_UP(freq, 1000);
->> -
->> -	return freq;
->> -}
->> -
->>  static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
->>  {
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> @@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
->>  static struct sdhci_ops sdhci_arasan_ops = {
->>  	.set_clock = sdhci_arasan_set_clock,
->>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->> -	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->>  	.set_bus_width = sdhci_set_bus_width,
->>  	.reset = sdhci_arasan_reset,
->>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 6fdd7a7..f73494e 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
->>  	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
->>  		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
->>  					SDHCI_TIMEOUT_CLK_SHIFT;
->> +
->> +		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
->> +			host->timeout_clk *= 1000;
->> +
->>  		if (host->timeout_clk == 0) {
->> -			if (host->ops->get_timeout_clock) {
->> -				host->timeout_clk =
->> -					host->ops->get_timeout_clock(host);
->> -			} else {
->> +			if (unlikely(!host->ops->get_timeout_clock)) {
->
-> This is not a CPU hot path, so I don't want to use 'likely' or 'unlikely'.
+Commit a8e326a911d3 ("mmc: tegra: implement module external clock change")
+implemented the SDHCI 'set_clock' handler for Tegra in order to change the
+module clock for the Tegra SDHCI controller by using the CCF API
+clk_set_rate(). The problem is the clk_set_rate() may sleep and the
+'set_clock' handler is always called from within the context of a spinlock.
+Hence, occasionally, 'scheduling while atomic' are seen. Fix this by moving
+the setting of the module clock to the new 'set_parent_clock' handler which
+is not called from within the context of a spinlock.
 
-will remove this and fix all the typo. :)
+Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
 
->
->>  				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
->>  					mmc_hostname(mmc));
->>  				ret = -ENODEV;
->>  				goto undma;
->>  			}
->> -		}
->>
->> -		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
->> -			host->timeout_clk *= 1000;
->> +			host->timeout_clk =
->> +				DIV_ROUND_UP(host->ops->get_timeout_clock(host),
->> +					     1000);
->> +		}
->>
->>  		if (override_timeout_clk)
->>  			host->timeout_clk = override_timeout_clk;
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index edf3adf..27c252c 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -547,6 +547,7 @@ struct sdhci_ops {
->>  	int		(*enable_dma)(struct sdhci_host *host);
->>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
->>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
->> +	/* get_timeout_clock should return clk rate in unit of Hz */
->>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
->>  	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
->>  	void		(*set_timeout)(struct sdhci_host *host,
->>
->
->
->
->
+Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-tegra.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
 
-
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 20b6ff5b4af1..048f84e615d3 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -217,18 +217,25 @@ static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
+ 	sdhci_writel(host,val, SDHCI_TEGRA_AUTO_CAL_CONFIG);
+ }
+ 
+-static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++static void tegra_sdhci_set_parent_clock(struct sdhci_host *host,
++					 unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	unsigned long host_clk;
+ 
+ 	if (!clock)
+-		return sdhci_set_clock(host, clock);
++		return;
+ 
+ 	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
+-	clk_set_rate(pltfm_host->clk, host_clk);
++	WARN_ON(clk_set_rate(pltfm_host->clk, host_clk));
+ 	host->max_clk = clk_get_rate(pltfm_host->clk);
++}
++
++static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	sdhci_set_clock(host, clock);
+ 
+@@ -320,6 +327,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+ 	.read_w     = tegra_sdhci_readw,
+ 	.write_l    = tegra_sdhci_writel,
+ 	.set_clock  = tegra_sdhci_set_clock,
++	.set_parent_clock = tegra_sdhci_set_parent_clock,
+ 	.set_bus_width = tegra_sdhci_set_bus_width,
+ 	.reset      = tegra_sdhci_reset,
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+@@ -368,6 +376,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+ 	.write_w    = tegra_sdhci_writew,
+ 	.write_l    = tegra_sdhci_writel,
+ 	.set_clock  = tegra_sdhci_set_clock,
++	.set_parent_clock = tegra_sdhci_set_parent_clock,
+ 	.set_bus_width = tegra_sdhci_set_bus_width,
+ 	.reset      = tegra_sdhci_reset,
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
 -- 
-Best Regards
-Shawn Lin
-
+2.7.4
