@@ -1,49 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: ushc: fix NULL-deref at probe
-Date: Thu, 16 Mar 2017 15:46:25 +0100
-Message-ID: <CAPDyKFpGQ-Kf39jc9cgWGeQb7PNActRXMOzYAX+szXfhb+fruw@mail.gmail.com>
-References: <20170313124022.28401-1-johan@kernel.org>
+Subject: Re: [PATCH 0/2] mmc: core: null pointer dereference bug
+Date: Thu, 16 Mar 2017 15:46:48 +0100
+Message-ID: <CAPDyKFoJtspNN9RCLFjVrj0DHsm6HjhQTTsVEmWEyL+bqibdXw@mail.gmail.com>
+References: <1489567684-22763-1-git-send-email-me@tobin.cc>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170313124022.28401-1-johan@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Johan Hovold <johan@kernel.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux USB List <linux-usb@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable <stable@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:33640 "EHLO
+        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754164AbdCPOqu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 10:46:50 -0400
+Received: by mail-vk0-f43.google.com with SMTP id d188so25244976vka.0
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 07:46:49 -0700 (PDT)
+In-Reply-To: <1489567684-22763-1-git-send-email-me@tobin.cc>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Tobin C. Harding" <me@tobin.cc>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 13 March 2017 at 13:40, Johan Hovold <johan@kernel.org> wrote:
-> Make sure to check the number of endpoints to avoid dereferencing a
-> NULL-pointer should a malicious device lack endpoints.
+On 15 March 2017 at 09:48, Tobin C. Harding <me@tobin.cc> wrote:
+> Various functions take as parameter an optional pointer. Pointer
+> should be guarded with non-NULL check before dereferencing.
 >
-> Fixes: 53f3a9e26ed5 ("mmc: USB SD Host Controller (USHC) driver")
-> Cc: stable <stable@vger.kernel.org>     # 2.6.37
-> Cc: David Vrabel <david.vrabel@csr.com>
-> Signed-off-by: Johan Hovold <johan@kernel.org>
+> While fixing this bug it was found that the file contains multiple
+> functions doing variations on the same thing, sdio_readb(),
+> sdio_writeb(), sdio_readw(), sdio_writew() etc. Although the functions
+> have very similar logic the code is laid out in a variety of
+> ways. This makes it overly complicated to read. There is a already a
+> nice clean chunk of code, if we use this format for all instances then
+> we will have cleaned up the code, reduced the line count and lessened
+> the cognitive load required while reading.
+>
+> Patch 01 adds non-NULL check before dereference of pointer.
+>
+> Patch 02 cleans up the return code to be simple and uniform.
+>
+> Code has not been tested. sdio_io.c with patches applied has been
+> checked with checkpatch, Sparse, and Smatch. Each patch has been
+> applied and built on x86_64 and PowerPC
+>
+> Tobin C. Harding (2):
+>   mmc: core: guard dereference of optional parameter
+>   mmc: core: simplify return code
+>
+>  drivers/mmc/core/sdio_io.c | 54 ++++++++++++++++++----------------------------
+>  1 file changed, 21 insertions(+), 33 deletions(-)
+>
+> --
+> 2.7.4
+>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/ushc.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-> index d2c386f09d69..1d843357422e 100644
-> --- a/drivers/mmc/host/ushc.c
-> +++ b/drivers/mmc/host/ushc.c
-> @@ -426,6 +426,9 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
->         struct ushc_data *ushc;
->         int ret;
->
-> +       if (intf->cur_altsetting->desc.bNumEndpoints < 1)
-> +               return -ENODEV;
-> +
->         mmc = mmc_alloc_host(sizeof(struct ushc_data), &intf->dev);
->         if (mmc == NULL)
->                 return -ENOMEM;
-> --
-> 2.12.0
->
