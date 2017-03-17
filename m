@@ -1,54 +1,75 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: meson-gx-mmc: 2nd patch set
-Date: Fri, 17 Mar 2017 07:44:53 +0100
-Message-ID: <b5e36943-ba83-e73e-7df7-d6967aff5886@gmail.com>
-References: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 4/7] arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig
+ and multi_v7_defconfig
+Date: Fri, 17 Mar 2017 08:35:12 +0100
+Message-ID: <CAPDyKFo+GLXjBK+DwxTqq65OSVvrtF9eMT4pVu+xaxWsE3NdDg@mail.gmail.com>
+References: <1488964751-22763-1-git-send-email-kraxel@redhat.com> <1488964751-22763-8-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:34313 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750885AbdCQGpI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 02:45:08 -0400
-Received: by mail-wr0-f174.google.com with SMTP id l37so45799381wrc.1
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2017 23:45:07 -0700 (PDT)
-In-Reply-To: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:34790 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750885AbdCQHfO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 03:35:14 -0400
+Received: by mail-vk0-f45.google.com with SMTP id r136so36622815vke.1
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Mar 2017 00:35:13 -0700 (PDT)
+In-Reply-To: <1488964751-22763-8-git-send-email-kraxel@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Helmut Klein <hgkr.klein@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Gerd Hoffmann <kraxel@redhat.com>
+Cc: linux-rpi-kernel@lists.infradead.org, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Stefan Wahren <stefan.wahren@i2se.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Am 16.03.2017 um 22:12 schrieb Helmut Klein:
-> Hallo Heiner,
-> 
-> i applied your 2nd patch sets to linux-amlogic. (and of course the older set v5 1...10).
-> 
-> The performance of the sd-card and the mmc-chip of my minimx is much better now.
-> 
-> sd-card: from 6.5 to 22.5 MBytes/s
-> mmc: from 14.5 to 28.5 MBytes/s (hs200 compatible device)
-> 
-> But:
-> the wifi-adapter is no longer operational. The problem starts with patch 3 and gets worse with patch 5.
-> 
-> the adapter (ap6330) is attached to the sdio port of the the s905. (=mmc1)
-> 
-Thanks for testing and sharing the feedback. Much appreciated.
-The board I test on supports block devices only.
+-trimmed cc list
 
-Could you please share few more details:
-- Drivers involved
-- All syslog messages related to the device / driver
+On 8 March 2017 at 10:19, Gerd Hoffmann <kraxel@redhat.com> wrote:
+> We need to enable this controller so that we can switch the SD card's
+> pinmux over to it by default, which will improve storage performance.
+>
+> Read access (dd with 64k blocks on rpi2):
+>   CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
+>   CONFIG_MMC_BCM2835:     19-20 MB/s
+>
+> Differences on write access are pretty much in the noise.
+>
+> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 
-And please set the relevant mailing lists on cc when providing test feedback.
-Others might find your feedback helpful too.
+Normally this change should go via arm soc. However as the new
+CONFIG_MMC_BCM2835 is added in this series, perhaps it makes sense to
+that I pick it up. In such case I need an ack from some of the arm soc
+folkz, like Arnd/Olof.
 
-Thanks, Heiner
+Kind regards
+Uffe
 
-> so i think it is important to test your patch set asap on an officially supported board with a wifi adapter).
-> 
-> regards
-> Helmut
-> 
-
+> ---
+>  arch/arm/configs/bcm2835_defconfig  | 1 +
+>  arch/arm/configs/multi_v7_defconfig | 1 +
+>  2 files changed, 2 insertions(+)
+>
+> diff --git a/arch/arm/configs/bcm2835_defconfig b/arch/arm/configs/bcm2835_defconfig
+> index 4b89f4e..3767c24 100644
+> --- a/arch/arm/configs/bcm2835_defconfig
+> +++ b/arch/arm/configs/bcm2835_defconfig
+> @@ -92,6 +92,7 @@ CONFIG_MMC=y
+>  CONFIG_MMC_SDHCI=y
+>  CONFIG_MMC_SDHCI_PLTFM=y
+>  CONFIG_MMC_SDHCI_IPROC=y
+> +CONFIG_MMC_BCM2835=y
+>  CONFIG_NEW_LEDS=y
+>  CONFIG_LEDS_CLASS=y
+>  CONFIG_LEDS_GPIO=y
+> diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+> index a94126f..63b94d0 100644
+> --- a/arch/arm/configs/multi_v7_defconfig
+> +++ b/arch/arm/configs/multi_v7_defconfig
+> @@ -730,6 +730,7 @@ CONFIG_MMC_DW_EXYNOS=y
+>  CONFIG_MMC_DW_ROCKCHIP=y
+>  CONFIG_MMC_SH_MMCIF=y
+>  CONFIG_MMC_SUNXI=y
+> +CONFIG_MMC_BCM2835=y
+>  CONFIG_NEW_LEDS=y
+>  CONFIG_LEDS_CLASS=y
+>  CONFIG_LEDS_CLASS_FLASH=m
+> --
+> 1.8.3.1
+>
