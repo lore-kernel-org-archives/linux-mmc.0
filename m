@@ -1,68 +1,34 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [v3 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Sat, 18 Mar 2017 02:23:30 +0900
-Message-ID: <CAK7LNAQGOeZVqvc=6Agq2xN5B5cBMtaCAkS8-V6uBoO1ziSSuw@mail.gmail.com>
-References: <1489754302-10996-1-git-send-email-piotrs@cadence.com> <1489754503-16559-1-git-send-email-piotrs@cadence.com>
+From: Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>
+Subject: Re: [v3 2/3] Documentation: bindings: add description of PHY delays
+ for sdhci-cadence
+Date: Sat, 18 Mar 2017 02:29:41 +0900
+Message-ID: <CAK7LNAT5FQY6yQT43SHFYVLVVsimiYtOCe+P9p55zj3+ey4mwQ@mail.gmail.com>
+References: <1489754302-10996-1-git-send-email-piotrs@cadence.com> <1489754417-13639-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1489754503-16559-1-git-send-email-piotrs@cadence.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1489754417-13639-1-git-send-email-piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 Hi Piotr,
 
-2017-03-17 21:41 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
+2017-03-17 21:40 GMT+09:00 Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>:
 > DTS properties are used instead of fixed data
 > because PHY settings can be different for different chips/boards.
+> Add description of new DLL PHY delays.
 >
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-> ---
-> Changes for v2:
-> - dts part was removed from this patch
-> - most delays were moved from dts file
->   to data associated with an SoC specific compatible
-> - remove unrelated changes
-> ---
-> Changes for v3:
-> - move all delays back to dts because they are also boards dependent
-> - prefix all of the Cadence-specific properties with cdns prefix
-> - put checking delay properties inside the for loop
->   instead of using a lot of single if expressions
+> Signed-off-by: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
 
 
-I am OK with this approach
-because I do not have a better idea.
+I think you have a chance for v4.
 
-Only two minor comments below.
+Next time, please follow Rob's suggestion
 
+> For the subject: "dt-bindings: mmc: ..."
 
-
-
-
-> @@ -62,10 +66,33 @@
->   */
->  #define SDHCI_CDNS_MAX_TUNING_LOOP     40
->
-> +static const struct of_device_id sdhci_cdns_match[];
-> +
-
-You forgot to remove this.
-
-
-
-> @@ -227,6 +267,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->         struct sdhci_cdns_priv *priv;
->         struct clk *clk;
->         int ret;
-> +       struct device *dev = &pdev->dev;
->
->         clk = devm_clk_get(&pdev->dev, NULL);
-
-
-If you add "dev", please use it for devm_clk_get, too.
 
 
 
@@ -70,3 +36,7 @@ If you add "dev", please use it for devm_clk_get, too.
 -- 
 Best Regards
 Masahiro Yamada
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
