@@ -1,149 +1,104 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: [v3 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Fri, 17 Mar 2017 12:41:43 +0000
-Message-ID: <1489754503-16559-1-git-send-email-piotrs@cadence.com>
+From: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
+Subject: [v3 2/3] Documentation: bindings: add description of PHY delays for sdhci-cadence
+Date: Fri, 17 Mar 2017 12:40:17 +0000
+Message-ID: <1489754417-13639-1-git-send-email-piotrs@cadence.com>
 References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0014ca01.pphosted.com ([208.84.65.235]:34818 "EHLO
-        mx0a-0014ca01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751039AbdCQNLK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 09:11:10 -0400
-In-Reply-To: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1489754302-10996-1-git-send-email-piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Masahiro Yamada <yamada.masahiro-uWyLwvC0a2jby3iVrkZq2A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Piotr Sroka <piotrs@cadence.com>
 
 DTS properties are used instead of fixed data
 because PHY settings can be different for different chips/boards.
+Add description of new DLL PHY delays.
 
-Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+Signed-off-by: Piotr Sroka <piotrs-vna1KIf7WgpBDgjK7y7TUQ@public.gmane.org>
 ---
 Changes for v2:
-- dts part was removed from this patch
+- file was created in v2. It was a part of driver source file patch.
 - most delays were moved from dts file 
   to data associated with an SoC specific compatible
-- remove unrelated changes
+- description of delays was updated to be more clearly
 ---
 Changes for v3:
 - move all delays back to dts because they are also boards dependent
 - prefix all of the Cadence-specific properties with cdns prefix
-- put checking delay properties inside the for loop 
-  instead of using a lot of single if expressions 
 ---
- drivers/mmc/host/sdhci-cadence.c | 57 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 50 insertions(+), 7 deletions(-)
+ .../devicetree/bindings/mmc/sdhci-cadence.txt      | 48 ++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index b2334ec..7728ce6 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -18,6 +18,7 @@
- #include <linux/module.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/of.h>
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+index c0f37cb..c341820 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-cadence.txt
+@@ -19,6 +19,53 @@ if supported.  See mmc.txt for details.
+ - mmc-hs400-1_8v
+ - mmc-hs400-1_2v
  
- #include "sdhci-pltfm.h"
- 
-@@ -54,6 +55,9 @@
- #define SDHCI_CDNS_PHY_DLY_EMMC_LEGACY	0x06
- #define SDHCI_CDNS_PHY_DLY_EMMC_SDR	0x07
- #define SDHCI_CDNS_PHY_DLY_EMMC_DDR	0x08
-+#define SDHCI_CDNS_PHY_DLY_SDCLK	0x0b
-+#define SDHCI_CDNS_PHY_DLY_HSMMC	0x0c
-+#define SDHCI_CDNS_PHY_DLY_STROBE	0x0d
- 
- /*
-  * The tuned val register is 6 bit-wide, but not the whole of the range is
-@@ -62,10 +66,33 @@
-  */
- #define SDHCI_CDNS_MAX_TUNING_LOOP	40
- 
-+static const struct of_device_id sdhci_cdns_match[];
++Some PHY delays can be configured by following properties.
++PHY DLL input delays:
++They are used to delay the data valid window, and align the window
++to sampling clock. The delay starts from 5ns (for delay parameter equal to 0)
++and it is increased by 2.5ns in each step.
++- cdns,phy-input-delay-sd-highspeed:
++  Value of the delay in the input path for SD high-speed timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-legacy:
++  Value of the delay in the input path for SD legacy timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-sd-uhs-sdr12:
++  Value of the delay in the input path for SD UHS SDR12 timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-sd-uhs-sdr25:
++  Value of the delay in the input path for SD UHS SDR25 timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-sd-uhs-sdr50:
++  Value of the delay in the input path for SD UHS SDR50 timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-sd-uhs-ddr50:
++  Value of the delay in the input path for SD UHS DDR50 timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-mmc-highspeed:
++  Value of the delay in the input path for MMC high-speed timing
++  Valid range = [0:0x1F].
++- cdns,phy-input-delay-mmc-ddr:
++  Value of the delay in the input path for eMMC high-speed DDR timing
++  Valid range = [0:0x1F].
 +
- struct sdhci_cdns_priv {
- 	void __iomem *hrs_addr;
- };
- 
++PHY DLL clock delays:
++Each delay property represents the fraction of the clock period.
++The approximate delay value will be
++(<delay property value>/128)*sdmclk_clock_period.
++- cdns,phy-dll-delay-sdclk:
++  Value of the delay introduced on the sdclk output
++  for all modes except HS200, HS400 and HS400_ES.
++  Valid range = [0:0x7F].
++- cdns,phy-dll-delay-sdclk-hsmmc:
++  Value of the delay introduced on the sdclk output
++  for HS200, HS400 and HS400_ES speed modes.
++  Valid range = [0:0x7F].
++- cdns,phy-dll-delay-strobe:
++  Value of the delay introduced on the dat_strobe input
++  used in HS400 / HS400_ES speed modes.
++  Valid range = [0:0x7F].
 +
-+struct sdhci_cdns_phy_cfg {
-+	const char *property;
-+	u8 addr;
-+};
-+
-+static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
-+	{ "cdns,phy-input-delay-sd-highspeed", SDHCI_CDNS_PHY_DLY_SD_HS, },
-+	{ "cdns,phy-input-delay-sd-legacy", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
-+	{ "cdns,phy-input-delay-sd-uhs-sdr12", SDHCI_CDNS_PHY_DLY_UHS_SDR12, },
-+	{ "cdns,phy-input-delay-sd-uhs-sdr25", SDHCI_CDNS_PHY_DLY_UHS_SDR25, },
-+	{ "cdns,phy-input-delay-sd-uhs-sdr50", SDHCI_CDNS_PHY_DLY_UHS_SDR50, },
-+	{ "cdns,phy-input-delay-sd-uhs-ddr50", SDHCI_CDNS_PHY_DLY_UHS_DDR50, },
-+	{ "cdns,phy-input-delay-mmc-highspeed", SDHCI_CDNS_PHY_DLY_EMMC_SDR, },
-+	{ "cdns,phy-input-delay-mmc-ddr", SDHCI_CDNS_PHY_DLY_EMMC_DDR, },
-+	{ "cdns,phy-dll-delay-sdclk", SDHCI_CDNS_PHY_DLY_SDCLK, },
-+	{ "cdns,phy-dll-delay-sdclk-hsmmc", SDHCI_CDNS_PHY_DLY_HSMMC, },
-+	{ "cdns,phy-dll-delay-strobe", SDHCI_CDNS_PHY_DLY_STROBE, },
-+};
-+
-+
- static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
- 				    u8 addr, u8 data)
- {
-@@ -90,13 +117,26 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
- 	return 0;
- }
- 
--static void sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-+static int sdhci_cdns_phy_init(struct device_node *np,
-+			       struct sdhci_cdns_priv *priv)
- {
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_SD_HS, 4);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_SD_DEFAULT, 4);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_LEGACY, 9);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_SDR, 2);
--	sdhci_cdns_write_phy_reg(priv, SDHCI_CDNS_PHY_DLY_EMMC_DDR, 3);
-+	u32 val;
-+	int ret, i;
-+
-+	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++) {
-+		ret = of_property_read_u32(np, sdhci_cdns_phy_cfgs[i].property,
-+					   &val);
-+		if (ret)
-+			continue;
-+
-+		ret = sdhci_cdns_write_phy_reg(priv,
-+					       sdhci_cdns_phy_cfgs[i].addr,
-+					       val);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return 0;
- }
- 
- static inline void *sdhci_cdns_priv(struct sdhci_host *host)
-@@ -227,6 +267,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	struct sdhci_cdns_priv *priv;
- 	struct clk *clk;
- 	int ret;
-+	struct device *dev = &pdev->dev;
- 
- 	clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(clk))
-@@ -254,7 +295,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto free;
- 
--	sdhci_cdns_phy_init(priv);
-+	ret = sdhci_cdns_phy_init(dev->of_node, priv);
-+	if (ret)
-+		goto free;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
+ Example:
+ 	emmc: sdhci@5a000000 {
+ 		compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+@@ -29,4 +76,5 @@ Example:
+ 		mmc-ddr-1_8v;
+ 		mmc-hs200-1_8v;
+ 		mmc-hs400-1_8v;
++		cdns,phy-dll-delay-sdclk = <0>;
+ 	};
 -- 
 2.2.2
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
