@@ -1,132 +1,298 @@
-From: Jan Glauber <jan.glauber-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v12 1/9] dt-bindings: mmc: Add Cavium SOCs MMC bindings
-Date: Fri, 17 Mar 2017 11:51:06 +0100
-Message-ID: <20170317105106.GC3011@hardcore>
-References: <20170310132507.32025-1-jglauber@cavium.com>
- <20170310132507.32025-2-jglauber@cavium.com>
- <CAPDyKFqVHN--=AWttMz_uDEkGTO+aX8APM34enDuVxqM6XKYJg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v12 2/9] mmc: cavium: Add core MMC driver for Cavium SOCs
+Date: Fri, 17 Mar 2017 12:24:57 +0100
+Message-ID: <CAPDyKFqW7-JiNZTpCEUv+=Hf_rLh4x89h+i7_9UUwmxRERg_5A@mail.gmail.com>
+References: <20170310132507.32025-1-jglauber@cavium.com> <20170310132507.32025-3-jglauber@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqVHN--=AWttMz_uDEkGTO+aX8APM34enDuVxqM6XKYJg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, "Steven J . Hill" <Steven.Hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170310132507.32025-3-jglauber@cavium.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jan Glauber <jglauber@cavium.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 17, 2017 at 09:31:23AM +0100, Ulf Hansson wrote:
-> On 10 March 2017 at 14:24, Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> wrote:
-> > Add description of Cavium Octeon and ThunderX SOC device tree bindings.
-> >
-> > CC: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > CC: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > CC: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > CC: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> >
-> > Signed-off-by: Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> > Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> > Signed-off-by: Steven J. Hill <steven.hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> > Acked-by: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > ---
-> >  .../devicetree/bindings/mmc/cavium-mmc.txt         | 58 ++++++++++++++++++++++
-> >  1 file changed, 58 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/cavium-mmc.txt b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-> > new file mode 100644
-> > index 0000000..225c2be
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-> > @@ -0,0 +1,58 @@
-> > +* Cavium Octeon & ThunderX MMC controller
-> > +
-> > +The highspeed MMC host controller on Caviums SoCs provides an interface
-> > +for MMC and SD types of memory cards.
-> > +
-> > +Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-> > +as the speed of SD standard 4.0. Only 3.3 Volt is supported.
-> > +
-> > +Required properties:
-> > + - compatible : should be one of:
-> > +   cavium,octeon-6130-mmc
-> > +   cavium,octeon-6130-mmc-slot
-> > +   cavium,octeon-7890-mmc
-> > +   cavium,octeon-7890-mmc-slot
-> > +   cavium,thunder-8190-mmc
-> > +   cavium,thunder-8190-mmc-slot
-> > +   cavium,thunder-8390-mmc
-> > +   cavium,thunder-8390-mmc-slot
-> > + - reg : mmc controller base registers
-> > + - clocks : phandle
-> > +
-> > +Optional properties:
-> > + - for cd, bus-width and additional generic mmc parameters
-> > +   please refer to mmc.txt within this directory
-> > + - cavium,cmd-clk-skew : number of coprocessor clocks before sampling command
-> > + - cavium,dat-clk-skew : number of coprocessor clocks before sampling data
-> > +
-> > +Deprecated properties:
-> > +- spi-max-frequency : use max-frequency instead
-> > +- cavium,bus-max-width : use bus-width instead
-> > +
-> > +Examples:
-> > +       mmc_1_4: mmc@1,4 {
-> > +               compatible = "cavium,thunder-8390-mmc";
-> > +               reg = <0x0c00 0 0 0 0>; /* DEVFN = 0x0c (1:4) */
-> > +               #address-cells = <1>;
-> > +               #size-cells = <0>;
-> > +               clocks = <&sclk>;
-> > +
-> > +               mmc-slot@0 {
-> > +                       compatible = "cavium,thunder-8390-mmc-slot";
-> > +                       reg = <0>;
-> 
-> Just realized that I forgotten to follow up about the details for I
-> think we should generally describe slots nodes in DT.
-> 
-> Currently we treat a child node of a host device node, with reg=0 as
-> being an embedded mmc card [1] (in case it has the "mmc-card"
-> compatible set).
-> When reg is 1->7, those are reserved for SDIO function nodes [2] (as
-> those can be exactly 7, according to the SDIO spec).
-> 
-> Let's take the above into account and consider that a slot node may
-> also require a its own child node as to describe an embedded mmc card
-> or SDIO funcs. In this context I don't think it makes sense to use SoC
-> specific compatibles for slot nodes, instead I suggest we use only
-> "mmc-slot".
-> 
-> Does that makes sense?
+On 10 March 2017 at 14:25, Jan Glauber <jglauber@cavium.com> wrote:
+> This core driver will be used by a MIPS platform driver
+> or by an ARM64 PCI driver. The core driver implements the
+> mmc_host_ops and slot probe & remove functions.
+> Callbacks are provided to allow platform specific interrupt
+> enable and bus locking.
+>
+> The host controller supports:
+> - up to 4 slots that can contain sd-cards or eMMC chips
+> - 1, 4 and 8 bit bus width
+> - SDR and DDR
+> - transfers up to 52 Mhz (might be less when multiple slots are used)
+> - DMA read/write
+> - multi-block read/write (but not stream mode)
+>
+> Voltage is limited to 3.3v and shared for all slots (vmmc and vmmcq).
+>
+> A global lock for all MMC devices is required because the host
+> controller is shared.
+>
+> Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> Signed-off-by: David Daney <david.daney@cavium.com>
+> Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+> ---
+>  drivers/mmc/host/cavium-mmc.c | 988 ++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/cavium-mmc.h | 178 ++++++++
+>  2 files changed, 1166 insertions(+)
+>  create mode 100644 drivers/mmc/host/cavium-mmc.c
+>  create mode 100644 drivers/mmc/host/cavium-mmc.h
+>
+> diff --git a/drivers/mmc/host/cavium-mmc.c b/drivers/mmc/host/cavium-mmc.c
+> new file mode 100644
+> index 0000000..11fdcfb
+> --- /dev/null
+> +++ b/drivers/mmc/host/cavium-mmc.c
+> @@ -0,0 +1,988 @@
+> +/*
+> + * Shared part of driver for MMC/SDHC controller on Cavium OCTEON and
+> + * ThunderX SOCs.
+> + *
+> + * This file is subject to the terms and conditions of the GNU General Public
+> + * License.  See the file "COPYING" in the main directory of this archive
+> + * for more details.
+> + *
+> + * Copyright (C) 2012-2017 Cavium Inc.
+> + * Authors:
+> + *   David Daney <david.daney@cavium.com>
+> + *   Peter Swain <pswain@cavium.com>
+> + *   Steven J. Hill <steven.hill@cavium.com>
+> + *   Jan Glauber <jglauber@cavium.com>
+> + */
+> +#include <linux/bitfield.h>
+> +#include <linux/delay.h>
+> +#include <linux/dma-direction.h>
+> +#include <linux/dma-mapping.h>
+> +#include <linux/gpio/consumer.h>
+> +#include <linux/interrupt.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/mmc/slot-gpio.h>
+> +#include <linux/module.h>
+> +#include <linux/regulator/consumer.h>
+> +#include <linux/scatterlist.h>
+> +#include <linux/time.h>
+> +
+> +#include "cavium-mmc.h"
+> +
+> +const char *cvm_mmc_irq_names[] = {
+> +       "MMC Buffer",
+> +       "MMC Command",
+> +       "MMC DMA",
+> +       "MMC Command Error",
+> +       "MMC DMA Error",
+> +       "MMC Switch",
+> +       "MMC Switch Error",
+> +       "MMC DMA int Fifo",
+> +       "MMC DMA int",
+> +};
 
-The slot compatible is currently not used, setting it to "mmc-slot" 
-looks like good to me.
+Debug-leftover?
 
---Jan
+[...]
 
-> > +                       vmmc-supply = <&mmc_supply_3v3>;
-> > +                       max-frequency = <42000000>;
-> > +                       bus-width = <4>;
-> > +                       cap-sd-highspeed;
-> > +               };
-> > +
-> > +               mmc-slot@1 {
-> > +                       compatible = "cavium,thunder-8390-mmc-slot";
-> > +                       reg = <1>;
-> > +                       vmmc-supply = <&mmc_supply_3v3>;
-> > +                       max-frequency = <42000000>;
-> > +                       bus-width = <8>;
-> > +                       cap-mmc-highspeed;
-> > +                       non-removable;
-> > +               };
-> > +       };
-> > --
-> > 2.9.0.rc0.21.g7777322
-> >
-> 
-> Kind regards
-> Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +
+> +static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +       struct cvm_mmc_slot *slot = mmc_priv(mmc);
+> +       struct cvm_mmc_host *host = slot->host;
+> +       int clk_period = 0, power_class = 10, bus_width = 0;
+> +       u64 clock, emm_switch;
+> +
+> +       host->acquire_bus(host);
+> +       cvm_mmc_switch_to(slot);
+> +
+> +       /* Set the power state */
+> +       switch (ios->power_mode) {
+> +       case MMC_POWER_ON:
+> +               break;
+> +
+> +       case MMC_POWER_OFF:
+> +               cvm_mmc_reset_bus(slot);
+> +
+> +               if (host->global_pwr_gpiod)
+> +                       gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
+
+If I have understood the changelog correctly this GPIO is shared for
+all slots, right?
+
+In such case, this doesn't work. You need to centralize the management
+of this GPIO pin (to enable reference counting), as otherwise one slot
+can decide to power off its card while another still uses their card
+and expecting the power to be on.
+
+Another option would be to model it as GPIO regulator (using a device
+tree overlay as we discussed earlier), then you get the reference
+counting for free - and easily get ocr_avail mask from the mmc core's
+regulator API. :-)
+
+Moreover, I didn't find this GPIO being documented as a DT binding, it
+should and it should also be marked as deprecated.
+
+> +               else
+> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> +               break;
+> +
+> +       case MMC_POWER_UP:
+> +               if (host->global_pwr_gpiod)
+> +                       gpiod_set_value_cansleep(host->global_pwr_gpiod, 1);
+
+Dittto.
+
+> +               else
+> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+> +               break;
+> +       }
+> +
+
+[...]
+
+> +
+> +static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
+> +{
+> +       u32 id, cmd_skew = 0, dat_skew = 0, bus_width = 0, f_max = 0;
+> +       struct device_node *node = dev->of_node;
+> +       struct mmc_host *mmc = slot->mmc;
+> +       u64 clock_period;
+> +       int ret;
+> +
+> +       ret = of_property_read_u32(node, "reg", &id);
+> +       if (ret) {
+> +               dev_err(dev, "Missing or invalid reg property on %s\n",
+> +                       of_node_full_name(node));
+> +               return ret;
+> +       }
+> +
+> +       if (id >= CAVIUM_MAX_MMC || slot->host->slot[id]) {
+> +               dev_err(dev, "Invalid reg property on %s\n",
+> +                       of_node_full_name(node));
+> +               return -EINVAL;
+> +       }
+> +
+> +       /* Deprecated Cavium bindings for old firmware */
+> +       of_property_read_u32(node, "cavium,bus-max-width", &bus_width);
+> +       of_property_read_u32(node, "spi-max-frequency", &f_max);
+> +       if (slot->host->global_pwr_gpiod) {
+> +               /* Get a sane OCR mask for other parts of the MMC subsytem. */
+> +               ret = mmc_of_parse_voltage(node, &mmc->ocr_avail);
+
+I noticed your comment to Arnd for the cover-letter. So I assume you
+will remove this and instead assign mmc->ocr_avail a default value in
+cases when you don't have a vmmc regulator to find it from.
+
+> +               if (ret < 0)
+> +                       return ret;
+> +       }
+> +
+> +       /* Cavium-specific DT properties */
+> +       of_property_read_u32(node, "cavium,cmd-clk-skew", &cmd_skew);
+> +       of_property_read_u32(node, "cavium,dat-clk-skew", &dat_skew);
+> +
+> +       if (!slot->host->global_pwr_gpiod) {
+> +               mmc->supply.vmmc = devm_regulator_get(dev, "vmmc");
+> +               if (IS_ERR(mmc->supply.vmmc))
+> +                       return PTR_ERR(mmc->supply.vmmc);
+> +
+> +               ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+> +               if (ret > 0)
+> +                       mmc->ocr_avail = ret;
+> +       }
+> +
+> +       /* Common MMC bindings */
+> +       ret = mmc_of_parse(mmc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       /* Set bus width */
+> +       if (!bus_width) {
+> +               if (mmc->caps & MMC_CAP_8_BIT_DATA)
+> +                       bus_width = 8;
+> +               else if (mmc->caps & MMC_CAP_4_BIT_DATA)
+> +                       bus_width = 4;
+> +               else
+> +                       bus_width = 1;
+> +       }
+> +
+> +       switch (bus_width) {
+> +       case 8:
+> +               slot->bus_width = 2;
+
+Why do you need to store this in slot struct? The information is
+already available in the mmc host.
+
+> +               slot->mmc->caps = MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
+
+This is wrong, as you will clear all the other mmc caps potentially
+assigned by mmc_of_parse() above.
+
+Moreover, you can use mmc->caps instead of slot->mmc->caps.
+
+> +               break;
+> +       case 4:
+> +               slot->bus_width = 1;
+> +               slot->mmc->caps = MMC_CAP_4_BIT_DATA;
+> +               break;
+> +       case 1:
+> +               slot->bus_width = 0;
+> +               break;
+> +       }
+
+I would rather make the deprecated bindings to take the lowest
+precedence and besides, this bus_width setup looks messy. How about
+something like this instead:
+
+mmc_of_parse();
+
+if (!(mmc->caps & (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA))) {
+    of_property_read_u32(node, "cavium,bus-max-width", &bus_width);
+    if (bus_width == 8)
+          mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
+    else if (bus_width == 4)
+          mmc->caps |= MMC_CAP_4_BIT_DATA;
+}
+
+> +
+> +       /* Set maximum and minimum frequency */
+> +       if (f_max)
+> +               mmc->f_max = f_max;
+
+Again, let's make sure the deprecated bindings takes lower precedence.
+Thus if mmc->f_max has a value let's use that and if not, then parse
+the deprecated DT binding and use that value instead.
+
+> +       if (!mmc->f_max || mmc->f_max > 52000000)
+> +               mmc->f_max = 52000000;
+> +       mmc->f_min = 400000;
+> +
+> +       /* Sampling register settings, period in picoseconds */
+> +       clock_period = 1000000000000ull / slot->host->sys_freq;
+> +       slot->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
+> +       slot->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
+> +
+> +       return id;
+> +}
+
+[...]
+
+> diff --git a/drivers/mmc/host/cavium-mmc.h b/drivers/mmc/host/cavium-mmc.h
+> new file mode 100644
+> index 0000000..c3843448
+> --- /dev/null
+> +++ b/drivers/mmc/host/cavium-mmc.h
+
+[...]
+
+ +
+> +/* Protoypes */
+> +irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id);
+> +int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host);
+> +int cvm_mmc_of_slot_remove(struct cvm_mmc_slot *slot);
+> +extern const char *cvm_mmc_irq_names[];
+
+Debug leftover?
+
+Kind regards
+Uffe
