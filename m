@@ -1,77 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH v4 0/7] mmc: bcm2835: Add new driver for the sdhost controller
-Date: Fri, 17 Mar 2017 08:51:27 +0100
-Message-ID: <CAPDyKFoLLJnJW-rSQ9QigxM14pa7WWPd9XcwQ2J=H1cbxHXqCQ@mail.gmail.com>
-References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
+Date: Fri, 17 Mar 2017 08:55:14 +0100
+Message-ID: <CAPDyKFpSMFcVMRRuQ4xosLU8jKpZ=8KxincYTEQdTxpniCMiLQ@mail.gmail.com>
+References: <1488964751-22763-1-git-send-email-kraxel@redhat.com> <87r31xysw9.fsf@eliezer.anholt.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Gerd Hoffmann <kraxel@redhat.com>
-Cc: linux-rpi-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Stefan Wahren <stefan.wahren@i2se.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux@armlinux.org.uk, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87r31xysw9.fsf-omZaPlIz5HhaEpDpdNBo/KxOck334EZe@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
+Cc: Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, BCM Kernel Feedback <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 March 2017 at 10:19, Gerd Hoffmann <kraxel@redhat.com> wrote:
->   Hi,
+On 16 March 2017 at 19:32, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org> wrote:
+> Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> writes:
 >
-> Next version if the bcm2835 sdhost patch series.
+>>   Hi,
+>>
+>> Next version if the bcm2835 sdhost patch series.
 >
-> New in v4:
->  * squashed in more cleanups by Stefan.
->  * removed the long cleanup patch list
->    from commit message (patch 2).
->  * rebased to (and tested with) 4.11-rc1.
->  * minor fixes pointed out in review.
->
-> New in v3:
->  * squashed in cleanups by Stefan.
->  * use one dma channel only.
->  * improve commit messages.
->
-> New in v2:
->  * DMA fixed.
->  * updated docs (kconfig, file comment, commit message) clarifying
->    the two sd controller situation.
->  * some code cleanups, as pointed out by Stefan.
->  * dt bindings use mmc@... now.
->  * added patches to update defconfigs.
->  * added patch for rpi3 device tree, so wifi is actually enabled.
->
-> please review & test,
->   Gerd
->
-> Eric Anholt (2):
->   dt-bindings: Add binding for brcm,bcm2835-sdhost.
->   mmc: bcm2835: Add new driver for the sdhost controller.
->
-> Gerd Hoffmann (5):
->   mmc: bcm2835: add sdhost controller to devicetree
->   arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and
->     multi_v7_defconfig
->   arm64: set CONFIG_MMC_BCM2835=y in defconfig
->   arm: dts: bcm283x: switch from &sdhci to &sdhost
->   arm64: dts: bcm2837: add &sdhci and &sdhost
->
->  .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   23 +
->  arch/arm/boot/dts/bcm2835-rpi.dtsi                 |    6 +
->  arch/arm/boot/dts/bcm283x.dtsi                     |   10 +
->  arch/arm/configs/bcm2835_defconfig                 |    1 +
->  arch/arm/configs/multi_v7_defconfig                |    1 +
->  arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts   |   17 +
->  arch/arm64/configs/defconfig                       |    1 +
->  drivers/mmc/host/Kconfig                           |   14 +
->  drivers/mmc/host/Makefile                          |    1 +
->  drivers/mmc/host/bcm2835.c                         | 1465 ++++++++++++++++++++
->  10 files changed, 1539 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
->  create mode 100644 drivers/mmc/host/bcm2835.c
->
-> --
-> 1.8.3.1
->
+> Still waiting for the subsystem maintainer to merge the driver before
+> merging the platform side.
 
-Thanks, applied patch1 and patch2 from the series.
+Ah, didn't notice this. So Eric, you will take care of the arm soc
+changes then. Great!
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
