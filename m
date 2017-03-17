@@ -1,84 +1,77 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 3/7] mmc: bcm2835: add sdhost controller to devicetree
-Date: Fri, 17 Mar 2017 08:48:25 +0100
-Message-ID: <CAPDyKFpX-P+K+88BNmkL0G7k0afqs_mSCcZS=ZVSavuhBjpCKA@mail.gmail.com>
+Subject: Re: [PATCH v4 0/7] mmc: bcm2835: Add new driver for the sdhost controller
+Date: Fri, 17 Mar 2017 08:51:27 +0100
+Message-ID: <CAPDyKFoLLJnJW-rSQ9QigxM14pa7WWPd9XcwQ2J=H1cbxHXqCQ@mail.gmail.com>
 References: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
- <1488964751-22763-6-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1488964751-22763-6-git-send-email-kraxel@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1488964751-22763-1-git-send-email-kraxel@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Gerd Hoffmann <kraxel@redhat.com>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Florian Fainelli <f.fainelli@gmail.com>, Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Anholt <eric@anholt.net>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: linux-rpi-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Stefan Wahren <stefan.wahren@i2se.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux@armlinux.org.uk, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-- trimmed cc-list
-
 On 8 March 2017 at 10:19, Gerd Hoffmann <kraxel@redhat.com> wrote:
-> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
-> Acked-by: Eric Anholt <eric@anholt.net>
-
-Again this is arm soc material. You need to change the prefix of the
-commit msg to also reflect that.
-
-*If* I am going to pick this up I need acks.
-
-Kind regards
-Uffe
-
-> ---
->  arch/arm/boot/dts/bcm2835-rpi.dtsi |  6 ++++++
->  arch/arm/boot/dts/bcm283x.dtsi     | 10 ++++++++++
->  2 files changed, 16 insertions(+)
+>   Hi,
 >
-> diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> index 1e00a28..8b95832 100644
-> --- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> +++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
-> @@ -69,6 +69,12 @@
->         bus-width = <4>;
->  };
+> Next version if the bcm2835 sdhost patch series.
 >
-> +&sdhost {
-> +       pinctrl-names = "default";
-> +       pinctrl-0 = <&sdhost_gpio48>;
-> +       bus-width = <4>;
-> +};
-> +
->  &pwm {
->         pinctrl-names = "default";
->         pinctrl-0 = <&pwm0_gpio40 &pwm1_gpio45>;
-> diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-> index 9798bc9..19099a5 100644
-> --- a/arch/arm/boot/dts/bcm283x.dtsi
-> +++ b/arch/arm/boot/dts/bcm283x.dtsi
-> @@ -350,6 +350,16 @@
->                         arm,primecell-periphid = <0x00241011>;
->                 };
+> New in v4:
+>  * squashed in more cleanups by Stefan.
+>  * removed the long cleanup patch list
+>    from commit message (patch 2).
+>  * rebased to (and tested with) 4.11-rc1.
+>  * minor fixes pointed out in review.
 >
-> +               sdhost: mmc@7e202000 {
-> +                       compatible = "brcm,bcm2835-sdhost";
-> +                       reg = <0x7e202000 0x100>;
-> +                       interrupts = <2 24>;
-> +                       clocks = <&clocks BCM2835_CLOCK_VPU>;
-> +                       dmas = <&dma 13>;
-> +                       dma-names = "rx-tx";
-> +                       status = "disabled";
-> +               };
-> +
->                 i2s: i2s@7e203000 {
->                         compatible = "brcm,bcm2835-i2s";
->                         reg = <0x7e203000 0x20>,
+> New in v3:
+>  * squashed in cleanups by Stefan.
+>  * use one dma channel only.
+>  * improve commit messages.
+>
+> New in v2:
+>  * DMA fixed.
+>  * updated docs (kconfig, file comment, commit message) clarifying
+>    the two sd controller situation.
+>  * some code cleanups, as pointed out by Stefan.
+>  * dt bindings use mmc@... now.
+>  * added patches to update defconfigs.
+>  * added patch for rpi3 device tree, so wifi is actually enabled.
+>
+> please review & test,
+>   Gerd
+>
+> Eric Anholt (2):
+>   dt-bindings: Add binding for brcm,bcm2835-sdhost.
+>   mmc: bcm2835: Add new driver for the sdhost controller.
+>
+> Gerd Hoffmann (5):
+>   mmc: bcm2835: add sdhost controller to devicetree
+>   arm: set CONFIG_MMC_BCM2835=y in bcm2835_defconfig and
+>     multi_v7_defconfig
+>   arm64: set CONFIG_MMC_BCM2835=y in defconfig
+>   arm: dts: bcm283x: switch from &sdhci to &sdhost
+>   arm64: dts: bcm2837: add &sdhci and &sdhost
+>
+>  .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   23 +
+>  arch/arm/boot/dts/bcm2835-rpi.dtsi                 |    6 +
+>  arch/arm/boot/dts/bcm283x.dtsi                     |   10 +
+>  arch/arm/configs/bcm2835_defconfig                 |    1 +
+>  arch/arm/configs/multi_v7_defconfig                |    1 +
+>  arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts   |   17 +
+>  arch/arm64/configs/defconfig                       |    1 +
+>  drivers/mmc/host/Kconfig                           |   14 +
+>  drivers/mmc/host/Makefile                          |    1 +
+>  drivers/mmc/host/bcm2835.c                         | 1465 ++++++++++++++++++++
+>  10 files changed, 1539 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+>  create mode 100644 drivers/mmc/host/bcm2835.c
+>
 > --
 > 1.8.3.1
 >
+
+Thanks, applied patch1 and patch2 from the series.
+
+Kind regards
+Uffe
