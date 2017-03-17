@@ -1,110 +1,159 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v2, 0/7] Add SD UHS-I and eMMC HS200 support for eSDHC
-Date: Fri, 17 Mar 2017 03:01:53 +0000
-Message-ID: <DB6PR0401MB2536C06643318C075620B0E4F8390@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
- <DB6PR0401MB253672A97F3E14C2BEFF946EF8210@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <DB6PR0401MB253672A97F3E14C2BEFF946EF8210@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'ulf.hansson@linaro.org'" <ulf.hansson@linaro.org>, 'Adrian Hunter' <adrian.hunter@intel.com>, 'Rob Herring' <robh+dt@kernel.org>, 'Mark Rutland' <mark.rutland@arm.com>, 'Catalin Marinas' <catalin.marinas@arm.com>, 'Will
- Deacon' <will.deacon@arm.com>
-Cc: "'devicetree@vger.kernel.org'" <devicetree@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v5] mmc: sdhci: clarify the get_timeout_clock callback
+Date: Fri, 17 Mar 2017 11:11:59 +0800
+Message-ID: <1489720319-70840-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.134]:49537 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751531AbdCQDQa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2017 23:16:30 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Shawn Lin <shawn.lin@rock-chips.com>, Anssi Hannula <anssi.hannula@bitwise.fi>
 
-Hi Adrian,
+Currently the get_timeout_clock callback doesn't clearly
+have a statement that it needs the variant drivers to return
+the timeout clock rate in kHz if the SDHCI_TIMEOUT_CLK_UNIT
+isn't present, otherwise the variant drivers should return it
+in MHz. So actually sdhci-of-arasan return the wrong value found
+by Anssi[1]. It's also very likely that further variant drivers which
+are going to use this callback will be confused by this situation.
+Given the fact that moderm sdhci variant hosts are very prone to get
+the timeout clock from common clock framework (actually the only three
+users did that), it's more natural to return the value in Hz and we
+make an explicit comment there. Then we put the unit conversion inside
+the sdhci core. Thus will improve the code and prevent further misuses.
 
-Could you help to review the new version patch-set?
-Thanks a lot.
+[1]: https://patchwork.kernel.org/patch/9569431/
+
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+
+Changes in v5:
+- fix typo
+- remove unlikely
+
+Changes in v4:
+- rebased on -next
+- add Masahiro's ack for sdhci-cadence
+
+Changes in v3:
+- squash all the patches into one to keep bisectability
+- fix wrong return value of sdhci-cadence
+- slight improve the condition check to avoid the complaint of
+  checkpatch
+
+Changes in v2:
+- fix the comment and make it return in Hz
+
+ drivers/mmc/host/sdhci-cadence.c   |  4 ++--
+ drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
+ drivers/mmc/host/sdhci.c           | 16 +++++++++-------
+ drivers/mmc/host/sdhci.h           |  1 +
+ 4 files changed, 13 insertions(+), 25 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 316cfec..7baeeaf 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+ {
+ 	/*
+ 	 * Cadence's spec says the Timeout Clock Frequency is the same as the
+-	 * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
++	 * Base Clock Frequency.
+ 	 */
+-	return host->max_clk / 1000;
++	return host->max_clk;
+ }
+ 
+ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 1cfd7f9..c52f153 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
+ 	return ret;
+ }
+ 
+-static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+-{
+-	unsigned long freq;
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	/* SDHCI timeout clock is in kHz */
+-	freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
+-
+-	/* or in MHz */
+-	if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+-		freq = DIV_ROUND_UP(freq, 1000);
+-
+-	return freq;
+-}
+-
+ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
+ static struct sdhci_ops sdhci_arasan_ops = {
+ 	.set_clock = sdhci_arasan_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+-	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
++	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.reset = sdhci_arasan_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6fdd7a7..4a9df4ac 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+ 		host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
+ 					SDHCI_TIMEOUT_CLK_SHIFT;
++
++		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
++			host->timeout_clk *= 1000;
++
+ 		if (host->timeout_clk == 0) {
+-			if (host->ops->get_timeout_clock) {
+-				host->timeout_clk =
+-					host->ops->get_timeout_clock(host);
+-			} else {
++			if (!host->ops->get_timeout_clock) {
+ 				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
+ 					mmc_hostname(mmc));
+ 				ret = -ENODEV;
+ 				goto undma;
+ 			}
+-		}
+ 
+-		if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+-			host->timeout_clk *= 1000;
++			host->timeout_clk =
++				DIV_ROUND_UP(host->ops->get_timeout_clock(host),
++					     1000);
++		}
+ 
+ 		if (override_timeout_clk)
+ 			host->timeout_clk = override_timeout_clk;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index edf3adf..27c252c 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -547,6 +547,7 @@ struct sdhci_ops {
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
++	/* get_timeout_clock should return clk rate in unit of Hz */
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
+ 	void		(*set_timeout)(struct sdhci_host *host,
+-- 
+1.9.1
 
 
-Best regards,
-Yangbo Lu
-
-> -----Original Message-----
-> From: Y.B. Lu
-> Sent: Thursday, March 09, 2017 10:23 AM
-> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Adrian Hunter; Rob
-> Herring; Mark Rutland; Catalin Marinas; Will Deacon
-> Cc: devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> Xiaobo Xie
-> Subject: RE: [v2, 0/7] Add SD UHS-I and eMMC HS200 support for eSDHC
-> 
-> Any comments on this patchset ?
-> Thanks :)
-> 
-> 
-> Best regards,
-> Yangbo Lu
-> 
-> > -----Original Message-----
-> > From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
-> > Sent: Friday, March 03, 2017 4:19 PM
-> > To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Adrian Hunter;
-> > Rob Herring; Mark Rutland; Catalin Marinas; Will Deacon
-> > Cc: devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> > Xiaobo Xie; Y.B. Lu
-> > Subject: [v2, 0/7] Add SD UHS-I and eMMC HS200 support for eSDHC
-> >
-> > It's complicated to support SD UHS-I and eMMC HS200 for eSDHC because
-> > there're many differences between eSDHC and SD/eMMC spec. Several
-> > differences as below must be considered:
-> > 1. Peripheral clock must be used instead of platform clock.
-> >     - eSDHC could select peripheral clock or platform clock as its
-> clock
-> >       source. According to RM, UHS-I/HS200 must use peripheral clock
-> > since
-> >       it supports higher frequency than platform clock.
-> >     - Patch 1 and patch 6 is to support this.
-> > 2. Signal voltage switching requires a control circuit out of eSDHC.
-> >     - eSDHC supports signal voltage switch from 3.3v to 1.8v by
-> >       eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
-> >       signal SDHC_VS, and there must be a control circuit out of eSDHC
-> >       to change the signal voltage according to SDHC_VS output signal.
-> >     - Patch 2 is to support this.
-> > 3. eSDHC uses tuning block for tuning procedure.
-> >     - Tuning clock control register must be configured before tuning.
-> >     - Patch 3 is to support this.
-> > 4. Delay is needed between tuning cycles for HS200 tuning.
-> >     - Once a patch removed mdelay between tuning cycles.
-> >       But eSDHC needs it.
-> >     - Patch 4 and patch 5 is to support this.
-> > 5. UHS-I/HS200 modes could be enabled in dts node.
-> >     - Patch 7 is to support this.
-> >
-> > Please review and merge these patches on mmc git tree if no changes
-> > are required.
-> >
-> > Yangbo Lu (7):
-> >   mmc: sdhci-of-esdhc: add peripheral clock support
-> >   mmc: sdhci-of-esdhc: add support for signal voltage switch
-> >   mmc: sdhci-of-esdhc: add tuning support
-> >   mmc: sdhci: add a quirk to restore delay in tuning
-> >   mmc: sdhci-of-esdhc: add delay between tuning cycles
-> >   arm64: dts: ls1046a: add clocks property and compatible for eSDHC
-> node
-> >   arm64: dts: ls1046ardb: add MMC HS200/UHS-1 modes support
-> >
-> >  arch/arm64/boot/dts/freescale/fsl-ls1046a-rdb.dts |   8 ++
-> >  arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi    |   3 +-
-> >  drivers/mmc/host/sdhci-esdhc.h                    |   7 +
-> >  drivers/mmc/host/sdhci-of-esdhc.c                 | 167
-> > +++++++++++++++++++++-
-> >  drivers/mmc/host/sdhci.c                          |   3 +-
-> >  drivers/mmc/host/sdhci.h                          |   2 +
-> >  6 files changed, 186 insertions(+), 4 deletions(-)
-> >
-> > --
-> > 2.1.0.27.g96db324
