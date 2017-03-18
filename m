@@ -1,60 +1,52 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH v4 5/7] arm64: set CONFIG_MMC_BCM2835=y in defconfig
-Date: Fri, 17 Mar 2017 17:07:17 -0700
-Message-ID: <874lyrjvm2.fsf@eliezer.anholt.net>
-References: <1488964751-22763-1-git-send-email-kraxel@redhat.com> <1488964751-22763-10-git-send-email-kraxel@redhat.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-        micalg=pgp-sha512; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488964751-22763-10-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, lee@kernel.org, stefan.wahren@i2se.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
+From: Sergio Prado <sergio.prado@e-labworks.com>
+Subject: [PATCH v5 0/2] mmc: host: s3cmci: add device tree support
+Date: Fri, 17 Mar 2017 22:13:51 -0300
+Message-ID: <1489799633-29278-1-git-send-email-sergio.prado@e-labworks.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:33850 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751037AbdCRBOY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 21:14:24 -0400
+Received: by mail-qk0-f193.google.com with SMTP id v127so11818988qkb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Mar 2017 18:14:23 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Cc: Sergio Prado <sergio.prado@e-labworks.com>
 
---=-=-=
-Content-Type: text/plain
+This series adds support for configuring Samsung's S3C24XX MMC/SD/SDIO
+controller via device tree.
 
-Gerd Hoffmann <kraxel@redhat.com> writes:
+Tested on FriendlyARM mini2440, based on s3c2440 SoC.
 
-> We need to enable this controller so that we can switch the SD card's
-> pinmux over to it by default, which will improve storage performance.
->
-> Read access (dd with 64k blocks on rpi2):
->   CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
->   CONFIG_MMC_BCM2835:     19-20 MB/s
->
-> Differences on write access are pretty much in the noise.
->
-> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+Changes since v4 (as suggested by Jaehoon Chung):
+- using just a flag as a data structure for the driver to check for
+  s3c2400 compatibility
 
-Now that the driver has been merged, I've merged the platform patches up
-to this point.
+Changes since v3 (as suggested by Rob Herring):
+- describing properties that wasn't documented and removing unnecessary
+  comment in the device tree binding
 
-Unfortunately, sending PRs to arm-soc that merge in branches from other
-trees has failed in the past, so I won't be able to merge 6 and 7 for
-4.12.  That said, it's a whole lot less that the various downstream
-kernels will need to pull for the Pi3 than they've been carrying around
-until now :)
+Changes since v2:
+- struct "s3cmci_drv_data" and flag "is2440" renamed
+- copying the whole driver data struct instead of only its member so
+  it will be easier to extend the information in the future
+- using mmc_of_parse() to read "cd-gpios" and "wp-gpios" properties
+  from device tree
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+Changes since v1:
+- pinctrl description removed from DT binding
+- unit and label on DT binding renamed to mmc
 
------BEGIN PGP SIGNATURE-----
+Sergio Prado (2):
+  dt-bindings: mmc: add DT binding for S3C24XX MMC/SD/SDIO controller
+  mmc: host: s3cmci: allow probing from device tree
 
-iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAljMejUACgkQtdYpNtH8
-nuiLghAAhh7Kv9RWBDFZPP0Ey8kT2ejm0hnr4heoTUSl7qdmgFIyxZW+Gx0XRl/Z
-WVqUxWPI1jsGLpl3xggnbfDyxw+Xt9iRzTQss472ilC5wm4goXw1nqtfnR9G/flC
-4FMzehABwWsIsG6Dkny8z6YlUq6khVl4R5UcK7t+qXpNrK1Oh22dhBZBIJFfR1cq
-8cqaYvofFWN8pvJPIOroubO2lUOroRPwXaP4AD/LVNwyg0KwKL0bkkACSd+Aq2z9
-6DG1G/PO/mu2x/gPa3ZJPWDlXVs6MNHl2re+5xIqXJbUMQKiQs4gN4jCvd4SyY+5
-IUzaA1Cmio7jsqnMzllY2LAlGXVGqsWk3KiWTgJt3R9PgRa4yWvoL43RCCZA+RU0
-145bkOLP/dRjAnxKYq7T7BWp4wZVBjzxVkx0wbRCBFDvoE1+/z+QmwV0e1MKaRdh
-Rx85+4tTBmncuAO6yr1mu3B1K+OoBtw+jlArBjVrFITsDHm35amfbBQgCizvCBe3
-MiFNNkIRRt0cPPjH2SysiJs8J1qDO10Aqw6lxPUGwlCPzGDJDBfoWMB6o3n4O1Vl
-tDEjm6LZ6fm981MDDeM38CzZI9X+XJOIGxTeICgIAIQFYNh40RsMOZB5mFnyYdaW
-grLYolPvVrq6FxTyG4kqR1QmkhM07hwK25x5bMHNdSv6CBfunU0=
-=SdMv
------END PGP SIGNATURE-----
---=-=-=--
+ .../devicetree/bindings/mmc/samsung,s3cmci.txt     |  42 ++++
+ drivers/mmc/host/s3cmci.c                          | 257 ++++++++++-----------
+ 2 files changed, 168 insertions(+), 131 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
+
+-- 
+1.9.1
+
