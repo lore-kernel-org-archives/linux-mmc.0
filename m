@@ -1,528 +1,60 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: meson-gx-mmc: 2nd patch set
-Date: Fri, 17 Mar 2017 20:54:13 +0100
-Message-ID: <9a90bda9-6d12-a368-99ce-67c112249a43@gmail.com>
-References: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
- <b5e36943-ba83-e73e-7df7-d6967aff5886@gmail.com>
- <2a6d59e0-28db-b65a-835d-512a7e68443e@gmail.com>
+From: Eric Anholt <eric@anholt.net>
+Subject: Re: [PATCH v4 5/7] arm64: set CONFIG_MMC_BCM2835=y in defconfig
+Date: Fri, 17 Mar 2017 17:07:17 -0700
+Message-ID: <874lyrjvm2.fsf@eliezer.anholt.net>
+References: <1488964751-22763-1-git-send-email-kraxel@redhat.com> <1488964751-22763-10-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:35387 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751246AbdCQTz1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 15:55:27 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u108so10761492wrb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Mar 2017 12:54:29 -0700 (PDT)
-In-Reply-To: <2a6d59e0-28db-b65a-835d-512a7e68443e@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; boundary="=-=-=";
+        micalg=pgp-sha512; protocol="application/pgp-signature"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1488964751-22763-10-git-send-email-kraxel@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, lee@kernel.org, stefan.wahren@i2se.com, f.fainelli@gmail.com, rjui@broadcom.com, sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com, linux@armlinux.org.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Gerd Hoffmann <kraxel@redhat.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Helmut Klein <hgkr.klein@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Am 17.03.2017 um 19:00 schrieb Helmut Klein:
-> On 17.03.2017 07:44, Heiner Kallweit wrote:
->> Am 16.03.2017 um 22:12 schrieb Helmut Klein:
->>> Hallo Heiner,
->>>
->>> i applied your 2nd patch sets to linux-amlogic. (and of course the older set v5 1...10).
->>>
->>> The performance of the sd-card and the mmc-chip of my minimx is much better now.
->>>
->>> sd-card: from 6.5 to 22.5 MBytes/s
->>> mmc: from 14.5 to 28.5 MBytes/s (hs200 compatible device)
->>>
->>> But:
->>> the wifi-adapter is no longer operational. The problem starts with patch 3 and gets worse with patch 5.
->>>
->>> the adapter (ap6330) is attached to the sdio port of the the s905. (=mmc1)
->>>
->> Thanks for testing and sharing the feedback. Much appreciated.
->> The board I test on supports block devices only.
->>
->> Could you please share few more details:
->> - Drivers involved
->> - All syslog messages related to the device / driver
->>
->> And please set the relevant mailing lists on cc when providing test feedback.
->> Others might find your feedback helpful too.
->>
->> Thanks, Heiner
->>
->>> so i think it is important to test your patch set asap on an officially supported board with a wifi adapter).
->>>
->>> regards
->>> Helmut
->>>
->>
->>
-> 
-> The driver for the wifi adapter is brcmfmac. It is compiled as a module and loaded via /etc/modules.
-> the driver depends on the modules brcmutil and cfg80211, which are auto loaded.
-> 
-> my user space is debian unstable. The kernel is cross compiled on my x86-64 laptop with gcc 5.4.1
-> 
-> i use my own kernel configuration without an initial ramdisk. mmc, usb & ext4 drivers are compiled into the kernel
-> 
-> kernel & dtb are loaded by u-boot from mmcblk2p1 (sd-card)
-> 
-> the drive for the kernel is sda2 (sd-card inside of a usb card reader).
-> 
-> 
-> here is the filtered (mmc|brcmfmac) syslog output when only patches 1 & 2 are applied
-> 
-> [    1.685012] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
-> [    1.873010] mmc0: new DDR MMC card at address 0001
-> [    1.873258] mmcblk0: mmc0:0001 NCard  14.5 GiB
-> [    1.876731] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
-> [    1.882597] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
-> [    2.004399] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
-> [    2.048160] meson-gx-mmc d0072000.mmc: Got CD GPIO
-> [    2.066962] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
-> [    2.068985] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.074242] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.081275] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
-> [    2.124761] mmc2: Skipping voltage switch
-> [    2.153763] mmc1: new high speed SDIO card at address 0001
-> [    2.158567] mmc2: new high speed SDHC card at address 59b4
-> [    2.159219] mmcblk2: mmc2:59b4 USD00 29.5 GiB
-> [    2.164206]  mmcblk2: p1 p2
-> [    6.664118] brcmfmac: brcmf_c_preinit_dcmds: Firmware version = wl0: Jan  6 2014 15:11:29 version 5.90.195.89.13 FWID 01-72f124c5
-> [    6.736239] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code (0x30 0x30)
-> [    6.928045] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 184
-> [    6.930475] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 188
-> [    6.938524] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 192
-> [    6.946543] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 196
-> [    6.954566] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 200
-> [    6.954663] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code (0x30 0x30)
-> [    6.969995] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 204
-> [    6.978023] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 208
-> 
-> this is the output after adding patch 3
-> 
-> [    1.684982] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
-> [    1.873041] mmc0: new DDR MMC card at address 0001
-> [    1.873273] mmcblk0: mmc0:0001 NCard  14.5 GiB
-> [    1.876765] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
-> [    1.882621] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
-> [    2.004408] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
-> [    2.048189] meson-gx-mmc d0072000.mmc: Got CD GPIO
-> [    2.066978] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
-> [    2.069001] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.074253] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.081285] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
-> [    2.124874] mmc2: Skipping voltage switch
-> [    2.153475] mmc1: new high speed SDIO card at address 0001
-> [    2.158610] mmc2: new high speed SDHC card at address 59b4
-> [    2.158935] mmcblk2: mmc2:59b4 USD00 29.5 GiB
-> [    2.163910]  mmcblk2: p1 p2
-> [    6.586318] brcmfmac: brcmf_sdiod_ramrw: membytes transfer failed <<<=====
-> [    6.586810] brcmfmac: brcmf_sdio_download_code_file: error -84 on writing 239507 membytes at 0x00000000
-> [    6.596373] brcmfmac: brcmf_sdio_download_firmware: dongle image file download failed
-> 
-> and this is the output after adding patches 4 & 5
-> 
-> [    1.684941] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
-> [    1.868910] mmc0: new DDR MMC card at address 0001
-> [    1.869159] mmcblk0: mmc0:0001 NCard  14.5 GiB
-> [    1.872639] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
-> [    1.878497] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
-> [    1.884356] mmcblk0rpmb: mmc0:0001 NCard  partition 3 128 KiB <<<=====
-> [    2.000339] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
-> [    2.044090] meson-gx-mmc d0072000.mmc: Got CD GPIO
-> [    2.062850] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
-> [    2.064869] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.070129] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
-> [    2.077161] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
-> [    2.120693] mmc2: Skipping voltage switch
-> [    2.148795] mmc1: new high speed SDIO card at address 0001
-> [    2.154443] mmc2: new high speed SDHC card at address 59b4
-> [    2.154660] mmcblk2: mmc2:59b4 USD00 29.5 GiB
-> [    2.159402]  mmcblk2: p1 p2
-> [    6.550881] brcmfmac: brcmf_chip_recognition: SB chip is not supported     <<<=====
-> [    6.556606] brcmfmac: brcmf_sdio_probe_attach: brcmf_chip_attach failed!
-> [    6.563260] brcmfmac: brcmf_sdio_probe: brcmf_sdio_probe_attach failed
-> [    6.569796] brcmfmac: brcmf_ops_sdio_probe: F2 error, probe failed -19...
-> 
-> regards
-> Helmut
-> 
+--=-=-=
+Content-Type: text/plain
 
-Thanks a lot for the additional information. The first version of the patch
-set broke byte mode obviously (block mode is working fine).
+Gerd Hoffmann <kraxel@redhat.com> writes:
 
-Before submitting a new version of the patch set:
-Could you please apply patches 1, 2, and 4 of the patch set plus the
-following one and re-test?
+> We need to enable this controller so that we can switch the SD card's
+> pinmux over to it by default, which will improve storage performance.
+>
+> Read access (dd with 64k blocks on rpi2):
+>   CONFIG_MMC_SDHCI_IPROC: 11-12 MB/s
+>   CONFIG_MMC_BCM2835:     19-20 MB/s
+>
+> Differences on write access are pretty much in the noise.
+>
+> Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 
-Thanks, Heiner
+Now that the driver has been merged, I've merged the platform patches up
+to this point.
 
----
- drivers/mmc/host/meson-gx-mmc.c | 222 ++++++++++++++++++++++------------------
- 1 file changed, 124 insertions(+), 98 deletions(-)
+Unfortunately, sending PRs to arm-soc that merge in branches from other
+trees has failed in the past, so I won't be able to merge 6 and 7 for
+4.12.  That said, it's a whole lot less that the various downstream
+kernels will need to pull for the Pi3 than they've been carrying around
+until now :)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 6bfd3da9..ca685902 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -121,6 +121,13 @@
- #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
- #define MUX_CLK_NUM_PARENTS 2
- 
-+struct sd_emmc_desc {
-+	u32 cmd_cfg;
-+	u32 cmd_arg;
-+	u32 cmd_data;
-+	u32 cmd_resp;
-+};
-+
- struct meson_host {
- 	struct	device		*dev;
- 	struct	mmc_host	*mmc;
-@@ -136,19 +143,12 @@ struct meson_host {
- 	struct clk_divider cfg_div;
- 	struct clk *cfg_div_clk;
- 
--	unsigned int bounce_buf_size;
--	void *bounce_buf;
--	dma_addr_t bounce_dma_addr;
-+	struct sd_emmc_desc *descs;
-+	dma_addr_t descs_dma_addr;
- 
- 	bool vqmmc_enabled;
- };
- 
--struct sd_emmc_desc {
--	u32 cmd_cfg;
--	u32 cmd_arg;
--	u32 cmd_data;
--	u32 cmd_resp;
--};
- #define CMD_CFG_LENGTH_SHIFT 0
- #define CMD_CFG_LENGTH_MASK 0x1ff
- #define CMD_CFG_BLOCK_MODE BIT(9)
-@@ -185,6 +185,36 @@ static struct mmc_command *meson_mmc_get_next_command(struct mmc_command *cmd)
- 		return NULL;
- }
- 
-+static enum dma_data_direction meson_mmc_get_data_dir(struct mmc_data *data)
-+{
-+	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
-+}
-+
-+static void meson_mmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct mmc_data *data = mrq->data;
-+
-+	if (!data)
-+		return;
-+
-+	data->host_cookie = true;
-+
-+	data->sg_count = dma_map_sg(mmc_dev(mmc), data->sg, data->sg_len,
-+				    meson_mmc_get_data_dir(data));
-+	if (!data->sg_count)
-+		dev_err(mmc_dev(mmc), "dma_map_sg failed");
-+}
-+
-+static void meson_mmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-+			       int err)
-+{
-+	struct mmc_data *data = mrq->data;
-+
-+	if (data && data->sg_count)
-+		dma_unmap_sg(mmc_dev(mmc), data->sg, data->sg_len,
-+			     meson_mmc_get_data_dir(data));
-+}
-+
- static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
- {
- 	struct mmc_host *mmc = host->mmc;
-@@ -434,104 +464,102 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
- static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- {
- 	struct meson_host *host = mmc_priv(mmc);
--	struct sd_emmc_desc *desc, desc_tmp;
--	u32 cfg;
--	u8 blk_len, cmd_cfg_timeout;
--	unsigned int xfer_bytes = 0;
-+	struct sd_emmc_desc *desc = host->descs;
-+	struct mmc_data *data = cmd->data;
-+	struct scatterlist *sg;
-+	u32 cfg, cmd_cfg = 0;
-+	u8 blk_len;
-+	int i;
- 
--	/* Setup descriptors */
- 	dma_rmb();
--	desc = &desc_tmp;
--	memset(desc, 0, sizeof(struct sd_emmc_desc));
- 
--	desc->cmd_cfg |= (cmd->opcode & CMD_CFG_CMD_INDEX_MASK)	<<
--		CMD_CFG_CMD_INDEX_SHIFT;
--	desc->cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
--	desc->cmd_arg = cmd->arg;
-+	cmd_cfg |= (cmd->opcode & CMD_CFG_CMD_INDEX_MASK) <<
-+		   CMD_CFG_CMD_INDEX_SHIFT;
-+	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
- 
- 	/* Response */
- 	if (cmd->flags & MMC_RSP_PRESENT) {
--		desc->cmd_cfg &= ~CMD_CFG_NO_RESP;
- 		if (cmd->flags & MMC_RSP_136)
--			desc->cmd_cfg |= CMD_CFG_RESP_128;
--		desc->cmd_cfg |= CMD_CFG_RESP_NUM;
--		desc->cmd_resp = 0;
-+			cmd_cfg |= CMD_CFG_RESP_128;
-+		cmd_cfg |= CMD_CFG_RESP_NUM;
- 
- 		if (!(cmd->flags & MMC_RSP_CRC))
--			desc->cmd_cfg |= CMD_CFG_RESP_NOCRC;
-+			cmd_cfg |= CMD_CFG_RESP_NOCRC;
- 
- 		if (cmd->flags & MMC_RSP_BUSY)
--			desc->cmd_cfg |= CMD_CFG_R1B;
-+			cmd_cfg |= CMD_CFG_R1B;
- 	} else {
--		desc->cmd_cfg |= CMD_CFG_NO_RESP;
-+		cmd_cfg |= CMD_CFG_NO_RESP;
- 	}
- 
--	/* data? */
--	if (cmd->data) {
--		desc->cmd_cfg |= CMD_CFG_DATA_IO;
--		if (cmd->data->blocks > 1) {
--			desc->cmd_cfg |= CMD_CFG_BLOCK_MODE;
--			desc->cmd_cfg |=
--				(cmd->data->blocks & CMD_CFG_LENGTH_MASK) <<
--				CMD_CFG_LENGTH_SHIFT;
-+	if (data) {
-+		cmd_cfg |= CMD_CFG_DATA_IO;
-+
-+		if (data->blocks > 1) {
-+			cmd_cfg |= CMD_CFG_BLOCK_MODE;
- 
- 			/* check if block-size matches, if not update */
- 			cfg = readl(host->regs + SD_EMMC_CFG);
- 			blk_len = cfg & (CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
- 			blk_len >>= CFG_BLK_LEN_SHIFT;
--			if (blk_len != ilog2(cmd->data->blksz)) {
--				dev_dbg(host->dev, "%s: update blk_len %d -> %d\n",
--					__func__, blk_len,
--					ilog2(cmd->data->blksz));
--				blk_len = ilog2(cmd->data->blksz);
-+			if (blk_len != ilog2(data->blksz)) {
-+				dev_dbg(host->dev,
-+					"%s: update blk_len %d -> %d\n",
-+					__func__, blk_len, ilog2(data->blksz));
-+				blk_len = ilog2(data->blksz);
- 				cfg &= ~(CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
- 				cfg |= blk_len << CFG_BLK_LEN_SHIFT;
- 				writel(cfg, host->regs + SD_EMMC_CFG);
- 			}
--		} else {
--			desc->cmd_cfg &= ~CMD_CFG_BLOCK_MODE;
--			desc->cmd_cfg |=
--				(cmd->data->blksz & CMD_CFG_LENGTH_MASK) <<
--				CMD_CFG_LENGTH_SHIFT;
- 		}
- 
--		cmd->data->bytes_xfered = 0;
--		xfer_bytes = cmd->data->blksz * cmd->data->blocks;
--		if (cmd->data->flags & MMC_DATA_WRITE) {
--			desc->cmd_cfg |= CMD_CFG_DATA_WR;
--			WARN_ON(xfer_bytes > host->bounce_buf_size);
--			sg_copy_to_buffer(cmd->data->sg, cmd->data->sg_len,
--					  host->bounce_buf, xfer_bytes);
--			cmd->data->bytes_xfered = xfer_bytes;
--			dma_wmb();
--		} else {
--			desc->cmd_cfg &= ~CMD_CFG_DATA_WR;
--		}
-+		data->bytes_xfered = 0;
-+		if (data->flags & MMC_DATA_WRITE)
-+			cmd_cfg |= CMD_CFG_DATA_WR;
- 
--		desc->cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
-+		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT_DATA) <<
-+			   CMD_CFG_TIMEOUT_SHIFT;
-+
-+		for_each_sg(data->sg, sg, data->sg_count, i) {
-+			unsigned int len = sg_dma_len(sg);
-+
-+			if (data->blocks > 1)
-+				len /= data->blksz;
-+
-+			desc[i].cmd_cfg = cmd_cfg;
-+			desc[i].cmd_cfg |= (len & CMD_CFG_LENGTH_MASK) <<
-+					   CMD_CFG_LENGTH_SHIFT;
-+			if (i > 0)
-+				desc[i].cmd_cfg |= CMD_CFG_NO_CMD;
-+			desc[i].cmd_arg = cmd->arg;
-+			desc[i].cmd_resp = 0;
-+			desc[i].cmd_data = sg_dma_address(sg);
-+		}
-+		desc[data->sg_count - 1].cmd_cfg |= CMD_CFG_END_OF_CHAIN;
- 
--		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
- 	} else {
--		desc->cmd_cfg &= ~CMD_CFG_DATA_IO;
--		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
-+		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT) << CMD_CFG_TIMEOUT_SHIFT;
-+		cmd_cfg |= CMD_CFG_END_OF_CHAIN;
-+		desc[0].cmd_cfg = cmd_cfg;
-+		desc[0].cmd_arg = cmd->arg;
-+		desc[0].cmd_resp = 0;
-+		desc[0].cmd_data = 0;
- 	}
--	desc->cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
--		CMD_CFG_TIMEOUT_SHIFT;
- 
- 	host->cmd = cmd;
- 
--	/* Last descriptor */
--	desc->cmd_cfg |= CMD_CFG_END_OF_CHAIN;
--	writel(desc->cmd_cfg, host->regs + SD_EMMC_CMD_CFG);
--	writel(desc->cmd_data, host->regs + SD_EMMC_CMD_DAT);
--	writel(desc->cmd_resp, host->regs + SD_EMMC_CMD_RSP);
- 	wmb(); /* ensure descriptor is written before kicked */
--	writel(desc->cmd_arg, host->regs + SD_EMMC_CMD_ARG);
-+	cfg = host->descs_dma_addr | START_DESC_BUSY;
-+	writel(cfg, host->regs + SD_EMMC_START);
- }
- 
- static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct meson_host *host = mmc_priv(mmc);
-+	bool needs_pre_post_req = mrq->data && !mrq->data->host_cookie;
-+
-+	if (needs_pre_post_req)
-+		meson_mmc_pre_req(mmc, mrq);
- 
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
-@@ -540,6 +568,9 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		meson_mmc_start_cmd(mmc, mrq->sbc);
- 	else
- 		meson_mmc_start_cmd(mmc, mrq->cmd);
-+
-+	if (needs_pre_post_req)
-+		meson_mmc_post_req(mmc, mrq, 0);
- }
- 
- static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
-@@ -560,6 +591,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- {
- 	struct meson_host *host = dev_id;
- 	struct mmc_command *cmd;
-+	struct mmc_data *data;
- 	u32 irq_en, status, raw_status;
- 	irqreturn_t ret = IRQ_HANDLED;
- 
-@@ -571,6 +603,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 	if (WARN_ON(!cmd))
- 		return IRQ_NONE;
- 
-+	data = cmd->data;
-+
- 	spin_lock(&host->lock);
- 	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
- 	raw_status = readl(host->regs + SD_EMMC_STATUS);
-@@ -608,12 +642,17 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 		dev_dbg(host->dev, "Unhandled IRQ: Descriptor timeout\n");
- 		cmd->error = -ETIMEDOUT;
- 	}
-+
-+	if (data && !cmd->error)
-+		data->bytes_xfered = data->blksz * data->blocks;
-+
- 	if (status & IRQ_SDIO)
- 		dev_dbg(host->dev, "Unhandled IRQ: SDIO.\n");
- 
--	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS))
--		ret = IRQ_WAKE_THREAD;
--	else  {
-+	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS)) {
-+		if (meson_mmc_get_next_command(cmd))
-+			ret = IRQ_WAKE_THREAD;
-+	} else  {
- 		dev_warn(host->dev, "Unknown IRQ! status=0x%04x: MMC CMD%u arg=0x%08x flags=0x%08x stop=%d\n",
- 			 status, cmd->opcode, cmd->arg,
- 			 cmd->flags, cmd->mrq->stop ? 1 : 0);
-@@ -642,26 +681,12 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- {
- 	struct meson_host *host = dev_id;
- 	struct mmc_command *next_cmd, *cmd = host->cmd;
--	struct mmc_data *data;
--	unsigned int xfer_bytes;
- 
- 	if (WARN_ON(!cmd))
- 		return IRQ_NONE;
- 
--	data = cmd->data;
--	if (data && data->flags & MMC_DATA_READ) {
--		xfer_bytes = data->blksz * data->blocks;
--		WARN_ON(xfer_bytes > host->bounce_buf_size);
--		sg_copy_from_buffer(data->sg, data->sg_len,
--				    host->bounce_buf, xfer_bytes);
--		data->bytes_xfered = xfer_bytes;
--	}
--
- 	next_cmd = meson_mmc_get_next_command(cmd);
--	if (next_cmd)
--		meson_mmc_start_cmd(host->mmc, next_cmd);
--	else
--		meson_mmc_request_done(host->mmc, cmd->mrq);
-+	meson_mmc_start_cmd(host->mmc, next_cmd);
- 
- 	return IRQ_HANDLED;
- }
-@@ -695,6 +720,8 @@ static const struct mmc_host_ops meson_mmc_ops = {
- 	.request	= meson_mmc_request,
- 	.set_ios	= meson_mmc_set_ios,
- 	.get_cd         = meson_mmc_get_cd,
-+	.pre_req	= meson_mmc_pre_req,
-+	.post_req	= meson_mmc_post_req,
- };
- 
- static int meson_mmc_probe(struct platform_device *pdev)
-@@ -774,15 +801,14 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 
- 	mmc->caps |= MMC_CAP_CMD23;
- 	mmc->max_blk_count = CMD_CFG_LENGTH_MASK;
--	mmc->max_req_size = mmc->max_blk_count * mmc->max_blk_size;
--
--	/* data bounce buffer */
--	host->bounce_buf_size = mmc->max_req_size;
--	host->bounce_buf =
--		dma_alloc_coherent(host->dev, host->bounce_buf_size,
--				   &host->bounce_dma_addr, GFP_KERNEL);
--	if (host->bounce_buf == NULL) {
--		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
-+	mmc->max_segs = PAGE_SIZE / sizeof(struct sd_emmc_desc);
-+	mmc->max_seg_size = mmc->max_blk_count * mmc->max_blk_size;
-+	mmc->max_req_size = mmc->max_seg_size * mmc->max_segs;
-+
-+	host->descs = dma_alloc_coherent(host->dev, PAGE_SIZE,
-+					 &host->descs_dma_addr, GFP_KERNEL);
-+	if (!host->descs) {
-+		dev_err(host->dev, "Allocating descriptor DMA buffer failed\n");
- 		ret = -ENOMEM;
- 		goto err_div_clk;
- 	}
-@@ -807,8 +833,8 @@ static int meson_mmc_remove(struct platform_device *pdev)
- 	/* disable interrupts */
- 	writel(0, host->regs + SD_EMMC_IRQ_EN);
- 
--	dma_free_coherent(host->dev, host->bounce_buf_size,
--			  host->bounce_buf, host->bounce_dma_addr);
-+	dma_free_coherent(host->dev, PAGE_SIZE, host->descs,
-+			  host->descs_dma_addr);
- 
- 	clk_disable_unprepare(host->cfg_div_clk);
- 	clk_disable_unprepare(host->core_clk);
--- 
-2.12.0
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
 
+iQIzBAEBCgAdFiEE/JuuFDWp9/ZkuCBXtdYpNtH8nugFAljMejUACgkQtdYpNtH8
+nuiLghAAhh7Kv9RWBDFZPP0Ey8kT2ejm0hnr4heoTUSl7qdmgFIyxZW+Gx0XRl/Z
+WVqUxWPI1jsGLpl3xggnbfDyxw+Xt9iRzTQss472ilC5wm4goXw1nqtfnR9G/flC
+4FMzehABwWsIsG6Dkny8z6YlUq6khVl4R5UcK7t+qXpNrK1Oh22dhBZBIJFfR1cq
+8cqaYvofFWN8pvJPIOroubO2lUOroRPwXaP4AD/LVNwyg0KwKL0bkkACSd+Aq2z9
+6DG1G/PO/mu2x/gPa3ZJPWDlXVs6MNHl2re+5xIqXJbUMQKiQs4gN4jCvd4SyY+5
+IUzaA1Cmio7jsqnMzllY2LAlGXVGqsWk3KiWTgJt3R9PgRa4yWvoL43RCCZA+RU0
+145bkOLP/dRjAnxKYq7T7BWp4wZVBjzxVkx0wbRCBFDvoE1+/z+QmwV0e1MKaRdh
+Rx85+4tTBmncuAO6yr1mu3B1K+OoBtw+jlArBjVrFITsDHm35amfbBQgCizvCBe3
+MiFNNkIRRt0cPPjH2SysiJs8J1qDO10Aqw6lxPUGwlCPzGDJDBfoWMB6o3n4O1Vl
+tDEjm6LZ6fm981MDDeM38CzZI9X+XJOIGxTeICgIAIQFYNh40RsMOZB5mFnyYdaW
+grLYolPvVrq6FxTyG4kqR1QmkhM07hwK25x5bMHNdSv6CBfunU0=
+=SdMv
+-----END PGP SIGNATURE-----
+--=-=-=--
