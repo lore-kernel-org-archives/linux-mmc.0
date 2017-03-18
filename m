@@ -1,430 +1,533 @@
-From: Sergio Prado <sergio.prado@e-labworks.com>
-Subject: [PATCH v5 2/2] mmc: host: s3cmci: allow probing from device tree
-Date: Fri, 17 Mar 2017 22:13:53 -0300
-Message-ID: <1489799633-29278-3-git-send-email-sergio.prado@e-labworks.com>
-References: <1489799633-29278-1-git-send-email-sergio.prado@e-labworks.com>
+From: Helmut Klein <hgkr.klein@gmail.com>
+Subject: Re: meson-gx-mmc: 2nd patch set
+Date: Sat, 18 Mar 2017 09:11:40 +0100
+Message-ID: <b969ab41-8c10-0f06-5bd8-3421d5ec6774@gmail.com>
+References: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
+ <b5e36943-ba83-e73e-7df7-d6967aff5886@gmail.com>
+ <2a6d59e0-28db-b65a-835d-512a7e68443e@gmail.com>
+ <9a90bda9-6d12-a368-99ce-67c112249a43@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:35079 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751405AbdCRBOq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2017 21:14:46 -0400
-Received: by mail-qk0-f194.google.com with SMTP id o135so11815688qke.2
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Mar 2017 18:14:40 -0700 (PDT)
-In-Reply-To: <1489799633-29278-1-git-send-email-sergio.prado@e-labworks.com>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36776 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750990AbdCRIMs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Mar 2017 04:12:48 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x124so6413706wmf.3
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Mar 2017 01:11:48 -0700 (PDT)
+In-Reply-To: <9a90bda9-6d12-a368-99ce-67c112249a43@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, robh+dt@kernel.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
-Cc: Sergio Prado <sergio.prado@e-labworks.com>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Allows configuring Samsung S3C24XX MMC/SD/SDIO controller using a device
-tree.
+On 17.03.2017 20:54, Heiner Kallweit wrote:
+> Am 17.03.2017 um 19:00 schrieb Helmut Klein:
+>> On 17.03.2017 07:44, Heiner Kallweit wrote:
+>>> Am 16.03.2017 um 22:12 schrieb Helmut Klein:
+>>>> Hallo Heiner,
+>>>>
+>>>> i applied your 2nd patch sets to linux-amlogic. (and of course the older set v5 1...10).
+>>>>
+>>>> The performance of the sd-card and the mmc-chip of my minimx is much better now.
+>>>>
+>>>> sd-card: from 6.5 to 22.5 MBytes/s
+>>>> mmc: from 14.5 to 28.5 MBytes/s (hs200 compatible device)
+>>>>
+>>>> But:
+>>>> the wifi-adapter is no longer operational. The problem starts with patch 3 and gets worse with patch 5.
+>>>>
+>>>> the adapter (ap6330) is attached to the sdio port of the the s905. (=mmc1)
+>>>>
+>>> Thanks for testing and sharing the feedback. Much appreciated.
+>>> The board I test on supports block devices only.
+>>>
+>>> Could you please share few more details:
+>>> - Drivers involved
+>>> - All syslog messages related to the device / driver
+>>>
+>>> And please set the relevant mailing lists on cc when providing test feedback.
+>>> Others might find your feedback helpful too.
+>>>
+>>> Thanks, Heiner
+>>>
+>>>> so i think it is important to test your patch set asap on an officially supported board with a wifi adapter).
+>>>>
+>>>> regards
+>>>> Helmut
+>>>>
+>>>
+>>>
+>>
+>> The driver for the wifi adapter is brcmfmac. It is compiled as a module and loaded via /etc/modules.
+>> the driver depends on the modules brcmutil and cfg80211, which are auto loaded.
+>>
+>> my user space is debian unstable. The kernel is cross compiled on my x86-64 laptop with gcc 5.4.1
+>>
+>> i use my own kernel configuration without an initial ramdisk. mmc, usb & ext4 drivers are compiled into the kernel
+>>
+>> kernel & dtb are loaded by u-boot from mmcblk2p1 (sd-card)
+>>
+>> the drive for the kernel is sda2 (sd-card inside of a usb card reader).
+>>
+>>
+>> here is the filtered (mmc|brcmfmac) syslog output when only patches 1 & 2 are applied
+>>
+>> [    1.685012] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
+>> [    1.873010] mmc0: new DDR MMC card at address 0001
+>> [    1.873258] mmcblk0: mmc0:0001 NCard  14.5 GiB
+>> [    1.876731] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
+>> [    1.882597] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
+>> [    2.004399] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
+>> [    2.048160] meson-gx-mmc d0072000.mmc: Got CD GPIO
+>> [    2.066962] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
+>> [    2.068985] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.074242] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.081275] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
+>> [    2.124761] mmc2: Skipping voltage switch
+>> [    2.153763] mmc1: new high speed SDIO card at address 0001
+>> [    2.158567] mmc2: new high speed SDHC card at address 59b4
+>> [    2.159219] mmcblk2: mmc2:59b4 USD00 29.5 GiB
+>> [    2.164206]  mmcblk2: p1 p2
+>> [    6.664118] brcmfmac: brcmf_c_preinit_dcmds: Firmware version = wl0: Jan  6 2014 15:11:29 version 5.90.195.89.13 FWID 01-72f124c5
+>> [    6.736239] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code (0x30 0x30)
+>> [    6.928045] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 184
+>> [    6.930475] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 188
+>> [    6.938524] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 192
+>> [    6.946543] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 196
+>> [    6.954566] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 200
+>> [    6.954663] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code (0x30 0x30)
+>> [    6.969995] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 204
+>> [    6.978023] brcmfmac: brcmf_construct_chaninfo: Ignoring unexpected firmware channel 208
+>>
+>> this is the output after adding patch 3
+>>
+>> [    1.684982] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
+>> [    1.873041] mmc0: new DDR MMC card at address 0001
+>> [    1.873273] mmcblk0: mmc0:0001 NCard  14.5 GiB
+>> [    1.876765] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
+>> [    1.882621] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
+>> [    2.004408] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
+>> [    2.048189] meson-gx-mmc d0072000.mmc: Got CD GPIO
+>> [    2.066978] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
+>> [    2.069001] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.074253] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.081285] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
+>> [    2.124874] mmc2: Skipping voltage switch
+>> [    2.153475] mmc1: new high speed SDIO card at address 0001
+>> [    2.158610] mmc2: new high speed SDHC card at address 59b4
+>> [    2.158935] mmcblk2: mmc2:59b4 USD00 29.5 GiB
+>> [    2.163910]  mmcblk2: p1 p2
+>> [    6.586318] brcmfmac: brcmf_sdiod_ramrw: membytes transfer failed <<<=====
+>> [    6.586810] brcmfmac: brcmf_sdio_download_code_file: error -84 on writing 239507 membytes at 0x00000000
+>> [    6.596373] brcmfmac: brcmf_sdio_download_firmware: dongle image file download failed
+>>
+>> and this is the output after adding patches 4 & 5
+>>
+>> [    1.684941] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
+>> [    1.868910] mmc0: new DDR MMC card at address 0001
+>> [    1.869159] mmcblk0: mmc0:0001 NCard  14.5 GiB
+>> [    1.872639] mmcblk0boot0: mmc0:0001 NCard  partition 1 4.00 MiB
+>> [    1.878497] mmcblk0boot1: mmc0:0001 NCard  partition 2 4.00 MiB
+>> [    1.884356] mmcblk0rpmb: mmc0:0001 NCard  partition 3 128 KiB <<<=====
+>> [    2.000339] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
+>> [    2.044090] meson-gx-mmc d0072000.mmc: Got CD GPIO
+>> [    2.062850] mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
+>> [    2.064869] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.070129] mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
+>> [    2.077161] mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
+>> [    2.120693] mmc2: Skipping voltage switch
+>> [    2.148795] mmc1: new high speed SDIO card at address 0001
+>> [    2.154443] mmc2: new high speed SDHC card at address 59b4
+>> [    2.154660] mmcblk2: mmc2:59b4 USD00 29.5 GiB
+>> [    2.159402]  mmcblk2: p1 p2
+>> [    6.550881] brcmfmac: brcmf_chip_recognition: SB chip is not supported     <<<=====
+>> [    6.556606] brcmfmac: brcmf_sdio_probe_attach: brcmf_chip_attach failed!
+>> [    6.563260] brcmfmac: brcmf_sdio_probe: brcmf_sdio_probe_attach failed
+>> [    6.569796] brcmfmac: brcmf_ops_sdio_probe: F2 error, probe failed -19...
+>>
+>> regards
+>> Helmut
+>>
+>
+> Thanks a lot for the additional information. The first version of the patch
+> set broke byte mode obviously (block mode is working fine).
+>
+> Before submitting a new version of the patch set:
+> Could you please apply patches 1, 2, and 4 of the patch set plus the
+> following one and re-test?
+>
+> Thanks, Heiner
+>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 222 ++++++++++++++++++++++------------------
+>  1 file changed, 124 insertions(+), 98 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 6bfd3da9..ca685902 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -121,6 +121,13 @@
+>  #define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+>  #define MUX_CLK_NUM_PARENTS 2
+>
+> +struct sd_emmc_desc {
+> +	u32 cmd_cfg;
+> +	u32 cmd_arg;
+> +	u32 cmd_data;
+> +	u32 cmd_resp;
+> +};
+> +
+>  struct meson_host {
+>  	struct	device		*dev;
+>  	struct	mmc_host	*mmc;
+> @@ -136,19 +143,12 @@ struct meson_host {
+>  	struct clk_divider cfg_div;
+>  	struct clk *cfg_div_clk;
+>
+> -	unsigned int bounce_buf_size;
+> -	void *bounce_buf;
+> -	dma_addr_t bounce_dma_addr;
+> +	struct sd_emmc_desc *descs;
+> +	dma_addr_t descs_dma_addr;
+>
+>  	bool vqmmc_enabled;
+>  };
+>
+> -struct sd_emmc_desc {
+> -	u32 cmd_cfg;
+> -	u32 cmd_arg;
+> -	u32 cmd_data;
+> -	u32 cmd_resp;
+> -};
+>  #define CMD_CFG_LENGTH_SHIFT 0
+>  #define CMD_CFG_LENGTH_MASK 0x1ff
+>  #define CMD_CFG_BLOCK_MODE BIT(9)
+> @@ -185,6 +185,36 @@ static struct mmc_command *meson_mmc_get_next_command(struct mmc_command *cmd)
+>  		return NULL;
+>  }
+>
+> +static enum dma_data_direction meson_mmc_get_data_dir(struct mmc_data *data)
+> +{
+> +	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
+> +}
+> +
+> +static void meson_mmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+> +{
+> +	struct mmc_data *data = mrq->data;
+> +
+> +	if (!data)
+> +		return;
+> +
+> +	data->host_cookie = true;
+> +
+> +	data->sg_count = dma_map_sg(mmc_dev(mmc), data->sg, data->sg_len,
+> +				    meson_mmc_get_data_dir(data));
+> +	if (!data->sg_count)
+> +		dev_err(mmc_dev(mmc), "dma_map_sg failed");
+> +}
+> +
+> +static void meson_mmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> +			       int err)
+> +{
+> +	struct mmc_data *data = mrq->data;
+> +
+> +	if (data && data->sg_count)
+> +		dma_unmap_sg(mmc_dev(mmc), data->sg, data->sg_len,
+> +			     meson_mmc_get_data_dir(data));
+> +}
+> +
+>  static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
+>  {
+>  	struct mmc_host *mmc = host->mmc;
+> @@ -434,104 +464,102 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+>  static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  {
+>  	struct meson_host *host = mmc_priv(mmc);
+> -	struct sd_emmc_desc *desc, desc_tmp;
+> -	u32 cfg;
+> -	u8 blk_len, cmd_cfg_timeout;
+> -	unsigned int xfer_bytes = 0;
+> +	struct sd_emmc_desc *desc = host->descs;
+> +	struct mmc_data *data = cmd->data;
+> +	struct scatterlist *sg;
+> +	u32 cfg, cmd_cfg = 0;
+> +	u8 blk_len;
+> +	int i;
+>
+> -	/* Setup descriptors */
+>  	dma_rmb();
+> -	desc = &desc_tmp;
+> -	memset(desc, 0, sizeof(struct sd_emmc_desc));
+>
+> -	desc->cmd_cfg |= (cmd->opcode & CMD_CFG_CMD_INDEX_MASK)	<<
+> -		CMD_CFG_CMD_INDEX_SHIFT;
+> -	desc->cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
+> -	desc->cmd_arg = cmd->arg;
+> +	cmd_cfg |= (cmd->opcode & CMD_CFG_CMD_INDEX_MASK) <<
+> +		   CMD_CFG_CMD_INDEX_SHIFT;
+> +	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
+>
+>  	/* Response */
+>  	if (cmd->flags & MMC_RSP_PRESENT) {
+> -		desc->cmd_cfg &= ~CMD_CFG_NO_RESP;
+>  		if (cmd->flags & MMC_RSP_136)
+> -			desc->cmd_cfg |= CMD_CFG_RESP_128;
+> -		desc->cmd_cfg |= CMD_CFG_RESP_NUM;
+> -		desc->cmd_resp = 0;
+> +			cmd_cfg |= CMD_CFG_RESP_128;
+> +		cmd_cfg |= CMD_CFG_RESP_NUM;
+>
+>  		if (!(cmd->flags & MMC_RSP_CRC))
+> -			desc->cmd_cfg |= CMD_CFG_RESP_NOCRC;
+> +			cmd_cfg |= CMD_CFG_RESP_NOCRC;
+>
+>  		if (cmd->flags & MMC_RSP_BUSY)
+> -			desc->cmd_cfg |= CMD_CFG_R1B;
+> +			cmd_cfg |= CMD_CFG_R1B;
+>  	} else {
+> -		desc->cmd_cfg |= CMD_CFG_NO_RESP;
+> +		cmd_cfg |= CMD_CFG_NO_RESP;
+>  	}
+>
+> -	/* data? */
+> -	if (cmd->data) {
+> -		desc->cmd_cfg |= CMD_CFG_DATA_IO;
+> -		if (cmd->data->blocks > 1) {
+> -			desc->cmd_cfg |= CMD_CFG_BLOCK_MODE;
+> -			desc->cmd_cfg |=
+> -				(cmd->data->blocks & CMD_CFG_LENGTH_MASK) <<
+> -				CMD_CFG_LENGTH_SHIFT;
+> +	if (data) {
+> +		cmd_cfg |= CMD_CFG_DATA_IO;
+> +
+> +		if (data->blocks > 1) {
+> +			cmd_cfg |= CMD_CFG_BLOCK_MODE;
+>
+>  			/* check if block-size matches, if not update */
+>  			cfg = readl(host->regs + SD_EMMC_CFG);
+>  			blk_len = cfg & (CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
+>  			blk_len >>= CFG_BLK_LEN_SHIFT;
+> -			if (blk_len != ilog2(cmd->data->blksz)) {
+> -				dev_dbg(host->dev, "%s: update blk_len %d -> %d\n",
+> -					__func__, blk_len,
+> -					ilog2(cmd->data->blksz));
+> -				blk_len = ilog2(cmd->data->blksz);
+> +			if (blk_len != ilog2(data->blksz)) {
+> +				dev_dbg(host->dev,
+> +					"%s: update blk_len %d -> %d\n",
+> +					__func__, blk_len, ilog2(data->blksz));
+> +				blk_len = ilog2(data->blksz);
+>  				cfg &= ~(CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
+>  				cfg |= blk_len << CFG_BLK_LEN_SHIFT;
+>  				writel(cfg, host->regs + SD_EMMC_CFG);
+>  			}
+> -		} else {
+> -			desc->cmd_cfg &= ~CMD_CFG_BLOCK_MODE;
+> -			desc->cmd_cfg |=
+> -				(cmd->data->blksz & CMD_CFG_LENGTH_MASK) <<
+> -				CMD_CFG_LENGTH_SHIFT;
+>  		}
+>
+> -		cmd->data->bytes_xfered = 0;
+> -		xfer_bytes = cmd->data->blksz * cmd->data->blocks;
+> -		if (cmd->data->flags & MMC_DATA_WRITE) {
+> -			desc->cmd_cfg |= CMD_CFG_DATA_WR;
+> -			WARN_ON(xfer_bytes > host->bounce_buf_size);
+> -			sg_copy_to_buffer(cmd->data->sg, cmd->data->sg_len,
+> -					  host->bounce_buf, xfer_bytes);
+> -			cmd->data->bytes_xfered = xfer_bytes;
+> -			dma_wmb();
+> -		} else {
+> -			desc->cmd_cfg &= ~CMD_CFG_DATA_WR;
+> -		}
+> +		data->bytes_xfered = 0;
+> +		if (data->flags & MMC_DATA_WRITE)
+> +			cmd_cfg |= CMD_CFG_DATA_WR;
+>
+> -		desc->cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
+> +		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT_DATA) <<
+> +			   CMD_CFG_TIMEOUT_SHIFT;
+> +
+> +		for_each_sg(data->sg, sg, data->sg_count, i) {
+> +			unsigned int len = sg_dma_len(sg);
+> +
+> +			if (data->blocks > 1)
+> +				len /= data->blksz;
+> +
+> +			desc[i].cmd_cfg = cmd_cfg;
+> +			desc[i].cmd_cfg |= (len & CMD_CFG_LENGTH_MASK) <<
+> +					   CMD_CFG_LENGTH_SHIFT;
+> +			if (i > 0)
+> +				desc[i].cmd_cfg |= CMD_CFG_NO_CMD;
+> +			desc[i].cmd_arg = cmd->arg;
+> +			desc[i].cmd_resp = 0;
+> +			desc[i].cmd_data = sg_dma_address(sg);
+> +		}
+> +		desc[data->sg_count - 1].cmd_cfg |= CMD_CFG_END_OF_CHAIN;
+>
+> -		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
+>  	} else {
+> -		desc->cmd_cfg &= ~CMD_CFG_DATA_IO;
+> -		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
+> +		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT) << CMD_CFG_TIMEOUT_SHIFT;
+> +		cmd_cfg |= CMD_CFG_END_OF_CHAIN;
+> +		desc[0].cmd_cfg = cmd_cfg;
+> +		desc[0].cmd_arg = cmd->arg;
+> +		desc[0].cmd_resp = 0;
+> +		desc[0].cmd_data = 0;
+>  	}
+> -	desc->cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
+> -		CMD_CFG_TIMEOUT_SHIFT;
+>
+>  	host->cmd = cmd;
+>
+> -	/* Last descriptor */
+> -	desc->cmd_cfg |= CMD_CFG_END_OF_CHAIN;
+> -	writel(desc->cmd_cfg, host->regs + SD_EMMC_CMD_CFG);
+> -	writel(desc->cmd_data, host->regs + SD_EMMC_CMD_DAT);
+> -	writel(desc->cmd_resp, host->regs + SD_EMMC_CMD_RSP);
+>  	wmb(); /* ensure descriptor is written before kicked */
+> -	writel(desc->cmd_arg, host->regs + SD_EMMC_CMD_ARG);
+> +	cfg = host->descs_dma_addr | START_DESC_BUSY;
+> +	writel(cfg, host->regs + SD_EMMC_START);
+>  }
+>
+>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>  	struct meson_host *host = mmc_priv(mmc);
+> +	bool needs_pre_post_req = mrq->data && !mrq->data->host_cookie;
+> +
+> +	if (needs_pre_post_req)
+> +		meson_mmc_pre_req(mmc, mrq);
+>
+>  	/* Stop execution */
+>  	writel(0, host->regs + SD_EMMC_START);
+> @@ -540,6 +568,9 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		meson_mmc_start_cmd(mmc, mrq->sbc);
+>  	else
+>  		meson_mmc_start_cmd(mmc, mrq->cmd);
+> +
+> +	if (needs_pre_post_req)
+> +		meson_mmc_post_req(mmc, mrq, 0);
+>  }
+>
+>  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+> @@ -560,6 +591,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>  {
+>  	struct meson_host *host = dev_id;
+>  	struct mmc_command *cmd;
+> +	struct mmc_data *data;
+>  	u32 irq_en, status, raw_status;
+>  	irqreturn_t ret = IRQ_HANDLED;
+>
+> @@ -571,6 +603,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>  	if (WARN_ON(!cmd))
+>  		return IRQ_NONE;
+>
+> +	data = cmd->data;
+> +
+>  	spin_lock(&host->lock);
+>  	irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
+>  	raw_status = readl(host->regs + SD_EMMC_STATUS);
+> @@ -608,12 +642,17 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>  		dev_dbg(host->dev, "Unhandled IRQ: Descriptor timeout\n");
+>  		cmd->error = -ETIMEDOUT;
+>  	}
+> +
+> +	if (data && !cmd->error)
+> +		data->bytes_xfered = data->blksz * data->blocks;
+> +
+>  	if (status & IRQ_SDIO)
+>  		dev_dbg(host->dev, "Unhandled IRQ: SDIO.\n");
+>
+> -	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS))
+> -		ret = IRQ_WAKE_THREAD;
+> -	else  {
+> +	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS)) {
+> +		if (meson_mmc_get_next_command(cmd))
+> +			ret = IRQ_WAKE_THREAD;
+> +	} else  {
+>  		dev_warn(host->dev, "Unknown IRQ! status=0x%04x: MMC CMD%u arg=0x%08x flags=0x%08x stop=%d\n",
+>  			 status, cmd->opcode, cmd->arg,
+>  			 cmd->flags, cmd->mrq->stop ? 1 : 0);
+> @@ -642,26 +681,12 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>  {
+>  	struct meson_host *host = dev_id;
+>  	struct mmc_command *next_cmd, *cmd = host->cmd;
+> -	struct mmc_data *data;
+> -	unsigned int xfer_bytes;
+>
+>  	if (WARN_ON(!cmd))
+>  		return IRQ_NONE;
+>
+> -	data = cmd->data;
+> -	if (data && data->flags & MMC_DATA_READ) {
+> -		xfer_bytes = data->blksz * data->blocks;
+> -		WARN_ON(xfer_bytes > host->bounce_buf_size);
+> -		sg_copy_from_buffer(data->sg, data->sg_len,
+> -				    host->bounce_buf, xfer_bytes);
+> -		data->bytes_xfered = xfer_bytes;
+> -	}
+> -
+>  	next_cmd = meson_mmc_get_next_command(cmd);
+> -	if (next_cmd)
+> -		meson_mmc_start_cmd(host->mmc, next_cmd);
+> -	else
+> -		meson_mmc_request_done(host->mmc, cmd->mrq);
+> +	meson_mmc_start_cmd(host->mmc, next_cmd);
+>
+>  	return IRQ_HANDLED;
+>  }
+> @@ -695,6 +720,8 @@ static const struct mmc_host_ops meson_mmc_ops = {
+>  	.request	= meson_mmc_request,
+>  	.set_ios	= meson_mmc_set_ios,
+>  	.get_cd         = meson_mmc_get_cd,
+> +	.pre_req	= meson_mmc_pre_req,
+> +	.post_req	= meson_mmc_post_req,
+>  };
+>
+>  static int meson_mmc_probe(struct platform_device *pdev)
+> @@ -774,15 +801,14 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>
+>  	mmc->caps |= MMC_CAP_CMD23;
+>  	mmc->max_blk_count = CMD_CFG_LENGTH_MASK;
+> -	mmc->max_req_size = mmc->max_blk_count * mmc->max_blk_size;
+> -
+> -	/* data bounce buffer */
+> -	host->bounce_buf_size = mmc->max_req_size;
+> -	host->bounce_buf =
+> -		dma_alloc_coherent(host->dev, host->bounce_buf_size,
+> -				   &host->bounce_dma_addr, GFP_KERNEL);
+> -	if (host->bounce_buf == NULL) {
+> -		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
+> +	mmc->max_segs = PAGE_SIZE / sizeof(struct sd_emmc_desc);
+> +	mmc->max_seg_size = mmc->max_blk_count * mmc->max_blk_size;
+> +	mmc->max_req_size = mmc->max_seg_size * mmc->max_segs;
+> +
+> +	host->descs = dma_alloc_coherent(host->dev, PAGE_SIZE,
+> +					 &host->descs_dma_addr, GFP_KERNEL);
+> +	if (!host->descs) {
+> +		dev_err(host->dev, "Allocating descriptor DMA buffer failed\n");
+>  		ret = -ENOMEM;
+>  		goto err_div_clk;
+>  	}
+> @@ -807,8 +833,8 @@ static int meson_mmc_remove(struct platform_device *pdev)
+>  	/* disable interrupts */
+>  	writel(0, host->regs + SD_EMMC_IRQ_EN);
+>
+> -	dma_free_coherent(host->dev, host->bounce_buf_size,
+> -			  host->bounce_buf, host->bounce_dma_addr);
+> +	dma_free_coherent(host->dev, PAGE_SIZE, host->descs,
+> +			  host->descs_dma_addr);
+>
+>  	clk_disable_unprepare(host->cfg_div_clk);
+>  	clk_disable_unprepare(host->core_clk);
+>
 
-Signed-off-by: Sergio Prado <sergio.prado@e-labworks.com>
----
- drivers/mmc/host/s3cmci.c | 257 +++++++++++++++++++++++-----------------------
- 1 file changed, 126 insertions(+), 131 deletions(-)
+compared to the patches 1...5 there is absolutely no change to patches 
+1, 2, 4 and the above. Neither syslog nor performance.
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 7a173f8c455b..3020f31d593c 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -24,6 +24,10 @@
- #include <linux/interrupt.h>
- #include <linux/irq.h>
- #include <linux/io.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_gpio.h>
-+#include <linux/mmc/slot-gpio.h>
- 
- #include <plat/gpio-cfg.h>
- #include <mach/dma.h>
-@@ -807,21 +811,6 @@ static irqreturn_t s3cmci_irq(int irq, void *dev_id)
- 
- }
- 
--/*
-- * ISR for the CardDetect Pin
--*/
--
--static irqreturn_t s3cmci_irq_cd(int irq, void *dev_id)
--{
--	struct s3cmci_host *host = (struct s3cmci_host *)dev_id;
--
--	dbg(host, dbg_irq, "card detect\n");
--
--	mmc_detect_change(host->mmc, msecs_to_jiffies(500));
--
--	return IRQ_HANDLED;
--}
--
- static void s3cmci_dma_done_callback(void *arg)
- {
- 	struct s3cmci_host *host = arg;
-@@ -1177,19 +1166,6 @@ static void s3cmci_send_request(struct mmc_host *mmc)
- 	s3cmci_enable_irq(host, true);
- }
- 
--static int s3cmci_card_present(struct mmc_host *mmc)
--{
--	struct s3cmci_host *host = mmc_priv(mmc);
--	struct s3c24xx_mci_pdata *pdata = host->pdata;
--	int ret;
--
--	if (pdata->no_detect)
--		return -ENOSYS;
--
--	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
--	return ret ^ pdata->detect_invert;
--}
--
- static void s3cmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct s3cmci_host *host = mmc_priv(mmc);
-@@ -1198,7 +1174,7 @@ static void s3cmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	host->cmd_is_stop = 0;
- 	host->mrq = mrq;
- 
--	if (s3cmci_card_present(mmc) == 0) {
-+	if (mmc_gpio_get_cd(mmc) == 0) {
- 		dbg(host, dbg_err, "%s: no medium present\n", __func__);
- 		host->mrq->cmd->error = -ENOMEDIUM;
- 		mmc_request_done(mmc, mrq);
-@@ -1242,8 +1218,9 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_POWER_ON:
- 	case MMC_POWER_UP:
- 		/* Configure GPE5...GPE10 pins in SD mode */
--		s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
--				      S3C_GPIO_PULL_NONE);
-+		if (!host->pdev->dev.of_node)
-+			s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
-+					      S3C_GPIO_PULL_NONE);
- 
- 		if (host->pdata->set_power)
- 			host->pdata->set_power(ios->power_mode, ios->vdd);
-@@ -1255,7 +1232,8 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	case MMC_POWER_OFF:
- 	default:
--		gpio_direction_output(S3C2410_GPE(5), 0);
-+		if (!host->pdev->dev.of_node)
-+			gpio_direction_output(S3C2410_GPE(5), 0);
- 
- 		if (host->is2440)
- 			mci_con |= S3C2440_SDICON_SDRESET;
-@@ -1295,21 +1273,6 @@ static void s3cmci_reset(struct s3cmci_host *host)
- 	writel(con, host->base + S3C2410_SDICON);
- }
- 
--static int s3cmci_get_ro(struct mmc_host *mmc)
--{
--	struct s3cmci_host *host = mmc_priv(mmc);
--	struct s3c24xx_mci_pdata *pdata = host->pdata;
--	int ret;
--
--	if (pdata->no_wprotect)
--		return 0;
--
--	ret = gpio_get_value(pdata->gpio_wprotect) ? 1 : 0;
--	ret ^= pdata->wprotect_invert;
--
--	return ret;
--}
--
- static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- {
- 	struct s3cmci_host *host = mmc_priv(mmc);
-@@ -1353,8 +1316,8 @@ static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- static struct mmc_host_ops s3cmci_ops = {
- 	.request	= s3cmci_request,
- 	.set_ios	= s3cmci_set_ios,
--	.get_ro		= s3cmci_get_ro,
--	.get_cd		= s3cmci_card_present,
-+	.get_ro		= mmc_gpio_get_ro,
-+	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = s3cmci_enable_sdio_irq,
- };
- 
-@@ -1545,21 +1508,14 @@ static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
- 
- #endif /* CONFIG_DEBUG_FS */
- 
--static int s3cmci_probe(struct platform_device *pdev)
-+static int s3cmci_probe_pdata(struct s3cmci_host *host)
- {
--	struct s3cmci_host *host;
--	struct mmc_host	*mmc;
--	int ret;
--	int is2440;
--	int i;
-+	struct platform_device *pdev = host->pdev;
-+	struct mmc_host *mmc = host->mmc;
-+	struct s3c24xx_mci_pdata *pdata;
-+	int i, ret;
- 
--	is2440 = platform_get_device_id(pdev)->driver_data;
--
--	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto probe_out;
--	}
-+	host->is2440 = platform_get_device_id(pdev)->driver_data;
- 
- 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++) {
- 		ret = gpio_request(i, dev_name(&pdev->dev));
-@@ -1569,25 +1525,101 @@ static int s3cmci_probe(struct platform_device *pdev)
- 			for (i--; i >= S3C2410_GPE(5); i--)
- 				gpio_free(i);
- 
--			goto probe_free_host;
-+			return ret;
-+		}
-+	}
-+
-+	if (!pdev->dev.platform_data)
-+		pdev->dev.platform_data = &s3cmci_def_pdata;
-+
-+	pdata = pdev->dev.platform_data;
-+
-+	if (pdata->no_wprotect)
-+		mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
-+
-+	if (pdata->no_detect)
-+		mmc->caps |= MMC_CAP_NEEDS_POLL;
-+
-+	if (pdata->wprotect_invert);
-+		mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-+
-+	if (pdata->detect_invert)
-+		 mmc->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-+
-+	if (gpio_is_valid(pdata->gpio_detect)) {
-+		ret = mmc_gpio_request_cd(mmc, pdata->gpio_detect, 0);
-+		if (ret) {
-+			dev_err(&pdev->dev, "error requesting GPIO for CD %d\n",
-+				ret);
-+			return ret;
- 		}
- 	}
- 
-+	if (gpio_is_valid(pdata->gpio_wprotect)) {
-+		ret = mmc_gpio_request_ro(mmc, pdata->gpio_wprotect);
-+		if (ret) {
-+			dev_err(&pdev->dev, "error requesting GPIO for WP %d\n",
-+				ret);
-+			return ret;
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+static int s3cmci_probe_dt(struct s3cmci_host *host)
-+{
-+	struct platform_device *pdev = host->pdev;
-+	struct s3c24xx_mci_pdata *pdata;
-+	struct mmc_host *mmc = host->mmc;
-+	int ret;
-+
-+	host->is2440 = (int) of_device_get_match_data(&pdev->dev);
-+
-+	ret = mmc_of_parse(mmc);
-+	if (ret)
-+		return ret;
-+
-+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata)
-+		return -ENOMEM;
-+
-+	pdev->dev.platform_data = pdata;
-+
-+	return 0;
-+}
-+
-+static int s3cmci_probe(struct platform_device *pdev)
-+{
-+	struct s3cmci_host *host;
-+	struct mmc_host	*mmc;
-+	int ret;
-+	int i;
-+
-+	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
-+	if (!mmc) {
-+		ret = -ENOMEM;
-+		goto probe_out;
-+	}
-+
- 	host = mmc_priv(mmc);
- 	host->mmc 	= mmc;
- 	host->pdev	= pdev;
--	host->is2440	= is2440;
-+
-+	if (pdev->dev.of_node)
-+		ret = s3cmci_probe_dt(host);
-+	else
-+		ret = s3cmci_probe_pdata(host);
-+
-+	if (ret)
-+		goto probe_free_host;
- 
- 	host->pdata = pdev->dev.platform_data;
--	if (!host->pdata) {
--		pdev->dev.platform_data = &s3cmci_def_pdata;
--		host->pdata = &s3cmci_def_pdata;
--	}
- 
- 	spin_lock_init(&host->complete_lock);
- 	tasklet_init(&host->pio_tasklet, pio_tasklet, (unsigned long) host);
- 
--	if (is2440) {
-+	if (host->is2440) {
- 		host->sdiimsk	= S3C2440_SDIIMSK;
- 		host->sdidata	= S3C2440_SDIDATA;
- 		host->clk_div	= 1;
-@@ -1645,43 +1677,6 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	disable_irq(host->irq);
- 	host->irq_state = false;
- 
--	if (!host->pdata->no_detect) {
--		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
--		if (ret) {
--			dev_err(&pdev->dev, "failed to get detect gpio\n");
--			goto probe_free_irq;
--		}
--
--		host->irq_cd = gpio_to_irq(host->pdata->gpio_detect);
--
--		if (host->irq_cd >= 0) {
--			if (request_irq(host->irq_cd, s3cmci_irq_cd,
--					IRQF_TRIGGER_RISING |
--					IRQF_TRIGGER_FALLING,
--					DRIVER_NAME, host)) {
--				dev_err(&pdev->dev,
--					"can't get card detect irq.\n");
--				ret = -ENOENT;
--				goto probe_free_gpio_cd;
--			}
--		} else {
--			dev_warn(&pdev->dev,
--				 "host detect has no irq available\n");
--			gpio_direction_input(host->pdata->gpio_detect);
--		}
--	} else
--		host->irq_cd = -1;
--
--	if (!host->pdata->no_wprotect) {
--		ret = gpio_request(host->pdata->gpio_wprotect, "s3cmci wp");
--		if (ret) {
--			dev_err(&pdev->dev, "failed to get writeprotect\n");
--			goto probe_free_irq_cd;
--		}
--
--		gpio_direction_input(host->pdata->gpio_wprotect);
--	}
--
- 	/* Depending on the dma state, get a DMA channel to use. */
- 
- 	if (s3cmci_host_usedma(host)) {
-@@ -1689,7 +1684,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 		ret = PTR_ERR_OR_ZERO(host->dma);
- 		if (ret) {
- 			dev_err(&pdev->dev, "cannot get DMA channel.\n");
--			goto probe_free_gpio_wp;
-+			goto probe_free_irq;
- 		}
- 	}
- 
-@@ -1768,18 +1763,6 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	if (s3cmci_host_usedma(host))
- 		dma_release_channel(host->dma);
- 
-- probe_free_gpio_wp:
--	if (!host->pdata->no_wprotect)
--		gpio_free(host->pdata->gpio_wprotect);
--
-- probe_free_gpio_cd:
--	if (!host->pdata->no_detect)
--		gpio_free(host->pdata->gpio_detect);
--
-- probe_free_irq_cd:
--	if (host->irq_cd >= 0)
--		free_irq(host->irq_cd, host);
--
-  probe_free_irq:
- 	free_irq(host->irq, host);
- 
-@@ -1790,8 +1773,9 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	release_mem_region(host->mem->start, resource_size(host->mem));
- 
-  probe_free_gpio:
--	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
--		gpio_free(i);
-+	if (!pdev->dev.of_node)
-+		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+			gpio_free(i);
- 
-  probe_free_host:
- 	mmc_free_host(mmc);
-@@ -1818,7 +1802,6 @@ static int s3cmci_remove(struct platform_device *pdev)
- {
- 	struct mmc_host		*mmc  = platform_get_drvdata(pdev);
- 	struct s3cmci_host	*host = mmc_priv(mmc);
--	struct s3c24xx_mci_pdata *pd = host->pdata;
- 	int i;
- 
- 	s3cmci_shutdown(pdev);
-@@ -1832,15 +1815,9 @@ static int s3cmci_remove(struct platform_device *pdev)
- 
- 	free_irq(host->irq, host);
- 
--	if (!pd->no_wprotect)
--		gpio_free(pd->gpio_wprotect);
--
--	if (!pd->no_detect)
--		gpio_free(pd->gpio_detect);
--
--	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
--		gpio_free(i);
--
-+	if (!pdev->dev.of_node)
-+		for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+			gpio_free(i);
- 
- 	iounmap(host->base);
- 	release_mem_region(host->mem->start, resource_size(host->mem));
-@@ -1849,6 +1826,23 @@ static int s3cmci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static const struct of_device_id s3cmci_dt_match[] = {
-+	{
-+		.compatible = "samsung,s3c2410-sdi",
-+		.data = (void *)0,
-+	},
-+	{
-+		.compatible = "samsung,s3c2412-sdi",
-+		.data = (void *)1,
-+	},
-+	{
-+		.compatible = "samsung,s3c2440-sdi",
-+		.data = (void *)1,
-+	},
-+	{ /* sentinel */ },
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-+
- static const struct platform_device_id s3cmci_driver_ids[] = {
- 	{
- 		.name	= "s3c2410-sdi",
-@@ -1868,6 +1862,7 @@ static int s3cmci_remove(struct platform_device *pdev)
- static struct platform_driver s3cmci_driver = {
- 	.driver	= {
- 		.name	= "s3c-sdi",
-+		.of_match_table = s3cmci_dt_match,
- 	},
- 	.id_table	= s3cmci_driver_ids,
- 	.probe		= s3cmci_probe,
--- 
-1.9.1
-
+regards
+Helmut
