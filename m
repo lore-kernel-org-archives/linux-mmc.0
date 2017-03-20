@@ -1,27 +1,52 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc: tmio: always get number of taps
-Date: Mon, 20 Mar 2017 09:30:57 +0100
-Message-ID: <20170320083057.GD21538@verge.net.au>
-References: <20170317090450.18593-1-wsa+renesas@sang-engineering.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: RE: [v2 PATCH 3/3] mmc: sdhci-cadence: Update PHY delay configuration
+Date: Mon, 20 Mar 2017 08:38:10 +0000
+Message-ID: <DM5PR07MB308228CF27D659686132429EDD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
+References: <1488807587-5375-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNATAa7svo_DrotgM0XKMhLbZ2Qum8qe6fJxxf4Z+ouH_wA@mail.gmail.com>
+ <DM5PR07MB308240E2DC885342BA477D04DD2F0@DM5PR07MB3082.namprd07.prod.outlook.com>
+ <CAK7LNAT_ATrohuDx0sCaPp+5GUc-hLvrUGKX921U2OKcqcCUZQ@mail.gmail.com>
+ <MWHPR07MB3088821EDD127BD6BF1A1EDFDD250@MWHPR07MB3088.namprd07.prod.outlook.com>
+ <CAK7LNARu=ozunUudPpcPokScR6rAFNkh24+rwd3UVeFR4p+oEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170317090450.18593-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAK7LNARu=ozunUudPpcPokScR6rAFNkh24+rwd3UVeFR4p+oEA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 17, 2017 at 10:04:50AM +0100, Wolfram Sang wrote:
-> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> 
-> Current code gets number of taps only once and keeps the value. This is
-> not correct, we need to obtain it every time before executing tuning,
-> so remove the outer if-block.
-> 
-> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> [wsa: extracted from a larger patch and reworded commit message]
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
+IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDE3IE1hcmNo
+LCAyMDE3IDY6MjMgUE0NCj4gU3ViamVjdDogUmU6IFt2MiBQQVRDSCAzLzNdIG1tYzogc2RoY2kt
+Y2FkZW5jZTogVXBkYXRlIFBIWSBkZWxheSBjb25maWd1cmF0aW9uDQo+IA0KPiBIaSBQaW90ciwN
+Cj4gDQo+IFNvcnJ5IGZvciBteSBsYXRlIHJlcGx5Lg0KPiANCj4gDQo+ID4NCj4gPiBJdCBsb29r
+cyB0aGF0ICJpbnB1dCBkZWxheXMiIGFuZCAiRExMIHNkY2xrIGRlbGF5cyIgc2hvdWxkIGJlIGRl
+ZmluZWQgaW4gZHRzIGZpbGUgYmVjYXVzZSB0aGV5IGRlcGVuZCBvbiBhIGNoaXAgYW5kIGEgYm9h
+cmQNCj4gaW1wbGVtZW50YXRpb24uIE9uIHRoZSBvdGhlciBoYW5kIHRoZSBsZXNzIGR0cyBwcm9w
+ZXJ0aWVzIHRoZSBiZXR0ZXIuDQo+ID4NCj4gPiBUaGVyZSBpcyBvbmUgbW9yZSB3YXkgdG8gaGFu
+ZGxlIGlucHV0IGRlbGF5cy4gSXQgY2FuIGJlIGFjaGlldmVkIGJ5IFBIWSB0cmFpbmluZy4gUEhZ
+IHRyYWluaW5nIGlzIHNpbWlsYXIgdG8gdGhlIHR1bmluZyBhbmQgaXQgc2hvdWxkIGJlDQo+IGRv
+bmUgd2hlbiBwcm9wZXIgdGltaW5nIG1vZGUgaXMgc2VsZWN0ZWQgYW5kIGNsb2NrIGZyZXF1ZW5j
+eSBpcyBzZXQuDQo+ID4gVG8gbWFrZSBpdCBwb3NzaWJsZSB0aGUgc2RoY2lfc2V0X2lvcyBmdW5j
+dGlvbiBuZWVkIHRvIGJlIGdsb2JhbC4gVGhlbiBJIGNvdWxkIGNyZWF0ZSBzZGhjaV9jZG5zX3Nl
+dF9pb3MgZnVuY3Rpb24gYXMgZm9sbG93czoNCj4gPiB2b2lkIHNkaGNpX2NkbnNfc2V0X2lvcyhz
+dHJ1Y3QgbW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykgew0KPiA+ICAgICAgICAg
+LiAuIC4NCj4gPg0KPiA+ICAgICAgICAgc2RoY2lfc2V0X2lvcyhtbWMsIGlvcyk7DQo+ID4gICAg
+ICAgICAvKiBleGVjdXRlIFBIWSB0cmFpbmluZyBpZiBuZWVkZWQgKi8NCj4gPiAgICAgICAgIHNk
+aGNpX2NkbnNfZXhlY19waHlfdHJhaW5pbmcoaG9zdCk7DQo+ID4gfQ0KPiA+DQo+ID4gVGhlIG1t
+YyBmcmFtZXdvcmsgY29uZmlndXJlcyB0aW1pbmcgYW5kIGZyZXF1ZW5jeSBzZXBhcmF0ZWx5IHNv
+IFBIWSB0cmFpbmluZyBzaG91bGQgYmUgZXhlY3V0ZWQgZXZlcnkgdGltZSBpZiB0aW1pbmcgb3Ig
+Y2xvY2sNCj4gZnJlcXVlbmN5IGlzIGNoYW5nZWQuIEkgYW0gbm90IHN1cmUgSWYgSSBjYW4gY2hh
+bmdlIHNkaGNpX3NldF9pb3MgdG8gZ2xvYmFsIGZ1bmN0aW9uLg0KPiANCj4gDQo+IEkgYW0gT0sg
+d2l0aCB0aGlzLCBidXQgSSBob3BlIEFkcmlhbiBjYW4gYWR2aXNlIHVzLg0KPiANCj4gDQo+IA0K
+PiANCj4gPiBTbyBtYXliZSBwdXQgYWxsIGRlbGF5cyB0byBkdHMgZmlsZSB3b3VsZCBiZSBhIGJl
+dHRlciBzb2x1dGlvbj8gV2hhdCBkbyB5b3UgdGhpbms/DQo+IA0KPiBJIGFtIE9LIHdpdGggRFQg
+YXBwcm9hY2ggdG9vDQo+IGJlY2F1c2UgdGhpcyB3YXkgc2VlbXMgc2ltcGxlciwgYWZ0ZXIgYWxs
+Lg0KPiANCj4gKE15IHN1Z2dlc3Rpb24gZm9yIGRhdGEgYXJyYXkgYXBwcm9hY2ggd2FzIG1pc2xl
+YWRpbmcsIHNvcnJ5LikNCj4gDQpUaGFua3MgZm9yIHJldmlldyBhbnl3YXkgaXQgd2FzIHVzZWZ1
+bC4gTm93IGRlY2lzaW9uIGJldHdlZW4gRFRTIGFuZCBkYXRhIGFycmF5IGlzIG1vcmUgY2xlYXIg
+Zm9yIG1lLiANCg0KUmVnYXJkcyANClBpb3RyIFNyb2thDQo=
