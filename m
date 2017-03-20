@@ -1,173 +1,66 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 24/25] mmc: sdhci-pci: Add runtime suspend/resume callbacks
-Date: Mon, 20 Mar 2017 19:50:52 +0200
-Message-ID: <1490032253-6030-25-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 18/25] mmc: sdhci: Factor out sdhci_set_default_irqs
+Date: Mon, 20 Mar 2017 19:50:46 +0200
+Message-ID: <1490032253-6030-19-git-send-email-adrian.hunter@intel.com>
 References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:65242 "EHLO mga04.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:36549 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756246AbdCTR6p (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Mar 2017 13:58:45 -0400
+        id S1756102AbdCTR6f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Mar 2017 13:58:35 -0400
 In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Add runtime suspend/resume callbacks to match suspend/resume callbacks.
+Factor out sdhci_set_default_irqs().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 98 +++++++++++++++++++++++----------------
- drivers/mmc/host/sdhci-pci.h      |  4 ++
- 2 files changed, 62 insertions(+), 40 deletions(-)
+ drivers/mmc/host/sdhci.c | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 5ed8369704fd..d9a38c53e2ba 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -119,6 +119,56 @@ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b2ef0d93cebd..7f1c0126342f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -225,15 +225,8 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
+ 	}
  }
- #endif
  
-+#ifdef CONFIG_PM
-+static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot;
-+	struct sdhci_host *host;
-+	int i, ret;
-+
-+	for (i = 0; i < chip->num_slots; i++) {
-+		slot = chip->slots[i];
-+		if (!slot)
-+			continue;
-+
-+		host = slot->host;
-+
-+		ret = sdhci_runtime_suspend_host(host);
-+		if (ret)
-+			goto err_pci_runtime_suspend;
-+
-+		if (chip->rpm_retune &&
-+		    host->tuning_mode != SDHCI_TUNING_MODE_3)
-+			mmc_retune_needed(host->mmc);
-+	}
-+
-+	return 0;
-+
-+err_pci_runtime_suspend:
-+	while (--i >= 0)
-+		sdhci_runtime_resume_host(chip->slots[i]->host);
-+	return ret;
+-static void sdhci_init(struct sdhci_host *host, int soft)
++static void sdhci_set_default_irqs(struct sdhci_host *host)
+ {
+-	struct mmc_host *mmc = host->mmc;
+-
+-	if (soft)
+-		sdhci_do_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
+-	else
+-		sdhci_do_reset(host, SDHCI_RESET_ALL);
+-
+ 	host->ier = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+ 		    SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
+ 		    SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC |
+@@ -246,6 +239,18 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
 +}
 +
-+static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
++static void sdhci_init(struct sdhci_host *host, int soft)
 +{
-+	struct sdhci_pci_slot *slot;
-+	int i, ret;
++	struct mmc_host *mmc = host->mmc;
 +
-+	for (i = 0; i < chip->num_slots; i++) {
-+		slot = chip->slots[i];
-+		if (!slot)
-+			continue;
++	if (soft)
++		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++	else
++		sdhci_do_reset(host, SDHCI_RESET_ALL);
 +
-+		ret = sdhci_runtime_resume_host(slot->host);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return 0;
-+}
-+#endif
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Hardware specific quirk handling                                          *
-@@ -1796,61 +1846,29 @@ static int sdhci_pci_resume(struct device *dev)
- static int sdhci_pci_runtime_suspend(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
--	struct sdhci_pci_chip *chip;
--	struct sdhci_pci_slot *slot;
--	struct sdhci_host *host;
--	int i, ret;
-+	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
++	sdhci_set_default_irqs(host);
  
--	chip = pci_get_drvdata(pdev);
- 	if (!chip)
- 		return 0;
- 
--	for (i = 0; i < chip->num_slots; i++) {
--		slot = chip->slots[i];
--		if (!slot)
--			continue;
--
--		host = slot->host;
--
--		ret = sdhci_runtime_suspend_host(host);
--		if (ret)
--			goto err_pci_runtime_suspend;
--
--		if (chip->rpm_retune &&
--		    host->tuning_mode != SDHCI_TUNING_MODE_3)
--			mmc_retune_needed(host->mmc);
--	}
--
--	return 0;
-+	if (chip->fixes && chip->fixes->runtime_suspend)
-+		return chip->fixes->runtime_suspend(chip);
- 
--err_pci_runtime_suspend:
--	while (--i >= 0)
--		sdhci_runtime_resume_host(chip->slots[i]->host);
--	return ret;
-+	return sdhci_pci_runtime_suspend_host(chip);
- }
- 
- static int sdhci_pci_runtime_resume(struct device *dev)
- {
- 	struct pci_dev *pdev = to_pci_dev(dev);
--	struct sdhci_pci_chip *chip;
--	struct sdhci_pci_slot *slot;
--	int i, ret;
-+	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
- 
--	chip = pci_get_drvdata(pdev);
- 	if (!chip)
- 		return 0;
- 
--	for (i = 0; i < chip->num_slots; i++) {
--		slot = chip->slots[i];
--		if (!slot)
--			continue;
-+	if (chip->fixes && chip->fixes->runtime_resume)
-+		return chip->fixes->runtime_resume(chip);
- 
--		ret = sdhci_runtime_resume_host(slot->host);
--		if (ret)
--			return ret;
--	}
--
--	return 0;
-+	return sdhci_pci_runtime_resume_host(chip);
- }
- #endif
- 
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index ec8f91c403d6..37766d20a600 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -71,6 +71,10 @@ struct sdhci_pci_fixes {
- 	int			(*suspend) (struct sdhci_pci_chip *);
- 	int			(*resume) (struct sdhci_pci_chip *);
- #endif
-+#ifdef CONFIG_PM
-+	int			(*runtime_suspend) (struct sdhci_pci_chip *);
-+	int			(*runtime_resume) (struct sdhci_pci_chip *);
-+#endif
- 
- 	const struct sdhci_ops	*ops;
- 	size_t			priv_size;
+ 	if (soft) {
+ 		/* force clock reconfiguration */
 -- 
 1.9.1
 
