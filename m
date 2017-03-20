@@ -1,50 +1,173 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: pwrseq: add op reset to struct mmc_pwrseq_ops
-Date: Mon, 20 Mar 2017 18:56:03 +0100
-Message-ID: <CAPDyKFrhfteb8Nx2Tzi__VgmQrsWbvjAVnFmAPTOBtHohLXiUA@mail.gmail.com>
-References: <75ad5eac-412b-fe73-ff53-3d8b975937e4@gmail.com>
- <c75c3e5c-c4e1-3f2f-267b-1c781052c55e@gmail.com> <CAPDyKFr6_Y3cSv5Q1WRSQBo7_bsyeVVQTYBQ01gykdMpVWNtXw@mail.gmail.com>
- <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 24/25] mmc: sdhci-pci: Add runtime suspend/resume callbacks
+Date: Mon, 20 Mar 2017 19:50:52 +0200
+Message-ID: <1490032253-6030-25-git-send-email-adrian.hunter@intel.com>
+References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f178.google.com ([209.85.217.178]:35429 "EHLO
-        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756261AbdCTSZD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 14:25:03 -0400
-Received: by mail-ua0-f178.google.com with SMTP id q7so80695543uaf.2
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2017 11:25:02 -0700 (PDT)
-In-Reply-To: <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com>
+Received: from mga04.intel.com ([192.55.52.120]:65242 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756246AbdCTR6p (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Mar 2017 13:58:45 -0400
+In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-[...]
+Add runtime suspend/resume callbacks to match suspend/resume callbacks.
 
->>> @@ -166,6 +166,7 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
->>>                 int retries);
->>>
->>>  int mmc_hw_reset(struct mmc_host *host);
->>> +void mmc_hw_reset_pwrseq(struct mmc_host *host);
->>
->> Don't you think we can make this transparent to mmc host drivers,
->> instead of them having to assign their host_ops->hw_reset() callback
->> to this new API? Because I guess that's the though!?
->>
->> In principle the mmc core already have all the information it needs,
->> as to understand when the eMMC pwrseq should be invoked. Or perhaps
->> the code may become a bit too messy for that?
->>
-> The easiest way I could think of:
-> If host->ops->hw_reset is NULL overwrite it with pwrseq->ops->reset
-> in mmc_add_host. But host->ops is defined es being const, so the compiler
-> won't allow us to do this. Of course we could do some casting but usually
-> I try to avoid hacks like casting away const qualifiers.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 98 +++++++++++++++++++++++----------------
+ drivers/mmc/host/sdhci-pci.h      |  4 ++
+ 2 files changed, 62 insertions(+), 40 deletions(-)
 
-No thanks. :-)
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 5ed8369704fd..d9a38c53e2ba 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -119,6 +119,56 @@ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip)
+ }
+ #endif
+ 
++#ifdef CONFIG_PM
++static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot;
++	struct sdhci_host *host;
++	int i, ret;
++
++	for (i = 0; i < chip->num_slots; i++) {
++		slot = chip->slots[i];
++		if (!slot)
++			continue;
++
++		host = slot->host;
++
++		ret = sdhci_runtime_suspend_host(host);
++		if (ret)
++			goto err_pci_runtime_suspend;
++
++		if (chip->rpm_retune &&
++		    host->tuning_mode != SDHCI_TUNING_MODE_3)
++			mmc_retune_needed(host->mmc);
++	}
++
++	return 0;
++
++err_pci_runtime_suspend:
++	while (--i >= 0)
++		sdhci_runtime_resume_host(chip->slots[i]->host);
++	return ret;
++}
++
++static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot;
++	int i, ret;
++
++	for (i = 0; i < chip->num_slots; i++) {
++		slot = chip->slots[i];
++		if (!slot)
++			continue;
++
++		ret = sdhci_runtime_resume_host(slot->host);
++		if (ret)
++			return ret;
++	}
++
++	return 0;
++}
++#endif
++
+ /*****************************************************************************\
+  *                                                                           *
+  * Hardware specific quirk handling                                          *
+@@ -1796,61 +1846,29 @@ static int sdhci_pci_resume(struct device *dev)
+ static int sdhci_pci_runtime_suspend(struct device *dev)
+ {
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+-	struct sdhci_pci_chip *chip;
+-	struct sdhci_pci_slot *slot;
+-	struct sdhci_host *host;
+-	int i, ret;
++	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
+ 
+-	chip = pci_get_drvdata(pdev);
+ 	if (!chip)
+ 		return 0;
+ 
+-	for (i = 0; i < chip->num_slots; i++) {
+-		slot = chip->slots[i];
+-		if (!slot)
+-			continue;
+-
+-		host = slot->host;
+-
+-		ret = sdhci_runtime_suspend_host(host);
+-		if (ret)
+-			goto err_pci_runtime_suspend;
+-
+-		if (chip->rpm_retune &&
+-		    host->tuning_mode != SDHCI_TUNING_MODE_3)
+-			mmc_retune_needed(host->mmc);
+-	}
+-
+-	return 0;
++	if (chip->fixes && chip->fixes->runtime_suspend)
++		return chip->fixes->runtime_suspend(chip);
+ 
+-err_pci_runtime_suspend:
+-	while (--i >= 0)
+-		sdhci_runtime_resume_host(chip->slots[i]->host);
+-	return ret;
++	return sdhci_pci_runtime_suspend_host(chip);
+ }
+ 
+ static int sdhci_pci_runtime_resume(struct device *dev)
+ {
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+-	struct sdhci_pci_chip *chip;
+-	struct sdhci_pci_slot *slot;
+-	int i, ret;
++	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
+ 
+-	chip = pci_get_drvdata(pdev);
+ 	if (!chip)
+ 		return 0;
+ 
+-	for (i = 0; i < chip->num_slots; i++) {
+-		slot = chip->slots[i];
+-		if (!slot)
+-			continue;
++	if (chip->fixes && chip->fixes->runtime_resume)
++		return chip->fixes->runtime_resume(chip);
+ 
+-		ret = sdhci_runtime_resume_host(slot->host);
+-		if (ret)
+-			return ret;
+-	}
+-
+-	return 0;
++	return sdhci_pci_runtime_resume_host(chip);
+ }
+ #endif
+ 
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index ec8f91c403d6..37766d20a600 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -71,6 +71,10 @@ struct sdhci_pci_fixes {
+ 	int			(*suspend) (struct sdhci_pci_chip *);
+ 	int			(*resume) (struct sdhci_pci_chip *);
+ #endif
++#ifdef CONFIG_PM
++	int			(*runtime_suspend) (struct sdhci_pci_chip *);
++	int			(*runtime_resume) (struct sdhci_pci_chip *);
++#endif
+ 
+ 	const struct sdhci_ops	*ops;
+ 	size_t			priv_size;
+-- 
+1.9.1
 
-[...]
-
-Kind regards
-Uffe
