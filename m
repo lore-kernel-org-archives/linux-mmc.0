@@ -1,159 +1,156 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 10/25] mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
-Date: Mon, 20 Mar 2017 19:50:38 +0200
-Message-ID: <1490032253-6030-11-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 14/25] mmc: sdhci: Improve register dump print format
+Date: Mon, 20 Mar 2017 19:50:42 +0200
+Message-ID: <1490032253-6030-15-git-send-email-adrian.hunter@intel.com>
 References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:11877 "EHLO mga04.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:36549 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756047AbdCTR6O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Mar 2017 13:58:14 -0400
+        id S1756165AbdCTR6N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Mar 2017 13:58:13 -0400
 In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Tuning execution is already synchronized with respect to other host
-operations by upper layers "claiming" the host, which also takes care of
-runtime pm. There can be no requests in progress. Retain the spin lock
-usage only for ensuring that sending tuning commands is synchronized with
-respect to the interrupt handler.
+Ensure all prints start with the mmc host name, and the text all lines up.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 36 ++++++++++++++----------------------
- 1 file changed, 14 insertions(+), 22 deletions(-)
+ drivers/mmc/host/sdhci.c | 104 ++++++++++++++++++++++++-----------------------
+ 1 file changed, 53 insertions(+), 51 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f7dfb40826c7..fffd2efd703e 100644
+index 93730a3013ff..70022a0c886a 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1987,8 +1987,7 @@ static void sdhci_reset_tuning(struct sdhci_host *host)
- 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- }
+@@ -40,6 +40,9 @@
+ #define DBG(f, x...) \
+ 	pr_debug("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
  
--static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
--			       unsigned long flags)
-+static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	sdhci_reset_tuning(host);
- 
-@@ -1997,9 +1996,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
- 
- 	sdhci_end_tuning(host);
- 
--	spin_unlock_irqrestore(&host->lock, flags);
- 	mmc_abort_tuning(host->mmc, opcode);
--	spin_lock_irqsave(&host->lock, flags);
- }
- 
- /*
-@@ -2009,12 +2006,14 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
-  * interrupt setup is different to other commands and there is no timeout
-  * interrupt so special handling is needed.
-  */
--static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
--			      unsigned long flags)
-+static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	struct mmc_host *mmc = host->mmc;
- 	struct mmc_command cmd = {};
- 	struct mmc_request mrq = {};
-+	unsigned long flags;
++#define SDHCI_DUMP(f, x...) \
++	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
 +
-+	spin_lock_irqsave(&host->lock, flags);
+ #define MAX_TUNING_LOOP 40
  
- 	cmd.opcode = opcode;
- 	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-@@ -2048,17 +2047,16 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
+ static unsigned int debug_quirks = 0;
+@@ -51,65 +54,64 @@
  
- 	host->tuning_done = 0;
- 
-+	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	/* Wait for Buffer Read Ready interrupt */
- 	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
- 			   msecs_to_jiffies(50));
- 
--	spin_lock_irqsave(&host->lock, flags);
- }
- 
--static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode,
--				   unsigned long flags)
-+static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ static void sdhci_dumpregs(struct sdhci_host *host)
  {
- 	int i;
- 
-@@ -2069,12 +2067,12 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode,
- 	for (i = 0; i < MAX_TUNING_LOOP; i++) {
- 		u16 ctrl;
- 
--		sdhci_send_tuning(host, opcode, flags);
-+		sdhci_send_tuning(host, opcode);
- 
- 		if (!host->tuning_done) {
- 			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
- 				mmc_hostname(host->mmc));
--			sdhci_abort_tuning(host, opcode, flags);
-+			sdhci_abort_tuning(host, opcode);
- 			return;
- 		}
- 
-@@ -2099,12 +2097,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	int err = 0;
--	unsigned long flags;
- 	unsigned int tuning_count = 0;
- 	bool hs400_tuning;
- 
--	spin_lock_irqsave(&host->lock, flags);
+-	pr_err(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
+-	       mmc_hostname(host->mmc));
 -
- 	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
+-	pr_err(DRIVER_NAME ": Sys addr: 0x%08x | Version:  0x%08x\n",
+-	       sdhci_readl(host, SDHCI_DMA_ADDRESS),
+-	       sdhci_readw(host, SDHCI_HOST_VERSION));
+-	pr_err(DRIVER_NAME ": Blk size: 0x%08x | Blk cnt:  0x%08x\n",
+-	       sdhci_readw(host, SDHCI_BLOCK_SIZE),
+-	       sdhci_readw(host, SDHCI_BLOCK_COUNT));
+-	pr_err(DRIVER_NAME ": Argument: 0x%08x | Trn mode: 0x%08x\n",
+-	       sdhci_readl(host, SDHCI_ARGUMENT),
+-	       sdhci_readw(host, SDHCI_TRANSFER_MODE));
+-	pr_err(DRIVER_NAME ": Present:  0x%08x | Host ctl: 0x%08x\n",
+-	       sdhci_readl(host, SDHCI_PRESENT_STATE),
+-	       sdhci_readb(host, SDHCI_HOST_CONTROL));
+-	pr_err(DRIVER_NAME ": Power:    0x%08x | Blk gap:  0x%08x\n",
+-	       sdhci_readb(host, SDHCI_POWER_CONTROL),
+-	       sdhci_readb(host, SDHCI_BLOCK_GAP_CONTROL));
+-	pr_err(DRIVER_NAME ": Wake-up:  0x%08x | Clock:    0x%08x\n",
+-	       sdhci_readb(host, SDHCI_WAKE_UP_CONTROL),
+-	       sdhci_readw(host, SDHCI_CLOCK_CONTROL));
+-	pr_err(DRIVER_NAME ": Timeout:  0x%08x | Int stat: 0x%08x\n",
+-	       sdhci_readb(host, SDHCI_TIMEOUT_CONTROL),
+-	       sdhci_readl(host, SDHCI_INT_STATUS));
+-	pr_err(DRIVER_NAME ": Int enab: 0x%08x | Sig enab: 0x%08x\n",
+-	       sdhci_readl(host, SDHCI_INT_ENABLE),
+-	       sdhci_readl(host, SDHCI_SIGNAL_ENABLE));
+-	pr_err(DRIVER_NAME ": AC12 err: 0x%08x | Slot int: 0x%08x\n",
+-	       sdhci_readw(host, SDHCI_ACMD12_ERR),
+-	       sdhci_readw(host, SDHCI_SLOT_INT_STATUS));
+-	pr_err(DRIVER_NAME ": Caps:     0x%08x | Caps_1:   0x%08x\n",
+-	       sdhci_readl(host, SDHCI_CAPABILITIES),
+-	       sdhci_readl(host, SDHCI_CAPABILITIES_1));
+-	pr_err(DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
+-	       sdhci_readw(host, SDHCI_COMMAND),
+-	       sdhci_readl(host, SDHCI_MAX_CURRENT));
+-	pr_err(DRIVER_NAME ": Resp[0]:  0x%08x | Resp[1]:  0x%08x\n",
++	SDHCI_DUMP("============ SDHCI REGISTER DUMP ===========\n");
++
++	SDHCI_DUMP("Sys addr:  0x%08x | Version:  0x%08x\n",
++		   sdhci_readl(host, SDHCI_DMA_ADDRESS),
++		   sdhci_readw(host, SDHCI_HOST_VERSION));
++	SDHCI_DUMP("Blk size:  0x%08x | Blk cnt:  0x%08x\n",
++		   sdhci_readw(host, SDHCI_BLOCK_SIZE),
++		   sdhci_readw(host, SDHCI_BLOCK_COUNT));
++	SDHCI_DUMP("Argument:  0x%08x | Trn mode: 0x%08x\n",
++		   sdhci_readl(host, SDHCI_ARGUMENT),
++		   sdhci_readw(host, SDHCI_TRANSFER_MODE));
++	SDHCI_DUMP("Present:   0x%08x | Host ctl: 0x%08x\n",
++		   sdhci_readl(host, SDHCI_PRESENT_STATE),
++		   sdhci_readb(host, SDHCI_HOST_CONTROL));
++	SDHCI_DUMP("Power:     0x%08x | Blk gap:  0x%08x\n",
++		   sdhci_readb(host, SDHCI_POWER_CONTROL),
++		   sdhci_readb(host, SDHCI_BLOCK_GAP_CONTROL));
++	SDHCI_DUMP("Wake-up:   0x%08x | Clock:    0x%08x\n",
++		   sdhci_readb(host, SDHCI_WAKE_UP_CONTROL),
++		   sdhci_readw(host, SDHCI_CLOCK_CONTROL));
++	SDHCI_DUMP("Timeout:   0x%08x | Int stat: 0x%08x\n",
++		   sdhci_readb(host, SDHCI_TIMEOUT_CONTROL),
++		   sdhci_readl(host, SDHCI_INT_STATUS));
++	SDHCI_DUMP("Int enab:  0x%08x | Sig enab: 0x%08x\n",
++		   sdhci_readl(host, SDHCI_INT_ENABLE),
++		   sdhci_readl(host, SDHCI_SIGNAL_ENABLE));
++	SDHCI_DUMP("AC12 err:  0x%08x | Slot int: 0x%08x\n",
++		   sdhci_readw(host, SDHCI_ACMD12_ERR),
++		   sdhci_readw(host, SDHCI_SLOT_INT_STATUS));
++	SDHCI_DUMP("Caps:      0x%08x | Caps_1:   0x%08x\n",
++		   sdhci_readl(host, SDHCI_CAPABILITIES),
++		   sdhci_readl(host, SDHCI_CAPABILITIES_1));
++	SDHCI_DUMP("Cmd:       0x%08x | Max curr: 0x%08x\n",
++		   sdhci_readw(host, SDHCI_COMMAND),
++		   sdhci_readl(host, SDHCI_MAX_CURRENT));
++	SDHCI_DUMP("Resp[0]:   0x%08x | Resp[1]:  0x%08x\n",
+ 		   sdhci_readl(host, SDHCI_RESPONSE),
+ 		   sdhci_readl(host, SDHCI_RESPONSE + 4));
+-	pr_err(DRIVER_NAME ": Resp[2]:  0x%08x | Resp[3]:  0x%08x\n",
++	SDHCI_DUMP("Resp[2]:   0x%08x | Resp[3]:  0x%08x\n",
+ 		   sdhci_readl(host, SDHCI_RESPONSE + 8),
+ 		   sdhci_readl(host, SDHCI_RESPONSE + 12));
+-
+-	pr_err(DRIVER_NAME ": Host ctl2: 0x%08x\n",
+-	       sdhci_readw(host, SDHCI_HOST_CONTROL2));
++	SDHCI_DUMP("Host ctl2: 0x%08x\n",
++		   sdhci_readw(host, SDHCI_HOST_CONTROL2));
  
- 	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
-@@ -2121,7 +2116,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	/* HS400 tuning is done in HS200 mode */
- 	case MMC_TIMING_MMC_HS400:
- 		err = -EINVAL;
--		goto out_unlock;
-+		goto out;
- 
- 	case MMC_TIMING_MMC_HS200:
- 		/*
-@@ -2142,26 +2137,23 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		/* FALLTHROUGH */
- 
- 	default:
--		goto out_unlock;
-+		goto out;
+ 	if (host->flags & SDHCI_USE_ADMA) {
+-		if (host->flags & SDHCI_USE_64_BIT_DMA)
+-			pr_err(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x%08x\n",
+-			       sdhci_readl(host, SDHCI_ADMA_ERROR),
+-			       sdhci_readl(host, SDHCI_ADMA_ADDRESS_HI),
+-			       sdhci_readl(host, SDHCI_ADMA_ADDRESS));
+-		else
+-			pr_err(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
+-			       sdhci_readl(host, SDHCI_ADMA_ERROR),
+-			       sdhci_readl(host, SDHCI_ADMA_ADDRESS));
++		if (host->flags & SDHCI_USE_64_BIT_DMA) {
++			SDHCI_DUMP("ADMA Err:  0x%08x | ADMA Ptr: 0x%08x%08x\n",
++				   sdhci_readl(host, SDHCI_ADMA_ERROR),
++				   sdhci_readl(host, SDHCI_ADMA_ADDRESS_HI),
++				   sdhci_readl(host, SDHCI_ADMA_ADDRESS));
++		} else {
++			SDHCI_DUMP("ADMA Err:  0x%08x | ADMA Ptr: 0x%08x\n",
++				   sdhci_readl(host, SDHCI_ADMA_ERROR),
++				   sdhci_readl(host, SDHCI_ADMA_ADDRESS));
++		}
  	}
  
- 	if (host->ops->platform_execute_tuning) {
--		spin_unlock_irqrestore(&host->lock, flags);
- 		err = host->ops->platform_execute_tuning(host, opcode);
--		spin_lock_irqsave(&host->lock, flags);
--		goto out_unlock;
-+		goto out;
- 	}
- 
- 	host->mmc->retune_period = tuning_count;
- 
- 	sdhci_start_tuning(host);
- 
--	__sdhci_execute_tuning(host, opcode, flags);
-+	__sdhci_execute_tuning(host, opcode);
- 
- 	sdhci_end_tuning(host);
--out_unlock:
-+out:
- 	host->flags &= ~SDHCI_HS400_TUNING;
--	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	return err;
+-	pr_err(DRIVER_NAME ": ===========================================\n");
++	SDHCI_DUMP("============================================\n");
  }
+ 
+ /*****************************************************************************\
 -- 
 1.9.1
 
