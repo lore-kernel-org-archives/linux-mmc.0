@@ -1,33 +1,61 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v3 2/3] Documentation: bindings: add description of PHY delays
- for sdhci-cadence
-Date: Mon, 20 Mar 2017 08:49:42 +0000
-Message-ID: <DM5PR07MB30825F564934022A40A52C88DD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
-References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
- <1489754417-13639-1-git-send-email-piotrs@cadence.com>
- <CAK7LNAT5FQY6yQT43SHFYVLVVsimiYtOCe+P9p55zj3+ey4mwQ@mail.gmail.com>
+From: Andrzej Hajda <a.hajda@samsung.com>
+Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
+Date: Mon, 20 Mar 2017 10:22:54 +0100
+Message-ID: <e70d77e9-bd60-a0f4-6510-48b72cb67624@samsung.com>
+References: <20170315113139.17989-1-p.zabel@pengutronix.de>
+ <CGME20170320092255eucas1p1459c023fd9b479c8e5323a6ac97dbf58@eucas1p1.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAT5FQY6yQT43SHFYVLVVsimiYtOCe+P9p55zj3+ey4mwQ@mail.gmail.com>
-Content-Language: en-US
+In-reply-to: <20170315113139.17989-1-p.zabel@pengutronix.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Philipp Zabel <p.zabel@pengutronix.de>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, "Szyprowski, Marek" <m.szyprowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
-IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDE3IE1hcmNo
-LCAyMDE3IDY6MzAgUE0NCj4gU3ViamVjdDogUmU6IFt2MyAyLzNdIERvY3VtZW50YXRpb246IGJp
-bmRpbmdzOiBhZGQgZGVzY3JpcHRpb24gb2YgUEhZIGRlbGF5cyBmb3Igc2RoY2ktY2FkZW5jZQ0K
-PiANCj4gSGkgUGlvdHIsDQo+IA0KPiAyMDE3LTAzLTE3IDIxOjQwIEdNVCswOTowMCBQaW90ciBT
-cm9rYSA8cGlvdHJzQGNhZGVuY2UuY29tPjoNCj4gPiBEVFMgcHJvcGVydGllcyBhcmUgdXNlZCBp
-bnN0ZWFkIG9mIGZpeGVkIGRhdGEgYmVjYXVzZSBQSFkgc2V0dGluZ3MgY2FuDQo+ID4gYmUgZGlm
-ZmVyZW50IGZvciBkaWZmZXJlbnQgY2hpcHMvYm9hcmRzLg0KPiA+IEFkZCBkZXNjcmlwdGlvbiBv
-ZiBuZXcgRExMIFBIWSBkZWxheXMuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBQaW90ciBTcm9r
-YSA8cGlvdHJzQGNhZGVuY2UuY29tPg0KPiANCj4gDQo+IEkgdGhpbmsgeW91IGhhdmUgYSBjaGFu
-Y2UgZm9yIHY0Lg0KPiANCj4gTmV4dCB0aW1lLCBwbGVhc2UgZm9sbG93IFJvYidzIHN1Z2dlc3Rp
-b24NCj4gDQo+ID4gRm9yIHRoZSBzdWJqZWN0OiAiZHQtYmluZGluZ3M6IG1tYzogLi4uIg0KPiAN
-Cj4gDQpJIG1pc3NlZCBpdC4gVGhhbmtzLiBJIHdpbGwgdXNlIHByb3BlciBwcmVmaXggaW4gdGhl
-IG5leHQgdmVyc2lvbi4NCg0KQmVzdCBSZWdhcmRzDQpQaW90ciBTcm9rYQ0K
+Hi Philipp,
+
+Todays next branch does not work with exynos5433-tm2 board.
+I guess this patch causes regression. On MMC without reset controller I
+get errors:
+[    4.938222] dwmmc_exynos 15540000.mshc: platform data not available
+[    4.943268] dwmmc_exynos: probe of 15540000.mshc failed with error -22
+[    4.950184] dwmmc_exynos 15560000.mshc: platform data not available
+[    4.955962] dwmmc_exynos: probe of 15560000.mshc failed with error -22
+
+Commenting out reset controller get and error checks 'fixes' the issue.
+
+On 15.03.2017 12:31, Philipp Zabel wrote:
+> As of commit bb475230b8e5 ("reset: make optional functions really
+> optional"), the reset framework API calls use NULL pointers to describe
+> optional, non-present reset controls.
+> 
+> This allows to return errors from devm_reset_control_get_optional and to
+> call reset_control_(de)assert unconditionally.
+> 
+> Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 14 +++++---------
+>  1 file changed, 5 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a9ac0b4573131..3d62b0a1f81cb 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2968,10 +2968,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  
+>  	/* find reset controller when exist */
+>  	pdata->rstc = devm_reset_control_get_optional(dev, "reset");
+> -	if (IS_ERR(pdata->rstc)) {
+> -		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
+> -			return ERR_PTR(-EPROBE_DEFER);
+> -	}
+> +	if (IS_ERR(pdata->rstc))
+> +		return ERR_CAST(pdata->rstc);
+
+
+With three lines above commented out it works.
+
+Regards
+Andrzej
