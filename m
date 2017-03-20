@@ -1,50 +1,33 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: change controller error info to
- debug level
-Date: Mon, 20 Mar 2017 09:59:52 +0100
-Message-ID: <20170320085952.dodqzbj7bvvggke6@lukather>
-References: <20170316132903.61246-1-icenowy@aosc.xyz>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: RE: [v3 2/3] Documentation: bindings: add description of PHY delays
+ for sdhci-cadence
+Date: Mon, 20 Mar 2017 08:49:42 +0000
+Message-ID: <DM5PR07MB30825F564934022A40A52C88DD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
+References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
+ <1489754417-13639-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNAT5FQY6yQT43SHFYVLVVsimiYtOCe+P9p55zj3+ey4mwQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="kutqrz3po2h66nsu"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBIFUX3DAKGQECHE6PEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <20170316132903.61246-1-icenowy-ymACFijhrKM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAK7LNAT5FQY6yQT43SHFYVLVVsimiYtOCe+P9p55zj3+ey4mwQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
---kutqrz3po2h66nsu
-Content-Type: text/plain; charset=UTF-8
-Content-Disposition: inline
-
-On Thu, Mar 16, 2017 at 09:29:03PM +0800, Icenowy Zheng wrote:
-> The controller's errors are usually normal (for example, for MMC or SDIO
-> cards, some errors are expected to happen; and for boards without a
-> dedicated card detect pin the error info will even flood console and
-> hide other normal messages) and hard to understand.
-> 
-> Change their print level to debug, thus it won't be shown to generic
-> users.
-> 
-> Signed-off-by: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-
-Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-
-Thanks!
-Maxime
-
--- 
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
---kutqrz3po2h66nsu--
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
+IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDE3IE1hcmNo
+LCAyMDE3IDY6MzAgUE0NCj4gU3ViamVjdDogUmU6IFt2MyAyLzNdIERvY3VtZW50YXRpb246IGJp
+bmRpbmdzOiBhZGQgZGVzY3JpcHRpb24gb2YgUEhZIGRlbGF5cyBmb3Igc2RoY2ktY2FkZW5jZQ0K
+PiANCj4gSGkgUGlvdHIsDQo+IA0KPiAyMDE3LTAzLTE3IDIxOjQwIEdNVCswOTowMCBQaW90ciBT
+cm9rYSA8cGlvdHJzQGNhZGVuY2UuY29tPjoNCj4gPiBEVFMgcHJvcGVydGllcyBhcmUgdXNlZCBp
+bnN0ZWFkIG9mIGZpeGVkIGRhdGEgYmVjYXVzZSBQSFkgc2V0dGluZ3MgY2FuDQo+ID4gYmUgZGlm
+ZmVyZW50IGZvciBkaWZmZXJlbnQgY2hpcHMvYm9hcmRzLg0KPiA+IEFkZCBkZXNjcmlwdGlvbiBv
+ZiBuZXcgRExMIFBIWSBkZWxheXMuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBQaW90ciBTcm9r
+YSA8cGlvdHJzQGNhZGVuY2UuY29tPg0KPiANCj4gDQo+IEkgdGhpbmsgeW91IGhhdmUgYSBjaGFu
+Y2UgZm9yIHY0Lg0KPiANCj4gTmV4dCB0aW1lLCBwbGVhc2UgZm9sbG93IFJvYidzIHN1Z2dlc3Rp
+b24NCj4gDQo+ID4gRm9yIHRoZSBzdWJqZWN0OiAiZHQtYmluZGluZ3M6IG1tYzogLi4uIg0KPiAN
+Cj4gDQpJIG1pc3NlZCBpdC4gVGhhbmtzLiBJIHdpbGwgdXNlIHByb3BlciBwcmVmaXggaW4gdGhl
+IG5leHQgdmVyc2lvbi4NCg0KQmVzdCBSZWdhcmRzDQpQaW90ciBTcm9rYQ0K
