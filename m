@@ -1,65 +1,35 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
-Date: Mon, 20 Mar 2017 19:10:56 +0100
-Message-ID: <CAPDyKFr-08ontZTfraOEAOROcb9pqFQkqzV4zMRA4OdsxXrvtQ@mail.gmail.com>
-References: <20170315113139.17989-1-p.zabel@pengutronix.de>
- <CGME20170320092255eucas1p1459c023fd9b479c8e5323a6ac97dbf58@eucas1p1.samsung.com>
- <e70d77e9-bd60-a0f4-6510-48b72cb67624@samsung.com> <1490003602.2917.16.camel@pengutronix.de>
- <b80ceee9-40e7-f32b-d44a-00dd4e7f6461@samsung.com> <1490005679.2917.32.camel@pengutronix.de>
- <5f6c8c58-c4e4-39e6-2c29-e889bd6bf565@samsung.com> <1490007648.2917.41.camel@pengutronix.de>
+From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
+Subject: RE: Possible bug in mmc-utils: Is MMC 'partition setting completed'
+ required for 'write reliability'?
+Date: Mon, 20 Mar 2017 18:01:06 +0000
+Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD58E8@Elexis-Exch02.elexisad.net>
+References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>,<CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1490007648.2917.41.camel@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: Andrzej Hajda <a.hajda@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Szyprowski, Marek" <m.szyprowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail1.bemta3.messagelabs.com ([195.245.230.167]:14992 "EHLO
+        mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1756131AbdCTSCP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 14:02:15 -0400
+In-Reply-To: <CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
+Content-Language: en-GB
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ben Gardiner <ben.l.gardiner@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 20 March 2017 at 12:00, Philipp Zabel <p.zabel@pengutronix.de> wrote:
-> On Mon, 2017-03-20 at 11:49 +0100, Andrzej Hajda wrote:
->> On 20.03.2017 11:27, Philipp Zabel wrote:
-> [...]
->> > diff --git a/include/linux/reset.h b/include/linux/reset.h
->> > index 86b4ed75359e8..c905ff1c21ec6 100644
->> > --- a/include/linux/reset.h
->> > +++ b/include/linux/reset.h
->> > @@ -74,14 +74,14 @@ static inline struct reset_control *__of_reset_control_get(
->> >                                     const char *id, int index, bool shared,
->> >                                     bool optional)
->> >  {
->> > -   return ERR_PTR(-ENOTSUPP);
->> > +   return optional ? NULL : ERR_PTR(-ENOTSUPP);
->> >  }
->> >
->> >  static inline struct reset_control *__devm_reset_control_get(
->> >                                     struct device *dev, const char *id,
->> >                                     int index, bool shared, bool optional)
->> >  {
->> > -   return ERR_PTR(-ENOTSUPP);
->> > +   return optional ? NULL : ERR_PTR(-ENOTSUPP);
->> >  }
->> >
->> >  #endif /* CONFIG_RESET_CONTROLLER */
->> > ---------->8----------
->>
->> In dw_mmc.c file there are also unconditional calls to
->> reset_control_assert, with disabled RESET_CONTROLLER it will cause
->> unexpected WARNs.
->> Anyway if you change reset API as above I think you should remove all
->> warns from reset stubs, because NULL reset is valid, but these warns are
->> there for reason - contradiction.
->
-> You are right, I have to let go of those, too.
-
-
-Until fixed, I have dropped the three changes from my next branch
-related to this. Please re-post when fixed.
-
-Kind regards
-Uffe
-
->
-> regards
-> Philipp
->
+DQpIZWxsbyBDaHJpcyBhbmQgQmVuLA0KDQpvdXIgY29ycG9yYXRlIGUtbWFpbCBzZWVtcyB0byBk
+aXNsaWtlIHRoZSBrZXJuZWwgbWFpbGluZyBsaXN0LCBzbyBiZSBzdXJlIHRvIGtlZXAgQ0Npbmcg
+bWUgZGlyZWN0bHkuDQoNCklmIHlvdSBib3RoIGFncmVlIHdpdGggbXkgZGlhZ25vc2lzLCBJJ2xs
+IGJlIGhhcHB5IHRvIGJ1aWxkIHlvdSBhIHBhdGNoLg0KDQoNCi0tDQoNCmkuQS4gSGFyYWxkIEJy
+aW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50ZXJuYXRpb25hbCBHbWJIDQpXZXJrIExlb3BvbGRz
+aMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0OS0yNTENCkQtMzM4MTggTGVvcG9sZHNow7ZoZQ0K
+DQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUxMw0KDQpFOiAgICAgIGhhcmFsZC5icmlua21hbm5A
+YnN0LWludGVybmF0aW9uYWwuY29tPG1haWx0bzpoYXJhbGQuYnJpbmttYW5uQGJzdC1pbnRlcm5h
+dGlvbmFsLmNvbT4NClc6ICAgICAgaHR0cDovL3d3dy5ic3QtZWx0cm9tYXQuY29tDQoNCg0KDQoN
+Cg0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fDQpBbXRzZ2VyaWNodCBCaWVsZWZlbGQsIEhSQiBOci4gMzA4MzANCkdlc2Now6RmdHNmw7xo
+cmVyIEtyaXN0aWFuIErDvG5rZSwgRHIuIEpvaGFubi1DYXJzdGVuIEtpcHAsIERyLiBHdW50ZXIN
+ClRhdXRvcnVzDQpTaXR6IGRlciBHZXNlbGxzY2hhZnQ6IEJpZWxlZmVsZA0KVmVydHJhdWxpY2hl
+IEUtTWFpbCB2b24gQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21iSA0K
