@@ -1,74 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: pwrseq: add op reset to struct mmc_pwrseq_ops
-Date: Mon, 20 Mar 2017 19:02:26 +0100
-Message-ID: <CAPDyKFpuAgFnoAFymZeiPiCQcXATkz6KCEm8Wr_j4hD+nrtGuQ@mail.gmail.com>
-References: <75ad5eac-412b-fe73-ff53-3d8b975937e4@gmail.com>
- <c75c3e5c-c4e1-3f2f-267b-1c781052c55e@gmail.com> <CAPDyKFr6_Y3cSv5Q1WRSQBo7_bsyeVVQTYBQ01gykdMpVWNtXw@mail.gmail.com>
- <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com> <d029f887-4fd3-1319-fd01-a99ea9ede5c1@gmail.com>
+Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
+Date: Mon, 20 Mar 2017 19:09:26 +0100
+Message-ID: <CAPDyKFpkcPVnoMs+eH4yo_tBJoKURd3O9VHd0jjvFbCiiNZsZw@mail.gmail.com>
+References: <20170315113139.17989-1-p.zabel@pengutronix.de>
+ <CGME20170320092255eucas1p1459c023fd9b479c8e5323a6ac97dbf58@eucas1p1.samsung.com>
+ <e70d77e9-bd60-a0f4-6510-48b72cb67624@samsung.com> <1490003602.2917.16.camel@pengutronix.de>
+ <b80ceee9-40e7-f32b-d44a-00dd4e7f6461@samsung.com> <1490005679.2917.32.camel@pengutronix.de>
+ <5f6c8c58-c4e4-39e6-2c29-e889bd6bf565@samsung.com> <1490007648.2917.41.camel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:34285 "EHLO
-        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756393AbdCTSCs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 14:02:48 -0400
-Received: by mail-vk0-f46.google.com with SMTP id z204so17503455vkd.1
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2017 11:02:37 -0700 (PDT)
-In-Reply-To: <d029f887-4fd3-1319-fd01-a99ea9ede5c1@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1490007648.2917.41.camel@pengutronix.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Philipp Zabel <p.zabel@pengutronix.de>
+Cc: Andrzej Hajda <a.hajda@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Szyprowski, Marek" <m.szyprowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-[...]
-
+On 20 March 2017 at 12:00, Philipp Zabel <p.zabel@pengutronix.de> wrote:
+> On Mon, 2017-03-20 at 11:49 +0100, Andrzej Hajda wrote:
+>> On 20.03.2017 11:27, Philipp Zabel wrote:
+> [...]
+>> > diff --git a/include/linux/reset.h b/include/linux/reset.h
+>> > index 86b4ed75359e8..c905ff1c21ec6 100644
+>> > --- a/include/linux/reset.h
+>> > +++ b/include/linux/reset.h
+>> > @@ -74,14 +74,14 @@ static inline struct reset_control *__of_reset_control_get(
+>> >                                     const char *id, int index, bool shared,
+>> >                                     bool optional)
+>> >  {
+>> > -   return ERR_PTR(-ENOTSUPP);
+>> > +   return optional ? NULL : ERR_PTR(-ENOTSUPP);
+>> >  }
+>> >
+>> >  static inline struct reset_control *__devm_reset_control_get(
+>> >                                     struct device *dev, const char *id,
+>> >                                     int index, bool shared, bool optional)
+>> >  {
+>> > -   return ERR_PTR(-ENOTSUPP);
+>> > +   return optional ? NULL : ERR_PTR(-ENOTSUPP);
+>> >  }
+>> >
+>> >  #endif /* CONFIG_RESET_CONTROLLER */
+>> > ---------->8----------
 >>
-> Other alternative:
+>> In dw_mmc.c file there are also unconditional calls to
+>> reset_control_assert, with disabled RESET_CONTROLLER it will cause
+>> unexpected WARNs.
+>> Anyway if you change reset API as above I think you should remove all
+>> warns from reset stubs, because NULL reset is valid, but these warns are
+>> there for reason - contradiction.
 >
-> typedef void (*hw_reset_t)(struct mmc_host *host);
+> You are right, I have to let go of those, too.
 >
-> hw_reset_t mmc_get_hw_reset(struct mmc_host *host)
-> {
->        struct mmc_pwrseq *p = host->pwrseq;
->
->        if (host->ops->hw_reset)
->                return host->ops->hw_reset;
->        else if (p && p->ops->reset)
->                return p->ops->reset;
->        else
->                return NULL;
-> }
->
-> And then use what mmc_get_hw_reset returns instead of using
-> host->ops->hw_reset directly.
->
-> How do you like this one?
-
-Well, I would just rather do these checks and call the correct
-callback in mmc_reset(). There is no need to invent a function
-returning a function pointer when we call it directly instead.
-
-Additionally, I wonder whether it could make sense to allow both
-callbacks to co-exist and then call both. This would give the mmc host
-some options for doing some internal reset as well, while the pwrseq
-could handle the actual GPIO pin.
-
-What do you think?
-
-Kind regards
-Uffe
-
->
->>>>  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
->>>>
->>>>  #endif /* LINUX_MMC_CORE_H */
->>>> --
->>>> 2.11.0
->>>>
->>>>
->>>
->>> Kind regards
->>> Uffe
->>>
->>
+> regards
+> Philipp
 >
