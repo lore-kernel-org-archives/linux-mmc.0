@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
-Date: Mon, 20 Mar 2017 19:09:26 +0100
-Message-ID: <CAPDyKFpkcPVnoMs+eH4yo_tBJoKURd3O9VHd0jjvFbCiiNZsZw@mail.gmail.com>
+Date: Mon, 20 Mar 2017 19:10:56 +0100
+Message-ID: <CAPDyKFr-08ontZTfraOEAOROcb9pqFQkqzV4zMRA4OdsxXrvtQ@mail.gmail.com>
 References: <20170315113139.17989-1-p.zabel@pengutronix.de>
  <CGME20170320092255eucas1p1459c023fd9b479c8e5323a6ac97dbf58@eucas1p1.samsung.com>
  <e70d77e9-bd60-a0f4-6510-48b72cb67624@samsung.com> <1490003602.2917.16.camel@pengutronix.de>
@@ -51,6 +51,14 @@ On 20 March 2017 at 12:00, Philipp Zabel <p.zabel@pengutronix.de> wrote:
 >> there for reason - contradiction.
 >
 > You are right, I have to let go of those, too.
+
+
+Until fixed, I have dropped the three changes from my next branch
+related to this. Please re-post when fixed.
+
+Kind regards
+Uffe
+
 >
 > regards
 > Philipp
