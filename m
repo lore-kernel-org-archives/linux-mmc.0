@@ -1,112 +1,159 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 11/25] mmc: sdhci: Improve debug print format
-Date: Mon, 20 Mar 2017 19:50:39 +0200
-Message-ID: <1490032253-6030-12-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 10/25] mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
+Date: Mon, 20 Mar 2017 19:50:38 +0200
+Message-ID: <1490032253-6030-11-git-send-email-adrian.hunter@intel.com>
 References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:65242 "EHLO mga04.intel.com"
+Received: from mga04.intel.com ([192.55.52.120]:11877 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756094AbdCTR6P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Mar 2017 13:58:15 -0400
+        id S1756047AbdCTR6O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Mar 2017 13:58:14 -0400
 In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Ensure all debug prints start with the mmc host name.
+Tuning execution is already synchronized with respect to other host
+operations by upper layers "claiming" the host, which also takes care of
+runtime pm. There can be no requests in progress. Retain the spin lock
+usage only for ensuring that sending tuning commands is synchronized with
+respect to the interrupt handler.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 28 ++++++++++++----------------
- 1 file changed, 12 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sdhci.c | 36 ++++++++++++++----------------------
+ 1 file changed, 14 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fffd2efd703e..56be77c2044e 100644
+index f7dfb40826c7..fffd2efd703e 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -38,7 +38,7 @@
- #define DRIVER_NAME "sdhci"
+@@ -1987,8 +1987,7 @@ static void sdhci_reset_tuning(struct sdhci_host *host)
+ 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ }
  
- #define DBG(f, x...) \
--	pr_debug(DRIVER_NAME " [%s()]: " f, __func__,## x)
-+	pr_debug("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
- 
- #define MAX_TUNING_LOOP 40
- 
-@@ -715,8 +715,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	}
- 
- 	if (count >= 0xF) {
--		DBG("%s: Too large timeout 0x%x requested for CMD%d!\n",
--		    mmc_hostname(host->mmc), count, cmd->opcode);
-+		DBG("Too large timeout 0x%x requested for CMD%d!\n",
-+		    count, cmd->opcode);
- 		count = 0xE;
- 	}
- 
-@@ -2479,7 +2479,6 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- #ifdef CONFIG_MMC_DEBUG
- static void sdhci_adma_show_error(struct sdhci_host *host)
+-static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
+-			       unsigned long flags)
++static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode)
  {
--	const char *name = mmc_hostname(host->mmc);
- 	void *desc = host->adma_table;
+ 	sdhci_reset_tuning(host);
  
- 	sdhci_dumpregs(host);
-@@ -2488,14 +2487,14 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
- 		struct sdhci_adma2_64_desc *dma_desc = desc;
+@@ -1997,9 +1996,7 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
  
- 		if (host->flags & SDHCI_USE_64_BIT_DMA)
--			DBG("%s: %p: DMA 0x%08x%08x, LEN 0x%04x, Attr=0x%02x\n",
--			    name, desc, le32_to_cpu(dma_desc->addr_hi),
-+			DBG("%p: DMA 0x%08x%08x, LEN 0x%04x, Attr=0x%02x\n",
-+			    desc, le32_to_cpu(dma_desc->addr_hi),
- 			    le32_to_cpu(dma_desc->addr_lo),
- 			    le16_to_cpu(dma_desc->len),
- 			    le16_to_cpu(dma_desc->cmd));
- 		else
--			DBG("%s: %p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
--			    name, desc, le32_to_cpu(dma_desc->addr_lo),
-+			DBG("%p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
-+			    desc, le32_to_cpu(dma_desc->addr_lo),
- 			    le16_to_cpu(dma_desc->len),
- 			    le16_to_cpu(dma_desc->cmd));
+ 	sdhci_end_tuning(host);
  
-@@ -2611,10 +2610,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 				~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
- 				SDHCI_DEFAULT_BOUNDARY_SIZE;
- 			host->data->bytes_xfered = dmanow - dmastart;
--			DBG("%s: DMA base 0x%08x, transferred 0x%06x bytes,"
--				" next 0x%08x\n",
--				mmc_hostname(host->mmc), dmastart,
--				host->data->bytes_xfered, dmanow);
-+			DBG("DMA base 0x%08x, transferred 0x%06x bytes, next 0x%08x\n",
-+			    dmastart, host->data->bytes_xfered, dmanow);
- 			sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
+-	spin_unlock_irqrestore(&host->lock, flags);
+ 	mmc_abort_tuning(host->mmc, opcode);
+-	spin_lock_irqsave(&host->lock, flags);
+ }
+ 
+ /*
+@@ -2009,12 +2006,14 @@ static void sdhci_abort_tuning(struct sdhci_host *host, u32 opcode,
+  * interrupt setup is different to other commands and there is no timeout
+  * interrupt so special handling is needed.
+  */
+-static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
+-			      unsigned long flags)
++static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_command cmd = {};
+ 	struct mmc_request mrq = {};
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	cmd.opcode = opcode;
+ 	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+@@ -2048,17 +2047,16 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode,
+ 
+ 	host->tuning_done = 0;
+ 
++	mmiowb();
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	/* Wait for Buffer Read Ready interrupt */
+ 	wait_event_timeout(host->buf_ready_int, (host->tuning_done == 1),
+ 			   msecs_to_jiffies(50));
+ 
+-	spin_lock_irqsave(&host->lock, flags);
+ }
+ 
+-static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode,
+-				   unsigned long flags)
++static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	int i;
+ 
+@@ -2069,12 +2067,12 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode,
+ 	for (i = 0; i < MAX_TUNING_LOOP; i++) {
+ 		u16 ctrl;
+ 
+-		sdhci_send_tuning(host, opcode, flags);
++		sdhci_send_tuning(host, opcode);
+ 
+ 		if (!host->tuning_done) {
+ 			pr_info("%s: Tuning timeout, falling back to fixed sampling clock\n",
+ 				mmc_hostname(host->mmc));
+-			sdhci_abort_tuning(host, opcode, flags);
++			sdhci_abort_tuning(host, opcode);
+ 			return;
  		}
  
-@@ -2659,8 +2656,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 				  SDHCI_INT_BUS_POWER);
- 		sdhci_writel(host, mask, SDHCI_INT_STATUS);
+@@ -2099,12 +2097,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	int err = 0;
+-	unsigned long flags;
+ 	unsigned int tuning_count = 0;
+ 	bool hs400_tuning;
  
--		DBG("*** %s got interrupt: 0x%08x\n",
--			mmc_hostname(host->mmc), intmask);
-+		DBG("IRQ status 0x%08x\n", intmask);
+-	spin_lock_irqsave(&host->lock, flags);
+-
+ 	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
  
- 		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
- 			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
-@@ -3290,9 +3286,9 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	     !(host->flags & SDHCI_USE_SDMA)) &&
- 	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
- 		host->flags |= SDHCI_AUTO_CMD23;
--		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
-+		DBG("Auto-CMD23 available\n");
- 	} else {
--		DBG("%s: Auto-CMD23 unavailable\n", mmc_hostname(mmc));
-+		DBG("Auto-CMD23 unavailable\n");
+ 	if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+@@ -2121,7 +2116,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	/* HS400 tuning is done in HS200 mode */
+ 	case MMC_TIMING_MMC_HS400:
+ 		err = -EINVAL;
+-		goto out_unlock;
++		goto out;
+ 
+ 	case MMC_TIMING_MMC_HS200:
+ 		/*
+@@ -2142,26 +2137,23 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		/* FALLTHROUGH */
+ 
+ 	default:
+-		goto out_unlock;
++		goto out;
  	}
  
- 	/*
+ 	if (host->ops->platform_execute_tuning) {
+-		spin_unlock_irqrestore(&host->lock, flags);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+-		spin_lock_irqsave(&host->lock, flags);
+-		goto out_unlock;
++		goto out;
+ 	}
+ 
+ 	host->mmc->retune_period = tuning_count;
+ 
+ 	sdhci_start_tuning(host);
+ 
+-	__sdhci_execute_tuning(host, opcode, flags);
++	__sdhci_execute_tuning(host, opcode);
+ 
+ 	sdhci_end_tuning(host);
+-out_unlock:
++out:
+ 	host->flags &= ~SDHCI_HS400_TUNING;
+-	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	return err;
+ }
 -- 
 1.9.1
 
