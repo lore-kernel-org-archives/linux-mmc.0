@@ -1,36 +1,50 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v3 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Mon, 20 Mar 2017 08:47:44 +0000
-Message-ID: <DM5PR07MB308222A445B7A39CBFE4896ADD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
-References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
- <1489754503-16559-1-git-send-email-piotrs@cadence.com>
- <CAK7LNAQGOeZVqvc=6Agq2xN5B5cBMtaCAkS8-V6uBoO1ziSSuw@mail.gmail.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: change controller error info to
+ debug level
+Date: Mon, 20 Mar 2017 09:59:52 +0100
+Message-ID: <20170320085952.dodqzbj7bvvggke6@lukather>
+References: <20170316132903.61246-1-icenowy@aosc.xyz>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAQGOeZVqvc=6Agq2xN5B5cBMtaCAkS8-V6uBoO1ziSSuw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="kutqrz3po2h66nsu"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBIFUX3DAKGQECHE6PEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20170316132903.61246-1-icenowy-ymACFijhrKM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFzYWhpcm8gWWFtYWRh
-IFttYWlsdG86eWFtYWRhLm1hc2FoaXJvQHNvY2lvbmV4dC5jb21dDQo+IFNlbnQ6IDE3IE1hcmNo
-LCAyMDE3IDY6MjQgUE0NCj4gU3ViamVjdDogUmU6IFt2MyAzLzNdIG1tYzogc2RoY2ktY2FkZW5j
-ZTogVXBkYXRlIFBIWSBkZWxheSBjb25maWd1cmF0aW9uDQo+IA0KPiANCj4gDQo+ID4gQEAgLTYy
-LDEwICs2NiwzMyBAQA0KPiA+ICAgKi8NCj4gPiAgI2RlZmluZSBTREhDSV9DRE5TX01BWF9UVU5J
-TkdfTE9PUCAgICAgNDANCj4gPg0KPiA+ICtzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9p
-ZCBzZGhjaV9jZG5zX21hdGNoW107DQo+ID4gKw0KPiANCj4gWW91IGZvcmdvdCB0byByZW1vdmUg
-dGhpcy4NCj4gDQpZb3UgYXJlIHJpZ2h0LiBUaGFua3MuDQogDQo+IA0KPiA+IEBAIC0yMjcsNiAr
-MjY3LDcgQEAgc3RhdGljIGludCBzZGhjaV9jZG5zX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZp
-Y2UgKnBkZXYpDQo+ID4gICAgICAgICBzdHJ1Y3Qgc2RoY2lfY2Ruc19wcml2ICpwcml2Ow0KPiA+
-ICAgICAgICAgc3RydWN0IGNsayAqY2xrOw0KPiA+ICAgICAgICAgaW50IHJldDsNCj4gPiArICAg
-ICAgIHN0cnVjdCBkZXZpY2UgKmRldiA9ICZwZGV2LT5kZXY7DQo+ID4NCj4gPiAgICAgICAgIGNs
-ayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCBOVUxMKTsNCj4gDQo+IA0KPiBJZiB5b3UgYWRk
-ICJkZXYiLCBwbGVhc2UgdXNlIGl0IGZvciBkZXZtX2Nsa19nZXQsIHRvby4NCj4gDQpJIGRpZCBv
-biB0aGUgZmlyc3QgcGF0Y2ggdmVyc2lvbiBidXQgVWxmIHBvaW50ZWQgdGhhdCB0aGlzIGlzIHVu
-cmVsYXRlZCBjaGFuZ2UgYW5kIHNob3VsZCBiZSByZW1vdmVkLiANClRoZXJlZm9yZSBJIHJlbW92
-ZSBpdC4gDQoNCj4gDQo+IA0KPiAtLQ0KPiBCZXN0IFJlZ2FyZHMNCj4gTWFzYWhpcm8gWWFtYWRh
-DQo=
+
+--kutqrz3po2h66nsu
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+On Thu, Mar 16, 2017 at 09:29:03PM +0800, Icenowy Zheng wrote:
+> The controller's errors are usually normal (for example, for MMC or SDIO
+> cards, some errors are expected to happen; and for boards without a
+> dedicated card detect pin the error info will even flood console and
+> hide other normal messages) and hard to understand.
+> 
+> Change their print level to debug, thus it won't be shown to generic
+> users.
+> 
+> Signed-off-by: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
+
+Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+
+Thanks!
+Maxime
+
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+--kutqrz3po2h66nsu--
