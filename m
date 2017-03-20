@@ -1,49 +1,75 @@
-From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
-Subject: Possible bug in mmc-utils: Is MMC 'partition setting completed'
- required for 'write reliability'?
-Date: Mon, 20 Mar 2017 15:40:09 +0000
-Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH V2 1/2] mmc: sdhci: Add support for setting parent clock
+Date: Mon, 20 Mar 2017 17:52:18 +0100
+Message-ID: <20170320165218.GA14787@ulmo.ba.sec>
+References: <1489742732-7722-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta5.messagelabs.com ([195.245.231.152]:61628 "EHLO
-        mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754077AbdCTQFu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 12:05:50 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="VbJkn9YxBvnuCH5J"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1489742732-7722-1-git-send-email-jonathanh@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jon Hunter <jonathanh@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ritesh Harjani <riteshh@codeaurora.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-DQpJIGFtIGhhdmluZyBwcm9ibGVtcyB3aXRoIHRoZSAnbW1jJyB1c2Vyc3BhY2UgY29tbWFuZCBp
-biBtbWMtdXRpbHMuDQpUaGlzIGNhbGw6DQoNCj4gL3Vzci9iaW4vbW1jIHdyaXRlX3JlbGlhYmls
-aXR5IHNldCAteSAwIC9kZXYvbW1jYmxrMQ0KDQpyZXN1bHRzIGluOg0KDQo+IHNldHRpbmcgT1RQ
-IFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCENCj4gU2V0dGluZyBPVFAgUEFSVElUSU9OX1NF
-VFRJTkdfQ09NUExFVEVEIGZhaWxlZCBvbiAvZGV2L21tY2JsazENCg0KV2hpY2ggaXMgbm90IHRv
-byBzdXJwcmlzaW5nLCBzaW5jZSBJIG9ubHkgd2FudCB0byBzZXQgdGhlIHdyaXRlDQpyZWxpYWJp
-bGl0eSBiaXQgYW5kIGRpZCBub3QgdG91Y2ggYW55IChtbWMtKXBhcnRpdGlvbiBpbmZvcm1hdGlv
-biwgc28NCnRoYXQgaXQgcHJvYmFibHkgc3RpbGwgaXMgaW52YWxpZC4NCg0KSWYgSSB0aGVuIHR5
-cGU6DQoNCj4gL3Vzci9iaW4vbW1jIGV4dGNzZCByZWFkIC9kZXYvbW1jYmxrMQ0KDQp0aGF0IHJl
-bGlhYmxlIHdyaXRlIGJpdCBpcyBzaG93biBhcyBzZXQ6DQoNCj4gV3JpdGUgcmVsaWFiaWxpdHkg
-c2V0dGluZyByZWdpc3RlciBbV1JfUkVMX1NFVF06IDB4MDENCg0KQWZ0ZXIgY29uc3VsdGluZyB0
-aGUgSkVERUMgc3RhbmRhcmRzIEkgZmFpbGVkIHRvIGZpbmQgdGhlIG5lY2Vzc2l0eSB0bw0Kc2V0
-IHRoZSAiUGFydGl0aW9uIHNldHRpbmcgY29tcGxldGUiIGJpdCB0byBhY3R1YWxseSBlbmFibGUg
-dGhlDQoicmVsaWFibGUgd3JpdGUiIGZ1bmN0aW9uLiBJZiB0aGVyZSAqaXMqIG5vIGNvbm5lY3Rp
-b24sIHRoZW4gY29tbWl0DQoxOTZkMGQyOTU4ODg2N2JlZDUwY2QyOGI4ZjAzY2JiYjVlMGU2NjA4
-ICgyMDEzLTA5LTE5IDE3OjE0OjI5KSBtdXN0IG5vdA0KdHJ5IHRvIHNldCB0aGF0IGJpdCBhbmQg
-YWxzbyBtdXN0IHJlZnJhaW4gZnJvbSBzZXR0aW5nIHRoZSByZWxpYWJsZQ0Kd3JpdGUgYml0IGl0
-c2VsZiB3aGVuIGluIGRyeSBydW4gbW9kZS4NCg0KSSB3aWxsIGhhdmUgdG8gZGVmZXIgdG8gdGhl
-IGV4cGVydHMgaW4gdGhpcyBtYXR0ZXIgd2hldGhlciB0aGlzIGlzDQphY3R1YWxseSBhIGJ1ZyBp
-biB0aGUgbW1jIHV0aWxpdHkgb3IganVzdCBhIGxlc3MgdGhhbiBjbGVhciBkZWZpbml0aW9uDQpp
-biB0aGUgc3RhbmRhcmQgb3Igc29tZXRoaW5nIGVsc2UgZW50aXJlbHkuDQoNCi0tDQoNCmkuQS4g
-SGFyYWxkIEJyaW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50ZXJuYXRpb25hbCBHbWJIDQpXZXJr
-IExlb3BvbGRzaMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0OS0yNTENCkQtMzM4MTggTGVvcG9s
-ZHNow7ZoZQ0KDQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUxMw0KDQpFOiAgICAgIGhhcmFsZC5i
-cmlua21hbm5AYnN0LWludGVybmF0aW9uYWwuY29tDQpXOiAgICAgIGh0dHA6Ly93d3cuYnN0LWVs
-dHJvbWF0LmNvbQ0KDQoNCg0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fDQpBbXRzZ2VyaWNodCBCaWVsZWZlbGQsIEhSQiBOci4gMzA4MzAN
-Ckdlc2Now6RmdHNmw7xocmVyIEtyaXN0aWFuIErDvG5rZSwgRHIuIEpvaGFubi1DYXJzdGVuIEtp
-cHAsIERyLiBHdW50ZXINClRhdXRvcnVzDQpTaXR6IGRlciBHZXNlbGxzY2hhZnQ6IEJpZWxlZmVs
-ZA0KVmVydHJhdWxpY2hlIEUtTWFpbCB2b24gQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21i
-SA0KDQo=
+
+--VbJkn9YxBvnuCH5J
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Fri, Mar 17, 2017 at 09:25:31AM +0000, Jon Hunter wrote:
+> It is common for SD/MMC host controllers to set the parent clock that
+> drives the SD/MMC interface in order to support various operating
+> speeds. Typically, this is performed by calling common clock framework
+> APIs such as clk_set_rate(). The problem is that these APIs may sleep
+> and must not be called from within atomic sections and therefore, these
+> functions cannot be called within the existing 'set_clock' SDHCI
+> operator because they are called from within the context of a spinlock.
+> Add a new 'set_parent_clock' operator for the SDHCI driver that is
+> called early during the SDHCI 'set_ios' before the spinlock is aquired
+> to give the platform driver the opportunity to set the parent clock
+> rate.
+>=20
+> Please note that the Tegra and MSM SDHCI drivers currently appear to
+> mis-use the 'set_clock' operator by calling clk_set_rate(). In the case
+> of Tegra, occasionally but not always, 'scheduling while atomic' errors
+> are reported (so most of the time we are getting lucky). In the of the
+> MSM SDHCI driver, it is releasing and re-acquiring the spinlock which is
+> bad.
+>=20
+> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+> ---
+>=20
+> Changes since V1:
+> - Fixed idiotic copy-paste error and testing thoroughly!
+>=20
+>  drivers/mmc/host/sdhci.c | 3 +++
+>  drivers/mmc/host/sdhci.h | 2 ++
+>  2 files changed, 5 insertions(+)
+
+Reviewed-by: Thierry Reding <treding@nvidia.com>
+
+--VbJkn9YxBvnuCH5J
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAljQCL4ACgkQ3SOs138+
+s6HyIg//YxnQMIQVmFmTvURzNnEmcZdwzX7mhdKEGx8T73wuSntPt0SZwZWcakmA
+RVvFfnaTPACCcBLTKDY30L0BtDFvVHtM3GUYu1b7L/1hYnKm0GwrgVLctlql4zG+
+q5c/6yPFlJ5ZeSdTIkSsd7/4gPQQIdMbB7TkvmpxqLIgYIZ/sWxBLrxcYHT4CZoz
+SbdTVeVh7s2K0fYx8NIC+SEyfWE2PsNurfjy7aBEBWqXxcNkt9e4U6y33bqzyTm8
+Mu5M4kwEGY+0lAYVeihBFDEh5l8Szge8Dm3vSzw6qp2317aJjQ5gDZiYmVvV7GDy
+F0JI7fZYoG5UXE0EaU7f2dmwU5UlOnq1tOLr0oUwj5XytoSH0GFZGvQxMQ6SqIKu
+n8Tczvdc5zQGkpJOXI1eu5JNO/1q6NRIo5A8pLUBmR5FoQEFSY5UFCt47qB32qvE
+FViBMmHV+N8i+YPDkvJC92SYlggDLX84HCv84qBVjfDAJwsCGlPmT8IwzqgXHfqk
+TZHTU+FdEXs5QIKaHGJT4uTp8kevsqlXFSXGBE53SVRdICq5q8vwvgyakXA39Wil
+vbkb/bNMm3y1wGTINL6qSlKk7QMZyPPlUngxKGQ9YjYViNH6EmDrzInkkvkmX3J+
+8XdPWwruUnk/k/ffCEbEMYpLq9AdQxPp9orEbpptE93+GRUr4Tw=
+=bffC
+-----END PGP SIGNATURE-----
+
+--VbJkn9YxBvnuCH5J--
