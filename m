@@ -1,89 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v12 3/9] mmc: cavium: Add MMC platform driver for Octeon SOCs
-Date: Mon, 20 Mar 2017 16:19:41 +0100
-Message-ID: <CAPDyKFrKOiyPiFKH7z7RaFYFuMM67oLmWOx25wT2x6m+BeSKeQ@mail.gmail.com>
-References: <20170310132507.32025-1-jglauber@cavium.com> <20170310132507.32025-4-jglauber@cavium.com>
- <CAPDyKFqTf7qGMb5b-ZEdYJUrF-kr-kzLO-mR_N5Xx06eohgtCQ@mail.gmail.com> <20170320144050.GA18823@hardcore>
+From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
+Subject: Possible bug in mmc-utils: Is MMC 'partition setting completed'
+ required for 'write reliability'?
+Date: Mon, 20 Mar 2017 15:40:09 +0000
+Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f53.google.com ([209.85.213.53]:34688 "EHLO
-        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753377AbdCTPp3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 11:45:29 -0400
-Received: by mail-vk0-f53.google.com with SMTP id z204so15271971vkd.1
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2017 08:43:56 -0700 (PDT)
-In-Reply-To: <20170320144050.GA18823@hardcore>
+Received: from mail1.bemta5.messagelabs.com ([195.245.231.152]:61628 "EHLO
+        mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754077AbdCTQFu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 12:05:50 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jan Glauber <jan.glauber@caviumnetworks.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-On 20 March 2017 at 15:40, Jan Glauber <jan.glauber@caviumnetworks.com> wrote:
-> On Fri, Mar 17, 2017 at 02:35:34PM +0100, Ulf Hansson wrote:
->> On 10 March 2017 at 14:25, Jan Glauber <jglauber@cavium.com> wrote:
->> > Add a platform driver for Octeon MIPS SOCs.
->> >
->> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
->> > Signed-off-by: David Daney <david.daney@cavium.com>
->> > Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
->> > ---
->> >  drivers/mmc/host/Kconfig               |  10 ++
->> >  drivers/mmc/host/Makefile              |   2 +
->> >  drivers/mmc/host/cavium-pltfm-octeon.c | 183 +++++++++++++++++++++++++++++++++
->> >  3 files changed, 195 insertions(+)
->> >  create mode 100644 drivers/mmc/host/cavium-pltfm-octeon.c
->>
->> Please rename the file to cavium-octeon.c
->
-> OK.
->
->> >
->> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> > index f08691a..68cc811 100644
->> > --- a/drivers/mmc/host/Kconfig
->> > +++ b/drivers/mmc/host/Kconfig
->> > @@ -622,6 +622,16 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
->> >         help
->> >           If you say yes here SD-Cards may work on the EZkit.
->> >
->> > +config MMC_CAVIUM_OCTEON
->> > +       tristate "Cavium OCTEON SD/MMC Card Interface support"
->> > +       depends on CAVIUM_OCTEON_SOC
->> > +       help
->> > +         This selects Cavium OCTEON SD/MMC card Interface.
->> > +         If you have an OCTEON board with a Multimedia Card slot,
->> > +         say Y or M here.
->> > +
->> > +         If unsure, say N.
->> > +
->>
->> Adding more new cavium variants becomes a bit messy in this approach.
->> May I suggest something similar we are using for SDHCI mmc driver.
->
-> There will be no more new variants.
->
->> That is:
->>
->> For the core mmc cavium driver:
->> config MMC_CAVIUM (to build cavium-mmc.o)
->> I would also appreciate to rename that file to cavium.c
->> This also means you need to export the functions you provide from the
->> header cavium-mmc.h (rename to cavium.h)
->>
->> For the octeon variant:
->> config MMC_CAVIUM_OCTEON (to build cavium-octeon.o)
->> depends on MMC_CAVIUM && CAVIUM_OCTEON_SOC
->
-> Why is this better? It creates a module out of the shared code that only
-> has one single user, the ThunderX or the Octeon driver and they will
-> never run both at the same time.
->
-> Why not just link the shared code to the driver that uses it? Calling
-> accross modules is also slower, although that doesn't matter here.
-
-Okay, lets's keep it as is. We can always change it later on, if we
-think it's needed.
-
-Kind regards
-Uffe
+DQpJIGFtIGhhdmluZyBwcm9ibGVtcyB3aXRoIHRoZSAnbW1jJyB1c2Vyc3BhY2UgY29tbWFuZCBp
+biBtbWMtdXRpbHMuDQpUaGlzIGNhbGw6DQoNCj4gL3Vzci9iaW4vbW1jIHdyaXRlX3JlbGlhYmls
+aXR5IHNldCAteSAwIC9kZXYvbW1jYmxrMQ0KDQpyZXN1bHRzIGluOg0KDQo+IHNldHRpbmcgT1RQ
+IFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCENCj4gU2V0dGluZyBPVFAgUEFSVElUSU9OX1NF
+VFRJTkdfQ09NUExFVEVEIGZhaWxlZCBvbiAvZGV2L21tY2JsazENCg0KV2hpY2ggaXMgbm90IHRv
+byBzdXJwcmlzaW5nLCBzaW5jZSBJIG9ubHkgd2FudCB0byBzZXQgdGhlIHdyaXRlDQpyZWxpYWJp
+bGl0eSBiaXQgYW5kIGRpZCBub3QgdG91Y2ggYW55IChtbWMtKXBhcnRpdGlvbiBpbmZvcm1hdGlv
+biwgc28NCnRoYXQgaXQgcHJvYmFibHkgc3RpbGwgaXMgaW52YWxpZC4NCg0KSWYgSSB0aGVuIHR5
+cGU6DQoNCj4gL3Vzci9iaW4vbW1jIGV4dGNzZCByZWFkIC9kZXYvbW1jYmxrMQ0KDQp0aGF0IHJl
+bGlhYmxlIHdyaXRlIGJpdCBpcyBzaG93biBhcyBzZXQ6DQoNCj4gV3JpdGUgcmVsaWFiaWxpdHkg
+c2V0dGluZyByZWdpc3RlciBbV1JfUkVMX1NFVF06IDB4MDENCg0KQWZ0ZXIgY29uc3VsdGluZyB0
+aGUgSkVERUMgc3RhbmRhcmRzIEkgZmFpbGVkIHRvIGZpbmQgdGhlIG5lY2Vzc2l0eSB0bw0Kc2V0
+IHRoZSAiUGFydGl0aW9uIHNldHRpbmcgY29tcGxldGUiIGJpdCB0byBhY3R1YWxseSBlbmFibGUg
+dGhlDQoicmVsaWFibGUgd3JpdGUiIGZ1bmN0aW9uLiBJZiB0aGVyZSAqaXMqIG5vIGNvbm5lY3Rp
+b24sIHRoZW4gY29tbWl0DQoxOTZkMGQyOTU4ODg2N2JlZDUwY2QyOGI4ZjAzY2JiYjVlMGU2NjA4
+ICgyMDEzLTA5LTE5IDE3OjE0OjI5KSBtdXN0IG5vdA0KdHJ5IHRvIHNldCB0aGF0IGJpdCBhbmQg
+YWxzbyBtdXN0IHJlZnJhaW4gZnJvbSBzZXR0aW5nIHRoZSByZWxpYWJsZQ0Kd3JpdGUgYml0IGl0
+c2VsZiB3aGVuIGluIGRyeSBydW4gbW9kZS4NCg0KSSB3aWxsIGhhdmUgdG8gZGVmZXIgdG8gdGhl
+IGV4cGVydHMgaW4gdGhpcyBtYXR0ZXIgd2hldGhlciB0aGlzIGlzDQphY3R1YWxseSBhIGJ1ZyBp
+biB0aGUgbW1jIHV0aWxpdHkgb3IganVzdCBhIGxlc3MgdGhhbiBjbGVhciBkZWZpbml0aW9uDQpp
+biB0aGUgc3RhbmRhcmQgb3Igc29tZXRoaW5nIGVsc2UgZW50aXJlbHkuDQoNCi0tDQoNCmkuQS4g
+SGFyYWxkIEJyaW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50ZXJuYXRpb25hbCBHbWJIDQpXZXJr
+IExlb3BvbGRzaMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0OS0yNTENCkQtMzM4MTggTGVvcG9s
+ZHNow7ZoZQ0KDQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUxMw0KDQpFOiAgICAgIGhhcmFsZC5i
+cmlua21hbm5AYnN0LWludGVybmF0aW9uYWwuY29tDQpXOiAgICAgIGh0dHA6Ly93d3cuYnN0LWVs
+dHJvbWF0LmNvbQ0KDQoNCg0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fDQpBbXRzZ2VyaWNodCBCaWVsZWZlbGQsIEhSQiBOci4gMzA4MzAN
+Ckdlc2Now6RmdHNmw7xocmVyIEtyaXN0aWFuIErDvG5rZSwgRHIuIEpvaGFubi1DYXJzdGVuIEtp
+cHAsIERyLiBHdW50ZXINClRhdXRvcnVzDQpTaXR6IGRlciBHZXNlbGxzY2hhZnQ6IEJpZWxlZmVs
+ZA0KVmVydHJhdWxpY2hlIEUtTWFpbCB2b24gQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21i
+SA0KDQo=
