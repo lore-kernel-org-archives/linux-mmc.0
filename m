@@ -1,144 +1,74 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 08/25] mmc: sdhci: Remove ->select_drive_strength() callback
-Date: Mon, 20 Mar 2017 19:50:36 +0200
-Message-ID: <1490032253-6030-9-git-send-email-adrian.hunter@intel.com>
-References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: pwrseq: add op reset to struct mmc_pwrseq_ops
+Date: Mon, 20 Mar 2017 19:02:26 +0100
+Message-ID: <CAPDyKFpuAgFnoAFymZeiPiCQcXATkz6KCEm8Wr_j4hD+nrtGuQ@mail.gmail.com>
+References: <75ad5eac-412b-fe73-ff53-3d8b975937e4@gmail.com>
+ <c75c3e5c-c4e1-3f2f-267b-1c781052c55e@gmail.com> <CAPDyKFr6_Y3cSv5Q1WRSQBo7_bsyeVVQTYBQ01gykdMpVWNtXw@mail.gmail.com>
+ <ac5f62eb-64c6-b66f-24cc-b6ae74a01697@gmail.com> <d029f887-4fd3-1319-fd01-a99ea9ede5c1@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:14086 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755752AbdCTR6M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Mar 2017 13:58:12 -0400
-In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34285 "EHLO
+        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756393AbdCTSCs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 14:02:48 -0400
+Received: by mail-vk0-f46.google.com with SMTP id z204so17503455vkd.1
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2017 11:02:37 -0700 (PDT)
+In-Reply-To: <d029f887-4fd3-1319-fd01-a99ea9ede5c1@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-Drivers can use the host operation directly, so remove this now unused
-callback.
+[...]
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 20 --------------------
- drivers/mmc/host/sdhci-pci.h      |  4 ----
- drivers/mmc/host/sdhci.c          | 14 --------------
- drivers/mmc/host/sdhci.h          |  4 ----
- 4 files changed, 42 deletions(-)
+>>
+> Other alternative:
+>
+> typedef void (*hw_reset_t)(struct mmc_host *host);
+>
+> hw_reset_t mmc_get_hw_reset(struct mmc_host *host)
+> {
+>        struct mmc_pwrseq *p = host->pwrseq;
+>
+>        if (host->ops->hw_reset)
+>                return host->ops->hw_reset;
+>        else if (p && p->ops->reset)
+>                return p->ops->reset;
+>        else
+>                return NULL;
+> }
+>
+> And then use what mmc_get_hw_reset returns instead of using
+> host->ops->hw_reset directly.
+>
+> How do you like this one?
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 351920f4ec42..5c620206138e 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -36,10 +36,6 @@
- static int sdhci_pci_enable_dma(struct sdhci_host *host);
- static void sdhci_pci_set_bus_width(struct sdhci_host *host, int width);
- static void sdhci_pci_hw_reset(struct sdhci_host *host);
--static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
--					   struct mmc_card *card,
--					   unsigned int max_dtr, int host_drv,
--					   int card_drv, int *drv_type);
- 
- /*****************************************************************************\
-  *                                                                           *
-@@ -514,7 +510,6 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
- 	.reset			= sdhci_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
--	.select_drive_strength	= sdhci_pci_select_drive_strength,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
-@@ -1658,20 +1653,6 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
- 		slot->hw_reset(host);
- }
- 
--static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
--					   struct mmc_card *card,
--					   unsigned int max_dtr, int host_drv,
--					   int card_drv, int *drv_type)
--{
--	struct sdhci_pci_slot *slot = sdhci_priv(host);
--
--	if (!slot->select_drive_strength)
--		return 0;
--
--	return slot->select_drive_strength(host, card, max_dtr, host_drv,
--					   card_drv, drv_type);
--}
--
- static const struct sdhci_ops sdhci_pci_ops = {
- 	.set_clock	= sdhci_set_clock,
- 	.enable_dma	= sdhci_pci_enable_dma,
-@@ -1679,7 +1660,6 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
- 	.reset		= sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
--	.select_drive_strength	= sdhci_pci_select_drive_strength,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index cfe519c0c990..da7b95016c6f 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -86,10 +86,6 @@ struct sdhci_pci_slot {
- 	bool			cd_override_level;
- 
- 	void (*hw_reset)(struct sdhci_host *host);
--	int (*select_drive_strength)(struct sdhci_host *host,
--				     struct mmc_card *card,
--				     unsigned int max_dtr, int host_drv,
--				     int card_drv, int *drv_type);
- 	unsigned long		private[0] ____cacheline_aligned;
- };
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c3c7df480a66..cb235cb74948 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2176,19 +2176,6 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- }
- EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
- 
--static int sdhci_select_drive_strength(struct mmc_card *card,
--				       unsigned int max_dtr, int host_drv,
--				       int card_drv, int *drv_type)
--{
--	struct sdhci_host *host = mmc_priv(card->host);
--
--	if (!host->ops->select_drive_strength)
--		return 0;
--
--	return host->ops->select_drive_strength(host, card, max_dtr, host_drv,
--						card_drv, drv_type);
--}
--
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
- {
- 	/* Host Controller v3.00 defines preset value registers */
-@@ -2302,7 +2289,6 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
- 	.prepare_hs400_tuning		= sdhci_prepare_hs400_tuning,
- 	.execute_tuning			= sdhci_execute_tuning,
--	.select_drive_strength		= sdhci_select_drive_strength,
- 	.card_event			= sdhci_card_event,
- 	.card_busy	= sdhci_card_busy,
- };
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index edf3adfbc213..67772674da90 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -562,10 +562,6 @@ struct sdhci_ops {
- 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
- 	void    (*card_event)(struct sdhci_host *host);
- 	void	(*voltage_switch)(struct sdhci_host *host);
--	int	(*select_drive_strength)(struct sdhci_host *host,
--					 struct mmc_card *card,
--					 unsigned int max_dtr, int host_drv,
--					 int card_drv, int *drv_type);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
--- 
-1.9.1
+Well, I would just rather do these checks and call the correct
+callback in mmc_reset(). There is no need to invent a function
+returning a function pointer when we call it directly instead.
 
+Additionally, I wonder whether it could make sense to allow both
+callbacks to co-exist and then call both. This would give the mmc host
+some options for doing some internal reset as well, while the pwrseq
+could handle the actual GPIO pin.
+
+What do you think?
+
+Kind regards
+Uffe
+
+>
+>>>>  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+>>>>
+>>>>  #endif /* LINUX_MMC_CORE_H */
+>>>> --
+>>>> 2.11.0
+>>>>
+>>>>
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>
+>
