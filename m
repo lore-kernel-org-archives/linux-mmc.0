@@ -1,35 +1,60 @@
-From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
-Subject: RE: Possible bug in mmc-utils: Is MMC 'partition setting completed'
- required for 'write reliability'?
-Date: Mon, 20 Mar 2017 18:01:06 +0000
-Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD58E8@Elexis-Exch02.elexisad.net>
-References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>,<CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 02/25] mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
+Date: Mon, 20 Mar 2017 19:50:30 +0200
+Message-ID: <1490032253-6030-3-git-send-email-adrian.hunter@intel.com>
+References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta3.messagelabs.com ([195.245.230.167]:14992 "EHLO
-        mail1.bemta3.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1756131AbdCTSCP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 14:02:15 -0400
-In-Reply-To: <CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
-Content-Language: en-GB
+Received: from mga01.intel.com ([192.55.52.88]:11845 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755699AbdCTSAJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Mar 2017 14:00:09 -0400
+In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ben Gardiner <ben.l.gardiner@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-DQpIZWxsbyBDaHJpcyBhbmQgQmVuLA0KDQpvdXIgY29ycG9yYXRlIGUtbWFpbCBzZWVtcyB0byBk
-aXNsaWtlIHRoZSBrZXJuZWwgbWFpbGluZyBsaXN0LCBzbyBiZSBzdXJlIHRvIGtlZXAgQ0Npbmcg
-bWUgZGlyZWN0bHkuDQoNCklmIHlvdSBib3RoIGFncmVlIHdpdGggbXkgZGlhZ25vc2lzLCBJJ2xs
-IGJlIGhhcHB5IHRvIGJ1aWxkIHlvdSBhIHBhdGNoLg0KDQoNCi0tDQoNCmkuQS4gSGFyYWxkIEJy
-aW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50ZXJuYXRpb25hbCBHbWJIDQpXZXJrIExlb3BvbGRz
-aMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0OS0yNTENCkQtMzM4MTggTGVvcG9sZHNow7ZoZQ0K
-DQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUxMw0KDQpFOiAgICAgIGhhcmFsZC5icmlua21hbm5A
-YnN0LWludGVybmF0aW9uYWwuY29tPG1haWx0bzpoYXJhbGQuYnJpbmttYW5uQGJzdC1pbnRlcm5h
-dGlvbmFsLmNvbT4NClc6ICAgICAgaHR0cDovL3d3dy5ic3QtZWx0cm9tYXQuY29tDQoNCg0KDQoN
-Cg0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fDQpBbXRzZ2VyaWNodCBCaWVsZWZlbGQsIEhSQiBOci4gMzA4MzANCkdlc2Now6RmdHNmw7xo
-cmVyIEtyaXN0aWFuIErDvG5rZSwgRHIuIEpvaGFubi1DYXJzdGVuIEtpcHAsIERyLiBHdW50ZXIN
-ClRhdXRvcnVzDQpTaXR6IGRlciBHZXNlbGxzY2hhZnQ6IEJpZWxlZmVsZA0KVmVydHJhdWxpY2hl
-IEUtTWFpbCB2b24gQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21iSA0K
+Disabling interrupts for even a millisecond can cause problems for some
+devices. That can happen when Intel host controllers wait for the present
+state to propagate.
+
+The spin lock is not necessary here. Anything that is racing with changes
+to the I/O state is already broken. The mmc core already provides
+synchronization via "claiming" the host.
+
+Although the spin lock probably should be removed from the code paths that
+lead to this point, such a patch would touch too much code to be suitable
+for stable trees. Consequently, for this patch, just drop the spin lock
+while waiting.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org # v4.9+
+---
+ drivers/mmc/host/sdhci-pci-core.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 982b3e349426..86560d590786 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -451,6 +451,8 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+ 	if (mode == MMC_POWER_OFF)
+ 		return;
+ 
++	spin_unlock_irq(&host->lock);
++
+ 	/*
+ 	 * Bus power might not enable after D3 -> D0 transition due to the
+ 	 * present state not yet having propagated. Retry for up to 2ms.
+@@ -463,6 +465,8 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+ 		reg |= SDHCI_POWER_ON;
+ 		sdhci_writeb(host, reg, SDHCI_POWER_CONTROL);
+ 	}
++
++	spin_lock_irq(&host->lock);
+ }
+ 
+ static const struct sdhci_ops sdhci_intel_byt_ops = {
+-- 
+1.9.1
+
