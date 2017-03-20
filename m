@@ -1,58 +1,54 @@
-From: Philipp Zabel <p.zabel@pengutronix.de>
-Subject: Re: [PATCH v2 06/14] mmc: dw_mmc: simplify optional reset handling
-Date: Mon, 20 Mar 2017 12:00:48 +0100
-Message-ID: <1490007648.2917.41.camel@pengutronix.de>
-References: <20170315113139.17989-1-p.zabel@pengutronix.de>
-         <CGME20170320092255eucas1p1459c023fd9b479c8e5323a6ac97dbf58@eucas1p1.samsung.com>
-         <e70d77e9-bd60-a0f4-6510-48b72cb67624@samsung.com>
-         <1490003602.2917.16.camel@pengutronix.de>
-         <b80ceee9-40e7-f32b-d44a-00dd4e7f6461@samsung.com>
-         <1490005679.2917.32.camel@pengutronix.de>
-         <5f6c8c58-c4e4-39e6-2c29-e889bd6bf565@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5f6c8c58-c4e4-39e6-2c29-e889bd6bf565@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrzej Hajda <a.hajda@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, "Szyprowski, Marek" <m.szyprowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+From: Alexander Stein <alexander.stein@systec-electronic.com>
+Subject: [PATCH 1/2] mmc-utils: feature spec 5.0+, Pre EOL information
+Date: Mon, 20 Mar 2017 12:07:08 +0100
+Message-ID: <20170320110709.31079-1-alexander.stein@systec-electronic.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from webbox1416.server-home.net ([77.236.96.61]:36351 "EHLO
+        webbox1416.server-home.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754218AbdCTLIP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2017 07:08:15 -0400
+Received: from imapserver.systec-electronic.com (unknown [212.185.67.146])
+        by webbox1416.server-home.net (Postfix) with ESMTPA id C81AC27A3EF
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2017 12:07:22 +0100 (CET)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Alexander Stein <alexander.stein@systec-electronic.com>
 
-On Mon, 2017-03-20 at 11:49 +0100, Andrzej Hajda wrote:
-> On 20.03.2017 11:27, Philipp Zabel wrote:
-[...]
-> > diff --git a/include/linux/reset.h b/include/linux/reset.h
-> > index 86b4ed75359e8..c905ff1c21ec6 100644
-> > --- a/include/linux/reset.h
-> > +++ b/include/linux/reset.h
-> > @@ -74,14 +74,14 @@ static inline struct reset_control *__of_reset_control_get(
-> >  					const char *id, int index, bool shared,
-> >  					bool optional)
-> >  {
-> > -	return ERR_PTR(-ENOTSUPP);
-> > +	return optional ? NULL : ERR_PTR(-ENOTSUPP);
-> >  }
-> >  
-> >  static inline struct reset_control *__devm_reset_control_get(
-> >  					struct device *dev, const char *id,
-> >  					int index, bool shared, bool optional)
-> >  {
-> > -	return ERR_PTR(-ENOTSUPP);
-> > +	return optional ? NULL : ERR_PTR(-ENOTSUPP);
-> >  }
-> >  
-> >  #endif /* CONFIG_RESET_CONTROLLER */
-> > ---------->8----------
-> 
-> In dw_mmc.c file there are also unconditional calls to
-> reset_control_assert, with disabled RESET_CONTROLLER it will cause
-> unexpected WARNs.
-> Anyway if you change reset API as above I think you should remove all
-> warns from reset stubs, because NULL reset is valid, but these warns are
-> there for reason - contradiction.
+Signed-off-by: Alexander Stein <alexander.stein@systec-electronic.com>
+---
+ mmc.h      | 1 +
+ mmc_cmds.c | 5 +++++
+ 2 files changed, 6 insertions(+)
 
-You are right, I have to let go of those, too.
+diff --git a/mmc.h b/mmc.h
+index f3fa03f..fa49df6 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -63,6 +63,7 @@
+ #define EXT_CSD_NUM_OF_FW_SEC_PROG_0	302	/* RO */
+ #define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B 	269	/* RO */
+ #define EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A 	268	/* RO */
++#define EXT_CSD_PRE_EOL_INFO		267	/* RO */
+ #define EXT_CSD_FIRMWARE_VERSION	254	/* RO */
+ #define EXT_CSD_CACHE_SIZE_3		252
+ #define EXT_CSD_CACHE_SIZE_2		251
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 0e4322e..728ad77 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1748,6 +1748,11 @@ int do_read_extcsd(int nargs, char **argv)
+ 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]);
+ 	}
+ 
++	if (ext_csd_rev >= 7) {
++		printf("eMMC Pre EOL information [EXT_CSD_PRE_EOL_INFO]: 0x%02x\n",
++			ext_csd[EXT_CSD_PRE_EOL_INFO]);
++	}
++
+ 	if (ext_csd_rev >= 8) {
+ 		printf("Command Queue Support [CMDQ_SUPPORT]: 0x%02x\n",
+ 		       ext_csd[EXT_CSD_CMDQ_SUPPORT]);
+-- 
+2.10.2
 
-regards
-Philipp
