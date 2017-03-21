@@ -1,142 +1,100 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci: intel: Disable runtime pm when the
- sdio_irq is enabled.
-Date: Tue, 21 Mar 2017 11:00:44 +0100
-Message-ID: <CAPDyKFpaqJDCxR7eTtgOVCn7SUNeCFPPTc884fe7yjXi-LRGow@mail.gmail.com>
-References: <20170315163145.15475-1-hdegoede@redhat.com> <20170315163145.15475-2-hdegoede@redhat.com>
+Subject: Re: [PATCH 00/25] sdhci patches
+Date: Tue, 21 Mar 2017 11:01:27 +0100
+Message-ID: <CAPDyKFoUoDE8RFqW-dVbwBTW1Hw1ExtXB35CNcncPHAFCGfJpQ@mail.gmail.com>
+References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:36860 "EHLO
-        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751792AbdCUKAr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 06:00:47 -0400
-Received: by mail-vk0-f47.google.com with SMTP id j64so74203248vkg.3
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 03:00:46 -0700 (PDT)
-In-Reply-To: <20170315163145.15475-2-hdegoede@redhat.com>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:33480 "EHLO
+        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751792AbdCUKB3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 06:01:29 -0400
+Received: by mail-vk0-f53.google.com with SMTP id d188so88653469vka.0
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 03:01:28 -0700 (PDT)
+In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-On 15 March 2017 at 17:31, Hans de Goede <hdegoede@redhat.com> wrote:
-> SDIO cards may need clock to send the card interrupt to the host.
+On 20 March 2017 at 18:50, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Hi
 >
-> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
-> pinging the tablet results in:
+> Here are some sdhci patches that include preparation for CQE and some
+> general improvements.  Patches such as:
 >
-> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
-> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
-> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
-> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
-> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
-> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
-> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
-> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
-> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
-> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
+>     mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
+>     mmc: sdhci: Do not use spin lock in set_ios paths
 >
-> Where as with this patch I get:
+> affect several drivers specifically, like:
 >
-> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
-> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
-> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
-> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
-> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
-> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
-> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
-> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
-> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
-> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
+>     drivers/mmc/host/sdhci-brcmstb.c
+>     drivers/mmc/host/sdhci-esdhc-imx.c
+>     drivers/mmc/host/sdhci-of-arasan.c
+>     drivers/mmc/host/sdhci-of-at91.c
+>     drivers/mmc/host/sdhci-of-esdhc.c
+>     drivers/mmc/host/sdhci-pxav3.c
+>     drivers/mmc/host/sdhci-s3c.c
+>     drivers/mmc/host/sdhci-sirf.c
+>     drivers/mmc/host/sdhci-spear.c
+>     drivers/mmc/host/sdhci-st.c
 >
-> Cc: Dong Aisheng <b29396@freescale.com>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> ---
-> Changes in v2:
-> -New patch replacing "mmc: sdhci: sdio-intel: Set
->  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
-> ---
->  drivers/mmc/host/sdhci-acpi.c     | 1 +
->  drivers/mmc/host/sdhci-pci-core.c | 1 +
->  drivers/mmc/host/sdhci.c          | 6 ++++++
->  drivers/mmc/host/sdhci.h          | 2 ++
->  4 files changed, 10 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 237f318..53b431a 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
->         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-> +                  SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
->                    MMC_CAP_WAIT_WHILE_BUSY,
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 982b3e3..a3b242e 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
->  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-> +                       SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->         .allow_runtime_pm = true,
->         .probe_slot     = byt_sdio_probe_slot,
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6fdd7a7..59c5cad 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1828,6 +1828,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->         struct sdhci_host *host = mmc_priv(mmc);
->         unsigned long flags;
 >
-> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && enable)
-> +               pm_runtime_get(host->mmc->parent);
-
-There are currently no sdhci variant for any SoC that implements
-wakeup support in runtime suspend for SDIO irqs. In other words, it
-seems all sdhci hosts suffers from the same problem.
-
-I imagine there are vendor trees implementing wakeups, however until
-we see such code being pushed upstream, I suggest we make this the
-default behavior instead of using a quirk.
-
-> +
->         spin_lock_irqsave(&host->lock, flags);
->         if (enable)
->                 host->flags |= SDHCI_SDIO_IRQ_ENABLED;
-> @@ -1836,6 +1839,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> Adrian Hunter (25):
+>       mmc: sdhci: Do not disable interrupts while waiting for clock
+>       mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
+>       mmc: sdhci: Optimize delay loops
+>       mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
+>       mmc: sdhci-pci: Let devices define their own private data
+>       mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
+>       mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices
+>       mmc: sdhci: Remove ->select_drive_strength() callback
+>       mmc: sdhci: Do not use spin lock in set_ios paths
+>       mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
+>       mmc: sdhci: Improve debug print format
+>       mmc: sdhci: Add response register to register dump
+>       mmc: sdhci: Use sdhci_readl() not readl() in sdhci_dumpregs()
+>       mmc: sdhci: Improve register dump print format
+>       mmc: sdhci: Export sdhci_dumpregs
+>       mmc: sdhci: Get rid of 'extern' in header file
+>       mmc: sdhci: Add sdhci_cleanup_host
+>       mmc: sdhci: Factor out sdhci_set_default_irqs
+>       mmc: sdhci: Add CQE support
+>       mmc: sdhci-pci: Let devices define how to add the host
+>       mmc: sdhci-pci: Do not use suspend/resume callbacks with runtime pm
+>       mmc: sdhci-pci: Conditionally compile pm sleep functions
+>       mmc: sdhci-pci: Let suspend/resume callbacks replace default callbacks
+>       mmc: sdhci-pci: Add runtime suspend/resume callbacks
+>       mmc: sdhci-pci: Move a function to avoid later forward declaration
 >
->         sdhci_enable_sdio_irq_nolock(host, enable);
->         spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && !enable)
-> +               pm_runtime_put(host->mmc->parent);
->  }
->
->  static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index edf3adf..b72c38d 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -427,6 +427,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
->  /* Broken Clock divider zero in controller */
->  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
-> +/* Must not runtime suspend when sdio_irq is enabled */
-> +#define SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM            (1<<16)
->
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
-> --
-> 2.9.3
+>  drivers/mmc/host/sdhci-acpi.c        |  12 +-
+>  drivers/mmc/host/sdhci-brcmstb.c     |   3 +
+>  drivers/mmc/host/sdhci-esdhc-imx.c   |   6 +
+>  drivers/mmc/host/sdhci-msm.c         |   8 -
+>  drivers/mmc/host/sdhci-of-arasan.c   |   9 +-
+>  drivers/mmc/host/sdhci-of-at91.c     |   5 +-
+>  drivers/mmc/host/sdhci-of-esdhc.c    |   3 +
+>  drivers/mmc/host/sdhci-pci-core.c    | 551 ++++++++++++++++++++---------------
+>  drivers/mmc/host/sdhci-pci-data.c    |   3 -
+>  drivers/mmc/host/sdhci-pci-o2micro.c |   4 +-
+>  drivers/mmc/host/sdhci-pci.h         |  24 +-
+>  drivers/mmc/host/sdhci-pltfm.c       |   3 +
+>  drivers/mmc/host/sdhci-pxav3.c       |  10 +-
+>  drivers/mmc/host/sdhci-s3c.c         |  10 +-
+>  drivers/mmc/host/sdhci-sirf.c        |   3 +
+>  drivers/mmc/host/sdhci-spear.c       |   3 +
+>  drivers/mmc/host/sdhci-st.c          |   6 +-
+>  drivers/mmc/host/sdhci.c             | 404 ++++++++++++++++---------
+>  drivers/mmc/host/sdhci.h             |  58 ++--
+>  19 files changed, 691 insertions(+), 434 deletions(-)
 >
 
-Kind regards
+Adrian, I have reviewed this and it looks great to me!
+
+I have applied patch 1 and 2 for fixes, while the rest of the series
+is applied for next.
+
+Thanks and kind regards
 Uffe
