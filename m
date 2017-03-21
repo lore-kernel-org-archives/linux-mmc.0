@@ -1,22 +1,21 @@
 From: Piotr Sroka <piotrs@cadence.com>
-Subject: (unknown)
-Date: Tue, 21 Mar 2017 06:58:21 +0000
-Message-ID: <201703210658.v2L6wLPU009645@lvloginb.cadence.com>
+Subject: RE: [v4 3/3] mmc: sdhci-cadence: Update PHY delay configuration
+Date: Tue, 21 Mar 2017 07:01:22 +0000
+Message-ID: <201703210701.v2L71Mct013139@lvloginb.cadence.com>
+References: <1490008372-16372-1-git-send-email-piotrs@cadence.com>
+ <1490008855-27135-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNARTMF2F1_3QWqF87qV6FzeYHguWbRC5DEDnvYV1M-=9TQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0014ca01.pphosted.com ([208.86.201.193]:44688 "EHLO
-        mx0a-0014ca01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1756144AbdCUG6i (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 02:58:38 -0400
+Received: from keymaster.Cadence.COM ([158.140.2.26]:33304 "EHLO
+        mx-sanjose5.cadence.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751648AbdCUHBc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 03:01:32 -0400
+In-Reply-To: <CAK7LNARTMF2F1_3QWqF87qV6FzeYHguWbRC5DEDnvYV1M-=9TQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Piotr <piotrs@cadence.com>
-
-Subject: RE: [v4 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-In-reply-to: <CAK7LNARTMF2F1_3QWqF87qV6FzeYHguWbRC5DEDnvYV1M-=9TQ@mail.gmail.com>
-References: <1490008372-16372-1-git-send-email-piotrs@cadence.com> <1490008855-27135-1-git-send-email-piotrs@cadence.com> <CAK7LNARTMF2F1_3QWqF87qV6FzeYHguWbRC5DEDnvYV1M-=9TQ@mail.gmail.com>
 
 
 Hi Masahiro 
