@@ -1,48 +1,32 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v3 3/3] mmc: sdhci-cadence: Update PHY delay configuration
-Date: Tue, 21 Mar 2017 07:19:17 +0000
-Message-ID: <201703210719.v2L7JHLV032698@lvloginb.cadence.com>
-References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
- <1489754503-16559-1-git-send-email-piotrs@cadence.com>
- <CAK7LNAQGOeZVqvc=6Agq2xN5B5cBMtaCAkS8-V6uBoO1ziSSuw@mail.gmail.com>
- <DM5PR07MB308222A445B7A39CBFE4896ADD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
- <CAK7LNAR_i0Q0jymENMSxu-hn4S3KQ3kEwbPmju1H5K2pmMranw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v12 4/9] mmc: cavium: Work-around hardware bug on cn6xxx
+ and cnf7xxx
+Date: Tue, 21 Mar 2017 09:58:24 +0100
+Message-ID: <CAK8P3a2BX3-hbgGzYD_Oub1MR1pC9kLq73L+9gR5_gvYQyqqXA@mail.gmail.com>
+References: <20170310132507.32025-1-jglauber@cavium.com> <20170310132507.32025-5-jglauber@cavium.com>
+ <CAPDyKFrbAUoYk7h8XmYdwiyr8QZXA0WTyFVw3EVFQ8UK71cwOw@mail.gmail.com> <6dc8a2a3-ca79-745a-c716-2188319b9378@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAR_i0Q0jymENMSxu-hn4S3KQ3kEwbPmju1H5K2pmMranw@mail.gmail.com>
+In-Reply-To: <6dc8a2a3-ca79-745a-c716-2188319b9378@caviumnetworks.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Piotr <piotrs@cadence.com>
+To: David Daney <ddaney@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Masahiro,
+On Mon, Mar 20, 2017 at 9:45 PM, David Daney <ddaney@caviumnetworks.com> wrote:
+> On 03/17/2017 07:13 AM, Ulf Hansson wrote:
+>> My point is really that we should avoid exporting SoC specific APIs
+>> which shall be called from drivers. This is old fashion.
+>
+>
+> Some people find it objectionable to see 1-off architecture specific in-line
+> asm in a driver file, but I agree that putting it as close to the user as
+> possible makes sense.
 
-> Hi Piotr,
-> 
-> 2017-03-20 17:47 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> >
-> >>
-> >> > @@ -227,6 +267,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
-> >> >         struct sdhci_cdns_priv *priv;
-> >> >         struct clk *clk;
-> >> >         int ret;
-> >> > +       struct device *dev = &pdev->dev;
-> >> >
-> >> >         clk = devm_clk_get(&pdev->dev, NULL);
-> >>
-> >>
-> >> If you add "dev", please use it for devm_clk_get, too.
-> >>
-> > I did on the first patch version but Ulf pointed that this is unrelated change and should be removed.
-> > Therefore I remove it.
-> 
-> Ah, OK.
-> 
-> Could you consider to send a separate patch for this?
-> 
-Ok. If v5 is needed I will add additional patch making this modification. If not I will prepare a spearate patch.
+The proper solution might be to create an architecture independent interface
+for it, what it is that the function does. Can you explain what the purpose
+of locking/unlocking the cache line for MMC is? Is this something that
+could be done more generally in the dma_map_ops implementation?
 
-
-Best Regards
-Piotr Sroka
+     Arnd
