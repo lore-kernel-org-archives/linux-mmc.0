@@ -1,87 +1,47 @@
-From: David Daney <ddaney@caviumnetworks.com>
-Subject: Re: [PATCH v12 4/9] mmc: cavium: Work-around hardware bug on cn6xxx
- and cnf7xxx
-Date: Tue, 21 Mar 2017 13:22:05 -0700
-Message-ID: <79a1e294-797d-8b1f-0dcd-129df268c089@caviumnetworks.com>
-References: <20170310132507.32025-1-jglauber@cavium.com>
- <20170310132507.32025-5-jglauber@cavium.com>
- <CAPDyKFrbAUoYk7h8XmYdwiyr8QZXA0WTyFVw3EVFQ8UK71cwOw@mail.gmail.com>
- <6dc8a2a3-ca79-745a-c716-2188319b9378@caviumnetworks.com>
- <CAK8P3a2BX3-hbgGzYD_Oub1MR1pC9kLq73L+9gR5_gvYQyqqXA@mail.gmail.com>
- <67481a9f-f7b5-4ec0-22cc-f6e019dc131e@caviumnetworks.com>
- <CAK8P3a3PBx14CpGY5g7U9YHk3zkvVV=7gJHuSh50eOVKcfVAqA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Jin Qian <jinqian@android.com>
+Subject: [PATCH 1/1] mmc: core: export emmc revision via sysfs
+Date: Tue, 21 Mar 2017 15:01:57 -0700
+Message-ID: <20170321220200.23145-1-jinqian@android.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0052.outbound.protection.outlook.com ([104.47.42.52]:11488
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757233AbdCUUWU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 21 Mar 2017 16:22:20 -0400
-In-Reply-To: <CAK8P3a3PBx14CpGY5g7U9YHk3zkvVV=7gJHuSh50eOVKcfVAqA@mail.gmail.com>
+Received: from mail-pf0-f182.google.com ([209.85.192.182]:34756 "EHLO
+        mail-pf0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755420AbdCUWC4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 18:02:56 -0400
+Received: by mail-pf0-f182.google.com with SMTP id p189so62131508pfp.1
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 15:02:09 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>, Dong Aisheng <aisheng.dong@nxp.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jin Qian <jinqian@android.com>, Jin Qian <jinqian@google.com>
 
-On 03/21/2017 12:49 PM, Arnd Bergmann wrote:
-> On Tue, Mar 21, 2017 at 4:19 PM, David Daney <ddaney@caviumnetworks.com> wrote:
->> On 03/21/2017 01:58 AM, Arnd Bergmann wrote:
->>>
->>> On Mon, Mar 20, 2017 at 9:45 PM, David Daney <ddaney@caviumnetworks.com>
->>> wrote:
->>>>
->>>> On 03/17/2017 07:13 AM, Ulf Hansson wrote:
->>>>>
->>>>> My point is really that we should avoid exporting SoC specific APIs
->>>>> which shall be called from drivers. This is old fashion.
->>>>
->>>>
->>>>
->>>> Some people find it objectionable to see 1-off architecture specific
->>>> in-line
->>>> asm in a driver file, but I agree that putting it as close to the user as
->>>> possible makes sense.
->>>
->>>
->>> The proper solution might be to create an architecture independent
->>> interface
->>> for it, what it is that the function does. Can you explain what the
->>> purpose
->>> of locking/unlocking the cache line for MMC is? Is this something that
->>> could be done more generally in the dma_map_ops implementation?
->>
->>
->> It is a 1-off erratum workaround that is only needed on fewer than five
->> models/revisions of a mips64 based SoC family.  As such, creating a general
->> purpose, architecture independent, framework is clearly not the proper
->> approach.
->
-> If this is just for maintaining coherency of the DMA operation inbetween,
-> then there is already a generic API for that, which the driver calls.
-> Adding the workaround into octeon_dma_map_sg() would be a way
-> to abstract the platform erratum from the driver.
->
+Extend sysfs to access ext_csd revision information.
 
-Either I am bad at explaining things, or you are not reading what I wrote.
+Signed-off-by: Jin Qian <jinqian@google.com>
+Signed-off-by: Jin Qian <jinqian@android.com>
+---
+ drivers/mmc/core/mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-These are two facts about the bug:
-
-1) The bug has nothing to do with coherency management, so hacking 
-something into dma_map* is the wrong thing to do.
-
-2) The bug effects exactly one device, so hacking something into common 
-code that is used by other devices is the wrong thing to do.
-
-Suggesting that we use an alternate set of facts, although an 
-interesting exercise, doesn't get us closer to answering the question of 
-which source code file should contain the code.
-
-This is one opinion about the bug:
-
-1) The bug is in the device, not the "platform", so putting the 
-workaround code in the driver for the device may be the cleanest approach.
-
-David Daney
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7fd722868875..08c62c9bec48 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -779,6 +779,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
++MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+ MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+ MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+ 	card->ext_csd.device_life_time_est_typ_a,
+@@ -836,6 +837,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_prv.attr,
++	&dev_attr_rev.attr,
+ 	&dev_attr_pre_eol_info.attr,
+ 	&dev_attr_life_time.attr,
+ 	&dev_attr_serial.attr,
+-- 
+2.12.1.500.gab5fba24ee-goog
 
