@@ -1,113 +1,60 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 00/25] sdhci patches
-Date: Tue, 21 Mar 2017 15:14:36 +0000
-Message-ID: <20170321151436.carjcczuyuoota2v@dell>
-References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
- <20170321110039.6vphjb7n4zpe65kg@dell>
- <04376d75-accb-b21e-f2ae-f3077157b205@intel.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v12 4/9] mmc: cavium: Work-around hardware bug on cn6xxx
+ and cnf7xxx
+Date: Tue, 21 Mar 2017 20:49:36 +0100
+Message-ID: <CAK8P3a3PBx14CpGY5g7U9YHk3zkvVV=7gJHuSh50eOVKcfVAqA@mail.gmail.com>
+References: <20170310132507.32025-1-jglauber@cavium.com> <20170310132507.32025-5-jglauber@cavium.com>
+ <CAPDyKFrbAUoYk7h8XmYdwiyr8QZXA0WTyFVw3EVFQ8UK71cwOw@mail.gmail.com>
+ <6dc8a2a3-ca79-745a-c716-2188319b9378@caviumnetworks.com> <CAK8P3a2BX3-hbgGzYD_Oub1MR1pC9kLq73L+9gR5_gvYQyqqXA@mail.gmail.com>
+ <67481a9f-f7b5-4ec0-22cc-f6e019dc131e@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38411 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757221AbdCUPVa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 11:21:30 -0400
-Received: by mail-wm0-f44.google.com with SMTP id t189so15067305wmt.1
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 08:21:29 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <04376d75-accb-b21e-f2ae-f3077157b205@intel.com>
+Received: from mail-ot0-f179.google.com ([74.125.82.179]:35157 "EHLO
+        mail-ot0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758004AbdCUTti (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 15:49:38 -0400
+In-Reply-To: <67481a9f-f7b5-4ec0-22cc-f6e019dc131e@caviumnetworks.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: David Daney <ddaney@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Steven J . Hill" <Steven.Hill@cavium.com>, David Daney <david.daney@cavium.com>
 
-On Tue, 21 Mar 2017, Adrian Hunter wrote:
+On Tue, Mar 21, 2017 at 4:19 PM, David Daney <ddaney@caviumnetworks.com> wrote:
+> On 03/21/2017 01:58 AM, Arnd Bergmann wrote:
+>>
+>> On Mon, Mar 20, 2017 at 9:45 PM, David Daney <ddaney@caviumnetworks.com>
+>> wrote:
+>>>
+>>> On 03/17/2017 07:13 AM, Ulf Hansson wrote:
+>>>>
+>>>> My point is really that we should avoid exporting SoC specific APIs
+>>>> which shall be called from drivers. This is old fashion.
+>>>
+>>>
+>>>
+>>> Some people find it objectionable to see 1-off architecture specific
+>>> in-line
+>>> asm in a driver file, but I agree that putting it as close to the user as
+>>> possible makes sense.
+>>
+>>
+>> The proper solution might be to create an architecture independent
+>> interface
+>> for it, what it is that the function does. Can you explain what the
+>> purpose
+>> of locking/unlocking the cache line for MMC is? Is this something that
+>> could be done more generally in the dma_map_ops implementation?
+>
+>
+> It is a 1-off erratum workaround that is only needed on fewer than five
+> models/revisions of a mips64 based SoC family.  As such, creating a general
+> purpose, architecture independent, framework is clearly not the proper
+> approach.
 
-> On 21/03/17 13:00, Lee Jones wrote:
-> > On Mon, 20 Mar 2017, Adrian Hunter wrote:
-> >> Adrian Hunter (25):
-> >>       mmc: sdhci: Do not disable interrupts while waiting for clock
-> >>       mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
-> >>       mmc: sdhci: Optimize delay loops
-> >>       mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
-> >>       mmc: sdhci-pci: Let devices define their own private data
-> >>       mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
-> >>       mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices
-> >>       mmc: sdhci: Remove ->select_drive_strength() callback
-> >>       mmc: sdhci: Do not use spin lock in set_ios paths
-> >>       mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
-> >>       mmc: sdhci: Improve debug print format
-> >>       mmc: sdhci: Add response register to register dump
-> >>       mmc: sdhci: Use sdhci_readl() not readl() in sdhci_dumpregs()
-> >>       mmc: sdhci: Improve register dump print format
-> >>       mmc: sdhci: Export sdhci_dumpregs
-> >>       mmc: sdhci: Get rid of 'extern' in header file
-> >>       mmc: sdhci: Add sdhci_cleanup_host
-> >>       mmc: sdhci: Factor out sdhci_set_default_irqs
-> >>       mmc: sdhci: Add CQE support
-> >>       mmc: sdhci-pci: Let devices define how to add the host
-> >>       mmc: sdhci-pci: Do not use suspend/resume callbacks with runtime pm
-> >>       mmc: sdhci-pci: Conditionally compile pm sleep functions
-> >>       mmc: sdhci-pci: Let suspend/resume callbacks replace default callbacks
-> >>       mmc: sdhci-pci: Add runtime suspend/resume callbacks
-> >>       mmc: sdhci-pci: Move a function to avoid later forward declaration
-> > 
-> > Why have you sent this set to so many people?
-> 
-> Because they might have an interest in testing the drivers that they have
-> contributed to.
-> 
-> > 
-> > Mores the point, why have you sent it to me?
-> 
-> Because you contributed to:
-> 
-> 	drivers/mmc/host/sdhci-st.c
-> 
-> and might have an interest in testing it.
+If this is just for maintaining coherency of the DMA operation inbetween,
+then there is already a generic API for that, which the driver calls.
+Adding the workaround into octeon_dma_map_sg() would be a way
+to abstract the platform erratum from the driver.
 
-Please don't send patches to every email address get_maintainer.pl
-spits out.  If everyone did that contributors, especially the ones
-who work across many subsystems, would be completely swamped in mail.
-
-Instead exercise common sense and only include the Maintainers and
-*maybe* super heavy, regular contributors or authors if you are that
-way inclined.
-
-Personally I only send to the Maintainers of the file.  If anyone else
-has a keen interest they will normally set up filters on the MLs to
-catch patches submitted. 
-
-> >>  drivers/mmc/host/sdhci-acpi.c        |  12 +-
-> >>  drivers/mmc/host/sdhci-brcmstb.c     |   3 +
-> >>  drivers/mmc/host/sdhci-esdhc-imx.c   |   6 +
-> >>  drivers/mmc/host/sdhci-msm.c         |   8 -
-> >>  drivers/mmc/host/sdhci-of-arasan.c   |   9 +-
-> >>  drivers/mmc/host/sdhci-of-at91.c     |   5 +-
-> >>  drivers/mmc/host/sdhci-of-esdhc.c    |   3 +
-> >>  drivers/mmc/host/sdhci-pci-core.c    | 551 ++++++++++++++++++++---------------
-> >>  drivers/mmc/host/sdhci-pci-data.c    |   3 -
-> >>  drivers/mmc/host/sdhci-pci-o2micro.c |   4 +-
-> >>  drivers/mmc/host/sdhci-pci.h         |  24 +-
-> >>  drivers/mmc/host/sdhci-pltfm.c       |   3 +
-> >>  drivers/mmc/host/sdhci-pxav3.c       |  10 +-
-> >>  drivers/mmc/host/sdhci-s3c.c         |  10 +-
-> >>  drivers/mmc/host/sdhci-sirf.c        |   3 +
-> >>  drivers/mmc/host/sdhci-spear.c       |   3 +
-> >>  drivers/mmc/host/sdhci-st.c          |   6 +-
-> >>  drivers/mmc/host/sdhci.c             | 404 ++++++++++++++++---------
-> >>  drivers/mmc/host/sdhci.h             |  58 ++--
-> >>  19 files changed, 691 insertions(+), 434 deletions(-)
-> >>
-> >>
-> >> Regards
-> >> Adrian
-> > 
-> 
-
--- 
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org │ Open source software for ARM SoCs
-Follow Linaro: Facebook | Twitter | Blog
+      Arnd
