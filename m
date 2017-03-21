@@ -1,64 +1,117 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/1] mmc: core: export emmc revision via sysfs
-Date: Wed, 22 Mar 2017 07:17:24 +0900
-Message-ID: <e2a14f9b-aa91-81a7-275f-67c03dd7f179@samsung.com>
-References: <CGME20170321220337epcas2p2439e1bf9ecbf4140f23fe7e2bdfcd831@epcas2p2.samsung.com>
- <20170321220200.23145-1-jinqian@android.com>
+Subject: Re: [bug report] mmc: bcm2835: Add new driver for the sdhost
+ controller.
+Date: Wed, 22 Mar 2017 07:25:17 +0900
+Message-ID: <4161ecb0-d848-449d-15dd-77073f57f1c9@samsung.com>
+References: <CGME20170321201612epcas3p3b8f6908c50556c7d91c3bce97837a92c@epcas3p3.samsung.com>
+ <20170321201400.GA22118@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:36292 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932822AbdCUWR2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 18:17:28 -0400
-In-reply-to: <20170321220200.23145-1-jinqian@android.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:60808 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933010AbdCUWZV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 18:25:21 -0400
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
+ with ESMTP id <0ON602RPXRM6KH80@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 22 Mar 2017 07:25:18 +0900 (KST)
+In-reply-to: <20170321201400.GA22118@mwanda>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jin Qian <jinqian@android.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>, Dong Aisheng <aisheng.dong@nxp.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>, eric@anholt.net
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 03/22/2017 07:01 AM, Jin Qian wrote:
-> Extend sysfs to access ext_csd revision information.
+On 03/22/2017 05:14 AM, Dan Carpenter wrote:
+> Hello Eric Anholt,
 > 
-> Signed-off-by: Jin Qian <jinqian@google.com>
-> Signed-off-by: Jin Qian <jinqian@android.com>
-
-I think you can choose one of them for signed-off tag.
-
-> ---
->  drivers/mmc/core/mmc.c | 2 ++
->  1 file changed, 2 insertions(+)
+> This is a semi-automatic email about new static checker warnings.
 > 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 7fd722868875..08c62c9bec48 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -779,6 +779,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
-> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+> The patch 5aa25d971ab4: "mmc: bcm2835: Add new driver for the sdhost 
+> controller." from Mar 8, 2017, leads to the following Smatch 
+> complaint:
+> 
+> drivers/mmc/host/bcm2835.c:1203 bcm2835_request()
+> 	 error: we previously assumed 'host->mrq->data' could be null (see line 1186)
+> 
+> drivers/mmc/host/bcm2835.c
+>   1156  static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>   1157  {
+>   1158          struct bcm2835_host *host = mmc_priv(mmc);
+>   1159          struct device *dev = &host->pdev->dev;
+>   1160          u32 edm, fsm;
+>   1161  
+>   1162          /* Reset the error statuses in case this is a retry */
+>   1163          if (mrq->sbc)
+>   1164                  mrq->sbc->error = 0;
+>   1165          if (mrq->cmd)
+>   1166                  mrq->cmd->error = 0;
+>   1167          if (mrq->data)
+>   1168                  mrq->data->error = 0;
+>   1169          if (mrq->stop)
+>   1170                  mrq->stop->error = 0;
+>   1171  
+>   1172          if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
+>                     ^^^^^^^^^
+> Tested here.
+> 
+>   1173                  dev_err(dev, "unsupported block size (%d bytes)\n",
+>   1174                          mrq->data->blksz);
+>   1175                  mrq->cmd->error = -EINVAL;
+>   1176                  mmc_request_done(mmc, mrq);
+>   1177                  return;
+>   1178          }
+>   1179  
+>   1180          if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
+>                                      ^^^^^^^^^
+> And here.
+> 
+>   1181                  bcm2835_prepare_dma(host, mrq->data);
+>   1182  
+>   1183          mutex_lock(&host->mutex);
+>   1184  
+>   1185		WARN_ON(host->mrq);
+>   1186		host->mrq = mrq;
+> 
+> Now host->mrq->data is possibly NULL.
+> 
+>   1187	
+>   1188		edm = readl(host->ioaddr + SDEDM);
+>   1189		fsm = edm & SDEDM_FSM_MASK;
+>   1190	
+>   1191		if ((fsm != SDEDM_FSM_IDENTMODE) &&
+>   1192		    (fsm != SDEDM_FSM_DATAMODE)) {
+>   1193			dev_err(dev, "previous command (%d) not complete (EDM %08x)\n",
+>   1194				readl(host->ioaddr + SDCMD) & SDCMD_CMD_MASK,
+>   1195				edm);
+>   1196			bcm2835_dumpregs(host);
+>   1197			mrq->cmd->error = -EILSEQ;
+>   1198			bcm2835_finish_request(host);
+>   1199			mutex_unlock(&host->mutex);
+>   1200			return;
+>   1201		}
+>   1202	
+>   1203		host->use_sbc = !!mrq->sbc && (host->mrq->data->flags & MMC_DATA_READ);
+>                                                ^^^^^^^^^^^^^^^^^
+> Dereferenced without a test.
 
-I'm not sure but if someone want to know ext_csd revision information, attribute name might be more clearly.
-e,g) ext_csd_rev?
-
-It's my preference. :)
+I think that it can be just added the condition checking for host->mrq->data.
 
 Best Regards,
 Jaehoon Chung
 
->  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
->  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
->  	card->ext_csd.device_life_time_est_typ_a,
-> @@ -836,6 +837,7 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_name.attr,
->  	&dev_attr_oemid.attr,
->  	&dev_attr_prv.attr,
-> +	&dev_attr_rev.attr,
->  	&dev_attr_pre_eol_info.attr,
->  	&dev_attr_life_time.attr,
->  	&dev_attr_serial.attr,
+> 
+>   1204		if (host->use_sbc) {
+>   1205			if (bcm2835_send_command(host, mrq->sbc)) {
+> 
+> regards,
+> dan carpenter
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > 
 
