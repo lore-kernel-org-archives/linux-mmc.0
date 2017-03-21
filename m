@@ -1,123 +1,124 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci: intel: Disable runtime pm when the
- sdio_irq is enabled.
-Date: Tue, 21 Mar 2017 15:54:24 +0100
-Message-ID: <CAPDyKFp-w9jORUUC=eqwPnnZcxQKCu_d2y9pqvX3cq_rx67gYA@mail.gmail.com>
-References: <20170315163145.15475-1-hdegoede@redhat.com> <20170315163145.15475-2-hdegoede@redhat.com>
- <CAPDyKFpaqJDCxR7eTtgOVCn7SUNeCFPPTc884fe7yjXi-LRGow@mail.gmail.com> <7e093710-03d0-30f1-4088-5f68217cb109@intel.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 00/25] sdhci patches
+Date: Tue, 21 Mar 2017 15:17:35 +0000
+Message-ID: <20170321151735.g2emerbvkht2y2ij@dell>
+References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
+ <20170321110039.6vphjb7n4zpe65kg@dell>
+ <04376d75-accb-b21e-f2ae-f3077157b205@intel.com>
+ <20170321151436.carjcczuyuoota2v@dell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f44.google.com ([209.85.213.44]:35552 "EHLO
-        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932700AbdCUOy2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 10:54:28 -0400
-Received: by mail-vk0-f44.google.com with SMTP id x75so96726288vke.2
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 07:54:26 -0700 (PDT)
-In-Reply-To: <7e093710-03d0-30f1-4088-5f68217cb109@intel.com>
+Received: from mail-wr0-f174.google.com ([209.85.128.174]:33195 "EHLO
+        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757592AbdCUPRl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2017 11:17:41 -0400
+Received: by mail-wr0-f174.google.com with SMTP id u48so114051017wrc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2017 08:17:40 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20170321151436.carjcczuyuoota2v@dell>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
 
-On 21 March 2017 at 13:34, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/03/17 12:00, Ulf Hansson wrote:
->> On 15 March 2017 at 17:31, Hans de Goede <hdegoede@redhat.com> wrote:
->>> SDIO cards may need clock to send the card interrupt to the host.
->>>
->>> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
->>> pinging the tablet results in:
->>>
->>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
->>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
->>>
->>> Where as with this patch I get:
->>>
->>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
->>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
->>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
->>>
->>> Cc: Dong Aisheng <b29396@freescale.com>
->>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>> ---
->>> Changes in v2:
->>> -New patch replacing "mmc: sdhci: sdio-intel: Set
->>>  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
->>> ---
->>>  drivers/mmc/host/sdhci-acpi.c     | 1 +
->>>  drivers/mmc/host/sdhci-pci-core.c | 1 +
->>>  drivers/mmc/host/sdhci.c          | 6 ++++++
->>>  drivers/mmc/host/sdhci.h          | 2 ++
->>>  4 files changed, 10 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index 237f318..53b431a 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->>>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
->>>         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->>>         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
->>> +                  SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->>>                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->>>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
->>>                    MMC_CAP_WAIT_WHILE_BUSY,
->>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->>> index 982b3e3..a3b242e 100644
->>> --- a/drivers/mmc/host/sdhci-pci-core.c
->>> +++ b/drivers/mmc/host/sdhci-pci-core.c
->>> @@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
->>>  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->>>         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->>>         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
->>> +                       SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->>>                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->>>         .allow_runtime_pm = true,
->>>         .probe_slot     = byt_sdio_probe_slot,
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 6fdd7a7..59c5cad 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1828,6 +1828,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->>>         struct sdhci_host *host = mmc_priv(mmc);
->>>         unsigned long flags;
->>>
->>> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && enable)
->>> +               pm_runtime_get(host->mmc->parent);
->>
->> There are currently no sdhci variant for any SoC that implements
->> wakeup support in runtime suspend for SDIO irqs. In other words, it
->> seems all sdhci hosts suffers from the same problem.
->
-> There might still be drivers that expect SDIO interrupts during
-> runtime suspend, considering this patch:
->
->         https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=be138554a7923658ded799b0e8794d9c1d08a6e5
+On Tue, 21 Mar 2017, Lee Jones wrote:
 
-Right. Thanks for pointing it out.
+> On Tue, 21 Mar 2017, Adrian Hunter wrote:
+> 
+> > On 21/03/17 13:00, Lee Jones wrote:
+> > > On Mon, 20 Mar 2017, Adrian Hunter wrote:
+> > >> Adrian Hunter (25):
+> > >>       mmc: sdhci: Do not disable interrupts while waiting for clock
+> > >>       mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
+> > >>       mmc: sdhci: Optimize delay loops
+> > >>       mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
+> > >>       mmc: sdhci-pci: Let devices define their own private data
+> > >>       mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
+> > >>       mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices
+> > >>       mmc: sdhci: Remove ->select_drive_strength() callback
+> > >>       mmc: sdhci: Do not use spin lock in set_ios paths
+> > >>       mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
+> > >>       mmc: sdhci: Improve debug print format
+> > >>       mmc: sdhci: Add response register to register dump
+> > >>       mmc: sdhci: Use sdhci_readl() not readl() in sdhci_dumpregs()
+> > >>       mmc: sdhci: Improve register dump print format
+> > >>       mmc: sdhci: Export sdhci_dumpregs
+> > >>       mmc: sdhci: Get rid of 'extern' in header file
+> > >>       mmc: sdhci: Add sdhci_cleanup_host
+> > >>       mmc: sdhci: Factor out sdhci_set_default_irqs
+> > >>       mmc: sdhci: Add CQE support
+> > >>       mmc: sdhci-pci: Let devices define how to add the host
+> > >>       mmc: sdhci-pci: Do not use suspend/resume callbacks with runtime pm
+> > >>       mmc: sdhci-pci: Conditionally compile pm sleep functions
+> > >>       mmc: sdhci-pci: Let suspend/resume callbacks replace default callbacks
+> > >>       mmc: sdhci-pci: Add runtime suspend/resume callbacks
+> > >>       mmc: sdhci-pci: Move a function to avoid later forward declaration
+> > > 
+> > > Why have you sent this set to so many people?
+> > 
+> > Because they might have an interest in testing the drivers that they have
+> > contributed to.
+> > 
+> > > 
+> > > Mores the point, why have you sent it to me?
+> > 
+> > Because you contributed to:
+> > 
+> > 	drivers/mmc/host/sdhci-st.c
+> > 
+> > and might have an interest in testing it.
+> 
+> Please don't send patches to every email address get_maintainer.pl
+> spits out.  If everyone did that contributors, especially the ones
+> who work across many subsystems, would be completely swamped in mail.
+> 
+> Instead exercise common sense and only include the Maintainers and
+> *maybe* super heavy, regular contributors or authors if you are that
+> way inclined.
+> 
+> Personally I only send to the Maintainers of the file.  If anyone else
+> has a keen interest they will normally set up filters on the MLs to
+> catch patches submitted. 
 
-However I don't think that is how runtime PM should be deployed when
-it is used for controlling devices like sdhci. Let's change that once
-we  have the common issue for sdhci and SDIO irqs resolved.
+I've just seen that you *are* the Maintainer of SDHCI, so I guess this
+it *slightly* different for you.  In this case I would have only Cc'ed
+your Co- and Sub- Maintainers and any heavy contributors/authors.
 
-[...]
+The long as the short of it is, little people like me shouldn't really
+be in receipt of this change.
 
-Kind regards
-Uffe
+> > >>  drivers/mmc/host/sdhci-acpi.c        |  12 +-
+> > >>  drivers/mmc/host/sdhci-brcmstb.c     |   3 +
+> > >>  drivers/mmc/host/sdhci-esdhc-imx.c   |   6 +
+> > >>  drivers/mmc/host/sdhci-msm.c         |   8 -
+> > >>  drivers/mmc/host/sdhci-of-arasan.c   |   9 +-
+> > >>  drivers/mmc/host/sdhci-of-at91.c     |   5 +-
+> > >>  drivers/mmc/host/sdhci-of-esdhc.c    |   3 +
+> > >>  drivers/mmc/host/sdhci-pci-core.c    | 551 ++++++++++++++++++++---------------
+> > >>  drivers/mmc/host/sdhci-pci-data.c    |   3 -
+> > >>  drivers/mmc/host/sdhci-pci-o2micro.c |   4 +-
+> > >>  drivers/mmc/host/sdhci-pci.h         |  24 +-
+> > >>  drivers/mmc/host/sdhci-pltfm.c       |   3 +
+> > >>  drivers/mmc/host/sdhci-pxav3.c       |  10 +-
+> > >>  drivers/mmc/host/sdhci-s3c.c         |  10 +-
+> > >>  drivers/mmc/host/sdhci-sirf.c        |   3 +
+> > >>  drivers/mmc/host/sdhci-spear.c       |   3 +
+> > >>  drivers/mmc/host/sdhci-st.c          |   6 +-
+> > >>  drivers/mmc/host/sdhci.c             | 404 ++++++++++++++++---------
+> > >>  drivers/mmc/host/sdhci.h             |  58 ++--
+> > >>  19 files changed, 691 insertions(+), 434 deletions(-)
+> > >>
+> > >>
+> > >> Regards
+> > >> Adrian
+> > > 
+> > 
+> 
+
+-- 
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org │ Open source software for ARM SoCs
+Follow Linaro: Facebook | Twitter | Blog
