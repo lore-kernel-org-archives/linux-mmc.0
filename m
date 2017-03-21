@@ -1,44 +1,48 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [v4 2/3] dt-bindings: mmc: add description of PHY delays for sdhci-cadence
-Date: Tue, 21 Mar 2017 16:40:07 +0900
-Message-ID: <CAK7LNATgKnJUApbTJ08y08KmA2pNx93Nep7yvBN19cHGfwV3hQ@mail.gmail.com>
-References: <1490008372-16372-1-git-send-email-piotrs@cadence.com> <1490008842-26854-1-git-send-email-piotrs@cadence.com>
+From: Piotr Sroka <piotrs@cadence.com>
+Subject: RE: [v3 3/3] mmc: sdhci-cadence: Update PHY delay configuration
+Date: Tue, 21 Mar 2017 07:19:17 +0000
+Message-ID: <201703210719.v2L7JHLV032698@lvloginb.cadence.com>
+References: <1489754302-10996-1-git-send-email-piotrs@cadence.com>
+ <1489754503-16559-1-git-send-email-piotrs@cadence.com>
+ <CAK7LNAQGOeZVqvc=6Agq2xN5B5cBMtaCAkS8-V6uBoO1ziSSuw@mail.gmail.com>
+ <DM5PR07MB308222A445B7A39CBFE4896ADD3A0@DM5PR07MB3082.namprd07.prod.outlook.com>
+ <CAK7LNAR_i0Q0jymENMSxu-hn4S3KQ3kEwbPmju1H5K2pmMranw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1490008842-26854-1-git-send-email-piotrs@cadence.com>
+In-Reply-To: <CAK7LNAR_i0Q0jymENMSxu-hn4S3KQ3kEwbPmju1H5K2pmMranw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Piotr Sroka <piotrs@cadence.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Piotr <piotrs@cadence.com>
 List-Id: linux-mmc@vger.kernel.org
 
-2017-03-20 20:20 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> DTS properties are used instead of fixed data
-> because PHY settings can be different for different chips/boards.
-> Add description of new DLL PHY delays.
->
-> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-> ---
-> Changes for v2:
-> - file was created in v2. It was a part of driver source file patch.
-> - most delays were moved from dts file
->   to data associated with an SoC specific compatible
-> - description of delays was updated to be more clearly
-> ---
-> Changes for v3:
-> - move all delays back to dts because they are also boards dependent
-> - prefix all of the Cadence-specific properties with cdns prefix
-> ---
-> Changes for v4:
-> - change the beginning of the commit subject
-> ---
+Hi Masahiro,
+
+> Hi Piotr,
+> 
+> 2017-03-20 17:47 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
+> >
+> >>
+> >> > @@ -227,6 +267,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+> >> >         struct sdhci_cdns_priv *priv;
+> >> >         struct clk *clk;
+> >> >         int ret;
+> >> > +       struct device *dev = &pdev->dev;
+> >> >
+> >> >         clk = devm_clk_get(&pdev->dev, NULL);
+> >>
+> >>
+> >> If you add "dev", please use it for devm_clk_get, too.
+> >>
+> > I did on the first patch version but Ulf pointed that this is unrelated change and should be removed.
+> > Therefore I remove it.
+> 
+> Ah, OK.
+> 
+> Could you consider to send a separate patch for this?
+> 
+Ok. If v5 is needed I will add additional patch making this modification. If not I will prepare a spearate patch.
 
 
-Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-
-
-
--- 
 Best Regards
-Masahiro Yamada
+Piotr Sroka
