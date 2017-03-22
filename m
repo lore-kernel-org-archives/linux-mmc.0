@@ -1,71 +1,236 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v6 04/14] mmc: sdhci: Export sdhci_set_ios() from sdhci.c
-Date: Wed, 22 Mar 2017 16:48:43 +0200
-Message-ID: <05648b8f-26e8-8af7-5544-6e8ef1df7c43@intel.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
- <b95bc01da68874afbf85968d6181c60508fc56ff.1487091464.git-series.gregory.clement@free-electrons.com>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
+ checking status
+Date: Wed, 22 Mar 2017 17:17:38 +0100
+Message-ID: <20170322161738.mw65ykldgfuwjhcg@rfolt0960.corp.atmel.com>
+References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
+ <20170310142117.6060-1-ludovic.desroches@atmel.com>
+ <CAPDyKFqpX3ZQSxiZsMyei9K0v9eSqVSBC89_U2=VtokGSqtFfA@mail.gmail.com>
+ <20170317163311.vhhcwgr2asjxuoh7@rfolt0960.corp.atmel.com>
+ <CAPDyKFqJA-Tj=Q+-gR+gOUNokzN0QpxHBgaEVqOGtCWiXt6Bzw@mail.gmail.com>
+ <20170322104933.72klypbhx3hqioax@rfolt0960.corp.atmel.com>
+ <CAPDyKFo9hoaA7wptkkyhitFmV_92=M=001EOgMtSBp=b2c7nYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <b95bc01da68874afbf85968d6181c60508fc56ff.1487091464.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Yehuda Yitschak <yehuday-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw@semihalf.c>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from esa2.microchip.iphmx.com ([68.232.149.84]:56282 "EHLO
+        esa2.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759356AbdCVQTK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 12:19:10 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFo9hoaA7wptkkyhitFmV_92=M=001EOgMtSBp=b2c7nYw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, nicolas.ferre@microchip.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@microchip.com>
 
-On 14/02/17 19:01, Gregory CLEMENT wrote:
-> From: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+On Wed, Mar 22, 2017 at 12:18:00PM +0100, Ulf Hansson wrote:
+> [...]
 > 
-> Export sdhci_set_ios() in sdhci.c.
-> Thus vendor sdhci driver can implement its own set_ios() routine.
+> >> >>
+> >> >> We had other reports for similar problems. The following change fix
+> >> >> those issues, have you tried this out?
+> >> >>
+> >> >> [PATCH] mmc: core: Restore parts of the polling policy when switch to HS/HS DDR
+> >> >> https://patchwork.kernel.org/patch/9515239/
+> >> >
+> >> > I did the test with next and the behavior is the same.
+> >> >
+> >> > mmc0: Invalid UHS-I mode selected
+> >> > mmc0: switch to bus width 8 ddr failed
+> >> > mmc0: error -110 whilst initialising MMC card
+> >> >
+> >> > It seems the root cause is to perform mmc_set_timing before mmc_switch_status.
+> >>
+> >> Okay, I see! This sounds a bit weird.
+> >>
+> >> As you know, the CMD6 has been a problematic historically, mostly
+> >> because of busy detection issues. We have now tried to make the code
+> >> more robust in __mmc_switch() and its friends.
+> >> That said, before considering to apply your fix, I would really like
+> >> us to investigate this a bit more, to make sure we find the correct
+> >> solution and of course to avoid regressions for other cases.
+> >>
+> >> Recently reported issues [1] that was observed for sdhci-esdc-imx,
+> >> which has been fixed now, can be summarized in these two issues:
+> >>
+> >> *) Only 3.3V I/O voltage DDR mode was supported by the SoC. Still the
+> >> mmc core tried to set 1.8V, which caused errors when switching to HS
+> >> DDR mode.
+> >> -> To fix this, we invented MMC_CAP_3_3V_DDR [2] and a corresponding
+> >> DT binding ("mmc-ddr-3_3v"). Hosts/SoCs, that supports only 3.3V DDR
+> >> mode, should set this.
+> >>
+> >> **). Changing host's timings couldn't be done while the card was busy,
+> >> because of internal limitations by the sdhci-esdhc-imx controller. The
+> >> consequence was that the following CMD13 command (to get the switch
+> >> status), returned the error code -110, perhaps similar to your case.
+> >> ->To fix this, we decided to move the update of the host's timing, to
+> >> after we verified the card isn't being busy [3].
+> >>
+> >>
+> >> From your description to the problem you encounter, I would recommend
+> >> the following debug steps to try to understand what really goes on.
+> >> 1.
+> >> Check if the 3.3V DDR issue is applicable for your case as well, and
+> >> fix it if it is.
+> >
+> > There is a regulator driven by the sdhci controller to manage 3.3V and
+> > 1.8V I/O voltage.
+> >
+> >>
+> >> 2.
+> >> Both sdhci-esdhc-imx and sdhci-of-at91, don't have
+> >> MMC_CAP_WAIT_WHILE_BUSY set. However, both sdhci variants are using
+> >> the ->card_busy() host ops (assigned to sdhci_card_busy()), which
+> >> triggers __mmc_switch() to call mmc_poll_for_busy() when it switches
+> >> to HS DDR mode (CMD6). Could it be that sdhci_card_busy() isn't
+> >> working properly for sdhci-of-at91? This could lead to that that
+> >> mmc_poll_for_busy() believes the card isn't busy, while it actually
+> >> is.
+> >>
+> >> To check whether theory 2 stands, I would explore these debug alternatives.
+> >> *) Remove the assignment of ->card_busy() in sdhci.c, which makes
+> >> mmc_poll_for_busy() to use CMD13 polling instead. If this works, it
+> >> would be useful to know how many times a CMD13 is sent to find out
+> >> when card moves out of busy state.
+> >
+> > It doesn't work.
 > 
-> Signed-off-by: Hu Ziji <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> Okay. So what kind of error do you get when sending the CMD13 to poll? -110?
 
-Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+No error when I poll after CMD6. Here is a log with CMD13 to perform the
+polling:
 
-> ---
->  drivers/mmc/host/sdhci.c | 3 ++-
->  drivers/mmc/host/sdhci.h | 1 +
->  2 files changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 23909804ffb8..0e9ed0fadff9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1570,7 +1570,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
->  
-> -static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->  	struct sdhci_host *host = mmc_priv(mmc);
->  	unsigned long flags;
-> @@ -1730,6 +1730,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	mmiowb();
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_set_ios);
->  
->  static int sdhci_get_cd(struct mmc_host *mmc)
->  {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0b66f210ae82..3563c0c384ca 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -691,6 +691,7 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
->  void sdhci_reset(struct sdhci_host *host, u8 mask);
->  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-> +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->  
->  #ifdef CONFIG_PM
->  extern int sdhci_suspend_host(struct sdhci_host *host);
-> 
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 1
+mmc0: starting CMD8 arg 00000000 flags 000000b5
+mmc0:     blksz 512 blocks 1 flags 00000200 tsac 400 ms nsac 1000
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: sdhci: IRQ status 0x00000002
+mmc0: req done (CMD8): 0: 00000900 00000000 00000000 00000000
+mmc0:     512 bytes transferred: 0
+=== mmc_select_hs_ddr: l.1072 ===
+--- __mmc_switch ---
+__mmc_switch: mmc_wait_for_cmd
+mmc0: starting CMD6 arg 03b70601 flags 0000049d
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: sdhci: IRQ status 0x00000002
+mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
+__mmc_switch: mmc_poll_for_busy
+mmc0: starting CMD13 arg 00010000 flags 00000195
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+mmc_poll_for_busy: l.512
+__mmc_switch: mmc_set_timing
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 8
+__mmc_switch: mmc_switch_status
+mmc0: starting CMD13 arg 00010000 flags 00000195
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req done (CMD13): -110: 00000000 00000000 00000000 00000000
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 1
+mmc0: Invalid UHS-I mode selected
+mmc0: switch to bus width 8 ddr failed
+mmc0: error -110 whilst initialising MMC card
+mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+> 
+> >
+> >> **) While using ->card_busy(), I would just add some simple debug
+> >> prints in mmc_poll_for_busy() to prints its return values.
+> >
+> > No error returned. I exit the function after the while loop.
+> 
+> If I understand correctly, the ->card_busy() callbacks immediately
+> reports the eMMC card as *not* being busy, right?
+
+Yes, with sdhci_card_busy() this time:
+
+=== mmc_select_hs_ddr: l.1072 ===                                                                       
+--- __mmc_switch ---
+__mmc_switch: mmc_wait_for_cmd
+mmc0: starting CMD6 arg 03b70601 flags 0000049d
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: sdhci: IRQ status 0x00000002
+mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
+__mmc_switch: mmc_poll_for_busy
+mmc_poll_for_busy: ops->card_busy
+mmc_poll_for_busy: l.513
+__mmc_switch: mmc_set_timing
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 8
+__mmc_switch: mmc_switch_status
+mmc0: starting CMD13 arg 00010000 flags 00000195
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req failed (CMD13): -110, retrying...
+mmc0: sdhci: IRQ status 0x00038000
+mmc0: req done (CMD13): -110: 00000000 00000000 00000000 00000000
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 1
+mmc0: Invalid UHS-I mode selected
+mmc0: switch to bus width 8 ddr failed
+mmc0: error -110 whilst initialising MMC card
+
+
+> 
+> >
+> > I continue the investigation to figure out why calling mmc_set_timing before
+> > mmc_switch_status causes an issue.
+> 
+> Great!
+> 
+> Please tell if you need some further help with some more ideas.
+
+Ok thanks.
+
+To compare, if I put mmc_set_timing after mmc_switch_status:
+
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 1
+mmc0: starting CMD8 arg 00000000 flags 000000b5
+mmc0:     blksz 512 blocks 1 flags 00000200 tsac 400 ms nsac 1000
+mmc0: sdhci: IRQ status 0x00000001             
+mmc0: sdhci: IRQ status 0x00000002
+mmc0: req done (CMD8): 0: 00000900 00000000 00000000 00000000
+mmc0:     512 bytes transferred: 0             
+=== mmc_select_hs_ddr: l.1072 === 
+--- __mmc_switch ---                                                 
+__mmc_switch: mmc_wait_for_cmd                 
+mmc0: starting CMD6 arg 03b70601 flags 0000049d                                                   
+mmc0: sdhci: IRQ status 0x00000001                                                                      
+mmc0: sdhci: IRQ status 0x00000002             
+mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
+__mmc_switch: mmc_poll_for_busy                              
+mmc_poll_for_busy: ops->card_busy              
+mmc_poll_for_busy: l.513          
+__mmc_switch: mmc_switch_status
+mmc0: starting CMD13 arg 00010000 flags 00000195
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+__mmc_switch: mmc_set_timing
+mmc0: clock 52000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 8 timing 8
+--- __mmc_switch ---
+__mmc_switch: mmc_wait_for_cmd
+mmc0: starting CMD6 arg 03a10101 flags 0000049d
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: sdhci: IRQ status 0x00000002
+mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
+__mmc_switch: mmc_poll_for_busy
+mmc_poll_for_busy: ops->card_busy
+mmc_poll_for_busy: l.513
+__mmc_switch: mmc_switch_status
+mmc0: starting CMD13 arg 00010000 flags 00000195
+mmc0: sdhci: IRQ status 0x00000001
+mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+mmc0: new DDR MMC card at address 0001
+
+Regards
+
+Ludovic
