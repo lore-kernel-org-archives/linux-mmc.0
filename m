@@ -1,101 +1,73 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 00/25] sdhci patches
-Date: Wed, 22 Mar 2017 09:47:56 +0100
-Message-ID: <20170322084755.7q5zw6dg74uux4mu@rfolt0960.corp.atmel.com>
-References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
+From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
+Subject: Re: Possible bug in mmc-utils: Is MMC 'partition setting completed'
+ required for 'write reliability'?
+Date: Wed, 22 Mar 2017 10:41:20 +0000
+Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD5932@Elexis-Exch02.elexisad.net>
+References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
+ <00b923df-6aad-6428-3247-ead8995066c1@vaisala.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa3.microchip.iphmx.com ([68.232.153.233]:48037 "EHLO
-        esa3.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759105AbdCVK0R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 06:26:17 -0400
-Content-Disposition: inline
-In-Reply-To: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail1.bemta6.messagelabs.com ([193.109.254.108]:37012 "EHLO
+        mail1.bemta6.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1758808AbdCVKmU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 06:42:20 -0400
+In-Reply-To: <00b923df-6aad-6428-3247-ead8995066c1@vaisala.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: Tomas Melin <tomas.melin@vaisala.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-On Mon, Mar 20, 2017 at 07:50:28PM +0200, Adrian Hunter wrote:
-> Hi
-> 
-> Here are some sdhci patches that include preparation for CQE and some
-> general improvements.  Patches such as:
-> 
->     mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
->     mmc: sdhci: Do not use spin lock in set_ios paths
-> 
-> affect several drivers specifically, like:
-> 
->     drivers/mmc/host/sdhci-brcmstb.c
->     drivers/mmc/host/sdhci-esdhc-imx.c
->     drivers/mmc/host/sdhci-of-arasan.c
->     drivers/mmc/host/sdhci-of-at91.c
->     drivers/mmc/host/sdhci-of-esdhc.c
->     drivers/mmc/host/sdhci-pxav3.c
->     drivers/mmc/host/sdhci-s3c.c
->     drivers/mmc/host/sdhci-sirf.c
->     drivers/mmc/host/sdhci-spear.c
->     drivers/mmc/host/sdhci-st.c
-> 
-> 
-> 
-> Adrian Hunter (25):
->       mmc: sdhci: Do not disable interrupts while waiting for clock
->       mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
->       mmc: sdhci: Optimize delay loops
->       mmc: sdhci: Let drivers decide whether to use mmc_retune_needed() with pm
->       mmc: sdhci-pci: Let devices define their own private data
->       mmc: sdhci-pci: Don't re-tune with runtime pm for some Intel devices
->       mmc: sdhci-pci: Use ACPI DSM to get driver strength for some Intel devices
->       mmc: sdhci: Remove ->select_drive_strength() callback
->       mmc: sdhci: Do not use spin lock in set_ios paths
->       mmc: sdhci: Reduce spin lock usage in sdhci_execute_tuning
->       mmc: sdhci: Improve debug print format
->       mmc: sdhci: Add response register to register dump
->       mmc: sdhci: Use sdhci_readl() not readl() in sdhci_dumpregs()
->       mmc: sdhci: Improve register dump print format
->       mmc: sdhci: Export sdhci_dumpregs
->       mmc: sdhci: Get rid of 'extern' in header file
->       mmc: sdhci: Add sdhci_cleanup_host
->       mmc: sdhci: Factor out sdhci_set_default_irqs
->       mmc: sdhci: Add CQE support
->       mmc: sdhci-pci: Let devices define how to add the host
->       mmc: sdhci-pci: Do not use suspend/resume callbacks with runtime pm
->       mmc: sdhci-pci: Conditionally compile pm sleep functions
->       mmc: sdhci-pci: Let suspend/resume callbacks replace default callbacks
->       mmc: sdhci-pci: Add runtime suspend/resume callbacks
->       mmc: sdhci-pci: Move a function to avoid later forward declaration
-> 
->  drivers/mmc/host/sdhci-acpi.c        |  12 +-
->  drivers/mmc/host/sdhci-brcmstb.c     |   3 +
->  drivers/mmc/host/sdhci-esdhc-imx.c   |   6 +
->  drivers/mmc/host/sdhci-msm.c         |   8 -
->  drivers/mmc/host/sdhci-of-arasan.c   |   9 +-
->  drivers/mmc/host/sdhci-of-at91.c     |   5 +-
->  drivers/mmc/host/sdhci-of-esdhc.c    |   3 +
->  drivers/mmc/host/sdhci-pci-core.c    | 551 ++++++++++++++++++++---------------
->  drivers/mmc/host/sdhci-pci-data.c    |   3 -
->  drivers/mmc/host/sdhci-pci-o2micro.c |   4 +-
->  drivers/mmc/host/sdhci-pci.h         |  24 +-
->  drivers/mmc/host/sdhci-pltfm.c       |   3 +
->  drivers/mmc/host/sdhci-pxav3.c       |  10 +-
->  drivers/mmc/host/sdhci-s3c.c         |  10 +-
->  drivers/mmc/host/sdhci-sirf.c        |   3 +
->  drivers/mmc/host/sdhci-spear.c       |   3 +
->  drivers/mmc/host/sdhci-st.c          |   6 +-
->  drivers/mmc/host/sdhci.c             | 404 ++++++++++++++++---------
->  drivers/mmc/host/sdhci.h             |  58 ++--
->  19 files changed, 691 insertions(+), 434 deletions(-)
-> 
-
-Tested-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-
-> 
-> Regards
-> Adrian
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQpPbiBXZWQsIDIwMTctMDMtMjIgYXQgMTE6MTMgKzAyMDAsIFRvbWFzIE1lbGluIHdyb3RlOg0K
+PiBPbiAwMy8yMC8yMDE3IDA1OjQwIFBNLCBCcmlua21hbm4sIEhhcmFsZCB3cm90ZToNCj4gPg0K
+PiA+IEkgYW0gaGF2aW5nIHByb2JsZW1zIHdpdGggdGhlICdtbWMnIHVzZXJzcGFjZSBjb21tYW5k
+IGluIG1tYy11dGlscy4NCj4gPiBUaGlzIGNhbGw6DQo+ID4NCj4gPj4gL3Vzci9iaW4vbW1jIHdy
+aXRlX3JlbGlhYmlsaXR5IHNldCAteSAwIC9kZXYvbW1jYmxrMQ0KPiA+DQo+ID4gcmVzdWx0cyBp
+bjoNCj4gPg0KPiA+PiBzZXR0aW5nIE9UUCBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQhDQo+
+ID4+IFNldHRpbmcgT1RQIFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCBmYWlsZWQgb24gL2Rl
+di9tbWNibGsxDQo+ID4NCj4gPiBXaGljaCBpcyBub3QgdG9vIHN1cnByaXNpbmcsIHNpbmNlIEkg
+b25seSB3YW50IHRvIHNldCB0aGUgd3JpdGUNCj4gPiByZWxpYWJpbGl0eSBiaXQgYW5kIGRpZCBu
+b3QgdG91Y2ggYW55IChtbWMtKXBhcnRpdGlvbiBpbmZvcm1hdGlvbiwgc28NCj4gPiB0aGF0IGl0
+IHByb2JhYmx5IHN0aWxsIGlzIGludmFsaWQuDQo+DQo+IE15IGV4cGVyaWVuY2UgaXMgdGhhdCB5
+b3UgbmVlZCB0byBmaXJzdCBkbyB0aGUgcGFydGl0aW9uaW5nIGJlZm9yZSB0aGUgd3JpdGUNCj4g
+cmVsaWFiaWxpdHkgZmxhZyBjYW4gYmUgc2V0LiBUaGlzIGlzIGJlY2F1c2UgdGhlIHBhcnRpdGlv
+biBmb3Igd2hpY2ggdGhlIHdyaXRlDQo+IHJlbGlhYmlsaXR5IGdldHMgc2V0LCBmaXJzdCBuZWVk
+cyB0byBiZSBjb25maWd1cmVkIGZvciBlbmhhbmNlZCBtb2RlIChlbmhfYXJlYSBzZXQpLg0KDQpZ
+ZXMsIHRoYXQgaXMgd2hhdCB0aGUgbW1jIHV0aWxpdHkgbWFrZXMgeW91IGRvLCBidXQgSSB0aGlu
+ayBpcyBub3QNCnN1cHBvcnRlZCBieSB0aGUgc3RhbmRhcmQuIEkgYW0gbG9va2luZyBhdCAiRW1i
+ZWRkZWQgTXVsdGktTWVkaWEgQ2FyZA0KKGUuTU1DKSBFbGVjdHJpY2FsIFN0YW5kYXJkICg1LjEp
+IiBKRVNEODQtQjUxLg0KDQpDaGFwdGVyIDYuMiBkZXNjcmliZXMgdGhlICJQYXJ0aXRpb24gTWFu
+YWdlbWVudCIgYW5kIHRoYXQgaW5jbHVkZXMgdGhlc2UNCnNldHRpbmdzIChDaGFwdGVyIDYuMi40
+KToNCg0KR1BfU0laRV9NVUxUX0dQMCAtIEdQX1NJWkVfTVVMVF9HUDMgWzE1NDoxNDNdDQpQQVJU
+SVRJT05TX0FUVFJJQlVURSAgICAgICAgICAgICAgICBbMTU2XQ0KRVhUX1BBUlRJVElPTlNfQVRU
+UklCVVRFICAgICAgICAgICAgWzUzOjUyXQ0KRU5IX1NUQVJUX0FERFIgICAgICAgICAgICAgICAg
+ICAgICAgWzEzOToxMzZdDQpFTkhfU0laRV9NVUxUICAgICAgICAgICAgICAgICAgICAgICBbMTU5
+OjE1N10NCg0KTW9zdCBwYXJ0aWN1bGFybHkgdGhpcyBjaGFwdGVyIGRvZXMgKk5PVCogbWVudGlv
+bg0KDQpXUl9SRUxfU0VUICAgICAgICAgICAgICAgICAgICAgICAgICBbMTY3XQ0KDQphdCBhbGwh
+DQoNCkFuZCBuZWl0aGVyIGRvZXMgdGhlIGNoYXB0ZXIgYWJvdXQgJ3JlbGlhYmxlIHdyaXRlJyAo
+Ny40Ljc4KSByZWZlciB0bw0KdGhlIHBhcnRpdGlvbiBzZXR1cC4NCg0KV2hhdCBJIGFtIGxvb2tp
+bmcgZm9yIGlzIGEgZGVmaW5pdGUgYW5zd2VyIHRvIHdoZXRoZXIgbXkgaW50ZXJwcmV0YXRpb24N
+Cm9mIHRoZSBzdGFuZGFyZCBpcyBjb3JyZWN0IG9yIG5vdC4gSWYgaXQgaXMgY29ycmVjdCwgdGhl
+biB0aGUgJ21tYw0Kd3JpdGVfcmVsaWFiaWxpdHkgc2V0JyBpbXBsZW1lbnRhdGlvbiBpcyB3cm9u
+Zy4NCg0KQWRkaXRpb25hbGx5IHRoaXM6DQoNCj4gL3Vzci9iaW4vbW1jIHdyaXRlX3JlbGlhYmls
+aXR5IHNldCAtbiAwIC9kZXYvbW1jYmxrMQ0KDQpzaG91bGQgbm90IGRvIGFueXRoaW5nIGJlY2F1
+c2Ugb2YgdGhlIC1uIChkcnkgcnVuLSlvcHRpb24sIGJ1dCB0aGUgd3JpdGUNCnJlbGlhYmlsaXR5
+IGJpdCBpcyBzdGlsbCBiZWluZyBzZXQuDQoNCkZZSTogT3VyIGludGVudGlvbiBpcyB0byBrZWVw
+IHRoZSBVc2VyIERhdGEgQXJlYSBpbiBvbmUgcGllY2UsIGkuZS4gbm8NCmVNTUMtcGFydGl0aW9u
+aW5nIGF0IGFsbCwgYW5kIGVuYWJsZSAncmVsaWFibGUgd3JpdGUnLCBidXQgbm8gb3RoZXINCmVu
+aGFuY2VtZW50cywgZm9yIHRoZSBlbnRpcmUgVXNlciBEYXRhIEFyZWEuDQoNCj4gPiBJZiBJIHRo
+ZW4gdHlwZToNCj4gPg0KPiA+PiAvdXNyL2Jpbi9tbWMgZXh0Y3NkIHJlYWQgL2Rldi9tbWNibGsx
+DQo+ID4NCj4gPiB0aGF0IHJlbGlhYmxlIHdyaXRlIGJpdCBpcyBzaG93biBhcyBzZXQ6DQo+ID4N
+Cj4gPj4gV3JpdGUgcmVsaWFiaWxpdHkgc2V0dGluZyByZWdpc3RlciBbV1JfUkVMX1NFVF06IDB4
+MDENCj4NCj4gVGhlIGJpdCBnZXRzIHNldCwgYnV0IGlzIGl0IHN0aWxsIG9uIGFmdGVyIGEgcmVi
+b290Pw0KDQpZZXMsIGl0IGlzLg0KDQoNCkJlc3QgcmVnYXJkcw0KDQppLkEuIEhhcmFsZCBCcmlu
+a21hbm4NCg0KLS0NCg0KQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21iSA0KV2VyayBMZW9w
+b2xkc2jDtmhlDQpIZXJmb3JkZXIgU3RyYcOfZSAyNDktMjUxDQpELTMzODE4IExlb3BvbGRzaMO2
+aGUNCg0KVDogICAgICArNDkgKDUyMDgpIDk4Ny01MTMNCg0KRTogICAgICBoYXJhbGQuYnJpbmtt
+YW5uQGJzdC1pbnRlcm5hdGlvbmFsLmNvbQ0KVzogICAgICBodHRwOi8vd3d3LmJzdC1lbHRyb21h
+dC5jb20NCg0KDQoNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXw0KQW10c2dlcmljaHQgQmllbGVmZWxkLCBIUkIgTnIuIDMwODMwDQpHZXNj
+aMOkZnRzZsO8aHJlciBLcmlzdGlhbiBKw7xua2UsIERyLiBKb2hhbm4tQ2Fyc3RlbiBLaXBwLCBE
+ci4gR3VudGVyDQpUYXV0b3J1cw0KU2l0eiBkZXIgR2VzZWxsc2NoYWZ0OiBCaWVsZWZlbGQNClZl
+cnRyYXVsaWNoZSBFLU1haWwgdm9uIEJTVCBlbHRyb21hdCBJbnRlcm5hdGlvbmFsIEdtYkgNCg0K
