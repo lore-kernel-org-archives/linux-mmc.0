@@ -1,71 +1,68 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 6/6] mmc: meson-gx: simplify setting timeout configuration
- parameters
-Date: Wed, 22 Mar 2017 22:34:01 +0100
-Message-ID: <8105b3e7-9c80-038e-9cfe-53139d6892ce@gmail.com>
+Subject: [PATCH 1/6] mmc: meson-gx: remove unneeded configuration bit resets
+Date: Wed, 22 Mar 2017 22:18:37 +0100
+Message-ID: <bc05bb2e-f42d-cd66-c0d8-04d2e98e0c5d@gmail.com>
 References: <8bf58a83-d8d7-615c-c89b-87a62a3c9c40@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34933 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753759AbdCVVeZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 17:34:25 -0400
-Received: by mail-wm0-f65.google.com with SMTP id z133so13143852wmb.2
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 14:34:18 -0700 (PDT)
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35901 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752775AbdCVVeN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 17:34:13 -0400
+Received: by mail-wm0-f66.google.com with SMTP id x124so13082012wmf.3
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 14:34:12 -0700 (PDT)
 In-Reply-To: <8bf58a83-d8d7-615c-c89b-87a62a3c9c40@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-We don't need variable cmd_cfg_timeout, so remove it and simplify the
-code a little.
+The variables holding the configuration bits are zero-initialized.
+So we can remove all bit resets.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 11 +++++------
- 1 file changed, 5 insertions(+), 6 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 87303404..b917765c 100644
+index bd075fef..04a55577 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -426,7 +426,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 	struct meson_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = cmd->data;
- 	u32 cfg, cmd_cfg = 0, cmd_data = 0;
--	u8 blk_len, cmd_cfg_timeout;
-+	u8 blk_len;
- 	unsigned int xfer_bytes = 0;
+@@ -441,7 +441,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
  
- 	/* Setup descriptors */
-@@ -454,6 +454,9 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 	/* data? */
- 	if (data) {
- 		cmd_cfg |= CMD_CFG_DATA_IO;
-+		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT_DATA) <<
-+			   CMD_CFG_TIMEOUT_SHIFT;
-+
- 		if (data->blocks > 1) {
- 			cmd_cfg |= CMD_CFG_BLOCK_MODE;
- 			cmd_cfg |= (data->blocks & CMD_CFG_LENGTH_MASK) <<
-@@ -488,13 +491,9 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 	/* Response */
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+-		desc->cmd_cfg &= ~CMD_CFG_NO_RESP;
+ 		if (cmd->flags & MMC_RSP_136)
+ 			desc->cmd_cfg |= CMD_CFG_RESP_128;
+ 		desc->cmd_cfg |= CMD_CFG_RESP_NUM;
+@@ -479,7 +478,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 				writel(cfg, host->regs + SD_EMMC_CFG);
+ 			}
+ 		} else {
+-			desc->cmd_cfg &= ~CMD_CFG_BLOCK_MODE;
+ 			desc->cmd_cfg |=
+ 				(cmd->data->blksz & CMD_CFG_LENGTH_MASK) <<
+ 				CMD_CFG_LENGTH_SHIFT;
+@@ -494,15 +492,12 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 					  host->bounce_buf, xfer_bytes);
+ 			cmd->data->bytes_xfered = xfer_bytes;
+ 			dma_wmb();
+-		} else {
+-			desc->cmd_cfg &= ~CMD_CFG_DATA_WR;
  		}
  
- 		cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
--
--		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
+ 		desc->cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
+ 
+ 		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
  	} else {
--		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
-+		cmd_cfg |= ilog2(SD_EMMC_CMD_TIMEOUT) << CMD_CFG_TIMEOUT_SHIFT;
+-		desc->cmd_cfg &= ~CMD_CFG_DATA_IO;
+ 		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
  	}
--	cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
--		   CMD_CFG_TIMEOUT_SHIFT;
- 
- 	host->cmd = cmd;
- 
+ 	desc->cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
 -- 
 2.12.0
 
