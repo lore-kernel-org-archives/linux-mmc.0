@@ -1,150 +1,777 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci: intel: Disable runtime pm when the
- sdio_irq is enabled.
-Date: Wed, 22 Mar 2017 16:29:07 +0200
-Message-ID: <ea2a7bfa-0507-c067-6982-6df5153be461@intel.com>
-References: <20170315163145.15475-1-hdegoede@redhat.com>
- <20170315163145.15475-2-hdegoede@redhat.com>
- <CAPDyKFpaqJDCxR7eTtgOVCn7SUNeCFPPTc884fe7yjXi-LRGow@mail.gmail.com>
- <7e093710-03d0-30f1-4088-5f68217cb109@intel.com>
- <CAPDyKFp-w9jORUUC=eqwPnnZcxQKCu_d2y9pqvX3cq_rx67gYA@mail.gmail.com>
- <2d388dd3-a024-0eea-dc07-c207be0a044c@intel.com>
- <CAPDyKFqie1ZPj-bzmMurf7+SZiXKUckrJH40yx21gAfvxRVEEg@mail.gmail.com>
+Subject: Re: [PATCH v6 08/14] mmc: sdhci-xenon: Add Marvell Xenon SDHC core
+ functionality
+Date: Wed, 22 Mar 2017 16:32:54 +0200
+Message-ID: <d46eaff5-6c87-01ce-d206-ba36ad8e0918@intel.com>
+References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
+ <cb885ae19e7c467908cdaa1f1cc8d95a7217d663.1487091464.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:9101 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1759133AbdCVOel (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 22 Mar 2017 10:34:41 -0400
-In-Reply-To: <CAPDyKFqie1ZPj-bzmMurf7+SZiXKUckrJH40yx21gAfvxRVEEg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cb885ae19e7c467908cdaa1f1cc8d95a7217d663.1487091464.git-series.gregory.clement@free-electrons.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, Mike Turquette <mturquette@baylibre.com>, Nadav Haklai <nadavh@marvell.com>, Ziji Hu <huziji@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, Marcin Wojtas <mw@semihalf.com>, linux-arm-kernel@lists.infradead.org, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-kernel@vger.kernel.org, Wilson Ding <dingwei@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>
 
-On 22/03/17 16:00, Ulf Hansson wrote:
-> On 22 March 2017 at 13:06, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 21/03/17 16:54, Ulf Hansson wrote:
->>> On 21 March 2017 at 13:34, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 21/03/17 12:00, Ulf Hansson wrote:
->>>>> On 15 March 2017 at 17:31, Hans de Goede <hdegoede@redhat.com> wrote:
->>>>>> SDIO cards may need clock to send the card interrupt to the host.
->>>>>>
->>>>>> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
->>>>>> pinging the tablet results in:
->>>>>>
->>>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
->>>>>>
->>>>>> Where as with this patch I get:
->>>>>>
->>>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
->>>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
->>>>>>
->>>>>> Cc: Dong Aisheng <b29396@freescale.com>
->>>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>>>>> ---
->>>>>> Changes in v2:
->>>>>> -New patch replacing "mmc: sdhci: sdio-intel: Set
->>>>>>  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
->>>>>> ---
->>>>>>  drivers/mmc/host/sdhci-acpi.c     | 1 +
->>>>>>  drivers/mmc/host/sdhci-pci-core.c | 1 +
->>>>>>  drivers/mmc/host/sdhci.c          | 6 ++++++
->>>>>>  drivers/mmc/host/sdhci.h          | 2 ++
->>>>>>  4 files changed, 10 insertions(+)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>>>>> index 237f318..53b431a 100644
->>>>>> --- a/drivers/mmc/host/sdhci-acpi.c
->>>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>>>>> @@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->>>>>>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
->>>>>>         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->>>>>>         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
->>>>>> +                  SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->>>>>>                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->>>>>>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
->>>>>>                    MMC_CAP_WAIT_WHILE_BUSY,
->>>>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->>>>>> index 982b3e3..a3b242e 100644
->>>>>> --- a/drivers/mmc/host/sdhci-pci-core.c
->>>>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
->>>>>> @@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
->>>>>>  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->>>>>>         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->>>>>>         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
->>>>>> +                       SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
->>>>>>                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->>>>>>         .allow_runtime_pm = true,
->>>>>>         .probe_slot     = byt_sdio_probe_slot,
->>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>> index 6fdd7a7..59c5cad 100644
->>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>> @@ -1828,6 +1828,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->>>>>>         struct sdhci_host *host = mmc_priv(mmc);
->>>>>>         unsigned long flags;
->>>>>>
->>>>>> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && enable)
->>>>>> +               pm_runtime_get(host->mmc->parent);
->>>>>
->>>>> There are currently no sdhci variant for any SoC that implements
->>>>> wakeup support in runtime suspend for SDIO irqs. In other words, it
->>>>> seems all sdhci hosts suffers from the same problem.
->>>>
->>>> There might still be drivers that expect SDIO interrupts during
->>>> runtime suspend, considering this patch:
->>>>
->>>>         https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=be138554a7923658ded799b0e8794d9c1d08a6e5
->>>
->>> Right. Thanks for pointing it out.
->>>
->>> However I don't think that is how runtime PM should be deployed when
->>> it is used for controlling devices like sdhci. Let's change that once
->>> we  have the common issue for sdhci and SDIO irqs resolved.
->>
->> Yes, then perhaps we could accept the inverted quirk on the basis that it
->> will be removed.
+On 14/02/17 19:01, Gregory CLEMENT wrote:
+> From: Hu Ziji <huziji@marvell.com>
 > 
-> Well, why have quirk for something that will be always executed. Isn't
-> it better to invent one, when we see a need for it?
+> Add Xenon eMMC/SD/SDIO host controller core functionality.
+> Add Xenon specific initialization process.
+> Add Xenon specific mmc_host_ops APIs.
+> Add Xenon specific register definitions.
+> 
+> Add CONFIG_MMC_SDHCI_XENON support in drivers/mmc/host/Kconfig.
+> 
+> Marvell Xenon SDHC conforms to SD Physical Layer Specification
+> Version 3.01 and is designed according to the guidelines provided
+> in the SD Host Controller Standard Specification Version 3.00.
+> 
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-I think the idea was to add the quirk to sdhci-esdhc-imx but I doubt
-sdhci-esdhc-imx is really saving much power with the function and interface
-clocks still on, so we can dispense with a quirk for now if that is what you
-prefer.
+A few minor comments below.
 
+> ---
+>  drivers/mmc/host/Kconfig       |   9 +-
+>  drivers/mmc/host/Makefile      |   3 +-
+>  drivers/mmc/host/sdhci-xenon.c | 602 ++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci-xenon.h |  70 ++++-
+>  4 files changed, 684 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-xenon.c
+>  create mode 100644 drivers/mmc/host/sdhci-xenon.h
 > 
->>
->> Hans, as I wrote somewhere else, we can use pm_runtime_get_noresume() and
->> pm_runtime_put_noidle() since sdhci_enable_sdio_irq() must be called with
->> the host claimed and therefore runtime resumed.
->>
-> 
-> Good point. This makes it more clear on what goes on.
-> 
-> Kind regards
-> Uffe
-> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 2eb97014dc3f..1c1a88bfbdad 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -819,3 +819,12 @@ config MMC_SDHCI_BRCMSTB
+>  	  Broadcom STB SoCs.
+>  
+>  	  If unsure, say Y.
+> +
+> +config MMC_SDHCI_XENON
+> +	tristate "Marvell Xenon eMMC/SD/SDIO SDHCI driver"
+> +	depends on MMC_SDHCI_PLTFM
+> +	help
+> +	  This selects Marvell Xenon eMMC/SD/SDIO SDHCI.
+> +	  If you have a machine with integrated Marvell Xenon SDHC IP,
+> +	  say Y or M here.
+> +	  If unsure, say N.
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index ccc9c4cba154..b0a2ab4b256e 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -82,3 +82,6 @@ obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
+>  ifeq ($(CONFIG_CB710_DEBUG),y)
+>  	CFLAGS-cb710-mmc	+= -DDEBUG
+>  endif
+> +
+> +obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
+> +sdhci-xenon-driver-y		+= sdhci-xenon.o
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> new file mode 100644
+> index 000000000000..e633f803907a
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -0,0 +1,602 @@
+> +/*
+> + * Driver for Marvell Xenon SDHC as a platform device
+> + *
+> + * Copyright (C) 2016 Marvell, All Rights Reserved.
+> + *
+> + * Author:	Hu Ziji <huziji@marvell.com>
+> + * Date:	2016-8-24
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public License as
+> + * published by the Free Software Foundation version 2.
+> + *
+> + * Inspired by Jisheng Zhang <jszhang@marvell.com>
+> + * Special thanks to Video BG4 project team.
+> + */
+> +
+> +#include <linux/delay.h>
+> +#include <linux/module.h>
+> +#include <linux/of.h>
+> +
+> +#include "sdhci-pltfm.h"
+> +#include "sdhci-xenon.h"
+> +
+> +static int enable_xenon_internal_clk(struct sdhci_host *host)
+> +{
+> +	u32 reg;
+> +	u8 timeout;
+> +
+> +	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+> +	reg |= SDHCI_CLOCK_INT_EN;
+> +	sdhci_writel(host, reg, SDHCI_CLOCK_CONTROL);
+> +	/* Wait max 20 ms */
+> +	timeout = 20;
+> +	while (!((reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> +			& SDHCI_CLOCK_INT_STABLE)) {
+> +		if (timeout == 0) {
+> +			pr_err("%s: Internal clock never stabilised.\n",
+> +			       mmc_hostname(host->mmc));
+> +			return -ETIMEDOUT;
+> +		}
+> +		timeout--;
+> +		mdelay(1);
 
+If it takes a lot less than 1 ms this can waste time.  See recent patch
+"mmc: sdhci: Optimize delay loops"
+
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +/* Set SDCLK-off-while-idle */
+> +static void xenon_set_sdclk_off_idle(struct sdhci_host *host,
+> +				     unsigned char sdhc_id, bool enable)
+> +{
+> +	u32 reg;
+> +	u32 mask;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
+> +	/* Get the bit shift basing on the SDHC index */
+> +	mask = (0x1 << (XENON_SDCLK_IDLEOFF_ENABLE_SHIFT + sdhc_id));
+> +	if (enable)
+> +		reg |= mask;
+> +	else
+> +		reg &= ~mask;
+> +
+> +	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
+> +}
+> +
+> +/* Enable/Disable the Auto Clock Gating function */
+> +static void xenon_set_acg(struct sdhci_host *host, bool enable)
+> +{
+> +	u32 reg;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
+> +	if (enable)
+> +		reg &= ~XENON_AUTO_CLKGATE_DISABLE_MASK;
+> +	else
+> +		reg |= XENON_AUTO_CLKGATE_DISABLE_MASK;
+> +	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
+> +}
+> +
+> +/* Enable this SDHC */
+> +static void xenon_enable_sdhc(struct sdhci_host *host,
+> +			      unsigned char sdhc_id)
+> +{
+> +	u32 reg;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
+> +	reg |= (BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
+> +	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
+> +
+> +	/*
+> +	 * Manually set the flag which all the card types require,
+> +	 * including SD, eMMC, SDIO
+> +	 */
+> +	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> +}
+> +
+> +/* Disable this SDHC */
+> +static void xenon_disable_sdhc(struct sdhci_host *host,
+> +			       unsigned char sdhc_id)
+> +{
+> +	u32 reg;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
+> +	reg &= ~(BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
+> +	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
+> +}
+> +
+> +/* Enable Parallel Transfer Mode */
+> +static void xenon_enable_sdhc_parallel_tran(struct sdhci_host *host,
+> +					    unsigned char sdhc_id)
+> +{
+> +	u32 reg;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_EXT_OP_CTRL);
+> +	reg |= BIT(sdhc_id);
+> +	sdhci_writel(host, reg, XENON_SYS_EXT_OP_CTRL);
+> +}
+> +
+> +/* Mask command conflict error */
+> +static void xenon_mask_cmd_conflict_err(struct sdhci_host *host)
+> +{
+> +	u32  reg;
+> +
+> +	reg = sdhci_readl(host, XENON_SYS_EXT_OP_CTRL);
+> +	reg |= XENON_MASK_CMD_CONFLICT_ERR;
+> +	sdhci_writel(host, reg, XENON_SYS_EXT_OP_CTRL);
+> +}
+> +
+> +static void xenon_sdhc_retune_setup(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	u32 reg;
+> +
+> +	/* Disable the Re-Tuning Request functionality */
+> +	reg = sdhci_readl(host, XENON_SLOT_RETUNING_REQ_CTRL);
+> +	reg &= ~XENON_RETUNING_COMPATIBLE;
+> +	sdhci_writel(host, reg, XENON_SLOT_RETUNING_REQ_CTRL);
+> +
+> +	/* Disable the Re-tuning Interrupt */
+> +	reg = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
+> +	reg &= ~SDHCI_INT_RETUNE;
+> +	sdhci_writel(host, reg, SDHCI_SIGNAL_ENABLE);
+> +	reg = sdhci_readl(host, SDHCI_INT_ENABLE);
+> +	reg &= ~SDHCI_INT_RETUNE;
+> +	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
+> +
+> +	/* Force to use Tuning Mode 1 */
+> +	host->tuning_mode = SDHCI_TUNING_MODE_1;
+> +	/* Set re-tuning period */
+> +	host->tuning_count = 1 << (priv->tuning_count - 1);
+> +}
+> +
+> +/*
+> + * Operations inside struct sdhci_ops
+> + */
+> +/* Recover the Register Setting cleared during SOFTWARE_RESET_ALL */
+> +static void sdhci_xenon_reset_exit(struct sdhci_host *host,
+> +				   unsigned char sdhc_id, u8 mask)
+> +{
+> +	/* Only SOFTWARE RESET ALL will clear the register setting */
+> +	if (!(mask & SDHCI_RESET_ALL))
+> +		return;
+> +
+> +	/* Disable tuning request and auto-retuning again */
+> +	xenon_sdhc_retune_setup(host);
+> +
+> +	xenon_set_acg(host, true);
+> +
+> +	xenon_set_sdclk_off_idle(host, sdhc_id, false);
+> +
+> +	xenon_mask_cmd_conflict_err(host);
+> +}
+> +
+> +static void sdhci_xenon_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	sdhci_reset(host, mask);
+> +	sdhci_xenon_reset_exit(host, priv->sdhc_id, mask);
+> +}
+> +
+> +/*
+> + * Xenon defines different values for HS200 and HS400
+> + * in Host_Control_2
+> + */
+> +static void xenon_set_uhs_signaling(struct sdhci_host *host,
+> +				    unsigned int timing)
+> +{
+> +	u16 ctrl_2;
+> +
+> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	/* Select Bus Speed Mode for host */
+> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+> +	if (timing == MMC_TIMING_MMC_HS200)
+> +		ctrl_2 |= XENON_CTRL_HS200;
+> +	else if (timing == MMC_TIMING_UHS_SDR104)
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+> +	else if (timing == MMC_TIMING_UHS_SDR12)
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+> +	else if (timing == MMC_TIMING_UHS_SDR25)
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+> +	else if (timing == MMC_TIMING_UHS_SDR50)
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+> +	else if ((timing == MMC_TIMING_UHS_DDR50) ||
+> +		 (timing == MMC_TIMING_MMC_DDR52))
+> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+> +	else if (timing == MMC_TIMING_MMC_HS400)
+> +		ctrl_2 |= XENON_CTRL_HS400;
+> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> +}
+> +
+> +static const struct sdhci_ops sdhci_xenon_ops = {
+> +	.set_clock		= sdhci_set_clock,
+> +	.set_bus_width		= sdhci_set_bus_width,
+> +	.reset			= sdhci_xenon_reset,
+> +	.set_uhs_signaling	= xenon_set_uhs_signaling,
+> +	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
+> +};
+> +
+> +static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+> +	.ops = &sdhci_xenon_ops,
+> +	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +		  SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
+> +		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +};
+> +
+> +/*
+> + * Xenon Specific Operations in mmc_host_ops
+> + */
+> +static void xenon_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	unsigned long flags;
+> +	u32 reg;
+> +
+> +	/*
+> +	 * HS400/HS200/eMMC HS doesn't have Preset Value register.
+> +	 * However, sdhci_set_ios will read HS400/HS200 Preset register.
+> +	 * Disable Preset Value register for HS400/HS200.
+> +	 * eMMC HS with preset_enabled set will trigger a bug in
+> +	 * get_preset_value().
+> +	 */
+> +	spin_lock_irqsave(&host->lock, flags);
+
+We are no longer using the spin lock in set_ios.  See recent patch "mmc:
+sdhci: Do not use spin lock in set_ios paths"
+
+> +	if ((ios->timing == MMC_TIMING_MMC_HS400) ||
+> +	    (ios->timing == MMC_TIMING_MMC_HS200) ||
+> +	    (ios->timing == MMC_TIMING_MMC_HS)) {
+> +		host->preset_enabled = false;
+> +		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> +		host->flags &= ~SDHCI_PV_ENABLED;
+> +
+> +		reg = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +		reg &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+> +		sdhci_writew(host, reg, SDHCI_HOST_CONTROL2);
+> +	} else {
+> +		host->quirks2 &= ~SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> +	}
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +	sdhci_set_ios(mmc, ios);
+> +
+> +	if (host->clock > XENON_DEFAULT_SDCLK_FREQ) {
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		xenon_set_sdclk_off_idle(host, priv->sdhc_id, true);
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +	}
+> +}
+> +
+> +static int xenon_emmc_signal_voltage_switch(struct mmc_host *mmc,
+> +					    struct mmc_ios *ios)
+> +{
+> +	unsigned char voltage = ios->signal_voltage;
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	unsigned char voltage_code;
+> +	u32 ctrl;
+> +
+> +	if ((voltage == MMC_SIGNAL_VOLTAGE_330) ||
+> +	    (voltage == MMC_SIGNAL_VOLTAGE_180)) {
+> +		if (voltage == MMC_SIGNAL_VOLTAGE_330)
+> +			voltage_code = XENON_EMMC_VCCQ_3_3V;
+> +		else if (voltage == MMC_SIGNAL_VOLTAGE_180)
+> +			voltage_code = XENON_EMMC_VCCQ_1_8V;
+> +
+> +		/*
+> +		 * This host is for eMMC, XENON self-defined
+> +		 * eMMC control register should be accessed
+> +		 * instead of Host Control 2
+> +		 */
+> +		ctrl = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+> +		ctrl &= ~XENON_EMMC_VCCQ_MASK;
+> +		ctrl |= voltage_code;
+> +		sdhci_writel(host, ctrl, XENON_SLOT_EMMC_CTRL);
+> +
+> +		/* There is no standard to determine this waiting period */
+> +		usleep_range(1000, 2000);
+> +
+> +		/* Check whether io voltage switch is done */
+> +		ctrl = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+> +		ctrl &= XENON_EMMC_VCCQ_MASK;
+> +		/*
+> +		 * This bit is set only when regulator feeds back
+> +		 * the voltage switch results to Xenon SDHC.
+> +		 * However, in actaul implementation, regulator might not
+
+actaul -> actual
+
+> +		 * provide this feedback.
+> +		 * Thus we shall not rely on this bit to determine
+> +		 * if switch failed.
+> +		 * If the bit is not set, just throw a message.
+> +		 * Besides, error code should not be returned.
+> +		 */
+> +		if (ctrl != voltage_code)
+> +			dev_info(mmc_dev(mmc), "fail to detect eMMC signal voltage stable\n");
+> +		return 0;
+> +	}
+> +
+> +	dev_err(mmc_dev(mmc), "Unsupported signal voltage: %d\n", voltage);
+> +	return -EINVAL;
+> +}
+> +
+> +static int xenon_start_signal_voltage_switch(struct mmc_host *mmc,
+> +					     struct mmc_ios *ios)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	/*
+> +	 * Before SD/SDIO set signal voltage, SD bus clock should be
+> +	 * disabled. However, sdhci_set_clock will also disable the Internal
+> +	 * clock in mmc_set_signal_voltage().
+> +	 * If Internal clock is disabled, the 3.3V/1.8V bit can not be updated.
+> +	 * Thus here manually enable internal clock.
+> +	 *
+> +	 * After switch completes, it is unnecessary to disable internal clock,
+> +	 * since keeping internal clock active obeys SD spec.
+> +	 */
+> +	enable_xenon_internal_clk(host);
+> +
+> +	if (priv->init_card_type == MMC_TYPE_MMC)
+> +		return xenon_emmc_signal_voltage_switch(mmc, ios);
+> +
+> +	return sdhci_start_signal_voltage_switch(mmc, ios);
+> +}
+> +
+> +/*
+> + * Update card type.
+> + * priv->init_card_type will be used in PHY timing adjustment.
+> + */
+> +static void xenon_init_card(struct mmc_host *mmc, struct mmc_card *card)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	/* Update card type*/
+> +	priv->init_card_type = card->type;
+> +}
+> +
+> +static int xenon_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +	if (host->timing == MMC_TIMING_UHS_DDR50)
+> +		return 0;
+> +
+> +	/*
+> +	 * Currently force Xenon driver back to support mode 1 only,
+> +	 * even though Xenon might claim to support mode 2 or mode 3.
+> +	 * It requires more time to test mode 2/mode 3 on more platforms.
+> +	 */
+> +	if (host->tuning_mode != SDHCI_TUNING_MODE_1)
+> +		xenon_sdhc_retune_setup(host);
+> +
+> +	return sdhci_execute_tuning(mmc, opcode);
+> +}
+> +
+> +static void xenon_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	u32 reg;
+> +	u8 sdhc_id = priv->sdhc_id;
+> +
+> +	sdhci_enable_sdio_irq(mmc, enable);
+> +
+> +	if (enable) {
+> +		/*
+> +		 * Set SDIO Card Inserted indication
+> +		 * to enable detecting SDIO async irq.
+> +		 */
+> +		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
+> +		reg |= (1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
+> +		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
+> +	} else {
+> +		/* Clear SDIO Card Inserted indication */
+> +		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
+> +		reg &= ~(1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
+> +		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
+> +	}
+> +}
+> +
+> +static void xenon_replace_mmc_host_ops(struct sdhci_host *host)
+> +{
+> +	host->mmc_host_ops.set_ios = xenon_set_ios;
+> +	host->mmc_host_ops.start_signal_voltage_switch =
+> +			xenon_start_signal_voltage_switch;
+> +	host->mmc_host_ops.init_card = xenon_init_card;
+> +	host->mmc_host_ops.execute_tuning = xenon_execute_tuning;
+> +	host->mmc_host_ops.enable_sdio_irq = xenon_enable_sdio_irq;
+> +}
+> +
+> +/*
+> + * Parse Xenon specific DT properties:
+> + * init_card_type: check whether this SDHC is for eMMC
+> + * sdhc-id: the index of current SDHC.
+> + *	    Refer to XENON_SYS_CFG_INFO register
+> + * tun-count: the interval between re-tuning
+> + */
+> +static int xenon_probe_dt(struct platform_device *pdev)
+> +{
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct mmc_host *mmc = host->mmc;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	u32 sdhc_id, nr_sdhc;
+> +	u32 tuning_count;
+> +
+> +	/* Disable HS200 on Armada AP806 */
+> +	if (of_device_is_compatible(np, "marvell,armada-ap806-sdhci"))
+> +		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+> +
+> +	priv->init_card_type = XENON_CARD_TYPE_UNKNOWN;
+> +	/* Check if mmc-card sub-node exists */
+> +	if (mmc_of_parse_mmc_card(mmc)) {
+> +		priv->init_card_type = MMC_TYPE_MMC;
+> +		/*
+> +		 * Force to clear BUS_TEST to
+> +		 * skip bus_test_pre and bus_test_post
+> +		 */
+> +		mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
+> +	}
+> +
+> +	priv->sdhc_id = 0x0;
+> +	if (!of_property_read_u32(np, "marvell,xenon-sdhc-id", &sdhc_id)) {
+> +		nr_sdhc = sdhci_readl(host, XENON_SYS_CFG_INFO);
+> +		nr_sdhc &= XENON_NR_SUPPORTED_SLOT_MASK;
+> +		if (unlikely(sdhc_id > nr_sdhc)) {
+> +			dev_err(mmc_dev(mmc), "SDHC Index %d exceeds Number of SDHCs %d\n",
+> +				sdhc_id, nr_sdhc);
+> +			return -EINVAL;
+> +		}
+> +	}
+> +
+> +	tuning_count = XENON_DEF_TUNING_COUNT;
+> +	if (!of_property_read_u32(np, "marvell,xenon-tun-count",
+> +				  &tuning_count)) {
+> +		if (unlikely(tuning_count >= XENON_TMR_RETUN_NO_PRESENT)) {
+> +			dev_err(mmc_dev(mmc), "Wrong Re-tuning Count. Set default value %d\n",
+> +				XENON_DEF_TUNING_COUNT);
+> +			tuning_count = XENON_DEF_TUNING_COUNT;
+> +		}
+> +	}
+> +	priv->tuning_count = tuning_count;
+> +
+> +	return 0;
+> +}
+> +
+> +static int xenon_sdhc_probe(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	u8 sdhc_id = priv->sdhc_id;
+> +
+> +	/* Enable SDHC */
+> +	xenon_enable_sdhc(host, sdhc_id);
+> +
+> +	/* Enable ACG */
+> +	xenon_set_acg(host, true);
+> +
+> +	/* Enable Parallel Transfer Mode */
+> +	xenon_enable_sdhc_parallel_tran(host, sdhc_id);
+> +
+> +	xenon_mask_cmd_conflict_err(host);
+> +
+> +	return 0;
+> +}
+> +
+> +static void xenon_sdhc_remove(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	u8 sdhc_id = priv->sdhc_id;
+> +
+> +	/* disable SDHC */
+> +	xenon_disable_sdhc(host, sdhc_id);
+> +}
+> +
+> +static int sdhci_xenon_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct sdhci_host *host;
+> +	struct sdhci_xenon_priv *priv;
+> +	int err;
+> +
+> +	host = sdhci_pltfm_init(pdev, &sdhci_xenon_pdata,
+> +				sizeof(struct sdhci_xenon_priv));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	xenon_set_acg(host, false);
+> +
+> +	/*
+> +	 * Link Xenon specific mmc_host_ops function,
+> +	 * to replace standard ones in sdhci_ops.
+> +	 */
+> +	xenon_replace_mmc_host_ops(host);
+> +
+> +	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+> +	if (IS_ERR(pltfm_host->clk)) {
+> +		err = PTR_ERR(pltfm_host->clk);
+> +		dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
+> +		goto free_pltfm;
+> +	}
+> +	err = clk_prepare_enable(pltfm_host->clk);
+> +	if (err)
+> +		goto free_pltfm;
+> +
+> +	err = mmc_of_parse(host->mmc);
+> +	if (err)
+> +		goto err_clk;
+> +
+> +	sdhci_get_of_property(pdev);
+> +
+> +	/* Xenon specific dt parse */
+> +	err = xenon_probe_dt(pdev);
+> +	if (err)
+> +		goto err_clk;
+> +
+> +	err = xenon_sdhc_probe(host);
+> +	if (err)
+> +		goto err_clk;
+> +
+> +	err = sdhci_add_host(host);
+> +	if (err)
+> +		goto remove_sdhc;
+> +
+> +	return 0;
+> +
+> +remove_sdhc:
+> +	xenon_sdhc_remove(host);
+> +err_clk:
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +free_pltfm:
+> +	sdhci_pltfm_free(pdev);
+> +	return err;
+> +}
+> +
+> +static int sdhci_xenon_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	xenon_sdhc_remove(host);
+> +
+> +	sdhci_remove_host(host, 0);
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +
+> +	sdhci_pltfm_free(pdev);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct of_device_id sdhci_xenon_dt_ids[] = {
+> +	{ .compatible = "marvell,armada-ap806-sdhci",},
+> +	{ .compatible = "marvell,armada-cp110-sdhci",},
+> +	{ .compatible = "marvell,armada-3700-sdhci",},
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+> +
+> +static struct platform_driver sdhci_xenon_driver = {
+> +	.driver	= {
+> +		.name	= "xenon-sdhci",
+> +		.of_match_table = sdhci_xenon_dt_ids,
+> +		.pm = &sdhci_pltfm_pmops,
+> +	},
+> +	.probe	= sdhci_xenon_probe,
+> +	.remove	= sdhci_xenon_remove,
+> +};
+> +
+> +module_platform_driver(sdhci_xenon_driver);
+> +
+> +MODULE_DESCRIPTION("SDHCI platform driver for Marvell Xenon SDHC");
+> +MODULE_AUTHOR("Hu Ziji <huziji@marvell.com>");
+> +MODULE_LICENSE("GPL v2");
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> new file mode 100644
+> index 000000000000..69de711db9eb
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -0,0 +1,70 @@
+> +/*
+> + * Copyright (C) 2016 Marvell, All Rights Reserved.
+> + *
+> + * Author:	Hu Ziji <huziji@marvell.com>
+> + * Date:	2016-8-24
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public License as
+> + * published by the Free Software Foundation version 2.
+> + */
+> +#ifndef SDHCI_XENON_H_
+> +#define SDHCI_XENON_H_
+> +
+> +/* Register Offset of Xenon SDHC self-defined register */
+> +#define XENON_SYS_CFG_INFO			0x0104
+> +#define XENON_SLOT_TYPE_SDIO_SHIFT		24
+> +#define XENON_NR_SUPPORTED_SLOT_MASK		0x7
+> +
+> +#define XENON_SYS_OP_CTRL			0x0108
+> +#define XENON_AUTO_CLKGATE_DISABLE_MASK		BIT(20)
+> +#define XENON_SDCLK_IDLEOFF_ENABLE_SHIFT	8
+> +#define XENON_SLOT_ENABLE_SHIFT			0
+> +
+> +#define XENON_SYS_EXT_OP_CTRL			0x010C
+> +#define XENON_MASK_CMD_CONFLICT_ERR		BIT(8)
+> +
+> +#define XENON_SLOT_EMMC_CTRL			0x0130
+> +#define XENON_EMMC_VCCQ_MASK			0x3
+> +#define XENON_EMMC_VCCQ_1_8V			0x1
+> +#define XENON_EMMC_VCCQ_3_3V			0x3
+> +
+> +#define XENON_SLOT_RETUNING_REQ_CTRL		0x0144
+> +/* retuning compatible */
+> +#define XENON_RETUNING_COMPATIBLE		0x1
+> +
+> +/* Tuning Parameter */
+> +#define XENON_TMR_RETUN_NO_PRESENT		0xF
+> +#define XENON_DEF_TUNING_COUNT			0x9
+> +
+> +#define XENON_DEFAULT_SDCLK_FREQ		400000
+> +
+> +/* Xenon specific Mode Select value */
+> +#define XENON_CTRL_HS200			0x5
+> +#define XENON_CTRL_HS400			0x6
+> +
+> +/* Indicate Card Type is not clear yet */
+> +#define XENON_CARD_TYPE_UNKNOWN			0xF
+> +
+> +struct sdhci_xenon_priv {
+> +	unsigned char	tuning_count;
+> +	/* idx of SDHC */
+> +	u8		sdhc_id;
+> +
+> +	/*
+> +	 * eMMC/SD/SDIO require different PHY settings or
+> +	 * voltage control. It's necessary for Xenon driver to
+> +	 * recognize card type during, or even before initialization.
+> +	 * However, mmc_host->card is not available yet at that time.
+> +	 * This field records the card type during init.
+> +	 * For eMMC, it is updated in dt parse. For SD/SDIO, it is
+> +	 * updated in xenon_init_card().
+> +	 *
+> +	 * It is only valid during initialization after it is updated.
+> +	 * Do not access this variable in normal transfers after
+> +	 * initialization completes.
+> +	 */
+> +	unsigned int	init_card_type;
+> +};
+> +
+> +#endif
+> 
