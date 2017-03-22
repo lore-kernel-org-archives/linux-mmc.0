@@ -1,73 +1,119 @@
-From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
-Subject: Re: Possible bug in mmc-utils: Is MMC 'partition setting completed'
- required for 'write reliability'?
-Date: Wed, 22 Mar 2017 10:41:20 +0000
-Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD5932@Elexis-Exch02.elexisad.net>
-References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
- <00b923df-6aad-6428-3247-ead8995066c1@vaisala.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
+ checking status
+Date: Wed, 22 Mar 2017 12:18:00 +0100
+Message-ID: <CAPDyKFo9hoaA7wptkkyhitFmV_92=M=001EOgMtSBp=b2c7nYw@mail.gmail.com>
+References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
+ <20170310142117.6060-1-ludovic.desroches@atmel.com> <CAPDyKFqpX3ZQSxiZsMyei9K0v9eSqVSBC89_U2=VtokGSqtFfA@mail.gmail.com>
+ <20170317163311.vhhcwgr2asjxuoh7@rfolt0960.corp.atmel.com>
+ <CAPDyKFqJA-Tj=Q+-gR+gOUNokzN0QpxHBgaEVqOGtCWiXt6Bzw@mail.gmail.com> <20170322104933.72klypbhx3hqioax@rfolt0960.corp.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta6.messagelabs.com ([193.109.254.108]:37012 "EHLO
-        mail1.bemta6.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1758808AbdCVKmU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 06:42:20 -0400
-In-Reply-To: <00b923df-6aad-6428-3247-ead8995066c1@vaisala.com>
-Content-Language: en-US
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:36039 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933647AbdCVLSD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 07:18:03 -0400
+Received: by mail-vk0-f45.google.com with SMTP id j64so107304406vkg.3
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 04:18:02 -0700 (PDT)
+In-Reply-To: <20170322104933.72klypbhx3hqioax@rfolt0960.corp.atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Melin <tomas.melin@vaisala.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, nicolas.ferre@microchip.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
 
-DQpPbiBXZWQsIDIwMTctMDMtMjIgYXQgMTE6MTMgKzAyMDAsIFRvbWFzIE1lbGluIHdyb3RlOg0K
-PiBPbiAwMy8yMC8yMDE3IDA1OjQwIFBNLCBCcmlua21hbm4sIEhhcmFsZCB3cm90ZToNCj4gPg0K
-PiA+IEkgYW0gaGF2aW5nIHByb2JsZW1zIHdpdGggdGhlICdtbWMnIHVzZXJzcGFjZSBjb21tYW5k
-IGluIG1tYy11dGlscy4NCj4gPiBUaGlzIGNhbGw6DQo+ID4NCj4gPj4gL3Vzci9iaW4vbW1jIHdy
-aXRlX3JlbGlhYmlsaXR5IHNldCAteSAwIC9kZXYvbW1jYmxrMQ0KPiA+DQo+ID4gcmVzdWx0cyBp
-bjoNCj4gPg0KPiA+PiBzZXR0aW5nIE9UUCBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQhDQo+
-ID4+IFNldHRpbmcgT1RQIFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCBmYWlsZWQgb24gL2Rl
-di9tbWNibGsxDQo+ID4NCj4gPiBXaGljaCBpcyBub3QgdG9vIHN1cnByaXNpbmcsIHNpbmNlIEkg
-b25seSB3YW50IHRvIHNldCB0aGUgd3JpdGUNCj4gPiByZWxpYWJpbGl0eSBiaXQgYW5kIGRpZCBu
-b3QgdG91Y2ggYW55IChtbWMtKXBhcnRpdGlvbiBpbmZvcm1hdGlvbiwgc28NCj4gPiB0aGF0IGl0
-IHByb2JhYmx5IHN0aWxsIGlzIGludmFsaWQuDQo+DQo+IE15IGV4cGVyaWVuY2UgaXMgdGhhdCB5
-b3UgbmVlZCB0byBmaXJzdCBkbyB0aGUgcGFydGl0aW9uaW5nIGJlZm9yZSB0aGUgd3JpdGUNCj4g
-cmVsaWFiaWxpdHkgZmxhZyBjYW4gYmUgc2V0LiBUaGlzIGlzIGJlY2F1c2UgdGhlIHBhcnRpdGlv
-biBmb3Igd2hpY2ggdGhlIHdyaXRlDQo+IHJlbGlhYmlsaXR5IGdldHMgc2V0LCBmaXJzdCBuZWVk
-cyB0byBiZSBjb25maWd1cmVkIGZvciBlbmhhbmNlZCBtb2RlIChlbmhfYXJlYSBzZXQpLg0KDQpZ
-ZXMsIHRoYXQgaXMgd2hhdCB0aGUgbW1jIHV0aWxpdHkgbWFrZXMgeW91IGRvLCBidXQgSSB0aGlu
-ayBpcyBub3QNCnN1cHBvcnRlZCBieSB0aGUgc3RhbmRhcmQuIEkgYW0gbG9va2luZyBhdCAiRW1i
-ZWRkZWQgTXVsdGktTWVkaWEgQ2FyZA0KKGUuTU1DKSBFbGVjdHJpY2FsIFN0YW5kYXJkICg1LjEp
-IiBKRVNEODQtQjUxLg0KDQpDaGFwdGVyIDYuMiBkZXNjcmliZXMgdGhlICJQYXJ0aXRpb24gTWFu
-YWdlbWVudCIgYW5kIHRoYXQgaW5jbHVkZXMgdGhlc2UNCnNldHRpbmdzIChDaGFwdGVyIDYuMi40
-KToNCg0KR1BfU0laRV9NVUxUX0dQMCAtIEdQX1NJWkVfTVVMVF9HUDMgWzE1NDoxNDNdDQpQQVJU
-SVRJT05TX0FUVFJJQlVURSAgICAgICAgICAgICAgICBbMTU2XQ0KRVhUX1BBUlRJVElPTlNfQVRU
-UklCVVRFICAgICAgICAgICAgWzUzOjUyXQ0KRU5IX1NUQVJUX0FERFIgICAgICAgICAgICAgICAg
-ICAgICAgWzEzOToxMzZdDQpFTkhfU0laRV9NVUxUICAgICAgICAgICAgICAgICAgICAgICBbMTU5
-OjE1N10NCg0KTW9zdCBwYXJ0aWN1bGFybHkgdGhpcyBjaGFwdGVyIGRvZXMgKk5PVCogbWVudGlv
-bg0KDQpXUl9SRUxfU0VUICAgICAgICAgICAgICAgICAgICAgICAgICBbMTY3XQ0KDQphdCBhbGwh
-DQoNCkFuZCBuZWl0aGVyIGRvZXMgdGhlIGNoYXB0ZXIgYWJvdXQgJ3JlbGlhYmxlIHdyaXRlJyAo
-Ny40Ljc4KSByZWZlciB0bw0KdGhlIHBhcnRpdGlvbiBzZXR1cC4NCg0KV2hhdCBJIGFtIGxvb2tp
-bmcgZm9yIGlzIGEgZGVmaW5pdGUgYW5zd2VyIHRvIHdoZXRoZXIgbXkgaW50ZXJwcmV0YXRpb24N
-Cm9mIHRoZSBzdGFuZGFyZCBpcyBjb3JyZWN0IG9yIG5vdC4gSWYgaXQgaXMgY29ycmVjdCwgdGhl
-biB0aGUgJ21tYw0Kd3JpdGVfcmVsaWFiaWxpdHkgc2V0JyBpbXBsZW1lbnRhdGlvbiBpcyB3cm9u
-Zy4NCg0KQWRkaXRpb25hbGx5IHRoaXM6DQoNCj4gL3Vzci9iaW4vbW1jIHdyaXRlX3JlbGlhYmls
-aXR5IHNldCAtbiAwIC9kZXYvbW1jYmxrMQ0KDQpzaG91bGQgbm90IGRvIGFueXRoaW5nIGJlY2F1
-c2Ugb2YgdGhlIC1uIChkcnkgcnVuLSlvcHRpb24sIGJ1dCB0aGUgd3JpdGUNCnJlbGlhYmlsaXR5
-IGJpdCBpcyBzdGlsbCBiZWluZyBzZXQuDQoNCkZZSTogT3VyIGludGVudGlvbiBpcyB0byBrZWVw
-IHRoZSBVc2VyIERhdGEgQXJlYSBpbiBvbmUgcGllY2UsIGkuZS4gbm8NCmVNTUMtcGFydGl0aW9u
-aW5nIGF0IGFsbCwgYW5kIGVuYWJsZSAncmVsaWFibGUgd3JpdGUnLCBidXQgbm8gb3RoZXINCmVu
-aGFuY2VtZW50cywgZm9yIHRoZSBlbnRpcmUgVXNlciBEYXRhIEFyZWEuDQoNCj4gPiBJZiBJIHRo
-ZW4gdHlwZToNCj4gPg0KPiA+PiAvdXNyL2Jpbi9tbWMgZXh0Y3NkIHJlYWQgL2Rldi9tbWNibGsx
-DQo+ID4NCj4gPiB0aGF0IHJlbGlhYmxlIHdyaXRlIGJpdCBpcyBzaG93biBhcyBzZXQ6DQo+ID4N
-Cj4gPj4gV3JpdGUgcmVsaWFiaWxpdHkgc2V0dGluZyByZWdpc3RlciBbV1JfUkVMX1NFVF06IDB4
-MDENCj4NCj4gVGhlIGJpdCBnZXRzIHNldCwgYnV0IGlzIGl0IHN0aWxsIG9uIGFmdGVyIGEgcmVi
-b290Pw0KDQpZZXMsIGl0IGlzLg0KDQoNCkJlc3QgcmVnYXJkcw0KDQppLkEuIEhhcmFsZCBCcmlu
-a21hbm4NCg0KLS0NCg0KQlNUIGVsdHJvbWF0IEludGVybmF0aW9uYWwgR21iSA0KV2VyayBMZW9w
-b2xkc2jDtmhlDQpIZXJmb3JkZXIgU3RyYcOfZSAyNDktMjUxDQpELTMzODE4IExlb3BvbGRzaMO2
-aGUNCg0KVDogICAgICArNDkgKDUyMDgpIDk4Ny01MTMNCg0KRTogICAgICBoYXJhbGQuYnJpbmtt
-YW5uQGJzdC1pbnRlcm5hdGlvbmFsLmNvbQ0KVzogICAgICBodHRwOi8vd3d3LmJzdC1lbHRyb21h
-dC5jb20NCg0KDQoNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXw0KQW10c2dlcmljaHQgQmllbGVmZWxkLCBIUkIgTnIuIDMwODMwDQpHZXNj
-aMOkZnRzZsO8aHJlciBLcmlzdGlhbiBKw7xua2UsIERyLiBKb2hhbm4tQ2Fyc3RlbiBLaXBwLCBE
-ci4gR3VudGVyDQpUYXV0b3J1cw0KU2l0eiBkZXIgR2VzZWxsc2NoYWZ0OiBCaWVsZWZlbGQNClZl
-cnRyYXVsaWNoZSBFLU1haWwgdm9uIEJTVCBlbHRyb21hdCBJbnRlcm5hdGlvbmFsIEdtYkgNCg0K
+[...]
+
+>> >>
+>> >> We had other reports for similar problems. The following change fix
+>> >> those issues, have you tried this out?
+>> >>
+>> >> [PATCH] mmc: core: Restore parts of the polling policy when switch to HS/HS DDR
+>> >> https://patchwork.kernel.org/patch/9515239/
+>> >
+>> > I did the test with next and the behavior is the same.
+>> >
+>> > mmc0: Invalid UHS-I mode selected
+>> > mmc0: switch to bus width 8 ddr failed
+>> > mmc0: error -110 whilst initialising MMC card
+>> >
+>> > It seems the root cause is to perform mmc_set_timing before mmc_switch_status.
+>>
+>> Okay, I see! This sounds a bit weird.
+>>
+>> As you know, the CMD6 has been a problematic historically, mostly
+>> because of busy detection issues. We have now tried to make the code
+>> more robust in __mmc_switch() and its friends.
+>> That said, before considering to apply your fix, I would really like
+>> us to investigate this a bit more, to make sure we find the correct
+>> solution and of course to avoid regressions for other cases.
+>>
+>> Recently reported issues [1] that was observed for sdhci-esdc-imx,
+>> which has been fixed now, can be summarized in these two issues:
+>>
+>> *) Only 3.3V I/O voltage DDR mode was supported by the SoC. Still the
+>> mmc core tried to set 1.8V, which caused errors when switching to HS
+>> DDR mode.
+>> -> To fix this, we invented MMC_CAP_3_3V_DDR [2] and a corresponding
+>> DT binding ("mmc-ddr-3_3v"). Hosts/SoCs, that supports only 3.3V DDR
+>> mode, should set this.
+>>
+>> **). Changing host's timings couldn't be done while the card was busy,
+>> because of internal limitations by the sdhci-esdhc-imx controller. The
+>> consequence was that the following CMD13 command (to get the switch
+>> status), returned the error code -110, perhaps similar to your case.
+>> ->To fix this, we decided to move the update of the host's timing, to
+>> after we verified the card isn't being busy [3].
+>>
+>>
+>> From your description to the problem you encounter, I would recommend
+>> the following debug steps to try to understand what really goes on.
+>> 1.
+>> Check if the 3.3V DDR issue is applicable for your case as well, and
+>> fix it if it is.
+>
+> There is a regulator driven by the sdhci controller to manage 3.3V and
+> 1.8V I/O voltage.
+>
+>>
+>> 2.
+>> Both sdhci-esdhc-imx and sdhci-of-at91, don't have
+>> MMC_CAP_WAIT_WHILE_BUSY set. However, both sdhci variants are using
+>> the ->card_busy() host ops (assigned to sdhci_card_busy()), which
+>> triggers __mmc_switch() to call mmc_poll_for_busy() when it switches
+>> to HS DDR mode (CMD6). Could it be that sdhci_card_busy() isn't
+>> working properly for sdhci-of-at91? This could lead to that that
+>> mmc_poll_for_busy() believes the card isn't busy, while it actually
+>> is.
+>>
+>> To check whether theory 2 stands, I would explore these debug alternatives.
+>> *) Remove the assignment of ->card_busy() in sdhci.c, which makes
+>> mmc_poll_for_busy() to use CMD13 polling instead. If this works, it
+>> would be useful to know how many times a CMD13 is sent to find out
+>> when card moves out of busy state.
+>
+> It doesn't work.
+
+Okay. So what kind of error do you get when sending the CMD13 to poll? -110?
+
+>
+>> **) While using ->card_busy(), I would just add some simple debug
+>> prints in mmc_poll_for_busy() to prints its return values.
+>
+> No error returned. I exit the function after the while loop.
+
+If I understand correctly, the ->card_busy() callbacks immediately
+reports the eMMC card as *not* being busy, right?
+
+>
+> I continue the investigation to figure out why calling mmc_set_timing before
+> mmc_switch_status causes an issue.
+
+Great!
+
+Please tell if you need some further help with some more ideas.
+
+[...]
+
+Kind regards
+Uffe
