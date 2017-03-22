@@ -1,175 +1,129 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
- checking status
-Date: Wed, 22 Mar 2017 11:49:33 +0100
-Message-ID: <20170322104933.72klypbhx3hqioax@rfolt0960.corp.atmel.com>
-References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
- <20170310142117.6060-1-ludovic.desroches@atmel.com>
- <CAPDyKFqpX3ZQSxiZsMyei9K0v9eSqVSBC89_U2=VtokGSqtFfA@mail.gmail.com>
- <20170317163311.vhhcwgr2asjxuoh7@rfolt0960.corp.atmel.com>
- <CAPDyKFqJA-Tj=Q+-gR+gOUNokzN0QpxHBgaEVqOGtCWiXt6Bzw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci: intel: Disable runtime pm when the
+ sdio_irq is enabled.
+Date: Wed, 22 Mar 2017 14:06:43 +0200
+Message-ID: <2d388dd3-a024-0eea-dc07-c207be0a044c@intel.com>
+References: <20170315163145.15475-1-hdegoede@redhat.com>
+ <20170315163145.15475-2-hdegoede@redhat.com>
+ <CAPDyKFpaqJDCxR7eTtgOVCn7SUNeCFPPTc884fe7yjXi-LRGow@mail.gmail.com>
+ <7e093710-03d0-30f1-4088-5f68217cb109@intel.com>
+ <CAPDyKFp-w9jORUUC=eqwPnnZcxQKCu_d2y9pqvX3cq_rx67gYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa4.microchip.iphmx.com ([68.232.154.123]:62956 "EHLO
-        esa4.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934353AbdCVLay (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 07:30:54 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqJA-Tj=Q+-gR+gOUNokzN0QpxHBgaEVqOGtCWiXt6Bzw@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:10440 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934267AbdCVMMx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 22 Mar 2017 08:12:53 -0400
+In-Reply-To: <CAPDyKFp-w9jORUUC=eqwPnnZcxQKCu_d2y9pqvX3cq_rx67gYA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, nicolas.ferre@microchip.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@microchip.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>
 
-Hi Ulf,
-
-On Wed, Mar 22, 2017 at 09:41:28AM +0100, Ulf Hansson wrote:
-> On 17 March 2017 at 17:33, Ludovic Desroches
-> <ludovic.desroches@microchip.com> wrote:
-> > On Fri, Mar 17, 2017 at 04:14:18PM +0100, Ulf Hansson wrote:
-> >> On 10 March 2017 at 15:21, Ludovic Desroches
-> >> <ludovic.desroches@atmel.com> wrote:
-> >> > From: Ludovic Desroches <ludovic.desroches@microchip.com>
-> >> >
-> >> > The commit e173f8911f09 mmc: core: Update CMD13 polling policy when
-> >> > switch to HS DDR mode in addition to fix the management of CRC error,
-> >> > changes the place where the DDR52 timing is set.
-> >> >
-> >> > Before this commit, the sequence was:
-> >> > - set width to 8 with MMC_HS timing
-> >> > - send the switch command
-> >> > - check the status
-> >> > - set width to 8 with MMC_DDR52 timing
-> >> > - send the switch command
-> >> > - check the status
-> >> > Now:
-> >> > - set width to 8 with MMC_HS timing
-> >> > - send the switch command
-> >> > - set width to 8 with MMC_DDR52 timing
-> >> > - check the status
-> >> >
-> >> > It may lead to get an error when checking the status with some devices.
-> >> >
-> >> > Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> >> > ---
-> >> >  drivers/mmc/core/mmc.c | 5 ++++-
-> >> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> >> >
-> >> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> >> > index 0fccca0..b837148 100644
-> >> > --- a/drivers/mmc/core/mmc.c
-> >> > +++ b/drivers/mmc/core/mmc.c
-> >> > @@ -1062,7 +1062,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
-> >> >                            EXT_CSD_BUS_WIDTH,
-> >> >                            ext_csd_bits,
-> >> >                            card->ext_csd.generic_cmd6_time,
-> >> > -                          MMC_TIMING_MMC_DDR52,
-> >> > +                          0,
-> >> >                            true, true, true);
-> >> >         if (err) {
-> >> >                 pr_err("%s: switch to bus width %d ddr failed\n",
-> >> > @@ -1106,6 +1106,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
-> >> >         if (err)
-> >> >                 err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-> >> >
-> >> > +       if (!err)
-> >> > +               mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-> >> > +
-> >> >         return err;
-> >> >  }
-> >> >
-> >> > --
-> >> > 2.9.0
-> >> >
-> >>
-> >> We had other reports for similar problems. The following change fix
-> >> those issues, have you tried this out?
-> >>
-> >> [PATCH] mmc: core: Restore parts of the polling policy when switch to HS/HS DDR
-> >> https://patchwork.kernel.org/patch/9515239/
-> >
-> > I did the test with next and the behavior is the same.
-> >
-> > mmc0: Invalid UHS-I mode selected
-> > mmc0: switch to bus width 8 ddr failed
-> > mmc0: error -110 whilst initialising MMC card
-> >
-> > It seems the root cause is to perform mmc_set_timing before mmc_switch_status.
+On 21/03/17 16:54, Ulf Hansson wrote:
+> On 21 March 2017 at 13:34, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 21/03/17 12:00, Ulf Hansson wrote:
+>>> On 15 March 2017 at 17:31, Hans de Goede <hdegoede@redhat.com> wrote:
+>>>> SDIO cards may need clock to send the card interrupt to the host.
+>>>>
+>>>> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
+>>>> pinging the tablet results in:
+>>>>
+>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
+>>>>
+>>>> Where as with this patch I get:
+>>>>
+>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
+>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
+>>>>
+>>>> Cc: Dong Aisheng <b29396@freescale.com>
+>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>>> ---
+>>>> Changes in v2:
+>>>> -New patch replacing "mmc: sdhci: sdio-intel: Set
+>>>>  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-acpi.c     | 1 +
+>>>>  drivers/mmc/host/sdhci-pci-core.c | 1 +
+>>>>  drivers/mmc/host/sdhci.c          | 6 ++++++
+>>>>  drivers/mmc/host/sdhci.h          | 2 ++
+>>>>  4 files changed, 10 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>>>> index 237f318..53b431a 100644
+>>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>>> @@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>>>>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+>>>>         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>>>>         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+>>>> +                  SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
+>>>>                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>>>>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+>>>>                    MMC_CAP_WAIT_WHILE_BUSY,
+>>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>>>> index 982b3e3..a3b242e 100644
+>>>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>>>> @@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
+>>>>  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+>>>>         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>>>>         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+>>>> +                       SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
+>>>>                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>>>>         .allow_runtime_pm = true,
+>>>>         .probe_slot     = byt_sdio_probe_slot,
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 6fdd7a7..59c5cad 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -1828,6 +1828,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>>>>         struct sdhci_host *host = mmc_priv(mmc);
+>>>>         unsigned long flags;
+>>>>
+>>>> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && enable)
+>>>> +               pm_runtime_get(host->mmc->parent);
+>>>
+>>> There are currently no sdhci variant for any SoC that implements
+>>> wakeup support in runtime suspend for SDIO irqs. In other words, it
+>>> seems all sdhci hosts suffers from the same problem.
+>>
+>> There might still be drivers that expect SDIO interrupts during
+>> runtime suspend, considering this patch:
+>>
+>>         https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=be138554a7923658ded799b0e8794d9c1d08a6e5
 > 
-> Okay, I see! This sounds a bit weird.
+> Right. Thanks for pointing it out.
 > 
-> As you know, the CMD6 has been a problematic historically, mostly
-> because of busy detection issues. We have now tried to make the code
-> more robust in __mmc_switch() and its friends.
-> That said, before considering to apply your fix, I would really like
-> us to investigate this a bit more, to make sure we find the correct
-> solution and of course to avoid regressions for other cases.
-> 
-> Recently reported issues [1] that was observed for sdhci-esdc-imx,
-> which has been fixed now, can be summarized in these two issues:
-> 
-> *) Only 3.3V I/O voltage DDR mode was supported by the SoC. Still the
-> mmc core tried to set 1.8V, which caused errors when switching to HS
-> DDR mode.
-> -> To fix this, we invented MMC_CAP_3_3V_DDR [2] and a corresponding
-> DT binding ("mmc-ddr-3_3v"). Hosts/SoCs, that supports only 3.3V DDR
-> mode, should set this.
-> 
-> **). Changing host's timings couldn't be done while the card was busy,
-> because of internal limitations by the sdhci-esdhc-imx controller. The
-> consequence was that the following CMD13 command (to get the switch
-> status), returned the error code -110, perhaps similar to your case.
-> ->To fix this, we decided to move the update of the host's timing, to
-> after we verified the card isn't being busy [3].
-> 
->
-> From your description to the problem you encounter, I would recommend
-> the following debug steps to try to understand what really goes on.
-> 1.
-> Check if the 3.3V DDR issue is applicable for your case as well, and
-> fix it if it is.
+> However I don't think that is how runtime PM should be deployed when
+> it is used for controlling devices like sdhci. Let's change that once
+> we  have the common issue for sdhci and SDIO irqs resolved.
 
-There is a regulator driven by the sdhci controller to manage 3.3V and
-1.8V I/O voltage.
+Yes, then perhaps we could accept the inverted quirk on the basis that it
+will be removed.
 
-> 
-> 2.
-> Both sdhci-esdhc-imx and sdhci-of-at91, don't have
-> MMC_CAP_WAIT_WHILE_BUSY set. However, both sdhci variants are using
-> the ->card_busy() host ops (assigned to sdhci_card_busy()), which
-> triggers __mmc_switch() to call mmc_poll_for_busy() when it switches
-> to HS DDR mode (CMD6). Could it be that sdhci_card_busy() isn't
-> working properly for sdhci-of-at91? This could lead to that that
-> mmc_poll_for_busy() believes the card isn't busy, while it actually
-> is.
-> 
-> To check whether theory 2 stands, I would explore these debug alternatives.
-> *) Remove the assignment of ->card_busy() in sdhci.c, which makes
-> mmc_poll_for_busy() to use CMD13 polling instead. If this works, it
-> would be useful to know how many times a CMD13 is sent to find out
-> when card moves out of busy state.
+Hans, as I wrote somewhere else, we can use pm_runtime_get_noresume() and
+pm_runtime_put_noidle() since sdhci_enable_sdio_irq() must be called with
+the host claimed and therefore runtime resumed.
 
-It doesn't work.
-
-> **) While using ->card_busy(), I would just add some simple debug
-> prints in mmc_poll_for_busy() to prints its return values.
-
-No error returned. I exit the function after the while loop.
-
-I continue the investigation to figure out why calling mmc_set_timing before
-mmc_switch_status causes an issue.
-
-Regards
-
-Ludovic
-
-> Kind regards
-> Uffe
-> 
-> [1]
-> https://patchwork.kernel.org/patch/9514583
-> [2]
-> https://www.spinics.net/lists/linux-mmc/msg41967.html
-> [3]
-> https://patchwork.kernel.org/patch/9515239
