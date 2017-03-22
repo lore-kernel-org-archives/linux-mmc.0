@@ -1,78 +1,139 @@
-From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
-Subject: Re: Possible bug in mmc-utils: Is MMC 'partition setting completed'
- required for 'write reliability'?
-Date: Wed, 22 Mar 2017 12:52:55 +0000
-Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD5947@Elexis-Exch02.elexisad.net>
-References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
- <00b923df-6aad-6428-3247-ead8995066c1@vaisala.com>
- <70BB63196E12E948A726997ECFE8646BC0CD5932@Elexis-Exch02.elexisad.net>
- <0fab4456-cb52-2af2-6598-b363a0e390f5@vaisala.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci: intel: Disable runtime pm when the
+ sdio_irq is enabled.
+Date: Wed, 22 Mar 2017 15:00:01 +0100
+Message-ID: <CAPDyKFqie1ZPj-bzmMurf7+SZiXKUckrJH40yx21gAfvxRVEEg@mail.gmail.com>
+References: <20170315163145.15475-1-hdegoede@redhat.com> <20170315163145.15475-2-hdegoede@redhat.com>
+ <CAPDyKFpaqJDCxR7eTtgOVCn7SUNeCFPPTc884fe7yjXi-LRGow@mail.gmail.com>
+ <7e093710-03d0-30f1-4088-5f68217cb109@intel.com> <CAPDyKFp-w9jORUUC=eqwPnnZcxQKCu_d2y9pqvX3cq_rx67gYA@mail.gmail.com>
+ <2d388dd3-a024-0eea-dc07-c207be0a044c@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta5.messagelabs.com ([195.245.231.142]:29947 "EHLO
-        mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751906AbdCVMxD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 08:53:03 -0400
-In-Reply-To: <0fab4456-cb52-2af2-6598-b363a0e390f5@vaisala.com>
-Content-Language: en-US
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:35474 "EHLO
+        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751305AbdCVOAE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 10:00:04 -0400
+Received: by mail-vk0-f46.google.com with SMTP id r69so15284366vke.2
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 07:00:03 -0700 (PDT)
+In-Reply-To: <2d388dd3-a024-0eea-dc07-c207be0a044c@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Melin <tomas.melin@vaisala.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>
 
-DQpIaSBUb21hcywNCg0KT24gV2VkLCAyMDE3LTAzLTIyIGF0IDEzOjI1ICswMjAwLCBUb21hcyBN
-ZWxpbiB3cm90ZToNCj4gT24gMDMvMjIvMjAxNyAxMjo0MSBQTSwgQnJpbmttYW5uLCBIYXJhbGQg
-d3JvdGU6DQo+ID4gT24gV2VkLCAyMDE3LTAzLTIyIGF0IDExOjEzICswMjAwLCBUb21hcyBNZWxp
-biB3cm90ZToNCj4gPj4gT24gMDMvMjAvMjAxNyAwNTo0MCBQTSwgQnJpbmttYW5uLCBIYXJhbGQg
-d3JvdGU6DQo+ID4+Pg0KPiA+Pj4gSSBhbSBoYXZpbmcgcHJvYmxlbXMgd2l0aCB0aGUgJ21tYycg
-dXNlcnNwYWNlIGNvbW1hbmQgaW4gbW1jLXV0aWxzLg0KPiA+Pj4gVGhpcyBjYWxsOg0KPiA+Pj4N
-Cj4gPj4+PiAvdXNyL2Jpbi9tbWMgd3JpdGVfcmVsaWFiaWxpdHkgc2V0IC15IDAgL2Rldi9tbWNi
-bGsxDQo+ID4+Pg0KPiA+Pj4gcmVzdWx0cyBpbjoNCj4gPj4+DQo+ID4+Pj4gc2V0dGluZyBPVFAg
-UEFSVElUSU9OX1NFVFRJTkdfQ09NUExFVEVEIQ0KPiA+Pj4+IFNldHRpbmcgT1RQIFBBUlRJVElP
-Tl9TRVRUSU5HX0NPTVBMRVRFRCBmYWlsZWQgb24gL2Rldi9tbWNibGsxDQo+ID4+Pg0KPiA+Pj4g
-V2hpY2ggaXMgbm90IHRvbyBzdXJwcmlzaW5nLCBzaW5jZSBJIG9ubHkgd2FudCB0byBzZXQgdGhl
-IHdyaXRlDQo+ID4+PiByZWxpYWJpbGl0eSBiaXQgYW5kIGRpZCBub3QgdG91Y2ggYW55IChtbWMt
-KXBhcnRpdGlvbiBpbmZvcm1hdGlvbiwgc28NCj4gPj4+IHRoYXQgaXQgcHJvYmFibHkgc3RpbGwg
-aXMgaW52YWxpZC4NCj4gPj4NCj4gPj4gTXkgZXhwZXJpZW5jZSBpcyB0aGF0IHlvdSBuZWVkIHRv
-IGZpcnN0IGRvIHRoZSBwYXJ0aXRpb25pbmcgYmVmb3JlIHRoZSB3cml0ZQ0KPiA+PiByZWxpYWJp
-bGl0eSBmbGFnIGNhbiBiZSBzZXQuIFRoaXMgaXMgYmVjYXVzZSB0aGUgcGFydGl0aW9uIGZvciB3
-aGljaCB0aGUgd3JpdGUNCj4gPj4gcmVsaWFiaWxpdHkgZ2V0cyBzZXQsIGZpcnN0IG5lZWRzIHRv
-IGJlIGNvbmZpZ3VyZWQgZm9yIGVuaGFuY2VkIG1vZGUgKGVuaF9hcmVhIHNldCkuDQo+ID4NCj4g
-PiBZZXMsIHRoYXQgaXMgd2hhdCB0aGUgbW1jIHV0aWxpdHkgbWFrZXMgeW91IGRvLCBidXQgSSB0
-aGluayBpcyBub3QNCj4gPiBzdXBwb3J0ZWQgYnkgdGhlIHN0YW5kYXJkLiBJIGFtIGxvb2tpbmcg
-YXQgIkVtYmVkZGVkIE11bHRpLU1lZGlhIENhcmQNCj4gPiAoZS5NTUMpIEVsZWN0cmljYWwgU3Rh
-bmRhcmQgKDUuMSkiIEpFU0Q4NC1CNTEuDQo+DQo+IEZyb20gU2VjdGlvbiA2LjYuOCBEYXRhIFdy
-aXRlIGluIHRoZSBzYW1lIHN0YW5kYXJkOg0KPg0KPiAiLi4uVGhpcyB3cml0ZSBtdXN0IGhhcHBl
-biBhcyBwYXJ0DQo+IG9mIHRoZSBwYXJ0aXRpb25pbmcgcHJvY2VzcyBhbmQgbXVzdCBvY2N1ciBi
-ZWZvcmUgdGhlDQo+IFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCBiaXQgaXMgc2V0Lg0KPiBU
-aGUgY2hhbmdlcyBtYWRlIHRvIHRoZSBXUl9SRUxfU0VUIHJlZ2lzdGVyIHdpbGwgbm90IGhhdmUg
-YW4gaW1wYWN0IHVudGlsIHRoZQ0KPiBwYXJ0aXRpb25pbmcgcHJvY2VzcyBpcw0KPiBjb21wbGV0
-ZSAoaS5lLiwgYWZ0ZXIgdGhlIHBvd2VyIGN5Y2xlIGhhcyBvY2N1cnJlZCBhbmQgdGhlIHBhcnRp
-dGlvbmluZyBoYXMNCj4gY29tcGxldGVkIHN1Y2Nlc3NmdWxseSkuIERhdGENCj4gcmVsaWFiaWxp
-dHkgc2V0dGluZ3MgZm9yIHBhcnRpdGlvbnMgdGhhdCBkbyBub3QgZXhpc3QgaW4gdGhlIGRldmlj
-ZSBoYXZlIG5vDQo+IGltcGFjdCBvbiB0aGUgZGV2aWNlLiINCg0KWWVzISBUaGF0J3MgdGhlIHNl
-bnRlbmNlIEkgaGF2ZSBiZWVuIGxvb2tpbmcgZm9yLg0KDQpUaGFuayB5b3UhDQoNCj4gU28gdGhl
-IHNldHRpbmcgb2YgV1JfUkVMX1NFVCBpcyBjb25uZWN0ZWQgdG8gdGhlIHBhcnRpdGlvbmluZyBv
-ZiB0aGUgZGV2aWNlLiBBbmQNCj4gYXMgbG9uZyBhcyB0aGUgcGFydGl0aW9uaW5nIGlzIG5vdCBz
-ZXQsIGlpcmMgdGhlIFBBUlRJVElPTl9TRVRUSU5HX0NPTVBMRVRFRCBiaXQNCj4gd2lsbCBub3Qg
-YmUgYWNjZXB0ZWQgdG8gYmUgc2V0IGJ5IHRoZSBkZXZpY2UuDQoNCkkgd2lsbCBwbGF5IHdpdGgg
-dGhhdCBhbmQgc2VlIHdoYXQgaGFwcGVucy4NCg0KQnV0IG9uIGEgc2xpZ2h0bHkgZGlmZmVyZW50
-IG1hdHRlciBpbiB0aGUgc2FtZSBjaGFwdGVyIGl0IGFsc28gc2F5czoNCg0KIlRoZSBob3N0IGhh
-cyB0aGUgb3B0aW9uIG9mIGNoYW5naW5nIHRoZSByZWxpYWJpbGl0eSBvZiB0aGUgd3JpdGVzIGlu
-DQpvbmUgb3IgbW9yZSBwYXJ0aXRpb25zIG9uIHRoZSBkZXZpY2UuIFRoZSBlbnRpcmUgcmVnaXN0
-ZXIgaXMgY29uc2lkZXJlZA0KdG8gYmUgd3JpdGUgb25jZSBzbyB0aGUgaG9zdCBoYXMgb25lIG9w
-cG9ydHVuaXR5IHRvIHdyaXRlIGFsbCBvZiB0aGUNCmJpdHMgaW4gdGhlIHJlZ2lzdGVyLiAoU2Vw
-YXJhdGUgd3JpdGVzIHRvIGNoYW5nZSBpbmRpdmlkdWFsIGJpdHMgYXJlIG5vdA0KcGVybWl0dGVk
-KSINCg0KSG93ZXZlciwgJ21tYyB3cml0ZV9yZWxpYWJpbGl0eSBzZXQnIHdpbGwgb25seSBzZXQg
-b25lIGJpdCBhdCBhIHRpbWUuDQoNCg0KVGhhbmtzIGFnYWluLCBUb21hcy4NCg0KUmVnYXJkcywg
-SGFyYWxkDQoNCi0tDQoNCmkuQS4gSGFyYWxkIEJyaW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50
-ZXJuYXRpb25hbCBHbWJIDQpXZXJrIExlb3BvbGRzaMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0
-OS0yNTENCkQtMzM4MTggTGVvcG9sZHNow7ZoZQ0KDQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUx
-Mw0KDQpFOiAgICAgIGhhcmFsZC5icmlua21hbm5AYnN0LWludGVybmF0aW9uYWwuY29tDQpXOiAg
-ICAgIGh0dHA6Ly93d3cuYnN0LWVsdHJvbWF0LmNvbQ0KDQoNCg0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpBbXRzZ2VyaWNodCBCaWVs
-ZWZlbGQsIEhSQiBOci4gMzA4MzANCkdlc2Now6RmdHNmw7xocmVyIEtyaXN0aWFuIErDvG5rZSwg
-RHIuIEpvaGFubi1DYXJzdGVuIEtpcHAsIERyLiBHdW50ZXINClRhdXRvcnVzDQpTaXR6IGRlciBH
-ZXNlbGxzY2hhZnQ6IEJpZWxlZmVsZA0KVmVydHJhdWxpY2hlIEUtTWFpbCB2b24gQlNUIGVsdHJv
-bWF0IEludGVybmF0aW9uYWwgR21iSA0KDQo=
+On 22 March 2017 at 13:06, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 21/03/17 16:54, Ulf Hansson wrote:
+>> On 21 March 2017 at 13:34, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 21/03/17 12:00, Ulf Hansson wrote:
+>>>> On 15 March 2017 at 17:31, Hans de Goede <hdegoede@redhat.com> wrote:
+>>>>> SDIO cards may need clock to send the card interrupt to the host.
+>>>>>
+>>>>> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
+>>>>> pinging the tablet results in:
+>>>>>
+>>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
+>>>>>
+>>>>> Where as with this patch I get:
+>>>>>
+>>>>> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
+>>>>> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
+>>>>>
+>>>>> Cc: Dong Aisheng <b29396@freescale.com>
+>>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>>>> ---
+>>>>> Changes in v2:
+>>>>> -New patch replacing "mmc: sdhci: sdio-intel: Set
+>>>>>  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci-acpi.c     | 1 +
+>>>>>  drivers/mmc/host/sdhci-pci-core.c | 1 +
+>>>>>  drivers/mmc/host/sdhci.c          | 6 ++++++
+>>>>>  drivers/mmc/host/sdhci.h          | 2 ++
+>>>>>  4 files changed, 10 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>>>>> index 237f318..53b431a 100644
+>>>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>>>> @@ -288,6 +288,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>>>>>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+>>>>>         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>>>>>         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+>>>>> +                  SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
+>>>>>                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>>>>>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+>>>>>                    MMC_CAP_WAIT_WHILE_BUSY,
+>>>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>>>>> index 982b3e3..a3b242e 100644
+>>>>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>>>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>>>>> @@ -498,6 +498,7 @@ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
+>>>>>  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+>>>>>         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>>>>>         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+>>>>> +                       SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM |
+>>>>>                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>>>>>         .allow_runtime_pm = true,
+>>>>>         .probe_slot     = byt_sdio_probe_slot,
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index 6fdd7a7..59c5cad 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -1828,6 +1828,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>>>>>         struct sdhci_host *host = mmc_priv(mmc);
+>>>>>         unsigned long flags;
+>>>>>
+>>>>> +       if ((host->quirks2 & SDHCI_QUIRK2_SDIO_IRQ_NO_RUNTIME_PM) && enable)
+>>>>> +               pm_runtime_get(host->mmc->parent);
+>>>>
+>>>> There are currently no sdhci variant for any SoC that implements
+>>>> wakeup support in runtime suspend for SDIO irqs. In other words, it
+>>>> seems all sdhci hosts suffers from the same problem.
+>>>
+>>> There might still be drivers that expect SDIO interrupts during
+>>> runtime suspend, considering this patch:
+>>>
+>>>         https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=be138554a7923658ded799b0e8794d9c1d08a6e5
+>>
+>> Right. Thanks for pointing it out.
+>>
+>> However I don't think that is how runtime PM should be deployed when
+>> it is used for controlling devices like sdhci. Let's change that once
+>> we  have the common issue for sdhci and SDIO irqs resolved.
+>
+> Yes, then perhaps we could accept the inverted quirk on the basis that it
+> will be removed.
+
+Well, why have quirk for something that will be always executed. Isn't
+it better to invent one, when we see a need for it?
+
+>
+> Hans, as I wrote somewhere else, we can use pm_runtime_get_noresume() and
+> pm_runtime_put_noidle() since sdhci_enable_sdio_irq() must be called with
+> the host claimed and therefore runtime resumed.
+>
+
+Good point. This makes it more clear on what goes on.
+
+Kind regards
+Uffe
