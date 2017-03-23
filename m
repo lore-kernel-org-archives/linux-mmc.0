@@ -1,105 +1,72 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [v2, 4/7] mmc: sdhci: add a quirk to restore delay in tuning
-Date: Thu, 23 Mar 2017 09:03:43 +0200
-Message-ID: <878da006-5b83-a9d9-6136-07d8f07ea65f@intel.com>
-References: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
- <1488529129-23560-5-git-send-email-yangbo.lu@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: sh_mmcif: Document r7s72100 DT bindings
+Date: Thu, 23 Mar 2017 09:29:48 +0100
+Message-ID: <CAPDyKFqEr2ydNZn72OiH0p5Awr8k3yBXrpApBRKpqmcQiePV=w@mail.gmail.com>
+References: <20170322144209.31768-1-chris.brandt@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1488529129-23560-5-git-send-email-yangbo.lu@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:34994 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932714AbdCWI3v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 04:29:51 -0400
+Received: by mail-ua0-f181.google.com with SMTP id q7so89549135uaf.2
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2017 01:29:49 -0700 (PDT)
+In-Reply-To: <20170322144209.31768-1-chris.brandt@renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 03/03/17 10:18, Yangbo Lu wrote:
-> There was a mdelay between tuning cycles which is removed since
-> eMMC spec didn't require that. However it's observed that eSDHC
-> needed this delay for HS200 successful tuning. Maybe it's also
-> needed for some other controllers. This patch is to add a quirk
-> to fix it.
-> 
-> Fixes: 197160d52e85 ("mmc: sdhci: remove mdelay in eMMC tuning")
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+On 22 March 2017 at 15:42, Chris Brandt <chris.brandt@renesas.com> wrote:
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+> Acked-by: Rob Herring <robh@kernel.org>
+
+Thanks, applied for next!
+
+Kind regards
+Uffe
+
 > ---
-
-I would prefer to do something like this:
-
----
-From: Adrian Hunter <adrian.hunter@intel.com>
-Date: Thu, 23 Mar 2017 08:54:06 +0200
-Subject: [PATCH] mmc: sdhci: Control the delay between tuning commands
-
-The delay between tuning commands for SD cards is not part of the
-specification. A driver that needs it probably needs it for eMMC too,
-whereas most drivers would probably like to set it to 0. Make it a
-host member (host->tuning_delay) that defaults to the existing behaviour.
-Drivers can set it to zero to eliminate the delay, or set it to a positive
-value to always have a delay.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 11 ++++++++---
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 9 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a33102fc800b..2fc33485df1d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2100,9 +2100,9 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
- 			break;
- 		}
- 
--		/* eMMC spec does not require a delay between tuning cycles */
--		if (opcode == MMC_SEND_TUNING_BLOCK)
--			mdelay(1);
-+		/* Spec does not require a delay between tuning cycles */
-+		if (host->tuning_delay > 0)
-+			mdelay(host->tuning_delay);
- 	}
- 
- 	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
-@@ -2164,6 +2164,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 	host->mmc->retune_period = tuning_count;
- 
-+	if (host->tuning_delay < 0)
-+		host->tuning_delay = opcode == MMC_SEND_TUNING_BLOCK;
-+
- 	sdhci_start_tuning(host);
- 
- 	__sdhci_execute_tuning(host, opcode);
-@@ -3108,6 +3111,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 	host->cqe_ier     = SDHCI_CQE_INT_MASK;
- 	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
- 
-+	host->tuning_delay = -1;
-+
- 	return host;
- }
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 35b41da0a636..b0f416fc9548 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -538,6 +538,7 @@ struct sdhci_host {
- #define SDHCI_TUNING_MODE_1	0
- #define SDHCI_TUNING_MODE_2	1
- #define SDHCI_TUNING_MODE_3	2
-+	int			tuning_delay;	/* Delay (ms) between tuning commands */
- 
- 	unsigned long private[0] ____cacheline_aligned;
- };
--- 
-1.9.1
+> v4:
+> * added Reviewed-by and Acked-by
+> v3:
+> * added list of how many interrupts each SOC has
+> v2:
+> * added interrupt description
+> ---
+>  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> index e4ba92aa..c32dc5a 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> @@ -8,6 +8,7 @@ Required properties:
+>
+>  - compatible: should be "renesas,mmcif-<soctype>", "renesas,sh-mmcif" as a
+>    fallback. Examples with <soctype> are:
+> +       - "renesas,mmcif-r7s72100" for the MMCIF found in r7s72100 SoCs
+>         - "renesas,mmcif-r8a73a4" for the MMCIF found in r8a73a4 SoCs
+>         - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+>         - "renesas,mmcif-r8a7778" for the MMCIF found in r8a7778 SoCs
+> @@ -17,6 +18,13 @@ Required properties:
+>         - "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
+>         - "renesas,mmcif-sh73a0" for the MMCIF found in sh73a0 SoCs
+>
+> +- interrupts: Some SoCs have only 1 shared interrupt, while others have either
+> +  2 or 3 individual interrupts (error, int, card detect). Below is the number
+> +  of interrupts for each SoC:
+> +    1: r8a73a4, r8a7778, r8a7790, r8a7791, r8a7793, r8a7794
+> +    2: r8a7740, sh73a0
+> +    3: r7s72100
+> +
+>  - clocks: reference to the functional clock
+>
+>  - dmas: reference to the DMA channels, one per channel name listed in the
+> --
+> 2.10.1
+>
+>
