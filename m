@@ -1,67 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdio: improve mmc_io_rw_extended
-Date: Thu, 23 Mar 2017 11:05:27 +0100
-Message-ID: <CAPDyKFrFPBqGwqe8hFuDb--9U_VNkj-c2rx=WVNKjiwcuTzBuA@mail.gmail.com>
-References: <76e7bc2c-0cb0-4fca-7e2f-00770cd72a1b@gmail.com>
+From: "Bean Huo (beanhuo)" <beanhuo@micron.com>
+Subject: RE: [PATCH V1] mmc: core: fix still flush cache when eMMC cache off
+Date: Thu, 23 Mar 2017 10:45:51 +0000
+Message-ID: <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
+References: <4e7d0b4b8df1430698e822b1a36bcc11@SIWEX5A.sing.micron.com>
+ <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:35841 "EHLO
-        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751123AbdCWKFb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 06:05:31 -0400
-Received: by mail-ua0-f180.google.com with SMTP id x52so5812146uax.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2017 03:05:28 -0700 (PDT)
-In-Reply-To: <76e7bc2c-0cb0-4fca-7e2f-00770cd72a1b@gmail.com>
+Received: from mailout.micron.com ([137.201.242.129]:53097 "EHLO
+        mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751977AbdCWKqF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 06:46:05 -0400
+In-Reply-To: <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "axboe@fb.com" <axboe@fb.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>
 
-On 22 March 2017 at 21:59, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> Improve mmc_io_rw_extended a little:
-> - using DIV_ROUND_UP achieves the same but is better readable
-> - simplify code by using sg_set_buf
-> - simplify one statement by using -= operator
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/sdio_ops.c | 9 ++++-----
->  1 file changed, 4 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-> index 3c0d3ab4..abaaba38 100644
-> --- a/drivers/mmc/core/sdio_ops.c
-> +++ b/drivers/mmc/core/sdio_ops.c
-> @@ -152,7 +152,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->         data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
->
->         left_size = data.blksz * data.blocks;
-> -       nents = (left_size - 1) / seg_size + 1;
-> +       nents = DIV_ROUND_UP(left_size, seg_size);
->         if (nents > 1) {
->                 if (sg_alloc_table(&sgtable, nents, GFP_KERNEL))
->                         return -ENOMEM;
-> @@ -161,10 +161,9 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->                 data.sg_len = nents;
->
->                 for_each_sg(data.sg, sg_ptr, data.sg_len, i) {
-> -                       sg_set_page(sg_ptr, virt_to_page(buf + (i * seg_size)),
-> -                                       min(seg_size, left_size),
-> -                                       offset_in_page(buf + (i * seg_size)));
-> -                       left_size = left_size - seg_size;
-> +                       sg_set_buf(sg_ptr, buf + i * seg_size,
-> +                                  min(seg_size, left_size));
-> +                       left_size -= seg_size;
->                 }
->         } else {
->                 data.sg = &sg;
-> --
-> 2.12.0
->
+SGksIA0KDQo+T24gMTkgTWFyY2ggMjAxNyBhdCAwMTo0NSwgQmVhbiBIdW8gKGJlYW5odW8pIDxi
+ZWFuaHVvQG1pY3Jvbi5jb20+IHdyb3RlOg0KPj4gVGhpcyBwYXRjaCBmaXhlcyB0aGUgaXNzdWUg
+dGhhdCBtbWNfYmxrX2lzc3VlX3JxIHN0aWxsIGZsdXNoZXMgY2FjaGUNCj4+IHdoZW4gZU1NQyBj
+YWNoZSBoYXMgYWxyZWFkeSBiZWVuIG9mZiB0aHJvdWdoIHVzZXIgc3BhY2UgdG9vbCwgc3VjaCBh
+cw0KPj4gbW1jLXV0aWxzLg0KPj4gVGhlIHJlYXNvbiBpcyB0aGF0IGNhcmQtPmV4dF9jc2QuY2Fj
+aGVfY3RybCBpc24ndCByZXNldC4NCj4NCj5GaXJzdCwgd2h5IGRvIHlvdSB3YW50IHRvIHR1cm4g
+b2YgdGhlIGNhY2hlIGN0cmw/IElzIHRoZSBlTU1DIGRldmljZSBoYXZpbmcNCj5pc3N1ZXMgd2l0
+aCBpdD8gVGhlbiB3ZSBzaG91bGQgaW52ZW50IGEgY2FyZCBxdWlyayBpbnN0ZWFkLg0KDQoNCldo
+eSBJIHR1cm4gb2ZmIGl0PyBiZWNhdXNlIEkgZGlkIHBvd2VyIGxvc3MgdGVzdGluZyBhbmQgdmFs
+aWRhdGlvbiwgSSBzaG91bGQgc3dpdGNoIGl0IG9mZiBhbmQgb24uDQpXaGVuIEkgZG8gc29tZSBw
+ZXJmb3JtYW5jZSBhbmQgcG93ZXIgbG9zcyBjYXNlIHZhbGlkYXRpb24gb24gc2V2ZXJhbCBMaW51
+eCByZWxlYXNlIHZlcnNpb25zLA0KSSBuZWVkIHRvIHN3aXRjaCBvZmYgb3Igb24gY2FjaGUgdGhy
+b3VnaCB1c2VyIHNwYWNlIHRvb2wuDQpJIGNhbid0IGNvbmZpcm0gZXZlcnkgdXNlciB0aGF0IGxp
+a2VzIG1lLCBCdXQgSSB0aGluayBhdCBsZWFzdCBpdCBpcyBub3QgcmVhc29uYWJsZSB0byANCmZs
+dXNoIGVNTUMgY2FjaGUsIHdoZW4gaW50ZXJuYWwgZU1NQyBjYWNoZSBpcyBvZmYuDQoNCj5TZWNv
+bmQsIHdoYXQgZXJyb3JzIGRvIHlvdSBlbmNvdW50ZXIgd2hlbiB0aGUgbW1jIGNvcmUgdHJpZXMg
+dG8gZmx1c2ggdGhlDQo+Y2FjaGUgd2hlbiBpdCBoYXMgYmVlbiB0dXJuZWQgb2ZmPyBDYW4geW91
+IHBsZWFzZSBlbGFib3JhdGUgb24gdGhpcz8NCg0KDQpObyBlcnJvciBmb3VuZCwgYnV0IGZpcnN0
+bHksIHBsZWFzZSB0aGluayBhYm91dCBvdmVyaGVhZCBpbnRyb2R1Y2VkIGJ5IHVzZWxlc3MgZmx1
+c2ggY2FjaGUsIFVubGVzcyB5b3UNCkRvbid0IGNhcmUgdGhpcyB0aW55IHRpbWUuIHNlY29uZCwg
+dW5kZXIgdGhlIGNvbmRpdGlvbiBvZiBjYWNoZSBvZmYsIGFkZGl0aW9uYWwgZmx1c2ggY2FjaGUg
+cmVxdWVzdCBzdGlsbCBoYXMgaW1wYWN0IG9uDQpJbnRlcm5hbCBlTU1DIGxvZ2ljLiBJIGRvbid0
+IGtub3cgV2hhdCBhbmQgaG93IGltcGFjdCwgYnV0IGF0IGxlYXN0IGl0IGlzIHJlYWxseSBleGlz
+dC4NCg0KDQo+Pg0KPj4gU2lnbmVkLW9mZi1ieTogYmVhbmh1byA8YmVhbmh1b0BtaWNyb24uY29t
+Pg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvY29yZS9ibG9jay5jIHwgOSArKysrKysrKysNCj4+
+ICAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspDQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2Ry
+aXZlcnMvbW1jL2NvcmUvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYyBpbmRleA0K
+Pj4gMTYyMWZhMC4uZmIzNjM1YWMgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2Js
+b2NrLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KPj4gQEAgLTY0LDYgKzY0
+LDcgQEAgTU9EVUxFX0FMSUFTKCJtbWM6YmxvY2siKTsNCj4+ICAjZGVmaW5lIE1NQ19CTEtfVElN
+RU9VVF9NUyAgKDEwICogNjAgKiAxMDAwKSAgICAgICAgLyogMTAgbWludXRlIHRpbWVvdXQgKi8N
+Cj4+ICAjZGVmaW5lIE1NQ19TQU5JVElaRV9SRVFfVElNRU9VVCAyNDAwMDAgICNkZWZpbmUNCj4+
+IE1NQ19FWFRSQUNUX0lOREVYX0ZST01fQVJHKHgpICgoeCAmIDB4MDBGRjAwMDApID4+IDE2KQ0K
+Pj4gKyNkZWZpbmUgTU1DX0VYVFJBQ1RfVkFMVUVfRlJPTV9BUkcoeCkgKCh4ICYgMHgwMDAwRkYw
+MCkgPj4gOCkNCj4+DQo+PiAgI2RlZmluZSBtbWNfcmVxX3JlbF93cihyZXEpICAgICgocmVxLT5j
+bWRfZmxhZ3MgJiBSRVFfRlVBKSAmJiBcDQo+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgKHJxX2RhdGFfZGlyKHJlcSkgPT0gV1JJVEUpKSBAQA0KPj4gLTUzNSw2ICs1MzYsMTQg
+QEAgc3RhdGljIGludCBfX21tY19ibGtfaW9jdGxfY21kKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwN
+Cj5zdHJ1Y3QgbW1jX2Jsa19kYXRhICptZCwNCj4+ICAgICAgICAgICAgICAgICByZXR1cm4gZGF0
+YS5lcnJvcjsNCj4+ICAgICAgICAgfQ0KPj4NCj4+ICsgICAgICAgaWYgKChNTUNfRVhUUkFDVF9J
+TkRFWF9GUk9NX0FSRyhjbWQuYXJnKSA9PQ0KPkVYVF9DU0RfQ0FDSEVfQ1RSTCkgJiYNCj4+ICsg
+ICAgICAgICAgIChjbWQub3Bjb2RlID09IE1NQ19TV0lUQ0gpICYmIChjYXJkLT5leHRfY3NkLmNh
+Y2hlX3NpemUgPiAwKSkgew0KPj4gKyAgICAgICAgICAgICAgIGlmIChNTUNfRVhUUkFDVF9WQUxV
+RV9GUk9NX0FSRyhjbWQuYXJnKSAmIDEpDQo+PiArICAgICAgICAgICAgICAgICAgICAgICBjYXJk
+LT5leHRfY3NkLmNhY2hlX2N0cmwgPSAxOw0KPj4gKyAgICAgICAgICAgICAgIGVsc2UNCj4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuY2FjaGVfY3RybCA9IDA7DQo+PiAr
+ICAgICAgIH0NCj4+ICsNCj4NCj5JIGFtIHN1cmUgImNhY2hlIGN0cmwiIGlzbid0IHRoZSBvbmx5
+IHRoaW5nIHVzZXIgc3BhY2UgdmlhIG1tYyBpb2N0bCBjYW4gY2F1c2UNCj5wcm9ibGVtcyBmb3Iu
+IFRoZSBtbWMgY29yZSBrZWVwIHRyYWNrcyBvZiBvdGhlciBleHQgY3NkIHN0YXRlcywgZXRjLCBh
+cyB3ZWxsLiBJDQo+ZG9uJ3QgdGhpbmsgaXQncyB3b3J0aCB0byBjb21wZW5zYXRlIGFuZCB0cnkg
+dG8gYWN0IGFjY29yZGluZ2x5IHRvIGNvdmVyIGNhc2VzDQo+d2hlbiB1c2VyIHNwYWNlIGhhcyBt
+ZXNzZWQgdXAuDQo+DQo+VG8gYmUgY2xlYXIsIGl0IHdvdWxkIGhhdmUgYmVlbiBlbnRpcmVseSBk
+aWZmZXJlbnQgaWYgdGhlIHNvbWV0aGluZyB3YXMgY2hhbmdlZA0KPnZpYSBhIG1tYyBzeXNmcyBp
+bnRlcmZhY2UuIFRoZW4gd2UgcmVhbGx5IHNob3VsZCBhY3QgYWNjb3JkaW5nbHksIGhvd2V2ZXIg
+Zm9yDQo+bW1jIGlvY3RscyBpdCBqdXN0IGJlY29tZXMgdW5tYW5hZ2VhYmxlIGR1ZSB0byBpdHMg
+ZmxleGliaWxpdHkuDQoNCkkgd2lsbCBjaGVjayB0aGlzIGxhdGVyLiBCdXQgZmx1c2ggY2FjaGUg
+c2VhbXMgbm93IHRoZXJlIGlzIG9ubHkgb25lIGVudHJ5LCBhbmQNCkl0IGNoZWNrcyAiY2FjaGVf
+Y3RybCIuDQoNCj4NCj4+ICAgICAgICAgLyoNCj4+ICAgICAgICAgICogQWNjb3JkaW5nIHRvIHRo
+ZSBTRCBzcGVjcywgc29tZSBjb21tYW5kcyByZXF1aXJlIGEgZGVsYXkgYWZ0ZXINCj4+ICAgICAg
+ICAgICogaXNzdWluZyB0aGUgY29tbWFuZC4NCj4+IC0tDQo+PiAyLjcuNA0KPg0KPktpbmQgcmVn
+YXJkcw0KPlVmZmUNCj4tLQ0KPlRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZSBib2R5IG9mDQo+YSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPmh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
