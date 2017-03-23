@@ -1,16 +1,14 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: Re: [EXT] Re: [PATCH v6 07/14] dt: bindings: Add bindings for Marvell
- Xenon SD Host Controller
-Date: Thu, 23 Mar 2017 13:32:23 +0800
-Message-ID: <c3c97ce1-4aaa-4e85-d2c3-275f5247c0cc@marvell.com>
-References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
- <3a4ce2fd25ed812482b0fc96f50dd305c8f40fe9.1487091464.git-series.gregory.clement@free-electrons.com>
- <CAPDyKFrmb51cTR7B5S0JkmACH0=bw9+28RmWnjwWkuiT7N4wVw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [v2, 4/7] mmc: sdhci: add a quirk to restore delay in tuning
+Date: Thu, 23 Mar 2017 09:03:43 +0200
+Message-ID: <878da006-5b83-a9d9-6136-07d8f07ea65f@intel.com>
+References: <1488529129-23560-1-git-send-email-yangbo.lu@nxp.com>
+ <1488529129-23560-5-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFrmb51cTR7B5S0JkmACH0=bw9+28RmWnjwWkuiT7N4wVw@mail.gmail.com>
+In-Reply-To: <1488529129-23560-5-git-send-email-yangbo.lu@nxp.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,125 +18,88 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Thomas
+To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: devicetree@vger.kernel.org, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+On 03/03/17 10:18, Yangbo Lu wrote:
+> There was a mdelay between tuning cycles which is removed since
+> eMMC spec didn't require that. However it's observed that eSDHC
+> needed this delay for HS200 successful tuning. Maybe it's also
+> needed for some other controllers. This patch is to add a quirk
+> to fix it.
+> 
+> Fixes: 197160d52e85 ("mmc: sdhci: remove mdelay in eMMC tuning")
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> ---
 
-On 2017/3/15 20:48, Ulf Hansson wrote:
-> [...]
-> 
->> +
->> +Example:
->> +- For eMMC:
->> +
->> +       sdhci@aa0000 {
->> +               compatible = "marvell,armada-ap806-sdhci";
->> +               reg = <0xaa0000 0x1000>;
->> +               interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
->> +               clocks = <&emmc_clk>;
->> +               clock-names = "core";
->> +               bus-width = <4>;
->> +               marvell,xenon-phy-slow-mode;
->> +               marvell,xenon-tun-count = <11>;
-> 
-> There's no vmmc-supply here.
-> 
-> How do you control power to the eMMC card?
-> 
+I would prefer to do something like this:
 
-	Sorry for the delayed reply.
-	Just confirmed with the engineers.
+---
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Thu, 23 Mar 2017 08:54:06 +0200
+Subject: [PATCH] mmc: sdhci: Control the delay between tuning commands
 
-	It seems that there is a regulator.
-	I will ask for a complete node example.
+The delay between tuning commands for SD cards is not part of the
+specification. A driver that needs it probably needs it for eMMC too,
+whereas most drivers would probably like to set it to 0. Make it a
+host member (host->tuning_delay) that defaults to the existing behaviour.
+Drivers can set it to zero to eliminate the delay, or set it to a positive
+value to always have a delay.
 
->> +
->> +               #address-cells = <1>;
->> +               #size-cells = <0>;
->> +               apm_mmccard: mmccard@0 {
->> +                       compatible = "mmc-card";
->> +                       reg = <0>;
->> +               };
->> +       };
->> +
->> +- For SD/SDIO:
->> +
->> +       sdhci@ab0000 {
->> +               compatible = "marvell,armada-cp110-sdhci";
->> +               reg = <0xab0000 0x1000>;
->> +               interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
->> +               vqmmc-supply = <&sd_regulator>;
-> 
-> I guess you know vqmmc is for the I/O voltage.
-> 
-> Again, how do you power the SD/SDIO card? No vmmc?
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 11 ++++++++---
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-	The vmmc-supply regulator does exist according to the engineer.
-	I will ask them to provide a complete one.
-
-> 
->> +               clocks = <&sdclk>;
->> +               clock-names = "core";
->> +               bus-width = <4>;
->> +               marvell,xenon-tun-count = <9>;
->> +       };
->> +
->> +- For eMMC with compatible "marvell,armada-3700-sdhci":
->> +
->> +       sdhci@aa0000 {
->> +               compatible = "marvell,armada-3700-sdhci";
->> +               reg = <0xaa0000 0x1000>,
->> +                     <phy_addr 0x4>;
->> +               interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
->> +               clocks = <&emmcclk>;
->> +               clock-names = "core";
->> +               bus-width = <8>;
->> +               mmc-ddr-1_8v;
->> +               mmc-hs400-1_8v;
-> 
-> Again, no vmmc?
-> 
-
-	The engineer told me the power to eMMC card is fixed on this platform.
-	They don't implement a specific regulator for eMMC core power.
-
->> +
->> +               marvell,pad-type = "fixed-1-8v";
->> +
->> +               #address-cells = <1>;
->> +               #size-cells = <0>;
->> +               mmccard: mmccard@0 {
->> +                       compatible = "mmc-card";
->> +                       reg = <0>;
->> +               };
->> +       };
->> +
->> +- For SD/SDIO with compatible "marvell,armada-3700-sdhci":
->> +
->> +       sdhci@ab0000 {
->> +               compatible = "marvell,armada-3700-sdhci";
->> +               reg = <0xab0000 0x1000>,
->> +                     <phy_addr 0x4>;
->> +               interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
->> +               vqmmc-supply = <&sd_regulator>;
-> 
-> Again, no vmmc?
-> 
-	
-	It seems that the core power to SD is also fixed.
-
->> +               clocks = <&sdclk>;
->> +               clock-names = "core";
->> +               bus-width = <4>;
->> +
->> +               marvell,pad-type = "sd";
->> +       };
->> --
->> git-series 0.9.1
-> 
-> 
-> Kind regards
-> Uffe
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a33102fc800b..2fc33485df1d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2100,9 +2100,9 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 			break;
+ 		}
+ 
+-		/* eMMC spec does not require a delay between tuning cycles */
+-		if (opcode == MMC_SEND_TUNING_BLOCK)
+-			mdelay(1);
++		/* Spec does not require a delay between tuning cycles */
++		if (host->tuning_delay > 0)
++			mdelay(host->tuning_delay);
+ 	}
+ 
+ 	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
+@@ -2164,6 +2164,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	host->mmc->retune_period = tuning_count;
+ 
++	if (host->tuning_delay < 0)
++		host->tuning_delay = opcode == MMC_SEND_TUNING_BLOCK;
++
+ 	sdhci_start_tuning(host);
+ 
+ 	__sdhci_execute_tuning(host, opcode);
+@@ -3108,6 +3111,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 	host->cqe_ier     = SDHCI_CQE_INT_MASK;
+ 	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
+ 
++	host->tuning_delay = -1;
++
+ 	return host;
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 35b41da0a636..b0f416fc9548 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -538,6 +538,7 @@ struct sdhci_host {
+ #define SDHCI_TUNING_MODE_1	0
+ #define SDHCI_TUNING_MODE_2	1
+ #define SDHCI_TUNING_MODE_3	2
++	int			tuning_delay;	/* Delay (ms) between tuning commands */
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
+-- 
+1.9.1
