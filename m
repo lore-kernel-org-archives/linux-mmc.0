@@ -1,61 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V1] mmc: core: fix still flush cache when eMMC cache off
-Date: Thu, 23 Mar 2017 14:10:18 +0100
-Message-ID: <CAPDyKFqNm3cu0MckrOcT1rdt1s6oSFCE72Lz_GyfHZYaqoqAoA@mail.gmail.com>
-References: <4e7d0b4b8df1430698e822b1a36bcc11@SIWEX5A.sing.micron.com>
- <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com> <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
+From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
+Subject: Re: Possible bug in mmc-utils: Is MMC 'partition setting completed'
+ required for 'write reliability'?
+Date: Thu, 23 Mar 2017 15:25:53 +0000
+Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD5964@Elexis-Exch02.elexisad.net>
+References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
+ <CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
+ <70BB63196E12E948A726997ECFE8646BC0CD58E8@Elexis-Exch02.elexisad.net>
+ <CA+5vRUWjsifK5JhNUFv+3Zz4VHPoAWDpz+q6LyNj9OUk4Mw+ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Bean Huo (beanhuo)" <beanhuo@micron.com>
-Cc: "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "axboe@fb.com" <axboe@fb.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail1.bemta5.messagelabs.com ([195.245.231.143]:45272 "EHLO
+        mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S933890AbdCWP0E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 11:26:04 -0400
+In-Reply-To: <CA+5vRUWjsifK5JhNUFv+3Zz4VHPoAWDpz+q6LyNj9OUk4Mw+ag@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Gardiner <ben.l.gardiner@gmail.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 23 March 2017 at 11:45, Bean Huo (beanhuo) <beanhuo@micron.com> wrote:
-> Hi,
->
->>On 19 March 2017 at 01:45, Bean Huo (beanhuo) <beanhuo@micron.com> wrote:
->>> This patch fixes the issue that mmc_blk_issue_rq still flushes cache
->>> when eMMC cache has already been off through user space tool, such as
->>> mmc-utils.
->>> The reason is that card->ext_csd.cache_ctrl isn't reset.
->>
->>First, why do you want to turn of the cache ctrl? Is the eMMC device having
->>issues with it? Then we should invent a card quirk instead.
->
->
-> Why I turn off it? because I did power loss testing and validation, I should switch it off and on.
-> When I do some performance and power loss case validation on several Linux release versions,
-> I need to switch off or on cache through user space tool.
-> I can't confirm every user that likes me, But I think at least it is not reasonable to
-> flush eMMC cache, when internal eMMC cache is off.
-
-Ah, I see. Your use-case seems reasonable while validating robustness
-of the eMMC!
-
->
->>Second, what errors do you encounter when the mmc core tries to flush the
->>cache when it has been turned off? Can you please elaborate on this?
->
->
-> No error found, but firstly, please think about overhead introduced by useless flush cache, Unless you
-> Don't care this tiny time. second, under the condition of cache off, additional flush cache request still has impact on
-> Internal eMMC logic. I don't know What and how impact, but at least it is really exist.
-
-Got it!
-
-However I still don't like the mmc ioctls API to compensate and deal
-with all "crazy-ness" that user-space may cause. Cache-ctrl is only
-one case out of many.
-
-I see two viable options to solve your problem.
-1) Extend mmc_test with a new test(s) for cache ctrl and perhaps
-suspend/resume. Isn't this actually exactly what you want?
-2) Extend debugfs to be able to turn cache ctrl on/off.
-
-[...]
-
-Kind regards
-Uffe
+DQpIaSBCZW4sDQoNCk9uIFRodSwgMjAxNy0wMy0yMyBhdCAxNDo0NiArMDAwMCwgQmVuIEdhcmRp
+bmVyIHdyb3RlOg0KPiBIaSBndXlzLA0KPg0KPiBJJ3ZlIGJlZW4gYXdheSBmcm9tIHBsYXlpbmcg
+d2l0aCBlbW1jIHNpbmNlIHJvdWdobHkgd2hlbiB0aGF0IHBhdGNoIHdhcyBzdWJtaXR0ZWQuIE15
+IHJlY29sbGVjdGlvbiB3YXMgdGhhdCBlbmFibGluZyByZWxpYWJsZSB3cml0ZSBmZWF0dXJlIGNo
+YW5nZWQgdGhlIG5hbmQgd2VhciBsZXZlbGluZyBwYXJhbWV0ZXJzIG9mIHRoZSBmbGFzaCBjb250
+cm9sbGVyIGluIHRoZSBlbW1jLiBIZW5jZSB3aHkgc2V0dGluZyB0aGUgcGFydGl0aW9uIGJpdCBp
+cyByZXF1aXJlZC4gQnV0IHRoaXMgaXMgYSBmb2dneSByZWNvbGxlY3Rpb24gYXQgYmVzdA0KPg0K
+PiBJIHdpbGwgZGVmZXIgdG8gYW55b25lIHdobyBpcyBhY3R1YWxseSB0ZXN0aW5nIHRoZSBiZWhh
+dmlvdXJzIG9yIHRoZXNlIGVtbWMgZGV2aWNlcy4gU28gSSBoYXZlIG5vIG9iamVjdGlvbnMuDQo+
+DQo+IEJlc3QgUmVnYXJkcywNCj4gQmVuIEdhcmRpbmVyDQoNCkluIHRoZSBtZWFudGltZSBUb21h
+cyBNZWxpbiBmb3VuZCB0aGlzIGluICJFbWJlZGRlZCBNdWx0aS1NZWRpYSBDYXJkDQooZS5NTUMp
+IEVsZWN0cmljYWwgU3RhbmRhcmQgKDUuMSkiIEpFU0Q4NC1CNTEuDQoNCj4gIi4uLlRoaXMgd3Jp
+dGUgbXVzdCBoYXBwZW4gYXMgcGFydA0KPiBvZiB0aGUgcGFydGl0aW9uaW5nIHByb2Nlc3MgYW5k
+IG11c3Qgb2NjdXIgYmVmb3JlIHRoZQ0KPiBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQgYml0
+IGlzIHNldC4NCj4gVGhlIGNoYW5nZXMgbWFkZSB0byB0aGUgV1JfUkVMX1NFVCByZWdpc3RlciB3
+aWxsIG5vdCBoYXZlIGFuIGltcGFjdCB1bnRpbCB0aGUNCj4gcGFydGl0aW9uaW5nIHByb2Nlc3Mg
+aXMNCj4gY29tcGxldGUgKGkuZS4sIGFmdGVyIHRoZSBwb3dlciBjeWNsZSBoYXMgb2NjdXJyZWQg
+YW5kIHRoZSBwYXJ0aXRpb25pbmcgaGFzDQo+IGNvbXBsZXRlZCBzdWNjZXNzZnVsbHkpLiBEYXRh
+DQo+IHJlbGlhYmlsaXR5IHNldHRpbmdzIGZvciBwYXJ0aXRpb25zIHRoYXQgZG8gbm90IGV4aXN0
+IGluIHRoZSBkZXZpY2UgaGF2ZSBubw0KPiBpbXBhY3Qgb24gdGhlIGRldmljZS4iDQo+DQo+IFNv
+IHRoZSBzZXR0aW5nIG9mIFdSX1JFTF9TRVQgaXMgY29ubmVjdGVkIHRvIHRoZSBwYXJ0aXRpb25p
+bmcgb2YgdGhlIGRldmljZS4gQW5kDQo+IGFzIGxvbmcgYXMgdGhlIHBhcnRpdGlvbmluZyBpcyBu
+b3Qgc2V0LCBpaXJjIHRoZSBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQgYml0DQo+IHdpbGwg
+bm90IGJlIGFjY2VwdGVkIHRvIGJlIHNldCBieSB0aGUgZGV2aWNlLg0KDQpIb3dldmVyLCBvdXIg
+ZU1NQyBkZXZpY2UgZG9lcyBub3Qgc2VlbSB0byBiZWhhdmUgdGhhdCB3YXkuIEkgYW0gc3RpbGwN
+CmludmVzdGlnYXRpbmcsIHRob3VnaC4gQW5kIEkgbW9zdCBkZWZpbml0ZWx5IGRvIG5vdCB3YW50
+IHRvIHN1Ym1pdA0Kc29tZXRoaW5nIHRoYXQgaXMgb25seSBiYXNlZCBvbiB0aGUgcGFydGljdWxh
+ciBiZWhhdmlvdXIgb2YgdGhlIGRldmljZQ0Kd2UgaGFwcGVuIHRvIHVzZS4NCg0KSG93ZXZlciwg
+dGhlIG9uZSB0aGluZyB3aGVyZSB0aGUgY3VycmVudCBpbXBsZW1lbnRhdGlvbiBkb2VzIGNvbnRy
+YWRpY3QNCnRoZSBzdGFuZGFyZCBpcyB0aGF0IGl0IGNhbiBvbmx5IHNldCB3cml0ZSByZWxpYWJp
+bGl0eSBmb3Igb25lDQooZU1NQy0pcGFydGl0aW9uIGF0IGEgdGltZSwgd2hpY2ggdGhlIHN0YW5k
+YXJkIGV4cGxpY2l0bHkgZXhjbHVkZXM6ICJUaGUNCmVudGlyZSByZWdpc3RlciBpcyBjb25zaWRl
+cmVkIHRvIGJlIHdyaXRlIG9uY2Ugc28gdGhlIGhvc3QgaGFzIG9uZQ0Kb3Bwb3J0dW5pdHkgdG8g
+d3JpdGUgYWxsIG9mIHRoZSBiaXRzIGluIHRoZSByZWdpc3Rlci4gKFNlcGFyYXRlIHdyaXRlcw0K
+dG8gY2hhbmdlIGluZGl2aWR1YWwgYml0cyBhcmUgbm90IHBlcm1pdHRlZCkiDQoNClRoaXMgaXMg
+YWxzbyB0aGUgb2JzZXJ2ZWQgYmVoYXZpb3VyIG9uIG91ciBlTU1DLg0KDQpJIGRpZCBtYW5hZ2Ug
+dG8gc3VjY2Vzc2Z1bGx5IGNvbXBsZXRlIHRoZSBwYXJ0aXRpb24gc2V0dGluZyBieSBkb2luZw0K
+dGhpcyAoYW5kIG9ubHkgdGhpcyk6DQoNCj4gbW1jIGVuaF9hcmVhIHNldCAteSAwIDAgL2Rldi9t
+bWNibGsxDQoNCndoaWNoIGRvZXNuJ3QgZG8gYW55dGhpbmcgdXNlZnVsLCBzaW5jZSB0aGF0IGlz
+IHRoZSBvcmlnaW5hbCBzZXR0aW5nDQphbnl3YXkuIEFmdGVyIGEgcG93ZXIgY3ljbGUgYWxsIG15
+IGRhdGEgd2FzIGdvbmUgKGFzIGV4cGVjdGVkKSwgYnV0IEkNCmNvdWxkIG5vdCBvYnNlcnZlIGFu
+eSBvdGhlciBjaGFuZ2UgaW4gYmVoYXZpb3VyLiBUaGUgdmFyaW91cyBmbGFncyB3ZXJlDQppbmRp
+Y2F0aW5nIHN1Y2Nlc3MuDQoNCkkgYW0gb3BlbiB0byBzdWdnZXN0aW9ucyBhYm91dCBob3cgdG8g
+YWN0dWFsbHkgdGVzdCAncmVsaWFibGUgd3JpdGUnIGluDQphY3Rpb24gcmF0aGVyIHRoYW4gcmVs
+eWluZyBvbiB3aGF0IHRoZSBkZXZpY2UgdGVsbHMgbWUuIEFueSBpZGVhcz8NCg0KUmVnYXJkcywg
+SGFyYWxkDQoNCi0tDQoNCmkuQS4gSGFyYWxkIEJyaW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50
+ZXJuYXRpb25hbCBHbWJIDQpXZXJrIExlb3BvbGRzaMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0
+OS0yNTENCkQtMzM4MTggTGVvcG9sZHNow7ZoZQ0KDQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUx
+Mw0KDQpFOiAgICAgIGhhcmFsZC5icmlua21hbm5AYnN0LWludGVybmF0aW9uYWwuY29tDQpXOiAg
+ICAgIGh0dHA6Ly93d3cuYnN0LWVsdHJvbWF0LmNvbQ0KDQoNCg0KDQpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpBbXRzZ2VyaWNodCBCaWVs
+ZWZlbGQsIEhSQiBOci4gMzA4MzANCkdlc2Now6RmdHNmw7xocmVyIEtyaXN0aWFuIErDvG5rZSwg
+RHIuIEpvaGFubi1DYXJzdGVuIEtpcHAsIERyLiBHdW50ZXINClRhdXRvcnVzDQpTaXR6IGRlciBH
+ZXNlbGxzY2hhZnQ6IEJpZWxlZmVsZA0KVmVydHJhdWxpY2hlIEUtTWFpbCB2b24gQlNUIGVsdHJv
+bWF0IEludGVybmF0aW9uYWwgR21iSA0KDQo=
