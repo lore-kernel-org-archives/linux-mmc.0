@@ -1,69 +1,46 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 1/6] mmc: meson-gx: remove unneeded configuration bit resets
-Date: Wed, 22 Mar 2017 22:18:37 +0100
-Message-ID: <bc05bb2e-f42d-cd66-c0d8-04d2e98e0c5d@gmail.com>
-References: <8bf58a83-d8d7-615c-c89b-87a62a3c9c40@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Jin Qian <jinqian@android.com>
+Subject: [PATCHv2 1/1] mmc: core: export emmc revision via sysfs
+Date: Wed, 22 Mar 2017 17:18:45 -0700
+Message-ID: <20170323001849.20332-1-jinqian@android.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35901 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752775AbdCVVeN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 17:34:13 -0400
-Received: by mail-wm0-f66.google.com with SMTP id x124so13082012wmf.3
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 14:34:12 -0700 (PDT)
-In-Reply-To: <8bf58a83-d8d7-615c-c89b-87a62a3c9c40@gmail.com>
+Received: from mail-pg0-f52.google.com ([74.125.83.52]:33381 "EHLO
+        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754791AbdCWAUd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2017 20:20:33 -0400
+Received: by mail-pg0-f52.google.com with SMTP id w20so11803932pgc.0
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2017 17:20:32 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Uri Yanai <uri.yanai@sandisk.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jin Qian <jinqian@android.com>
 
-The variables holding the configuration bits are zero-initialized.
-So we can remove all bit resets.
+Extend sysfs to access ext_csd revision information.
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Signed-off-by: Jin Qian <jinqian@android.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 5 -----
- 1 file changed, 5 deletions(-)
+ drivers/mmc/core/mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index bd075fef..04a55577 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -441,7 +441,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 
- 	/* Response */
- 	if (cmd->flags & MMC_RSP_PRESENT) {
--		desc->cmd_cfg &= ~CMD_CFG_NO_RESP;
- 		if (cmd->flags & MMC_RSP_136)
- 			desc->cmd_cfg |= CMD_CFG_RESP_128;
- 		desc->cmd_cfg |= CMD_CFG_RESP_NUM;
-@@ -479,7 +478,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 				writel(cfg, host->regs + SD_EMMC_CFG);
- 			}
- 		} else {
--			desc->cmd_cfg &= ~CMD_CFG_BLOCK_MODE;
- 			desc->cmd_cfg |=
- 				(cmd->data->blksz & CMD_CFG_LENGTH_MASK) <<
- 				CMD_CFG_LENGTH_SHIFT;
-@@ -494,15 +492,12 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 					  host->bounce_buf, xfer_bytes);
- 			cmd->data->bytes_xfered = xfer_bytes;
- 			dma_wmb();
--		} else {
--			desc->cmd_cfg &= ~CMD_CFG_DATA_WR;
- 		}
- 
- 		desc->cmd_data = host->bounce_dma_addr & CMD_DATA_MASK;
- 
- 		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT_DATA);
- 	} else {
--		desc->cmd_cfg &= ~CMD_CFG_DATA_IO;
- 		cmd_cfg_timeout = ilog2(SD_EMMC_CMD_TIMEOUT);
- 	}
- 	desc->cmd_cfg |= (cmd_cfg_timeout & CMD_CFG_TIMEOUT_MASK) <<
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7fd722868875..08c62c9bec48 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -779,6 +779,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
++MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+ MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+ MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+ 	card->ext_csd.device_life_time_est_typ_a,
+@@ -836,6 +837,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_prv.attr,
++	&dev_attr_rev.attr,
+ 	&dev_attr_pre_eol_info.attr,
+ 	&dev_attr_life_time.attr,
+ 	&dev_attr_serial.attr,
 -- 
-2.12.0
-
+2.12.1.500.gab5fba24ee-goog
 
