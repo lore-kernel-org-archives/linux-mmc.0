@@ -1,72 +1,144 @@
-From: Jin Qian <jinqian@android.com>
-Subject: Re: [PATCH 1/1] mmc: core: export emmc revision via sysfs
-Date: Wed, 22 Mar 2017 17:23:57 -0700
-Message-ID: <CA+yUs=yJtjpFENQuz55AEjEHtR3GQ=zm-=MHnTyS45JGTPEkLA@mail.gmail.com>
-References: <CGME20170321220337epcas2p2439e1bf9ecbf4140f23fe7e2bdfcd831@epcas2p2.samsung.com>
- <20170321220200.23145-1-jinqian@android.com> <e2a14f9b-aa91-81a7-275f-67c03dd7f179@samsung.com>
+From: Ziji Hu <huziji@marvell.com>
+Subject: Re: [EXT] Re: [PATCH v6 07/14] dt: bindings: Add bindings for Marvell
+ Xenon SD Host Controller
+Date: Thu, 23 Mar 2017 13:32:23 +0800
+Message-ID: <c3c97ce1-4aaa-4e85-d2c3-275f5247c0cc@marvell.com>
+References: <cover.ff78bebe0384f650a51e5e6f0f1dca6e7894b53b.1487091464.git-series.gregory.clement@free-electrons.com>
+ <3a4ce2fd25ed812482b0fc96f50dd305c8f40fe9.1487091464.git-series.gregory.clement@free-electrons.com>
+ <CAPDyKFrmb51cTR7B5S0JkmACH0=bw9+28RmWnjwWkuiT7N4wVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e2a14f9b-aa91-81a7-275f-67c03dd7f179@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>, Dong Aisheng <aisheng.dong@nxp.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFrmb51cTR7B5S0JkmACH0=bw9+28RmWnjwWkuiT7N4wVw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Jimmy Xu <zmxu@marvell.com>, Andrew Lunn <andrew@lunn.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@baylibre.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Doug Jones <dougj@marvell.com>, linux-clk <linux-clk@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Yehuda Yitschak <yehuday@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Rob Herring <robh+dt@kernel.org>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Thomas
 List-Id: linux-mmc@vger.kernel.org
 
-Removed redundant signoff.
+Hi Ulf,
 
-export rev to collect some statistics on how many devices are running
-with which mmc revision.
+On 2017/3/15 20:48, Ulf Hansson wrote:
+> [...]
+> 
+>> +
+>> +Example:
+>> +- For eMMC:
+>> +
+>> +       sdhci@aa0000 {
+>> +               compatible = "marvell,armada-ap806-sdhci";
+>> +               reg = <0xaa0000 0x1000>;
+>> +               interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
+>> +               clocks = <&emmc_clk>;
+>> +               clock-names = "core";
+>> +               bus-width = <4>;
+>> +               marvell,xenon-phy-slow-mode;
+>> +               marvell,xenon-tun-count = <11>;
+> 
+> There's no vmmc-supply here.
+> 
+> How do you control power to the eMMC card?
+> 
 
-Other attr name seems follow cid.<name> or ext_csd.<name>.
+	Sorry for the delayed reply.
+	Just confirmed with the engineers.
 
-Thanks,
-jin
+	It seems that there is a regulator.
+	I will ask for a complete node example.
 
+>> +
+>> +               #address-cells = <1>;
+>> +               #size-cells = <0>;
+>> +               apm_mmccard: mmccard@0 {
+>> +                       compatible = "mmc-card";
+>> +                       reg = <0>;
+>> +               };
+>> +       };
+>> +
+>> +- For SD/SDIO:
+>> +
+>> +       sdhci@ab0000 {
+>> +               compatible = "marvell,armada-cp110-sdhci";
+>> +               reg = <0xab0000 0x1000>;
+>> +               interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
+>> +               vqmmc-supply = <&sd_regulator>;
+> 
+> I guess you know vqmmc is for the I/O voltage.
+> 
+> Again, how do you power the SD/SDIO card? No vmmc?
 
-On Tue, Mar 21, 2017 at 3:17 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi,
->
-> On 03/22/2017 07:01 AM, Jin Qian wrote:
->> Extend sysfs to access ext_csd revision information.
->>
->> Signed-off-by: Jin Qian <jinqian@google.com>
->> Signed-off-by: Jin Qian <jinqian@android.com>
->
-> I think you can choose one of them for signed-off tag.
->
->> ---
->>  drivers/mmc/core/mmc.c | 2 ++
->>  1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 7fd722868875..08c62c9bec48 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -779,6 +779,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->>  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
->> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
->
-> I'm not sure but if someone want to know ext_csd revision information, attribute name might be more clearly.
-> e,g) ext_csd_rev?
->
-> It's my preference. :)
->
-> Best Regards,
-> Jaehoon Chung
->
->>  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
->>  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
->>       card->ext_csd.device_life_time_est_typ_a,
->> @@ -836,6 +837,7 @@ static struct attribute *mmc_std_attrs[] = {
->>       &dev_attr_name.attr,
->>       &dev_attr_oemid.attr,
->>       &dev_attr_prv.attr,
->> +     &dev_attr_rev.attr,
->>       &dev_attr_pre_eol_info.attr,
->>       &dev_attr_life_time.attr,
->>       &dev_attr_serial.attr,
->>
->
+	The vmmc-supply regulator does exist according to the engineer.
+	I will ask them to provide a complete one.
+
+> 
+>> +               clocks = <&sdclk>;
+>> +               clock-names = "core";
+>> +               bus-width = <4>;
+>> +               marvell,xenon-tun-count = <9>;
+>> +       };
+>> +
+>> +- For eMMC with compatible "marvell,armada-3700-sdhci":
+>> +
+>> +       sdhci@aa0000 {
+>> +               compatible = "marvell,armada-3700-sdhci";
+>> +               reg = <0xaa0000 0x1000>,
+>> +                     <phy_addr 0x4>;
+>> +               interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>
+>> +               clocks = <&emmcclk>;
+>> +               clock-names = "core";
+>> +               bus-width = <8>;
+>> +               mmc-ddr-1_8v;
+>> +               mmc-hs400-1_8v;
+> 
+> Again, no vmmc?
+> 
+
+	The engineer told me the power to eMMC card is fixed on this platform.
+	They don't implement a specific regulator for eMMC core power.
+
+>> +
+>> +               marvell,pad-type = "fixed-1-8v";
+>> +
+>> +               #address-cells = <1>;
+>> +               #size-cells = <0>;
+>> +               mmccard: mmccard@0 {
+>> +                       compatible = "mmc-card";
+>> +                       reg = <0>;
+>> +               };
+>> +       };
+>> +
+>> +- For SD/SDIO with compatible "marvell,armada-3700-sdhci":
+>> +
+>> +       sdhci@ab0000 {
+>> +               compatible = "marvell,armada-3700-sdhci";
+>> +               reg = <0xab0000 0x1000>,
+>> +                     <phy_addr 0x4>;
+>> +               interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>
+>> +               vqmmc-supply = <&sd_regulator>;
+> 
+> Again, no vmmc?
+> 
+	
+	It seems that the core power to SD is also fixed.
+
+>> +               clocks = <&sdclk>;
+>> +               clock-names = "core";
+>> +               bus-width = <4>;
+>> +
+>> +               marvell,pad-type = "sd";
+>> +       };
+>> --
+>> git-series 0.9.1
+> 
+> 
+> Kind regards
+> Uffe
+> 
