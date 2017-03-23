@@ -1,85 +1,61 @@
-From: "Bean Huo (beanhuo)" <beanhuo@micron.com>
-Subject: RE: [PATCH V1] mmc: core: fix still flush cache when eMMC cache off
-Date: Thu, 23 Mar 2017 10:45:51 +0000
-Message-ID: <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V1] mmc: core: fix still flush cache when eMMC cache off
+Date: Thu, 23 Mar 2017 14:10:18 +0100
+Message-ID: <CAPDyKFqNm3cu0MckrOcT1rdt1s6oSFCE72Lz_GyfHZYaqoqAoA@mail.gmail.com>
 References: <4e7d0b4b8df1430698e822b1a36bcc11@SIWEX5A.sing.micron.com>
- <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com>
+ <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com> <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:53097 "EHLO
-        mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751977AbdCWKqF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 06:46:05 -0400
-In-Reply-To: <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Bean Huo (beanhuo)" <beanhuo@micron.com>
 Cc: "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "axboe@fb.com" <axboe@fb.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>
+List-Id: linux-mmc@vger.kernel.org
 
-SGksIA0KDQo+T24gMTkgTWFyY2ggMjAxNyBhdCAwMTo0NSwgQmVhbiBIdW8gKGJlYW5odW8pIDxi
-ZWFuaHVvQG1pY3Jvbi5jb20+IHdyb3RlOg0KPj4gVGhpcyBwYXRjaCBmaXhlcyB0aGUgaXNzdWUg
-dGhhdCBtbWNfYmxrX2lzc3VlX3JxIHN0aWxsIGZsdXNoZXMgY2FjaGUNCj4+IHdoZW4gZU1NQyBj
-YWNoZSBoYXMgYWxyZWFkeSBiZWVuIG9mZiB0aHJvdWdoIHVzZXIgc3BhY2UgdG9vbCwgc3VjaCBh
-cw0KPj4gbW1jLXV0aWxzLg0KPj4gVGhlIHJlYXNvbiBpcyB0aGF0IGNhcmQtPmV4dF9jc2QuY2Fj
-aGVfY3RybCBpc24ndCByZXNldC4NCj4NCj5GaXJzdCwgd2h5IGRvIHlvdSB3YW50IHRvIHR1cm4g
-b2YgdGhlIGNhY2hlIGN0cmw/IElzIHRoZSBlTU1DIGRldmljZSBoYXZpbmcNCj5pc3N1ZXMgd2l0
-aCBpdD8gVGhlbiB3ZSBzaG91bGQgaW52ZW50IGEgY2FyZCBxdWlyayBpbnN0ZWFkLg0KDQoNCldo
-eSBJIHR1cm4gb2ZmIGl0PyBiZWNhdXNlIEkgZGlkIHBvd2VyIGxvc3MgdGVzdGluZyBhbmQgdmFs
-aWRhdGlvbiwgSSBzaG91bGQgc3dpdGNoIGl0IG9mZiBhbmQgb24uDQpXaGVuIEkgZG8gc29tZSBw
-ZXJmb3JtYW5jZSBhbmQgcG93ZXIgbG9zcyBjYXNlIHZhbGlkYXRpb24gb24gc2V2ZXJhbCBMaW51
-eCByZWxlYXNlIHZlcnNpb25zLA0KSSBuZWVkIHRvIHN3aXRjaCBvZmYgb3Igb24gY2FjaGUgdGhy
-b3VnaCB1c2VyIHNwYWNlIHRvb2wuDQpJIGNhbid0IGNvbmZpcm0gZXZlcnkgdXNlciB0aGF0IGxp
-a2VzIG1lLCBCdXQgSSB0aGluayBhdCBsZWFzdCBpdCBpcyBub3QgcmVhc29uYWJsZSB0byANCmZs
-dXNoIGVNTUMgY2FjaGUsIHdoZW4gaW50ZXJuYWwgZU1NQyBjYWNoZSBpcyBvZmYuDQoNCj5TZWNv
-bmQsIHdoYXQgZXJyb3JzIGRvIHlvdSBlbmNvdW50ZXIgd2hlbiB0aGUgbW1jIGNvcmUgdHJpZXMg
-dG8gZmx1c2ggdGhlDQo+Y2FjaGUgd2hlbiBpdCBoYXMgYmVlbiB0dXJuZWQgb2ZmPyBDYW4geW91
-IHBsZWFzZSBlbGFib3JhdGUgb24gdGhpcz8NCg0KDQpObyBlcnJvciBmb3VuZCwgYnV0IGZpcnN0
-bHksIHBsZWFzZSB0aGluayBhYm91dCBvdmVyaGVhZCBpbnRyb2R1Y2VkIGJ5IHVzZWxlc3MgZmx1
-c2ggY2FjaGUsIFVubGVzcyB5b3UNCkRvbid0IGNhcmUgdGhpcyB0aW55IHRpbWUuIHNlY29uZCwg
-dW5kZXIgdGhlIGNvbmRpdGlvbiBvZiBjYWNoZSBvZmYsIGFkZGl0aW9uYWwgZmx1c2ggY2FjaGUg
-cmVxdWVzdCBzdGlsbCBoYXMgaW1wYWN0IG9uDQpJbnRlcm5hbCBlTU1DIGxvZ2ljLiBJIGRvbid0
-IGtub3cgV2hhdCBhbmQgaG93IGltcGFjdCwgYnV0IGF0IGxlYXN0IGl0IGlzIHJlYWxseSBleGlz
-dC4NCg0KDQo+Pg0KPj4gU2lnbmVkLW9mZi1ieTogYmVhbmh1byA8YmVhbmh1b0BtaWNyb24uY29t
-Pg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvY29yZS9ibG9jay5jIHwgOSArKysrKysrKysNCj4+
-ICAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspDQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2Ry
-aXZlcnMvbW1jL2NvcmUvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYyBpbmRleA0K
-Pj4gMTYyMWZhMC4uZmIzNjM1YWMgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2Js
-b2NrLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KPj4gQEAgLTY0LDYgKzY0
-LDcgQEAgTU9EVUxFX0FMSUFTKCJtbWM6YmxvY2siKTsNCj4+ICAjZGVmaW5lIE1NQ19CTEtfVElN
-RU9VVF9NUyAgKDEwICogNjAgKiAxMDAwKSAgICAgICAgLyogMTAgbWludXRlIHRpbWVvdXQgKi8N
-Cj4+ICAjZGVmaW5lIE1NQ19TQU5JVElaRV9SRVFfVElNRU9VVCAyNDAwMDAgICNkZWZpbmUNCj4+
-IE1NQ19FWFRSQUNUX0lOREVYX0ZST01fQVJHKHgpICgoeCAmIDB4MDBGRjAwMDApID4+IDE2KQ0K
-Pj4gKyNkZWZpbmUgTU1DX0VYVFJBQ1RfVkFMVUVfRlJPTV9BUkcoeCkgKCh4ICYgMHgwMDAwRkYw
-MCkgPj4gOCkNCj4+DQo+PiAgI2RlZmluZSBtbWNfcmVxX3JlbF93cihyZXEpICAgICgocmVxLT5j
-bWRfZmxhZ3MgJiBSRVFfRlVBKSAmJiBcDQo+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgKHJxX2RhdGFfZGlyKHJlcSkgPT0gV1JJVEUpKSBAQA0KPj4gLTUzNSw2ICs1MzYsMTQg
-QEAgc3RhdGljIGludCBfX21tY19ibGtfaW9jdGxfY21kKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwN
-Cj5zdHJ1Y3QgbW1jX2Jsa19kYXRhICptZCwNCj4+ICAgICAgICAgICAgICAgICByZXR1cm4gZGF0
-YS5lcnJvcjsNCj4+ICAgICAgICAgfQ0KPj4NCj4+ICsgICAgICAgaWYgKChNTUNfRVhUUkFDVF9J
-TkRFWF9GUk9NX0FSRyhjbWQuYXJnKSA9PQ0KPkVYVF9DU0RfQ0FDSEVfQ1RSTCkgJiYNCj4+ICsg
-ICAgICAgICAgIChjbWQub3Bjb2RlID09IE1NQ19TV0lUQ0gpICYmIChjYXJkLT5leHRfY3NkLmNh
-Y2hlX3NpemUgPiAwKSkgew0KPj4gKyAgICAgICAgICAgICAgIGlmIChNTUNfRVhUUkFDVF9WQUxV
-RV9GUk9NX0FSRyhjbWQuYXJnKSAmIDEpDQo+PiArICAgICAgICAgICAgICAgICAgICAgICBjYXJk
-LT5leHRfY3NkLmNhY2hlX2N0cmwgPSAxOw0KPj4gKyAgICAgICAgICAgICAgIGVsc2UNCj4+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QuY2FjaGVfY3RybCA9IDA7DQo+PiAr
-ICAgICAgIH0NCj4+ICsNCj4NCj5JIGFtIHN1cmUgImNhY2hlIGN0cmwiIGlzbid0IHRoZSBvbmx5
-IHRoaW5nIHVzZXIgc3BhY2UgdmlhIG1tYyBpb2N0bCBjYW4gY2F1c2UNCj5wcm9ibGVtcyBmb3Iu
-IFRoZSBtbWMgY29yZSBrZWVwIHRyYWNrcyBvZiBvdGhlciBleHQgY3NkIHN0YXRlcywgZXRjLCBh
-cyB3ZWxsLiBJDQo+ZG9uJ3QgdGhpbmsgaXQncyB3b3J0aCB0byBjb21wZW5zYXRlIGFuZCB0cnkg
-dG8gYWN0IGFjY29yZGluZ2x5IHRvIGNvdmVyIGNhc2VzDQo+d2hlbiB1c2VyIHNwYWNlIGhhcyBt
-ZXNzZWQgdXAuDQo+DQo+VG8gYmUgY2xlYXIsIGl0IHdvdWxkIGhhdmUgYmVlbiBlbnRpcmVseSBk
-aWZmZXJlbnQgaWYgdGhlIHNvbWV0aGluZyB3YXMgY2hhbmdlZA0KPnZpYSBhIG1tYyBzeXNmcyBp
-bnRlcmZhY2UuIFRoZW4gd2UgcmVhbGx5IHNob3VsZCBhY3QgYWNjb3JkaW5nbHksIGhvd2V2ZXIg
-Zm9yDQo+bW1jIGlvY3RscyBpdCBqdXN0IGJlY29tZXMgdW5tYW5hZ2VhYmxlIGR1ZSB0byBpdHMg
-ZmxleGliaWxpdHkuDQoNCkkgd2lsbCBjaGVjayB0aGlzIGxhdGVyLiBCdXQgZmx1c2ggY2FjaGUg
-c2VhbXMgbm93IHRoZXJlIGlzIG9ubHkgb25lIGVudHJ5LCBhbmQNCkl0IGNoZWNrcyAiY2FjaGVf
-Y3RybCIuDQoNCj4NCj4+ICAgICAgICAgLyoNCj4+ICAgICAgICAgICogQWNjb3JkaW5nIHRvIHRo
-ZSBTRCBzcGVjcywgc29tZSBjb21tYW5kcyByZXF1aXJlIGEgZGVsYXkgYWZ0ZXINCj4+ICAgICAg
-ICAgICogaXNzdWluZyB0aGUgY29tbWFuZC4NCj4+IC0tDQo+PiAyLjcuNA0KPg0KPktpbmQgcmVn
-YXJkcw0KPlVmZmUNCj4tLQ0KPlRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZSBib2R5IG9mDQo+YSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPmh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On 23 March 2017 at 11:45, Bean Huo (beanhuo) <beanhuo@micron.com> wrote:
+> Hi,
+>
+>>On 19 March 2017 at 01:45, Bean Huo (beanhuo) <beanhuo@micron.com> wrote:
+>>> This patch fixes the issue that mmc_blk_issue_rq still flushes cache
+>>> when eMMC cache has already been off through user space tool, such as
+>>> mmc-utils.
+>>> The reason is that card->ext_csd.cache_ctrl isn't reset.
+>>
+>>First, why do you want to turn of the cache ctrl? Is the eMMC device having
+>>issues with it? Then we should invent a card quirk instead.
+>
+>
+> Why I turn off it? because I did power loss testing and validation, I should switch it off and on.
+> When I do some performance and power loss case validation on several Linux release versions,
+> I need to switch off or on cache through user space tool.
+> I can't confirm every user that likes me, But I think at least it is not reasonable to
+> flush eMMC cache, when internal eMMC cache is off.
+
+Ah, I see. Your use-case seems reasonable while validating robustness
+of the eMMC!
+
+>
+>>Second, what errors do you encounter when the mmc core tries to flush the
+>>cache when it has been turned off? Can you please elaborate on this?
+>
+>
+> No error found, but firstly, please think about overhead introduced by useless flush cache, Unless you
+> Don't care this tiny time. second, under the condition of cache off, additional flush cache request still has impact on
+> Internal eMMC logic. I don't know What and how impact, but at least it is really exist.
+
+Got it!
+
+However I still don't like the mmc ioctls API to compensate and deal
+with all "crazy-ness" that user-space may cause. Cache-ctrl is only
+one case out of many.
+
+I see two viable options to solve your problem.
+1) Extend mmc_test with a new test(s) for cache ctrl and perhaps
+suspend/resume. Isn't this actually exactly what you want?
+2) Extend debugfs to be able to turn cache ctrl on/off.
+
+[...]
+
+Kind regards
+Uffe
