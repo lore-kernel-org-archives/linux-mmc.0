@@ -1,78 +1,74 @@
-From: "Brinkmann, Harald" <Harald.Brinkmann@bst-international.com>
-Subject: Re: Possible bug in mmc-utils: Is MMC 'partition setting completed'
- required for 'write reliability'?
-Date: Thu, 23 Mar 2017 15:25:53 +0000
-Message-ID: <70BB63196E12E948A726997ECFE8646BC0CD5964@Elexis-Exch02.elexisad.net>
-References: <70BB63196E12E948A726997ECFE8646BC0CD58D9@Elexis-Exch02.elexisad.net>
- <CAG=SpYFveapkwrjxn=fBEWVzHfwJCy7PP=E-t-mRO43S9O1zhg@mail.gmail.com>
- <70BB63196E12E948A726997ECFE8646BC0CD58E8@Elexis-Exch02.elexisad.net>
- <CA+5vRUWjsifK5JhNUFv+3Zz4VHPoAWDpz+q6LyNj9OUk4Mw+ag@mail.gmail.com>
+From: David Daney <ddaney@caviumnetworks.com>
+Subject: Re: [PATCH v12 6/9] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
+Date: Thu, 23 Mar 2017 10:41:23 -0700
+Message-ID: <3146b3ef-a3c2-902d-2157-11425e6fc138@caviumnetworks.com>
+References: <20170310132507.32025-1-jglauber@cavium.com>
+ <20170310132507.32025-7-jglauber@cavium.com>
+ <CAPDyKFp2-KOSYy41QCFcqdU_Rzfncea8Q4QvjHSmho+tAMYMKg@mail.gmail.com>
+ <20170323085812.GA2250@hardcore>
+ <CAPDyKFqzpu1GiRCO5cVQ8yOPg-6CVRUFJSWWW5bLmh99vn+38g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta5.messagelabs.com ([195.245.231.143]:45272 "EHLO
-        mail1.bemta5.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S933890AbdCWP0E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 11:26:04 -0400
-In-Reply-To: <CA+5vRUWjsifK5JhNUFv+3Zz4VHPoAWDpz+q6LyNj9OUk4Mw+ag@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-bn3nam01on0086.outbound.protection.outlook.com ([104.47.33.86]:31881
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932967AbdCWRl3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 23 Mar 2017 13:41:29 -0400
+In-Reply-To: <CAPDyKFqzpu1GiRCO5cVQ8yOPg-6CVRUFJSWWW5bLmh99vn+38g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Gardiner <ben.l.gardiner@gmail.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jan Glauber <jan.glauber@caviumnetworks.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <ddaney@caviumnetworks.com>, "Steven J . Hill" <Steven.Hill@cavium.com>
 
-DQpIaSBCZW4sDQoNCk9uIFRodSwgMjAxNy0wMy0yMyBhdCAxNDo0NiArMDAwMCwgQmVuIEdhcmRp
-bmVyIHdyb3RlOg0KPiBIaSBndXlzLA0KPg0KPiBJJ3ZlIGJlZW4gYXdheSBmcm9tIHBsYXlpbmcg
-d2l0aCBlbW1jIHNpbmNlIHJvdWdobHkgd2hlbiB0aGF0IHBhdGNoIHdhcyBzdWJtaXR0ZWQuIE15
-IHJlY29sbGVjdGlvbiB3YXMgdGhhdCBlbmFibGluZyByZWxpYWJsZSB3cml0ZSBmZWF0dXJlIGNo
-YW5nZWQgdGhlIG5hbmQgd2VhciBsZXZlbGluZyBwYXJhbWV0ZXJzIG9mIHRoZSBmbGFzaCBjb250
-cm9sbGVyIGluIHRoZSBlbW1jLiBIZW5jZSB3aHkgc2V0dGluZyB0aGUgcGFydGl0aW9uIGJpdCBp
-cyByZXF1aXJlZC4gQnV0IHRoaXMgaXMgYSBmb2dneSByZWNvbGxlY3Rpb24gYXQgYmVzdA0KPg0K
-PiBJIHdpbGwgZGVmZXIgdG8gYW55b25lIHdobyBpcyBhY3R1YWxseSB0ZXN0aW5nIHRoZSBiZWhh
-dmlvdXJzIG9yIHRoZXNlIGVtbWMgZGV2aWNlcy4gU28gSSBoYXZlIG5vIG9iamVjdGlvbnMuDQo+
-DQo+IEJlc3QgUmVnYXJkcywNCj4gQmVuIEdhcmRpbmVyDQoNCkluIHRoZSBtZWFudGltZSBUb21h
-cyBNZWxpbiBmb3VuZCB0aGlzIGluICJFbWJlZGRlZCBNdWx0aS1NZWRpYSBDYXJkDQooZS5NTUMp
-IEVsZWN0cmljYWwgU3RhbmRhcmQgKDUuMSkiIEpFU0Q4NC1CNTEuDQoNCj4gIi4uLlRoaXMgd3Jp
-dGUgbXVzdCBoYXBwZW4gYXMgcGFydA0KPiBvZiB0aGUgcGFydGl0aW9uaW5nIHByb2Nlc3MgYW5k
-IG11c3Qgb2NjdXIgYmVmb3JlIHRoZQ0KPiBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQgYml0
-IGlzIHNldC4NCj4gVGhlIGNoYW5nZXMgbWFkZSB0byB0aGUgV1JfUkVMX1NFVCByZWdpc3RlciB3
-aWxsIG5vdCBoYXZlIGFuIGltcGFjdCB1bnRpbCB0aGUNCj4gcGFydGl0aW9uaW5nIHByb2Nlc3Mg
-aXMNCj4gY29tcGxldGUgKGkuZS4sIGFmdGVyIHRoZSBwb3dlciBjeWNsZSBoYXMgb2NjdXJyZWQg
-YW5kIHRoZSBwYXJ0aXRpb25pbmcgaGFzDQo+IGNvbXBsZXRlZCBzdWNjZXNzZnVsbHkpLiBEYXRh
-DQo+IHJlbGlhYmlsaXR5IHNldHRpbmdzIGZvciBwYXJ0aXRpb25zIHRoYXQgZG8gbm90IGV4aXN0
-IGluIHRoZSBkZXZpY2UgaGF2ZSBubw0KPiBpbXBhY3Qgb24gdGhlIGRldmljZS4iDQo+DQo+IFNv
-IHRoZSBzZXR0aW5nIG9mIFdSX1JFTF9TRVQgaXMgY29ubmVjdGVkIHRvIHRoZSBwYXJ0aXRpb25p
-bmcgb2YgdGhlIGRldmljZS4gQW5kDQo+IGFzIGxvbmcgYXMgdGhlIHBhcnRpdGlvbmluZyBpcyBu
-b3Qgc2V0LCBpaXJjIHRoZSBQQVJUSVRJT05fU0VUVElOR19DT01QTEVURUQgYml0DQo+IHdpbGwg
-bm90IGJlIGFjY2VwdGVkIHRvIGJlIHNldCBieSB0aGUgZGV2aWNlLg0KDQpIb3dldmVyLCBvdXIg
-ZU1NQyBkZXZpY2UgZG9lcyBub3Qgc2VlbSB0byBiZWhhdmUgdGhhdCB3YXkuIEkgYW0gc3RpbGwN
-CmludmVzdGlnYXRpbmcsIHRob3VnaC4gQW5kIEkgbW9zdCBkZWZpbml0ZWx5IGRvIG5vdCB3YW50
-IHRvIHN1Ym1pdA0Kc29tZXRoaW5nIHRoYXQgaXMgb25seSBiYXNlZCBvbiB0aGUgcGFydGljdWxh
-ciBiZWhhdmlvdXIgb2YgdGhlIGRldmljZQ0Kd2UgaGFwcGVuIHRvIHVzZS4NCg0KSG93ZXZlciwg
-dGhlIG9uZSB0aGluZyB3aGVyZSB0aGUgY3VycmVudCBpbXBsZW1lbnRhdGlvbiBkb2VzIGNvbnRy
-YWRpY3QNCnRoZSBzdGFuZGFyZCBpcyB0aGF0IGl0IGNhbiBvbmx5IHNldCB3cml0ZSByZWxpYWJp
-bGl0eSBmb3Igb25lDQooZU1NQy0pcGFydGl0aW9uIGF0IGEgdGltZSwgd2hpY2ggdGhlIHN0YW5k
-YXJkIGV4cGxpY2l0bHkgZXhjbHVkZXM6ICJUaGUNCmVudGlyZSByZWdpc3RlciBpcyBjb25zaWRl
-cmVkIHRvIGJlIHdyaXRlIG9uY2Ugc28gdGhlIGhvc3QgaGFzIG9uZQ0Kb3Bwb3J0dW5pdHkgdG8g
-d3JpdGUgYWxsIG9mIHRoZSBiaXRzIGluIHRoZSByZWdpc3Rlci4gKFNlcGFyYXRlIHdyaXRlcw0K
-dG8gY2hhbmdlIGluZGl2aWR1YWwgYml0cyBhcmUgbm90IHBlcm1pdHRlZCkiDQoNClRoaXMgaXMg
-YWxzbyB0aGUgb2JzZXJ2ZWQgYmVoYXZpb3VyIG9uIG91ciBlTU1DLg0KDQpJIGRpZCBtYW5hZ2Ug
-dG8gc3VjY2Vzc2Z1bGx5IGNvbXBsZXRlIHRoZSBwYXJ0aXRpb24gc2V0dGluZyBieSBkb2luZw0K
-dGhpcyAoYW5kIG9ubHkgdGhpcyk6DQoNCj4gbW1jIGVuaF9hcmVhIHNldCAteSAwIDAgL2Rldi9t
-bWNibGsxDQoNCndoaWNoIGRvZXNuJ3QgZG8gYW55dGhpbmcgdXNlZnVsLCBzaW5jZSB0aGF0IGlz
-IHRoZSBvcmlnaW5hbCBzZXR0aW5nDQphbnl3YXkuIEFmdGVyIGEgcG93ZXIgY3ljbGUgYWxsIG15
-IGRhdGEgd2FzIGdvbmUgKGFzIGV4cGVjdGVkKSwgYnV0IEkNCmNvdWxkIG5vdCBvYnNlcnZlIGFu
-eSBvdGhlciBjaGFuZ2UgaW4gYmVoYXZpb3VyLiBUaGUgdmFyaW91cyBmbGFncyB3ZXJlDQppbmRp
-Y2F0aW5nIHN1Y2Nlc3MuDQoNCkkgYW0gb3BlbiB0byBzdWdnZXN0aW9ucyBhYm91dCBob3cgdG8g
-YWN0dWFsbHkgdGVzdCAncmVsaWFibGUgd3JpdGUnIGluDQphY3Rpb24gcmF0aGVyIHRoYW4gcmVs
-eWluZyBvbiB3aGF0IHRoZSBkZXZpY2UgdGVsbHMgbWUuIEFueSBpZGVhcz8NCg0KUmVnYXJkcywg
-SGFyYWxkDQoNCi0tDQoNCmkuQS4gSGFyYWxkIEJyaW5rbWFubg0KDQpCU1QgZWx0cm9tYXQgSW50
-ZXJuYXRpb25hbCBHbWJIDQpXZXJrIExlb3BvbGRzaMO2aGUNCkhlcmZvcmRlciBTdHJhw59lIDI0
-OS0yNTENCkQtMzM4MTggTGVvcG9sZHNow7ZoZQ0KDQpUOiAgICAgICs0OSAoNTIwOCkgOTg3LTUx
-Mw0KDQpFOiAgICAgIGhhcmFsZC5icmlua21hbm5AYnN0LWludGVybmF0aW9uYWwuY29tDQpXOiAg
-ICAgIGh0dHA6Ly93d3cuYnN0LWVsdHJvbWF0LmNvbQ0KDQoNCg0KDQpfX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpBbXRzZ2VyaWNodCBCaWVs
-ZWZlbGQsIEhSQiBOci4gMzA4MzANCkdlc2Now6RmdHNmw7xocmVyIEtyaXN0aWFuIErDvG5rZSwg
-RHIuIEpvaGFubi1DYXJzdGVuIEtpcHAsIERyLiBHdW50ZXINClRhdXRvcnVzDQpTaXR6IGRlciBH
-ZXNlbGxzY2hhZnQ6IEJpZWxlZmVsZA0KVmVydHJhdWxpY2hlIEUtTWFpbCB2b24gQlNUIGVsdHJv
-bWF0IEludGVybmF0aW9uYWwgR21iSA0KDQo=
+On 03/23/2017 02:28 AM, Ulf Hansson wrote:
+> On 23 March 2017 at 09:58, Jan Glauber <jan.glauber@caviumnetworks.com> wrote:
+>> On Fri, Mar 17, 2017 at 03:58:26PM +0100, Ulf Hansson wrote:
+>>> On 10 March 2017 at 14:25, Jan Glauber <jglauber@cavium.com> wrote:
+>>>> Add a platform driver for ThunderX ARM SOCs.
+>>>>
+>>>> Signed-off-by: Jan Glauber <jglauber@cavium.com>
+>>>> ---
+>>>>  drivers/mmc/host/Kconfig               |  10 ++
+>>>>  drivers/mmc/host/Makefile              |   2 +
+>>>>  drivers/mmc/host/cavium-mmc.h          |  10 +-
+>>>>  drivers/mmc/host/cavium-pci-thunderx.c | 198 +++++++++++++++++++++++++++++++++
+>>>>  4 files changed, 218 insertions(+), 2 deletions(-)
+>>>>  create mode 100644 drivers/mmc/host/cavium-pci-thunderx.c
+>>>>
+>>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>>> index 68cc811..3983dee 100644
+>>>> --- a/drivers/mmc/host/Kconfig
+>>>> +++ b/drivers/mmc/host/Kconfig
+>>>> @@ -632,6 +632,16 @@ config MMC_CAVIUM_OCTEON
+>>>>
+>>>>           If unsure, say N.
+>>>>
+>>>> +config MMC_CAVIUM_THUNDERX
+>>>> +       tristate "Cavium ThunderX SD/MMC Card Interface support"
+>>>> +       depends on PCI && 64BIT && (ARM64 || COMPILE_TEST)
+>>>> +       select GPIO_THUNDERX
+>>>
+>>> Do you really need to select GPIO_THUNDERX? What is the relationship?
+>>
+>> I don't know much about gpio, but in the end despite all these layers
+>> there must be a gpio set function called doing the writeq on our SOC
+>> to enable/disable the power gpio, right?
+>>
+>> GPIO_THUNDERX implements this gpio set function for Cavium's SOC.
+>
+> Got it. However using "select" should be avoided.
+>
+> Please use "depends on GPIOLIB" instead. The select of "GPIO_THUNDERX"
+> should be done part of the defconfig or via an SoC specifc Kconfig
+> file.
+>
+
+Thanks, I think that is the cleanest approach.
+
+We may want to add an MSI-X dependency as well, as legacy interrupts are 
+not supported by the hardware.
+
+David.
+
