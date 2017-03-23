@@ -1,44 +1,56 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 0/2] mmc: factor out getting dma direction from host drivers
-Date: Thu, 23 Mar 2017 22:17:41 +0100
-Message-ID: <44d784c1-ab30-db59-9037-db8c87935b43@gmail.com>
+Subject: [PATCH 1/2] mmc: core: add mmc_get_dma_dir
+Date: Thu, 23 Mar 2017 22:20:40 +0100
+Message-ID: <1dbd7d7c-3f0a-20b1-b7c3-22872cf9341d@gmail.com>
+References: <44d784c1-ab30-db59-9037-db8c87935b43@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:36880 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932783AbdCWVR5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 17:17:57 -0400
-Received: by mail-wm0-f42.google.com with SMTP id n11so6923552wma.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2017 14:17:56 -0700 (PDT)
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34239 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751336AbdCWV1h (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 17:27:37 -0400
+Received: by mail-wm0-f66.google.com with SMTP id u132so1817546wmg.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2017 14:27:36 -0700 (PDT)
+In-Reply-To: <44d784c1-ab30-db59-9037-db8c87935b43@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Several host drivers contain identical code for determining the
-DMA direction. Therefore factor this out to the core.
+Add function for determining DMA direction to core.
 
-Heiner Kallweit (2):
-  mmc: core: add mmc_get_dma_dir
-  mmc: use new core function mmc_get_dma_dir
+Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+---
+ include/linux/mmc/host.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
- drivers/mmc/host/android-goldfish.c | 10 ++--------
- drivers/mmc/host/atmel-mci.c        |  6 ++----
- drivers/mmc/host/davinci_mmc.c      | 10 +++-------
- drivers/mmc/host/dw_mmc.c           | 14 +++-----------
- drivers/mmc/host/jz4740_mmc.c       |  9 ++-------
- drivers/mmc/host/mmc_spi.c          |  5 +----
- drivers/mmc/host/mtk-sd.c           |  8 ++------
- drivers/mmc/host/mvsdio.c           | 11 +++++------
- drivers/mmc/host/omap_hsmmc.c       | 17 ++++-------------
- drivers/mmc/host/s3cmci.c           |  4 ++--
- drivers/mmc/host/sdhci.c            |  9 +++------
- drivers/mmc/host/sunxi-mmc.c        | 14 +++-----------
- include/linux/mmc/host.h            |  6 ++++++
- 13 files changed, 38 insertions(+), 85 deletions(-)
-
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 83f1c4a9..21385ac0 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -17,6 +17,7 @@
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/pm.h>
++#include <linux/dma-direction.h>
+ 
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -499,6 +500,11 @@ static inline bool mmc_can_retune(struct mmc_host *host)
+ 	return host->can_retune == 1;
+ }
+ 
++static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
++{
++	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
++}
++
+ int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+ int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+ 
 -- 
 2.12.0
+
 
