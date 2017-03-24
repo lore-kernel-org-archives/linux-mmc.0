@@ -1,52 +1,184 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: meson-gx: add cmd23 and descriptor chain mode
-Date: Fri, 24 Mar 2017 08:27:59 +0100
-Message-ID: <CAPDyKFrE97s3LohQDspy+9qDRfxC+ybcY_3FdLqpXupitqN2jw@mail.gmail.com>
-References: <f1f8dae2-e976-4d42-99dc-34d08cb3d628@gmail.com>
+Subject: Re: [PATCH v5] mmc: sdhci: clarify the get_timeout_clock callback
+Date: Fri, 24 Mar 2017 08:40:33 +0100
+Message-ID: <CAPDyKFpZrbKMEbuOufxeU4sLW4r45SBqHQRQy3yEtrisX82dEA@mail.gmail.com>
+References: <1489720319-70840-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:36332 "EHLO
-        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751511AbdCXH2B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 03:28:01 -0400
-Received: by mail-vk0-f46.google.com with SMTP id s68so6508189vke.3
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2017 00:28:00 -0700 (PDT)
-In-Reply-To: <f1f8dae2-e976-4d42-99dc-34d08cb3d628@gmail.com>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:33860 "EHLO
+        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751313AbdCXHkg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 03:40:36 -0400
+Received: by mail-vk0-f53.google.com with SMTP id z204so6794344vkd.1
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2017 00:40:35 -0700 (PDT)
+In-Reply-To: <1489720319-70840-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Anssi Hannula <anssi.hannula@bitwise.fi>
 
-On 15 March 2017 at 20:16, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> Apart from three minor improvements this patch series adds support
-> for CMD23 mode and switches the driver to descriptor chain mode.
+On 17 March 2017 at 04:11, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Currently the get_timeout_clock callback doesn't clearly
+> have a statement that it needs the variant drivers to return
+> the timeout clock rate in kHz if the SDHCI_TIMEOUT_CLK_UNIT
+> isn't present, otherwise the variant drivers should return it
+> in MHz. So actually sdhci-of-arasan return the wrong value found
+> by Anssi[1]. It's also very likely that further variant drivers which
+> are going to use this callback will be confused by this situation.
+> Given the fact that moderm sdhci variant hosts are very prone to get
+> the timeout clock from common clock framework (actually the only three
+> users did that), it's more natural to return the value in Hz and we
+> make an explicit comment there. Then we put the unit conversion inside
+> the sdhci core. Thus will improve the code and prevent further misuses.
 >
-> On my system with a 128GB eMMC card this increased the read
-> performance from 10 - 15 MB/s to 140 MB/s.
+> [1]: https://patchwork.kernel.org/patch/9569431/
 >
-> Successfully tested on a Odroid C2 with custom uboot based on recent
-> mainline uboot. Behavior might be different with vendor uboot.
->
-> Heiner Kallweit (5):
->   mmc: meson-gx: switch irq name to DT node name
->   mmc: meson-gx: improve response reading
->   mmc: meson-gx: use block mode also for just one block
->   mmc: meson-gx: add support for CMD23 mode
->   mmc: meson-gx: switch to descriptor chain mode
->
->  drivers/mmc/host/meson-gx-mmc.c | 258 ++++++++++++++++++++++------------------
->  1 file changed, 142 insertions(+), 116 deletions(-)
->
-> --
-> 2.12.0
->
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Acked-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Heiner,
+Shawn, can you please re-base this as doesn't apply to my next branch.
 
-As I just applied the series for the "small refactoring", how do you
-want me to handle this one. Is it safe to apply on top or do you need
-to re-base it?
+While doing that, I would recommend to not refer to a patchwork link
+in the changelog. It's better to do that in the section where you
+describe the version history.
+
+Instead I would add a "Reported-by: Anssi Hannula
+<anssi.hannula@bitwise.fi>", to give Anssi cred about reporting the
+issue.
 
 Kind regards
 Uffe
+
+> ---
+>
+> Changes in v5:
+> - fix typo
+> - remove unlikely
+>
+> Changes in v4:
+> - rebased on -next
+> - add Masahiro's ack for sdhci-cadence
+>
+> Changes in v3:
+> - squash all the patches into one to keep bisectability
+> - fix wrong return value of sdhci-cadence
+> - slight improve the condition check to avoid the complaint of
+>   checkpatch
+>
+> Changes in v2:
+> - fix the comment and make it return in Hz
+>
+>  drivers/mmc/host/sdhci-cadence.c   |  4 ++--
+>  drivers/mmc/host/sdhci-of-arasan.c | 17 +----------------
+>  drivers/mmc/host/sdhci.c           | 16 +++++++++-------
+>  drivers/mmc/host/sdhci.h           |  1 +
+>  4 files changed, 13 insertions(+), 25 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index 316cfec..7baeeaf 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -103,9 +103,9 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+>  {
+>         /*
+>          * Cadence's spec says the Timeout Clock Frequency is the same as the
+> -        * Base Clock Frequency.  Divide it by 1000 to return a value in kHz.
+> +        * Base Clock Frequency.
+>          */
+> -       return host->max_clk / 1000;
+> +       return host->max_clk;
+>  }
+>
+>  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 1cfd7f9..c52f153 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -157,21 +157,6 @@ static int sdhci_arasan_syscon_write(struct sdhci_host *host,
+>         return ret;
+>  }
+>
+> -static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+> -{
+> -       unsigned long freq;
+> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -
+> -       /* SDHCI timeout clock is in kHz */
+> -       freq = DIV_ROUND_UP(clk_get_rate(pltfm_host->clk), 1000);
+> -
+> -       /* or in MHz */
+> -       if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> -               freq = DIV_ROUND_UP(freq, 1000);
+> -
+> -       return freq;
+> -}
+> -
+>  static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -286,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
+>  static struct sdhci_ops sdhci_arasan_ops = {
+>         .set_clock = sdhci_arasan_set_clock,
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> -       .get_timeout_clock = sdhci_arasan_get_timeout_clock,
+> +       .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>         .set_bus_width = sdhci_set_bus_width,
+>         .reset = sdhci_arasan_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6fdd7a7..4a9df4ac 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3289,20 +3289,22 @@ int sdhci_setup_host(struct sdhci_host *host)
+>         if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+>                 host->timeout_clk = (host->caps & SDHCI_TIMEOUT_CLK_MASK) >>
+>                                         SDHCI_TIMEOUT_CLK_SHIFT;
+> +
+> +               if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> +                       host->timeout_clk *= 1000;
+> +
+>                 if (host->timeout_clk == 0) {
+> -                       if (host->ops->get_timeout_clock) {
+> -                               host->timeout_clk =
+> -                                       host->ops->get_timeout_clock(host);
+> -                       } else {
+> +                       if (!host->ops->get_timeout_clock) {
+>                                 pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
+>                                         mmc_hostname(mmc));
+>                                 ret = -ENODEV;
+>                                 goto undma;
+>                         }
+> -               }
+>
+> -               if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
+> -                       host->timeout_clk *= 1000;
+> +                       host->timeout_clk =
+> +                               DIV_ROUND_UP(host->ops->get_timeout_clock(host),
+> +                                            1000);
+> +               }
+>
+>                 if (override_timeout_clk)
+>                         host->timeout_clk = override_timeout_clk;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index edf3adf..27c252c 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -547,6 +547,7 @@ struct sdhci_ops {
+>         int             (*enable_dma)(struct sdhci_host *host);
+>         unsigned int    (*get_max_clock)(struct sdhci_host *host);
+>         unsigned int    (*get_min_clock)(struct sdhci_host *host);
+> +       /* get_timeout_clock should return clk rate in unit of Hz */
+>         unsigned int    (*get_timeout_clock)(struct sdhci_host *host);
+>         unsigned int    (*get_max_timeout_count)(struct sdhci_host *host);
+>         void            (*set_timeout)(struct sdhci_host *host,
+> --
+> 1.9.1
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
