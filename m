@@ -1,77 +1,52 @@
-From: "Bean Huo (beanhuo)" <beanhuo@micron.com>
-Subject: RE: [PATCH V1] mmc: core: fix still flush cache when eMMC cache off
-Date: Fri, 24 Mar 2017 11:16:30 +0000
-Message-ID: <bba6c1dd59ee4b8aad4b1f9929f7caf0@SIWEX5A.sing.micron.com>
-References: <4e7d0b4b8df1430698e822b1a36bcc11@SIWEX5A.sing.micron.com>
- <CAPDyKFoy_EDRNkicPAMPReB3GCxZPkO+H9Jh14nxg3YfVzchOw@mail.gmail.com>
- <3a0f2112746a4f0fbaa73906c606a340@SIWEX5A.sing.micron.com>
- <CAPDyKFqNm3cu0MckrOcT1rdt1s6oSFCE72Lz_GyfHZYaqoqAoA@mail.gmail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [v5 2/4] dt-bindings: mmc: add description of PHY delays for
+ sdhci-cadence
+Date: Fri, 24 Mar 2017 11:26:20 -0500
+Message-ID: <20170324162620.mukktylezkobybfm@rob-hp-laptop>
+References: <1490106736-2242-1-git-send-email-piotrs@cadence.com>
+ <1490106781-3129-1-git-send-email-piotrs@cadence.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:38114 "EHLO
-        mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751421AbdCXLQk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 07:16:40 -0400
-In-Reply-To: <CAPDyKFqNm3cu0MckrOcT1rdt1s6oSFCE72Lz_GyfHZYaqoqAoA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:33091 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757349AbdCXQ0X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 12:26:23 -0400
+Content-Disposition: inline
+In-Reply-To: <1490106781-3129-1-git-send-email-piotrs@cadence.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "axboe@fb.com" <axboe@fb.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>
+To: Piotr Sroka <piotrs@cadence.com>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
 
-SGksIFVmZmUNCg0KPj4+T24gMTkgTWFyY2ggMjAxNyBhdCAwMTo0NSwgQmVhbiBIdW8gKGJlYW5o
-dW8pIDxiZWFuaHVvQG1pY3Jvbi5jb20+DQo+d3JvdGU6DQo+Pj4+IFRoaXMgcGF0Y2ggZml4ZXMg
-dGhlIGlzc3VlIHRoYXQgbW1jX2Jsa19pc3N1ZV9ycSBzdGlsbCBmbHVzaGVzIGNhY2hlDQo+Pj4+
-IHdoZW4gZU1NQyBjYWNoZSBoYXMgYWxyZWFkeSBiZWVuIG9mZiB0aHJvdWdoIHVzZXIgc3BhY2Ug
-dG9vbCwgc3VjaA0KPj4+PiBhcyBtbWMtdXRpbHMuDQo+Pj4+IFRoZSByZWFzb24gaXMgdGhhdCBj
-YXJkLT5leHRfY3NkLmNhY2hlX2N0cmwgaXNuJ3QgcmVzZXQuDQo+Pj4NCj4+PkZpcnN0LCB3aHkg
-ZG8geW91IHdhbnQgdG8gdHVybiBvZiB0aGUgY2FjaGUgY3RybD8gSXMgdGhlIGVNTUMgZGV2aWNl
-DQo+Pj5oYXZpbmcgaXNzdWVzIHdpdGggaXQ/IFRoZW4gd2Ugc2hvdWxkIGludmVudCBhIGNhcmQg
-cXVpcmsgaW5zdGVhZC4NCj4+DQo+Pg0KPj4gV2h5IEkgdHVybiBvZmYgaXQ/IGJlY2F1c2UgSSBk
-aWQgcG93ZXIgbG9zcyB0ZXN0aW5nIGFuZCB2YWxpZGF0aW9uLCBJIHNob3VsZA0KPnN3aXRjaCBp
-dCBvZmYgYW5kIG9uLg0KPj4gV2hlbiBJIGRvIHNvbWUgcGVyZm9ybWFuY2UgYW5kIHBvd2VyIGxv
-c3MgY2FzZSB2YWxpZGF0aW9uIG9uIHNldmVyYWwNCj4+IExpbnV4IHJlbGVhc2UgdmVyc2lvbnMs
-IEkgbmVlZCB0byBzd2l0Y2ggb2ZmIG9yIG9uIGNhY2hlIHRocm91Z2ggdXNlciBzcGFjZSB0b29s
-Lg0KPj4gSSBjYW4ndCBjb25maXJtIGV2ZXJ5IHVzZXIgdGhhdCBsaWtlcyBtZSwgQnV0IEkgdGhp
-bmsgYXQgbGVhc3QgaXQgaXMNCj4+IG5vdCByZWFzb25hYmxlIHRvIGZsdXNoIGVNTUMgY2FjaGUs
-IHdoZW4gaW50ZXJuYWwgZU1NQyBjYWNoZSBpcyBvZmYuDQo+DQo+QWgsIEkgc2VlLiBZb3VyIHVz
-ZS1jYXNlIHNlZW1zIHJlYXNvbmFibGUgd2hpbGUgdmFsaWRhdGluZyByb2J1c3RuZXNzIG9mIHRo
-ZQ0KPmVNTUMhDQo+DQo+Pg0KPj4+U2Vjb25kLCB3aGF0IGVycm9ycyBkbyB5b3UgZW5jb3VudGVy
-IHdoZW4gdGhlIG1tYyBjb3JlIHRyaWVzIHRvIGZsdXNoDQo+Pj50aGUgY2FjaGUgd2hlbiBpdCBo
-YXMgYmVlbiB0dXJuZWQgb2ZmPyBDYW4geW91IHBsZWFzZSBlbGFib3JhdGUgb24gdGhpcz8NCj4+
-DQo+Pg0KPj4gTm8gZXJyb3IgZm91bmQsIGJ1dCBmaXJzdGx5LCBwbGVhc2UgdGhpbmsgYWJvdXQg
-b3ZlcmhlYWQgaW50cm9kdWNlZCBieQ0KPj4gdXNlbGVzcyBmbHVzaCBjYWNoZSwgVW5sZXNzIHlv
-dSBEb24ndCBjYXJlIHRoaXMgdGlueSB0aW1lLiBzZWNvbmQsDQo+PiB1bmRlciB0aGUgY29uZGl0
-aW9uIG9mIGNhY2hlIG9mZiwgYWRkaXRpb25hbCBmbHVzaCBjYWNoZSByZXF1ZXN0IHN0aWxsIGhh
-cyBpbXBhY3QNCj4+b24gSW50ZXJuYWwgZU1NQyBsb2dpYy4gSSBkb24ndCBrbm93IFdoYXQgYW5k
-IGhvdyBpbXBhY3QsIGJ1dCBhdCBsZWFzdCBpdCBpcw0KPj5yZWFsbHkgZXhpc3QuDQo+DQo+R290
-IGl0IQ0KPg0KPkhvd2V2ZXIgSSBzdGlsbCBkb24ndCBsaWtlIHRoZSBtbWMgaW9jdGxzIEFQSSB0
-byBjb21wZW5zYXRlIGFuZCBkZWFsIHdpdGggYWxsDQo+ImNyYXp5LW5lc3MiIHRoYXQgdXNlci1z
-cGFjZSBtYXkgY2F1c2UuIENhY2hlLWN0cmwgaXMgb25seSBvbmUgY2FzZSBvdXQgb2YgbWFueS4N
-Cg0KUXVlc3Rpb24gaXMgdGhhdCBub3QgZXZlcnkgTGludXgtbW1jIHVzZXIgcmVhbGx5IHVuZGVy
-c3RhbmQgdGhhdCBzaG91bGRuJ3QgdXNlICJtbWMgaW9jdGxzIEFQSSANCnRvIGNvbXBlbnNhdGUg
-YW5kIGRlYWwgd2l0aCBhbGwgY3JhenktbmVzcyB0aGF0IHVzZXItc3BhY2UgbWF5IGNhdXNlICIu
-DQpubyBtYXR0ZXIgd2UgbGlrZSBvciBkaXNsaWtlLCBJc3N1ZSBpcyBhbHJlYWR5IHRoZXJlOyBJ
-IHRoaW5rIHRoYXQgbW9zdCBvZiBlTU1DIHVzZXIgaXMgbm93IA0KY29uZmlndXJpbmcgZU1NQyB0
-aHJvdWdoIG1tYy11dGlscyBhbmQgbW1jIGlvY3Rscy4gVGhpcyBpcyBhIHJlYWwgY29uZGl0aW9u
-Lg0KU29tZSBhdXRvbW90aXZlIGFwcGxpY2F0aW9ucywgQ2FjaGUgd291bGQgbm90IGJlIGVuYWJs
-ZWQuIA0KDQpNYXliZSBJIGFtIHNoYWxsb3csIG1tYyBpb2N0bHMgbGlrZXMgYmFja2Rvb3IgdGhh
-dCBsZXQgdXNlciBhY2Nlc3MgYW5kIGNvbmZpZ3VyZSBlTU1DIHNvbWUgZmVhdHVyZSwNCkV2ZW4g
-bm90IHRvbyBvZnRlbi4gSSBzdGlsbCBzdWdnZXN0IHRvIGZpeCB0aGlzIGluIG1tYyBpb2N0bHMs
-IHVubGVzcyBtbWMgaW90Y2xzIGJlaW5nIGRlbGV0ZWQsIGFuZCBtbWMtdXRpbHMNCmRvZXNuJ3Qg
-c3VwcG9ydCBDYWNoZSBvZmYvb24uDQpCZWNhdXNlIGVNTUMgaW50ZXJuYWwgY2FjaGUgaGFzIGJl
-ZW4gZGlzYWJsZWQsIGJ1dCBMaW51eC1tbWMgc3RpbGwgaXNzdWUgZmx1c2ggY2FjaGUgcmVxdWVz
-dCwgdGhpcyBpcyBpbmRlZWQNCk5vdCByZWFzb25hYmxlLiBJdCBkZWZpbml0ZWx5IGluY3JlYXNl
-cyBzeXN0ZW0gbGV2ZWwgb3ZlcmhlYWQuDQoNCj5JIHNlZSB0d28gdmlhYmxlIG9wdGlvbnMgdG8g
-c29sdmUgeW91ciBwcm9ibGVtLg0KPjEpIEV4dGVuZCBtbWNfdGVzdCB3aXRoIGEgbmV3IHRlc3Qo
-cykgZm9yIGNhY2hlIGN0cmwgYW5kIHBlcmhhcHMgc3VzcGVuZC9yZXN1bWUuDQo+SXNuJ3QgdGhp
-cyBhY3R1YWxseSBleGFjdGx5IHdoYXQgeW91IHdhbnQ/DQoNCj4yKSBFeHRlbmQgZGVidWdmcyB0
-byBiZSBhYmxlIHRvIHR1cm4gY2FjaGUgY3RybCBvbi9vZmYuDQoNCkkgY2FuIHRyeSwgYnV0IHRo
-aXMgcGF0Y2ggaXMganVzdCB0byBmaXggbW1jIGN0cmxzIGJhY2tkb29yIG9uIGVNTUMgZmx1c2gg
-Y2FjaGUuDQoNCj5bLi4uXQ0KPg0KPktpbmQgcmVnYXJkcw0KPlVmZmUNCj4tLQ0KPlRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
-bWMiIGluIHRoZSBib2R5IG9mDQo+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPmh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0K
+On Tue, Mar 21, 2017 at 02:33:01PM +0000, Piotr Sroka wrote:
+> DTS properties are used instead of fixed data
+> because PHY settings can be different for different chips/boards.
+> Add description of new DLL PHY delays.
+> 
+> Signed-off-by: Piotr Sroka <piotrs@cadence.com>
+> ---
+> Changes for v2:
+> - file was created in v2. It was a part of driver source file patch.
+> - most delays were moved from dts file
+>   to data associated with an SoC specific compatible
+> - description of delays was updated to be more clearly
+> ---
+> Changes for v3:
+> - move all delays back to dts because they are also boards dependent
+> - prefix all of the Cadence-specific properties with cdns prefix
+> ---
+> Changes for v4:
+> - change the beginning of the commit subject
+> ---
+> Changes for v5:
+> - change name of property to be consistent with timing modes 
+>   available in Linux
+
+I don't see any change here...
+
+> ---
+>  .../devicetree/bindings/mmc/sdhci-cadence.txt      | 48 ++++++++++++++++++++++
+>  1 file changed, 48 insertions(+)
+
+Acked-by: Rob Herring <robh@kernel.org>
