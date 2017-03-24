@@ -1,76 +1,89 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: Re: [PATCH] mmc: core: Do not hold re-tuning during CMD6 commands
-Date: Fri, 24 Mar 2017 16:32:49 +0800
-Message-ID: <1490344369.22814.10.camel@mhfsdcap03>
-References: <1490336341-22292-1-git-send-email-chaotian.jing@mediatek.com>
-         <1490336341-22292-2-git-send-email-chaotian.jing@mediatek.com>
-         <13a83728-0031-5683-c371-4b517df32299@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.11 rc4
+Date: Fri, 24 Mar 2017 10:19:11 +0100
+Message-ID: <CAPDyKFrAhummENr6BcwTO6uN8_apjfZfPAuWMBzY1HNnp7A-Bg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([218.249.47.110]:45719 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1756376AbdCXIc6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 04:32:58 -0400
-In-Reply-To: <13a83728-0031-5683-c371-4b517df32299@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com
 
-On Fri, 2017-03-24 at 09:52 +0200, Adrian Hunter wrote:
-> On 24/03/17 08:19, Chaotian Jing wrote:
-> > this patch is refine for 'commit c6dbab9cb58f ("mmc: core: Hold re-tuning
-> > during switch commands")'
-> > Since it has 3 retries at max for CMD6, if the first CMD6 got CRC error,
-> > then should do re-tune before the next CMD6 was sent.
-> > 
-> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> > ---
-> >  drivers/mmc/core/mmc_ops.c |    3 +--
-> >  1 file changed, 1 insertion(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> > index fe80f26..6931927 100644
-> > --- a/drivers/mmc/core/mmc_ops.c
-> > +++ b/drivers/mmc/core/mmc_ops.c
-> > @@ -534,8 +534,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-> >  	bool use_r1b_resp = use_busy_signal;
-> >  	unsigned char old_timing = host->ios.timing;
-> >  
-> > -	mmc_retune_hold(host);
-> > -
-> >  	/*
-> >  	 * If the cmd timeout and the max_busy_timeout of the host are both
-> >  	 * specified, let's validate them. A failure means we need to prevent
-> > @@ -567,6 +565,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-> >  		cmd.sanitize_busy = true;
-> >  
-> >  	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-> > +	mmc_retune_hold(host);
-> 
-> That is not how mmc_retune_hold() works, you need mmc_retune_hold_now() as
-> it is here:
-> 
-> 	https://marc.info/?l=linux-mmc&m=148940903816582
-> 
-> But using "retries" with commands that have busy-waiting on the data line
-> doesn't make much sense anyway.  Particularly with CRC errors, I would
-> expect the card is actually busily doing the switch and we need only to wait
-> for it.  The same can be true for timeout errors.  For some CMD6 we might
-> need to send CMD12 if the card is busy after an error.  I would prefer an
-> explicit attempt at recovery from CMD6 errors.
-> 
+Hi Linus,
 
-It's the host driver's responsibility to ensure card is not in busy
-state before issue the next R1B command, or the MMC core layer needs do
-extra check/waiting before issue a R1B command.
-I think the purpose of "re-tune" is trying to cover particular case(eg.
-voltage fluctuate or EMI or some glitch of host/device which caused CRC
-error) , but in such cases, too many cases are disable re-tune function
-by mmc_retune_hold(), for example, in this case, if a response CRC error
-got then we never have chance to recover it. then cause system cannot
-access emmc or suspend/resume fail.
+Here are a couple of mmc fixes intended for v4.11 rc4. They are based
+on v4.11-rc2.
+
+Details are as usual found in the signed tag. Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit 4495c08e84729385774601b5146d51d9e5849f81:
+
+  Linux 4.11-rc2 (2017-03-12 14:47:08 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.11-rc2
+
+for you to fetch changes up to 027fb89e61054b4aedd962adb3e2003dec78a716:
+
+  mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
+(2017-03-23 09:24:42 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix initialization of HS400-ES eMMC cards
+ - A couple of fixes for the mmc block device driver
+ - Resolved a compiler warning
+
+MMC host:
+ - sdhci: Do not disable IRQs while waiting for clock
+ - sdhci-pci: Do not disable IRQs in sdhci_intel_set_power
+ - sdhci-of-arasan: Fix incorrect timeout clock
+ - mediatek: Fix bug for setting wrong clock frequency
+ - sdhci-of-at91: Use regulator to fix cmd timeout errors
+ - ushc: Fix NULL-deref at probe
+ - rockchip-dw-mshc: Rename RK1108 to RV1108 in DT
+
+----------------------------------------------------------------
+Adrian Hunter (4):
+      mmc: block: Fix is_waiting_last_req set incorrectly
+      mmc: block: Fix cmd error reset failure path
+      mmc: sdhci: Do not disable interrupts while waiting for clock
+      mmc: sdhci-pci: Do not disable interrupts in sdhci_intel_set_power
+
+Andy Yan (1):
+      dt-bindings: rockchip-dw-mshc: rename RK1108 to RV1108
+
+Anssi Hannula (1):
+      mmc: sdhci-of-arasan: fix incorrect timeout clock
+
+Guenter Roeck (1):
+      mmc: core: Fix access to HS400-ES devices
+
+Johan Hovold (1):
+      mmc: ushc: fix NULL-deref at probe
+
+Romain Izard (1):
+      mmc: sdhci-of-at91: Support external regulators
+
+Winkler, Tomas (1):
+      mmc: core: mmc_blk_rw_cmd_err - remove unused variable
+
+yong mao (1):
+      mmc: mediatek: Fixed bug where clock frequency could be set wrong
+
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.txt      |  2 +-
+ drivers/mmc/core/block.c                              |  7 +++----
+ drivers/mmc/core/mmc.c                                |  2 +-
+ drivers/mmc/host/mtk-sd.c                             |  4 ++--
+ drivers/mmc/host/sdhci-of-arasan.c                    | 14 +++++---------
+ drivers/mmc/host/sdhci-of-at91.c                      | 19 +++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-core.c                     |  4 ++++
+ drivers/mmc/host/sdhci.c                              |  4 +++-
+ drivers/mmc/host/ushc.c                               |  3 +++
+ 9 files changed, 41 insertions(+), 18 deletions(-)
