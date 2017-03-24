@@ -1,80 +1,51 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 5/5] mmc: meson-gx: switch to descriptor chain mode
-Date: Fri, 24 Mar 2017 12:04:02 -0700
-Message-ID: <m2bmsqijj1.fsf@baylibre.com>
-References: <f1f8dae2-e976-4d42-99dc-34d08cb3d628@gmail.com>
-        <57af6536-edf9-a2aa-40fe-a90338245d0e@gmail.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
+Subject: [PATCH v2 0/2] mmc: factor out getting dma direction from host
+ drivers
+Date: Fri, 24 Mar 2017 21:01:23 +0100
+Message-ID: <7f8a382e-ff2f-db2f-ef24-25cdee9d2f68@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:36466 "EHLO
-        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934578AbdCXTEI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 15:04:08 -0400
-Received: by mail-pf0-f180.google.com with SMTP id o126so4647866pfb.3
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2017 12:04:07 -0700 (PDT)
-In-Reply-To: <57af6536-edf9-a2aa-40fe-a90338245d0e@gmail.com> (Heiner
-        Kallweit's message of "Wed, 15 Mar 2017 20:34:46 +0100")
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:36989 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935840AbdCXUBk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2017 16:01:40 -0400
+Received: by mail-wm0-f45.google.com with SMTP id n11so375777wma.0
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2017 13:01:39 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Heiner,
+Several host drivers contain identical code for determining the
+DMA direction. Therefore factor this out to the core.
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+v2:
+- use new function in more new places
 
-> Switch the driver from using a linearized bounce buffer to descriptor
-> chain mode. This drastically improves performance.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Heiner Kallweit (2):
+  mmc: core: add mmc_get_dma_dir
+  mmc: use new core function mmc_get_dma_dir
 
-I know this series needs a respin on top of your other cleanups, and
-I'll have a closer look at it then, but one comment for the respin...
+ drivers/mmc/host/android-goldfish.c | 10 ++--------
+ drivers/mmc/host/atmel-mci.c        | 25 +++++++++----------------
+ drivers/mmc/host/davinci_mmc.c      | 14 ++++----------
+ drivers/mmc/host/dw_mmc.c           | 14 +++-----------
+ drivers/mmc/host/jz4740_mmc.c       |  9 ++-------
+ drivers/mmc/host/mmc_spi.c          |  5 +----
+ drivers/mmc/host/mmci.c             | 20 ++++++++------------
+ drivers/mmc/host/moxart-mmc.c       |  8 +++-----
+ drivers/mmc/host/mtk-sd.c           |  8 ++------
+ drivers/mmc/host/mvsdio.c           | 11 +++++------
+ drivers/mmc/host/omap_hsmmc.c       | 17 ++++-------------
+ drivers/mmc/host/s3cmci.c           |  4 ++--
+ drivers/mmc/host/sdhci.c            |  9 +++------
+ drivers/mmc/host/sunxi-mmc.c        | 14 +++-----------
+ include/linux/mmc/host.h            |  6 ++++++
+ 15 files changed, 57 insertions(+), 117 deletions(-)
 
-[...]
+-- 
+2.12.0
 
->  static int meson_mmc_probe(struct platform_device *pdev)
-> @@ -764,15 +790,14 @@ static int meson_mmc_probe(struct platform_device *pdev)
->  
->  	mmc->caps |= MMC_CAP_CMD23;
->  	mmc->max_blk_count = CMD_CFG_LENGTH_MASK;
-> -	mmc->max_req_size = mmc->max_blk_count * mmc->max_blk_size;
-> -
-> -	/* data bounce buffer */
-> -	host->bounce_buf_size = mmc->max_req_size;
-> -	host->bounce_buf =
-> -		dma_alloc_coherent(host->dev, host->bounce_buf_size,
-> -				   &host->bounce_dma_addr, GFP_KERNEL);
-> -	if (host->bounce_buf == NULL) {
-> -		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
-> +	mmc->max_segs = PAGE_SIZE / sizeof(struct sd_emmc_desc);
-> +	mmc->max_seg_size = mmc->max_blk_count * mmc->max_blk_size;
-> +	mmc->max_req_size = mmc->max_seg_size * mmc->max_segs;
-> +
-> +	host->descs = dma_alloc_coherent(host->dev, PAGE_SIZE,
-> +					 &host->descs_dma_addr, GFP_KERNEL);
-> +	if (!host->descs) {
-> +		dev_err(host->dev, "Allocating descriptor DMA buffer failed\n");
->  		ret = -ENOMEM;
->  		goto err_div_clk;
->  	}
-> @@ -797,8 +822,8 @@ static int meson_mmc_remove(struct platform_device *pdev)
->  	/* disable interrupts */
->  	writel(0, host->regs + SD_EMMC_IRQ_EN);
->  
-> -	dma_free_coherent(host->dev, host->bounce_buf_size,
-> -			  host->bounce_buf, host->bounce_dma_addr);
-> +	dma_free_coherent(host->dev, PAGE_SIZE, host->descs,
-> +			  host->descs_dma_addr);
->  
->  	clk_disable_unprepare(host->cfg_div_clk);
->  	clk_disable_unprepare(host->core_clk);
-
-Please replace the usage of PAGE_SIZE above with a #define at the top of
-the driver for the max number of descriptors/segments.  Right now, if
-you wanted to change that, you'd have to change it in at least three
-places.
-
-Kevin
 
