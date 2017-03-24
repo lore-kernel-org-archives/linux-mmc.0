@@ -1,433 +1,61 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 2/2] mmc: use new core function mmc_get_dma_dir
-Date: Thu, 23 Mar 2017 22:27:21 +0100
-Message-ID: <21c2e340-99d9-a995-fea8-3cc3981124dc@gmail.com>
-References: <44d784c1-ab30-db59-9037-db8c87935b43@gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCHv2 1/1] mmc: core: export emmc revision via sysfs
+Date: Fri, 24 Mar 2017 09:59:52 +0900
+Message-ID: <CAH9JG2UYdhT3RevK+w_2OzFL9VBf4z1o112tofpyOzns2NJ8Sw@mail.gmail.com>
+References: <20170323001849.20332-1-jinqian@android.com> <CAPDyKFrU7tUoRxwkF_e9x4nF+7z8ufxxpckYx_W8yDkmG=797w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:33652 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751336AbdCWV1j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2017 17:27:39 -0400
-Received: by mail-wm0-f66.google.com with SMTP id n11so1829495wma.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2017 14:27:38 -0700 (PDT)
-In-Reply-To: <44d784c1-ab30-db59-9037-db8c87935b43@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrU7tUoRxwkF_e9x4nF+7z8ufxxpckYx_W8yDkmG=797w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Jin Qian <jinqian@android.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Uri Yanai <uri.yanai@sandisk.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Use new core function mmc_get_dma_dir().
+On Thu, Mar 23, 2017 at 6:03 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 23 March 2017 at 01:18, Jin Qian <jinqian@android.com> wrote:
+>> Extend sysfs to access ext_csd revision information.
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
- drivers/mmc/host/android-goldfish.c | 10 ++--------
- drivers/mmc/host/atmel-mci.c        |  6 ++----
- drivers/mmc/host/davinci_mmc.c      | 10 +++-------
- drivers/mmc/host/dw_mmc.c           | 14 +++-----------
- drivers/mmc/host/jz4740_mmc.c       |  9 ++-------
- drivers/mmc/host/mmc_spi.c          |  5 +----
- drivers/mmc/host/mtk-sd.c           |  8 ++------
- drivers/mmc/host/mvsdio.c           | 11 +++++------
- drivers/mmc/host/omap_hsmmc.c       | 17 ++++-------------
- drivers/mmc/host/s3cmci.c           |  4 ++--
- drivers/mmc/host/sdhci.c            |  9 +++------
- drivers/mmc/host/sunxi-mmc.c        | 14 +++-----------
- 12 files changed, 32 insertions(+), 85 deletions(-)
+it can be used secure erase feature for each revision. so it's helpful
+to support at sysfs node.
 
-diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-index 590a8a45..5b3e1c9b 100644
---- a/drivers/mmc/host/android-goldfish.c
-+++ b/drivers/mmc/host/android-goldfish.c
-@@ -212,10 +212,7 @@ static void goldfish_mmc_xfer_done(struct goldfish_mmc_host *host,
- 	if (host->dma_in_use) {
- 		enum dma_data_direction dma_data_dir;
- 
--		if (data->flags & MMC_DATA_WRITE)
--			dma_data_dir = DMA_TO_DEVICE;
--		else
--			dma_data_dir = DMA_FROM_DEVICE;
-+		dma_data_dir = mmc_get_dma_dir(data);
- 
- 		if (dma_data_dir == DMA_FROM_DEVICE) {
- 			/*
-@@ -390,10 +387,7 @@ static void goldfish_mmc_prepare_data(struct goldfish_mmc_host *host,
- 	 */
- 	sg_len = (data->blocks == 1) ? 1 : data->sg_len;
- 
--	if (data->flags & MMC_DATA_WRITE)
--		dma_data_dir = DMA_TO_DEVICE;
--	else
--		dma_data_dir = DMA_FROM_DEVICE;
-+	dma_data_dir = mmc_get_dma_dir(data);
- 
- 	host->sg_len = dma_map_sg(mmc_dev(host->mmc), data->sg,
- 				  sg_len, dma_data_dir);
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 0ad8ef56..1ad3b9cd 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -954,8 +954,7 @@ static void atmci_pdc_cleanup(struct atmel_mci *host)
- 	if (data)
- 		dma_unmap_sg(&host->pdev->dev,
- 				data->sg, data->sg_len,
--				((data->flags & MMC_DATA_WRITE)
--				 ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
-+				mmc_get_dma_dir(data));
- }
- 
- /*
-@@ -993,8 +992,7 @@ static void atmci_dma_cleanup(struct atmel_mci *host)
- 	if (data)
- 		dma_unmap_sg(host->dma.chan->device->dev,
- 				data->sg, data->sg_len,
--				((data->flags & MMC_DATA_WRITE)
--				 ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
-+				mmc_get_dma_dir(data));
- }
- 
- /*
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 1e2600da..9b1ecc12 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -478,18 +478,14 @@ static int mmc_davinci_start_dma_transfer(struct mmc_davinci_host *host,
- 	int ret = 0;
- 
- 	host->sg_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				((data->flags & MMC_DATA_WRITE)
--				? DMA_TO_DEVICE
--				: DMA_FROM_DEVICE));
-+				  mmc_get_dma_dir(data));
- 
- 	/* no individual DMA segment should need a partial FIFO */
- 	for (i = 0; i < host->sg_len; i++) {
- 		if (sg_dma_len(data->sg + i) & mask) {
- 			dma_unmap_sg(mmc_dev(host->mmc),
--					data->sg, data->sg_len,
--					(data->flags & MMC_DATA_WRITE)
--					? DMA_TO_DEVICE
--					: DMA_FROM_DEVICE);
-+				     data->sg, data->sg_len,
-+				     mmc_get_dma_dir(data));
- 			return -1;
- 		}
- 	}
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e165db05..249ded65 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -431,14 +431,6 @@ static void dw_mci_stop_dma(struct dw_mci *host)
- 	set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
- }
- 
--static int dw_mci_get_dma_dir(struct mmc_data *data)
--{
--	if (data->flags & MMC_DATA_WRITE)
--		return DMA_TO_DEVICE;
--	else
--		return DMA_FROM_DEVICE;
--}
--
- static void dw_mci_dma_cleanup(struct dw_mci *host)
- {
- 	struct mmc_data *data = host->data;
-@@ -447,7 +439,7 @@ static void dw_mci_dma_cleanup(struct dw_mci *host)
- 		dma_unmap_sg(host->dev,
- 			     data->sg,
- 			     data->sg_len,
--			     dw_mci_get_dma_dir(data));
-+			     mmc_get_dma_dir(data));
- 		data->host_cookie = COOKIE_UNMAPPED;
- 	}
- }
-@@ -903,7 +895,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
- 	sg_len = dma_map_sg(host->dev,
- 			    data->sg,
- 			    data->sg_len,
--			    dw_mci_get_dma_dir(data));
-+			    mmc_get_dma_dir(data));
- 	if (sg_len == 0)
- 		return -EINVAL;
- 
-@@ -943,7 +935,7 @@ static void dw_mci_post_req(struct mmc_host *mmc,
- 		dma_unmap_sg(slot->host->dev,
- 			     data->sg,
- 			     data->sg_len,
--			     dw_mci_get_dma_dir(data));
-+			     mmc_get_dma_dir(data));
- 	data->host_cookie = COOKIE_UNMAPPED;
- }
- 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 819ad329..57e254aa 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -200,11 +200,6 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
- 	return -ENODEV;
- }
- 
--static inline int jz4740_mmc_get_dma_dir(struct mmc_data *data)
--{
--	return (data->flags & MMC_DATA_READ) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
--}
--
- static inline struct dma_chan *jz4740_mmc_get_dma_chan(struct jz4740_mmc_host *host,
- 						       struct mmc_data *data)
- {
-@@ -215,7 +210,7 @@ static void jz4740_mmc_dma_unmap(struct jz4740_mmc_host *host,
- 				 struct mmc_data *data)
- {
- 	struct dma_chan *chan = jz4740_mmc_get_dma_chan(host, data);
--	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
-+	enum dma_data_direction dir = mmc_get_dma_dir(data);
- 
- 	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
- }
-@@ -227,7 +222,7 @@ static int jz4740_mmc_prepare_dma_data(struct jz4740_mmc_host *host,
- 				       struct dma_chan *chan)
- {
- 	struct jz4740_mmc_host_next *next_data = &host->next_data;
--	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
-+	enum dma_data_direction dir = mmc_get_dma_dir(data);
- 	int sg_len;
- 
- 	if (!next && data->host_cookie &&
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index e77d79c8..476e53d3 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -888,10 +888,7 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
- 	u32			clock_rate;
- 	unsigned long		timeout;
- 
--	if (data->flags & MMC_DATA_READ)
--		direction = DMA_FROM_DEVICE;
--	else
--		direction = DMA_TO_DEVICE;
-+	direction = mmc_get_dma_dir(data);
- 	mmc_spi_setup_data_message(host, multiple, direction);
- 	t = &host->t;
- 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index b235d8da..c8b0b6b9 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -462,11 +462,9 @@ static void msdc_prepare_data(struct msdc_host *host, struct mmc_request *mrq)
- 	struct mmc_data *data = mrq->data;
- 
- 	if (!(data->host_cookie & MSDC_PREPARE_FLAG)) {
--		bool read = (data->flags & MMC_DATA_READ) != 0;
--
- 		data->host_cookie |= MSDC_PREPARE_FLAG;
- 		data->sg_count = dma_map_sg(host->dev, data->sg, data->sg_len,
--					   read ? DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+					    mmc_get_dma_dir(data));
- 	}
- }
- 
-@@ -478,10 +476,8 @@ static void msdc_unprepare_data(struct msdc_host *host, struct mmc_request *mrq)
- 		return;
- 
- 	if (data->host_cookie & MSDC_PREPARE_FLAG) {
--		bool read = (data->flags & MMC_DATA_READ) != 0;
--
- 		dma_unmap_sg(host->dev, data->sg, data->sg_len,
--			     read ? DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+			     mmc_get_dma_dir(data));
- 		data->host_cookie &= ~MSDC_PREPARE_FLAG;
- 	}
- }
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 42296e55..58d74b8d 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -125,10 +125,10 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
- 		return 1;
- 	} else {
- 		dma_addr_t phys_addr;
--		int dma_dir = (data->flags & MMC_DATA_READ) ?
--			DMA_FROM_DEVICE : DMA_TO_DEVICE;
--		host->sg_frags = dma_map_sg(mmc_dev(host->mmc), data->sg,
--					    data->sg_len, dma_dir);
-+
-+		host->sg_frags = dma_map_sg(mmc_dev(host->mmc),
-+					    data->sg, data->sg_len,
-+					    mmc_get_dma_dir(data));
- 		phys_addr = sg_dma_address(data->sg);
- 		mvsd_write(MVSD_SYS_ADDR_LOW, (u32)phys_addr & 0xffff);
- 		mvsd_write(MVSD_SYS_ADDR_HI,  (u32)phys_addr >> 16);
-@@ -294,8 +294,7 @@ static u32 mvsd_finish_data(struct mvsd_host *host, struct mmc_data *data,
- 		host->pio_size = 0;
- 	} else {
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_frags,
--			     (data->flags & MMC_DATA_READ) ?
--				DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+			     mmc_get_dma_dir(data));
- 	}
- 
- 	if (err_status & MVSD_ERR_DATA_TIMEOUT)
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index a58bd653..bf64cf23 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -935,15 +935,6 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
- 	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
- }
- 
--static int
--omap_hsmmc_get_dma_dir(struct omap_hsmmc_host *host, struct mmc_data *data)
--{
--	if (data->flags & MMC_DATA_WRITE)
--		return DMA_TO_DEVICE;
--	else
--		return DMA_FROM_DEVICE;
--}
--
- static struct dma_chan *omap_hsmmc_get_dma_chan(struct omap_hsmmc_host *host,
- 	struct mmc_data *data)
- {
-@@ -1055,7 +1046,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
- 		dmaengine_terminate_all(chan);
- 		dma_unmap_sg(chan->device->dev,
- 			host->data->sg, host->data->sg_len,
--			omap_hsmmc_get_dma_dir(host, host->data));
-+			mmc_get_dma_dir(host->data));
- 
- 		host->data->host_cookie = 0;
- 	}
-@@ -1350,7 +1341,7 @@ static void omap_hsmmc_dma_callback(void *param)
- 	if (!data->host_cookie)
- 		dma_unmap_sg(chan->device->dev,
- 			     data->sg, data->sg_len,
--			     omap_hsmmc_get_dma_dir(host, data));
-+			     mmc_get_dma_dir(data));
- 
- 	req_in_progress = host->req_in_progress;
- 	host->dma_ch = -1;
-@@ -1383,7 +1374,7 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
- 	/* Check if next job is already prepared */
- 	if (next || data->host_cookie != host->next_data.cookie) {
- 		dma_len = dma_map_sg(chan->device->dev, data->sg, data->sg_len,
--				     omap_hsmmc_get_dma_dir(host, data));
-+				     mmc_get_dma_dir(data));
- 
- 	} else {
- 		dma_len = host->next_data.dma_len;
-@@ -1569,7 +1560,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, data);
- 
- 		dma_unmap_sg(c->device->dev, data->sg, data->sg_len,
--			     omap_hsmmc_get_dma_dir(host, data));
-+			     mmc_get_dma_dir(data));
- 		data->host_cookie = 0;
- 	}
- }
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 7a173f8c..5c9037eb 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1104,7 +1104,7 @@ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
- 		conf.direction = DMA_MEM_TO_DEV;
- 
- 	dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+		   mmc_get_dma_dir(data));
- 
- 	dmaengine_slave_config(host->dma, &conf);
- 	desc = dmaengine_prep_slave_sg(host->dma, data->sg, data->sg_len,
-@@ -1121,7 +1121,7 @@ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
- 
- unmap_exit:
- 	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+		     mmc_get_dma_dir(data));
- 	return -ENOMEM;
- }
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a33102fc..af8b60f3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -502,8 +502,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 		return data->sg_count;
- 
- 	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				data->flags & MMC_DATA_WRITE ?
--				DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+			      mmc_get_dma_dir(data));
- 
- 	if (sg_count == 0)
- 		return -ENOSPC;
-@@ -2213,8 +2212,7 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 
- 	if (data->host_cookie != COOKIE_UNMAPPED)
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			     data->flags & MMC_DATA_WRITE ?
--			       DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+			     mmc_get_dma_dir(data));
- 
- 	data->host_cookie = COOKIE_UNMAPPED;
- }
-@@ -2330,8 +2328,7 @@ static bool sdhci_request_done(struct sdhci_host *host)
- 
- 		if (data && data->host_cookie == COOKIE_MAPPED) {
- 			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				     (data->flags & MMC_DATA_READ) ?
--				     DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+				     mmc_get_dma_dir(data));
- 			data->host_cookie = COOKIE_UNMAPPED;
- 		}
- 	}
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 6ffcd283..ea415b0d 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -385,14 +385,6 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
- 	wmb();
- }
- 
--static enum dma_data_direction sunxi_mmc_get_dma_dir(struct mmc_data *data)
--{
--	if (data->flags & MMC_DATA_WRITE)
--		return DMA_TO_DEVICE;
--	else
--		return DMA_FROM_DEVICE;
--}
--
- static int sunxi_mmc_map_dma(struct sunxi_mmc_host *host,
- 			     struct mmc_data *data)
- {
-@@ -400,7 +392,7 @@ static int sunxi_mmc_map_dma(struct sunxi_mmc_host *host,
- 	struct scatterlist *sg;
- 
- 	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			     sunxi_mmc_get_dma_dir(data));
-+			     mmc_get_dma_dir(data));
- 	if (dma_len == 0) {
- 		dev_err(mmc_dev(host->mmc), "dma_map_sg failed\n");
- 		return -ENOMEM;
-@@ -551,7 +543,7 @@ static irqreturn_t sunxi_mmc_finalize_request(struct sunxi_mmc_host *host)
- 		rval |= SDXC_FIFO_RESET;
- 		mmc_writel(host, REG_GCTRL, rval);
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				     sunxi_mmc_get_dma_dir(data));
-+			     mmc_get_dma_dir(data));
- 	}
- 
- 	mmc_writel(host, REG_RINTR, 0xffff);
-@@ -1022,7 +1014,7 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 		if (data)
- 			dma_unmap_sg(mmc_dev(mmc), data->sg, data->sg_len,
--				     sunxi_mmc_get_dma_dir(data));
-+				     mmc_get_dma_dir(data));
- 
- 		dev_err(mmc_dev(mmc), "request already pending\n");
- 		mrq->cmd->error = -EBUSY;
--- 
-2.12.0
-
-
+Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+>>
+>> Signed-off-by: Jin Qian <jinqian@android.com>
+>> ---
+>>  drivers/mmc/core/mmc.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 7fd722868875..08c62c9bec48 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -779,6 +779,7 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>>  MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
+>> +MMC_DEV_ATTR(rev, "0x%x\n", card->ext_csd.rev);
+>
+> We have "product revision" in CID, we have "CSD structure/spec
+> version" in CSD and some other related in EXT_CSD.
+>
+> To make it clear what "rev" is about, I suggest we follow Jaehoon
+> suggestions. Let's name it "ext_csd_rev".
+>
+>>  MMC_DEV_ATTR(pre_eol_info, "%02x\n", card->ext_csd.pre_eol_info);
+>>  MMC_DEV_ATTR(life_time, "0x%02x 0x%02x\n",
+>>         card->ext_csd.device_life_time_est_typ_a,
+>> @@ -836,6 +837,7 @@ static struct attribute *mmc_std_attrs[] = {
+>>         &dev_attr_name.attr,
+>>         &dev_attr_oemid.attr,
+>>         &dev_attr_prv.attr,
+>> +       &dev_attr_rev.attr,
+>>         &dev_attr_pre_eol_info.attr,
+>>         &dev_attr_life_time.attr,
+>>         &dev_attr_serial.attr,
+>> --
+>> 2.12.1.500.gab5fba24ee-goog
+>>
+>
+> Kind regards
+> Uffe
