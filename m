@@ -1,40 +1,33 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH] mmc: bcm2835: Fix possible NULL ptr dereference in bcm2835_request
-Date: Sat, 25 Mar 2017 13:17:00 +0000
-Message-ID: <1490447820-751-1-git-send-email-stefan.wahren@i2se.com>
+From: Chris Moore <moore@free.fr>
+Subject: Re: [PATCH v2 1/4] mmc: meson-gx: use bitfield macros
+Date: Sat, 25 Mar 2017 15:16:11 +0100
+Message-ID: <22cd1b77-41b7-3283-f184-5bb916bdb52f@free.fr>
+References: <aae9e7c7-d8a2-72b1-22f7-f0ad513d4667@gmail.com>
+ <ed2aa5cb-4cac-11b6-1be4-5d0e42001c45@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([217.72.192.73]:53291 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750994AbdCYNSC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Mar 2017 09:18:02 -0400
+Received: from smtp4-g21.free.fr ([212.27.42.4]:50868 "EHLO smtp4-g21.free.fr"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750903AbdCYOQS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 25 Mar 2017 10:16:18 -0400
+In-Reply-To: <ed2aa5cb-4cac-11b6-1be4-5d0e42001c45@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Dan Carpenter <dan.carpenter@oracle.com>, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>
+To: Heiner Kallweit <hkallweit1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: linux-amlogic@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This fixes a NULL pointer dereference in case of a MMC request with a
-set block count command and no data.
+Hi,
 
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
----
- drivers/mmc/host/bcm2835.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Le 25/03/2017 à 11:23, Heiner Kallweit a écrit :
+> Use GENMASK consistently for all bit masks and switch to using the
+> bitfield macros GET_FIELD and PREP_FIELD. This hides parts of the
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 7d1b0db..1f343a4 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1200,7 +1200,8 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
- 
--	host->use_sbc = !!mrq->sbc && (host->mrq->data->flags & MMC_DATA_READ);
-+	host->use_sbc = !!mrq->sbc && host->mrq->data &&
-+			(host->mrq->data->flags & MMC_DATA_READ);
- 	if (host->use_sbc) {
- 		if (bcm2835_send_command(host, mrq->sbc)) {
- 			if (!host->use_busy)
--- 
-1.7.9.5
+Nitpick:
+s/GET_FIELD/FIELD_GET
+s/PREP_FIELD/FIELD_PREP
 
+> complexity of dealing with bit fields.
+
+Chris
