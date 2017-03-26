@@ -1,45 +1,60 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH v2 resend 1/2] mmc: sdhci-acpi: Remove unneeded acpi_bus_get_status() call
-Date: Sun, 26 Mar 2017 13:15:08 +0200
-Message-ID: <20170326111509.1474-1-hdegoede@redhat.com>
+Subject: [PATCH v2 resend 2/2] mmc: sdhci-acpi: Sync quirks with sdhci_intel_byt_* from sdhci-pci-core.c
+Date: Sun, 26 Mar 2017 13:15:09 +0200
+Message-ID: <20170326111509.1474-2-hdegoede@redhat.com>
+References: <20170326111509.1474-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38558 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35942 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751264AbdCZLWU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 26 Mar 2017 07:22:20 -0400
+        id S1751264AbdCZLWM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 26 Mar 2017 07:22:12 -0400
+In-Reply-To: <20170326111509.1474-1-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
 
-The acpi-subsys already calls acpi_bus_get_status() and checks that
-device->status.present is set before even registering the platform_device
-so out probe function will never get called if device->status.present is
-false and there is no need for this check.
+The sdhci_intel_byt_* and the non _qcom_ sdhci_acpi_slot_ entries in
+sdhci-acpi.c are for the same mmc host in either pci or acpi mapped
+mode, so the flags should be the same.
+
+The syncing removes the SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk from
+sdhci_acpi_slot_int_sdio, this quirk is a nop as this slot also has
+MMC_CAP_NONREMOVABLE, and adds SDHCI_QUIRK2_PRESET_VALUE_BROKEN to
+sdhci_acpi_slot_int_sdio and sdhci_acpi_slot_int_sd. Note that
+sdhci_acpi_slot_int_mmc already has the SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+quirk, which is another indication that the others need it too.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
-Changes in v2:
--This is a new patch replacing "mmc: sdhci-acpi: Check device status
- before calling fix_up_power()"
----
- drivers/mmc/host/sdhci-acpi.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sdhci-acpi.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 9dcb704..ae00e4c 100644
+index ae00e4c..9fd8d7a 100644
 --- a/drivers/mmc/host/sdhci-acpi.c
 +++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -398,9 +398,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 		if (child->status.present && child->status.enabled)
- 			acpi_device_fix_up_power(child);
+@@ -286,9 +286,9 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ };
  
--	if (acpi_bus_get_status(device) || !device->status.present)
--		return -ENODEV;
--
- 	if (sdhci_acpi_byt_defer(dev))
- 		return -EPROBE_DEFER;
- 
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+-	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+-		   SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+-	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
++	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
+ 		   MMC_CAP_WAIT_WHILE_BUSY,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+@@ -301,6 +301,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
+ 		   SDHCI_ACPI_RUNTIME_PM,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
++		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 		   SDHCI_QUIRK2_STOP_WITH_TC,
+ 	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
+ 	.probe_slot	= sdhci_acpi_sd_probe_slot,
 -- 
 2.9.3
 
