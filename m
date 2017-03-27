@@ -1,64 +1,94 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 1/2] mmc: core: add functions mmc_dma_(un)map_sg
-Date: Mon, 27 Mar 2017 20:25:11 +0200
-Message-ID: <11e5aed4-c3ca-0d04-484a-9387302eaff2@gmail.com>
+Subject: [PATCH 1/2] mmc: meson-gx: factor out setting block size
+Date: Mon, 27 Mar 2017 21:57:11 +0200
+Message-ID: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:32776 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751564AbdC0Scw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2017 14:32:52 -0400
-Received: by mail-wr0-f193.google.com with SMTP id 20so15757722wrx.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2017 11:32:46 -0700 (PDT)
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33408 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751651AbdC0T5V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2017 15:57:21 -0400
+Received: by mail-wr0-f194.google.com with SMTP id 20so16415966wrx.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2017 12:57:20 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-After the recent introduction of mmc_get_dma_dir next step is to
-factor out the typical usage of dma_(un)map_sg to the core.
-Several host drivers use dma_(un)map_sg with these parameters:
-data->sg, data->sg_len, mmc_get_dma_dir(data)
-Therefore factor this out to the core and introduce
-mmc_dma_(un)map_sg.
+Factor out setting the block size. This also contributes to reducing
+complexity of function meson_mmc_start_cmd.
 
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 ---
- include/linux/mmc/host.h | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
+ drivers/mmc/host/meson-gx-mmc.c | 42 ++++++++++++++++++++++++++---------------
+ 1 file changed, 27 insertions(+), 15 deletions(-)
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 21385ac0..8d28a600 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -17,7 +17,7 @@
- #include <linux/mmc/core.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/pm.h>
--#include <linux/dma-direction.h>
-+#include <linux/dma-mapping.h>
- 
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -505,6 +505,16 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
- 	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index f5dd5cc7..0de32008 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -431,12 +431,36 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+ 	mmc_request_done(host->mmc, mrq);
  }
  
-+static inline int mmc_dma_map_sg(struct device *dev, struct mmc_data *data)
++static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
 +{
-+	return dma_map_sg(dev, data->sg, data->sg_len, mmc_get_dma_dir(data));
++	struct meson_host *host = mmc_priv(mmc);
++	u32 cfg, blksz_old;
++
++	cfg = readl(host->regs + SD_EMMC_CFG);
++	blksz_old = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
++
++	if (!is_power_of_2(blksz))
++		dev_err(host->dev, "blksz %u is not a power of 2\n", blksz);
++
++	blksz = ilog2(blksz);
++
++	/* check if block-size matches, if not update */
++	if (blksz == blksz_old)
++		return;
++
++	dev_dbg(host->dev, "%s: update blk_len %d -> %d\n", __func__,
++		blksz_old, blksz);
++
++	cfg &= ~CFG_BLK_LEN_MASK;
++	cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blksz);
++	writel(cfg, host->regs + SD_EMMC_CFG);
 +}
 +
-+static inline void mmc_dma_unmap_sg(struct device *dev, struct mmc_data *data)
-+{
-+	dma_unmap_sg(dev, data->sg, data->sg_len, mmc_get_dma_dir(data));
-+}
-+
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+ 	struct mmc_data *data = cmd->data;
+-	u32 cfg, cmd_cfg = 0, cmd_data = 0;
+-	u8 blk_len;
++	u32 cmd_cfg = 0, cmd_data = 0;
+ 	unsigned int xfer_bytes = 0;
  
+ 	/* Setup descriptors */
+@@ -470,19 +494,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 			cmd_cfg |= CMD_CFG_BLOCK_MODE;
+ 			cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK,
+ 					      data->blocks);
+-
+-			/* check if block-size matches, if not update */
+-			cfg = readl(host->regs + SD_EMMC_CFG);
+-			blk_len = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
+-			if (blk_len != ilog2(data->blksz)) {
+-				dev_dbg(host->dev, "%s: update blk_len %d -> %d\n",
+-					__func__, blk_len,
+-					ilog2(data->blksz));
+-				blk_len = ilog2(data->blksz);
+-				cfg &= ~CFG_BLK_LEN_MASK;
+-				cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blk_len);
+-				writel(cfg, host->regs + SD_EMMC_CFG);
+-			}
++			meson_mmc_set_blksz(mmc, data->blksz);
+ 		} else {
+ 			cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK, data->blksz);
+ 		}
 -- 
 2.12.1
 
