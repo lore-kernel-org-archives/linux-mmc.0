@@ -1,72 +1,157 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: use new core function mmc_get_dma_dir
-Date: Sun, 26 Mar 2017 20:37:42 +0200
-Message-ID: <64902537-a4dc-42dd-3be8-aa0f4acd3de7@gmail.com>
-References: <201703262329.HGjB85Id%fengguang.wu@intel.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH] mmc: core: Do not hold re-tuning during CMD6 commands
+Date: Mon, 27 Mar 2017 09:35:00 +0800
+Message-ID: <1490578500.22814.31.camel@mhfsdcap03>
+References: <1490336341-22292-1-git-send-email-chaotian.jing@mediatek.com>
+         <1490336341-22292-2-git-send-email-chaotian.jing@mediatek.com>
+         <13a83728-0031-5683-c371-4b517df32299@intel.com>
+         <1490344369.22814.10.camel@mhfsdcap03>
+         <03d54000-9ced-1b31-df80-d254f02433db@intel.com>
+         <1490348427.22814.19.camel@mhfsdcap03>
+         <CAPDyKFoo5sJ2XtjyiW1DLjhFdJySbDK7+N05vrKpeiZsp25qrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36410 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751465AbdCZTJf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Mar 2017 15:09:35 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u1so6988960wra.3
-        for <linux-mmc@vger.kernel.org>; Sun, 26 Mar 2017 12:09:34 -0700 (PDT)
-In-Reply-To: <201703262329.HGjB85Id%fengguang.wu@intel.com>
+Received: from mailgw02.mediatek.com ([218.249.47.111]:46765 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751510AbdC0BfH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Mar 2017 21:35:07 -0400
+In-Reply-To: <CAPDyKFoo5sJ2XtjyiW1DLjhFdJySbDK7+N05vrKpeiZsp25qrA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kbuild test robot <lkp@intel.com>
-Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Matthias Brugger <matthias.bgg@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>
 
-Am 26.03.2017 um 17:37 schrieb kbuild test robot:
-> Hi Heiner,
+On Fri, 2017-03-24 at 11:49 +0100, Ulf Hansson wrote:
+> On 24 March 2017 at 10:40, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> > On Fri, 2017-03-24 at 11:19 +0200, Adrian Hunter wrote:
+> >> On 24/03/17 10:32, Chaotian Jing wrote:
+> >> > On Fri, 2017-03-24 at 09:52 +0200, Adrian Hunter wrote:
+> >> >> On 24/03/17 08:19, Chaotian Jing wrote:
+> >> >>> this patch is refine for 'commit c6dbab9cb58f ("mmc: core: Hold re-tuning
+> >> >>> during switch commands")'
+> >> >>> Since it has 3 retries at max for CMD6, if the first CMD6 got CRC error,
+> >> >>> then should do re-tune before the next CMD6 was sent.
+> >> >>>
+> >> >>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> >> >>> ---
+> >> >>>  drivers/mmc/core/mmc_ops.c |    3 +--
+> >> >>>  1 file changed, 1 insertion(+), 2 deletions(-)
+> >> >>>
+> >> >>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> >> >>> index fe80f26..6931927 100644
+> >> >>> --- a/drivers/mmc/core/mmc_ops.c
+> >> >>> +++ b/drivers/mmc/core/mmc_ops.c
+> >> >>> @@ -534,8 +534,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> >> >>>   bool use_r1b_resp = use_busy_signal;
+> >> >>>   unsigned char old_timing = host->ios.timing;
+> >> >>>
+> >> >>> - mmc_retune_hold(host);
+> >> >>> -
+> >> >>>   /*
+> >> >>>    * If the cmd timeout and the max_busy_timeout of the host are both
+> >> >>>    * specified, let's validate them. A failure means we need to prevent
+> >> >>> @@ -567,6 +565,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> >> >>>           cmd.sanitize_busy = true;
+> >> >>>
+> >> >>>   err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+> >> >>> + mmc_retune_hold(host);
+> >> >>
+> >> >> That is not how mmc_retune_hold() works, you need mmc_retune_hold_now() as
+> >> >> it is here:
+> >> >>
+> >> >>    https://marc.info/?l=linux-mmc&m=148940903816582
+> >> >>
+> >> >> But using "retries" with commands that have busy-waiting on the data line
+> >> >> doesn't make much sense anyway.  Particularly with CRC errors, I would
+> >> >> expect the card is actually busily doing the switch and we need only to wait
+> >> >> for it.  The same can be true for timeout errors.  For some CMD6 we might
+> >> >> need to send CMD12 if the card is busy after an error.  I would prefer an
+> >> >> explicit attempt at recovery from CMD6 errors.
+> >> >>
+> >> >
+> >> > It's the host driver's responsibility to ensure card is not in busy
+> >> > state before issue the next R1B command, or the MMC core layer needs do
+> >> > extra check/waiting before issue a R1B command.
+> >>
+> >> Better to deal with cards stuck in busy from the places where busy-waiting
+> >> is expected.
+> >>
+> > Yes, if a R1B command got response CRC error, we can do busy-waiting in
+> > the error hander funtion(mmc_wait_for_req_done())
 > 
-> [auto build test ERROR on linus/master]
-> [also build test ERROR on v4.11-rc3 next-20170324]
-> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+> That would introduce too big changes and I am sure it will cause/hide
+> other problems.
 > 
-> url:    https://github.com/0day-ci/linux/commits/Heiner-Kallweit/mmc-factor-out-getting-dma-direction-from-host-drivers/20170326-215045
-> config: arm-at91_dt_defconfig (attached as .config)
-> compiler: arm-linux-gnueabi-gcc (Debian 6.1.1-9) 6.1.1 20160705
-> reproduce:
->         wget https://raw.githubusercontent.com/01org/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
->         chmod +x ~/bin/make.cross
->         # save the attached .config to linux build tree
->         make.cross ARCH=arm 
+> If there is a problem in __mmc_switch(), let's try to fix it there first.
 > 
-> All errors (new ones prefixed by >>):
+Anyway, it is a bug of retry 3 times at max but without check current
+card status and ensure it's in transfer state before next retry.
+> >> > I think the purpose of "re-tune" is trying to cover particular case(eg.
+> >> > voltage fluctuate or EMI or some glitch of host/device which caused CRC
+> >> > error)
+> >>
+> >> No, re-tuning is to compensate for drift caused primarily by temperature change.
+> >>
+> > Yes, by JEDEC spec, temperature change cause timing drift of EMMC
+> > device, but, as you mentioned, maybe I have a hardware problem of host,
+> > but needs Software to cover it. so that we are doing our best to do
+> > re-tune if got CRC error. if could recover it, then  it's better than
+> > system hung.
 > 
->    drivers/mmc/host/atmel-mci.c: In function 'atmci_prepare_data_pdc':
->>> drivers/mmc/host/atmel-mci.c:1134:6: error: 'dir' undeclared (first use in this function)
->        ((dir == DMA_FROM_DEVICE) ? XFER_RECEIVE : XFER_TRANSMIT));
->          ^~~
-I removed dir and missed to change this statement. I will send a fixed version of the patch set.
+> Exactly in what cases do you get CRC errors for CMD6. We need a full
+> cmd log to understand and to help.
+> 
+> >> > error) , but in such cases, too many cases are disable re-tune function
+> >> > by mmc_retune_hold(), for example, in this case, if a response CRC error
+> >> > got then we never have chance to recover it. then cause system cannot
+> >> > access emmc or suspend/resume fail.
+> >>
+> >> Maybe you have a hardware problem.
+> 
+> There is no way I am going to accept patches touching this part of the
+> mmc core, without providing real evidence for how it solves a problem.
+> To me, it seems like you are applying a workaround for another issue.
+> 
+> Again, try to provide us with some more data and logs, then perhaps we
+> can help narrow down the issues.
+> 
+> Kind regards
+> Uffe
+
+Below is the fail log of suspend fail.
+the normal command tune result should be 0xffffff9ff, but some time, we
+get the tune result of 0xffffffff, then we choose the 10 as the best
+tune parameter, which is not stable.
+I know that we should focus on why we get the result of 0xffffffff, this
+may be result of device/host timing shifting while tuning. but what I
+want to do is that when get a response CRC error, we can do re-tune to
+recovery it, but not only return the -84 and cause suspend fail
+eventually. if all hardware are perfect, then we don't need the re-tune
+mechanism.
+
+as Adrian's comment, if temperature change at here caused CMD6 response
+CRC error, then how to recovery it ?
+
+[  129.106622]  (0)[96:mmcqd/0]mtk-msdc 11230000.mmc: phase:
+[map:fffff9ff] [maxlen:21] [final:21] -->current result is OK and 21 is
+stable
+[  129.109404]  (0)[96:mmcqd/0]mtk-msdc 11230000.mmc: phase:
+[map:ffffe03f] [maxlen:19] [final:22]
+--------------------> below is next resume and re-init card:
+[  129.778454]  (0)[96:mmcqd/0]mtk-msdc 11230000.mmc: Regulator set
+error -22: 3300000 - 3300000
+[  130.016987]  (0)[96:mmcqd/0]mtk-msdc 11230000.mmc: phase:
+[map:ffffffff] [maxlen:32] [final:10] --> this result if not OK and 10
+is not stable.
+[  130.019556]  (0)[96:mmcqd/0]mtk-msdc 11230000.mmc: phase:
+[map:ffffc03f] [maxlen:18] [final:23]
+[  130.124279]  (1)[1248:system_server]mmc0: cache flush error -84 
+[  130.125058]  (1)[1248:system_server]dpm_run_callback():
+mmc_bus_suspend+0x0/0x4c returns -84 
+[  130.126104]  (1)[1248:system_server]PM: Device mmc0:0001 failed to
+suspend: error -84 
 
 
->    drivers/mmc/host/atmel-mci.c:1134:6: note: each undeclared identifier is reported only once for each function it appears in
-> 
-> vim +/dir +1134 drivers/mmc/host/atmel-mci.c
-> 
-> 24011f34 Ludovic Desroches 2012-05-16  1128  			for (i = 0; i < host->data_size; i++)
-> 24011f34 Ludovic Desroches 2012-05-16  1129  				host->buffer[i] = swab32(host->buffer[i]);
-> 24011f34 Ludovic Desroches 2012-05-16  1130  	}
-> 7a90dcc2 Ludovic Desroches 2012-05-16  1131  
-> 796211b7 Ludovic Desroches 2011-08-11  1132  	if (host->data_size)
-> 796211b7 Ludovic Desroches 2011-08-11  1133  		atmci_pdc_set_both_buf(host,
-> 796211b7 Ludovic Desroches 2011-08-11 @1134  			((dir == DMA_FROM_DEVICE) ? XFER_RECEIVE : XFER_TRANSMIT));
-> 796211b7 Ludovic Desroches 2011-08-11  1135  
-> 796211b7 Ludovic Desroches 2011-08-11  1136  	return iflags;
-> 796211b7 Ludovic Desroches 2011-08-11  1137  }
-> 
-> :::::: The code at line 1134 was first introduced by commit
-> :::::: 796211b7953bd1036670359f31cd97f309322107 mmc: atmel-mci: add pdc support and runtime capabilities detection
-> 
-> :::::: TO: Ludovic Desroches <ludovic.desroches@atmel.com>
-> :::::: CC: Chris Ball <cjb@laptop.org>
-> 
-> ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
-> 
 
