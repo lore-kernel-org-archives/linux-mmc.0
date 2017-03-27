@@ -1,151 +1,93 @@
 From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [v3, 2/7] mmc: sdhci-of-esdhc: add support for signal voltage switch
-Date: Mon, 27 Mar 2017 15:49:37 +0800
-Message-ID: <1490600982-5410-3-git-send-email-yangbo.lu@nxp.com>
+Subject: [v3, 4/7] mmc: sdhci: Control the delay between tuning commands
+Date: Mon, 27 Mar 2017 15:49:39 +0800
+Message-ID: <1490600982-5410-5-git-send-email-yangbo.lu@nxp.com>
 References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0072.outbound.protection.outlook.com ([104.47.40.72]:20544
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+Received: from mail-sn1nam02on0040.outbound.protection.outlook.com ([104.47.36.40]:47115
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752064AbdC0IEi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 27 Mar 2017 04:04:38 -0400
+        id S1752067AbdC0IEq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Mar 2017 04:04:46 -0400
 In-Reply-To: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
 Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-eSDHC supports signal voltage switch from 3.3v to 1.8v by
-eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
-signal SDHC_VS, and there must be a control circuit out of eSDHC
-to change the signal voltage according to SDHC_VS output signal.
+From: Adrian Hunter <adrian.hunter@intel.com>
 
+The delay between tuning commands for SD cards is not part of the
+specification. A driver that needs it probably needs it for eMMC
+too, whereas most drivers would probably like to set it to 0. Make
+it a host member (host->tuning_delay) that defaults to the existing
+behaviour. Drivers can set it to zero to eliminate the delay, or
+set it to a positive value to always have a delay.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
 Changes for v2:
-	- Used Adrain's method to support voltage switching:
-          host->mmc_host_ops.start_signal_voltage_switch =
-                     esdhc_signal_voltage_switch;
+	- None
 Changes for v3:
-	- Put .start_signal_voltage_switch assigning after IS_ERR(host) check.
+	- Used a host member for tuning delay instead of a quirk.(Adrian's patch)
+	- Addressed warning in checkpatch.
 ---
- drivers/mmc/host/sdhci-esdhc.h    |  1 +
- drivers/mmc/host/sdhci-of-esdhc.c | 74 +++++++++++++++++++++++++++++++++++++++
- 2 files changed, 75 insertions(+)
+ drivers/mmc/host/sdhci.c | 11 ++++++++---
+ drivers/mmc/host/sdhci.h |  2 ++
+ 2 files changed, 10 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 5343fc0..6869567 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -37,6 +37,7 @@
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0d4485d..ffd1607 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2100,9 +2100,9 @@ static void __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 			break;
+ 		}
  
- /* Protocol Control Register */
- #define ESDHC_PROCTL			0x28
-+#define ESDHC_VOLT_SEL			0x00000400
- #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
- #define ESDHC_CTRL_8BITBUS		(0x2 << 1)
- #define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 7ce1caf..a70499a 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -16,6 +16,7 @@
- #include <linux/err.h>
- #include <linux/io.h>
- #include <linux/of.h>
-+#include <linux/of_address.h>
- #include <linux/delay.h>
- #include <linux/module.h>
- #include <linux/sys_soc.h>
-@@ -559,6 +560,76 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+-		/* eMMC spec does not require a delay between tuning cycles */
+-		if (opcode == MMC_SEND_TUNING_BLOCK)
+-			mdelay(1);
++		/* Spec does not require a delay between tuning cycles */
++		if (host->tuning_delay > 0)
++			mdelay(host->tuning_delay);
+ 	}
+ 
+ 	pr_info("%s: Tuning failed, falling back to fixed sampling clock\n",
+@@ -2164,6 +2164,9 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	host->mmc->retune_period = tuning_count;
+ 
++	if (host->tuning_delay < 0)
++		host->tuning_delay = opcode == MMC_SEND_TUNING_BLOCK;
++
+ 	sdhci_start_tuning(host);
+ 
+ 	__sdhci_execute_tuning(host, opcode);
+@@ -3108,6 +3111,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 	host->cqe_ier     = SDHCI_CQE_INT_MASK;
+ 	host->cqe_err_ier = SDHCI_CQE_INT_ERR_MASK;
+ 
++	host->tuning_delay = -1;
++
+ 	return host;
  }
  
-+/* The SCFG, Supplemental Configuration Unit, provides SoC specific
-+ * configuration and status registers for the device. There is a
-+ * SDHC IO VSEL control register on SCFG for some platforms. It's
-+ * used to support SDHC IO voltage switching.
-+ */
-+static const struct of_device_id scfg_device_ids[] = {
-+	{ .compatible = "fsl,t1040-scfg", },
-+	{ .compatible = "fsl,ls1012a-scfg", },
-+	{ .compatible = "fsl,ls1046a-scfg", },
-+	{}
-+};
-+
-+/* SDHC IO VSEL control register definition */
-+#define SCFG_SDHCIOVSELCR	0x408
-+#define SDHCIOVSELCR_TGLEN	0x80000000
-+#define SDHCIOVSELCR_VSELVAL	0x60000000
-+#define SDHCIOVSELCR_SDHC_VS	0x00000001
-+
-+static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
-+				       struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct device_node *scfg_node;
-+	void __iomem *scfg_base = NULL;
-+	u32 sdhciovselcr;
-+	u32 val;
-+
-+	/*
-+	 * Signal Voltage Switching is only applicable for Host Controllers
-+	 * v3.00 and above.
-+	 */
-+	if (host->version < SDHCI_SPEC_300)
-+		return 0;
-+
-+	val = sdhci_readl(host, ESDHC_PROCTL);
-+
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		val &= ~ESDHC_VOLT_SEL;
-+		sdhci_writel(host, val, ESDHC_PROCTL);
-+		return 0;
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		scfg_node = of_find_matching_node(NULL, scfg_device_ids);
-+		if (scfg_node)
-+			scfg_base = of_iomap(scfg_node, 0);
-+		if (scfg_base) {
-+			sdhciovselcr = SDHCIOVSELCR_TGLEN |
-+				       SDHCIOVSELCR_VSELVAL;
-+			iowrite32be(sdhciovselcr,
-+				scfg_base + SCFG_SDHCIOVSELCR);
-+
-+			val |= ESDHC_VOLT_SEL;
-+			sdhci_writel(host, val, ESDHC_PROCTL);
-+			mdelay(5);
-+
-+			sdhciovselcr = SDHCIOVSELCR_TGLEN |
-+				       SDHCIOVSELCR_SDHC_VS;
-+			iowrite32be(sdhciovselcr,
-+				scfg_base + SCFG_SDHCIOVSELCR);
-+			iounmap(scfg_base);
-+		} else {
-+			val |= ESDHC_VOLT_SEL;
-+			sdhci_writel(host, val, ESDHC_PROCTL);
-+		}
-+		return 0;
-+	default:
-+		return 0;
-+	}
-+}
-+
- #ifdef CONFIG_PM_SLEEP
- static u32 esdhc_proctl;
- static int esdhc_of_suspend(struct device *dev)
-@@ -714,6 +785,9 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index fdb5d7e..2407960 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -538,6 +538,8 @@ struct sdhci_host {
+ #define SDHCI_TUNING_MODE_1	0
+ #define SDHCI_TUNING_MODE_2	1
+ #define SDHCI_TUNING_MODE_3	2
++	/* Delay (ms) between tuning commands */
++	int			tuning_delay;
  
-+	host->mmc_host_ops.start_signal_voltage_switch =
-+		esdhc_signal_voltage_switch;
-+
- 	esdhc_init(pdev, host);
- 
- 	sdhci_get_of_property(pdev);
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
 -- 
 2.1.0.27.g96db324
 
