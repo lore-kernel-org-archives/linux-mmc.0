@@ -1,84 +1,74 @@
-From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH 2/2] mmc: meson-gx: factor out setting response configuration
- bits
-Date: Mon, 27 Mar 2017 22:02:32 +0200
-Message-ID: <aeb1c108-59c9-664d-ad5d-c28d95176f36@gmail.com>
-References: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: add functions mmc_dma_(un)map_sg
+Date: Tue, 28 Mar 2017 09:18:03 +0200
+Message-ID: <CAPDyKFqDpLe5FgYEC90Pfk_LNy3jWos+_Dpqbi7bMM_60TUQ0Q@mail.gmail.com>
+References: <11e5aed4-c3ca-0d04-484a-9387302eaff2@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33636 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751183AbdC0ULa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2017 16:11:30 -0400
-Received: by mail-wr0-f193.google.com with SMTP id 20so16525312wrx.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2017 13:11:28 -0700 (PDT)
-In-Reply-To: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34004 "EHLO
+        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754313AbdC1HSo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Mar 2017 03:18:44 -0400
+Received: by mail-vk0-f46.google.com with SMTP id z204so78371759vkd.1
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Mar 2017 00:18:04 -0700 (PDT)
+In-Reply-To: <11e5aed4-c3ca-0d04-484a-9387302eaff2@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Factor out setting the response configuration bits thus further reducing
-complexity of function meson_mmc_start_cmd.
+On 27 March 2017 at 20:25, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+> After the recent introduction of mmc_get_dma_dir next step is to
+> factor out the typical usage of dma_(un)map_sg to the core.
+> Several host drivers use dma_(un)map_sg with these parameters:
+> data->sg, data->sg_len, mmc_get_dma_dir(data)
+> Therefore factor this out to the core and introduce
+> mmc_dma_(un)map_sg.
+>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> ---
+>  include/linux/mmc/host.h | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 21385ac0..8d28a600 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -17,7 +17,7 @@
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/pm.h>
+> -#include <linux/dma-direction.h>
+> +#include <linux/dma-mapping.h>
+>
+>  struct mmc_ios {
+>         unsigned int    clock;                  /* clock rate */
+> @@ -505,6 +505,16 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
+>         return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
+>  }
+>
+> +static inline int mmc_dma_map_sg(struct device *dev, struct mmc_data *data)
+> +{
+> +       return dma_map_sg(dev, data->sg, data->sg_len, mmc_get_dma_dir(data));
+> +}
+> +
+> +static inline void mmc_dma_unmap_sg(struct device *dev, struct mmc_data *data)
+> +{
+> +       dma_unmap_sg(dev, data->sg, data->sg_len, mmc_get_dma_dir(data));
+> +}
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 32 ++++++++++++++++++--------------
- 1 file changed, 18 insertions(+), 14 deletions(-)
+These seems a bit silly as they are just wrapper functions. To me this
+doesn't improve the code, but rather makes it harder to understand
+what goes on.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 0de32008..0036680b 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -456,6 +456,23 @@ static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
- 	writel(cfg, host->regs + SD_EMMC_CFG);
- }
- 
-+static void meson_mmc_set_response_bits(struct mmc_command *cmd, u32 *cmd_cfg)
-+{
-+	if (cmd->flags & MMC_RSP_PRESENT) {
-+		if (cmd->flags & MMC_RSP_136)
-+			*cmd_cfg |= CMD_CFG_RESP_128;
-+		*cmd_cfg |= CMD_CFG_RESP_NUM;
-+
-+		if (!(cmd->flags & MMC_RSP_CRC))
-+			*cmd_cfg |= CMD_CFG_RESP_NOCRC;
-+
-+		if (cmd->flags & MMC_RSP_BUSY)
-+			*cmd_cfg |= CMD_CFG_R1B;
-+	} else {
-+		*cmd_cfg |= CMD_CFG_NO_RESP;
-+	}
-+}
-+
- static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- {
- 	struct meson_host *host = mmc_priv(mmc);
-@@ -469,20 +486,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
- 	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
- 
--	/* Response */
--	if (cmd->flags & MMC_RSP_PRESENT) {
--		if (cmd->flags & MMC_RSP_136)
--			cmd_cfg |= CMD_CFG_RESP_128;
--		cmd_cfg |= CMD_CFG_RESP_NUM;
--
--		if (!(cmd->flags & MMC_RSP_CRC))
--			cmd_cfg |= CMD_CFG_RESP_NOCRC;
--
--		if (cmd->flags & MMC_RSP_BUSY)
--			cmd_cfg |= CMD_CFG_R1B;
--	} else {
--		cmd_cfg |= CMD_CFG_NO_RESP;
--	}
-+	meson_mmc_set_response_bits(cmd, &cmd_cfg);
- 
- 	/* data? */
- 	if (data) {
--- 
-2.12.1
+Kind regards
+Uffe
 
-
+> +
+>  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+>  int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+>
+> --
+> 2.12.1
+>
