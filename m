@@ -1,98 +1,50 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH 1/2] mmc: meson-gx: factor out setting block size
-Date: Tue, 28 Mar 2017 08:04:45 -0700
-Message-ID: <m237dxbfxu.fsf@baylibre.com>
-References: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Azhar Shaikh <azhar.shaikh@intel.com>
+Subject: [PATCH 1/2] mmc: sdhci-acpi: Set MMC_CAP_AGGRESSIVE_PM for BYT-related Intel controllers
+Date: Tue, 28 Mar 2017 11:08:29 -0700
+Message-ID: <1490724510-105153-1-git-send-email-azhar.shaikh@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:33828 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753049AbdC1PFe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Mar 2017 11:05:34 -0400
-Received: by mail-pg0-f45.google.com with SMTP id 21so75299210pgg.1
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Mar 2017 08:05:15 -0700 (PDT)
-In-Reply-To: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com> (Heiner
-        Kallweit's message of "Mon, 27 Mar 2017 21:57:11 +0200")
+Received: from mga11.intel.com ([192.55.52.93]:34436 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753066AbdC1SIc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 28 Mar 2017 14:08:32 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+Cc: linux-kernel@vger.kernel.org, azhar.shaikh@intel.com
 
-Heiner Kallweit <hkallweit1@gmail.com> writes:
+Set MMC_CAP_AGGRESSIVE_PM for BYT-related Intel SD card
+controllers.
 
-> Factor out setting the block size. This also contributes to reducing
-> complexity of function meson_mmc_start_cmd.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Signed-off-by: Azhar Shaikh <azhar.shaikh@intel.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 9dcb704..a15d237 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -263,10 +263,8 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+ 
+ 	/* Platform specific code during sd probe slot goes here */
+ 
+-	if (hid && !strcmp(hid, "80865ACA")) {
++	if (hid && !strcmp(hid, "80865ACA"))
+ 		host->mmc_host_ops.get_cd = bxt_get_cd;
+-		host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+-	}
+ 
+ 	return 0;
+ }
+@@ -302,7 +300,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+ 		   SDHCI_QUIRK2_STOP_WITH_TC,
+-	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
++	.caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
+ 	.probe_slot	= sdhci_acpi_sd_probe_slot,
+ };
+ 
+-- 
+1.9.1
 
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 42 ++++++++++++++++++++++++++---------------
->  1 file changed, 27 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index f5dd5cc7..0de32008 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -431,12 +431,36 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
->  	mmc_request_done(host->mmc, mrq);
->  }
->  
-> +static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
-> +{
-> +	struct meson_host *host = mmc_priv(mmc);
-> +	u32 cfg, blksz_old;
-> +
-> +	cfg = readl(host->regs + SD_EMMC_CFG);
-> +	blksz_old = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
-> +
-> +	if (!is_power_of_2(blksz))
-> +		dev_err(host->dev, "blksz %u is not a power of 2\n", blksz);
-> +
-> +	blksz = ilog2(blksz);
-> +
-> +	/* check if block-size matches, if not update */
-> +	if (blksz == blksz_old)
-> +		return;
-> +
-> +	dev_dbg(host->dev, "%s: update blk_len %d -> %d\n", __func__,
-> +		blksz_old, blksz);
-> +
-> +	cfg &= ~CFG_BLK_LEN_MASK;
-> +	cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blksz);
-> +	writel(cfg, host->regs + SD_EMMC_CFG);
-> +}
-> +
->  static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->  {
->  	struct meson_host *host = mmc_priv(mmc);
->  	struct mmc_data *data = cmd->data;
-> -	u32 cfg, cmd_cfg = 0, cmd_data = 0;
-> -	u8 blk_len;
-> +	u32 cmd_cfg = 0, cmd_data = 0;
->  	unsigned int xfer_bytes = 0;
->  
->  	/* Setup descriptors */
-> @@ -470,19 +494,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->  			cmd_cfg |= CMD_CFG_BLOCK_MODE;
->  			cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK,
->  					      data->blocks);
-> -
-> -			/* check if block-size matches, if not update */
-> -			cfg = readl(host->regs + SD_EMMC_CFG);
-> -			blk_len = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
-> -			if (blk_len != ilog2(data->blksz)) {
-> -				dev_dbg(host->dev, "%s: update blk_len %d -> %d\n",
-> -					__func__, blk_len,
-> -					ilog2(data->blksz));
-> -				blk_len = ilog2(data->blksz);
-> -				cfg &= ~CFG_BLK_LEN_MASK;
-> -				cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blk_len);
-> -				writel(cfg, host->regs + SD_EMMC_CFG);
-> -			}
-> +			meson_mmc_set_blksz(mmc, data->blksz);
->  		} else {
->  			cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK, data->blksz);
->  		}
