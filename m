@@ -1,76 +1,74 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 06/16] mmc: core: replace waitqueue with worker
-Date: Tue, 28 Mar 2017 09:47:51 +0200
-Message-ID: <CACRpkdYAY8CcWb5obz2Awh9_QoHeoN=aWjDsVKeftsQy0Y5MJg@mail.gmail.com>
-References: <20170209153403.9730-1-linus.walleij@linaro.org>
- <20170209153403.9730-7-linus.walleij@linaro.org> <00989e26-cdb9-48d7-2e46-ae6ef66e59a7@intel.com>
- <CACRpkdYOyEs8vxmPt1kGiKJrw8+16DyD8Nn=ke6mgxPaCQynCw@mail.gmail.com>
- <3fc89f9f-fbcf-113d-3644-b6c9dae003f0@intel.com> <8f1f3d4c-410c-2632-c776-4ced363bdb0d@kernel.dk>
- <e4b2c4bc-8627-2234-354d-c986f69b220f@intel.com> <97f2a4ea-0802-9f23-6ac7-b9d6c6afbfcc@kernel.dk>
- <a3571278-b30d-c3cb-bea6-d1776eb53025@intel.com> <a3216031-0801-45e2-320c-bfc88fa742b4@kernel.dk>
+Subject: Re: [PATCH RFC 22/39] mmc: block: Prepare CQE data
+Date: Tue, 28 Mar 2017 09:57:53 +0200
+Message-ID: <CACRpkdatdkWG8L3NtZbJpv5XZEWGugRHWMo8QDYh4e_mFHjuKA@mail.gmail.com>
+References: <1486731352-8018-1-git-send-email-adrian.hunter@intel.com>
+ <1486731352-8018-23-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdZkTgNEUFiG5JorBM+MiXVfp6iSnNH0-k27jYb+zjgiLw@mail.gmail.com>
+ <e31765ec-3453-9c40-1710-bea881cd9dec@intel.com> <CACRpkdbjmUWw=ZPsVGGCS=6bsho=qw=OQVaE3p4AJWuccyGXag@mail.gmail.com>
+ <f823dfb9-2acd-e9be-7132-a0b28659c316@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f44.google.com ([209.85.214.44]:38114 "EHLO
-        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753989AbdC1Hry (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Mar 2017 03:47:54 -0400
-Received: by mail-it0-f44.google.com with SMTP id y18so9631546itc.1
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Mar 2017 00:47:53 -0700 (PDT)
-In-Reply-To: <a3216031-0801-45e2-320c-bfc88fa742b4@kernel.dk>
+Received: from mail-it0-f47.google.com ([209.85.214.47]:37914 "EHLO
+        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754508AbdC1H6Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Mar 2017 03:58:24 -0400
+Received: by mail-it0-f47.google.com with SMTP id y18so9840505itc.1
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Mar 2017 00:58:24 -0700 (PDT)
+In-Reply-To: <f823dfb9-2acd-e9be-7132-a0b28659c316@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Paolo Valente <paolo.valente@linaro.org>, Chunyan Zhang <zhang.chunyan@linaro.org>, Baolin Wang <baolin.wang@linaro.org>, linux-block@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>
+To: Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@kernel.dk>
+Cc: linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-On Tue, Mar 14, 2017 at 3:36 PM, Jens Axboe <axboe@kernel.dk> wrote:
+On Fri, Mar 10, 2017 at 9:29 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 10/03/17 00:39, Linus Walleij wrote:
+>> On Fri, Mar 3, 2017 at 1:22 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 15/02/17 15:49, Linus Walleij wrote:
+>>>> On Fri, Feb 10, 2017 at 1:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>>> Enhance mmc_blk_data_prep() to support CQE requests.
+>>>>>
+>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>>
+>>>> Hey:
+>>>>
+>>>>> +#include <linux/ioprio.h>
+>>>> (...)
+>>>>> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
+>>>>> +               brq->data.flags |= MMC_DATA_PRIO;
+>>>>
+>>>> What is this?
+>>>
+>>> It is the command queue priority.
+>>>
+>>> The command queue supports 2 priorities: "high" (1) and "simple" (0).  The
+>>> eMMC will give "high" priority tasks priority over "simple" priority tasks.
+>>>
+>>> So here we give priority to IOPRIO_CLASS_RT which seems appropriate.
+>>
+>> So if I understand correctly, you are obtaining the block layer scheduling
+>> priorities, that can (only?) be set by ionice has from the command line?
+>
+> AFAICS it is the ioprio_set() system call .
 
-> There's one case that doesn't look like it was converted properly, but
-> that's a mistake. The general insert-and-run cases run inline if we can,
-> but the direct-issue needs a fixup, see below.
->
->
-> diff --git a/block/blk-mq.c b/block/blk-mq.c
-> index 159187a28d66..4196d6bee92d 100644
-> --- a/block/blk-mq.c
-> +++ b/block/blk-mq.c
-> @@ -1434,7 +1434,8 @@ static blk_qc_t request_to_qc_t(struct blk_mq_hw_ctx *hctx, struct request *rq)
->         return blk_tag_to_qc_t(rq->internal_tag, hctx->queue_num, true);
->  }
->
-> -static void blk_mq_try_issue_directly(struct request *rq, blk_qc_t *cookie)
-> +static void blk_mq_try_issue_directly(struct request *rq, blk_qc_t *cookie,
-> +                                     bool can_block)
->  {
->         struct request_queue *q = rq->q;
->         struct blk_mq_queue_data bd = {
-> @@ -1475,7 +1476,7 @@ static void blk_mq_try_issue_directly(struct request *rq, blk_qc_t *cookie)
->         }
->
->  insert:
-> -       blk_mq_sched_insert_request(rq, false, true, true, false);
-> +       blk_mq_sched_insert_request(rq, false, true, false, can_block);
->  }
->
->  /*
-> @@ -1569,11 +1570,11 @@ static blk_qc_t blk_mq_make_request(struct request_queue *q, struct bio *bio)
->
->                 if (!(data.hctx->flags & BLK_MQ_F_BLOCKING)) {
->                         rcu_read_lock();
-> -                       blk_mq_try_issue_directly(old_rq, &cookie);
-> +                       blk_mq_try_issue_directly(old_rq, &cookie, false);
->                         rcu_read_unlock();
->                 } else {
->                         srcu_idx = srcu_read_lock(&data.hctx->queue_rq_srcu);
-> -                       blk_mq_try_issue_directly(old_rq, &cookie);
-> +                       blk_mq_try_issue_directly(old_rq, &cookie, true);
->                         srcu_read_unlock(&data.hctx->queue_rq_srcu, srcu_idx);
->                 }
->                 goto done;
+OK to be clear, correct, it is set by that system call.
 
-Jens do you have this in your patch queue or is it something you want
-us to test and
-submit back to you?
+And as far as I can tell there is exactly one program in the world that issues
+that syscall, and that is ionice(1).
+
+It is described to the world as a way for users to give hints to the
+I/O scheduler
+about how to manage requests. For example a user can hint that some IO
+is a backup job and not important and some IO is a media player and really
+important.
+
+And since the block layer only handles this hint in the legacy blk CFQ scheduler
+I want to know from the block layer developers if this priority has any future.
+BFQ does not use this hint at all, I think Paolo described the ionice command
+as problematic, and we need to understand if user-provided IO scheduling hints
+is something that is going to be used in the future.
 
 Yours,
 Linus Walleij
