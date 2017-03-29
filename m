@@ -1,98 +1,51 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3] mmc: sdhci: Disable runtime pm when the sdio_irq is
- enabled
-Date: Wed, 29 Mar 2017 11:41:31 +0300
-Message-ID: <07ed9280-4f8a-512d-745b-3e6e128d4811@intel.com>
-References: <20170326111445.1316-1-hdegoede@redhat.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: host: s3cmci: fix broken conditional expression
+Date: Wed, 29 Mar 2017 11:52:41 +0200
+Message-ID: <20170329095250.2937200-1-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:38648 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752764AbdC2IrW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 29 Mar 2017 04:47:22 -0400
-In-Reply-To: <20170326111445.1316-1-hdegoede@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ben Dooks <ben-linux@fluff.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Sergio Prado <sergio.prado@e-labworks.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>, Sylwester Nawrocki <s.nawrocki@samsung.com>, linux-arm-kernel@lists.infradead.org, Heiner Kallweit <hkallweit1@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Dong Aisheng <b29396@freescale.com>, Ian W MORRISON <ianwmorrison@gmail.com>
 
-On 26/03/17 14:14, Hans de Goede wrote:
-> SDIO cards may need clock to send the card interrupt to the host.
-> 
-> On a cherrytrail tablet with a RTL8723BS wifi chip, without this patch
-> pinging the tablet results in:
-> 
-> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=78.6 ms
-> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1760 ms
-> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=753 ms
-> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=3.88 ms
-> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=795 ms
-> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1841 ms
-> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=810 ms
-> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1860 ms
-> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=812 ms
-> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=48.6 ms
-> 
-> Where as with this patch I get:
-> 
-> PING 192.168.1.14 (192.168.1.14) 56(84) bytes of data.
-> 64 bytes from 192.168.1.14: icmp_seq=1 ttl=64 time=3.96 ms
-> 64 bytes from 192.168.1.14: icmp_seq=2 ttl=64 time=1.97 ms
-> 64 bytes from 192.168.1.14: icmp_seq=3 ttl=64 time=17.2 ms
-> 64 bytes from 192.168.1.14: icmp_seq=4 ttl=64 time=2.46 ms
-> 64 bytes from 192.168.1.14: icmp_seq=5 ttl=64 time=2.83 ms
-> 64 bytes from 192.168.1.14: icmp_seq=6 ttl=64 time=1.40 ms
-> 64 bytes from 192.168.1.14: icmp_seq=7 ttl=64 time=2.10 ms
-> 64 bytes from 192.168.1.14: icmp_seq=8 ttl=64 time=1.40 ms
-> 64 bytes from 192.168.1.14: icmp_seq=9 ttl=64 time=2.04 ms
-> 64 bytes from 192.168.1.14: icmp_seq=10 ttl=64 time=1.40 ms
-> 
-> Cc: Dong Aisheng <b29396@freescale.com>
-> Cc: Ian W MORRISON <ianwmorrison@gmail.com>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+The DT support introduced a typo that gcc detects when -Wempty-body
+is enabled:
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+drivers/mmc/host/s3cmci.c: In function 's3cmci_probe_pdata':
+drivers/mmc/host/s3cmci.c:1543:29: error: suggest braces around empty body in an 'if' statement [-Werror=empty-body]
+  if (pdata->wprotect_invert);
 
-> ---
-> Changes in v2:
-> -New patch replacing "mmc: sdhci: sdio-intel: Set
->  SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk"
-> Changes in v3:
-> -Always get / put the runtime pm-ref instead of using a quirk, as (almost)
->  all sdhci controllers need this
-> -Use pm_runtime_get_noresume / pm_runtime_put_noidle as the caller must
->  already have claimed the mmc-host so we will already be runtime-resumed
->  when called
-> ---
->  drivers/mmc/host/sdhci.c | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9c1a099..63bc33a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1830,6 +1830,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->  	struct sdhci_host *host = mmc_priv(mmc);
->  	unsigned long flags;
->  
-> +	if (enable)
-> +		pm_runtime_get_noresume(host->mmc->parent);
-> +
->  	spin_lock_irqsave(&host->lock, flags);
->  	if (enable)
->  		host->flags |= SDHCI_SDIO_IRQ_ENABLED;
-> @@ -1838,6 +1841,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->  
->  	sdhci_enable_sdio_irq_nolock(host, enable);
->  	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	if (!enable)
-> +		pm_runtime_put_noidle(host->mmc->parent);
->  }
->  
->  static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> 
+Clearly the ';' was not intended here, so remove it.
 
+Fixes: 4b13f3b290d1 ("mmc: host: s3cmci: allow probing from device tree")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/s3cmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index 09eab2120bbd..bbf1fbbc8e2a 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1540,7 +1540,7 @@ static int s3cmci_probe_pdata(struct s3cmci_host *host)
+ 	if (pdata->no_detect)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+-	if (pdata->wprotect_invert);
++	if (pdata->wprotect_invert)
+ 		mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+ 
+ 	if (pdata->detect_invert)
+-- 
+2.9.0
