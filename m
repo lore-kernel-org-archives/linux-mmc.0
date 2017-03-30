@@ -1,56 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Outstanding MQ questions from MMC
-Date: Thu, 30 Mar 2017 18:39:19 +0200
-Message-ID: <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
-References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
- <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
+From: Russell King - ARM Linux <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
+Subject: Re: [PATCH v7 00/13] mmc: Add support to Marvell Xenon SD Host
+ Controller
+Date: Thu, 30 Mar 2017 19:56:39 +0100
+Message-ID: <20170330185639.GI7909@n2100.armlinux.org.uk>
+References: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Yehuda Yitschak <yehuday-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Kostya Porotchkin <kostap-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Hanna Hawa <hannah-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 March 2017 at 14:42, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Wed, Mar 29, 2017 at 5:09 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
->> Hi folks,
->>
->> I earlier left some unanswered questions in my MMC to MQ conversion series
->> but I figured it is better if I collect them and ask the blk-mq
->> maintainers directly
->> how to deal with the following situations that occur in the MMC block layer:
->>
->>
->> 1. The current MMC code locks the host when the first request comes in
->> from blk_fetch_request() and unlocks it when blk_fetch_request() returns
->> NULL twice in a row. Then the polling thread terminated and is not restarted
->> until we get called by the mmc_request_fn.
->>
->> Host locking means that we will not send other commands to the MMC
->> card from i.e. userspace, which sometimes can send spurious stuff orthogonal
->> to the block layer. If the block layer has locked the host, userspace
->> has to wait
->> and vice versa. It is not a common contention point but it still happens.
->>
->> In MQ, I have simply locked the host on the first request and then I never
->> release it. Clearly this does not work. I am uncertain on how to handle this
->> and whether MQ has a way to tell us that the queue is empty so we may release
->> the host. I toyed with the idea to just set up a timer, but a "queue
->> empty" callback
->> from the block layer is what would be ideal.
->
-> Would it be possible to change the userspace code to go through
-> the block layer instead and queue a request there, to avoid having
-> to lock the card at all?
+On Thu, Mar 30, 2017 at 05:22:52PM +0200, Gregory CLEMENT wrote:
+> - Remove parse of child node mmc-card. Wait for a better solution.
 
-That would be good from an I/O scheduling point of view, as it would
-avoid one side being able to starve the other.
+So for mcbin, I have:
 
-However, we would still need a lock, as we also have card detect work
-queue, which also needs to claim the host when it polls for removable
-cards.
+&ap_sdhci0 {
+        bus-width = <8>;
+        marvell,xenon-emmc;
+        marvell,xenon-phy-type = "emmc 5.1 phy";
+        /*
+         * Not stable in HS modes - phy needs "more calibration", so add
+         * the "slow-mode" and disable SDR104, SDR50 and DDR50 modes.
+         */
+        marvell,xenon-phy-slow-mode;
+        no-1-8-v;
+        non-removable;
+        status = "okay";
+        vqmmc-supply = <&v_vddo_h>;
 
-Kind regards
-Uffe
+        #address-cells = <1>;
+        #size-cells = <0>;
+        mmccard: mmccard@0 {
+                compatible = "mmc-card";
+                reg = <0>;
+        };
+};
+
+Does this mean the "mmccard" bit is no longer required - or is it required
+for the eMMC to be detected but is no longer supported by the driver?
+
+Thanks.
+
+-- 
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
