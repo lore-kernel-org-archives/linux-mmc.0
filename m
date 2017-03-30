@@ -1,65 +1,64 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron
- boards
-Date: Thu, 30 Mar 2017 14:11:19 +0900
-Message-ID: <6b9a3425-fe3c-0c9a-8d1b-d2d2ac1ec9de@samsung.com>
-References: <20170330011709.GA110687@google.com>
-        <6d87cb71-1339-0dc9-e071-1c117f541881@rock-chips.com>
-        <20170330014230.GA21467@google.com>
-        <CANCyOWYsG9rpCvEsBMDJAyOTjKJCe=O-35-Zbhjh4is+op_h=w@mail.gmail.com>
-        <CGME20170330025350epcas4p423e66068f5d962677952830258676fcf@epcas4p4.samsung.com>
-        <20170330025345.GA29421@google.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-acpi: Set MMC_CAP_AGGRESSIVE_PM for
+ BYT-related Intel controllers
+Date: Thu, 30 Mar 2017 10:41:19 +0300
+Message-ID: <7b084ccd-8862-3430-0842-de496535d7e2@intel.com>
+References: <1490724510-105153-1-git-send-email-azhar.shaikh@intel.com>
+ <1490811393-109654-1-git-send-email-azhar.shaikh@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:31871 "EHLO
-        epoutp01.samsung.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1754735AbdC3FLX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2017 01:11:23 -0400
-In-reply-to: <20170330025345.GA29421@google.com>
+Received: from mga14.intel.com ([192.55.52.115]:27897 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932555AbdC3HrF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 30 Mar 2017 03:47:05 -0400
+In-Reply-To: <1490811393-109654-1-git-send-email-azhar.shaikh@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Brian Norris <briannorris@chromium.org>, Eddie Cai <eddie.cai.kernel@gmail.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, amstan@chromium.org, Kevin Mihelich <kevin@archlinuxarm.org>
+To: Azhar Shaikh <azhar.shaikh@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-Hi,
+On 29/03/17 21:16, Azhar Shaikh wrote:
+> Set MMC_CAP_AGGRESSIVE_PM for BYT-related Intel SD card
+> controllers.
+> 
+> Signed-off-by: Azhar Shaikh <azhar.shaikh@intel.com>
 
-On 03/30/2017 11:53 AM, Brian Norris wrote:
-> Hi Eddie,
-> 
-> On Thu, Mar 30, 2017 at 10:18:59AM +0800, Eddie Cai wrote:
->> I test on rk3288 firefly reload with 4.11-rc4. It work fine.
-> 
-> OK, thanks for checking.
-> 
->>> On Thu, Mar 30, 2017 at 09:32:22AM +0800, Shawn Lin wrote:
->>>> Hi Brian,
->>>>
->>>> On 2017/3/30 9:17, Brian Norris wrote:
->>>>> Hi all,
->>>>>
->>>>> I haven't managed to get as far as a bugfix for this, but I've bisected
->>>>> some issues seen on v4.10+ with a Chromebook of the Veyron family (Jaq,
->>>>> in particular). v4.9 works fine.
-> 
-> [...]
-> 
-> By the way, Kevin (CC'd) says he noticed similiar Wifi issues on an
-> Exynos 5800 Peach chromebook, but not on an Exynos 5250 Snow chromebook.	
-> I haven't picked these apart yet to see what the differences and
-> similarities are, but presumably it's not actually a Rockchip-specific
-> bug. Maybe related to the way power sequencing is plumbed for these, for
-> example?
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I'm not sure but if card-detecting is polling, the timing issue could be occurred.
-
-Best Regards,
-Jaehoon Chung
-
+> ---
+> Changes in v2:
+>   - Rebased the patch on top of 'next' branch.
+>   - No code change.
 > 
-> Brian
+>  drivers/mmc/host/sdhci-acpi.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 > 
-> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 665c5f3..c6a9a1b 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -263,10 +263,8 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+>  
+>  	/* Platform specific code during sd probe slot goes here */
+>  
+> -	if (hid && !strcmp(hid, "80865ACA")) {
+> +	if (hid && !strcmp(hid, "80865ACA"))
+>  		host->mmc_host_ops.get_cd = bxt_get_cd;
+> -		host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+> -	}
+>  
+>  	return 0;
+>  }
+> @@ -302,7 +300,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+>  	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>  	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
+>  		   SDHCI_QUIRK2_STOP_WITH_TC,
+> -	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
+> +	.caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
+>  	.probe_slot	= sdhci_acpi_sd_probe_slot,
+>  };
+>  
 > 
 
