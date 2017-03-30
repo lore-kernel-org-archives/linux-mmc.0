@@ -1,52 +1,104 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: s3cmci: fix broken conditional expression
-Date: Thu, 30 Mar 2017 21:31:26 +0200
-Message-ID: <CAPDyKFq6U9mXVz-msN4uDwDJANZqdVwcKTLVyqu1rthhsRx6KQ@mail.gmail.com>
-References: <20170329095250.2937200-1-arnd@arndb.de>
+Subject: Re: [PATCH 1/2] mmc: meson-gx: factor out setting block size
+Date: Thu, 30 Mar 2017 21:31:34 +0200
+Message-ID: <CAPDyKFqSdAdSLAcgd-CYT3Fvb4GzmTkQhU7QfkFU4dA06qVvxA@mail.gmail.com>
+References: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170329095250.2937200-1-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ben Dooks <ben-linux@fluff.org>, Heiner Kallweit <hkallweit1@gmail.com>, Sergio Prado <sergio.prado@e-labworks.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vk0-f47.google.com ([209.85.213.47]:33737 "EHLO
+        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934600AbdC3Tbg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2017 15:31:36 -0400
+Received: by mail-vk0-f47.google.com with SMTP id d188so66756708vka.0
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Mar 2017 12:31:35 -0700 (PDT)
+In-Reply-To: <b9a9a85b-8975-abca-7901-b557ea7ccc13@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org
 
-On 29 March 2017 at 11:52, Arnd Bergmann <arnd@arndb.de> wrote:
-> The DT support introduced a typo that gcc detects when -Wempty-body
-> is enabled:
+On 27 March 2017 at 21:57, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+> Factor out setting the block size. This also contributes to reducing
+> complexity of function meson_mmc_start_cmd.
 >
-> drivers/mmc/host/s3cmci.c: In function 's3cmci_probe_pdata':
-> drivers/mmc/host/s3cmci.c:1543:29: error: suggest braces around empty body in an 'if' statement [-Werror=empty-body]
->   if (pdata->wprotect_invert);
->
-> Clearly the ';' was not intended here, so remove it.
->
-> Fixes: 4b13f3b290d1 ("mmc: host: s3cmci: allow probing from device tree")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/s3cmci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/meson-gx-mmc.c | 42 ++++++++++++++++++++++++++---------------
+>  1 file changed, 27 insertions(+), 15 deletions(-)
 >
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index 09eab2120bbd..bbf1fbbc8e2a 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -1540,7 +1540,7 @@ static int s3cmci_probe_pdata(struct s3cmci_host *host)
->         if (pdata->no_detect)
->                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index f5dd5cc7..0de32008 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -431,12 +431,36 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+>         mmc_request_done(host->mmc, mrq);
+>  }
 >
-> -       if (pdata->wprotect_invert);
-> +       if (pdata->wprotect_invert)
->                 mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> +static void meson_mmc_set_blksz(struct mmc_host *mmc, unsigned int blksz)
+> +{
+> +       struct meson_host *host = mmc_priv(mmc);
+> +       u32 cfg, blksz_old;
+> +
+> +       cfg = readl(host->regs + SD_EMMC_CFG);
+> +       blksz_old = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
+> +
+> +       if (!is_power_of_2(blksz))
+> +               dev_err(host->dev, "blksz %u is not a power of 2\n", blksz);
+> +
+> +       blksz = ilog2(blksz);
+> +
+> +       /* check if block-size matches, if not update */
+> +       if (blksz == blksz_old)
+> +               return;
+> +
+> +       dev_dbg(host->dev, "%s: update blk_len %d -> %d\n", __func__,
+> +               blksz_old, blksz);
+> +
+> +       cfg &= ~CFG_BLK_LEN_MASK;
+> +       cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blksz);
+> +       writel(cfg, host->regs + SD_EMMC_CFG);
+> +}
+> +
+>  static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  {
+>         struct meson_host *host = mmc_priv(mmc);
+>         struct mmc_data *data = cmd->data;
+> -       u32 cfg, cmd_cfg = 0, cmd_data = 0;
+> -       u8 blk_len;
+> +       u32 cmd_cfg = 0, cmd_data = 0;
+>         unsigned int xfer_bytes = 0;
 >
->         if (pdata->detect_invert)
+>         /* Setup descriptors */
+> @@ -470,19 +494,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>                         cmd_cfg |= CMD_CFG_BLOCK_MODE;
+>                         cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK,
+>                                               data->blocks);
+> -
+> -                       /* check if block-size matches, if not update */
+> -                       cfg = readl(host->regs + SD_EMMC_CFG);
+> -                       blk_len = FIELD_GET(CFG_BLK_LEN_MASK, cfg);
+> -                       if (blk_len != ilog2(data->blksz)) {
+> -                               dev_dbg(host->dev, "%s: update blk_len %d -> %d\n",
+> -                                       __func__, blk_len,
+> -                                       ilog2(data->blksz));
+> -                               blk_len = ilog2(data->blksz);
+> -                               cfg &= ~CFG_BLK_LEN_MASK;
+> -                               cfg |= FIELD_PREP(CFG_BLK_LEN_MASK, blk_len);
+> -                               writel(cfg, host->regs + SD_EMMC_CFG);
+> -                       }
+> +                       meson_mmc_set_blksz(mmc, data->blksz);
+>                 } else {
+>                         cmd_cfg |= FIELD_PREP(CMD_CFG_LENGTH_MASK, data->blksz);
+>                 }
 > --
-> 2.9.0
+> 2.12.1
 >
