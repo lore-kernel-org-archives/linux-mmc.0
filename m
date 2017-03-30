@@ -1,98 +1,56 @@
-From: Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v13 1/6] dt-bindings: mmc: Add Cavium SOCs MMC bindings
-Date: Thu, 30 Mar 2017 17:31:23 +0200
-Message-ID: <20170330153128.22842-2-jglauber@cavium.com>
-References: <20170330153128.22842-1-jglauber@cavium.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170330153128.22842-1-jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, "Steven J . Hill" <steven.hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: Outstanding MQ questions from MMC
+Date: Thu, 30 Mar 2017 18:39:19 +0200
+Message-ID: <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
+References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
+ <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add description of Cavium Octeon and ThunderX SOC device tree bindings.
+On 30 March 2017 at 14:42, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wed, Mar 29, 2017 at 5:09 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> Hi folks,
+>>
+>> I earlier left some unanswered questions in my MMC to MQ conversion series
+>> but I figured it is better if I collect them and ask the blk-mq
+>> maintainers directly
+>> how to deal with the following situations that occur in the MMC block layer:
+>>
+>>
+>> 1. The current MMC code locks the host when the first request comes in
+>> from blk_fetch_request() and unlocks it when blk_fetch_request() returns
+>> NULL twice in a row. Then the polling thread terminated and is not restarted
+>> until we get called by the mmc_request_fn.
+>>
+>> Host locking means that we will not send other commands to the MMC
+>> card from i.e. userspace, which sometimes can send spurious stuff orthogonal
+>> to the block layer. If the block layer has locked the host, userspace
+>> has to wait
+>> and vice versa. It is not a common contention point but it still happens.
+>>
+>> In MQ, I have simply locked the host on the first request and then I never
+>> release it. Clearly this does not work. I am uncertain on how to handle this
+>> and whether MQ has a way to tell us that the queue is empty so we may release
+>> the host. I toyed with the idea to just set up a timer, but a "queue
+>> empty" callback
+>> from the block layer is what would be ideal.
+>
+> Would it be possible to change the userspace code to go through
+> the block layer instead and queue a request there, to avoid having
+> to lock the card at all?
 
-CC: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-CC: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-CC: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-CC: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+That would be good from an I/O scheduling point of view, as it would
+avoid one side being able to starve the other.
 
-Signed-off-by: Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Steven J. Hill <steven.hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Acked-by: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
----
- .../devicetree/bindings/mmc/cavium-mmc.txt         | 57 ++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/cavium-mmc.txt
+However, we would still need a lock, as we also have card detect work
+queue, which also needs to claim the host when it polls for removable
+cards.
 
-diff --git a/Documentation/devicetree/bindings/mmc/cavium-mmc.txt b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-new file mode 100644
-index 0000000..1433e62
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/cavium-mmc.txt
-@@ -0,0 +1,57 @@
-+* Cavium Octeon & ThunderX MMC controller
-+
-+The highspeed MMC host controller on Caviums SoCs provides an interface
-+for MMC and SD types of memory cards.
-+
-+Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-+as the speed of SD standard 4.0. Only 3.3 Volt is supported.
-+
-+Required properties:
-+ - compatible : should be one of:
-+   cavium,octeon-6130-mmc
-+   cavium,octeon-7890-mmc
-+   cavium,thunder-8190-mmc
-+   cavium,thunder-8390-mmc
-+   mmc-slot
-+ - reg : mmc controller base registers
-+ - clocks : phandle
-+
-+Optional properties:
-+ - for cd, bus-width and additional generic mmc parameters
-+   please refer to mmc.txt within this directory
-+ - cavium,cmd-clk-skew : number of coprocessor clocks before sampling command
-+ - cavium,dat-clk-skew : number of coprocessor clocks before sampling data
-+
-+Deprecated properties:
-+- spi-max-frequency : use max-frequency instead
-+- cavium,bus-max-width : use bus-width instead
-+- power-gpios : use vmmc-supply instead
-+- cavium,octeon-6130-mmc-slot : use mmc-slot instead
-+
-+Examples:
-+	mmc_1_4: mmc@1,4 {
-+		compatible = "cavium,thunder-8390-mmc";
-+		reg = <0x0c00 0 0 0 0>;	/* DEVFN = 0x0c (1:4) */
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&sclk>;
-+
-+		mmc-slot@0 {
-+			compatible = "mmc-slot";
-+			reg = <0>;
-+			vmmc-supply = <&mmc_supply_3v3>;
-+			max-frequency = <42000000>;
-+			bus-width = <4>;
-+			cap-sd-highspeed;
-+		};
-+
-+		mmc-slot@1 {
-+			compatible = "mmc-slot";
-+			reg = <1>;
-+			vmmc-supply = <&mmc_supply_3v3>;
-+			max-frequency = <42000000>;
-+			bus-width = <8>;
-+			cap-mmc-highspeed;
-+			non-removable;
-+		};
-+	};
--- 
-2.9.0.rc0.21.g7777322
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kind regards
+Uffe
