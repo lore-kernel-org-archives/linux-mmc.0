@@ -1,680 +1,1229 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v7 07/13] mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality
-Date: Thu, 30 Mar 2017 17:22:59 +0200
-Message-ID: <f98dadbc6cba05e1a3530379f8f7e2a86e0e1b45.1490886907.git-series.gregory.clement@free-electrons.com>
-References: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
+From: Jan Glauber <jglauber@cavium.com>
+Subject: [PATCH v13 2/6] mmc: cavium: Add core MMC driver for Cavium SOCs
+Date: Thu, 30 Mar 2017 17:31:24 +0200
+Message-ID: <20170330153128.22842-3-jglauber@cavium.com>
+References: <20170330153128.22842-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
-In-Reply-To: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
-References: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
+In-Reply-To: <20170330153128.22842-1-jglauber@cavium.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Ziji Hu <huziji@marvell.com>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Doug Jones <dougj@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Yehuda
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: David Daney <david.daney@cavium.com>, "Steven J . Hill" <steven.hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Hu Ziji <huziji@marvell.com>
+This core driver will be used by a MIPS platform driver
+or by an ARM64 PCI driver. The core driver implements the
+mmc_host_ops and slot probe & remove functions.
+Callbacks are provided to allow platform specific interrupt
+enable and bus locking.
 
-Add Xenon eMMC/SD/SDIO host controller core functionality.
-Add Xenon specific initialization process.
-Add Xenon specific mmc_host_ops APIs.
-Add Xenon specific register definitions.
+The host controller supports:
+- up to 4 slots that can contain sd-cards or eMMC chips
+- 1, 4 and 8 bit bus width
+- SDR and DDR
+- transfers up to 52 Mhz (might be less when multiple slots are used)
+- DMA read/write
+- multi-block read/write (but not stream mode)
 
-Add CONFIG_MMC_SDHCI_XENON support in drivers/mmc/host/Kconfig.
+Voltage is limited to 3.3v and shared for all slots (vmmc and vmmcq).
 
-Marvell Xenon SDHC conforms to SD Physical Layer Specification
-Version 3.01 and is designed according to the guidelines provided
-in the SD Host Controller Standard Specification Version 3.00.
+A global lock for all MMC devices is required because the host
+controller is shared.
 
-Signed-off-by: Hu Ziji <huziji@marvell.com>
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Signed-off-by: Jan Glauber <jglauber@cavium.com>
+Signed-off-by: David Daney <david.daney@cavium.com>
+Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
 ---
- drivers/mmc/host/Kconfig       |   8 +-
- drivers/mmc/host/Makefile      |   3 +-
- drivers/mmc/host/sdhci-xenon.c | 541 ++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-xenon.h |  60 ++++-
- 4 files changed, 612 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-xenon.c
- create mode 100644 drivers/mmc/host/sdhci-xenon.h
+ drivers/mmc/host/cavium.c | 982 ++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cavium.h | 192 +++++++++
+ 2 files changed, 1174 insertions(+)
+ create mode 100644 drivers/mmc/host/cavium.c
+ create mode 100644 drivers/mmc/host/cavium.h
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index a638cd0d80be..f36f8ff9296d 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -842,3 +842,11 @@ config MMC_SDHCI_BRCMSTB
- 	  Broadcom STB SoCs.
- 
- 	  If unsure, say Y.
-+
-+config MMC_SDHCI_XENON
-+	tristate "Marvell Xenon eMMC/SD/SDIO SDHCI driver"
-+	depends on MMC_SDHCI_PLTFM
-+	help
-+	  This selects Marvell Xenon eMMC/SD/SDIO SDHCI.
-+	  If you have a controller with this interface, say Y or M here.
-+	  If unsure, say N.
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index bc2c2e2c68c0..014f0548ea86 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -84,3 +84,6 @@ obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
- ifeq ($(CONFIG_CB710_DEBUG),y)
- 	CFLAGS-cb710-mmc	+= -DDEBUG
- endif
-+
-+obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
-+sdhci-xenon-driver-y		+= sdhci-xenon.o
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
 new file mode 100644
-index 000000000000..b3f2b018fe3d
+index 0000000..910e290
 --- /dev/null
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -0,0 +1,541 @@
++++ b/drivers/mmc/host/cavium.c
+@@ -0,0 +1,982 @@
 +/*
-+ * Driver for Marvell Xenon SDHC as a platform device
++ * Shared part of driver for MMC/SDHC controller on Cavium OCTEON and
++ * ThunderX SOCs.
 + *
-+ * Copyright (C) 2016 Marvell, All Rights Reserved.
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
 + *
-+ * Author:	Hu Ziji <huziji@marvell.com>
-+ * Date:	2016-8-24
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation version 2.
-+ *
-+ * Inspired by Jisheng Zhang <jszhang@marvell.com>
-+ * Special thanks to Video BG4 project team.
++ * Copyright (C) 2012-2017 Cavium Inc.
++ * Authors:
++ *   David Daney <david.daney@cavium.com>
++ *   Peter Swain <pswain@cavium.com>
++ *   Steven J. Hill <steven.hill@cavium.com>
++ *   Jan Glauber <jglauber@cavium.com>
 + */
-+
++#include <linux/bitfield.h>
 +#include <linux/delay.h>
-+#include <linux/ktime.h>
++#include <linux/dma-direction.h>
++#include <linux/dma-mapping.h>
++#include <linux/gpio/consumer.h>
++#include <linux/interrupt.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/slot-gpio.h>
 +#include <linux/module.h>
-+#include <linux/of.h>
++#include <linux/regulator/consumer.h>
++#include <linux/scatterlist.h>
++#include <linux/time.h>
 +
-+#include "sdhci-pltfm.h"
-+#include "sdhci-xenon.h"
++#include "cavium.h"
 +
-+static int xenon_enable_internal_clk(struct sdhci_host *host)
++const char *cvm_mmc_irq_names[] = {
++	"MMC Buffer",
++	"MMC Command",
++	"MMC DMA",
++	"MMC Command Error",
++	"MMC DMA Error",
++	"MMC Switch",
++	"MMC Switch Error",
++	"MMC DMA int Fifo",
++	"MMC DMA int",
++};
++
++/*
++ * The Cavium MMC host hardware assumes that all commands have fixed
++ * command and response types.  These are correct if MMC devices are
++ * being used.  However, non-MMC devices like SD use command and
++ * response types that are unexpected by the host hardware.
++ *
++ * The command and response types can be overridden by supplying an
++ * XOR value that is applied to the type.  We calculate the XOR value
++ * from the values in this table and the flags passed from the MMC
++ * core.
++ */
++static struct cvm_mmc_cr_type cvm_mmc_cr_types[] = {
++	{0, 0},		/* CMD0 */
++	{0, 3},		/* CMD1 */
++	{0, 2},		/* CMD2 */
++	{0, 1},		/* CMD3 */
++	{0, 0},		/* CMD4 */
++	{0, 1},		/* CMD5 */
++	{0, 1},		/* CMD6 */
++	{0, 1},		/* CMD7 */
++	{1, 1},		/* CMD8 */
++	{0, 2},		/* CMD9 */
++	{0, 2},		/* CMD10 */
++	{1, 1},		/* CMD11 */
++	{0, 1},		/* CMD12 */
++	{0, 1},		/* CMD13 */
++	{1, 1},		/* CMD14 */
++	{0, 0},		/* CMD15 */
++	{0, 1},		/* CMD16 */
++	{1, 1},		/* CMD17 */
++	{1, 1},		/* CMD18 */
++	{3, 1},		/* CMD19 */
++	{2, 1},		/* CMD20 */
++	{0, 0},		/* CMD21 */
++	{0, 0},		/* CMD22 */
++	{0, 1},		/* CMD23 */
++	{2, 1},		/* CMD24 */
++	{2, 1},		/* CMD25 */
++	{2, 1},		/* CMD26 */
++	{2, 1},		/* CMD27 */
++	{0, 1},		/* CMD28 */
++	{0, 1},		/* CMD29 */
++	{1, 1},		/* CMD30 */
++	{1, 1},		/* CMD31 */
++	{0, 0},		/* CMD32 */
++	{0, 0},		/* CMD33 */
++	{0, 0},		/* CMD34 */
++	{0, 1},		/* CMD35 */
++	{0, 1},		/* CMD36 */
++	{0, 0},		/* CMD37 */
++	{0, 1},		/* CMD38 */
++	{0, 4},		/* CMD39 */
++	{0, 5},		/* CMD40 */
++	{0, 0},		/* CMD41 */
++	{2, 1},		/* CMD42 */
++	{0, 0},		/* CMD43 */
++	{0, 0},		/* CMD44 */
++	{0, 0},		/* CMD45 */
++	{0, 0},		/* CMD46 */
++	{0, 0},		/* CMD47 */
++	{0, 0},		/* CMD48 */
++	{0, 0},		/* CMD49 */
++	{0, 0},		/* CMD50 */
++	{0, 0},		/* CMD51 */
++	{0, 0},		/* CMD52 */
++	{0, 0},		/* CMD53 */
++	{0, 0},		/* CMD54 */
++	{0, 1},		/* CMD55 */
++	{0xff, 0xff},	/* CMD56 */
++	{0, 0},		/* CMD57 */
++	{0, 0},		/* CMD58 */
++	{0, 0},		/* CMD59 */
++	{0, 0},		/* CMD60 */
++	{0, 0},		/* CMD61 */
++	{0, 0},		/* CMD62 */
++	{0, 0}		/* CMD63 */
++};
++
++static struct cvm_mmc_cr_mods cvm_mmc_get_cr_mods(struct mmc_command *cmd)
 +{
-+	u32 reg;
-+	ktime_t timeout;
++	struct cvm_mmc_cr_type *cr;
++	u8 hardware_ctype, hardware_rtype;
++	u8 desired_ctype = 0, desired_rtype = 0;
++	struct cvm_mmc_cr_mods r;
 +
-+	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
-+	reg |= SDHCI_CLOCK_INT_EN;
-+	sdhci_writel(host, reg, SDHCI_CLOCK_CONTROL);
-+	/* Wait max 20 ms */
-+	timeout = ktime_add_ms(ktime_get(), 20);
-+	while (!((reg = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+			& SDHCI_CLOCK_INT_STABLE)) {
-+		if (ktime_after(ktime_get(), timeout)) {
-+			dev_err(mmc_dev(host->mmc), "Internal clock never stabilised.\n");
-+			return -ETIMEDOUT;
-+		}
-+		usleep_range(900, 1100);
++	cr = cvm_mmc_cr_types + (cmd->opcode & 0x3f);
++	hardware_ctype = cr->ctype;
++	hardware_rtype = cr->rtype;
++	if (cmd->opcode == MMC_GEN_CMD)
++		hardware_ctype = (cmd->arg & 1) ? 1 : 2;
++
++	switch (mmc_cmd_type(cmd)) {
++	case MMC_CMD_ADTC:
++		desired_ctype = (cmd->data->flags & MMC_DATA_WRITE) ? 2 : 1;
++		break;
++	case MMC_CMD_AC:
++	case MMC_CMD_BC:
++	case MMC_CMD_BCR:
++		desired_ctype = 0;
++		break;
 +	}
 +
-+	return 0;
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_NONE:
++		desired_rtype = 0;
++		break;
++	case MMC_RSP_R1:/* MMC_RSP_R5, MMC_RSP_R6, MMC_RSP_R7 */
++	case MMC_RSP_R1B:
++		desired_rtype = 1;
++		break;
++	case MMC_RSP_R2:
++		desired_rtype = 2;
++		break;
++	case MMC_RSP_R3: /* MMC_RSP_R4 */
++		desired_rtype = 3;
++		break;
++	}
++	r.ctype_xor = desired_ctype ^ hardware_ctype;
++	r.rtype_xor = desired_rtype ^ hardware_rtype;
++	return r;
 +}
 +
-+/* Set SDCLK-off-while-idle */
-+static void xenon_set_sdclk_off_idle(struct sdhci_host *host,
-+				     unsigned char sdhc_id, bool enable)
++static void check_switch_errors(struct cvm_mmc_host *host)
 +{
-+	u32 reg;
-+	u32 mask;
++	u64 emm_switch;
 +
-+	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-+	/* Get the bit shift basing on the SDHC index */
-+	mask = (0x1 << (XENON_SDCLK_IDLEOFF_ENABLE_SHIFT + sdhc_id));
-+	if (enable)
-+		reg |= mask;
-+	else
-+		reg &= ~mask;
-+
-+	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
++	emm_switch = readq(host->base + MIO_EMM_SWITCH(host));
++	if (emm_switch & MIO_EMM_SWITCH_ERR0)
++		dev_err(host->dev, "Switch power class error\n");
++	if (emm_switch & MIO_EMM_SWITCH_ERR1)
++		dev_err(host->dev, "Switch hs timing error\n");
++	if (emm_switch & MIO_EMM_SWITCH_ERR2)
++		dev_err(host->dev, "Switch bus width error\n");
 +}
 +
-+/* Enable/Disable the Auto Clock Gating function */
-+static void xenon_set_acg(struct sdhci_host *host, bool enable)
++static void clear_bus_id(u64 *reg)
 +{
-+	u32 reg;
++	u64 bus_id_mask = GENMASK_ULL(61, 60);
 +
-+	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-+	if (enable)
-+		reg &= ~XENON_AUTO_CLKGATE_DISABLE_MASK;
-+	else
-+		reg |= XENON_AUTO_CLKGATE_DISABLE_MASK;
-+	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
++	*reg &= ~bus_id_mask;
 +}
 +
-+/* Enable this SDHC */
-+static void xenon_enable_sdhc(struct sdhci_host *host,
-+			      unsigned char sdhc_id)
++static void set_bus_id(u64 *reg, int bus_id)
 +{
-+	u32 reg;
-+
-+	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-+	reg |= (BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
-+	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-+
-+	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-+	/*
-+	 * Force to clear BUS_TEST to
-+	 * skip bus_test_pre and bus_test_post
-+	 */
-+	host->mmc->caps &= ~MMC_CAP_BUS_WIDTH_TEST;
++	clear_bus_id(reg);
++	*reg |= FIELD_PREP(GENMASK(61, 60), bus_id);
 +}
 +
-+/* Disable this SDHC */
-+static void xenon_disable_sdhc(struct sdhci_host *host,
-+			       unsigned char sdhc_id)
++static int get_bus_id(u64 reg)
 +{
-+	u32 reg;
-+
-+	reg = sdhci_readl(host, XENON_SYS_OP_CTRL);
-+	reg &= ~(BIT(sdhc_id) << XENON_SLOT_ENABLE_SHIFT);
-+	sdhci_writel(host, reg, XENON_SYS_OP_CTRL);
-+}
-+
-+/* Enable Parallel Transfer Mode */
-+static void xenon_enable_sdhc_parallel_tran(struct sdhci_host *host,
-+					    unsigned char sdhc_id)
-+{
-+	u32 reg;
-+
-+	reg = sdhci_readl(host, XENON_SYS_EXT_OP_CTRL);
-+	reg |= BIT(sdhc_id);
-+	sdhci_writel(host, reg, XENON_SYS_EXT_OP_CTRL);
-+}
-+
-+/* Mask command conflict error */
-+static void xenon_mask_cmd_conflict_err(struct sdhci_host *host)
-+{
-+	u32  reg;
-+
-+	reg = sdhci_readl(host, XENON_SYS_EXT_OP_CTRL);
-+	reg |= XENON_MASK_CMD_CONFLICT_ERR;
-+	sdhci_writel(host, reg, XENON_SYS_EXT_OP_CTRL);
-+}
-+
-+static void xenon_retune_setup(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	/* Disable the Re-Tuning Request functionality */
-+	reg = sdhci_readl(host, XENON_SLOT_RETUNING_REQ_CTRL);
-+	reg &= ~XENON_RETUNING_COMPATIBLE;
-+	sdhci_writel(host, reg, XENON_SLOT_RETUNING_REQ_CTRL);
-+
-+	/* Disable the Re-tuning Interrupt */
-+	reg = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
-+	reg &= ~SDHCI_INT_RETUNE;
-+	sdhci_writel(host, reg, SDHCI_SIGNAL_ENABLE);
-+	reg = sdhci_readl(host, SDHCI_INT_ENABLE);
-+	reg &= ~SDHCI_INT_RETUNE;
-+	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
-+
-+	/* Force to use Tuning Mode 1 */
-+	host->tuning_mode = SDHCI_TUNING_MODE_1;
-+	/* Set re-tuning period */
-+	host->tuning_count = 1 << (priv->tuning_count - 1);
++	return FIELD_GET(GENMASK_ULL(61, 60), reg);
 +}
 +
 +/*
-+ * Operations inside struct sdhci_ops
++ * We never set the switch_exe bit since that would interfere
++ * with the commands send by the MMC core.
 + */
-+/* Recover the Register Setting cleared during SOFTWARE_RESET_ALL */
-+static void xenon_reset_exit(struct sdhci_host *host,
-+			     unsigned char sdhc_id, u8 mask)
++static void do_switch(struct cvm_mmc_host *host, u64 emm_switch)
 +{
-+	/* Only SOFTWARE RESET ALL will clear the register setting */
-+	if (!(mask & SDHCI_RESET_ALL))
++	int retries = 100;
++	u64 rsp_sts;
++	int bus_id;
++
++	/*
++	 * Modes setting only taken from slot 0. Work around that hardware
++	 * issue by first switching to slot 0.
++	 */
++	bus_id = get_bus_id(emm_switch);
++	clear_bus_id(&emm_switch);
++	writeq(emm_switch, host->base + MIO_EMM_SWITCH(host));
++
++	set_bus_id(&emm_switch, bus_id);
++	writeq(emm_switch, host->base + MIO_EMM_SWITCH(host));
++
++	/* wait for the switch to finish */
++	do {
++		rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
++		if (!(rsp_sts & MIO_EMM_RSP_STS_SWITCH_VAL))
++			break;
++		udelay(10);
++	} while (--retries);
++
++	check_switch_errors(host);
++}
++
++static bool switch_val_changed(struct cvm_mmc_slot *slot, u64 new_val)
++{
++	/* Match BUS_ID, HS_TIMING, BUS_WIDTH, POWER_CLASS, CLK_HI, CLK_LO */
++	u64 match = 0x3001070fffffffffull;
++
++	return (slot->cached_switch & match) != (new_val & match);
++}
++
++static void set_wdog(struct cvm_mmc_slot *slot, unsigned int ns)
++{
++	u64 timeout;
++
++	if (!slot->clock)
 +		return;
 +
-+	/* Disable tuning request and auto-retuning again */
-+	xenon_retune_setup(host);
-+
-+	xenon_set_acg(host, true);
-+
-+	xenon_set_sdclk_off_idle(host, sdhc_id, false);
-+
-+	xenon_mask_cmd_conflict_err(host);
++	if (ns)
++		timeout = (slot->clock * ns) / NSEC_PER_SEC;
++	else
++		timeout = (slot->clock * 850ull) / 1000ull;
++	writeq(timeout, slot->host->base + MIO_EMM_WDOG(slot->host));
 +}
 +
-+static void xenon_reset(struct sdhci_host *host, u8 mask)
++static void cvm_mmc_reset_bus(struct cvm_mmc_slot *slot)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	struct cvm_mmc_host *host = slot->host;
++	u64 emm_switch, wdog;
 +
-+	sdhci_reset(host, mask);
-+	xenon_reset_exit(host, priv->sdhc_id, mask);
++	emm_switch = readq(slot->host->base + MIO_EMM_SWITCH(host));
++	emm_switch &= ~(MIO_EMM_SWITCH_EXE | MIO_EMM_SWITCH_ERR0 |
++			MIO_EMM_SWITCH_ERR1 | MIO_EMM_SWITCH_ERR2);
++	set_bus_id(&emm_switch, slot->bus_id);
++
++	wdog = readq(slot->host->base + MIO_EMM_WDOG(host));
++	do_switch(slot->host, emm_switch);
++
++	slot->cached_switch = emm_switch;
++
++	msleep(20);
++
++	writeq(wdog, slot->host->base + MIO_EMM_WDOG(host));
 +}
 +
-+/*
-+ * Xenon defines different values for HS200 and HS400
-+ * in Host_Control_2
-+ */
-+static void xenon_set_uhs_signaling(struct sdhci_host *host,
-+				    unsigned int timing)
++/* Switch to another slot if needed */
++static void cvm_mmc_switch_to(struct cvm_mmc_slot *slot)
 +{
-+	u16 ctrl_2;
++	struct cvm_mmc_host *host = slot->host;
++	struct cvm_mmc_slot *old_slot;
++	u64 emm_sample, emm_switch;
 +
-+	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	if (timing == MMC_TIMING_MMC_HS200)
-+		ctrl_2 |= XENON_CTRL_HS200;
-+	else if (timing == MMC_TIMING_UHS_SDR104)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-+	else if (timing == MMC_TIMING_UHS_SDR12)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-+	else if (timing == MMC_TIMING_UHS_SDR25)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-+	else if (timing == MMC_TIMING_UHS_SDR50)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-+	else if ((timing == MMC_TIMING_UHS_DDR50) ||
-+		 (timing == MMC_TIMING_MMC_DDR52))
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-+	else if (timing == MMC_TIMING_MMC_HS400)
-+		ctrl_2 |= XENON_CTRL_HS400;
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+}
++	if (slot->bus_id == host->last_slot)
++		return;
 +
-+static const struct sdhci_ops sdhci_xenon_ops = {
-+	.set_clock		= sdhci_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.reset			= xenon_reset,
-+	.set_uhs_signaling	= xenon_set_uhs_signaling,
-+	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
-+	.ops = &sdhci_xenon_ops,
-+	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-+		  SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+};
-+
-+/*
-+ * Xenon Specific Operations in mmc_host_ops
-+ */
-+static void xenon_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	/*
-+	 * HS400/HS200/eMMC HS doesn't have Preset Value register.
-+	 * However, sdhci_set_ios will read HS400/HS200 Preset register.
-+	 * Disable Preset Value register for HS400/HS200.
-+	 * eMMC HS with preset_enabled set will trigger a bug in
-+	 * get_preset_value().
-+	 */
-+	if ((ios->timing == MMC_TIMING_MMC_HS400) ||
-+	    (ios->timing == MMC_TIMING_MMC_HS200) ||
-+	    (ios->timing == MMC_TIMING_MMC_HS)) {
-+		host->preset_enabled = false;
-+		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-+		host->flags &= ~SDHCI_PV_ENABLED;
-+
-+		reg = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		reg &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
-+		sdhci_writew(host, reg, SDHCI_HOST_CONTROL2);
-+	} else {
-+		host->quirks2 &= ~SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
++	if (host->last_slot >= 0 && host->slot[host->last_slot]) {
++		old_slot = host->slot[host->last_slot];
++		old_slot->cached_switch = readq(host->base + MIO_EMM_SWITCH(host));
++		old_slot->cached_rca = readq(host->base + MIO_EMM_RCA(host));
 +	}
 +
-+	sdhci_set_ios(mmc, ios);
++	writeq(slot->cached_rca, host->base + MIO_EMM_RCA(host));
++	emm_switch = slot->cached_switch;
++	set_bus_id(&emm_switch, slot->bus_id);
++	do_switch(host, emm_switch);
 +
-+	if (host->clock > XENON_DEFAULT_SDCLK_FREQ)
-+		xenon_set_sdclk_off_idle(host, priv->sdhc_id, true);
++	emm_sample = FIELD_PREP(MIO_EMM_SAMPLE_CMD_CNT, slot->cmd_cnt) |
++		     FIELD_PREP(MIO_EMM_SAMPLE_DAT_CNT, slot->dat_cnt);
++	writeq(emm_sample, host->base + MIO_EMM_SAMPLE(host));
++
++	host->last_slot = slot->bus_id;
 +}
 +
-+static int xenon_start_signal_voltage_switch(struct mmc_host *mmc,
-+					     struct mmc_ios *ios)
++static void do_read(struct cvm_mmc_host *host, struct mmc_request *req,
++		    u64 dbuf)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
++	struct sg_mapping_iter *smi = &host->smi;
++	int data_len = req->data->blocks * req->data->blksz;
++	int bytes_xfered, shift = -1;
++	u64 dat = 0;
 +
++	/* Auto inc from offset zero */
++	writeq((0x10000 | (dbuf << 6)), host->base + MIO_EMM_BUF_IDX(host));
++
++	for (bytes_xfered = 0; bytes_xfered < data_len;) {
++		if (smi->consumed >= smi->length) {
++			if (!sg_miter_next(smi))
++				break;
++			smi->consumed = 0;
++		}
++
++		if (shift < 0) {
++			dat = readq(host->base + MIO_EMM_BUF_DAT(host));
++			shift = 56;
++		}
++
++		while (smi->consumed < smi->length && shift >= 0) {
++			((u8 *)smi->addr)[smi->consumed] = (dat >> shift) & 0xff;
++			bytes_xfered++;
++			smi->consumed++;
++			shift -= 8;
++		}
++	}
++
++	sg_miter_stop(smi);
++	req->data->bytes_xfered = bytes_xfered;
++	req->data->error = 0;
++}
++
++static void do_write(struct mmc_request *req)
++{
++	req->data->bytes_xfered = req->data->blocks * req->data->blksz;
++	req->data->error = 0;
++}
++
++static void set_cmd_response(struct cvm_mmc_host *host, struct mmc_request *req,
++			     u64 rsp_sts)
++{
++	u64 rsp_hi, rsp_lo;
++
++	if (!(rsp_sts & MIO_EMM_RSP_STS_RSP_VAL))
++		return;
++
++	rsp_lo = readq(host->base + MIO_EMM_RSP_LO(host));
++
++	switch (FIELD_GET(MIO_EMM_RSP_STS_RSP_TYPE, rsp_sts)) {
++	case 1:
++	case 3:
++		req->cmd->resp[0] = (rsp_lo >> 8) & 0xffffffff;
++		req->cmd->resp[1] = 0;
++		req->cmd->resp[2] = 0;
++		req->cmd->resp[3] = 0;
++		break;
++	case 2:
++		req->cmd->resp[3] = rsp_lo & 0xffffffff;
++		req->cmd->resp[2] = (rsp_lo >> 32) & 0xffffffff;
++		rsp_hi = readq(host->base + MIO_EMM_RSP_HI(host));
++		req->cmd->resp[1] = rsp_hi & 0xffffffff;
++		req->cmd->resp[0] = (rsp_hi >> 32) & 0xffffffff;
++		break;
++	}
++}
++
++static int get_dma_dir(struct mmc_data *data)
++{
++	return (data->flags & MMC_DATA_WRITE) ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
++}
++
++static int finish_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
++{
++	data->bytes_xfered = data->blocks * data->blksz;
++	data->error = 0;
++	return 1;
++}
++
++static int finish_dma(struct cvm_mmc_host *host, struct mmc_data *data)
++{
++	return finish_dma_single(host, data);
++}
++
++static int check_status(u64 rsp_sts)
++{
++	if (rsp_sts & MIO_EMM_RSP_STS_RSP_BAD_STS ||
++	    rsp_sts & MIO_EMM_RSP_STS_RSP_CRC_ERR ||
++	    rsp_sts & MIO_EMM_RSP_STS_BLK_CRC_ERR)
++		return -EILSEQ;
++	if (rsp_sts & MIO_EMM_RSP_STS_RSP_TIMEOUT ||
++	    rsp_sts & MIO_EMM_RSP_STS_BLK_TIMEOUT)
++		return -ETIMEDOUT;
++	if (rsp_sts & MIO_EMM_RSP_STS_DBUF_ERR)
++		return -EIO;
++	return 0;
++}
++
++/* Try to clean up failed DMA. */
++static void cleanup_dma(struct cvm_mmc_host *host, u64 rsp_sts)
++{
++	u64 emm_dma;
++
++	emm_dma = readq(host->base + MIO_EMM_DMA(host));
++	emm_dma |= FIELD_PREP(MIO_EMM_DMA_VAL, 1) |
++		   FIELD_PREP(MIO_EMM_DMA_DAT_NULL, 1);
++	set_bus_id(&emm_dma, get_bus_id(rsp_sts));
++	writeq(emm_dma, host->base + MIO_EMM_DMA(host));
++}
++
++irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
++{
++	struct cvm_mmc_host *host = dev_id;
++	struct mmc_request *req;
++	unsigned long flags = 0;
++	u64 emm_int, rsp_sts;
++	bool host_done;
++
++	if (host->need_irq_handler_lock)
++		spin_lock_irqsave(&host->irq_handler_lock, flags);
++	else
++		__acquire(&host->irq_handler_lock);
++
++	/* Clear interrupt bits (write 1 clears ). */
++	emm_int = readq(host->base + MIO_EMM_INT(host));
++	writeq(emm_int, host->base + MIO_EMM_INT(host));
++
++	if (emm_int & MIO_EMM_INT_SWITCH_ERR)
++		check_switch_errors(host);
++
++	req = host->current_req;
++	if (!req)
++		goto out;
++
++	rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
 +	/*
-+	 * Before SD/SDIO set signal voltage, SD bus clock should be
-+	 * disabled. However, sdhci_set_clock will also disable the Internal
-+	 * clock in mmc_set_signal_voltage().
-+	 * If Internal clock is disabled, the 3.3V/1.8V bit can not be updated.
-+	 * Thus here manually enable internal clock.
-+	 *
-+	 * After switch completes, it is unnecessary to disable internal clock,
-+	 * since keeping internal clock active obeys SD spec.
++	 * dma_val set means DMA is still in progress. Don't touch
++	 * the request and wait for the interrupt indicating that
++	 * the DMA is finished.
 +	 */
-+	xenon_enable_internal_clk(host);
++	if ((rsp_sts & MIO_EMM_RSP_STS_DMA_VAL) && host->dma_active)
++		goto out;
 +
-+	/*
-+	 * If Vqmmc is fixed on platform, vqmmc regulator should be unavailable.
-+	 * Thus SDHCI_CTRL_VDD_180 bit might not work then.
-+	 * Skip the standard voltage switch to avoid any issue.
-+	 */
-+	if (PTR_ERR(mmc->supply.vqmmc) == -ENODEV)
-+		return 0;
++	if (!host->dma_active && req->data &&
++	    (emm_int & MIO_EMM_INT_BUF_DONE)) {
++		unsigned int type = (rsp_sts >> 7) & 3;
 +
-+	return sdhci_start_signal_voltage_switch(mmc, ios);
++		if (type == 1)
++			do_read(host, req, rsp_sts & MIO_EMM_RSP_STS_DBUF);
++		else if (type == 2)
++			do_write(req);
++	}
++
++	host_done = emm_int & MIO_EMM_INT_CMD_DONE ||
++		    emm_int & MIO_EMM_INT_DMA_DONE ||
++		    emm_int & MIO_EMM_INT_CMD_ERR  ||
++		    emm_int & MIO_EMM_INT_DMA_ERR;
++
++	if (!(host_done && req->done))
++		goto no_req_done;
++
++	req->cmd->error = check_status(rsp_sts);
++
++	if (host->dma_active && req->data)
++		if (!finish_dma(host, req->data))
++			goto no_req_done;
++
++	set_cmd_response(host, req, rsp_sts);
++	if ((emm_int & MIO_EMM_INT_DMA_ERR) &&
++	    (rsp_sts & MIO_EMM_RSP_STS_DMA_PEND))
++		cleanup_dma(host, rsp_sts);
++
++	host->current_req = NULL;
++	req->done(req);
++
++no_req_done:
++	if (host->dmar_fixup_done)
++		host->dmar_fixup_done(host);
++	if (host_done)
++		host->release_bus(host);
++out:
++	if (host->need_irq_handler_lock)
++		spin_unlock_irqrestore(&host->irq_handler_lock, flags);
++	else
++		__release(&host->irq_handler_lock);
++	return IRQ_RETVAL(emm_int != 0);
 +}
 +
 +/*
-+ * Update card type.
-+ * priv->init_card_type will be used in PHY timing adjustment.
++ * Program DMA_CFG and if needed DMA_ADR.
++ * Returns 0 on error, DMA address otherwise.
 + */
-+static void xenon_init_card(struct mmc_host *mmc, struct mmc_card *card)
++static u64 prepare_dma_single(struct cvm_mmc_host *host, struct mmc_data *data)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u64 dma_cfg, addr;
++	int count, rw;
 +
-+	/* Update card type*/
-+	priv->init_card_type = card->type;
-+}
-+
-+static int xenon_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (host->timing == MMC_TIMING_UHS_DDR50)
++	count = dma_map_sg(host->dev, data->sg, data->sg_len,
++			   get_dma_dir(data));
++	if (!count)
 +		return 0;
 +
-+	/*
-+	 * Currently force Xenon driver back to support mode 1 only,
-+	 * even though Xenon might claim to support mode 2 or mode 3.
-+	 * It requires more time to test mode 2/mode 3 on more platforms.
-+	 */
-+	if (host->tuning_mode != SDHCI_TUNING_MODE_1)
-+		xenon_retune_setup(host);
++	rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++	dma_cfg = FIELD_PREP(MIO_EMM_DMA_CFG_EN, 1) |
++		  FIELD_PREP(MIO_EMM_DMA_CFG_RW, rw);
++#ifdef __LITTLE_ENDIAN
++	dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_ENDIAN, 1);
++#endif
++	dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_SIZE,
++			      (sg_dma_len(&data->sg[0]) / 8) - 1);
 +
-+	return sdhci_execute_tuning(mmc, opcode);
++	addr = sg_dma_address(&data->sg[0]);
++	if (!host->big_dma_addr)
++		dma_cfg |= FIELD_PREP(MIO_EMM_DMA_CFG_ADR, addr);
++	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
++
++	pr_debug("[%s] sg_dma_len: %u  total sg_elem: %d\n",
++		 (rw) ? "W" : "R", sg_dma_len(&data->sg[0]), count);
++
++	if (host->big_dma_addr)
++		writeq(addr, host->dma_base + MIO_EMM_DMA_ADR(host));
++	return addr;
 +}
 +
-+static void xenon_enable_sdio_irq(struct mmc_host *mmc, int enable)
++static u64 prepare_dma(struct cvm_mmc_host *host, struct mmc_data *data)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+	u8 sdhc_id = priv->sdhc_id;
++	return prepare_dma_single(host, data);
++}
 +
-+	sdhci_enable_sdio_irq(mmc, enable);
++static u64 prepare_ext_dma(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct cvm_mmc_slot *slot = mmc_priv(mmc);
++	u64 emm_dma;
 +
-+	if (enable) {
++	emm_dma = FIELD_PREP(MIO_EMM_DMA_VAL, 1) |
++		  FIELD_PREP(MIO_EMM_DMA_SECTOR,
++			     (mrq->data->blksz == 512) ? 1 : 0) |
++		  FIELD_PREP(MIO_EMM_DMA_RW,
++			     (mrq->data->flags & MMC_DATA_WRITE) ? 1 : 0) |
++		  FIELD_PREP(MIO_EMM_DMA_BLOCK_CNT, mrq->data->blocks) |
++		  FIELD_PREP(MIO_EMM_DMA_CARD_ADDR, mrq->cmd->arg);
++	set_bus_id(&emm_dma, slot->bus_id);
++
++	if (mmc_card_mmc(mmc->card) || (mmc_card_sd(mmc->card) &&
++	    (mmc->card->scr.cmds & SD_SCR_CMD23_SUPPORT)))
++		emm_dma |= FIELD_PREP(MIO_EMM_DMA_MULTI, 1);
++
++	pr_debug("[%s] blocks: %u  multi: %d\n",
++		(emm_dma & MIO_EMM_DMA_RW) ? "W" : "R",
++		 mrq->data->blocks, (emm_dma & MIO_EMM_DMA_MULTI) ? 1 : 0);
++	return emm_dma;
++}
++
++static void cvm_mmc_dma_request(struct mmc_host *mmc,
++				struct mmc_request *mrq)
++{
++	struct cvm_mmc_slot *slot = mmc_priv(mmc);
++	struct cvm_mmc_host *host = slot->host;
++	struct mmc_data *data;
++	u64 emm_dma, addr;
++
++	if (!mrq->data || !mrq->data->sg || !mrq->data->sg_len ||
++	    !mrq->stop || mrq->stop->opcode != MMC_STOP_TRANSMISSION) {
++		dev_err(&mmc->card->dev,
++			"Error: cmv_mmc_dma_request no data\n");
++		goto error;
++	}
++
++	cvm_mmc_switch_to(slot);
++
++	data = mrq->data;
++	pr_debug("DMA request  blocks: %d  block_size: %d  total_size: %d\n",
++		 data->blocks, data->blksz, data->blocks * data->blksz);
++	if (data->timeout_ns)
++		set_wdog(slot, data->timeout_ns);
++
++	WARN_ON(host->current_req);
++	host->current_req = mrq;
++
++	emm_dma = prepare_ext_dma(mmc, mrq);
++	addr = prepare_dma(host, data);
++	if (!addr) {
++		dev_err(host->dev, "prepare_dma failed\n");
++		goto error;
++	}
++
++	host->dma_active = true;
++	host->int_enable(host, MIO_EMM_INT_CMD_ERR | MIO_EMM_INT_DMA_DONE |
++			 MIO_EMM_INT_DMA_ERR);
++
++	if (host->dmar_fixup)
++		host->dmar_fixup(host, mrq->cmd, data, addr);
++
++	/*
++	 * If we have a valid SD card in the slot, we set the response
++	 * bit mask to check for CRC errors and timeouts only.
++	 * Otherwise, use the default power reset value.
++	 */
++	if (mmc->card && mmc_card_sd(mmc->card))
++		writeq(0x00b00000ull, host->base + MIO_EMM_STS_MASK(host));
++	else
++		writeq(0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
++	writeq(emm_dma, host->base + MIO_EMM_DMA(host));
++	return;
++
++error:
++	mrq->cmd->error = -EINVAL;
++	if (mrq->done)
++		mrq->done(mrq);
++	host->release_bus(host);
++}
++
++static void do_read_request(struct cvm_mmc_host *host, struct mmc_request *mrq)
++{
++	sg_miter_start(&host->smi, mrq->data->sg, mrq->data->sg_len,
++		       SG_MITER_ATOMIC | SG_MITER_TO_SG);
++}
++
++static void do_write_request(struct cvm_mmc_host *host, struct mmc_request *mrq)
++{
++	unsigned int data_len = mrq->data->blocks * mrq->data->blksz;
++	struct sg_mapping_iter *smi = &host->smi;
++	unsigned int bytes_xfered;
++	int shift = 56;
++	u64 dat = 0;
++
++	/* Copy data to the xmit buffer before issuing the command. */
++	sg_miter_start(smi, mrq->data->sg, mrq->data->sg_len, SG_MITER_FROM_SG);
++
++	/* Auto inc from offset zero, dbuf zero */
++	writeq(0x10000ull, host->base + MIO_EMM_BUF_IDX(host));
++
++	for (bytes_xfered = 0; bytes_xfered < data_len;) {
++		if (smi->consumed >= smi->length) {
++			if (!sg_miter_next(smi))
++				break;
++			smi->consumed = 0;
++		}
++
++		while (smi->consumed < smi->length && shift >= 0) {
++			dat |= ((u8 *)smi->addr)[smi->consumed] << shift;
++			bytes_xfered++;
++			smi->consumed++;
++			shift -= 8;
++		}
++
++		if (shift < 0) {
++			writeq(dat, host->base + MIO_EMM_BUF_DAT(host));
++			shift = 56;
++			dat = 0;
++		}
++	}
++	sg_miter_stop(smi);
++}
++
++static void cvm_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct cvm_mmc_slot *slot = mmc_priv(mmc);
++	struct cvm_mmc_host *host = slot->host;
++	struct mmc_command *cmd = mrq->cmd;
++	struct cvm_mmc_cr_mods mods;
++	u64 emm_cmd, rsp_sts;
++	int retries = 100;
++
++	/*
++	 * Note about locking:
++	 * All MMC devices share the same bus and controller. Allow only a
++	 * single user of the bootbus/MMC bus at a time. The lock is acquired
++	 * on all entry points from the MMC layer.
++	 *
++	 * For requests the lock is only released after the completion
++	 * interrupt!
++	 */
++	host->acquire_bus(host);
++
++	if (cmd->opcode == MMC_READ_MULTIPLE_BLOCK ||
++	    cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)
++		return cvm_mmc_dma_request(mmc, mrq);
++
++	cvm_mmc_switch_to(slot);
++
++	mods = cvm_mmc_get_cr_mods(cmd);
++
++	WARN_ON(host->current_req);
++	host->current_req = mrq;
++
++	if (cmd->data) {
++		if (cmd->data->flags & MMC_DATA_READ)
++			do_read_request(host, mrq);
++		else
++			do_write_request(host, mrq);
++
++		if (cmd->data->timeout_ns)
++			set_wdog(slot, cmd->data->timeout_ns);
++	} else
++		set_wdog(slot, 0);
++
++	host->dma_active = false;
++	host->int_enable(host, MIO_EMM_INT_CMD_DONE | MIO_EMM_INT_CMD_ERR);
++
++	emm_cmd = FIELD_PREP(MIO_EMM_CMD_VAL, 1) |
++		  FIELD_PREP(MIO_EMM_CMD_CTYPE_XOR, mods.ctype_xor) |
++		  FIELD_PREP(MIO_EMM_CMD_RTYPE_XOR, mods.rtype_xor) |
++		  FIELD_PREP(MIO_EMM_CMD_IDX, cmd->opcode) |
++		  FIELD_PREP(MIO_EMM_CMD_ARG, cmd->arg);
++	set_bus_id(&emm_cmd, slot->bus_id);
++	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
++		emm_cmd |= FIELD_PREP(MIO_EMM_CMD_OFFSET,
++				64 - ((cmd->data->blocks * cmd->data->blksz) / 8));
++
++	writeq(0, host->base + MIO_EMM_STS_MASK(host));
++
++retry:
++	rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
++	if (rsp_sts & MIO_EMM_RSP_STS_DMA_VAL ||
++	    rsp_sts & MIO_EMM_RSP_STS_CMD_VAL ||
++	    rsp_sts & MIO_EMM_RSP_STS_SWITCH_VAL ||
++	    rsp_sts & MIO_EMM_RSP_STS_DMA_PEND) {
++		udelay(10);
++		if (--retries)
++			goto retry;
++	}
++	if (!retries)
++		dev_err(host->dev, "Bad status: %llx before command write\n", rsp_sts);
++	writeq(emm_cmd, host->base + MIO_EMM_CMD(host));
++}
++
++static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct cvm_mmc_slot *slot = mmc_priv(mmc);
++	struct cvm_mmc_host *host = slot->host;
++	int clk_period = 0, power_class = 10, bus_width = 0;
++	u64 clock, emm_switch;
++
++	host->acquire_bus(host);
++	cvm_mmc_switch_to(slot);
++
++	/* Set the power state */
++	switch (ios->power_mode) {
++	case MMC_POWER_ON:
++		break;
++
++	case MMC_POWER_OFF:
++		cvm_mmc_reset_bus(slot);
++		if (host->global_pwr_gpiod)
++			host->set_shared_power(host, 0);
++		else
++			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++		break;
++
++	case MMC_POWER_UP:
++		if (host->global_pwr_gpiod)
++			host->set_shared_power(host, 1);
++		else
++			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
++		break;
++	}
++
++	/* Convert bus width to HW definition */
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_8:
++		bus_width = 2;
++		break;
++	case MMC_BUS_WIDTH_4:
++		bus_width = 1;
++		break;
++	case MMC_BUS_WIDTH_1:
++		bus_width = 0;
++		break;
++	}
++
++	/* Change the clock frequency. */
++	clock = ios->clock;
++	if (clock > 52000000)
++		clock = 52000000;
++	slot->clock = clock;
++
++	if (clock)
++		clk_period = (host->sys_freq + clock - 1) / (2 * clock);
++
++	emm_switch = FIELD_PREP(MIO_EMM_SWITCH_HS_TIMING,
++				(ios->timing == MMC_TIMING_MMC_HS)) |
++		     FIELD_PREP(MIO_EMM_SWITCH_BUS_WIDTH, bus_width) |
++		     FIELD_PREP(MIO_EMM_SWITCH_POWER_CLASS, power_class) |
++		     FIELD_PREP(MIO_EMM_SWITCH_CLK_HI, clk_period) |
++		     FIELD_PREP(MIO_EMM_SWITCH_CLK_LO, clk_period);
++	set_bus_id(&emm_switch, slot->bus_id);
++
++	if (!switch_val_changed(slot, emm_switch))
++		goto out;
++
++	set_wdog(slot, 0);
++	do_switch(host, emm_switch);
++	slot->cached_switch = emm_switch;
++out:
++	host->release_bus(host);
++}
++
++static const struct mmc_host_ops cvm_mmc_ops = {
++	.request        = cvm_mmc_request,
++	.set_ios        = cvm_mmc_set_ios,
++	.get_ro		= mmc_gpio_get_ro,
++	.get_cd		= mmc_gpio_get_cd,
++};
++
++static void cvm_mmc_set_clock(struct cvm_mmc_slot *slot, unsigned int clock)
++{
++	struct mmc_host *mmc = slot->mmc;
++
++	clock = min(clock, mmc->f_max);
++	clock = max(clock, mmc->f_min);
++	slot->clock = clock;
++}
++
++static int cvm_mmc_init_lowlevel(struct cvm_mmc_slot *slot)
++{
++	struct cvm_mmc_host *host = slot->host;
++	u64 emm_switch;
++
++	/* Enable this bus slot. */
++	host->emm_cfg |= (1ull << slot->bus_id);
++	writeq(host->emm_cfg, slot->host->base + MIO_EMM_CFG(host));
++	udelay(10);
++
++	/* Program initial clock speed and power. */
++	cvm_mmc_set_clock(slot, slot->mmc->f_min);
++	emm_switch = FIELD_PREP(MIO_EMM_SWITCH_POWER_CLASS, 10);
++	emm_switch |= FIELD_PREP(MIO_EMM_SWITCH_CLK_HI,
++				 (host->sys_freq / slot->clock) / 2);
++	emm_switch |= FIELD_PREP(MIO_EMM_SWITCH_CLK_LO,
++				 (host->sys_freq / slot->clock) / 2);
++
++	/* Make the changes take effect on this bus slot. */
++	set_bus_id(&emm_switch, slot->bus_id);
++	do_switch(host, emm_switch);
++
++	slot->cached_switch = emm_switch;
++
++	/*
++	 * Set watchdog timeout value and default reset value
++	 * for the mask register. Finally, set the CARD_RCA
++	 * bit so that we can get the card address relative
++	 * to the CMD register for CMD7 transactions.
++	 */
++	set_wdog(slot, 0);
++	writeq(0xe4390080ull, host->base + MIO_EMM_STS_MASK(host));
++	writeq(1, host->base + MIO_EMM_RCA(host));
++	return 0;
++}
++
++static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
++{
++	u32 id, cmd_skew = 0, dat_skew = 0, bus_width = 0;
++	struct device_node *node = dev->of_node;
++	struct mmc_host *mmc = slot->mmc;
++	u64 clock_period;
++	int ret;
++
++	ret = of_property_read_u32(node, "reg", &id);
++	if (ret) {
++		dev_err(dev, "Missing or invalid reg property on %s\n",
++			of_node_full_name(node));
++		return ret;
++	}
++
++	if (id >= CAVIUM_MAX_MMC || slot->host->slot[id]) {
++		dev_err(dev, "Invalid reg property on %s\n",
++			of_node_full_name(node));
++		return -EINVAL;
++	}
++
++	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
++	if (IS_ERR(mmc->supply.vmmc)) {
++		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
++			return -EPROBE_DEFER;
 +		/*
-+		 * Set SDIO Card Inserted indication
-+		 * to enable detecting SDIO async irq.
++		 * Legacy Octeon firmware has no regulator entry, fall-back to
++		 * a hard-coded voltage to get a sane OCR.
 +		 */
-+		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
-+		reg |= (1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
-+		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
++		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 +	} else {
-+		/* Clear SDIO Card Inserted indication */
-+		reg = sdhci_readl(host, XENON_SYS_CFG_INFO);
-+		reg &= ~(1 << (sdhc_id + XENON_SLOT_TYPE_SDIO_SHIFT));
-+		sdhci_writel(host, reg, XENON_SYS_CFG_INFO);
++		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
++		if (ret > 0)
++			mmc->ocr_avail = ret;
 +	}
-+}
 +
-+static void xenon_replace_mmc_host_ops(struct sdhci_host *host)
-+{
-+	host->mmc_host_ops.set_ios = xenon_set_ios;
-+	host->mmc_host_ops.start_signal_voltage_switch =
-+			xenon_start_signal_voltage_switch;
-+	host->mmc_host_ops.init_card = xenon_init_card;
-+	host->mmc_host_ops.execute_tuning = xenon_execute_tuning;
-+	host->mmc_host_ops.enable_sdio_irq = xenon_enable_sdio_irq;
-+}
++	/* Common MMC bindings */
++	ret = mmc_of_parse(mmc);
++	if (ret)
++		return ret;
 +
-+/*
-+ * Parse Xenon specific DT properties:
-+ * sdhc-id: the index of current SDHC.
-+ *	    Refer to XENON_SYS_CFG_INFO register
-+ * tun-count: the interval between re-tuning
-+ */
-+static int xenon_probe_dt(struct platform_device *pdev)
-+{
-+	struct device_node *np = pdev->dev.of_node;
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 sdhc_id, nr_sdhc;
-+	u32 tuning_count;
-+
-+	/* Disable HS200 on Armada AP806 */
-+	if (of_device_is_compatible(np, "marvell,armada-ap806-sdhci"))
-+		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
-+
-+	sdhc_id = 0x0;
-+	if (!of_property_read_u32(np, "marvell,xenon-sdhc-id", &sdhc_id)) {
-+		nr_sdhc = sdhci_readl(host, XENON_SYS_CFG_INFO);
-+		nr_sdhc &= XENON_NR_SUPPORTED_SLOT_MASK;
-+		if (unlikely(sdhc_id > nr_sdhc)) {
-+			dev_err(mmc_dev(mmc), "SDHC Index %d exceeds Number of SDHCs %d\n",
-+				sdhc_id, nr_sdhc);
-+			return -EINVAL;
-+		}
++	/* Set bus width */
++	if (!(mmc->caps & (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA))) {
++		of_property_read_u32(node, "cavium,bus-max-width", &bus_width);
++		if (bus_width == 8)
++			mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
++		else if (bus_width == 4)
++			mmc->caps |= MMC_CAP_4_BIT_DATA;
 +	}
-+	priv->sdhc_id = sdhc_id;
 +
-+	tuning_count = XENON_DEF_TUNING_COUNT;
-+	if (!of_property_read_u32(np, "marvell,xenon-tun-count",
-+				  &tuning_count)) {
-+		if (unlikely(tuning_count >= XENON_TMR_RETUN_NO_PRESENT)) {
-+			dev_err(mmc_dev(mmc), "Wrong Re-tuning Count. Set default value %d\n",
-+				XENON_DEF_TUNING_COUNT);
-+			tuning_count = XENON_DEF_TUNING_COUNT;
-+		}
++	/* Set maximum and minimum frequency */
++	if (!mmc->f_max)
++		of_property_read_u32(node, "spi-max-frequency", &mmc->f_max);
++	if (!mmc->f_max || mmc->f_max > 52000000)
++		mmc->f_max = 52000000;
++	mmc->f_min = 400000;
++
++	/* Sampling register settings, period in picoseconds */
++	clock_period = 1000000000000ull / slot->host->sys_freq;
++	of_property_read_u32(node, "cavium,cmd-clk-skew", &cmd_skew);
++	of_property_read_u32(node, "cavium,dat-clk-skew", &dat_skew);
++	slot->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
++	slot->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
++
++	return id;
++}
++
++int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host)
++{
++	struct cvm_mmc_slot *slot;
++	struct mmc_host *mmc;
++	int ret, id;
++
++	mmc = mmc_alloc_host(sizeof(struct cvm_mmc_slot), dev);
++	if (!mmc)
++		return -ENOMEM;
++
++	slot = mmc_priv(mmc);
++	slot->mmc = mmc;
++	slot->host = host;
++
++	ret = cvm_mmc_of_parse(dev, slot);
++	if (ret < 0)
++		goto error;
++	id = ret;
++
++	/* Set up host parameters */
++	mmc->ops = &cvm_mmc_ops;
++
++	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
++		     MMC_CAP_ERASE | MMC_CAP_CMD23 | MMC_CAP_POWER_OFF_CARD;
++
++	mmc->max_segs = 1;
++
++	/* DMA size field can address up to 8 MB */
++	mmc->max_seg_size = 8 * 1024 * 1024;
++	mmc->max_req_size = mmc->max_seg_size;
++	/* External DMA is in 512 byte blocks */
++	mmc->max_blk_size = 512;
++	/* DMA block count field is 15 bits */
++	mmc->max_blk_count = 32767;
++
++	slot->clock = mmc->f_min;
++	slot->bus_id = id;
++	slot->cached_rca = 1;
++
++	host->acquire_bus(host);
++	host->slot[id] = slot;
++	cvm_mmc_switch_to(slot);
++	cvm_mmc_init_lowlevel(slot);
++	host->release_bus(host);
++
++	ret = mmc_add_host(mmc);
++	if (ret) {
++		dev_err(dev, "mmc_add_host() returned %d\n", ret);
++		slot->host->slot[id] = NULL;
++		goto error;
 +	}
-+	priv->tuning_count = tuning_count;
-+
-+	return 0;
-+}
-+
-+static int xenon_sdhc_prepare(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u8 sdhc_id = priv->sdhc_id;
-+
-+	/* Enable SDHC */
-+	xenon_enable_sdhc(host, sdhc_id);
-+
-+	/* Enable ACG */
-+	xenon_set_acg(host, true);
-+
-+	/* Enable Parallel Transfer Mode */
-+	xenon_enable_sdhc_parallel_tran(host, sdhc_id);
-+
-+	/* Disable SDCLK-Off-While-Idle before card init */
-+	xenon_set_sdclk_off_idle(host, sdhc_id, false);
-+
-+	xenon_mask_cmd_conflict_err(host);
-+
-+	return 0;
-+}
-+
-+static void xenon_sdhc_unprepare(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u8 sdhc_id = priv->sdhc_id;
-+
-+	/* disable SDHC */
-+	xenon_disable_sdhc(host, sdhc_id);
-+}
-+
-+static int xenon_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	struct xenon_priv *priv;
-+	int err;
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_xenon_pdata,
-+				sizeof(struct xenon_priv));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	/*
-+	 * Link Xenon specific mmc_host_ops function,
-+	 * to replace standard ones in sdhci_ops.
-+	 */
-+	xenon_replace_mmc_host_ops(host);
-+
-+	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
-+	if (IS_ERR(pltfm_host->clk)) {
-+		err = PTR_ERR(pltfm_host->clk);
-+		dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
-+		goto free_pltfm;
-+	}
-+	err = clk_prepare_enable(pltfm_host->clk);
-+	if (err)
-+		goto free_pltfm;
-+
-+	err = mmc_of_parse(host->mmc);
-+	if (err)
-+		goto err_clk;
-+
-+	sdhci_get_of_property(pdev);
-+
-+	xenon_set_acg(host, false);
-+
-+	/* Xenon specific dt parse */
-+	err = xenon_probe_dt(pdev);
-+	if (err)
-+		goto err_clk;
-+
-+	err = xenon_sdhc_prepare(host);
-+	if (err)
-+		goto err_clk;
-+
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto remove_sdhc;
-+
 +	return 0;
 +
-+remove_sdhc:
-+	xenon_sdhc_unprepare(host);
-+err_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
-+free_pltfm:
-+	sdhci_pltfm_free(pdev);
-+	return err;
++error:
++	mmc_free_host(slot->mmc);
++	return ret;
 +}
 +
-+static int xenon_remove(struct platform_device *pdev)
++int cvm_mmc_of_slot_remove(struct cvm_mmc_slot *slot)
 +{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	xenon_sdhc_unprepare(host);
-+
-+	sdhci_remove_host(host, 0);
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+	sdhci_pltfm_free(pdev);
-+
++	mmc_remove_host(slot->mmc);
++	slot->host->slot[slot->bus_id] = NULL;
++	mmc_free_host(slot->mmc);
 +	return 0;
 +}
-+
-+static const struct of_device_id sdhci_xenon_dt_ids[] = {
-+	{ .compatible = "marvell,armada-ap806-sdhci",},
-+	{ .compatible = "marvell,armada-cp110-sdhci",},
-+	{ .compatible = "marvell,armada-3700-sdhci",},
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
-+
-+static struct platform_driver sdhci_xenon_driver = {
-+	.driver	= {
-+		.name	= "xenon-sdhci",
-+		.of_match_table = sdhci_xenon_dt_ids,
-+		.pm = &sdhci_pltfm_pmops,
-+	},
-+	.probe	= xenon_probe,
-+	.remove	= xenon_remove,
-+};
-+
-+module_platform_driver(sdhci_xenon_driver);
-+
-+MODULE_DESCRIPTION("SDHCI platform driver for Marvell Xenon SDHC");
-+MODULE_AUTHOR("Hu Ziji <huziji@marvell.com>");
-+MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+diff --git a/drivers/mmc/host/cavium.h b/drivers/mmc/host/cavium.h
 new file mode 100644
-index 000000000000..813585b45e8d
+index 0000000..f5d2b61
 --- /dev/null
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -0,0 +1,60 @@
++++ b/drivers/mmc/host/cavium.h
+@@ -0,0 +1,192 @@
 +/*
-+ * Copyright (C) 2016 Marvell, All Rights Reserved.
++ * Driver for MMC and SSD cards for Cavium OCTEON and ThunderX SOCs.
 + *
-+ * Author:	Hu Ziji <huziji@marvell.com>
-+ * Date:	2016-8-24
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
 + *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation version 2.
++ * Copyright (C) 2012-2017 Cavium Inc.
 + */
-+#ifndef SDHCI_XENON_H_
-+#define SDHCI_XENON_H_
 +
-+/* Register Offset of Xenon SDHC self-defined register */
-+#define XENON_SYS_CFG_INFO			0x0104
-+#define XENON_SLOT_TYPE_SDIO_SHIFT		24
-+#define XENON_NR_SUPPORTED_SLOT_MASK		0x7
++#ifndef _CAVIUM_MMC_H_
++#define _CAVIUM_MMC_H_
 +
-+#define XENON_SYS_OP_CTRL			0x0108
-+#define XENON_AUTO_CLKGATE_DISABLE_MASK		BIT(20)
-+#define XENON_SDCLK_IDLEOFF_ENABLE_SHIFT	8
-+#define XENON_SLOT_ENABLE_SHIFT			0
++#include <linux/bitops.h>
++#include <linux/clk.h>
++#include <linux/gpio/consumer.h>
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include <linux/of.h>
++#include <linux/scatterlist.h>
++#include <linux/semaphore.h>
 +
-+#define XENON_SYS_EXT_OP_CTRL			0x010C
-+#define XENON_MASK_CMD_CONFLICT_ERR		BIT(8)
++#define CAVIUM_MAX_MMC		4
 +
-+#define XENON_SLOT_RETUNING_REQ_CTRL		0x0144
-+/* retuning compatible */
-+#define XENON_RETUNING_COMPATIBLE		0x1
++/* DMA register addresses */
++#define MIO_EMM_DMA_CFG(x)	(0x00 + x->reg_off_dma)
 +
-+/* Tuning Parameter */
-+#define XENON_TMR_RETUN_NO_PRESENT		0xF
-+#define XENON_DEF_TUNING_COUNT			0x9
++/* register addresses */
++#define MIO_EMM_CFG(x)		(0x00 + x->reg_off)
++#define MIO_EMM_SWITCH(x)	(0x48 + x->reg_off)
++#define MIO_EMM_DMA(x)		(0x50 + x->reg_off)
++#define MIO_EMM_CMD(x)		(0x58 + x->reg_off)
++#define MIO_EMM_RSP_STS(x)	(0x60 + x->reg_off)
++#define MIO_EMM_RSP_LO(x)	(0x68 + x->reg_off)
++#define MIO_EMM_RSP_HI(x)	(0x70 + x->reg_off)
++#define MIO_EMM_INT(x)		(0x78 + x->reg_off)
++#define MIO_EMM_INT_EN(x)	(0x80 + x->reg_off)
++#define MIO_EMM_WDOG(x)		(0x88 + x->reg_off)
++#define MIO_EMM_SAMPLE(x)	(0x90 + x->reg_off)
++#define MIO_EMM_STS_MASK(x)	(0x98 + x->reg_off)
++#define MIO_EMM_RCA(x)		(0xa0 + x->reg_off)
++#define MIO_EMM_BUF_IDX(x)	(0xe0 + x->reg_off)
++#define MIO_EMM_BUF_DAT(x)	(0xe8 + x->reg_off)
 +
-+#define XENON_DEFAULT_SDCLK_FREQ		400000
++struct cvm_mmc_host {
++	struct device *dev;
++	void __iomem *base;
++	void __iomem *dma_base;
++	int reg_off;
++	int reg_off_dma;
++	u64 emm_cfg;
++	u64 n_minus_one;	/* OCTEON II workaround location */
++	int last_slot;
++	struct clk *clk;
++	int sys_freq;
 +
-+/* Xenon specific Mode Select value */
-+#define XENON_CTRL_HS200			0x5
-+#define XENON_CTRL_HS400			0x6
++	struct mmc_request *current_req;
++	struct sg_mapping_iter smi;
++	bool dma_active;
 +
-+struct xenon_priv {
-+	unsigned char	tuning_count;
-+	/* idx of SDHC */
-+	u8		sdhc_id;
++	bool has_ciu3;
++	bool big_dma_addr;
++	bool need_irq_handler_lock;
++	spinlock_t irq_handler_lock;
++	struct semaphore mmc_serializer;
 +
-+	/*
-+	 * eMMC/SD/SDIO require different register settings.
-+	 * Xenon driver has to recognize card type
-+	 * before mmc_host->card is not available.
-+	 * This field records the card type during init.
-+	 * It is updated in xenon_init_card().
-+	 *
-+	 * It is only valid during initialization after it is updated.
-+	 * Do not access this variable in normal transfers after
-+	 * initialization completes.
-+	 */
-+	unsigned int	init_card_type;
++	struct gpio_desc *global_pwr_gpiod;
++	atomic_t shared_power_users;
++
++	struct cvm_mmc_slot *slot[CAVIUM_MAX_MMC];
++	struct platform_device *slot_pdev[CAVIUM_MAX_MMC];
++
++	void (*set_shared_power)(struct cvm_mmc_host *, int);
++	void (*acquire_bus)(struct cvm_mmc_host *);
++	void (*release_bus)(struct cvm_mmc_host *);
++	void (*int_enable)(struct cvm_mmc_host *, u64);
++	/* required on some MIPS models */
++	void (*dmar_fixup)(struct cvm_mmc_host *, struct mmc_command *,
++			   struct mmc_data *, u64);
++	void (*dmar_fixup_done)(struct cvm_mmc_host *);
 +};
++
++struct cvm_mmc_slot {
++	struct mmc_host *mmc;		/* slot-level mmc_core object */
++	struct cvm_mmc_host *host;	/* common hw for all slots */
++
++	u64 clock;
++
++	u64 cached_switch;
++	u64 cached_rca;
++
++	unsigned int cmd_cnt;		/* sample delay */
++	unsigned int dat_cnt;		/* sample delay */
++
++	int bus_id;
++};
++
++struct cvm_mmc_cr_type {
++	u8 ctype;
++	u8 rtype;
++};
++
++struct cvm_mmc_cr_mods {
++	u8 ctype_xor;
++	u8 rtype_xor;
++};
++
++/* Bitfield definitions */
++#define MIO_EMM_CMD_SKIP_BUSY		BIT_ULL(62)
++#define MIO_EMM_CMD_BUS_ID		GENMASK_ULL(61, 60)
++#define MIO_EMM_CMD_VAL			BIT_ULL(59)
++#define MIO_EMM_CMD_DBUF		BIT_ULL(55)
++#define MIO_EMM_CMD_OFFSET		GENMASK_ULL(54, 49)
++#define MIO_EMM_CMD_CTYPE_XOR		GENMASK_ULL(42, 41)
++#define MIO_EMM_CMD_RTYPE_XOR		GENMASK_ULL(40, 38)
++#define MIO_EMM_CMD_IDX			GENMASK_ULL(37, 32)
++#define MIO_EMM_CMD_ARG			GENMASK_ULL(31, 0)
++
++#define MIO_EMM_DMA_SKIP_BUSY		BIT_ULL(62)
++#define MIO_EMM_DMA_BUS_ID		GENMASK_ULL(61, 60)
++#define MIO_EMM_DMA_VAL			BIT_ULL(59)
++#define MIO_EMM_DMA_SECTOR		BIT_ULL(58)
++#define MIO_EMM_DMA_DAT_NULL		BIT_ULL(57)
++#define MIO_EMM_DMA_THRES		GENMASK_ULL(56, 51)
++#define MIO_EMM_DMA_REL_WR		BIT_ULL(50)
++#define MIO_EMM_DMA_RW			BIT_ULL(49)
++#define MIO_EMM_DMA_MULTI		BIT_ULL(48)
++#define MIO_EMM_DMA_BLOCK_CNT		GENMASK_ULL(47, 32)
++#define MIO_EMM_DMA_CARD_ADDR		GENMASK_ULL(31, 0)
++
++#define MIO_EMM_DMA_CFG_EN		BIT_ULL(63)
++#define MIO_EMM_DMA_CFG_RW		BIT_ULL(62)
++#define MIO_EMM_DMA_CFG_CLR		BIT_ULL(61)
++#define MIO_EMM_DMA_CFG_SWAP32		BIT_ULL(59)
++#define MIO_EMM_DMA_CFG_SWAP16		BIT_ULL(58)
++#define MIO_EMM_DMA_CFG_SWAP8		BIT_ULL(57)
++#define MIO_EMM_DMA_CFG_ENDIAN		BIT_ULL(56)
++#define MIO_EMM_DMA_CFG_SIZE		GENMASK_ULL(55, 36)
++#define MIO_EMM_DMA_CFG_ADR		GENMASK_ULL(35, 0)
++
++#define MIO_EMM_INT_SWITCH_ERR		BIT_ULL(6)
++#define MIO_EMM_INT_SWITCH_DONE		BIT_ULL(5)
++#define MIO_EMM_INT_DMA_ERR		BIT_ULL(4)
++#define MIO_EMM_INT_CMD_ERR		BIT_ULL(3)
++#define MIO_EMM_INT_DMA_DONE		BIT_ULL(2)
++#define MIO_EMM_INT_CMD_DONE		BIT_ULL(1)
++#define MIO_EMM_INT_BUF_DONE		BIT_ULL(0)
++
++#define MIO_EMM_RSP_STS_BUS_ID		GENMASK_ULL(61, 60)
++#define MIO_EMM_RSP_STS_CMD_VAL		BIT_ULL(59)
++#define MIO_EMM_RSP_STS_SWITCH_VAL	BIT_ULL(58)
++#define MIO_EMM_RSP_STS_DMA_VAL		BIT_ULL(57)
++#define MIO_EMM_RSP_STS_DMA_PEND	BIT_ULL(56)
++#define MIO_EMM_RSP_STS_DBUF_ERR	BIT_ULL(28)
++#define MIO_EMM_RSP_STS_DBUF		BIT_ULL(23)
++#define MIO_EMM_RSP_STS_BLK_TIMEOUT	BIT_ULL(22)
++#define MIO_EMM_RSP_STS_BLK_CRC_ERR	BIT_ULL(21)
++#define MIO_EMM_RSP_STS_RSP_BUSYBIT	BIT_ULL(20)
++#define MIO_EMM_RSP_STS_STP_TIMEOUT	BIT_ULL(19)
++#define MIO_EMM_RSP_STS_STP_CRC_ERR	BIT_ULL(18)
++#define MIO_EMM_RSP_STS_STP_BAD_STS	BIT_ULL(17)
++#define MIO_EMM_RSP_STS_STP_VAL		BIT_ULL(16)
++#define MIO_EMM_RSP_STS_RSP_TIMEOUT	BIT_ULL(15)
++#define MIO_EMM_RSP_STS_RSP_CRC_ERR	BIT_ULL(14)
++#define MIO_EMM_RSP_STS_RSP_BAD_STS	BIT_ULL(13)
++#define MIO_EMM_RSP_STS_RSP_VAL		BIT_ULL(12)
++#define MIO_EMM_RSP_STS_RSP_TYPE	GENMASK_ULL(11, 9)
++#define MIO_EMM_RSP_STS_CMD_TYPE	GENMASK_ULL(8, 7)
++#define MIO_EMM_RSP_STS_CMD_IDX		GENMASK_ULL(6, 1)
++#define MIO_EMM_RSP_STS_CMD_DONE	BIT_ULL(0)
++
++#define MIO_EMM_SAMPLE_CMD_CNT		GENMASK_ULL(25, 16)
++#define MIO_EMM_SAMPLE_DAT_CNT		GENMASK_ULL(9, 0)
++
++#define MIO_EMM_SWITCH_BUS_ID		GENMASK_ULL(61, 60)
++#define MIO_EMM_SWITCH_EXE		BIT_ULL(59)
++#define MIO_EMM_SWITCH_ERR0		BIT_ULL(58)
++#define MIO_EMM_SWITCH_ERR1		BIT_ULL(57)
++#define MIO_EMM_SWITCH_ERR2		BIT_ULL(56)
++#define MIO_EMM_SWITCH_HS_TIMING	BIT_ULL(48)
++#define MIO_EMM_SWITCH_BUS_WIDTH	GENMASK_ULL(42, 40)
++#define MIO_EMM_SWITCH_POWER_CLASS	GENMASK_ULL(35, 32)
++#define MIO_EMM_SWITCH_CLK_HI		GENMASK_ULL(31, 16)
++#define MIO_EMM_SWITCH_CLK_LO		GENMASK_ULL(15, 0)
++
++/* Protoypes */
++irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id);
++int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host);
++int cvm_mmc_of_slot_remove(struct cvm_mmc_slot *slot);
++extern const char *cvm_mmc_irq_names[];
 +
 +#endif
 -- 
-git-series 0.9.1
+2.9.0.rc0.21.g7777322
