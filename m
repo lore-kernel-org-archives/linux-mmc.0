@@ -1,70 +1,52 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-acpi: Set MMC_CAP_AGGRESSIVE_PM for
- BYT-related Intel controllers
-Date: Thu, 30 Mar 2017 21:31:18 +0200
-Message-ID: <CAPDyKFptvekvJQDUVnNYYLT5SHH9i9-X3jLj38Qo-w9-u9UzEA@mail.gmail.com>
-References: <1490724510-105153-1-git-send-email-azhar.shaikh@intel.com> <1490811393-109654-1-git-send-email-azhar.shaikh@intel.com>
+Subject: Re: [PATCH] mmc: host: s3cmci: fix broken conditional expression
+Date: Thu, 30 Mar 2017 21:31:26 +0200
+Message-ID: <CAPDyKFq6U9mXVz-msN4uDwDJANZqdVwcKTLVyqu1rthhsRx6KQ@mail.gmail.com>
+References: <20170329095250.2937200-1-arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f51.google.com ([209.85.213.51]:35850 "EHLO
-        mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934770AbdC3TbZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2017 15:31:25 -0400
-Received: by mail-vk0-f51.google.com with SMTP id s68so67115393vke.3
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Mar 2017 12:31:24 -0700 (PDT)
-In-Reply-To: <1490811393-109654-1-git-send-email-azhar.shaikh@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170329095250.2937200-1-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ben Dooks <ben-linux@fluff.org>, Heiner Kallweit <hkallweit1@gmail.com>, Sergio Prado <sergio.prado@e-labworks.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, Krzysztof Kozlowski <krzk@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Azhar Shaikh <azhar.shaikh@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 29 March 2017 at 20:16, Azhar Shaikh <azhar.shaikh@intel.com> wrote:
-> Set MMC_CAP_AGGRESSIVE_PM for BYT-related Intel SD card
-> controllers.
+On 29 March 2017 at 11:52, Arnd Bergmann <arnd@arndb.de> wrote:
+> The DT support introduced a typo that gcc detects when -Wempty-body
+> is enabled:
 >
-> Signed-off-by: Azhar Shaikh <azhar.shaikh@intel.com>
-
+> drivers/mmc/host/s3cmci.c: In function 's3cmci_probe_pdata':
+> drivers/mmc/host/s3cmci.c:1543:29: error: suggest braces around empty body in an 'if' statement [-Werror=empty-body]
+>   if (pdata->wprotect_invert);
+>
+> Clearly the ';' was not intended here, so remove it.
+>
+> Fixes: 4b13f3b290d1 ("mmc: host: s3cmci: allow probing from device tree")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
-
 > ---
-> Changes in v2:
->   - Rebased the patch on top of 'next' branch.
->   - No code change.
+>  drivers/mmc/host/s3cmci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
->  drivers/mmc/host/sdhci-acpi.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
+> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+> index 09eab2120bbd..bbf1fbbc8e2a 100644
+> --- a/drivers/mmc/host/s3cmci.c
+> +++ b/drivers/mmc/host/s3cmci.c
+> @@ -1540,7 +1540,7 @@ static int s3cmci_probe_pdata(struct s3cmci_host *host)
+>         if (pdata->no_detect)
+>                 mmc->caps |= MMC_CAP_NEEDS_POLL;
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 665c5f3..c6a9a1b 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -263,10 +263,8 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+> -       if (pdata->wprotect_invert);
+> +       if (pdata->wprotect_invert)
+>                 mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
 >
->         /* Platform specific code during sd probe slot goes here */
->
-> -       if (hid && !strcmp(hid, "80865ACA")) {
-> +       if (hid && !strcmp(hid, "80865ACA"))
->                 host->mmc_host_ops.get_cd = bxt_get_cd;
-> -               host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
-> -       }
->
->         return 0;
->  }
-> @@ -302,7 +300,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
->         .quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->         .quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
->                    SDHCI_QUIRK2_STOP_WITH_TC,
-> -       .caps    = MMC_CAP_WAIT_WHILE_BUSY,
-> +       .caps    = MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_AGGRESSIVE_PM,
->         .probe_slot     = sdhci_acpi_sd_probe_slot,
->  };
->
+>         if (pdata->detect_invert)
 > --
-> 1.9.1
+> 2.9.0
 >
