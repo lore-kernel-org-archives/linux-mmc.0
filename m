@@ -1,60 +1,50 @@
-From: Piotr Sroka <piotrs@cadence.com>
-Subject: RE: [v5 2/4] dt-bindings: mmc: add description of PHY delays for sdhci-cadence
-Date: Thu, 30 Mar 2017 12:06:36 +0100
-Message-ID: <201703301106.v2UB6aj4001807@lvloginb.cadence.com>
-References: <1490106736-2242-1-git-send-email-piotrs@cadence.com>
- <1490106781-3129-1-git-send-email-piotrs@cadence.com>
- <CAK7LNAS+=KjuD-31he5fRw=S_t10Uygae7bOWf+uRYVCPeW=5w@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: Outstanding MQ questions from MMC
+Date: Thu, 30 Mar 2017 14:42:53 +0200
+Message-ID: <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
+References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAS+=KjuD-31he5fRw=S_t10Uygae7bOWf+uRYVCPeW=5w@mail.gmail.com> 
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Piotr <piotrs@cadence.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:35166 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933107AbdC3Mmz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2017 08:42:55 -0400
+In-Reply-To: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 
-Hi Masahiro
+On Wed, Mar 29, 2017 at 5:09 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> Hi folks,
+>
+> I earlier left some unanswered questions in my MMC to MQ conversion series
+> but I figured it is better if I collect them and ask the blk-mq
+> maintainers directly
+> how to deal with the following situations that occur in the MMC block layer:
+>
+>
+> 1. The current MMC code locks the host when the first request comes in
+> from blk_fetch_request() and unlocks it when blk_fetch_request() returns
+> NULL twice in a row. Then the polling thread terminated and is not restarted
+> until we get called by the mmc_request_fn.
+>
+> Host locking means that we will not send other commands to the MMC
+> card from i.e. userspace, which sometimes can send spurious stuff orthogonal
+> to the block layer. If the block layer has locked the host, userspace
+> has to wait
+> and vice versa. It is not a common contention point but it still happens.
+>
+> In MQ, I have simply locked the host on the first request and then I never
+> release it. Clearly this does not work. I am uncertain on how to handle this
+> and whether MQ has a way to tell us that the queue is empty so we may release
+> the host. I toyed with the idea to just set up a timer, but a "queue
+> empty" callback
+> from the block layer is what would be ideal.
 
-2017-03-22 16:30  Masahiro Yamada <yamada.masahiro@socionext.com>:
-> 2017-03-21 23:33 GMT+09:00 Piotr Sroka <piotrs@cadence.com>:
-> > DTS properties are used instead of fixed data
-> > because PHY settings can be different for different chips/boards.
-> > Add description of new DLL PHY delays.
-> >
-> > Signed-off-by: Piotr Sroka <piotrs@cadence.com>
-> > ---
-> > Changes for v2:
-> > - file was created in v2. It was a part of driver source file patch.
-> > - most delays were moved from dts file
-> >   to data associated with an SoC specific compatible
-> > - description of delays was updated to be more clearly
-> > ---
-> > Changes for v3:
-> > - move all delays back to dts because they are also boards dependent
-> > - prefix all of the Cadence-specific properties with cdns prefix
-> > ---
-> > Changes for v4:
-> > - change the beginning of the commit subject
-> > ---
-> > Changes for v5:
-> > - change name of property to be consistent with timing modes
-> >   available in Linux
-> 
-> 
-> As I gave Reviewed-by in v4 already, this looks good to me.
-> 
-> 
-> Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> 
-> 
-> As I said before,
-> once you get Reviewed/Acked tags,
-> please include them in your later version.
-> 
+Would it be possible to change the userspace code to go through
+the block layer instead and queue a request there, to avoid having
+to lock the card at all?
 
-Ok. I will remember next time.
-
--- 
-Best Regards
-Piotr Sroka
+       Arnd
