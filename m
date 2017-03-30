@@ -1,56 +1,92 @@
-From: Russell King - ARM Linux <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>
-Subject: Re: [PATCH v7 00/13] mmc: Add support to Marvell Xenon SD Host
- Controller
-Date: Thu, 30 Mar 2017 19:56:39 +0100
-Message-ID: <20170330185639.GI7909@n2100.armlinux.org.uk>
-References: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement@free-electrons.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection
+Date: Thu, 30 Mar 2017 21:30:30 +0200
+Message-ID: <CAPDyKFraFT-ML8uU-3xQNQGKUs-SaVi=wg6ULepRxTPUGRFxqA@mail.gmail.com>
+References: <20170328090045.2133-1-ludovic.desroches@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <cover.51071caa64e5df81264a91b9a81ed1e94f47d2c4.1490886907.git-series.gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jimmy Xu <zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Mike Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Doug Jones <dougj-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Yehuda Yitschak <yehuday-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Kostya Porotchkin <kostap-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Hanna Hawa <hannah-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ryan Gao <ygao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:34460 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934807AbdC3Tac (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2017 15:30:32 -0400
+Received: by mail-vk0-f48.google.com with SMTP id z204so67223785vkd.1
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Mar 2017 12:30:31 -0700 (PDT)
+In-Reply-To: <20170328090045.2133-1-ludovic.desroches@microchip.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@microchip.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, nicolas.ferre@microchip.com, "# 4 . 4+" <stable@vger.kernel.org>
 
-On Thu, Mar 30, 2017 at 05:22:52PM +0200, Gregory CLEMENT wrote:
-> - Remove parse of child node mmc-card. Wait for a better solution.
+On 28 March 2017 at 11:00, Ludovic Desroches
+<ludovic.desroches@microchip.com> wrote:
+> The controller has different timings for MMC_TIMING_UHS_DDR50 and
+> MMC_TIMING_MMC_DDR52. Configuring the controller with SDHCI_CTRL_UHS_DDR50,
+> when MMC_TIMING_MMC_DDR52 timings are requested, is not correct and can
+> lead to unexpected behavior.
+>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> Fixes: bb5f8ea4d514 ("mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC")
+> Cc: <stable@vger.kernel.org> # 4.4+
 
-So for mcbin, I have:
+Thanks, applied for fixes!
 
-&ap_sdhci0 {
-        bus-width = <8>;
-        marvell,xenon-emmc;
-        marvell,xenon-phy-type = "emmc 5.1 phy";
-        /*
-         * Not stable in HS modes - phy needs "more calibration", so add
-         * the "slow-mode" and disable SDR104, SDR50 and DDR50 modes.
-         */
-        marvell,xenon-phy-slow-mode;
-        no-1-8-v;
-        non-removable;
-        status = "okay";
-        vqmmc-supply = <&v_vddo_h>;
+And thanks for really getting to bottom to fix this issue properly!
 
-        #address-cells = <1>;
-        #size-cells = <0>;
-        mmccard: mmccard@0 {
-                compatible = "mmc-card";
-                reg = <0>;
-        };
-};
+Kind regards
+Uffe
 
-Does this mean the "mmccard" bit is no longer required - or is it required
-for the eMMC to be detected but is no longer supported by the driver?
-
-Thanks.
-
--- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ---
+>
+> Hi,
+>
+> Here is the proper fix (I hope!) to the issue I have since commit e173f8911f09
+> ("mmc: core: Update CMD13 polling policy when switch to HS DDR mode"). This
+> commit was probably not the root cause but causes some side effect due to a
+> bad timing configuration.
+>
+> I can't explain how it was working before but for sure I was not configuring
+> properly the controller timings.
+>
+> Regards
+>
+>
+>  drivers/mmc/host/sdhci-of-at91.c | 11 ++++++++++-
+>  1 file changed, 10 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 814571f..7611fd6 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -29,6 +29,8 @@
+>
+>  #include "sdhci-pltfm.h"
+>
+> +#define SDMMC_MC1R     0x204
+> +#define                SDMMC_MC1R_DDR          BIT(3)
+>  #define SDMMC_CACR     0x230
+>  #define                SDMMC_CACR_CAPWREN      BIT(0)
+>  #define                SDMMC_CACR_KEY          (0x46 << 8)
+> @@ -101,11 +103,18 @@ static void sdhci_at91_set_power(struct sdhci_host *host, unsigned char mode,
+>         sdhci_set_power_noreg(host, mode, vdd);
+>  }
+>
+> +void sdhci_at91_set_uhs_signaling(struct sdhci_host *host, unsigned int timing)
+> +{
+> +       if (timing == MMC_TIMING_MMC_DDR52)
+> +               sdhci_writeb(host, SDMMC_MC1R_DDR, SDMMC_MC1R);
+> +       sdhci_set_uhs_signaling(host, timing);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>         .set_clock              = sdhci_at91_set_clock,
+>         .set_bus_width          = sdhci_set_bus_width,
+>         .reset                  = sdhci_reset,
+> -       .set_uhs_signaling      = sdhci_set_uhs_signaling,
+> +       .set_uhs_signaling      = sdhci_at91_set_uhs_signaling,
+>         .set_power              = sdhci_at91_set_power,
+>  };
+>
+> --
+> 2.9.0
+>
