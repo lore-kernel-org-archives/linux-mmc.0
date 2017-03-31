@@ -1,67 +1,60 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v5 2/2] mmc: host: s3cmci: allow probing from device tree
-Date: Fri, 31 Mar 2017 09:25:34 +0200
-Message-ID: <CAK8P3a2emCf=KtpCJMOaJnr89Gi+rCi0eun_vjb1wiYB=JR6jg@mail.gmail.com>
-References: <1489799633-29278-1-git-send-email-sergio.prado@e-labworks.com> <1489799633-29278-3-git-send-email-sergio.prado@e-labworks.com>
+Subject: Re: Outstanding MQ questions from MMC
+Date: Fri, 31 Mar 2017 10:43:43 +0200
+Message-ID: <CAK8P3a1yJJ33R9EPPcErLUO2enFGrSJzWmVRwHdHP+3_2iP7ow@mail.gmail.com>
+References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
+ <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com> <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:36023 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752385AbdCaHZg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2017 03:25:36 -0400
-In-Reply-To: <1489799633-29278-3-git-send-email-sergio.prado@e-labworks.com>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:36465 "EHLO
+        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752024AbdCaInp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2017 04:43:45 -0400
+In-Reply-To: <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergio Prado <sergio.prado@e-labworks.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "ben-linux@fluff.org" <ben-linux@fluff.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 
-On Sat, Mar 18, 2017 at 2:13 AM, Sergio Prado
-<sergio.prado@e-labworks.com> wrote:
+On Thu, Mar 30, 2017 at 6:39 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 30 March 2017 at 14:42, Arnd Bergmann <arnd@arndb.de> wrote:
+>> On Wed, Mar 29, 2017 at 5:09 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
 
+>>> In MQ, I have simply locked the host on the first request and then I never
+>>> release it. Clearly this does not work. I am uncertain on how to handle this
+>>> and whether MQ has a way to tell us that the queue is empty so we may release
+>>> the host. I toyed with the idea to just set up a timer, but a "queue
+>>> empty" callback
+>>> from the block layer is what would be ideal.
+>>
+>> Would it be possible to change the userspace code to go through
+>> the block layer instead and queue a request there, to avoid having
+>> to lock the card at all?
 >
-> +static const struct of_device_id s3cmci_dt_match[] = {
-> +       {
-> +               .compatible = "samsung,s3c2410-sdi",
-> +               .data = (void *)0,
-> +       },
-> +       {
-> +               .compatible = "samsung,s3c2412-sdi",
-> +               .data = (void *)1,
-> +       },
-> +       {
-> +               .compatible = "samsung,s3c2440-sdi",
-> +               .data = (void *)1,
-> +       },
-> +       { /* sentinel */ },
-> +};
-> +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-> +
+> That would be good from an I/O scheduling point of view, as it would
+> avoid one side being able to starve the other.
+>
+> However, we would still need a lock, as we also have card detect work
+> queue, which also needs to claim the host when it polls for removable
+> cards.
 
-The names don't match:
+Hmm, In theory the card-detect work queue should not be active
+at the same time as any I/O, but I see you point. Could the card-detect
+wq perhaps also use the blk queue for sending a special request that
+triggers the detection logic?
 
-In file included from /git/arm-soc/drivers/mmc/host/s3cmci.c:14:0:
-/git/arm-soc/drivers/mmc/host/s3cmci.c:1844:25: error:
-'sdhci_s3c_dt_match' undeclared here (not in a function); did you mean
-'s3cmci_dt_match'?
- MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-                         ^
-/git/arm-soc/include/linux/module.h:212:21: note: in definition of
-macro 'MODULE_DEVICE_TABLE'
- extern const typeof(name) __mod_##type##__##name##_device_table  \
-                     ^~~~
-/git/arm-soc/include/linux/module.h:212:27: error:
-'__mod_of__sdhci_s3c_dt_match_device_table' aliased to undefined
-symbol 'sdhci_s3c_dt_match'
- extern const typeof(name) __mod_##type##__##name##_device_table  \
-                           ^
-/git/arm-soc/drivers/mmc/host/s3cmci.c:1844:1: note: in expansion of
-macro 'MODULE_DEVICE_TABLE'
- MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
- ^~~~~~~~~~~~~~~~~~~
-/git/arm-soc/scripts/Makefile.build:314: recipe for target
-'drivers/mmc/host/s3cmci.o' failed
+Alternatively, I had this idea that we could translate blk requests into
+mmc commands and then have a (short fixed length) set of outstanding
+mmc commands in the device that always get done in order. The card
+detect and the user space I/O would then directly put mmc commands
+onto the command queue, as would the blk-mq scheduler. You
+still need a lock to access that command queue, but the mmc host
+would just always pick the next command off the list when one
+command completes.
+This also lets you integrate packed commands: if the next outstanding
+command is the same type as the request coming in from blk-mq,
+you can merge it into a single mmc command to be submitted
+together, otherwise it gets deferred.
 
-Can you send a fix?
-
-       Arnd
+      Arnd
