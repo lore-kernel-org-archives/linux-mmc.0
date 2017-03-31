@@ -1,57 +1,91 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.11 rc5
-Date: Fri, 31 Mar 2017 14:12:06 +0200
-Message-ID: <CAPDyKFpcZh0rNfZFUd3S_dh-8gimuZxSxvPLqzVtD3UU6da69w@mail.gmail.com>
+From: Sergio Prado <sergio.prado-1e4yhPs3/ABSwrhanM7KvQ@public.gmane.org>
+Subject: Re: [PATCH v5 2/2] mmc: host: s3cmci: allow probing from device tree
+Date: Fri, 31 Mar 2017 19:46:22 -0300
+Message-ID: <20170331224622.GA11126@sprado-desktop>
+References: <1489799633-29278-1-git-send-email-sergio.prado@e-labworks.com>
+ <1489799633-29278-3-git-send-email-sergio.prado@e-labworks.com>
+ <CAK8P3a2emCf=KtpCJMOaJnr89Gi+rCi0eun_vjb1wiYB=JR6jg@mail.gmail.com>
+ <CAPDyKFquGSgK7tkYDpkJM7C7JChZMqvmHoJyiLE9_ZG4CGBOSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:33922 "EHLO
-        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933137AbdCaMMI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2017 08:12:08 -0400
-Received: by mail-vk0-f46.google.com with SMTP id z204so88484932vkd.1
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2017 05:12:07 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFquGSgK7tkYDpkJM7C7JChZMqvmHoJyiLE9_ZG4CGBOSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org" <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, Linux ARM <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Linus,
+On Fri, Mar 31, 2017 at 01:11:59PM +0200, Ulf Hansson wrote:
+> On 31 March 2017 at 09:25, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+> > On Sat, Mar 18, 2017 at 2:13 AM, Sergio Prado
+> > <sergio.prado-1e4yhPs3/ABSwrhanM7KvQ@public.gmane.org> wrote:
+> >
+> >>
+> >> +static const struct of_device_id s3cmci_dt_match[] = {
+> >> +       {
+> >> +               .compatible = "samsung,s3c2410-sdi",
+> >> +               .data = (void *)0,
+> >> +       },
+> >> +       {
+> >> +               .compatible = "samsung,s3c2412-sdi",
+> >> +               .data = (void *)1,
+> >> +       },
+> >> +       {
+> >> +               .compatible = "samsung,s3c2440-sdi",
+> >> +               .data = (void *)1,
+> >> +       },
+> >> +       { /* sentinel */ },
+> >> +};
+> >> +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> >> +
+> >
+> > The names don't match:
+> >
+> > In file included from /git/arm-soc/drivers/mmc/host/s3cmci.c:14:0:
+> > /git/arm-soc/drivers/mmc/host/s3cmci.c:1844:25: error:
+> > 'sdhci_s3c_dt_match' undeclared here (not in a function); did you mean
+> > 's3cmci_dt_match'?
+> >  MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> >                          ^
+> > /git/arm-soc/include/linux/module.h:212:21: note: in definition of
+> > macro 'MODULE_DEVICE_TABLE'
+> >  extern const typeof(name) __mod_##type##__##name##_device_table  \
+> >                      ^~~~
+> > /git/arm-soc/include/linux/module.h:212:27: error:
+> > '__mod_of__sdhci_s3c_dt_match_device_table' aliased to undefined
+> > symbol 'sdhci_s3c_dt_match'
+> >  extern const typeof(name) __mod_##type##__##name##_device_table  \
+> >                            ^
+> > /git/arm-soc/drivers/mmc/host/s3cmci.c:1844:1: note: in expansion of
+> > macro 'MODULE_DEVICE_TABLE'
+> >  MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> >  ^~~~~~~~~~~~~~~~~~~
+> > /git/arm-soc/scripts/Makefile.build:314: recipe for target
+> > 'drivers/mmc/host/s3cmci.o' failed
+> >
+> > Can you send a fix?
+> 
+> Never mind, I am dropping the patches from my next branch as those
+> clearly haven't been built/tested by Sergio properly. It's better that
+> he re-spins them.
+> 
+> Arnd, thanks for reporting and even fixing some of the problems!
+> 
+> Kind regards
+> Uffe
 
-Here are a couple of mmc fixes intended for v4.11 rc5. They are based
-on v4.11-rc4.
+Arnd, thanks for reporting the error.
 
-Details are as usual found in the signed tag. Please pull this in!
+I have built/tested the patches, but only as a built-in feature, and
+this error occurs when enabled as a module.
 
-Kind regards
-Ulf Hansson
+I will re-spins them and send v6.
 
+Best regards,
 
-The following changes since commit c02ed2e75ef4c74e41e421acb4ef1494671585e8:
-
-  Linux 4.11-rc4 (2017-03-26 14:15:16 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.11-rc4
-
-for you to fetch changes up to d0918764c17b94c30bbb2619929b1719ff52707a:
-
-  mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection (2017-03-30
-21:10:29 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci: Fix bug when using SDIO IRQ
- - sdhci-of-at91: Fix eMMC DDR52 card detection
-
-----------------------------------------------------------------
-Hans de Goede (1):
-      mmc: sdhci: Disable runtime pm when the sdio_irq is enabled
-
-Ludovic Desroches (1):
-      mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection
-
- drivers/mmc/host/sdhci-of-at91.c | 11 ++++++++++-
- drivers/mmc/host/sdhci.c         |  6 ++++++
- 2 files changed, 16 insertions(+), 1 deletion(-)
+Sergio Prado
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
