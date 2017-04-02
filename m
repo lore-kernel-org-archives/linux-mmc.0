@@ -1,7 +1,7 @@
 From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v4 02/14] dt/bindings: Document gpio-ingenic
-Date: Sun,  2 Apr 2017 22:42:32 +0200
-Message-ID: <20170402204244.14216-3-paul@crapouillou.net>
+Subject: [PATCH v4 09/14] MIPS: JZ4780: CI20: Add pinctrl configuration for several drivers
+Date: Sun,  2 Apr 2017 22:42:39 +0200
+Message-ID: <20170402204244.14216-10-paul@crapouillou.net>
 References: <20170125185207.23902-2-paul@crapouillou.net>
  <20170402204244.14216-1-paul@crapouillou.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,72 +11,117 @@ To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.co
 Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
 List-Id: linux-mmc@vger.kernel.org
 
-This commit adds documentation for the devicetree bindings of the
-gpio-ingenic driver, which handles GPIOs of the Ingenic SoCs
-currently supported by the Linux kernel.
+We set the pin configuration for the jz4780-nand and jz4780-uart
+drivers.
 
 Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 ---
- .../devicetree/bindings/gpio/ingenic,gpio.txt      | 48 ++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
+ arch/mips/boot/dts/ingenic/ci20.dts | 60 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
 
- v2: New patch
+ v2: Changed the devicetree bindings to match the new driver
  v3: No changes
- v4: Update for the v4 version of the gpio-ingenic driver
+ v4: No changes
 
-diff --git a/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt b/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
-new file mode 100644
-index 000000000000..f54af444f7c3
---- /dev/null
-+++ b/Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
-@@ -0,0 +1,48 @@
-+Ingenic jz47xx GPIO controller
+diff --git a/arch/mips/boot/dts/ingenic/ci20.dts b/arch/mips/boot/dts/ingenic/ci20.dts
+index 1652d8d60b1e..fd138d9978c1 100644
+--- a/arch/mips/boot/dts/ingenic/ci20.dts
++++ b/arch/mips/boot/dts/ingenic/ci20.dts
+@@ -29,18 +29,30 @@
+ 
+ &uart0 {
+ 	status = "okay";
 +
-+That the Ingenic GPIO driver node must be a sub-node of the Ingenic pinctrl
-+driver node.
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart0>;
+ };
+ 
+ &uart1 {
+ 	status = "okay";
 +
-+Required properties:
-+--------------------
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart1>;
+ };
+ 
+ &uart3 {
+ 	status = "okay";
 +
-+ - compatible: Must contain one of:
-+    - "ingenic,jz4740-gpio"
-+    - "ingenic,jz4770-gpio"
-+    - "ingenic,jz4780-gpio"
-+	And one of:
-+	- "ingenic,gpio-bank-a"
-+	- "ingenic,gpio-bank-b"
-+	- "ingenic,gpio-bank-c"
-+	- "ingenic,gpio-bank-d"
-+	- "ingenic,gpio-bank-e" (for SoC version > jz4740)
-+	- "ingenic,gpio-bank-f" (for SoC version > jz4740)
-+ - interrupt-controller: Marks the device node as an interrupt controller.
-+ - interrupts: Interrupt specifier for the controllers interrupt.
-+ - #interrupt-cells: Should be 2. Refer to
-+   ../interrupt-controller/interrupts.txt for more details.
-+ - gpio-controller: Marks the device node as a GPIO controller.
-+ - #gpio-cells: Should be 2. The first cell is the GPIO number and the second
-+    cell specifies GPIO flags, as defined in <dt-bindings/gpio/gpio.h>. Only the
-+    GPIO_ACTIVE_HIGH and GPIO_ACTIVE_LOW flags are supported.
-+ - gpio-ranges: Range of pins managed by the GPIO controller. Refer to
-+   'gpio.txt' in this directory for more details.
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart2>;
+ };
+ 
+ &uart4 {
+ 	status = "okay";
 +
-+Example:
-+--------
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart4>;
+ };
+ 
+ &nemc {
+@@ -61,6 +73,13 @@
+ 		ingenic,nemc-tAW = <15>;
+ 		ingenic,nemc-tSTRV = <100>;
+ 
++		/*
++		 * Only CLE/ALE are needed for the devices that are connected, rather
++		 * than the full address line set.
++		 */
++		pinctrl-names = "default";
++		pinctrl-0 = <&pins_nemc>;
++
+ 		nand@1 {
+ 			reg = <1>;
+ 
+@@ -69,6 +88,9 @@
+ 			nand-ecc-mode = "hw";
+ 			nand-on-flash-bbt;
+ 
++			pinctrl-names = "default";
++			pinctrl-0 = <&pins_nemc_cs1>;
++
+ 			partitions {
+ 				compatible = "fixed-partitions";
+ 				#address-cells = <2>;
+@@ -106,3 +128,41 @@
+ &bch {
+ 	status = "okay";
+ };
 +
 +&pinctrl {
-+	gpa: gpio-controller@0 {
-+		compatible = "ingenic,gpio-bank-a", "ingenic,jz4740-gpio";
++	pins_uart0: uart0 {
++		function = "uart0";
++		groups = "uart0-data";
++		bias-disable;
++	};
 +
-+		gpio-controller;
-+		gpio-ranges = <&pinctrl 0 0 32>;
-+		#gpio-cells = <2>;
++	pins_uart1: uart1 {
++		function = "uart1";
++		groups = "uart1-data";
++		bias-disable;
++	};
 +
-+		interrupt-controller;
-+		#interrupt-cells = <2>;
++	pins_uart2: uart2 {
++		function = "uart2";
++		groups = "uart2-data", "uart2-hwflow";
++		bias-disable;
++	};
 +
-+		interrupt-parent = <&intc>;
-+		interrupts = <28>;
++	pins_uart4: uart4 {
++		function = "uart4";
++		groups = "uart4-data";
++		bias-disable;
++	};
++
++	pins_nemc: nemc {
++		function = "nemc";
++		groups = "nemc-data", "nemc-cle-ale", "nemc-rd-we", "nemc-frd-fwe";
++		bias-disable;
++	};
++
++	pins_nemc_cs1: nemc-cs1 {
++		function = "nemc-cs1";
++		groups = "nemc-cs1";
++		bias-disable;
 +	};
 +};
 -- 
