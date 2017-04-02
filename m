@@ -1,7 +1,7 @@
 From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v4 11/14] mtd: nand: jz4740: Let the pinctrl driver configure the pins
-Date: Sun,  2 Apr 2017 22:42:41 +0200
-Message-ID: <20170402204244.14216-12-paul@crapouillou.net>
+Subject: [PATCH v4 05/14] MIPS: ingenic: Enable pinctrl for all ingenic SoCs
+Date: Sun,  2 Apr 2017 22:42:35 +0200
+Message-ID: <20170402204244.14216-6-paul@crapouillou.net>
 References: <20170125185207.23902-2-paul@crapouillou.net>
  <20170402204244.14216-1-paul@crapouillou.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,98 +11,31 @@ To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.co
 Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Before, this NAND driver would set itself the configuration of the
-chip-select pins for the various NAND banks.
-
-Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-the pins being properly configured before the driver probes.
+There is a pinctrl driver for each of the Ingenic SoCs supported by the
+upstream Linux kernel. In order to switch away from the old GPIO
+platform code, we now enable the pinctrl drivers by default for the
+Ingenic SoCs.
 
 Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-Acked-by: Boris Brezillon <boris.brezillon@free-electrons.com>
 ---
- drivers/mtd/nand/jz4740_nand.c | 23 +----------------------
- 1 file changed, 1 insertion(+), 22 deletions(-)
+ arch/mips/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
  v2: No changes
  v3: No changes
  v4: No changes
 
-diff --git a/drivers/mtd/nand/jz4740_nand.c b/drivers/mtd/nand/jz4740_nand.c
-index 5551c36adbdf..0d06a1f07d82 100644
---- a/drivers/mtd/nand/jz4740_nand.c
-+++ b/drivers/mtd/nand/jz4740_nand.c
-@@ -25,7 +25,6 @@
- 
- #include <linux/gpio.h>
- 
--#include <asm/mach-jz4740/gpio.h>
- #include <asm/mach-jz4740/jz4740_nand.h>
- 
- #define JZ_REG_NAND_CTRL	0x50
-@@ -310,34 +309,20 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
- 			       uint8_t *nand_dev_id)
- {
- 	int ret;
--	int gpio;
--	char gpio_name[9];
- 	char res_name[6];
- 	uint32_t ctrl;
- 	struct nand_chip *chip = &nand->chip;
- 	struct mtd_info *mtd = nand_to_mtd(chip);
- 
--	/* Request GPIO port. */
--	gpio = JZ_GPIO_MEM_CS0 + bank - 1;
--	sprintf(gpio_name, "NAND CS%d", bank);
--	ret = gpio_request(gpio, gpio_name);
--	if (ret) {
--		dev_warn(&pdev->dev,
--			"Failed to request %s gpio %d: %d\n",
--			gpio_name, gpio, ret);
--		goto notfound_gpio;
--	}
--
- 	/* Request I/O resource. */
- 	sprintf(res_name, "bank%d", bank);
- 	ret = jz_nand_ioremap_resource(pdev, res_name,
- 					&nand->bank_mem[bank - 1],
- 					&nand->bank_base[bank - 1]);
- 	if (ret)
--		goto notfound_resource;
-+		return ret;
- 
- 	/* Enable chip in bank. */
--	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_MEM_CS0);
- 	ctrl = readl(nand->base + JZ_REG_NAND_CTRL);
- 	ctrl |= JZ_NAND_CTRL_ENABLE_CHIP(bank - 1);
- 	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
-@@ -377,12 +362,8 @@ static int jz_nand_detect_bank(struct platform_device *pdev,
- 	dev_info(&pdev->dev, "No chip found on bank %i\n", bank);
- 	ctrl &= ~(JZ_NAND_CTRL_ENABLE_CHIP(bank - 1));
- 	writel(ctrl, nand->base + JZ_REG_NAND_CTRL);
--	jz_gpio_set_function(gpio, JZ_GPIO_FUNC_NONE);
- 	jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 				 nand->bank_base[bank - 1]);
--notfound_resource:
--	gpio_free(gpio);
--notfound_gpio:
- 	return ret;
- }
- 
-@@ -503,7 +484,6 @@ static int jz_nand_probe(struct platform_device *pdev)
- err_unclaim_banks:
- 	while (chipnr--) {
- 		unsigned char bank = nand->banks[chipnr];
--		gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
- 		jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 					 nand->bank_base[bank - 1]);
- 	}
-@@ -530,7 +510,6 @@ static int jz_nand_remove(struct platform_device *pdev)
- 		if (bank != 0) {
- 			jz_nand_iounmap_resource(nand->bank_mem[bank - 1],
- 						 nand->bank_base[bank - 1]);
--			gpio_free(JZ_GPIO_MEM_CS0 + bank - 1);
- 		}
- 	}
- 
+diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
+index a008a9f03072..b88cf931b829 100644
+--- a/arch/mips/Kconfig
++++ b/arch/mips/Kconfig
+@@ -363,6 +363,7 @@ config MACH_INGENIC
+ 	select SYS_SUPPORTS_ZBOOT_UART16550
+ 	select DMA_NONCOHERENT
+ 	select IRQ_MIPS_CPU
++	select PINCTRL
+ 	select GPIOLIB
+ 	select COMMON_CLK
+ 	select GENERIC_IRQ_CHIP
 -- 
 2.11.0
