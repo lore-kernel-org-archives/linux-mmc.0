@@ -1,102 +1,165 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v4 06/14] MIPS: jz4740: DTS: Add nodes for ingenic pinctrl and gpio drivers
-Date: Sun,  2 Apr 2017 22:42:36 +0200
-Message-ID: <20170402204244.14216-7-paul@crapouillou.net>
-References: <20170125185207.23902-2-paul@crapouillou.net>
- <20170402204244.14216-1-paul@crapouillou.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170402204244.14216-1-paul@crapouillou.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>
-Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [mmc] mmc: core: add proper be32 annotation
+Date: Sun,  2 Apr 2017 23:56:03 +0300
+Message-ID: <20170402205603.23790-1-tomas.winkler@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:10212 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751738AbdDBU4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 2 Apr 2017 16:56:46 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Tomas Winkler <tomas.winkler@intel.com>
 
-For a description of the pinctrl devicetree node, please read
-Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+Annotate big endian values correctly and make sparse happy.
+In mmc_app_send_scr remove scr function parameter as it was
+updating card->raw_scr anyway.
 
-For a description of the gpio devicetree nodes, please read
-Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
-
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
 ---
- arch/mips/boot/dts/ingenic/jz4740.dtsi | 61 ++++++++++++++++++++++++++++++++++
- 1 file changed, 61 insertions(+)
+ drivers/mmc/core/mmc_ops.c |  8 ++++----
+ drivers/mmc/core/sd.c      |  4 ++--
+ drivers/mmc/core/sd_ops.c  | 19 +++++++++----------
+ drivers/mmc/core/sd_ops.h  |  2 +-
+ 4 files changed, 16 insertions(+), 17 deletions(-)
 
- v2: Changed the devicetree bindings to match the new driver
- v3: No changes
- v4: Update the bindings for the v4 version of the drivers
-
-diff --git a/arch/mips/boot/dts/ingenic/jz4740.dtsi b/arch/mips/boot/dts/ingenic/jz4740.dtsi
-index 3e1587f1f77a..9c23c877fc34 100644
---- a/arch/mips/boot/dts/ingenic/jz4740.dtsi
-+++ b/arch/mips/boot/dts/ingenic/jz4740.dtsi
-@@ -55,6 +55,67 @@
- 		clock-names = "rtc";
- 	};
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index fe80f26d6971..d94a722fd340 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -305,7 +305,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ {
+ 	int ret, i;
+-	u32 *csd_tmp;
++	__be32 *csd_tmp;
  
-+	pinctrl: ingenic-pinctrl@10010000 {
-+		compatible = "ingenic,jz4740-pinctrl";
-+		reg = <0x10010000 0x400>;
+ 	if (!mmc_host_is_spi(card->host))
+ 		return mmc_send_cxd_native(card->host, card->rca << 16,
+@@ -319,7 +319,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ 	if (ret)
+ 		goto err;
+ 
+-	for (i = 0;i < 4;i++)
++	for (i = 0; i < 4; i++)
+ 		csd[i] = be32_to_cpu(csd_tmp[i]);
+ 
+ err:
+@@ -330,7 +330,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ {
+ 	int ret, i;
+-	u32 *cid_tmp;
++	__be32 *cid_tmp;
+ 
+ 	if (!mmc_host_is_spi(host)) {
+ 		if (!host->card)
+@@ -347,7 +347,7 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ 	if (ret)
+ 		goto err;
+ 
+-	for (i = 0;i < 4;i++)
++	for (i = 0; i < 4; i++)
+ 		cid[i] = be32_to_cpu(cid_tmp[i]);
+ 
+ err:
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 89531b48ae84..d109634fbfce 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -225,7 +225,7 @@ static int mmc_decode_scr(struct mmc_card *card)
+ static int mmc_read_ssr(struct mmc_card *card)
+ {
+ 	unsigned int au, es, et, eo;
+-	u32 *raw_ssr;
++	__be32 *raw_ssr;
+ 	int i;
+ 
+ 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
+@@ -853,7 +853,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+ 		/*
+ 		 * Fetch SCR from card.
+ 		 */
+-		err = mmc_app_send_scr(card, card->raw_scr);
++		err = mmc_app_send_scr(card);
+ 		if (err)
+ 			return err;
+ 
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 9d5824a37586..47056d8d1bac 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -232,14 +232,14 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca)
+ 	return 0;
+ }
+ 
+-int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
++int mmc_app_send_scr(struct mmc_card *card)
+ {
+ 	int err;
+ 	struct mmc_request mrq = {};
+ 	struct mmc_command cmd = {};
+ 	struct mmc_data data = {};
+ 	struct scatterlist sg;
+-	void *data_buf;
++	__be32 *scr;
+ 
+ 	/* NOTE: caller guarantees scr is heap-allocated */
+ 
+@@ -250,8 +250,8 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 	/* dma onto stack is unsafe/nonportable, but callers to this
+ 	 * routine normally provide temporary on-stack buffers ...
+ 	 */
+-	data_buf = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
+-	if (data_buf == NULL)
++	scr = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
++	if (!scr)
+ 		return -ENOMEM;
+ 
+ 	mrq.cmd = &cmd;
+@@ -267,23 +267,22 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 	data.sg = &sg;
+ 	data.sg_len = 1;
+ 
+-	sg_init_one(&sg, data_buf, 8);
++	sg_init_one(&sg, scr, 8);
+ 
+ 	mmc_set_data_timeout(&data, card);
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+ 
+-	memcpy(scr, data_buf, sizeof(card->raw_scr));
+-	kfree(data_buf);
++	card->raw_scr[0] = be32_to_cpu(scr[0]);
++	card->raw_scr[1] = be32_to_cpu(scr[1]);
 +
-+		gpa: gpio-controller@0 {
-+			compatible = "ingenic,gpio-bank-a", "ingenic,jz4740-gpio";
-+
-+			gpio-controller;
-+			gpio-ranges = <&pinctrl 0 0 32>;
-+			#gpio-cells = <2>;
-+
-+			interrupt-controller;
-+			#interrupt-cells = <2>;
-+
-+			interrupt-parent = <&intc>;
-+			interrupts = <28>;
-+		};
-+
-+		gpb: gpio-controller@1 {
-+			compatible = "ingenic,gpio-bank-b", "ingenic,jz4740-gpio";
-+
-+			gpio-controller;
-+			gpio-ranges = <&pinctrl 0 32 32>;
-+			#gpio-cells = <2>;
-+
-+			interrupt-controller;
-+			#interrupt-cells = <2>;
-+
-+			interrupt-parent = <&intc>;
-+			interrupts = <27>;
-+		};
-+
-+		gpc: gpio-controller@2 {
-+			compatible = "ingenic,gpio-bank-c", "ingenic,jz4740-gpio";
-+
-+			gpio-controller;
-+			gpio-ranges = <&pinctrl 0 64 32>;
-+			#gpio-cells = <2>;
-+
-+			interrupt-controller;
-+			#interrupt-cells = <2>;
-+
-+			interrupt-parent = <&intc>;
-+			interrupts = <26>;
-+		};
-+
-+		gpd: gpio-controller@3 {
-+			compatible = "ingenic,gpio-bank-d", "ingenic,jz4740-gpio";
-+
-+			gpio-controller;
-+			gpio-ranges = <&pinctrl 0 96 32>;
-+			#gpio-cells = <2>;
-+
-+			interrupt-controller;
-+			#interrupt-cells = <2>;
-+
-+			interrupt-parent = <&intc>;
-+			interrupts = <25>;
-+		};
-+	};
-+
- 	uart0: serial@10030000 {
- 		compatible = "ingenic,jz4740-uart";
- 		reg = <0x10030000 0x100>;
++	kfree(scr);
+ 
+ 	if (cmd.error)
+ 		return cmd.error;
+ 	if (data.error)
+ 		return data.error;
+ 
+-	scr[0] = be32_to_cpu(scr[0]);
+-	scr[1] = be32_to_cpu(scr[1]);
+-
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index 784f8e6b6baa..0e6c3d51e66d 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -22,7 +22,7 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width);
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
+ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
+-int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
++int mmc_app_send_scr(struct mmc_card *card);
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ 	u8 value, u8 *resp);
+ int mmc_app_sd_status(struct mmc_card *card, void *ssr);
 -- 
-2.11.0
+2.9.3
+
