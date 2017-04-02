@@ -1,7 +1,7 @@
 From: Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v4 10/14] mmc: jz4740: Let the pinctrl driver configure the pins
-Date: Sun,  2 Apr 2017 22:42:40 +0200
-Message-ID: <20170402204244.14216-11-paul@crapouillou.net>
+Subject: [PATCH v4 08/14] MIPS: JZ4740: Qi LB60: Add pinctrl configuration for several drivers
+Date: Sun,  2 Apr 2017 22:42:38 +0200
+Message-ID: <20170402204244.14216-9-paul@crapouillou.net>
 References: <20170125185207.23902-2-paul@crapouillou.net>
  <20170402204244.14216-1-paul@crapouillou.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,130 +11,116 @@ To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.co
 Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Now that the JZ4740 and similar SoCs have a pinctrl driver, we rely on
-the pins being properly configured before the driver probes.
+We set the pin configuration for the jz4740-nand, jz4740-mmc,
+jz4740-fb, jz4740-pwm and jz4740-uart drivers.
+
+This will permit those drivers to be cleaned out of the custom GPIO code
+that they currently use.
 
 Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/jz4740_mmc.c | 44 +++++--------------------------------------
- 1 file changed, 5 insertions(+), 39 deletions(-)
+ arch/mips/boot/dts/ingenic/qi_lb60.dts | 13 +++++++++++
+ arch/mips/jz4740/board-qi_lb60.c       | 42 ++++++++++++++++++++++++++--------
+ 2 files changed, 46 insertions(+), 9 deletions(-)
 
- v2: Set pin sleep/default state in suspend/resume callbacks
+ v2: Changed the devicetree bindings to match the new driver
  v3: No changes
- v4: Re-insert accidentally removed <linux/gpio.h> include
+ v4: No changes
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 819ad32964fc..42b3ee566dc7 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -20,6 +20,7 @@
- #include <linux/irq.h>
- #include <linux/interrupt.h>
- #include <linux/module.h>
-+#include <linux/pinctrl/consumer.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
- #include <linux/scatterlist.h>
-@@ -27,7 +28,6 @@
- 
- #include <linux/bitops.h>
- #include <linux/gpio.h>
--#include <asm/mach-jz4740/gpio.h>
- #include <asm/cacheflush.h>
- #include <linux/dma-mapping.h>
- #include <linux/dmaengine.h>
-@@ -906,15 +906,6 @@ static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.enable_sdio_irq = jz4740_mmc_enable_sdio_irq,
+diff --git a/arch/mips/boot/dts/ingenic/qi_lb60.dts b/arch/mips/boot/dts/ingenic/qi_lb60.dts
+index be1a7d3a3e1b..b715ee2ac2ee 100644
+--- a/arch/mips/boot/dts/ingenic/qi_lb60.dts
++++ b/arch/mips/boot/dts/ingenic/qi_lb60.dts
+@@ -17,3 +17,16 @@
+ &rtc_dev {
+ 	system-power-controller;
+ };
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pins_uart0>;
++};
++
++&pinctrl {
++	pins_uart0: uart0 {
++		function = "uart0";
++		groups = "uart0-data";
++		bias-disable;
++	};
++};
+diff --git a/arch/mips/jz4740/board-qi_lb60.c b/arch/mips/jz4740/board-qi_lb60.c
+index a5bd94b95263..bf3dcc9ee9f8 100644
+--- a/arch/mips/jz4740/board-qi_lb60.c
++++ b/arch/mips/jz4740/board-qi_lb60.c
+@@ -22,6 +22,8 @@
+ #include <linux/input/matrix_keypad.h>
+ #include <linux/spi/spi.h>
+ #include <linux/spi/spi_gpio.h>
++#include <linux/pinctrl/machine.h>
++#include <linux/pinctrl/pinconf-generic.h>
+ #include <linux/power_supply.h>
+ #include <linux/power/jz4740-battery.h>
+ #include <linux/power/gpio-charger.h>
+@@ -447,13 +449,36 @@ static struct platform_device *jz_platform_devices[] __initdata = {
+ 	&qi_lb60_audio_device,
  };
  
--static const struct jz_gpio_bulk_request jz4740_mmc_pins[] = {
--	JZ_GPIO_BULK_PIN(MSC_CMD),
--	JZ_GPIO_BULK_PIN(MSC_CLK),
--	JZ_GPIO_BULK_PIN(MSC_DATA0),
--	JZ_GPIO_BULK_PIN(MSC_DATA1),
--	JZ_GPIO_BULK_PIN(MSC_DATA2),
--	JZ_GPIO_BULK_PIN(MSC_DATA3),
--};
--
- static int jz4740_mmc_request_gpio(struct device *dev, int gpio,
- 	const char *name, bool output, int value)
- {
-@@ -978,15 +969,6 @@ static void jz4740_mmc_free_gpios(struct platform_device *pdev)
- 		gpio_free(pdata->gpio_power);
- }
- 
--static inline size_t jz4740_mmc_num_pins(struct jz4740_mmc_host *host)
+-static void __init board_gpio_setup(void)
 -{
--	size_t num_pins = ARRAY_SIZE(jz4740_mmc_pins);
--	if (host->pdata && host->pdata->data_1bit)
--		num_pins -= 3;
--
--	return num_pins;
+-	/* We only need to enable/disable pullup here for pins used in generic
+-	 * drivers. Everything else is done by the drivers themselves. */
+-	jz_gpio_disable_pullup(QI_LB60_GPIO_SD_VCC_EN_N);
+-	jz_gpio_disable_pullup(QI_LB60_GPIO_SD_CD);
 -}
--
- static int jz4740_mmc_probe(struct platform_device* pdev)
++static unsigned long pin_cfg_bias_disable[] = {
++	    PIN_CONFIG_BIAS_DISABLE,
++};
++
++static struct pinctrl_map pin_map[] __initdata = {
++	/* NAND pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-nand",
++			"10010000.jz4740-pinctrl", "nand", "nand"),
++
++	/* fbdev pin configuration */
++	PIN_MAP_MUX_GROUP("jz4740-fb", PINCTRL_STATE_DEFAULT,
++			"10010000.jz4740-pinctrl", "lcd", "lcd-8bit"),
++	PIN_MAP_MUX_GROUP("jz4740-fb", PINCTRL_STATE_SLEEP,
++			"10010000.jz4740-pinctrl", "lcd", "lcd-no-pins"),
++
++	/* MMC pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "mmc", "mmc-1bit"),
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "mmc", "mmc-4bit"),
++	PIN_MAP_CONFIGS_PIN_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "PD0", pin_cfg_bias_disable),
++	PIN_MAP_CONFIGS_PIN_DEFAULT("jz4740-mmc.0",
++			"10010000.jz4740-pinctrl", "PD2", pin_cfg_bias_disable),
++
++	/* PWM pin configuration */
++	PIN_MAP_MUX_GROUP_DEFAULT("jz4740-pwm",
++			"10010000.jz4740-pinctrl", "pwm4", "pwm4"),
++};
++
+ 
+ static int __init qi_lb60_init_platform_devices(void)
  {
- 	int ret;
-@@ -1027,15 +1009,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		goto err_free_host;
- 	}
+@@ -469,6 +494,7 @@ static int __init qi_lb60_init_platform_devices(void)
+ 				ARRAY_SIZE(qi_lb60_spi_board_info));
  
--	ret = jz_gpio_bulk_request(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--	if (ret) {
--		dev_err(&pdev->dev, "Failed to request mmc pins: %d\n", ret);
--		goto err_free_host;
--	}
--
- 	ret = jz4740_mmc_request_gpios(mmc, pdev);
- 	if (ret)
--		goto err_gpio_bulk_free;
-+		goto err_release_dma;
+ 	pwm_add_table(qi_lb60_pwm_lookup, ARRAY_SIZE(qi_lb60_pwm_lookup));
++	pinctrl_register_mappings(pin_map, ARRAY_SIZE(pin_map));
  
- 	mmc->ops = &jz4740_mmc_ops;
- 	mmc->f_min = JZ_MMC_CLK_RATE / 128;
-@@ -1091,10 +1067,9 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	free_irq(host->irq, host);
- err_free_gpios:
- 	jz4740_mmc_free_gpios(pdev);
--err_gpio_bulk_free:
-+err_release_dma:
- 	if (host->use_dma)
- 		jz4740_mmc_release_dma_channels(host);
--	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- err_free_host:
- 	mmc_free_host(mmc);
- 
-@@ -1114,7 +1089,6 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 	free_irq(host->irq, host);
- 
- 	jz4740_mmc_free_gpios(pdev);
--	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- 
- 	if (host->use_dma)
- 		jz4740_mmc_release_dma_channels(host);
-@@ -1128,20 +1102,12 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 
- static int jz4740_mmc_suspend(struct device *dev)
+ 	return platform_add_devices(jz_platform_devices,
+ 					ARRAY_SIZE(jz_platform_devices));
+@@ -479,8 +505,6 @@ static int __init qi_lb60_board_setup(void)
  {
--	struct jz4740_mmc_host *host = dev_get_drvdata(dev);
--
--	jz_gpio_bulk_suspend(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--
--	return 0;
-+	return pinctrl_pm_select_sleep_state(dev);
- }
+ 	printk(KERN_INFO "Qi Hardware JZ4740 QI LB60 setup\n");
  
- static int jz4740_mmc_resume(struct device *dev)
- {
--	struct jz4740_mmc_host *host = dev_get_drvdata(dev);
+-	board_gpio_setup();
 -
--	jz_gpio_bulk_resume(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
--
--	return 0;
-+	return pinctrl_pm_select_default_state(dev);
- }
+ 	if (qi_lb60_init_platform_devices())
+ 		panic("Failed to initialize platform devices");
  
- static SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
 -- 
 2.11.0
