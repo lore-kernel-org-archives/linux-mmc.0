@@ -1,165 +1,128 @@
-From: Tomas Winkler <tomas.winkler@intel.com>
-Subject: [mmc] mmc: core: add proper be32 annotation
-Date: Sun,  2 Apr 2017 23:56:03 +0300
-Message-ID: <20170402205603.23790-1-tomas.winkler@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:10212 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751738AbdDBU4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 2 Apr 2017 16:56:46 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Nicolas Ferre <nicolas.ferre@microchip.com>
+Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
+ checking status
+Date: Mon, 3 Apr 2017 10:17:51 +0200
+Message-ID: <7b638940-9d79-f51c-37fc-008f17024558@microchip.com>
+References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
+ <20170310142117.6060-1-ludovic.desroches@atmel.com>
+ <133e7fc9-2d01-79a2-8f1e-08ce2ebf835f@microchip.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <133e7fc9-2d01-79a2-8f1e-08ce2ebf835f@microchip.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Thorsten Leemhuis <regressions@leemhuis.info>
+Cc: ulf.hansson@linaro.org, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Tomas Winkler <tomas.winkler@intel.com>
 
-Annotate big endian values correctly and make sparse happy.
-In mmc_app_send_scr remove scr function parameter as it was
-updating card->raw_scr anyway.
+Le 15/03/2017 =E0 12:48, Nicolas Ferre a =E9crit :
+> Le 10/03/2017 =E0 15:21, Ludovic Desroches a =E9crit :
+>> From: Ludovic Desroches <ludovic.desroches@microchip.com>
+>>
+>> The commit e173f8911f09 mmc: core: Update CMD13 polling policy when
+>> switch to HS DDR mode in addition to fix the management of CRC error,
+>> changes the place where the DDR52 timing is set.
+>>
+>> Before this commit, the sequence was:
+>> - set width to 8 with MMC_HS timing
+>> - send the switch command
+>> - check the status
+>> - set width to 8 with MMC_DDR52 timing
+>> - send the switch command
+>> - check the status
+>> Now:
+>> - set width to 8 with MMC_HS timing
+>> - send the switch command
+>> - set width to 8 with MMC_DDR52 timing
+>> - check the status
+>>
+>> It may lead to get an error when checking the status with some devices.
+>>
+>> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+> =
 
-Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
----
- drivers/mmc/core/mmc_ops.c |  8 ++++----
- drivers/mmc/core/sd.c      |  4 ++--
- drivers/mmc/core/sd_ops.c  | 19 +++++++++----------
- drivers/mmc/core/sd_ops.h  |  2 +-
- 4 files changed, 16 insertions(+), 17 deletions(-)
+> Tested-by: Nicolas Ferre <nicolas.ferre@microchip.com>
+> =
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index fe80f26d6971..d94a722fd340 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -305,7 +305,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
--	u32 *csd_tmp;
-+	__be32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
-@@ -319,7 +319,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
- 	if (ret)
- 		goto err;
- 
--	for (i = 0;i < 4;i++)
-+	for (i = 0; i < 4; i++)
- 		csd[i] = be32_to_cpu(csd_tmp[i]);
- 
- err:
-@@ -330,7 +330,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
--	u32 *cid_tmp;
-+	__be32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -347,7 +347,7 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 	if (ret)
- 		goto err;
- 
--	for (i = 0;i < 4;i++)
-+	for (i = 0; i < 4; i++)
- 		cid[i] = be32_to_cpu(cid_tmp[i]);
- 
- err:
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 89531b48ae84..d109634fbfce 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -225,7 +225,7 @@ static int mmc_decode_scr(struct mmc_card *card)
- static int mmc_read_ssr(struct mmc_card *card)
- {
- 	unsigned int au, es, et, eo;
--	u32 *raw_ssr;
-+	__be32 *raw_ssr;
- 	int i;
- 
- 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-@@ -853,7 +853,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
- 		/*
- 		 * Fetch SCR from card.
- 		 */
--		err = mmc_app_send_scr(card, card->raw_scr);
-+		err = mmc_app_send_scr(card);
- 		if (err)
- 			return err;
- 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 9d5824a37586..47056d8d1bac 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -232,14 +232,14 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca)
- 	return 0;
- }
- 
--int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
-+int mmc_app_send_scr(struct mmc_card *card)
- {
- 	int err;
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
- 	struct scatterlist sg;
--	void *data_buf;
-+	__be32 *scr;
- 
- 	/* NOTE: caller guarantees scr is heap-allocated */
- 
-@@ -250,8 +250,8 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
- 	/* dma onto stack is unsafe/nonportable, but callers to this
- 	 * routine normally provide temporary on-stack buffers ...
- 	 */
--	data_buf = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
--	if (data_buf == NULL)
-+	scr = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
-+	if (!scr)
- 		return -ENOMEM;
- 
- 	mrq.cmd = &cmd;
-@@ -267,23 +267,22 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
- 	data.sg = &sg;
- 	data.sg_len = 1;
- 
--	sg_init_one(&sg, data_buf, 8);
-+	sg_init_one(&sg, scr, 8);
- 
- 	mmc_set_data_timeout(&data, card);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
--	memcpy(scr, data_buf, sizeof(card->raw_scr));
--	kfree(data_buf);
-+	card->raw_scr[0] = be32_to_cpu(scr[0]);
-+	card->raw_scr[1] = be32_to_cpu(scr[1]);
-+
-+	kfree(scr);
- 
- 	if (cmd.error)
- 		return cmd.error;
- 	if (data.error)
- 		return data.error;
- 
--	scr[0] = be32_to_cpu(scr[0]);
--	scr[1] = be32_to_cpu(scr[1]);
--
- 	return 0;
- }
- 
-diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-index 784f8e6b6baa..0e6c3d51e66d 100644
---- a/drivers/mmc/core/sd_ops.h
-+++ b/drivers/mmc/core/sd_ops.h
-@@ -22,7 +22,7 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width);
- int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
- int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
- int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
--int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
-+int mmc_app_send_scr(struct mmc_card *card);
- int mmc_sd_switch(struct mmc_card *card, int mode, int group,
- 	u8 value, u8 *resp);
- int mmc_app_sd_status(struct mmc_card *card, void *ssr);
--- 
-2.9.3
+> On sama5d2 Xplained (eMMC on sdhci).
+> =
 
+> Note that without this patch the system is unable to boot. Even if it
+> was present on 4.10 but we didn't spot it, I see now this as a regression.
+
+Thorsten,
+
+I believe that Ludovic found the root cause of this issue that we were
+experiencing on our platform.
+
+He investigated with the help of Ulf and it is now solved by his patch
+"[PATCH] mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection" already
+integrated in Linus' tree last Friday.
+
+As far as we are concerned, you can remove the mention of this
+regression from your report
+https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1368368.html
+
+Thanks a lot for maintaining this useful tool!
+
+Best regards,
+
+> We would also need to add the tags:
+> Cc: stable <stable@vger.kernel.org> #4.10+
+> Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch
+> to HS DDR mode")
+> =
+
+> =
+
+> Best regards,
+> =
+
+>> ---
+>>  drivers/mmc/core/mmc.c | 5 ++++-
+>>  1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 0fccca0..b837148 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1062,7 +1062,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>>  			   EXT_CSD_BUS_WIDTH,
+>>  			   ext_csd_bits,
+>>  			   card->ext_csd.generic_cmd6_time,
+>> -			   MMC_TIMING_MMC_DDR52,
+>> +			   0,
+>>  			   true, true, true);
+>>  	if (err) {
+>>  		pr_err("%s: switch to bus width %d ddr failed\n",
+>> @@ -1106,6 +1106,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>>  	if (err)
+>>  		err =3D __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+>>  =
+
+>> +	if (!err)
+>> +		mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+>> +
+>>  	return err;
+>>  }
+>>  =
+
+>>
+> =
+
+> =
+
+
+
+-- =
+
+Nicolas Ferre
