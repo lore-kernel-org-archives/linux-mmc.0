@@ -1,128 +1,57 @@
-From: Nicolas Ferre <nicolas.ferre@microchip.com>
-Subject: Re: [RFC PATCH] mmc: core: HS DDR switch, don't change timing before
- checking status
-Date: Mon, 3 Apr 2017 10:17:51 +0200
-Message-ID: <7b638940-9d79-f51c-37fc-008f17024558@microchip.com>
-References: <98664253-9a68-fa59-7f17-438b0d522fe8@microchip.com>
- <20170310142117.6060-1-ludovic.desroches@atmel.com>
- <133e7fc9-2d01-79a2-8f1e-08ce2ebf835f@microchip.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH v4 06/14] MIPS: jz4740: DTS: Add nodes for ingenic pinctrl
+ and gpio drivers
+Date: Mon, 3 Apr 2017 12:57:25 +0300
+Message-ID: <48f7f4ee-b8e3-0096-ddea-2fbe0b399b40@cogentembedded.com>
+References: <20170125185207.23902-2-paul@crapouillou.net>
+ <20170402204244.14216-1-paul@crapouillou.net>
+ <20170402204244.14216-7-paul@crapouillou.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <133e7fc9-2d01-79a2-8f1e-08ce2ebf835f@microchip.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Thorsten Leemhuis <regressions@leemhuis.info>
-Cc: ulf.hansson@linaro.org, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <20170402204244.14216-7-paul@crapouillou.net>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Paul Cercueil <paul@crapouillou.net>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>
+Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Le 15/03/2017 =E0 12:48, Nicolas Ferre a =E9crit :
-> Le 10/03/2017 =E0 15:21, Ludovic Desroches a =E9crit :
->> From: Ludovic Desroches <ludovic.desroches@microchip.com>
->>
->> The commit e173f8911f09 mmc: core: Update CMD13 polling policy when
->> switch to HS DDR mode in addition to fix the management of CRC error,
->> changes the place where the DDR52 timing is set.
->>
->> Before this commit, the sequence was:
->> - set width to 8 with MMC_HS timing
->> - send the switch command
->> - check the status
->> - set width to 8 with MMC_DDR52 timing
->> - send the switch command
->> - check the status
->> Now:
->> - set width to 8 with MMC_HS timing
->> - send the switch command
->> - set width to 8 with MMC_DDR52 timing
->> - check the status
->>
->> It may lead to get an error when checking the status with some devices.
->>
->> Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
-> =
+Hello!
 
-> Tested-by: Nicolas Ferre <nicolas.ferre@microchip.com>
-> =
+On 4/2/2017 11:42 PM, Paul Cercueil wrote:
 
-> On sama5d2 Xplained (eMMC on sdhci).
-> =
+> For a description of the pinctrl devicetree node, please read
+> Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+>
+> For a description of the gpio devicetree nodes, please read
+> Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
+>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+[...]
 
-> Note that without this patch the system is unable to boot. Even if it
-> was present on 4.10 but we didn't spot it, I see now this as a regression.
+> diff --git a/arch/mips/boot/dts/ingenic/jz4740.dtsi b/arch/mips/boot/dts/ingenic/jz4740.dtsi
+> index 3e1587f1f77a..9c23c877fc34 100644
+> --- a/arch/mips/boot/dts/ingenic/jz4740.dtsi
+> +++ b/arch/mips/boot/dts/ingenic/jz4740.dtsi
+> @@ -55,6 +55,67 @@
+>  		clock-names = "rtc";
+>  	};
+>
+> +	pinctrl: ingenic-pinctrl@10010000 {
 
-Thorsten,
+    The node name should be generic, so please rename it to something like 
+"pin-controller@..."
 
-I believe that Ludovic found the root cause of this issue that we were
-experiencing on our platform.
+> +		compatible = "ingenic,jz4740-pinctrl";
+> +		reg = <0x10010000 0x400>;
+> +
+> +		gpa: gpio-controller@0 {
 
-He investigated with the help of Ulf and it is now solved by his patch
-"[PATCH] mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection" already
-integrated in Linus' tree last Friday.
+    The name should be just "gpio@0", according to ePAPR and its successor 
+spec. Although, using the <unit-address> without the "reg" prop isn't allowed 
+either...
 
-As far as we are concerned, you can remove the mention of this
-regression from your report
-https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1368368.html
+[...]
 
-Thanks a lot for maintaining this useful tool!
+MBR, Sergei
 
-Best regards,
-
-> We would also need to add the tags:
-> Cc: stable <stable@vger.kernel.org> #4.10+
-> Fixes: e173f8911f09 ("mmc: core: Update CMD13 polling policy when switch
-> to HS DDR mode")
-> =
-
-> =
-
-> Best regards,
-> =
-
->> ---
->>  drivers/mmc/core/mmc.c | 5 ++++-
->>  1 file changed, 4 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 0fccca0..b837148 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1062,7 +1062,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->>  			   EXT_CSD_BUS_WIDTH,
->>  			   ext_csd_bits,
->>  			   card->ext_csd.generic_cmd6_time,
->> -			   MMC_TIMING_MMC_DDR52,
->> +			   0,
->>  			   true, true, true);
->>  	if (err) {
->>  		pr_err("%s: switch to bus width %d ddr failed\n",
->> @@ -1106,6 +1106,9 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->>  	if (err)
->>  		err =3D __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
->>  =
-
->> +	if (!err)
->> +		mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->> +
->>  	return err;
->>  }
->>  =
-
->>
-> =
-
-> =
-
-
-
--- =
-
-Nicolas Ferre
