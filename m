@@ -1,109 +1,109 @@
-From: David Haworth <dave@fen-net.de>
-Subject: Re: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
-Date: Wed, 5 Apr 2017 00:00:40 +0200
-Message-ID: <20170404220040.GA2997@fen-net.de>
-References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: core: add mmc-card hardware reset enable support
+Date: Wed, 05 Apr 2017 13:40:33 +0900
+Message-ID: <ea610a5c-3857-14f8-3039-414bee724223@samsung.com>
+References: <CGME20170404141714epcas5p495985819f877cc723ef217e9cefe89c1@epcas5p4.samsung.com>
+ <1491315394-7568-1-git-send-email-richard.leitner@skidata.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="bp/iNruPH9dso1Pn"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hermes.f3n.de ([212.204.115.44]:37233 "EHLO hermes.f3n.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755116AbdDDWSq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 4 Apr 2017 18:18:46 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <1491315394-7568-1-git-send-email-richard.leitner-WcANXNA0UjBBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Richard Leitner <richard.leitner-WcANXNA0UjBBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dev-M/VWbR8SM2SsTnJN9+BGXg@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Harvey <tharvey@gateworks.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
+Hi,
 
---bp/iNruPH9dso1Pn
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 04/04/2017 11:16 PM, Richard Leitner wrote:
+> Some eMMCs disable their hardware reset line (RST_N) by default. To enable
+> it the host must set the corresponding bit in ECSD. An example for such
+> a device is the Micron MTFCxGACAANA-4M.
+> 
+> This patch adds a new mmc-card devicetree property to let the host enable
+> this feature during card initialization.
+> 
+> Signed-off-by: Richard Leitner <richard.leitner-WcANXNA0UjBBDgjK7y7TUQ@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-card.txt |  3 +++
+>  drivers/mmc/core/mmc.c                             | 21 +++++++++++++++++++++
+>  2 files changed, 24 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt b/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> index a70fcd6..8590a40 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> @@ -12,6 +12,9 @@ Required properties:
+>  Optional properties:
+>  -broken-hpi : Use this to indicate that the mmc-card has a broken hpi
+>                implementation, and that hpi should not be used
+> +-enable-hw-reset : some eMMC devices have disabled the hw reset functionality
+> +                   (RST_N_FUNCTION) by default. By adding this property the
+> +                   host will enable it during initialization.
 
-Hi Tim,
+As i know, RST_N_FUNCTION is controlled bit[1:0]
+0x0 : RST_n disabled (by default)
+0x1 : permanently enabled
+0x2 : permanently disabled
 
-This looks uncomfortably familiar.
-I've been having problems with "some" micro-SDHC cards, but in
-different circumstances: mmc_spi on a raspberry pi.
+I think that it needs to add the description about these..
+>  
+>  Example:
+>  
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index b502601..518d0e3 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1520,9 +1520,16 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  	int err;
+>  	u32 cid[4];
+>  	u32 rocr;
+> +	struct device_node *np;
+> +	bool enable_rst_n = false;
+>  
+>  	WARN_ON(!host->claimed);
+>  
+> +	np = mmc_of_find_child_device(host, 0);
+> +	if (np && of_device_is_compatible(np, "mmc-card"))
+> +		enable_rst_n = of_property_read_bool(np, "enable-hw-reset");
+> +	of_node_put(np);
+> +
+>  	/* Set correct bus mode for MMC before attempting init */
+>  	if (!mmc_host_is_spi(host))
+>  		mmc_set_bus_mode(host, MMC_BUSMODE_OPENDRAIN);
+> @@ -1810,6 +1817,20 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		}
+>  	}
+>  
+> +	/*
+> +	 * try to enable RST_N if requested
+> +	 * This is needed because some eMMC chips disable this function by
+> +	 * default.
+> +	 */
+> +	if (enable_rst_n) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				 EXT_CSD_RST_N_FUNCTION, EXT_CSD_RST_N_ENABLED,
+> +				 card->ext_csd.generic_cmd6_time);
+> +		if (err && err != -EBADMSG)
+> +			pr_warn("%s: Enabling RST_N feature failed\n",
+> +				mmc_hostname(card->host));
+> +	}
 
-"Good" cards sign on as "mmcblk1: mmc1:0000 00000 7.35 GiB"
-"Bad" cards sign on as  "mmcblk1: mmc1:0000 SU08G 7.40 GiB"
-and eventually return a bit shifted response.
+If enabled hw-reset, it doesn't need to re-enable this bit.
+i didn't check the mmc-util..
+If mmc-util provides the changing this, the using mmc-util is better than this.
 
-The "bad" cards are all SanDisk cards. The "good" cards are cheap
-cards with one exception that is marked as SanDisk but looks like
-a fake.
+Best Regards,
+Jaehoon Chung
 
-More details here:
-https://www.raspberrypi.org/forums/viewtopic.php?f=3D44&t=3D172562&p=3D1103=
-943#p1103943
-if you can read it.
-Unfortunately I don't have a solution.
+> +
+>  	if (!oldcard)
+>  		host->card = card;
+>  
+> 
 
-All the best
-Dave
-
-On 2017-04-04 14:26:40 -0700, Tim Harvey wrote:
-> Greetings,
->=20
-> I've been seeing mmc failures with Linux 4.10 on some IMX6 boards with
-> UHS-I support when used with DDR50 cards (I've got a couple from
-> different manufacturers). I do not see the same issues when using
-> SDR104 cards. I can also see the issue on the latest linux-mmc repo.
->=20
-> The issue is easily replicated by ejecting and inserting the DDR50 card
->=20
-> A successful init looks like this:
-> [  150.514018] mmc0: host does not support reading read-only switch,
-> assuming write-enable
-> [  150.578204] mmc0: new ultra high speed DDR50 SDHC card at address aaaa
-> [  150.592140] mmcblk0: mmc0:aaaa SL08G 7.40 GiB
-> [  150.611512]  mmcblk0: p1
->=20
-> A failing init (about 1 of every 5 trys) looks like this:
-> [   49.514082] mmc0: host does not support reading read-only switch,
-> assuming write-enable
-> [   49.676112] mmc0: tuning execution failed: -5
-> [   49.680510] mmc0: ddr50 tuning failed
-> [   49.684206] mmc0: new ultra high speed DDR50 SDHC card at address aaaa
-> [   49.696456] mmcblk0: mmc0:aaaa SL08G 7.40 GiB
-> ^^^^ failed to read the partition table and at this point all access fail=
-s:
-> # dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D1k count=3D1
-> [   89.417210] mmcblk0: error -84 transferring data, sector 0, nr 32,
-> cmd response 0x900, card status 0xb00
-> 1+0 records in
-> 1+0 records out
-> 1024 bytes (1.0 kB, 1.0 KiB) copied, 0.1227 s, 8.3 kB/s
->=20
-> I know the issue started occurring in Linux v4.4 but I also have heard
-> there are some tuning patches in the queue so before I bisected
-> between v4.4 and v4.3. Note that v4.3 is missing DDR50 tuning but when
-> I backport that I found that when ddr tuning failed there it did not
-> cause the card to not be accessible.
->=20
-> Regards,
->=20
-> Tim
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---bp/iNruPH9dso1Pn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAljkF4gACgkQHM6a+0rWdYqPRQCfZIDs3Y5Hpi5gbHYF6TS+OiMy
-ingAoJU/sdKOegmfFyowUIG/p0ivPlLs
-=f6Ys
------END PGP SIGNATURE-----
-
---bp/iNruPH9dso1Pn--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
