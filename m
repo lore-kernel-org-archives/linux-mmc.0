@@ -1,7 +1,7 @@
-From: Helmut Klein <hgkr.klein@gmail.com>
+From: Heiner Kallweit <hkallweit1@gmail.com>
 Subject: Re: meson-gx-mmc: 2nd patch set
-Date: Wed, 5 Apr 2017 19:17:56 +0200
-Message-ID: <27557b81-4649-3a48-b932-321f6d3e20e5@gmail.com>
+Date: Wed, 5 Apr 2017 19:48:43 +0200
+Message-ID: <aa775b92-fe11-40f6-9f36-2aa2074113dd@gmail.com>
 References: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
  <9a90bda9-6d12-a368-99ce-67c112249a43@gmail.com>
  <b969ab41-8c10-0f06-5bd8-3421d5ec6774@gmail.com>
@@ -23,22 +23,22 @@ References: <d1f4c34c-799c-c76c-4ad8-5c0060f9c71f@gmail.com>
  <9a481525-801a-1923-82af-6e5597932c4e@gmail.com>
  <0d67236f-79e5-426c-0295-f83a66daf7fe@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:36143 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933058AbdDERSK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2017 13:18:10 -0400
-Received: by mail-wr0-f195.google.com with SMTP id k6so4496683wre.3
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Apr 2017 10:18:09 -0700 (PDT)
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:36047 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751840AbdDERs7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2017 13:48:59 -0400
+Received: by mail-wr0-f193.google.com with SMTP id k6so4729480wre.3
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Apr 2017 10:48:58 -0700 (PDT)
 In-Reply-To: <0d67236f-79e5-426c-0295-f83a66daf7fe@baylibre.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Neil Armstrong <narmstrong@baylibre.com>, Heiner Kallweit <hkallweit1@gmail.com>
+To: Neil Armstrong <narmstrong@baylibre.com>, Helmut Klein <hgkr.klein@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-amlogic@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 05.04.2017 15:37, Neil Armstrong wrote:
+Am 05.04.2017 um 15:37 schrieb Neil Armstrong:
 > On 04/05/2017 02:38 PM, Helmut Klein wrote:
 >> On 05.04.2017 08:02, Heiner Kallweit wrote:
 >>> Am 04.04.2017 um 22:02 schrieb Helmut Klein:
@@ -1773,26 +1773,26 @@ On 05.04.2017 15:37, Neil Armstrong wrote:
 >>
 >>  enum brcmf_sdio_frmtype {
 >>         BRCMF_SDIO_FT_NORMAL,
->
+> 
 > Hi Heiner,
->
+> 
 > Isn't a way to use the old behaviour with a badly aligned buffer ?
->
+> 
+Sure, it's not an either or. The driver can support both behaviors and we can dynamically
+switch, e.g. after checking whether any segment of the scatterlist is unaligned.
+It's just that it creates a certain overhead, in driver code and at runtime as well
+(relatively big bounce buffer of 256k DMA coherent memory + copying all data to and from
+bounce buffer).
+
+On the other hand: There's only a handful of WiFi drivers with SDIO interface support
+and so far vendors of meson-gx-based boards seem to use one of them only. We could go
+and fix drivers only once by chance any vendor uses a WiFi chip with this other driver.
+To me this risk seems acceptable, but of course others (MMC maintainer in particular)
+may see this differently.
+
+Heiner
+
 > Neil
->
->
+> 
+> 
 
-"a solution" was a bad expression.
-
-with my mail i wanted to show, that
-- Heiners drivers is, when receiving correctly aligned buffers, 
-perfectly operational
-- the performance isn't better than that of the amlogic driver, which 
-uses, as much as i can see, a bounce buffer for sdio
-
-and what was surprising for me:
-- the code for the buffer aligment inside of brcmfmac uses a locally 
-defined value. isn't there a global definition for this??
-- handling for buffer alignment seems IMHO inconsistent in the kernel
-
-Helmut
