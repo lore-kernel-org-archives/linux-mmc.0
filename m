@@ -1,7 +1,8 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
-Date: Fri, 07 Apr 2017 13:59:45 +0900
-Message-ID: <ff7d064d-6ab5-db09-f22c-b01940af337d@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron
+ boards
+Date: Fri, 7 Apr 2017 14:50:04 +0800
+Message-ID: <bdb7c3c8-87c2-0fd3-73f0-d0b1ddf64e7f@rock-chips.com>
 References: <20170330011709.GA110687@google.com>
  <6d87cb71-1339-0dc9-e071-1c117f541881@rock-chips.com>
  <20170330014230.GA21467@google.com>
@@ -11,27 +12,24 @@ References: <20170330011709.GA110687@google.com>
  <6b9a3425-fe3c-0c9a-8d1b-d2d2ac1ec9de@samsung.com>
  <20170406220410.GA5708@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:32771 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751261AbdDGE7s (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2017 00:59:48 -0400
-Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0OO0029UQWJMYE90@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 07 Apr 2017 13:59:46 +0900 (KST)
-In-reply-to: <20170406220410.GA5708@google.com>
+Received: from lucky1.263xmail.com ([211.157.147.131]:56415 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753307AbdDGGuI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2017 02:50:08 -0400
+In-Reply-To: <20170406220410.GA5708@google.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Brian Norris <briannorris@chromium.org>
-Cc: Eddie Cai <eddie.cai.kernel@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, amstan@chromium.org, Kevin Mihelich <kevin@archlinuxarm.org>, Doug Anderson <dianders@chromium.org>
+To: Brian Norris <briannorris@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Eddie Cai <eddie.cai.kernel@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, amstan@chromium.org, Kevin Mihelich <kevin@archlinuxarm.org>, Doug Anderson <dianders@chromium.org>
 
-On 04/07/2017 07:04 AM, Brian Norris wrote:
+Hi Brian,
+
+On 2017/4/7 6:04, Brian Norris wrote:
 > Hi,
-> 
+>
 > On Thu, Mar 30, 2017 at 02:11:19PM +0900, Jaehoon Chung wrote:
 >> On 03/30/2017 11:53 AM, Brian Norris wrote:
 >>> On Thu, Mar 30, 2017 at 10:18:59AM +0800, Eddie Cai wrote:
@@ -59,24 +57,24 @@ On 04/07/2017 07:04 AM, Brian Norris wrote:
 >>> example?
 >>
 >> I'm not sure but if card-detecting is polling, the timing issue could be occurred.
-> 
+>
 > I don't know much about MMC in general, nor about this driver. Any
 > chance you'd accept reverts of the patches in question though? This is a
 > huge regression, and there were only a few relevant changes that seem to
 > have triggered this. I can try to come up with something targeted, but
 > I'm not going to even try if that'd get rejected up front.
 
-Sure, if it's big regression, we can revert the patches relevant to problem.
-After fixing it, we can re-apply them..before reverting, i will try to fix it until next Wends,
+Untile now, none of my(and my colleagues') rockchip platforms are able
+to reproduce this issue, so I can't tell what exactly the problem is.
+However, I noticed you mentioned that the Exynos platforms are also
+affected by rpm of dwmmc. I don't see dw_mmc-exynos enable this feature,
+so it looks quite odd to me!
 
-Otherwise, will revert them at that time.
+Can I or Eddie get a Veyron board to help you debug it?
 
-Best Regards,
-Jaehoon Chung
-
-> 
+>
 > Brian
-> 
-> 
-> 
+>
+>
+>
 
