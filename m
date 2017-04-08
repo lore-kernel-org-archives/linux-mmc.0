@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2 04/22] mmc: block: Introduce queue semantics
-Date: Sat, 8 Apr 2017 19:40:07 +0200
-Message-ID: <CACRpkdZagwtgb8fiMsumxdNMn8=Vb+rvfyc5gq1Toy9tkUs91A@mail.gmail.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <1489408613-26915-5-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 05/22] mmc: queue: Share mmc request array between partitions
+Date: Sat, 8 Apr 2017 19:41:43 +0200
+Message-ID: <CACRpkdYTbD0U8z2ZBgBcq5hLu=Up=J4Tzz2+YT93TYmRsiZiUA@mail.gmail.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <1489408613-26915-6-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:35873 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751517AbdDHRkI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2017 13:40:08 -0400
-Received: by mail-io0-f182.google.com with SMTP id l7so64844172ioe.3
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2017 10:40:08 -0700 (PDT)
-In-Reply-To: <1489408613-26915-5-git-send-email-adrian.hunter@intel.com>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:37813 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752153AbdDHRlp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2017 13:41:45 -0400
+Received: by mail-it0-f41.google.com with SMTP id a140so8177291ita.0
+        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2017 10:41:45 -0700 (PDT)
+In-Reply-To: <1489408613-26915-6-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,20 +20,20 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Mon, Mar 13, 2017 at 1:36 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Change from viewing the requests in progress as 'current' and 'previous',
-> to viewing them as a queue. The current request is allocated to the first
-> free slot. The presence of incomplete requests is determined from the
-> count (mq->qcnt) of entries in the queue. Non-read-write requests (i.e.
-> discards and flushes) are not added to the queue at all and require no
-> special handling. Also no special handling is needed for the
-> MMC_BLK_NEW_REQUEST case.
+> eMMC can have multiple internal partitions that are represented as separate
+> disks / queues. However switching between partitions is only done when the
+> queue is empty. Consequently the array of mmc requests that are queued can
+> be shared between partitions saving memory.
 >
-> As well as allowing an arbitrarily sized queue, the queue thread function
-> is significantly simpler.
+> Keep a pointer to the mmc request queue on the card, and use that instead
+> of allocating a new one for each partition.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+This is an especially nice patch, and even just merging this patch set
+to this point is already a significant improvement to the core code IMO.
 
 Yours,
 Linus Walleij
