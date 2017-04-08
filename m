@@ -1,34 +1,46 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2 08/22] mmc: block: Disable Command Queue while RPMB is used
-Date: Sat, 8 Apr 2017 19:44:51 +0200
-Message-ID: <CACRpkdbKUdLgB1YDFc+bnNTzLKxTbtpZjwcLg2OWHpSazh_gFw@mail.gmail.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <1489408613-26915-9-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:38631 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751955AbdDHRox (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2017 13:44:53 -0400
-Received: by mail-it0-f53.google.com with SMTP id y18so8171711itc.1
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2017 10:44:53 -0700 (PDT)
-In-Reply-To: <1489408613-26915-9-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH v2 2/2] mmc: core: for data errors, take response of stop cmd into account
+Date: Sat,  8 Apr 2017 22:20:06 +0200
+Message-ID: <20170408202006.27276-3-wsa+renesas@sang-engineering.com>
+References: <20170408202006.27276-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170408202006.27276-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Mon, Mar 13, 2017 at 1:36 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+Some errors are flagged only with the next command after a multiblock
+transfer, e.g. ECC error. So, when checking for data transfer errors,
+we check the result from the stop command as well.
 
-> RPMB does not allow Command Queue commands. Disable and re-enable the
-> Command Queue when switching.
->
-> Note that the driver only switches partitions when the queue is empty.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Reviewed-by: Harjani Ritesh <riteshh@codeaurora.org>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/core/block.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-
-Yours,
-Linus Walleij
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index bacaa255c4b16a..ea3dc8a22ad2cb 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1374,7 +1374,8 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 		return MMC_BLK_RETRY;
+ 	}
+ 
+-	if (brq->data.error) {
++	/* Some errors (ECC) are flagged on the next commmand, so check stop, too */
++	if (brq->data.error || brq->stop.error) {
+ 		if (need_retune && !brq->retune_retry_done) {
+ 			pr_debug("%s: retrying because a re-tune was needed\n",
+ 				 req->rq_disk->disk_name);
+@@ -1382,7 +1383,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 			return MMC_BLK_RETRY;
+ 		}
+ 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
+-		       req->rq_disk->disk_name, brq->data.error,
++		       req->rq_disk->disk_name, brq->data.error ?: brq->stop.error,
+ 		       (unsigned)blk_rq_pos(req),
+ 		       (unsigned)blk_rq_sectors(req),
+ 		       brq->cmd.resp[0], brq->stop.resp[0]);
+-- 
+2.11.0
