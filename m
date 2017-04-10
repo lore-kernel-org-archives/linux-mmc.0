@@ -1,51 +1,68 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [v3, 5/7] mmc: sdhci-of-esdhc: add delay between tuning cycles
-Date: Mon, 10 Apr 2017 15:39:43 +0300
-Message-ID: <6f4ebcff-7051-cc3a-98b5-16345c4f9e83@intel.com>
-References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
- <1490600982-5410-6-git-send-email-yangbo.lu@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 06/22] mmc: mmc: Add functions to enable / disable the
+ Command Queue
+Date: Mon, 10 Apr 2017 15:02:55 +0200
+Message-ID: <CAPDyKFoyKP1qXjb-L+9kQes1V0Zqt-GrB4=fF-kp=1OTuFAXAQ@mail.gmail.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
+ <1489408613-26915-7-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpuVWfwL-n13JKybsm56yaEzYOws7GpX-gbe-BX1O9crA@mail.gmail.com> <31e5cbc2-91e0-9d32-003c-df6ea0a10a49@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:11307 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752750AbdDJMpZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 10 Apr 2017 08:45:25 -0400
-In-Reply-To: <1490600982-5410-6-git-send-email-yangbo.lu@nxp.com>
+Received: from mail-ua0-f174.google.com ([209.85.217.174]:36251 "EHLO
+        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753243AbdDJNC5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2017 09:02:57 -0400
+Received: by mail-ua0-f174.google.com with SMTP id a1so31854879uaf.3
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2017 06:02:56 -0700 (PDT)
+In-Reply-To: <31e5cbc2-91e0-9d32-003c-df6ea0a10a49@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 27/03/17 10:49, Yangbo Lu wrote:
-> It's observed that eSDHC needed delay between tuning cycles for
-> HS200 successful tuning. This patch is to set 1ms delay for that.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+On 10 April 2017 at 13:11, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 10/04/17 14:01, Ulf Hansson wrote:
+>> On 13 March 2017 at 13:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> Add helper functions to enable or disable the Command Queue.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> ---
+>>>  Documentation/mmc/mmc-dev-attrs.txt |  1 +
+>>>  drivers/mmc/core/mmc.c              |  2 ++
+>>>  drivers/mmc/core/mmc_ops.c          | 28 ++++++++++++++++++++++++++++
+>>>  drivers/mmc/core/mmc_ops.h          |  2 ++
+>>>  include/linux/mmc/card.h            |  1 +
+>>>  5 files changed, 34 insertions(+)
+>>>
+>>> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+>>> index 404a0e9e92b0..dcd1252877fb 100644
+>>> --- a/Documentation/mmc/mmc-dev-attrs.txt
+>>> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+>>> @@ -30,6 +30,7 @@ All attributes are read-only.
+>>>         rel_sectors             Reliable write sector count
+>>>         ocr                     Operation Conditions Register
+>>>         dsr                     Driver Stage Register
+>>> +       cmdq_en                 Command Queue enabled: 1 => enabled, 0 => not enabled
+>>>
+>>>  Note on Erase Size and Preferred Erase Size:
+>>>
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index 7fd722868875..5727a0842a59 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -790,6 +790,7 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+>>>  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+>>>  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+>>>  MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
+>>> +MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
+>>
+>> Why do we need to be able to change this from userspace?
+>
+> MMC_DEV_ATTR makes it read-only, so it is just a way for userspace to see if
+> command queue is enabled.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Of course! Thanks for the clarification - and yes, that makes sense!
 
-> ---
-> Changes for v2:
-> 	- None
-> Changes for v3:
-> 	- Used a host member for tuning delay instead of a quirk.
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 8c8e147..0754ef4 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -807,6 +807,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
->  	host->mmc_host_ops.start_signal_voltage_switch =
->  		esdhc_signal_voltage_switch;
->  	host->mmc_host_ops.execute_tuning = esdhc_execute_tuning;
-> +	host->tuning_delay = 1;
->  
->  	esdhc_init(pdev, host);
->  
-> 
-
+Kind regards
+Uffe
