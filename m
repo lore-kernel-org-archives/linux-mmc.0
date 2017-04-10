@@ -1,38 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v3, 0/7] Add SD UHS-I and eMMC HS200 support for eSDHC
-Date: Mon, 10 Apr 2017 12:48:30 +0200
-Message-ID: <CAPDyKFpN-+7mxxeBHEELROWsn275Mec6unDHdnY3Gsz3oKT9pw@mail.gmail.com>
-References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com> <DB6PR0401MB253627A0ABBF6DA9EC063A84F8010@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+Subject: Re: [PATCH V2 06/22] mmc: mmc: Add functions to enable / disable the
+ Command Queue
+Date: Mon, 10 Apr 2017 13:01:23 +0200
+Message-ID: <CAPDyKFpuVWfwL-n13JKybsm56yaEzYOws7GpX-gbe-BX1O9crA@mail.gmail.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <1489408613-26915-7-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:33957 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752251AbdDJKsb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2017 06:48:31 -0400
-Received: by mail-ua0-f173.google.com with SMTP id u103so32228870uau.1
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2017 03:48:31 -0700 (PDT)
-In-Reply-To: <DB6PR0401MB253627A0ABBF6DA9EC063A84F8010@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+Received: from mail-ua0-f175.google.com ([209.85.217.175]:34516 "EHLO
+        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752343AbdDJLBY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2017 07:01:24 -0400
+Received: by mail-ua0-f175.google.com with SMTP id u103so32517181uau.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2017 04:01:24 -0700 (PDT)
+In-Reply-To: <1489408613-26915-7-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Y.B. Lu" <yangbo.lu@nxp.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 10 April 2017 at 10:20, Y.B. Lu <yangbo.lu@nxp.com> wrote:
-> Hi Andrian and Uffe,
+On 13 March 2017 at 13:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Add helper functions to enable or disable the Command Queue.
 >
-> Do you have any comments on MMC patches?
-> Could you help to merge the mmc patches if there is no changes requested?
-
-I am waiting for Adrian's acks.
-
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  Documentation/mmc/mmc-dev-attrs.txt |  1 +
+>  drivers/mmc/core/mmc.c              |  2 ++
+>  drivers/mmc/core/mmc_ops.c          | 28 ++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc_ops.h          |  2 ++
+>  include/linux/mmc/card.h            |  1 +
+>  5 files changed, 34 insertions(+)
 >
-> Regarding to the dts patches, I have some more platforms to support.
-> So I'd like to drop them currently, and send them all to arm mailing list for reviewing.
+> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+> index 404a0e9e92b0..dcd1252877fb 100644
+> --- a/Documentation/mmc/mmc-dev-attrs.txt
+> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+> @@ -30,6 +30,7 @@ All attributes are read-only.
+>         rel_sectors             Reliable write sector count
+>         ocr                     Operation Conditions Register
+>         dsr                     Driver Stage Register
+> +       cmdq_en                 Command Queue enabled: 1 => enabled, 0 => not enabled
+>
+>  Note on Erase Size and Preferred Erase Size:
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 7fd722868875..5727a0842a59 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -790,6 +790,7 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+>  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+>  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+>  MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
+> +MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
 
-If it's new bindings/compatibles, the DT doc changes needs to be
-discussed and agreed upon first. Actual changes to the DTS files,
-should preferably go via the arm soc tree.
+Why do we need to be able to change this from userspace?
+
+[...]
 
 Kind regards
 Uffe
