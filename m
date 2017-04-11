@@ -1,219 +1,189 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
-Date: Tue, 11 Apr 2017 05:14:48 +0000
-Message-ID: <DB6PR0401MB253634F0774283AEA36D8ACDF8000@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+From: "Y.B. Lu" <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [v3, 2/7] mmc: sdhci-of-esdhc: add support for signal voltage
+ switch
+Date: Tue, 11 Apr 2017 05:20:27 +0000
+Message-ID: <DB6PR0401MB2536429268B58A13C69C5808F8000@DB6PR0401MB2536.eurprd04.prod.outlook.com>
 References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
- <1490600982-5410-2-git-send-email-yangbo.lu@nxp.com>
- <a8810e0a-95fa-a590-6827-15031ff52886@intel.com>
+ <1490600982-5410-3-git-send-email-yangbo.lu@nxp.com>
+ <e7e08c87-ecd6-ab24-636c-7707a5172b08@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-he1eur01on0065.outbound.protection.outlook.com ([104.47.0.65]:48576
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752095AbdDKFOx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 11 Apr 2017 01:14:53 -0400
-In-Reply-To: <a8810e0a-95fa-a590-6827-15031ff52886@intel.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <e7e08c87-ecd6-ab24-636c-7707a5172b08-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
 Hi Adrian,
 
 
 > -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
-> Sent: Monday, April 10, 2017 8:36 PM
-> To: Y.B. Lu; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org;
-> linux-arm-kernel@lists.infradead.org; ulf.hansson@linaro.org; Rob Herring=
+> From: linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-mmc-
+> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Adrian Hunter
+> Sent: Monday, April 10, 2017 8:38 PM
+> To: Y.B. Lu; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Rob Herring=
 ;
 > Mark Rutland; Catalin Marinas; Will Deacon
 > Cc: Xiaobo Xie
-> Subject: Re: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
+> Subject: Re: [v3, 2/7] mmc: sdhci-of-esdhc: add support for signal
+> voltage switch
 >=20
 > On 27/03/17 10:49, Yangbo Lu wrote:
-> > eSDHC could select peripheral clock or platform clock as clock source
-> > by the PCS bit of eSDHC Control Register, and this bit couldn't be
-> > reset by software reset for all. In default, the platform clock is
-> > used. But we have to use peripheral clock since it has a higher
-> > frequency to support eMMC
-> > HS200 mode and SD UHS-I mode. This patch is to add peripheral clock
-> > support and use it instead of platform clock if it's declared in eSDHC
-> dts node.
+> > eSDHC supports signal voltage switch from 3.3v to 1.8v by
+> > eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
+> > signal SDHC_VS, and there must be a control circuit out of eSDHC to
+> > change the signal voltage according to SDHC_VS output signal.
 > >
-> > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> > Signed-off-by: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 >=20
-> Apart from minor comments:
+> Apart from minor comment below:
 >=20
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 >=20
 > > ---
 > > Changes for v2:
-> > 	- None
-> > Changes for v3:
-> > 	- None
+> > 	- Used Adrain's method to support voltage switching:
+> >           host->mmc_host_ops.start_signal_voltage_switch =3D
+> >                      esdhc_signal_voltage_switch; Changes for v3:
+> > 	- Put .start_signal_voltage_switch assigning after IS_ERR(host)
+> check.
 > > ---
 > >  drivers/mmc/host/sdhci-esdhc.h    |  1 +
-> >  drivers/mmc/host/sdhci-of-esdhc.c | 70
-> > +++++++++++++++++++++++++++++++++++++--
-> >  2 files changed, 69 insertions(+), 2 deletions(-)
+> >  drivers/mmc/host/sdhci-of-esdhc.c | 74
+> > +++++++++++++++++++++++++++++++++++++++
+> >  2 files changed, 75 insertions(+)
 > >
 > > diff --git a/drivers/mmc/host/sdhci-esdhc.h
-> > b/drivers/mmc/host/sdhci-esdhc.h index ece8b37..5343fc0 100644
+> > b/drivers/mmc/host/sdhci-esdhc.h index 5343fc0..6869567 100644
 > > --- a/drivers/mmc/host/sdhci-esdhc.h
 > > +++ b/drivers/mmc/host/sdhci-esdhc.h
-> > @@ -54,6 +54,7 @@
+> > @@ -37,6 +37,7 @@
 > >
-> >  /* Control Register for DMA transfer */
-> >  #define ESDHC_DMA_SYSCTL		0x40c
-> > +#define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
-> >  #define ESDHC_DMA_SNOOP			0x00000040
-> >
-> >  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */ diff --git
-> > a/drivers/mmc/host/sdhci-of-esdhc.c
+> >  /* Protocol Control Register */
+> >  #define ESDHC_PROCTL			0x28
+> > +#define ESDHC_VOLT_SEL			0x00000400
+> >  #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
+> >  #define ESDHC_CTRL_8BITBUS		(0x2 << 1)
+> >  #define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
 > > b/drivers/mmc/host/sdhci-of-esdhc.c
-> > index ff37e74..7ce1caf 100644
+> > index 7ce1caf..a70499a 100644
 > > --- a/drivers/mmc/host/sdhci-of-esdhc.c
 > > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -19,6 +19,7 @@
+> > @@ -16,6 +16,7 @@
+> >  #include <linux/err.h>
+> >  #include <linux/io.h>
+> >  #include <linux/of.h>
+> > +#include <linux/of_address.h>
 > >  #include <linux/delay.h>
 > >  #include <linux/module.h>
 > >  #include <linux/sys_soc.h>
-> > +#include <linux/clk.h>
-> >  #include <linux/mmc/host.h>
-> >  #include "sdhci-pltfm.h"
-> >  #include "sdhci-esdhc.h"
-> > @@ -30,6 +31,7 @@ struct sdhci_esdhc {
-> >  	u8 vendor_ver;
-> >  	u8 spec_ver;
-> >  	bool quirk_incorrect_hostver;
-> > +	unsigned int peripheral_clock;
-> >  };
+> > @@ -559,6 +560,76 @@ static void esdhc_reset(struct sdhci_host *host,
+> u8 mask)
+> >  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);  }
 > >
-> >  /**
-> > @@ -414,15 +416,25 @@ static int esdhc_of_enable_dma(struct sdhci_host
-> > *host)  static unsigned int esdhc_of_get_max_clock(struct sdhci_host
-> > *host)  {
-> >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
-> >
-> > -	return pltfm_host->clock;
-> > +	if (esdhc->peripheral_clock)
-> > +		return esdhc->peripheral_clock;
-> > +	else
-> > +		return pltfm_host->clock;
-> >  }
-> >
-> >  static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
-> > {
-> >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
-> > +	unsigned int clock;
-> >
-> > -	return pltfm_host->clock / 256 / 16;
-> > +	if (esdhc->peripheral_clock)
-> > +		clock =3D esdhc->peripheral_clock;
-> > +	else
-> > +		clock =3D pltfm_host->clock;
-> > +	return clock / 256 / 16;
-> >  }
-> >
-> >  static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
-> > clock) @@ -512,6 +524,33 @@ static void
-> esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
-> >  	sdhci_writel(host, ctrl, ESDHC_PROCTL);  }
-> >
-> > +static void esdhc_clock_enable(struct sdhci_host *host, bool enable)
+> > +/* The SCFG, Supplemental Configuration Unit, provides SoC specific
+> > + * configuration and status registers for the device. There is a
+> > + * SDHC IO VSEL control register on SCFG for some platforms. It's
+> > + * used to support SDHC IO voltage switching.
+> > + */
+> > +static const struct of_device_id scfg_device_ids[] =3D {
+> > +	{ .compatible =3D "fsl,t1040-scfg", },
+> > +	{ .compatible =3D "fsl,ls1012a-scfg", },
+> > +	{ .compatible =3D "fsl,ls1046a-scfg", },
+> > +	{}
+> > +};
+> > +
+> > +/* SDHC IO VSEL control register definition */
+> > +#define SCFG_SDHCIOVSELCR	0x408
+> > +#define SDHCIOVSELCR_TGLEN	0x80000000
+> > +#define SDHCIOVSELCR_VSELVAL	0x60000000
+> > +#define SDHCIOVSELCR_SDHC_VS	0x00000001
+> > +
+> > +static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
+> > +				       struct mmc_ios *ios)
 > > +{
+> > +	struct sdhci_host *host =3D mmc_priv(mmc);
+> > +	struct device_node *scfg_node;
+> > +	void __iomem *scfg_base =3D NULL;
+> > +	u32 sdhciovselcr;
 > > +	u32 val;
-> > +	u32 timeout;
 > > +
-> > +	val =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> > +	/*
+> > +	 * Signal Voltage Switching is only applicable for Host Controllers
+> > +	 * v3.00 and above.
+> > +	 */
+> > +	if (host->version < SDHCI_SPEC_300)
+> > +		return 0;
 > > +
-> > +	if (enable)
-> > +		val |=3D ESDHC_CLOCK_SDCLKEN;
-> > +	else
-> > +		val &=3D ~ESDHC_CLOCK_SDCLKEN;
+> > +	val =3D sdhci_readl(host, ESDHC_PROCTL);
 > > +
-> > +	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
+> > +	switch (ios->signal_voltage) {
+> > +	case MMC_SIGNAL_VOLTAGE_330:
+> > +		val &=3D ~ESDHC_VOLT_SEL;
+> > +		sdhci_writel(host, val, ESDHC_PROCTL);
+> > +		return 0;
+> > +	case MMC_SIGNAL_VOLTAGE_180:
+> > +		scfg_node =3D of_find_matching_node(NULL, scfg_device_ids);
+> > +		if (scfg_node)
+> > +			scfg_base =3D of_iomap(scfg_node, 0);
+> > +		if (scfg_base) {
+> > +			sdhciovselcr =3D SDHCIOVSELCR_TGLEN |
+> > +				       SDHCIOVSELCR_VSELVAL;
+> > +			iowrite32be(sdhciovselcr,
+> > +				scfg_base + SCFG_SDHCIOVSELCR);
+>=20
+> In other places there is support for little endian also, so why not here?
+
+[Lu Yangbo-B47093] The SCFG unit is always a big-endian module on both ARM =
+and PPC QorIQ platforms.
+There is little possibility to have little-endian in future.
+
+>=20
 > > +
-> > +	timeout =3D 20;
-> > +	val =3D ESDHC_CLOCK_STABLE;
-> > +	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
-> > +		if (timeout =3D=3D 0) {
-> > +			pr_err("%s: Internal clock never stabilised.\n",
-> > +				mmc_hostname(host->mmc));
-> > +			break;
+> > +			val |=3D ESDHC_VOLT_SEL;
+> > +			sdhci_writel(host, val, ESDHC_PROCTL);
+> > +			mdelay(5);
+> > +
+> > +			sdhciovselcr =3D SDHCIOVSELCR_TGLEN |
+> > +				       SDHCIOVSELCR_SDHC_VS;
+> > +			iowrite32be(sdhciovselcr,
+> > +				scfg_base + SCFG_SDHCIOVSELCR);
+> > +			iounmap(scfg_base);
+> > +		} else {
+> > +			val |=3D ESDHC_VOLT_SEL;
+> > +			sdhci_writel(host, val, ESDHC_PROCTL);
 > > +		}
-> > +		timeout--;
-> > +		mdelay(1);
->=20
-> If the time to stabilize is much less that 1 ms then this loop can waste
-> time.  Have a look at the change in sdhci.c.
->=20
-
-[Lu Yangbo-B47093] Thanks a lot. The method in sdhci.c is really better.
-I will send next version to use it soon.
-
-Currently another place in esdhc driver could also change to use this metho=
-d. I will send a separate patch for that later.
-
-
+> > +		return 0;
+> > +	default:
+> > +		return 0;
 > > +	}
 > > +}
 > > +
-> >  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
-> >  	sdhci_reset(host, mask);
-> > @@ -613,6 +652,9 @@ static void esdhc_init(struct platform_device
-> > *pdev, struct sdhci_host *host)  {
-> >  	struct sdhci_pltfm_host *pltfm_host;
-> >  	struct sdhci_esdhc *esdhc;
-> > +	struct device_node *np;
-> > +	struct clk *clk;
-> > +	u32 val;
-> >  	u16 host_ver;
+> >  #ifdef CONFIG_PM_SLEEP
+> >  static u32 esdhc_proctl;
+> >  static int esdhc_of_suspend(struct device *dev) @@ -714,6 +785,9 @@
+> > static int sdhci_esdhc_probe(struct platform_device *pdev)
+> >  	if (IS_ERR(host))
+> >  		return PTR_ERR(host);
 > >
-> >  	pltfm_host =3D sdhci_priv(host);
-> > @@ -626,6 +668,30 @@ static void esdhc_init(struct platform_device
-> *pdev, struct sdhci_host *host)
-> >  		esdhc->quirk_incorrect_hostver =3D true;
-> >  	else
-> >  		esdhc->quirk_incorrect_hostver =3D false;
+> > +	host->mmc_host_ops.start_signal_voltage_switch =3D
+> > +		esdhc_signal_voltage_switch;
 > > +
-> > +	np =3D pdev->dev.of_node;
-> > +	clk =3D of_clk_get(np, 0);
->=20
-> Should there be a clk_put somewhere?
-
-[Lu Yangbo-B47093] Will add it after driver gets the clock value.
-
->=20
-> > +	if (!IS_ERR(clk)) {
-> > +		/*
-> > +		 * esdhc->peripheral_clock would be assigned with a value
-> > +		 * which is eSDHC base clock when use periperal clock.
-> > +		 * For ls1046a, the clock value got by common clk API is
-> > +		 * peripheral clock while the eSDHC base clock is 1/2
-> > +		 * peripheral clock.
-> > +		 */
-> > +		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc"))
-> > +			esdhc->peripheral_clock =3D clk_get_rate(clk) / 2;
-> > +		else
-> > +			esdhc->peripheral_clock =3D clk_get_rate(clk);
-> > +	}
-> > +
-> > +	if (esdhc->peripheral_clock) {
-> > +		esdhc_clock_enable(host, false);
-> > +		val =3D sdhci_readl(host, ESDHC_DMA_SYSCTL);
-> > +		val |=3D ESDHC_PERIPHERAL_CLK_SEL;
-> > +		sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
-> > +		esdhc_clock_enable(host, true);
-> > +	}
-> >  }
+> >  	esdhc_init(pdev, host);
 > >
-> >  static int sdhci_esdhc_probe(struct platform_device *pdev)
+> >  	sdhci_get_of_property(pdev);
 > >
-
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
