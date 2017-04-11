@@ -1,36 +1,94 @@
-From: David Haworth <dave@fen-net.de>
-Subject: Re: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
-Date: Tue, 11 Apr 2017 16:40:00 +0200
-Message-ID: <20170411144000.GA3541@fen-net.de>
-References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
- <20170404220040.GA2997@fen-net.de>
- <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hermes.f3n.de ([212.204.115.44]:49289 "EHLO hermes.f3n.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751047AbdDKOkA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 11 Apr 2017 10:40:00 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Don't allow Runtime PM for SDIO cards
+Date: Tue, 11 Apr 2017 15:55:43 -0700
+Message-ID: <20170411225543.987-1-dianders@chromium.org>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: briannorris@chromium.org, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, kevin@archlinuxarm.org, amstan@chromium.org, xzy.xu@rock-chips.com, Douglas Anderson <dianders@chromium.org>, stable@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Harvey <tharvey@gateworks.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Weijun Yang <york.yang@csr.com>
 
-Hi Tim,
+According to the SDIO standard interrupts are normally signalled in a
+very complicated way.  They require the card clock to be running and
+require the controller to be paying close attention to the signals
+coming from the card.  This simply can't happen with the clock stopped
+or with the controller in a low power mode.
 
-On 2017-04-07 12:55:28 -0700, Tim Harvey wrote:
-> 
-> Thanks for the response, but I don't think this is the same thing
-> because in your case I don't see any tuning or transfer errors
-> reported.
+To that end, we'll disable runtime_pm when we detect that an SDIO card
+was inserted.  This is much like with what we do with the special
+"SDMMC_CLKEN_LOW_PWR" bit that dw_mmc supports.
 
-I think the "shifted response code" might be the result of a transfer
-error, but you're right - no tuning.
+NOTE: we specifically do this Runtime PM disabling at card init time
+rather than in the enable_sdio_irq() callback.  This is _different_
+than how SDHCI does it.  Why do we do it differently?
 
-I see you had another reply though - I hope you manage to find a solution.
+- Unlike SDHCI, dw_mmc uses the standard sdio_irq code in Linux (AKA
+  dw_mmc doesn't set MMC_CAP2_SDIO_IRQ_NOTHREAD).
+- Because we use the standard sdio_irq code:
+  - We see a constant stream of enable_sdio_irq(0) and
+    enable_sdio_irq(1) calls.  This is because the standard code
+    disables interrupts while processing and re-enables them after.
+  - While interrupts are disabled, there's technically a period where
+    we could get runtime disabled while processing interrupts.
+  - If we are runtime disabled while processing interrupts, we'll
+    reset the controller at resume time (see dw_mci_runtime_resume),
+    which seems like a terrible idea because we could possibly have
+    another interrupt pending.
 
-Cheers,
-Dave
+To fix the above isues we'd want to put something in the standard
+sdio_irq code that makes sure to call pm_runtime get/put when
+interrupts are being actively being processed.  That's possible to do,
+but it seems like a more complicated mechanism when we really just
+want the runtime pm disabled always for SDIO cards given that all the
+other bits needed to get Runtime PM vs. SDIO just aren't there.
+
+NOTE: at some point in time someone might come up with a fancy way to
+do SDIO interrupts and still allow (some) amount of runtime PM.
+Technically we could turn off the card clock if we used an alternate
+way of signaling SDIO interrupts (and out of band interrupt is one way
+to do this).  We probably wouldn't actually want to fully runtime
+suspend in this case though--at least not with the current
+dw_mci_runtime_resume() which basically fully resets the controller at
+resume time.
+
+Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
+Cc: <stable@vger.kernel.org>
+Reported-by: Brian Norris <briannorris@chromium.org>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 249ded65192e..e45129f48174 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -23,6 +23,7 @@
+ #include <linux/ioport.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/seq_file.h>
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+@@ -1620,10 +1621,16 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ 
+ 		if (card->type == MMC_TYPE_SDIO ||
+ 		    card->type == MMC_TYPE_SD_COMBO) {
+-			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
++				pm_runtime_get_noresume(mmc->parent);
++				set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			}
+ 			clk_en_a = clk_en_a_old & ~clken_low_pwr;
+ 		} else {
+-			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
++				pm_runtime_put_noidle(mmc->parent);
++				clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			}
+ 			clk_en_a = clk_en_a_old | clken_low_pwr;
+ 		}
+ 
+-- 
+2.12.2.715.g7642488e1d-goog
