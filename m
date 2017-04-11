@@ -1,121 +1,194 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
-Date: Tue, 11 Apr 2017 09:28:11 +0000
-Message-ID: <AM4PR0401MB23245B9B41978D09DAD9FD8D90000@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
- <20170404220040.GA2997@fen-net.de>
- <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
+Date: Tue, 11 Apr 2017 12:21:14 +0200
+Message-ID: <CAPDyKFrMm8fw_-CodDL5KfD131_4w1NTTfKs6pzVV3_EoMufhw@mail.gmail.com>
+References: <20170330011709.GA110687@google.com> <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0059.outbound.protection.outlook.com ([104.47.2.59]:54152
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753454AbdDKJ2O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 11 Apr 2017 05:28:14 -0400
-In-Reply-To: <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:36122 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752676AbdDKKVQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2017 06:21:16 -0400
+Received: by mail-vk0-f45.google.com with SMTP id s68so109269725vke.3
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Apr 2017 03:21:15 -0700 (PDT)
+In-Reply-To: <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Harvey <tharvey@gateworks.com>, David Haworth <dave@fen-net.de>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Weijun Yang <york.yang@csr.com>
+To: Doug Anderson <dianders@google.com>
+Cc: Brian Norris <briannorris@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBUaW0gSGFydmV5DQo+IFNlbnQ6IFNhdHVyZGF5LCBBcHJpbCAwOCwgMjAx
-NyAzOjU1IEFNDQo+IFRvOiBEYXZpZCBIYXdvcnRoIDxkYXZlQGZlbi1uZXQuZGU+DQo+IENjOiBM
-aW51eCBNTUMgTGlzdCA8bGludXgtbW1jQHZnZXIua2VybmVsLm9yZz47IEZhYmlvIEVzdGV2YW0N
-Cj4gPGZhYmlvLmVzdGV2YW1AbnhwLmNvbT47IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5h
-cm8ub3JnPjsgV2VpanVuDQo+IFlhbmcgPHlvcmsueWFuZ0Bjc3IuY29tPg0KPiBTdWJqZWN0OiBS
-ZTogSU1YNiBFU0RIQyBtbWMgd2l0aCBVSFMtSSBvY2Nhc2lvbmFsIGZhaWx1cmUgd2l0aCBERFI1
-MCBjYXJkcw0KPiANCj4gT24gVHVlLCBBcHIgNCwgMjAxNyBhdCAzOjAwIFBNLCBEYXZpZCBIYXdv
-cnRoIDxkYXZlQGZlbi1uZXQuZGU+IHdyb3RlOg0KPiA+IEhpIFRpbSwNCj4gPg0KPiA+IFRoaXMg
-bG9va3MgdW5jb21mb3J0YWJseSBmYW1pbGlhci4NCj4gPiBJJ3ZlIGJlZW4gaGF2aW5nIHByb2Js
-ZW1zIHdpdGggInNvbWUiIG1pY3JvLVNESEMgY2FyZHMsIGJ1dCBpbg0KPiA+IGRpZmZlcmVudCBj
-aXJjdW1zdGFuY2VzOiBtbWNfc3BpIG9uIGEgcmFzcGJlcnJ5IHBpLg0KPiA+DQo+ID4gIkdvb2Qi
-IGNhcmRzIHNpZ24gb24gYXMgIm1tY2JsazE6IG1tYzE6MDAwMCAwMDAwMCA3LjM1IEdpQiINCj4g
-PiAiQmFkIiBjYXJkcyBzaWduIG9uIGFzICAibW1jYmxrMTogbW1jMTowMDAwIFNVMDhHIDcuNDAg
-R2lCIg0KPiA+IGFuZCBldmVudHVhbGx5IHJldHVybiBhIGJpdCBzaGlmdGVkIHJlc3BvbnNlLg0K
-PiA+DQo+ID4gVGhlICJiYWQiIGNhcmRzIGFyZSBhbGwgU2FuRGlzayBjYXJkcy4gVGhlICJnb29k
-IiBjYXJkcyBhcmUgY2hlYXANCj4gPiBjYXJkcyB3aXRoIG9uZSBleGNlcHRpb24gdGhhdCBpcyBt
-YXJrZWQgYXMgU2FuRGlzayBidXQgbG9va3MgbGlrZSBhDQo+ID4gZmFrZS4NCj4gPg0KPiA+IE1v
-cmUgZGV0YWlscyBoZXJlOg0KPiA+DQo+IGh0dHBzOi8vd3d3LnJhc3BiZXJyeXBpLm9yZy9mb3J1
-bXMvdmlld3RvcGljLnBocD9mPTQ0JnQ9MTcyNTYyJnA9MTEwMzkNCj4gPiA0MyNwMTEwMzk0Mw0K
-PiA+IGlmIHlvdSBjYW4gcmVhZCBpdC4NCj4gPiBVbmZvcnR1bmF0ZWx5IEkgZG9uJ3QgaGF2ZSBh
-IHNvbHV0aW9uLg0KPiA+DQo+ID4gQWxsIHRoZSBiZXN0DQo+ID4gRGF2ZQ0KPiA+DQo+IA0KPiBE
-YXZlLA0KPiANCj4gVGhhbmtzIGZvciB0aGUgcmVzcG9uc2UsIGJ1dCBJIGRvbid0IHRoaW5rIHRo
-aXMgaXMgdGhlIHNhbWUgdGhpbmcgYmVjYXVzZSBpbiB5b3VyDQo+IGNhc2UgSSBkb24ndCBzZWUg
-YW55IHR1bmluZyBvciB0cmFuc2ZlciBlcnJvcnMgcmVwb3J0ZWQuDQo+IA0KPiBJJ3ZlIG1vdmVk
-IG9uIHRvIDQuMTEtcmM1IGFuZCBub3RpY2UgdGhhdCBJJ20gYWx3YXlzIHNlZWluZyB0aGF0IG9u
-IGEgZmFpbHVyZSB0aGUNCj4gaW14IHNkaGMgbm90IGFibGUgdG8gZGV0ZXJtaW5lIGEgbWluL21h
-eCB0dW5pbmcgZGVsYXk6DQo+IA0KPiA0LjExLjAtcmM1Og0KPiBbICAgNDguODEyMzgxXSBtbWMw
-OiBjYXJkIGFhYWEgcmVtb3ZlZA0KPiBbICAgNDkuNzkzMzkyXSBtbWMwOiBob3N0IGRvZXMgbm90
-IHN1cHBvcnQgcmVhZGluZyByZWFkLW9ubHkgc3dpdGNoLA0KPiBhc3N1bWluZyB3cml0ZS1lbmFi
-bGUNCj4gWyAgIDQ5LjgxMDI5NF0gc2RoY2lfZXhlY3V0ZV90dW5pbmcNCj4gWyAgIDQ5LjgxMzYx
-Ml0gZXNkaGNfZXhlY3V0aW5nX3R1bmluZw0KPiBbICAgNDkuOTY4MTU0XSBzZGhjaS1lc2RoYy1p
-bXggMjE5ODAwMC51c2RoYzogdHVuaW5nIGZhaWxlZCBhdCAweDdmDQo+IHJldCAtNSAobWluPTEy
-Ny9tYXg9MTI4KQ0KPiBeXl5eIGFkZGVkIGRlYnVnIHNob3dzIC1FSU8gcmV0dXJuZWQgZnJvbSBt
-bWNfc2VuZF90dW5pbmcgYWx0aG91Z2ggSSd2ZQ0KPiBhbHNvIHNlZW4gLTg0IGdldCByZXR1cm5l
-ZA0KPiBbICAgNDkuOTgwNTQwXSBtbWMwOiB0dW5pbmcgZXhlY3V0aW9uIGZhaWxlZDogLTUNCj4g
-WyAgIDQ5Ljk4NDk3NF0gbW1jMDogZGRyNTAgdHVuaW5nIGZhaWxlZA0KPiBbICAgNDkuOTg5MDY4
-XSBtbWMwOiBuZXcgdWx0cmEgaGlnaCBzcGVlZCBERFI1MCBTREhDIGNhcmQgYXQgYWRkcmVzcyBh
-YWFhDQo+IFsgICA0OS45OTk4NDRdIG1tY2JsazA6IG1tYzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0K
-PiANCj4gSSd2ZSBhbHNvIGZvdW5kIHRoYXQgaWYgSSByZXZlcnQgJzlmYWFjN2IgbW1jOiBzZGhj
-aTogZW5hYmxlIHR1bmluZyBmb3IgRERSNTAnDQo+IHRodXMgc2tpcHBpbmcgdGhlIHR1bmluZyB0
-aGUgaXNzdWUgZ29lcyBhd2F5IGhvd2V2ZXIgbm90ZSB0aGF0IG9jY2FzaW9uYWxseSBJDQo+IGRv
-IHNlZSBhIHRyYW5zZmVyIGVycm9yIHRoYXQgcGVyaGFwcyBpcyByZXRyaWVkIFsgIDM2MS4wNjc3
-NjNdIG1tYzA6IGNhcmQgYWFhYQ0KPiByZW1vdmVkIFsgIDM2MS40MTI3MzJdIG1tYzA6IGhvc3Qg
-ZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsDQo+IGFzc3VtaW5nIHdy
-aXRlLWVuYWJsZSBbICAzNjEuNDI5NzE5XSBtbWMwOiBuZXcgdWx0cmEgaGlnaCBzcGVlZCBERFI1
-MCBTREhDDQo+IGNhcmQgYXQgYWRkcmVzcyBhYWFhIFsgIDM2MS40NDMwNjBdIG1tY2JsazA6IG1t
-YzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0KPiBbICAzNjEuNDY1NjU4XSAgbW1jYmxrMDogcDEgWyAg
-MzYyLjQyMjMzNV0gbW1jMDogY2FyZCBhYWFhIHJlbW92ZWQNCj4gWyAgMzYyLjc1MjcxOV0gbW1j
-MDogaG9zdCBkb2VzIG5vdCBzdXBwb3J0IHJlYWRpbmcgcmVhZC1vbmx5IHN3aXRjaCwgYXNzdW1p
-bmcNCj4gd3JpdGUtZW5hYmxlIFsgIDM2Mi43Njk2NzVdIG1tYzA6IG5ldyB1bHRyYSBoaWdoIHNw
-ZWVkIEREUjUwIFNESEMgY2FyZCBhdA0KPiBhZGRyZXNzIGFhYWEgWyAgMzYyLjc4MjkwMF0gbW1j
-YmxrMDogbW1jMDphYWFhIFNMMDhHIDcuNDAgR2lCIFsgIDM2Mi44MDU5OTZdDQo+IG1tY2JsazA6
-IGVycm9yIC04NCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2VjdG9yIDAsIG5yIDgsIGNtZCByZXNwb25z
-ZSAweDkwMCwgY2FyZA0KPiBzdGF0dXMgMHhiMDAgXl5eXiBvY2Nhc2lvbmFsbHkgc2VlIHRoaXMg
-ZXJyb3IgYnV0IGJlY2F1c2UgcmV0cmllcyBvY2N1ciBhdCB0aGUNCj4gYmxvY2sgbGV2ZWwgaXQg
-c3RpbGwgd29ya3MgWyAgMzYyLjkzMTY4OV0gIG1tY2JsazA6IHAxDQo+IA0KPiBBZ2FpbiB3aXRo
-IDlmYWFjN2IgcmV2ZXJ0ZWQgYW5kIHNvbWUgZXh0cmEgZGVidWdnaW5nOg0KPiBbICAgMzMuODIz
-MTcwXSBtbWMwOiBob3N0IGRvZXMgbm90IHN1cHBvcnQgcmVhZGluZyByZWFkLW9ubHkgc3dpdGNo
-LA0KPiBhc3N1bWluZyB3cml0ZS1lbmFibGUNCj4gWyAgIDMzLjg0NzE4NV0gbW1jMDogbmV3IHVs
-dHJhIGhpZ2ggc3BlZWQgRERSNTAgU0RIQyBjYXJkIGF0IGFkZHJlc3MgYWFhYQ0KPiBbICAgMzMu
-ODU2MDYzXSBtbWNibGswOiBtbWMwOmFhYWEgU0wwOEcgNy40MCBHaUINCj4gWyAgIDMzLjg3NDIy
-N10gbW1jYmxrMDogZXJyb3IgLTg0IHRyYW5zZmVycmluZyBkYXRhLCBzZWN0b3IgMCwgbnIgOCwN
-Cj4gY21kIHJlc3BvbnNlIDB4OTAwLCBjYXJkIHN0YXR1cyAweGIwMA0KPiBbICAgMzMuODk2ODI5
-XSBtbWNibGswOiBlcnJvciAtODQgdHJhbnNmZXJyaW5nIGRhdGEsIHNlY3RvciAwLCBuciA4LA0K
-PiBjbWQgcmVzcG9uc2UgMHg5MDAsIGNhcmQgc3RhdHVzIDB4YjAwDQo+IFsgICAzMy45MDYzMTJd
-IG1tY2JsazA6IGVycm9yIC04NCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2VjdG9yIDAsIG5yIDgsDQo+
-IGNtZCByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMgMHhiMDANCj4gWyAgIDM0LjAyMjExN10g
-bW1jYmxrMDogZXJyb3IgMCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2VjdG9yIDAsIG5yIDgsIGNtZA0K
-PiByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMgMHhiMDANCj4gXl5eXiBhZGRlZCBkZWJ1Z2dp
-bmcgc2hvd3MgcmV0cmllcyBhdCBibG9jayBsZXZlbCBhbmQgZXZlbnR1YWxseSBhbGwgaXMgZmlu
-ZQ0KPiBbICAgMzQuMDMxNTAwXSAgbW1jYmxrMDogcDENCj4gDQo+IFNvIGZhciBldmVyeSBERFI1
-MCBjYXJkIEkgaGF2ZSAoc2V2ZXJhbCBLaW5nc3RvbiBhbmQgU2FuZGlzayBjYXJkDQo+IG1vZGVs
-cykgYmVoYXZlcyBsaWtlIHRoaXMuDQo+IA0KPiBJIHRyaWVkIGFkZGluZyBhIHNldHRsaW5nIGRl
-bGF5IHdoZW4gVlNFTEVDVCB3YXMgY2hhbmdlZCBpbiB0aGUgc2RoY2ktZXNkaGMtDQo+IGlteCBk
-cml2ZXIgYW5kIHRoYXQgZGlkbid0IGhlbHAuDQo+IA0KSGkgVGltDQoNCldoaWNoIGlteDYgc29j
-IGRvIHlvdSB1c2U/ICBGcm9tIHlvdXIgbG9nLCBJIG5vdGljZSB5b3UgdXNlIHRoZSBNQU4gdHVu
-aW5nIG1ldGhvZCwgc28gSSBndWVzcyB5b3UgdXNlIGlteDZxZGwuDQoNCmlteCB1c2RoYyBoYXMg
-YW4gSUMgYnVnLiBGb3IgdGhlIHR1bmluZyBwcm9jZWR1cmUsIHRoZSBmaXJzdCBwYXNzIHR1bmlu
-ZyBkZWxheSB2YWx1ZSBtdXN0IGJpZ2dlciB0aGFuIDEwLiANCkR1ZSB0byBERFI1MCB0aW1pbmcg
-aXMgbm90IHRoYXQgcmlnb3JvdXMsIHNvIG1heWJlIGV2ZW4gd2hlbiB3ZSBqdXN0IGFkZCAxIGRl
-bGF5IGNlbGwsIHR1bmluZyBjYW4gcGFzcywgYnV0IHRoaXMgdHJpZ2dlciB0aGUgaW50ZXJuYWwg
-SUMgYnVnLCB0aGVuIHlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgaXNzdWUganVzdCBhcyB5b3UgbWVl
-dDoNCiAgICAgICBzZGhjaS1lc2RoYy1pbXggMjE5ODAwMC51c2RoYzogdHVuaW5nIGZhaWxlZCBh
-dCAweDdmICAgICAgICAoIG1pbj0xMjcvbWF4PTEyOCkNCg0KU28geW91IGNhbiBjaGFuZ2UgdGhl
-IEVTREhDX1RVTkVfQ1RSTF9NSU4gZnJvbSAwIHRvIDE1LCB0aGVuIHlvdSBjYW4gc2VlIHRoZSBE
-RFI1MCB0dW5pbmcgcmV0dXJuIHRvIG5vcm1hbC4NCg0KRm9yIHRoZSBTVEQgdHVuaW5nIG1ldGhv
-ZCwgeW91IGNhbiBhZGQgdGhlIHByb3BlcnR5ICdmc2wsdHVuaW5nLXN0YXJ0LXRhcCA9IDwyMD4n
-IGluIGR0cy4NCg0KQWxsIHRoaXMgbWFrZSB0aGUgZmlyc3QgdHJ5aW5nIHR1bmluZyBkZWxheSB2
-YWx1ZSBsYXJnZXIgdGhhbiAxMCwgdG8gYXZvaWQgIHRoZSBpbnRlcm5hbCBJTVggVVNESEMgSUMg
-YnVnLg0KDQpTRFIxMDQgY2FyZCBkbyBub3QgaGFzIHRoaXMgaXNzdWUsIGJlY2F1c2UgZm9yIFNE
-UjEwNCBjYXJkLCB0aGUgZmlyc3QgcGFzcyB0dW5pbmcgdmFsdWUgbm9ybWFsbHkgbGFyZ2VyIHRo
-YW4gMTAuIA0KDQpCZXN0IFJlZ2FyZHMsDQpIYWlibw0KDQo+IFRpbQ0KPiAtLQ0KPiBUbyB1bnN1
-YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgt
-bW1jIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
-Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbA0K
+[...]
+
+>
+>> Issue #2 - Wifi (via SDIO, mmc1) is completely dead:
+>>
+>> [    1.444125] mmc_host mmc1: card is non-removable.
+>> [    1.471368] mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+>> [    1.619553] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
+>> [    1.881699] mmc1: new ultra high speed SDR104 SDIO card at address 0001
+>> [   25.681172] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
+>> [   25.691666] mwifiex: rx work enabled, cpus 4
+>> [   26.827000] mwifiex_sdio mmc1:0001:1: info: FW download over, size 800344 bytes
+>> [   27.561352] mwifiex_sdio mmc1:0001:1: WLAN FW is active
+>> [   33.585165] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
+>> [   37.651344] mwifiex_sdio mmc1:0001:1: mwifiex_cmd_timeout_func: Timeout cmd id = 0xa9, act = 0x0
+>> [   37.660122] mwifiex_sdio mmc1:0001:1: num_data_h2c_failure = 0
+>> [   37.665951] mwifiex_sdio mmc1:0001:1: num_cmd_h2c_failure = 0
+>> [   37.671688] mwifiex_sdio mmc1:0001:1: is_cmd_timedout = 1
+>> [   37.677076] mwifiex_sdio mmc1:0001:1: num_tx_timeout = 0
+>> [   37.682380] mwifiex_sdio mmc1:0001:1: last_cmd_index = 1
+>> [   37.687681] mwifiex_sdio mmc1:0001:1: last_cmd_id: 00 00 a9 00 00 00 00 00 00 00
+>> [   37.695066] mwifiex_sdio mmc1:0001:1: last_cmd_act: 00 00 00 00 00 00 00 00 00 00
+>> [   37.702536] mwifiex_sdio mmc1:0001:1: last_cmd_resp_index = 0
+>> [   37.708269] mwifiex_sdio mmc1:0001:1: last_cmd_resp_id: 00 00 00 00 00 00 00 00 00 00
+>> [   37.716087] mwifiex_sdio mmc1:0001:1: last_event_index = 0
+>> [   37.721564] mwifiex_sdio mmc1:0001:1: last_event: 00 00 00 00 00 00 00 00 00 00
+>> [   37.728857] mwifiex_sdio mmc1:0001:1: data_sent=1 cmd_sent=0
+>> [   37.734508] mwifiex_sdio mmc1:0001:1: ps_mode=0 ps_state=0
+>> [   37.740016] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
+>> [   37.750268] mwifiex_sdio mmc1:0001:1: info: mwifiex_fw_dpc: unregister device
+>
+> This doesn't surprise me at all.  What surprises me, though, is that
+> nobody else seems to be able to reproduce this.
+
+Me too.
+
+As I have stated several times, the PM code for SDIO is fragile/broken
+for many scenarios. This is just one case.
+
+>
+> On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
+> Interrupts.  See this bit in the device tree:
+>
+>   cap-sdio-irq;
+>
+> SDIO interrupts (in 4-bit mode) specifically need the card clock to be
+> running all the time to work.  I can reproduce your regression (on
+> veryron-jerry, which also has Marvell WiFi) and I can also find that
+> the regression is "gone' if I take out the "cap-sdio-irq" in the
+> veyron device tree.  Ah, interestingly enough, turning off SDIO
+> interrupts has the side effect of sending enough (polling) traffic
+> that we never seem to runtime suspend, either.  ;-P
+
+We did a similar fix for sdhci recently. Simply, in cases when sdio
+IRQ is turned on, we call pm_runtime_get_noresume() to prevent the
+device from being runtime suspended.
+
+Unless the SoC supports the SDIO irq to be re-routed to a wakeup IRQ
+at runtime suspend, there is no other solution. However, re-routing to
+a wakeup IRQ should be done, when switching to 1-bit mode is
+completed. This is currently not supported by the mmc core.
+
+>
+> In general I'd question whether dw_mmc actually gets much power
+> benefit from Runtime PM in Linux.  The dw_mmc IP blocks already have a
+> feature in them to automatically stop and restart the card clock.  See
+> SDMMC_CLKEN_LOW_PWR.  Maybe you're getting the benefit of turning off
+> VMMC or VQMMC?  Is that really a lot of power?  Presumably those power
+> savings would be for eMMC or normal SD cards (not SDIO).
+
+I think that depends on the PM topology of the SoC. Perhaps the dw_mmc
+devices are in PM domains sharing power rails etc, and preventing
+runtime PM could be very costly as it then prevent those shared
+resources to be put into low power state.
+
+I think the best we can do at this point is something similar as we do
+for sdhci.
+
+>
+> Maybe someone else on this thread knows how Runtime PM is supposed to
+> work in general for SDIO?  I notice that in sdio.c the
+> mmc_sdio_runtime_suspend() unconditionally calls mmc_power_off().
+> That seems odd since the main mmc_sdio_suspend() _doesn't_ call it if
+> mmc_card_keep_power().  Hrmmm...
+
+As stated above, the system PM and runtime PM code for SDIO is fragile
+and needs an update. I know how to do it, but it requires some work. I
+have started to hack on it several times, maybe I just need to put
+everything else aside and focus on this. :-)
+
+Moreover, I would really like to invent the feature being able to
+defer system PM resume of the SDIO card (in cases when it means a full
+re-init of the SDIO card) to runtime PM resume instead. Why? It would
+saves several hundreds of milliseconds in system PM resume time. The
+very similar feature as we already have for SD/(e)MMC.
+
+>
+> OK, so I just tried this on veyron-minnie.  On minnie we have Broadcom
+> WiFi.  That actually works (!).  Presumably this is because
+> brcmf_sdiod_host_fixup() calls pm_runtime_forbid().  Commenting that
+> out breaks things.
+
+I think this should be managed in the dw_mmc driver instead, as it is
+there the problem lies.
+
+>
+> OK, and I can make Marvell work by adding
+> "pm_runtime_forbid(func->card->host->parent);" to the end of
+> mwifiex_sdio_probe().
+
+Again, dw_mmc is the correct place.
+
+>
+> --
+>
+> So where does that leave us?
+>
+> A) Technically we can fix Marvell's driver to work like Broadcom's.
+> One could possibly assert that this is the wrong fix because
+> technically we could make Runtime PM work with SDIO with enough work.
+> We could theoretically move into 1-bit mode and there (I think) you
+> can get interrupts with the clock off.  ...or we could have a
+> dedicated SDIO Interrupt pin (for the embedded case), which is talked
+> about in the SDIO spec.
+
+If the WIFI chip supports an external SDIO irq pin, that is very much
+preferred. Both from PM point of view, but actually also from
+performance point of view (mainly because it's faster to ack the IRQ).
+
+That said, for these scenarios, I assume the switching to 1-bit mode
+isn't necessary before gating the clock, as the IRQ is driven
+completely separately from the SDIO bus. From my own experience, this
+is how cw1200 WIFI chip behaves on ux500.
+
+>
+> B) Technically we could hack this in the dw_mmc code to disable
+> Runtime PM if we see that an SDIO interrupt is used.  One advantage of
+> doing it here is that if we ever add support in dw_mmc for the
+> external SDIO interrupt we could allow Runtime PM in that case.  In
+> theory the dw_mmc IP block has some basic support for a dedicated SDIO
+> interrupt pin, but there's no code to support it.
+
+Right.
+
+>
+> C) Technically we could add this into the MMC core.
+
+Perhaps the MMC core needs to play a role, not sure exactly how yet.
+
+>
+> D) Technically we could remove Runtime PM support from dw_mmc for now
+> until someone can address all these issues (and ideally show a real
+> power savings).
+
+No. Then it's better to just prevent runtime suspend when SDIO irq
+becomes enabled.
+
+>
+>
+> I'd tend to vote for D, but I've been pretty absent from dw_mmc for a
+> long time, so probably my vote isn't worth that much...
+>
+> Shawn: I think you actually enabled runtime PM.  Did you really see
+> power savings, or did it just seem like enabling Runtime PM would be a
+> neat thing to do?
+>
+>
+> -Doug
+
+Dough, really appreciate you efforts in testing this and the detailed
+way you describes the problem.
+
+Kind regards
+Uffe
