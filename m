@@ -1,15 +1,15 @@
 From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [v4, 3/5] mmc: sdhci-of-esdhc: add tuning support
-Date: Tue, 11 Apr 2017 13:10:29 +0800
-Message-ID: <1491887431-31894-4-git-send-email-yangbo.lu@nxp.com>
+Subject: [v4, 1/5] mmc: sdhci-of-esdhc: add peripheral clock support
+Date: Tue, 11 Apr 2017 13:10:27 +0800
+Message-ID: <1491887431-31894-2-git-send-email-yangbo.lu@nxp.com>
 References: <1491887431-31894-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0085.outbound.protection.outlook.com ([104.47.32.85]:11249
+Received: from mail-sn1nam01on0080.outbound.protection.outlook.com ([104.47.32.80]:57642
         "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752179AbdDKFZU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1753440AbdDKFZU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 11 Apr 2017 01:25:20 -0400
 In-Reply-To: <1491887431-31894-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -17,80 +17,164 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-eSDHC uses tuning block for tuning procedure. So the tuning
-block control register must be configured properly before tuning.
+eSDHC could select peripheral clock or platform clock as clock source by
+the PCS bit of eSDHC Control Register, and this bit couldn't be reset by
+software reset for all. In default, the platform clock is used. But we have
+to use peripheral clock since it has a higher frequency to support eMMC
+HS200 mode and SD UHS-I mode. This patch is to add peripheral clock support
+and use it instead of platform clock if it's declared in eSDHC dts node.
 
 Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
 Changes for v2:
-	- Replaced old function for mmc_host_ops.execute_tuning with
-	  esdhc_execute_tuning to support eSDHC tuning.
-Changes for v3:
-	- Put .execute_tuning assigning after after IS_ERR(host) check.
-Changes for v4:
 	- None
+Changes for v3:
+	- None
+Changes for v4:
+	- Added clk_put()
+	- Used udelay() to poll ESDHC_CLOCK_STABLE
 ---
- drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
- drivers/mmc/host/sdhci-of-esdhc.c | 20 ++++++++++++++++++++
- 2 files changed, 25 insertions(+)
+ drivers/mmc/host/sdhci-esdhc.h    |  1 +
+ drivers/mmc/host/sdhci-of-esdhc.c | 72 +++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 71 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 6869567..c4bbd74 100644
+index ece8b37..5343fc0 100644
 --- a/drivers/mmc/host/sdhci-esdhc.h
 +++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -53,9 +53,14 @@
- #define ESDHC_CLOCK_HCKEN		0x00000002
- #define ESDHC_CLOCK_IPGEN		0x00000001
+@@ -54,6 +54,7 @@
  
-+/* Tuning Block Control Register */
-+#define ESDHC_TBCTL			0x120
-+#define ESDHC_TB_EN			0x00000004
-+
  /* Control Register for DMA transfer */
  #define ESDHC_DMA_SYSCTL		0x40c
- #define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
-+#define ESDHC_FLUSH_ASYNC_FIFO		0x00040000
++#define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
  #define ESDHC_DMA_SNOOP			0x00000040
  
  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 4dd28c3..80dc802 100644
+index ff37e74..6d024b6 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -630,6 +630,25 @@ static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
- 	}
+@@ -19,6 +19,7 @@
+ #include <linux/delay.h>
+ #include <linux/module.h>
+ #include <linux/sys_soc.h>
++#include <linux/clk.h>
+ #include <linux/mmc/host.h>
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
+@@ -30,6 +31,7 @@ struct sdhci_esdhc {
+ 	u8 vendor_ver;
+ 	u8 spec_ver;
+ 	bool quirk_incorrect_hostver;
++	unsigned int peripheral_clock;
+ };
+ 
+ /**
+@@ -414,15 +416,25 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ static unsigned int esdhc_of_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 
+-	return pltfm_host->clock;
++	if (esdhc->peripheral_clock)
++		return esdhc->peripheral_clock;
++	else
++		return pltfm_host->clock;
  }
  
-+static int esdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
++	unsigned int clock;
+ 
+-	return pltfm_host->clock / 256 / 16;
++	if (esdhc->peripheral_clock)
++		clock = esdhc->peripheral_clock;
++	else
++		clock = pltfm_host->clock;
++	return clock / 256 / 16;
+ }
+ 
+ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+@@ -512,6 +524,33 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+ 	sdhci_writel(host, ctrl, ESDHC_PROCTL);
+ }
+ 
++static void esdhc_clock_enable(struct sdhci_host *host, bool enable)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
 +	u32 val;
++	ktime_t timeout;
 +
-+	/* Use tuning block for tuning procedure */
-+	esdhc_clock_enable(host, false);
-+	val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-+	val |= ESDHC_FLUSH_ASYNC_FIFO;
-+	sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
++	val = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
 +
-+	val = sdhci_readl(host, ESDHC_TBCTL);
-+	val |= ESDHC_TB_EN;
-+	sdhci_writel(host, val, ESDHC_TBCTL);
-+	esdhc_clock_enable(host, true);
++	if (enable)
++		val |= ESDHC_CLOCK_SDCLKEN;
++	else
++		val &= ~ESDHC_CLOCK_SDCLKEN;
 +
-+	return sdhci_execute_tuning(mmc, opcode);
++	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
++
++	/* Wait max 20 ms */
++	timeout = ktime_add_ms(ktime_get(), 20);
++	val = ESDHC_CLOCK_STABLE;
++	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
++		if (ktime_after(ktime_get(), timeout)) {
++			pr_err("%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
++			break;
++		}
++		udelay(10);
++	}
 +}
 +
- #ifdef CONFIG_PM_SLEEP
- static u32 esdhc_proctl;
- static int esdhc_of_suspend(struct device *dev)
-@@ -789,6 +808,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	sdhci_reset(host, mask);
+@@ -613,6 +652,9 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_esdhc *esdhc;
++	struct device_node *np;
++	struct clk *clk;
++	u32 val;
+ 	u16 host_ver;
  
- 	host->mmc_host_ops.start_signal_voltage_switch =
- 		esdhc_signal_voltage_switch;
-+	host->mmc_host_ops.execute_tuning = esdhc_execute_tuning;
+ 	pltfm_host = sdhci_priv(host);
+@@ -626,6 +668,32 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 		esdhc->quirk_incorrect_hostver = true;
+ 	else
+ 		esdhc->quirk_incorrect_hostver = false;
++
++	np = pdev->dev.of_node;
++	clk = of_clk_get(np, 0);
++	if (!IS_ERR(clk)) {
++		/*
++		 * esdhc->peripheral_clock would be assigned with a value
++		 * which is eSDHC base clock when use periperal clock.
++		 * For ls1046a, the clock value got by common clk API is
++		 * peripheral clock while the eSDHC base clock is 1/2
++		 * peripheral clock.
++		 */
++		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc"))
++			esdhc->peripheral_clock = clk_get_rate(clk) / 2;
++		else
++			esdhc->peripheral_clock = clk_get_rate(clk);
++
++		clk_put(clk);
++	}
++
++	if (esdhc->peripheral_clock) {
++		esdhc_clock_enable(host, false);
++		val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
++		val |= ESDHC_PERIPHERAL_CLK_SEL;
++		sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
++		esdhc_clock_enable(host, true);
++	}
+ }
  
- 	esdhc_init(pdev, host);
- 
+ static int sdhci_esdhc_probe(struct platform_device *pdev)
 -- 
 2.1.0.27.g96db324
 
