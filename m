@@ -1,78 +1,59 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci: provide isr for card-detect interrupts
-Date: Tue, 11 Apr 2017 13:31:16 +0300
-Message-ID: <772c085c-beba-cfe8-23ca-0c46a96145fe@intel.com>
-References: <20170411102056.2869-1-jszhang@marvell.com>
- <20170411102056.2869-3-jszhang@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: add mmc-card hardware reset enable support
+Date: Tue, 11 Apr 2017 12:43:39 +0200
+Message-ID: <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
+References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com> <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170411102056.2869-3-jszhang@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Jisheng Zhang <jszhang@marvell.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Richard Leitner <richard.leitner@skidata.com>, Bart Van Assche <bart.vanassche@sandisk.com>, Luca Porzio <lporzio@micron.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/04/17 13:20, Jisheng Zhang wrote:
-> We found one issue on BG4CT platforms with GPIO for sdcar card detect
-> interrupt: remove sdcard when there's read write access to the sdcard,
-> sometimes the card remove event can't be handled for a long time, so
-> the  system still think the sdcard is still plugged in. It turns out
-> that the sdhci_card_event() is missing in common slot gpio's card
-> detect isr.
+On 11 April 2017 at 10:17, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Tue, Apr 11, 2017 at 9:31 AM, Richard Leitner
+> <richard.leitner@skidata.com> wrote:
+>
+>> Some eMMCs disable their hardware reset line (RST_N) by default. To enable
+>> it the host must set the corresponding bit in ECSD. An example for such
+>> a device is the Micron MTFCxGACAANA-4M.
+>>
+>> This patch adds a new mmc-card devicetree property to let the host enable
+>> this feature during card initialization.
+>>
+>> Signed-off-by: Richard Leitner <richard.leitner@skidata.com>
+>
+> Do we know *WHY* these cards disable their hardware reset lines?
 
-->card_event() is called by mmc_rescan().  Why is that too late?
+Allow me to make a guess. In case the reset isn't enabled, the
+internal eMMC card firmware don't monitor the pin for the reset. I
+guess that could makes sense if SoC vendors has failed to properly
+connect the pin, avoiding the eMMC card to be reset when it shouldn't.
 
-> 
-> We fix this issue by providing sdhci's own isr for card-detect
-> interrupts. In this own isr, we call sdhci_card_event() then process
-> the change of state.
+>
+> If it is just some random over-cautious panic thing we might consider
+> just force re-enableing it, maybe with a warning in the dmesg, so we can
+> always reset the card. No DT property needed.
 
-Why doesn't every other host controller have this problem?
+There is actually already a DT property "cap-mmc-hw-reset"
+(MMC_CAP_HW_RESET), which tells whether the eMMC reset is supported by
+the host.
 
-> 
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 63bc33a54d0d..b6c5021a5892 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2777,6 +2777,16 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  	return result;
->  }
->  
-> +static irqreturn_t sdhci_cd_irq(int irq, void *dev_id)
-> +{
-> +	struct mmc_host *mmc = dev_id;
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +	mmc->ops->card_event(mmc);
-> +	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
-> +	return IRQ_HANDLED;
-> +}
-> +
->  static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
->  {
->  	struct sdhci_host *host = dev_id;
-> @@ -3617,6 +3627,8 @@ int __sdhci_add_host(struct sdhci_host *host)
->  
->  	sdhci_init(host, 0);
->  
-> +	mmc_gpio_set_cd_isr(mmc, sdhci_cd_irq);
-> +
->  	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
->  				   IRQF_SHARED,	mmc_hostname(mmc), host);
->  	if (ret) {
-> 
+Perhaps we can consider to force-enabling it for the eMMC card, when
+this property is set for the mmc host!? At least, inventing yet
+another binding doesn't make sense to me.
+
+>
+> Putting some people who work for eMMC vendors in the To: line so they
+> can say if they know about this.
+
+Yes, let's see what they say about it.
+
+>
+> Yours,
+> Linus Walleij
+
+Kind regards
+Uffe
