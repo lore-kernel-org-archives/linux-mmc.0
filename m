@@ -1,204 +1,219 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
-Date: Mon, 10 Apr 2017 16:35:55 -0700
-Message-ID: <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
-References: <20170330011709.GA110687@google.com>
+From: "Y.B. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
+Date: Tue, 11 Apr 2017 05:14:48 +0000
+Message-ID: <DB6PR0401MB253634F0774283AEA36D8ACDF8000@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
+ <1490600982-5410-2-git-send-email-yangbo.lu@nxp.com>
+ <a8810e0a-95fa-a590-6827-15031ff52886@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f180.google.com ([209.85.128.180]:36726 "EHLO
-        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751564AbdDJXf6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2017 19:35:58 -0400
-Received: by mail-wr0-f180.google.com with SMTP id c55so84839025wrc.3
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2017 16:35:58 -0700 (PDT)
-In-Reply-To: <20170330011709.GA110687@google.com>
+Received: from mail-he1eur01on0065.outbound.protection.outlook.com ([104.47.0.65]:48576
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752095AbdDKFOx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 11 Apr 2017 01:14:53 -0400
+In-Reply-To: <a8810e0a-95fa-a590-6827-15031ff52886@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Brian Norris <briannorris@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
+To: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
-Hi,
-
-On Wed, Mar 29, 2017 at 6:17 PM, Brian Norris <briannorris@chromium.org> wrote:
-> Hi all,
->
-> I haven't managed to get as far as a bugfix for this, but I've bisected
-> some issues seen on v4.10+ with a Chromebook of the Veyron family (Jaq,
-> in particular). v4.9 works fine.
-
-OK, I finally got everything up and running to test this too...
+Hi Adrian,
 
 
-> Issue #1 - eMMC complains periodically:
->
-> [    4.358135] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [    4.461466] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [    5.291450] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [    5.381471] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [   11.243337] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [   17.371628] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+> Sent: Monday, April 10, 2017 8:36 PM
+> To: Y.B. Lu; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org;
+> linux-arm-kernel@lists.infradead.org; ulf.hansson@linaro.org; Rob Herring=
+;
+> Mark Rutland; Catalin Marinas; Will Deacon
+> Cc: Xiaobo Xie
+> Subject: Re: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
+>=20
+> On 27/03/17 10:49, Yangbo Lu wrote:
+> > eSDHC could select peripheral clock or platform clock as clock source
+> > by the PCS bit of eSDHC Control Register, and this bit couldn't be
+> > reset by software reset for all. In default, the platform clock is
+> > used. But we have to use peripheral clock since it has a higher
+> > frequency to support eMMC
+> > HS200 mode and SD UHS-I mode. This patch is to add peripheral clock
+> > support and use it instead of platform clock if it's declared in eSDHC
+> dts node.
+> >
+> > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+>=20
+> Apart from minor comments:
+>=20
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>=20
+> > ---
+> > Changes for v2:
+> > 	- None
+> > Changes for v3:
+> > 	- None
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc.h    |  1 +
+> >  drivers/mmc/host/sdhci-of-esdhc.c | 70
+> > +++++++++++++++++++++++++++++++++++++--
+> >  2 files changed, 69 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-esdhc.h
+> > b/drivers/mmc/host/sdhci-esdhc.h index ece8b37..5343fc0 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc.h
+> > +++ b/drivers/mmc/host/sdhci-esdhc.h
+> > @@ -54,6 +54,7 @@
+> >
+> >  /* Control Register for DMA transfer */
+> >  #define ESDHC_DMA_SYSCTL		0x40c
+> > +#define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
+> >  #define ESDHC_DMA_SNOOP			0x00000040
+> >
+> >  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */ diff --git
+> > a/drivers/mmc/host/sdhci-of-esdhc.c
+> > b/drivers/mmc/host/sdhci-of-esdhc.c
+> > index ff37e74..7ce1caf 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -19,6 +19,7 @@
+> >  #include <linux/delay.h>
+> >  #include <linux/module.h>
+> >  #include <linux/sys_soc.h>
+> > +#include <linux/clk.h>
+> >  #include <linux/mmc/host.h>
+> >  #include "sdhci-pltfm.h"
+> >  #include "sdhci-esdhc.h"
+> > @@ -30,6 +31,7 @@ struct sdhci_esdhc {
+> >  	u8 vendor_ver;
+> >  	u8 spec_ver;
+> >  	bool quirk_incorrect_hostver;
+> > +	unsigned int peripheral_clock;
+> >  };
+> >
+> >  /**
+> > @@ -414,15 +416,25 @@ static int esdhc_of_enable_dma(struct sdhci_host
+> > *host)  static unsigned int esdhc_of_get_max_clock(struct sdhci_host
+> > *host)  {
+> >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
+> >
+> > -	return pltfm_host->clock;
+> > +	if (esdhc->peripheral_clock)
+> > +		return esdhc->peripheral_clock;
+> > +	else
+> > +		return pltfm_host->clock;
+> >  }
+> >
+> >  static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+> > {
+> >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
+> > +	unsigned int clock;
+> >
+> > -	return pltfm_host->clock / 256 / 16;
+> > +	if (esdhc->peripheral_clock)
+> > +		clock =3D esdhc->peripheral_clock;
+> > +	else
+> > +		clock =3D pltfm_host->clock;
+> > +	return clock / 256 / 16;
+> >  }
+> >
+> >  static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
+> > clock) @@ -512,6 +524,33 @@ static void
+> esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+> >  	sdhci_writel(host, ctrl, ESDHC_PROCTL);  }
+> >
+> > +static void esdhc_clock_enable(struct sdhci_host *host, bool enable)
+> > +{
+> > +	u32 val;
+> > +	u32 timeout;
+> > +
+> > +	val =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> > +
+> > +	if (enable)
+> > +		val |=3D ESDHC_CLOCK_SDCLKEN;
+> > +	else
+> > +		val &=3D ~ESDHC_CLOCK_SDCLKEN;
+> > +
+> > +	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
+> > +
+> > +	timeout =3D 20;
+> > +	val =3D ESDHC_CLOCK_STABLE;
+> > +	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
+> > +		if (timeout =3D=3D 0) {
+> > +			pr_err("%s: Internal clock never stabilised.\n",
+> > +				mmc_hostname(host->mmc));
+> > +			break;
+> > +		}
+> > +		timeout--;
+> > +		mdelay(1);
+>=20
+> If the time to stabilize is much less that 1 ms then this loop can waste
+> time.  Have a look at the change in sdhci.c.
+>=20
 
-I don't believe that this is an error, actually.  Really we just need
-to quiet this message or (since I've always found it useful) move it
-to a different place.  I believe that with runtime PM we're
-effectively turning the clock off whenever the MMC device isn't in
-use.  On dw_mmc we have a "helpful" printout every time the clock is
-changed, and that's what you're seeing here.
+[Lu Yangbo-B47093] Thanks a lot. The method in sdhci.c is really better.
+I will send next version to use it soon.
 
-You can see with:
-
-while true; do
-  dd if=/dev/mmcblk2 of=/dev/null bs=512 count=1 iflag=direct;
-  sleep .1;
-done
-
-...that you'll get a printout every 100ms.
-
-
-Ah, looks like this is in:
-
-ce69e2fea093 mmc: dw_mmc: silent verbose log when calling from PM context
-
-...as pointed out by Shawn Lin.  So I think in 4.10 we can just ignore
-those messages and they're good on 4.11.
-
-
-> and if I stress it out at all (e.g., dd if=/dev/mmcblk2 bs=1M >
-> /dev/null), it will eventually croak:
->
-> [  359.916315] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [  360.071378] dwmmc_rockchip ff0f0000.dwmmc: Successfully tuned phase to 153
-> [  360.211351] mmcblk2: error -110 transferring data, sector 8644608, nr 2048, cmd response 0x900, card status 0x0
-> [  360.221936] mmcblk2: retrying using single block read
-> [  363.491362] mmcblk2: error -110 transferring data, sector 8646656, nr 2048, cmd response 0x900, card status 0x0
-> [  363.531569] mmc_host mmc2: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
-> [  363.596326] mmc_host mmc2: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [  363.612712] dwmmc_rockchip ff0f0000.dwmmc: Successfully tuned phase to 152
-> [  363.751351] mmcblk2: error -110 transferring data, sector 8646656, nr 2048, cmd response 0x900, card status 0x0
-> [  363.761938] mmcblk2: retrying using single block read
-> [  366.611356] INFO: task mmcqd/2boot1:92 blocked for more than 120 seconds.
-> [  366.618134]       Not tainted 4.10.0 #284
-> [  366.622146] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> [  366.629960] mmcqd/2boot1    D    0    92      2 0x00000000
-> [  366.635454] [<c07dc21c>] (__schedule) from [<c07dc4e0>] (schedule+0x90/0xa0)
-> [  366.642497] [<c07dc4e0>] (schedule) from [<c066e8b4>] (__mmc_claim_host+0xd4/0x19c)
-> [  366.650142] [<c066e8b4>] (__mmc_claim_host) from [<c066e9ac>] (mmc_get_card+0x30/0x34)
-> [  366.658056] [<c066e9ac>] (mmc_get_card) from [<c067fc8c>] (mmc_blk_issue_rq+0x64/0x48c)
-> [  366.666052] [<c067fc8c>] (mmc_blk_issue_rq) from [<c0680230>] (mmc_queue_thread+0x114/0x1b4)
-> [  366.674484] [<c0680230>] (mmc_queue_thread) from [<c023d1b0>] (kthread+0x128/0x144)
-> [  366.682134] [<c023d1b0>] (kthread) from [<c02076e8>] (ret_from_fork+0x14/0x2c)
-
-I'm not convinced this is a regression.
-
-I remember Heiko saying that he's heard reports that on some boards
-eMMC doesn't work with high speed, and I'be believe that's what you're
-seeing here.  It would be interesting to try to debug this.  I can't
-personally reproduce, though.
-
-I think veyron_minnie already has UHS turned off for eMMC upstream.  I
-guess we could do it for other veyron boards too until someone can
-debug?
-
-
-> Issue #2 - Wifi (via SDIO, mmc1) is completely dead:
->
-> [    1.444125] mmc_host mmc1: card is non-removable.
-> [    1.471368] mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
-> [    1.619553] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [    1.881699] mmc1: new ultra high speed SDR104 SDIO card at address 0001
-> [   25.681172] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [   25.691666] mwifiex: rx work enabled, cpus 4
-> [   26.827000] mwifiex_sdio mmc1:0001:1: info: FW download over, size 800344 bytes
-> [   27.561352] mwifiex_sdio mmc1:0001:1: WLAN FW is active
-> [   33.585165] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [   37.651344] mwifiex_sdio mmc1:0001:1: mwifiex_cmd_timeout_func: Timeout cmd id = 0xa9, act = 0x0
-> [   37.660122] mwifiex_sdio mmc1:0001:1: num_data_h2c_failure = 0
-> [   37.665951] mwifiex_sdio mmc1:0001:1: num_cmd_h2c_failure = 0
-> [   37.671688] mwifiex_sdio mmc1:0001:1: is_cmd_timedout = 1
-> [   37.677076] mwifiex_sdio mmc1:0001:1: num_tx_timeout = 0
-> [   37.682380] mwifiex_sdio mmc1:0001:1: last_cmd_index = 1
-> [   37.687681] mwifiex_sdio mmc1:0001:1: last_cmd_id: 00 00 a9 00 00 00 00 00 00 00
-> [   37.695066] mwifiex_sdio mmc1:0001:1: last_cmd_act: 00 00 00 00 00 00 00 00 00 00
-> [   37.702536] mwifiex_sdio mmc1:0001:1: last_cmd_resp_index = 0
-> [   37.708269] mwifiex_sdio mmc1:0001:1: last_cmd_resp_id: 00 00 00 00 00 00 00 00 00 00
-> [   37.716087] mwifiex_sdio mmc1:0001:1: last_event_index = 0
-> [   37.721564] mwifiex_sdio mmc1:0001:1: last_event: 00 00 00 00 00 00 00 00 00 00
-> [   37.728857] mwifiex_sdio mmc1:0001:1: data_sent=1 cmd_sent=0
-> [   37.734508] mwifiex_sdio mmc1:0001:1: ps_mode=0 ps_state=0
-> [   37.740016] mmc_host mmc1: Bus speed (slot 0) = 148500000Hz (slot req 150000000Hz, actual 148500000HZ div = 0)
-> [   37.750268] mwifiex_sdio mmc1:0001:1: info: mwifiex_fw_dpc: unregister device
-
-This doesn't surprise me at all.  What surprises me, though, is that
-nobody else seems to be able to reproduce this.
-
-On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
-Interrupts.  See this bit in the device tree:
-
-  cap-sdio-irq;
-
-SDIO interrupts (in 4-bit mode) specifically need the card clock to be
-running all the time to work.  I can reproduce your regression (on
-veryron-jerry, which also has Marvell WiFi) and I can also find that
-the regression is "gone' if I take out the "cap-sdio-irq" in the
-veyron device tree.  Ah, interestingly enough, turning off SDIO
-interrupts has the side effect of sending enough (polling) traffic
-that we never seem to runtime suspend, either.  ;-P
-
-In general I'd question whether dw_mmc actually gets much power
-benefit from Runtime PM in Linux.  The dw_mmc IP blocks already have a
-feature in them to automatically stop and restart the card clock.  See
-SDMMC_CLKEN_LOW_PWR.  Maybe you're getting the benefit of turning off
-VMMC or VQMMC?  Is that really a lot of power?  Presumably those power
-savings would be for eMMC or normal SD cards (not SDIO).
-
-Maybe someone else on this thread knows how Runtime PM is supposed to
-work in general for SDIO?  I notice that in sdio.c the
-mmc_sdio_runtime_suspend() unconditionally calls mmc_power_off().
-That seems odd since the main mmc_sdio_suspend() _doesn't_ call it if
-mmc_card_keep_power().  Hrmmm...
-
-OK, so I just tried this on veyron-minnie.  On minnie we have Broadcom
-WiFi.  That actually works (!).  Presumably this is because
-brcmf_sdiod_host_fixup() calls pm_runtime_forbid().  Commenting that
-out breaks things.
-
-OK, and I can make Marvell work by adding
-"pm_runtime_forbid(func->card->host->parent);" to the end of
-mwifiex_sdio_probe().
-
---
-
-So where does that leave us?
-
-A) Technically we can fix Marvell's driver to work like Broadcom's.
-One could possibly assert that this is the wrong fix because
-technically we could make Runtime PM work with SDIO with enough work.
-We could theoretically move into 1-bit mode and there (I think) you
-can get interrupts with the clock off.  ...or we could have a
-dedicated SDIO Interrupt pin (for the embedded case), which is talked
-about in the SDIO spec.
-
-B) Technically we could hack this in the dw_mmc code to disable
-Runtime PM if we see that an SDIO interrupt is used.  One advantage of
-doing it here is that if we ever add support in dw_mmc for the
-external SDIO interrupt we could allow Runtime PM in that case.  In
-theory the dw_mmc IP block has some basic support for a dedicated SDIO
-interrupt pin, but there's no code to support it.
-
-C) Technically we could add this into the MMC core.
-
-D) Technically we could remove Runtime PM support from dw_mmc for now
-until someone can address all these issues (and ideally show a real
-power savings).
+Currently another place in esdhc driver could also change to use this metho=
+d. I will send a separate patch for that later.
 
 
-I'd tend to vote for D, but I've been pretty absent from dw_mmc for a
-long time, so probably my vote isn't worth that much...
+> > +	}
+> > +}
+> > +
+> >  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
+> >  	sdhci_reset(host, mask);
+> > @@ -613,6 +652,9 @@ static void esdhc_init(struct platform_device
+> > *pdev, struct sdhci_host *host)  {
+> >  	struct sdhci_pltfm_host *pltfm_host;
+> >  	struct sdhci_esdhc *esdhc;
+> > +	struct device_node *np;
+> > +	struct clk *clk;
+> > +	u32 val;
+> >  	u16 host_ver;
+> >
+> >  	pltfm_host =3D sdhci_priv(host);
+> > @@ -626,6 +668,30 @@ static void esdhc_init(struct platform_device
+> *pdev, struct sdhci_host *host)
+> >  		esdhc->quirk_incorrect_hostver =3D true;
+> >  	else
+> >  		esdhc->quirk_incorrect_hostver =3D false;
+> > +
+> > +	np =3D pdev->dev.of_node;
+> > +	clk =3D of_clk_get(np, 0);
+>=20
+> Should there be a clk_put somewhere?
 
-Shawn: I think you actually enabled runtime PM.  Did you really see
-power savings, or did it just seem like enabling Runtime PM would be a
-neat thing to do?
+[Lu Yangbo-B47093] Will add it after driver gets the clock value.
 
+>=20
+> > +	if (!IS_ERR(clk)) {
+> > +		/*
+> > +		 * esdhc->peripheral_clock would be assigned with a value
+> > +		 * which is eSDHC base clock when use periperal clock.
+> > +		 * For ls1046a, the clock value got by common clk API is
+> > +		 * peripheral clock while the eSDHC base clock is 1/2
+> > +		 * peripheral clock.
+> > +		 */
+> > +		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc"))
+> > +			esdhc->peripheral_clock =3D clk_get_rate(clk) / 2;
+> > +		else
+> > +			esdhc->peripheral_clock =3D clk_get_rate(clk);
+> > +	}
+> > +
+> > +	if (esdhc->peripheral_clock) {
+> > +		esdhc_clock_enable(host, false);
+> > +		val =3D sdhci_readl(host, ESDHC_DMA_SYSCTL);
+> > +		val |=3D ESDHC_PERIPHERAL_CLK_SEL;
+> > +		sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
+> > +		esdhc_clock_enable(host, true);
+> > +	}
+> >  }
+> >
+> >  static int sdhci_esdhc_probe(struct platform_device *pdev)
+> >
 
--Doug
