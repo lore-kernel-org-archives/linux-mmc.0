@@ -1,178 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [mmc] mmc: core: add proper be32 annotation
-Date: Wed, 12 Apr 2017 16:11:59 +0200
-Message-ID: <CAPDyKFprd-McHDf_w4BwzDgQrJztpcJnsQThApg8koFoMXHP7g@mail.gmail.com>
-References: <20170402205603.23790-1-tomas.winkler@intel.com>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
+Date: Wed, 12 Apr 2017 09:12:24 -0700
+Message-ID: <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
+References: <20170330011709.GA110687@google.com> <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
+ <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:36798 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752868AbdDLOMA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2017 10:12:00 -0400
-Received: by mail-ua0-f173.google.com with SMTP id a1so16824814uaf.3
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2017 07:12:00 -0700 (PDT)
-In-Reply-To: <20170402205603.23790-1-tomas.winkler@intel.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:38727 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752497AbdDLQM1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2017 12:12:27 -0400
+Received: by mail-wm0-f53.google.com with SMTP id t189so28047695wmt.1
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2017 09:12:26 -0700 (PDT)
+In-Reply-To: <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Winkler <tomas.winkler@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Brian Norris <briannorris@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
 
-On 2 April 2017 at 22:56, Tomas Winkler <tomas.winkler@intel.com> wrote:
-> Annotate big endian values correctly and make sparse happy.
-> In mmc_app_send_scr remove scr function parameter as it was
-> updating card->raw_scr anyway.
->
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+Shawn
 
-Thanks, applied for next!
+On Tue, Apr 11, 2017 at 5:54 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>> This doesn't surprise me at all.  What surprises me, though, is that
+>> nobody else seems to be able to reproduce this.
+>>
+>> On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
+>> Interrupts.  See this bit in the device tree:
+>>
+>>   cap-sdio-irq;
+>>
+>
+> all of *my* boards are using side-band interrupt, so there are no
+> "cap-sdio-irq".
 
-Kind regards
-Uffe
+They are all using side-band interrupt?  What WiFi device do you have connected?
 
-> ---
->  drivers/mmc/core/mmc_ops.c |  8 ++++----
->  drivers/mmc/core/sd.c      |  4 ++--
->  drivers/mmc/core/sd_ops.c  | 19 +++++++++----------
->  drivers/mmc/core/sd_ops.h  |  2 +-
->  4 files changed, 16 insertions(+), 17 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index fe80f26d6971..d94a722fd340 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -305,7 +305,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
->  int mmc_send_csd(struct mmc_card *card, u32 *csd)
->  {
->         int ret, i;
-> -       u32 *csd_tmp;
-> +       __be32 *csd_tmp;
->
->         if (!mmc_host_is_spi(card->host))
->                 return mmc_send_cxd_native(card->host, card->rca << 16,
-> @@ -319,7 +319,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
->         if (ret)
->                 goto err;
->
-> -       for (i = 0;i < 4;i++)
-> +       for (i = 0; i < 4; i++)
->                 csd[i] = be32_to_cpu(csd_tmp[i]);
->
->  err:
-> @@ -330,7 +330,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
->  int mmc_send_cid(struct mmc_host *host, u32 *cid)
->  {
->         int ret, i;
-> -       u32 *cid_tmp;
-> +       __be32 *cid_tmp;
->
->         if (!mmc_host_is_spi(host)) {
->                 if (!host->card)
-> @@ -347,7 +347,7 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
->         if (ret)
->                 goto err;
->
-> -       for (i = 0;i < 4;i++)
-> +       for (i = 0; i < 4; i++)
->                 cid[i] = be32_to_cpu(cid_tmp[i]);
->
->  err:
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 89531b48ae84..d109634fbfce 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -225,7 +225,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->  static int mmc_read_ssr(struct mmc_card *card)
->  {
->         unsigned int au, es, et, eo;
-> -       u32 *raw_ssr;
-> +       __be32 *raw_ssr;
->         int i;
->
->         if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-> @@ -853,7 +853,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->                 /*
->                  * Fetch SCR from card.
->                  */
-> -               err = mmc_app_send_scr(card, card->raw_scr);
-> +               err = mmc_app_send_scr(card);
->                 if (err)
->                         return err;
->
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 9d5824a37586..47056d8d1bac 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -232,14 +232,14 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca)
->         return 0;
->  }
->
-> -int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
-> +int mmc_app_send_scr(struct mmc_card *card)
->  {
->         int err;
->         struct mmc_request mrq = {};
->         struct mmc_command cmd = {};
->         struct mmc_data data = {};
->         struct scatterlist sg;
-> -       void *data_buf;
-> +       __be32 *scr;
->
->         /* NOTE: caller guarantees scr is heap-allocated */
->
-> @@ -250,8 +250,8 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
->         /* dma onto stack is unsafe/nonportable, but callers to this
->          * routine normally provide temporary on-stack buffers ...
->          */
-> -       data_buf = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
-> -       if (data_buf == NULL)
-> +       scr = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
-> +       if (!scr)
->                 return -ENOMEM;
->
->         mrq.cmd = &cmd;
-> @@ -267,23 +267,22 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
->         data.sg = &sg;
->         data.sg_len = 1;
->
-> -       sg_init_one(&sg, data_buf, 8);
-> +       sg_init_one(&sg, scr, 8);
->
->         mmc_set_data_timeout(&data, card);
->
->         mmc_wait_for_req(card->host, &mrq);
->
-> -       memcpy(scr, data_buf, sizeof(card->raw_scr));
-> -       kfree(data_buf);
-> +       card->raw_scr[0] = be32_to_cpu(scr[0]);
-> +       card->raw_scr[1] = be32_to_cpu(scr[1]);
-> +
-> +       kfree(scr);
->
->         if (cmd.error)
->                 return cmd.error;
->         if (data.error)
->                 return data.error;
->
-> -       scr[0] = be32_to_cpu(scr[0]);
-> -       scr[1] = be32_to_cpu(scr[1]);
-> -
->         return 0;
->  }
->
-> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> index 784f8e6b6baa..0e6c3d51e66d 100644
-> --- a/drivers/mmc/core/sd_ops.h
-> +++ b/drivers/mmc/core/sd_ops.h
-> @@ -22,7 +22,7 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width);
->  int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
->  int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
->  int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
-> -int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
-> +int mmc_app_send_scr(struct mmc_card *card);
->  int mmc_sd_switch(struct mmc_card *card, int mode, int group,
->         u8 value, u8 *resp);
->  int mmc_app_sd_status(struct mmc_card *card, void *ssr);
-> --
-> 2.9.3
->
+If you're truly using a side-band interrupt using the dedicated SDIO
+interrupt pin on your SoC, I'm pretty sure you still need to define
+cap-sdio-irq in order for things to work properly.  If you don't do
+that, you'll get "polling mode" for SDIO Interrupts.  See
+sdio_irq_thread() where you can see that the kernel will poll your
+device every 10 ms if MMC_CAP_SDIO_IRQ isn't set.
+
+Maybe you should try defining cap-sdio-irq and see if you get a big
+performance boost?
