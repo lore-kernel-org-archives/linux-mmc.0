@@ -1,47 +1,45 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
-Date: Wed, 12 Apr 2017 09:12:24 -0700
-Message-ID: <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
-References: <20170330011709.GA110687@google.com> <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
- <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v3 1/3] mmc: sdhci-acpi: Remove unneeded acpi_bus_get_status() call
+Date: Wed, 12 Apr 2017 20:19:20 +0200
+Message-ID: <20170412181922.31833-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:38727 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752497AbdDLQM1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2017 12:12:27 -0400
-Received: by mail-wm0-f53.google.com with SMTP id t189so28047695wmt.1
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2017 09:12:26 -0700 (PDT)
-In-Reply-To: <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57788 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752282AbdDLSTY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Apr 2017 14:19:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Brian Norris <briannorris@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org
 
-Shawn
+The acpi-subsys already calls acpi_bus_get_status() and checks that
+device->status.present is set before even registering the platform_device
+so out probe function will never get called if device->status.present is
+false and there is no need for this check.
 
-On Tue, Apr 11, 2017 at 5:54 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> This doesn't surprise me at all.  What surprises me, though, is that
->> nobody else seems to be able to reproduce this.
->>
->> On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
->> Interrupts.  See this bit in the device tree:
->>
->>   cap-sdio-irq;
->>
->
-> all of *my* boards are using side-band interrupt, so there are no
-> "cap-sdio-irq".
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-This is a new patch replacing "mmc: sdhci-acpi: Check device status
+ before calling fix_up_power()"
+---
+ drivers/mmc/host/sdhci-acpi.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-They are all using side-band interrupt?  What WiFi device do you have connected?
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 237f318..9fd8d7a 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -399,9 +399,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 		if (child->status.present && child->status.enabled)
+ 			acpi_device_fix_up_power(child);
+ 
+-	if (acpi_bus_get_status(device) || !device->status.present)
+-		return -ENODEV;
+-
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
+ 
+-- 
+2.9.3
 
-If you're truly using a side-band interrupt using the dedicated SDIO
-interrupt pin on your SoC, I'm pretty sure you still need to define
-cap-sdio-irq in order for things to work properly.  If you don't do
-that, you'll get "polling mode" for SDIO Interrupts.  See
-sdio_irq_thread() where you can see that the kernel will poll your
-device every 10 ms if MMC_CAP_SDIO_IRQ isn't set.
-
-Maybe you should try defining cap-sdio-irq and see if you get a big
-performance boost?
