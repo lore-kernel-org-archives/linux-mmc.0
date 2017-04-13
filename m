@@ -1,122 +1,112 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Don't allow Runtime PM for SDIO cards
-Date: Thu, 13 Apr 2017 11:32:48 +0200
-Message-ID: <CAPDyKFo4FMu0F5DwBNb4b5JTp5UwHAUBQdvk00J5zzvbk6OZSQ@mail.gmail.com>
-References: <20170411225543.987-1-dianders@chromium.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 2/3] mmc: sdhci-acpi: Add blacklist module option
+Date: Thu, 13 Apr 2017 14:50:00 +0300
+Message-ID: <994652a8-2b08-b4b6-fe42-d35af09d19c0@intel.com>
+References: <20170412181922.31833-1-hdegoede@redhat.com>
+ <20170412181922.31833-2-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170411225543.987-1-dianders@chromium.org>
-Sender: stable-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Brian Norris <briannorris@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, kevin@archlinuxarm.org, Alexandru Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, "# 4.0+" <stable@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga06.intel.com ([134.134.136.31]:12373 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751349AbdDMLzl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 13 Apr 2017 07:55:41 -0400
+In-Reply-To: <20170412181922.31833-2-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org
 
-On 12 April 2017 at 00:55, Douglas Anderson <dianders@chromium.org> wrote:
-> According to the SDIO standard interrupts are normally signalled in a
-> very complicated way.  They require the card clock to be running and
-> require the controller to be paying close attention to the signals
-> coming from the card.  This simply can't happen with the clock stopped
-> or with the controller in a low power mode.
+On 12/04/17 21:19, Hans de Goede wrote:
+> Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
+> powered when probing") introduced unconditional calling of
+> acpi_device_fix_up_power() on the mmc controller and its children.
+> 
+> This broke wifi on some systems because acpi_device_fix_up_power()
+> was called even for disabled children sometimes leaving gpio-s in
+> a state where wifi would not work, this was fixed in
+> commit e1d070c3793a ("mmc: sdhci-acpi: Only powered up enabled acpi
+> child devices").
+> 
+> Unfortunately on some devices calling acpi_device_fix_up_power()
+> still causes issues. Specifically on the GPD-win mini clam-shell PC
+> which has a pci-e wifi module, it causes the wifi module to get
+> turned off. This is a BIOS bug and I've tried to get the manufacturer
+> to fix this but sofar they have not responded (and even if they do
+> then we cannot assume all users will update their BIOS).
+> 
+> Since the GPD-win uses a pci-e wifi module the sdhci controller for
+> sdio cards really should not get initialized on it at all.
 
-Right - unless we have a possibility to re-route the SDIO irq line to
-GPIO irq for wake-up when the controller enters low power state.
+What if we move the call to acpi_device_fix_up_power() for the child
+devices into the ->init_card() callback? i.e. it won't happen if there
+is no card:
 
->
-> To that end, we'll disable runtime_pm when we detect that an SDIO card
-> was inserted.  This is much like with what we do with the special
-> "SDMMC_CLKEN_LOW_PWR" bit that dw_mmc supports.
 
-I wonder whether this is related to SDIO IRQs but not generic to SDIO.
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index c6a9a1bfaa22..dd97978f0361 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -81,6 +81,7 @@ struct sdhci_acpi_host {
+ 	const struct sdhci_acpi_slot	*slot;
+ 	struct platform_device		*pdev;
+ 	bool				use_runtime_pm;
++	bool				child_fixup_power_done;
+ };
+ 
+ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+@@ -374,11 +375,29 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+ 	return NULL;
+ }
+ 
++static void sdhci_acpi_init_card(struct mmc_host *mmc, struct mmc_card *card)
++{
++	struct device *dev = mmc_dev(mmc);
++	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
++	struct acpi_device *adev = ACPI_COMPANION(dev);
++	struct acpi_device *child;
++
++	if (c->child_fixup_power_done || !adev)
++		return;
++
++	/* Ensure child devices are powered on */
++	list_for_each_entry(child, &adev->children, node)
++		if (child->status.present && child->status.enabled)
++			acpi_device_fix_up_power(child);
++
++	c->child_fixup_power_done = true;
++}
++
+ static int sdhci_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	acpi_handle handle = ACPI_HANDLE(dev);
+-	struct acpi_device *device, *child;
++	struct acpi_device *device;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+@@ -390,11 +409,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (acpi_bus_get_device(handle, &device))
+ 		return -ENODEV;
+ 
+-	/* Power on the SDHCI controller and its children */
++	/* Power on the SDHCI controller */
+ 	acpi_device_fix_up_power(device);
+-	list_for_each_entry(child, &device->children, node)
+-		if (child->status.present && child->status.enabled)
+-			acpi_device_fix_up_power(child);
+ 
+ 	if (acpi_bus_get_status(device) || !device->status.present)
+ 		return -ENODEV;
+@@ -432,6 +448,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	host->ops	= &sdhci_acpi_ops_dflt;
+ 	host->irq	= platform_get_irq(pdev, 0);
+ 
++	host->mmc_host_ops.init_card = sdhci_acpi_init_card;
++
+ 	host->ioaddr = devm_ioremap_nocache(dev, iomem->start,
+ 					    resource_size(iomem));
+ 	if (host->ioaddr == NULL) {
 
-For example, when we have a WIFI chip with a dedicated and separate
-IRQ line, enabling SDMMC_CLKEN_LOW_PWR could make sense.
-
->
-> NOTE: we specifically do this Runtime PM disabling at card init time
-> rather than in the enable_sdio_irq() callback.  This is _different_
-> than how SDHCI does it.  Why do we do it differently?
->
-> - Unlike SDHCI, dw_mmc uses the standard sdio_irq code in Linux (AKA
->   dw_mmc doesn't set MMC_CAP2_SDIO_IRQ_NOTHREAD).
-> - Because we use the standard sdio_irq code:
->   - We see a constant stream of enable_sdio_irq(0) and
->     enable_sdio_irq(1) calls.  This is because the standard code
->     disables interrupts while processing and re-enables them after.
->   - While interrupts are disabled, there's technically a period where
->     we could get runtime disabled while processing interrupts.
->   - If we are runtime disabled while processing interrupts, we'll
->     reset the controller at resume time (see dw_mci_runtime_resume),
->     which seems like a terrible idea because we could possibly have
->     another interrupt pending.
-
-Thanks for the detailed clarification.
-
->
-> To fix the above isues we'd want to put something in the standard
-> sdio_irq code that makes sure to call pm_runtime get/put when
-> interrupts are being actively being processed.  That's possible to do,
-> but it seems like a more complicated mechanism when we really just
-> want the runtime pm disabled always for SDIO cards given that all the
-> other bits needed to get Runtime PM vs. SDIO just aren't there.
->
-> NOTE: at some point in time someone might come up with a fancy way to
-> do SDIO interrupts and still allow (some) amount of runtime PM.
-> Technically we could turn off the card clock if we used an alternate
-> way of signaling SDIO interrupts (and out of band interrupt is one way
-> to do this).  We probably wouldn't actually want to fully runtime
-> suspend in this case though--at least not with the current
-> dw_mci_runtime_resume() which basically fully resets the controller at
-> resume time.
-
-I understand this "quick" fix in dw_mmc takes care of the problem.
-However, allow me to try to make this a bit more generic. I intend to
-post something within a few days. If I fail, let's go with this
-solution.
-
-Kind regards
-Uffe
-
->
-> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
-> Cc: <stable@vger.kernel.org>
-> Reported-by: Brian Norris <briannorris@chromium.org>
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 249ded65192e..e45129f48174 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -23,6 +23,7 @@
->  #include <linux/ioport.h>
->  #include <linux/module.h>
->  #include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/seq_file.h>
->  #include <linux/slab.h>
->  #include <linux/stat.h>
-> @@ -1620,10 +1621,16 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->
->                 if (card->type == MMC_TYPE_SDIO ||
->                     card->type == MMC_TYPE_SD_COMBO) {
-> -                       set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> +                       if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
-> +                               pm_runtime_get_noresume(mmc->parent);
-> +                               set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> +                       }
->                         clk_en_a = clk_en_a_old & ~clken_low_pwr;
->                 } else {
-> -                       clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> +                       if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
-> +                               pm_runtime_put_noidle(mmc->parent);
-> +                               clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> +                       }
->                         clk_en_a = clk_en_a_old | clken_low_pwr;
->                 }
->
-> --
-> 2.12.2.715.g7642488e1d-goog
->
