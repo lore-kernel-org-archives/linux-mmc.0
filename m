@@ -1,75 +1,112 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron
- boards
-Date: Thu, 13 Apr 2017 16:28:10 +0800
-Message-ID: <170a5878-55e9-bec9-4705-b00a0ff342a7@rock-chips.com>
-References: <20170330011709.GA110687@google.com>
- <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
- <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com>
- <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Don't allow Runtime PM for SDIO cards
+Date: Thu, 13 Apr 2017 16:33:01 +0800
+Message-ID: <13eda64f-3421-3db5-05ce-69a9fd4c85cb@rock-chips.com>
+References: <20170411225543.987-1-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:59575 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:41349 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750811AbdDMI2P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2017 04:28:15 -0400
-In-Reply-To: <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
+        with ESMTP id S1751439AbdDMIdH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2017 04:33:07 -0400
+In-Reply-To: <20170411225543.987-1-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: Brian Norris <briannorris@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, briannorris@chromium.org, linux-rockchip@lists.infradead.org, Heiko Stuebner <heiko@sntech.de>, kevin@archlinuxarm.org, amstan@chromium.org, xzy.xu@rock-chips.com, stable@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
 
-在 2017/4/13 0:12, Doug Anderson 写道:
-> Shawn
+
+On 2017/4/12 6:55, Douglas Anderson wrote:
+> According to the SDIO standard interrupts are normally signalled in a
+> very complicated way.  They require the card clock to be running and
+> require the controller to be paying close attention to the signals
+> coming from the card.  This simply can't happen with the clock stopped
+> or with the controller in a low power mode.
 >
-> On Tue, Apr 11, 2017 at 5:54 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>> This doesn't surprise me at all.  What surprises me, though, is that
->>> nobody else seems to be able to reproduce this.
->>>
->>> On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
->>> Interrupts.  See this bit in the device tree:
->>>
->>>   cap-sdio-irq;
->>>
->>
->> all of *my* boards are using side-band interrupt, so there are no
->> "cap-sdio-irq".
+> To that end, we'll disable runtime_pm when we detect that an SDIO card
+> was inserted.  This is much like with what we do with the special
+> "SDMMC_CLKEN_LOW_PWR" bit that dw_mmc supports.
 >
-> They are all using side-band interrupt?  What WiFi device do you have connected?
-
-I'm using brcm wifi that using out-of-tree drivers.
-
+> NOTE: we specifically do this Runtime PM disabling at card init time
+> rather than in the enable_sdio_irq() callback.  This is _different_
+> than how SDHCI does it.  Why do we do it differently?
 >
-> If you're truly using a side-band interrupt using the dedicated SDIO
-> interrupt pin on your SoC, I'm pretty sure you still need to define
-
-Not really. The intention of using side-band int is that we could put
-the host into low power mode(maybe with pd off), so that the wifi could
-still works with Socs. And mostly, we don't need to keep the controller
-on when in S3. The side-band io could be registered as a gpio interrupt
-(wakeup source), and once the wifi chip need to communicate with Socs,
-it could wakeup the system(of course sdio controller will be alive
-then). Also, once using side-band interrupt, the interrupt service and
-management should be done with the wifi function drivers. I'm pretty
-sure that my at-hand drivers, for instance, brcm and realtek actually
-do that.
-
-> cap-sdio-irq in order for things to work properly.  If you don't do
-> that, you'll get "polling mode" for SDIO Interrupts.  See
-> sdio_irq_thread() where you can see that the kernel will poll your
-> device every 10 ms if MMC_CAP_SDIO_IRQ isn't set.
+> - Unlike SDHCI, dw_mmc uses the standard sdio_irq code in Linux (AKA
+>   dw_mmc doesn't set MMC_CAP2_SDIO_IRQ_NOTHREAD).
+> - Because we use the standard sdio_irq code:
+>   - We see a constant stream of enable_sdio_irq(0) and
+>     enable_sdio_irq(1) calls.  This is because the standard code
+>     disables interrupts while processing and re-enables them after.
+>   - While interrupts are disabled, there's technically a period where
+>     we could get runtime disabled while processing interrupts.
+>   - If we are runtime disabled while processing interrupts, we'll
+>     reset the controller at resume time (see dw_mci_runtime_resume),
+>     which seems like a terrible idea because we could possibly have
+>     another interrupt pending.
 >
-> Maybe you should try defining cap-sdio-irq and see if you get a big
-> performance boost?
-
-Sorry, I didn't test the upstreamed wifi drivers but from the test of my
-out-of-tree wifi drivers, there is no much difference.
-
+> To fix the above isues we'd want to put something in the standard
+> sdio_irq code that makes sure to call pm_runtime get/put when
+> interrupts are being actively being processed.  That's possible to do,
+> but it seems like a more complicated mechanism when we really just
+> want the runtime pm disabled always for SDIO cards given that all the
+> other bits needed to get Runtime PM vs. SDIO just aren't there.
 >
+> NOTE: at some point in time someone might come up with a fancy way to
+> do SDIO interrupts and still allow (some) amount of runtime PM.
+> Technically we could turn off the card clock if we used an alternate
+> way of signaling SDIO interrupts (and out of band interrupt is one way
+> to do this).  We probably wouldn't actually want to fully runtime
+> suspend in this case though--at least not with the current
+> dw_mci_runtime_resume() which basically fully resets the controller at
+> resume time.
+>
+> Fixes: e9ed8835e990 ("mmc: dw_mmc: add runtime PM callback")
+> Cc: <stable@vger.kernel.org>
+> Reported-by: Brian Norris <briannorris@chromium.org>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+
+Thanks, Doug, for this fix.
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 249ded65192e..e45129f48174 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/ioport.h>
+>  #include <linux/module.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/seq_file.h>
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+> @@ -1620,10 +1621,16 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>
+>  		if (card->type == MMC_TYPE_SDIO ||
+>  		    card->type == MMC_TYPE_SD_COMBO) {
+> -			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> +			if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
+> +				pm_runtime_get_noresume(mmc->parent);
+> +				set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> +			}
+>  			clk_en_a = clk_en_a_old & ~clken_low_pwr;
+>  		} else {
+> -			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> +			if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
+> +				pm_runtime_put_noidle(mmc->parent);
+> +				clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> +			}
+>  			clk_en_a = clk_en_a_old | clken_low_pwr;
+>  		}
 >
 >
 
