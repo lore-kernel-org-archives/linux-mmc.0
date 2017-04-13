@@ -1,31 +1,26 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [PATCH] mmc: cavium: Fix a shift wrapping bug
-Date: Thu, 13 Apr 2017 22:47:48 +0300
-Message-ID: <20170413194748.GE591@mwanda>
+From: "Steven J. Hill" <Steven.Hill@cavium.com>
+Subject: MMC block addressing mode.
+Date: Thu, 13 Apr 2017 14:49:37 -0500
+Message-ID: <f1cbb93e-68f0-df11-5e89-7b52e00a0b79@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Jan Glauber <jglauber@cavium.com>
-Cc: David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam01on0089.outbound.protection.outlook.com ([104.47.32.89]:40289
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755951AbdDMTtm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 13 Apr 2017 15:49:42 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
 
-"dat" is a u64 and "shift" starts as 54 so this is a shift wrapping bug.
+Uffe,
 
-Fixes: 8047c753f3d3 ("mmc: cavium: Add core MMC driver for Cavium SOCs")
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+The Cavium hardware requires knowledge of the card addressing mode.
+We need to either restore mmc_card_blockaddr(), or create another
+way to generate the same information. You previously suggested use
+of the 'blksz' value, however, it has the same value regardless of
+the card capacity. What would you suggest? Cheers.
 
-diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-index d842b6986189..54ff1363b564 100644
---- a/drivers/mmc/host/cavium.c
-+++ b/drivers/mmc/host/cavium.c
-@@ -733,7 +733,7 @@ static void do_write_request(struct cvm_mmc_host *host, struct mmc_request *mrq)
- 		}
- 
- 		while (smi->consumed < smi->length && shift >= 0) {
--			dat |= ((u8 *)smi->addr)[smi->consumed] << shift;
-+			dat |= (u64)((u8 *)smi->addr)[smi->consumed] << shift;
- 			bytes_xfered++;
- 			smi->consumed++;
- 			shift -= 8;
+Steve
