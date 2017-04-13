@@ -1,40 +1,60 @@
-From: "Steven J. Hill" <Steven.Hill@cavium.com>
-Subject: Re: [PATCH v13 0/6] Cavium MMC driver
-Date: Wed, 12 Apr 2017 18:21:32 -0500
-Message-ID: <44e49a3b-ec51-7318-f6c1-911712127ddb@cavium.com>
-References: <20170330153128.22842-1-jglauber@cavium.com>
- <20170412223750.mcm62ns57uag6y7q@raspberrypi-3.musicnaut.iki.fi>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [REGRESSION 4.10] dw_mmc: failures on Rockchip rk3288 veyron boards
+Date: Thu, 13 Apr 2017 09:17:21 +0200
+Message-ID: <CAPDyKFrv+BR-tz8zp93vLwW9JBybp7BCjW4nSn3H9u4Kxt56EA@mail.gmail.com>
+References: <20170330011709.GA110687@google.com> <CAD=FV=WWt=20WUT8jhZ3fBPiQq9UM-bEuFSXuuNu_7d3ONLdLQ@mail.gmail.com>
+ <23842930-ece6-8879-daa5-c2220cfbf09f@rock-chips.com> <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam03on0065.outbound.protection.outlook.com ([104.47.42.65]:48480
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752372AbdDLXVk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 12 Apr 2017 19:21:40 -0400
-In-Reply-To: <20170412223750.mcm62ns57uag6y7q@raspberrypi-3.musicnaut.iki.fi>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:33949 "EHLO
+        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753286AbdDMHRW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2017 03:17:22 -0400
+Received: by mail-vk0-f52.google.com with SMTP id z204so24320416vkd.1
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Apr 2017 00:17:22 -0700 (PDT)
+In-Reply-To: <CAD=FV=U+SQ8RwPz+8tVzoLgTLNM=jca1FtLBgsZ+GTY24rhTKQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaro Koskinen <aaro.koskinen@iki.fi>, Jan Glauber <jglauber@cavium.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Brian Norris <briannorris@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru M Stan <amstan@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, kevin@archlinuxarm.org
 
-On 04/12/2017 05:37 PM, Aaro Koskinen wrote:
-> 
-> Please rather post a new version that also works with OCTEON. I don't
-> think a partial driver should be merged; originally this driver was
-> working fine with OCTEON so there should be no issue supporting that?!
+On 12 April 2017 at 18:12, Doug Anderson <dianders@google.com> wrote:
+> Shawn
 >
-Hey Aaro.
+> On Tue, Apr 11, 2017 at 5:54 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>> This doesn't surprise me at all.  What surprises me, though, is that
+>>> nobody else seems to be able to reproduce this.
+>>>
+>>> On veyron, WiFi is connected via SDIO.  For good speed, it uses SDIO
+>>> Interrupts.  See this bit in the device tree:
+>>>
+>>>   cap-sdio-irq;
+>>>
+>>
+>> all of *my* boards are using side-band interrupt, so there are no
+>> "cap-sdio-irq".
+>
+> They are all using side-band interrupt?  What WiFi device do you have connected?
+>
+> If you're truly using a side-band interrupt using the dedicated SDIO
+> interrupt pin on your SoC, I'm pretty sure you still need to define
+> cap-sdio-irq in order for things to work properly.  If you don't do
+> that, you'll get "polling mode" for SDIO Interrupts.  See
+> sdio_irq_thread() where you can see that the kernel will poll your
+> device every 10 ms if MMC_CAP_SDIO_IRQ isn't set.
 
-The difference is that Jan added scatter/gather support to take
-advantage of the DMA FIFOs on Thunder. The same FIFOs exist on
-Octeon parts 73xx, 76xx, 78xx, CNF73xx, and CNF75xx to name a
-few. In order to support those, portions of the Octeon platform
-code had to be rewritten as well as minor changes in the core
-Cavium driver code. I have a fully tested patchset that cleanly
-applies on top of Jan's v13 driver. My personal preference is
-for the Octeon code to be a separate patch. I will defer that
-decision to Jan, David and the MMC maintainers.
+In these cases I would expect the WIFI driver to deal with the SDIO
+IRQ itself and not requesting it via calling sdio_claim_irq(). Because
+of this, there should be no polling performed by the sdio_irq_thread.
 
-Steve
+>
+> Maybe you should try defining cap-sdio-irq and see if you get a big
+> performance boost?
+
+No, that seems like a bad idea. I think it would rather add overhead -
+decreasing performance. Likely it will also make us wake up the mmc
+host from its low power state, when when it actually isn't needed.
+
+Kind regards
+Uffe
