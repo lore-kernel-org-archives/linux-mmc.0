@@ -1,76 +1,47 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Use macros in pci_ids definition
-Date: Thu, 13 Apr 2017 11:52:39 +0300
-Message-ID: <3b1dd7a6-65a8-e7ea-97b8-24e742b6f62d@intel.com>
-References: <1491417893-16095-1-git-send-email-matthiasmartinsson@gmail.com>
- <1491417893-16095-2-git-send-email-matthiasmartinsson@gmail.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci: provide isr for card-detect interrupts
+Date: Thu, 13 Apr 2017 17:17:59 +0800
+Message-ID: <20170413171759.1e98aa36@xhacker>
+References: <20170411102056.2869-1-jszhang@marvell.com>
+ <20170411102056.2869-3-jszhang@marvell.com>
+ <772c085c-beba-cfe8-23ca-0c46a96145fe@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:34316 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750773AbdDMI6U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 13 Apr 2017 04:58:20 -0400
-In-Reply-To: <1491417893-16095-2-git-send-email-matthiasmartinsson@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <772c085c-beba-cfe8-23ca-0c46a96145fe@intel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matthias Kraemer <matthiasmartinsson@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 05/04/17 21:44, Matthias Kraemer wrote:
-> This patch applies the PCI_DEVICE_ macros to specify the pci_ids instead
-> of open-coding them within the sdhci-pci driver.
+On Tue, 11 Apr 2017 13:31:16 +0300 Adrian Hunter wrote:
+
+> On 11/04/17 13:20, Jisheng Zhang wrote:
+> > We found one issue on BG4CT platforms with GPIO for sdcar card detect
+> > interrupt: remove sdcard when there's read write access to the sdcard,
+> > sometimes the card remove event can't be handled for a long time, so
+> > the  system still think the sdcard is still plugged in. It turns out
+> > that the sdhci_card_event() is missing in common slot gpio's card
+> > detect isr.  
 > 
-> v2:
-> Suggested-by Adrian Hunter <adrian.hunter@intel.com>
-> Instead of using the generic PCI_ marcos, introduce device specific macros
-> to be able to shorten the table entries even further.
-> 
-> Signed-off-by: Matthias Kraemer <matthiasmartinsson@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 673 +++++++-------------------------------
->  drivers/mmc/host/sdhci-pci.h      |  14 +
->  2 files changed, 139 insertions(+), 548 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 86560d5..b5292b0 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -992,554 +992,131 @@ static const struct sdhci_pci_fixes sdhci_amd = {
->  };
->  
->  static const struct pci_device_id pci_ids[] = {
-> -	{
-> -		.vendor		= PCI_VENDOR_ID_RICOH,
-> -		.device		= PCI_DEVICE_ID_RICOH_R5C822,
-> -		.subvendor	= PCI_ANY_ID,
-> -		.subdevice	= PCI_ANY_ID,
-> -		.driver_data	= (kernel_ulong_t)&sdhci_ricoh,
-> -	},
-> -
-> -	{
-> -		.vendor         = PCI_VENDOR_ID_RICOH,
-> -		.device         = 0x843,
-> -		.subvendor      = PCI_ANY_ID,
-> -		.subdevice      = PCI_ANY_ID,
-> -		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
-> -	},
-> -
+> ->card_event() is called by mmc_rescan().  Why is that too late?  
 
-<SNIP>
+Indeed, maybe the "too late" here is not accurate. Compared with host's
+CD interrupt handling, the GPIO CD interrupt handling differs in when to
+call sdhci_card_event(): in previous case, it's called in ISR, in later
+it's in workqueue.
 
-> +	{SDHCI_PCI_DEVICE(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C822,
-> +			  sdhci_ricoh)},
-> +	{SDHCI_PCI_DEVICE(PCI_VENDOR_ID_RICOH, 0x843, sdhci_ricoh_mmc)},
+Now, I agree it's not necessary to put into ISR. So let's ignore the
+two patches.
 
-There are still duplicate PCI_VENDOR_ID_... and PCI_DEVICE_ID_... and
-sdhci_... and {}.  I would just expect to see:
-
-	SDHCI_PCI_DEV(RICOH, RICOH_R5C822, ricoh),
-	SDHCI_PCI_DEV(RICOH, 0x843, ricoh_mmc),
-
-Where there are numbers with no define, just define them:
-
-	#define PCI_DEVICE_ID_0x843	0x843
-
+Thanks for your review,
+Jisheng
