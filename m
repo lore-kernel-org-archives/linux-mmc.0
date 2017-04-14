@@ -1,190 +1,162 @@
-From: Tim Harvey <tharvey@gateworks.com>
-Subject: Re: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
-Date: Fri, 14 Apr 2017 07:57:11 -0700
-Message-ID: <CAJ+vNU2OdVfT58DHm8g8306ZUgt9Pv1SJxhD0T6XAWKt0TvebQ@mail.gmail.com>
-References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
- <20170404220040.GA2997@fen-net.de> <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
- <AM4PR0401MB23245B9B41978D09DAD9FD8D90000@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <CAJ+vNU3gRG3K94V31EG1ufRsngsYG6hWq_97P2szZ2oATOd3=g@mail.gmail.com> <VI1PR0401MB2335F1B3BD74C219734BA0FA90050@VI1PR0401MB2335.eurprd04.prod.outlook.com>
+From: Julia Lawall <julia.lawall@lip6.fr>
+Subject: Re: [PATCH 04/22] target: Make use of the new sg_map function at 16
+ call sites (fwd)
+Date: Fri, 14 Apr 2017 17:19:28 +0200 (CEST)
+Message-ID: <alpine.DEB.2.20.1704141717510.3212@hadrien>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:35918 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751369AbdDNO5N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2017 10:57:13 -0400
-Received: by mail-wr0-f173.google.com with SMTP id c55so52160820wrc.3
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Apr 2017 07:57:13 -0700 (PDT)
-In-Reply-To: <VI1PR0401MB2335F1B3BD74C219734BA0FA90050@VI1PR0401MB2335.eurprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: kbuild-all@01.org, Steve Wise <swise@opengridcomputing.com>, linux-nvme@lists.infradead.org, Stephen Bates <sbates@raithlin.com>, target-devel@vger.kernel.org, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, Sagi Grimberg <sagi@grimberg.me>, linux-scsi@vger.kernel.org, Matthew Wilcox <mawilcox@microsoft.com>, linux-rdma@vger.kernel.org, Christoph Hellwig <hch@lst.de>, fcoe-devel@open-fcoe.org, Ross Zwisler <ross.zwisler@linux.intel.com>, open-iscsi@googlegroups.com, linux-media@vger.kernel.org, Ming Lin <ming.l@ssi.samsung.com>, intel-gfx@lists.freedesktop.org, sparmaintainer@unisys.com, linux-raid@vger.kernel.org, dri-devel@lists.freedesktop.org, Dan Williams <dan.j.williams@intel.com>, megaraidlinux.pdl@broadcom.com, Jens Axboe <axboe@kernel.dk>, linaro-mm-sig@lists.linaro.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Greg Kroah-Hartman <gregkh@linuxfo>
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>
-Cc: David Haworth <dave@fen-net.de>, Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Weijun Yang <york.yang@csr.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawnguo@kernel.org>
 
-On Fri, Apr 14, 2017 at 12:41 AM, Bough Chen <haibo.chen@nxp.com> wrote:
->> -----Original Message-----
->> From: Tim Harvey [mailto:tharvey@gateworks.com]
->> Sent: Tuesday, April 11, 2017 10:22 PM
->> To: Bough Chen <haibo.chen@nxp.com>
->> Cc: David Haworth <dave@fen-net.de>; Linux MMC List <linux-
->> mmc@vger.kernel.org>; Fabio Estevam <fabio.estevam@nxp.com>; Ulf
->> Hansson <ulf.hansson@linaro.org>; Weijun Yang <york.yang@csr.com>; Adrian
->> Hunter <adrian.hunter@intel.com>
->> Subject: Re: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
->>
->> On Tue, Apr 11, 2017 at 2:28 AM, Bough Chen <haibo.chen@nxp.com> wrote:
->> >> -----Original Message-----
->> <snip>
->> >>
->> >> I've moved on to 4.11-rc5 and notice that I'm always seeing that on a
->> >> failure the imx sdhc not able to determine a min/max tuning delay:
->> >>
->> >> 4.11.0-rc5:
->> >> [   48.812381] mmc0: card aaaa removed
->> >> [   49.793392] mmc0: host does not support reading read-only switch,
->> >> assuming write-enable
->> >> [   49.810294] sdhci_execute_tuning
->> >> [   49.813612] esdhc_executing_tuning
->> >> [   49.968154] sdhci-esdhc-imx 2198000.usdhc: tuning failed at 0x7f
->> >> ret -5 (min=127/max=128)
->> >> ^^^^ added debug shows -EIO returned from mmc_send_tuning although
->> >> I've also seen -84 get returned
->> >> [   49.980540] mmc0: tuning execution failed: -5
->> >> [   49.984974] mmc0: ddr50 tuning failed
->> >> [   49.989068] mmc0: new ultra high speed DDR50 SDHC card at address aaaa
->> >> [   49.999844] mmcblk0: mmc0:aaaa SL08G 7.40 GiB
->> >>
->> >> I've also found that if I revert '9faac7b mmc: sdhci: enable tuning for DDR50'
->> >> thus skipping the tuning the issue goes away however note that
->> >> occasionally I do see a transfer error that perhaps is retried [
->> >> 361.067763] mmc0: card aaaa removed [  361.412732] mmc0: host does
->> >> not support reading read-only switch, assuming write-enable [
->> >> 361.429719] mmc0: new ultra high speed DDR50 SDHC card at address
->> >> aaaa [  361.443060] mmcblk0: mmc0:aaaa SL08G 7.40 GiB [  361.465658]
->> >> mmcblk0: p1 [  362.422335] mmc0: card aaaa removed [  362.752719]
->> >> mmc0: host does not support reading read-only switch, assuming
->> >> write-enable [  362.769675] mmc0: new ultra high speed DDR50 SDHC
->> >> card at address aaaa [  362.782900] mmcblk0: mmc0:aaaa SL08G 7.40 GiB
->> >> [  362.805996]
->> >> mmcblk0: error -84 transferring data, sector 0, nr 8, cmd response
->> >> 0x900, card status 0xb00 ^^^^ occasionally see this error but because
->> >> retries occur at the block level it still works [  362.931689]
->> >> mmcblk0: p1
->> >>
->> >> Again with 9faac7b reverted and some extra debugging:
->> >> [   33.823170] mmc0: host does not support reading read-only switch,
->> >> assuming write-enable
->> >> [   33.847185] mmc0: new ultra high speed DDR50 SDHC card at address aaaa
->> >> [   33.856063] mmcblk0: mmc0:aaaa SL08G 7.40 GiB
->> >> [   33.874227] mmcblk0: error -84 transferring data, sector 0, nr 8,
->> >> cmd response 0x900, card status 0xb00
->> >> [   33.896829] mmcblk0: error -84 transferring data, sector 0, nr 8,
->> >> cmd response 0x900, card status 0xb00
->> >> [   33.906312] mmcblk0: error -84 transferring data, sector 0, nr 8,
->> >> cmd response 0x900, card status 0xb00
->> >> [   34.022117] mmcblk0: error 0 transferring data, sector 0, nr 8, cmd
->> >> response 0x900, card status 0xb00
->> >> ^^^^ added debugging shows retries at block level and eventually all is fine
->> >> [   34.031500]  mmcblk0: p1
->> >>
->> >> So far every DDR50 card I have (several Kingston and Sandisk card
->> >> models) behaves like this.
->> >>
->> >> I tried adding a settling delay when VSELECT was changed in the
->> >> sdhci-esdhc- imx driver and that didn't help.
->> >>
->> > Hi Tim
->> >
->> > Which imx6 soc do you use?  From your log, I notice you use the MAN tuning
->> method, so I guess you use imx6qdl.
->> >
->> > imx usdhc has an IC bug. For the tuning procedure, the first pass tuning delay
->> value must bigger than 10.
->> > Due to DDR50 timing is not that rigorous, so maybe even when we just add 1
->> delay cell, tuning can pass, but this trigger the internal IC bug, then you meet
->> the following issue just as you meet:
->> >        sdhci-esdhc-imx 2198000.usdhc: tuning failed at 0x7f
->> ( min=127/max=128)
->> >
->>
->> Haibo,
->>
->> Thanks for the response.
->>
->> Yes, this issue is seen on the IMX6DQ and IMX6SDL. Can you point me to
->> information on this bug? I don't see it in the latest IMX6DQCE.pdf errata
->> document.
->>
->> > So you can change the ESDHC_TUNE_CTRL_MIN from 0 to 15, then you can
->> see the DDR50 tuning return to normal.
->> >
->> > For the STD tuning method, you can add the property 'fsl,tuning-start-tap =
->> <20>' in dts.
->> >
->> > All this make the first trying tuning delay value larger than 10, to avoid  the
->> internal IMX USDHC IC bug.
->> >
->> > SDR104 card do not has this issue, because for SDR104 card, the first pass
->> tuning value normally larger than 10.
->> >
->>
->> unfortunately, this does not resolve the issue. I tried ESDHC_TUNE_CTRL_MIN
->> of 15, 20, and 30 and they all produce the same issue around 20% of insertions:
->> sdhci-esdhc-imx 2198000.usdhc: tunning failed at 0x7f ret -84
->>
->> Here are some min/max tuning values from some various cards I have:
->> - Samsung SL08G DDR50: min=8 max=37
->> - Kingston SD8GB DDR50: min=8 max=36
->> - Sandisk SS16G DDR50: min=10 max=37
->> - Sandisk SU08G DDR50: min=9 max=36
->> - Samsung Pro 00000 SDR104: min=14 max=26
->> - Kingston SDR104 SDCIT: min=25 max=36
->>
->> All of the DDR50 cards above fail in the same way appx 20% of insertions.
->>
->> Has anyone else been able to confirm they see the same issue on IMX6 boards
->> with UHS-I support and DDR50?
->
-> Hi Tim,
->
-> I debug this issue these days, and find this is the I/O timing issue.
->
-> Can you try to improve the pad I/O drive strength for DDR50 card? You can apply the following patch:
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 6a1328e..4c3aeac 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -848,6 +848,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
->
->         switch (uhs) {
->         case MMC_TIMING_UHS_SDR50:
-> +       case MMC_TIMING_UHS_DDR50:
->                 pinctrl = imx_data->pins_100mhz;
->                 break;
->         case MMC_TIMING_UHS_SDR104:
->
-> If this patch also test pass on your side, I will upstream it.
->
-
-Haibo,
-
-Yes, this does resolve the issue where DDR50 cards fail to tune 20% of
-the time. Using the 100mhz pinctrl's for DDR50 passes tuning every
-time with a min=1 and max=29 (as opposed to a min=8 max=36 I was
-seeing on previous successes).
-
-Please submit a patch if you don't mind. Also, stable@vger.kernel.org
-should be cc'd on the patch and the patch should be applied all the
-way back to Linux v4.4 where DDR50 tuning first appeared with 9faac7b
-mmc: sdhci: enable tuning for DDR50.
-
-> By the way, I just confirm with our IC guys, the IC bug I mentioned in the before mail do not impact the software tuning method (MAN_TUNING), this IC bug just impact the STD_TUNING, sorry for the mislead.
->
-
-Ok, thanks for the info. Note still that I don't see anything in the
-IMX6 errata regarding thisb.
-
-Regards,
-
-Tim
+SXQgbG9va3MgbGlrZSAmdWRldi0+Y21kcl9sb2NrIHNob3VsZCBiZSByZWxlYXNlZCBhdCBsaW5l
+IDUxMiBpZiBpdCBoYXMKbm90IGJlZW4gcmVsZWFzZWQgb3RoZXJ3aXNlLiAgVGhlIGxvY2sgd2Fz
+IHRha2VuIGF0IGxpbmUgNDM4LgoKanVsaWEKCi0tLS0tLS0tLS0gRm9yd2FyZGVkIG1lc3NhZ2Ug
+LS0tLS0tLS0tLQpEYXRlOiBGcmksIDE0IEFwciAyMDE3IDIyOjIxOjQ0ICswODAwCkZyb206IGti
+dWlsZCB0ZXN0IHJvYm90IDxmZW5nZ3Vhbmcud3VAaW50ZWwuY29tPgpUbzoga2J1aWxkQDAxLm9y
+ZwpDYzogSnVsaWEgTGF3YWxsIDxqdWxpYS5sYXdhbGxAbGlwNi5mcj4KU3ViamVjdDogUmU6IFtQ
+QVRDSCAwNC8yMl0gdGFyZ2V0OiBNYWtlIHVzZSBvZiB0aGUgbmV3IHNnX21hcCBmdW5jdGlvbiBh
+dCAxNgogICAgY2FsbCBzaXRlcwoKSGkgTG9nYW4sCgpbYXV0byBidWlsZCB0ZXN0IFdBUk5JTkcg
+b24gc2NzaS9mb3ItbmV4dF0KW2Fsc28gYnVpbGQgdGVzdCBXQVJOSU5HIG9uIHY0LjExLXJjNl0K
+W2Nhbm5vdCBhcHBseSB0byBuZXh0LTIwMTcwNDEzXQpbaWYgeW91ciBwYXRjaCBpcyBhcHBsaWVk
+IHRvIHRoZSB3cm9uZyBnaXQgdHJlZSwgcGxlYXNlIGRyb3AgdXMgYSBub3RlIHRvIGhlbHAgaW1w
+cm92ZSB0aGUgc3lzdGVtXQoKdXJsOiAgICBodHRwczovL2dpdGh1Yi5jb20vMGRheS1jaS9saW51
+eC9jb21taXRzL0xvZ2FuLUd1bnRob3JwZS9JbnRyb2R1Y2UtY29tbW9uLXNjYXR0ZXJsaXN0LW1h
+cC1mdW5jdGlvbi8yMDE3MDQxNC0xNDI1MTgKYmFzZTogICBodHRwczovL2dpdC5rZXJuZWwub3Jn
+L3B1Yi9zY20vbGludXgva2VybmVsL2dpdC9qZWpiL3Njc2kuZ2l0IGZvci1uZXh0Cjo6Ojo6OiBi
+cmFuY2ggZGF0ZTogOCBob3VycyBhZ28KOjo6Ojo6IGNvbW1pdCBkYXRlOiA4IGhvdXJzIGFnbwoK
+Pj4gZHJpdmVycy90YXJnZXQvdGFyZ2V0X2NvcmVfdXNlci5jOjUxMjoyLTg6IHByZWNlZGluZyBs
+b2NrIG9uIGxpbmUgNDM4CiAgIGRyaXZlcnMvdGFyZ2V0L3RhcmdldF9jb3JlX3VzZXIuYzo1MTI6
+Mi04OiBwcmVjZWRpbmcgbG9jayBvbiBsaW5lIDQ3MQoKZ2l0IHJlbW90ZSBhZGQgbGludXgtcmV2
+aWV3IGh0dHBzOi8vZ2l0aHViLmNvbS8wZGF5LWNpL2xpbnV4CmdpdCByZW1vdGUgdXBkYXRlIGxp
+bnV4LXJldmlldwpnaXQgY2hlY2tvdXQgNzgwODIxMzRlN2FmZGM1OWQ3NDRlYjhkMmRlZjVjNTg4
+ZTg5YzM3OAp2aW0gKzUxMiBkcml2ZXJzL3RhcmdldC90YXJnZXRfY29yZV91c2VyLmMKCjdjOWU3
+YTZmIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDMyICAJCQkJc2l6ZW9mKHN0cnVjdCB0
+Y211X2NtZF9lbnRyeSkpOwo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQz
+MyAgCWNvbW1hbmRfc2l6ZSA9IGJhc2VfY29tbWFuZF9zaXplCjdjOWU3YTZmIEFuZHkgR3JvdmVy
+ICAgICAgMjAxNC0xMC0wMSAgNDM0ICAJCSsgcm91bmRfdXAoc2NzaV9jb21tYW5kX3NpemUoc2Vf
+Y21kLT50X3Rhc2tfY2RiKSwgVENNVV9PUF9BTElHTl9TSVpFKTsKN2M5ZTdhNmYgQW5keSBHcm92
+ZXIgICAgICAyMDE0LTEwLTAxICA0MzUKN2M5ZTdhNmYgQW5keSBHcm92ZXIgICAgICAyMDE0LTEw
+LTAxICA0MzYgIAlXQVJOX09OKGNvbW1hbmRfc2l6ZSAmIChUQ01VX09QX0FMSUdOX1NJWkUtMSkp
+Owo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQzNwo3YzllN2E2ZiBBbmR5
+IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgQDQzOCAgCXNwaW5fbG9ja19pcnEoJnVkZXYtPmNtZHJf
+bG9jayk7CjdjOWU3YTZmIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDM5CjdjOWU3YTZm
+IEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDQwICAJbWIgPSB1ZGV2LT5tYl9hZGRyOwo3
+YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ0MSAgCWNtZF9oZWFkID0gbWIt
+PmNtZF9oZWFkICUgdWRldi0+Y21kcl9zaXplOyAvKiBVQU0gKi8KMjY0MTg2NDkgU2hlbmcgWWFu
+ZyAgICAgICAyMDE2LTAyLTI2ICA0NDIgIAlkYXRhX2xlbmd0aCA9IHNlX2NtZC0+ZGF0YV9sZW5n
+dGg7CjI2NDE4NjQ5IFNoZW5nIFlhbmcgICAgICAgMjAxNi0wMi0yNiAgNDQzICAJaWYgKHNlX2Nt
+ZC0+c2VfY21kX2ZsYWdzICYgU0NGX0JJREkpIHsKMjY0MTg2NDkgU2hlbmcgWWFuZyAgICAgICAy
+MDE2LTAyLTI2ICA0NDQgIAkJQlVHX09OKCEoc2VfY21kLT50X2JpZGlfZGF0YV9zZyAmJiBzZV9j
+bWQtPnRfYmlkaV9kYXRhX25lbnRzKSk7CjI2NDE4NjQ5IFNoZW5nIFlhbmcgICAgICAgMjAxNi0w
+Mi0yNiAgNDQ1ICAJCWRhdGFfbGVuZ3RoICs9IHNlX2NtZC0+dF9iaWRpX2RhdGFfc2ctPmxlbmd0
+aDsKMjY0MTg2NDkgU2hlbmcgWWFuZyAgICAgICAyMDE2LTAyLTI2ICA0NDYgIAl9CjU1NDYxN2Iy
+IEFuZHkgR3JvdmVyICAgICAgMjAxNi0wOC0yNSAgNDQ3ICAJaWYgKChjb21tYW5kX3NpemUgPiAo
+dWRldi0+Y21kcl9zaXplIC8gMikpIHx8CjU1NDYxN2IyIEFuZHkgR3JvdmVyICAgICAgMjAxNi0w
+OC0yNSAgNDQ4ICAJICAgIGRhdGFfbGVuZ3RoID4gdWRldi0+ZGF0YV9zaXplKSB7CjU1NDYxN2Iy
+IEFuZHkgR3JvdmVyICAgICAgMjAxNi0wOC0yNSAgNDQ5ICAJCXByX3dhcm4oIlRDTVU6IFJlcXVl
+c3Qgb2Ygc2l6ZSAlenUvJXp1IGlzIHRvbyBiaWcgZm9yICV1LyV6dSAiCjNkOWI5NTU1IEFuZHkg
+R3JvdmVyICAgICAgMjAxNi0wOC0yNSAgNDUwICAJCQkiY21kIHJpbmcvZGF0YSBhcmVhXG4iLCBj
+b21tYW5kX3NpemUsIGRhdGFfbGVuZ3RoLAo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQt
+MTAtMDEgIDQ1MSAgCQkJdWRldi0+Y21kcl9zaXplLCB1ZGV2LT5kYXRhX3NpemUpOwo1NTQ2MTdi
+MiBBbmR5IEdyb3ZlciAgICAgIDIwMTYtMDgtMjUgIDQ1MiAgCQlzcGluX3VubG9ja19pcnEoJnVk
+ZXYtPmNtZHJfbG9jayk7CjU1NDYxN2IyIEFuZHkgR3JvdmVyICAgICAgMjAxNi0wOC0yNSAgNDUz
+ICAJCXJldHVybiBUQ01fSU5WQUxJRF9DREJfRklFTEQ7CjU1NDYxN2IyIEFuZHkgR3JvdmVyICAg
+ICAgMjAxNi0wOC0yNSAgNDU0ICAJfQo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAt
+MDEgIDQ1NQoyNjQxODY0OSBTaGVuZyBZYW5nICAgICAgIDIwMTYtMDItMjYgIDQ1NiAgCXdoaWxl
+ICghaXNfcmluZ19zcGFjZV9hdmFpbCh1ZGV2LCBjb21tYW5kX3NpemUsIGRhdGFfbGVuZ3RoKSkg
+ewo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ1NyAgCQlpbnQgcmV0Owo3
+YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ1OCAgCQlERUZJTkVfV0FJVChf
+X3dhaXQpOwo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ1OQo3YzllN2E2
+ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ2MCAgCQlwcmVwYXJlX3RvX3dhaXQoJnVk
+ZXYtPndhaXRfY21kciwgJl9fd2FpdCwgVEFTS19JTlRFUlJVUFRJQkxFKTsKN2M5ZTdhNmYgQW5k
+eSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0NjEKN2M5ZTdhNmYgQW5keSBHcm92ZXIgICAgICAy
+MDE0LTEwLTAxICA0NjIgIAkJcHJfZGVidWcoInNsZWVwaW5nIGZvciByaW5nIHNwYWNlXG4iKTsK
+N2M5ZTdhNmYgQW5keSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0NjMgIAkJc3Bpbl91bmxvY2tf
+aXJxKCZ1ZGV2LT5jbWRyX2xvY2spOwo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAt
+MDEgIDQ2NCAgCQlyZXQgPSBzY2hlZHVsZV90aW1lb3V0KG1zZWNzX3RvX2ppZmZpZXMoVENNVV9U
+SU1FX09VVCkpOwo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ2NSAgCQlm
+aW5pc2hfd2FpdCgmdWRldi0+d2FpdF9jbWRyLCAmX193YWl0KTsKN2M5ZTdhNmYgQW5keSBHcm92
+ZXIgICAgICAyMDE0LTEwLTAxICA0NjYgIAkJaWYgKCFyZXQpIHsKN2M5ZTdhNmYgQW5keSBHcm92
+ZXIgICAgICAyMDE0LTEwLTAxICA0NjcgIAkJCXByX3dhcm4oInRjbXU6IGNvbW1hbmQgdGltZWQg
+b3V0XG4iKTsKMDJlYjkyNGYgQW5keSBHcm92ZXIgICAgICAyMDE2LTEwLTA2ICA0NjggIAkJCXJl
+dHVybiBUQ01fTE9HSUNBTF9VTklUX0NPTU1VTklDQVRJT05fRkFJTFVSRTsKN2M5ZTdhNmYgQW5k
+eSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0NjkgIAkJfQo3YzllN2E2ZiBBbmR5IEdyb3ZlciAg
+ICAgIDIwMTQtMTAtMDEgIDQ3MAo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEg
+IDQ3MSAgCQlzcGluX2xvY2tfaXJxKCZ1ZGV2LT5jbWRyX2xvY2spOwo3YzllN2E2ZiBBbmR5IEdy
+b3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ3Mgo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQt
+MTAtMDEgIDQ3MyAgCQkvKiBXZSBkcm9wcGVkIGNtZHJfbG9jaywgY21kX2hlYWQgaXMgc3RhbGUg
+Ki8KN2M5ZTdhNmYgQW5keSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0NzQgIAkJY21kX2hlYWQg
+PSBtYi0+Y21kX2hlYWQgJSB1ZGV2LT5jbWRyX3NpemU7IC8qIFVBTSAqLwo3YzllN2E2ZiBBbmR5
+IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDQ3NSAgCX0KN2M5ZTdhNmYgQW5keSBHcm92ZXIgICAg
+ICAyMDE0LTEwLTAxICA0NzYKZjU2NTc0YTIgQW5keSBHcm92ZXIgICAgICAyMDE0LTEwLTAyICA0
+NzcgIAkvKiBJbnNlcnQgYSBQQUQgaWYgZW5kLW9mLXJpbmcgc3BhY2UgaXMgdG9vIHNtYWxsICov
+CmY1NjU3NGEyIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMiAgNDc4ICAJaWYgKGhlYWRfdG9f
+ZW5kKGNtZF9oZWFkLCB1ZGV2LT5jbWRyX3NpemUpIDwgY29tbWFuZF9zaXplKSB7CmY1NjU3NGEy
+IEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMiAgNDc5ICAJCXNpemVfdCBwYWRfc2l6ZSA9IGhl
+YWRfdG9fZW5kKGNtZF9oZWFkLCB1ZGV2LT5jbWRyX3NpemUpOwpmNTY1NzRhMiBBbmR5IEdyb3Zl
+ciAgICAgIDIwMTQtMTAtMDIgIDQ4MAo3YzllN2E2ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAt
+MDEgIDQ4MSAgCQllbnRyeSA9ICh2b2lkICopIG1iICsgQ01EUl9PRkYgKyBjbWRfaGVhZDsKN2M5
+ZTdhNmYgQW5keSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0ODIgIAkJdGNtdV9mbHVzaF9kY2Fj
+aGVfcmFuZ2UoZW50cnksIHNpemVvZigqZW50cnkpKTsKMGFkNDZhZjggQW5keSBHcm92ZXIgICAg
+ICAyMDE1LTA0LTE0ICA0ODMgIAkJdGNtdV9oZHJfc2V0X29wKCZlbnRyeS0+aGRyLmxlbl9vcCwg
+VENNVV9PUF9QQUQpOwowYWQ0NmFmOCBBbmR5IEdyb3ZlciAgICAgIDIwMTUtMDQtMTQgIDQ4NCAg
+CQl0Y211X2hkcl9zZXRfbGVuKCZlbnRyeS0+aGRyLmxlbl9vcCwgcGFkX3NpemUpOwowYWQ0NmFm
+OCBBbmR5IEdyb3ZlciAgICAgIDIwMTUtMDQtMTQgIDQ4NSAgCQllbnRyeS0+aGRyLmNtZF9pZCA9
+IDA7IC8qIG5vdCB1c2VkIGZvciBQQUQgKi8KMGFkNDZhZjggQW5keSBHcm92ZXIgICAgICAyMDE1
+LTA0LTE0ICA0ODYgIAkJZW50cnktPmhkci5rZmxhZ3MgPSAwOwowYWQ0NmFmOCBBbmR5IEdyb3Zl
+ciAgICAgIDIwMTUtMDQtMTQgIDQ4NyAgCQllbnRyeS0+aGRyLnVmbGFncyA9IDA7CjdjOWU3YTZm
+IEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDg4CjdjOWU3YTZmIEFuZHkgR3JvdmVyICAg
+ICAgMjAxNC0xMC0wMSAgNDg5ICAJCVVQREFURV9IRUFEKG1iLT5jbWRfaGVhZCwgcGFkX3NpemUs
+IHVkZXYtPmNtZHJfc2l6ZSk7CjdjOWU3YTZmIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAg
+NDkwCjdjOWU3YTZmIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDkxICAJCWNtZF9oZWFk
+ID0gbWItPmNtZF9oZWFkICUgdWRldi0+Y21kcl9zaXplOyAvKiBVQU0gKi8KN2M5ZTdhNmYgQW5k
+eSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0OTIgIAkJV0FSTl9PTihjbWRfaGVhZCAhPSAwKTsK
+N2M5ZTdhNmYgQW5keSBHcm92ZXIgICAgICAyMDE0LTEwLTAxICA0OTMgIAl9CjdjOWU3YTZmIEFu
+ZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDk0CjdjOWU3YTZmIEFuZHkgR3JvdmVyICAgICAg
+MjAxNC0xMC0wMSAgNDk1ICAJZW50cnkgPSAodm9pZCAqKSBtYiArIENNRFJfT0ZGICsgY21kX2hl
+YWQ7CjdjOWU3YTZmIEFuZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNDk2ICAJdGNtdV9mbHVz
+aF9kY2FjaGVfcmFuZ2UoZW50cnksIHNpemVvZigqZW50cnkpKTsKMGFkNDZhZjggQW5keSBHcm92
+ZXIgICAgICAyMDE1LTA0LTE0ICA0OTcgIAl0Y211X2hkcl9zZXRfb3AoJmVudHJ5LT5oZHIubGVu
+X29wLCBUQ01VX09QX0NNRCk7CjBhZDQ2YWY4IEFuZHkgR3JvdmVyICAgICAgMjAxNS0wNC0xNCAg
+NDk4ICAJdGNtdV9oZHJfc2V0X2xlbigmZW50cnktPmhkci5sZW5fb3AsIGNvbW1hbmRfc2l6ZSk7
+CjBhZDQ2YWY4IEFuZHkgR3JvdmVyICAgICAgMjAxNS0wNC0xNCAgNDk5ICAJZW50cnktPmhkci5j
+bWRfaWQgPSB0Y211X2NtZC0+Y21kX2lkOwowYWQ0NmFmOCBBbmR5IEdyb3ZlciAgICAgIDIwMTUt
+MDQtMTQgIDUwMCAgCWVudHJ5LT5oZHIua2ZsYWdzID0gMDsKMGFkNDZhZjggQW5keSBHcm92ZXIg
+ICAgICAyMDE1LTA0LTE0ICA1MDEgIAllbnRyeS0+aGRyLnVmbGFncyA9IDA7CjdjOWU3YTZmIEFu
+ZHkgR3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNTAyCjI2NDE4NjQ5IFNoZW5nIFlhbmcgICAgICAg
+MjAxNi0wMi0yNiAgNTAzICAJYml0bWFwX2NvcHkob2xkX2JpdG1hcCwgdWRldi0+ZGF0YV9iaXRt
+YXAsIERBVEFfQkxPQ0tfQklUUyk7CjI2NDE4NjQ5IFNoZW5nIFlhbmcgICAgICAgMjAxNi0wMi0y
+NiAgNTA0CjNkOWI5NTU1IEFuZHkgR3JvdmVyICAgICAgMjAxNi0wOC0yNSAgNTA1ICAJLyogSGFu
+ZGxlIGFsbG9jYXRpbmcgc3BhY2UgZnJvbSB0aGUgZGF0YSBhcmVhICovCjdjOWU3YTZmIEFuZHkg
+R3JvdmVyICAgICAgMjAxNC0xMC0wMSAgNTA2ICAJaW92ID0gJmVudHJ5LT5yZXEuaW92WzBdOwpm
+OTdlYzdkYiBJbGlhcyBUc2l0c2ltcGlzIDIwMTUtMDQtMjMgIDUwNyAgCWlvdl9jbnQgPSAwOwpl
+NDY0OGIwMSBJbGlhcyBUc2l0c2ltcGlzIDIwMTUtMDQtMjMgIDUwOCAgCWNvcHlfdG9fZGF0YV9h
+cmVhID0gKHNlX2NtZC0+ZGF0YV9kaXJlY3Rpb24gPT0gRE1BX1RPX0RFVklDRQplNDY0OGIwMSBJ
+bGlhcyBUc2l0c2ltcGlzIDIwMTUtMDQtMjMgIDUwOSAgCQl8fCBzZV9jbWQtPnNlX2NtZF9mbGFn
+cyAmIFNDRl9CSURJKTsKNzgwODIxMzQgTG9nYW4gR3VudGhvcnBlICAyMDE3LTA0LTEzICA1MTAg
+IAlpZiAoYWxsb2NfYW5kX3NjYXR0ZXJfZGF0YV9hcmVhKHVkZXYsIHNlX2NtZC0+dF9kYXRhX3Nn
+LAo3ODA4MjEzNCBMb2dhbiBHdW50aG9ycGUgIDIwMTctMDQtMTMgIDUxMSAgCQlzZV9jbWQtPnRf
+ZGF0YV9uZW50cywgJmlvdiwgJmlvdl9jbnQsIGNvcHlfdG9fZGF0YV9hcmVhKSkKNzgwODIxMzQg
+TG9nYW4gR3VudGhvcnBlICAyMDE3LTA0LTEzIEA1MTIgIAkJcmV0dXJuIFRDTV9PVVRfT0ZfUkVT
+T1VSQ0VTOwo3ODA4MjEzNCBMb2dhbiBHdW50aG9ycGUgIDIwMTctMDQtMTMgIDUxMwo3YzllN2E2
+ZiBBbmR5IEdyb3ZlciAgICAgIDIwMTQtMTAtMDEgIDUxNCAgCWVudHJ5LT5yZXEuaW92X2NudCA9
+IGlvdl9jbnQ7CjBhZDQ2YWY4IEFuZHkgR3JvdmVyICAgICAgMjAxNS0wNC0xNCAgNTE1ICAJZW50
+cnktPnJlcS5pb3ZfZGlmX2NudCA9IDA7CgotLS0KMC1EQVkga2VybmVsIHRlc3QgaW5mcmFzdHJ1
+Y3R1cmUgICAgICAgICAgICAgICAgT3BlbiBTb3VyY2UgVGVjaG5vbG9neSBDZW50ZXIKaHR0cHM6
+Ly9saXN0cy4wMS5vcmcvcGlwZXJtYWlsL2tidWlsZC1hbGwgICAgICAgICAgICAgICAgICAgSW50
+ZWwgQ29ycG9yYXRpb24KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Au
+b3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRl
+dmVsCg==
