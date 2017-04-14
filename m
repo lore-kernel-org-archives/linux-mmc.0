@@ -1,201 +1,142 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v4, 1/5] mmc: sdhci-of-esdhc: add peripheral clock support
-Date: Fri, 14 Apr 2017 05:20:42 +0000
-Message-ID: <DB6PR0401MB253621F0A568F543ADC5ED98F8050@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1491887431-31894-1-git-send-email-yangbo.lu@nxp.com>
- <1491887431-31894-2-git-send-email-yangbo.lu@nxp.com>
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
+Date: Fri, 14 Apr 2017 07:41:20 +0000
+Message-ID: <VI1PR0401MB2335F1B3BD74C219734BA0FA90050@VI1PR0401MB2335.eurprd04.prod.outlook.com>
+References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
+ <20170404220040.GA2997@fen-net.de>
+ <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
+ <AM4PR0401MB23245B9B41978D09DAD9FD8D90000@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+ <CAJ+vNU3gRG3K94V31EG1ufRsngsYG6hWq_97P2szZ2oATOd3=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0043.outbound.protection.outlook.com ([104.47.2.43]:13728
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+Received: from mail-eopbgr00062.outbound.protection.outlook.com ([40.107.0.62]:52320
+        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751540AbdDNFUq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Apr 2017 01:20:46 -0400
-In-Reply-To: <1491887431-31894-2-git-send-email-yangbo.lu@nxp.com>
+        id S1751492AbdDNHlZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 Apr 2017 03:41:25 -0400
+In-Reply-To: <CAJ+vNU3gRG3K94V31EG1ufRsngsYG6hWq_97P2szZ2oATOd3=g@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
+To: Tim Harvey <tharvey@gateworks.com>
+Cc: David Haworth <dave@fen-net.de>, Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Weijun Yang <york.yang@csr.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Adrian,
-
-
-> -----Original Message-----
-> From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
-> Sent: Tuesday, April 11, 2017 1:10 PM
-> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Adrian Hunter
-> Cc: Xiaobo Xie; Y.B. Lu
-> Subject: [v4, 1/5] mmc: sdhci-of-esdhc: add peripheral clock support
->=20
-> eSDHC could select peripheral clock or platform clock as clock source by
-> the PCS bit of eSDHC Control Register, and this bit couldn't be reset by
-> software reset for all. In default, the platform clock is used. But we
-> have to use peripheral clock since it has a higher frequency to support
-> eMMC
-> HS200 mode and SD UHS-I mode. This patch is to add peripheral clock
-> support and use it instead of platform clock if it's declared in eSDHC
-> dts node.
->=20
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> ---
-> Changes for v2:
-> 	- None
-> Changes for v3:
-> 	- None
-> Changes for v4:
-> 	- Added clk_put()
-> 	- Used udelay() to poll ESDHC_CLOCK_STABLE
-
-[Lu Yangbo-B47093] Could these changes address your comments? :)
-If yes, I think we can ask Uffe's help to merge these patches.
-
-Thanks a lot.
-
-- Yangbo Lu
-> ---
->  drivers/mmc/host/sdhci-esdhc.h    |  1 +
->  drivers/mmc/host/sdhci-of-esdhc.c | 72
-> +++++++++++++++++++++++++++++++++++++--
->  2 files changed, 71 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-
-> esdhc.h index ece8b37..5343fc0 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -54,6 +54,7 @@
->=20
->  /* Control Register for DMA transfer */
->  #define ESDHC_DMA_SYSCTL		0x40c
-> +#define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
->  #define ESDHC_DMA_SNOOP			0x00000040
->=20
->  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */ diff --git
-> a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index ff37e74..6d024b6 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -19,6 +19,7 @@
->  #include <linux/delay.h>
->  #include <linux/module.h>
->  #include <linux/sys_soc.h>
-> +#include <linux/clk.h>
->  #include <linux/mmc/host.h>
->  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
-> @@ -30,6 +31,7 @@ struct sdhci_esdhc {
->  	u8 vendor_ver;
->  	u8 spec_ver;
->  	bool quirk_incorrect_hostver;
-> +	unsigned int peripheral_clock;
->  };
->=20
->  /**
-> @@ -414,15 +416,25 @@ static int esdhc_of_enable_dma(struct sdhci_host
-> *host)  static unsigned int esdhc_of_get_max_clock(struct sdhci_host
-> *host)  {
->  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
->=20
-> -	return pltfm_host->clock;
-> +	if (esdhc->peripheral_clock)
-> +		return esdhc->peripheral_clock;
-> +	else
-> +		return pltfm_host->clock;
->  }
->=20
->  static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)  {
->  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
-> +	unsigned int clock;
->=20
-> -	return pltfm_host->clock / 256 / 16;
-> +	if (esdhc->peripheral_clock)
-> +		clock =3D esdhc->peripheral_clock;
-> +	else
-> +		clock =3D pltfm_host->clock;
-> +	return clock / 256 / 16;
->  }
->=20
->  static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
-> clock) @@ -512,6 +524,33 @@ static void esdhc_pltfm_set_bus_width(struct
-> sdhci_host *host, int width)
->  	sdhci_writel(host, ctrl, ESDHC_PROCTL);  }
->=20
-> +static void esdhc_clock_enable(struct sdhci_host *host, bool enable) {
-> +	u32 val;
-> +	ktime_t timeout;
-> +
-> +	val =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-> +
-> +	if (enable)
-> +		val |=3D ESDHC_CLOCK_SDCLKEN;
-> +	else
-> +		val &=3D ~ESDHC_CLOCK_SDCLKEN;
-> +
-> +	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
-> +
-> +	/* Wait max 20 ms */
-> +	timeout =3D ktime_add_ms(ktime_get(), 20);
-> +	val =3D ESDHC_CLOCK_STABLE;
-> +	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
-> +		if (ktime_after(ktime_get(), timeout)) {
-> +			pr_err("%s: Internal clock never stabilised.\n",
-> +				mmc_hostname(host->mmc));
-> +			break;
-> +		}
-> +		udelay(10);
-> +	}
-> +}
-> +
->  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
->  	sdhci_reset(host, mask);
-> @@ -613,6 +652,9 @@ static void esdhc_init(struct platform_device *pdev,
-> struct sdhci_host *host)  {
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_esdhc *esdhc;
-> +	struct device_node *np;
-> +	struct clk *clk;
-> +	u32 val;
->  	u16 host_ver;
->=20
->  	pltfm_host =3D sdhci_priv(host);
-> @@ -626,6 +668,32 @@ static void esdhc_init(struct platform_device *pdev,
-> struct sdhci_host *host)
->  		esdhc->quirk_incorrect_hostver =3D true;
->  	else
->  		esdhc->quirk_incorrect_hostver =3D false;
-> +
-> +	np =3D pdev->dev.of_node;
-> +	clk =3D of_clk_get(np, 0);
-> +	if (!IS_ERR(clk)) {
-> +		/*
-> +		 * esdhc->peripheral_clock would be assigned with a value
-> +		 * which is eSDHC base clock when use periperal clock.
-> +		 * For ls1046a, the clock value got by common clk API is
-> +		 * peripheral clock while the eSDHC base clock is 1/2
-> +		 * peripheral clock.
-> +		 */
-> +		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc"))
-> +			esdhc->peripheral_clock =3D clk_get_rate(clk) / 2;
-> +		else
-> +			esdhc->peripheral_clock =3D clk_get_rate(clk);
-> +
-> +		clk_put(clk);
-> +	}
-> +
-> +	if (esdhc->peripheral_clock) {
-> +		esdhc_clock_enable(host, false);
-> +		val =3D sdhci_readl(host, ESDHC_DMA_SYSCTL);
-> +		val |=3D ESDHC_PERIPHERAL_CLK_SEL;
-> +		sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
-> +		esdhc_clock_enable(host, true);
-> +	}
->  }
->=20
->  static int sdhci_esdhc_probe(struct platform_device *pdev)
-> --
-> 2.1.0.27.g96db324
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBUaW0gSGFydmV5IFttYWlsdG86
+dGhhcnZleUBnYXRld29ya3MuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBBcHJpbCAxMSwgMjAxNyAx
+MDoyMiBQTQ0KPiBUbzogQm91Z2ggQ2hlbiA8aGFpYm8uY2hlbkBueHAuY29tPg0KPiBDYzogRGF2
+aWQgSGF3b3J0aCA8ZGF2ZUBmZW4tbmV0LmRlPjsgTGludXggTU1DIExpc3QgPGxpbnV4LQ0KPiBt
+bWNAdmdlci5rZXJuZWwub3JnPjsgRmFiaW8gRXN0ZXZhbSA8ZmFiaW8uZXN0ZXZhbUBueHAuY29t
+PjsgVWxmDQo+IEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBXZWlqdW4gWWFuZyA8
+eW9yay55YW5nQGNzci5jb20+OyBBZHJpYW4NCj4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVs
+LmNvbT4NCj4gU3ViamVjdDogUmU6IElNWDYgRVNESEMgbW1jIHdpdGggVUhTLUkgb2NjYXNpb25h
+bCBmYWlsdXJlIHdpdGggRERSNTAgY2FyZHMNCj4gDQo+IE9uIFR1ZSwgQXByIDExLCAyMDE3IGF0
+IDI6MjggQU0sIEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4gd3JvdGU6DQo+ID4+IC0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IDxzbmlwPg0KPiA+Pg0KPiA+PiBJJ3ZlIG1vdmVk
+IG9uIHRvIDQuMTEtcmM1IGFuZCBub3RpY2UgdGhhdCBJJ20gYWx3YXlzIHNlZWluZyB0aGF0IG9u
+IGENCj4gPj4gZmFpbHVyZSB0aGUgaW14IHNkaGMgbm90IGFibGUgdG8gZGV0ZXJtaW5lIGEgbWlu
+L21heCB0dW5pbmcgZGVsYXk6DQo+ID4+DQo+ID4+IDQuMTEuMC1yYzU6DQo+ID4+IFsgICA0OC44
+MTIzODFdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkDQo+ID4+IFsgICA0OS43OTMzOTJdIG1tYzA6
+IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsDQo+ID4+IGFz
+c3VtaW5nIHdyaXRlLWVuYWJsZQ0KPiA+PiBbICAgNDkuODEwMjk0XSBzZGhjaV9leGVjdXRlX3R1
+bmluZw0KPiA+PiBbICAgNDkuODEzNjEyXSBlc2RoY19leGVjdXRpbmdfdHVuaW5nDQo+ID4+IFsg
+ICA0OS45NjgxNTRdIHNkaGNpLWVzZGhjLWlteCAyMTk4MDAwLnVzZGhjOiB0dW5pbmcgZmFpbGVk
+IGF0IDB4N2YNCj4gPj4gcmV0IC01IChtaW49MTI3L21heD0xMjgpDQo+ID4+IF5eXl4gYWRkZWQg
+ZGVidWcgc2hvd3MgLUVJTyByZXR1cm5lZCBmcm9tIG1tY19zZW5kX3R1bmluZyBhbHRob3VnaA0K
+PiA+PiBJJ3ZlIGFsc28gc2VlbiAtODQgZ2V0IHJldHVybmVkDQo+ID4+IFsgICA0OS45ODA1NDBd
+IG1tYzA6IHR1bmluZyBleGVjdXRpb24gZmFpbGVkOiAtNQ0KPiA+PiBbICAgNDkuOTg0OTc0XSBt
+bWMwOiBkZHI1MCB0dW5pbmcgZmFpbGVkDQo+ID4+IFsgICA0OS45ODkwNjhdIG1tYzA6IG5ldyB1
+bHRyYSBoaWdoIHNwZWVkIEREUjUwIFNESEMgY2FyZCBhdCBhZGRyZXNzIGFhYWENCj4gPj4gWyAg
+IDQ5Ljk5OTg0NF0gbW1jYmxrMDogbW1jMDphYWFhIFNMMDhHIDcuNDAgR2lCDQo+ID4+DQo+ID4+
+IEkndmUgYWxzbyBmb3VuZCB0aGF0IGlmIEkgcmV2ZXJ0ICc5ZmFhYzdiIG1tYzogc2RoY2k6IGVu
+YWJsZSB0dW5pbmcgZm9yIEREUjUwJw0KPiA+PiB0aHVzIHNraXBwaW5nIHRoZSB0dW5pbmcgdGhl
+IGlzc3VlIGdvZXMgYXdheSBob3dldmVyIG5vdGUgdGhhdA0KPiA+PiBvY2Nhc2lvbmFsbHkgSSBk
+byBzZWUgYSB0cmFuc2ZlciBlcnJvciB0aGF0IHBlcmhhcHMgaXMgcmV0cmllZCBbDQo+ID4+IDM2
+MS4wNjc3NjNdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkIFsgIDM2MS40MTI3MzJdIG1tYzA6IGhv
+c3QgZG9lcw0KPiA+PiBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsIGFzc3Vt
+aW5nIHdyaXRlLWVuYWJsZSBbDQo+ID4+IDM2MS40Mjk3MTldIG1tYzA6IG5ldyB1bHRyYSBoaWdo
+IHNwZWVkIEREUjUwIFNESEMgY2FyZCBhdCBhZGRyZXNzDQo+ID4+IGFhYWEgWyAgMzYxLjQ0MzA2
+MF0gbW1jYmxrMDogbW1jMDphYWFhIFNMMDhHIDcuNDAgR2lCIFsgIDM2MS40NjU2NThdDQo+ID4+
+IG1tY2JsazA6IHAxIFsgIDM2Mi40MjIzMzVdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkIFsgIDM2
+Mi43NTI3MTldDQo+ID4+IG1tYzA6IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQt
+b25seSBzd2l0Y2gsIGFzc3VtaW5nDQo+ID4+IHdyaXRlLWVuYWJsZSBbICAzNjIuNzY5Njc1XSBt
+bWMwOiBuZXcgdWx0cmEgaGlnaCBzcGVlZCBERFI1MCBTREhDDQo+ID4+IGNhcmQgYXQgYWRkcmVz
+cyBhYWFhIFsgIDM2Mi43ODI5MDBdIG1tY2JsazA6IG1tYzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0K
+PiA+PiBbICAzNjIuODA1OTk2XQ0KPiA+PiBtbWNibGswOiBlcnJvciAtODQgdHJhbnNmZXJyaW5n
+IGRhdGEsIHNlY3RvciAwLCBuciA4LCBjbWQgcmVzcG9uc2UNCj4gPj4gMHg5MDAsIGNhcmQgc3Rh
+dHVzIDB4YjAwIF5eXl4gb2NjYXNpb25hbGx5IHNlZSB0aGlzIGVycm9yIGJ1dCBiZWNhdXNlDQo+
+ID4+IHJldHJpZXMgb2NjdXIgYXQgdGhlIGJsb2NrIGxldmVsIGl0IHN0aWxsIHdvcmtzIFsgIDM2
+Mi45MzE2ODldDQo+ID4+IG1tY2JsazA6IHAxDQo+ID4+DQo+ID4+IEFnYWluIHdpdGggOWZhYWM3
+YiByZXZlcnRlZCBhbmQgc29tZSBleHRyYSBkZWJ1Z2dpbmc6DQo+ID4+IFsgICAzMy44MjMxNzBd
+IG1tYzA6IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsDQo+
+ID4+IGFzc3VtaW5nIHdyaXRlLWVuYWJsZQ0KPiA+PiBbICAgMzMuODQ3MTg1XSBtbWMwOiBuZXcg
+dWx0cmEgaGlnaCBzcGVlZCBERFI1MCBTREhDIGNhcmQgYXQgYWRkcmVzcyBhYWFhDQo+ID4+IFsg
+ICAzMy44NTYwNjNdIG1tY2JsazA6IG1tYzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0KPiA+PiBbICAg
+MzMuODc0MjI3XSBtbWNibGswOiBlcnJvciAtODQgdHJhbnNmZXJyaW5nIGRhdGEsIHNlY3RvciAw
+LCBuciA4LA0KPiA+PiBjbWQgcmVzcG9uc2UgMHg5MDAsIGNhcmQgc3RhdHVzIDB4YjAwDQo+ID4+
+IFsgICAzMy44OTY4MjldIG1tY2JsazA6IGVycm9yIC04NCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2Vj
+dG9yIDAsIG5yIDgsDQo+ID4+IGNtZCByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMgMHhiMDAN
+Cj4gPj4gWyAgIDMzLjkwNjMxMl0gbW1jYmxrMDogZXJyb3IgLTg0IHRyYW5zZmVycmluZyBkYXRh
+LCBzZWN0b3IgMCwgbnIgOCwNCj4gPj4gY21kIHJlc3BvbnNlIDB4OTAwLCBjYXJkIHN0YXR1cyAw
+eGIwMA0KPiA+PiBbICAgMzQuMDIyMTE3XSBtbWNibGswOiBlcnJvciAwIHRyYW5zZmVycmluZyBk
+YXRhLCBzZWN0b3IgMCwgbnIgOCwgY21kDQo+ID4+IHJlc3BvbnNlIDB4OTAwLCBjYXJkIHN0YXR1
+cyAweGIwMA0KPiA+PiBeXl5eIGFkZGVkIGRlYnVnZ2luZyBzaG93cyByZXRyaWVzIGF0IGJsb2Nr
+IGxldmVsIGFuZCBldmVudHVhbGx5IGFsbCBpcyBmaW5lDQo+ID4+IFsgICAzNC4wMzE1MDBdICBt
+bWNibGswOiBwMQ0KPiA+Pg0KPiA+PiBTbyBmYXIgZXZlcnkgRERSNTAgY2FyZCBJIGhhdmUgKHNl
+dmVyYWwgS2luZ3N0b24gYW5kIFNhbmRpc2sgY2FyZA0KPiA+PiBtb2RlbHMpIGJlaGF2ZXMgbGlr
+ZSB0aGlzLg0KPiA+Pg0KPiA+PiBJIHRyaWVkIGFkZGluZyBhIHNldHRsaW5nIGRlbGF5IHdoZW4g
+VlNFTEVDVCB3YXMgY2hhbmdlZCBpbiB0aGUNCj4gPj4gc2RoY2ktZXNkaGMtIGlteCBkcml2ZXIg
+YW5kIHRoYXQgZGlkbid0IGhlbHAuDQo+ID4+DQo+ID4gSGkgVGltDQo+ID4NCj4gPiBXaGljaCBp
+bXg2IHNvYyBkbyB5b3UgdXNlPyAgRnJvbSB5b3VyIGxvZywgSSBub3RpY2UgeW91IHVzZSB0aGUg
+TUFOIHR1bmluZw0KPiBtZXRob2QsIHNvIEkgZ3Vlc3MgeW91IHVzZSBpbXg2cWRsLg0KPiA+DQo+
+ID4gaW14IHVzZGhjIGhhcyBhbiBJQyBidWcuIEZvciB0aGUgdHVuaW5nIHByb2NlZHVyZSwgdGhl
+IGZpcnN0IHBhc3MgdHVuaW5nIGRlbGF5DQo+IHZhbHVlIG11c3QgYmlnZ2VyIHRoYW4gMTAuDQo+
+ID4gRHVlIHRvIEREUjUwIHRpbWluZyBpcyBub3QgdGhhdCByaWdvcm91cywgc28gbWF5YmUgZXZl
+biB3aGVuIHdlIGp1c3QgYWRkIDENCj4gZGVsYXkgY2VsbCwgdHVuaW5nIGNhbiBwYXNzLCBidXQg
+dGhpcyB0cmlnZ2VyIHRoZSBpbnRlcm5hbCBJQyBidWcsIHRoZW4geW91IG1lZXQNCj4gdGhlIGZv
+bGxvd2luZyBpc3N1ZSBqdXN0IGFzIHlvdSBtZWV0Og0KPiA+ICAgICAgICBzZGhjaS1lc2RoYy1p
+bXggMjE5ODAwMC51c2RoYzogdHVuaW5nIGZhaWxlZCBhdCAweDdmDQo+ICggbWluPTEyNy9tYXg9
+MTI4KQ0KPiA+DQo+IA0KPiBIYWlibywNCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHJlc3BvbnNlLg0K
+PiANCj4gWWVzLCB0aGlzIGlzc3VlIGlzIHNlZW4gb24gdGhlIElNWDZEUSBhbmQgSU1YNlNETC4g
+Q2FuIHlvdSBwb2ludCBtZSB0bw0KPiBpbmZvcm1hdGlvbiBvbiB0aGlzIGJ1Zz8gSSBkb24ndCBz
+ZWUgaXQgaW4gdGhlIGxhdGVzdCBJTVg2RFFDRS5wZGYgZXJyYXRhDQo+IGRvY3VtZW50Lg0KPiAN
+Cj4gPiBTbyB5b3UgY2FuIGNoYW5nZSB0aGUgRVNESENfVFVORV9DVFJMX01JTiBmcm9tIDAgdG8g
+MTUsIHRoZW4geW91IGNhbg0KPiBzZWUgdGhlIEREUjUwIHR1bmluZyByZXR1cm4gdG8gbm9ybWFs
+Lg0KPiA+DQo+ID4gRm9yIHRoZSBTVEQgdHVuaW5nIG1ldGhvZCwgeW91IGNhbiBhZGQgdGhlIHBy
+b3BlcnR5ICdmc2wsdHVuaW5nLXN0YXJ0LXRhcCA9DQo+IDwyMD4nIGluIGR0cy4NCj4gPg0KPiA+
+IEFsbCB0aGlzIG1ha2UgdGhlIGZpcnN0IHRyeWluZyB0dW5pbmcgZGVsYXkgdmFsdWUgbGFyZ2Vy
+IHRoYW4gMTAsIHRvIGF2b2lkICB0aGUNCj4gaW50ZXJuYWwgSU1YIFVTREhDIElDIGJ1Zy4NCj4g
+Pg0KPiA+IFNEUjEwNCBjYXJkIGRvIG5vdCBoYXMgdGhpcyBpc3N1ZSwgYmVjYXVzZSBmb3IgU0RS
+MTA0IGNhcmQsIHRoZSBmaXJzdCBwYXNzDQo+IHR1bmluZyB2YWx1ZSBub3JtYWxseSBsYXJnZXIg
+dGhhbiAxMC4NCj4gPg0KPiANCj4gdW5mb3J0dW5hdGVseSwgdGhpcyBkb2VzIG5vdCByZXNvbHZl
+IHRoZSBpc3N1ZS4gSSB0cmllZCBFU0RIQ19UVU5FX0NUUkxfTUlODQo+IG9mIDE1LCAyMCwgYW5k
+IDMwIGFuZCB0aGV5IGFsbCBwcm9kdWNlIHRoZSBzYW1lIGlzc3VlIGFyb3VuZCAyMCUgb2YgaW5z
+ZXJ0aW9uczoNCj4gc2RoY2ktZXNkaGMtaW14IDIxOTgwMDAudXNkaGM6IHR1bm5pbmcgZmFpbGVk
+IGF0IDB4N2YgcmV0IC04NA0KPiANCj4gSGVyZSBhcmUgc29tZSBtaW4vbWF4IHR1bmluZyB2YWx1
+ZXMgZnJvbSBzb21lIHZhcmlvdXMgY2FyZHMgSSBoYXZlOg0KPiAtIFNhbXN1bmcgU0wwOEcgRERS
+NTA6IG1pbj04IG1heD0zNw0KPiAtIEtpbmdzdG9uIFNEOEdCIEREUjUwOiBtaW49OCBtYXg9MzYN
+Cj4gLSBTYW5kaXNrIFNTMTZHIEREUjUwOiBtaW49MTAgbWF4PTM3DQo+IC0gU2FuZGlzayBTVTA4
+RyBERFI1MDogbWluPTkgbWF4PTM2DQo+IC0gU2Ftc3VuZyBQcm8gMDAwMDAgU0RSMTA0OiBtaW49
+MTQgbWF4PTI2DQo+IC0gS2luZ3N0b24gU0RSMTA0IFNEQ0lUOiBtaW49MjUgbWF4PTM2DQo+IA0K
+PiBBbGwgb2YgdGhlIEREUjUwIGNhcmRzIGFib3ZlIGZhaWwgaW4gdGhlIHNhbWUgd2F5IGFwcHgg
+MjAlIG9mIGluc2VydGlvbnMuDQo+IA0KPiBIYXMgYW55b25lIGVsc2UgYmVlbiBhYmxlIHRvIGNv
+bmZpcm0gdGhleSBzZWUgdGhlIHNhbWUgaXNzdWUgb24gSU1YNiBib2FyZHMNCj4gd2l0aCBVSFMt
+SSBzdXBwb3J0IGFuZCBERFI1MD8NCg0KSGkgVGltLA0KDQpJIGRlYnVnIHRoaXMgaXNzdWUgdGhl
+c2UgZGF5cywgYW5kIGZpbmQgdGhpcyBpcyB0aGUgSS9PIHRpbWluZyBpc3N1ZS4gDQoNCkNhbiB5
+b3UgdHJ5IHRvIGltcHJvdmUgdGhlIHBhZCBJL08gZHJpdmUgc3RyZW5ndGggZm9yIEREUjUwIGNh
+cmQ/IFlvdSBjYW4gYXBwbHkgdGhlIGZvbGxvd2luZyBwYXRjaDoNCg0KZGlmZiAtLWdpdCBhL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
+LWVzZGhjLWlteC5jDQppbmRleCA2YTEzMjhlLi40YzNhZWFjIDEwMDY0NA0KLS0tIGEvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXguYw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1lc2RoYy1pbXguYw0KQEAgLTg0OCw2ICs4NDgsNyBAQCBzdGF0aWMgaW50IGVzZGhjX2NoYW5n
+ZV9waW5zdGF0ZShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwNCg0KICAgICAgICBzd2l0Y2ggKHVo
+cykgew0KICAgICAgICBjYXNlIE1NQ19USU1JTkdfVUhTX1NEUjUwOg0KKyAgICAgICBjYXNlIE1N
+Q19USU1JTkdfVUhTX0REUjUwOg0KICAgICAgICAgICAgICAgIHBpbmN0cmwgPSBpbXhfZGF0YS0+
+cGluc18xMDBtaHo7DQogICAgICAgICAgICAgICAgYnJlYWs7DQogICAgICAgIGNhc2UgTU1DX1RJ
+TUlOR19VSFNfU0RSMTA0Og0KDQpJZiB0aGlzIHBhdGNoIGFsc28gdGVzdCBwYXNzIG9uIHlvdXIg
+c2lkZSwgSSB3aWxsIHVwc3RyZWFtIGl0Lg0KDQpCeSB0aGUgd2F5LCBJIGp1c3QgY29uZmlybSB3
+aXRoIG91ciBJQyBndXlzLCB0aGUgSUMgYnVnIEkgbWVudGlvbmVkIGluIHRoZSBiZWZvcmUgbWFp
+bCBkbyBub3QgaW1wYWN0IHRoZSBzb2Z0d2FyZSB0dW5pbmcgbWV0aG9kIChNQU5fVFVOSU5HKSwg
+dGhpcyBJQyBidWcganVzdCBpbXBhY3QgdGhlIFNURF9UVU5JTkcsIHNvcnJ5IGZvciB0aGUgbWlz
+bGVhZC4NCg0KSGFpYm8gQ2hlbg0KDQo+IA0KPiBSZWdhcmRzLA0KPiANCj4gVGltDQo=
