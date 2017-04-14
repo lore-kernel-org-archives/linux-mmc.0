@@ -1,42 +1,45 @@
-From: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 03/22] libiscsi: Make use of new the sg_map helper function
-Date: Fri, 14 Apr 2017 09:37:20 -0600
-Message-ID: <85eda3a6-edab-e59e-d2d4-c3af5599d0fd@deltatee.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Subject: Re: [PATCH 09/22] dm-crypt: Make use of the new sg_map helper in 4
+ call sites
+Date: Fri, 14 Apr 2017 10:03:43 -0600
+Message-ID: <302ae5ab-d515-5427-2e54-d58a9cdb8241@deltatee.com>
 References: <1492121135-4437-1-git-send-email-logang@deltatee.com>
- <1492121135-4437-4-git-send-email-logang@deltatee.com>
- <20170414083607.GB25471@lst.de>
+ <1492121135-4437-10-git-send-email-logang@deltatee.com>
+ <20170414083921.GC25471@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-In-Reply-To: <20170414083607.GB25471-jcswGhMUV9g@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
-Cc: Steve Wise <swise-7bPotxP6k4+P2YhJcF5u+vpXobYPEAuW@public.gmane.org>, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sumit Semwal <sumit.semwal-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, rds-devel-N0ozoZBvEnrZJqsBc5GL+g@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Wilcox <mawilcox-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fcoe-devel-s9riP+hp16TNLxjTenLetw@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ming Lin <ming.l-Vzezgt5dB6uUEJcrhfAQsw@public.gmane.org>, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, megaraidlinux.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, linaro-mm-sig-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, "Martin K. Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tejun Heo <tj@k>
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20170414083921.GC25471@lst.de>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Steve Wise <swise@opengridcomputing.com>, linux-nvme@lists.infradead.org, Stephen Bates <sbates@raithlin.com>, target-devel@vger.kernel.org, Sumit Semwal <sumit.semwal@linaro.org>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, Sagi Grimberg <sagi@grimberg.me>, linux-scsi@vger.kernel.org, Matthew Wilcox <mawilcox@microsoft.com>, linux-rdma@vger.kernel.org, fcoe-devel@open-fcoe.org, Ross Zwisler <ross.zwisler@linux.intel.com>, open-iscsi@googlegroups.com, linux-media@vger.kernel.org, Ming Lin <ming.l@ssi.samsung.com>, intel-gfx@lists.freedesktop.org, sparmaintainer@unisys.com, linux-raid@vger.kernel.org, dri-devel@lists.freedesktop.org, Dan Williams <dan.j.williams@intel.com>, megaraidlinux.pdl@broadcom.com, Jens Axboe <axboe@kernel.dk>, linaro-mm-sig@lists.linaro.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
 
-On 14/04/17 02:36 AM, Christoph Hellwig wrote:
-> On Thu, Apr 13, 2017 at 04:05:16PM -0600, Logan Gunthorpe wrote:
->> Convert the kmap and kmap_atomic uses to the sg_map function. We now
->> store the flags for the kmap instead of a boolean to indicate
->> atomicitiy. We also propogate a possible kmap error down and create
->> a new ISCSI_TCP_INTERNAL_ERR error type for this.
+On 14/04/17 02:39 AM, Christoph Hellwig wrote:
+> On Thu, Apr 13, 2017 at 04:05:22PM -0600, Logan Gunthorpe wrote:
+>> Very straightforward conversion to the new function in all four spots.
 > 
-> Can you split out the new error handling into a separate prep patch
-> which should go to the iscsi maintainers ASAP?
-> 
+> I think the right fix here is to switch dm-crypt to the ahash API
+> that takes a scatterlist.
 
-Yes, I can do that. I'd just have thought they'd want to see the use
-case for the new error before accepting a patch like that...
+Hmm, well I'm not sure I understand the code enough to make that
+conversion. But I was looking at it. One tricky bit seems to be that
+crypt_iv_lmk_one adds a seed, skips the first 16 bytes in the page and
+then hashes another 16 bytes from other data. What would you do
+construct a new sgl for it and pass it to the ahash api?
+
+The other thing is crypt_iv_lmk_post also seems to modify the page after
+the hash with a  crypto_xor so you'd still need at least one kmap in there.
 
 Logan
