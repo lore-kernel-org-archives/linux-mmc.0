@@ -1,142 +1,67 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: IMX6 ESDHC mmc with UHS-I occasional failure with DDR50 cards
-Date: Fri, 14 Apr 2017 07:41:20 +0000
-Message-ID: <VI1PR0401MB2335F1B3BD74C219734BA0FA90050@VI1PR0401MB2335.eurprd04.prod.outlook.com>
-References: <CAJ+vNU2S5NubFzKkHKjS2iHPt2_ysC-2e87ghUXPxsVEOKX+4w@mail.gmail.com>
- <20170404220040.GA2997@fen-net.de>
- <CAJ+vNU16hUhLufteFx2nqxnh1mrf6B025EqtpmWZp6USgfiJzw@mail.gmail.com>
- <AM4PR0401MB23245B9B41978D09DAD9FD8D90000@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <CAJ+vNU3gRG3K94V31EG1ufRsngsYG6hWq_97P2szZ2oATOd3=g@mail.gmail.com>
+From: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Subject: Re: [PATCH 01/22] scatterlist: Introduce sg_map helper functions
+Date: Fri, 14 Apr 2017 10:35:18 +0200
+Message-ID: <20170414083518.GA25471@lst.de>
+References: <1492121135-4437-1-git-send-email-logang@deltatee.com> <1492121135-4437-2-git-send-email-logang@deltatee.com>
+Reply-To: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-eopbgr00062.outbound.protection.outlook.com ([40.107.0.62]:52320
-        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751492AbdDNHlZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Apr 2017 03:41:25 -0400
-In-Reply-To: <CAJ+vNU3gRG3K94V31EG1ufRsngsYG6hWq_97P2szZ2oATOd3=g@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <open-iscsi+bncBDUNBGN3R4KRBR4TYLDQKGQEUPQMGEY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <1492121135-4437-2-git-send-email-logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
+List-Post: <https://groups.google.com/group/open-iscsi/post>, <mailto:open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:open-iscsi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/open-iscsi
+List-Subscribe: <https://groups.google.com/group/open-iscsi/subscribe>, <mailto:open-iscsi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+856124926423+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/open-iscsi/subscribe>
+To: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
+Cc: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "Martin K. Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Sagi Grimberg <sagi-NQWnxTmZq1alnMjI0IkVqw@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ross Zwisler <ross.zwisler-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matthew Wilcox <mawilcox-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, Sumit Semwal <sumit.semwal-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ming Lin <ming.l-Vzezgt5dB6uUEJcrhfAQsw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linaro-mm-sig-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fcoe-devel-s9riP+hp16TNLxjTenLetw@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, megaraidlinux.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, devel@drive
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Harvey <tharvey@gateworks.com>
-Cc: David Haworth <dave@fen-net.de>, Linux MMC List <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Weijun Yang <york.yang@csr.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBUaW0gSGFydmV5IFttYWlsdG86
-dGhhcnZleUBnYXRld29ya3MuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBBcHJpbCAxMSwgMjAxNyAx
-MDoyMiBQTQ0KPiBUbzogQm91Z2ggQ2hlbiA8aGFpYm8uY2hlbkBueHAuY29tPg0KPiBDYzogRGF2
-aWQgSGF3b3J0aCA8ZGF2ZUBmZW4tbmV0LmRlPjsgTGludXggTU1DIExpc3QgPGxpbnV4LQ0KPiBt
-bWNAdmdlci5rZXJuZWwub3JnPjsgRmFiaW8gRXN0ZXZhbSA8ZmFiaW8uZXN0ZXZhbUBueHAuY29t
-PjsgVWxmDQo+IEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBXZWlqdW4gWWFuZyA8
-eW9yay55YW5nQGNzci5jb20+OyBBZHJpYW4NCj4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVs
-LmNvbT4NCj4gU3ViamVjdDogUmU6IElNWDYgRVNESEMgbW1jIHdpdGggVUhTLUkgb2NjYXNpb25h
-bCBmYWlsdXJlIHdpdGggRERSNTAgY2FyZHMNCj4gDQo+IE9uIFR1ZSwgQXByIDExLCAyMDE3IGF0
-IDI6MjggQU0sIEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4gd3JvdGU6DQo+ID4+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IDxzbmlwPg0KPiA+Pg0KPiA+PiBJJ3ZlIG1vdmVk
-IG9uIHRvIDQuMTEtcmM1IGFuZCBub3RpY2UgdGhhdCBJJ20gYWx3YXlzIHNlZWluZyB0aGF0IG9u
-IGENCj4gPj4gZmFpbHVyZSB0aGUgaW14IHNkaGMgbm90IGFibGUgdG8gZGV0ZXJtaW5lIGEgbWlu
-L21heCB0dW5pbmcgZGVsYXk6DQo+ID4+DQo+ID4+IDQuMTEuMC1yYzU6DQo+ID4+IFsgICA0OC44
-MTIzODFdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkDQo+ID4+IFsgICA0OS43OTMzOTJdIG1tYzA6
-IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsDQo+ID4+IGFz
-c3VtaW5nIHdyaXRlLWVuYWJsZQ0KPiA+PiBbICAgNDkuODEwMjk0XSBzZGhjaV9leGVjdXRlX3R1
-bmluZw0KPiA+PiBbICAgNDkuODEzNjEyXSBlc2RoY19leGVjdXRpbmdfdHVuaW5nDQo+ID4+IFsg
-ICA0OS45NjgxNTRdIHNkaGNpLWVzZGhjLWlteCAyMTk4MDAwLnVzZGhjOiB0dW5pbmcgZmFpbGVk
-IGF0IDB4N2YNCj4gPj4gcmV0IC01IChtaW49MTI3L21heD0xMjgpDQo+ID4+IF5eXl4gYWRkZWQg
-ZGVidWcgc2hvd3MgLUVJTyByZXR1cm5lZCBmcm9tIG1tY19zZW5kX3R1bmluZyBhbHRob3VnaA0K
-PiA+PiBJJ3ZlIGFsc28gc2VlbiAtODQgZ2V0IHJldHVybmVkDQo+ID4+IFsgICA0OS45ODA1NDBd
-IG1tYzA6IHR1bmluZyBleGVjdXRpb24gZmFpbGVkOiAtNQ0KPiA+PiBbICAgNDkuOTg0OTc0XSBt
-bWMwOiBkZHI1MCB0dW5pbmcgZmFpbGVkDQo+ID4+IFsgICA0OS45ODkwNjhdIG1tYzA6IG5ldyB1
-bHRyYSBoaWdoIHNwZWVkIEREUjUwIFNESEMgY2FyZCBhdCBhZGRyZXNzIGFhYWENCj4gPj4gWyAg
-IDQ5Ljk5OTg0NF0gbW1jYmxrMDogbW1jMDphYWFhIFNMMDhHIDcuNDAgR2lCDQo+ID4+DQo+ID4+
-IEkndmUgYWxzbyBmb3VuZCB0aGF0IGlmIEkgcmV2ZXJ0ICc5ZmFhYzdiIG1tYzogc2RoY2k6IGVu
-YWJsZSB0dW5pbmcgZm9yIEREUjUwJw0KPiA+PiB0aHVzIHNraXBwaW5nIHRoZSB0dW5pbmcgdGhl
-IGlzc3VlIGdvZXMgYXdheSBob3dldmVyIG5vdGUgdGhhdA0KPiA+PiBvY2Nhc2lvbmFsbHkgSSBk
-byBzZWUgYSB0cmFuc2ZlciBlcnJvciB0aGF0IHBlcmhhcHMgaXMgcmV0cmllZCBbDQo+ID4+IDM2
-MS4wNjc3NjNdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkIFsgIDM2MS40MTI3MzJdIG1tYzA6IGhv
-c3QgZG9lcw0KPiA+PiBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsIGFzc3Vt
-aW5nIHdyaXRlLWVuYWJsZSBbDQo+ID4+IDM2MS40Mjk3MTldIG1tYzA6IG5ldyB1bHRyYSBoaWdo
-IHNwZWVkIEREUjUwIFNESEMgY2FyZCBhdCBhZGRyZXNzDQo+ID4+IGFhYWEgWyAgMzYxLjQ0MzA2
-MF0gbW1jYmxrMDogbW1jMDphYWFhIFNMMDhHIDcuNDAgR2lCIFsgIDM2MS40NjU2NThdDQo+ID4+
-IG1tY2JsazA6IHAxIFsgIDM2Mi40MjIzMzVdIG1tYzA6IGNhcmQgYWFhYSByZW1vdmVkIFsgIDM2
-Mi43NTI3MTldDQo+ID4+IG1tYzA6IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQt
-b25seSBzd2l0Y2gsIGFzc3VtaW5nDQo+ID4+IHdyaXRlLWVuYWJsZSBbICAzNjIuNzY5Njc1XSBt
-bWMwOiBuZXcgdWx0cmEgaGlnaCBzcGVlZCBERFI1MCBTREhDDQo+ID4+IGNhcmQgYXQgYWRkcmVz
-cyBhYWFhIFsgIDM2Mi43ODI5MDBdIG1tY2JsazA6IG1tYzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0K
-PiA+PiBbICAzNjIuODA1OTk2XQ0KPiA+PiBtbWNibGswOiBlcnJvciAtODQgdHJhbnNmZXJyaW5n
-IGRhdGEsIHNlY3RvciAwLCBuciA4LCBjbWQgcmVzcG9uc2UNCj4gPj4gMHg5MDAsIGNhcmQgc3Rh
-dHVzIDB4YjAwIF5eXl4gb2NjYXNpb25hbGx5IHNlZSB0aGlzIGVycm9yIGJ1dCBiZWNhdXNlDQo+
-ID4+IHJldHJpZXMgb2NjdXIgYXQgdGhlIGJsb2NrIGxldmVsIGl0IHN0aWxsIHdvcmtzIFsgIDM2
-Mi45MzE2ODldDQo+ID4+IG1tY2JsazA6IHAxDQo+ID4+DQo+ID4+IEFnYWluIHdpdGggOWZhYWM3
-YiByZXZlcnRlZCBhbmQgc29tZSBleHRyYSBkZWJ1Z2dpbmc6DQo+ID4+IFsgICAzMy44MjMxNzBd
-IG1tYzA6IGhvc3QgZG9lcyBub3Qgc3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSBzd2l0Y2gsDQo+
-ID4+IGFzc3VtaW5nIHdyaXRlLWVuYWJsZQ0KPiA+PiBbICAgMzMuODQ3MTg1XSBtbWMwOiBuZXcg
-dWx0cmEgaGlnaCBzcGVlZCBERFI1MCBTREhDIGNhcmQgYXQgYWRkcmVzcyBhYWFhDQo+ID4+IFsg
-ICAzMy44NTYwNjNdIG1tY2JsazA6IG1tYzA6YWFhYSBTTDA4RyA3LjQwIEdpQg0KPiA+PiBbICAg
-MzMuODc0MjI3XSBtbWNibGswOiBlcnJvciAtODQgdHJhbnNmZXJyaW5nIGRhdGEsIHNlY3RvciAw
-LCBuciA4LA0KPiA+PiBjbWQgcmVzcG9uc2UgMHg5MDAsIGNhcmQgc3RhdHVzIDB4YjAwDQo+ID4+
-IFsgICAzMy44OTY4MjldIG1tY2JsazA6IGVycm9yIC04NCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2Vj
-dG9yIDAsIG5yIDgsDQo+ID4+IGNtZCByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMgMHhiMDAN
-Cj4gPj4gWyAgIDMzLjkwNjMxMl0gbW1jYmxrMDogZXJyb3IgLTg0IHRyYW5zZmVycmluZyBkYXRh
-LCBzZWN0b3IgMCwgbnIgOCwNCj4gPj4gY21kIHJlc3BvbnNlIDB4OTAwLCBjYXJkIHN0YXR1cyAw
-eGIwMA0KPiA+PiBbICAgMzQuMDIyMTE3XSBtbWNibGswOiBlcnJvciAwIHRyYW5zZmVycmluZyBk
-YXRhLCBzZWN0b3IgMCwgbnIgOCwgY21kDQo+ID4+IHJlc3BvbnNlIDB4OTAwLCBjYXJkIHN0YXR1
-cyAweGIwMA0KPiA+PiBeXl5eIGFkZGVkIGRlYnVnZ2luZyBzaG93cyByZXRyaWVzIGF0IGJsb2Nr
-IGxldmVsIGFuZCBldmVudHVhbGx5IGFsbCBpcyBmaW5lDQo+ID4+IFsgICAzNC4wMzE1MDBdICBt
-bWNibGswOiBwMQ0KPiA+Pg0KPiA+PiBTbyBmYXIgZXZlcnkgRERSNTAgY2FyZCBJIGhhdmUgKHNl
-dmVyYWwgS2luZ3N0b24gYW5kIFNhbmRpc2sgY2FyZA0KPiA+PiBtb2RlbHMpIGJlaGF2ZXMgbGlr
-ZSB0aGlzLg0KPiA+Pg0KPiA+PiBJIHRyaWVkIGFkZGluZyBhIHNldHRsaW5nIGRlbGF5IHdoZW4g
-VlNFTEVDVCB3YXMgY2hhbmdlZCBpbiB0aGUNCj4gPj4gc2RoY2ktZXNkaGMtIGlteCBkcml2ZXIg
-YW5kIHRoYXQgZGlkbid0IGhlbHAuDQo+ID4+DQo+ID4gSGkgVGltDQo+ID4NCj4gPiBXaGljaCBp
-bXg2IHNvYyBkbyB5b3UgdXNlPyAgRnJvbSB5b3VyIGxvZywgSSBub3RpY2UgeW91IHVzZSB0aGUg
-TUFOIHR1bmluZw0KPiBtZXRob2QsIHNvIEkgZ3Vlc3MgeW91IHVzZSBpbXg2cWRsLg0KPiA+DQo+
-ID4gaW14IHVzZGhjIGhhcyBhbiBJQyBidWcuIEZvciB0aGUgdHVuaW5nIHByb2NlZHVyZSwgdGhl
-IGZpcnN0IHBhc3MgdHVuaW5nIGRlbGF5DQo+IHZhbHVlIG11c3QgYmlnZ2VyIHRoYW4gMTAuDQo+
-ID4gRHVlIHRvIEREUjUwIHRpbWluZyBpcyBub3QgdGhhdCByaWdvcm91cywgc28gbWF5YmUgZXZl
-biB3aGVuIHdlIGp1c3QgYWRkIDENCj4gZGVsYXkgY2VsbCwgdHVuaW5nIGNhbiBwYXNzLCBidXQg
-dGhpcyB0cmlnZ2VyIHRoZSBpbnRlcm5hbCBJQyBidWcsIHRoZW4geW91IG1lZXQNCj4gdGhlIGZv
-bGxvd2luZyBpc3N1ZSBqdXN0IGFzIHlvdSBtZWV0Og0KPiA+ICAgICAgICBzZGhjaS1lc2RoYy1p
-bXggMjE5ODAwMC51c2RoYzogdHVuaW5nIGZhaWxlZCBhdCAweDdmDQo+ICggbWluPTEyNy9tYXg9
-MTI4KQ0KPiA+DQo+IA0KPiBIYWlibywNCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHJlc3BvbnNlLg0K
-PiANCj4gWWVzLCB0aGlzIGlzc3VlIGlzIHNlZW4gb24gdGhlIElNWDZEUSBhbmQgSU1YNlNETC4g
-Q2FuIHlvdSBwb2ludCBtZSB0bw0KPiBpbmZvcm1hdGlvbiBvbiB0aGlzIGJ1Zz8gSSBkb24ndCBz
-ZWUgaXQgaW4gdGhlIGxhdGVzdCBJTVg2RFFDRS5wZGYgZXJyYXRhDQo+IGRvY3VtZW50Lg0KPiAN
-Cj4gPiBTbyB5b3UgY2FuIGNoYW5nZSB0aGUgRVNESENfVFVORV9DVFJMX01JTiBmcm9tIDAgdG8g
-MTUsIHRoZW4geW91IGNhbg0KPiBzZWUgdGhlIEREUjUwIHR1bmluZyByZXR1cm4gdG8gbm9ybWFs
-Lg0KPiA+DQo+ID4gRm9yIHRoZSBTVEQgdHVuaW5nIG1ldGhvZCwgeW91IGNhbiBhZGQgdGhlIHBy
-b3BlcnR5ICdmc2wsdHVuaW5nLXN0YXJ0LXRhcCA9DQo+IDwyMD4nIGluIGR0cy4NCj4gPg0KPiA+
-IEFsbCB0aGlzIG1ha2UgdGhlIGZpcnN0IHRyeWluZyB0dW5pbmcgZGVsYXkgdmFsdWUgbGFyZ2Vy
-IHRoYW4gMTAsIHRvIGF2b2lkICB0aGUNCj4gaW50ZXJuYWwgSU1YIFVTREhDIElDIGJ1Zy4NCj4g
-Pg0KPiA+IFNEUjEwNCBjYXJkIGRvIG5vdCBoYXMgdGhpcyBpc3N1ZSwgYmVjYXVzZSBmb3IgU0RS
-MTA0IGNhcmQsIHRoZSBmaXJzdCBwYXNzDQo+IHR1bmluZyB2YWx1ZSBub3JtYWxseSBsYXJnZXIg
-dGhhbiAxMC4NCj4gPg0KPiANCj4gdW5mb3J0dW5hdGVseSwgdGhpcyBkb2VzIG5vdCByZXNvbHZl
-IHRoZSBpc3N1ZS4gSSB0cmllZCBFU0RIQ19UVU5FX0NUUkxfTUlODQo+IG9mIDE1LCAyMCwgYW5k
-IDMwIGFuZCB0aGV5IGFsbCBwcm9kdWNlIHRoZSBzYW1lIGlzc3VlIGFyb3VuZCAyMCUgb2YgaW5z
-ZXJ0aW9uczoNCj4gc2RoY2ktZXNkaGMtaW14IDIxOTgwMDAudXNkaGM6IHR1bm5pbmcgZmFpbGVk
-IGF0IDB4N2YgcmV0IC04NA0KPiANCj4gSGVyZSBhcmUgc29tZSBtaW4vbWF4IHR1bmluZyB2YWx1
-ZXMgZnJvbSBzb21lIHZhcmlvdXMgY2FyZHMgSSBoYXZlOg0KPiAtIFNhbXN1bmcgU0wwOEcgRERS
-NTA6IG1pbj04IG1heD0zNw0KPiAtIEtpbmdzdG9uIFNEOEdCIEREUjUwOiBtaW49OCBtYXg9MzYN
-Cj4gLSBTYW5kaXNrIFNTMTZHIEREUjUwOiBtaW49MTAgbWF4PTM3DQo+IC0gU2FuZGlzayBTVTA4
-RyBERFI1MDogbWluPTkgbWF4PTM2DQo+IC0gU2Ftc3VuZyBQcm8gMDAwMDAgU0RSMTA0OiBtaW49
-MTQgbWF4PTI2DQo+IC0gS2luZ3N0b24gU0RSMTA0IFNEQ0lUOiBtaW49MjUgbWF4PTM2DQo+IA0K
-PiBBbGwgb2YgdGhlIEREUjUwIGNhcmRzIGFib3ZlIGZhaWwgaW4gdGhlIHNhbWUgd2F5IGFwcHgg
-MjAlIG9mIGluc2VydGlvbnMuDQo+IA0KPiBIYXMgYW55b25lIGVsc2UgYmVlbiBhYmxlIHRvIGNv
-bmZpcm0gdGhleSBzZWUgdGhlIHNhbWUgaXNzdWUgb24gSU1YNiBib2FyZHMNCj4gd2l0aCBVSFMt
-SSBzdXBwb3J0IGFuZCBERFI1MD8NCg0KSGkgVGltLA0KDQpJIGRlYnVnIHRoaXMgaXNzdWUgdGhl
-c2UgZGF5cywgYW5kIGZpbmQgdGhpcyBpcyB0aGUgSS9PIHRpbWluZyBpc3N1ZS4gDQoNCkNhbiB5
-b3UgdHJ5IHRvIGltcHJvdmUgdGhlIHBhZCBJL08gZHJpdmUgc3RyZW5ndGggZm9yIEREUjUwIGNh
-cmQ/IFlvdSBjYW4gYXBwbHkgdGhlIGZvbGxvd2luZyBwYXRjaDoNCg0KZGlmZiAtLWdpdCBhL2Ry
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNkaGMtaW14LmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LWVzZGhjLWlteC5jDQppbmRleCA2YTEzMjhlLi40YzNhZWFjIDEwMDY0NA0KLS0tIGEvZHJpdmVy
-cy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXguYw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1lc2RoYy1pbXguYw0KQEAgLTg0OCw2ICs4NDgsNyBAQCBzdGF0aWMgaW50IGVzZGhjX2NoYW5n
-ZV9waW5zdGF0ZShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwNCg0KICAgICAgICBzd2l0Y2ggKHVo
-cykgew0KICAgICAgICBjYXNlIE1NQ19USU1JTkdfVUhTX1NEUjUwOg0KKyAgICAgICBjYXNlIE1N
-Q19USU1JTkdfVUhTX0REUjUwOg0KICAgICAgICAgICAgICAgIHBpbmN0cmwgPSBpbXhfZGF0YS0+
-cGluc18xMDBtaHo7DQogICAgICAgICAgICAgICAgYnJlYWs7DQogICAgICAgIGNhc2UgTU1DX1RJ
-TUlOR19VSFNfU0RSMTA0Og0KDQpJZiB0aGlzIHBhdGNoIGFsc28gdGVzdCBwYXNzIG9uIHlvdXIg
-c2lkZSwgSSB3aWxsIHVwc3RyZWFtIGl0Lg0KDQpCeSB0aGUgd2F5LCBJIGp1c3QgY29uZmlybSB3
-aXRoIG91ciBJQyBndXlzLCB0aGUgSUMgYnVnIEkgbWVudGlvbmVkIGluIHRoZSBiZWZvcmUgbWFp
-bCBkbyBub3QgaW1wYWN0IHRoZSBzb2Z0d2FyZSB0dW5pbmcgbWV0aG9kIChNQU5fVFVOSU5HKSwg
-dGhpcyBJQyBidWcganVzdCBpbXBhY3QgdGhlIFNURF9UVU5JTkcsIHNvcnJ5IGZvciB0aGUgbWlz
-bGVhZC4NCg0KSGFpYm8gQ2hlbg0KDQo+IA0KPiBSZWdhcmRzLA0KPiANCj4gVGltDQo=
+> diff --git a/drivers/dma-buf/dma-buf.c b/drivers/dma-buf/dma-buf.c
+> index 0007b79..b95934b 100644
+> --- a/drivers/dma-buf/dma-buf.c
+> +++ b/drivers/dma-buf/dma-buf.c
+> @@ -37,6 +37,9 @@
+>  
+>  #include <uapi/linux/dma-buf.h>
+>  
+> +/* Prevent the highmem.h macro from aliasing ops->kunmap_atomic */
+> +#undef kunmap_atomic
+> +
+>  static inline int is_dma_buf_file(struct file *);
+>  
+>  struct dma_buf_list {
+
+I think the right fix here is to rename the operation to unmap_atomic
+and send out a little patch for that ASAP.
+
+> + *   Flags can be any of:
+> + *	* SG_KMAP	 - Use kmap to create the mapping
+> + *	* SG_KMAP_ATOMIC - Use kmap_atomic to map the page atommically.
+> + *			   Thus, the rules of that function apply: the cpu
+> + *			   may not sleep until it is unmaped.
+> + *
+> + *   Also, consider carefully whether this function is appropriate. It is
+> + *   largely not recommended for new code and if the sgl came from another
+> + *   subsystem and you don't know what kind of memory might be in the list
+> + *   then you definitely should not call it. Non-mappable memory may be in
+> + *   the sgl and thus this function may fail unexpectedly.
+> + **/
+> +static inline void *sg_map_offset(struct scatterlist *sg, size_t offset,
+> +				   int flags)
+
+I'd rather have separate functions for kmap vs kmap_atomic instead of
+the flags parameter.  And while you're at it just always pass the 0
+offset parameter instead of adding a wrapper..
+
+Otherwise this looks good to me.
+
+-- 
+You received this message because you are subscribed to the Google Groups "open-iscsi" group.
+To unsubscribe from this group and stop receiving emails from it, send an email to open-iscsi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+To post to this group, send email to open-iscsi-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+Visit this group at https://groups.google.com/group/open-iscsi.
+For more options, visit https://groups.google.com/d/optout.
