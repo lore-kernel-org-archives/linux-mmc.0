@@ -1,69 +1,46 @@
-From: =?utf-8?B?SmlhamllIEhhbyAo6YOd5Yqg6IqCKQ==?=
-        <jiajie.hao@mediatek.com>
-Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0hdIG1tYzogc2RpbzogRml4IHNkaW8gd2FpdCBidXN5?=
- =?utf-8?Q?_implement_limitation?=
-Date: Mon, 17 Apr 2017 08:36:00 +0000
-Message-ID: <013a85cdb0434870bfaeadf08373af97@MTKMBS31N1.mediatek.inc>
-References: <1492416571-28843-1-git-send-email-jiajie.hao@mediatek.com>
- <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
+From: Haibo Chen <haibo.chen@nxp.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: increase the pad I/O drive strength for DDR50 card
+Date: Mon, 17 Apr 2017 19:10:02 +0800
+Message-ID: <1492427402-5506-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
-Content-Language: zh-CN
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?utf-8?B?SmlhamllIEhhbyAo6YOd5Yqg6IqCKQ==?= <jiajie.hao@mediatek.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linus.walleij@linaro.org" <linus.walleij@linaro.org>, =?utf-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= <Chaotian.Jing@mediatek.com>, =?utf-8?B?WW9uZyBNYW8gKOavm+WLhyk=?= <yong.mao@mediatek.com>, =?utf-8?B?RWRkaWUgSHVhbmcgKOm7g+aZuuWCkSk=?= <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-eopbgr40051.outbound.protection.outlook.com ([40.107.4.51]:28320
+        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751894AbdDQLDp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 17 Apr 2017 07:03:45 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com
+Cc: tharvey@gateworks.com, stable@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Q0M6IGxpbnV4LWFybS1rZXJuZWwNCg0KDQpNYW55IHRoYW5rcw0KSmlhamllLg0KDQotLS0tLemC
-ruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IGppYWppZS5oYW9AbWVkaWF0ZWsuY29tIFttYWls
-dG86amlhamllLmhhb0BtZWRpYXRlay5jb21dIA0K5Y+R6YCB5pe26Ze0OiAyMDE35bm0NOaciDE3
-5pelIDE2OjEwDQrmlLbku7bkuro6IHVsZi5oYW5zc29uQGxpbmFyby5vcmcNCuaKhOmAgTogbGlu
-dXMud2FsbGVpakBsaW5hcm8ub3JnOyBDaGFvdGlhbiBKaW5nICjkupXmnJ3lpKkpIDxDaGFvdGlh
-bi5KaW5nQG1lZGlhdGVrLmNvbT47IFlvbmcgTWFvICjmr5vli4cpIDx5b25nLm1hb0BtZWRpYXRl
-ay5jb20+OyBFZGRpZSBIdWFuZyAo6buD5pm65YKRKSA8ZWRkaWUuaHVhbmdAbWVkaWF0ZWsuY29t
-Pjsgc3J2X2hldXBzdHJlYW0gPHNydl9oZXVwc3RyZWFtQG1lZGlhdGVrLmNvbT47IGxpbnV4LW1t
-Y0B2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1l
-ZGlhdGVrQGxpc3RzLmluZnJhZGVhZC5vcmc7IGxpbnV4LWFybS1rZXJuZWxAbWVkaWF0ZWsuY29t
-OyBKaWFqaWUgSGFvICjpg53liqDoioIpIDxqaWFqaWUuaGFvQG1lZGlhdGVrLmNvbT4NCuS4u+mi
-mDogW1BBVENIXSBtbWM6IHNkaW86IEZpeCBzZGlvIHdhaXQgYnVzeSBpbXBsZW1lbnQgbGltaXRh
-dGlvbg0KDQpGcm9tOiBKaWFqaWUgSGFvIDxqaWFqaWUuaGFvQG1lZGlhdGVrLmNvbT4NCg0KVGhl
-IGhvc3QgbWF5IGlzc3VlIGFuIEkvTyBhYm9ydCBieSB3cml0aW5nIHRvIHRoZSBDQ0NSIGF0IGFu
-eSB0aW1lIGR1cmluZyBJL08gcmVhZCBvcGVyYXRpb24gdmlhIENNRDUyLiBBbmQgaG9zdCBtYXkg
-bmVlZCBzdXNwZW5kIHRyYW5zY2F0aW9uIGR1cmluZyB3cml0ZSBidXN5IHN0YWdlIGluIFNESU8g
-c3VzcGVuZC9yZXN1bWUgc2NlbmFyaW8uDQpGcm9tIG90aGVyIHNpZGUsIGEgY2FyZCBtYXkgYWNj
-ZXB0IENNRDUyIGR1cmluZyBkYXRhIHRyYW5zZmVyIHBoYXNlLg0KDQpQcmV2aW91cyBpbXBsZW1l
-bnQgd291bGQgYmxvY2sgaXNzdWluZyBhYm92ZSBjb21tYW5kIGluIGJ1c3kgc3RhZ2UuDQpJdCBj
-YXVzZSBmdW5jdGlvbiBkcml2ZXIgY2FuJ3QgaW1wbGVtZW50IGFzIHByb3BlciB3YXkgYW5kIGhh
-cyBubyBvcHBvcnR1bml0eSB0byBkbyBzb21lIGNvdmVyYWdlIGluIGVycm9yIGNhc2UgdmlhIEkv
-TyBhYm9ydCBldGMuDQoNCldlIG5lZWQgYnlwYXNzIHNvbWUgbmVjZXNzYXJ5IG9wZXJhdGlvbiBk
-dXJpbmcgYnVzeSBjaGVjayBzdGFnZS4NCg0KQ2hhbmdlLUlkOiBJYjVhNDU5OWEyYTk4Y2JjZjQ0
-MWI1NjRmNWY2ZmJiMTBjOGE1OWUxYg0KU2lnbmVkLW9mZi1ieTogSmlhamllIEhhbyA8amlhamll
-Lmhhb0BtZWRpYXRlay5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9jb3JlL2NvcmUuYyAgICAgfCAg
-ICA0ICsrKy0NCiBkcml2ZXJzL21tYy9jb3JlL3NkaW9fb3BzLmggfCAgIDEwICsrKysrKysrKysN
-CiAyIGZpbGVzIGNoYW5nZWQsIDEzIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCg0KZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jIGIvZHJpdmVycy9tbWMvY29yZS9jb3Jl
-LmMgaW5kZXggOTI2ZTBmZC4uOWM5YTRiYyAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUv
-Y29yZS5jDQorKysgYi9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KQEAgLTIzNCw4ICsyMzQsMTAg
-QEAgc3RhdGljIHZvaWQgX19tbWNfc3RhcnRfcmVxdWVzdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3Qs
-IHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KIAkvKg0KIAkgKiBGb3Igc2RpbyBydyBjb21tYW5k
-cyB3ZSBtdXN0IHdhaXQgZm9yIGNhcmQgYnVzeSBvdGhlcndpc2Ugc29tZQ0KIAkgKiBzZGlvIGRl
-dmljZXMgd29uJ3Qgd29yayBwcm9wZXJseS4NCisJICogQW5kIGJ5cGFzcyBJL08gYWJvcnQsIHJl
-c2V0IGFuZCBidXMgc3VzcGVuZCBvcGVyYXRpb25zLg0KIAkgKi8NCi0JaWYgKG1tY19pc19pb19v
-cChtcnEtPmNtZC0+b3Bjb2RlKSAmJiBob3N0LT5vcHMtPmNhcmRfYnVzeSkgew0KKwlpZiAobW1j
-X2lzX2lvX29wKG1ycS0+Y21kLT5vcGNvZGUpICYmIGhvc3QtPm9wcy0+Y2FyZF9idXN5ICYmDQor
-CSAgICAhbW1jX2lzX2lvX2J5cGFzcyhtcnEtPmNtZC0+b3Bjb2RlLCBtcnEtPmNtZC0+YXJnKSkg
-ew0KIAkJaW50IHRyaWVzID0gNTAwOyAvKiBXYWl0IGFwcm94IDUwMG1zIGF0IG1heGltdW0gKi8N
-CiANCiAJCXdoaWxlIChob3N0LT5vcHMtPmNhcmRfYnVzeShob3N0KSAmJiAtLXRyaWVzKSBkaWZm
-IC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9zZGlvX29wcy5oIGIvZHJpdmVycy9tbWMvY29yZS9z
-ZGlvX29wcy5oIGluZGV4IGJlZDhhODMuLjk4OTY2OTYgMTAwNjQ0DQotLS0gYS9kcml2ZXJzL21t
-Yy9jb3JlL3NkaW9fb3BzLmgNCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19vcHMuaA0KQEAg
-LTMxLDUgKzMxLDE1IEBAIHN0YXRpYyBpbmxpbmUgYm9vbCBtbWNfaXNfaW9fb3AodTMyIG9wY29k
-ZSkNCiAJcmV0dXJuIG9wY29kZSA9PSBTRF9JT19SV19ESVJFQ1QgfHwgb3Bjb2RlID09IFNEX0lP
-X1JXX0VYVEVOREVEOyAgfQ0KIA0KK3N0YXRpYyBpbmxpbmUgYm9vbCBtbWNfaXNfaW9fYnlwYXNz
-KHUzMiBvcGNvZGUsIHUzMiBhcmcpIHsNCisJdTMyIGFkZHI7DQorDQorCWFkZHIgPSAoYXJnID4+
-IDkpICYgMHgxRkZGRjsNCisNCisJcmV0dXJuICgob3Bjb2RlID09IFNEX0lPX1JXX0RJUkVDVCkg
-JiYNCisJCShhZGRyID09IFNESU9fQ0NDUl9BQk9SVCB8fCBhZGRyID09IFNESU9fQ0NDUl9TVVNQ
-RU5EKSk7IH0NCisNCiAjZW5kaWYNCiANCi0tDQoxLjcuOS41DQoNCg==
+Currently for DDR50 card, it need tuning in default. We meet tuning fail
+issue for DDR50 card and some data CRC error when DDR50 sd card works.
+
+This is because the default pad I/O drive strength can't make sure DDR50
+card work stable. So increase the pad I/O drive strength for DDR50 card,
+and use pins_100mhz.
+
+Tested-and-reported-by: Tim Harvey <tharvey@gateworks.com>
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+Cc: stable@vger.kernel.org # v4.4+
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index cf666a0..abad67a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -830,6 +830,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 
+ 	switch (uhs) {
+ 	case MMC_TIMING_UHS_SDR50:
++	case MMC_TIMING_UHS_DDR50:
+ 		pinctrl = imx_data->pins_100mhz;
+ 		break;
+ 	case MMC_TIMING_UHS_SDR104:
+-- 
+1.9.1
+
