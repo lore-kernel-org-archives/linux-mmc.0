@@ -1,72 +1,44 @@
 From: Petr Cvek <petr.cvek@tul.cz>
-Subject: [PATCH 0/4] mmc: pxamci: better error handling + fix a race condition
-Date: Wed, 19 Apr 2017 01:16:00 +0200
-Message-ID: <12f3d97d-4e32-9144-3d71-cbc0a4bfb2c5@tul.cz>
+Subject: [PATCH 1/4] mmc: pxamci: Use the right flags for DMA callback init
+Date: Wed, 19 Apr 2017 01:16:26 +0200
+Message-ID: <fbc663e3-4de5-7370-afa8-0f8747f50ca7@tul.cz>
+References: <cover.1492492523.git.petr.cvek@tul.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bubo.tul.cz ([147.230.16.1]:32904 "EHLO bubo.tul.cz"
+Received: from bubo.tul.cz ([147.230.16.1]:32922 "EHLO bubo.tul.cz"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752196AbdDRXPf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 18 Apr 2017 19:15:35 -0400
+        id S1752196AbdDRXP7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Apr 2017 19:15:59 -0400
+In-Reply-To: <cover.1492492523.git.petr.cvek@tul.cz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, robert.jarzmik@free.fr
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi,
+The MMC_DATA_READ and the MMC_DATA_WRITE flags for the mmc request are not
+mutually exclusive (two different bits). Change the callback initialization
+code to use the proper one.
 
-This patchset deals with a very rare race condition [1] in the PXA MCI
-driver which was introduced by using the DMA callback tasklet after
-converting the driver for the usage of the kernel DMA engine. The consequent
-(and not strictly relevant) changes in the driver v4.7-v4.10 caused the bug
-to manifest, but only under a heavy load.
+Signed-off-by: Petr Cvek <petr.cvek@tul.cz>
+---
+ drivers/mmc/host/pxamci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-The PXA27x SoC is a little bit weird because when a DMA fills the write FIFO
-you must manually flush it. This is done in the callback of the DMA. After
-the flush a MCI interrupt is generated and the code continues.
-
-The problem is the read FIFO and the writes of the data sizes divisible by 32
-the MCI interrupt is generated immediately after end of the DMA. The driver
-trusted the DMA callback to spinlock the IRQ before MCI interrupt handler is
-called but it is not a valid solution as the DMA callback is using a tasklet
-which can be delayed for a very long time (during testing there was a few
-cases of a multiple tasklet scheduling before finally the tasklet started).
-
-The patchset makes the MCI interrupt dependent on the callback in a way that
-the interrupt is enabled only in the callback. The read path interrupt enable
-stays at the same place (before starting the DMA), it has been only restricted
-for the data read path.
-
-The patchset clarifies the code a little and adds a few error reports.
-
-The fix should not make the operation slower as the only slowdown may be
-in the case of write && weird length of data && heavy load (when the tasklet
-is delayed anyway).
-
-The patchset has been tested on the HTC Magician (PXA27x). I suggest a test
-on a different SoC (driver seems to be compatible with PXA300+). Any
-incompatibility can be probably fixed by something like cpu_is_pxa300().
-
-References:
-
-[1] "[BUG] dmaengine: pxa_dma: + mmc: pxamci: race condition with DMA error
-    on tx channel"
-    https://www.spinics.net/lists/linux-mmc/msg42899.html
-
-Thanks,
-
-Petr Cvek (4):
-  mmc: pxamci: Use the right flags for DMA callback init
-  mmc: pxamci: Enhance error checking
-  mmc: pxamci: Disable DATA_TRAN_DONE interrupt sooner
-  mmc: pxamci: Fix race condition between pxamci_dma_irq() and
-    pxamci_irq()
-
- drivers/mmc/host/pxamci.c | 46 +++++++++++++++++++++++++++++++++-------------
- 1 file changed, 33 insertions(+), 13 deletions(-)
-
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index c763b404510f..80bc8065b50f 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -235,7 +235,7 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+ 		return;
+ 	}
+ 
+-	if (!(data->flags & MMC_DATA_READ)) {
++	if (data->flags & MMC_DATA_WRITE) {
+ 		tx->callback = pxamci_dma_irq;
+ 		tx->callback_param = host;
+ 	}
 -- 
 2.11.0
 
