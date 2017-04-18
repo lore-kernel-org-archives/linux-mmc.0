@@ -1,78 +1,52 @@
-From: Daniel Vetter <daniel@ffwll.ch>
-Subject: Re: [PATCH 05/22] drm/i915: Make use of the new sg_map
- helper function
-Date: Tue, 18 Apr 2017 08:44:27 +0200
-Message-ID: <20170418064427.r5ewu3p66p2zwdru@phenom.ffwll.local>
-References: <1492121135-4437-1-git-send-email-logang@deltatee.com>
- <1492121135-4437-6-git-send-email-logang@deltatee.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: increase the pad I/O drive strength
+ for DDR50 card
+Date: Tue, 18 Apr 2017 10:01:15 +0300
+Message-ID: <46db055c-73b8-5aa0-cc33-021d528ee816@intel.com>
+References: <1492427402-5506-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <1492121135-4437-6-git-send-email-logang@deltatee.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Steve Wise <swise@opengridcomputing.com>, linux-nvme@lists.infradead.org, Stephen Bates <sbates@raithlin.com>, target-devel@vger.kernel.org, Sumit Semwal <sumit.semwal@linaro.org>, devel@driverdev.osuosl.org, rds-devel@oss.oracle.com, Sagi Grimberg <sagi@grimberg.me>, linux-scsi@vger.kernel.org, Matthew Wilcox <mawilcox@microsoft.com>, linux-rdma@vger.kernel.org, Christoph Hellwig <hch@lst.de>, fcoe-devel@open-fcoe.org, Ross Zwisler <ross.zwisler@linux.intel.com>, open-iscsi@googlegroups.com, linux-media@vger.kernel.org, Ming Lin <ming.l@ssi.samsung.com>, intel-gfx@lists.freedesktop.org, sparmaintainer@unisys.com, linux-raid@vger.kernel.org, dri-devel@lists.freedesktop.org, Dan Williams <dan.j.williams@intel.com>, megaraidlinux.pdl@broadcom.com, Jens Axboe <axboe@kernel.dk>, linaro-mm-sig@lists.linaro.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Greg
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:65453 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754706AbdDRHG5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Apr 2017 03:06:57 -0400
+In-Reply-To: <1492427402-5506-1-git-send-email-haibo.chen@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>, ulf.hansson@linaro.org, aisheng.dong@nxp.com
+Cc: tharvey@gateworks.com, stable@vger.kernel.org, linux-mmc@vger.kernel.org
 
-T24gVGh1LCBBcHIgMTMsIDIwMTcgYXQgMDQ6MDU6MThQTSAtMDYwMCwgTG9nYW4gR3VudGhvcnBl
-IHdyb3RlOgo+IFRoaXMgaXMgYSBzaW5nbGUgc3RyYWlnaHRmb3J3YXJkIGNvbnZlcnNpb24gZnJv
-bSBrbWFwIHRvIHNnX21hcC4KPiAKPiBTaWduZWQtb2ZmLWJ5OiBMb2dhbiBHdW50aG9ycGUgPGxv
-Z2FuZ0BkZWx0YXRlZS5jb20+CgpBY2tlZC1ieTogRGFuaWVsIFZldHRlciA8ZGFuaWVsLnZldHRl
-ckBmZndsbC5jaD4KClByb2JhYmx5IG1ha2VzIHNlbnNlIHRvIG1lcmdlIHRocm91Z2ggc29tZSBv
-dGhlciB0cmVlLCBidXQgcGxlYXNlIGJlIGF3YXJlCm9mIHRoZSBjb25zaWRlcmFibGUgY2h1cm4g
-cmF0ZSBpbiBpOTE1IChpLmUuIG1ha2Ugc3VyZSB5b3VyIHRyZWUgaXMgaW4KbGludXgtbmV4dCBi
-ZWZvcmUgeW91IHNlbmQgYSBwdWxsIHJlcXVlc3QgZm9yIHRoaXMpLiBQbGFuZSBCIHdvdWxkIGJl
-IHRvCmdldCB0aGUgcHJlcCBwYXRjaCBpbiBmaXJzdCBhbmQgdGhlbiBtZXJnZSB0aGUgaTkxNSBj
-b252ZXJzaW9uIG9uZSBrZXJuZWwKcmVsZWFzZSBsYXRlci4KLURhbmllbAoKPiAtLS0KPiAgZHJp
-dmVycy9ncHUvZHJtL2k5MTUvaTkxNV9nZW0uYyB8IDI3ICsrKysrKysrKysrKysrKystLS0tLS0t
-LS0tLQo+ICAxIGZpbGUgY2hhbmdlZCwgMTYgaW5zZXJ0aW9ucygrKSwgMTEgZGVsZXRpb25zKC0p
-Cj4gCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZ3B1L2RybS9pOTE1L2k5MTVfZ2VtLmMgYi9kcml2
-ZXJzL2dwdS9kcm0vaTkxNS9pOTE1X2dlbS5jCj4gaW5kZXggNjdiMWZjNS4uMWIxYjkxYSAxMDA2
-NDQKPiAtLS0gYS9kcml2ZXJzL2dwdS9kcm0vaTkxNS9pOTE1X2dlbS5jCj4gKysrIGIvZHJpdmVy
-cy9ncHUvZHJtL2k5MTUvaTkxNV9nZW0uYwo+IEBAIC0yMTg4LDYgKzIxODgsMTUgQEAgc3RhdGlj
-IHZvaWQgX19pOTE1X2dlbV9vYmplY3RfcmVzZXRfcGFnZV9pdGVyKHN0cnVjdCBkcm1faTkxNV9n
-ZW1fb2JqZWN0ICpvYmopCj4gIAkJcmFkaXhfdHJlZV9kZWxldGUoJm9iai0+bW0uZ2V0X3BhZ2Uu
-cmFkaXgsIGl0ZXIuaW5kZXgpOwo+ICB9Cj4gIAo+ICtzdGF0aWMgdm9pZCBpOTE1X2dlbV9vYmpl
-Y3RfdW5tYXAoY29uc3Qgc3RydWN0IGRybV9pOTE1X2dlbV9vYmplY3QgKm9iaiwKPiArCQkJCSAg
-dm9pZCAqcHRyKQo+ICt7Cj4gKwlpZiAoaXNfdm1hbGxvY19hZGRyKHB0cikpCj4gKwkJdnVubWFw
-KHB0cik7Cj4gKwllbHNlCj4gKwkJc2dfdW5tYXAob2JqLT5tbS5wYWdlcy0+c2dsLCBwdHIsIFNH
-X0tNQVApOwo+ICt9Cj4gKwo+ICB2b2lkIF9faTkxNV9nZW1fb2JqZWN0X3B1dF9wYWdlcyhzdHJ1
-Y3QgZHJtX2k5MTVfZ2VtX29iamVjdCAqb2JqLAo+ICAJCQkJIGVudW0gaTkxNV9tbV9zdWJjbGFz
-cyBzdWJjbGFzcykKPiAgewo+IEBAIC0yMjE1LDEwICsyMjI0LDcgQEAgdm9pZCBfX2k5MTVfZ2Vt
-X29iamVjdF9wdXRfcGFnZXMoc3RydWN0IGRybV9pOTE1X2dlbV9vYmplY3QgKm9iaiwKPiAgCQl2
-b2lkICpwdHI7Cj4gIAo+ICAJCXB0ciA9IHB0cl9tYXNrX2JpdHMob2JqLT5tbS5tYXBwaW5nKTsK
-PiAtCQlpZiAoaXNfdm1hbGxvY19hZGRyKHB0cikpCj4gLQkJCXZ1bm1hcChwdHIpOwo+IC0JCWVs
-c2UKPiAtCQkJa3VubWFwKGttYXBfdG9fcGFnZShwdHIpKTsKPiArCQlpOTE1X2dlbV9vYmplY3Rf
-dW5tYXAob2JqLCBwdHIpOwo+ICAKPiAgCQlvYmotPm1tLm1hcHBpbmcgPSBOVUxMOwo+ICAJfQo+
-IEBAIC0yNDc1LDggKzI0ODEsMTEgQEAgc3RhdGljIHZvaWQgKmk5MTVfZ2VtX29iamVjdF9tYXAo
-Y29uc3Qgc3RydWN0IGRybV9pOTE1X2dlbV9vYmplY3QgKm9iaiwKPiAgCXZvaWQgKmFkZHI7Cj4g
-IAo+ICAJLyogQSBzaW5nbGUgcGFnZSBjYW4gYWx3YXlzIGJlIGttYXBwZWQgKi8KPiAtCWlmIChu
-X3BhZ2VzID09IDEgJiYgdHlwZSA9PSBJOTE1X01BUF9XQikKPiAtCQlyZXR1cm4ga21hcChzZ19w
-YWdlKHNndC0+c2dsKSk7Cj4gKwlpZiAobl9wYWdlcyA9PSAxICYmIHR5cGUgPT0gSTkxNV9NQVBf
-V0IpIHsKPiArCQlhZGRyID0gc2dfbWFwKHNndC0+c2dsLCBTR19LTUFQKTsKPiArCQlpZiAoSVNf
-RVJSKGFkZHIpKQo+ICsJCQlyZXR1cm4gTlVMTDsKPiArCX0KPiAgCj4gIAlpZiAobl9wYWdlcyA+
-IEFSUkFZX1NJWkUoc3RhY2tfcGFnZXMpKSB7Cj4gIAkJLyogVG9vIGJpZyBmb3Igc3RhY2sgLS0g
-YWxsb2NhdGUgdGVtcG9yYXJ5IGFycmF5IGluc3RlYWQgKi8KPiBAQCAtMjU0MywxMSArMjU1Miw3
-IEBAIHZvaWQgKmk5MTVfZ2VtX29iamVjdF9waW5fbWFwKHN0cnVjdCBkcm1faTkxNV9nZW1fb2Jq
-ZWN0ICpvYmosCj4gIAkJCWdvdG8gZXJyX3VucGluOwo+ICAJCX0KPiAgCj4gLQkJaWYgKGlzX3Zt
-YWxsb2NfYWRkcihwdHIpKQo+IC0JCQl2dW5tYXAocHRyKTsKPiAtCQllbHNlCj4gLQkJCWt1bm1h
-cChrbWFwX3RvX3BhZ2UocHRyKSk7Cj4gLQo+ICsJCWk5MTVfZ2VtX29iamVjdF91bm1hcChvYmos
-IHB0cik7Cj4gIAkJcHRyID0gb2JqLT5tbS5tYXBwaW5nID0gTlVMTDsKPiAgCX0KPiAgCj4gLS0g
-Cj4gMi4xLjQKPiAKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXwo+IGRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKPiBkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0
-b3Aub3JnCj4gaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9k
-cmktZGV2ZWwKCi0tIApEYW5pZWwgVmV0dGVyClNvZnR3YXJlIEVuZ2luZWVyLCBJbnRlbCBDb3Jw
-b3JhdGlvbgpodHRwOi8vYmxvZy5mZndsbC5jaApfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpJbnRlbC1nZnggbWFpbGluZyBsaXN0CkludGVsLWdmeEBsaXN0
-cy5mcmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9s
-aXN0aW5mby9pbnRlbC1nZngK
+On 17/04/17 14:10, Haibo Chen wrote:
+> Currently for DDR50 card, it need tuning in default. We meet tuning fail
+> issue for DDR50 card and some data CRC error when DDR50 sd card works.
+> 
+> This is because the default pad I/O drive strength can't make sure DDR50
+> card work stable. So increase the pad I/O drive strength for DDR50 card,
+> and use pins_100mhz.
+> 
+> Tested-and-reported-by: Tim Harvey <tharvey@gateworks.com>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Cc: stable@vger.kernel.org # v4.4+
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index cf666a0..abad67a 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -830,6 +830,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+>  
+>  	switch (uhs) {
+>  	case MMC_TIMING_UHS_SDR50:
+> +	case MMC_TIMING_UHS_DDR50:
+>  		pinctrl = imx_data->pins_100mhz;
+>  		break;
+>  	case MMC_TIMING_UHS_SDR104:
+> 
+
