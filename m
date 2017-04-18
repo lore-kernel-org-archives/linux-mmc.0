@@ -1,82 +1,72 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH 1/3] mmc: sdio: Add API to manage SDIO IRQs from a workqueue
-Date: Tue, 18 Apr 2017 14:43:34 -0700
-Message-ID: <CAD=FV=XMk4+86WaCWjuf3NVwRoEubjcY+zQhH-hsb=H3sRpw0A@mail.gmail.com>
-References: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org> <1492518724-30511-2-git-send-email-ulf.hansson@linaro.org>
+From: Petr Cvek <petr.cvek@tul.cz>
+Subject: [PATCH 0/4] mmc: pxamci: better error handling + fix a race condition
+Date: Wed, 19 Apr 2017 01:16:00 +0200
+Message-ID: <12f3d97d-4e32-9144-3d71-cbc0a4bfb2c5@tul.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:34374 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751977AbdDRVnh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2017 17:43:37 -0400
-Received: by mail-wr0-f174.google.com with SMTP id z109so3577547wrb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2017 14:43:36 -0700 (PDT)
-In-Reply-To: <1492518724-30511-2-git-send-email-ulf.hansson@linaro.org>
+Received: from bubo.tul.cz ([147.230.16.1]:32904 "EHLO bubo.tul.cz"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752196AbdDRXPf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Apr 2017 19:15:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: ulf.hansson@linaro.org, robert.jarzmik@free.fr
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
 Hi,
 
-On Tue, Apr 18, 2017 at 5:32 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> For hosts not supporting MMC_CAP2_SDIO_IRQ_NOTHREAD but MMC_CAP_SDIO_IRQ,
-> the SDIO IRQs are processed from a dedicated kernel thread. For these
-> cases, the host calls mmc_signal_sdio_irq() from its ISR to signal a new
-> SDIO IRQ.
->
-> Signaling an SDIO IRQ makes the host's ->enable_sdio_irq() callback to be
-> invoked to temporary disable the IRQs, before the kernel thread is woken up
-> to process it. When processing of the IRQs are completed, they are
-> re-enabled by the kernel thread, again via invoking the host's
-> ->enable_sdio_irq().
->
-> The observation from this, is that the execution path is being unnecessary
-> complex, as the host driver already knows that it needs to temporary
-> disable the IRQs before signaling a new one. Moreover, replacing the kernel
-> thread with a work/workqueue would greatly simplify the code.
->
-> To address the above problems, let's continue to build upon the support for
-> MMC_CAP2_SDIO_IRQ_NOTHREAD, as it already implements SDIO IRQs to be
-> processed without using the clumsy kernel thread, but it also avoids the
-> ping-ponging calls of the host's ->enable_sdio_irq() callback for each
-> processed IRQ.
->
-> Therefore, let's add new API sdio_signal_irq(), which enables hosts to
-> signal/process SDIO IRQs by using a work/workqueue, rather than using the
-> kernel thread.
->
-> Add also a new host callback ->ack_sdio_irq(), which the work invokes when
-> the SDIO IRQs are processed. This informs the host about when it can
-> re-enable the SDIO IRQs. Potentially, we could re-use the existing
-> ->enable_sdio_irq() callback for this matter, however it has turned out
-> that it's more convenient for hosts to get this information via a separate
-> callback.
->
-> Hosts needs to enable MMC_CAP2_SDIO_IRQ_NOTHREAD to use this new feature,
-> however the feature is optional for already existing hosts suppporting
-> MMC_CAP2_SDIO_IRQ_NOTHREAD.
->
-> It's likely that all host can convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD and
-> benefit from this feature. Further changes will have to tell. Until then
-> the old path using the kernel thread remains possible.
+This patchset deals with a very rare race condition [1] in the PXA MCI
+driver which was introduced by using the DMA callback tasklet after
+converting the driver for the usage of the kernel DMA engine. The consequent
+(and not strictly relevant) changes in the driver v4.7-v4.10 caused the bug
+to manifest, but only under a heavy load.
 
-So one other subtle problem with the new approach is that you totally
-lose all of the polling logic in sdio_irq_thread().
+The PXA27x SoC is a little bit weird because when a DMA fills the write FIFO
+you must manually flush it. This is done in the callback of the DMA. After
+the flush a MCI interrupt is generated and the code continues.
 
-...so if I take your series and then comment out "cap-sdio-irq;" in
-the veyron "dtsi" then things stop working.  Right now dw_mmc only
-enables SDIO Interrupts if that bit is set and relies on polling
-otherwise.  Presumably there's not a _huge_ reason why you would need
-to make dw_mmc work without actual SDIO IRQ signaling, but the way the
-code is structured right now things will probably break for some users
-out there.
+The problem is the read FIFO and the writes of the data sizes divisible by 32
+the MCI interrupt is generated immediately after end of the DMA. The driver
+trusted the DMA callback to spinlock the IRQ before MCI interrupt handler is
+called but it is not a valid solution as the DMA callback is using a tasklet
+which can be delayed for a very long time (during testing there was a few
+cases of a multiple tasklet scheduling before finally the tasklet started).
 
-One note is that I remember on exynos5250-snow that we needed to
-enable a hybrid interrupt/polling mechanism.  The problem we ran into
-was terribly rare and it was never root caused if there was just some
-subtle bug or if certain versions of dw_mmc sometimes just dropped
-interrupts (and the patch was never upstreamed), so possibly we don't
-care.  ...but having the polling code there as a fallback seems like
-it could have a benefit.
+The patchset makes the MCI interrupt dependent on the callback in a way that
+the interrupt is enabled only in the callback. The read path interrupt enable
+stays at the same place (before starting the DMA), it has been only restricted
+for the data read path.
+
+The patchset clarifies the code a little and adds a few error reports.
+
+The fix should not make the operation slower as the only slowdown may be
+in the case of write && weird length of data && heavy load (when the tasklet
+is delayed anyway).
+
+The patchset has been tested on the HTC Magician (PXA27x). I suggest a test
+on a different SoC (driver seems to be compatible with PXA300+). Any
+incompatibility can be probably fixed by something like cpu_is_pxa300().
+
+References:
+
+[1] "[BUG] dmaengine: pxa_dma: + mmc: pxamci: race condition with DMA error
+    on tx channel"
+    https://www.spinics.net/lists/linux-mmc/msg42899.html
+
+Thanks,
+
+Petr Cvek (4):
+  mmc: pxamci: Use the right flags for DMA callback init
+  mmc: pxamci: Enhance error checking
+  mmc: pxamci: Disable DATA_TRAN_DONE interrupt sooner
+  mmc: pxamci: Fix race condition between pxamci_dma_irq() and
+    pxamci_irq()
+
+ drivers/mmc/host/pxamci.c | 46 +++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 33 insertions(+), 13 deletions(-)
+
+-- 
+2.11.0
+
