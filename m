@@ -1,104 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/3] mmc: dw_mmc: Convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs
-Date: Tue, 18 Apr 2017 14:32:03 +0200
-Message-ID: <1492518724-30511-3-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 3/3] mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs are enabled
+Date: Tue, 18 Apr 2017 14:32:04 +0200
+Message-ID: <1492518724-30511-4-git-send-email-ulf.hansson@linaro.org>
 References: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:34065 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753110AbdDRMcL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2017 08:32:11 -0400
-Received: by mail-wr0-f173.google.com with SMTP id z109so101438901wrb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2017 05:32:10 -0700 (PDT)
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:37972 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755396AbdDRMcM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2017 08:32:12 -0400
+Received: by mail-wm0-f51.google.com with SMTP id r190so13324135wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2017 05:32:11 -0700 (PDT)
 In-Reply-To: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@google.com>
 
-Convert to use the more lightweight method for processing SDIO IRQs, which
-involves the following changes:
+To be able to handle SDIO IRQs the dw_mmc device needs to be powered and
+providing clock to the SDIO card. Therefore, we must not allow the device
+to be runtime PM suspended while SDIO IRQs are enabled.
 
-- Enable MMC_CAP2_SDIO_IRQ_NOTHREAD when SDIO IRQ is supported.
-- Mask SDIO IRQ when signaling it for processing.
-- Re-enable (unmask) the SDIO IRQ from the ->ack_sdio_irq() callback.
+To fix this, let's increase the runtime PM usage count while the mmc core
+enables SDIO IRQs. Later when the mmc core tells dw_mmc to disable SDIO
+IRQs, we drop the usage count to again allow runtime PM suspend.
+
+This now becomes the default behaviour for dw_mmc. In cases where SDIO IRQs
+can be re-routed as GPIO wake-ups during runtime PM suspend, one could
+potentially allow runtime PM suspend. However, that will have to be
+addressed as a separate change on top of this one.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++---
- 1 file changed, 26 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 249ded6..f086791 100644
+index f086791..4256957 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1635,9 +1635,8 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
- 	}
- }
+@@ -38,6 +38,7 @@
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
+ #include <linux/mmc/slot-gpio.h>
++#include <linux/pm_runtime.h>
  
--static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
- {
--	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
- 	unsigned long irqflags;
- 	u32 int_mask;
-@@ -1655,6 +1654,20 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
- }
+ #include "dw_mmc.h"
  
-+static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+
-+	__dw_mci_enable_sdio_irq(slot, enb);
-+}
-+
-+static void dw_mci_ack_sdio_irq(struct mmc_host *mmc)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+
-+	__dw_mci_enable_sdio_irq(slot, 1);
-+}
-+
- static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+@@ -1657,8 +1658,15 @@ static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
+ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
  {
  	struct dw_mci_slot *slot = mmc_priv(mmc);
-@@ -1756,6 +1769,7 @@ static const struct mmc_host_ops dw_mci_ops = {
- 	.get_cd			= dw_mci_get_cd,
- 	.hw_reset               = dw_mci_hw_reset,
- 	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
-+	.ack_sdio_irq		= dw_mci_ack_sdio_irq,
- 	.execute_tuning		= dw_mci_execute_tuning,
- 	.card_busy		= dw_mci_card_busy,
- 	.start_signal_voltage_switch = dw_mci_switch_voltage,
-@@ -2645,9 +2659,14 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 				continue;
++	struct dw_mci *host = slot->host;
  
- 			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
-+				u32 int_mask;
+ 	__dw_mci_enable_sdio_irq(slot, enb);
 +
- 				mci_writel(host, RINTSTS,
- 					   SDMMC_INT_SDIO(slot->sdio_id));
--				mmc_signal_sdio_irq(slot->mmc);
-+				int_mask = mci_readl(host, INTMASK);
-+				int_mask &= ~SDMMC_INT_SDIO(slot->sdio_id);
-+				mci_writel(host, INTMASK, int_mask);
-+				sdio_signal_irq(slot->mmc);
- 			}
- 		}
++	/* Avoid runtime suspending the device when SDIO IRQ is enabled */
++	if (enb)
++		pm_runtime_get_noresume(host->dev);
++	else
++		pm_runtime_put_noidle(host->dev);
+ }
  
-@@ -2748,6 +2767,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (ret)
- 		goto err_host_allocated;
- 
-+	/* Process SDIO IRQs through the sdio_irq_work. */
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-+
- 	/* Useful defaults if platform data is unset. */
- 	if (host->use_dma == TRANS_MODE_IDMAC) {
- 		mmc->max_segs = host->ring_size;
+ static void dw_mci_ack_sdio_irq(struct mmc_host *mmc)
 -- 
 2.7.4
 
