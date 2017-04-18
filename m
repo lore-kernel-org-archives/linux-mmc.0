@@ -1,36 +1,61 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: increase the pad I/O drive
- strength for DDR50 card
-Date: Tue, 18 Apr 2017 18:23:40 +0800
-Message-ID: <20170418102340.GB19365@b29396-OptiPlex-7040>
-References: <1492427402-5506-1-git-send-email-haibo.chen@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: SDR104 card, Intel Joule and Linux 4.11
+Date: Tue, 18 Apr 2017 13:27:51 +0300
+Message-ID: <f6080192-30a5-ee81-fb19-7ebb4e0ff56b@intel.com>
+References: <CAE+8NkJhOGGrWD1NeLk1AoNtdOqwoMtbpWFgbSoo0O1kdtQuZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:33607 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755382AbdDRKXr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2017 06:23:47 -0400
-Content-Disposition: inline
-In-Reply-To: <1492427402-5506-1-git-send-email-haibo.chen@nxp.com>
+Received: from mga06.intel.com ([134.134.136.31]:61100 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932413AbdDRKdd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 18 Apr 2017 06:33:33 -0400
+In-Reply-To: <CAE+8NkJhOGGrWD1NeLk1AoNtdOqwoMtbpWFgbSoo0O1kdtQuZw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com, tharvey@gateworks.com, stable@vger.kernel.org, linux-mmc@vger.kernel.org
+To: John Ewalt <johnewalt@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Mon, Apr 17, 2017 at 07:10:02PM +0800, Haibo Chen wrote:
-> Currently for DDR50 card, it need tuning in default. We meet tuning fail
-> issue for DDR50 card and some data CRC error when DDR50 sd card works.
+On 17/04/17 03:36, John Ewalt wrote:
+> Hi all,
 > 
-> This is because the default pad I/O drive strength can't make sure DDR50
-> card work stable. So increase the pad I/O drive strength for DDR50 card,
-> and use pins_100mhz.
+> I am not sure if this is the right way to ask a question about SD cards, so
+> please correct me as I am new to Linux kernel development. 
 > 
-> Tested-and-reported-by: Tim Harvey <tharvey@gateworks.com>
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Cc: stable@vger.kernel.org # v4.4+
+> I am currently working with a Intel Joule SOM and development board (Broxton
+> M core) and when I insert the SD card, it is recognized as a SDR104 UHS-I
+> card.  Since this host has the MMC_CAP_AGGRESSIVE_PM bit set, it is
+> suspended.  That all works as expected.  When the card is resumed, the OCR
+> is read expecting bit 24 (switch to 1.8 V accepted (S18A)) to be set, but it
+> is clear as the card is still at 1.8v signaling since it was never powered
+> down during the suspend.  
 
-Acked-by: Dong Aisheng <aisheng.dong@nxp.com>
+I would expect the power to go off.  AFAICS there is ASL in the host
+controllers _PS3 method to tell the PMIC to do that.
 
-Regards
-Dong Aisheng
+> 
+> I see 3 ways to solve this problem:
+> First, power down the card during suspend.  I think this is the intended
+> behavior but there is no power manager registered to this host (as compiled)
+> and I'm not sure how to add one, let alone the hardware changes necessary to
+> implement the powering down of the sd card.
+> 
+> Second, don't suspend (I have tested this and it works as the card is not
+> suspended) 
+> 
+> Third, the host could remember that the card was at 1.8v signaling and if it
+> will not "switch" to 1.8v, assume it is at 1.8v and go through the uhs_setup
+> anyway.  I have tried this too and it works for UHS cards, but I doubt it
+> would be the right change.
+> 
+> 
+> I would appreciate any help or direction anyone can provide as I would
+> really like to use my fast card at the full data rates.  I am currently
+> setup to test any suggestions you have.  
+> 
+> Thank you all,
+> 
+> -John
+> 
+
