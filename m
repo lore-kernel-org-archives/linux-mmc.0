@@ -1,84 +1,77 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: Outstanding MQ questions from MMC
-Date: Tue, 18 Apr 2017 15:31:22 +0000
-Message-ID: <34FA1610-93EF-441A-B8B9-F1DD6B706398@sandisk.com>
-References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
- <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
- <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
- <CAK8P3a1yJJ33R9EPPcErLUO2enFGrSJzWmVRwHdHP+3_2iP7ow@mail.gmail.com>
- <CACRpkdYsWnXLZEpZr74pLB8zjTV4Q=sdAfX+sz0n_E46SaJa9Q@mail.gmail.com>
- <BY2PR0401MB0901B37DB60608662AE5C631E5050@BY2PR0401MB0901.namprd04.prod.outlook.com>
- <CACRpkdbstMEC-_JcEfEm1debQRPeYBDmTPm0L_jGFnrgRZg1Zw@mail.gmail.com>
- <BY2PR0401MB0901B0167734FEFB7F1E5DF6E5040@BY2PR0401MB0901.namprd04.prod.outlook.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Subject: Re: [PATCH 16/22] xen-blkfront: Make use of the new sg_map helper
+ function
+Date: Tue, 18 Apr 2017 09:42:20 -0600
+Message-ID: <7930aa93-6106-e12f-ba76-e2771d4ec2dc@deltatee.com>
+References: <1492121135-4437-1-git-send-email-logang@deltatee.com>
+ <1492121135-4437-17-git-send-email-logang@deltatee.com>
+ <063D6719AE5E284EB5DD2968C1650D6DCFFD3CD7@AcuExch.aculab.com>
+ <20170418142723.GA27133@char.us.oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:65151 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752292AbdDRPbg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2017 11:31:36 -0400
-In-Reply-To: <BY2PR0401MB0901B0167734FEFB7F1E5DF6E5040@BY2PR0401MB0901.namprd04.prod.outlook.com>
-Content-Language: en-US
-Content-ID: <BAC264AE3EC97541AFA99C91DC12320E@namprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20170418142723.GA27133@char.us.oracle.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, David Laight <David.Laight@ACULAB.COM>, xen-devel@lists.xensource.com
+Cc: "linux-nvdimm@lists.01.org" <linux-nvdimm@ml01.01.org>, Steve Wise <swise@opengridcomputing.com>, "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>, "target-devel@vger.kernel.org" <target-devel@vger.kernel.org>, Sumit Semwal <sumit.semwal@linaro.org>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "rds-devel@oss.oracle.com" <rds-devel@oss.oracle.com>, Sagi Grimberg <sagi@grimberg.me>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Matthew Wilcox <mawilcox@microsoft.com>, "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, "fcoe-devel@open-fcoe.org" <fcoe-devel@open-fcoe.org>, Ross Zwisler <ross.zwisler@linux.intel.com>, "open-iscsi@googlegroups.com" <open-iscsi@googlegroups.com>, "linux-media@vger.kernel.org" <linux-media@vger.kernel.org>, Ming Lin <ming.l@ssi.samsung.com>, intel-gfx@list
 List-Id: linux-mmc@vger.kernel.org
-To: Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, "ulf. org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 
-VGhlcmUgaXMgYW4gYWRkaXRpb25hbCBmdW5jdGlvbmFsaXR5LCB3aGljaCBpcyByZXF1aXJlIHRo
-ZSBob3N0IGxvY2sNCnRvIGJlIGhlbGQgZm9yIHNldmVyYWwgd3JpdGUgY29tbWFuZHMgLSB0aGUg
-RkZVLg0KSW4gY2FzZSBvZiBGRlUsIHRoZSBGVyBjYW4gYmUgZG93bmxvYWQvd3JpdGUgaW4gc2V2
-ZXJhbCBpdGVyYXRpb25zDQpvZiBXcml0ZSBjb21tYW5kIChDTUQyNSkuIFRoaXMgc2VxdWVuY2Ug
-c2hvdWxkIG5vdCBiZSBpbnRlcnJ1cHRlZCBieSByZWd1bGFyDQpXcml0ZSByZXF1ZXN0cy4NCklu
-IGN1cnJlbnQgZHJpdmVyLCBib3RoIEZGVSBhbmQgUlBNQiBjYW4gYmUgc2VudCBieSB1c2luZyBt
-bWNfYmxrX2lvY3RsX211bHRpX2NtZCgpLg0KDQpUaGFua3MsDQpBbGV4DQoNCg0KPiBPbiBBcHIg
-MTUsIDIwMTcsIGF0IDEwOjI0IFBNLCBBdnJpIEFsdG1hbiA8QXZyaS5BbHRtYW5Ac2FuZGlzay5j
-b20+IHdyb3RlOg0KPiANCj4gWW91IGNhbiBzZWUgaG93IGl0J3MgZG9uZSBpbiBtbWNfYmxrX2lv
-Y3RsX3JwbWJfY21kKCkuDQo+IA0KPiBUaGUgUlBNQiBwcm90b2NvbCBkZWZpbmVzIDYgdHlwZXMg
-b2YgYWNjZXNzZXM6DQo+IEFjY2Vzc2VzIHRoYXQgcGVyZm9ybXMgcmVhZCBvcGVyYXRpb24gKHJl
-YWQgY291bnRlciwgcmVhZCBkYXRhLCBhbmQgcmVhZCBjb25maWd1cmF0aW9uKSAtIHJlcXVpcmVz
-IHNlbmRpbmcgMiByZXF1ZXN0cy4gDQo+IEFjY2Vzc2VzIHRoYXQgcGVyZm9ybXMgd3JpdGUgb3Bl
-cmF0aW9uIChwcm9ncmFtIGtleSwgd3JpdGUgZGF0YSwgd3JpdGUgY29uZmlndXJhdGlvbikgLSBy
-ZXF1aXJlcyBzZW5kaW5nIDMgcmVxdWVzdHMsDQo+IEJ1dCB5b3UgbXVzdCBkbyByZWFkIGNvdW50
-ZXIgYmVmb3JlaGFuZCAoYWNjZXB0IGZyb20gcHJvZ3JhbSBrZXkpLCBoZW5jZSB0aGUgNSBkaWZm
-ZXJlbnQgcmVxdWVzdHMuDQo+IA0KPiBUaGUgc3RhbmRhcmQgZG9lcyBub3QgZGVmaW5lIGEgInNw
-ZWNpYWwiIHJlcXVlc3QgdGhhdCBkb2VzIGl0IGFsbCBpbiBvbmNlLCANCj4gYnV0IGV4cGVjdHMg
-YSBwcmUtZGVmaW5lIHNlcmllcyBvZiBjbWQxOCAmIGNtZDI1IGZvciBlYWNoIGFjY2VzcyB0eXBl
-LCANCj4gaW4gd2hpY2ggdGhlIHBheWxvYWQgYXJlIDUxMiBieXRlcyBmcmFtZXMgaW4gYSBwcmUt
-ZGVmaW5lZCBzdHJ1Y3R1cmUuDQo+IA0KPiBDaGVlcnMsDQo+IEF2cmkNCj4gDQo+PiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogTGludXMgV2FsbGVpaiBbbWFpbHRvOmxpbnVz
-LndhbGxlaWpAbGluYXJvLm9yZ10NCj4+IFNlbnQ6IFNhdHVyZGF5LCBBcHJpbCAxNSwgMjAxNyA5
-OjM1IFBNDQo+PiBUbzogQXZyaSBBbHRtYW4gPEF2cmkuQWx0bWFuQHNhbmRpc2suY29tPg0KPj4g
-Q2M6IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+OyBVbGYgSGFuc3Nvbg0KPj4gPHVsZi5o
-YW5zc29uQGxpbmFyby5vcmc+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC0NCj4+
-IGJsb2NrQHZnZXIua2VybmVsLm9yZzsgSmVucyBBeGJvZSA8YXhib2VAa2VybmVsLmRrPjsgQ2hy
-aXN0b3BoIEhlbGx3aWcNCj4+IDxoY2hAbHN0LmRlPjsgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1
-bnRlckBpbnRlbC5jb20+OyBQYW9sbyBWYWxlbnRlDQo+PiA8cGFvbG8udmFsZW50ZUBsaW5hcm8u
-b3JnPg0KPj4gU3ViamVjdDogUmU6IE91dHN0YW5kaW5nIE1RIHF1ZXN0aW9ucyBmcm9tIE1NQw0K
-Pj4gDQo+PiBPbiBGcmksIEFwciAxNCwgMjAxNyBhdCA4OjQxIFBNLCBBdnJpIEFsdG1hbiA8QXZy
-aS5BbHRtYW5Ac2FuZGlzay5jb20+DQo+PiB3cm90ZToNCj4+PiBbTWVdDQo+Pj4+IDIuIFR1cm4g
-UlBNQiBhbmQgb3RoZXIgaW9jdGwoKSBNTUMgb3BlcmF0aW9ucyBpbnRvIG1tY19xdWV1ZV9yZXEN
-Cj4+Pj4gICB0aGluZ3MgYW5kIGZ1bm5lbCB0aGVtIGludG8gdGhlIGJsb2NrIHNjaGVkdWxlcg0K
-Pj4+PiAgIHVzaW5nIFJFUV9PUF9EUlZfSU4vT1VUIHJlcXVlc3RzLg0KPj4+PiANCj4+PiANCj4+
-PiBBY2Nlc3NpbmcgdGhlIFJQTUIgaXMgZG9uZSB2aWEgYSBzdHJhbmdlIHByb3RvY29sLCBpbiB3
-aGljaCBlYWNoIGFjY2VzcyBpcw0KPj4gY29tcHJpc2VkIG9mIHNldmVyYWwgcmVxdWVzdHMuDQo+
-Pj4gRm9yIGV4YW1wbGUsIHdyaXRpbmcgdG8gdGhlIFJQTUIgd2lsbCByZXF1aXJlIHNlbmRpbmcg
-NSBkaWZmZXJlbnQgcmVxdWVzdHM6DQo+Pj4gMiByZXF1ZXN0cyB0byByZWFkIHRoZSB3cml0ZSBj
-b3VudGVyLCBhbmQgdGhlbiAzIG1vcmUgcmVxdWVzdHMgZm9yIHRoZQ0KPj4gd3JpdGUgb3BlcmF0
-aW9uIGl0c2VsZi4NCj4+PiANCj4+PiBPbmNlIHRoZSBzZXF1ZW5jZSBoYXMgc3RhcnRlZCwgaXQg
-c2hvdWxkIG5vdCBnZXQgaW50ZXJmZXJlZCBieSBvdGhlcg0KPj4gcmVxdWVzdHMsIG9yIHRoZSBv
-cGVyYXRpb24gd2lsbCBmYWlsLg0KPj4gDQo+PiBTbyBJIGd1ZXNzIGN1cnJlbnRseSBzb21ldGhp
-bmcgdGFrZXMgYSBob3N0IGxvY2sgYW5kIHRoZW4gcGVyZm9ybXMgdGhlDQo+PiA1IHJlcXVlc3Rz
-Lg0KPj4gDQo+PiBUaHVzIHdlIG5lZWQgdG8gc2VuZCBhIHNpbmdsZSBjdXN0b20gcmVxdWVzdCBj
-b250YWluaW5nIGEgbGlzdCBvZiA1IHRoaW5ncyB0bw0KPj4gZG8sIGFuZCByZXR1cm4gYWZ0ZXIg
-dGhhdC4NCj4+IA0KPj4gT3IgZG8geW91IG1lYW4gdGhhdCB3ZSByZXR1cm4gdG8gdXNlcnNwYWNl
-IGluYmV0d2VlbiB0aGVzZSBkaWZmZXJlbnQNCj4+IHJlcXVlc3RzIGFuZCB0aGUgc2VxdWVuY2lu
-ZyBpcyBkb25lIGluIHVzZXJzcGFjZT8NCj4+IA0KPj4gSSBob3BlIG5vdCBiZWNhdXNlIHRoYXQg
-c291bmRzIGZyYWdpbGUsIGxpa2UgdXNlcnNwYWNlIGNvdWxkIGNyYXNoIGFuZCBsZWF2ZQ0KPj4g
-dGhlIGhvc3QgbG9jayBkYW5nbGluZyA6Lw0KPj4gDQo+PiBZb3VycywNCj4+IExpbnVzIFdhbGxl
-aWoNCj4gE++/ve+/vey5uxzvv70m77+9fu+/vSbvv70Y77+977+9Ky3vv73vv73dthfvv73vv713
-77+977+9y5vvv73vv73vv71t77+9Yu+/ve+/vWbvv73Ip++/vRfvv73vv73cqH3vv73vv73vv73G
-oHrvv70majordu+/ve+/ve+/vQfvv73vv73vv73vv716Wivvv73vv70rembvv73vv73vv71o77+9
-77+977+9fu+/ve+/ve+/ve+/vWnvv73vv73vv71677+9Hu+/vXfvv73vv73vv70/77+977+977+9
-77+9Ju+/vSnfohtmDQoNCg==
+
+
+On 18/04/17 08:27 AM, Konrad Rzeszutek Wilk wrote:
+> Interesting that you didn't CC any of the maintainers. Could you 
+> do that in the future please?
+
+Please read the cover letter. The distribution list for the patchset
+would have been way too large to cc every maintainer (even as limited as
+it was, I had mailing lists yelling at me). My plan was to get buy in
+for the first patch, get it merged and resend the rest independently to
+their respective maintainers. Of course, though, I'd be open to other
+suggestions.
+
+>>>
+>>> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+>>> ---
+>>>  drivers/block/xen-blkfront.c | 33 +++++++++++++++++++++++++++------
+>>>  1 file changed, 27 insertions(+), 6 deletions(-)
+>>>
+>>> diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
+>>> index 5067a0a..7dcf41d 100644
+>>> --- a/drivers/block/xen-blkfront.c
+>>> +++ b/drivers/block/xen-blkfront.c
+>>> @@ -807,8 +807,19 @@ static int blkif_queue_rw_req(struct request *req, struct blkfront_ring_info *ri
+>>>  		BUG_ON(sg->offset + sg->length > PAGE_SIZE);
+>>>
+>>>  		if (setup.need_copy) {
+>>> -			setup.bvec_off = sg->offset;
+>>> -			setup.bvec_data = kmap_atomic(sg_page(sg));
+>>> +			setup.bvec_off = 0;
+>>> +			setup.bvec_data = sg_map(sg, SG_KMAP_ATOMIC);
+>>> +			if (IS_ERR(setup.bvec_data)) {
+>>> +				/*
+>>> +				 * This should really never happen unless
+>>> +				 * the code is changed to use memory that is
+>>> +				 * not mappable in the sg. Seeing there is a
+>>> +				 * questionable error path out of here,
+>>> +				 * we WARN.
+>>> +				 */
+>>> +				WARN(1, "Non-mappable memory used in sg!");
+>>> +				return 1;
+>>> +			}
+>> ...
+>>
+>> Perhaps add a flag to mark failure as 'unexpected' and trace (and panic?)
+>> inside sg_map().
+
+Thanks, that's a good suggestion. I'll make the change for v2.
+
+Logan
