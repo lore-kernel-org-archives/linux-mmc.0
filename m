@@ -1,69 +1,107 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 0/2] Specify tuning count for individual board
-Date: Wed, 19 Apr 2017 17:00:32 +0800
-Message-ID: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: sdio: Add API to manage SDIO IRQs from a workqueue
+Date: Wed, 19 Apr 2017 12:48:12 +0200
+Message-ID: <CAPDyKFqruAXXnp_=6u4i5DnXpjvO_YkCiv-PjooaSQXqjn9z-A@mail.gmail.com>
+References: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org>
+ <1492518724-30511-2-git-send-email-ulf.hansson@linaro.org> <CAD=FV=XMk4+86WaCWjuf3NVwRoEubjcY+zQhH-hsb=H3sRpw0A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:35516 "EHLO
+        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1762274AbdDSKsN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 06:48:13 -0400
+Received: by mail-ua0-f173.google.com with SMTP id f10so11823912uaa.2
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 03:48:13 -0700 (PDT)
+In-Reply-To: <CAD=FV=XMk4+86WaCWjuf3NVwRoEubjcY+zQhH-hsb=H3sRpw0A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
+On 18 April 2017 at 23:43, Doug Anderson <dianders@google.com> wrote:
+> Hi,
+>
+> On Tue, Apr 18, 2017 at 5:32 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> For hosts not supporting MMC_CAP2_SDIO_IRQ_NOTHREAD but MMC_CAP_SDIO_IRQ,
+>> the SDIO IRQs are processed from a dedicated kernel thread. For these
+>> cases, the host calls mmc_signal_sdio_irq() from its ISR to signal a new
+>> SDIO IRQ.
+>>
+>> Signaling an SDIO IRQ makes the host's ->enable_sdio_irq() callback to be
+>> invoked to temporary disable the IRQs, before the kernel thread is woken up
+>> to process it. When processing of the IRQs are completed, they are
+>> re-enabled by the kernel thread, again via invoking the host's
+>> ->enable_sdio_irq().
+>>
+>> The observation from this, is that the execution path is being unnecessary
+>> complex, as the host driver already knows that it needs to temporary
+>> disable the IRQs before signaling a new one. Moreover, replacing the kernel
+>> thread with a work/workqueue would greatly simplify the code.
+>>
+>> To address the above problems, let's continue to build upon the support for
+>> MMC_CAP2_SDIO_IRQ_NOTHREAD, as it already implements SDIO IRQs to be
+>> processed without using the clumsy kernel thread, but it also avoids the
+>> ping-ponging calls of the host's ->enable_sdio_irq() callback for each
+>> processed IRQ.
+>>
+>> Therefore, let's add new API sdio_signal_irq(), which enables hosts to
+>> signal/process SDIO IRQs by using a work/workqueue, rather than using the
+>> kernel thread.
+>>
+>> Add also a new host callback ->ack_sdio_irq(), which the work invokes when
+>> the SDIO IRQs are processed. This informs the host about when it can
+>> re-enable the SDIO IRQs. Potentially, we could re-use the existing
+>> ->enable_sdio_irq() callback for this matter, however it has turned out
+>> that it's more convenient for hosts to get this information via a separate
+>> callback.
+>>
+>> Hosts needs to enable MMC_CAP2_SDIO_IRQ_NOTHREAD to use this new feature,
+>> however the feature is optional for already existing hosts suppporting
+>> MMC_CAP2_SDIO_IRQ_NOTHREAD.
+>>
+>> It's likely that all host can convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD and
+>> benefit from this feature. Further changes will have to tell. Until then
+>> the old path using the kernel thread remains possible.
+>
+> So one other subtle problem with the new approach is that you totally
+> lose all of the polling logic in sdio_irq_thread().
 
-I was seeing that it spends almost 700ms to init eMMC on RK3368 platform.
-It also happened when resuming from S3 for each time. dw_mmc-rockchip
-was trying to scan all degrees. However I wonder whether it's worth
-doing that? Look at how the other host drivers do, for instance,
-sdhci. At least sdhci-of-arasan on RK3399 platform only do tuning
-for 32 times executed by PHY. Anyway, 360 times by default looks crazy
-to me. I hope we could vote for it in DT instead of hard-coding it in
-the code.
+The polling is still there, as I haven't removed the kthread in this series.
 
-[    1.193248] dwmmc_rockchip ff0f0000.dwmmc: IDMAC supports 32-bit
-address mode.
-[    1.193316] dwmmc_rockchip ff0f0000.dwmmc: Using internal DMA
-controller.
-[    1.193332] dwmmc_rockchip ff0f0000.dwmmc: Version ID is 270a
-[    1.193387] dwmmc_rockchip ff0f0000.dwmmc: DW MMC controller at irq
-18,32 bit host data width,256 deep fifo
-[    1.193410] dwmmc_rockchip ff0f0000.dwmmc: 'clock-freq-min-max'
-property was deprecated.
-[    1.193446] dwmmc_rockchip ff0f0000.dwmmc: No vmmc regulator found
-[    1.193458] dwmmc_rockchip ff0f0000.dwmmc: No vqmmc regulator found
-[    1.205185] mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req
-400000Hz, actual 400000HZ div = 0)
-[    1.219611] dwmmc_rockchip ff0f0000.dwmmc: 1 slots initialized
+I was also thinking of the next step, which could move the polling
+inside the work, simply by re-schedule itself.
 
-....
+>
+> ...so if I take your series and then comment out "cap-sdio-irq;" in
+> the veyron "dtsi" then things stop working.  Right now dw_mmc only
+> enables SDIO Interrupts if that bit is set and relies on polling
+> otherwise.  Presumably there's not a _huge_ reason why you would need
+> to make dw_mmc work without actual SDIO IRQ signaling, but the way the
+> code is structured right now things will probably break for some users
+> out there.
 
-[    1.912482] dwmmc_rockchip ff0f0000.dwmmc: Successfully tuned phase
-to 182
-[    1.912683] mmc1: new HS200 MMC card at address 0001
-[    1.914511] mmcblk1: mmc1:0001 M8G1GC 7.28 GiB
-[    1.915527] mmcblk1boot0: mmc1:0001 M8G1GC partition 1 4.00 MiB
-[    1.916388] mmcblk1boot1: mmc1:0001 M8G1GC partition 2 4.00 MiB
-[    1.917232] mmcblk1rpmb: mmc1:0001 M8G1GC partition 3 512 KiB
+Did you actually test this or the conclusion was theoretical?
 
+I *was* actually thinking of the polling case and I think it should be
+addressed, unless I am missing something of course.
 
+More precisely, in patch2, I make sure MMC_CAP2_SDIO_IRQ_NOTHREAD
+becomes set for dw_mmc, only *if* MMC_CAP_SDIO_IRQ is set. That means
+the polling with the kthread is done for cases when MMC_CAP_SDIO_IRQ
+is unset. Right!?
 
-Shawn Lin (2):
-  dt-bindings: rockchip-dw-mshc: add optional
-    rockchip,default-num-phases
-  mmc: dw_mmc-rockchip: parse rockchip,default-num-phases from DT
+>
+> One note is that I remember on exynos5250-snow that we needed to
+> enable a hybrid interrupt/polling mechanism.  The problem we ran into
+> was terribly rare and it was never root caused if there was just some
+> subtle bug or if certain versions of dw_mmc sometimes just dropped
+> interrupts (and the patch was never upstreamed), so possibly we don't
+> care.  ...but having the polling code there as a fallback seems like
+> it could have a benefit.
 
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  4 ++
- drivers/mmc/host/dw_mmc-rockchip.c                 | 48 ++++++++++++++--------
- 2 files changed, 34 insertions(+), 18 deletions(-)
+I see. To be clear, removing the polling is not my intent and isn't
+what the series tries to do.
 
--- 
-1.9.1
+Kind regards
+Uffe
