@@ -1,81 +1,78 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 07/25] mmc: sdhci-pci: Use ACPI DSM to get driver
- strength for some Intel devices
-Date: Wed, 19 Apr 2017 14:24:20 +0200
-Message-ID: <20170419122419.GA3832@katana>
-References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
- <1490032253-6030-8-git-send-email-adrian.hunter@intel.com>
- <20170404084847.GB1439@katana>
- <47372fbd-9c16-725a-7f25-97481f09a6eb@intel.com>
+From: "Y.B. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [v4, 0/5] Add SD UHS-I and eMMC HS200 support for eSDHC
+Date: Wed, 19 Apr 2017 12:32:17 +0000
+Message-ID: <DB6PR0401MB25366BBD95AAA87296C4B7B6F8180@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <1491887431-31894-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="ReaqsoxgOBHFXBhH"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:42134 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1762957AbdDSMYY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Apr 2017 08:24:24 -0400
-Content-Disposition: inline
-In-Reply-To: <47372fbd-9c16-725a-7f25-97481f09a6eb@intel.com>
+Received: from mail-he1eur01on0052.outbound.protection.outlook.com ([104.47.0.52]:21843
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1762790AbdDSMcV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Apr 2017 08:32:21 -0400
+In-Reply-To: <1491887431-31894-1-git-send-email-yangbo.lu@nxp.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
-
---ReaqsoxgOBHFXBhH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-
-> > do you think it makes sense then to have a similar encoded value from DT
-> > (maybe "mmc-fixed-driver-type-<n>" with n=3D0..4)?
+> -----Original Message-----
+> From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
+> Sent: Tuesday, April 11, 2017 1:10 PM
+> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org; Adrian Hunter
+> Cc: Xiaobo Xie; Y.B. Lu
+> Subject: [v4, 0/5] Add SD UHS-I and eMMC HS200 support for eSDHC
 >=20
-> The _DSM, being a device-specific method does not have to support differe=
-nt
-> devices with different requirements whereas DT does.
-
-So, it is more like a vendor specific property (e.g. "renesas,
-mmc-driver-type")? Sorry, I don't know much about ACPI.
-
-> >                                                  This is a largely
-> > reduced encoding of what you proposed in 2015 [1] but may be more
-> > pragmatic for soldered on-board devices working on their max speeds with
-> > fixed voltages and frequencies? Or did I get something wrong?
+> It's complicated to support SD UHS-I and eMMC HS200 for eSDHC because
+> there're many differences between eSDHC and SD/eMMC spec. Several
+> differences as below must be considered:
+> 1. Peripheral clock must be used instead of platform clock.
+>     - eSDHC could select peripheral clock or platform clock as its clock
+>       source. According to RM, UHS-I/HS200 must use peripheral clock
+> since
+>       it supports higher frequency than platform clock.
+>     - Patch 1 is to support this.
+> 2. Signal voltage switching requires a control circuit out of eSDHC.
+>     - eSDHC supports signal voltage switch from 3.3v to 1.8v by
+>       eSDHC_PROCTL[VOLT_SEL] bit. This bit changes the value of output
+>       signal SDHC_VS, and there must be a control circuit out of eSDHC
+>       to change the signal voltage according to SDHC_VS output signal.
+>     - Patch 2 is to support this.
+> 3. eSDHC uses tuning block for tuning procedure.
+>     - Tuning clock control register must be configured before tuning.
+>     - Patch 3 is to support this.
+> 4. Delay is needed between tuning cycles for HS200 tuning.
+>     - Once a patch removed mdelay between tuning cycles.
+>       But eSDHC needs it.
+>     - Patch 4 and patch 5 is to support this.
 >=20
-> What I proposed was being forced on me by the requirement to provide a
-> solution that could meet any conceivable need.  That gets over-complicate=
-d.
+>=20
+> Adrian Hunter (1):
+>   mmc: sdhci: Control the delay between tuning commands
+>=20
+> Yangbo Lu (4):
+>   mmc: sdhci-of-esdhc: add peripheral clock support
+>   mmc: sdhci-of-esdhc: add support for signal voltage switch
+>   mmc: sdhci-of-esdhc: add tuning support
+>   mmc: sdhci-of-esdhc: add delay between tuning cycles
 
-Yeah, that became pretty clear.
+[Lu Yangbo-B47093] Sorry, just found I had forgot to add Adrian's Ack into =
+the new version patches.
+The Ack was given in v3.
 
-> But as you say, in practice people are probably only interested in provid=
-ing
-> one value for the max speed / frequency.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-OK. Thanks for your answers! Much appreciated.
+>=20
+>  drivers/mmc/host/sdhci-esdhc.h    |   7 ++
+>  drivers/mmc/host/sdhci-of-esdhc.c | 167
+> +++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.c          |  11 ++-
+>  drivers/mmc/host/sdhci.h          |   2 +
+>  4 files changed, 182 insertions(+), 5 deletions(-)
+>=20
+> --
+> 2.1.0.27.g96db324
 
-
---ReaqsoxgOBHFXBhH
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJY91bzAAoJEBQN5MwUoCm2aDAP/2ShryXUvwxDeiQPjtEyCjwd
-UYgOCH5qmX7wgbvyOF79/v6hcLaBKF7BclgyJ6kqpQY/rn6WE/agSnut4eSXdQWE
-cTP3EXzfc0s7teCQ+U/UXvCUp7UUf34+BLhJG7WePI378xWOSXKUljhJnQ9aiaiQ
-INi0zSw+aD7rQGhIohC3kOhCL7aR8fxZhJdnkl/qjUngGxeUdoPxLSgbbusG7HM1
-bFuH57IVSeB/gLtOGW6YUIam60heoPwTahA5NrSciP+7LB2sljmMjjBsDR0xJzPv
-nrYzG49GzB4seQYfvQ9PTqvcjCNZPf2CoF7upTKemWNkWyjrLhJIIFI+jL3ehcJH
-/cU1Cha2peP5sYzfLkqbNN/+x0P2gp5mEep8VIV3XD1fn6NNK53jXPABiIPRJQrS
-7LS5ksr/UdUYZU9vTdWfCPHN4dmlgezvzfQJm3qPKiv6TJrjPAzFhUtBtOeEMvSb
-qnvJk2kumxpdtxzEkmRIWVFWHsUsnjdbWIoXqv2jDCTUiy7sG1T6QTYjSqZxHhTa
-nHLMPtJt/AVkQ57jU+o9SAypPaLxoc3wrH/JcOLb+O/s711prtWxQuOAPu2QhM6W
-F9C6jvmywExWCmn5Cop6UOMpteIz0/wu85W7qwF3AU8ddHBHCHXJvxrsJp0fdyxy
-6n9K785fTCZDZi90Z3fs
-=zlZ7
------END PGP SIGNATURE-----
-
---ReaqsoxgOBHFXBhH--
