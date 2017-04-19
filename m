@@ -1,79 +1,55 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc-rockchip: parse rockchip,default-num-phases
- from DT
-Date: Wed, 19 Apr 2017 13:19:19 -0700
-Message-ID: <CAD=FV=X6PRe1u+s4Nnt=9gJD2T4=YyLdMWnKe5rZg2KgWGNAvg@mail.gmail.com>
-References: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com> <1492592434-81312-3-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1492592434-81312-3-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH v2 0/5] mmc: Improve/fix support for SDIO IRQs
+Date: Wed, 19 Apr 2017 23:17:06 +0200
+Message-ID: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f172.google.com ([209.85.128.172]:35695 "EHLO
+        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966850AbdDSVRU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 17:17:20 -0400
+Received: by mail-wr0-f172.google.com with SMTP id o21so23624067wrb.2
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 14:17:20 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@google.com>
 
-Hi,
+Changes in v2:
+	- Folded in a new change, patch 1/5 to fix a race condition while
+	processing SDIO IRQs.
+	- Fixed review comments provided by Dough.
+	- Updated change logs.
+	- Small changes to how ->ack_sdio_irq() is being invoked, to simplify
+	code.
+	- Added a revert patch of the dw_mmc change for runtime PM issues, which
+	was a quick fix for stable/fixes. 
 
-On Wed, Apr 19, 2017 at 2:00 AM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> Currently we unconditionally do tuning for each degree, which
-> costs 900ms for each boot and resume.
->
-> May someone argue that this is a question of accuracy VS time. But I
-> would say it's a trick of how we need to do decision for our boards.
-> If we don't care the time we spend at all, we could definitely do tuning
-> for each degree. But when we need to improve the user experience, for
-> instance, speed up resuming from S3, we should also have the right to
-> do that. This patch add parsing "rockchip,default-num-phases", for folks
-> to specify the number of doing tuning. If not specified, 360 will be used
-> as before.
->
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->
-> ---
->
->  drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++--------------
->  1 file changed, 30 insertions(+), 18 deletions(-)
+Some general description of the series:
 
-No huge objection here, but I do remember we ended up at the 360
-phases due to some of the craziness with dw_mmc delay elements on
-rk3288.  IIRC one of the big problems was that the delay elements
-changed _a lot_ with the "LOGIC" voltage and we tweaked the voltage at
-runtime for DDR DVFS.  That imposed an extra need to be very accurate
-on that SoC, at least on any board that was designed to support DDR
-DVFS.
+Regressions for SDIO IRQs have been reported for dw_mmc, caused by enabling
+runtime PM support for it.
 
-I also remember there being some weirdness on the Rockchip
-implementation where there was a certain set of phases that the MMC
-controller was essentially "blind".  This blind spot was in the middle
-of an otherwise good range of points.  Unfortunately this blind spot
-was somewhat hard to detect properly because it was not very big.
-...the variability of the delay elements meant that there could be big
-ranges where we weren't getting any good test coverage, but also the
-fact that they changed with the LOGIC voltage might mean that we
-weren't in the "blind" spot and then suddenly we were.
+This series extends and improves the SDIO IRQs support in the core, such that
+it better suites the need for dw_mmc, particulary around runtime PM.
 
-One other note is that i remember that the vast majority of time spent
-tuning was dealing with "bad" phases, not dealing with "good" phases.
-If you're looking to speed things up, maybe finding a way to make
-"bad" phases fail faster would be wise?  I think one of the reasons
-bad phases failed so slowly is because the dw_mmc timeouts are all so
-long.
-
-Oh, and I guess one last note is that I have no idea if folks will
-like the device bindings here.  Part of me thinks it should be
-something more "symbolic" like "rockchip,need-accurate-tuning" or
-something like that.  I guess I'd let the DT experts chime in.
+Do note, so far this is only compile tested. I would thus appreciate help in
+testing and of course also in reviewing.
 
 
-So I guess to summarize:
-* On rk3288 boards w/ DDR DVFS (or any other similar boards), 360
-seems to provide real benefit.
-* On other boards, probably you can get by with fewer phases.
+Ulf Hansson (5):
+  mmc: core: Prevent processing SDIO IRQs when none is claimed
+  mmc: sdio: Add API to manage SDIO IRQs from a workqueue
+  mmc: dw_mmc: Convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs
+  mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs are enabled
+  Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
 
+ drivers/mmc/core/host.c     |  2 ++
+ drivers/mmc/core/sdio_irq.c | 27 +++++++++++++++++++++++++--
+ drivers/mmc/core/sdio_ops.h |  2 ++
+ drivers/mmc/host/dw_mmc.c   | 44 ++++++++++++++++++++++++++++++++------------
+ include/linux/mmc/host.h    |  3 +++
+ 5 files changed, 64 insertions(+), 14 deletions(-)
 
--Doug
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+2.7.4
+
