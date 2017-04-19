@@ -1,80 +1,141 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH 4/4] mmc: pxamci: Fix race condition between pxamci_dma_irq() and pxamci_irq()
-Date: Wed, 19 Apr 2017 21:22:32 +0200
-Message-ID: <87fuh46w3r.fsf@belgarion.home>
-References: <cover.1492492523.git.petr.cvek@tul.cz>
-        <31e332fa-f152-1eff-39fb-91f332b84757@tul.cz>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH 1/3] mmc: sdio: Add API to manage SDIO IRQs from a workqueue
+Date: Wed, 19 Apr 2017 12:29:06 -0700
+Message-ID: <CAD=FV=XX-LRdNQytWDQ5N5qEtNQyQH1kmU9KUaT1EnKWG1EvtA@mail.gmail.com>
+References: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org>
+ <1492518724-30511-2-git-send-email-ulf.hansson@linaro.org>
+ <CAD=FV=XMk4+86WaCWjuf3NVwRoEubjcY+zQhH-hsb=H3sRpw0A@mail.gmail.com> <CAPDyKFqruAXXnp_=6u4i5DnXpjvO_YkCiv-PjooaSQXqjn9z-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp09.smtpout.orange.fr ([80.12.242.131]:36067 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967353AbdDSTWf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 15:22:35 -0400
-In-Reply-To: <31e332fa-f152-1eff-39fb-91f332b84757@tul.cz> (Petr Cvek's
-        message of "Wed, 19 Apr 2017 01:18:00 +0200")
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:36259 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1763523AbdDST3K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 15:29:10 -0400
+Received: by mail-wr0-f169.google.com with SMTP id c55so22068759wrc.3
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 12:29:09 -0700 (PDT)
+In-Reply-To: <CAPDyKFqruAXXnp_=6u4i5DnXpjvO_YkCiv-PjooaSQXqjn9z-A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Petr Cvek <petr.cvek@tul.cz>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Petr Cvek <petr.cvek@tul.cz> writes:
+Hi,
 
-> The data write requests may require an FIFO flush when the DMA transaction
-> ends. This is handled by a DMA callback pxamci_dma_irq(). After flushing
-> the FIFO the MCI controller generates the DATA_TRAN_DONE interrupt.
+On Wed, Apr 19, 2017 at 3:48 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 18 April 2017 at 23:43, Doug Anderson <dianders@google.com> wrote:
+>> Hi,
+>>
+>> On Tue, Apr 18, 2017 at 5:32 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> For hosts not supporting MMC_CAP2_SDIO_IRQ_NOTHREAD but MMC_CAP_SDIO_IRQ,
+>>> the SDIO IRQs are processed from a dedicated kernel thread. For these
+>>> cases, the host calls mmc_signal_sdio_irq() from its ISR to signal a new
+>>> SDIO IRQ.
+>>>
+>>> Signaling an SDIO IRQ makes the host's ->enable_sdio_irq() callback to be
+>>> invoked to temporary disable the IRQs, before the kernel thread is woken up
+>>> to process it. When processing of the IRQs are completed, they are
+>>> re-enabled by the kernel thread, again via invoking the host's
+>>> ->enable_sdio_irq().
+>>>
+>>> The observation from this, is that the execution path is being unnecessary
+>>> complex, as the host driver already knows that it needs to temporary
+>>> disable the IRQs before signaling a new one. Moreover, replacing the kernel
+>>> thread with a work/workqueue would greatly simplify the code.
+>>>
+>>> To address the above problems, let's continue to build upon the support for
+>>> MMC_CAP2_SDIO_IRQ_NOTHREAD, as it already implements SDIO IRQs to be
+>>> processed without using the clumsy kernel thread, but it also avoids the
+>>> ping-ponging calls of the host's ->enable_sdio_irq() callback for each
+>>> processed IRQ.
+>>>
+>>> Therefore, let's add new API sdio_signal_irq(), which enables hosts to
+>>> signal/process SDIO IRQs by using a work/workqueue, rather than using the
+>>> kernel thread.
+>>>
+>>> Add also a new host callback ->ack_sdio_irq(), which the work invokes when
+>>> the SDIO IRQs are processed. This informs the host about when it can
+>>> re-enable the SDIO IRQs. Potentially, we could re-use the existing
+>>> ->enable_sdio_irq() callback for this matter, however it has turned out
+>>> that it's more convenient for hosts to get this information via a separate
+>>> callback.
+>>>
+>>> Hosts needs to enable MMC_CAP2_SDIO_IRQ_NOTHREAD to use this new feature,
+>>> however the feature is optional for already existing hosts suppporting
+>>> MMC_CAP2_SDIO_IRQ_NOTHREAD.
+>>>
+>>> It's likely that all host can convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD and
+>>> benefit from this feature. Further changes will have to tell. Until then
+>>> the old path using the kernel thread remains possible.
+>>
+>> So one other subtle problem with the new approach is that you totally
+>> lose all of the polling logic in sdio_irq_thread().
 >
-> Problem is the DATA_TRAN_DONE interrupt will be generated when the write
-> data length is divisible by the FIFO size (no flush is required). And in
-> this case the DMA callback can be called long time after the
-> DATA_TRAN_DONE interrupt (as the DMA callback is realised by a tasklet,
-> it can even stack). When the DMA callback is finally called there can
-> already be a different type of the transaction (another data read or write
-> request).
->
-> The dmaengine_tx_status() will be called for a wrong DMA transaction and
-> in some case it returns DMA_IN_PROGRESS, which the code recognize as
-> an error and ends a running DMA and halts the MCI controller.
->
-> The problem presents itself under heavy (interrupt) load with a high MCI
-> traffic with this message:
->
-> 	mmc0: DMA error on tx channel
->
-> The fix must obey these situations:
->  - Any command will erase the FIFO
->  - Data writes divisible by the FIFO size will (probably) automatically
->    generate a DATA_TRAN_DONE interrupt
->  - Data writes with a nonzero FIFO remainder must be flushed and then MCI
->    generates a DATA_TRAN_DONE interrupt
->  - Data reads do not require a flush but they will generate
->    a DATA_TRAN_DONE interrupt
->
-> The fix changes the DATA_TRAN_DONE interrupt enable from read/write
-> requests to read requests. The DATA_TRAN_DONE interrupt for a write
-> request is enabled in the DMA callback, this assures  a DATA_TRAN_DONE
-> interrupt will be always called after a callback (with or without an FIFO
-> flush).
+> The polling is still there, as I haven't removed the kthread in this series.
 
-I'm a bit concerned with the way this patch works.
-What bothers me is the re-enabling of the interrupt source in the DMA completion
-path, ie. in pxamci_dma_irq().
-For example, imagine :
- - the tran_done bit is left set (for whatever reason)
- - a new transation is queued
- - the DMA finishes, but not the last request
- - the pxamci_enable_irq() enables the interrupt, which fires right away even if
-   the tran_done for this interrupt wasn't yet set
+The code still exists, but it won't be called, right?
 
-I will need a bit more time to think this one through, as I'm not yet set about
-all the consequences. That shouldn't prevent you from pushing for reviews of
-these patches of course, as I think this serie (or an equivalent) is required to
-fix the current race condition.
+Oh!  Shoot, I see that you only enable the new code in dw_mmc when the
+cap is set.  Hrm.
 
-As this is the last patch, I wonder if this serie is bisectable, especially is
-patch 1/4 self contained ?
 
-Cheers.
+> I was also thinking of the next step, which could move the polling
+> inside the work, simply by re-schedule itself.
+>
+>>
+>> ...so if I take your series and then comment out "cap-sdio-irq;" in
+>> the veyron "dtsi" then things stop working.  Right now dw_mmc only
+>> enables SDIO Interrupts if that bit is set and relies on polling
+>> otherwise.  Presumably there's not a _huge_ reason why you would need
+>> to make dw_mmc work without actual SDIO IRQ signaling, but the way the
+>> code is structured right now things will probably break for some users
+>> out there.
+>
+> Did you actually test this or the conclusion was theoretical?
 
---
-Robert
+I did, but I had confirmation bias so upon the first sign of failure I
+decided "I must be right--it doesn't work".  :(  Maybe something else
+was causing problems.  Trying again now.
+
+OK, let's see:
+
+With "cap-sdio-irq" commented out but without your 3 patches:
+=> Boot up, "ifconfig eth0 down; ping -c 20 8.8.8.8".  Seems OK.
+
+With "cap-sdio-irq" commented out but _with_ your 3 patches:
+=> Boot up, "ifconfig eth0 down; ping -c 20 8.8.8.8".  Seems OK.
+
+So I guess the conclusion is that I missed the part about your patch
+only enabling the new features if MMC_CAP_SDIO_IRQ.  Sorry.  :(
+...and then I must have hit some other unrelated failure that I can't
+reproduce now and assumed it was your patch's fault.
+
+So basically I would say that I've lightly tested your code.  It's not
+code I've stressed a ton, but it survived some basic tests anyway...
+:)  The code also looks pretty sane to me.
+
+
+> I *was* actually thinking of the polling case and I think it should be
+> addressed, unless I am missing something of course.
+>
+> More precisely, in patch2, I make sure MMC_CAP2_SDIO_IRQ_NOTHREAD
+> becomes set for dw_mmc, only *if* MMC_CAP_SDIO_IRQ is set. That means
+> the polling with the kthread is done for cases when MMC_CAP_SDIO_IRQ
+> is unset. Right!?
+
+Yeah, looks right to me now that I have my glasses on.
+
+
+>> One note is that I remember on exynos5250-snow that we needed to
+>> enable a hybrid interrupt/polling mechanism.  The problem we ran into
+>> was terribly rare and it was never root caused if there was just some
+>> subtle bug or if certain versions of dw_mmc sometimes just dropped
+>> interrupts (and the patch was never upstreamed), so possibly we don't
+>> care.  ...but having the polling code there as a fallback seems like
+>> it could have a benefit.
+>
+> I see. To be clear, removing the polling is not my intent and isn't
+> what the series tries to do.
+
+OK, makes sense.  Just figured I'd mention this in case you had future
+plans around this code.  :)
