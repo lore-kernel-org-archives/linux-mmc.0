@@ -1,107 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 1/2] mmc: slot-gpio: Add support to enable irq wake on cd_irq
-Date: Wed, 19 Apr 2017 16:09:22 +0300
-Message-ID: <1492607363-5346-2-git-send-email-adrian.hunter@intel.com>
-References: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:25803 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1763532AbdDSNPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Apr 2017 09:15:06 -0400
-In-Reply-To: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Alexander Kochetkov <al.kochet@gmail.com>
+Subject: [PATCH] mmc: dw_mmc: hide clock message when card is resuming
+Date: Wed, 19 Apr 2017 17:55:56 +0300
+Message-ID: <1492613756-16740-1-git-send-email-al.kochet@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Alexander Kochetkov <al.kochet@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Add mmc_gpio_cd_enable_wake() to allow drivers to enable irq wake on the
-card detect irq.
+Commit e9748e0364fe ("mmc: dw_mmc: force setup bus if active slots exist")
+made a change resulted in clock message appears every time the card is
+resuming (every 5 second in average). Add condition that previously used to
+print the message.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Fixes: e9748e0364fe ("mmc: dw_mmc: force setup bus if active slots exist")
+Signed-off-by: Alexander Kochetkov <al.kochet@gmail.com>
 ---
- drivers/mmc/core/core.c       |  5 ++++-
- drivers/mmc/core/slot-gpio.c  | 12 ++++++++++++
- include/linux/mmc/host.h      |  1 +
- include/linux/mmc/slot-gpio.h |  1 +
- 4 files changed, 18 insertions(+), 1 deletion(-)
+ drivers/mmc/host/dw_mmc.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0bb39795d484..6987976252ad 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2828,8 +2828,11 @@ void mmc_stop_host(struct mmc_host *host)
- 	host->removed = 1;
- 	spin_unlock_irqrestore(&host->lock, flags);
- #endif
--	if (host->slot.cd_irq >= 0)
-+	if (host->slot.cd_irq >= 0) {
-+		if (host->slot.cd_wake_enabled)
-+			disable_irq_wake(host->slot.cd_irq);
- 		disable_irq(host->slot.cd_irq);
-+	}
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 73db085..faaf2c1 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1178,7 +1178,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
  
- 	host->rescan_disable = 1;
- 	cancel_delayed_work_sync(&host->detect);
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index a8450a8701e4..56e4edb9e63a 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -25,6 +25,7 @@ struct mmc_gpio {
- 	struct gpio_desc *cd_gpio;
- 	bool override_ro_active_level;
- 	bool override_cd_active_level;
-+	bool cd_wake;
- 	irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
- 	char *ro_label;
- 	char cd_label[0];
-@@ -118,6 +119,15 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
- }
- EXPORT_SYMBOL(mmc_gpio_request_ro);
- 
-+void mmc_gpio_cd_enable_wake(struct mmc_host *host)
-+{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
-+
-+	if (ctx && ctx->cd_gpio)
-+		ctx->cd_wake = true;
-+}
-+EXPORT_SYMBOL(mmc_gpio_cd_enable_wake);
-+
- void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
-@@ -151,6 +161,8 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
- 
- 	if (irq < 0)
- 		host->caps |= MMC_CAP_NEEDS_POLL;
-+	else if (ctx->cd_wake && !enable_irq_wake(irq))
-+		host->slot.cd_wake_enabled = true;
- }
- EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 21385ac0c9b1..78c544e296cd 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -184,6 +184,7 @@ struct mmc_async_req {
-  */
- struct mmc_slot {
- 	int cd_irq;
-+	bool cd_wake_enabled;
- 	void *handler_priv;
- };
- 
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index 82f0d289f110..6af681d33a53 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -33,5 +33,6 @@ void mmc_gpio_set_cd_isr(struct mmc_host *host,
- 			 irqreturn_t (*isr)(int irq, void *dev_id));
- void mmc_gpiod_request_cd_irq(struct mmc_host *host);
- bool mmc_can_gpio_cd(struct mmc_host *host);
-+void mmc_gpio_cd_enable_wake(struct mmc_host *host);
- 
- #endif
+ 		if ((clock != slot->__clk_old &&
+ 			!test_bit(DW_MMC_CARD_NEEDS_POLL, &slot->flags)) ||
+-			force_clkinit) {
++		    (force_clkinit &&
++			(slot->mmc->pm_flags & MMC_PM_KEEP_POWER))) {
+ 			dev_info(&slot->mmc->class_dev,
+ 				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
+ 				 slot->id, host->bus_hz, clock,
 -- 
-1.9.1
-
+1.7.9.5
