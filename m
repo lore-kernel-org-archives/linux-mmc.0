@@ -1,37 +1,60 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 07/25] mmc: sdhci-pci: Use ACPI DSM to get driver strength
- for some Intel devices
-Date: Wed, 19 Apr 2017 15:58:57 +0300
-Message-ID: <d3a52420-e8f1-90dd-af8d-d12e18171f01@intel.com>
-References: <1490032253-6030-1-git-send-email-adrian.hunter@intel.com>
- <1490032253-6030-8-git-send-email-adrian.hunter@intel.com>
- <20170404084847.GB1439@katana>
- <47372fbd-9c16-725a-7f25-97481f09a6eb@intel.com>
- <20170419122419.GA3832@katana>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 2/2] mmc: sdhci-pci: Enable card detect wake for Intel BYT-related SD card host controllers
+Date: Wed, 19 Apr 2017 16:09:23 +0300
+Message-ID: <1492607363-5346-3-git-send-email-adrian.hunter@intel.com>
+References: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:8548 "EHLO mga05.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:25803 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1763389AbdDSNEq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Apr 2017 09:04:46 -0400
-In-Reply-To: <20170419122419.GA3832@katana>
+        id S1763519AbdDSNPI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Apr 2017 09:15:08 -0400
+In-Reply-To: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Al Cooper <alcooperx@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <aisheng.dong@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, Zach Brown <zach.brown@ni.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jisheng Zhang <jszhang@marvell.com>, Yangbo Lu <yangbo.lu@nxp.com>, Jaehoon Chung <jh80.chung@samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>, Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Harjani Ritesh <riteshh@codeaurora.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 19/04/17 15:24, Wolfram Sang wrote:
-> 
->>> do you think it makes sense then to have a similar encoded value from DT
->>> (maybe "mmc-fixed-driver-type-<n>" with n=0..4)?
->>
->> The _DSM, being a device-specific method does not have to support different
->> devices with different requirements whereas DT does.
-> 
-> So, it is more like a vendor specific property (e.g. "renesas,
-> mmc-driver-type")? Sorry, I don't know much about ACPI.
+Enable card detect wake for Intel BYT-related SD card host controllers.
 
-Yes, it is effectively vendor-specific in this case.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 3 +++
+ drivers/mmc/host/sdhci-pci.h      | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 833072b8453e..57d6f50b73dc 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -634,6 +634,7 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 				 MMC_CAP_AGGRESSIVE_PM;
+ 	slot->cd_idx = 0;
+ 	slot->cd_override_level = true;
++	slot->cd_wake = true;
+ 	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXT_SD ||
+ 	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXTM_SD ||
+ 	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD ||
+@@ -1989,6 +1990,8 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		if (ret) {
+ 			dev_warn(&pdev->dev, "failed to setup card detect gpio\n");
+ 			slot->cd_idx = -1;
++		} else if (slot->cd_wake) {
++			mmc_gpio_cd_enable_wake(host->mmc);
+ 		}
+ 	}
+ 
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 37766d20a600..6029fb314421 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -91,6 +91,7 @@ struct sdhci_pci_slot {
+ 
+ 	int			cd_idx;
+ 	bool			cd_override_level;
++	bool			cd_wake;
+ 
+ 	void (*hw_reset)(struct sdhci_host *host);
+ 	unsigned long		private[0] ____cacheline_aligned;
+-- 
+1.9.1
 
