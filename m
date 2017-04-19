@@ -1,98 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 3/5] mmc: dw_mmc: Convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs
-Date: Wed, 19 Apr 2017 23:17:09 +0200
-Message-ID: <1492636631-28254-4-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH v2 5/5] Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
+Date: Wed, 19 Apr 2017 23:17:11 +0200
+Message-ID: <1492636631-28254-6-git-send-email-ulf.hansson@linaro.org>
 References: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:35964 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967443AbdDSVRY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 17:17:24 -0400
-Received: by mail-wm0-f45.google.com with SMTP id o81so89660336wmb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 14:17:23 -0700 (PDT)
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35976 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967325AbdDSVR0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 17:17:26 -0400
+Received: by mail-wm0-f42.google.com with SMTP id o81so89660865wmb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 14:17:25 -0700 (PDT)
 In-Reply-To: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@google.com>
 
-Convert to use the more lightweight method for processing SDIO IRQs, which
-involves the following changes:
+This reverts commit a6db2c86033bc41329770e90c20d4f1fec3824e4.
 
-- Enable MMC_CAP2_SDIO_IRQ_NOTHREAD when SDIO IRQ is supported.
-- Mask SDIO IRQ when signaling it for processing.
-- Re-enable (unmask) the SDIO IRQ from the ->ack_sdio_irq() callback.
+As dw_mmc now is capable of preventing runtime PM suspend while SDIO IRQs
+are enabled, let's drop the less fine-grained approach of preventing
+runtime PM suspend for all SDIO cards.
+
+In this way we wont keep the host runtime PM resumed, unless really needed
+and thus avoiding to waste power.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/dw_mmc.c | 25 ++++++++++++++++++++++---
- 1 file changed, 22 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e45129f..635d76c 100644
+index c14a36b..c95dc9b 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1642,9 +1642,8 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
- 	}
- }
+@@ -23,7 +23,6 @@
+ #include <linux/ioport.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+-#include <linux/pm_runtime.h>
+ #include <linux/seq_file.h>
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+@@ -1622,16 +1621,10 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
  
--static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
- {
--	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
- 	unsigned long irqflags;
- 	u32 int_mask;
-@@ -1662,6 +1661,20 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
- }
- 
-+static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+
-+	__dw_mci_enable_sdio_irq(slot, enb);
-+}
-+
-+static void dw_mci_ack_sdio_irq(struct mmc_host *mmc)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+
-+	__dw_mci_enable_sdio_irq(slot, 1);
-+}
-+
- static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
-@@ -1763,6 +1776,7 @@ static const struct mmc_host_ops dw_mci_ops = {
- 	.get_cd			= dw_mci_get_cd,
- 	.hw_reset               = dw_mci_hw_reset,
- 	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
-+	.ack_sdio_irq		= dw_mci_ack_sdio_irq,
- 	.execute_tuning		= dw_mci_execute_tuning,
- 	.card_busy		= dw_mci_card_busy,
- 	.start_signal_voltage_switch = dw_mci_switch_voltage,
-@@ -2654,7 +2668,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
- 				mci_writel(host, RINTSTS,
- 					   SDMMC_INT_SDIO(slot->sdio_id));
--				mmc_signal_sdio_irq(slot->mmc);
-+				__dw_mci_enable_sdio_irq(slot, 0);
-+				sdio_signal_irq(slot->mmc);
- 			}
+ 		if (card->type == MMC_TYPE_SDIO ||
+ 		    card->type == MMC_TYPE_SD_COMBO) {
+-			if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
+-				pm_runtime_get_noresume(mmc->parent);
+-				set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+-			}
++			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+ 			clk_en_a = clk_en_a_old & ~clken_low_pwr;
+ 		} else {
+-			if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
+-				pm_runtime_put_noidle(mmc->parent);
+-				clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+-			}
++			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+ 			clk_en_a = clk_en_a_old | clken_low_pwr;
  		}
  
-@@ -2755,6 +2770,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (ret)
- 		goto err_host_allocated;
- 
-+	/* Process SDIO IRQs through the sdio_irq_work. */
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-+
- 	/* Useful defaults if platform data is unset. */
- 	if (host->use_dma == TRANS_MODE_IDMAC) {
- 		mmc->max_segs = host->ring_size;
 -- 
 2.7.4
 
