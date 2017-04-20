@@ -1,93 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdio: Fix sdio wait busy implement limitation
-Date: Thu, 20 Apr 2017 15:27:16 +0200
-Message-ID: <CAPDyKFrDNBFV=1PtiopXoc+Zd7Tc-MZnR5k4za4Grbbs1aCP4Q@mail.gmail.com>
-References: <1492416571-28843-1-git-send-email-jiajie.hao@mediatek.com> <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Alexander Kochetkov <al.kochet@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: hide clock message when card is resuming
+Date: Thu, 20 Apr 2017 16:50:42 +0300
+Message-ID: <B42FBB3A-66CF-4EAA-A1BF-002C99D486C5@gmail.com>
+References: <CGME20170419145649epcas2p428230d6fa04b2b6905e500f7b0a33297@epcas2p4.samsung.com> <1492613756-16740-1-git-send-email-al.kochet@gmail.com> <25b5c103-ed7c-d03f-d285-bde651691ba1@samsung.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f174.google.com ([209.85.217.174]:33469 "EHLO
-        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S944660AbdDTN1S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Apr 2017 09:27:18 -0400
-Received: by mail-ua0-f174.google.com with SMTP id j59so6439406uad.0
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Apr 2017 06:27:17 -0700 (PDT)
-In-Reply-To: <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:33049 "EHLO
+        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1031457AbdDTNup (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Apr 2017 09:50:45 -0400
+In-Reply-To: <25b5c103-ed7c-d03f-d285-bde651691ba1@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jiajie.hao@mediatek.com
-Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@mediatek.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 17 April 2017 at 10:09,  <jiajie.hao@mediatek.com> wrote:
-> From: Jiajie Hao <jiajie.hao@mediatek.com>
->
-> The host may issue an I/O abort by writing to the CCCR at any time
-> during I/O read operation via CMD52. And host may need suspend
-> transcation during write busy stage in SDIO suspend/resume scenario.
-> From other side, a card may accept CMD52 during data transfer phase.
->
-> Previous implement would block issuing above command in busy stage.
-> It cause function driver can't implement as proper way and has no
-> opportunity to do some coverage in error case via I/O abort etc.
->
-> We need bypass some necessary operation during busy check stage.
->
-> Change-Id: Ib5a4599a2a98cbcf441b564f5f6fbb10c8a59e1b
 
-Please remove this.
+> 20 =D0=B0=D0=BF=D1=80. 2017 =D0=B3., =D0=B2 13:06, Jaehoon Chung =
+<jh80.chung@samsung.com> =D0=BD=D0=B0=D0=BF=D0=B8=D1=81=D0=B0=D0=BB(=D0=B0=
+):
+>=20
+> I think you are not using the latest kernel. which version do you use?
+>=20
+> =
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/=
+?id=3Dce69e2fea093b7fa3991c87849c4955cd47796c9
+>=20
+> Could you check this?
 
-> Signed-off-by: Jiajie Hao <jiajie.hao@mediatek.com>
-> ---
->  drivers/mmc/core/core.c     |    4 +++-
->  drivers/mmc/core/sdio_ops.h |   10 ++++++++++
->  2 files changed, 13 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 926e0fd..9c9a4bc 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -234,8 +234,10 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->         /*
->          * For sdio rw commands we must wait for card busy otherwise some
->          * sdio devices won't work properly.
-> +        * And bypass I/O abort, reset and bus suspend operations.
->          */
-> -       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
-> +       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy &&
-> +           !mmc_is_io_bypass(mrq->cmd->opcode, mrq->cmd->arg)) {
+Commit ce69e2fea093 (=C2=ABmmc: dw_mmc: silent verbose log when calling =
+from PM context=C2=BB) fix
+issue I have. So my patch not needed anymore.
 
-Instead of adding yet another function, let's extend the existing
-mmc_is_io_op() to cover this new cases as well.
+I use 4.10.10, probably ce69e2fea093b7fa3991c87849c4955cd47796c9 should =
+be backported to 4.10 branch.
+4.9 branch doesn=E2=80=99t have commit e9748e0364fe ("mmc: dw_mmc: force =
+setup bus if active slots exist=C2=BB) what
+cause the problem.
 
-Moreover, to be reflect the purpose of the function, I suggest we
-rename it from mmc_is_io_op() to sdio_is_op_busy().
+I=E2=80=99ll send request to stable.
 
->                 int tries = 500; /* Wait aprox 500ms at maximum */
->
->                 while (host->ops->card_busy(host) && --tries)
-> diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-> index bed8a83..9896696 100644
-> --- a/drivers/mmc/core/sdio_ops.h
-> +++ b/drivers/mmc/core/sdio_ops.h
-> @@ -31,5 +31,15 @@ static inline bool mmc_is_io_op(u32 opcode)
->         return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
->  }
->
-> +static inline bool mmc_is_io_bypass(u32 opcode, u32 arg)
-> +{
-> +       u32 addr;
-> +
-> +       addr = (arg >> 9) & 0x1FFFF;
-> +
-> +       return ((opcode == SD_IO_RW_DIRECT) &&
-> +               (addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND));
-> +}
-> +
->  #endif
->
-> --
-> 1.7.9.5
->
+Regards,
+Alexander.
 
-Kind regards
-Uffe
