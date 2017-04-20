@@ -1,39 +1,36 @@
-From: "Steven J. Hill" <Steven.Hill@cavium.com>
-Subject: Re: MMC block addressing mode.
-Date: Thu, 20 Apr 2017 16:28:09 -0500
-Message-ID: <fdc1864b-9d5a-25ad-5d15-dc094f1c0886@cavium.com>
-References: <f1cbb93e-68f0-df11-5e89-7b52e00a0b79@cavium.com>
- <CAPDyKFqfEQ6POgoSFL=t0nP62CB13DNL0m8m-Vzqaw0GMAV3qg@mail.gmail.com>
- <ef902f01-96fb-a314-e57c-bde8e1545b66@cavium.com>
- <c503aae1-4162-4398-1645-9e2acab5d002@caviumnetworks.com>
- <ebc19d7d-c6a2-0886-a17a-e1b4d82f957e@cavium.com>
+From: Petr Cvek <petr.cvek@tul.cz>
+Subject: Re: [PATCH 3/4] mmc: pxamci: Disable DATA_TRAN_DONE interrupt sooner
+Date: Fri, 21 Apr 2017 01:37:04 +0200
+Message-ID: <b3b51174-970f-fed1-060f-21ea8b6ee4dc@tul.cz>
+References: <cover.1492492523.git.petr.cvek@tul.cz>
+ <04139c1a-cee8-f64c-4b0e-2e3c472169a3@tul.cz> <87k26g6whu.fsf@belgarion.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0084.outbound.protection.outlook.com ([104.47.36.84]:64867
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1033541AbdDTV2O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Apr 2017 17:28:14 -0400
-In-Reply-To: <ebc19d7d-c6a2-0886-a17a-e1b4d82f957e@cavium.com>
+Received: from bubo.tul.cz ([147.230.16.1]:33744 "EHLO bubo.tul.cz"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S947895AbdDTXgb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 20 Apr 2017 19:36:31 -0400
+In-Reply-To: <87k26g6whu.fsf@belgarion.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jan Glauber <jan.glauber@caviumnetworks.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 04/20/2017 04:24 PM, Steven J. Hill wrote:
-> On 04/20/2017 12:12 PM, David Daney wrote:
->>
->> Steven and Jan:  Can we get around this requirement by:
->>
->> - Always set MIO_EMM_DMA[MULTI] = 1;  This way by SECTOR mode may be unimportant.
->>
->> - Always set MIO_EMM_DMA[SECTOR] = SUITABLE_CONSTANT.
->>
-> No, this does not work. The 1.88GB card plugged into my 78xx
-> board gives the output below. We cannot just blindly set the
-> MULTI bit for all cards. These results are identical for all
-> four combinations of SECTOR and MULTI values hardcoded.
+Dne 19.4.2017 v 21:14 Robert Jarzmik napsal(a):
+> Petr Cvek <petr.cvek@tul.cz> writes:
 > 
-...for 3 of the 4 combinations. Obviously the correct one works.
+>> Disable the DATA_TRAN_DONE interrupt as soon as possible in the handler.
+> Yeah, but why, please explain.
+> If that's only to "reduce" the race occurrence, then I'd rather have this patch
+> dropped. Otherwise if there is a compelling reason let's see ...
+> 
+
+I created it during researching where put the IRQ enable in the callback and then I left it that way the data done interrupt will be disabled if there was an error at the beginning of the pxamci_data_done(). 
+
+I dropped the patch and re-tested and it works (in the case the tests at the start of the pxamci_data_done() fail there will be probably some irq hell though :-D). 
+
+> Cheers.
+> 
+
