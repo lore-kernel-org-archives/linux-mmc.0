@@ -1,66 +1,97 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v2 5/5] Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
-Date: Wed, 19 Apr 2017 23:17:11 +0200
-Message-ID: <1492636631-28254-6-git-send-email-ulf.hansson@linaro.org>
-References: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:35976 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967325AbdDSVR0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Apr 2017 17:17:26 -0400
-Received: by mail-wm0-f42.google.com with SMTP id o81so89660865wmb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Apr 2017 14:17:25 -0700 (PDT)
-In-Reply-To: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc-rockchip: parse
+ rockchip,default-num-phases from DT
+Date: Thu, 20 Apr 2017 09:21:27 +0800
+Message-ID: <58609a89-3413-3383-4bd5-271868500f7d@rock-chips.com>
+References: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com>
+ <1492592434-81312-3-git-send-email-shawn.lin@rock-chips.com>
+ <CAD=FV=X6PRe1u+s4Nnt=9gJD2T4=YyLdMWnKe5rZg2KgWGNAvg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAD=FV=X6PRe1u+s4Nnt=9gJD2T4=YyLdMWnKe5rZg2KgWGNAvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@google.com>
 
-This reverts commit a6db2c86033bc41329770e90c20d4f1fec3824e4.
-
-As dw_mmc now is capable of preventing runtime PM suspend while SDIO IRQs
-are enabled, let's drop the less fine-grained approach of preventing
-runtime PM suspend for all SDIO cards.
-
-In this way we wont keep the host runtime PM resumed, unless really needed
-and thus avoiding to waste power.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/dw_mmc.c | 11 ++---------
- 1 file changed, 2 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c14a36b..c95dc9b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -23,7 +23,6 @@
- #include <linux/ioport.h>
- #include <linux/module.h>
- #include <linux/platform_device.h>
--#include <linux/pm_runtime.h>
- #include <linux/seq_file.h>
- #include <linux/slab.h>
- #include <linux/stat.h>
-@@ -1622,16 +1621,10 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
- 
- 		if (card->type == MMC_TYPE_SDIO ||
- 		    card->type == MMC_TYPE_SD_COMBO) {
--			if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
--				pm_runtime_get_noresume(mmc->parent);
--				set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
--			}
-+			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
- 			clk_en_a = clk_en_a_old & ~clken_low_pwr;
- 		} else {
--			if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
--				pm_runtime_put_noidle(mmc->parent);
--				clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
--			}
-+			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
- 			clk_en_a = clk_en_a_old | clken_low_pwr;
- 		}
- 
--- 
-2.7.4
-
+SGkgRG91ZywKCuWcqCAyMDE3LzQvMjAgNDoxOSwgRG91ZyBBbmRlcnNvbiDlhpnpgZM6Cj4gSGks
+Cj4KPiBPbiBXZWQsIEFwciAxOSwgMjAxNyBhdCAyOjAwIEFNLCBTaGF3biBMaW4gPHNoYXduLmxp
+bkByb2NrLWNoaXBzLmNvbT4gd3JvdGU6Cj4+IEN1cnJlbnRseSB3ZSB1bmNvbmRpdGlvbmFsbHkg
+ZG8gdHVuaW5nIGZvciBlYWNoIGRlZ3JlZSwgd2hpY2gKPj4gY29zdHMgOTAwbXMgZm9yIGVhY2gg
+Ym9vdCBhbmQgcmVzdW1lLgo+Pgo+PiBNYXkgc29tZW9uZSBhcmd1ZSB0aGF0IHRoaXMgaXMgYSBx
+dWVzdGlvbiBvZiBhY2N1cmFjeSBWUyB0aW1lLiBCdXQgSQo+PiB3b3VsZCBzYXkgaXQncyBhIHRy
+aWNrIG9mIGhvdyB3ZSBuZWVkIHRvIGRvIGRlY2lzaW9uIGZvciBvdXIgYm9hcmRzLgo+PiBJZiB3
+ZSBkb24ndCBjYXJlIHRoZSB0aW1lIHdlIHNwZW5kIGF0IGFsbCwgd2UgY291bGQgZGVmaW5pdGVs
+eSBkbyB0dW5pbmcKPj4gZm9yIGVhY2ggZGVncmVlLiBCdXQgd2hlbiB3ZSBuZWVkIHRvIGltcHJv
+dmUgdGhlIHVzZXIgZXhwZXJpZW5jZSwgZm9yCj4+IGluc3RhbmNlLCBzcGVlZCB1cCByZXN1bWlu
+ZyBmcm9tIFMzLCB3ZSBzaG91bGQgYWxzbyBoYXZlIHRoZSByaWdodCB0bwo+PiBkbyB0aGF0LiBU
+aGlzIHBhdGNoIGFkZCBwYXJzaW5nICJyb2NrY2hpcCxkZWZhdWx0LW51bS1waGFzZXMiLCBmb3Ig
+Zm9sa3MKPj4gdG8gc3BlY2lmeSB0aGUgbnVtYmVyIG9mIGRvaW5nIHR1bmluZy4gSWYgbm90IHNw
+ZWNpZmllZCwgMzYwIHdpbGwgYmUgdXNlZAo+PiBhcyBiZWZvcmUuCj4+Cj4+IFNpZ25lZC1vZmYt
+Ynk6IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPgo+Pgo+PiAtLS0KPj4KPj4g
+IGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLXJvY2tjaGlwLmMgfCA0OCArKysrKysrKysrKysrKysr
+KysrKysrKystLS0tLS0tLS0tLS0tLQo+PiAgMSBmaWxlIGNoYW5nZWQsIDMwIGluc2VydGlvbnMo
+KyksIDE4IGRlbGV0aW9ucygtKQo+Cj4gTm8gaHVnZSBvYmplY3Rpb24gaGVyZSwgYnV0IEkgZG8g
+cmVtZW1iZXIgd2UgZW5kZWQgdXAgYXQgdGhlIDM2MAo+IHBoYXNlcyBkdWUgdG8gc29tZSBvZiB0
+aGUgY3JhemluZXNzIHdpdGggZHdfbW1jIGRlbGF5IGVsZW1lbnRzIG9uCj4gcmszMjg4LiAgSUlS
+QyBvbmUgb2YgdGhlIGJpZyBwcm9ibGVtcyB3YXMgdGhhdCB0aGUgZGVsYXkgZWxlbWVudHMKPiBj
+aGFuZ2VkIF9hIGxvdF8gd2l0aCB0aGUgIkxPR0lDIiB2b2x0YWdlIGFuZCB3ZSB0d2Vha2VkIHRo
+ZSB2b2x0YWdlIGF0Cj4gcnVudGltZSBmb3IgRERSIERWRlMuICBUaGF0IGltcG9zZWQgYW4gZXh0
+cmEgbmVlZCB0byBiZSB2ZXJ5IGFjY3VyYXRlCj4gb24gdGhhdCBTb0MsIGF0IGxlYXN0IG9uIGFu
+eSBib2FyZCB0aGF0IHdhcyBkZXNpZ25lZCB0byBzdXBwb3J0IEREUgo+IERWRlMuCj4KCk5vdCBq
+dXN0IHdpdGggdGhlIHZkZF9sb2dpYyBidXQgYWxzbyB3aXRoIHRoZSBwcm9jZXNzIG9mIFNvYy4K
+VG8gYmV0dGVyIGd1YXJhdGVlIHRoZSBhY2N1cmFjeSwgZmlyc3RseSB3ZSB1c2UgZGVsYXkgZWxl
+bWVudCB0byBkbwp0dW5pbmcgYW5kIHRoZW4gY29udmVydCBpdCB0byBiZSBjb21iaW5hdGlvbiBv
+ZiBkZWdyZWUgKyBkZWxheSBlbGVtZW50LgpCdXQgYXMgdGhlIGRhbGF5IGVsZW1lbnRzIGFyZW4n
+dCBhY2N1cmFjeSB0aGVtc2VsZiwgc28gYWxsIHRoZSBtYXRoIHdlCmRvIGhlcmUgaXMgdHJpY2su
+Cgo+IEkgYWxzbyByZW1lbWJlciB0aGVyZSBiZWluZyBzb21lIHdlaXJkbmVzcyBvbiB0aGUgUm9j
+a2NoaXAKPiBpbXBsZW1lbnRhdGlvbiB3aGVyZSB0aGVyZSB3YXMgYSBjZXJ0YWluIHNldCBvZiBw
+aGFzZXMgdGhhdCB0aGUgTU1DCj4gY29udHJvbGxlciB3YXMgZXNzZW50aWFsbHkgImJsaW5kIi4g
+IFRoaXMgYmxpbmQgc3BvdCB3YXMgaW4gdGhlIG1pZGRsZQo+IG9mIGFuIG90aGVyd2lzZSBnb29k
+IHJhbmdlIG9mIHBvaW50cy4gIFVuZm9ydHVuYXRlbHkgdGhpcyBibGluZCBzcG90Cj4gd2FzIHNv
+bWV3aGF0IGhhcmQgdG8gZGV0ZWN0IHByb3Blcmx5IGJlY2F1c2UgaXQgd2FzIG5vdCB2ZXJ5IGJp
+Zy4KPiAuLi50aGUgdmFyaWFiaWxpdHkgb2YgdGhlIGRlbGF5IGVsZW1lbnRzIG1lYW50IHRoYXQg
+dGhlcmUgY291bGQgYmUgYmlnCj4gcmFuZ2VzIHdoZXJlIHdlIHdlcmVuJ3QgZ2V0dGluZyBhbnkg
+Z29vZCB0ZXN0IGNvdmVyYWdlLCBidXQgYWxzbyB0aGUKPiBmYWN0IHRoYXQgdGhleSBjaGFuZ2Vk
+IHdpdGggdGhlIExPR0lDIHZvbHRhZ2UgbWlnaHQgbWVhbiB0aGF0IHdlCj4gd2VyZW4ndCBpbiB0
+aGUgImJsaW5kIiBzcG90IGFuZCB0aGVuIHN1ZGRlbmx5IHdlIHdlcmUuCgpJIHVuZGVydGFuZCBh
+bGwgb2YgdGhlc2UgYXMgSSB3YXMgc3VmZmVyaW5nIGZyb20gaXQgd2hlbiBicmluZ2luZyB1cApS
+SzMyODguCgo+Cj4gT25lIG90aGVyIG5vdGUgaXMgdGhhdCBpIHJlbWVtYmVyIHRoYXQgdGhlIHZh
+c3QgbWFqb3JpdHkgb2YgdGltZSBzcGVudAo+IHR1bmluZyB3YXMgZGVhbGluZyB3aXRoICJiYWQi
+IHBoYXNlcywgbm90IGRlYWxpbmcgd2l0aCAiZ29vZCIgcGhhc2VzLgo+IElmIHlvdSdyZSBsb29r
+aW5nIHRvIHNwZWVkIHRoaW5ncyB1cCwgbWF5YmUgZmluZGluZyBhIHdheSB0byBtYWtlCj4gImJh
+ZCIgcGhhc2VzIGZhaWwgZmFzdGVyIHdvdWxkIGJlIHdpc2U/ICBJIHRoaW5rIG9uZSBvZiB0aGUg
+cmVhc29ucwo+IGJhZCBwaGFzZXMgZmFpbGVkIHNvIHNsb3dseSBpcyBiZWNhdXNlIHRoZSBkd19t
+bWMgdGltZW91dHMgYXJlIGFsbCBzbwo+IGxvbmcuCgpHb29kIHBvaW50LiBJIGhhdmVuJ3QgdGhv
+dWdodCBvZiBzcGVlZGluZyB1cCB0aGUgaGFuZGxlIG9mIGJhZCBwaGFzZXMsCmJ1dCBJIHdpbGwg
+dGFrZSBhIGxvb2sgYXQgdGhpcy4KCj4KPiBPaCwgYW5kIEkgZ3Vlc3Mgb25lIGxhc3Qgbm90ZSBp
+cyB0aGF0IEkgaGF2ZSBubyBpZGVhIGlmIGZvbGtzIHdpbGwKPiBsaWtlIHRoZSBkZXZpY2UgYmlu
+ZGluZ3MgaGVyZS4gIFBhcnQgb2YgbWUgdGhpbmtzIGl0IHNob3VsZCBiZQo+IHNvbWV0aGluZyBt
+b3JlICJzeW1ib2xpYyIgbGlrZSAicm9ja2NoaXAsbmVlZC1hY2N1cmF0ZS10dW5pbmciIG9yCj4g
+c29tZXRoaW5nIGxpa2UgdGhhdC4gIEkgZ3Vlc3MgSSdkIGxldCB0aGUgRFQgZXhwZXJ0cyBjaGlt
+ZSBpbi4KPgo+Cj4gU28gSSBndWVzcyB0byBzdW1tYXJpemU6Cj4gKiBPbiByazMyODggYm9hcmRz
+IHcvIEREUiBEVkZTIChvciBhbnkgb3RoZXIgc2ltaWxhciBib2FyZHMpLCAzNjAKPiBzZWVtcyB0
+byBwcm92aWRlIHJlYWwgYmVuZWZpdC4KPiAqIE9uIG90aGVyIGJvYXJkcywgcHJvYmFibHkgeW91
+IGNhbiBnZXQgYnkgd2l0aCBmZXdlciBwaGFzZXMuCj4KCkkgd291bGQgdHJ5IHRvIHNheSBpdCdz
+IGEgcXVlc3Rpb24gb2YgIjkwMG1zIGZvciBhIHNpbmdsZSB0aW1lIiBWUy4KInNvbWUgb2YgZGlz
+Y3JldGUgdHVuaW5nIGNvc3QgZm9yIG1vcmUgY2hhbmNlIHRvIGRvIHJldHVuZSIuCgooMSlXZSBj
+b3VsZCB0cnkgdG8gZG8gYSBtb3JlIGFjY3VyYXRlIHR1bmluZyBwcm9jZXNzIGFuZCBzcGVuZHMg
+OTAwbXMuClRoZW4gd2UgaGF2ZSBsZXNzIGNoYW5jZSB0byBkbyByZXR1bmUgbGF0ZXIuCgooMilX
+ZSBkbyBhIHJvdWdoIHR1bmluZyBhbmQgaGF2ZSBtb3JlIGNoYW5jZSB0byBkbyByZXR1bmUgbGF0
+ZXIuCgpJIGFsc28gd291bGQgc2F5IHRoYXQgdGhpcyBpcyBhIGdhbWUgLCBhbmQgd2UgY2FuJ3Qg
+c2F5IHdoaWNoCm9uZSBpcyBiZXR0ZXIuIE9idmlvdXMgbm93IHRoZSAiOTAwbXMiIGFsd3lhcyBo
+YXBwZW5zIGluIHRoZSBzcG90CnJvdXRpbmUsIGZvciBpbnN0YW5jZSwgYm9vdGluZyBhbmQgcmVz
+dW1pbmcgZnJvbSBTMy4KCj4KPiAtRG91Zwo+Cj4KPgoKCl9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51
+eC1yb2NrY2hpcEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3Jn
+L21haWxtYW4vbGlzdGluZm8vbGludXgtcm9ja2NoaXAK
