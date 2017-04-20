@@ -1,127 +1,55 @@
-From: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
-Subject: [PATCH 1/2] mmc: arasan: adapt to runtime pm
-Date: Thu, 20 Apr 2017 11:14:47 +0530
-Message-ID: <1492667088-20866-1-git-send-email-shubhrajyoti.datta@xilinx.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: limit SD clock for ls1012a/ls1046a
+Date: Thu, 20 Apr 2017 14:58:29 +0800
+Message-ID: <1492671509-22044-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0060.outbound.protection.outlook.com ([104.47.41.60]:18656
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+Received: from mail-co1nam03on0066.outbound.protection.outlook.com ([104.47.40.66]:27732
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1765646AbdDTFo4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 20 Apr 2017 01:44:56 -0400
+        id S941841AbdDTHNU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 20 Apr 2017 03:13:20 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, michal.simek@xilinx.com, shubhrajyoti.datta@gmail.com, Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-Currently the clock are enabled at probe and released at driver
-removal. This moves to enable before mmc read/ write and disables
-after it.
+The ls1046a datasheet specified that the max SD clock frequency
+for eSDHC SDR104/HS200 was 167MHz, and the ls1012a datasheet
+specified it's 125MHz for ls1012a. So this patch is to add the
+limitation.
 
-Signed-off-by: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 50 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 48 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 1cfd7f9..812e75a 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -24,6 +24,7 @@
- #include <linux/module.h>
- #include <linux/of_device.h>
- #include <linux/phy/phy.h>
-+#include <linux/pm_runtime.h>
- #include <linux/regmap.h>
- #include "sdhci-pltfm.h"
- #include <linux/of.h>
-@@ -373,10 +374,44 @@ static int sdhci_arasan_resume(struct device *dev)
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 49ac197..57966ef 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -456,6 +456,20 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (esdhc->vendor_ver < VENDOR_V_23)
+ 		pre_div = 2;
  
- 	return sdhci_resume_host(host);
- }
++	/*
++	 * Limit SD clock to 167MHz for ls1046a according to its datasheet
++	 */
++	if (clock > 167000000 &&
++	    of_find_compatible_node(NULL, NULL, "fsl,ls1046a-esdhc"))
++		clock = 167000000;
 +
-+static int sdhci_arasan_runtime_suspend(struct device *dev)
-+{
-+	struct platform_device *pdev = to_platform_device(dev);
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
++	/*
++	 * Limit SD clock to 125MHz for ls1012a according to its datasheet
++	 */
++	if (clock > 125000000 &&
++	    of_find_compatible_node(NULL, NULL, "fsl,ls1012a-esdhc"))
++		clock = 125000000;
 +
-+	ret = sdhci_runtime_suspend_host(host);
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+
-+	return ret;
-+}
-+
-+static int sdhci_arasan_runtime_resume(struct device *dev)
-+{
-+	struct platform_device *pdev = to_platform_device(dev);
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+
-+	clk_prepare_enable(pltfm_host->clk);
-+	clk_prepare_enable(sdhci_arasan->clk_ahb);
-+
-+	return sdhci_runtime_resume_host(host);
-+}
- #endif /* ! CONFIG_PM_SLEEP */
- 
--static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
--			 sdhci_arasan_resume);
-+static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend,
-+				sdhci_arasan_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-+			   sdhci_arasan_runtime_resume,
-+			   NULL)
-+};
- 
- static const struct of_device_id sdhci_arasan_of_match[] = {
- 	/* SoC-specific compatible strings w/ soc_ctl_map */
-@@ -637,6 +672,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
- 	sdhci_get_of_property(pdev);
- 
- 	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
-@@ -687,6 +728,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_add_host;
- 
-+	pm_runtime_put(&pdev->dev);
- 	return 0;
- 
- err_add_host:
-@@ -695,6 +737,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- unreg_clk:
- 	sdhci_arasan_unregister_sdclk(&pdev->dev);
- clk_disable_all:
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- 	clk_disable_unprepare(clk_xin);
- clk_dis_ahb:
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-@@ -723,6 +768,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 
- 	clk_disable_unprepare(clk_ahb);
- 
-+	pm_runtime_disable(&pdev->dev);
- 	return ret;
- }
- 
+ 	/* Workaround to reduce the clock frequency for p1010 esdhc */
+ 	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
+ 		if (clock > 20000000)
 -- 
-2.7.4
+2.1.0.27.g96db324
 
