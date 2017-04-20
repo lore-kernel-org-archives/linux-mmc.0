@@ -1,38 +1,32 @@
-From: "Steven J. Hill" <Steven.Hill@cavium.com>
-Subject: Re: MMC block addressing mode.
-Date: Thu, 20 Apr 2017 11:17:26 -0500
-Message-ID: <ef902f01-96fb-a314-e57c-bde8e1545b66@cavium.com>
-References: <f1cbb93e-68f0-df11-5e89-7b52e00a0b79@cavium.com>
- <CAPDyKFqfEQ6POgoSFL=t0nP62CB13DNL0m8m-Vzqaw0GMAV3qg@mail.gmail.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Thu, 20 Apr 2017 11:27:18 -0500
+Message-ID: <20170420162718.nxgzkiek6xhk2atb@rob-hp-laptop>
+References: <1492510391-704-1-git-send-email-yong.mao@mediatek.com>
+ <1492510391-704-2-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqfEQ6POgoSFL=t0nP62CB13DNL0m8m-Vzqaw0GMAV3qg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <david.daney@cavium.com>, Jan Glauber <jan.glauber@caviumnetworks.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1492510391-704-2-git-send-email-yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Daniel Kurtz <djkurtz-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 04/20/2017 09:18 AM, Ulf Hansson wrote:
->>
->> The Cavium hardware requires knowledge of the card addressing mode.
->> We need to either restore mmc_card_blockaddr(), or create another
->> way to generate the same information. You previously suggested use
->> of the 'blksz' value, however, it has the same value regardless of
->> the card capacity. What would you suggest? Cheers.
+On Tue, Apr 18, 2017 at 06:13:09PM +0800, Yong Mao wrote:
+> From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 > 
-> Right. Can you explain what the Cavium hardware need it for?
->
-Uffe,
+> Add description for mediatek,clk-pad-delay
+> 
+> Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.txt |    2 ++
+>  1 file changed, 2 insertions(+)
 
-In Cavium's MMC controller, the DMA engine requires software to
-specify the addressing mode of the card. For DMA write operations,
-the CARD_ADDR field in the MIO_EMM_DMA register is programmed with
-a byte address if the media card <= 2GB. If the card is > 2GB, the
-address is interpreted as a 512 byte sector address. The SECTOR bit
-tells the controller how to interpret the address in CARD_ADDR. If
-set to 1, use 512 byte sector addressing, otherwise it is set to 0
-and byte addressing is used.
-
-Steve
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
