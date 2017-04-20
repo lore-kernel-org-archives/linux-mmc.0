@@ -1,96 +1,92 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: reset tuning circuit when power
- on mmc card
-Date: Thu, 20 Apr 2017 14:30:56 +0200
-Message-ID: <CAPDyKFoUj+7y5+xZct=1B7k94_zNV0ML0QOznEa8DwvO1s9Y5w@mail.gmail.com>
-References: <1492509931-3388-1-git-send-email-haibo.chen@nxp.com>
+Subject: Re: [PATCH] mmc: sdio: Fix sdio wait busy implement limitation
+Date: Thu, 20 Apr 2017 15:27:16 +0200
+Message-ID: <CAPDyKFrDNBFV=1PtiopXoc+Zd7Tc-MZnR5k4za4Grbbs1aCP4Q@mail.gmail.com>
+References: <1492416571-28843-1-git-send-email-jiajie.hao@mediatek.com> <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:35113 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S945280AbdDTMa6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Apr 2017 08:30:58 -0400
-Received: by mail-ua0-f176.google.com with SMTP id f10so48190716uaa.2
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Apr 2017 05:30:58 -0700 (PDT)
-In-Reply-To: <1492509931-3388-1-git-send-email-haibo.chen@nxp.com>
+Received: from mail-ua0-f174.google.com ([209.85.217.174]:33469 "EHLO
+        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S944660AbdDTN1S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Apr 2017 09:27:18 -0400
+Received: by mail-ua0-f174.google.com with SMTP id j59so6439406uad.0
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Apr 2017 06:27:17 -0700 (PDT)
+In-Reply-To: <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Aisheng Dong <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: jiajie.hao@mediatek.com
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@mediatek.com
 
-On 18 April 2017 at 12:05, Haibo Chen <haibo.chen@nxp.com> wrote:
-> USDHC tuning circuit should be reset before every time card enumeration
-> or re-enumeration.
+On 17 April 2017 at 10:09,  <jiajie.hao@mediatek.com> wrote:
+> From: Jiajie Hao <jiajie.hao@mediatek.com>
 >
-> SD3.0 card need tuning. For SDR104 card, when system suspend in standby
-> mode, and then resume back, the IO timing is still SDR104(tuned) which
-> may result in card re-enumeration fail in low card speed(400khz) for some
-> cards. And we did meet the issue that in certain probability, SDR104
-> card meet mmc command CRC/Timeout error when send CMD2 during mmc bus
-> resume.
+> The host may issue an I/O abort by writing to the CCCR at any time
+> during I/O read operation via CMD52. And host may need suspend
+> transcation during write busy stage in SDIO suspend/resume scenario.
+> From other side, a card may accept CMD52 during data transfer phase.
 >
-> This patch reset the tuning circuit when the ios timing is
-> MMC_TIMING_LEGACY/MMC_TIMING_MMC_HS/MMC_TIMING_SD_HS, which means both
-> mmc_power_up() and mmc_power_off() will reset the tuning circuit.
+> Previous implement would block issuing above command in busy stage.
+> It cause function driver can't implement as proper way and has no
+> opportunity to do some coverage in error case via I/O abort etc.
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> We need bypass some necessary operation during busy check stage.
+>
+> Change-Id: Ib5a4599a2a98cbcf441b564f5f6fbb10c8a59e1b
+
+Please remove this.
+
+> Signed-off-by: Jiajie Hao <jiajie.hao@mediatek.com>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 26 ++++++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
+>  drivers/mmc/core/core.c     |    4 +++-
+>  drivers/mmc/core/sdio_ops.h |   10 ++++++++++
+>  2 files changed, 13 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index abad67a..23d8b8a 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -889,6 +889,28 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
->         }
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 926e0fd..9c9a4bc 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -234,8 +234,10 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>         /*
+>          * For sdio rw commands we must wait for card busy otherwise some
+>          * sdio devices won't work properly.
+> +        * And bypass I/O abort, reset and bus suspend operations.
+>          */
+> -       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
+> +       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy &&
+> +           !mmc_is_io_bypass(mrq->cmd->opcode, mrq->cmd->arg)) {
+
+Instead of adding yet another function, let's extend the existing
+mmc_is_io_op() to cover this new cases as well.
+
+Moreover, to be reflect the purpose of the function, I suggest we
+rename it from mmc_is_io_op() to sdio_is_op_busy().
+
+>                 int tries = 500; /* Wait aprox 500ms at maximum */
+>
+>                 while (host->ops->card_busy(host) && --tries)
+> diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+> index bed8a83..9896696 100644
+> --- a/drivers/mmc/core/sdio_ops.h
+> +++ b/drivers/mmc/core/sdio_ops.h
+> @@ -31,5 +31,15 @@ static inline bool mmc_is_io_op(u32 opcode)
+>         return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
 >  }
 >
-> +static void esdhc_reset_tuning(struct sdhci_host *host)
+> +static inline bool mmc_is_io_bypass(u32 opcode, u32 arg)
 > +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-> +       u32 ctrl;
+> +       u32 addr;
 > +
-> +       /* Rest the tuning circurt */
-> +       if (esdhc_is_usdhc(imx_data)) {
-> +               if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
-> +                       ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> +                       ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> +                       ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-> +                       writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-> +                       writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-> +               } else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-> +                       ctrl = readl(host->ioaddr + SDHCI_ACMD12_ERR);
-> +                       ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> +                       writel(ctrl, host->ioaddr + SDHCI_ACMD12_ERR);
-> +               }
-> +       }
+> +       addr = (arg >> 9) & 0x1FFFF;
+> +
+> +       return ((opcode == SD_IO_RW_DIRECT) &&
+> +               (addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND));
 > +}
 > +
->  static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  {
->         u32 m;
-> @@ -932,6 +954,10 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->                 host->ops->set_clock(host, host->clock);
->                 esdhc_set_strobe_dll(host);
->                 break;
-> +       case MMC_TIMING_LEGACY:
-> +       default:
-> +               esdhc_reset_tuning(host);
-> +               break;
-
-I understand this fixes the problem.
-
-However a more appropriate fix would be to reset tuning when
-->ios.power_mode == MMC_POWER_UP, don't you think?
-
->         }
+>  #endif
 >
->         esdhc_change_pinstate(host, timing);
 > --
-> 1.9.1
+> 1.7.9.5
 >
 
 Kind regards
