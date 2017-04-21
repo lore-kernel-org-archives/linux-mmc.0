@@ -1,11 +1,11 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 3/4] mmc: sdhci-acpi: Set MMC_CAP2_NO_SDIO_RESET if child has wake from S4 (hibernate)
-Date: Fri, 21 Apr 2017 13:08:07 +0300
-Message-ID: <1492769288-7474-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 4/4] mmc: sdhci-pci: Set MMC_CAP2_NO_SDIO_RESET if child has wake from S4 (hibernate)
+Date: Fri, 21 Apr 2017 13:08:08 +0300
+Message-ID: <1492769288-7474-5-git-send-email-adrian.hunter@intel.com>
 References: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 In-Reply-To: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
+Sender: linux-pm-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@vger.kernel.org>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 List-Id: linux-mmc@vger.kernel.org
@@ -16,18 +16,19 @@ which indicates a capability to wake from S4 (hibernate).
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-core.c | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index c6a9a1bfaa22..e053a45db6b1 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -374,6 +374,14 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
- 	return NULL;
- }
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 57d6f50b73dc..cc9fc7d54570 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -597,11 +597,42 @@ static int ni_set_max_freq(struct sdhci_pci_slot *slot)
  
-+static bool sdhci_acpi_child_has_s4w(struct acpi_device *child)
+ 	return 0;
+ }
++
++static bool __sdhci_pci_child_has_s4w(struct acpi_device *child)
 +{
 +	acpi_handle handle = child->handle;
 +	unsigned long long ret;
@@ -35,40 +36,45 @@ index c6a9a1bfaa22..e053a45db6b1 100644
 +	return ACPI_SUCCESS(acpi_evaluate_integer(handle, "_S4W", NULL, &ret));
 +}
 +
- static int sdhci_acpi_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
-@@ -382,6 +390,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	struct sdhci_acpi_host *c;
- 	struct sdhci_host *host;
- 	struct resource *iomem;
++static bool sdhci_pci_child_has_s4w(struct sdhci_pci_slot *slot)
++{
++	struct acpi_device *adev = ACPI_COMPANION(&slot->chip->pdev->dev);
++	struct acpi_device *child;
 +	bool child_has_s4w = false;
- 	resource_size_t len;
- 	const char *hid;
- 	const char *uid;
-@@ -393,8 +402,11 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	/* Power on the SDHCI controller and its children */
- 	acpi_device_fix_up_power(device);
- 	list_for_each_entry(child, &device->children, node)
--		if (child->status.present && child->status.enabled)
++
++	if (!adev)
++		return false;
++
++	list_for_each_entry(child, &adev->children, node)
 +		if (child->status.present && child->status.enabled) {
- 			acpi_device_fix_up_power(child);
-+			if (sdhci_acpi_child_has_s4w(child))
++			if (__sdhci_pci_child_has_s4w(child))
 +				child_has_s4w = true;
 +		}
++
++	return child_has_s4w;
++}
+ #else
+ static inline int ni_set_max_freq(struct sdhci_pci_slot *slot)
+ {
+ 	return 0;
+ }
++
++static bool sdhci_pci_child_has_s4w(struct sdhci_pci_slot *slot)
++{
++	return false;
++}
+ #endif
  
- 	if (acpi_bus_get_status(device) || !device->status.present)
- 		return -ENODEV;
-@@ -439,6 +451,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 		goto err_free;
- 	}
+ static int ni_byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+@@ -1960,6 +1991,9 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
  
-+	if (child_has_s4w)
+ 	host->ioaddr = pcim_iomap_table(pdev)[bar];
+ 
++	if (sdhci_pci_child_has_s4w(slot))
 +		host->mmc->caps2 |= MMC_CAP2_NO_SDIO_RESET;
 +
- 	if (c->slot) {
- 		if (c->slot->probe_slot) {
- 			err = c->slot->probe_slot(pdev, hid, uid);
+ 	if (chip->fixes && chip->fixes->probe_slot) {
+ 		ret = chip->fixes->probe_slot(slot);
+ 		if (ret)
 -- 
 1.9.1
-
