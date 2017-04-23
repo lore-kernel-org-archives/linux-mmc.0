@@ -1,111 +1,97 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
-Date: Sat, 22 Apr 2017 10:45:23 +0300
-Message-ID: <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
+From: Jiajie Hao <jiajie.hao@mediatek.com>
+Subject: Re: [PATCH] mmc: sdio: Fix sdio wait busy implement limitation
+Date: Sun, 23 Apr 2017 14:42:26 +0800
+Message-ID: <1492929746.18907.9.camel@mhfsdcap03>
+References: <1492416571-28843-1-git-send-email-jiajie.hao@mediatek.com>
+         <1492416571-28843-2-git-send-email-jiajie.hao@mediatek.com>
+         <CAPDyKFrDNBFV=1PtiopXoc+Zd7Tc-MZnR5k4za4Grbbs1aCP4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:5942 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1042861AbdDVHxP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 22 Apr 2017 03:53:15 -0400
-In-Reply-To: <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrDNBFV=1PtiopXoc+Zd7Tc-MZnR5k4za4Grbbs1aCP4Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, linux-arm-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-On 04/10/2017 04:53 PM, Ulf Hansson wrote:
-> On 13 March 2017 at 13:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Hi
->>
->> Here are the hardware command queue patches without the software command
->> queue patches or sdhci patches.
->>
->> Changes since V1:
->>
->>         "Share mmc request array between partitions" is dependent
->>         on changes in "Introduce queue semantics", so added that
->>         and block fixes:
->>
->>         Added "Fix is_waiting_last_req set incorrectly"
->>         Added "Fix cmd error reset failure path"
->>         Added "Use local var for mqrq_cur"
->>         Added "Introduce queue semantics"
->>
->> Changes since RFC:
->>
->>         Re-based on next.
->>         Added comment about command queue priority.
->>         Added some acks and reviews.
->>
->>
->> Adrian Hunter (21):
->>       mmc: block: Fix is_waiting_last_req set incorrectly
->>       mmc: block: Fix cmd error reset failure path
->>       mmc: block: Use local var for mqrq_cur
->>       mmc: block: Introduce queue semantics
->>       mmc: queue: Share mmc request array between partitions
->>       mmc: mmc: Add functions to enable / disable the Command Queue
->>       mmc: mmc_test: Disable Command Queue while mmc_test is used
->>       mmc: block: Disable Command Queue while RPMB is used
->>       mmc: block: Change mmc_apply_rel_rw() to get block address from the request
->>       mmc: block: Factor out data preparation
->>       mmc: core: Factor out debug prints from mmc_start_request()
->>       mmc: core: Factor out mrq preparation from mmc_start_request()
->>       mmc: core: Add mmc_retune_hold_now()
->>       mmc: core: Add members to mmc_request and mmc_data for CQE's
->>       mmc: host: Add CQE interface
->>       mmc: core: Turn off CQE before sending commands
->>       mmc: core: Add support for handling CQE requests
->>       mmc: mmc: Enable Command Queuing
->>       mmc: mmc: Enable CQE's
->>       mmc: block: Prepare CQE data
->>       mmc: block: Add CQE support
->>
->> Venkat Gopalakrishnan (1):
->>       mmc: cqhci: support for command queue enabled host
->>
->>  Documentation/mmc/mmc-dev-attrs.txt |    1 +
->>  drivers/mmc/core/block.c            |  527 ++++++++++++----
->>  drivers/mmc/core/block.h            |    7 +
->>  drivers/mmc/core/bus.c              |    7 +
->>  drivers/mmc/core/core.c             |  203 ++++++-
->>  drivers/mmc/core/host.c             |    6 +
->>  drivers/mmc/core/host.h             |    1 +
->>  drivers/mmc/core/mmc.c              |   39 +-
->>  drivers/mmc/core/mmc_ops.c          |   28 +
->>  drivers/mmc/core/mmc_ops.h          |    2 +
->>  drivers/mmc/core/mmc_test.c         |   14 +
->>  drivers/mmc/core/queue.c            |  607 ++++++++++++++----
->>  drivers/mmc/core/queue.h            |   55 +-
->>  drivers/mmc/host/Kconfig            |   13 +
->>  drivers/mmc/host/Makefile           |    1 +
->>  drivers/mmc/host/cqhci.c            | 1148 +++++++++++++++++++++++++++++++++++
->>  drivers/mmc/host/cqhci.h            |  240 ++++++++
->>  include/linux/mmc/card.h            |    8 +
->>  include/linux/mmc/core.h            |   19 +-
->>  include/linux/mmc/host.h            |   24 +
->>  include/trace/events/mmc.h          |   17 +-
->>  21 files changed, 2694 insertions(+), 273 deletions(-)
->>  create mode 100644 drivers/mmc/host/cqhci.c
->>  create mode 100644 drivers/mmc/host/cqhci.h
->>
->>
->> Regards
->> Adrian
+Hi Ulf,
+
+Very appreciated for your comment.
+> On Thu, 2017-04-20 at 15:27 +0200, Ulf Hansson wrote:
+> On 17 April 2017 at 10:09,  <jiajie.hao@mediatek.com> wrote:
+> > From: Jiajie Hao <jiajie.hao@mediatek.com>
+> >
+> > The host may issue an I/O abort by writing to the CCCR at any time
+> > during I/O read operation via CMD52. And host may need suspend
+> > transcation during write busy stage in SDIO suspend/resume scenario.
+> > From other side, a card may accept CMD52 during data transfer phase.
+> >
+> > Previous implement would block issuing above command in busy stage.
+> > It cause function driver can't implement as proper way and has no
+> > opportunity to do some coverage in error case via I/O abort etc.
+> >
+> > We need bypass some necessary operation during busy check stage.
+> >
+> > Change-Id: Ib5a4599a2a98cbcf441b564f5f6fbb10c8a59e1b
 > 
-> Sorry for the delay!
+> Please remove this.
+OK.
+> > Signed-off-by: Jiajie Hao <jiajie.hao@mediatek.com>
+> > ---
+> >  drivers/mmc/core/core.c     |    4 +++-
+> >  drivers/mmc/core/sdio_ops.h |   10 ++++++++++
+> >  2 files changed, 13 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 926e0fd..9c9a4bc 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -234,8 +234,10 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+> >         /*
+> >          * For sdio rw commands we must wait for card busy otherwise some
+> >          * sdio devices won't work properly.
+> > +        * And bypass I/O abort, reset and bus suspend operations.
+> >          */
+> > -       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
+> > +       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy &&
+> > +           !mmc_is_io_bypass(mrq->cmd->opcode, mrq->cmd->arg)) {
 > 
-> I have looked through parts of the new version of the series, just
-> reached to patch12. Before I continue, but also to move forward, I
-> have picked up patch 3 -> 12 (including 12). Patch 1 and 2, went as
-> fixes earlier.
+> Instead of adding yet another function, let's extend the existing
+> mmc_is_io_op() to cover this new cases as well.
+> 
+> Moreover, to be reflect the purpose of the function, I suggest we
+> rename it from mmc_is_io_op() to sdio_is_op_busy().
+It's a good suggestion. I'll resend patch in v2 for review.
+> >                 int tries = 500; /* Wait aprox 500ms at maximum */
+> >
+> >                 while (host->ops->card_busy(host) && --tries)
+> > diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+> > index bed8a83..9896696 100644
+> > --- a/drivers/mmc/core/sdio_ops.h
+> > +++ b/drivers/mmc/core/sdio_ops.h
+> > @@ -31,5 +31,15 @@ static inline bool mmc_is_io_op(u32 opcode)
+> >         return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
+> >  }
+> >
+> > +static inline bool mmc_is_io_bypass(u32 opcode, u32 arg)
+> > +{
+> > +       u32 addr;
+> > +
+> > +       addr = (arg >> 9) & 0x1FFFF;
+> > +
+> > +       return ((opcode == SD_IO_RW_DIRECT) &&
+> > +               (addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND));
+> > +}
+> > +
+> >  #endif
+> >
+> > --
+> > 1.7.9.5
+> >
+> 
+> Kind regards
+> Uffe
 
-Ulf and Linus have been doing a great job of keeping this moving, but it
-would be nice to see some others taking more interest.  The first command
-queue patches were posted in February 2014, over 3 years ago!
-
+Best regards
+Jiajie
