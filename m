@@ -1,37 +1,90 @@
-From: "Ms. Katherine" <ulia@distral.ro>
-Subject: EXTREMELY IMPORTANT
-Date: Mon, 24 Apr 2017 19:52:13 +0100
-Message-ID: <20170424185219.099CD51B334F__40001.0953228504$1493062589$gmane$org@mail.distral.ro>
-Reply-To: kathrynnmison@gmail.com
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdio: Fix sdio wait busy implement limitation
+Date: Mon, 24 Apr 2017 21:56:57 +0200
+Message-ID: <CAPDyKFpNoStWkKzrX39NSn-1W0YSMoE1nNLygNtS7V6uD7mocQ@mail.gmail.com>
+References: <1492940307-20785-1-git-send-email-jiajie.hao@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.distral.ro ([5.2.192.160]:33099 "EHLO mail.distral.ro"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S972417AbdDXTgB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 Apr 2017 15:36:01 -0400
-Content-Description: Mail message body
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:32892 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1173286AbdDXT5D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2017 15:57:03 -0400
+Received: by mail-qt0-f181.google.com with SMTP id m36so123452074qtb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2017 12:57:03 -0700 (PDT)
+In-Reply-To: <1492940307-20785-1-git-send-email-jiajie.hao@mediatek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <ulia@distral.ro>
+To: Jiajie Hao <jiajie.hao@mediatek.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Dear Beloved, Sorry for the inconvenience, I am getting in touch with you regarding an extremely important and urgent matter, Please I need your urgent assistance and idea to finish up a project (Orphanage Home) Due to my health condition, Everything is available to finish up the project, All I need is your idea and trust.
+On 23 April 2017 at 11:38, Jiajie Hao <jiajie.hao@mediatek.com> wrote:
+> The host may issue an I/O abort by writing to the CCCR at any time
+> during I/O read operation via CMD52. And host may need suspend
+> transcation during write busy stage in SDIO suspend/resume scenario.
+> From other side, a card may accept CMD52 during data transfer phase.
+>
+> Previous implement would block issuing above command in busy stage.
+> It cause function driver can't implement as proper way and has no
+> opportunity to do some coverage in error case via I/O abort etc.
+>
+> We need bypass some necessary operation during busy check stage.
+>
+> Signed-off-by: Jiajie Hao <jiajie.hao@mediatek.com>
 
-Sehr geehrte Geliebte, traurig für die Unannehmlichkeiten, ich bin in Kontakt mit Ihnen über eine äußerst wichtige und dringende Angelegenheit, Bitte brauche ich Ihre dringende Hilfe und Idee, um ein Projekt zu beenden (Orphanage Home) Wegen meines Gesundheitszustandes ist alles verfügbar Beenden Sie das Projekt, Alles was ich brauche ist Ihre Idee und Vertrauen.
+Thanks, applied for next!
 
-Please contact me for more details.
-Contact Email: kathrynnmison@gmail.com
+Kind regards
+Uffe
 
-Thanks
-
----
-This email has been checked for viruses by Avast antivirus software.
-https://www.avast.com/antivirus
-
-
--- 
-This message has been scanned for viruses and
-dangerous content by MailScanner, and is
-believed to be clean.
-
+> ---
+> Changes since v1:(https://lkml.org/lkml/2017/4/17/69)
+>     * extend orignal interface to cover necessary cases.
+>     * rename mmc_is_io_op() to sdio_is_op_busy() for matching it's meaning.
+>
+> ---
+>  drivers/mmc/core/core.c     |    4 +++-
+>  drivers/mmc/core/sdio_ops.h |   10 ++++++++--
+>  2 files changed, 11 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 926e0fd..2ae83a7 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -234,8 +234,10 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>         /*
+>          * For sdio rw commands we must wait for card busy otherwise some
+>          * sdio devices won't work properly.
+> +        * And bypass I/O abort, reset and bus suspend operations.
+>          */
+> -       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
+> +       if (sdio_is_io_busy(mrq->cmd->opcode, mrq->cmd->arg) &&
+> +           host->ops->card_busy) {
+>                 int tries = 500; /* Wait aprox 500ms at maximum */
+>
+>                 while (host->ops->card_busy(host) && --tries)
+> diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+> index bed8a83..ee35cb4 100644
+> --- a/drivers/mmc/core/sdio_ops.h
+> +++ b/drivers/mmc/core/sdio_ops.h
+> @@ -26,9 +26,15 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>  int sdio_reset(struct mmc_host *host);
+>  unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz);
+>
+> -static inline bool mmc_is_io_op(u32 opcode)
+> +static inline bool sdio_is_io_busy(u32 opcode, u32 arg)
+>  {
+> -       return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
+> +       u32 addr;
+> +
+> +       addr = (arg >> 9) & 0x1FFFF;
+> +
+> +       return (opcode == SD_IO_RW_EXTENDED ||
+> +               (opcode == SD_IO_RW_DIRECT &&
+> +               !(addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND)));
+>  }
+>
+>  #endif
+> --
+> 1.7.9.5
+>
