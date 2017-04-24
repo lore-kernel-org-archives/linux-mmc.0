@@ -1,90 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdio: Fix sdio wait busy implement limitation
-Date: Mon, 24 Apr 2017 21:56:57 +0200
-Message-ID: <CAPDyKFpNoStWkKzrX39NSn-1W0YSMoE1nNLygNtS7V6uD7mocQ@mail.gmail.com>
-References: <1492940307-20785-1-git-send-email-jiajie.hao@mediatek.com>
+Subject: Re: [PATCH 0/4] MMC support for Octeon platforms.
+Date: Mon, 24 Apr 2017 21:56:42 +0200
+Message-ID: <CAPDyKFoAeyqnomWSphRt95WPDuhHRnAuowYHRnMkAB6izZv4nw@mail.gmail.com>
+References: <1493059318-767-1-git-send-email-steven.hill@cavium.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:32892 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1173286AbdDXT5D (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2017 15:57:03 -0400
-Received: by mail-qt0-f181.google.com with SMTP id m36so123452074qtb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2017 12:57:03 -0700 (PDT)
-In-Reply-To: <1492940307-20785-1-git-send-email-jiajie.hao@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <1493059318-767-1-git-send-email-steven.hill@cavium.com>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: "Steven J. Hill" <steven.hill@cavium.com>
+Cc: David Daney <david.daney@cavium.com>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mips@linux-mips.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jiajie Hao <jiajie.hao@mediatek.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mediatek@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 23 April 2017 at 11:38, Jiajie Hao <jiajie.hao@mediatek.com> wrote:
-> The host may issue an I/O abort by writing to the CCCR at any time
-> during I/O read operation via CMD52. And host may need suspend
-> transcation during write busy stage in SDIO suspend/resume scenario.
-> From other side, a card may accept CMD52 during data transfer phase.
+On 24 April 2017 at 20:41, Steven J. Hill <steven.hill@cavium.com> wrote:
+> From: "Steven J. Hill" <Steven.Hill@cavium.com>
 >
-> Previous implement would block issuing above command in busy stage.
-> It cause function driver can't implement as proper way and has no
-> opportunity to do some coverage in error case via I/O abort etc.
+> Enable MMC support on Octeon SoCs. Tested on EdgeRouter Pro,
+> SFF7000, and SFF7800 platforms. This should be applied on top
+> of the "Cavium MMC driver" patch series from Jan Glauber.
 >
-> We need bypass some necessary operation during busy check stage.
+> Steven J. Hill (3):
+>   mmc: cavium: Fix detection of block or byte addressing.
+>   mmc: cavium: Add MMC support for Octeon SOCs.
+>   MIPS: Octeon: cavium_octeon_defconfig: Enable Octeon MMC
 >
-> Signed-off-by: Jiajie Hao <jiajie.hao@mediatek.com>
+> Ulf Hansson (1):
+>   mmc: core: Export API to allow hosts to get the card address
+>
+>  arch/mips/configs/cavium_octeon_defconfig |   5 +
+>  drivers/mmc/core/core.c                   |   6 +
+>  drivers/mmc/host/Kconfig                  |  10 +
+>  drivers/mmc/host/Makefile                 |   2 +
+>  drivers/mmc/host/cavium-octeon.c          | 351 ++++++++++++++++++++++++++++++
+>  drivers/mmc/host/cavium.c                 |   2 +-
+>  include/linux/mmc/card.h                  |   2 +
+>  7 files changed, 377 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/mmc/host/cavium-octeon.c
+>
+> --
+> 2.1.4
+>
 
-Thanks, applied for next!
+Thanks, applied patch 1->3. Patch 4 is for the MIPS SoC maintainer,
+unless I get an ack for it.
 
 Kind regards
 Uffe
-
-> ---
-> Changes since v1:(https://lkml.org/lkml/2017/4/17/69)
->     * extend orignal interface to cover necessary cases.
->     * rename mmc_is_io_op() to sdio_is_op_busy() for matching it's meaning.
->
-> ---
->  drivers/mmc/core/core.c     |    4 +++-
->  drivers/mmc/core/sdio_ops.h |   10 ++++++++--
->  2 files changed, 11 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 926e0fd..2ae83a7 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -234,8 +234,10 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->         /*
->          * For sdio rw commands we must wait for card busy otherwise some
->          * sdio devices won't work properly.
-> +        * And bypass I/O abort, reset and bus suspend operations.
->          */
-> -       if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
-> +       if (sdio_is_io_busy(mrq->cmd->opcode, mrq->cmd->arg) &&
-> +           host->ops->card_busy) {
->                 int tries = 500; /* Wait aprox 500ms at maximum */
->
->                 while (host->ops->card_busy(host) && --tries)
-> diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-> index bed8a83..ee35cb4 100644
-> --- a/drivers/mmc/core/sdio_ops.h
-> +++ b/drivers/mmc/core/sdio_ops.h
-> @@ -26,9 +26,15 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->  int sdio_reset(struct mmc_host *host);
->  unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz);
->
-> -static inline bool mmc_is_io_op(u32 opcode)
-> +static inline bool sdio_is_io_busy(u32 opcode, u32 arg)
->  {
-> -       return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
-> +       u32 addr;
-> +
-> +       addr = (arg >> 9) & 0x1FFFF;
-> +
-> +       return (opcode == SD_IO_RW_EXTENDED ||
-> +               (opcode == SD_IO_RW_DIRECT &&
-> +               !(addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND)));
->  }
->
->  #endif
-> --
-> 1.7.9.5
->
