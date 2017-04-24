@@ -1,35 +1,53 @@
-From: "Steven J. Hill" <Steven.Hill@cavium.com>
-Subject: Re: [PATCH 0/4] MMC support for Octeon platforms.
-Date: Mon, 24 Apr 2017 16:19:35 -0500
-Message-ID: <6576c581-b575-db7f-f9b3-4aabdef9e59b@cavium.com>
-References: <1493059318-767-1-git-send-email-steven.hill@cavium.com>
- <CAPDyKFoAeyqnomWSphRt95WPDuhHRnAuowYHRnMkAB6izZv4nw@mail.gmail.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Subject: Re: [PATCH RFC 3/4] mmc: sdhci-acpi: Set MMC_CAP2_NO_SDIO_RESET if
+ child has wake from S4 (hibernate)
+Date: Mon, 24 Apr 2017 23:52:00 +0200
+Message-ID: <CAJZ5v0hcfsbfy=KhgTDvg7zj-egKODDJAF0-gqWdxuxKfyBFPQ@mail.gmail.com>
+References: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com> <1492769288-7474-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0071.outbound.protection.outlook.com ([104.47.32.71]:49864
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S937558AbdDXVTm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 Apr 2017 17:19:42 -0400
-In-Reply-To: <CAPDyKFoAeyqnomWSphRt95WPDuhHRnAuowYHRnMkAB6izZv4nw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1492769288-7474-4-git-send-email-adrian.hunter@intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@vger.kernel.org>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: David Daney <david.daney@cavium.com>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mips@linux-mips.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ralf Baechle <ralf@linux-mips.org>
 
-On 04/24/2017 02:56 PM, Ulf Hansson wrote:
+On Fri, Apr 21, 2017 at 12:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> SDIO reset interferes with a SDIO function driver's restore from
+> hibernation. Set MMC_CAP2_NO_SDIO_RESET if a child node has _S4W method
+> which indicates a capability to wake from S4 (hibernate).
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index c6a9a1bfaa22..e053a45db6b1 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -374,6 +374,14 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+>         return NULL;
+>  }
+>
+> +static bool sdhci_acpi_child_has_s4w(struct acpi_device *child)
+> +{
+> +       acpi_handle handle = child->handle;
+> +       unsigned long long ret;
+> +
+> +       return ACPI_SUCCESS(acpi_evaluate_integer(handle, "_S4W", NULL, &ret));
 
-[....]
-> 
-> Thanks, applied patch 1->3. Patch 4 is for the MIPS SoC maintainer,
-> unless I get an ack for it.
-> 
-Thanks Uffe.
+First off, there is acpi_has_method().
 
-Ralf, please take patch 4/4 into your -next branch. Cheers.
+Second, checking child->wakeup.sleep_state is a better indicator of S4
+wakeup support.
 
+> +}
+> +
+>  static int sdhci_acpi_probe(struct platform_device *pdev)
+>  {
+>         struct device *dev = &pdev->dev;
 
--Steve
-
+Thanks,
+Rafael
