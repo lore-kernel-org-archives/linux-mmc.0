@@ -1,62 +1,115 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH RFC 3/4] mmc: sdhci-acpi: Set MMC_CAP2_NO_SDIO_RESET if
- child has wake from S4 (hibernate)
-Date: Tue, 25 Apr 2017 13:05:42 +0200
-Message-ID: <CAJZ5v0irctEBjpXFLW9nuevx4L0HNigNMQv1qgCuGp7tOiE8Jg@mail.gmail.com>
-References: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com>
- <1492769288-7474-4-git-send-email-adrian.hunter@intel.com>
- <CAJZ5v0hcfsbfy=KhgTDvg7zj-egKODDJAF0-gqWdxuxKfyBFPQ@mail.gmail.com> <a28facd9-9d81-2be0-280b-ac4267e334d0@intel.com>
+From: Shubhrajyoti Datta <shubhrajyoti.datta@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: arasan: adapt to runtime pm
+Date: Tue, 25 Apr 2017 16:49:25 +0530
+Message-ID: <CAKfKVtHVTpjvAsn+rVMbXDBSVkrTWv62SVz4oA_rohMi_rap9g@mail.gmail.com>
+References: <1492667088-20866-1-git-send-email-shubhrajyoti.datta@xilinx.com>
+ <77e3c31a-69df-a71e-47d8-da0e3924c4aa@intel.com> <CAKfKVtHUB2Q6hVzf_byepPbdQdQJRep5D7cWTR2-q0cN_SP8ig@mail.gmail.com>
+ <c3f89850-ae62-bed2-4750-159f4d4126b7@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <a28facd9-9d81-2be0-280b-ac4267e334d0@intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@vger.kernel.org>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:34692 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1946817AbdDYLT1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 07:19:27 -0400
+Received: by mail-qt0-f195.google.com with SMTP id y33so24453143qta.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2017 04:19:27 -0700 (PDT)
+In-Reply-To: <c3f89850-ae62-bed2-4750-159f4d4126b7@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Michal Simek <michal.simek@xilinx.com>
 
-On Tue, Apr 25, 2017 at 9:28 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 25/04/17 00:52, Rafael J. Wysocki wrote:
->> On Fri, Apr 21, 2017 at 12:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> SDIO reset interferes with a SDIO function driver's restore from
->>> hibernation. Set MMC_CAP2_NO_SDIO_RESET if a child node has _S4W method
->>> which indicates a capability to wake from S4 (hibernate).
->>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>> ---
->>>  drivers/mmc/host/sdhci-acpi.c | 17 ++++++++++++++++-
->>>  1 file changed, 16 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index c6a9a1bfaa22..e053a45db6b1 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -374,6 +374,14 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
->>>         return NULL;
->>>  }
->>>
->>> +static bool sdhci_acpi_child_has_s4w(struct acpi_device *child)
->>> +{
->>> +       acpi_handle handle = child->handle;
->>> +       unsigned long long ret;
->>> +
->>> +       return ACPI_SUCCESS(acpi_evaluate_integer(handle, "_S4W", NULL, &ret));
->>
->> First off, there is acpi_has_method().
->>
->> Second, checking child->wakeup.sleep_state is a better indicator of S4
->> wakeup support.
+On Tue, Apr 25, 2017 at 4:22 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> So, like this?
+> On 25/04/17 13:50, Shubhrajyoti Datta wrote:
+> > Hi Adrian,
+> >
+> > Thanks for the review.
+> >
+> > On Tue, Apr 25, 2017 at 3:47 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>
+> >> On 20/04/17 08:44, Shubhrajyoti Datta wrote:
+> >>> Currently the clock are enabled at probe and released at driver
+> >>> removal. This moves to enable before mmc read/ write and disables
+> >>> after it.
+> >>>
+> >>> Signed-off-by: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
+> >>> ---
+> >>>  drivers/mmc/host/sdhci-of-arasan.c | 50 ++++++++++++++++++++++++++++++++++++--
+> >>>  1 file changed, 48 insertions(+), 2 deletions(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> >>> index 1cfd7f9..812e75a 100644
+> >>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> >>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> >>> @@ -24,6 +24,7 @@
+> >>>  #include <linux/module.h>
+> >>>  #include <linux/of_device.h>
+> >>>  #include <linux/phy/phy.h>
+> >>> +#include <linux/pm_runtime.h>
+> >>>  #include <linux/regmap.h>
+> >>>  #include "sdhci-pltfm.h"
+> >>>  #include <linux/of.h>
+> >>> @@ -373,10 +374,44 @@ static int sdhci_arasan_resume(struct device *dev)
+> >>>
+> >>>       return sdhci_resume_host(host);
+> >>>  }
+> >>> +
+> >>
+> >> Runtime PM is under CONFIG_PM not CONFIG_PM_SLEEP
+> >
+> > Will fix.
+> >
+> >>
+> >>> +static int sdhci_arasan_runtime_suspend(struct device *dev)
+> >>> +{
+> >>> +     struct platform_device *pdev = to_platform_device(dev);
+> >>> +     struct sdhci_host *host = platform_get_drvdata(pdev);
+> >>> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >>> +     struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> >>> +     int ret;
+> >>> +
+> >>> +     ret = sdhci_runtime_suspend_host(host);
+> >>
+> >> Other drivers now have:
+> > Can you point me to an example.
+> >
+> >>
+> >>         if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> >>                 mmc_retune_needed(host->mmc);
+> >>
+> >> If you don't need re-tuning, maybe add a comment so we know.
+> >
+> > I  didnt  I  understood this one.
+> > I am calling sdhci_runtime_suspend_host  which has.
+> >
+> > 2907
+> > 2908 int sdhci_runtime_suspend_host(struct sdhci_host *host)
+> > 2909 {
+> > 2910         unsigned long flags;
+> > 2911
+> > 2912         mmc_retune_timer_stop(host->mmc);
+> > 2913         if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> > 2914                 mmc_retune_needed(host->mmc);
+> >
+> >
+> > Am I missing something
 >
->         child->wakeup.sleep_state >= ACPI_STATE_S4
+> It has changed recently, so you need to look at the 'next' branch of Ulf's
+> mmc tree:
 >
-> That comes just from _PRW right?
+>         git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
 
-It may be fixed up if the power resources in there don't match what
-_PRW itself returns, but generally yes.
+Thanks for the heads up will fix in the next version.
+I didnt have the latest updates in my tree.
 
-In any case _S4W is optional even for devices that can wake up from S4 IIRC.
-
-Thanks,
-Rafael
+>
+> >>
+> >>> +
+> >>> +     clk_disable_unprepare(pltfm_host->clk);
+> >>> +     clk_disable_unprepare(sdhci_arasan->clk_ahb);
+> >>> +
+> >>> +     return ret;
+> >
+>
