@@ -1,251 +1,54 @@
-From: David Woods <dwoods@mellanox.com>
-Subject: [PATCH] Use device_property_read instead of of_property_read in the dw_mmc driver
-Date: Tue, 25 Apr 2017 11:39:27 -0400
-Message-ID: <1493134767-19170-1-git-send-email-dwoods@mellanox.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:51920 "EHLO
-        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1950310AbdDYPj5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 11:39:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Logan Gunthorpe <logang@deltatee.com>
+Subject: [PATCH v2 02/21] libiscsi: Add an internal error code
+Date: Tue, 25 Apr 2017 12:20:49 -0600
+Message-ID: <1493144468-22493-3-git-send-email-logang@deltatee.com>
+References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+In-Reply-To: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvdimm@lists.01.org, linux-scsi@vger.kernel.org, open-iscsi@googlegroups.com, megaraidlinux.pdl@broadcom.com, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, target-devel@vger.kernel.org, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, dm-devel@redhat.com
+Cc: Jens Axboe <axboe@kernel.dk>, "James E.J. Bottomley" <jejb@linux.vnet.ibm.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Matthew Wilcox <mawilcox@microsoft.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sumit Semwal <sumit.semwal@linaro.org>, Ross Zwisler <ross.zwisler@linux.intel.com>, Dan Williams <dan.j.williams@intel.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Christoph Hellwig <hch@lst.de>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, jh80.chung@samsung.com, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: David Woods <dwoods@mellanox.com>
 
-Using the device_property interfaces allows the dw_mmc driver to work
-on platforms which run on either device tree or ACPI.
-
-Signed-off-by: David Woods <dwoods@mellanox.com>
-Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
----
- drivers/mmc/core/host.c   | 72 +++++++++++++++++++++++------------------------
- drivers/mmc/host/dw_mmc.c | 24 ++++++++--------
- 2 files changed, 47 insertions(+), 49 deletions(-)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3f8c85d..d2c059e 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
-  */
- int mmc_of_parse(struct mmc_host *host)
- {
--	struct device_node *np;
-+	struct device *dev = host->parent;
- 	u32 bus_width;
- 	int ret;
- 	bool cd_cap_invert, cd_gpio_invert = false;
- 	bool ro_cap_invert, ro_gpio_invert = false;
- 
--	if (!host->parent || !host->parent->of_node)
-+	if (!dev)
- 		return 0;
- 
--	np = host->parent->of_node;
--
- 	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
--	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-+	if (device_property_read_u32(dev, "bus-width", &bus_width) < 0) {
- 		dev_dbg(host->parent,
- 			"\"bus-width\" property is missing, assuming 1 bit.\n");
- 		bus_width = 1;
-@@ -210,7 +208,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* f_max is obtained from the optional "max-frequency" property */
--	of_property_read_u32(np, "max-frequency", &host->f_max);
-+	device_property_read_u32(dev, "max-frequency", &host->f_max);
- 
- 	/*
- 	 * Configure CD and WP pins. They are both by default active low to
-@@ -225,12 +223,12 @@ int mmc_of_parse(struct mmc_host *host)
- 	 */
- 
- 	/* Parse Card Detection */
--	if (of_property_read_bool(np, "non-removable")) {
-+	if (device_property_read_bool(dev, "non-removable")) {
- 		host->caps |= MMC_CAP_NONREMOVABLE;
- 	} else {
--		cd_cap_invert = of_property_read_bool(np, "cd-inverted");
-+		cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
- 
--		if (of_property_read_bool(np, "broken-cd"))
-+		if (device_property_read_bool(dev, "broken-cd"))
- 			host->caps |= MMC_CAP_NEEDS_POLL;
- 
- 		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-@@ -256,7 +254,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* Parse Write Protection */
--	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
-+	ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
- 
- 	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert);
- 	if (!ret)
-@@ -264,64 +262,64 @@ int mmc_of_parse(struct mmc_host *host)
- 	else if (ret != -ENOENT && ret != -ENOSYS)
- 		return ret;
- 
--	if (of_property_read_bool(np, "disable-wp"))
-+	if (device_property_read_bool(dev, "disable-wp"))
- 		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
- 
- 	/* See the comment on CD inversion above */
- 	if (ro_cap_invert ^ ro_gpio_invert)
- 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
- 
--	if (of_property_read_bool(np, "cap-sd-highspeed"))
-+	if (device_property_read_bool(dev, "cap-sd-highspeed"))
- 		host->caps |= MMC_CAP_SD_HIGHSPEED;
--	if (of_property_read_bool(np, "cap-mmc-highspeed"))
-+	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
- 		host->caps |= MMC_CAP_MMC_HIGHSPEED;
--	if (of_property_read_bool(np, "sd-uhs-sdr12"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr12"))
- 		host->caps |= MMC_CAP_UHS_SDR12;
--	if (of_property_read_bool(np, "sd-uhs-sdr25"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr25"))
- 		host->caps |= MMC_CAP_UHS_SDR25;
--	if (of_property_read_bool(np, "sd-uhs-sdr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr50"))
- 		host->caps |= MMC_CAP_UHS_SDR50;
--	if (of_property_read_bool(np, "sd-uhs-sdr104"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr104"))
- 		host->caps |= MMC_CAP_UHS_SDR104;
--	if (of_property_read_bool(np, "sd-uhs-ddr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-ddr50"))
- 		host->caps |= MMC_CAP_UHS_DDR50;
--	if (of_property_read_bool(np, "cap-power-off-card"))
-+	if (device_property_read_bool(dev, "cap-power-off-card"))
- 		host->caps |= MMC_CAP_POWER_OFF_CARD;
--	if (of_property_read_bool(np, "cap-mmc-hw-reset"))
-+	if (device_property_read_bool(dev, "cap-mmc-hw-reset"))
- 		host->caps |= MMC_CAP_HW_RESET;
--	if (of_property_read_bool(np, "cap-sdio-irq"))
-+	if (device_property_read_bool(dev, "cap-sdio-irq"))
- 		host->caps |= MMC_CAP_SDIO_IRQ;
--	if (of_property_read_bool(np, "full-pwr-cycle"))
-+	if (device_property_read_bool(dev, "full-pwr-cycle"))
- 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
--	if (of_property_read_bool(np, "keep-power-in-suspend"))
-+	if (device_property_read_bool(dev, "keep-power-in-suspend"))
- 		host->pm_caps |= MMC_PM_KEEP_POWER;
--	if (of_property_read_bool(np, "wakeup-source") ||
--	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
-+	if (device_property_read_bool(dev, "wakeup-source") ||
-+	    device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
- 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--	if (of_property_read_bool(np, "mmc-ddr-3_3v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
- 		host->caps |= MMC_CAP_3_3V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
- 		host->caps |= MMC_CAP_1_8V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_2v"))
- 		host->caps |= MMC_CAP_1_2V_DDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
-+	if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
- 		host->caps2 |= MMC_CAP2_HS400_ES;
--	if (of_property_read_bool(np, "no-sdio"))
-+	if (device_property_read_bool(dev, "no-sdio"))
- 		host->caps2 |= MMC_CAP2_NO_SDIO;
--	if (of_property_read_bool(np, "no-sd"))
-+	if (device_property_read_bool(dev, "no-sd"))
- 		host->caps2 |= MMC_CAP2_NO_SD;
--	if (of_property_read_bool(np, "no-mmc"))
-+	if (device_property_read_bool(dev, "no-mmc"))
- 		host->caps2 |= MMC_CAP2_NO_MMC;
- 
--	host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
-+	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
- 	if (host->dsr_req && (host->dsr & ~0xffff)) {
- 		dev_err(host->parent,
- 			"device tree specified broken value for DSR: 0x%x, ignoring\n",
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 8718432..3728c59 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2641,8 +2641,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	host->slot[id] = slot;
- 
- 	mmc->ops = &dw_mci_ops;
--	if (of_property_read_u32_array(host->dev->of_node,
--				       "clock-freq-min-max", freq, 2)) {
-+	if (device_property_read_u32_array(host->dev, "clock-freq-min-max",
-+					   freq, 2)) {
- 		mmc->f_min = DW_MCI_FREQ_MIN;
- 		mmc->f_max = DW_MCI_FREQ_MAX;
- 	} else {
-@@ -2742,7 +2742,6 @@ static void dw_mci_init_dma(struct dw_mci *host)
- {
- 	int addr_config;
- 	struct device *dev = host->dev;
--	struct device_node *np = dev->of_node;
- 
- 	/*
- 	* Check tansfer mode from HCON[17:16]
-@@ -2803,8 +2802,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
- 		dev_info(host->dev, "Using internal DMA controller.\n");
- 	} else {
- 		/* TRANS_MODE_EDMAC: check dma bindings again */
--		if ((of_property_count_strings(np, "dma-names") < 0) ||
--		    (!of_find_property(np, "dmas", NULL))) {
-+		if ((device_property_read_string_array(dev, "dma-names",
-+						       NULL, 0) < 0) ||
-+		    !device_property_present(dev, "dmas")) {
- 			goto no_dma;
- 		}
- 		host->dma_ops = &dw_mci_edmac_ops;
-@@ -2964,7 +2964,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- {
- 	struct dw_mci_board *pdata;
- 	struct device *dev = host->dev;
--	struct device_node *np = dev->of_node;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int ret;
- 	u32 clock_frequency;
-@@ -2981,20 +2980,21 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	}
- 
- 	/* find out number of slots supported */
--	of_property_read_u32(np, "num-slots", &pdata->num_slots);
-+	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
- 
--	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
-+	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
- 		dev_info(dev,
- 			 "fifo-depth property not found, using value of FIFOTH register as default\n");
- 
--	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
-+	device_property_read_u32(dev, "card-detect-delay",
-+				 &pdata->detect_delay_ms);
- 
--	of_property_read_u32(np, "data-addr", &host->data_addr_override);
-+	device_property_read_u32(dev, "data-addr", &host->data_addr_override);
- 
--	if (of_get_property(np, "fifo-watermark-aligned", NULL))
-+	if (device_property_present(dev, "fifo-watermark-aligned"))
- 		host->wm_aligned = true;
- 
--	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
-+	if (!device_property_read_u32(dev, "clock-frequency", &clock_frequency))
- 		pdata->bus_hz = clock_frequency;
- 
- 	if (drv_data && drv_data->parse_dt) {
--- 
-2.7.2
-
+VGhpcyBpcyBhIHByZXAgcGF0Y2ggdG8gYWRkIGEgbmV3IGVycm9yIGNvZGUgdG8gbGliaXNjc2ku
+IFdlIHdhbnQgdG8KcmV3b3JrIHNvbWUga21hcCBjYWxscyB0byBiZSBhYmxlIHRvIGZhaWwuIFdo
+ZW4gd2UgZG8sIHdlJ2QgbGlrZSB0bwp1c2UgdGhpcyBlcnJvciBjb2RlLgoKVGhpcyBwYXRjaCBz
+aW1wbHkgaW50cm9kdWNlcyBJU0NTSV9UQ1BfSU5URVJOQUxfRVJSIGFuZCBwcmludHMKIkludGVy
+bmFsIEVycm9yLiIgd2hlbiBpdCBnZXRzIGhpdC4KClNpZ25lZC1vZmYtYnk6IExvZ2FuIEd1bnRo
+b3JwZSA8bG9nYW5nQGRlbHRhdGVlLmNvbT4KLS0tCiBkcml2ZXJzL3Njc2kvY3hnYmkvbGliY3hn
+YmkuYyB8IDUgKysrKysKIGluY2x1ZGUvc2NzaS9saWJpc2NzaV90Y3AuaCAgIHwgMSArCiAyIGZp
+bGVzIGNoYW5nZWQsIDYgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvc2NzaS9j
+eGdiaS9saWJjeGdiaS5jIGIvZHJpdmVycy9zY3NpL2N4Z2JpL2xpYmN4Z2JpLmMKaW5kZXggYmQ3
+ZDM5ZS4uZTM4ZDBjMSAxMDA2NDQKLS0tIGEvZHJpdmVycy9zY3NpL2N4Z2JpL2xpYmN4Z2JpLmMK
+KysrIGIvZHJpdmVycy9zY3NpL2N4Z2JpL2xpYmN4Z2JpLmMKQEAgLTE1NTYsNiArMTU1NiwxMSBA
+QCBzdGF0aWMgaW5saW5lIGludCByZWFkX3BkdV9za2Ioc3RydWN0IGlzY3NpX2Nvbm4gKmNvbm4s
+CiAJCSAqLwogCQlpc2NzaV9jb25uX3ByaW50ayhLRVJOX0VSUiwgY29ubiwgIkludmFsaWQgcGR1
+IG9yIHNrYi4iKTsKIAkJcmV0dXJuIC1FRkFVTFQ7CisJY2FzZSBJU0NTSV9UQ1BfSU5URVJOQUxf
+RVJSOgorCQlwcl9pbmZvKCJza2IgMHglcCwgb2ZmICV1LCAlZCwgVENQX0lOVEVSTkFMX0VSUi5c
+biIsCisJCQlza2IsIG9mZnNldCwgb2ZmbG9hZGVkKTsKKwkJaXNjc2lfY29ubl9wcmludGsoS0VS
+Tl9FUlIsIGNvbm4sICJJbnRlcm5hbCBlcnJvci4iKTsKKwkJcmV0dXJuIC1FRkFVTFQ7CiAJY2Fz
+ZSBJU0NTSV9UQ1BfU0VHTUVOVF9ET05FOgogCQlsb2dfZGVidWcoMSA8PCBDWEdCSV9EQkdfUERV
+X1JYLAogCQkJInNrYiAweCVwLCBvZmYgJXUsICVkLCBUQ1BfU0VHX0RPTkUsIHJjICVkLlxuIiwK
+ZGlmZiAtLWdpdCBhL2luY2x1ZGUvc2NzaS9saWJpc2NzaV90Y3AuaCBiL2luY2x1ZGUvc2NzaS9s
+aWJpc2NzaV90Y3AuaAppbmRleCAzMDUyMGQ1Li45MDY5MWFkIDEwMDY0NAotLS0gYS9pbmNsdWRl
+L3Njc2kvbGliaXNjc2lfdGNwLmgKKysrIGIvaW5jbHVkZS9zY3NpL2xpYmlzY3NpX3RjcC5oCkBA
+IC05Miw2ICs5Miw3IEBAIGVudW0gewogCUlTQ1NJX1RDUF9TS0JfRE9ORSwJCS8qIHNrYiBpcyBv
+dXQgb2YgZGF0YSAqLwogCUlTQ1NJX1RDUF9DT05OX0VSUiwJCS8qIGlzY3NpIGxheWVyIGhhcyBm
+aXJlZCBhIGNvbm4gZXJyICovCiAJSVNDU0lfVENQX1NVU1BFTkRFRCwJCS8qIGNvbm4gaXMgc3Vz
+cGVuZGVkICovCisJSVNDU0lfVENQX0lOVEVSTkFMX0VSUiwgICAgICAgICAvKiBhbiBpbnRlcm5h
+bCBlcnJvciBvY2N1cnJlZCAqLwogfTsKIAogZXh0ZXJuIHZvaWQgaXNjc2lfdGNwX2hkcl9yZWN2
+X3ByZXAoc3RydWN0IGlzY3NpX3RjcF9jb25uICp0Y3BfY29ubik7Ci0tIAoyLjEuNAoKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50ZWwtZ2Z4IG1haWxp
+bmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBzOi8vbGlzdHMuZnJl
+ZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
