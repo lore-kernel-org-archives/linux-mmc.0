@@ -1,65 +1,148 @@
-From: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v2 19/21] mmc: sdricoh_cs: Make use of the new sg_map helper
- function
-Date: Tue, 25 Apr 2017 12:21:06 -0600
-Message-ID: <1493144468-22493-20-git-send-email-logang@deltatee.com>
-References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+From: Grygorii Strashko <grygorii.strashko@ti.com>
+Subject: Re: [PATCH RFC 2/4] mmc: sdio: Add capability to skip SDIO reset at
+ scan
+Date: Tue, 25 Apr 2017 13:51:19 -0500
+Message-ID: <a873b92c-e290-2e9b-d473-e28e9aeb4c0c@ti.com>
+References: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com>
+ <1492769288-7474-3-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFq7qWGgyXStJU3XZnGRcqMXZs_z21nJ2vUnCe0Pn-q19Q@mail.gmail.com>
+ <ff496ea4-ba9b-387b-2d3b-3bf59b878973@intel.com>
+ <CAPDyKFpDjx9EWLFCR5yejJg5bu3x--ksuOAE33+a_L0FNUW9dw@mail.gmail.com>
+ <9ed30be6-9a42-9cd1-f260-9b57da369b05@intel.com>
+ <CAPDyKFqorfJTVeS+r-qWYTFcAuJ67kmpk1WWQpkeMeQKsVfEcg@mail.gmail.com>
+ <15332477-f37b-21d0-f85b-132d7bc0cdb4@intel.com>
+ <CAPDyKFr-y5uAZMhGuiL8o7syTpDqFcQp5ibnO80ZWCFUNcQetQ@mail.gmail.com>
+ <e9dabea2-76bc-8112-93de-c2ad7f2668f3@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-In-Reply-To: <1493144468-22493-1-git-send-email-logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
-List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
- <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
-Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
-Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, megaraidlinux.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dm-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "James E.J. Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, "Martin K. Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Matthew Wilcox <mawilcox-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sumit Semwal <sumit.semwal-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sascha Sommer <saschasommer-KuiJ5kEpwI6ELgA04lAiVw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <e9dabea2-76bc-8112-93de-c2ad7f2668f3@intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@vger.kernel.org>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 List-Id: linux-mmc@vger.kernel.org
 
-This is a straightforward conversion to the new function.
 
-Signed-off-by: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
-Cc: Sascha Sommer <saschasommer-KuiJ5kEpwI6ELgA04lAiVw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/host/sdricoh_cs.c | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
-index 5ff26ab..03225c3 100644
---- a/drivers/mmc/host/sdricoh_cs.c
-+++ b/drivers/mmc/host/sdricoh_cs.c
-@@ -319,16 +319,20 @@ static void sdricoh_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		for (i = 0; i < data->blocks; i++) {
- 			size_t len = data->blksz;
- 			u8 *buf;
--			struct page *page;
- 			int result;
--			page = sg_page(data->sg);
- 
--			buf = kmap(page) + data->sg->offset + (len * i);
-+			buf = sg_map(data->sg, (len * i), SG_KMAP);
-+			if (IS_ERR(buf)) {
-+				cmd->error = PTR_ERR(buf);
-+				break;
-+			}
-+
- 			result =
- 				sdricoh_blockio(host,
- 					data->flags & MMC_DATA_READ, buf, len);
--			kunmap(page);
--			flush_dcache_page(page);
-+			sg_unmap(data->sg, buf, (len * i), SG_KMAP);
-+
-+			flush_dcache_page(sg_page(data->sg));
- 			if (result) {
- 				dev_err(dev, "sdricoh_request: cmd %i "
- 					"block transfer failed\n", cmd->opcode);
+On 04/25/2017 07:45 AM, Adrian Hunter wrote:
+> On 25/04/17 15:24, Ulf Hansson wrote:
+>> On 25 April 2017 at 13:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 25/04/17 13:46, Ulf Hansson wrote:
+>>>> On 25 April 2017 at 09:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 25/04/17 10:52, Ulf Hansson wrote:
+>>>>>> +Grygorii Strashko
+>>>>>>
+>>>>>> On 25 April 2017 at 08:21, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>>> On 24/04/17 23:33, Ulf Hansson wrote:
+>>>>>>>> On 21 April 2017 at 12:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>>>>> The SDIO card state might be being preserved during hibernation, for
+>>>>>>>>> example a SDIO wifi card supporting WOWLAN. That state will be lost if an
+>>>>>>>>> SDIO reset is done. One way to avoid that would be to build mmc core as a
+>>>>>>>>> module and simply not load it until after attempting to restore the
+>>>>>>>>> hibernation image. However that won't work if the hibernation image is
+>>>>>>>>> stored on eMMC which, of course, requires mmc core.
+>>>>>>>>
+>>>>>>>> I don't follow here. Are you saying the SDIO card is kept powered in
+>>>>>>>> hibernation, as to be able to support WOWLAN, right?
+>>>>>>>
+>>>>>>> Yes
+>>>>>>
+>>>>>> Okay, makes sense!
+>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>> Then, it feels plain wrong the mmc_rescan() tries to re-initialize it.
+>>>>>>>> That should never happen, unless something is broken of course.
+>>>>>>>
+>>>>>>> The thing to note about hibernation is that there is a regular boot in
+>>>>>>> between saving the hibernation image and restoring it again.  At boot time,
+>>>>>>> the kernel knows almost nothing about whether there is a hibernation image
+>>>>>>> and whether or not it will be restored.  Consequently it becomes difficult
+>>>>>>> to avoid mmc_rescan().  As mentioned above, we need mmc_rescan() to
+>>>>>>> initialize the eMMC so that the hibernation image can be read.
+>>>>>>
+>>>>>> What's wrong with using the hibernation callbacks in the struct
+>>>>>> dev_pm_ops? We already do this.
+>>>>>
+>>>>> Here is the scenario.  The kernel has just booted.  User space wants to try
+>>>>> to restore a hibernation image, if there is one.  So user space loads the
+>>>>> mmc core because the hibernation image is on eMMC.  Mmc core does an SDIO
+>>>>> reset on the SDIO card and the state is lost.  It has little to do with pm
+>>>>> callbacks AFAICS.
+>>>>
+>>>> Ah, now I see what you mean. I thought the problem was during the
+>>>> actual restoring of the hibernation image.
+>>>>
+>>>> Alright, when a boot is triggered by WOWLAN , you want to avoid
+>>>> sending the reset command for the SDIO card before the
+>>>> re-initialization of the SDIO card starts.
+>>>>
+>>>> The problem with this approach is that you can't differentiate between
+>>>> a cold boot and a boot triggered by WOWLAN, right!? In other words, in
+>>>> some cases the reset command may be needed while in other it won't.
+>>>
+>>> SDIO reset is only needed if the card has not been power-cycled.  The
+>>> assumption is that the platform takes care of that when needed. e.g. when
+>>> rebooting instead of going to S4.
+>>>
+>>>>
+>>>> Maybe you can elaborate more on what exactly what the problem is with
+>>>> sending the reset command when the boot is triggered from WOWLAN? Yes,
+>>>> the SDIO card loses its context, but how is that a problem?
+>>>
+>>> The wifi driver expects to find the function in an initialized state.
+>>
+>> So how does the the wifi driver distinguish this a boot caused by
+>> WOWLAN - and not a cold boot?
+> 
+> It doesn't have to.  It doesn't get loaded until after the attempt to
+> restore the hibernation image.  So in the hibernation case it has its
+> ->restore() callback.  
+
+For this case is a good question of how Kernel wifi card driver state will be
+synchronized HW state after restore from Hibernation (first of all wireless state -
+scan results, connection state and parameters)? Most probably wifi driver will
+need to perform mostly full re-initialization on restore, so...
+
+>If there is no hibernation image, it gets loaded and
+> probed.
+
+But in this case, as per you patch, there are will be no SDIO reset so
+do you expect that wifi driver will still work? 
+
+> 
+> AFAICT that is the normal way to stop drivers interfering with hibernation
+> i.e. don't load them until after the attempt is made to restore the
+> hibernation image.  We could do that with mmc core too, but for the fact
+> that the hibernation image is on eMMC.
+
+>From my experience, it pretty hard to restore HW state which runs by FW, so as
+W/A we just unloaded remoteproc, wireless and graphic drivers before hibernation and
+reloaded them right after. As I know the same approach often used in x86 world also.
+
+
+> 
+>>
+>>> Otherwise it would have to re-enable the function and re-do the
+>>> function-specific initialization.  I don't know if there are other
+>>
+>> At boot the SDIO func driver becomes probed, when the mmc core finds
+>> and SDIO card and then registers a func device for it. Are you saying
+>> that the SDIO func driver can take shortcuts when enabling the func
+>> device, when the boot is trigger from WOWLAN?
+> 
+> No.
+> 
+>>
+>>> consequences.  Presumably it will have lost any information about the nature
+>>> of the wake-up trigger.
+>>
+>> How does that matter?
+> 
+> I don't know if it matters.
+> 
+
 -- 
-2.1.4
+regards,
+-grygorii
