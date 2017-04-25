@@ -1,59 +1,251 @@
-From: Paolo Valente <paolo.valente@linaro.org>
-Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
-Date: Tue, 25 Apr 2017 15:28:41 +0200
-Message-ID: <6CE953B4-0A5C-4DDF-B85D-6CE58031C19C@linaro.org>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com> <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com> <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: David Woods <dwoods@mellanox.com>
+Subject: [PATCH] Use device_property_read instead of of_property_read in the dw_mmc driver
+Date: Tue, 25 Apr 2017 11:39:27 -0400
+Message-ID: <1493134767-19170-1-git-send-email-dwoods@mellanox.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:34616 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1430565AbdDYN2q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 09:28:46 -0400
-Received: by mail-wr0-f169.google.com with SMTP id l9so6657946wre.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2017 06:28:45 -0700 (PDT)
-In-Reply-To: <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
+Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:51920 "EHLO
+        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1950310AbdDYPj5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 11:39:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: David Woods <dwoods@mellanox.com>
 
+Using the device_property interfaces allows the dw_mmc driver to work
+on platforms which run on either device tree or ACPI.
 
-> Il giorno 24 apr 2017, alle ore 10:12, Linus Walleij =
-<linus.walleij@linaro.org> ha scritto:
->=20
-> On Sat, Apr 22, 2017 at 9:45 AM, Adrian Hunter =
-<adrian.hunter@intel.com> wrote:
->=20
->> Ulf and Linus have been doing a great job of keeping this moving, but =
-it
->> would be nice to see some others taking more interest.  The first =
-command
->> queue patches were posted in February 2014, over 3 years ago!
->=20
-> I agree.
->=20
-> I think both me & Ulf would also be doing more work if we had easily
-> accessible hardware with upstream host controller support for native
-> command queueing. (Hm, was just reading in libata about NCQ ...
-> d=C3=A9ja vu ... https://en.wikipedia.org/wiki/Native_Command_Queuing)
->=20
+Signed-off-by: David Woods <dwoods@mellanox.com>
+Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
+---
+ drivers/mmc/core/host.c   | 72 +++++++++++++++++++++++------------------------
+ drivers/mmc/host/dw_mmc.c | 24 ++++++++--------
+ 2 files changed, 47 insertions(+), 49 deletions(-)
 
-That would allow me too to run some test with BFQ and MMC ...
-
-Thanks,
-Paolo
-
-> Do we have some hardware with host-backed command queueing
-> out there that is easily obtained and has upstream support for the
-> basic system?
->=20
-> Yours,
-> Linus Walleij
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 3f8c85d..d2c059e 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
+  */
+ int mmc_of_parse(struct mmc_host *host)
+ {
+-	struct device_node *np;
++	struct device *dev = host->parent;
+ 	u32 bus_width;
+ 	int ret;
+ 	bool cd_cap_invert, cd_gpio_invert = false;
+ 	bool ro_cap_invert, ro_gpio_invert = false;
+ 
+-	if (!host->parent || !host->parent->of_node)
++	if (!dev)
+ 		return 0;
+ 
+-	np = host->parent->of_node;
+-
+ 	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+-	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
++	if (device_property_read_u32(dev, "bus-width", &bus_width) < 0) {
+ 		dev_dbg(host->parent,
+ 			"\"bus-width\" property is missing, assuming 1 bit.\n");
+ 		bus_width = 1;
+@@ -210,7 +208,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 	}
+ 
+ 	/* f_max is obtained from the optional "max-frequency" property */
+-	of_property_read_u32(np, "max-frequency", &host->f_max);
++	device_property_read_u32(dev, "max-frequency", &host->f_max);
+ 
+ 	/*
+ 	 * Configure CD and WP pins. They are both by default active low to
+@@ -225,12 +223,12 @@ int mmc_of_parse(struct mmc_host *host)
+ 	 */
+ 
+ 	/* Parse Card Detection */
+-	if (of_property_read_bool(np, "non-removable")) {
++	if (device_property_read_bool(dev, "non-removable")) {
+ 		host->caps |= MMC_CAP_NONREMOVABLE;
+ 	} else {
+-		cd_cap_invert = of_property_read_bool(np, "cd-inverted");
++		cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
+ 
+-		if (of_property_read_bool(np, "broken-cd"))
++		if (device_property_read_bool(dev, "broken-cd"))
+ 			host->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
+@@ -256,7 +254,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 	}
+ 
+ 	/* Parse Write Protection */
+-	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
++	ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
+ 
+ 	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert);
+ 	if (!ret)
+@@ -264,64 +262,64 @@ int mmc_of_parse(struct mmc_host *host)
+ 	else if (ret != -ENOENT && ret != -ENOSYS)
+ 		return ret;
+ 
+-	if (of_property_read_bool(np, "disable-wp"))
++	if (device_property_read_bool(dev, "disable-wp"))
+ 		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+ 
+ 	/* See the comment on CD inversion above */
+ 	if (ro_cap_invert ^ ro_gpio_invert)
+ 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+ 
+-	if (of_property_read_bool(np, "cap-sd-highspeed"))
++	if (device_property_read_bool(dev, "cap-sd-highspeed"))
+ 		host->caps |= MMC_CAP_SD_HIGHSPEED;
+-	if (of_property_read_bool(np, "cap-mmc-highspeed"))
++	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
+ 		host->caps |= MMC_CAP_MMC_HIGHSPEED;
+-	if (of_property_read_bool(np, "sd-uhs-sdr12"))
++	if (device_property_read_bool(dev, "sd-uhs-sdr12"))
+ 		host->caps |= MMC_CAP_UHS_SDR12;
+-	if (of_property_read_bool(np, "sd-uhs-sdr25"))
++	if (device_property_read_bool(dev, "sd-uhs-sdr25"))
+ 		host->caps |= MMC_CAP_UHS_SDR25;
+-	if (of_property_read_bool(np, "sd-uhs-sdr50"))
++	if (device_property_read_bool(dev, "sd-uhs-sdr50"))
+ 		host->caps |= MMC_CAP_UHS_SDR50;
+-	if (of_property_read_bool(np, "sd-uhs-sdr104"))
++	if (device_property_read_bool(dev, "sd-uhs-sdr104"))
+ 		host->caps |= MMC_CAP_UHS_SDR104;
+-	if (of_property_read_bool(np, "sd-uhs-ddr50"))
++	if (device_property_read_bool(dev, "sd-uhs-ddr50"))
+ 		host->caps |= MMC_CAP_UHS_DDR50;
+-	if (of_property_read_bool(np, "cap-power-off-card"))
++	if (device_property_read_bool(dev, "cap-power-off-card"))
+ 		host->caps |= MMC_CAP_POWER_OFF_CARD;
+-	if (of_property_read_bool(np, "cap-mmc-hw-reset"))
++	if (device_property_read_bool(dev, "cap-mmc-hw-reset"))
+ 		host->caps |= MMC_CAP_HW_RESET;
+-	if (of_property_read_bool(np, "cap-sdio-irq"))
++	if (device_property_read_bool(dev, "cap-sdio-irq"))
+ 		host->caps |= MMC_CAP_SDIO_IRQ;
+-	if (of_property_read_bool(np, "full-pwr-cycle"))
++	if (device_property_read_bool(dev, "full-pwr-cycle"))
+ 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
+-	if (of_property_read_bool(np, "keep-power-in-suspend"))
++	if (device_property_read_bool(dev, "keep-power-in-suspend"))
+ 		host->pm_caps |= MMC_PM_KEEP_POWER;
+-	if (of_property_read_bool(np, "wakeup-source") ||
+-	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
++	if (device_property_read_bool(dev, "wakeup-source") ||
++	    device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
+ 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+-	if (of_property_read_bool(np, "mmc-ddr-3_3v"))
++	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
+ 		host->caps |= MMC_CAP_3_3V_DDR;
+-	if (of_property_read_bool(np, "mmc-ddr-1_8v"))
++	if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
+ 		host->caps |= MMC_CAP_1_8V_DDR;
+-	if (of_property_read_bool(np, "mmc-ddr-1_2v"))
++	if (device_property_read_bool(dev, "mmc-ddr-1_2v"))
+ 		host->caps |= MMC_CAP_1_2V_DDR;
+-	if (of_property_read_bool(np, "mmc-hs200-1_8v"))
++	if (device_property_read_bool(dev, "mmc-hs200-1_8v"))
+ 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+-	if (of_property_read_bool(np, "mmc-hs200-1_2v"))
++	if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
+ 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+-	if (of_property_read_bool(np, "mmc-hs400-1_8v"))
++	if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
+ 		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
+-	if (of_property_read_bool(np, "mmc-hs400-1_2v"))
++	if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
+ 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+-	if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
++	if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
+ 		host->caps2 |= MMC_CAP2_HS400_ES;
+-	if (of_property_read_bool(np, "no-sdio"))
++	if (device_property_read_bool(dev, "no-sdio"))
+ 		host->caps2 |= MMC_CAP2_NO_SDIO;
+-	if (of_property_read_bool(np, "no-sd"))
++	if (device_property_read_bool(dev, "no-sd"))
+ 		host->caps2 |= MMC_CAP2_NO_SD;
+-	if (of_property_read_bool(np, "no-mmc"))
++	if (device_property_read_bool(dev, "no-mmc"))
+ 		host->caps2 |= MMC_CAP2_NO_MMC;
+ 
+-	host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
++	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
+ 	if (host->dsr_req && (host->dsr & ~0xffff)) {
+ 		dev_err(host->parent,
+ 			"device tree specified broken value for DSR: 0x%x, ignoring\n",
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 8718432..3728c59 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2641,8 +2641,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	host->slot[id] = slot;
+ 
+ 	mmc->ops = &dw_mci_ops;
+-	if (of_property_read_u32_array(host->dev->of_node,
+-				       "clock-freq-min-max", freq, 2)) {
++	if (device_property_read_u32_array(host->dev, "clock-freq-min-max",
++					   freq, 2)) {
+ 		mmc->f_min = DW_MCI_FREQ_MIN;
+ 		mmc->f_max = DW_MCI_FREQ_MAX;
+ 	} else {
+@@ -2742,7 +2742,6 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ {
+ 	int addr_config;
+ 	struct device *dev = host->dev;
+-	struct device_node *np = dev->of_node;
+ 
+ 	/*
+ 	* Check tansfer mode from HCON[17:16]
+@@ -2803,8 +2802,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 		dev_info(host->dev, "Using internal DMA controller.\n");
+ 	} else {
+ 		/* TRANS_MODE_EDMAC: check dma bindings again */
+-		if ((of_property_count_strings(np, "dma-names") < 0) ||
+-		    (!of_find_property(np, "dmas", NULL))) {
++		if ((device_property_read_string_array(dev, "dma-names",
++						       NULL, 0) < 0) ||
++		    !device_property_present(dev, "dmas")) {
+ 			goto no_dma;
+ 		}
+ 		host->dma_ops = &dw_mci_edmac_ops;
+@@ -2964,7 +2964,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ {
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+-	struct device_node *np = dev->of_node;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	int ret;
+ 	u32 clock_frequency;
+@@ -2981,20 +2980,21 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	}
+ 
+ 	/* find out number of slots supported */
+-	of_property_read_u32(np, "num-slots", &pdata->num_slots);
++	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
+ 
+-	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
++	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
+ 		dev_info(dev,
+ 			 "fifo-depth property not found, using value of FIFOTH register as default\n");
+ 
+-	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
++	device_property_read_u32(dev, "card-detect-delay",
++				 &pdata->detect_delay_ms);
+ 
+-	of_property_read_u32(np, "data-addr", &host->data_addr_override);
++	device_property_read_u32(dev, "data-addr", &host->data_addr_override);
+ 
+-	if (of_get_property(np, "fifo-watermark-aligned", NULL))
++	if (device_property_present(dev, "fifo-watermark-aligned"))
+ 		host->wm_aligned = true;
+ 
+-	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
++	if (!device_property_read_u32(dev, "clock-frequency", &clock_frequency))
+ 		pdata->bus_hz = clock_frequency;
+ 
+ 	if (drv_data && drv_data->parse_dt) {
+-- 
+2.7.2
 
