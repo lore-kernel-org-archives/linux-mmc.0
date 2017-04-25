@@ -1,123 +1,59 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 2/4] mmc: sdio: Add capability to skip SDIO reset at
- scan
-Date: Tue, 25 Apr 2017 15:45:41 +0300
-Message-ID: <e9dabea2-76bc-8112-93de-c2ad7f2668f3@intel.com>
-References: <1492769288-7474-1-git-send-email-adrian.hunter@intel.com>
- <1492769288-7474-3-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFq7qWGgyXStJU3XZnGRcqMXZs_z21nJ2vUnCe0Pn-q19Q@mail.gmail.com>
- <ff496ea4-ba9b-387b-2d3b-3bf59b878973@intel.com>
- <CAPDyKFpDjx9EWLFCR5yejJg5bu3x--ksuOAE33+a_L0FNUW9dw@mail.gmail.com>
- <9ed30be6-9a42-9cd1-f260-9b57da369b05@intel.com>
- <CAPDyKFqorfJTVeS+r-qWYTFcAuJ67kmpk1WWQpkeMeQKsVfEcg@mail.gmail.com>
- <15332477-f37b-21d0-f85b-132d7bc0cdb4@intel.com>
- <CAPDyKFr-y5uAZMhGuiL8o7syTpDqFcQp5ibnO80ZWCFUNcQetQ@mail.gmail.com>
-Mime-Version: 1.0
+From: Paolo Valente <paolo.valente@linaro.org>
+Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
+Date: Tue, 25 Apr 2017 15:28:41 +0200
+Message-ID: <6CE953B4-0A5C-4DDF-B85D-6CE58031C19C@linaro.org>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com> <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com> <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com> <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFr-y5uAZMhGuiL8o7syTpDqFcQp5ibnO80ZWCFUNcQetQ@mail.gmail.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@vger.kernel.org>, linux-acpi <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Grygorii Strashko <grygorii.strashko@ti.com>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:34616 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1430565AbdDYN2q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 09:28:46 -0400
+Received: by mail-wr0-f169.google.com with SMTP id l9so6657946wre.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2017 06:28:45 -0700 (PDT)
+In-Reply-To: <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 25/04/17 15:24, Ulf Hansson wrote:
-> On 25 April 2017 at 13:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 25/04/17 13:46, Ulf Hansson wrote:
->>> On 25 April 2017 at 09:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 25/04/17 10:52, Ulf Hansson wrote:
->>>>> +Grygorii Strashko
->>>>>
->>>>> On 25 April 2017 at 08:21, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>> On 24/04/17 23:33, Ulf Hansson wrote:
->>>>>>> On 21 April 2017 at 12:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>>>> The SDIO card state might be being preserved during hibernation, for
->>>>>>>> example a SDIO wifi card supporting WOWLAN. That state will be lost if an
->>>>>>>> SDIO reset is done. One way to avoid that would be to build mmc core as a
->>>>>>>> module and simply not load it until after attempting to restore the
->>>>>>>> hibernation image. However that won't work if the hibernation image is
->>>>>>>> stored on eMMC which, of course, requires mmc core.
->>>>>>>
->>>>>>> I don't follow here. Are you saying the SDIO card is kept powered in
->>>>>>> hibernation, as to be able to support WOWLAN, right?
->>>>>>
->>>>>> Yes
->>>>>
->>>>> Okay, makes sense!
->>>>>
->>>>>>
->>>>>>>
->>>>>>> Then, it feels plain wrong the mmc_rescan() tries to re-initialize it.
->>>>>>> That should never happen, unless something is broken of course.
->>>>>>
->>>>>> The thing to note about hibernation is that there is a regular boot in
->>>>>> between saving the hibernation image and restoring it again.  At boot time,
->>>>>> the kernel knows almost nothing about whether there is a hibernation image
->>>>>> and whether or not it will be restored.  Consequently it becomes difficult
->>>>>> to avoid mmc_rescan().  As mentioned above, we need mmc_rescan() to
->>>>>> initialize the eMMC so that the hibernation image can be read.
->>>>>
->>>>> What's wrong with using the hibernation callbacks in the struct
->>>>> dev_pm_ops? We already do this.
->>>>
->>>> Here is the scenario.  The kernel has just booted.  User space wants to try
->>>> to restore a hibernation image, if there is one.  So user space loads the
->>>> mmc core because the hibernation image is on eMMC.  Mmc core does an SDIO
->>>> reset on the SDIO card and the state is lost.  It has little to do with pm
->>>> callbacks AFAICS.
->>>
->>> Ah, now I see what you mean. I thought the problem was during the
->>> actual restoring of the hibernation image.
->>>
->>> Alright, when a boot is triggered by WOWLAN , you want to avoid
->>> sending the reset command for the SDIO card before the
->>> re-initialization of the SDIO card starts.
->>>
->>> The problem with this approach is that you can't differentiate between
->>> a cold boot and a boot triggered by WOWLAN, right!? In other words, in
->>> some cases the reset command may be needed while in other it won't.
->>
->> SDIO reset is only needed if the card has not been power-cycled.  The
->> assumption is that the platform takes care of that when needed. e.g. when
->> rebooting instead of going to S4.
->>
->>>
->>> Maybe you can elaborate more on what exactly what the problem is with
->>> sending the reset command when the boot is triggered from WOWLAN? Yes,
->>> the SDIO card loses its context, but how is that a problem?
->>
->> The wifi driver expects to find the function in an initialized state.
-> 
-> So how does the the wifi driver distinguish this a boot caused by
-> WOWLAN - and not a cold boot?
 
-It doesn't have to.  It doesn't get loaded until after the attempt to
-restore the hibernation image.  So in the hibernation case it has its
-->restore() callback.  If there is no hibernation image, it gets loaded and
-probed.
+> Il giorno 24 apr 2017, alle ore 10:12, Linus Walleij =
+<linus.walleij@linaro.org> ha scritto:
+>=20
+> On Sat, Apr 22, 2017 at 9:45 AM, Adrian Hunter =
+<adrian.hunter@intel.com> wrote:
+>=20
+>> Ulf and Linus have been doing a great job of keeping this moving, but =
+it
+>> would be nice to see some others taking more interest.  The first =
+command
+>> queue patches were posted in February 2014, over 3 years ago!
+>=20
+> I agree.
+>=20
+> I think both me & Ulf would also be doing more work if we had easily
+> accessible hardware with upstream host controller support for native
+> command queueing. (Hm, was just reading in libata about NCQ ...
+> d=C3=A9ja vu ... https://en.wikipedia.org/wiki/Native_Command_Queuing)
+>=20
 
-AFAICT that is the normal way to stop drivers interfering with hibernation
-i.e. don't load them until after the attempt is made to restore the
-hibernation image.  We could do that with mmc core too, but for the fact
-that the hibernation image is on eMMC.
+That would allow me too to run some test with BFQ and MMC ...
 
-> 
->> Otherwise it would have to re-enable the function and re-do the
->> function-specific initialization.  I don't know if there are other
-> 
-> At boot the SDIO func driver becomes probed, when the mmc core finds
-> and SDIO card and then registers a func device for it. Are you saying
-> that the SDIO func driver can take shortcuts when enabling the func
-> device, when the boot is trigger from WOWLAN?
+Thanks,
+Paolo
 
-No.
-
-> 
->> consequences.  Presumably it will have lost any information about the nature
->> of the wake-up trigger.
-> 
-> How does that matter?
-
-I don't know if it matters.
+> Do we have some hardware with host-backed command queueing
+> out there that is easily obtained and has upstream support for the
+> basic system?
+>=20
+> Yours,
+> Linus Walleij
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
