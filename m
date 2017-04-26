@@ -1,37 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/4] MMC support for Octeon platforms.
-Date: Tue, 25 Apr 2017 22:05:30 +0200
-Message-ID: <CAPDyKFr5imEOADNXdhv_YCVBQCHtZUQs1px_=VGiOf=64Mt6Ew@mail.gmail.com>
-References: <1493059318-767-1-git-send-email-steven.hill@cavium.com>
- <CAPDyKFoAeyqnomWSphRt95WPDuhHRnAuowYHRnMkAB6izZv4nw@mail.gmail.com> <20170425195451.GE28041@linux-mips.org>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: poll ESDHC_CLOCK_STABLE bit with udelay
+Date: Wed, 26 Apr 2017 10:45:49 +0800
+Message-ID: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:32881 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1948958AbdDYUFb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2017 16:05:31 -0400
-Received: by mail-qk0-f177.google.com with SMTP id h123so69535465qke.0
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2017 13:05:31 -0700 (PDT)
-In-Reply-To: <20170425195451.GE28041@linux-mips.org>
+Received: from mail-co1nam03on0074.outbound.protection.outlook.com ([104.47.40.74]:9581
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1758760AbdDZDBQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Apr 2017 23:01:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ralf Baechle <ralf@linux-mips.org>, "Steven J. Hill" <steven.hill@cavium.com>
-Cc: David Daney <david.daney@cavium.com>, Jan Glauber <jglauber@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mips@linux-mips.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
 
-On 25 April 2017 at 21:54, Ralf Baechle <ralf@linux-mips.org> wrote:
-> On Mon, Apr 24, 2017 at 09:56:42PM +0200, Ulf Hansson wrote:
->
->> Thanks, applied patch 1->3. Patch 4 is for the MIPS SoC maintainer,
->> unless I get an ack for it.
->
-> Here's the Ack for patch 4:
->
-> Acked-by: Ralf Baechle <ralf@linux-mips.org>
->
->   Ralf
+The loop to poll ESDHC_CLOCK_STABLE bit with mdelay would waste time
+because the time to stabilize is much less than 1 ms. This patch is
+to use udelay instead to avoid time wasting.
 
-Thanks, applied patch4 for next!
+Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 7518360..77dfc59 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -445,7 +445,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
+-	u32 timeout;
++	ktime_t timeout;
+ 	u32 temp;
+ 
+ 	host->mmc->actual_clock = 0;
+@@ -489,15 +489,14 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ 
+ 	/* Wait max 20 ms */
+-	timeout = 20;
++	timeout = ktime_add_ms(ktime_get(), 20);
+ 	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
+-		if (timeout == 0) {
++		if (ktime_after(ktime_get(), timeout)) {
+ 			pr_err("%s: Internal clock never stabilised.\n",
+ 				mmc_hostname(host->mmc));
+ 			return;
+ 		}
+-		timeout--;
+-		mdelay(1);
++		udelay(10);
+ 	}
+ 
+ 	temp |= ESDHC_CLOCK_SDCLKEN;
+-- 
+2.1.0.27.g96db324
+
