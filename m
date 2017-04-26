@@ -1,247 +1,67 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
-Date: Wed, 26 Apr 2017 03:09:40 +0000
-Message-ID: <DB6PR0401MB2536B5B0D0FD588C4B88DD16F8110@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-References: <1490600982-5410-1-git-send-email-yangbo.lu@nxp.com>
- <1490600982-5410-2-git-send-email-yangbo.lu@nxp.com>
- <a8810e0a-95fa-a590-6827-15031ff52886@intel.com>
- <DB6PR0401MB253634F0774283AEA36D8ACDF8000@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: poll ESDHC_CLOCK_STABLE bit with
+ udelay
+Date: Wed, 26 Apr 2017 09:02:06 +0300
+Message-ID: <9848f938-5474-c644-2183-5b2443bb0b8a@intel.com>
+References: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0050.outbound.protection.outlook.com ([104.47.2.50]:27152
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1434711AbdDZDJp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Apr 2017 23:09:45 -0400
-In-Reply-To: <DB6PR0401MB253634F0774283AEA36D8ACDF8000@DB6PR0401MB2536.eurprd04.prod.outlook.com>
-Content-Language: en-US
+Received: from mga01.intel.com ([192.55.52.88]:1836 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1950748AbdDZGHu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 26 Apr 2017 02:07:50 -0400
+In-Reply-To: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
-Hi Adrian,
+On 26/04/17 05:45, Yangbo Lu wrote:
+> The loop to poll ESDHC_CLOCK_STABLE bit with mdelay would waste time
+> because the time to stabilize is much less than 1 ms. This patch is
+> to use udelay instead to avoid time wasting.
+> 
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Y.B. Lu
-> Sent: Tuesday, April 11, 2017 1:15 PM
-> To: Adrian Hunter; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org;
-> linux-arm-kernel@lists.infradead.org; ulf.hansson@linaro.org; Rob Herring=
-;
-> Mark Rutland; Catalin Marinas; Will Deacon
-> Cc: Xiaobo Xie
-> Subject: RE: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock support
->=20
-> Hi Adrian,
->=20
->=20
-> > -----Original Message-----
-> > From: Adrian Hunter [mailto:adrian.hunter@intel.com]
-> > Sent: Monday, April 10, 2017 8:36 PM
-> > To: Y.B. Lu; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org;
-> > linux-arm-kernel@lists.infradead.org; ulf.hansson@linaro.org; Rob
-> > Herring; Mark Rutland; Catalin Marinas; Will Deacon
-> > Cc: Xiaobo Xie
-> > Subject: Re: [v3, 1/7] mmc: sdhci-of-esdhc: add peripheral clock
-> > support
-> >
-> > On 27/03/17 10:49, Yangbo Lu wrote:
-> > > eSDHC could select peripheral clock or platform clock as clock
-> > > source by the PCS bit of eSDHC Control Register, and this bit
-> > > couldn't be reset by software reset for all. In default, the
-> > > platform clock is used. But we have to use peripheral clock since it
-> > > has a higher frequency to support eMMC
-> > > HS200 mode and SD UHS-I mode. This patch is to add peripheral clock
-> > > support and use it instead of platform clock if it's declared in
-> > > eSDHC
-> > dts node.
-> > >
-> > > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> >
-> > Apart from minor comments:
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > > ---
-> > > Changes for v2:
-> > > 	- None
-> > > Changes for v3:
-> > > 	- None
-> > > ---
-> > >  drivers/mmc/host/sdhci-esdhc.h    |  1 +
-> > >  drivers/mmc/host/sdhci-of-esdhc.c | 70
-> > > +++++++++++++++++++++++++++++++++++++--
-> > >  2 files changed, 69 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-esdhc.h
-> > > b/drivers/mmc/host/sdhci-esdhc.h index ece8b37..5343fc0 100644
-> > > --- a/drivers/mmc/host/sdhci-esdhc.h
-> > > +++ b/drivers/mmc/host/sdhci-esdhc.h
-> > > @@ -54,6 +54,7 @@
-> > >
-> > >  /* Control Register for DMA transfer */
-> > >  #define ESDHC_DMA_SYSCTL		0x40c
-> > > +#define ESDHC_PERIPHERAL_CLK_SEL	0x00080000
-> > >  #define ESDHC_DMA_SNOOP			0x00000040
-> > >
-> > >  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */ diff --git
-> > > a/drivers/mmc/host/sdhci-of-esdhc.c
-> > > b/drivers/mmc/host/sdhci-of-esdhc.c
-> > > index ff37e74..7ce1caf 100644
-> > > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > > @@ -19,6 +19,7 @@
-> > >  #include <linux/delay.h>
-> > >  #include <linux/module.h>
-> > >  #include <linux/sys_soc.h>
-> > > +#include <linux/clk.h>
-> > >  #include <linux/mmc/host.h>
-> > >  #include "sdhci-pltfm.h"
-> > >  #include "sdhci-esdhc.h"
-> > > @@ -30,6 +31,7 @@ struct sdhci_esdhc {
-> > >  	u8 vendor_ver;
-> > >  	u8 spec_ver;
-> > >  	bool quirk_incorrect_hostver;
-> > > +	unsigned int peripheral_clock;
-> > >  };
-> > >
-> > >  /**
-> > > @@ -414,15 +416,25 @@ static int esdhc_of_enable_dma(struct
-> > > sdhci_host
-> > > *host)  static unsigned int esdhc_of_get_max_clock(struct sdhci_host
-> > > *host)  {
-> > >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
-> > >
-> > > -	return pltfm_host->clock;
-> > > +	if (esdhc->peripheral_clock)
-> > > +		return esdhc->peripheral_clock;
-> > > +	else
-> > > +		return pltfm_host->clock;
-> > >  }
-> > >
-> > >  static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
-> > > {
-> > >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > > +	struct sdhci_esdhc *esdhc =3D sdhci_pltfm_priv(pltfm_host);
-> > > +	unsigned int clock;
-> > >
-> > > -	return pltfm_host->clock / 256 / 16;
-> > > +	if (esdhc->peripheral_clock)
-> > > +		clock =3D esdhc->peripheral_clock;
-> > > +	else
-> > > +		clock =3D pltfm_host->clock;
-> > > +	return clock / 256 / 16;
-> > >  }
-> > >
-> > >  static void esdhc_of_set_clock(struct sdhci_host *host, unsigned
-> > > int
-> > > clock) @@ -512,6 +524,33 @@ static void
-> > esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
-> > >  	sdhci_writel(host, ctrl, ESDHC_PROCTL);  }
-> > >
-> > > +static void esdhc_clock_enable(struct sdhci_host *host, bool
-> > > +enable) {
-> > > +	u32 val;
-> > > +	u32 timeout;
-> > > +
-> > > +	val =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-> > > +
-> > > +	if (enable)
-> > > +		val |=3D ESDHC_CLOCK_SDCLKEN;
-> > > +	else
-> > > +		val &=3D ~ESDHC_CLOCK_SDCLKEN;
-> > > +
-> > > +	sdhci_writel(host, val, ESDHC_SYSTEM_CONTROL);
-> > > +
-> > > +	timeout =3D 20;
-> > > +	val =3D ESDHC_CLOCK_STABLE;
-> > > +	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & val)) {
-> > > +		if (timeout =3D=3D 0) {
-> > > +			pr_err("%s: Internal clock never stabilised.\n",
-> > > +				mmc_hostname(host->mmc));
-> > > +			break;
-> > > +		}
-> > > +		timeout--;
-> > > +		mdelay(1);
-> >
-> > If the time to stabilize is much less that 1 ms then this loop can
-> > waste time.  Have a look at the change in sdhci.c.
-> >
->=20
-> [Lu Yangbo-B47093] Thanks a lot. The method in sdhci.c is really better.
-> I will send next version to use it soon.
->=20
-> Currently another place in esdhc driver could also change to use this
-> method. I will send a separate patch for that later.
->=20
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 9 ++++-----
+>  1 file changed, 4 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 7518360..77dfc59 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -445,7 +445,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+>  	int pre_div = 1;
+>  	int div = 1;
+> -	u32 timeout;
+> +	ktime_t timeout;
+>  	u32 temp;
+>  
+>  	host->mmc->actual_clock = 0;
+> @@ -489,15 +489,14 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+>  
+>  	/* Wait max 20 ms */
+> -	timeout = 20;
+> +	timeout = ktime_add_ms(ktime_get(), 20);
+>  	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
+> -		if (timeout == 0) {
+> +		if (ktime_after(ktime_get(), timeout)) {
+>  			pr_err("%s: Internal clock never stabilised.\n",
+>  				mmc_hostname(host->mmc));
+>  			return;
+>  		}
+> -		timeout--;
+> -		mdelay(1);
+> +		udelay(10);
+>  	}
+>  
+>  	temp |= ESDHC_CLOCK_SDCLKEN;
+> 
 
-[Lu Yangbo-B47093] I just sent another patch to fix the mdelay problem.
-https://patchwork.kernel.org/patch/9700193/
-
-Thank you very much.
-
->=20
-> > > +	}
-> > > +}
-> > > +
-> > >  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
-> > >  	sdhci_reset(host, mask);
-> > > @@ -613,6 +652,9 @@ static void esdhc_init(struct platform_device
-> > > *pdev, struct sdhci_host *host)  {
-> > >  	struct sdhci_pltfm_host *pltfm_host;
-> > >  	struct sdhci_esdhc *esdhc;
-> > > +	struct device_node *np;
-> > > +	struct clk *clk;
-> > > +	u32 val;
-> > >  	u16 host_ver;
-> > >
-> > >  	pltfm_host =3D sdhci_priv(host);
-> > > @@ -626,6 +668,30 @@ static void esdhc_init(struct platform_device
-> > *pdev, struct sdhci_host *host)
-> > >  		esdhc->quirk_incorrect_hostver =3D true;
-> > >  	else
-> > >  		esdhc->quirk_incorrect_hostver =3D false;
-> > > +
-> > > +	np =3D pdev->dev.of_node;
-> > > +	clk =3D of_clk_get(np, 0);
-> >
-> > Should there be a clk_put somewhere?
->=20
-> [Lu Yangbo-B47093] Will add it after driver gets the clock value.
->=20
-> >
-> > > +	if (!IS_ERR(clk)) {
-> > > +		/*
-> > > +		 * esdhc->peripheral_clock would be assigned with a value
-> > > +		 * which is eSDHC base clock when use periperal clock.
-> > > +		 * For ls1046a, the clock value got by common clk API is
-> > > +		 * peripheral clock while the eSDHC base clock is 1/2
-> > > +		 * peripheral clock.
-> > > +		 */
-> > > +		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc"))
-> > > +			esdhc->peripheral_clock =3D clk_get_rate(clk) / 2;
-> > > +		else
-> > > +			esdhc->peripheral_clock =3D clk_get_rate(clk);
-> > > +	}
-> > > +
-> > > +	if (esdhc->peripheral_clock) {
-> > > +		esdhc_clock_enable(host, false);
-> > > +		val =3D sdhci_readl(host, ESDHC_DMA_SYSCTL);
-> > > +		val |=3D ESDHC_PERIPHERAL_CLK_SEL;
-> > > +		sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
-> > > +		esdhc_clock_enable(host, true);
-> > > +	}
-> > >  }
-> > >
-> > >  static int sdhci_esdhc_probe(struct platform_device *pdev)
-> > >
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
