@@ -1,61 +1,63 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH] mmc: sdhci-of-esdhc: poll ESDHC_CLOCK_STABLE bit with udelay
-Date: Wed, 26 Apr 2017 10:45:49 +0800
-Message-ID: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
+From: "Y.B. Lu" <yangbo.lu@nxp.com>
+Subject: RE: [v5, 2/5] mmc: sdhci-of-esdhc: add support for signal voltage
+ switch
+Date: Wed, 26 Apr 2017 03:04:31 +0000
+Message-ID: <DB6PR0401MB2536AB2EAAD8AFD6112D3C2DF8110@DB6PR0401MB2536.eurprd04.prod.outlook.com>
+References: <1492676084-28218-1-git-send-email-yangbo.lu@nxp.com>
+ <1492676084-28218-3-git-send-email-yangbo.lu@nxp.com>
+ <CAPDyKFpcTGp2sfF0yvFVv7mntphjbHvk_ofZ9YjvTWVSOcS79Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0074.outbound.protection.outlook.com ([104.47.40.74]:9581
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+Received: from mail-ve1eur01on0085.outbound.protection.outlook.com ([104.47.1.85]:14817
+        "EHLO EUR01-VE1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1758760AbdDZDBQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Apr 2017 23:01:16 -0400
+        id S1432740AbdDZDEf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Apr 2017 23:04:35 -0400
+In-Reply-To: <CAPDyKFpcTGp2sfF0yvFVv7mntphjbHvk_ofZ9YjvTWVSOcS79Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Xiaobo Xie <xiaobo.xie@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 
-The loop to poll ESDHC_CLOCK_STABLE bit with mdelay would waste time
-because the time to stabilize is much less than 1 ms. This patch is
-to use udelay instead to avoid time wasting.
-
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 9 ++++-----
- 1 file changed, 4 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 7518360..77dfc59 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -445,7 +445,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	int pre_div = 1;
- 	int div = 1;
--	u32 timeout;
-+	ktime_t timeout;
- 	u32 temp;
- 
- 	host->mmc->actual_clock = 0;
-@@ -489,15 +489,14 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
- 	/* Wait max 20 ms */
--	timeout = 20;
-+	timeout = ktime_add_ms(ktime_get(), 20);
- 	while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
--		if (timeout == 0) {
-+		if (ktime_after(ktime_get(), timeout)) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 				mmc_hostname(host->mmc));
- 			return;
- 		}
--		timeout--;
--		mdelay(1);
-+		udelay(10);
- 	}
- 
- 	temp |= ESDHC_CLOCK_SDCLKEN;
--- 
-2.1.0.27.g96db324
-
+SGkgVWZmZSwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBI
+YW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVGh1cnNkYXks
+IEFwcmlsIDIwLCAyMDE3IDEwOjA2IFBNDQo+IFRvOiBZLkIuIEx1DQo+IENjOiBsaW51eC1tbWNA
+dmdlci5rZXJuZWwub3JnOyBBZHJpYW4gSHVudGVyOyBYaWFvYm8gWGllDQo+IFN1YmplY3Q6IFJl
+OiBbdjUsIDIvNV0gbW1jOiBzZGhjaS1vZi1lc2RoYzogYWRkIHN1cHBvcnQgZm9yIHNpZ25hbA0K
+PiB2b2x0YWdlIHN3aXRjaA0KPiANCj4gWy4uLl0NCj4gDQo+ID4gKyAgICAgICBzd2l0Y2ggKGlv
+cy0+c2lnbmFsX3ZvbHRhZ2UpIHsNCj4gPiArICAgICAgIGNhc2UgTU1DX1NJR05BTF9WT0xUQUdF
+XzMzMDoNCj4gPiArICAgICAgICAgICAgICAgdmFsICY9IH5FU0RIQ19WT0xUX1NFTDsNCj4gPiAr
+ICAgICAgICAgICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHZhbCwgRVNESENfUFJPQ1RMKTsNCj4g
+PiArICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+ID4gKyAgICAgICBjYXNlIE1NQ19TSUdOQUxf
+Vk9MVEFHRV8xODA6DQo+ID4gKyAgICAgICAgICAgICAgIHNjZmdfbm9kZSA9IG9mX2ZpbmRfbWF0
+Y2hpbmdfbm9kZShOVUxMLA0KPiBzY2ZnX2RldmljZV9pZHMpOw0KPiA+ICsgICAgICAgICAgICAg
+ICBpZiAoc2NmZ19ub2RlKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHNjZmdfYmFzZSA9
+IG9mX2lvbWFwKHNjZmdfbm9kZSwgMCk7DQo+IA0KPiBXaHkgZG9uJ3QgeW91IGRvIHRoaXMgYXQg
+cHJvYmUgdGltZSBpbnN0ZWFkIG9mIGV2ZXJ5IHRpbWUgeW91IGRvIHRoZQ0KPiB2b2x0YWdlIHN3
+aXRjaD8NCj4gDQo+IE5ldmVyIG1pbmQgYXQgdGhpcyBwb2ludCwgSSBoYXZlIHF1ZXVlZCB0aGlz
+IHVwIGZvciA0LjEyLCBob3dldmVyIGZlZWwNCj4gZnJlZSB0byBzZW5kIGEgbmV3IHBhdGNoIG9u
+IHRvcC4NCg0KW0x1IFlhbmdiby1CNDcwOTNdIFRoYW5rIHlvdSB2ZXJ5IG11Y2ggZm9yIHBvaW50
+IG91dCB0aGlzLg0KSSB3aWxsIHdvcmsgb24gYW5vdGhlciBwYXRjaCB0byBmaXggdGhpcyA6KQ0K
+DQotIFlhbmdibyBMdQ0KDQo+IA0KPiA+ICsgICAgICAgICAgICAgICBpZiAoc2NmZ19iYXNlKSB7
+DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgc2RoY2lvdnNlbGNyID0gU0RIQ0lPVlNFTENS
+X1RHTEVOIHwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTREhD
+SU9WU0VMQ1JfVlNFTFZBTDsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBpb3dyaXRlMzJi
+ZShzZGhjaW92c2VsY3IsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzY2Zn
+X2Jhc2UgKyBTQ0ZHX1NESENJT1ZTRUxDUik7DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICAg
+ICAgICAgIHZhbCB8PSBFU0RIQ19WT0xUX1NFTDsNCj4gPiArICAgICAgICAgICAgICAgICAgICAg
+ICBzZGhjaV93cml0ZWwoaG9zdCwgdmFsLCBFU0RIQ19QUk9DVEwpOw0KPiA+ICsgICAgICAgICAg
+ICAgICAgICAgICAgIG1kZWxheSg1KTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgc2RoY2lvdnNlbGNyID0gU0RIQ0lPVlNFTENSX1RHTEVOIHwNCj4gPiArICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBTREhDSU9WU0VMQ1JfU0RIQ19WUzsNCj4gPiArICAg
+ICAgICAgICAgICAgICAgICAgICBpb3dyaXRlMzJiZShzZGhjaW92c2VsY3IsDQo+ID4gKyAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBzY2ZnX2Jhc2UgKyBTQ0ZHX1NESENJT1ZTRUxDUik7
+DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgaW91bm1hcChzY2ZnX2Jhc2UpOw0KPiA+ICsg
+ICAgICAgICAgICAgICB9IGVsc2Ugew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHZhbCB8
+PSBFU0RIQ19WT0xUX1NFTDsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBzZGhjaV93cml0
+ZWwoaG9zdCwgdmFsLCBFU0RIQ19QUk9DVEwpOw0KPiA+ICsgICAgICAgICAgICAgICB9DQo+ID4g
+KyAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiA+ICsgICAgICAgZGVmYXVsdDoNCj4gPiArICAg
+ICAgICAgICAgICAgcmV0dXJuIDA7DQo+ID4gKyAgICAgICB9DQo+ID4gK30NCj4gDQo+IFsuLi5d
+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
