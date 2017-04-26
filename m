@@ -1,34 +1,36 @@
-From: Andy Gross <andy.gross@linaro.org>
-Subject: Re: [PATCH v9 07/16] mmc: sdhci-msm: Add get_min_clock() and
- get_max_clock() callback
-Date: Wed, 26 Apr 2017 16:44:43 -0500
-Message-ID: <20170426214443.GA32019@hector.attlocal.net>
-References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
- <1479710246-26676-8-git-send-email-riteshh@codeaurora.org>
+From: Logan Gunthorpe <logang@deltatee.com>
+Subject: Re: [PATCH v2 01/21] scatterlist: Introduce sg_map helper functions
+Date: Wed, 26 Apr 2017 17:30:47 -0600
+Message-ID: <5958e5fc-e73f-1457-781f-05378fa1fd46@deltatee.com>
+References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+ <1493144468-22493-2-git-send-email-logang@deltatee.com>
+ <5dfc5bf5-482c-b5bb-029c-7cee80925f37@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1479710246-26676-8-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, sboyd@codeaurora.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-clk@vger.kernel.org, david.brown@linaro.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, rnayak@codeaurora.org, pramod.gurav@linaro.org, jeremymc@redhat.com, stable@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <5dfc5bf5-482c-b5bb-029c-7cee80925f37@amd.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: =?UTF-8?Q?Christian_K=c3=b6nig?= <christian.koenig@amd.com>, linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvdimm@lists.01.org, linux-scsi@vger.kernel.org, open-iscsi@googlegroups.com, megaraidlinux.pdl@broadcom.com, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, target-devel@vger.kernel.org, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, dm-devel@redhat.com
+Cc: Jens Axboe <axboe@kernel.dk>, "James E.J. Bottomley" <jejb@linux.vnet.ibm.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Matthew Wilcox <mawilcox@microsoft.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Ross Zwisler <ross.zwisler@linux.intel.com>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 21, 2016 at 12:07:17PM +0530, Ritesh Harjani wrote:
-> This add get_min_clock() and get_max_clock() callback
-> for sdhci-msm. sdhci-msm min/max clocks may be different
-> hence implement these callbacks.
-> 
-> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-This patch needs to be picked up for stable as 4.9 is currently broken w.r.t.
-MMC on Qualcomm platforms.
 
-Fixes: d84be51d1c1d ("mmc: sdhci-msm: Enable few quirks")
+On 26/04/17 02:59 AM,   wrote:
+> Good to know that somebody is working on this. Those problems troubled
+> us as well.
 
-Regards,
+Thanks Christian. It's a daunting problem and a there's a lot of work to
+do before we will ever be where we need to be so any help, even an ack,
+is greatly appreciated.
 
-Andy Gross
+Logan
