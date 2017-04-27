@@ -1,61 +1,57 @@
-From: Herbert Xu <herbert@gondor.apana.org.au>
-Subject: Re: [PATCH v2 07/21] crypto: shash, caam: Make use of the new sg_map
- helper function
-Date: Thu, 27 Apr 2017 11:56:03 +0800
-Message-ID: <20170427035603.GA32212@gondor.apana.org.au>
-References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
- <1493144468-22493-8-git-send-email-logang@deltatee.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH v2 01/21] scatterlist: Introduce sg_map helper functions
+Date: Thu, 27 Apr 2017 08:53:38 +0200
+Message-ID: <20170427065338.GA20677@lst.de>
+References: <1493144468-22493-1-git-send-email-logang@deltatee.com> <1493144468-22493-2-git-send-email-logang@deltatee.com> <20170426074416.GA7936@lst.de> <4736d44e-bbcf-5d59-a1a9-317d0f4da847@deltatee.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <netdev-owner@vger.kernel.org>
+Return-path: <linux-crypto-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1493144468-22493-8-git-send-email-logang@deltatee.com>
-Sender: netdev-owner@vger.kernel.org
+In-Reply-To: <4736d44e-bbcf-5d59-a1a9-317d0f4da847@deltatee.com>
+Sender: linux-crypto-owner@vger.kernel.org
 To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvdimm@lists.01.org, linux-scsi@vger.kernel.org, open-iscsi@googlegroups.com, megaraidlinux.pdl@broadcom.com, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, target-devel@vger.kernel.org, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, dm-devel@redhat.com, Christoph Hellwig <hch@lst.de>, "Martin K. Petersen" <martin.petersen@oracle.com>, "James E.J. Bottomley" <jejb@linux.vnet.ibm.com>, Jens Axboe <axboe@kernel.dk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Williams <dan.j.williams@intel.com>, Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: Christoph Hellwig <hch@lst.de>, linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvdimm@lists.01.org, linux-scsi@vger.kernel.org, open-iscsi@googlegroups.com, megaraidlinux.pdl@broadcom.com, sparmaintainer@unisys.com, devel@driverdev.osuosl.org, target-devel@vger.kernel.org, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, dm-devel@redhat.com, "Martin K. Petersen" <martin.petersen@oracle.com>, "James E.J. Bottomley" <jejb@linux.vnet.ibm.com>, Jens Axboe <axboe@kernel.dk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Williams <dan.j.williams@intel.com>, Ross Zwisler <ross.zwisler@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 25, 2017 at 12:20:54PM -0600, Logan Gunthorpe wrote:
-> Very straightforward conversion to the new function in the caam driver
-> and shash library.
-> 
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Cc: Herbert Xu <herbert@gondor.apana.org.au>
-> Cc: "David S. Miller" <davem@davemloft.net>
-> ---
->  crypto/shash.c                | 9 ++++++---
->  drivers/crypto/caam/caamalg.c | 8 +++-----
->  2 files changed, 9 insertions(+), 8 deletions(-)
-> 
-> diff --git a/crypto/shash.c b/crypto/shash.c
-> index 5e31c8d..5914881 100644
-> --- a/crypto/shash.c
-> +++ b/crypto/shash.c
-> @@ -283,10 +283,13 @@ int shash_ahash_digest(struct ahash_request *req, struct shash_desc *desc)
->  	if (nbytes < min(sg->length, ((unsigned int)(PAGE_SIZE)) - offset)) {
->  		void *data;
->  
-> -		data = kmap_atomic(sg_page(sg));
-> -		err = crypto_shash_digest(desc, data + offset, nbytes,
-> +		data = sg_map(sg, 0, SG_KMAP_ATOMIC);
-> +		if (IS_ERR(data))
-> +			return PTR_ERR(data);
-> +
-> +		err = crypto_shash_digest(desc, data, nbytes,
->  					  req->result);
-> -		kunmap_atomic(data);
-> +		sg_unmap(sg, data, 0, SG_KMAP_ATOMIC);
->  		crypto_yield(desc->flags);
->  	} else
->  		err = crypto_shash_init(desc) ?:
+On Wed, Apr 26, 2017 at 12:11:33PM -0600, Logan Gunthorpe wrote:
+> Ok, well for starters I think you are mistaken about kmap being able to
+> fail. I'm having a hard time finding many users of that function that
+> bother to check for an error when calling it.
 
-Nack.  This is an optimisation for the special case of a single
-SG list entry.  In fact in the common case the kmap_atomic should
-disappear altogether in the no-highmem case.  So replacing it
-with sg_map is not acceptable.
+A quick audit of the arch code shows you're right - kmap can't fail
+anywhere anymore.
 
-Cheers,
--- 
-Email: Herbert Xu <herbert@gondor.apana.org.au>
-Home Page: http://gondor.apana.org.au/~herbert/
-PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
+> The main difficulty we
+> have now is that neither of those functions are expected to fail and we
+> need them to be able to in cases where the page doesn't map to system
+> RAM. This patch series is trying to address it for users of scatterlist.
+> I'm certainly open to other suggestions.
+
+I think you'll need to follow the existing kmap semantics and never
+fail the iomem version either.  Otherwise you'll have a special case
+that's almost never used that has a different error path.
+
+> There are a fair number of cases in the kernel that do something like:
+> 
+> if (something)
+>     x = kmap(page);
+> else
+>     x = kmap_atomic(page);
+> ...
+> if (something)
+>     kunmap(page)
+> else
+>     kunmap_atomic(x)
+> 
+> Which just seems cumbersome to me.
+
+Passing a different flag based on something isn't really much better.
+
+> In any case, if you can accept an sg_kmap and sg_kmap_atomic api just
+> say so and I'll make the change. But I'll still need a flags variable
+> for SG_MAP_MUST_NOT_FAIL to support legacy cases that have no fail path
+> and both of those functions will need to be pretty nearly replicas of
+> each other.
+
+Again, wrong way.  Suddenly making things fail for your special case
+that normally don't fail is a receipe for bugs.
