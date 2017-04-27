@@ -1,77 +1,60 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH v9 07/16] mmc: sdhci-msm: Add get_min_clock() and
- get_max_clock() callback
-Date: Thu, 27 Apr 2017 13:44:41 +0200
-Message-ID: <20170427114441.GA19156@kroah.com>
-References: <1479710246-26676-1-git-send-email-riteshh@codeaurora.org>
- <1479710246-26676-8-git-send-email-riteshh@codeaurora.org>
- <20170426214443.GA32019@hector.attlocal.net>
- <CAPDyKFoHeuEpD3BmtTjsHEjz+w1dj0uD-OM3PokPpnTjNJ562A@mail.gmail.com>
- <20170427095216.GA624@kroah.com>
- <9650e710-3d96-51ea-3aef-2d97b07b08e0@linaro.org>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH 4/4] mmc: pxamci: Fix race condition between pxamci_dma_irq() and pxamci_irq()
+Date: Thu, 27 Apr 2017 15:14:28 +0200
+Message-ID: <87inlq0z7v.fsf@belgarion.home>
+References: <cover.1492492523.git.petr.cvek@tul.cz>
+        <31e332fa-f152-1eff-39fb-91f332b84757@tul.cz>
+        <87fuh46w3r.fsf@belgarion.home>
+        <43c3a3b4-75b5-613e-4e28-9c38271ccb63@tul.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <9650e710-3d96-51ea-3aef-2d97b07b08e0@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: Georgi Djakov <georgi.djakov@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Andy Gross <andy.gross@linaro.org>, Ritesh Harjani <riteshh@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Sahitya Tummala <stummala@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Rajendra Nayak <rnayak@codeaurora.org>, Pramod Gurav <pramod.gurav@linaro.org>, jeremymc@redhat.com, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp01.smtpout.orange.fr ([80.12.242.123]:53936 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751256AbdD0NOd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Apr 2017 09:14:33 -0400
+In-Reply-To: <43c3a3b4-75b5-613e-4e28-9c38271ccb63@tul.cz> (Petr Cvek's
+        message of "Fri, 21 Apr 2017 03:30:10 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Petr Cvek <petr.cvek@tul.cz>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thu, Apr 27, 2017 at 01:29:22PM +0300, Georgi Djakov wrote:
-> On 04/27/2017 12:52 PM, Greg Kroah-Hartman wrote:
-> > On Thu, Apr 27, 2017 at 11:03:08AM +0200, Ulf Hansson wrote:
-> >> +Greg
-> >> -trimmed cc
-> >>
-> >> On 26 April 2017 at 23:44, Andy Gross <andy.gross@linaro.org> wrote:
-> >>> On Mon, Nov 21, 2016 at 12:07:17PM +0530, Ritesh Harjani wrote:
-> >>>> This add get_min_clock() and get_max_clock() callback
-> >>>> for sdhci-msm. sdhci-msm min/max clocks may be different
-> >>>> hence implement these callbacks.
-> >>>>
-> >>>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> >>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> >>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >>>
-> >>> This patch needs to be picked up for stable as 4.9 is currently broken w.r.t.
-> >>> MMC on Qualcomm platforms.
-> >>>
-> >>> Fixes: d84be51d1c1d ("mmc: sdhci-msm: Enable few quirks")
-> >>>
-> >>> Regards,
-> >>>
-> >>> Andy Gross
-> >>
-> >> I did a quick investigation around this.
-> >>
-> >> So for some reason Greg decided to pick up the original commit,
-> >> a0e3142869d2 ("mmc: sdhci-msm: Enable few quirks"), for 4.9 stable
-> >> [1], even if that patch wasn't sent or tagged for stable.
-> >> It was a mistake, as simple as that - and I should also have spotted
-> >> it when Greg posted his stable-review series, sorry.
-> >>
-> >> For clarification, the original commit a0e3142869d2 ("mmc: sdhci-msm:
-> >> Enable few quirks"), is present in 4.10 together with $subject patch.
-> >> So the regression is present only in 4.9 stable.
-> >>
-> >> Greg, can you pick up @subject patch for stable according to Andy's
-> >> suggestion or you want some of us to re-post it to stable?
-> > 
-> > Sorry about this.  What git commit should I take for this from Linus's
-> > tree for the 4.9-stable tree?  Or if there isn't one, I'll be glad to
-> > just revert this.
-> > 
-> 
-> Thanks Greg and Ulf,
-> 
-> A revert of d84be51d1c1d ("mmc: sdhci-msm: Enable few quirks") would be
-> the best solution.
-> 
-> The other option is to pick 80031bdeb764 ("mmc: sdhci-msm: Add
-> get_min_clock() and get_max_clock() callback").
+Petr Cvek <petr.cvek@tul.cz> writes:
 
-I've reverted it now, thanks.
+> Dne 19.4.2017 v 21:22 Robert Jarzmik napsal(a):
+>> Petr Cvek <petr.cvek@tul.cz> writes:
 
-greg k-h
+Hi Petr,
+
+As promised, I though it a bit more, and I have a counter proposal, which looks
+simpler (if it works for you).
+
+Why not remove completely the call to pxamci_data_done() from pxamci_dma_irq() ?
+The pxamci_dma_irq() will only remain for the partial full write, and for the
+dev_err() part, but won't act on command completion, that part being full dealt
+with by pxamci_data_done().
+
+I still seeing a small race window, in that :
+ - DATA_TRAN_DONE is asserted for a MMC read transaction, because the MMC FIFO
+   was just emptied by the DMA IP
+ - imagine the memory is not yet written to by the DMA IP (ie. this is the race
+   window, the DATA being help in DMA IP internal FIFO)
+ - the pxamci_data_done() is called, and it calls dma_unmap_sg(), flushing the
+   cache
+ - the consumer reads this last data bit, which is still the old data, and then
+   the DMA finishes ...
+
+I know the probability is almost 0 for this scenario to happen given the
+timings, it's just to add fuel to the technical exchange.
+
+> The patches 1, 1+2, 1+2+3 should boot, but the MMC will of course fail as only
+> the 4 repairs it. Do you want me to send them independently? (or I can sort
+> them that the race condition repair is the first one)
+No no, I like it the way it is, and as far as Ulf is happy as his tree will
+carry them, I'm happy too.
+
+Cheers.
+
+--
+Robert
