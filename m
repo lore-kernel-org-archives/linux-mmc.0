@@ -1,60 +1,70 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH 4/4] mmc: pxamci: Fix race condition between pxamci_dma_irq() and pxamci_irq()
-Date: Thu, 27 Apr 2017 15:14:28 +0200
-Message-ID: <87inlq0z7v.fsf@belgarion.home>
-References: <cover.1492492523.git.petr.cvek@tul.cz>
-        <31e332fa-f152-1eff-39fb-91f332b84757@tul.cz>
-        <87fuh46w3r.fsf@belgarion.home>
-        <43c3a3b4-75b5-613e-4e28-9c38271ccb63@tul.cz>
+From: Jason Gunthorpe <jgunthorpe-ePGOBjL8dl3ta4EC/59zMFaTQe2KTcn/@public.gmane.org>
+Subject: Re: [PATCH v2 01/21] scatterlist: Introduce sg_map helper functions
+Date: Thu, 27 Apr 2017 09:27:20 -0600
+Message-ID: <20170427152720.GA7662@obsidianresearch.com>
+References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+ <1493144468-22493-2-git-send-email-logang@deltatee.com>
+ <20170426074416.GA7936@lst.de>
+ <4736d44e-bbcf-5d59-a1a9-317d0f4da847@deltatee.com>
+ <20170427065338.GA20677@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp01.smtpout.orange.fr ([80.12.242.123]:53936 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751256AbdD0NOd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Apr 2017 09:14:33 -0400
-In-Reply-To: <43c3a3b4-75b5-613e-4e28-9c38271ccb63@tul.cz> (Petr Cvek's
-        message of "Fri, 21 Apr 2017 03:30:10 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170427065338.GA20677-jcswGhMUV9g@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>
+Cc: linux-nvdimm-y27Ovi1pjclAfugRpC6u6w@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, dm-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sumit Semwal <sumit.semwal-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, "James E.J. Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Wilcox <mawilcox-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, megaraidlinux.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "Martin K. Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Petr Cvek <petr.cvek@tul.cz>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Petr Cvek <petr.cvek@tul.cz> writes:
+On Thu, Apr 27, 2017 at 08:53:38AM +0200, Christoph Hellwig wrote:
 
-> Dne 19.4.2017 v 21:22 Robert Jarzmik napsal(a):
->> Petr Cvek <petr.cvek@tul.cz> writes:
+> > The main difficulty we
+> > have now is that neither of those functions are expected to fail and we
+> > need them to be able to in cases where the page doesn't map to system
+> > RAM. This patch series is trying to address it for users of scatterlist.
+> > I'm certainly open to other suggestions.
+> 
+> I think you'll need to follow the existing kmap semantics and never
+> fail the iomem version either.  Otherwise you'll have a special case
+> that's almost never used that has a different error path.
 
-Hi Petr,
+How about first switching as many call sites as possible to use
+sg_copy_X_buffer instead of kmap?
 
-As promised, I though it a bit more, and I have a counter proposal, which looks
-simpler (if it works for you).
+A random audit of Logan's series suggests this is actually a fairly
+common thing.
 
-Why not remove completely the call to pxamci_data_done() from pxamci_dma_irq() ?
-The pxamci_dma_irq() will only remain for the partial full write, and for the
-dev_err() part, but won't act on command completion, that part being full dealt
-with by pxamci_data_done().
+eg drivers/mmc/host/sdhci.c is only doing this:
 
-I still seeing a small race window, in that :
- - DATA_TRAN_DONE is asserted for a MMC read transaction, because the MMC FIFO
-   was just emptied by the DMA IP
- - imagine the memory is not yet written to by the DMA IP (ie. this is the race
-   window, the DATA being help in DMA IP internal FIFO)
- - the pxamci_data_done() is called, and it calls dma_unmap_sg(), flushing the
-   cache
- - the consumer reads this last data bit, which is still the old data, and then
-   the DMA finishes ...
+                                        buffer = sdhci_kmap_atomic(sg, &flags);
+                                        memcpy(buffer, align, size);
+                                        sdhci_kunmap_atomic(buffer, &flags);
 
-I know the probability is almost 0 for this scenario to happen given the
-timings, it's just to add fuel to the technical exchange.
+drivers/scsi/mvsas/mv_sas.c is this:
 
-> The patches 1, 1+2, 1+2+3 should boot, but the MMC will of course fail as only
-> the 4 repairs it. Do you want me to send them independently? (or I can sort
-> them that the race condition repair is the first one)
-No no, I like it the way it is, and as far as Ulf is happy as his tree will
-carry them, I'm happy too.
++			to = sg_map(sg_resp, 0, SG_KMAP_ATOMIC);
++			memcpy(to,
++			       slot->response + sizeof(struct mvs_err_info),
++			       sg_dma_len(sg_resp));
++			sg_unmap(sg_resp, to, 0, SG_KMAP_ATOMIC);
 
-Cheers.
+etc.
 
---
-Robert
+Lots of other places seem similar, if not sometimes a little bit more
+convoluted..
+
+Switching all the trivial cases to use copy might bring more clarity
+as to what is actually required for the remaining few users? If there
+are only a few then it may no longer matter if the API is not idyllic.
+
+Jason
