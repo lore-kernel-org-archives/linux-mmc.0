@@ -1,50 +1,129 @@
-From: Logan Gunthorpe <logang@deltatee.com>
-Subject: Re: [PATCH v2 07/21] crypto: shash,
- caam: Make use of the new sg_map helper function
-Date: Fri, 28 Apr 2017 13:01:39 -0600
-Message-ID: <d5242ef0-2670-63e4-02ce-a6d2368b7292@deltatee.com>
-References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
- <1493144468-22493-8-git-send-email-logang@deltatee.com>
- <20170427035603.GA32212@gondor.apana.org.au>
- <94123cbf-3287-f05e-7267-0bcf08ab0a8b@deltatee.com>
- <20170428063039.GB6817@gondor.apana.org.au>
- <5a08708b-c3b8-41fe-96de-607a109eacbd@deltatee.com>
- <20170428175147.GA9596@gondor.apana.org.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-In-Reply-To: <20170428175147.GA9596@gondor.apana.org.au>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: dri-devel@lists.freedesktop.org, Stephen Bates <sbates@raithlin.com>, dm-devel@redhat.com, target-devel@vger.kernel.org, Christoph Hellwig <hch@lst.de>, devel@driverdev.osuosl.org, "James E.J. Bottomley" <jejb@linux.vnet.ibm.com>, linux-scsi@vger.kernel.org, linux-nvdimm@lists.01.org, linux-rdma@vger.kernel.org, Sumit Semwal <sumit.semwal@linaro.org>, Ross Zwisler <ross.zwisler@linux.intel.com>, open-iscsi@googlegroups.com, linux-media@vger.kernel.org, intel-gfx@lists.freedesktop.org, sparmaintainer@unisys.com, linux-raid@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, megaraidlinux.pdl@broadcom.com, Jens Axboe <axboe@kernel.dk>, "Martin K. Petersen" <martin.petersen@oracle.com>, netdev@vger.kernel.org, Matthew Wilcox <mawilcox@microsoft.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linu>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Check the return value from clk_prepare_enable()
+Date: Fri, 28 Apr 2017 17:00:04 -0300
+Message-ID: <1493409604-24716-1-git-send-email-festevam@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f195.google.com ([209.85.220.195]:32797 "EHLO
+        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S642167AbdD1UAY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 16:00:24 -0400
+Received: by mail-qk0-f195.google.com with SMTP id o85so10344265qkh.0
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 13:00:24 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, dongas86@gmail.com, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>
 
-CgpPbiAyOC8wNC8xNyAxMTo1MSBBTSwgSGVyYmVydCBYdSB3cm90ZToKPiBPbiBGcmksIEFwciAy
-OCwgMjAxNyBhdCAxMDo1Mzo0NUFNIC0wNjAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6Cj4+Cj4+
-Cj4+IE9uIDI4LzA0LzE3IDEyOjMwIEFNLCBIZXJiZXJ0IFh1IHdyb3RlOgo+Pj4gWW91IGFyZSBy
-aWdodC4gIEluZGVlZCB0aGUgZXhpc3RpbmcgY29kZSBsb29rcyBidWdneSBhcyB0aGV5Cj4+PiBk
-b24ndCB0YWtlIHNnLT5vZmZzZXQgaW50byBhY2NvdW50IHdoZW4gZG9pbmcgdGhlIGttYXAuICBD
-b3VsZAo+Pj4geW91IHNlbmQgbWUgc29tZSBwYXRjaGVzIHRoYXQgZml4IHRoZXNlIHByb2JsZW1z
-IGZpcnN0IHNvIHRoYXQKPj4+IHRoZXkgY2FuIGJlIGVhc2lseSBiYWNrcG9ydGVkPwo+Pgo+PiBP
-aywgSSB0aGluayB0aGUgb25seSBidWdneSBvbmUgaW4gY3J5cHRvIGlzIGhpZm5fNzk1eC4gU2hh
-c2ggYW5kIGNhYW0KPj4gYm90aCBkbyBoYXZlIHRoZSBzZy0+b2Zmc2V0IGFjY291bnRlZCBmb3Iu
-IEknbGwgc2VuZCBhIHBhdGNoIGZvciB0aGUKPj4gYnVnZ3kgb25lIHNob3J0bHkuCj4gCj4gSSB0
-aGluayB0aGV5J3JlIGFsbCBidWdneSB3aGVuIHNnLT5vZmZzZXQgaXMgZ3JlYXRlciB0aGFuIFBB
-R0VfU0laRS4KClllcywgdGVjaG5pY2FsbHkuIEJ1dCB0aGF0J3MgYSBfdmVyeV8gY29tbW9uIG1p
-c3Rha2UuIFByZXR0eSBuZWFybHkKZXZlcnkgY2FzZSBJIGxvb2tlZCBhdCBkaWQgbm90IHRha2Ug
-dGhhdCBpbnRvIGFjY291bnQuIEkgZG9uJ3QgdGhpbmsKc2cncyB0aGF0IHBvaW50IHRvIG1vcmUg
-dGhhbiBvbmUgY29udGludW91cyBwYWdlIGFyZSBhbGwgdGhhdCBjb21tb24uCgpGaXhpbmcgYWxs
-IHRob3NlIGNhc2VzIHdpdGhvdXQgbWFraW5nIGEgY29tbW9uIGZ1bmN0aW9uIGlzIGEgd2FzdGUg
-b2YKdGltZSBJTU8uCgpMb2dhbgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fXwpJbnRlbC1nZnggbWFpbGluZyBsaXN0CkludGVsLWdmeEBsaXN0cy5mcmVlZGVz
-a3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0aW5mby9p
-bnRlbC1nZngK
+From: Fabio Estevam <fabio.estevam@nxp.com>
+
+clk_prepare_enable() may fail, so we should better check its return value
+and propagate it in the case of error.
+
+Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 54 +++++++++++++++++++++++++++++---------
+ 1 file changed, 41 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 23d8b8a..b5c7241 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1250,14 +1250,20 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 
+ 	pltfm_host->clk = imx_data->clk_per;
+ 	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
+-	clk_prepare_enable(imx_data->clk_per);
+-	clk_prepare_enable(imx_data->clk_ipg);
+-	clk_prepare_enable(imx_data->clk_ahb);
++	err = clk_prepare_enable(imx_data->clk_per);
++	if (err)
++		goto free_sdhci;
++	err = clk_prepare_enable(imx_data->clk_ipg);
++	if (err)
++		goto disable_per_clk;
++	err = clk_prepare_enable(imx_data->clk_ahb);
++	if (err)
++		goto disable_ipg_clk;
+ 
+ 	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
+ 	if (IS_ERR(imx_data->pinctrl)) {
+ 		err = PTR_ERR(imx_data->pinctrl);
+-		goto disable_clk;
++		goto disable_ahb_clk;
+ 	}
+ 
+ 	imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
+@@ -1297,13 +1303,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	else
+ 		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
+ 	if (err)
+-		goto disable_clk;
++		goto disable_ahb_clk;
+ 
+ 	sdhci_esdhc_imx_hwinit(host);
+ 
+ 	err = sdhci_add_host(host);
+ 	if (err)
+-		goto disable_clk;
++		goto disable_ahb_clk;
+ 
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+@@ -1313,10 +1319,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 
+ 	return 0;
+ 
+-disable_clk:
+-	clk_disable_unprepare(imx_data->clk_per);
+-	clk_disable_unprepare(imx_data->clk_ipg);
++disable_ahb_clk:
+ 	clk_disable_unprepare(imx_data->clk_ahb);
++disable_ipg_clk:
++	clk_disable_unprepare(imx_data->clk_ipg);
++disable_per_clk:
++	clk_disable_unprepare(imx_data->clk_per);
+ free_sdhci:
+ 	sdhci_pltfm_free(pdev);
+ 	return err;
+@@ -1393,14 +1401,34 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	int err;
+ 
+ 	if (!sdhci_sdio_irq_enabled(host)) {
+-		clk_prepare_enable(imx_data->clk_per);
+-		clk_prepare_enable(imx_data->clk_ipg);
++		err = clk_prepare_enable(imx_data->clk_per);
++		if (err)
++			return err;
++		err = clk_prepare_enable(imx_data->clk_ipg);
++		if (err)
++			goto disable_per_clk;
+ 	}
+-	clk_prepare_enable(imx_data->clk_ahb);
++	err = clk_prepare_enable(imx_data->clk_ahb);
++	if (err)
++		goto disable_ipg_clk;
++	err = sdhci_runtime_resume_host(host);
++	if (err)
++		goto disable_ahb_clk;
++
++	return 0;
+ 
+-	return sdhci_runtime_resume_host(host);
++disable_ahb_clk:
++	clk_disable_unprepare(imx_data->clk_ahb);
++disable_ipg_clk:
++	if (!sdhci_sdio_irq_enabled(host))
++		clk_disable_unprepare(imx_data->clk_ipg);
++disable_per_clk:
++	if (!sdhci_sdio_irq_enabled(host))
++		clk_disable_unprepare(imx_data->clk_per);
++	return err;
+ }
+ #endif
+ 
+-- 
+2.7.4
+
