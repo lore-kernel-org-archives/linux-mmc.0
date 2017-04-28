@@ -1,7 +1,7 @@
 From: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
-Subject: [PATCH v5 09/14] MIPS: JZ4780: CI20: Add pinctrl configuration for several drivers
-Date: Fri, 28 Apr 2017 22:08:19 +0200
-Message-ID: <20170428200824.10906-10-paul@crapouillou.net>
+Subject: [PATCH v5 06/14] MIPS: jz4740: DTS: Add nodes for ingenic pinctrl and gpio drivers
+Date: Fri, 28 Apr 2017 22:08:16 +0200
+Message-ID: <20170428200824.10906-7-paul@crapouillou.net>
 References: <20170402204244.14216-2-paul@crapouillou.net>
  <20170428200824.10906-1-paul@crapouillou.net>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
@@ -11,120 +11,101 @@ To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexa
 Cc: Boris Brezillon <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maarten ter Huurne <maarten-Ph2Y2OKCxY1M656bX5wj8A@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Paul Burton <paul.burton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, james.hogan-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We set the pin configuration for the jz4780-nand and jz4780-uart
-drivers.
+For a description of the pinctrl devicetree node, please read
+Documentation/devicetree/bindings/pinctrl/ingenic,pinctrl.txt
+
+For a description of the gpio devicetree nodes, please read
+Documentation/devicetree/bindings/gpio/ingenic,gpio.txt
 
 Signed-off-by: Paul Cercueil <paul-icTtO2rgO2OTuSrc4Mpeew@public.gmane.org>
 ---
- arch/mips/boot/dts/ingenic/ci20.dts | 60 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 60 insertions(+)
+ arch/mips/boot/dts/ingenic/jz4740.dtsi | 68 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 68 insertions(+)
 
  v2: Changed the devicetree bindings to match the new driver
  v3: No changes
- v4: No changes
- v5: No changes
+ v4: Update the bindings for the v4 version of the drivers
+ v5: Add 'reg' properties and rename pinctrl/gpio nodes
 
-diff --git a/arch/mips/boot/dts/ingenic/ci20.dts b/arch/mips/boot/dts/ingenic/ci20.dts
-index 1652d8d60b1e..fd138d9978c1 100644
---- a/arch/mips/boot/dts/ingenic/ci20.dts
-+++ b/arch/mips/boot/dts/ingenic/ci20.dts
-@@ -29,18 +29,30 @@
+diff --git a/arch/mips/boot/dts/ingenic/jz4740.dtsi b/arch/mips/boot/dts/ingenic/jz4740.dtsi
+index 3e1587f1f77a..2ca7ce7481f1 100644
+--- a/arch/mips/boot/dts/ingenic/jz4740.dtsi
++++ b/arch/mips/boot/dts/ingenic/jz4740.dtsi
+@@ -55,6 +55,74 @@
+ 		clock-names = "rtc";
+ 	};
  
- &uart0 {
- 	status = "okay";
++	pinctrl: pin-controller@10010000 {
++		compatible = "ingenic,jz4740-pinctrl";
++		reg = <0x10010000 0x400>;
 +
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pins_uart0>;
- };
- 
- &uart1 {
- 	status = "okay";
++		#address-cells = <1>;
++		#size-cells = <0>;
 +
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pins_uart1>;
- };
- 
- &uart3 {
- 	status = "okay";
++		gpa: gpio@0 {
++			compatible = "ingenic,jz4740-gpio";
++			reg = <0>;
 +
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pins_uart2>;
- };
- 
- &uart4 {
- 	status = "okay";
++			gpio-controller;
++			gpio-ranges = <&pinctrl 0 0 32>;
++			#gpio-cells = <2>;
 +
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pins_uart4>;
- };
- 
- &nemc {
-@@ -61,6 +73,13 @@
- 		ingenic,nemc-tAW = <15>;
- 		ingenic,nemc-tSTRV = <100>;
- 
-+		/*
-+		 * Only CLE/ALE are needed for the devices that are connected, rather
-+		 * than the full address line set.
-+		 */
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pins_nemc>;
++			interrupt-controller;
++			#interrupt-cells = <2>;
 +
- 		nand@1 {
- 			reg = <1>;
- 
-@@ -69,6 +88,9 @@
- 			nand-ecc-mode = "hw";
- 			nand-on-flash-bbt;
- 
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&pins_nemc_cs1>;
++			interrupt-parent = <&intc>;
++			interrupts = <28>;
++		};
 +
- 			partitions {
- 				compatible = "fixed-partitions";
- 				#address-cells = <2>;
-@@ -106,3 +128,41 @@
- &bch {
- 	status = "okay";
- };
++		gpb: gpio@1 {
++			compatible = "ingenic,jz4740-gpio";
++			reg = <1>;
 +
-+&pinctrl {
-+	pins_uart0: uart0 {
-+		function = "uart0";
-+		groups = "uart0-data";
-+		bias-disable;
++			gpio-controller;
++			gpio-ranges = <&pinctrl 0 32 32>;
++			#gpio-cells = <2>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++
++			interrupt-parent = <&intc>;
++			interrupts = <27>;
++		};
++
++		gpc: gpio@2 {
++			compatible = "ingenic,jz4740-gpio";
++			reg = <2>;
++
++			gpio-controller;
++			gpio-ranges = <&pinctrl 0 64 32>;
++			#gpio-cells = <2>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++
++			interrupt-parent = <&intc>;
++			interrupts = <26>;
++		};
++
++		gpd: gpio@3 {
++			compatible = "ingenic,jz4740-gpio";
++			reg = <3>;
++
++			gpio-controller;
++			gpio-ranges = <&pinctrl 0 96 32>;
++			#gpio-cells = <2>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++
++			interrupt-parent = <&intc>;
++			interrupts = <25>;
++		};
 +	};
 +
-+	pins_uart1: uart1 {
-+		function = "uart1";
-+		groups = "uart1-data";
-+		bias-disable;
-+	};
-+
-+	pins_uart2: uart2 {
-+		function = "uart2";
-+		groups = "uart2-data", "uart2-hwflow";
-+		bias-disable;
-+	};
-+
-+	pins_uart4: uart4 {
-+		function = "uart4";
-+		groups = "uart4-data";
-+		bias-disable;
-+	};
-+
-+	pins_nemc: nemc {
-+		function = "nemc";
-+		groups = "nemc-data", "nemc-cle-ale", "nemc-rd-we", "nemc-frd-fwe";
-+		bias-disable;
-+	};
-+
-+	pins_nemc_cs1: nemc-cs1 {
-+		function = "nemc-cs1";
-+		groups = "nemc-cs1";
-+		bias-disable;
-+	};
-+};
+ 	uart0: serial@10030000 {
+ 		compatible = "ingenic,jz4740-uart";
+ 		reg = <0x10030000 0x100>;
 -- 
 2.11.0
 
