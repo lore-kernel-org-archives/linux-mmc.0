@@ -1,104 +1,92 @@
 From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH 1/3] mmc: sdio: Add API to manage SDIO IRQs from a workqueue
-Date: Fri, 28 Apr 2017 13:31:33 -0700
-Message-ID: <CAD=FV=WM_c+bXtraybrKbT_fuVk2jzor8vMjpnrRAQ2R79u_VA@mail.gmail.com>
-References: <1492518724-30511-1-git-send-email-ulf.hansson@linaro.org>
- <1492518724-30511-2-git-send-email-ulf.hansson@linaro.org>
- <CAD=FV=XMk4+86WaCWjuf3NVwRoEubjcY+zQhH-hsb=H3sRpw0A@mail.gmail.com>
- <CAPDyKFqruAXXnp_=6u4i5DnXpjvO_YkCiv-PjooaSQXqjn9z-A@mail.gmail.com>
- <CAD=FV=XX-LRdNQytWDQ5N5qEtNQyQH1kmU9KUaT1EnKWG1EvtA@mail.gmail.com> <CAPDyKFo2_qM9cxSu6Q=f1C1SdnQ4WPe_pR4Y4ypSotwc4Jc8gA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/5] mmc: Improve/fix support for SDIO IRQs
+Date: Fri, 28 Apr 2017 14:26:29 -0700
+Message-ID: <CAD=FV=UDq0KUkpohniViFwNFjyT=7hVLz1GYvrw7aLZkoNWG3g@mail.gmail.com>
+References: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:35808 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030850AbdD1Ubg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 16:31:36 -0400
-Received: by mail-yw0-f178.google.com with SMTP id u70so36425547ywe.2
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 13:31:35 -0700 (PDT)
-In-Reply-To: <CAPDyKFo2_qM9cxSu6Q=f1C1SdnQ4WPe_pR4Y4ypSotwc4Jc8gA@mail.gmail.com>
+Received: from mail-yb0-f179.google.com ([209.85.213.179]:35913 "EHLO
+        mail-yb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S939817AbdD1V0b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 17:26:31 -0400
+Received: by mail-yb0-f179.google.com with SMTP id s22so18462098ybe.3
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 14:26:30 -0700 (PDT)
+In-Reply-To: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Ulf
+Ulf,
 
-On Thu, Apr 20, 2017 at 5:14 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> [...]
+On Wed, Apr 19, 2017 at 2:17 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Changes in v2:
+>         - Folded in a new change, patch 1/5 to fix a race condition while
+>         processing SDIO IRQs.
+>         - Fixed review comments provided by Dough.
+>         - Updated change logs.
+>         - Small changes to how ->ack_sdio_irq() is being invoked, to simplify
+>         code.
+>         - Added a revert patch of the dw_mmc change for runtime PM issues, which
+>         was a quick fix for stable/fixes.
 >
->>
->> With "cap-sdio-irq" commented out but without your 3 patches:
->> => Boot up, "ifconfig eth0 down; ping -c 20 8.8.8.8".  Seems OK.
->>
->> With "cap-sdio-irq" commented out but _with_ your 3 patches:
->> => Boot up, "ifconfig eth0 down; ping -c 20 8.8.8.8".  Seems OK.
->>
->> So I guess the conclusion is that I missed the part about your patch
->> only enabling the new features if MMC_CAP_SDIO_IRQ.  Sorry.  :(
->> ...and then I must have hit some other unrelated failure that I can't
->> reproduce now and assumed it was your patch's fault.
->>
->> So basically I would say that I've lightly tested your code.  It's not
->> code I've stressed a ton, but it survived some basic tests anyway...
->> :)  The code also looks pretty sane to me.
+> Some general description of the series:
 >
-> Thanks a lot for your feedback a for running a new round of tests.
-> This seems promising then!
+> Regressions for SDIO IRQs have been reported for dw_mmc, caused by enabling
+> runtime PM support for it.
 >
-> When you have the time, it we awesome if you could run yet another new
-> round of test with the new version of the series. I posted it
-> yesterday evening my local time.
+> This series extends and improves the SDIO IRQs support in the core, such that
+> it better suites the need for dw_mmc, particulary around runtime PM.
+>
+> Do note, so far this is only compile tested. I would thus appreciate help in
+> testing and of course also in reviewing.
+>
+>
+> Ulf Hansson (5):
+>   mmc: core: Prevent processing SDIO IRQs when none is claimed
+>   mmc: sdio: Add API to manage SDIO IRQs from a workqueue
+>   mmc: dw_mmc: Convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs
+>   mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs are enabled
+>   Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
+>
+>  drivers/mmc/core/host.c     |  2 ++
+>  drivers/mmc/core/sdio_irq.c | 27 +++++++++++++++++++++++++--
+>  drivers/mmc/core/sdio_ops.h |  2 ++
+>  drivers/mmc/host/dw_mmc.c   | 44 ++++++++++++++++++++++++++++++++------------
+>  include/linux/mmc/host.h    |  3 +++
+>  5 files changed, 64 insertions(+), 14 deletions(-)
 
-Sorry for taking so long to get to this.  I've done this now and
-things seem to be working fine with your new series.  As with before,
-I'm not doing really stressful testing here, but what I've done seems
-OK.
+On an rk3288-veyron-jerry system (with Marvell WiFi), I applied your
+series atop v4.11-rc8.  I did basic tests and WiFi seemed to be
+working OK.  I most certainly didn't stress things out, but doing
+basic transfers / pings worked.
+
+Oh, but maybe suspend / resume is a bit unhappy?  It's a little hard
+to tell because it doesn't work 100% reliably (with respect to WiFi)
+even without your changes, but with your changes it seems to be broken
+worse.  AKA: i can often get suspend/resume to work without your
+changes, but I've never seen it work with your changes.  I get errors
+like:
+
+[   36.498454] call ff0f0000.dwmmc+ returned 0 after 5 usecs
+[   40.210761] Bluetooth: Host sleep enable command failed
+[   40.216594] Bluetooth: HS not activated, suspend failed!
+[   40.222537] dpm_run_callback(): pm_generic_suspend+0x0/0x48 returns -16
+[   40.229923] call mmc1:0001:2+ returned -16 after 4919039 usecs
+[   40.236442] PM: Device mmc1:0001:2 failed to suspend async: error -16
+[   45.330750] mwifiex_sdio mmc1:0001:1: mwifiex_cmd_timeout_func:
+Timeout cmd id = 0x107, act = 0x0
 
 
-> I would also be very interested to know if converting to the work
-> queue approach has any impact on throughput. Maybe you have some
-> simple test suite to also verify that?
+It appears that ("mmc: dw_mmc: Convert to use
+MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs") is the one causing it.
+It's plausible that dw_mmc is interacting with things in a bad way,
+though.
 
-I don't personally.  To really get something repeatable for WiFi, you
-need things in a chamber and need a test server setup.
+I probably can't spend another few days debugging this this right now,
+though.  :(  Anyone else on this thread want to dig?  If not, I might
+be able to come back to this in a bit...
 
-I did this quick test with the device sitting on my desk (with
-whatever the closest WiFi access point was), though:
-
-ifconfig eth0 down
-for i in $(seq 5); do
-  curl http://SomeBigFile > /dev/null
-done
-
-
->From this very simple test, the performance looks like a wash.
-
---
-
-Before your changes:
-
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 54.0M  100 54.0M    0     0  2753k      0  0:00:20  0:00:20 --:--:-- 2952k
-100 54.0M  100 54.0M    0     0  1073k      0  0:00:51  0:00:51 --:--:--  902k
-100 54.0M  100 54.0M    0     0  2494k      0  0:00:22  0:00:22 --:--:-- 3061k
-100 54.0M  100 54.0M    0     0  2455k      0  0:00:22  0:00:22 --:--:-- 2890k
-100 54.0M  100 54.0M    0     0  1934k      0  0:00:28  0:00:28 --:--:-- 2301k
-
-After your changes:
-
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 54.0M  100 54.0M    0     0  2376k      0  0:00:23  0:00:23 --:--:-- 2739k
-100 54.0M  100 54.0M    0     0  2303k      0  0:00:24  0:00:24 --:--:-- 2698k
-100 54.0M  100 54.0M    0     0  2512k      0  0:00:22  0:00:22 --:--:-- 2359k
-100 54.0M  100 54.0M    0     0  1774k      0  0:00:31  0:00:31 --:--:-- 1742k
-100 54.0M  100 54.0M    0     0  2124k      0  0:00:26  0:00:26 --:--:-- 2753k
-
---
-
-It's possible that Brian Norris (CCed) might have an easy way to do a
-better test?
 
 -Doug
