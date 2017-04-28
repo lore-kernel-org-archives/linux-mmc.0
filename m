@@ -1,84 +1,148 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH -next 2/2] mmc: sdhci-xenon: Fix the default value of
- LOGIC_TIMING_ADJUST register in eMMC 5.0 PHY
-Date: Fri, 28 Apr 2017 10:51:42 +0300
-Message-ID: <85d28107-bf1f-a611-c61b-8d365b503d01@intel.com>
-References: <cover.1493275841.git.huziji@marvell.com>
- <50ac97be8a5696487750791f231ab2606eb800bb.1493275842.git.huziji@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: slot-gpio: Add support to enable irq wake on cd_irq
+Date: Fri, 28 Apr 2017 12:27:29 +0200
+Message-ID: <CAPDyKFqACm+Q9xNVro=T+KkUL4-3JB2bkCMhc-Z6ynK+qr2v8A@mail.gmail.com>
+References: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
+ <1492607363-5346-2-git-send-email-adrian.hunter@intel.com>
+ <c33cc643-0f35-f92f-37b2-62e7ccba0209@intel.com> <CAPDyKFpmvk93qn_B-o7+UW7t4JSTm9w=2T=1Mov-iKxfCADz=Q@mail.gmail.com>
+ <a0a8df6c-cda6-f291-705a-f25f9c995813@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:44683 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756217AbdD1H5a (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 28 Apr 2017 03:57:30 -0400
-In-Reply-To: <50ac97be8a5696487750791f231ab2606eb800bb.1493275842.git.huziji@marvell.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34624 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S968856AbdD1K1b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 06:27:31 -0400
+Received: by mail-qk0-f169.google.com with SMTP id y63so48949660qkd.1
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 03:27:30 -0700 (PDT)
+In-Reply-To: <a0a8df6c-cda6-f291-705a-f25f9c995813@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hu Ziji <huziji@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, dougj@marvell.com, jszhang@marvell.com, nadavh@marvell.com, ygao@marvell.com, xigu@marvell.com, liuw@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, zjwu@marvell.com
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 28/04/17 05:35, Hu Ziji wrote:
-> The default value of LOGIC_TIMING_ADJUST register in eMMC 5.0 PHY
-> is different from that in eMMC 5.1 PHY.
-> Set the specific value for that register in eMMC 5.0 PHY.
-> 
-> Signed-off-by: Hu Ziji <huziji@marvell.com>
-> Reported-by: Jisheng Zhang <jszhang@marvell.com>
-> Tested-by: Jisheng Zhang <jszhang@marvell.com>
+On 28 April 2017 at 09:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 25/04/17 23:02, Ulf Hansson wrote:
+>> On 25 April 2017 at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 19/04/17 16:09, Adrian Hunter wrote:
+>>>> Add mmc_gpio_cd_enable_wake() to allow drivers to enable irq wake on the
+>>>> card detect irq.
+>>>>
+>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>
+>>> Any comments on this?
+>>
+>> Not yet. I need some more thinking about this.
+>
+> How is the thinking going ;-)
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+To many things at the moment. Anyway, to me this is material for 4.13.
+I will get back to it as soon as I can.
 
-> ---
->  drivers/mmc/host/sdhci-xenon-phy.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-> index 4bdbcd3..31d08cf 100644
-> --- a/drivers/mmc/host/sdhci-xenon-phy.c
-> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
-> @@ -108,6 +108,7 @@
->  
->  #define XENON_EMMC_5_0_PHY_LOGIC_TIMING_ADJUST	\
->  	(XENON_EMMC_5_0_PHY_REG_BASE + 0x14)
-> +#define XENON_EMMC_5_0_PHY_LOGIC_TIMING_VALUE	0x5A54
->  #define XENON_EMMC_PHY_LOGIC_TIMING_ADJUST	(XENON_EMMC_PHY_REG_BASE + 0x18)
->  #define XENON_LOGIC_TIMING_VALUE		0x00AA8977
->  
-> @@ -130,6 +131,8 @@ struct xenon_emmc_phy_regs {
->  	u16 logic_timing_adj;
->  	/* DLL Update Enable bit */
->  	u32 dll_update;
-> +	/* value in Logic Timing Adjustment register */
-> +	u32 logic_timing_val;
->  };
->  
->  static const char * const phy_types[] = {
-> @@ -166,6 +169,7 @@ static struct xenon_emmc_phy_regs xenon_emmc_5_0_phy_regs = {
->  	.dll_ctrl	= XENON_EMMC_5_0_PHY_DLL_CONTROL,
->  	.logic_timing_adj = XENON_EMMC_5_0_PHY_LOGIC_TIMING_ADJUST,
->  	.dll_update	= XENON_DLL_UPDATE_STROBE_5_0,
-> +	.logic_timing_val = XENON_EMMC_5_0_PHY_LOGIC_TIMING_VALUE,
->  };
->  
->  static struct xenon_emmc_phy_regs xenon_emmc_5_1_phy_regs = {
-> @@ -176,6 +180,7 @@ static struct xenon_emmc_phy_regs xenon_emmc_5_1_phy_regs = {
->  	.dll_ctrl	= XENON_EMMC_PHY_DLL_CONTROL,
->  	.logic_timing_adj = XENON_EMMC_PHY_LOGIC_TIMING_ADJUST,
->  	.dll_update	= XENON_DLL_UPDATE,
-> +	.logic_timing_val = XENON_LOGIC_TIMING_VALUE,
->  };
->  
->  /*
-> @@ -607,7 +612,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
->  
->  	if (timing == MMC_TIMING_MMC_HS400)
->  		/* Hardware team recommend a value for HS400 */
-> -		sdhci_writel(host, XENON_LOGIC_TIMING_VALUE,
-> +		sdhci_writel(host, phy_regs->logic_timing_val,
->  			     phy_regs->logic_timing_adj);
->  	else
->  		xenon_emmc_phy_disable_data_strobe(host);
-> 
+Kind regards
+Uffe
 
+>
+>>
+>> However, at first glance it seems very reasonable to make the core to
+>> help with cd wakeup irqs.
+>>
+>> Related topic: I have a plan of avoiding the mmc_pm_notify() to punt a
+>> work at resume, in case the host has enabled cd wakeup irqs. The
+>> reason is that we are sometimes resuming removable cards, just to find
+>> out that those are still there. I would be interesting to know how
+>> $subject change can help with this as well. I intend to keep this in
+>> mind while I review this, just so you know. :-)
+>>
+>> Kind regards
+>> Uffe
+>>
+>>>
+>>>> ---
+>>>>  drivers/mmc/core/core.c       |  5 ++++-
+>>>>  drivers/mmc/core/slot-gpio.c  | 12 ++++++++++++
+>>>>  include/linux/mmc/host.h      |  1 +
+>>>>  include/linux/mmc/slot-gpio.h |  1 +
+>>>>  4 files changed, 18 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>> index 0bb39795d484..6987976252ad 100644
+>>>> --- a/drivers/mmc/core/core.c
+>>>> +++ b/drivers/mmc/core/core.c
+>>>> @@ -2828,8 +2828,11 @@ void mmc_stop_host(struct mmc_host *host)
+>>>>       host->removed = 1;
+>>>>       spin_unlock_irqrestore(&host->lock, flags);
+>>>>  #endif
+>>>> -     if (host->slot.cd_irq >= 0)
+>>>> +     if (host->slot.cd_irq >= 0) {
+>>>> +             if (host->slot.cd_wake_enabled)
+>>>> +                     disable_irq_wake(host->slot.cd_irq);
+>>>>               disable_irq(host->slot.cd_irq);
+>>>> +     }
+>>>>
+>>>>       host->rescan_disable = 1;
+>>>>       cancel_delayed_work_sync(&host->detect);
+>>>> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+>>>> index a8450a8701e4..56e4edb9e63a 100644
+>>>> --- a/drivers/mmc/core/slot-gpio.c
+>>>> +++ b/drivers/mmc/core/slot-gpio.c
+>>>> @@ -25,6 +25,7 @@ struct mmc_gpio {
+>>>>       struct gpio_desc *cd_gpio;
+>>>>       bool override_ro_active_level;
+>>>>       bool override_cd_active_level;
+>>>> +     bool cd_wake;
+>>>>       irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+>>>>       char *ro_label;
+>>>>       char cd_label[0];
+>>>> @@ -118,6 +119,15 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+>>>>  }
+>>>>  EXPORT_SYMBOL(mmc_gpio_request_ro);
+>>>>
+>>>> +void mmc_gpio_cd_enable_wake(struct mmc_host *host)
+>>>> +{
+>>>> +     struct mmc_gpio *ctx = host->slot.handler_priv;
+>>>> +
+>>>> +     if (ctx && ctx->cd_gpio)
+>>>> +             ctx->cd_wake = true;
+>>>> +}
+>>>> +EXPORT_SYMBOL(mmc_gpio_cd_enable_wake);
+>>>> +
+>>>>  void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+>>>>  {
+>>>>       struct mmc_gpio *ctx = host->slot.handler_priv;
+>>>> @@ -151,6 +161,8 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+>>>>
+>>>>       if (irq < 0)
+>>>>               host->caps |= MMC_CAP_NEEDS_POLL;
+>>>> +     else if (ctx->cd_wake && !enable_irq_wake(irq))
+>>>> +             host->slot.cd_wake_enabled = true;
+>>>>  }
+>>>>  EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
+>>>>
+>>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>>> index 21385ac0c9b1..78c544e296cd 100644
+>>>> --- a/include/linux/mmc/host.h
+>>>> +++ b/include/linux/mmc/host.h
+>>>> @@ -184,6 +184,7 @@ struct mmc_async_req {
+>>>>   */
+>>>>  struct mmc_slot {
+>>>>       int cd_irq;
+>>>> +     bool cd_wake_enabled;
+>>>>       void *handler_priv;
+>>>>  };
+>>>>
+>>>> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+>>>> index 82f0d289f110..6af681d33a53 100644
+>>>> --- a/include/linux/mmc/slot-gpio.h
+>>>> +++ b/include/linux/mmc/slot-gpio.h
+>>>> @@ -33,5 +33,6 @@ void mmc_gpio_set_cd_isr(struct mmc_host *host,
+>>>>                        irqreturn_t (*isr)(int irq, void *dev_id));
+>>>>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>>>>  bool mmc_can_gpio_cd(struct mmc_host *host);
+>>>> +void mmc_gpio_cd_enable_wake(struct mmc_host *host);
+>>>>
+>>>>  #endif
+>>>>
+>>>
+>>
+>
