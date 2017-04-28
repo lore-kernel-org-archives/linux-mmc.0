@@ -1,80 +1,85 @@
-From: Hu Ziji <huziji@marvell.com>
-Subject: [PATCH -next 2/2] mmc: sdhci-xenon: Fix the default value of
- LOGIC_TIMING_ADJUST register in eMMC 5.0 PHY
-Date: Fri, 28 Apr 2017 10:35:15 +0800
-Message-ID: <50ac97be8a5696487750791f231ab2606eb800bb.1493275842.git.huziji@marvell.com>
-References: <cover.1493275841.git.huziji@marvell.com>
+From: Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>
+Subject: Re: [PATCH v2 07/21] crypto: shash, caam: Make use of the new sg_map
+ helper function
+Date: Fri, 28 Apr 2017 14:30:39 +0800
+Message-ID: <20170428063039.GB6817@gondor.apana.org.au>
+References: <1493144468-22493-1-git-send-email-logang@deltatee.com>
+ <1493144468-22493-8-git-send-email-logang@deltatee.com>
+ <20170427035603.GA32212@gondor.apana.org.au>
+ <94123cbf-3287-f05e-7267-0bcf08ab0a8b@deltatee.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:56237 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1031447AbdD1ChJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Apr 2017 22:37:09 -0400
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <cover.1493275841.git.huziji@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <94123cbf-3287-f05e-7267-0bcf08ab0a8b-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <https://lists.01.org/mailman/options/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/linux-nvdimm/>
+List-Post: <mailto:linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+List-Help: <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/linux-nvdimm>,
+ <mailto:linux-nvdimm-request-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org?subject=subscribe>
+Errors-To: linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Sender: "Linux-nvdimm" <linux-nvdimm-bounces-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org>
+To: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
+Cc: dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, dm-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, target-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, "James E.J. Bottomley" <jejb-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org, linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sumit Semwal <sumit.semwal-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, open-iscsi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, intel-gfx-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, sparmaintainer-GLv8BlqOqDDQT0dZR+AlfA@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, megaraidlinux.pdl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, "Martin K. Petersen" <martin.petersen-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Wilcox <mawilcox-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, dougj@marvell.com, jszhang@marvell.com, nadavh@marvell.com, ygao@marvell.com, xigu@marvell.com, liuw@marvell.com, dingwei@marvell.com, huziji@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, zjwu@marvell.com
 
-The default value of LOGIC_TIMING_ADJUST register in eMMC 5.0 PHY
-is different from that in eMMC 5.1 PHY.
-Set the specific value for that register in eMMC 5.0 PHY.
+On Thu, Apr 27, 2017 at 09:45:57AM -0600, Logan Gunthorpe wrote:
+> 
+> 
+> On 26/04/17 09:56 PM, Herbert Xu wrote:
+> > On Tue, Apr 25, 2017 at 12:20:54PM -0600, Logan Gunthorpe wrote:
+> >> Very straightforward conversion to the new function in the caam driver
+> >> and shash library.
+> >>
+> >> Signed-off-by: Logan Gunthorpe <logang-OTvnGxWRz7hWk0Htik3J/w@public.gmane.org>
+> >> Cc: Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>
+> >> Cc: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
+> >> ---
+> >>  crypto/shash.c                | 9 ++++++---
+> >>  drivers/crypto/caam/caamalg.c | 8 +++-----
+> >>  2 files changed, 9 insertions(+), 8 deletions(-)
+> >>
+> >> diff --git a/crypto/shash.c b/crypto/shash.c
+> >> index 5e31c8d..5914881 100644
+> >> --- a/crypto/shash.c
+> >> +++ b/crypto/shash.c
+> >> @@ -283,10 +283,13 @@ int shash_ahash_digest(struct ahash_request *req, struct shash_desc *desc)
+> >>  	if (nbytes < min(sg->length, ((unsigned int)(PAGE_SIZE)) - offset)) {
+> >>  		void *data;
+> >>  
+> >> -		data = kmap_atomic(sg_page(sg));
+> >> -		err = crypto_shash_digest(desc, data + offset, nbytes,
+> >> +		data = sg_map(sg, 0, SG_KMAP_ATOMIC);
+> >> +		if (IS_ERR(data))
+> >> +			return PTR_ERR(data);
+> >> +
+> >> +		err = crypto_shash_digest(desc, data, nbytes,
+> >>  					  req->result);
+> >> -		kunmap_atomic(data);
+> >> +		sg_unmap(sg, data, 0, SG_KMAP_ATOMIC);
+> >>  		crypto_yield(desc->flags);
+> >>  	} else
+> >>  		err = crypto_shash_init(desc) ?:
+> > 
+> > Nack.  This is an optimisation for the special case of a single
+> > SG list entry.  In fact in the common case the kmap_atomic should
+> > disappear altogether in the no-highmem case.  So replacing it
+> > with sg_map is not acceptable.
+> 
+> What you seem to have missed is that sg_map is just a thin wrapper
+> around kmap_atomic. Perhaps with a future check for a mappable page.
+> This change should have zero impact on performance.
 
-Signed-off-by: Hu Ziji <huziji@marvell.com>
-Reported-by: Jisheng Zhang <jszhang@marvell.com>
-Tested-by: Jisheng Zhang <jszhang@marvell.com>
----
- drivers/mmc/host/sdhci-xenon-phy.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+You are right.  Indeed the existing code looks buggy as they
+don't take sg->offset into account when doing the kmap.  Could
+you send me some patches that fix these problems first so that
+they can be easily backported?
 
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index 4bdbcd3..31d08cf 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -108,6 +108,7 @@
- 
- #define XENON_EMMC_5_0_PHY_LOGIC_TIMING_ADJUST	\
- 	(XENON_EMMC_5_0_PHY_REG_BASE + 0x14)
-+#define XENON_EMMC_5_0_PHY_LOGIC_TIMING_VALUE	0x5A54
- #define XENON_EMMC_PHY_LOGIC_TIMING_ADJUST	(XENON_EMMC_PHY_REG_BASE + 0x18)
- #define XENON_LOGIC_TIMING_VALUE		0x00AA8977
- 
-@@ -130,6 +131,8 @@ struct xenon_emmc_phy_regs {
- 	u16 logic_timing_adj;
- 	/* DLL Update Enable bit */
- 	u32 dll_update;
-+	/* value in Logic Timing Adjustment register */
-+	u32 logic_timing_val;
- };
- 
- static const char * const phy_types[] = {
-@@ -166,6 +169,7 @@ static struct xenon_emmc_phy_regs xenon_emmc_5_0_phy_regs = {
- 	.dll_ctrl	= XENON_EMMC_5_0_PHY_DLL_CONTROL,
- 	.logic_timing_adj = XENON_EMMC_5_0_PHY_LOGIC_TIMING_ADJUST,
- 	.dll_update	= XENON_DLL_UPDATE_STROBE_5_0,
-+	.logic_timing_val = XENON_EMMC_5_0_PHY_LOGIC_TIMING_VALUE,
- };
- 
- static struct xenon_emmc_phy_regs xenon_emmc_5_1_phy_regs = {
-@@ -176,6 +180,7 @@ static struct xenon_emmc_phy_regs xenon_emmc_5_1_phy_regs = {
- 	.dll_ctrl	= XENON_EMMC_PHY_DLL_CONTROL,
- 	.logic_timing_adj = XENON_EMMC_PHY_LOGIC_TIMING_ADJUST,
- 	.dll_update	= XENON_DLL_UPDATE,
-+	.logic_timing_val = XENON_LOGIC_TIMING_VALUE,
- };
- 
- /*
-@@ -607,7 +612,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
- 
- 	if (timing == MMC_TIMING_MMC_HS400)
- 		/* Hardware team recommend a value for HS400 */
--		sdhci_writel(host, XENON_LOGIC_TIMING_VALUE,
-+		sdhci_writel(host, phy_regs->logic_timing_val,
- 			     phy_regs->logic_timing_adj);
- 	else
- 		xenon_emmc_phy_disable_data_strobe(host);
+Thanks,
 -- 
-2.7.4
-
+Email: Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>
+Home Page: http://gondor.apana.org.au/~herbert/
+PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
