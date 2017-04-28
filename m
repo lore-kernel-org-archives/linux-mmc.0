@@ -1,140 +1,58 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/2] mmc: slot-gpio: Add support to enable irq wake on
- cd_irq
-Date: Fri, 28 Apr 2017 10:38:13 +0300
-Message-ID: <a0a8df6c-cda6-f291-705a-f25f9c995813@intel.com>
-References: <1492607363-5346-1-git-send-email-adrian.hunter@intel.com>
- <1492607363-5346-2-git-send-email-adrian.hunter@intel.com>
- <c33cc643-0f35-f92f-37b2-62e7ccba0209@intel.com>
- <CAPDyKFpmvk93qn_B-o7+UW7t4JSTm9w=2T=1Mov-iKxfCADz=Q@mail.gmail.com>
+Subject: Re: [PATCH -next 1/2] mmc: sdhci-xenon: Fix the work flow in
+ xenon_remove().
+Date: Fri, 28 Apr 2017 10:45:11 +0300
+Message-ID: <cc1a2b96-a9cb-f6d0-298d-1e598213454b@intel.com>
+References: <cover.1493275841.git.huziji@marvell.com>
+ <e05202317167dc118edd6e2404b3eebc03de57bb.1493275842.git.huziji@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:40953 "EHLO mga01.intel.com"
+Received: from mga05.intel.com ([192.55.52.43]:28053 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755022AbdD1Hn6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 28 Apr 2017 03:43:58 -0400
-In-Reply-To: <CAPDyKFpmvk93qn_B-o7+UW7t4JSTm9w=2T=1Mov-iKxfCADz=Q@mail.gmail.com>
+        id S1753066AbdD1Hu6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 28 Apr 2017 03:50:58 -0400
+In-Reply-To: <e05202317167dc118edd6e2404b3eebc03de57bb.1493275842.git.huziji@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Hu Ziji <huziji@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, dougj@marvell.com, jszhang@marvell.com, nadavh@marvell.com, ygao@marvell.com, xigu@marvell.com, liuw@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, zjwu@marvell.com
 
-On 25/04/17 23:02, Ulf Hansson wrote:
-> On 25 April 2017 at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 19/04/17 16:09, Adrian Hunter wrote:
->>> Add mmc_gpio_cd_enable_wake() to allow drivers to enable irq wake on the
->>> card detect irq.
->>>
->>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> Any comments on this?
+On 28/04/17 05:34, Hu Ziji wrote:
+> sdhci_remove_host() might execute SOFT_RESET_ALL.
+> Inside xenon_remove(), Xenon SDHC should be enabled during
+> sdhci_remove_host().
 > 
-> Not yet. I need some more thinking about this.
+> Move xenon_sdhc_unprepare after sdhci_remove_host() such that Xenon
+> SDHC is disabled after sdhci_remove_host() completes.
+> 
+> Signed-off-by: Hu Ziji <huziji@marvell.com>
+> Reported-by: Jisheng Zhang <jszhang@marvell.com>
+> Tested-by: Jisheng Zhang <jszhang@marvell.com>
 
-How is the thinking going ;-)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
+> ---
+>  drivers/mmc/host/sdhci-xenon.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> However, at first glance it seems very reasonable to make the core to
-> help with cd wakeup irqs.
-> 
-> Related topic: I have a plan of avoiding the mmc_pm_notify() to punt a
-> work at resume, in case the host has enabled cd wakeup irqs. The
-> reason is that we are sometimes resuming removable cards, just to find
-> out that those are still there. I would be interesting to know how
-> $subject change can help with this as well. I intend to keep this in
-> mind while I review this, just so you know. :-)
-> 
-> Kind regards
-> Uffe
-> 
->>
->>> ---
->>>  drivers/mmc/core/core.c       |  5 ++++-
->>>  drivers/mmc/core/slot-gpio.c  | 12 ++++++++++++
->>>  include/linux/mmc/host.h      |  1 +
->>>  include/linux/mmc/slot-gpio.h |  1 +
->>>  4 files changed, 18 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 0bb39795d484..6987976252ad 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -2828,8 +2828,11 @@ void mmc_stop_host(struct mmc_host *host)
->>>       host->removed = 1;
->>>       spin_unlock_irqrestore(&host->lock, flags);
->>>  #endif
->>> -     if (host->slot.cd_irq >= 0)
->>> +     if (host->slot.cd_irq >= 0) {
->>> +             if (host->slot.cd_wake_enabled)
->>> +                     disable_irq_wake(host->slot.cd_irq);
->>>               disable_irq(host->slot.cd_irq);
->>> +     }
->>>
->>>       host->rescan_disable = 1;
->>>       cancel_delayed_work_sync(&host->detect);
->>> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
->>> index a8450a8701e4..56e4edb9e63a 100644
->>> --- a/drivers/mmc/core/slot-gpio.c
->>> +++ b/drivers/mmc/core/slot-gpio.c
->>> @@ -25,6 +25,7 @@ struct mmc_gpio {
->>>       struct gpio_desc *cd_gpio;
->>>       bool override_ro_active_level;
->>>       bool override_cd_active_level;
->>> +     bool cd_wake;
->>>       irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
->>>       char *ro_label;
->>>       char cd_label[0];
->>> @@ -118,6 +119,15 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
->>>  }
->>>  EXPORT_SYMBOL(mmc_gpio_request_ro);
->>>
->>> +void mmc_gpio_cd_enable_wake(struct mmc_host *host)
->>> +{
->>> +     struct mmc_gpio *ctx = host->slot.handler_priv;
->>> +
->>> +     if (ctx && ctx->cd_gpio)
->>> +             ctx->cd_wake = true;
->>> +}
->>> +EXPORT_SYMBOL(mmc_gpio_cd_enable_wake);
->>> +
->>>  void mmc_gpiod_request_cd_irq(struct mmc_host *host)
->>>  {
->>>       struct mmc_gpio *ctx = host->slot.handler_priv;
->>> @@ -151,6 +161,8 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
->>>
->>>       if (irq < 0)
->>>               host->caps |= MMC_CAP_NEEDS_POLL;
->>> +     else if (ctx->cd_wake && !enable_irq_wake(irq))
->>> +             host->slot.cd_wake_enabled = true;
->>>  }
->>>  EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
->>>
->>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>> index 21385ac0c9b1..78c544e296cd 100644
->>> --- a/include/linux/mmc/host.h
->>> +++ b/include/linux/mmc/host.h
->>> @@ -184,6 +184,7 @@ struct mmc_async_req {
->>>   */
->>>  struct mmc_slot {
->>>       int cd_irq;
->>> +     bool cd_wake_enabled;
->>>       void *handler_priv;
->>>  };
->>>
->>> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
->>> index 82f0d289f110..6af681d33a53 100644
->>> --- a/include/linux/mmc/slot-gpio.h
->>> +++ b/include/linux/mmc/slot-gpio.h
->>> @@ -33,5 +33,6 @@ void mmc_gpio_set_cd_isr(struct mmc_host *host,
->>>                        irqreturn_t (*isr)(int irq, void *dev_id));
->>>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
->>>  bool mmc_can_gpio_cd(struct mmc_host *host);
->>> +void mmc_gpio_cd_enable_wake(struct mmc_host *host);
->>>
->>>  #endif
->>>
->>
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index 3b82a0b..786c3ed 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -514,10 +514,10 @@ static int xenon_remove(struct platform_device *pdev)
+>  
+>  	xenon_clean_phy(host);
+>  
+> -	xenon_sdhc_unprepare(host);
+> -
+>  	sdhci_remove_host(host, 0);
+>  
+> +	xenon_sdhc_unprepare(host);
+> +
+>  	clk_disable_unprepare(pltfm_host->clk);
+>  
+>  	sdhci_pltfm_free(pdev);
 > 
 
