@@ -1,49 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH -next 0/2] Two issue fixes of Xenon SDHCI
-Date: Fri, 28 Apr 2017 12:36:56 +0200
-Message-ID: <CAPDyKFq_niVea0Nf1YB1eAV3Ei3N82VKnfHrVNdJaezhRdYkZw@mail.gmail.com>
-References: <cover.1493275841.git.huziji@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: limit SD clock for ls1012a/ls1046a
+Date: Fri, 28 Apr 2017 12:37:02 +0200
+Message-ID: <CAPDyKFqVm=tkOL+jo_V+m=z+wqM+XT-gOGCpRO8QfzrE3=AV2A@mail.gmail.com>
+References: <1492671509-22044-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:36772 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2992703AbdD1Kg6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 06:36:58 -0400
-Received: by mail-qt0-f181.google.com with SMTP id g60so46736199qtd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 03:36:57 -0700 (PDT)
-In-Reply-To: <cover.1493275841.git.huziji@marvell.com>
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:34553 "EHLO
+        mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2992703AbdD1KhD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 06:37:03 -0400
+Received: by mail-qt0-f176.google.com with SMTP id c45so46642522qtb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 03:37:03 -0700 (PDT)
+In-Reply-To: <1492671509-22044-1-git-send-email-yangbo.lu@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hu Ziji <huziji@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Doug Jones <dougj@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Ryan Gao <ygao@marvell.com>, Victor Gu <xigu@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, zjwu@marvell.com
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 
-On 28 April 2017 at 04:34, Hu Ziji <huziji@marvell.com> wrote:
-> Hi Ulf,
+On 20 April 2017 at 08:58, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> The ls1046a datasheet specified that the max SD clock frequency
+> for eSDHC SDR104/HS200 was 167MHz, and the ls1012a datasheet
+> specified it's 125MHz for ls1012a. So this patch is to add the
+> limitation.
 >
->    Could you please help review the two fixes of Xenon SDHCI?
->    Patch 1 fixes the remove flow of Xenon SDHCI.
->    Patch 2 fixes a default value in PHY register.
->
->    Thank you.
->
-> Best regards,
-> Hu Ziji
->
-> Hu Ziji (2):
->   mmc: sdhci-xenon: Fix the work flow in xenon_remove().
->   mmc: sdhci-xenon: Fix the default value of LOGIC_TIMING_ADJUST
->     register in eMMC 5.0 PHY
->
->  drivers/mmc/host/sdhci-xenon-phy.c | 7 ++++++-
->  drivers/mmc/host/sdhci-xenon.c     | 4 ++--
->  2 files changed, 8 insertions(+), 3 deletions(-)
->
-> --
-> 2.7.4
->
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 49ac197..57966ef 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -456,6 +456,20 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+>         if (esdhc->vendor_ver < VENDOR_V_23)
+>                 pre_div = 2;
+>
+> +       /*
+> +        * Limit SD clock to 167MHz for ls1046a according to its datasheet
+> +        */
+> +       if (clock > 167000000 &&
+> +           of_find_compatible_node(NULL, NULL, "fsl,ls1046a-esdhc"))
+> +               clock = 167000000;
+> +
+> +       /*
+> +        * Limit SD clock to 125MHz for ls1012a according to its datasheet
+> +        */
+> +       if (clock > 125000000 &&
+> +           of_find_compatible_node(NULL, NULL, "fsl,ls1012a-esdhc"))
+> +               clock = 125000000;
+> +
+>         /* Workaround to reduce the clock frequency for p1010 esdhc */
+>         if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
+>                 if (clock > 20000000)
+> --
+> 2.1.0.27.g96db324
+>
