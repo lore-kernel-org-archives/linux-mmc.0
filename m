@@ -1,71 +1,57 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: poll ESDHC_CLOCK_STABLE bit with udelay
-Date: Fri, 28 Apr 2017 14:53:57 +0200
-Message-ID: <CAPDyKFpq-i1WsO1oRVED+QXq0L0xWok_mgCYhHfancrhbc9=kw@mail.gmail.com>
-References: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] dt-bindings: rockchip-dw-mshc: add optional
+ rockchip,default-num-phases
+Date: Fri, 28 Apr 2017 08:34:03 -0500
+Message-ID: <20170428133403.mmdvtp3ohff6v7gh@rob-hp-laptop>
+References: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com>
+ <1492592434-81312-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f182.google.com ([209.85.216.182]:35716 "EHLO
-        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2993785AbdD1MyE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Apr 2017 08:54:04 -0400
-Received: by mail-qt0-f182.google.com with SMTP id y33so49041849qta.2
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Apr 2017 05:54:04 -0700 (PDT)
-In-Reply-To: <1493174749-31003-1-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1492592434-81312-2-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 
-On 26 April 2017 at 04:45, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> The loop to poll ESDHC_CLOCK_STABLE bit with mdelay would waste time
-> because the time to stabilize is much less than 1 ms. This patch is
-> to use udelay instead to avoid time wasting.
->
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
+On Wed, Apr 19, 2017 at 05:00:33PM +0800, Shawn Lin wrote:
+> By default, dw_mmc-rockchip will execute tuning for each degree.
+> So we won't miss every point of the good sample windows. However,
+> probably the phases are linear inside the good sample window.
+> Actually we don't need to do tuning for each degree so that we could
+> save some time, for instance, probe the driver or resume from S3.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 9 ++++-----
->  1 file changed, 4 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 7518360..77dfc59 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -445,7 +445,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->         struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
->         int pre_div = 1;
->         int div = 1;
-> -       u32 timeout;
-> +       ktime_t timeout;
->         u32 temp;
->
->         host->mmc->actual_clock = 0;
-> @@ -489,15 +489,14 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->         sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
->
->         /* Wait max 20 ms */
-> -       timeout = 20;
-> +       timeout = ktime_add_ms(ktime_get(), 20);
->         while (!(sdhci_readl(host, ESDHC_PRSSTAT) & ESDHC_CLOCK_STABLE)) {
-> -               if (timeout == 0) {
-> +               if (ktime_after(ktime_get(), timeout)) {
->                         pr_err("%s: Internal clock never stabilised.\n",
->                                 mmc_hostname(host->mmc));
->                         return;
->                 }
-> -               timeout--;
-> -               mdelay(1);
-> +               udelay(10);
->         }
->
->         temp |= ESDHC_CLOCK_SDCLKEN;
-> --
-> 2.1.0.27.g96db324
->
+> 
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index 520d61d..ea47ec0 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -31,6 +31,10 @@ Optional Properties:
+>    probing, low speeds or in case where all phases work at tuning time.
+>    If not specified 0 deg will be used.
+>  
+> +* rockchip,default-num-phases: The default number of times that the host
+> +  execute tuning when needed. If not specified, the host will do tuning
+> +  for 360 times, namely tuning for each degree.
+
+How is it default when you specify it? I would think default here is 
+360.
+
+Should this be common?
+
+Rob
