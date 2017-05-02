@@ -1,69 +1,55 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC 1/5] mmc: renesas-sdhi, tmio: make dma more modular
-Date: Tue, 2 May 2017 15:03:11 +0200
-Message-ID: <20170502130311.GA3518@verge.net.au>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH/RFC 2/5] mmc: tmio: rename tmio_mmc_{pio => core}.c
+Date: Tue, 2 May 2017 15:11:32 +0200
+Message-ID: <20170502131132.gqg4uem2boborohm@ninjato>
 References: <1493723743-22821-1-git-send-email-horms+renesas@verge.net.au>
- <1493723743-22821-2-git-send-email-horms+renesas@verge.net.au>
- <CAK8P3a2RDm-ithQizfrZotFWkg9N8mrw-723jt7A=V7f-oKJQw@mail.gmail.com>
- <20170502125721.GA3160@verge.net.au>
+ <1493723743-22821-3-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="vctmhwfm3w5vqsmh"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:58168 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751015AbdEBNDR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 May 2017 09:03:17 -0400
+Received: from sauhun.de ([88.99.104.3]:54206 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750740AbdEBNLg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 May 2017 09:11:36 -0400
 Content-Disposition: inline
-In-Reply-To: <20170502125721.GA3160@verge.net.au>
+In-Reply-To: <1493723743-22821-3-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On Tue, May 02, 2017 at 02:57:23PM +0200, Simon Horman wrote:
-> On Tue, May 02, 2017 at 02:01:28PM +0200, Arnd Bergmann wrote:
-> > On Tue, May 2, 2017 at 1:15 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
-> > 
-> > > @@ -202,6 +214,15 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
-> > >  void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
-> > >  irqreturn_t tmio_mmc_irq(int irq, void *devid);
-> > >
-> > > +#if IS_ENABLED(CONFIG_MMC_SDHI)
-> > > +const struct tmio_mmc_dma_ops *tmio_mmc_get_dma_ops(void);
-> > > +#else
-> > > +static inline const struct tmio_mmc_dma_ops *tmio_mmc_get_dma_ops(void)
-> > > +{
-> > > +       return NULL;
-> > > +}
-> > > +#endif
-> > > +
-> > >  static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
-> > >                                          unsigned long *flags)
-> > >  {
-> > 
-> > Here you return a NULL pointer for the operations structure
-> > 
-> > > +
-> > > +static inline void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
-> > > +{
-> > > +       if (host->dma_ops->enable)
-> > > +               host->dma_ops->enable(host, enable);
-> > > +}
-> > >
-> > 
-> > And here you check the ->enable callback but not the dma_ops pointer.
-> > In the other callbacks you check the dma_ops pointer but not the callback.
-> > Is that intentional? Maybe always check the dma_ops pointer first for
-> > consistency, as a NULL operations structure (resulting from a future bug)
-> > might lead running user space with kernel privileges.
-> 
-> Thanks for noticing.
-> 
-> I resolved that problem but it seems to have crept back in again.
-> I'll check to see how that happened.
 
-I take back my comment above - I fixed a different problem and it looks
-like I sent out the latest local patches (phew!).
+--vctmhwfm3w5vqsmh
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Regardless, I'll look into the problem you mention with a view to fixing it
-in v2.
+
+> - * linux/drivers/mmc/host/tmio_mmc_pio.c
+> + * linux/drivers/mmc/host/tmio_mmc_core.c
+
+I think we should drop the filenames here (and in other places)  and use
+a human readable string instead?
+
+
+--vctmhwfm3w5vqsmh
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlkIhYAACgkQFA3kzBSg
+KbYSHBAAkGJ3xIafhSA9NngJ6dPiYmrbO2JEmkf9mguVRo27CH529qBQQuXEDVsM
+om5yyIXzTeen4fGp65dC0OpnXpj/1qGgKCj+cR+CYXWv9Hfc5Sk4HJMyAX9/FiJk
+dvWUwPwvLoLJqOCiCp5jHj8jpz/W06TjfOgG+ivoGT770Z9EnNUljxysvmq6p5Ve
+KZ4py5u/Swqf4eDiTmTktacsTHxRfJwan3jnPV37+3sTIZEKWGZ16gkvs20Q4FFK
+oIzhzY23LP4MNj/Ng9VNLYYARTP4teRh5ks0Es7IJllYDRXfPFg0kRbKUEuIBJ1n
+V029jecOjoQaj/hnmDhcTmn+i8JuyRB0UdYwbAjTU/tL/YB+ifvkiQN9xNQ3tp+0
+WxHw2UdWw7njoDiCQKYDx4cYWRiaVOy0gidz27rhy/RNt9hduQwuaN0/Q4//FlFL
+AGZeKNbwNvINGBerj+/XJDv6bIKmix+yxDIbAi5GV7nQsCh+tJS3j3NdvK/y+b1W
+LxAv7BCv0mIx1Uc4M7+QB2KM9aZQRbWMTLRby1f2jxnXBUtwHyBA0DbkV16WGhup
+J+yL3uNPkZn1A4OdjmtSfGeedoSHn0V9ngE6J3r3bjM0H5sMWIa4iuVtbfmJ6x3U
+FggBYOJ59ZXIZjC7C6mfDdQRk601lY4ATfIjCeh2d46vsp5UCbg=
+=IbHR
+-----END PGP SIGNATURE-----
+
+--vctmhwfm3w5vqsmh--
