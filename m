@@ -1,147 +1,57 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc-rockchip: parse
- rockchip,default-num-phases from DT
-Date: Tue, 2 May 2017 14:58:10 +0800
-Message-ID: <da486fac-e37a-c249-7400-8efa73c08505@rock-chips.com>
+Subject: Re: [PATCH 1/2] dt-bindings: rockchip-dw-mshc: add optional
+ rockchip,default-num-phases
+Date: Tue, 2 May 2017 15:03:03 +0800
+Message-ID: <8785b011-cec6-1556-5c96-a462182e8d85@rock-chips.com>
 References: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com>
- <1492592434-81312-3-git-send-email-shawn.lin@rock-chips.com>
- <CAD=FV=X6PRe1u+s4Nnt=9gJD2T4=YyLdMWnKe5rZg2KgWGNAvg@mail.gmail.com>
- <58609a89-3413-3383-4bd5-271868500f7d@rock-chips.com>
- <CAD=FV=Uyqvzg5H+Mg5RtQAWiCxVARx7uB4jxPe=2fcSmJQoOjw@mail.gmail.com>
+ <1492592434-81312-2-git-send-email-shawn.lin@rock-chips.com>
+ <20170428133403.mmdvtp3ohff6v7gh@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=Uyqvzg5H+Mg5RtQAWiCxVARx7uB4jxPe=2fcSmJQoOjw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20170428133403.mmdvtp3ohff6v7gh@rob-hp-laptop>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Doug,
-
-在 2017/4/25 0:18, Doug Anderson 写道:
-> Hi,
->
-> On Wed, Apr 19, 2017 at 6:21 PM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
->> Hi Doug,
->>
->> 在 2017/4/20 4:19, Doug Anderson 写道:
->>>
->>> Hi,
->>>
->>> On Wed, Apr 19, 2017 at 2:00 AM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->>> wrote:
->>>>
->>>> Currently we unconditionally do tuning for each degree, which
->>>> costs 900ms for each boot and resume.
->>>>
->>>> May someone argue that this is a question of accuracy VS time. But I
->>>> would say it's a trick of how we need to do decision for our boards.
->>>> If we don't care the time we spend at all, we could definitely do tuning
->>>> for each degree. But when we need to improve the user experience, for
->>>> instance, speed up resuming from S3, we should also have the right to
->>>> do that. This patch add parsing "rockchip,default-num-phases", for folks
->>>> to specify the number of doing tuning. If not specified, 360 will be used
->>>> as before.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->>>>
->>>> ---
->>>>
->>>>  drivers/mmc/host/dw_mmc-rockchip.c | 48
->>>> ++++++++++++++++++++++++--------------
->>>>  1 file changed, 30 insertions(+), 18 deletions(-)
->>>
->>>
->>> No huge objection here, but I do remember we ended up at the 360
->>> phases due to some of the craziness with dw_mmc delay elements on
->>> rk3288.  IIRC one of the big problems was that the delay elements
->>> changed _a lot_ with the "LOGIC" voltage and we tweaked the voltage at
->>> runtime for DDR DVFS.  That imposed an extra need to be very accurate
->>> on that SoC, at least on any board that was designed to support DDR
->>> DVFS.
->>>
->>
->> Not just with the vdd_logic but also with the process of Soc.
->> To better guaratee the accuracy, firstly we use delay element to do
->> tuning and then convert it to be combination of degree + delay element.
->> But as the dalay elements aren't accuracy themself, so all the math we
->> do here is trick.
->
-> Yup.  I brought up the vdd logic specifically because it's something
-> that can make the phases change quite dramatically on the same machine
-> between the time you tuned and the time you used it.
->
->
->>> I also remember there being some weirdness on the Rockchip
->>> implementation where there was a certain set of phases that the MMC
->>> controller was essentially "blind".  This blind spot was in the middle
->>> of an otherwise good range of points.  Unfortunately this blind spot
->>> was somewhat hard to detect properly because it was not very big.
->>> ...the variability of the delay elements meant that there could be big
->>> ranges where we weren't getting any good test coverage, but also the
->>> fact that they changed with the LOGIC voltage might mean that we
->>> weren't in the "blind" spot and then suddenly we were.
->>
->>
->> I undertand all of these as I was suffering from it when bringing up
->> RK3288.
->>
->>>
->>> One other note is that i remember that the vast majority of time spent
->>> tuning was dealing with "bad" phases, not dealing with "good" phases.
->>> If you're looking to speed things up, maybe finding a way to make
->>> "bad" phases fail faster would be wise?  I think one of the reasons
->>> bad phases failed so slowly is because the dw_mmc timeouts are all so
->>> long.
->>
->>
->> Good point. I haven't thought of speeding up the handle of bad phases,
->> but I will take a look at this.
->>
->>>
->>> Oh, and I guess one last note is that I have no idea if folks will
->>> like the device bindings here.  Part of me thinks it should be
->>> something more "symbolic" like "rockchip,need-accurate-tuning" or
->>> something like that.  I guess I'd let the DT experts chime in.
->>>
->>>
->>> So I guess to summarize:
->>> * On rk3288 boards w/ DDR DVFS (or any other similar boards), 360
->>> seems to provide real benefit.
->>> * On other boards, probably you can get by with fewer phases.
->>>
->>
->> I would try to say it's a question of "900ms for a single time" VS.
->> "some of discrete tuning cost for more chance to do retune".
->>
->> (1)We could try to do a more accurate tuning process and spends 900ms.
->> Then we have less chance to do retune later.
->>
->> (2)We do a rough tuning and have more chance to do retune later.
->
-> Ah, interesting point.  I haven't used newer versions of Linux much,
-> but I seem to remember that they will automatically retune sometimes
-> if they see errors.  That makes your strategy a bit more valid.
->
->
->> I also would say that this is a game , and we can't say which
->> one is better. Obvious now the "900ms" alwyas happens in the spot
->> routine, for instance, booting and resuming from S3.
->
-> Is it really 900 ms?  I don't quite remember it being that long, but I
-> could be remembering incorrectly.
-
-I saw the worst case was nearly 900ms. But mostly we need 600ms there.
-
->
-> -Doug
->
->
->
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgUm9iLAoK5ZyoIDIwMTcvNC8yOCAyMTozNCwgUm9iIEhlcnJpbmcg5YaZ6YGTOgo+IE9uIFdl
+ZCwgQXByIDE5LCAyMDE3IGF0IDA1OjAwOjMzUE0gKzA4MDAsIFNoYXduIExpbiB3cm90ZToKPj4g
+QnkgZGVmYXVsdCwgZHdfbW1jLXJvY2tjaGlwIHdpbGwgZXhlY3V0ZSB0dW5pbmcgZm9yIGVhY2gg
+ZGVncmVlLgo+PiBTbyB3ZSB3b24ndCBtaXNzIGV2ZXJ5IHBvaW50IG9mIHRoZSBnb29kIHNhbXBs
+ZSB3aW5kb3dzLiBIb3dldmVyLAo+PiBwcm9iYWJseSB0aGUgcGhhc2VzIGFyZSBsaW5lYXIgaW5z
+aWRlIHRoZSBnb29kIHNhbXBsZSB3aW5kb3cuCj4+IEFjdHVhbGx5IHdlIGRvbid0IG5lZWQgdG8g
+ZG8gdHVuaW5nIGZvciBlYWNoIGRlZ3JlZSBzbyB0aGF0IHdlIGNvdWxkCj4+IHNhdmUgc29tZSB0
+aW1lLCBmb3IgaW5zdGFuY2UsIHByb2JlIHRoZSBkcml2ZXIgb3IgcmVzdW1lIGZyb20gUzMuCj4+
+Cj4+IFNpZ25lZC1vZmYtYnk6IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPgo+
+PiAtLS0KPj4KPj4gIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvcm9ja2No
+aXAtZHctbXNoYy50eHQgfCA0ICsrKysKPj4gIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2VydGlvbnMo
+KykKPj4KPj4gZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
+bWMvcm9ja2NoaXAtZHctbXNoYy50eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGlu
+Z3MvbW1jL3JvY2tjaGlwLWR3LW1zaGMudHh0Cj4+IGluZGV4IDUyMGQ2MWQuLmVhNDdlYzAgMTAw
+NjQ0Cj4+IC0tLSBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvcm9ja2No
+aXAtZHctbXNoYy50eHQKPj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdz
+L21tYy9yb2NrY2hpcC1kdy1tc2hjLnR4dAo+PiBAQCAtMzEsNiArMzEsMTAgQEAgT3B0aW9uYWwg
+UHJvcGVydGllczoKPj4gICAgcHJvYmluZywgbG93IHNwZWVkcyBvciBpbiBjYXNlIHdoZXJlIGFs
+bCBwaGFzZXMgd29yayBhdCB0dW5pbmcgdGltZS4KPj4gICAgSWYgbm90IHNwZWNpZmllZCAwIGRl
+ZyB3aWxsIGJlIHVzZWQuCj4+Cj4+ICsqIHJvY2tjaGlwLGRlZmF1bHQtbnVtLXBoYXNlczogVGhl
+IGRlZmF1bHQgbnVtYmVyIG9mIHRpbWVzIHRoYXQgdGhlIGhvc3QKPj4gKyAgZXhlY3V0ZSB0dW5p
+bmcgd2hlbiBuZWVkZWQuIElmIG5vdCBzcGVjaWZpZWQsIHRoZSBob3N0IHdpbGwgZG8gdHVuaW5n
+Cj4+ICsgIGZvciAzNjAgdGltZXMsIG5hbWVseSB0dW5pbmcgZm9yIGVhY2ggZGVncmVlLgo+Cj4g
+SG93IGlzIGl0IGRlZmF1bHQgd2hlbiB5b3Ugc3BlY2lmeSBpdD8gSSB3b3VsZCB0aGluayBkZWZh
+dWx0IGhlcmUgaXMKPiAzNjAuCj4KCkkgZG9uJ3QgZ2V0IHlvdXIgcG9pbnQgaGVyZS4gRG8geW91
+IG1lYW4gdGhlIG5hbWUsIGRlZmF1bHQtbnVtLXBoYXNlcywKaXNuJ3QgY29ycmVjdCwgc28gSSBu
+ZWVkIGFub3RoZXIgb25lPwoKPiBTaG91bGQgdGhpcyBiZSBjb21tb24/Cj4KPiBSb2IKPgo+Cj4K
+CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1y
+b2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpo
+dHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlw
+Cg==
