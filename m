@@ -1,57 +1,111 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 1/2] dt-bindings: rockchip-dw-mshc: add optional
- rockchip,default-num-phases
-Date: Tue, 2 May 2017 15:03:03 +0800
-Message-ID: <8785b011-cec6-1556-5c96-a462182e8d85@rock-chips.com>
-References: <1492592434-81312-1-git-send-email-shawn.lin@rock-chips.com>
- <1492592434-81312-2-git-send-email-shawn.lin@rock-chips.com>
- <20170428133403.mmdvtp3ohff6v7gh@rob-hp-laptop>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/5] mmc: Improve/fix support for SDIO IRQs
+Date: Tue, 2 May 2017 09:06:06 +0200
+Message-ID: <CAPDyKFrRUveS9BKX7duAFgjyEkDKUueVD4d+9Euf0J3em2U2pQ@mail.gmail.com>
+References: <1492636631-28254-1-git-send-email-ulf.hansson@linaro.org> <CAD=FV=UDq0KUkpohniViFwNFjyT=7hVLz1GYvrw7aLZkoNWG3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20170428133403.mmdvtp3ohff6v7gh@rob-hp-laptop>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:34994 "EHLO
+        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751161AbdEBHGI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 May 2017 03:06:08 -0400
+Received: by mail-qk0-f179.google.com with SMTP id q1so35145400qkd.2
+        for <linux-mmc@vger.kernel.org>; Tue, 02 May 2017 00:06:08 -0700 (PDT)
+In-Reply-To: <CAD=FV=UDq0KUkpohniViFwNFjyT=7hVLz1GYvrw7aLZkoNWG3g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-SGkgUm9iLAoK5ZyoIDIwMTcvNC8yOCAyMTozNCwgUm9iIEhlcnJpbmcg5YaZ6YGTOgo+IE9uIFdl
-ZCwgQXByIDE5LCAyMDE3IGF0IDA1OjAwOjMzUE0gKzA4MDAsIFNoYXduIExpbiB3cm90ZToKPj4g
-QnkgZGVmYXVsdCwgZHdfbW1jLXJvY2tjaGlwIHdpbGwgZXhlY3V0ZSB0dW5pbmcgZm9yIGVhY2gg
-ZGVncmVlLgo+PiBTbyB3ZSB3b24ndCBtaXNzIGV2ZXJ5IHBvaW50IG9mIHRoZSBnb29kIHNhbXBs
-ZSB3aW5kb3dzLiBIb3dldmVyLAo+PiBwcm9iYWJseSB0aGUgcGhhc2VzIGFyZSBsaW5lYXIgaW5z
-aWRlIHRoZSBnb29kIHNhbXBsZSB3aW5kb3cuCj4+IEFjdHVhbGx5IHdlIGRvbid0IG5lZWQgdG8g
-ZG8gdHVuaW5nIGZvciBlYWNoIGRlZ3JlZSBzbyB0aGF0IHdlIGNvdWxkCj4+IHNhdmUgc29tZSB0
-aW1lLCBmb3IgaW5zdGFuY2UsIHByb2JlIHRoZSBkcml2ZXIgb3IgcmVzdW1lIGZyb20gUzMuCj4+
-Cj4+IFNpZ25lZC1vZmYtYnk6IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPgo+
-PiAtLS0KPj4KPj4gIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvcm9ja2No
-aXAtZHctbXNoYy50eHQgfCA0ICsrKysKPj4gIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2VydGlvbnMo
-KykKPj4KPj4gZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
-bWMvcm9ja2NoaXAtZHctbXNoYy50eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGlu
-Z3MvbW1jL3JvY2tjaGlwLWR3LW1zaGMudHh0Cj4+IGluZGV4IDUyMGQ2MWQuLmVhNDdlYzAgMTAw
-NjQ0Cj4+IC0tLSBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvcm9ja2No
-aXAtZHctbXNoYy50eHQKPj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdz
-L21tYy9yb2NrY2hpcC1kdy1tc2hjLnR4dAo+PiBAQCAtMzEsNiArMzEsMTAgQEAgT3B0aW9uYWwg
-UHJvcGVydGllczoKPj4gICAgcHJvYmluZywgbG93IHNwZWVkcyBvciBpbiBjYXNlIHdoZXJlIGFs
-bCBwaGFzZXMgd29yayBhdCB0dW5pbmcgdGltZS4KPj4gICAgSWYgbm90IHNwZWNpZmllZCAwIGRl
-ZyB3aWxsIGJlIHVzZWQuCj4+Cj4+ICsqIHJvY2tjaGlwLGRlZmF1bHQtbnVtLXBoYXNlczogVGhl
-IGRlZmF1bHQgbnVtYmVyIG9mIHRpbWVzIHRoYXQgdGhlIGhvc3QKPj4gKyAgZXhlY3V0ZSB0dW5p
-bmcgd2hlbiBuZWVkZWQuIElmIG5vdCBzcGVjaWZpZWQsIHRoZSBob3N0IHdpbGwgZG8gdHVuaW5n
-Cj4+ICsgIGZvciAzNjAgdGltZXMsIG5hbWVseSB0dW5pbmcgZm9yIGVhY2ggZGVncmVlLgo+Cj4g
-SG93IGlzIGl0IGRlZmF1bHQgd2hlbiB5b3Ugc3BlY2lmeSBpdD8gSSB3b3VsZCB0aGluayBkZWZh
-dWx0IGhlcmUgaXMKPiAzNjAuCj4KCkkgZG9uJ3QgZ2V0IHlvdXIgcG9pbnQgaGVyZS4gRG8geW91
-IG1lYW4gdGhlIG5hbWUsIGRlZmF1bHQtbnVtLXBoYXNlcywKaXNuJ3QgY29ycmVjdCwgc28gSSBu
-ZWVkIGFub3RoZXIgb25lPwoKPiBTaG91bGQgdGhpcyBiZSBjb21tb24/Cj4KPiBSb2IKPgo+Cj4K
-CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1y
-b2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpo
-dHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlw
-Cg==
+On 28 April 2017 at 23:26, Doug Anderson <dianders@google.com> wrote:
+> Ulf,
+>
+> On Wed, Apr 19, 2017 at 2:17 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Changes in v2:
+>>         - Folded in a new change, patch 1/5 to fix a race condition while
+>>         processing SDIO IRQs.
+>>         - Fixed review comments provided by Dough.
+>>         - Updated change logs.
+>>         - Small changes to how ->ack_sdio_irq() is being invoked, to simplify
+>>         code.
+>>         - Added a revert patch of the dw_mmc change for runtime PM issues, which
+>>         was a quick fix for stable/fixes.
+>>
+>> Some general description of the series:
+>>
+>> Regressions for SDIO IRQs have been reported for dw_mmc, caused by enabling
+>> runtime PM support for it.
+>>
+>> This series extends and improves the SDIO IRQs support in the core, such that
+>> it better suites the need for dw_mmc, particulary around runtime PM.
+>>
+>> Do note, so far this is only compile tested. I would thus appreciate help in
+>> testing and of course also in reviewing.
+>>
+>>
+>> Ulf Hansson (5):
+>>   mmc: core: Prevent processing SDIO IRQs when none is claimed
+>>   mmc: sdio: Add API to manage SDIO IRQs from a workqueue
+>>   mmc: dw_mmc: Convert to use MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs
+>>   mmc: dw_mmc: Prevent runtime PM suspend when SDIO IRQs are enabled
+>>   Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
+>>
+>>  drivers/mmc/core/host.c     |  2 ++
+>>  drivers/mmc/core/sdio_irq.c | 27 +++++++++++++++++++++++++--
+>>  drivers/mmc/core/sdio_ops.h |  2 ++
+>>  drivers/mmc/host/dw_mmc.c   | 44 ++++++++++++++++++++++++++++++++------------
+>>  include/linux/mmc/host.h    |  3 +++
+>>  5 files changed, 64 insertions(+), 14 deletions(-)
+>
+> On an rk3288-veyron-jerry system (with Marvell WiFi), I applied your
+> series atop v4.11-rc8.  I did basic tests and WiFi seemed to be
+> working OK.  I most certainly didn't stress things out, but doing
+> basic transfers / pings worked.
+
+Great, thanks for testing!
+
+>
+> Oh, but maybe suspend / resume is a bit unhappy?  It's a little hard
+> to tell because it doesn't work 100% reliably (with respect to WiFi)
+> even without your changes, but with your changes it seems to be broken
+> worse.  AKA: i can often get suspend/resume to work without your
+> changes, but I've never seen it work with your changes.  I get errors
+> like:
+>
+> [   36.498454] call ff0f0000.dwmmc+ returned 0 after 5 usecs
+> [   40.210761] Bluetooth: Host sleep enable command failed
+> [   40.216594] Bluetooth: HS not activated, suspend failed!
+> [   40.222537] dpm_run_callback(): pm_generic_suspend+0x0/0x48 returns -16
+> [   40.229923] call mmc1:0001:2+ returned -16 after 4919039 usecs
+> [   40.236442] PM: Device mmc1:0001:2 failed to suspend async: error -16
+> [   45.330750] mwifiex_sdio mmc1:0001:1: mwifiex_cmd_timeout_func:
+> Timeout cmd id = 0x107, act = 0x0
+>
+>
+> It appears that ("mmc: dw_mmc: Convert to use
+> MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs") is the one causing it.
+> It's plausible that dw_mmc is interacting with things in a bad way,
+> though.
+>
+> I probably can't spend another few days debugging this this right now,
+> though.  :(  Anyone else on this thread want to dig?  If not, I might
+> be able to come back to this in a bit...
+
+I understand that this is hard to test, simply because the PM support
+for SDIO in general is fragile/broken. I am work on fixing this as
+well, however let's first fix the behavior for SDIO IRQs. :-)
+
+That said, your report provides me with valuable information. I
+believe the problem is that I naively thought the
+*system_freezable_wq*, would be suitable to manage SDIO IRQ. Of
+course, during suspend the SDIO func driver may decide to send
+commands to quiescence its device and those commands may trigger SDIO
+IRQs. Using the system_freezable_wq, makes those works that becomes
+scheduled to be put on hold.
+
+As simple test can you re-place "system_freezable_wq" with "system_wq"
+in sdio_signal_irq() (drivers/mmc/core/sdio_irq.c)?
+
+Kind regards
+Uffe
