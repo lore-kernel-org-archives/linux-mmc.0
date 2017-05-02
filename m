@@ -1,42 +1,38 @@
-From: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
-Subject: [PATCH] mmc: arasan: Trivial print fix
-Date: Tue, 2 May 2017 15:49:56 +0530
-Message-ID: <1493720396-37592-1-git-send-email-shubhrajyoti.datta@xilinx.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [RFC PATCH 3/6] mmc: tmio: remove outdated comment
+Date: Tue, 2 May 2017 12:21:02 +0200
+Message-ID: <CAMuHMdVsd_ebqCV02Ri9NkU5Vrvb4N89bn+5KFL+rWHEcxPQnA@mail.gmail.com>
+References: <20170501090346.10801-1-wsa+renesas@sang-engineering.com> <20170501090346.10801-4-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0049.outbound.protection.outlook.com ([104.47.38.49]:49504
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750995AbdEBKUI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 May 2017 06:20:08 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170501090346.10801-4-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, michal.simek@xilinx.com, shubhrajyoti.datta@gmail.com, Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
 
-ret is signed however is printed as unsigned fix the same.
-If printed as a negative number the result is easier to read.
-No functional change.
+On Mon, May 1, 2017 at 11:03 AM, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> The obviously wrong comment was added in 2011 with commit df3ef2d3c92c0a
+> ("mmc: protect the tmio_mmc driver against a theoretical race") but
+> already obsoleted half a year later with commit b9269fdd4f61aa ("mmc:
+> tmio: fix recursive spinlock, don't schedule with interrupts disabled").
 
-Signed-off-by: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Fixes: b9269fdd4f61aa ("mmc: tmio: fix recursive spinlock, don't
+schedule with interrupts disabled")
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 1de40e6..77cc68b 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -704,7 +704,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret) {
--		dev_err(&pdev->dev, "parsing dt failed (%u)\n", ret);
-+		dev_err(&pdev->dev, "parsing dt failed (%d)\n", ret);
- 		goto unreg_clk;
- 	}
- 
--- 
-2.7.4
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
