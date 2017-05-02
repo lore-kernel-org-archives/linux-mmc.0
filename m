@@ -1,37 +1,42 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [RFC PATCH 2/6] mmc: tmio: refactor handling mrq
-Date: Tue, 2 May 2017 12:18:47 +0200
-Message-ID: <CAMuHMdWYfmauwb6QLgr168P7Mw9q6ADV-RxhZsrm5a0Actg8Ww@mail.gmail.com>
-References: <20170501090346.10801-1-wsa+renesas@sang-engineering.com> <20170501090346.10801-3-wsa+renesas@sang-engineering.com>
+From: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
+Subject: [PATCH] mmc: arasan: Trivial print fix
+Date: Tue, 2 May 2017 15:49:56 +0530
+Message-ID: <1493720396-37592-1-git-send-email-shubhrajyoti.datta@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:35026 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750955AbdEBKSt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 May 2017 06:18:49 -0400
-In-Reply-To: <20170501090346.10801-3-wsa+renesas@sang-engineering.com>
+Received: from mail-bl2nam02on0049.outbound.protection.outlook.com ([104.47.38.49]:49504
+        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750995AbdEBKUI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 May 2017 06:20:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, michal.simek@xilinx.com, shubhrajyoti.datta@gmail.com, Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
 
-On Mon, May 1, 2017 at 11:03 AM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Split handling mrq into a seperate function. We need to call it from
-> another place soon.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+ret is signed however is printed as unsigned fix the same.
+If printed as a negative number the result is easier to read.
+No functional change.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Shubhrajyoti Datta <shubhrajyoti.datta@xilinx.com>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Gr{oetje,eeting}s,
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 1de40e6..77cc68b 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -704,7 +704,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret) {
+-		dev_err(&pdev->dev, "parsing dt failed (%u)\n", ret);
++		dev_err(&pdev->dev, "parsing dt failed (%d)\n", ret);
+ 		goto unreg_clk;
+ 	}
+ 
+-- 
+2.7.4
 
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
