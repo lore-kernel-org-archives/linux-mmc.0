@@ -1,166 +1,72 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Use macros in pci_ids definition
-Date: Fri, 5 May 2017 09:09:03 +0300
-Message-ID: <a9bec849-7abe-b934-f6c3-cae8e55d3a6e@intel.com>
-References: <1493924158-2577-1-git-send-email-matthiasmartinsson@gmail.com>
- <1493924158-2577-2-git-send-email-matthiasmartinsson@gmail.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH v1] ACPI: Switch to use generic UUID API
+Date: Thu, 4 May 2017 23:20:08 -0700
+Message-ID: <CAPcyv4jzD0MEBRNTwTokVzgdDWas682ArUjRAGT1hp=QRE8Pjg@mail.gmail.com>
+References: <20170504092151.88646-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:62123 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751079AbdEEGOu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 5 May 2017 02:14:50 -0400
-In-Reply-To: <1493924158-2577-2-git-send-email-matthiasmartinsson@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+In-Reply-To: <20170504092151.88646-1-andriy.shevchenko@linux.intel.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: alsa-devel@alsa-project.org, Heikki Krogerus <heikki.krogerus@linux.intel.com>, Liam Girdwood <lgirdwood@gmail.com>, linux-pci@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Adrian Hunter <adrian.hunter@intel.com>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Joerg Roedel <joro@8bytes.org>, Linux ACPI <linux-acpi@vger.kernel.org>, tpmdd-devel@lists.sourceforge.net, Ben Skeggs <bskeggs@redhat.com>, nouveau@lists.freedesktop.org, linux-mmc@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>, Borislav Petkov <bp@suse.de>, Yisen Zhuang <yisen.zhuang@huawei.com>, Mathias Nyman <mathias.nyman@intel.com>, intel-gfx@lists.freedesktop.org, linux-input@vger.kernel.org, Mark Brown <broonie@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Felipe Balbi <balbi@kernel.or>
 List-Id: linux-mmc@vger.kernel.org
-To: Matthias Kraemer <matthiasmartinsson@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 
-On 04/05/17 21:55, Matthias Kraemer wrote:
-> This patch applies the PCI_DEVICE_ macros to specify the pci_ids instead
-> of open-coding them within the sdhci-pci driver.
-> 
-> v2,v3:
-> Suggested-by Adrian Hunter <adrian.hunter@intel.com>
-> Instead of using the generic PCI_ marcos, introduce device specific macros
-> to be able to shorten the table entries even further.
-> 
-> v4:
-> Fix compile-time issue
-
-Thanks, it looks better, although I still have some concerns - see below.
-
-> 
-> Signed-off-by: Matthias Kraemer <matthiasmartinsson@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 619 +++++---------------------------------
->  drivers/mmc/host/sdhci-pci.h      |  41 ++-
->  2 files changed, 111 insertions(+), 549 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 86560d5..d2b6115 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -992,554 +992,77 @@ static const struct sdhci_pci_fixes sdhci_amd = {
->  };
->  
->  static const struct pci_device_id pci_ids[] = {
-> -	{
-> -		.vendor		= PCI_VENDOR_ID_RICOH,
-> -		.device		= PCI_DEVICE_ID_RICOH_R5C822,
-> -		.subvendor	= PCI_ANY_ID,
-> -		.subdevice	= PCI_ANY_ID,
-> -		.driver_data	= (kernel_ulong_t)&sdhci_ricoh,
-> -	},
-> -
-> -	{
-> -		.vendor         = PCI_VENDOR_ID_RICOH,
-> -		.device         = 0x843,
-> -		.subvendor      = PCI_ANY_ID,
-> -		.subdevice      = PCI_ANY_ID,
-> -		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
-> -	},
-> -
-
-<SNIP>
-
-> -	{
-> -		.vendor		= PCI_VENDOR_ID_AMD,
-> -		.device		= PCI_ANY_ID,
-> -		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
-> -		.class_mask	= 0xFFFF00,
-> -		.subvendor	= PCI_ANY_ID,
-> -		.subdevice	= PCI_ANY_ID,
-> -		.driver_data	= (kernel_ulong_t)&sdhci_amd,
-> -	},
-> -	{	/* Generic SD host controller */
-> -		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
-> -	},
-> -
-> +	{SDHCI_PCI_DEVICE(RICOH, RICOH_R5C822, ricoh)},
-> +	{SDHCI_PCI_DEVICE(RICOH, RICOH_0x843, ricoh_mmc)},
-
-<SNIP>
-
-> +	{SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd)},
-> +	/* Generic SD host controller */
-> +	{PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
->  	{ /* end: all zeroes */ },
->  };
->  
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 36f7434..b3485cc 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -2,7 +2,7 @@
->  #define __SDHCI_PCI_H
->  
->  /*
-> - * PCI device IDs
-> + * PCI device IDs, sub IDs
->   */
->  
->  #define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
-> @@ -38,6 +38,45 @@
->  #define PCI_DEVICE_ID_INTEL_GLK_EMMC	0x31cc
->  #define PCI_DEVICE_ID_INTEL_GLK_SDIO	0x31d0
->  
-> +#define PCI_DEVICE_ID_RICOH_0x843	0x843
-> +#define PCI_DEVICE_ID_RICOH_0xe822	0xe822
-> +#define PCI_DEVICE_ID_RICOH_0xe823	0xe823
-> +#define PCI_DEVICE_ID_SYSKONNECT_0x8000	0x8000
-> +#define PCI_DEVICE_ID_VIA_0x95d0	0x95d0
-> +#define PCI_DEVICE_ID_REALTEK_0x5250	0x5250
-> +
-> +#define PCI_DEVICE_ID_INTEL_SUB_0x7884	0x7884
-> +
-> +/*
-> + * PCI device class and mask
-> + */
-> +
-> +#define SYSTEM_SDHCI			(PCI_CLASS_SYSTEM_SDHCI << 8)
-> +#define PCI_CLASS_MASK			0xFFFF00
-> +
-> +/*
-> + * Macros for PCI device-description
-> + */
-> +
-> +#define _PCI_VEND(vend) PCI_VENDOR_ID_##vend
-> +#define _PCI_DEV(dev) PCI_DEVICE_ID_##dev
-
-Without exception, the device is prefixed by the vendor, so this should be:
-
-#define _PCI_DEV(vend, dev) PCI_DEVICE_ID_##vend##_##dev
-
-> +
-> +#define SDHCI_PCI_DEVICE(vend, dev, cfg) \
-> +	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(dev), \
-> +	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
-> +	.driver_data = (kernel_ulong_t)&(sdhci_##cfg)
-
-Still don't understand why you don't put the {} brackets into the macro?
-
-> +
-> +#define SDHCI_PCI_DEVICE_SUB(vend, dev, subvend, subdev, cfg) \
-> +	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(dev), \
-> +	.subvendor = _PCI_VEND(subvend), .subdevice = _PCI_DEV(subdev), \
-> +	.driver_data = (kernel_ulong_t)&(sdhci_##cfg)
-> +
-
-Still don't understand why you don't put the {} brackets into the macro?
-
-> +#define SDHCI_PCI_DEVICE_CLASS(vend, cl, cl_msk, cfg) \
-> +	.vendor = _PCI_VEND(vend), .device = PCI_ANY_ID, \
-> +	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
-> +	.class = (cl), .class_mask = (cl_msk), \
-> +	.driver_data = (kernel_ulong_t)&(sdhci_##cfg)
-
-Still don't understand why you don't put the {} brackets into the macro?
-
-> +
->  /*
->   * PCI registers
->   */
-> 
-
+T24gVGh1LCBNYXkgNCwgMjAxNyBhdCAyOjIxIEFNLCBBbmR5IFNoZXZjaGVua28KPGFuZHJpeS5z
+aGV2Y2hlbmtvQGxpbnV4LmludGVsLmNvbT4gd3JvdGU6Cj4gYWNwaV9ldmFsdWF0ZV9kc20oKSBh
+bmQgZnJpZW5kcyB0YWtlIGEgcG9pbnRlciB0byBhIHJhdyBidWZmZXIgb2YgMTYKPiBieXRlcy4g
+SW5zdGVhZCB3ZSBjb252ZXJ0IHRoZW0gdG8gdXNlIHV1aWRfbGUgdHlwZS4gQXQgdGhlIHNhbWUg
+dGltZSB3ZQo+IGNvbnZlcnQgY3VycmVudCB1c2Vycy4KPgo+IGFjcGlfc3RyX3RvX3V1aWQoKSBi
+ZWNvbWVzIHVzZWxlc3MgYWZ0ZXIgdGhlIGNvbnZlcnNpb24gYW5kIGl0J3Mgc2FmZSB0bwo+IGdl
+dCByaWQgb2YgaXQuCj4KPiBUaGUgY29udmVyc2lvbiBmaXhlcyBhIHBvdGVudGlhbCBidWcgaW4g
+aW50MzQweF90aGVybWFsIGFzIHdlbGwgc2luY2UKPiB3ZSBoYXZlIHRvIHVzZSBtZW1jbXAoKSBv
+biBiaW5hcnkgZGF0YS4KPgo+IENjOiBSYWZhZWwgSi4gV3lzb2NraSA8cmp3QHJqd3lzb2NraS5u
+ZXQ+Cj4gQ2M6IE1pa2EgV2VzdGVyYmVyZyA8bWlrYS53ZXN0ZXJiZXJnQGxpbnV4LmludGVsLmNv
+bT4KPiBDYzogQm9yaXNsYXYgUGV0a292IDxicEBzdXNlLmRlPgo+IENjOiBEYW4gV2lsbGlhbXMg
+PGRhbi5qLndpbGxpYW1zQGludGVsLmNvbT4KPiBDYzogQW1pciBHb2xkc3RlaW4gPGFtaXI3M2ls
+QGdtYWlsLmNvbT4KPiBDYzogSmFya2tvIFNha2tpbmVuIDxqYXJra28uc2Fra2luZW5AbGludXgu
+aW50ZWwuY29tPgo+IENjOiBKYW5pIE5pa3VsYSA8amFuaS5uaWt1bGFAbGludXguaW50ZWwuY29t
+Pgo+IENjOiBCZW4gU2tlZ2dzIDxic2tlZ2dzQHJlZGhhdC5jb20+Cj4gQ2M6IEJlbmphbWluIFRp
+c3NvaXJlcyA8YmVuamFtaW4udGlzc29pcmVzQHJlZGhhdC5jb20+Cj4gQ2M6IEpvZXJnIFJvZWRl
+bCA8am9yb0A4Ynl0ZXMub3JnPgo+IENjOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGlu
+dGVsLmNvbT4KPiBDYzogWWlzZW4gWmh1YW5nIDx5aXNlbi56aHVhbmdAaHVhd2VpLmNvbT4KPiBD
+YzogQmpvcm4gSGVsZ2FhcyA8YmhlbGdhYXNAZ29vZ2xlLmNvbT4KPiBDYzogWmhhbmcgUnVpIDxy
+dWkuemhhbmdAaW50ZWwuY29tPgo+IENjOiBGZWxpcGUgQmFsYmkgPGJhbGJpQGtlcm5lbC5vcmc+
+Cj4gQ2M6IE1hdGhpYXMgTnltYW4gPG1hdGhpYXMubnltYW5AaW50ZWwuY29tPgo+IENjOiBIZWlr
+a2kgS3JvZ2VydXMgPGhlaWtraS5rcm9nZXJ1c0BsaW51eC5pbnRlbC5jb20+Cj4gQ2M6IExpYW0g
+R2lyZHdvb2QgPGxnaXJkd29vZEBnbWFpbC5jb20+Cj4gQ2M6IE1hcmsgQnJvd24gPGJyb29uaWVA
+a2VybmVsLm9yZz4KPiBTaWduZWQtb2ZmLWJ5OiBBbmR5IFNoZXZjaGVua28gPGFuZHJpeS5zaGV2
+Y2hlbmtvQGxpbnV4LmludGVsLmNvbT4KWy4uXQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL2FjcGkv
+bmZpdC9jb3JlLmMgYi9kcml2ZXJzL2FjcGkvbmZpdC9jb3JlLmMKPiBpbmRleCAwZjc5ODJhMWNh
+YWYuLmJkM2U0NWVkZTA1NiAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL2FjcGkvbmZpdC9jb3JlLmMK
+PiArKysgYi9kcml2ZXJzL2FjcGkvbmZpdC9jb3JlLmMKPiBAQCAtNzQsMTEgKzc0LDExIEBAIHN0
+cnVjdCBuZml0X3RhYmxlX3ByZXYgewo+ICAgICAgICAgc3RydWN0IGxpc3RfaGVhZCBmbHVzaGVz
+Owo+ICB9Owo+Cj4gLXN0YXRpYyB1OCBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF1bMTZdOwo+ICtz
+dGF0aWMgdXVpZF9sZSBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF07Cj4KPiAtY29uc3QgdTggKnRv
+X25maXRfdXVpZChlbnVtIG5maXRfdXVpZHMgaWQpCj4gK2NvbnN0IHV1aWRfbGUgKnRvX25maXRf
+dXVpZChlbnVtIG5maXRfdXVpZHMgaWQpCj4gIHsKPiAtICAgICAgIHJldHVybiBuZml0X3V1aWRb
+aWRdOwo+ICsgICAgICAgcmV0dXJuICZuZml0X3V1aWRbaWRdOwo+ICB9Cj4gIEVYUE9SVF9TWU1C
+T0wodG9fbmZpdF91dWlkKTsKPgo+IEBAIC0yMDcsNyArMjA3LDcgQEAgaW50IGFjcGlfbmZpdF9j
+dGwoc3RydWN0IG52ZGltbV9idXNfZGVzY3JpcHRvciAqbmRfZGVzYywgc3RydWN0IG52ZGltbSAq
+bnZkaW1tLAo+ICAgICAgICAgdTMyIG9mZnNldCwgZndfc3RhdHVzID0gMDsKPiAgICAgICAgIGFj
+cGlfaGFuZGxlIGhhbmRsZTsKPiAgICAgICAgIHVuc2lnbmVkIGludCBmdW5jOwo+IC0gICAgICAg
+Y29uc3QgdTggKnV1aWQ7Cj4gKyAgICAgICBjb25zdCB1dWlkX2xlICp1dWlkOwo+ICAgICAgICAg
+aW50IHJjLCBpOwo+Cj4gICAgICAgICBmdW5jID0gY21kOwo+IEBAIC0zOTQsNyArMzk0LDcgQEAg
+aW50IG5maXRfc3BhX3R5cGUoc3RydWN0IGFjcGlfbmZpdF9zeXN0ZW1fYWRkcmVzcyAqc3BhKQo+
+ICAgICAgICAgaW50IGk7Cj4KPiAgICAgICAgIGZvciAoaSA9IDA7IGkgPCBORklUX1VVSURfTUFY
+OyBpKyspCj4gLSAgICAgICAgICAgICAgIGlmIChtZW1jbXAodG9fbmZpdF91dWlkKGkpLCBzcGEt
+PnJhbmdlX2d1aWQsIDE2KSA9PSAwKQo+ICsgICAgICAgICAgICAgICBpZiAoIXV1aWRfbGVfY21w
+X3BwKHRvX25maXRfdXVpZChpKSwgKHV1aWRfbGUgKilzcGEtPnJhbmdlX2d1aWQpKQoKV2hhdCBp
+cyBfY21wX3BwPyBXaHkgbm90IF9jb21wYXJlPwoKT3RoZXIgdGhhbiB0aGF0LCBsb29rcyBvayB0
+byBtZS4KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KSW50
+ZWwtZ2Z4IG1haWxpbmcgbGlzdApJbnRlbC1nZnhAbGlzdHMuZnJlZWRlc2t0b3Aub3JnCmh0dHBz
+Oi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vaW50ZWwtZ2Z4Cg==
