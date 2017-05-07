@@ -1,480 +1,729 @@
-From: Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH v5 04/14] GPIO: Add gpio-ingenic driver
-Date: Mon, 8 May 2017 00:05:10 +0200
-Message-ID: <3a779fca-5a56-44e5-2acf-12b8abdaf906@crapouillou.net>
-References: <20170402204244.14216-2-paul@crapouillou.net>
- <20170428200824.10906-1-paul@crapouillou.net>
- <20170428200824.10906-5-paul@crapouillou.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170428200824.10906-5-paul@crapouillou.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>
-Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, james.hogan@imgtec.com, linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pwm@vger.kernel.org, linux-fbdev@vger.kernel.org
+From: Matthias Kraemer <matthiasmartinsson@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci: Use macros in pci_ids definition
+Date: Sun,  7 May 2017 09:15:14 +0200
+Message-ID: <1494141314-11220-2-git-send-email-matthiasmartinsson@gmail.com>
+References: <1494141314-11220-1-git-send-email-matthiasmartinsson@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35191 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751573AbdEGWrt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 7 May 2017 18:47:49 -0400
+Received: by mail-wr0-f196.google.com with SMTP id g12so6176955wrg.2
+        for <linux-mmc@vger.kernel.org>; Sun, 07 May 2017 15:47:48 -0700 (PDT)
+In-Reply-To: <1494141314-11220-1-git-send-email-matthiasmartinsson@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: Matthias Kraemer <matthiasmartinsson@gmail.com>
 
-It looks like the gpio_get_value() is broken on jz4740.
+This patch applies the PCI_DEVICE_ macros to specify the pci_ids instead
+of open-coding them within the sdhci-pci driver.
 
-I'll send a v6.
+v2,v3:
+Suggested-by Adrian Hunter <adrian.hunter@intel.com>
+Instead of using the generic PCI_ marcos, introduce device specific macros
+to be able to shorten the table entries even further.
 
-- Paul
+v4,v5:
+additional cleanup of macros
 
-On 28/04/2017 22:08, Paul Cercueil wrote:
-> This driver handles the GPIOs of all the Ingenic JZ47xx SoCs
-> currently supported by the upsteam Linux kernel.
->
-> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
-> ---
->   drivers/gpio/Kconfig        |  10 ++
->   drivers/gpio/Makefile       |   1 +
->   drivers/gpio/gpio-ingenic.c | 399 ++++++++++++++++++++++++++++++++++++++++++++
->   3 files changed, 410 insertions(+)
->   create mode 100644 drivers/gpio/gpio-ingenic.c
->
->   v2: Consider it's a new patch. Completely rewritten from v1.
->   v3: Add missing include <linux/pinctrl/consumer.h> and drop semicolon after }
->   v4: Completely rewritten from v3.
->   v5: Get bank number from 'reg' property; drop dependency on PINCTRL_INGENIC
->       (note: selecting PINCTRL would cause cyclic Kconfig dependencies, that's
->        why I just dropped the dependency on PINCTRL_INGENIC)
->
-> diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
-> index 05043071fc98..7a5f9cf123c1 100644
-> --- a/drivers/gpio/Kconfig
-> +++ b/drivers/gpio/Kconfig
-> @@ -241,6 +241,16 @@ config GPIO_ICH
->   
->   	  If unsure, say N.
->   
-> +config GPIO_INGENIC
-> +	tristate "Ingenic JZ47xx SoCs GPIO support"
-> +	depends on MACH_INGENIC || COMPILE_TEST
-> +	select GPIOLIB_IRQCHIP
-> +	help
-> +	  Say yes here to support the GPIO functionality present on the
-> +	  JZ4740 and JZ4780 SoCs from Ingenic.
-> +
-> +	  If unsure, say N.
-> +
->   config GPIO_IOP
->   	tristate "Intel IOP GPIO"
->   	depends on ARCH_IOP32X || ARCH_IOP33X || COMPILE_TEST
-> diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
-> index becb96c724fe..3fceb4ab3ca7 100644
-> --- a/drivers/gpio/Makefile
-> +++ b/drivers/gpio/Makefile
-> @@ -54,6 +54,7 @@ obj-$(CONFIG_GPIO_GPIO_MM)	+= gpio-gpio-mm.o
->   obj-$(CONFIG_GPIO_GRGPIO)	+= gpio-grgpio.o
->   obj-$(CONFIG_HTC_EGPIO)		+= gpio-htc-egpio.o
->   obj-$(CONFIG_GPIO_ICH)		+= gpio-ich.o
-> +obj-$(CONFIG_GPIO_INGENIC)	+= gpio-ingenic.o
->   obj-$(CONFIG_GPIO_IOP)		+= gpio-iop.o
->   obj-$(CONFIG_GPIO_IT87)		+= gpio-it87.o
->   obj-$(CONFIG_GPIO_JANZ_TTL)	+= gpio-janz-ttl.o
-> diff --git a/drivers/gpio/gpio-ingenic.c b/drivers/gpio/gpio-ingenic.c
-> new file mode 100644
-> index 000000000000..34e9339bd815
-> --- /dev/null
-> +++ b/drivers/gpio/gpio-ingenic.c
-> @@ -0,0 +1,399 @@
-> +/*
-> + * Ingenic JZ47xx GPIO driver
-> + *
-> + * Copyright (c) 2017 Paul Cercueil <paul@crapouillou.net>
-> + *
-> + * License terms: GNU General Public License (GPL) version 2
-> + */
-> +
-> +#include <linux/gpio/driver.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/io.h>
-> +#include <linux/module.h>
-> +#include <linux/of_address.h>
-> +#include <linux/of_device.h>
-> +#include <linux/of_irq.h>
-> +#include <linux/pinctrl/consumer.h>
-> +#include <linux/regmap.h>
-> +
-> +#define GPIO_PIN	0x00
-> +#define GPIO_MSK	0x20
-> +
-> +#define JZ4740_GPIO_DATA	0x10
-> +#define JZ4740_GPIO_SELECT	0x50
-> +#define JZ4740_GPIO_DIR		0x60
-> +#define JZ4740_GPIO_TRIG	0x70
-> +#define JZ4740_GPIO_FLAG	0x80
-> +
-> +#define JZ4770_GPIO_INT		0x10
-> +#define JZ4770_GPIO_PAT1	0x30
-> +#define JZ4770_GPIO_PAT0	0x40
-> +#define JZ4770_GPIO_FLAG	0x50
-> +
-> +#define REG_SET(x) ((x) + 0x4)
-> +#define REG_CLEAR(x) ((x) + 0x8)
-> +
-> +enum jz_version {
-> +	ID_JZ4740,
-> +	ID_JZ4770,
-> +	ID_JZ4780,
-> +};
-> +
-> +struct ingenic_gpio_chip {
-> +	struct regmap *map;
-> +	struct gpio_chip gc;
-> +	struct irq_chip irq_chip;
-> +	unsigned int irq, reg_base;
-> +	enum jz_version version;
-> +};
-> +
-> +static u32 gpio_ingenic_read_reg(struct ingenic_gpio_chip *jzgc, u8 reg)
-> +{
-> +	unsigned int val;
-> +
-> +	regmap_read(jzgc->map, jzgc->reg_base + reg, &val);
-> +
-> +	return (u32) val;
-> +}
-> +
-> +static void gpio_ingenic_set_bit(struct ingenic_gpio_chip *jzgc,
-> +		u8 reg, u8 offset, bool set)
-> +{
-> +	if (set)
-> +		reg = REG_SET(reg);
-> +	else
-> +		reg = REG_CLEAR(reg);
-> +
-> +	regmap_write(jzgc->map, jzgc->reg_base + reg, BIT(offset));
-> +}
-> +
-> +static inline bool gpio_get_value(struct ingenic_gpio_chip *jzgc, u8 offset)
-> +{
-> +	unsigned int val;
-> +
-> +	if (jzgc->version >= ID_JZ4770)
-> +		val = gpio_ingenic_read_reg(jzgc, GPIO_PIN);
-> +	else
-> +		val = gpio_ingenic_read_reg(jzgc, JZ4740_GPIO_DATA);
-> +
-> +	return !!(val & BIT(offset));
-> +}
-> +
-> +static void gpio_set_value(struct ingenic_gpio_chip *jzgc, u8 offset, int value)
-> +{
-> +	if (jzgc->version >= ID_JZ4770)
-> +		gpio_ingenic_set_bit(jzgc, JZ4770_GPIO_PAT0, offset, !!value);
-> +	else
-> +		gpio_ingenic_set_bit(jzgc, JZ4740_GPIO_DATA, offset, !!value);
-> +}
-> +
-> +static void irq_set_type(struct ingenic_gpio_chip *jzgc,
-> +		u8 offset, unsigned int type)
-> +{
-> +	u8 reg1, reg2;
-> +
-> +	if (jzgc->version >= ID_JZ4770) {
-> +		reg1 = JZ4770_GPIO_PAT1;
-> +		reg2 = JZ4770_GPIO_PAT0;
-> +	} else {
-> +		reg1 = JZ4740_GPIO_TRIG;
-> +		reg2 = JZ4740_GPIO_DIR;
-> +	}
-> +
-> +	switch (type) {
-> +	case IRQ_TYPE_EDGE_RISING:
-> +		gpio_ingenic_set_bit(jzgc, reg2, offset, true);
-> +		gpio_ingenic_set_bit(jzgc, reg1, offset, true);
-> +		break;
-> +	case IRQ_TYPE_EDGE_FALLING:
-> +		gpio_ingenic_set_bit(jzgc, reg2, offset, false);
-> +		gpio_ingenic_set_bit(jzgc, reg1, offset, true);
-> +		break;
-> +	case IRQ_TYPE_LEVEL_HIGH:
-> +		gpio_ingenic_set_bit(jzgc, reg2, offset, true);
-> +		gpio_ingenic_set_bit(jzgc, reg1, offset, false);
-> +		break;
-> +	case IRQ_TYPE_LEVEL_LOW:
-> +	default:
-> +		gpio_ingenic_set_bit(jzgc, reg2, offset, false);
-> +		gpio_ingenic_set_bit(jzgc, reg1, offset, false);
-> +		break;
-> +	}
-> +}
-> +
-> +static void ingenic_gpio_irq_mask(struct irq_data *irqd)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	gpio_ingenic_set_bit(jzgc, GPIO_MSK, irqd->hwirq, true);
-> +}
-> +
-> +static void ingenic_gpio_irq_unmask(struct irq_data *irqd)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	gpio_ingenic_set_bit(jzgc, GPIO_MSK, irqd->hwirq, false);
-> +}
-> +
-> +static void ingenic_gpio_irq_enable(struct irq_data *irqd)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +	int irq = irqd->hwirq;
-> +
-> +	if (jzgc->version >= ID_JZ4770)
-> +		gpio_ingenic_set_bit(jzgc, JZ4770_GPIO_INT, irq, true);
-> +	else
-> +		gpio_ingenic_set_bit(jzgc, JZ4740_GPIO_SELECT, irq, true);
-> +
-> +	ingenic_gpio_irq_unmask(irqd);
-> +}
-> +
-> +static void ingenic_gpio_irq_disable(struct irq_data *irqd)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +	int irq = irqd->hwirq;
-> +
-> +	ingenic_gpio_irq_mask(irqd);
-> +
-> +	if (jzgc->version >= ID_JZ4770)
-> +		gpio_ingenic_set_bit(jzgc, JZ4770_GPIO_INT, irq, false);
-> +	else
-> +		gpio_ingenic_set_bit(jzgc, JZ4740_GPIO_SELECT, irq, false);
-> +}
-> +
-> +static void ingenic_gpio_irq_ack(struct irq_data *irqd)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +	int irq = irqd->hwirq;
-> +	bool high;
-> +
-> +	if (irqd_get_trigger_type(irqd) == IRQ_TYPE_EDGE_BOTH) {
-> +		/*
-> +		 * Switch to an interrupt for the opposite edge to the one that
-> +		 * triggered the interrupt being ACKed.
-> +		 */
-> +		high = gpio_get_value(jzgc, irq);
-> +		if (high)
-> +			irq_set_type(jzgc, irq, IRQ_TYPE_EDGE_FALLING);
-> +		else
-> +			irq_set_type(jzgc, irq, IRQ_TYPE_EDGE_RISING);
-> +	}
-> +
-> +	if (jzgc->version >= ID_JZ4770)
-> +		gpio_ingenic_set_bit(jzgc, JZ4770_GPIO_FLAG, irq, false);
-> +	else
-> +		gpio_ingenic_set_bit(jzgc, JZ4740_GPIO_DATA, irq, true);
-> +}
-> +
-> +static int ingenic_gpio_irq_set_type(struct irq_data *irqd, unsigned int type)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	switch (type) {
-> +	case IRQ_TYPE_EDGE_BOTH:
-> +	case IRQ_TYPE_EDGE_RISING:
-> +	case IRQ_TYPE_EDGE_FALLING:
-> +		irq_set_handler_locked(irqd, handle_edge_irq);
-> +		break;
-> +	case IRQ_TYPE_LEVEL_HIGH:
-> +	case IRQ_TYPE_LEVEL_LOW:
-> +		irq_set_handler_locked(irqd, handle_level_irq);
-> +		break;
-> +	default:
-> +		irq_set_handler_locked(irqd, handle_bad_irq);
-> +	}
-> +
-> +	if (type == IRQ_TYPE_EDGE_BOTH) {
-> +		/*
-> +		 * The hardware does not support interrupts on both edges. The
-> +		 * best we can do is to set up a single-edge interrupt and then
-> +		 * switch to the opposing edge when ACKing the interrupt.
-> +		 */
-> +		bool high = gpio_get_value(jzgc, irqd->hwirq);
-> +
-> +		type = high ? IRQ_TYPE_EDGE_FALLING : IRQ_TYPE_EDGE_RISING;
-> +	}
-> +
-> +	irq_set_type(jzgc, irqd->hwirq, type);
-> +	return 0;
-> +}
-> +
-> +static int ingenic_gpio_irq_set_wake(struct irq_data *irqd, unsigned int on)
-> +{
-> +	struct gpio_chip *gc = irq_data_get_irq_chip_data(irqd);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	return irq_set_irq_wake(jzgc->irq, on);
-> +}
-> +
-> +static void ingenic_gpio_irq_handler(struct irq_desc *desc)
-> +{
-> +	struct gpio_chip *gc = irq_desc_get_handler_data(desc);
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +	struct irq_chip *irq_chip = irq_data_get_irq_chip(&desc->irq_data);
-> +	unsigned long flag, i;
-> +
-> +	chained_irq_enter(irq_chip, desc);
-> +
-> +	if (jzgc->version >= ID_JZ4770)
-> +		flag = gpio_ingenic_read_reg(jzgc, JZ4770_GPIO_FLAG);
-> +	else
-> +		flag = gpio_ingenic_read_reg(jzgc, JZ4740_GPIO_FLAG);
-> +
-> +	for_each_set_bit(i, &flag, 32)
-> +		generic_handle_irq(irq_linear_revmap(gc->irqdomain, i));
-> +	chained_irq_exit(irq_chip, desc);
-> +}
-> +
-> +static void ingenic_gpio_set(struct gpio_chip *gc,
-> +		unsigned int offset, int value)
-> +{
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	gpio_set_value(jzgc, offset, value);
-> +}
-> +
-> +static int ingenic_gpio_get(struct gpio_chip *gc, unsigned int offset)
-> +{
-> +	struct ingenic_gpio_chip *jzgc = gpiochip_get_data(gc);
-> +
-> +	return (int) gpio_get_value(jzgc, offset);
-> +}
-> +
-> +static int ingenic_gpio_direction_input(struct gpio_chip *gc,
-> +		unsigned int offset)
-> +{
-> +	return pinctrl_gpio_direction_input(gc->base + offset);
-> +}
-> +
-> +static int ingenic_gpio_direction_output(struct gpio_chip *gc,
-> +		unsigned int offset, int value)
-> +{
-> +	ingenic_gpio_set(gc, offset, value);
-> +	return pinctrl_gpio_direction_output(gc->base + offset);
-> +}
-> +
-> +static const struct of_device_id ingenic_gpio_of_match[] = {
-> +	{ .compatible = "ingenic,jz4740-gpio", .data = (void *)ID_JZ4740 },
-> +	{ .compatible = "ingenic,jz4770-gpio", .data = (void *)ID_JZ4770 },
-> +	{ .compatible = "ingenic,jz4780-gpio", .data = (void *)ID_JZ4780 },
-> +	{},
-> +};
-> +MODULE_DEVICE_TABLE(of, ingenic_gpio_of_match);
-> +
-> +static int ingenic_gpio_probe(struct platform_device *pdev)
-> +{
-> +	struct device *dev = &pdev->dev;
-> +	const struct of_device_id *of_id = of_match_device(
-> +			ingenic_gpio_of_match, dev);
-> +	struct ingenic_gpio_chip *jzgc;
-> +	u32 bank;
-> +	int err;
-> +
-> +	jzgc = devm_kzalloc(dev, sizeof(*jzgc), GFP_KERNEL);
-> +	if (!jzgc)
-> +		return -ENOMEM;
-> +
-> +	jzgc->map = dev_get_drvdata(dev->parent);
-> +	if (!jzgc->map) {
-> +		dev_err(dev, "Cannot get parent regmap\n");
-> +		return -ENXIO;
-> +	}
-> +
-> +	err = of_property_read_u32(dev->of_node, "reg", &bank);
-> +	if (err) {
-> +		dev_err(dev, "Cannot read \"reg\" property: %i\n", err);
-> +		return err;
-> +	}
-> +
-> +	jzgc->reg_base = bank * 0x100;
-> +
-> +	jzgc->gc.label = devm_kasprintf(dev, GFP_KERNEL, "GPIO%c", 'A' + bank);
-> +	if (!jzgc->gc.label)
-> +		return -ENOMEM;
-> +
-> +	/* DO NOT EXPAND THIS: FOR BACKWARD GPIO NUMBERSPACE COMPATIBIBILITY
-> +	 * ONLY: WORK TO TRANSITION CONSUMERS TO USE THE GPIO DESCRIPTOR API IN
-> +	 * <linux/gpio/consumer.h> INSTEAD.
-> +	 */
-> +	jzgc->gc.base = bank * 32;
-> +
-> +	jzgc->gc.ngpio = 32;
-> +	jzgc->gc.parent = dev;
-> +	jzgc->gc.of_node = dev->of_node;
-> +	jzgc->gc.owner = THIS_MODULE;
-> +	jzgc->version = (enum jz_version)of_id->data;
-> +
-> +	jzgc->gc.set = ingenic_gpio_set;
-> +	jzgc->gc.get = ingenic_gpio_get;
-> +	jzgc->gc.direction_input = ingenic_gpio_direction_input;
-> +	jzgc->gc.direction_output = ingenic_gpio_direction_output;
-> +
-> +	if (of_property_read_bool(dev->of_node, "gpio-ranges")) {
-> +		jzgc->gc.request = gpiochip_generic_request;
-> +		jzgc->gc.free = gpiochip_generic_free;
-> +	}
-> +
-> +	err = devm_gpiochip_add_data(dev, &jzgc->gc, jzgc);
-> +	if (err)
-> +		return err;
-> +
-> +	jzgc->irq = irq_of_parse_and_map(dev->of_node, 0);
-> +	if (!jzgc->irq)
-> +		return -EINVAL;
-> +
-> +	jzgc->irq_chip.name = jzgc->gc.label;
-> +	jzgc->irq_chip.irq_enable = ingenic_gpio_irq_enable;
-> +	jzgc->irq_chip.irq_disable = ingenic_gpio_irq_disable;
-> +	jzgc->irq_chip.irq_unmask = ingenic_gpio_irq_unmask;
-> +	jzgc->irq_chip.irq_mask = ingenic_gpio_irq_mask;
-> +	jzgc->irq_chip.irq_ack = ingenic_gpio_irq_ack;
-> +	jzgc->irq_chip.irq_set_type = ingenic_gpio_irq_set_type;
-> +	jzgc->irq_chip.irq_set_wake = ingenic_gpio_irq_set_wake;
-> +	jzgc->irq_chip.flags = IRQCHIP_MASK_ON_SUSPEND;
-> +
-> +	err = gpiochip_irqchip_add(&jzgc->gc, &jzgc->irq_chip, 0,
-> +			handle_level_irq, IRQ_TYPE_NONE);
-> +	if (err)
-> +		return err;
-> +
-> +	gpiochip_set_chained_irqchip(&jzgc->gc, &jzgc->irq_chip,
-> +			jzgc->irq, ingenic_gpio_irq_handler);
-> +	return 0;
-> +}
-> +
-> +static int ingenic_gpio_remove(struct platform_device *pdev)
-> +{
-> +	return 0;
-> +}
-> +
-> +static struct platform_driver ingenic_gpio_driver = {
-> +	.driver = {
-> +		.name = "gpio-ingenic",
-> +		.of_match_table = of_match_ptr(ingenic_gpio_of_match),
-> +	},
-> +	.probe = ingenic_gpio_probe,
-> +	.remove = ingenic_gpio_remove,
-> +};
-> +
-> +static int __init ingenic_gpio_drv_register(void)
-> +{
-> +	return platform_driver_register(&ingenic_gpio_driver);
-> +}
-> +subsys_initcall(ingenic_gpio_drv_register);
-> +
-> +static void __exit ingenic_gpio_drv_unregister(void)
-> +{
-> +	platform_driver_unregister(&ingenic_gpio_driver);
-> +}
-> +module_exit(ingenic_gpio_drv_unregister);
-> +
-> +MODULE_AUTHOR("Paul Cercueil <paul@crapouillou.net>");
-> +MODULE_DESCRIPTION("Ingenic JZ47xx GPIO driver");
-> +MODULE_LICENSE("GPL");
+Signed-off-by: Matthias Kraemer <matthiasmartinsson@gmail.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 618 +++++---------------------------------
+ drivers/mmc/host/sdhci-pci.h      |  44 ++-
+ 2 files changed, 113 insertions(+), 549 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 86560d5..47ba07d 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -992,554 +992,76 @@ static const struct sdhci_pci_fixes sdhci_amd = {
+ };
+ 
+ static const struct pci_device_id pci_ids[] = {
+-	{
+-		.vendor		= PCI_VENDOR_ID_RICOH,
+-		.device		= PCI_DEVICE_ID_RICOH_R5C822,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ricoh,
+-	},
+-
+-	{
+-		.vendor         = PCI_VENDOR_ID_RICOH,
+-		.device         = 0x843,
+-		.subvendor      = PCI_ANY_ID,
+-		.subdevice      = PCI_ANY_ID,
+-		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
+-	},
+-
+-	{
+-		.vendor         = PCI_VENDOR_ID_RICOH,
+-		.device         = 0xe822,
+-		.subvendor      = PCI_ANY_ID,
+-		.subdevice      = PCI_ANY_ID,
+-		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
+-	},
+-
+-	{
+-		.vendor         = PCI_VENDOR_ID_RICOH,
+-		.device         = 0xe823,
+-		.subvendor      = PCI_ANY_ID,
+-		.subdevice      = PCI_ANY_ID,
+-		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_ENE,
+-		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ene_712,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_ENE,
+-		.device		= PCI_DEVICE_ID_ENE_CB712_SD_2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ene_712,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_ENE,
+-		.device		= PCI_DEVICE_ID_ENE_CB714_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ene_714,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_ENE,
+-		.device		= PCI_DEVICE_ID_ENE_CB714_SD_2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ene_714,
+-	},
+-
+-	{
+-		.vendor         = PCI_VENDOR_ID_MARVELL,
+-		.device         = PCI_DEVICE_ID_MARVELL_88ALP01_SD,
+-		.subvendor      = PCI_ANY_ID,
+-		.subdevice      = PCI_ANY_ID,
+-		.driver_data    = (kernel_ulong_t)&sdhci_cafe,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_JMICRON,
+-		.device		= PCI_DEVICE_ID_JMICRON_JMB38X_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_jmicron,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_JMICRON,
+-		.device		= PCI_DEVICE_ID_JMICRON_JMB38X_MMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_jmicron,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_JMICRON,
+-		.device		= PCI_DEVICE_ID_JMICRON_JMB388_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_jmicron,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_JMICRON,
+-		.device		= PCI_DEVICE_ID_JMICRON_JMB388_ESD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_jmicron,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_SYSKONNECT,
+-		.device		= 0x8000,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_syskt,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_VIA,
+-		.device		= 0x95d0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_via,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_REALTEK,
+-		.device		= 0x5250,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_rtsx,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_QRK_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_qrk,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MRST_SD0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc0,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MRST_SD1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc1_hc2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MRST_SD2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc1_hc2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MFD_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_PCH_SDIO0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_pch_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_PCH_SDIO1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_pch_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BYT_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
+-		.subvendor	= PCI_VENDOR_ID_NI,
+-		.subdevice	= 0x7884,
+-		.driver_data	= (kernel_ulong_t)&sdhci_ni_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BYT_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BYT_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BYT_EMMC2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BSW_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BSW_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BSW_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_CLV_SDIO0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_CLV_SDIO1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_CLV_SDIO2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_CLV_EMMC0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_CLV_EMMC1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_MRFLD_MMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrfld_mmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_SPT_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_SPT_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_SPT_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_DNV_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXT_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXT_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXT_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXTM_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXTM_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_BXTM_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_APL_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_APL_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_APL_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_GLK_EMMC,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_GLK_SDIO,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_INTEL,
+-		.device		= PCI_DEVICE_ID_INTEL_GLK_SD,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_8120,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_8220,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_8221,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_8320,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_8321,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_FUJIN2,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_SDS0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_SDS1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_SEABIRD0,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-
+-	{
+-		.vendor		= PCI_VENDOR_ID_O2,
+-		.device		= PCI_DEVICE_ID_O2_SEABIRD1,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+-	},
+-	{
+-		.vendor		= PCI_VENDOR_ID_AMD,
+-		.device		= PCI_ANY_ID,
+-		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
+-		.class_mask	= 0xFFFF00,
+-		.subvendor	= PCI_ANY_ID,
+-		.subdevice	= PCI_ANY_ID,
+-		.driver_data	= (kernel_ulong_t)&sdhci_amd,
+-	},
+-	{	/* Generic SD host controller */
+-		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+-	},
+-
++	SDHCI_PCI_DEVICE(RICOH, R5C822, ricoh),
++	SDHCI_PCI_DEVICE(RICOH, RI843, ricoh_mmc),
++	SDHCI_PCI_DEVICE(RICOH, RIe822, ricoh_mmc),
++	SDHCI_PCI_DEVICE(RICOH, RIe823, ricoh_mmc),
++	SDHCI_PCI_DEVICE(ENE, CB712_SD, ene_712),
++	SDHCI_PCI_DEVICE(ENE, CB712_SD_2, ene_712),
++	SDHCI_PCI_DEVICE(ENE, CB714_SD, ene_714),
++	SDHCI_PCI_DEVICE(ENE, CB714_SD_2, ene_714),
++	SDHCI_PCI_DEVICE(MARVELL, 88ALP01_SD, cafe),
++	SDHCI_PCI_DEVICE(JMICRON, JMB38X_SD, jmicron),
++	SDHCI_PCI_DEVICE(JMICRON, JMB38X_MMC, jmicron),
++	SDHCI_PCI_DEVICE(JMICRON, JMB388_SD, jmicron),
++	SDHCI_PCI_DEVICE(JMICRON, JMB388_ESD, jmicron),
++	SDHCI_PCI_DEVICE(SYSKONNECT, SY8000, syskt),
++	SDHCI_PCI_DEVICE(VIA, V95d0, via),
++	SDHCI_PCI_DEVICE(REALTEK, RE5250, rtsx),
++	SDHCI_PCI_DEVICE(INTEL, QRK_SD, intel_qrk),
++	SDHCI_PCI_DEVICE(INTEL, MRST_SD0, intel_mrst_hc0),
++	SDHCI_PCI_DEVICE(INTEL, MRST_SD1, intel_mrst_hc1_hc2),
++	SDHCI_PCI_DEVICE(INTEL, MRST_SD2, intel_mrst_hc1_hc2),
++	SDHCI_PCI_DEVICE(INTEL, MFD_SD, intel_mfd_sd),
++	SDHCI_PCI_DEVICE(INTEL, MFD_SDIO1, intel_mfd_sdio),
++	SDHCI_PCI_DEVICE(INTEL, MFD_SDIO2, intel_mfd_sdio),
++	SDHCI_PCI_DEVICE(INTEL, MFD_EMMC0, intel_mfd_emmc),
++	SDHCI_PCI_DEVICE(INTEL, MFD_EMMC1, intel_mfd_emmc),
++	SDHCI_PCI_DEVICE(INTEL, PCH_SDIO0, intel_pch_sdio),
++	SDHCI_PCI_DEVICE(INTEL, PCH_SDIO1, intel_pch_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BYT_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE_SUB(INTEL, BYT_SDIO, NI, SUB7884, ni_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BYT_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BYT_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, BYT_EMMC2, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, BSW_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, BSW_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BSW_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, CLV_SDIO0, intel_mfd_sd),
++	SDHCI_PCI_DEVICE(INTEL, CLV_SDIO1, intel_mfd_sdio),
++	SDHCI_PCI_DEVICE(INTEL, CLV_SDIO2, intel_mfd_sdio),
++	SDHCI_PCI_DEVICE(INTEL, CLV_EMMC0, intel_mfd_emmc),
++	SDHCI_PCI_DEVICE(INTEL, CLV_EMMC1, intel_mfd_emmc),
++	SDHCI_PCI_DEVICE(INTEL, MRFLD_MMC, intel_mrfld_mmc),
++	SDHCI_PCI_DEVICE(INTEL, SPT_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, SPT_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, SPT_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, DNV_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, BXT_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, BXT_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BXT_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, BXTM_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, BXTM_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, BXTM_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, APL_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, APL_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, APL_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, GLK_EMMC, intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, GLK_SDIO, intel_byt_sdio),
++	SDHCI_PCI_DEVICE(INTEL, GLK_SD, intel_byt_sd),
++	SDHCI_PCI_DEVICE(O2, 8120, o2),
++	SDHCI_PCI_DEVICE(O2, 8220, o2),
++	SDHCI_PCI_DEVICE(O2, 8221, o2),
++	SDHCI_PCI_DEVICE(O2, 8320, o2),
++	SDHCI_PCI_DEVICE(O2, 8321, o2),
++	SDHCI_PCI_DEVICE(O2, FUJIN2, o2),
++	SDHCI_PCI_DEVICE(O2, SDS0, o2),
++	SDHCI_PCI_DEVICE(O2, SDS1, o2),
++	SDHCI_PCI_DEVICE(O2, SEABIRD0, o2),
++	SDHCI_PCI_DEVICE(O2, SEABIRD1, o2),
++	SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
++	/* Generic SD host controller */
++	{PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
+ 	{ /* end: all zeroes */ },
+ };
+ 
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 36f7434..bd7a9e6 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -2,7 +2,7 @@
+ #define __SDHCI_PCI_H
+ 
+ /*
+- * PCI device IDs
++ * PCI device IDs, sub IDs
+  */
+ 
+ #define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
+@@ -38,6 +38,48 @@
+ #define PCI_DEVICE_ID_INTEL_GLK_EMMC	0x31cc
+ #define PCI_DEVICE_ID_INTEL_GLK_SDIO	0x31d0
+ 
++#define PCI_DEVICE_ID_RICOH_RI843	0x843
++#define PCI_DEVICE_ID_RICOH_RIe822	0xe822
++#define PCI_DEVICE_ID_RICOH_RIe823	0xe823
++#define PCI_DEVICE_ID_SYSKONNECT_SY8000	0x8000
++#define PCI_DEVICE_ID_VIA_V95d0		0x95d0
++#define PCI_DEVICE_ID_REALTEK_RE5250	0x5250
++
++#define PCI_DEVICE_ID_INTEL_SUB7884	0x7884
++
++/*
++ * PCI device class and mask
++ */
++
++#define SYSTEM_SDHCI			(PCI_CLASS_SYSTEM_SDHCI << 8)
++#define PCI_CLASS_MASK			0xFFFF00
++
++/*
++ * Macros for PCI device-description
++ */
++
++#define _PCI_VEND(vend) PCI_VENDOR_ID_##vend
++#define _PCI_DEV(vend, dev) PCI_DEVICE_ID_##vend##_##dev
++
++#define SDHCI_PCI_DEVICE(vend, dev, cfg) { \
++	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(vend, dev), \
++	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
++	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
++}
++
++#define SDHCI_PCI_DEVICE_SUB(vend, dev, subvend, subdev, cfg) { \
++	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(vend, dev), \
++	.subvendor = _PCI_VEND(subvend), .subdevice = _PCI_DEV(vend, subdev), \
++	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
++}
++
++#define SDHCI_PCI_DEVICE_CLASS(vend, cl, cl_msk, cfg) { \
++	.vendor = _PCI_VEND(vend), .device = PCI_ANY_ID, \
++	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
++	.class = (cl), .class_mask = (cl_msk), \
++	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
++}
++
+ /*
+  * PCI registers
+  */
+-- 
+2.7.4
+
