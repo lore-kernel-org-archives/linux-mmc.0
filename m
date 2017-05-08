@@ -1,50 +1,37 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 1/8] mmc: dt: pwrseq-simple: Invent power-off-delay-us
-Date: Mon,  8 May 2017 18:21:10 +0200
-Message-ID: <1494260477-25163-2-git-send-email-ulf.hansson@linaro.org>
-References: <1494260477-25163-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 0/2] mmc: core: Fix the behaviour of pwrseq_emmc
+Date: Tue,  9 May 2017 00:09:01 +0200
+Message-ID: <1494281343-18963-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f175.google.com ([209.85.128.175]:33978 "EHLO
-        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751130AbdEHQV0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2017 12:21:26 -0400
-Received: by mail-wr0-f175.google.com with SMTP id l9so48815980wre.1
-        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2017 09:21:26 -0700 (PDT)
-In-Reply-To: <1494260477-25163-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:37912 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751270AbdEHWJI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2017 18:09:08 -0400
+Received: by mail-wm0-f49.google.com with SMTP id 142so80635963wma.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2017 15:09:08 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Xu <xuwei5@hisilicon.com>, linux-arm-kernel@lists.infradead.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Heiner Kallweit <hkallweit1@gmail.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Douglas Anderson <dianders@chromium.org>, Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>
 
-During power off, after the GPIO pin has been asserted, some devices like
-the Wifi chip from TI, Wl18xx, needs a delay before the host continues with
-clock gating and turning off regulators as to follow a graceful shutdown
-sequence.
+In case if a pwrseq-emmc has been bound to the host, a call to mmc_power_up()
+triggers an eMMC HW reset via the pwrseq_emmc's ->post_power_on() callback.
+This isn't really what we want, as mmc_power_up() is called each time when
+resuming the card.
 
-Therefore invent an optional power-off-delay-us DT binding for
-mmc-pwrseq-simple, to allow us to support this constraint.
+Let's fix this behaviour and avoid doing the emmc HW reset unless really needed.
 
-Cc: devicetree@vger.kernel.org
-Cc: Rob Herring <robh+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
- 1 file changed, 2 insertions(+)
+Ulf Hansson (2):
+  mmc: pwrseq: Add reset callback to the struct mmc_pwrseq_ops
+  mmc: core: Don't do eMMC HW reset when resuming the eMMC card
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index e254368..9029b45 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -18,6 +18,8 @@ Optional properties:
-   "ext_clock" (External clock provided to the card).
- - post-power-on-delay-ms : Delay in ms after powering the card and
- 	de-asserting the reset-gpios (if any)
-+- power-off-delay-us : Delay in us after asserting the reset-gpios (if any)
-+	during power off of the card.
- 
- Example:
- 
+ drivers/mmc/core/core.c        | 2 ++
+ drivers/mmc/core/mmc.c         | 2 ++
+ drivers/mmc/core/pwrseq.c      | 8 ++++++++
+ drivers/mmc/core/pwrseq.h      | 3 +++
+ drivers/mmc/core/pwrseq_emmc.c | 2 +-
+ 5 files changed, 16 insertions(+), 1 deletion(-)
+
 -- 
 2.7.4
 
