@@ -1,31 +1,42 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC 2/5] mmc: tmio: rename tmio_mmc_{pio => core}.c
-Date: Tue, 9 May 2017 15:14:57 +0200
-Message-ID: <20170509131457.GC13938@verge.net.au>
-References: <1493723743-22821-1-git-send-email-horms+renesas@verge.net.au>
- <1493723743-22821-3-git-send-email-horms+renesas@verge.net.au>
- <20170502131132.gqg4uem2boborohm@ninjato>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] mmc: sdricoh_cs: remove redundant check if len is non-zero
+Date: Tue,  9 May 2017 16:45:04 +0100
+Message-ID: <20170509154504.31901-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:44478 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752016AbdEINQB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2017 09:16:01 -0400
-Content-Disposition: inline
-In-Reply-To: <20170502131132.gqg4uem2boborohm@ninjato>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sascha Sommer <saschasommer@freenet.de>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On Tue, May 02, 2017 at 03:11:32PM +0200, Wolfram Sang wrote:
-> 
-> > - * linux/drivers/mmc/host/tmio_mmc_pio.c
-> > + * linux/drivers/mmc/host/tmio_mmc_core.c
-> 
-> I think we should drop the filenames here (and in other places)  and use
-> a human readable string instead?
+From: Colin Ian King <colin.king@canonical.com>
 
-Sure, I've shuffled around the comments at the top of the source files
-accordingly.
+At the end of either of the read or write loops len is always zero
+and hence the non-zero check on len and return of -EIO is redundant
+and can be removed.
+
+Detected by CoverityScan, CID#114293 ("Logically dead code")
+
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/sdricoh_cs.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
+index 5ff26ab81eb1..70cb00aa79a0 100644
+--- a/drivers/mmc/host/sdricoh_cs.c
++++ b/drivers/mmc/host/sdricoh_cs.c
+@@ -256,9 +256,6 @@ static int sdricoh_blockio(struct sdricoh_host *host, int read,
+ 		}
+ 	}
+ 
+-	if (len)
+-		return -EIO;
+-
+ 	return 0;
+ }
+ 
+-- 
+2.11.0
