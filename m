@@ -1,72 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v3 5/5] Revert "mmc: dw_mmc: Don't allow Runtime PM for SDIO cards"
-Date: Tue,  9 May 2017 10:27:29 +0200
-Message-ID: <1494318449-2591-6-git-send-email-ulf.hansson@linaro.org>
-References: <1494318449-2591-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:34731 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752144AbdEII1n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2017 04:27:43 -0400
-Received: by mail-wr0-f179.google.com with SMTP id l9so63240786wre.1
-        for <linux-mmc@vger.kernel.org>; Tue, 09 May 2017 01:27:42 -0700 (PDT)
-In-Reply-To: <1494318449-2591-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH/RFC 0/5] mmc: renesas-sdhi: refactor DMA support
+Date: Tue, 9 May 2017 11:28:01 +0200
+Message-ID: <20170509092801.GA8417@verge.net.au>
+References: <1493723743-22821-1-git-send-email-horms+renesas@verge.net.au>
+ <CAK8P3a10fwLwA=DzMoCbxoCewA8YqcJSzW8Avqt-vX+kSx0apA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a10fwLwA=DzMoCbxoCewA8YqcJSzW8Avqt-vX+kSx0apA@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Brian Norris <briannorris@chromium.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@google.com>
 
-This reverts commit a6db2c86033b ("mmc: dw_mmc: Don't allow Runtime PM for
-SDIO cards")'
+On Tue, May 02, 2017 at 02:03:06PM +0200, Arnd Bergmann wrote:
+> On Tue, May 2, 2017 at 1:15 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
+> > Hi Wolfram, Hi Arnd, Hi all,
+> >
+> > the intention of this patch-set is to refactor the DMA support in
+> > the Renesas SDHI driver in order to make it easier to add support
+> > for using the SDHI hardware with different DMA implementations.
+> >
+> > This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
+> > renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
+> > the reworking of the driver proposed by Arnd[1] in his review of that
+> > patch-set.
+> >
+> > [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
+> >
+> > Unlike that patch-set this patch-set does not add support for
+> > R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
+> 
+> Looks fine overall. Remind me why we are not using the dma-engine
+> framework though. IIRC this is because at least one of the possible
+> DMA implementations is tightly integrated with the TMIO register
+> set and not easily split out into another driver, right?
 
-As dw_mmc now is capable of preventing runtime PM suspend while SDIO IRQs
-are enabled, let's drop the less fine-grained method, which is preventing
-runtime PM suspend for all SDIO cards - no matter of whether SDIO IRQs are
-being enabled or not.
+In a nutshell, yes, that is my understanding.
 
-In this way we don't keep the host runtime PM resumed, unless it's really
-needed, thus avoiding to waste power.
-
-Especially when SDIO IRQs is supported via a separate out-of-band IRQ line,
-which isn't defined by the SDIO standard, typically the SDIO func driver
-doesn't enable SDIO IRQs via sdio_claim_irq(). So, for these cases we can
-now allow the dwmmc device to be runtime PM suspended in-between requests.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Tested-by: Douglas Anderson <dianders@chromium.org>
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
----
-
-Changes in v3:
-	- Don't remove include of pm_runtime.h as it's needed.
-
----
- drivers/mmc/host/dw_mmc.c | 10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 454b847..0e2d6f7 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1621,16 +1621,10 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
- 
- 		if (card->type == MMC_TYPE_SDIO ||
- 		    card->type == MMC_TYPE_SD_COMBO) {
--			if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
--				pm_runtime_get_noresume(mmc->parent);
--				set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
--			}
-+			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
- 			clk_en_a = clk_en_a_old & ~clken_low_pwr;
- 		} else {
--			if (test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags)) {
--				pm_runtime_put_noidle(mmc->parent);
--				clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
--			}
-+			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
- 			clk_en_a = clk_en_a_old | clken_low_pwr;
- 		}
- 
--- 
-2.7.4
-
+The DMA implementation that is currently present in mainline uses the
+SYS-DMAC device and the DMA Engine framework is used. However, we expect to
+support devices that make use of built-in bus master engine for SDHI DMA.
+In this case it does not seem to make much sense to break out DMA support
+into a separate driver as it can only be used as part of SDHI which it is a
+part of. This is as opposed to SYS-DMAC where the SYS-DMAC device may be
+used by several different devices, f.e. SDHI and SCIF (serial).
