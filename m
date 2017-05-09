@@ -1,42 +1,52 @@
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] mmc: sdricoh_cs: remove redundant check if len is non-zero
-Date: Tue,  9 May 2017 16:45:04 +0100
-Message-ID: <20170509154504.31901-1-colin.king@canonical.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sascha Sommer <saschasommer@freenet.de>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1] mmc: atmel-mci: Remove AVR32 bits from the driver
+Date: Tue,  9 May 2017 20:03:02 +0300
+Message-ID: <20170509170302.49117-1-andriy.shevchenko@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga07.intel.com ([134.134.136.100]:2843 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755855AbdEIRDl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 9 May 2017 13:03:41 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-From: Colin Ian King <colin.king@canonical.com>
+AVR32 is gone. Now it's time to clean up the driver by removing
+leftovers that was used by AVR32 related code.
 
-At the end of either of the read or write loops len is always zero
-and hence the non-zero check on len and return of -EIO is redundant
-and can be removed.
-
-Detected by CoverityScan, CID#114293 ("Logically dead code")
-
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/sdricoh_cs.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
-index 5ff26ab81eb1..70cb00aa79a0 100644
---- a/drivers/mmc/host/sdricoh_cs.c
-+++ b/drivers/mmc/host/sdricoh_cs.c
-@@ -256,9 +256,6 @@ static int sdricoh_blockio(struct sdricoh_host *host, int read,
- 		}
- 	}
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 388e4a3f13e6..55a3ff63bf47 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -172,13 +172,6 @@
+ #define	atmci_writel(port, reg, value)			\
+ 	__raw_writel((value), (port)->regs + reg)
  
--	if (len)
--		return -EIO;
+-/* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
+-#ifdef CONFIG_AVR32
+-#	define ATMCI_PDC_CONNECTED	0
+-#else
+-#	define ATMCI_PDC_CONNECTED	1
+-#endif
 -
- 	return 0;
- }
+ #define AUTOSUSPEND_DELAY	50
  
+ #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+@@ -2464,7 +2457,7 @@ static void atmci_get_cap(struct atmel_mci *host)
+ 			"version: 0x%x\n", version);
+ 
+ 	host->caps.has_dma_conf_reg = 0;
+-	host->caps.has_pdc = ATMCI_PDC_CONNECTED;
++	host->caps.has_pdc = 1;
+ 	host->caps.has_cfg_reg = 0;
+ 	host->caps.has_cstor_reg = 0;
+ 	host->caps.has_highspeed = 0;
 -- 
 2.11.0
+
