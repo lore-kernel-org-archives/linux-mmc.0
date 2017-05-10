@@ -1,111 +1,123 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 0/2] Add support for Meson MX "SDIO" MMC driver
-Date: Wed, 10 May 2017 10:44:34 +0200
-Message-ID: <CAPDyKFoYPjB1bjRfFCFT3vuzKgzm6-7L2qgNjxGL392cLDe7uA@mail.gmail.com>
-References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH v2 1/6] mmc: tmio: drop filenames from comment at top of source
+Date: Wed, 10 May 2017 11:25:25 +0200
+Message-ID: <1494408330-28161-2-git-send-email-horms+renesas@verge.net.au>
+References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:36099 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752323AbdEJIog (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2017 04:44:36 -0400
-Received: by mail-qt0-f174.google.com with SMTP id m91so20730759qte.3
-        for <linux-mmc@vger.kernel.org>; Wed, 10 May 2017 01:44:35 -0700 (PDT)
-In-Reply-To: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:54120 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752066AbdEJJZx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2017 05:25:53 -0400
+In-Reply-To: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-amlogic@lists.infradead.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Simon Horman <horms+renesas@verge.net.au>
 
-On 6 May 2017 at 19:18, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
-> This is the successor to Carlo Caione's "Add support for Amlogic Meson
-> MMC driver" series (v5) from [0].
->
-> I would like you to specifically review:
-> - whether I've (ab)used the MMC framework properly (as this is my first
->   "larger" contribution to an MMC driver)
+Reshuffle the comment at the top of the source
+dropping filenames and moving up human readable strings.
 
-I take a look soonish.
+This seems to be somewhat more useful information to start the
+source file with. It is also less fragile, f.e. to file renames.
 
-> - I think I have improved the locking compared to Carlo's version,
->   however I'd still like feedback on whether this looks sane now or if I
->   can improve that even further
->
-> (notable) changes since Carlo's latest version are:
-> - renamed the driver to meson-mx-sdio (Amlogic's reference kernel calls
->   the driver "aml_sdio" as there is a second MMC controller in these SoCs
->   which they call the "SDHC controller"). do the same with our driver to
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/tmio_mmc.c     | 8 +++-----
+ drivers/mmc/host/tmio_mmc.h     | 7 +++----
+ drivers/mmc/host/tmio_mmc_dma.c | 4 +---
+ drivers/mmc/host/tmio_mmc_pio.c | 8 +++-----
+ 4 files changed, 10 insertions(+), 17 deletions(-)
 
-I don't like to renaming drivers, just because there are a reference
-kernel using a different name.
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index e897e7fc3b14..ff14311bddbe 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -1,5 +1,7 @@
+ /*
+- * linux/drivers/mmc/host/tmio_mmc.c
++ * Driver for the MMC / SD / SDIO cell found in:
++ *
++ * TC6393XB TC6391XB TC6387XB T7L66XB ASIC3
+  *
+  * Copyright (C) 2007 Ian Molton
+  * Copyright (C) 2004 Ian Molton
+@@ -7,10 +9,6 @@
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+- *
+- * Driver for the MMC / SD / SDIO cell found in:
+- *
+- * TC6393XB TC6391XB TC6387XB T7L66XB ASIC3
+  */
+ 
+ #include <linux/device.h>
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index d0edb5730d3f..08076d2bc3b0 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -1,5 +1,7 @@
+ /*
+- * linux/drivers/mmc/host/tmio_mmc.h
++ * Driver for the MMC / SD / SDIO cell found in:
++ *
++ * TC6393XB TC6391XB TC6387XB T7L66XB ASIC3
+  *
+  * Copyright (C) 2016 Sang Engineering, Wolfram Sang
+  * Copyright (C) 2015-16 Renesas Electronics Corporation
+@@ -10,9 +12,6 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  *
+- * Driver for the MMC / SD / SDIO cell found in:
+- *
+- * TC6393XB TC6391XB TC6387XB T7L66XB ASIC3
+  */
+ 
+ #ifndef TMIO_MMC_H
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index e2093db2b7ff..98ce896b13e4 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -1,13 +1,11 @@
+ /*
+- * linux/drivers/mmc/tmio_mmc_dma.c
++ * DMA function for TMIO MMC implementations
+  *
+  * Copyright (C) 2010-2011 Guennadi Liakhovetski
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+- *
+- * DMA function for TMIO MMC implementations
+  */
+ 
+ #include <linux/device.h>
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index a2d92f10501b..d816a1061639 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1,5 +1,7 @@
+ /*
+- * linux/drivers/mmc/host/tmio_mmc_pio.c
++ * Driver for the MMC / SD / SDIO IP found in:
++ *
++ * TC6393XB, TC6391XB, TC6387XB, T7L66XB, ASIC3, SH-Mobile SoCs
+  *
+  * Copyright (C) 2016 Sang Engineering, Wolfram Sang
+  * Copyright (C) 2015-16 Renesas Electronics Corporation
+@@ -11,10 +13,6 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  *
+- * Driver for the MMC / SD / SDIO IP found in:
+- *
+- * TC6393XB, TC6391XB, TC6387XB, T7L66XB, ASIC3, SH-Mobile SoCs
+- *
+  * This driver draws mainly on scattered spec sheets, Reverse engineering
+  * of the toshiba e800  SD driver and some parts of the 2.4 ASIC3 driver (4 bit
+  * support). (Further 4 bit support from a later datasheet).
+-- 
+2.1.4
 
-What's is really the difference between controllers? Why do they have
-two variants?
-
-Can they be managed by the same driver?
-
->   avoid confusion once we add support for the second controller (which uses
->   a completely different register layout)
-
-Besides that, do they behave differently in some other way?
-
-> - add support for the internal "mux" in this MMC controller (which allows
->   connecting up to three devices to the the controller - at the cost of
->   performance though since the controller can only process one request at
->   a time). The driver registers a new device for each sub-node, which is
->   then fed into the MMC framework to allow per-slot configuration using
->   devicetree (see the example in the documentation)
-
-Unless there really is deployment for more than one slot on some
-boards/SoCs, I would strongly suggest to *not* implement this.
-
-Simply because of overhead and introduced complexity to the driver.
-
-> - use the common clock framework internally for managing the MMC clock
->   (there is a fixed-factor clock in the controller which takes clk81 as
->    input and divides it's clock by two and a divider clock which takes
->    the result from the fixed-factor clock as input)
-> - support the regulators provided by the MMC framework
-> - support for GPIO-based card-detection and read-only-detection through
->   the MMC framework
-> - use of the <linux/bitfield.h> FIELD_PREP and FIELD_GET macros where it
->   make sense (and thus the code easier to read)
-> - re-worked locking (based on the locking in dw_mmc as that also provides
->   multiple "MMC slots")
-
-Lots of changes!
-
-Before even start to review (or someone else), you really need to make
-this review-able.
-
-So, please, one change per patch - and make sure to write good
-changelogs. Then I can start to review.
-
->
-> tests done so far:
-> - reading an OLD 256MiB SD card (which uses only a 1-bit bus) works fine
->   (sha1sum of the whole device matches with what I get on my PC's
->   card-reader)
-> - reading a somewhat more modern class 10 SD card and putting Arch Linux
->   ARM on it (and using that as root file system)
-> - it successfully detects the RTL8723BS SDIO wifi chip in my device (even
->   if the SD card is also enabled)
-> - reading a 128MiB file from the SD card while scanning wifi networks on
->   the RTL8723BS card does not seem to result in any corruption (sha1sum
->   of the read file seems to match)
-> - read speed of my class 10 SD card: ~15MiB/s
-> - (unfortunately I could NOT test downloading a file over wifi to the SD
->   card because the RTL8723BS driver refuses to see any wifi networks, but
->   that might be a problem on the RTL8723BS driver side since I don't get
->   any error and the driver has just landed a few weeks ago in staging)
->
->
-> [0] http://lists.infradead.org/pipermail/linux-arm-kernel/2016-February/412136.html
->
-
-[...]
-
-Kind regards
-Uffe
