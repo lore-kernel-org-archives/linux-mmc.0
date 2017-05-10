@@ -1,301 +1,380 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v2 4/6] mmc: renesas-sdhi: rename tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c
-Date: Wed, 10 May 2017 11:25:28 +0200
-Message-ID: <1494408330-28161-5-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH v2 6/6] mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
+Date: Wed, 10 May 2017 11:25:30 +0200
+Message-ID: <1494408330-28161-7-git-send-email-horms+renesas@verge.net.au>
 References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from kirsty.vergenet.net ([202.4.237.240]:54135 "EHLO
         kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752302AbdEJJ0B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2017 05:26:01 -0400
+        with ESMTP id S1752314AbdEJJ0C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2017 05:26:02 -0400
 In-Reply-To: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Simon Horman <horms+renesas@verge.net.au>
 
-Rename the source file for DMA for SDHI as a follow-up to attaching
-DMA code to the SDHI driver rather than the tmio_core driver.
+Make renesas_sdhi_sys_dmac.c a top-level module file that makes use of
+library code supplied by renesas_sdhi_core.c
 
-The name "renesas" is chosen as the SDHI driver is applicable to a wider
-range of SoCs than SH-Mobile it seems to be a more appropriate name.
-However, the SDHI driver source itself, is left as sh_mobile_sdhi to
-avoid unnecessary churn.
-
-The name sys_dmac was chosen to reflect the type of DMA used.
-
-Internal symbols have also been renamed to reflect the filename change.
-
-A follow-up patch will re-organise the SDHI driver removing
-the need for renesas_sdhi_get_dma_ops().
+This is in order to facilitate adding other variants of SDHI;
+in particular SDHI using different DMA controllers.
 
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
- drivers/mmc/host/Makefile                          |  2 +-
- drivers/mmc/host/renesas_sdhi.h                    | 18 +++++++
- .../{tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c}    | 59 ++++++++++++----------
- drivers/mmc/host/sh_mobile_sdhi.c                  |  3 +-
- drivers/mmc/host/tmio_mmc.h                        |  9 ----
- 5 files changed, 52 insertions(+), 39 deletions(-)
- create mode 100644 drivers/mmc/host/renesas_sdhi.h
- rename drivers/mmc/host/{tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c} (82%)
+ drivers/mmc/host/renesas_sdhi.h          |  23 +++++-
+ drivers/mmc/host/renesas_sdhi_core.c     | 132 ++-----------------------------
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 109 ++++++++++++++++++++++++-
+ 3 files changed, 135 insertions(+), 129 deletions(-)
 
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index f9baa943b470..15e3cdcda673 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -36,7 +36,7 @@ obj-$(CONFIG_MMC_S3C)   	+= s3cmci.o
- obj-$(CONFIG_MMC_SDRICOH_CS)	+= sdricoh_cs.o
- obj-$(CONFIG_MMC_TMIO)		+= tmio_mmc.o
- obj-$(CONFIG_MMC_TMIO_CORE)	+= tmio_mmc_core.o
--obj-$(CONFIG_MMC_SDHI)		+= sh_mobile_sdhi.o tmio_mmc_dma.o
-+obj-$(CONFIG_MMC_SDHI)		+= sh_mobile_sdhi.o renesas_sdhi_sys_dmac.o
- obj-$(CONFIG_MMC_CB710)		+= cb710-mmc.o
- obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
- obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
 diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-new file mode 100644
-index 000000000000..f65d936cd680
---- /dev/null
+index f65d936cd680..eb3ea15ff92d 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
 +++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -0,0 +1,18 @@
-+/*
-+ * Renesas Mobile SDHI
-+ *
-+ * Copyright (C) 2017 Horms Solutions Ltd., Simon Horman
-+ * Copyright (C) 2017 Renesas Electronics Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+@@ -12,7 +12,28 @@
+ #ifndef RENESAS_SDHI_H
+ #define RENESAS_SDHI_H
+ 
++#include <linux/platform_device.h>
+ #include "tmio_mmc.h"
+ 
+-const struct tmio_mmc_dma_ops *renesas_sdhi_get_dma_ops(void);
++struct renesas_sdhi_scc {
++	unsigned long clk_rate;	/* clock rate for SDR104 */
++	u32 tap;		/* sampling clock position for SDR104 */
++};
 +
-+#ifndef RENESAS_SDHI_H
-+#define RENESAS_SDHI_H
++struct renesas_sdhi_of_data {
++	unsigned long tmio_flags;
++	u32	      tmio_ocr_mask;
++	unsigned long capabilities;
++	unsigned long capabilities2;
++	enum dma_slave_buswidth dma_buswidth;
++	dma_addr_t dma_rx_offset;
++	unsigned bus_shift;
++	int scc_offset;
++	struct renesas_sdhi_scc *taps;
++	int taps_num;
++};
 +
-+#include "tmio_mmc.h"
-+
-+const struct tmio_mmc_dma_ops *renesas_sdhi_get_dma_ops(void);
-+#endif
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-similarity index 82%
-rename from drivers/mmc/host/tmio_mmc_dma.c
-rename to drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index 537ee4ad8b60..94f453c2da6d 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
++int renesas_sdhi_probe(struct platform_device *pdev,
++                       const struct tmio_mmc_dma_ops *dma_ops);
++int renesas_sdhi_remove(struct platform_device *pdev);
+ #endif
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index b605b8fe9499..846ee1a8e5a6 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -1,5 +1,5 @@
+ /*
+- * SuperH Mobile SDHI
++ * Renesas SDHI
+  *
+  * Copyright (C) 2016 Sang Engineering, Wolfram Sang
+  * Copyright (C) 2015-16 Renesas Electronics Corporation
+@@ -23,8 +23,6 @@
+ #include <linux/kernel.h>
+ #include <linux/clk.h>
+ #include <linux/slab.h>
+-#include <linux/mod_devicetable.h>
+-#include <linux/module.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
+ #include <linux/mmc/host.h>
+@@ -48,100 +46,6 @@
+ 
+ #define host_to_priv(host) container_of((host)->pdata, struct renesas_sdhi, mmc_data)
+ 
+-struct renesas_sdhi_scc {
+-	unsigned long clk_rate;	/* clock rate for SDR104 */
+-	u32 tap;		/* sampling clock position for SDR104 */
+-};
+-
+-struct renesas_sdhi_of_data {
+-	unsigned long tmio_flags;
+-	u32	      tmio_ocr_mask;
+-	unsigned long capabilities;
+-	unsigned long capabilities2;
+-	enum dma_slave_buswidth dma_buswidth;
+-	dma_addr_t dma_rx_offset;
+-	unsigned bus_shift;
+-	int scc_offset;
+-	struct renesas_sdhi_scc *taps;
+-	int taps_num;
+-};
+-
+-static const struct renesas_sdhi_of_data of_default_cfg = {
+-	.tmio_flags = TMIO_MMC_HAS_IDLE_WAIT,
+-};
+-
+-static const struct renesas_sdhi_of_data of_rz_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_32BIT_DATA_PORT,
+-	.tmio_ocr_mask	= MMC_VDD_32_33,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+-};
+-
+-static const struct renesas_sdhi_of_data of_rcar_gen1_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+-			  TMIO_MMC_CLK_ACTUAL,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+-};
+-
+-/* Definitions for sampling clocks */
+-static struct renesas_sdhi_scc rcar_gen2_scc_taps[] = {
+-	{
+-		.clk_rate = 156000000,
+-		.tap = 0x00000703,
+-	},
+-	{
+-		.clk_rate = 0,
+-		.tap = 0x00000300,
+-	},
+-};
+-
+-static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+-			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+-	.dma_buswidth	= DMA_SLAVE_BUSWIDTH_4_BYTES,
+-	.dma_rx_offset	= 0x2000,
+-	.scc_offset	= 0x0300,
+-	.taps		= rcar_gen2_scc_taps,
+-	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
+-};
+-
+-/* Definitions for sampling clocks */
+-static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
+-	{
+-		.clk_rate = 0,
+-		.tap = 0x00000300,
+-	},
+-};
+-
+-static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+-			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+-	.bus_shift	= 2,
+-	.scc_offset	= 0x1000,
+-	.taps		= rcar_gen3_scc_taps,
+-	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
+-};
+-
+-static const struct of_device_id renesas_sdhi_of_match[] = {
+-	{ .compatible = "renesas,sdhi-shmobile" },
+-	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
+-	{ .compatible = "renesas,sdhi-r8a73a4", .data = &of_default_cfg, },
+-	{ .compatible = "renesas,sdhi-r8a7740", .data = &of_default_cfg, },
+-	{ .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, renesas_sdhi_of_match);
+-
+ struct renesas_sdhi {
+ 	struct clk *clk;
+ 	struct clk *clk_cd;
+@@ -552,9 +456,10 @@ static void renesas_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
+ 	renesas_sdhi_sdbuf_width(host, enable ? 32 : 16);
+ }
+ 
+-static int renesas_sdhi_probe(struct platform_device *pdev)
++int renesas_sdhi_probe(struct platform_device *pdev,
++		       const struct tmio_mmc_dma_ops *dma_ops)
+ {
+-	const struct renesas_sdhi_of_data *of_data = of_device_get_match_data(&pdev->dev);
++	const struct renesas_sdhi_of_data *of_data = of_device_get_match_data( &pdev->dev);
+ 	struct renesas_sdhi *priv;
+ 	struct tmio_mmc_data *mmc_data;
+ 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
+@@ -668,7 +573,7 @@ static int renesas_sdhi_probe(struct platform_device *pdev)
+ 	/* All SDHI have SDIO status bits which must be 1 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_SETBITS;
+ 
+-	ret = tmio_mmc_host_probe(host, mmc_data, renesas_sdhi_get_dma_ops());
++	ret = tmio_mmc_host_probe(host, mmc_data, dma_ops);
+ 	if (ret < 0)
+ 		goto efree;
+ 
+@@ -734,7 +639,7 @@ static int renesas_sdhi_probe(struct platform_device *pdev)
+ 	return ret;
+ }
+ 
+-static int renesas_sdhi_remove(struct platform_device *pdev)
++int renesas_sdhi_remove(struct platform_device *pdev)
+ {
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+@@ -743,28 +648,3 @@ static int renesas_sdhi_remove(struct platform_device *pdev)
+ 
+ 	return 0;
+ }
+-
+-static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-			pm_runtime_force_resume)
+-	SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+-			tmio_mmc_host_runtime_resume,
+-			NULL)
+-};
+-
+-static struct platform_driver renesas_sdhi_driver = {
+-	.driver		= {
+-		.name	= "sh_mobile_sdhi",
+-		.pm	= &tmio_mmc_dev_pm_ops,
+-		.of_match_table = renesas_sdhi_of_match,
+-	},
+-	.probe		= renesas_sdhi_probe,
+-	.remove		= renesas_sdhi_remove,
+-};
+-
+-module_platform_driver(renesas_sdhi_driver);
+-
+-MODULE_DESCRIPTION("Renesas SDHI driver");
+-MODULE_AUTHOR("Magnus Damm");
+-MODULE_LICENSE("GPL v2");
+-MODULE_ALIAS("platform:sh_mobile_sdhi");
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 94f453c2da6d..acc42e0a3411 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
 +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -20,7 +20,8 @@
- 
- #define TMIO_MMC_MIN_DMA_LEN 8
- 
--static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
-+static void renesas_sdhi_sys_dmac_enable_dma(struct tmio_mmc_host *host,
-+					     bool enable)
- {
- 	if (!host->chan_tx || !host->chan_rx)
- 		return;
-@@ -29,19 +30,19 @@ static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
- 		host->dma->enable(host, enable);
- }
- 
--static void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
-+static void renesas_sdhi_sys_dmac_abort_dma(struct tmio_mmc_host *host)
- {
--	tmio_mmc_enable_dma(host, false);
-+	renesas_sdhi_sys_dmac_enable_dma(host, false);
- 
- 	if (host->chan_rx)
- 		dmaengine_terminate_all(host->chan_rx);
- 	if (host->chan_tx)
- 		dmaengine_terminate_all(host->chan_tx);
- 
--	tmio_mmc_enable_dma(host, true);
-+	renesas_sdhi_sys_dmac_enable_dma(host, true);
- }
- 
--static void tmio_mmc_dma_callback(void *arg)
-+static void renesas_sdhi_sys_dmac_dma_callback(void *arg)
- {
- 	struct tmio_mmc_host *host = arg;
- 
-@@ -69,7 +70,7 @@ static void tmio_mmc_dma_callback(void *arg)
- 	spin_unlock_irq(&host->lock);
- }
- 
--static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
-+static void renesas_sdhi_sys_dmac_start_dma_rx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
-@@ -115,7 +116,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 
- 	if (desc) {
- 		reinit_completion(&host->dma_dataend);
--		desc->callback = tmio_mmc_dma_callback;
-+		desc->callback = renesas_sdhi_sys_dmac_dma_callback;
- 		desc->callback_param = host;
- 
- 		cookie = dmaengine_submit(desc);
-@@ -127,7 +128,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- pio:
- 	if (!desc) {
- 		/* DMA failed, fall back to PIO */
--		tmio_mmc_enable_dma(host, false);
-+		renesas_sdhi_sys_dmac_enable_dma(host, false);
- 		if (ret >= 0)
- 			ret = -EIO;
- 		host->chan_rx = NULL;
-@@ -143,7 +144,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 	}
- }
- 
--static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
-+static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
-@@ -193,7 +194,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 
- 	if (desc) {
- 		reinit_completion(&host->dma_dataend);
--		desc->callback = tmio_mmc_dma_callback;
-+		desc->callback = renesas_sdhi_sys_dmac_dma_callback;
- 		desc->callback_param = host;
- 
- 		cookie = dmaengine_submit(desc);
-@@ -205,7 +206,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- pio:
- 	if (!desc) {
- 		/* DMA failed, fall back to PIO */
--		tmio_mmc_enable_dma(host, false);
-+		renesas_sdhi_sys_dmac_enable_dma(host, false);
- 		if (ret >= 0)
- 			ret = -EIO;
- 		host->chan_tx = NULL;
-@@ -221,19 +222,19 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 	}
- }
- 
--static void tmio_mmc_start_dma(struct tmio_mmc_host *host,
-+static void renesas_sdhi_sys_dmac_start_dma(struct tmio_mmc_host *host,
- 			       struct mmc_data *data)
- {
- 	if (data->flags & MMC_DATA_READ) {
- 		if (host->chan_rx)
--			tmio_mmc_start_dma_rx(host);
-+			renesas_sdhi_sys_dmac_start_dma_rx(host);
- 	} else {
- 		if (host->chan_tx)
--			tmio_mmc_start_dma_tx(host);
-+			renesas_sdhi_sys_dmac_start_dma_tx(host);
- 	}
- }
- 
--static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
-+static void renesas_sdhi_sys_dmac_issue_tasklet_fn(unsigned long priv)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)priv;
- 	struct dma_chan *chan = NULL;
-@@ -255,8 +256,8 @@ static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
- 		dma_async_issue_pending(chan);
- }
- 
--static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
--				 struct tmio_mmc_data *pdata)
-+static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
-+					      struct tmio_mmc_data *pdata)
- {
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
- 	if (!host->dma || (!host->pdev->dev.of_node &&
-@@ -319,10 +320,12 @@ static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
- 			goto ebouncebuf;
- 
- 		init_completion(&host->dma_dataend);
--		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
-+		tasklet_init(&host->dma_issue,
-+			     renesas_sdhi_sys_dmac_issue_tasklet_fn,
-+			     (unsigned long)host);
- 	}
- 
--	tmio_mmc_enable_dma(host, true);
-+	renesas_sdhi_sys_dmac_enable_dma(host, true);
- 
- 	return;
- 
-@@ -336,7 +339,7 @@ static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
- 	host->chan_tx = NULL;
- }
- 
--static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
-+static void renesas_sdhi_sys_dmac_release_dma(struct tmio_mmc_host *host)
- {
- 	if (host->chan_tx) {
- 		struct dma_chan *chan = host->chan_tx;
-@@ -354,15 +357,15 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
- 	}
- }
- 
--static const struct tmio_mmc_dma_ops tmio_mmc_dma_ops = {
--	.start = tmio_mmc_start_dma,
--	.enable = tmio_mmc_enable_dma,
--	.request = tmio_mmc_request_dma,
--	.release = tmio_mmc_release_dma,
--	.abort = tmio_mmc_abort_dma,
-+static const struct tmio_mmc_dma_ops renesas_sdhi_sys_dmac_dma_ops = {
-+	.start = renesas_sdhi_sys_dmac_start_dma,
-+	.enable = renesas_sdhi_sys_dmac_enable_dma,
-+	.request = renesas_sdhi_sys_dmac_request_dma,
-+	.release = renesas_sdhi_sys_dmac_release_dma,
-+	.abort = renesas_sdhi_sys_dmac_abort_dma,
- };
- 
--const struct tmio_mmc_dma_ops *tmio_mmc_get_dma_ops(void)
-+const struct tmio_mmc_dma_ops *renesas_sdhi_get_dma_ops(void)
- {
--	return &tmio_mmc_dma_ops;
-+	return &renesas_sdhi_sys_dmac_dma_ops;
- }
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 90ab460811f6..708c2ba28f99 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -35,6 +35,7 @@
- #include <linux/pinctrl/pinctrl-state.h>
- #include <linux/regulator/consumer.h>
+@@ -13,13 +13,93 @@
+ #include <linux/dmaengine.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
++#include <linux/mod_devicetable.h>
++#include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
  
 +#include "renesas_sdhi.h"
  #include "tmio_mmc.h"
  
- #define EXT_ACC           0xe4
-@@ -667,7 +668,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	/* All SDHI have SDIO status bits which must be 1 */
- 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_SETBITS;
+ #define TMIO_MMC_MIN_DMA_LEN 8
  
--	ret = tmio_mmc_host_probe(host, mmc_data, tmio_mmc_get_dma_ops());
-+	ret = tmio_mmc_host_probe(host, mmc_data, renesas_sdhi_get_dma_ops());
- 	if (ret < 0)
- 		goto efree;
- 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 5b8f61de78c9..9c94b6eb9b49 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -213,15 +213,6 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- irqreturn_t tmio_mmc_irq(int irq, void *devid);
- 
--#if IS_ENABLED(CONFIG_MMC_SDHI)
--const struct tmio_mmc_dma_ops *tmio_mmc_get_dma_ops(void);
--#else
--static inline const struct tmio_mmc_dma_ops *tmio_mmc_get_dma_ops(void)
--{
--	return NULL;
--}
--#endif
--
- static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
- 					 unsigned long *flags)
++static const struct renesas_sdhi_of_data of_default_cfg = {
++	.tmio_flags = TMIO_MMC_HAS_IDLE_WAIT,
++};
++
++static const struct renesas_sdhi_of_data of_rz_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_32BIT_DATA_PORT,
++	.tmio_ocr_mask	= MMC_VDD_32_33,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++};
++
++static const struct renesas_sdhi_of_data of_rcar_gen1_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
++			  TMIO_MMC_CLK_ACTUAL,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++};
++
++/* Definitions for sampling clocks */
++static struct renesas_sdhi_scc rcar_gen2_scc_taps[] = {
++	{
++		.clk_rate = 156000000,
++		.tap = 0x00000703,
++	},
++	{
++		.clk_rate = 0,
++		.tap = 0x00000300,
++	},
++};
++
++static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
++			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++	.dma_buswidth	= DMA_SLAVE_BUSWIDTH_4_BYTES,
++	.dma_rx_offset	= 0x2000,
++	.scc_offset	= 0x0300,
++	.taps		= rcar_gen2_scc_taps,
++	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
++};
++
++/* Definitions for sampling clocks */
++static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
++	{
++		.clk_rate = 0,
++		.tap = 0x00000300,
++	},
++};
++
++static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
++			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++	.bus_shift	= 2,
++	.scc_offset	= 0x1000,
++	.taps		= rcar_gen3_scc_taps,
++	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
++};
++
++static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
++	{ .compatible = "renesas,sdhi-shmobile" },
++	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
++	{ .compatible = "renesas,sdhi-r8a73a4", .data = &of_default_cfg, },
++	{ .compatible = "renesas,sdhi-r8a7740", .data = &of_default_cfg, },
++	{ .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
++	{},
++};
++MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
++
++
+ static void renesas_sdhi_sys_dmac_enable_dma(struct tmio_mmc_host *host,
+ 					     bool enable)
  {
+@@ -365,7 +445,32 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_sys_dmac_dma_ops = {
+ 	.abort = renesas_sdhi_sys_dmac_abort_dma,
+ };
+ 
+-const struct tmio_mmc_dma_ops *renesas_sdhi_get_dma_ops(void)
++static int renesas_sdhi_sys_dmac_probe(struct platform_device *pdev)
+ {
+-	return &renesas_sdhi_sys_dmac_dma_ops;
++	return renesas_sdhi_probe(pdev, &renesas_sdhi_sys_dmac_dma_ops);
+ }
++
++static const struct dev_pm_ops renesas_sdhi_sys_dmac_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++			pm_runtime_force_resume)
++	SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
++			tmio_mmc_host_runtime_resume,
++			NULL)
++};
++
++static struct platform_driver renesas_sys_dmac_sdhi_driver = {
++	.driver		= {
++		.name	= "sh_mobile_sdhi",
++		.pm	= &renesas_sdhi_sys_dmac_dev_pm_ops,
++		.of_match_table = renesas_sdhi_sys_dmac_of_match,
++	},
++	.probe		= renesas_sdhi_sys_dmac_probe,
++	.remove		= renesas_sdhi_remove,
++};
++
++module_platform_driver(renesas_sys_dmac_sdhi_driver);
++
++MODULE_DESCRIPTION("Renesas SDHI driver");
++MODULE_AUTHOR("Magnus Damm");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:sh_mobile_sdhi");
 -- 
 2.1.4
 
