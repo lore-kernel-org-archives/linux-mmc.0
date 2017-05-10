@@ -1,136 +1,111 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 5/5] mmc: block: move multi-ioctl() to use block layer
-Date: Wed, 10 May 2017 10:24:18 +0200
-Message-ID: <20170510082418.10513-6-linus.walleij@linaro.org>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170510082418.10513-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC 0/2] Add support for Meson MX "SDIO" MMC driver
+Date: Wed, 10 May 2017 10:44:34 +0200
+Message-ID: <CAPDyKFoYPjB1bjRfFCFT3vuzKgzm6-7L2qgNjxGL392cLDe7uA@mail.gmail.com>
+References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:36099 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752323AbdEJIog (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2017 04:44:36 -0400
+Received: by mail-qt0-f174.google.com with SMTP id m91so20730759qte.3
+        for <linux-mmc@vger.kernel.org>; Wed, 10 May 2017 01:44:35 -0700 (PDT)
+In-Reply-To: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-amlogic@lists.infradead.org
 
-This switches also the multiple-command ioctl() call to issue
-all ioctl()s through the block layer instead of going directly
-to the device.
+On 6 May 2017 at 19:18, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+> This is the successor to Carlo Caione's "Add support for Amlogic Meson
+> MMC driver" series (v5) from [0].
+>
+> I would like you to specifically review:
+> - whether I've (ab)used the MMC framework properly (as this is my first
+>   "larger" contribution to an MMC driver)
 
-We extend the passed argument with an argument count and loop
-over all passed commands in the ioctl() issue function called
-from the block layer.
+I take a look soonish.
 
-By doing this we are again loosening the grip on the big host
-lock, since two calls to mmc_get_card()/mmc_put_card() are
-removed.
+> - I think I have improved the locking compared to Carlo's version,
+>   however I'd still like feedback on whether this looks sane now or if I
+>   can improve that even further
+>
+> (notable) changes since Carlo's latest version are:
+> - renamed the driver to meson-mx-sdio (Amlogic's reference kernel calls
+>   the driver "aml_sdio" as there is a second MMC controller in these SoCs
+>   which they call the "SDHC controller"). do the same with our driver to
 
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/core/block.c | 38 +++++++++++++++++++++++++-------------
- drivers/mmc/core/queue.h |  3 ++-
- 2 files changed, 27 insertions(+), 14 deletions(-)
+I don't like to renaming drivers, just because there are a reference
+kernel using a different name.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 640db4f57a31..152de904d5e4 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -563,6 +563,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 			     struct mmc_ioc_cmd __user *ic_ptr)
- {
- 	struct mmc_blk_ioc_data *idata;
-+	struct mmc_blk_ioc_data *idatas[1];
- 	struct mmc_blk_data *md;
- 	struct mmc_queue *mq;
- 	struct mmc_card *card;
-@@ -600,7 +601,9 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	req = blk_get_request(mq->queue,
- 		idata->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
- 		__GFP_RECLAIM);
--	req_to_mq_rq(req)->idata = idata;
-+	idatas[0] = idata;
-+	req_to_mq_rq(req)->idata = idatas;
-+	req_to_mq_rq(req)->ioc_count = 1;
- 	blk_execute_rq(mq->queue, NULL, req, 0);
- 	ioc_err = req_to_mq_rq(req)->ioc_result;
- 	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
-@@ -622,14 +625,17 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- static void mmc_blk_ioctl_cmd_issue(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_queue_req *mq_rq;
--	struct mmc_blk_ioc_data *idata;
- 	struct mmc_card *card = mq->card;
- 	struct mmc_blk_data *md = mq->blkdata;
- 	int ioc_err;
-+	int i;
- 
- 	mq_rq = req_to_mq_rq(req);
--	idata = mq_rq->idata;
--	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
-+	for (i = 0; i < mq_rq->ioc_count; i++) {
-+		ioc_err = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
-+		if (ioc_err)
-+			break;
-+	}
- 	mq_rq->ioc_result = ioc_err;
- 
- 	/* Always switch back to main area after RPMB access */
-@@ -646,8 +652,10 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	struct mmc_ioc_cmd __user *cmds = user->cmds;
- 	struct mmc_card *card;
- 	struct mmc_blk_data *md;
-+	struct mmc_queue *mq;
- 	int i, err = 0, ioc_err = 0;
- 	__u64 num_of_cmds;
-+	struct request *req;
- 
- 	/*
- 	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-@@ -689,21 +697,25 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 		goto cmd_done;
- 	}
- 
--	mmc_get_card(card);
--
--	for (i = 0; i < num_of_cmds && !ioc_err; i++)
--		ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
--
--	/* Always switch back to main area after RPMB access */
--	if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
--		mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
- 
--	mmc_put_card(card);
-+	/*
-+	 * Dispatch the ioctl()s into the block request queue.
-+	 */
-+	mq = &md->queue;
-+	req = blk_get_request(mq->queue,
-+		idata[0]->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
-+		__GFP_RECLAIM);
-+	req_to_mq_rq(req)->idata = idata;
-+	req_to_mq_rq(req)->ioc_count = num_of_cmds;
-+	blk_execute_rq(mq->queue, NULL, req, 0);
-+	ioc_err = req_to_mq_rq(req)->ioc_result;
- 
- 	/* copy to user if data and response */
- 	for (i = 0; i < num_of_cmds && !err; i++)
- 		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
- 
-+	blk_put_request(req);
-+
- cmd_done:
- 	mmc_blk_put(md);
- cmd_err:
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index aeb3408dc85e..7015df6681c3 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -42,7 +42,8 @@ struct mmc_queue_req {
- 	unsigned int		bounce_sg_len;
- 	struct mmc_async_req	areq;
- 	int			ioc_result;
--	struct mmc_blk_ioc_data	*idata;
-+	struct mmc_blk_ioc_data	**idata;
-+	unsigned int		ioc_count;
- };
- 
- struct mmc_queue {
--- 
-2.9.3
+What's is really the difference between controllers? Why do they have
+two variants?
+
+Can they be managed by the same driver?
+
+>   avoid confusion once we add support for the second controller (which uses
+>   a completely different register layout)
+
+Besides that, do they behave differently in some other way?
+
+> - add support for the internal "mux" in this MMC controller (which allows
+>   connecting up to three devices to the the controller - at the cost of
+>   performance though since the controller can only process one request at
+>   a time). The driver registers a new device for each sub-node, which is
+>   then fed into the MMC framework to allow per-slot configuration using
+>   devicetree (see the example in the documentation)
+
+Unless there really is deployment for more than one slot on some
+boards/SoCs, I would strongly suggest to *not* implement this.
+
+Simply because of overhead and introduced complexity to the driver.
+
+> - use the common clock framework internally for managing the MMC clock
+>   (there is a fixed-factor clock in the controller which takes clk81 as
+>    input and divides it's clock by two and a divider clock which takes
+>    the result from the fixed-factor clock as input)
+> - support the regulators provided by the MMC framework
+> - support for GPIO-based card-detection and read-only-detection through
+>   the MMC framework
+> - use of the <linux/bitfield.h> FIELD_PREP and FIELD_GET macros where it
+>   make sense (and thus the code easier to read)
+> - re-worked locking (based on the locking in dw_mmc as that also provides
+>   multiple "MMC slots")
+
+Lots of changes!
+
+Before even start to review (or someone else), you really need to make
+this review-able.
+
+So, please, one change per patch - and make sure to write good
+changelogs. Then I can start to review.
+
+>
+> tests done so far:
+> - reading an OLD 256MiB SD card (which uses only a 1-bit bus) works fine
+>   (sha1sum of the whole device matches with what I get on my PC's
+>   card-reader)
+> - reading a somewhat more modern class 10 SD card and putting Arch Linux
+>   ARM on it (and using that as root file system)
+> - it successfully detects the RTL8723BS SDIO wifi chip in my device (even
+>   if the SD card is also enabled)
+> - reading a 128MiB file from the SD card while scanning wifi networks on
+>   the RTL8723BS card does not seem to result in any corruption (sha1sum
+>   of the read file seems to match)
+> - read speed of my class 10 SD card: ~15MiB/s
+> - (unfortunately I could NOT test downloading a file over wifi to the SD
+>   card because the RTL8723BS driver refuses to see any wifi networks, but
+>   that might be a problem on the RTL8723BS driver side since I don't get
+>   any error and the driver has just landed a few weeks ago in staging)
+>
+>
+> [0] http://lists.infradead.org/pipermail/linux-arm-kernel/2016-February/412136.html
+>
+
+[...]
+
+Kind regards
+Uffe
