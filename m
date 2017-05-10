@@ -1,106 +1,89 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v2] mmc: atmel-mci: Remove AVR32 bits from the driver
-Date: Tue,  9 May 2017 20:21:17 +0300
-Message-ID: <20170509172117.50588-1-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:46050 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754120AbdEIRVW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 May 2017 13:21:22 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Zhang Rui <rui.zhang@intel.com>
+Subject: Re: [PATCH v1] ACPI: Switch to use generic UUID API
+Date: Wed, 10 May 2017 09:20:51 +0800
+Message-ID: <1494379251.2129.15.camel@intel.com>
+References: <20170504092151.88646-1-andriy.shevchenko@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20170504092151.88646-1-andriy.shevchenko@linux.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-acpi@vger.kernel.org, tpmdd-devel@lists.sourceforge.net, intel-gfx@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-input@vger.kernel.org, iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-pci@vger.kernel.org, linux-usb@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
+Cc: "Rafael J . Wysocki" <rjw@rjwysocki.net>, Mika Westerberg <mika.westerberg@linux.intel.com>, Borislav Petkov <bp@suse.de>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Jani Nikula <jani.nikula@linux.intel.com>, Ben Skeggs <bskeggs@redhat.com>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Joerg Roedel <joro@8bytes.org>, Adrian Hunter <adrian.hunter@intel.com>, Yisen Zhuang <yisen.zhuang@huawei.com>, Bjorn Helgaas <bhelgaas@google.com>, Felipe Balbi <balbi@kernel.org>, Mathias Nyman <mathias.nyman@intel.com>, Heikki Krogerus <heikki.krogerus@linux.intel.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@microchip.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-AVR32 is gone. Now it's time to clean up the driver by removing
-leftovers that was used by AVR32 related code.
+On Thu, 2017-05-04 at 12:21 +0300, Andy Shevchenko wrote:
+> acpi_evaluate_dsm() and friends take a pointer to a raw buffer of 16
+> bytes. Instead we convert them to use uuid_le type. At the same time
+> we
+> convert current users.
+> 
+> acpi_str_to_uuid() becomes useless after the conversion and it's safe
+> to
+> get rid of it.
+> 
+> The conversion fixes a potential bug in int340x_thermal as well since
+> we have to use memcmp() on binary data.
+> 
+> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> Cc: Borislav Petkov <bp@suse.de>
+> Cc: Dan Williams <dan.j.williams@intel.com>
+> Cc: Amir Goldstein <amir73il@gmail.com>
+> Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+> Cc: Jani Nikula <jani.nikula@linux.intel.com>
+> Cc: Ben Skeggs <bskeggs@redhat.com>
+> Cc: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+> Cc: Joerg Roedel <joro@8bytes.org>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Yisen Zhuang <yisen.zhuang@huawei.com>
+> Cc: Bjorn Helgaas <bhelgaas@google.com>
+> Cc: Zhang Rui <rui.zhang@intel.com>
+> Cc: Felipe Balbi <balbi@kernel.org>
+> Cc: Mathias Nyman <mathias.nyman@intel.com>
+> Cc: Heikki Krogerus <heikki.krogerus@linux.intel.com>
+> Cc: Liam Girdwood <lgirdwood@gmail.com>
+> Cc: Mark Brown <broonie@kernel.org>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+> 
+> diff --git a/drivers/thermal/int340x_thermal/int3400_thermal.c
+> b/drivers/thermal/int340x_thermal/int3400_thermal.c
+> index 9413c4abf0b9..c0eb3bb19b23 100644
+> --- a/drivers/thermal/int340x_thermal/int3400_thermal.c
+> +++ b/drivers/thermal/int340x_thermal/int3400_thermal.c
+> @@ -23,7 +23,7 @@ enum int3400_thermal_uuid {
+>  	INT3400_THERMAL_MAXIMUM_UUID,
+>  };
+>  
+> -static u8 *int3400_thermal_uuids[INT3400_THERMAL_MAXIMUM_UUID] = {
+> +static const char
+> *int3400_thermal_uuids[INT3400_THERMAL_MAXIMUM_UUID] = {
+>  	"42A441D6-AE6A-462b-A84B-4A8CE79027D3",
+>  	"3A95C389-E4B8-4629-A526-C52C88626BAE",
+>  	"97C68AE7-15FA-499c-B8C9-5DA81D606E0A",
+> @@ -141,10 +141,10 @@ static int int3400_thermal_get_uuids(struct
+> int3400_thermal_priv *priv)
+>  		}
+>  
+>  		for (j = 0; j < INT3400_THERMAL_MAXIMUM_UUID; j++) {
+> -			u8 uuid[16];
+> +			uuid_le u;
+>  
+> -			acpi_str_to_uuid(int3400_thermal_uuids[j],
+> uuid);
+> -			if (!strncmp(uuid, objb->buffer.pointer,
+> 16)) {
+> +			uuid_le_to_bin(int3400_thermal_uuids[j],
+> &u);
+> +			if (!uuid_le_cmp(*(uuid_le *)objb-
+> >buffer.pointer), u) {
+>  				priv->uuid_bitmap |= (1 << j);
+>  				break;
+>  			}
+thanks for the fix.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
-In v2:
-- remove more leftovers of avr32
- drivers/mmc/host/Kconfig     |  8 ++++----
- drivers/mmc/host/atmel-mci.c | 24 ++----------------------
- 2 files changed, 6 insertions(+), 26 deletions(-)
+Acked-by: Zhang Rui <rui.zhang@intel.com>
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2db84dd664d7..e7d3b097cd30 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -408,11 +408,11 @@ config MMC_AU1X
- 
- config MMC_ATMELMCI
- 	tristate "Atmel SD/MMC Driver (Multimedia Card Interface)"
--	depends on AVR32 || ARCH_AT91
-+	depends on ARCH_AT91
- 	help
--	  This selects the Atmel Multimedia Card Interface driver. If
--	  you have an AT32 (AVR32) or AT91 platform with a Multimedia
--	  Card slot, say Y or M here.
-+	  This selects the Atmel Multimedia Card Interface driver.
-+	  If you have an AT91 platform with a Multimedia Card slot,
-+	  say Y or M here.
- 
- 	  If unsure, say N.
- 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 388e4a3f13e6..2e96d964f582 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -44,7 +44,7 @@
- #include <asm/unaligned.h>
- 
- /*
-- * Superset of MCI IP registers integrated in Atmel AVR32 and AT91 Processors
-+ * Superset of MCI IP registers integrated in Atmel AT91 Processor
-  * Registers and bitfields marked with [2] are only available in MCI2
-  */
- 
-@@ -172,13 +172,6 @@
- #define	atmci_writel(port, reg, value)			\
- 	__raw_writel((value), (port)->regs + reg)
- 
--/* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
--#ifdef CONFIG_AVR32
--#	define ATMCI_PDC_CONNECTED	0
--#else
--#	define ATMCI_PDC_CONNECTED	1
--#endif
--
- #define AUTOSUSPEND_DELAY	50
- 
- #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
-@@ -1549,21 +1542,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
- 		break;
- 	default:
--		/*
--		 * TODO: None of the currently available AVR32-based
--		 * boards allow MMC power to be turned off. Implement
--		 * power control when this can be tested properly.
--		 *
--		 * We also need to hook this into the clock management
--		 * somehow so that newly inserted cards aren't
--		 * subjected to a fast clock before we have a chance
--		 * to figure out what the maximum rate is. Currently,
--		 * there's no way to avoid this, and there never will
--		 * be for boards that don't support power control.
--		 */
- 		break;
- 	}
--
- }
- 
- static int atmci_get_ro(struct mmc_host *mmc)
-@@ -2464,7 +2444,7 @@ static void atmci_get_cap(struct atmel_mci *host)
- 			"version: 0x%x\n", version);
- 
- 	host->caps.has_dma_conf_reg = 0;
--	host->caps.has_pdc = ATMCI_PDC_CONNECTED;
-+	host->caps.has_pdc = 1;
- 	host->caps.has_cfg_reg = 0;
- 	host->caps.has_cstor_reg = 0;
- 	host->caps.has_highspeed = 0;
--- 
-2.11.0
-
+-rui
