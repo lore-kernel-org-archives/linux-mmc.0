@@ -1,85 +1,140 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [RFC PATCH 1/3] mmc: sdio: Don't use abort-able claim host method from SDIO IRQ thread
-Date: Thu, 11 May 2017 14:39:00 +0200
-Message-ID: <1494506343-28572-2-git-send-email-ulf.hansson@linaro.org>
+Subject: [RFC PATCH 3/3] mmc: core: Allow mmc block device to re-claim the host
+Date: Thu, 11 May 2017 14:39:02 +0200
+Message-ID: <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org>
 References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:34109 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932671AbdEKMjI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2017 08:39:08 -0400
-Received: by mail-wr0-f179.google.com with SMTP id l9so19527177wre.1
-        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2017 05:39:08 -0700 (PDT)
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:33033 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932671AbdEKMjL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2017 08:39:11 -0400
+Received: by mail-wr0-f170.google.com with SMTP id w50so19594565wrc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2017 05:39:10 -0700 (PDT)
 In-Reply-To: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-In a step to simplify the use of the lock, mmc_claim|release_host(), let's
-change the SDIO IRQ thread to move away from using the abort-able claim
-host method.
+The current mmc block device implementation is tricky when it comes to
+claim and release of the host, while processing I/O requests. In principle
+we need to claim the host at the first request entering the queue and then
+we need to release the host, as soon as the queue becomes empty. This
+complexity relates to the asynchronous request mechanism that the mmc block
+device driver implements.
 
-In the SDIO IRQ thread case, we can instead check the numbers of SDIO IRQs
-that are currently claimed via host->sdio_irqs, as this field is protected
-from updates unless the host is claimed. When host->sdio_irqs has become
-zero, it means the SDIO func driver(s) has released the SDIO IRQ, then we
-can bail out and stop running the SDIO IRQ thread.
+For the legacy block interface that we currently implements, the above
+issue can be addressed, as we can find out when the queue really becomes
+empty.
+
+However, to find out whether the queue is empty, isn't really an applicable
+method when using the new blk-mq interface, as requests are instead pushed
+to us via the struct struct blk_mq_ops and its function pointers.
+
+Being able to support the asynchronous request method using the blk-mq
+interface, means we have to allow the mmc block device driver to re-claim
+the host from different tasks/contexts, as we may have > 1 request to
+operate upon.
+
+Therefore, let's extend the mmc_claim_host() API to support reference
+counting for the mmc block device.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/sdio_irq.c | 10 ++++++----
- include/linux/mmc/host.h    |  1 -
- 2 files changed, 6 insertions(+), 5 deletions(-)
+ drivers/mmc/core/core.c  | 14 ++++++++++----
+ drivers/mmc/core/core.h  |  7 ++++++-
+ include/linux/mmc/host.h |  1 +
+ 3 files changed, 17 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 6d4b720..95f7a09 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -137,9 +137,13 @@ static int sdio_irq_thread(void *_host)
- 		 * holding of the host lock does not cover too much work
- 		 * that doesn't require that lock to be held.
- 		 */
--		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
--		if (ret)
-+		mmc_claim_host(host);
-+		if (!host->sdio_irqs) {
-+			ret = 1;
-+			mmc_release_host(host);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0701e30..3633699 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1019,12 +1019,12 @@ unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz)
+ EXPORT_SYMBOL(mmc_align_data_size);
+ 
+ /**
+- *	mmc_claim_host - exclusively claim a host
++ *	__mmc_claim_host - exclusively claim a host
+  *	@host: mmc host to claim
+  *
+  *	Claim a host for a set of operations.
+  */
+-void mmc_claim_host(struct mmc_host *host)
++void __mmc_claim_host(struct mmc_host *host, bool is_blkdev)
+ {
+ 	DECLARE_WAITQUEUE(wait, current);
+ 	unsigned long flags;
+@@ -1036,7 +1036,11 @@ void mmc_claim_host(struct mmc_host *host)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	while (1) {
+ 		set_current_state(TASK_UNINTERRUPTIBLE);
+-		if (!host->claimed || host->claimer == current)
++		if (!host->claimed)
++			break;
++		if (host->claimer_is_blkdev && is_blkdev)
++			break;
++		if (host->claimer == current)
  			break;
-+		}
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		schedule();
+@@ -1045,6 +1049,7 @@ void mmc_claim_host(struct mmc_host *host)
+ 	set_current_state(TASK_RUNNING);
+ 	host->claimed = 1;
+ 	host->claimer = current;
++	host->claimer_is_blkdev = is_blkdev;
+ 	host->claim_cnt += 1;
+ 	if (host->claim_cnt == 1)
+ 		pm = true;
+@@ -1054,7 +1059,7 @@ void mmc_claim_host(struct mmc_host *host)
+ 	if (pm)
+ 		pm_runtime_get_sync(mmc_dev(host));
+ }
+-EXPORT_SYMBOL(mmc_claim_host);
++EXPORT_SYMBOL(__mmc_claim_host);
+ 
+ /**
+  *	mmc_release_host - release a host
+@@ -1076,6 +1081,7 @@ void mmc_release_host(struct mmc_host *host)
+ 	} else {
+ 		host->claimed = 0;
+ 		host->claimer = NULL;
++		host->claimer_is_blkdev = 0;
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		wake_up(&host->wq);
+ 		pm_runtime_mark_last_busy(mmc_dev(host));
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index b247b1f..1598a37 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -122,9 +122,14 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+ int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+ 			bool is_rel_write);
+ 
+-void mmc_claim_host(struct mmc_host *host);
++void __mmc_claim_host(struct mmc_host *host, bool is_blkdev);
+ void mmc_release_host(struct mmc_host *host);
+ void mmc_get_card(struct mmc_card *card);
+ void mmc_put_card(struct mmc_card *card);
+ 
++static inline void mmc_claim_host(struct mmc_host *host)
++{
++	__mmc_claim_host(host, 0);
++}
 +
- 		ret = process_sdio_pending_irqs(host);
- 		host->sdio_irq_pending = false;
- 		mmc_release_host(host);
-@@ -195,7 +199,6 @@ static int sdio_card_irq_get(struct mmc_card *card)
- 
- 	if (!host->sdio_irqs++) {
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
--			atomic_set(&host->sdio_irq_thread_abort, 0);
- 			host->sdio_irq_thread =
- 				kthread_run(sdio_irq_thread, host,
- 					    "ksdioirqd/%s", mmc_hostname(host));
-@@ -223,7 +226,6 @@ static int sdio_card_irq_put(struct mmc_card *card)
- 
- 	if (!--host->sdio_irqs) {
- 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
--			atomic_set(&host->sdio_irq_thread_abort, 1);
- 			kthread_stop(host->sdio_irq_thread);
- 		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
- 			host->ops->enable_sdio_irq(host, 0);
+ #endif
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 21385ac..8a4131f 100644
+index 8a4131f..7199817 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -359,7 +359,6 @@ struct mmc_host {
- 	unsigned int		sdio_irqs;
- 	struct task_struct	*sdio_irq_thread;
- 	bool			sdio_irq_pending;
--	atomic_t		sdio_irq_thread_abort;
+@@ -347,6 +347,7 @@ struct mmc_host {
  
- 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+ 	wait_queue_head_t	wq;
+ 	struct task_struct	*claimer;	/* task that has host claimed */
++	bool			claimer_is_blkdev; /* claimer is blkdev */
+ 	int			claim_cnt;	/* "claim" nesting count */
  
+ 	struct delayed_work	detect;
 -- 
 2.7.4
 
