@@ -1,31 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [RFC PATCH 0/3] mmc: core: Prepare mmc host locking for blk-mq
-Date: Thu, 11 May 2017 14:38:59 +0200
-Message-ID: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
-Sender: linux-block-owner@vger.kernel.org
+Subject: [RFC PATCH 1/3] mmc: sdio: Don't use abort-able claim host method from SDIO IRQ thread
+Date: Thu, 11 May 2017 14:39:00 +0200
+Message-ID: <1494506343-28572-2-git-send-email-ulf.hansson@linaro.org>
+References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f179.google.com ([209.85.128.179]:34109 "EHLO
+        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932671AbdEKMjI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2017 08:39:08 -0400
+Received: by mail-wr0-f179.google.com with SMTP id l9so19527177wre.1
+        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2017 05:39:08 -0700 (PDT)
+In-Reply-To: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
-List-Id: linux-mmc@vger.kernel.org
 
-The current APIs, mmc_claim|release_host() doesn't play well when the mmc block
-device driver tries to convert to blk-mq. In principle we need a re-claiming
-possibility of the host from the mmc block device driver, and to know when to
-release the host, need to keep track of a reference count instead.
+In a step to simplify the use of the lock, mmc_claim|release_host(), let's
+change the SDIO IRQ thread to move away from using the abort-able claim
+host method.
 
-This series, so far untested, implements the idea from above. Sent as an RFC
-just to get peoples opinion of whether this is an approach that could work.
+In the SDIO IRQ thread case, we can instead check the numbers of SDIO IRQs
+that are currently claimed via host->sdio_irqs, as this field is protected
+from updates unless the host is claimed. When host->sdio_irqs has become
+zero, it means the SDIO func driver(s) has released the SDIO IRQ, then we
+can bail out and stop running the SDIO IRQ thread.
 
-Ulf Hansson (3):
-  mmc: sdio: Don't use abort-able claim host method from SDIO IRQ thread
-  mmc: core: Remove redundant abort-able claim host API
-  mmc: core: Allow mmc block device to re-claim the host
-
- drivers/mmc/core/core.c     | 33 ++++++++++++++-------------------
- drivers/mmc/core/core.h     | 10 ++--------
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
  drivers/mmc/core/sdio_irq.c | 10 ++++++----
- include/linux/mmc/host.h    |  2 +-
- 4 files changed, 23 insertions(+), 32 deletions(-)
+ include/linux/mmc/host.h    |  1 -
+ 2 files changed, 6 insertions(+), 5 deletions(-)
 
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 6d4b720..95f7a09 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -137,9 +137,13 @@ static int sdio_irq_thread(void *_host)
+ 		 * holding of the host lock does not cover too much work
+ 		 * that doesn't require that lock to be held.
+ 		 */
+-		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
+-		if (ret)
++		mmc_claim_host(host);
++		if (!host->sdio_irqs) {
++			ret = 1;
++			mmc_release_host(host);
+ 			break;
++		}
++
+ 		ret = process_sdio_pending_irqs(host);
+ 		host->sdio_irq_pending = false;
+ 		mmc_release_host(host);
+@@ -195,7 +199,6 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 
+ 	if (!host->sdio_irqs++) {
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+-			atomic_set(&host->sdio_irq_thread_abort, 0);
+ 			host->sdio_irq_thread =
+ 				kthread_run(sdio_irq_thread, host,
+ 					    "ksdioirqd/%s", mmc_hostname(host));
+@@ -223,7 +226,6 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 
+ 	if (!--host->sdio_irqs) {
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+-			atomic_set(&host->sdio_irq_thread_abort, 1);
+ 			kthread_stop(host->sdio_irq_thread);
+ 		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+ 			host->ops->enable_sdio_irq(host, 0);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 21385ac..8a4131f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -359,7 +359,6 @@ struct mmc_host {
+ 	unsigned int		sdio_irqs;
+ 	struct task_struct	*sdio_irq_thread;
+ 	bool			sdio_irq_pending;
+-	atomic_t		sdio_irq_thread_abort;
+ 
+ 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+ 
 -- 
 2.7.4
+
