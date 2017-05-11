@@ -1,124 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [RFC PATCH 2/3] mmc: core: Remove redundant abort-able claim host API
-Date: Thu, 11 May 2017 14:39:01 +0200
-Message-ID: <1494506343-28572-3-git-send-email-ulf.hansson@linaro.org>
-References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2 0/6] mmc: renesas-sdhi: refactor DMA support
+Date: Thu, 11 May 2017 16:54:51 +0200
+Message-ID: <20170511145451.GE21895@verge.net.au>
+References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
+ <CAK8P3a3b0cLAB_+52uXQU8NsSJ4PjAXo7JPAKKoYWiUqiP3Rjw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f170.google.com ([209.85.128.170]:33024 "EHLO
-        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932418AbdEKMjJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2017 08:39:09 -0400
-Received: by mail-wr0-f170.google.com with SMTP id w50so19594147wrc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2017 05:39:09 -0700 (PDT)
-In-Reply-To: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:39432 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753820AbdEKOyy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2017 10:54:54 -0400
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a3b0cLAB_+52uXQU8NsSJ4PjAXo7JPAKKoYWiUqiP3Rjw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-The only user of the abort-able claim host API was the SDIO IRQ thread, but
-as that use has now been removed, let's simplify the code and remove the
-API.
+On Wed, May 10, 2017 at 12:07:02PM +0200, Arnd Bergmann wrote:
+> On Wed, May 10, 2017 at 11:25 AM, Simon Horman
+> <horms+renesas@verge.net.au> wrote:
+> > Hi Wolfram, Hi Ulf, Hi Arnd, Hi all,
+> >
+> > the intention of this patch-set is to refactor the DMA support in
+> > the Renesas SDHI driver in order to make it easier to add support
+> > for using the SDHI hardware with different DMA implementations.
+> >
+> > This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
+> > renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
+> > the reworking of the driver proposed by Arnd[1] in his review of that
+> > patch-set.
+> >
+> > [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
+> >
+> > Unlike that patch-set this patch-set does not add support for
+> > R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
+> 
+> (whole series)
+> 
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/core.c | 31 ++++++++++---------------------
- drivers/mmc/core/core.h | 13 +------------
- 2 files changed, 11 insertions(+), 33 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 82c45dd..0701e30 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1019,20 +1019,15 @@ unsigned int mmc_align_data_size(struct mmc_card *card, unsigned int sz)
- EXPORT_SYMBOL(mmc_align_data_size);
- 
- /**
-- *	__mmc_claim_host - exclusively claim a host
-+ *	mmc_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
-- *	@abort: whether or not the operation should be aborted
-  *
-- *	Claim a host for a set of operations.  If @abort is non null and
-- *	dereference a non-zero value then this will return prematurely with
-- *	that non-zero value without acquiring the lock.  Returns zero
-- *	with the lock held otherwise.
-+ *	Claim a host for a set of operations.
-  */
--int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
-+void mmc_claim_host(struct mmc_host *host)
- {
- 	DECLARE_WAITQUEUE(wait, current);
- 	unsigned long flags;
--	int stop;
- 	bool pm = false;
- 
- 	might_sleep();
-@@ -1041,31 +1036,25 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 	spin_lock_irqsave(&host->lock, flags);
- 	while (1) {
- 		set_current_state(TASK_UNINTERRUPTIBLE);
--		stop = abort ? atomic_read(abort) : 0;
--		if (stop || !host->claimed || host->claimer == current)
-+		if (!host->claimed || host->claimer == current)
- 			break;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		schedule();
- 		spin_lock_irqsave(&host->lock, flags);
- 	}
- 	set_current_state(TASK_RUNNING);
--	if (!stop) {
--		host->claimed = 1;
--		host->claimer = current;
--		host->claim_cnt += 1;
--		if (host->claim_cnt == 1)
--			pm = true;
--	} else
--		wake_up(&host->wq);
-+	host->claimed = 1;
-+	host->claimer = current;
-+	host->claim_cnt += 1;
-+	if (host->claim_cnt == 1)
-+		pm = true;
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	remove_wait_queue(&host->wq, &wait);
- 
- 	if (pm)
- 		pm_runtime_get_sync(mmc_dev(host));
--
--	return stop;
- }
--EXPORT_SYMBOL(__mmc_claim_host);
-+EXPORT_SYMBOL(mmc_claim_host);
- 
- /**
-  *	mmc_release_host - release a host
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 55f543f..b247b1f 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -122,20 +122,9 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
- int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
- 			bool is_rel_write);
- 
--int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
-+void mmc_claim_host(struct mmc_host *host);
- void mmc_release_host(struct mmc_host *host);
- void mmc_get_card(struct mmc_card *card);
- void mmc_put_card(struct mmc_card *card);
- 
--/**
-- *	mmc_claim_host - exclusively claim a host
-- *	@host: mmc host to claim
-- *
-- *	Claim a host for a set of operations.
-- */
--static inline void mmc_claim_host(struct mmc_host *host)
--{
--	__mmc_claim_host(host, NULL);
--}
--
- #endif
--- 
-2.7.4
-
+Wolfram, Ulf, could this series be considered for v4.13?
