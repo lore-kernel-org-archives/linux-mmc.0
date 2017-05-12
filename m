@@ -1,39 +1,33 @@
-From: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] mmc: vub3000: add missing USB-descriptor endianness conversions
-Date: Fri, 12 May 2017 12:03:35 +0200
-Message-ID: <20170512100335.1637-1-johan@kernel.org>
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: "Thomas Credit Firm" <miorellana@salud.gob.sv>
+Subject: APPLY FOR YOUR URGENT LOAN AT 2%
+Date: Fri, 12 May 2017 11:53:45 +0100
+Message-ID: <20170512105359.BD18E4807243__38416.7451331907$1494587131$gmane$org@mail.salud.gob.sv>
+Reply-To: thomascreditfirm@gmail.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.salud.gob.sv ([190.5.143.2]:60821 "EHLO mail.salud.gob.sv"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757704AbdELLFM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 12 May 2017 07:05:12 -0400
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: receipt <miorellana@salud.gob.sv>
 
-Add the missing endianness conversions when printing the USB
-device-descriptor idVendor and idProduct fields during probe.
+* Do you need an urgent loan? We offer all kinds of loan
+* Very fast and urgent transfer to your bank account. 
+* Payment begins (6) months after you get the money in your bank account 
+* Low interest rates 2% 
+* Payment of long-term (1-30 years) duration 
+For more information and loan application form through the Contact now 
 
-Signed-off-by: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+E-mail:  Thomascreditfirm@gmail.com 
+Thomas B. Dawson 
+THOMAS CREDIT FIRM
+
 ---
- drivers/mmc/host/vub300.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+This email has been checked for viruses by Avast antivirus software.
+https://www.avast.com/antivirus
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index c061e7c704be..fbeea1a491a6 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2107,7 +2107,8 @@ static int vub300_probe(struct usb_interface *interface,
- 	usb_string(udev, udev->descriptor.iSerialNumber, serial_number,
- 		   sizeof(serial_number));
- 	dev_info(&udev->dev, "probing VID:PID(%04X:%04X) %s %s %s\n",
--		 udev->descriptor.idVendor, udev->descriptor.idProduct,
-+		 le16_to_cpu(udev->descriptor.idVendor),
-+		 le16_to_cpu(udev->descriptor.idProduct),
- 		 manufacturer, product, serial_number);
- 	command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
- 	if (!command_out_urb) {
--- 
-2.13.0
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
