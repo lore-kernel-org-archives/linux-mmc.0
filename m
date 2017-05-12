@@ -1,109 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: core: modernize ioctl() requests
-Date: Thu, 11 May 2017 23:08:17 +0200
-Message-ID: <CAPDyKFr+Qf6dXGwcFUtO7e9dfNuz0JbqDJ95nnTt0ivjC-=zuw@mail.gmail.com>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 1/3] mmc: sdio: Don't use abort-able claim host method
+ from SDIO IRQ thread
+Date: Fri, 12 May 2017 10:42:05 +0300
+Message-ID: <6b359de4-4503-ca19-0e1d-84b909b21786@intel.com>
+References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+ <1494506343-28572-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170510082418.10513-1-linus.walleij@linaro.org>
+In-Reply-To: <1494506343-28572-2-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 May 2017 at 10:24, Linus Walleij <linus.walleij@linaro.org> wrote:
-> This is a series that starts to untangle the MMC "big host lock",
-> i.e. what is taken by issueing mmc_claim_host() which usually happens
-> through mmc_get_card().
->
-> The host lock is standing in the way of a bunch of modernizations,
-> because the block layer interface takes this lock when a new request
-> arrives, then will not release it until the queue is empty, which
-> is detected by getting NULL from blk_fetch_request().
->
-> This does not work with the new MQ block layer because it issues
-> requests asynchrously and there is no way of telling if the submit
-> queue is empty or not. Block requests must always be served. Trying
-> to introduce an interface for figuring out if the queue is empty
-> is probably generally a bad idea as it will require cross-talk
-> between all CPUs and then we hit Amdahl's Law again when scaling
-> upwards with CPUs.
->
-> So Arnd Bergmann suggested that whatever parallel requests the
-> host lock is protecting, maybe these requests can be funneled
-> through the block layer itself?
->
-> It turns out that most block drivers already do this, by using the
-> "special" block requests REQ_OP_DRV_IN and REQ_OP_DRV_OUT. And
-> it is what we should have done from the beginning.
->
-> To do this, the per-request extra data (which I think is also
-> referred to as "tag") need to be handled the same way that all
-> other block drivers do it: allocate it through the block layer.
-> In the MMC stack, this extra per-request data (tag) is called
-> struct mmc_queue_req.
->
-> So the second patch convert to using the generic block layer
-> mechanism to allocate tags. This makes the core simpler IMO and
-> that is why the patch series has negative line count. We move
-> stuff over to the block layer.
->
-> The first patch cleans out bounce buffer configurability and
-> move that to be a property of the host rather than a Kconfig option
-> in order to make it cleaner to do the rest of the refactorings.
->
-> The last two patches moves the ioctl() calls over to use the
-> new per-request tags and removes two instances of mmc_get_card(),
-> so we start to untangle the big host lock.
->
-> This approach can be used to get rid of the debugfs mmc_get_card()
-> as well but I want to start with the ioctl()s.
->
-> It already fixes a problem: userspace and the block layer could
-> essentially starve each other by bombing requests from either
-> block access or ioctl() congesting the host lock. With this,
-> ioctl() operations get scheduled by the block layer with
-> everything else. Not that I know how the block layer prioritizes
-> REQ_OP_DRV_IN and REQ_OP_DRV_OUT requests, but I am confident
-> it does a better job than the first-come-first-served host lock.
->
-> This drives a truck through mine and Adrians patch sets for
-> multiqueue and command queueing respectively, but I think that
-> both of our patch series will get easier to implement if we
-> exploit these patches as a base for future work, so if they can
-> get positive reviews and does not make everything explode, I
-> would suggest we merge them as a starter for the v4.13 kernel
-> cycle.
->
-> Linus Walleij (5):
->   mmc: core: Delete bounce buffer Kconfig option
->   mmc: core: Allocate per-request data using the block layer core
->   mmc: block: Tag is_rpmb as bool
->   mmc: block: move single ioctl() commands to block requests
->   mmc: block: move multi-ioctl() to use block layer
->
->  drivers/mmc/core/Kconfig  |  18 ----
->  drivers/mmc/core/block.c  | 126 +++++++++++++++----------
->  drivers/mmc/core/queue.c  | 235 ++++++++++++----------------------------------
->  drivers/mmc/core/queue.h  |  26 +++--
->  drivers/mmc/host/cavium.c |   3 +
->  drivers/mmc/host/pxamci.c |   6 ++
->  include/linux/mmc/card.h  |   2 -
->  include/linux/mmc/host.h  |   1 +
->  8 files changed, 161 insertions(+), 256 deletions(-)
->
-> --
-> 2.9.3
->
+On 11/05/17 15:39, Ulf Hansson wrote:
+> In a step to simplify the use of the lock, mmc_claim|release_host(), let's
+> change the SDIO IRQ thread to move away from using the abort-able claim
+> host method.
+> 
+> In the SDIO IRQ thread case, we can instead check the numbers of SDIO IRQs
+> that are currently claimed via host->sdio_irqs, as this field is protected
+> from updates unless the host is claimed. When host->sdio_irqs has become
+> zero, it means the SDIO func driver(s) has released the SDIO IRQ, then we
+> can bail out and stop running the SDIO IRQ thread.
 
+Does that work?  It looks a like kthread_stop() will wait on the thread,
+which is waiting to claim the host, which is claimed by the caller of
+sdio_card_irq_put() which called kthread_stop() i.e. deadlock.
 
-Really nice work you have done here! I have currently looked over the
-series and it seems promising. Allow me to get of couple of more days
-for review though.
-
-Also, hopefully we can get someone more to help to test it, but I am
-rather eager to apply this once rc1 is out.
-
-Kind regards
-Uffe
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/sdio_irq.c | 10 ++++++----
+>  include/linux/mmc/host.h    |  1 -
+>  2 files changed, 6 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index 6d4b720..95f7a09 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -137,9 +137,13 @@ static int sdio_irq_thread(void *_host)
+>  		 * holding of the host lock does not cover too much work
+>  		 * that doesn't require that lock to be held.
+>  		 */
+> -		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
+> -		if (ret)
+> +		mmc_claim_host(host);
+> +		if (!host->sdio_irqs) {
+> +			ret = 1;
+> +			mmc_release_host(host);
+>  			break;
+> +		}
+> +
+>  		ret = process_sdio_pending_irqs(host);
+>  		host->sdio_irq_pending = false;
+>  		mmc_release_host(host);
+> @@ -195,7 +199,6 @@ static int sdio_card_irq_get(struct mmc_card *card)
+>  
+>  	if (!host->sdio_irqs++) {
+>  		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+> -			atomic_set(&host->sdio_irq_thread_abort, 0);
+>  			host->sdio_irq_thread =
+>  				kthread_run(sdio_irq_thread, host,
+>  					    "ksdioirqd/%s", mmc_hostname(host));
+> @@ -223,7 +226,6 @@ static int sdio_card_irq_put(struct mmc_card *card)
+>  
+>  	if (!--host->sdio_irqs) {
+>  		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+> -			atomic_set(&host->sdio_irq_thread_abort, 1);
+>  			kthread_stop(host->sdio_irq_thread);
+>  		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>  			host->ops->enable_sdio_irq(host, 0);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 21385ac..8a4131f 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -359,7 +359,6 @@ struct mmc_host {
+>  	unsigned int		sdio_irqs;
+>  	struct task_struct	*sdio_irq_thread;
+>  	bool			sdio_irq_pending;
+> -	atomic_t		sdio_irq_thread_abort;
+>  
+>  	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+>  
+> 
