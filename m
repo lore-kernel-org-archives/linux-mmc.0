@@ -1,55 +1,49 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 3/3] mmc: core: Allow mmc block device to re-claim the
- host
-Date: Fri, 12 May 2017 11:36:06 +0300
-Message-ID: <f583aa94-578c-493d-f863-2fcc67e5d848@intel.com>
-References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
- <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: queue: delete mmc_req_is_special()
+Date: Fri, 12 May 2017 11:41:20 +0200
+Message-ID: <20170512094120.8726-1-linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36566 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751424AbdELJlb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2017 05:41:31 -0400
+Received: by mail-wm0-f49.google.com with SMTP id u65so15185763wmu.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 May 2017 02:41:31 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-On 11/05/17 15:39, Ulf Hansson wrote:
-> The current mmc block device implementation is tricky when it comes to
-> claim and release of the host, while processing I/O requests. In principle
-> we need to claim the host at the first request entering the queue and then
-> we need to release the host, as soon as the queue becomes empty. This
-> complexity relates to the asynchronous request mechanism that the mmc block
-> device driver implements.
-> 
-> For the legacy block interface that we currently implements, the above
-> issue can be addressed, as we can find out when the queue really becomes
-> empty.
-> 
-> However, to find out whether the queue is empty, isn't really an applicable
-> method when using the new blk-mq interface, as requests are instead pushed
-> to us via the struct struct blk_mq_ops and its function pointers.
+commit cdf8a6fb48882651049e468e6b16956fb83db86c
+"mmc: block: Introduce queue semantics"
+deleted the last user of mmc_req_is_special() and it was
+a horrible hack to classify requests as "special" or
+"not special" to begin with, so delete the helper.
 
-That is not entirely true.  We can pull requests by running the queue i.e.
-blk_mq_run_hw_queues(q, false), returning BLK_MQ_RQ_QUEUE_BUSY and stopping
-/ starting the queue as needed.
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/core/queue.h | 8 --------
+ 1 file changed, 8 deletions(-)
 
-But, as I have written before, we could start with the most trivial
-implementation.  ->queue_rq() puts the requests in a list and then the
-thread removes them from the list.
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index 7015df6681c3..e0936742c802 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -12,14 +12,6 @@ static inline struct mmc_queue_req *req_to_mq_rq(struct request *rq)
+ 	return blk_mq_rq_to_pdu(rq);
+ }
+ 
+-static inline bool mmc_req_is_special(struct request *req)
+-{
+-	return req &&
+-		(req_op(req) == REQ_OP_FLUSH ||
+-		 req_op(req) == REQ_OP_DISCARD ||
+-		 req_op(req) == REQ_OP_SECURE_ERASE);
+-}
+-
+ struct task_struct;
+ struct mmc_blk_data;
+ struct mmc_blk_ioc_data;
+-- 
+2.9.3
 
-That would be a good start because it would avoid having to deal with other
-issues at the same time.
-
-> 
-> Being able to support the asynchronous request method using the blk-mq
-> interface, means we have to allow the mmc block device driver to re-claim
-> the host from different tasks/contexts, as we may have > 1 request to
-> operate upon.
-> 
-> Therefore, let's extend the mmc_claim_host() API to support reference
-> counting for the mmc block device.
-
-Aren't you overlooking the possibility that there are many block devices per
-host. i.e. one per eMMC internal partition.
