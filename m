@@ -1,49 +1,39 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH] mmc: queue: delete mmc_req_is_special()
-Date: Fri, 12 May 2017 11:41:20 +0200
-Message-ID: <20170512094120.8726-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:36566 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751424AbdELJlb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2017 05:41:31 -0400
-Received: by mail-wm0-f49.google.com with SMTP id u65so15185763wmu.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 May 2017 02:41:31 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] mmc: vub3000: add missing USB-descriptor endianness conversions
+Date: Fri, 12 May 2017 12:03:35 +0200
+Message-ID: <20170512100335.1637-1-johan@kernel.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>
 
-commit cdf8a6fb48882651049e468e6b16956fb83db86c
-"mmc: block: Introduce queue semantics"
-deleted the last user of mmc_req_is_special() and it was
-a horrible hack to classify requests as "special" or
-"not special" to begin with, so delete the helper.
+Add the missing endianness conversions when printing the USB
+device-descriptor idVendor and idProduct fields during probe.
 
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/core/queue.h | 8 --------
- 1 file changed, 8 deletions(-)
+ drivers/mmc/host/vub300.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index 7015df6681c3..e0936742c802 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -12,14 +12,6 @@ static inline struct mmc_queue_req *req_to_mq_rq(struct request *rq)
- 	return blk_mq_rq_to_pdu(rq);
- }
- 
--static inline bool mmc_req_is_special(struct request *req)
--{
--	return req &&
--		(req_op(req) == REQ_OP_FLUSH ||
--		 req_op(req) == REQ_OP_DISCARD ||
--		 req_op(req) == REQ_OP_SECURE_ERASE);
--}
--
- struct task_struct;
- struct mmc_blk_data;
- struct mmc_blk_ioc_data;
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index c061e7c704be..fbeea1a491a6 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -2107,7 +2107,8 @@ static int vub300_probe(struct usb_interface *interface,
+ 	usb_string(udev, udev->descriptor.iSerialNumber, serial_number,
+ 		   sizeof(serial_number));
+ 	dev_info(&udev->dev, "probing VID:PID(%04X:%04X) %s %s %s\n",
+-		 udev->descriptor.idVendor, udev->descriptor.idProduct,
++		 le16_to_cpu(udev->descriptor.idVendor),
++		 le16_to_cpu(udev->descriptor.idProduct),
+ 		 manufacturer, product, serial_number);
+ 	command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+ 	if (!command_out_urb) {
 -- 
-2.9.3
+2.13.0
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
