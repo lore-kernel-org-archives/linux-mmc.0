@@ -1,51 +1,74 @@
-From: Geliang Tang <geliangtang@gmail.com>
-Subject: [PATCH] mmc: block: use memdup_user
-Date: Sat, 13 May 2017 11:15:58 +0800
-Message-ID: <b379dcae31767ca644693366c6131304523dcf23.1494578464.git.geliangtang@gmail.com>
-References: <908fa521decaf3703e172c3734c0d498741f3ddb.1494580404.git.geliangtang@gmail.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH] mmc: core: Delete an error message for a failed memory
+ allocation in three functions
+Date: Sat, 13 May 2017 14:54:10 +0200
+Message-ID: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <908fa521decaf3703e172c3734c0d498741f3ddb.1494580404.git.geliangtang@gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jens Axboe <axboe@fb.com>
-Cc: Geliang Tang <geliangtang@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>, Tomas Winkler <tomas.winkler@intel.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Use memdup_user() helper instead of open-coding to simplify the code.
+From: Markus Elfring <elfring@users.sourceforge.net>
+Date: Sat, 13 May 2017 14:40:08 +0200
 
-Signed-off-by: Geliang Tang <geliangtang@gmail.com>
+Omit an extra message for a memory allocation failure in these functions.
+
+This issue was detected by using the Coccinelle software.
+
+Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
+Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- drivers/mmc/core/block.c | 14 ++++----------
- 1 file changed, 4 insertions(+), 10 deletions(-)
+ drivers/mmc/core/sd.c | 16 +++-------------
+ 1 file changed, 3 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 8273b07..47ccb2a 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -342,21 +342,15 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
- 		return idata;
- 	}
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index d109634fbfce..1d7542daecbe 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -294,12 +294,8 @@ static int mmc_read_switch(struct mmc_card *card)
+ 	err = -EIO;
  
--	idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
--	if (!idata->buf) {
--		err = -ENOMEM;
-+	idata->buf = memdup_user((void __user *)(unsigned long)
-+				 idata->ic.data_ptr, idata->buf_bytes);
-+	if (IS_ERR(idata->buf)) {
-+		err = PTR_ERR(idata->buf);
- 		goto idata_err;
- 	}
- 
--	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
--					idata->ic.data_ptr, idata->buf_bytes)) {
--		err = -EFAULT;
--		goto copy_err;
+ 	status = kmalloc(64, GFP_KERNEL);
+-	if (!status) {
+-		pr_err("%s: could not allocate a buffer for "
+-			"switch capabilities.\n",
+-			mmc_hostname(card->host));
++	if (!status)
+ 		return -ENOMEM;
 -	}
--
- 	return idata;
  
--copy_err:
- 	kfree(idata->buf);
- idata_err:
- 	kfree(idata);
+ 	/*
+ 	 * Find out the card's support bits with a mode 0 operation.
+@@ -359,11 +355,8 @@ int mmc_sd_switch_hs(struct mmc_card *card)
+ 		return 0;
+ 
+ 	status = kmalloc(64, GFP_KERNEL);
+-	if (!status) {
+-		pr_err("%s: could not allocate a buffer for "
+-			"switch capabilities.\n", mmc_hostname(card->host));
++	if (!status)
+ 		return -ENOMEM;
+-	}
+ 
+ 	err = mmc_sd_switch(card, 1, 0, 1, status);
+ 	if (err)
+@@ -596,11 +589,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+ 		return 0;
+ 
+ 	status = kmalloc(64, GFP_KERNEL);
+-	if (!status) {
+-		pr_err("%s: could not allocate a buffer for "
+-			"switch capabilities.\n", mmc_hostname(card->host));
++	if (!status)
+ 		return -ENOMEM;
+-	}
+ 
+ 	/* Set 4-bit bus width */
+ 	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
 -- 
-2.9.3
+2.12.3
