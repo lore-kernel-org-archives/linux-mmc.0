@@ -1,51 +1,67 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH] mmc: atmel-mci: Delete an error message for a failed memory
- allocation in atmci_of_init()
-Date: Sat, 13 May 2017 15:17:56 +0200
-Message-ID: <199b33a2-6722-fba1-e7ec-5ac016c5bad0@users.sourceforge.net>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH] mmc: core: Delete an error message for a failed memory
+ allocation in three functions
+Date: Sat, 13 May 2017 17:24:35 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B641D7ABC@hasmsx108.ger.corp.intel.com>
+References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.web.de ([212.227.15.3]:58250 "EHLO mout.web.de"
+Received: from mga11.intel.com ([192.55.52.93]:15871 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753502AbdEMNSF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 13 May 2017 09:18:05 -0400
+        id S1753155AbdEMRYk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 13 May 2017 13:24:40 -0400
+In-Reply-To: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>
+To: SF Markus Elfring <elfring@users.sourceforge.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Uri Yanai <uri.yanai@sandisk.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
 
-From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Sat, 13 May 2017 15:05:28 +0200
-
-Omit an extra message for a memory allocation failure in this function.
-
-This issue was detected by using the Coccinelle software.
-
-Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
-Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
----
- drivers/mmc/host/atmel-mci.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 388e4a3f13e6..584247464eb8 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -667,10 +667,8 @@ atmci_of_init(struct platform_device *pdev)
- 	}
- 
- 	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--	if (!pdata) {
--		dev_err(&pdev->dev, "could not allocate memory for pdata\n");
-+	if (!pdata)
- 		return ERR_PTR(-ENOMEM);
--	}
- 
- 	for_each_child_of_node(np, cnp) {
- 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
--- 
-2.12.3
-
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU0YgTWFya3VzIEVsZnJp
+bmcgW21haWx0bzplbGZyaW5nQHVzZXJzLnNvdXJjZWZvcmdlLm5ldF0NCj4gU2VudDogU2F0dXJk
+YXksIE1heSAxMywgMjAxNyAxNTo1NA0KPiBUbzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsg
+Qm9qYW4gUHJ0dmFyIDxwcnR2YXIuYkBnbWFpbC5jb20+OyBMaW51cw0KPiBXYWxsZWlqIDxsaW51
+cy53YWxsZWlqQGxpbmFyby5vcmc+OyBQYXVsIEJ1cnRvbiA8cGF1bC5idXJ0b25AaW1ndGVjLmNv
+bT47DQo+IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPjsgVWxmIEhhbnNzb24N
+Cj4gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBVcmkgWWFuYWkgPHVyaS55YW5haUBzYW5kaXNr
+LmNvbT47IFdpbmtsZXIsDQo+IFRvbWFzIDx0b21hcy53aW5rbGVyQGludGVsLmNvbT4NCj4gQ2M6
+IExLTUwgPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBrZXJuZWwtamFuaXRvcnNAdmdl
+ci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFtQQVRDSF0gbW1jOiBjb3JlOiBEZWxldGUgYW4gZXJy
+b3IgbWVzc2FnZSBmb3IgYSBmYWlsZWQgbWVtb3J5DQo+IGFsbG9jYXRpb24gaW4gdGhyZWUgZnVu
+Y3Rpb25zDQo+IA0KPiBGcm9tOiBNYXJrdXMgRWxmcmluZyA8ZWxmcmluZ0B1c2Vycy5zb3VyY2Vm
+b3JnZS5uZXQ+DQo+IERhdGU6IFNhdCwgMTMgTWF5IDIwMTcgMTQ6NDA6MDggKzAyMDANCj4gDQo+
+IE9taXQgYW4gZXh0cmEgbWVzc2FnZSBmb3IgYSBtZW1vcnkgYWxsb2NhdGlvbiBmYWlsdXJlIGlu
+IHRoZXNlIGZ1bmN0aW9ucy4NCj4gDQo+IFRoaXMgaXNzdWUgd2FzIGRldGVjdGVkIGJ5IHVzaW5n
+IHRoZSBDb2NjaW5lbGxlIHNvZnR3YXJlLg0KPiANCj4gTGluazogaHR0cDovL2V2ZW50cy5saW51
+eGZvdW5kYXRpb24ub3JnL3NpdGVzL2V2ZW50cy9maWxlcy9zbGlkZXMvTENKMTYtDQo+IFJlZmFj
+dG9yX1N0cmluZ3MtV1NhbmdfMC5wZGYNCj4gU2lnbmVkLW9mZi1ieTogTWFya3VzIEVsZnJpbmcg
+PGVsZnJpbmdAdXNlcnMuc291cmNlZm9yZ2UubmV0Pg0KDQpMb29rcywgT0sgdG8gbWUuDQpUb21h
+cw0KDQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMvY29yZS9zZC5jIHwgMTYgKysrLS0tLS0tLS0tLS0t
+LQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKSwgMTMgZGVsZXRpb25zKC0pDQo+
+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9zZC5jIGIvZHJpdmVycy9tbWMvY29y
+ZS9zZC5jIGluZGV4DQo+IGQxMDk2MzRmYmZjZS4uMWQ3NTQyZGFlY2JlIDEwMDY0NA0KPiAtLS0g
+YS9kcml2ZXJzL21tYy9jb3JlL3NkLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+
+IEBAIC0yOTQsMTIgKzI5NCw4IEBAIHN0YXRpYyBpbnQgbW1jX3JlYWRfc3dpdGNoKHN0cnVjdCBt
+bWNfY2FyZCAqY2FyZCkNCj4gIAllcnIgPSAtRUlPOw0KPiANCj4gIAlzdGF0dXMgPSBrbWFsbG9j
+KDY0LCBHRlBfS0VSTkVMKTsNCj4gLQlpZiAoIXN0YXR1cykgew0KPiAtCQlwcl9lcnIoIiVzOiBj
+b3VsZCBub3QgYWxsb2NhdGUgYSBidWZmZXIgZm9yICINCj4gLQkJCSJzd2l0Y2ggY2FwYWJpbGl0
+aWVzLlxuIiwNCj4gLQkJCW1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSk7DQo+ICsJaWYgKCFzdGF0
+dXMpDQo+ICAJCXJldHVybiAtRU5PTUVNOw0KPiAtCX0NCj4gDQo+ICAJLyoNCj4gIAkgKiBGaW5k
+IG91dCB0aGUgY2FyZCdzIHN1cHBvcnQgYml0cyB3aXRoIGEgbW9kZSAwIG9wZXJhdGlvbi4NCj4g
+QEAgLTM1OSwxMSArMzU1LDggQEAgaW50IG1tY19zZF9zd2l0Y2hfaHMoc3RydWN0IG1tY19jYXJk
+ICpjYXJkKQ0KPiAgCQlyZXR1cm4gMDsNCj4gDQo+ICAJc3RhdHVzID0ga21hbGxvYyg2NCwgR0ZQ
+X0tFUk5FTCk7DQo+IC0JaWYgKCFzdGF0dXMpIHsNCj4gLQkJcHJfZXJyKCIlczogY291bGQgbm90
+IGFsbG9jYXRlIGEgYnVmZmVyIGZvciAiDQo+IC0JCQkic3dpdGNoIGNhcGFiaWxpdGllcy5cbiIs
+IG1tY19ob3N0bmFtZShjYXJkLQ0KPiA+aG9zdCkpOw0KPiArCWlmICghc3RhdHVzKQ0KPiAgCQly
+ZXR1cm4gLUVOT01FTTsNCj4gLQl9DQo+IA0KPiAgCWVyciA9IG1tY19zZF9zd2l0Y2goY2FyZCwg
+MSwgMCwgMSwgc3RhdHVzKTsNCj4gIAlpZiAoZXJyKQ0KPiBAQCAtNTk2LDExICs1ODksOCBAQCBz
+dGF0aWMgaW50IG1tY19zZF9pbml0X3Voc19jYXJkKHN0cnVjdCBtbWNfY2FyZA0KPiAqY2FyZCkN
+Cj4gIAkJcmV0dXJuIDA7DQo+IA0KPiAgCXN0YXR1cyA9IGttYWxsb2MoNjQsIEdGUF9LRVJORUwp
+Ow0KPiAtCWlmICghc3RhdHVzKSB7DQo+IC0JCXByX2VycigiJXM6IGNvdWxkIG5vdCBhbGxvY2F0
+ZSBhIGJ1ZmZlciBmb3IgIg0KPiAtCQkJInN3aXRjaCBjYXBhYmlsaXRpZXMuXG4iLCBtbWNfaG9z
+dG5hbWUoY2FyZC0NCj4gPmhvc3QpKTsNCj4gKwlpZiAoIXN0YXR1cykNCj4gIAkJcmV0dXJuIC1F
+Tk9NRU07DQo+IC0JfQ0KPiANCj4gIAkvKiBTZXQgNC1iaXQgYnVzIHdpZHRoICovDQo+ICAJaWYg
+KChjYXJkLT5ob3N0LT5jYXBzICYgTU1DX0NBUF80X0JJVF9EQVRBKSAmJg0KPiAtLQ0KPiAyLjEy
+LjMNCg0K
