@@ -1,99 +1,39 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 1/3] mmc: sdio: Don't use abort-able claim host method
- from SDIO IRQ thread
-Date: Mon, 15 May 2017 14:51:04 +0200
-Message-ID: <CAPDyKFr9eWCSrjx0qcxKzfJ+Oq7Z48h39dsCcn2iu_JNWJz=mQ@mail.gmail.com>
-References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
- <1494506343-28572-2-git-send-email-ulf.hansson@linaro.org> <6b359de4-4503-ca19-0e1d-84b909b21786@intel.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH] Use device_property_read instead of of_property_read in
+ the dw_mmc driver
+Date: Mon, 15 May 2017 16:30:08 +0300
+Message-ID: <CAHp75VdqV35EDUo3m19_9M7cYzvZnsJ7Ou1+ks9_S-8qDhDLZQ@mail.gmail.com>
+References: <1493134767-19170-1-git-send-email-dwoods@mellanox.com> <CAPDyKFpRsHGkS9hH9c_SGMNNU8ZC-=9Kk8-iVDnKrMUXbACNag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <6b359de4-4503-ca19-0e1d-84b909b21786@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:34185 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933359AbdEONaK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2017 09:30:10 -0400
+In-Reply-To: <CAPDyKFpRsHGkS9hH9c_SGMNNU8ZC-=9Kk8-iVDnKrMUXbACNag@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: David Woods <dwoods@mellanox.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Heiner Kallweit <hkallweit1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, cmetcalf@mellanox.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 12 May 2017 at 09:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 11/05/17 15:39, Ulf Hansson wrote:
->> In a step to simplify the use of the lock, mmc_claim|release_host(), let's
->> change the SDIO IRQ thread to move away from using the abort-able claim
->> host method.
->>
->> In the SDIO IRQ thread case, we can instead check the numbers of SDIO IRQs
->> that are currently claimed via host->sdio_irqs, as this field is protected
->> from updates unless the host is claimed. When host->sdio_irqs has become
->> zero, it means the SDIO func driver(s) has released the SDIO IRQ, then we
->> can bail out and stop running the SDIO IRQ thread.
->
-> Does that work?  It looks a like kthread_stop() will wait on the thread,
-> which is waiting to claim the host, which is claimed by the caller of
-> sdio_card_irq_put() which called kthread_stop() i.e. deadlock.
+On Mon, May 15, 2017 at 12:36 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 25 April 2017 at 17:39, David Woods <dwoods@mellanox.com> wrote:
+>> Using the device_property interfaces allows the dw_mmc driver to work
+>> on platforms which run on either device tree or ACPI.
 
-Adrian, you are right and thanks for your analyze!
+> Can you please split this to two separate changes. One for dw_mmc with
+> a proper prefix (mmc: dw_mmc:) and one for the mmc core (prefix "mmc:
+> core:").
 
-Maybe it's better that I first continue with my other series,
-converting the kthread to a work/work-queue. As that makes it easier
-to move away from using the abort-able claim host API.
+Btw, for the core part of change I would recommend to check other API
+functions which might go slightly different in case of ACPI vs DT vs
+built-in device properties.
 
-Kind regards
-Uffe
+For example, if any code is using of_gpio header and of_ related stuff
+it should be rethought as well (not sure if we would change there
+anything, though worth to double check).
 
->
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/core/sdio_irq.c | 10 ++++++----
->>  include/linux/mmc/host.h    |  1 -
->>  2 files changed, 6 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
->> index 6d4b720..95f7a09 100644
->> --- a/drivers/mmc/core/sdio_irq.c
->> +++ b/drivers/mmc/core/sdio_irq.c
->> @@ -137,9 +137,13 @@ static int sdio_irq_thread(void *_host)
->>                * holding of the host lock does not cover too much work
->>                * that doesn't require that lock to be held.
->>                */
->> -             ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
->> -             if (ret)
->> +             mmc_claim_host(host);
->> +             if (!host->sdio_irqs) {
->> +                     ret = 1;
->> +                     mmc_release_host(host);
->>                       break;
->> +             }
->> +
->>               ret = process_sdio_pending_irqs(host);
->>               host->sdio_irq_pending = false;
->>               mmc_release_host(host);
->> @@ -195,7 +199,6 @@ static int sdio_card_irq_get(struct mmc_card *card)
->>
->>       if (!host->sdio_irqs++) {
->>               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->> -                     atomic_set(&host->sdio_irq_thread_abort, 0);
->>                       host->sdio_irq_thread =
->>                               kthread_run(sdio_irq_thread, host,
->>                                           "ksdioirqd/%s", mmc_hostname(host));
->> @@ -223,7 +226,6 @@ static int sdio_card_irq_put(struct mmc_card *card)
->>
->>       if (!--host->sdio_irqs) {
->>               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->> -                     atomic_set(&host->sdio_irq_thread_abort, 1);
->>                       kthread_stop(host->sdio_irq_thread);
->>               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>                       host->ops->enable_sdio_irq(host, 0);
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 21385ac..8a4131f 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -359,7 +359,6 @@ struct mmc_host {
->>       unsigned int            sdio_irqs;
->>       struct task_struct      *sdio_irq_thread;
->>       bool                    sdio_irq_pending;
->> -     atomic_t                sdio_irq_thread_abort;
->>
->>       mmc_pm_flag_t           pm_flags;       /* requested pm features */
->>
->>
->
+-- 
+With Best Regards,
+Andy Shevchenko
