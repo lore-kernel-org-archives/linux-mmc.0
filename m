@@ -1,201 +1,93 @@
-From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Subject: Re: [PATCH 1/5] mmc: core: Delete bounce buffer Kconfig option
-Date: Mon, 15 May 2017 16:04:04 +0200
-Message-ID: <3202707.f2tzK1cxd8@amdc3058>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
-        <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
-        <20170510082418.10513-2-linus.walleij@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH 3/3] mmc: core: Allow mmc block device to re-claim the host
+Date: Mon, 15 May 2017 16:05:20 +0200
+Message-ID: <CAPDyKFqmvksL=bLR0FOfR=Q7B4TNa6oy0XZwFvkoT7nxLW4JBQ@mail.gmail.com>
+References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+ <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org> <f583aa94-578c-493d-f863-2fcc67e5d848@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38080 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965348AbdEOOEJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2017 10:04:09 -0400
-In-reply-to: <20170510082418.10513-2-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <f583aa94-578c-493d-f863-2fcc67e5d848@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
 
+On 12 May 2017 at 10:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 11/05/17 15:39, Ulf Hansson wrote:
+>> The current mmc block device implementation is tricky when it comes to
+>> claim and release of the host, while processing I/O requests. In principle
+>> we need to claim the host at the first request entering the queue and then
+>> we need to release the host, as soon as the queue becomes empty. This
+>> complexity relates to the asynchronous request mechanism that the mmc block
+>> device driver implements.
+>>
+>> For the legacy block interface that we currently implements, the above
+>> issue can be addressed, as we can find out when the queue really becomes
+>> empty.
+>>
+>> However, to find out whether the queue is empty, isn't really an applicable
+>> method when using the new blk-mq interface, as requests are instead pushed
+>> to us via the struct struct blk_mq_ops and its function pointers.
+>
+> That is not entirely true.  We can pull requests by running the queue i.e.
+> blk_mq_run_hw_queues(q, false), returning BLK_MQ_RQ_QUEUE_BUSY and stopping
+> / starting the queue as needed.
 
-Hi,
+I am not sure how that would work. It doesn't sound very effective to
+me, but I may be wrong.
 
-[ I added Daniel, Marc & Steven to cc: ]
+>
+> But, as I have written before, we could start with the most trivial
+> implementation.  ->queue_rq() puts the requests in a list and then the
+> thread removes them from the list.
 
-On Wednesday, May 10, 2017 10:24:14 AM Linus Walleij wrote:
-> This option is activated by all multiplatform configs and what
-> not so we almost always have it turned on, and the memory it
-> saves is negligible, even more so moving forward. The actual
-> bounce buffer only gets allocated only when used, the only
-> thing the ifdefs are saving is a little bit of code.
-> 
-> It is highly improper to have this as a Kconfig option that
-> get turned on by Kconfig, make this a pure runtime-thing and
-> let the host decide whether we use bounce buffers. We add a
-> new property "disable_bounce" to the host struct.
-> 
-> Notice that mmc_queue_calc_bouncesz() already disables the
-> bounce buffers if host->max_segs != 1, so any arch that has a
-> maximum number of segments higher than 1 will have bounce
-> buffers disabled.
-> 
-> The option CONFIG_MMC_BLOCK_BOUNCE is default y so the
-> majority of platforms in the kernel already have it on, and
-> it then gets turned off at runtime since most of these have
-> a host->max_segs > 1. The few exceptions that have
-> host->max_segs == 1 and still turn off the bounce buffering
-> are those that disable it in their defconfig.
-> 
-> Those are the following:
-> 
-> arch/arm/configs/colibri_pxa300_defconfig
-> arch/arm/configs/zeus_defconfig
-> - Uses MMC_PXA, drivers/mmc/host/pxamci.c
-> - Sets host->max_segs = NR_SG, which is 1
-> - This needs its bounce buffer deactivated so we set
->   host->disable_bounce to true in the host driver
+That would work...
 
-[...]
+>
+> That would be a good start because it would avoid having to deal with other
+> issues at the same time.
 
-> arch/mips/configs/cavium_octeon_defconfig
-> - Uses MMC_CAVIUM_OCTEON, drivers/mmc/host/cavium.c
-> - Sets host->max_segs to 16 or 1
-> - Setting host->disable_bounce to be sure for the 1 case
+...however this doesn't seem like a step in the direction we want to
+take when porting to blkmq.
 
->From looking at the code it seems that bounce buffering should
-be always beneficial to MMC performance when host->max_segs == 1.
+There will be an extra context switch for each an every request, won't there?
 
-It would be useful to know why these specific defconfigs
-disable bounce buffering (to save memory?). Maybe the defaults
-should be changed nowadays?
+My point is, to be able to convert to blkmq, we must also avoid
+performance regression - at leas as long as possible.
 
-[...]
+>
+>>
+>> Being able to support the asynchronous request method using the blk-mq
+>> interface, means we have to allow the mmc block device driver to re-claim
+>> the host from different tasks/contexts, as we may have > 1 request to
+>> operate upon.
+>>
+>> Therefore, let's extend the mmc_claim_host() API to support reference
+>> counting for the mmc block device.
+>
+> Aren't you overlooking the possibility that there are many block devices per
+> host. i.e. one per eMMC internal partition.
 
->  drivers/mmc/core/Kconfig  | 18 ------------------
->  drivers/mmc/core/queue.c  | 15 +--------------
->  drivers/mmc/host/cavium.c |  3 +++
->  drivers/mmc/host/pxamci.c |  6 ++++++
->  include/linux/mmc/host.h  |  1 +
->  5 files changed, 11 insertions(+), 32 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-> index fc1ecdaaa9ca..42e89060cd41 100644
-> --- a/drivers/mmc/core/Kconfig
-> +++ b/drivers/mmc/core/Kconfig
-> @@ -61,24 +61,6 @@ config MMC_BLOCK_MINORS
->  
->  	  If unsure, say 8 here.
->  
-> -config MMC_BLOCK_BOUNCE
-> -	bool "Use bounce buffer for simple hosts"
-> -	depends on MMC_BLOCK
-> -	default y
-> -	help
-> -	  SD/MMC is a high latency protocol where it is crucial to
-> -	  send large requests in order to get high performance. Many
-> -	  controllers, however, are restricted to continuous memory
-> -	  (i.e. they can't do scatter-gather), something the kernel
-> -	  rarely can provide.
-> -
-> -	  Say Y here to help these restricted hosts by bouncing
-> -	  requests back and forth from a large buffer. You will get
-> -	  a big performance gain at the cost of up to 64 KiB of
-> -	  physical memory.
-> -
-> -	  If unsure, say Y here.
-> -
->  config SDIO_UART
->  	tristate "SDIO UART/GPS class support"
->  	depends on TTY
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 5c37b6be3e7b..545466342fb1 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -219,7 +219,6 @@ static struct mmc_queue_req *mmc_queue_alloc_mqrqs(int qdepth)
->  	return mqrq;
->  }
->  
-> -#ifdef CONFIG_MMC_BLOCK_BOUNCE
->  static int mmc_queue_alloc_bounce_bufs(struct mmc_queue_req *mqrq, int qdepth,
->  				       unsigned int bouncesz)
->  {
-> @@ -258,7 +257,7 @@ static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
->  {
->  	unsigned int bouncesz = MMC_QUEUE_BOUNCESZ;
->  
-> -	if (host->max_segs != 1)
-> +	if (host->max_segs != 1 || host->disable_bounce)
->  		return 0;
->  
->  	if (bouncesz > host->max_req_size)
-> @@ -273,18 +272,6 @@ static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
->  
->  	return bouncesz;
->  }
-> -#else
-> -static inline bool mmc_queue_alloc_bounce(struct mmc_queue_req *mqrq,
-> -					  int qdepth, unsigned int bouncesz)
-> -{
-> -	return false;
-> -}
-> -
-> -static unsigned int mmc_queue_calc_bouncesz(struct mmc_host *host)
-> -{
-> -	return 0;
-> -}
-> -#endif
->  
->  static int mmc_queue_alloc_sgs(struct mmc_queue_req *mqrq, int qdepth,
->  			       int max_segs)
-> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-> index 58b51ba6aabd..66066f73e477 100644
-> --- a/drivers/mmc/host/cavium.c
-> +++ b/drivers/mmc/host/cavium.c
-> @@ -1050,6 +1050,9 @@ int cvm_mmc_of_slot_probe(struct device *dev, struct cvm_mmc_host *host)
->  	else
->  		mmc->max_segs = 1;
->  
-> +	/* Disable bounce buffers for max_segs = 1 */
-> +	mmc->disable_bounce = true;
-> +
->  	/* DMA size field can address up to 8 MB */
->  	mmc->max_seg_size = 8 * 1024 * 1024;
->  	mmc->max_req_size = mmc->max_seg_size;
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index c763b404510f..d3b5e6376504 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -666,6 +666,12 @@ static int pxamci_probe(struct platform_device *pdev)
->  	mmc->max_segs = NR_SG;
->  
->  	/*
-> +	 * This architecture used to disable bounce buffers through its
-> +	 * defconfig, now it is done at runtime as a host property.
-> +	 */
-> +	mmc->disable_bounce = true;
-> +
-> +	/*
->  	 * Our hardware DMA can handle a maximum of one page per SG entry.
->  	 */
->  	mmc->max_seg_size = PAGE_SIZE;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 21385ac0c9b1..b53c0e18a33b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -310,6 +310,7 @@ struct mmc_host {
->  	/* host specific block data */
->  	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
->  	unsigned short		max_segs;	/* see blk_queue_max_segments */
-> +	bool			disable_bounce; /* disable bounce buffers */
->  	unsigned short		unused;
->  	unsigned int		max_req_size;	/* maximum number of bytes in one req */
->  	unsigned int		max_blk_size;	/* maximum size of one mmc block */
+Right now, yes you are right. I hope soon not. :-)
 
-Best regards,
---
-Bartlomiej Zolnierkiewicz
-Samsung R&D Institute Poland
-Samsung Electronics
+These internal eMMC partitions are today suffering from the similar
+problems as we have for mmc ioctls. That means, requests are being I/O
+scheduled separately for each internal partition. Meaning requests for
+one partition could starve requests for another.
 
+I really hope we can fix this in some way or the other. Probably
+building upon Linus Walleij's series for fixing the problems for mmc
+ioctls [1] is the way to go.
+
+Then, when we have managed to fix these issues, I think my approach
+for extending the mmc_claim_host() API could be a possible
+intermediate step when trying to complete the blkmq port. Then we can
+continue to try to remove/re-work the claim host lock altogether as an
+optimization task.
+
+Kind regards
+Uffe
+
+[1]
+https://www.spinics.net/lists/linux-block/msg12677.html
