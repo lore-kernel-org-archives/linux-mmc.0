@@ -1,51 +1,51 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: vub3000: add missing USB-descriptor endianness conversions
-Date: Mon, 15 May 2017 12:51:38 +0200
-Message-ID: <CAPDyKFp-ehvqFtd+Q=+B=j2_ke1qE8ahXv6ejm+RcQ0ARNBcdA@mail.gmail.com>
-References: <20170512100335.1637-1-johan@kernel.org>
+Subject: Re: [PATCH 1/8] mmc: dt: pwrseq-simple: Invent power-off-delay-us
+Date: Mon, 15 May 2017 13:08:25 +0200
+Message-ID: <CAPDyKFqhbGqanoQqFsLrLaBXsQ5WdFrrunkvB2eOoJqH+W6jdQ@mail.gmail.com>
+References: <1494260477-25163-1-git-send-email-ulf.hansson@linaro.org>
+ <1494260477-25163-2-git-send-email-ulf.hansson@linaro.org> <20170512200300.a2hq546ra42ptlz5@rob-hp-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170512100335.1637-1-johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170512200300.a2hq546ra42ptlz5@rob-hp-laptop>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 May 2017 at 12:03, Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> Add the missing endianness conversions when printing the USB
-> device-descriptor idVendor and idProduct fields during probe.
+On 12 May 2017 at 22:03, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> On Mon, May 08, 2017 at 06:21:10PM +0200, Ulf Hansson wrote:
+>> During power off, after the GPIO pin has been asserted, some devices like
+>> the Wifi chip from TI, Wl18xx, needs a delay before the host continues with
+>> clock gating and turning off regulators as to follow a graceful shutdown
+>> sequence.
+>>
+>> Therefore invent an optional power-off-delay-us DT binding for
+>> mmc-pwrseq-simple, to allow us to support this constraint.
 >
-> Signed-off-by: Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Do you really need this to be programmable per device. A delay is not
+> going to hurt devices that don't need it.
 
-Thanks, applied for next!
+Well, that depends on what "hurt" means. The device would still be
+properly shut down, only that it would take unnecessary longer to do
+so.
+
+I think the problem here, is that this delay may also affect system
+suspend/resume time of the device, if the device powers off/on in this
+sequence.
+
+>
+> Sorry, but this is exactly what I don't like about "simple" bindings:
+> adding one property at a time.
+
+I understand you opinion, which in the end is a matter of taste/flavor.
+
+However, for me this just follows the existing approach - and suddenly
+say no to this, doesn't really seems right either.
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/vub300.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index c061e7c704be..fbeea1a491a6 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2107,7 +2107,8 @@ static int vub300_probe(struct usb_interface *interface,
->         usb_string(udev, udev->descriptor.iSerialNumber, serial_number,
->                    sizeof(serial_number));
->         dev_info(&udev->dev, "probing VID:PID(%04X:%04X) %s %s %s\n",
-> -                udev->descriptor.idVendor, udev->descriptor.idProduct,
-> +                le16_to_cpu(udev->descriptor.idVendor),
-> +                le16_to_cpu(udev->descriptor.idProduct),
->                  manufacturer, product, serial_number);
->         command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
->         if (!command_out_urb) {
-> --
-> 2.13.0
->
 --
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
