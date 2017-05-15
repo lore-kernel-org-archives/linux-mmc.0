@@ -1,51 +1,127 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/8] mmc: dt: pwrseq-simple: Invent power-off-delay-us
-Date: Mon, 15 May 2017 13:08:25 +0200
-Message-ID: <CAPDyKFqhbGqanoQqFsLrLaBXsQ5WdFrrunkvB2eOoJqH+W6jdQ@mail.gmail.com>
-References: <1494260477-25163-1-git-send-email-ulf.hansson@linaro.org>
- <1494260477-25163-2-git-send-email-ulf.hansson@linaro.org> <20170512200300.a2hq546ra42ptlz5@rob-hp-laptop>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/5] mmc: core: Delete bounce buffer Kconfig option
+Date: Mon, 15 May 2017 13:55:40 +0200
+Message-ID: <CAPDyKFpq14MHedWYrUZZuPHzBYBh5FpZaSzq3sA145pFWuEUPg@mail.gmail.com>
+References: <20170510082418.10513-1-linus.walleij@linaro.org> <20170510082418.10513-2-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170512200300.a2hq546ra42ptlz5@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20170510082418.10513-2-linus.walleij@linaro.org>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 May 2017 at 22:03, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Mon, May 08, 2017 at 06:21:10PM +0200, Ulf Hansson wrote:
->> During power off, after the GPIO pin has been asserted, some devices like
->> the Wifi chip from TI, Wl18xx, needs a delay before the host continues with
->> clock gating and turning off regulators as to follow a graceful shutdown
->> sequence.
->>
->> Therefore invent an optional power-off-delay-us DT binding for
->> mmc-pwrseq-simple, to allow us to support this constraint.
+On 10 May 2017 at 10:24, Linus Walleij <linus.walleij@linaro.org> wrote:
+> This option is activated by all multiplatform configs and what
+> not so we almost always have it turned on, and the memory it
+> saves is negligible, even more so moving forward. The actual
+> bounce buffer only gets allocated only when used, the only
+> thing the ifdefs are saving is a little bit of code.
 >
-> Do you really need this to be programmable per device. A delay is not
-> going to hurt devices that don't need it.
-
-Well, that depends on what "hurt" means. The device would still be
-properly shut down, only that it would take unnecessary longer to do
-so.
-
-I think the problem here, is that this delay may also affect system
-suspend/resume time of the device, if the device powers off/on in this
-sequence.
-
+> It is highly improper to have this as a Kconfig option that
+> get turned on by Kconfig, make this a pure runtime-thing and
+> let the host decide whether we use bounce buffers. We add a
+> new property "disable_bounce" to the host struct.
 >
-> Sorry, but this is exactly what I don't like about "simple" bindings:
-> adding one property at a time.
+> Notice that mmc_queue_calc_bouncesz() already disables the
+> bounce buffers if host->max_segs != 1, so any arch that has a
+> maximum number of segments higher than 1 will have bounce
+> buffers disabled.
+>
+> The option CONFIG_MMC_BLOCK_BOUNCE is default y so the
+> majority of platforms in the kernel already have it on, and
+> it then gets turned off at runtime since most of these have
+> a host->max_segs > 1. The few exceptions that have
+> host->max_segs == 1 and still turn off the bounce buffering
+> are those that disable it in their defconfig.
+>
+> Those are the following:
+>
+> arch/arm/configs/colibri_pxa300_defconfig
+> arch/arm/configs/zeus_defconfig
+> - Uses MMC_PXA, drivers/mmc/host/pxamci.c
+> - Sets host->max_segs = NR_SG, which is 1
+> - This needs its bounce buffer deactivated so we set
+>   host->disable_bounce to true in the host driver
+>
+> arch/arm/configs/davinci_all_defconfig
+> - Uses MMC_DAVINCI, drivers/mmc/host/davinci_mmc.c
+> - This driver sets host->max_segs to MAX_NR_SG, which is 16
+> - That means this driver anyways disabled bounce buffers
+> - No special action needed for this platform
+>
+> arch/arm/configs/lpc32xx_defconfig
+> arch/arm/configs/nhk8815_defconfig
+> arch/arm/configs/u300_defconfig
+> - Uses MMC_ARMMMCI, drivers/mmc/host/mmci.[c|h]
+> - This driver by default sets host->max_segs to NR_SG,
+>   which is 128, unless a DMA engine is used, and in that case
+>   the number of segments are also > 1
+> - That means this driver already disables bounce buffers
+> - No special action needed for these platforms
+>
+> arch/arm/configs/sama5_defconfig
+> - Uses MMC_SDHCI, MMC_SDHCI_PLTFM, MMC_SDHCI_OF_AT91, MMC_ATMELMCI
+> - Uses drivers/mmc/host/sdhci.c
+> - Normally sets host->max_segs to SDHCI_MAX_SEGS which is 128 and
+>   thus disables bounce buffers
+> - Sets host->max_segs to 1 if SDHCI_USE_SDMA is set
+> - SDHCI_USE_SDMA is only set by SDHCI on PCI adapers
+> - That means that for this platform bounce buffers are already
+>   disabled at runtime
+> - No special action needed for this platform
+>
+> arch/blackfin/configs/CM-BF533_defconfig
+> arch/blackfin/configs/CM-BF537E_defconfig
+> - Uses MMC_SPI (a simple MMC card connected on SPI pins)
+> - Uses drivers/mmc/host/mmc_spi.c
+> - Sets host->max_segs to MMC_SPI_BLOCKSATONCE which is 128
+> - That means this platform already disables bounce buffers at
+>   runtime
+> - No special action needed for these platforms
+>
+> arch/mips/configs/cavium_octeon_defconfig
+> - Uses MMC_CAVIUM_OCTEON, drivers/mmc/host/cavium.c
+> - Sets host->max_segs to 16 or 1
+> - Setting host->disable_bounce to be sure for the 1 case
+>
+> arch/mips/configs/qi_lb60_defconfig
+> - Uses MMC_JZ4740, drivers/mmc/host/jz4740_mmc.c
+> - This sets host->max_segs to 128 so bounce buffers are
+>   already runtime disabled
+> - No action needed for this platform
+>
+> It would be interesting to come up with a list of the platforms
+> that actually end up using bounce buffers. I have not been
+> able to infer such a list, but it occurs when
+> host->max_segs == 1 and the bounce buffering is not explicitly
+> disabled.
 
-I understand you opinion, which in the end is a matter of taste/flavor.
+Thanks for the descriptive change-log!
 
-However, for me this just follows the existing approach - and suddenly
-say no to this, doesn't really seems right either.
+[...]
+
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 21385ac0c9b1..b53c0e18a33b 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -310,6 +310,7 @@ struct mmc_host {
+>         /* host specific block data */
+>         unsigned int            max_seg_size;   /* see blk_queue_max_segment_size */
+>         unsigned short          max_segs;       /* see blk_queue_max_segments */
+> +       bool                    disable_bounce; /* disable bounce buffers */
+
+Instead of adding a separate host configuration flag, let's use one of
+capabilities bit-field instead (->caps or ->caps2). Then I suggest we
+then add a new bit, MMC_CAP_NO_BOUNCE_BUFF.
+
+>         unsigned short          unused;
+>         unsigned int            max_req_size;   /* maximum number of bytes in one req */
+>         unsigned int            max_blk_size;   /* maximum size of one mmc block */
+> --
+> 2.9.3
+>
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
