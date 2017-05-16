@@ -1,117 +1,73 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 3/3] mmc: core: Allow mmc block device to re-claim the host
-Date: Tue, 16 May 2017 16:32:52 +0200
-Message-ID: <CAPDyKFperzkkh2wDyh3=G1-357CZvYvaRtHv3Wp4QVXXfutBhA@mail.gmail.com>
-References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
- <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org>
- <f583aa94-578c-493d-f863-2fcc67e5d848@intel.com> <CAPDyKFqmvksL=bLR0FOfR=Q7B4TNa6oy0XZwFvkoT7nxLW4JBQ@mail.gmail.com>
- <e3887ef8-cd5d-ebda-35c4-01b2ea064afc@intel.com>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH 5/5] mmc: cavium: Fix probing race with regulator
+Date: Tue, 16 May 2017 09:37:48 -0500
+Message-ID: <CAL_Jsq+p8c-9Sypr6_fAsU2y=uakVhNENJ8XPS0j06Zo=a3caw@mail.gmail.com>
+References: <20170516093655.17746-1-jglauber@cavium.com> <20170516093655.17746-6-jglauber@cavium.com>
+ <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com> <20170516133838.GA20659@hc>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <e3887ef8-cd5d-ebda-35c4-01b2ea064afc@intel.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170516133838.GA20659@hc>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jan Glauber <jan.glauber@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 May 2017 at 15:24, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 15/05/17 17:05, Ulf Hansson wrote:
->> On 12 May 2017 at 10:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 11/05/17 15:39, Ulf Hansson wrote:
->>>> The current mmc block device implementation is tricky when it comes to
->>>> claim and release of the host, while processing I/O requests. In principle
->>>> we need to claim the host at the first request entering the queue and then
->>>> we need to release the host, as soon as the queue becomes empty. This
->>>> complexity relates to the asynchronous request mechanism that the mmc block
->>>> device driver implements.
->>>>
->>>> For the legacy block interface that we currently implements, the above
->>>> issue can be addressed, as we can find out when the queue really becomes
->>>> empty.
->>>>
->>>> However, to find out whether the queue is empty, isn't really an applicable
->>>> method when using the new blk-mq interface, as requests are instead pushed
->>>> to us via the struct struct blk_mq_ops and its function pointers.
->>>
->>> That is not entirely true.  We can pull requests by running the queue i.e.
->>> blk_mq_run_hw_queues(q, false), returning BLK_MQ_RQ_QUEUE_BUSY and stopping
->>> / starting the queue as needed.
+On Tue, May 16, 2017 at 8:38 AM, Jan Glauber
+<jan.glauber@caviumnetworks.com> wrote:
+> On Tue, May 16, 2017 at 08:07:50AM -0500, Rob Herring wrote:
+>> On Tue, May 16, 2017 at 4:36 AM, Jan Glauber <jglauber@cavium.com> wrote:
+>> > If the regulator probing is not yet finished this driver
+>> > might catch a -EPROBE_DEFER. Returning after this condition
+>> > did not remove the created platform device. On a repeated
+>> > call to the probe function the of_platform_device_create
+>> > fails.
+>> >
+>> > Calling of_platform_device_destroy after EPROBE_DEFER resolves
+>> > this bug.
+>> >
+>> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
+>> > ---
+>> >  drivers/mmc/host/cavium-thunderx.c | 4 +++-
+>> >  1 file changed, 3 insertions(+), 1 deletion(-)
+>> >
+>> > diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+>> > index fe3d772..257535e 100644
+>> > --- a/drivers/mmc/host/cavium-thunderx.c
+>> > +++ b/drivers/mmc/host/cavium-thunderx.c
+>> > @@ -137,8 +137,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+>> >                                 continue;
+>> >
+>> >                         ret = cvm_mmc_of_slot_probe(&host->slot_pdev[i]->dev, host);
+>> > -                       if (ret)
+>> > +                       if (ret) {
+>> > +                               of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
 >>
->> I am not sure how that would work. It doesn't sound very effective to
->> me, but I may be wrong.
+>> What if this fails after the 1st iteration of the loop. It's only
+>> cleaning up the current device.
 >
-> The queue depth is not the arbiter of whether we can issue a request.  That
-> means there will certainly be times when we have to return
-> BLK_MQ_RQ_QUEUE_BUSY from ->queue_rq() and perhaps stop the queue as well.
->
-> We could start with ->queue_rq() feeding every request to the existing
-> thread and work towards having it submit requests immediately when possible.
->  Currently mmc core cannot submit mmc_requests without waiting, but the
-> command queue implementation can for read/write requests when the host
-> controller and card are runtime resumed and the card is switched to the
-> correct internal partition (and we are not currently discarding flushing or
-> recovering), so it might be simpler to start with cmdq ;-)
+> The platform device is just a dummy device created directly before
+> cvm_mmc_of_slot_probe(). So there is no need to cleanup anything else.
 
-In the end I guess the only thing to do is to compare the patchsets to
-see how the result would look like. :-)
-
-My current observation is that our current implementation of the mmc
-block device and corresponding mmc queue, is still rather messy, even
-if you and Linus recently has worked hard to improve the situation.
-
-Moreover it looks quite different compared to other block device
-drivers and in the way of striving to make it more robust and
-maintainable, that's not good.
-
-Therefore, I am not really comfortable with replacing one mmc hack for
-block device management with yet another, as that seems to be what
-your approach would do - unless I am mistaken of course.
-
-Instead I would like us to move into a more generic blk device
-approach. Whatever that means. :-)
+So if you have 2 slots, the first slot probes successfully and the 2nd
+slot defers, then you only need to clean-up the 2nd device/slot? Looks
+to me like you are leaking the 1st device you alloc.
 
 >
->>
->>>
->>> But, as I have written before, we could start with the most trivial
->>> implementation.  ->queue_rq() puts the requests in a list and then the
->>> thread removes them from the list.
->>
->> That would work...
->>
->>>
->>> That would be a good start because it would avoid having to deal with other
->>> issues at the same time.
->>
->> ...however this doesn't seem like a step in the direction we want to
->> take when porting to blkmq.
->>
->> There will be an extra context switch for each an every request, won't there?
+> As far as I've seen it the platform code 'tags' the nodes it already
+> used, but I need the same node to be parsed again on -EPROBE_DEFER.
 >
-> No, for synchronous requests, it would be the same as now. ->queue_rq()
-> would be called in the context of the submitter and would wake the thread
-> just like ->request_fn() does now.
-
-You are right!
-
-However, in my comparison I was thinking of how it *can* work if we
-were able to submit/prepare request in the context of the caller.
-
+>> Use devm_of_platform_populate or
+>> of_platform_populate/of_platform_depopulate instead.
 >
->>
->> My point is, to be able to convert to blkmq, we must also avoid
->> performance regression - at leas as long as possible.
->
-> It would still be better to start simple, and measure the performance, than
-> to guess where the bottlenecks are.
+> I'm not sure one of these will work here.
 
-Yes, starting simple is always good!
+Those functions loop over child nodes and create devices. You are
+doing the same thing. You'd just need to create all the devices first
+and then probe them all.
 
-Although, even if simple, we need to stop adding more mmc specific
-hacks into the mmc block device layer.
+The whole structure here with the dummy devices and how you are
+initializing things is screwy. IMO, you should be creating actual
+drivers for the dummy devices.
 
-[...]
-
-Kind regards
-Uffe
+Rob
