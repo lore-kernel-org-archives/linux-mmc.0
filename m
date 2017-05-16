@@ -1,52 +1,121 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH 5/5] mmc: cavium: Fix probing race with regulator
-Date: Tue, 16 May 2017 08:07:50 -0500
-Message-ID: <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com>
-References: <20170516093655.17746-1-jglauber@cavium.com> <20170516093655.17746-6-jglauber@cavium.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 3/3] mmc: core: Allow mmc block device to re-claim the
+ host
+Date: Tue, 16 May 2017 16:24:20 +0300
+Message-ID: <e3887ef8-cd5d-ebda-35c4-01b2ea064afc@intel.com>
+References: <1494506343-28572-1-git-send-email-ulf.hansson@linaro.org>
+ <1494506343-28572-4-git-send-email-ulf.hansson@linaro.org>
+ <f583aa94-578c-493d-f863-2fcc67e5d848@intel.com>
+ <CAPDyKFqmvksL=bLR0FOfR=Q7B4TNa6oy0XZwFvkoT7nxLW4JBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:39982 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751529AbdEPNIM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 May 2017 09:08:12 -0400
-In-Reply-To: <20170516093655.17746-6-jglauber@cavium.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqmvksL=bLR0FOfR=Q7B4TNa6oy0XZwFvkoT7nxLW4JBQ@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Paolo Valente <paolo.valente@linaro.org>, linux-block@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jan Glauber <jglauber@cavium.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, May 16, 2017 at 4:36 AM, Jan Glauber <jglauber@cavium.com> wrote:
-> If the regulator probing is not yet finished this driver
-> might catch a -EPROBE_DEFER. Returning after this condition
-> did not remove the created platform device. On a repeated
-> call to the probe function the of_platform_device_create
-> fails.
->
-> Calling of_platform_device_destroy after EPROBE_DEFER resolves
-> this bug.
->
-> Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> ---
->  drivers/mmc/host/cavium-thunderx.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-> index fe3d772..257535e 100644
-> --- a/drivers/mmc/host/cavium-thunderx.c
-> +++ b/drivers/mmc/host/cavium-thunderx.c
-> @@ -137,8 +137,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
->                                 continue;
->
->                         ret = cvm_mmc_of_slot_probe(&host->slot_pdev[i]->dev, host);
-> -                       if (ret)
-> +                       if (ret) {
-> +                               of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
+On 15/05/17 17:05, Ulf Hansson wrote:
+> On 12 May 2017 at 10:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 11/05/17 15:39, Ulf Hansson wrote:
+>>> The current mmc block device implementation is tricky when it comes to
+>>> claim and release of the host, while processing I/O requests. In principle
+>>> we need to claim the host at the first request entering the queue and then
+>>> we need to release the host, as soon as the queue becomes empty. This
+>>> complexity relates to the asynchronous request mechanism that the mmc block
+>>> device driver implements.
+>>>
+>>> For the legacy block interface that we currently implements, the above
+>>> issue can be addressed, as we can find out when the queue really becomes
+>>> empty.
+>>>
+>>> However, to find out whether the queue is empty, isn't really an applicable
+>>> method when using the new blk-mq interface, as requests are instead pushed
+>>> to us via the struct struct blk_mq_ops and its function pointers.
+>>
+>> That is not entirely true.  We can pull requests by running the queue i.e.
+>> blk_mq_run_hw_queues(q, false), returning BLK_MQ_RQ_QUEUE_BUSY and stopping
+>> / starting the queue as needed.
+> 
+> I am not sure how that would work. It doesn't sound very effective to
+> me, but I may be wrong.
 
-What if this fails after the 1st iteration of the loop. It's only
-cleaning up the current device.
+The queue depth is not the arbiter of whether we can issue a request.  That
+means there will certainly be times when we have to return
+BLK_MQ_RQ_QUEUE_BUSY from ->queue_rq() and perhaps stop the queue as well.
 
-Use devm_of_platform_populate or
-of_platform_populate/of_platform_depopulate instead.
+We could start with ->queue_rq() feeding every request to the existing
+thread and work towards having it submit requests immediately when possible.
+ Currently mmc core cannot submit mmc_requests without waiting, but the
+command queue implementation can for read/write requests when the host
+controller and card are runtime resumed and the card is switched to the
+correct internal partition (and we are not currently discarding flushing or
+recovering), so it might be simpler to start with cmdq ;-)
 
-Rob
+> 
+>>
+>> But, as I have written before, we could start with the most trivial
+>> implementation.  ->queue_rq() puts the requests in a list and then the
+>> thread removes them from the list.
+> 
+> That would work...
+> 
+>>
+>> That would be a good start because it would avoid having to deal with other
+>> issues at the same time.
+> 
+> ...however this doesn't seem like a step in the direction we want to
+> take when porting to blkmq.
+> 
+> There will be an extra context switch for each an every request, won't there?
+
+No, for synchronous requests, it would be the same as now. ->queue_rq()
+would be called in the context of the submitter and would wake the thread
+just like ->request_fn() does now.
+
+> 
+> My point is, to be able to convert to blkmq, we must also avoid
+> performance regression - at leas as long as possible.
+
+It would still be better to start simple, and measure the performance, than
+to guess where the bottlenecks are.
+
+> 
+>>
+>>>
+>>> Being able to support the asynchronous request method using the blk-mq
+>>> interface, means we have to allow the mmc block device driver to re-claim
+>>> the host from different tasks/contexts, as we may have > 1 request to
+>>> operate upon.
+>>>
+>>> Therefore, let's extend the mmc_claim_host() API to support reference
+>>> counting for the mmc block device.
+>>
+>> Aren't you overlooking the possibility that there are many block devices per
+>> host. i.e. one per eMMC internal partition.
+> 
+> Right now, yes you are right. I hope soon not. :-)
+> 
+> These internal eMMC partitions are today suffering from the similar
+> problems as we have for mmc ioctls. That means, requests are being I/O
+> scheduled separately for each internal partition. Meaning requests for
+> one partition could starve requests for another.
+> 
+> I really hope we can fix this in some way or the other. Probably
+> building upon Linus Walleij's series for fixing the problems for mmc
+> ioctls [1] is the way to go.
+> 
+> Then, when we have managed to fix these issues, I think my approach
+> for extending the mmc_claim_host() API could be a possible
+> intermediate step when trying to complete the blkmq port. Then we can
+> continue to try to remove/re-work the claim host lock altogether as an
+> optimization task.
+> 
+> Kind regards
+> Uffe
+> 
+> [1]
+> https://www.spinics.net/lists/linux-block/msg12677.html
+> 
