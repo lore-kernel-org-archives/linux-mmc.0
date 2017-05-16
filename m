@@ -1,66 +1,65 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH 4/5] of/platform: Make of_platform_device_destroy globally visible
-Date: Tue, 16 May 2017 11:36:54 +0200
-Message-ID: <20170516093655.17746-5-jglauber@cavium.com>
+Subject: [PATCH 3/5] mmc: cavium: Prevent crash with incomplete DT
+Date: Tue, 16 May 2017 11:36:53 +0200
+Message-ID: <20170516093655.17746-4-jglauber@cavium.com>
 References: <20170516093655.17746-1-jglauber@cavium.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170516093655.17746-1-jglauber@cavium.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>, devicetree@vger.kernel.org
+Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-of_platform_device_destroy is the counterpart to
-of_platform_device_create which is a non-static function.
+In case the DT specifies neither a regulator nor a gpio
+for the shared power the driver will crash accessing the regulator.
+Prevent the crash by checking the regulator before use.
 
-After creating a platform device it might be necessary
-to destroy it to deal with -EPROBE_DEFER where a
-repeated of_platform_device_create call would fail otherwise.
-
-Therefore also make of_platform_device_destroy globally visible.
-
-Cc: Rob Herring <robh+dt@kernel.org>
-Cc: Frank Rowand <frowand.list@gmail.com>
-Cc: devicetree@vger.kernel.org
+As the MMC devices would likely not be usable without power
+check for that condition during probe and print a warning.
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 ---
- drivers/of/platform.c       | 3 ++-
- include/linux/of_platform.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/cavium.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/of/platform.c b/drivers/of/platform.c
-index 71fecc2..703a421 100644
---- a/drivers/of/platform.c
-+++ b/drivers/of/platform.c
-@@ -523,7 +523,7 @@ static int __init of_platform_default_populate_init(void)
- arch_initcall_sync(of_platform_default_populate_init);
- #endif
+diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+index 58b51ba..63f96dc 100644
+--- a/drivers/mmc/host/cavium.c
++++ b/drivers/mmc/host/cavium.c
+@@ -839,14 +839,14 @@ static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		cvm_mmc_reset_bus(slot);
+ 		if (host->global_pwr_gpiod)
+ 			host->set_shared_power(host, 0);
+-		else
++		else if (mmc->supply.vmmc)
+ 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+ 		break;
  
--static int of_platform_device_destroy(struct device *dev, void *data)
-+int of_platform_device_destroy(struct device *dev, void *data)
- {
- 	/* Do not touch devices not populated from the device tree */
- 	if (!dev->of_node || !of_node_check_flag(dev->of_node, OF_POPULATED))
-@@ -544,6 +544,7 @@ static int of_platform_device_destroy(struct device *dev, void *data)
- 	of_node_clear_flag(dev->of_node, OF_POPULATED_BUS);
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(of_platform_device_destroy);
+ 	case MMC_POWER_UP:
+ 		if (host->global_pwr_gpiod)
+ 			host->set_shared_power(host, 1);
+-		else
++		else if (mmc->supply.vmmc)
+ 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+ 		break;
+ 	}
+@@ -976,6 +976,7 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
+ 		 * Legacy Octeon firmware has no regulator entry, fall-back to
+ 		 * a hard-coded voltage to get a sane OCR.
+ 		 */
++		mmc->supply.vmmc = NULL;
+ 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 	} else {
+ 		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+@@ -983,6 +984,9 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
+ 			mmc->ocr_avail = ret;
+ 	}
  
- /**
-  * of_platform_depopulate() - Remove devices populated from device tree
-diff --git a/include/linux/of_platform.h b/include/linux/of_platform.h
-index dc8224a..e0d1946 100644
---- a/include/linux/of_platform.h
-+++ b/include/linux/of_platform.h
-@@ -64,6 +64,7 @@ extern struct platform_device *of_platform_device_create(struct device_node *np,
- 						   const char *bus_id,
- 						   struct device *parent);
- 
-+extern int of_platform_device_destroy(struct device *dev, void *data);
- extern int of_platform_bus_probe(struct device_node *root,
- 				 const struct of_device_id *matches,
- 				 struct device *parent);
++	if (!mmc->supply.vmmc && !slot->host->global_pwr_gpiod)
++		dev_warn(dev, "Missing power regulator or gpio, device may not work.\n");
++
+ 	/* Common MMC bindings */
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
 -- 
 2.9.0.rc0.21.g7777322
