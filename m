@@ -1,67 +1,38 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH 5/5] mmc: cavium: Fix probing race with regulator
-Date: Tue, 16 May 2017 15:38:38 +0200
-Message-ID: <20170516133838.GA20659@hc>
-References: <20170516093655.17746-1-jglauber@cavium.com>
- <20170516093655.17746-6-jglauber@cavium.com>
- <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: imx7: mmc_select_hs200 failed, error -74
+Date: Tue, 16 May 2017 10:58:30 -0300
+Message-ID: <CAOMZO5ByTR1C4qUdc+hBcGTFVf-NH2gS5PmH3=w5-TrAoDQVUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:44913
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750757AbdEPNi4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 May 2017 09:38:56 -0400
-Content-Disposition: inline
-In-Reply-To: <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:33673 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750777AbdEPN6b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2017 09:58:31 -0400
+Received: by mail-oi0-f47.google.com with SMTP id w10so26149446oif.0
+        for <linux-mmc@vger.kernel.org>; Tue, 16 May 2017 06:58:31 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Dong Aisheng <aisheng.dong@nxp.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Stefan Agner <stefan@agner.ch>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Tue, May 16, 2017 at 08:07:50AM -0500, Rob Herring wrote:
-> On Tue, May 16, 2017 at 4:36 AM, Jan Glauber <jglauber@cavium.com> wrote:
-> > If the regulator probing is not yet finished this driver
-> > might catch a -EPROBE_DEFER. Returning after this condition
-> > did not remove the created platform device. On a repeated
-> > call to the probe function the of_platform_device_create
-> > fails.
-> >
-> > Calling of_platform_device_destroy after EPROBE_DEFER resolves
-> > this bug.
-> >
-> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> > ---
-> >  drivers/mmc/host/cavium-thunderx.c | 4 +++-
-> >  1 file changed, 3 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-> > index fe3d772..257535e 100644
-> > --- a/drivers/mmc/host/cavium-thunderx.c
-> > +++ b/drivers/mmc/host/cavium-thunderx.c
-> > @@ -137,8 +137,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
-> >                                 continue;
-> >
-> >                         ret = cvm_mmc_of_slot_probe(&host->slot_pdev[i]->dev, host);
-> > -                       if (ret)
-> > +                       if (ret) {
-> > +                               of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
-> 
-> What if this fails after the 1st iteration of the loop. It's only
-> cleaning up the current device.
+Hi,
 
-The platform device is just a dummy device created directly before
-cvm_mmc_of_slot_probe(). So there is no need to cleanup anything else.
+On a imx7s-warp board (sdhci-esdhc-imx.c driver) running 4.12-rc1 the
+following mmc1 error message is seen:
 
-As far as I've seen it the platform code 'tags' the nodes it already
-used, but I need the same node to be parsed again on -EPROBE_DEFER.
+[    1.796192] mmc1: mmc_select_hs200 failed, error -74
+[    1.810220] mmc1: new MMC card at address 0001
+[    1.823066] mmcblk1: mmc1:0001 V10008 7.05 GiB
+[    1.834155] mmcblk1boot0: mmc1:0001 V10008 partition 1 4.00 MiB
+[    1.841608] mmcblk1boot1: mmc1:0001 V10008 partition 2 4.00 MiB
+[    1.848971] mmcblk1rpmb: mmc1:0001 V10008 partition 3 4.00 MiB
+[    1.859576]  mmcblk1: p1 p2
 
-> Use devm_of_platform_populate or
-> of_platform_populate/of_platform_depopulate instead.
+The rootfs can be mounted correctly from eMMC though.
 
-I'm not sure one of these will work here.
+What is the proper way to fix the 'mmc_select_hs200 failed' error message?
 
---Jan
+Thanks,
 
-> Rob
+Fabio Estevam
