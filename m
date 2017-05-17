@@ -1,129 +1,80 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH RESEND] mmc: sdhci-esdhc-imx: Check the return value from clk_prepare_enable()
-Date: Tue, 16 May 2017 19:08:31 -0300
-Message-ID: <1494972511-17655-1-git-send-email-festevam@gmail.com>
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: imx7: mmc_select_hs200 failed, error -74
+Date: Wed, 17 May 2017 02:10:32 +0000
+Message-ID: <AM4PR0401MB232411A003DC9F9D2F9CAEA490E70@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+References: <CAOMZO5ByTR1C4qUdc+hBcGTFVf-NH2gS5PmH3=w5-TrAoDQVUA@mail.gmail.com>
+ <CAOMZO5AXb3-YGc7hGRP_OY8C-Go0pBECbDoQo1SUB1i=t1Xi4w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:35204 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751300AbdEPWIo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2017 18:08:44 -0400
-Received: by mail-qk0-f194.google.com with SMTP id k74so24827081qke.2
-        for <linux-mmc@vger.kernel.org>; Tue, 16 May 2017 15:08:44 -0700 (PDT)
+Received: from mail-he1eur01on0087.outbound.protection.outlook.com ([104.47.0.87]:43104
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751861AbdEQCKg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 16 May 2017 22:10:36 -0400
+In-Reply-To: <CAOMZO5AXb3-YGc7hGRP_OY8C-Go0pBECbDoQo1SUB1i=t1Xi4w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, aisheng.dong@nxp.com, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>
+To: Fabio Estevam <festevam@gmail.com>, "A.S. Dong" <aisheng.dong@nxp.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Stefan Agner <stefan@agner.ch>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-From: Fabio Estevam <fabio.estevam@nxp.com>
-
-clk_prepare_enable() may fail, so we should better check its return value
-and propagate it in the case of error.
-
-Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 54 +++++++++++++++++++++++++++++---------
- 1 file changed, 41 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 23d8b8a..b5c7241 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1250,14 +1250,20 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 
- 	pltfm_host->clk = imx_data->clk_per;
- 	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
--	clk_prepare_enable(imx_data->clk_per);
--	clk_prepare_enable(imx_data->clk_ipg);
--	clk_prepare_enable(imx_data->clk_ahb);
-+	err = clk_prepare_enable(imx_data->clk_per);
-+	if (err)
-+		goto free_sdhci;
-+	err = clk_prepare_enable(imx_data->clk_ipg);
-+	if (err)
-+		goto disable_per_clk;
-+	err = clk_prepare_enable(imx_data->clk_ahb);
-+	if (err)
-+		goto disable_ipg_clk;
- 
- 	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
- 	if (IS_ERR(imx_data->pinctrl)) {
- 		err = PTR_ERR(imx_data->pinctrl);
--		goto disable_clk;
-+		goto disable_ahb_clk;
- 	}
- 
- 	imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
-@@ -1297,13 +1303,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	else
- 		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
- 	if (err)
--		goto disable_clk;
-+		goto disable_ahb_clk;
- 
- 	sdhci_esdhc_imx_hwinit(host);
- 
- 	err = sdhci_add_host(host);
- 	if (err)
--		goto disable_clk;
-+		goto disable_ahb_clk;
- 
- 	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-@@ -1313,10 +1319,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 
- 	return 0;
- 
--disable_clk:
--	clk_disable_unprepare(imx_data->clk_per);
--	clk_disable_unprepare(imx_data->clk_ipg);
-+disable_ahb_clk:
- 	clk_disable_unprepare(imx_data->clk_ahb);
-+disable_ipg_clk:
-+	clk_disable_unprepare(imx_data->clk_ipg);
-+disable_per_clk:
-+	clk_disable_unprepare(imx_data->clk_per);
- free_sdhci:
- 	sdhci_pltfm_free(pdev);
- 	return err;
-@@ -1393,14 +1401,34 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	int err;
- 
- 	if (!sdhci_sdio_irq_enabled(host)) {
--		clk_prepare_enable(imx_data->clk_per);
--		clk_prepare_enable(imx_data->clk_ipg);
-+		err = clk_prepare_enable(imx_data->clk_per);
-+		if (err)
-+			return err;
-+		err = clk_prepare_enable(imx_data->clk_ipg);
-+		if (err)
-+			goto disable_per_clk;
- 	}
--	clk_prepare_enable(imx_data->clk_ahb);
-+	err = clk_prepare_enable(imx_data->clk_ahb);
-+	if (err)
-+		goto disable_ipg_clk;
-+	err = sdhci_runtime_resume_host(host);
-+	if (err)
-+		goto disable_ahb_clk;
-+
-+	return 0;
- 
--	return sdhci_runtime_resume_host(host);
-+disable_ahb_clk:
-+	clk_disable_unprepare(imx_data->clk_ahb);
-+disable_ipg_clk:
-+	if (!sdhci_sdio_irq_enabled(host))
-+		clk_disable_unprepare(imx_data->clk_ipg);
-+disable_per_clk:
-+	if (!sdhci_sdio_irq_enabled(host))
-+		clk_disable_unprepare(imx_data->clk_per);
-+	return err;
- }
- #endif
- 
--- 
-2.7.4
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBGYWJpbyBFc3RldmFtDQo+IFNlbnQ6IFR1ZXNkYXksIE1heSAxNiwgMjAx
+NyAxMTozNyBQTQ0KPiBUbzogQS5TLiBEb25nIDxhaXNoZW5nLmRvbmdAbnhwLmNvbT4NCj4gQ2M6
+IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgbGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZzsgVWxmDQo+IEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBTdGVm
+YW4gQWduZXIgPHN0ZWZhbkBhZ25lci5jaD47IGxpbnV4LQ0KPiBhcm0ta2VybmVsQGxpc3RzLmlu
+ZnJhZGVhZC5vcmcNCj4gU3ViamVjdDogUmU6IGlteDc6IG1tY19zZWxlY3RfaHMyMDAgZmFpbGVk
+LCBlcnJvciAtNzQNCj4gDQo+IE9uIFR1ZSwgTWF5IDE2LCAyMDE3IGF0IDEwOjU4IEFNLCBGYWJp
+byBFc3RldmFtIDxmZXN0ZXZhbUBnbWFpbC5jb20+DQo+IHdyb3RlOg0KPiA+IEhpLA0KPiA+DQo+
+ID4gT24gYSBpbXg3cy13YXJwIGJvYXJkIChzZGhjaS1lc2RoYy1pbXguYyBkcml2ZXIpIHJ1bm5p
+bmcgNC4xMi1yYzEgdGhlDQo+ID4gZm9sbG93aW5nIG1tYzEgZXJyb3IgbWVzc2FnZSBpcyBzZWVu
+Og0KPiA+DQo+ID4gWyAgICAxLjc5NjE5Ml0gbW1jMTogbW1jX3NlbGVjdF9oczIwMCBmYWlsZWQs
+IGVycm9yIC03NA0KSGkgRmFiaW8sDQoNCkNhbiB5b3Ugb3BlbiB0aGUgbW1jIGRlYnVnIGFuZCBz
+aG93IHRoZSBmdWxsIGxvZz8NCkJ5IHRoZSB3YXksIHlvdSBzaG91bGQgZmlyc3QgbWFrZSBzdXJl
+IHdoZXRoZXIgdGhlIGVNTUMgY2hpcCB5b3UgdXNlZCBzdXBwb3J0IEhTMjAwLCBhbmQgZG91Ymxl
+DQpjaGVjayB3aGV0aGVyIHRoZSB2Y2NxIHZvbHRhZ2UgaXMgMS44diBvciAxLjJ2LCBIUzIwMCBt
+b2RlIGNhbid0IHdvcmsgb24gMy4zdiBJL08gdm9sdGFnZS4NCg0KQmVzdCBSZWdhcmRzDQpIYWli
+byBDaGVuDQoNCj4gPiBbICAgIDEuODEwMjIwXSBtbWMxOiBuZXcgTU1DIGNhcmQgYXQgYWRkcmVz
+cyAwMDAxDQo+ID4gWyAgICAxLjgyMzA2Nl0gbW1jYmxrMTogbW1jMTowMDAxIFYxMDAwOCA3LjA1
+IEdpQg0KPiA+IFsgICAgMS44MzQxNTVdIG1tY2JsazFib290MDogbW1jMTowMDAxIFYxMDAwOCBw
+YXJ0aXRpb24gMSA0LjAwIE1pQg0KPiA+IFsgICAgMS44NDE2MDhdIG1tY2JsazFib290MTogbW1j
+MTowMDAxIFYxMDAwOCBwYXJ0aXRpb24gMiA0LjAwIE1pQg0KPiA+IFsgICAgMS44NDg5NzFdIG1t
+Y2JsazFycG1iOiBtbWMxOjAwMDEgVjEwMDA4IHBhcnRpdGlvbiAzIDQuMDAgTWlCDQo+ID4gWyAg
+ICAxLjg1OTU3Nl0gIG1tY2JsazE6IHAxIHAyDQo+ID4NCj4gPiBUaGUgcm9vdGZzIGNhbiBiZSBt
+b3VudGVkIGNvcnJlY3RseSBmcm9tIGVNTUMgdGhvdWdoLg0KPiA+DQo+ID4gV2hhdCBpcyB0aGUg
+cHJvcGVyIHdheSB0byBmaXggdGhlICdtbWNfc2VsZWN0X2hzMjAwIGZhaWxlZCcgZXJyb3IgbWVz
+c2FnZT8NCj4gDQo+IHdpdGggdGhlIGZvbGxvd2luZyBjaGFuZ2VzOg0KPiANCj4gLS0tIGEvZHJp
+dmVycy9tbWMvY29yZS9tbWMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+IEBA
+IC0xNDU0LDcgKzE0NTQsNyBAQCBzdGF0aWMgaW50IG1tY19zZWxlY3RfaHMyMDAoc3RydWN0IG1t
+Y19jYXJkICpjYXJkKQ0KPiAgICAgICAgICAgICAgICAgaWYgKG1tY19zZXRfc2lnbmFsX3ZvbHRh
+Z2UoaG9zdCwgb2xkX3NpZ25hbF92b2x0YWdlKSkNCj4gICAgICAgICAgICAgICAgICAgICAgICAg
+ZXJyID0gLUVJTzsNCj4gDQo+IC0gICAgICAgICAgICAgICBwcl9lcnIoIiVzOiAlcyBmYWlsZWQs
+IGVycm9yICVkXG4iLCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksDQo+ICsgICAgICAgICAgICAg
+ICBwcl9kZWJ1ZygiJXM6ICVzIGZhaWxlZCwgZXJyb3IgJWRcbiIsDQo+ICsgbW1jX2hvc3RuYW1l
+KGNhcmQtPmhvc3QpLA0KPiAgICAgICAgICAgICAgICAgICAgICAgIF9fZnVuY19fLCBlcnIpOw0K
+PiAgICAgICAgIH0NCj4gICAgICAgICByZXR1cm4gZXJyOw0KPiBAQCAtMTQ3NCw3ICsxNDc0LDcg
+QEAgc3RhdGljIGludCBtbWNfc2VsZWN0X3RpbWluZyhzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+
+ICAgICAgICAgICAgICAgICBlcnIgPSBtbWNfc2VsZWN0X2hzNDAwZXMoY2FyZCk7DQo+ICAgICAg
+ICAgZWxzZSBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9IUzIw
+MCkNCj4gICAgICAgICAgICAgICAgIGVyciA9IG1tY19zZWxlY3RfaHMyMDAoY2FyZCk7DQo+IC0g
+ICAgICAgZWxzZSBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9I
+UykNCj4gKyAgICAgICBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQ
+RV9IUykNCj4gICAgICAgICAgICAgICAgIGVyciA9IG1tY19zZWxlY3RfaHMoY2FyZCk7DQo+IA0K
+PiAgICAgICAgIGlmIChlcnIgJiYgZXJyICE9IC1FQkFETVNHKQ0KPiANCj4gdGhlIGNhcmQgaXMg
+cHJvYmVkIGFzIEREUiBNTUMgYW5kIHRoZSBlcnJvciBtZXNzYWdlIGlzIGdvbmU6DQo+IA0KPiAj
+IGRtZXNnIHwgZ3JlcCBtbWMxDQo+IFsgICAgMS43MDI3OTddIG1tYzE6IFNESENJIGNvbnRyb2xs
+ZXIgb24gMzBiNjAwMDAudXNkaGMgWzMwYjYwMDAwLnVzZGhjXQ0KPiB1c2luZyBBDQo+IFsgICAg
+MS44MTEyMTFdIG1tYzE6IG5ldyBERFIgTU1DIGNhcmQgYXQgYWRkcmVzcyAwMDAxDQo+IFsgICAg
+MS44MjA3ODZdIG1tY2JsazE6IG1tYzE6MDAwMSBWMTAwMDggNy4wNSBHaUINCj4gWyAgICAxLjgz
+MzM0MF0gbW1jYmxrMWJvb3QwOiBtbWMxOjAwMDEgVjEwMDA4IHBhcnRpdGlvbiAxIDQuMDAgTWlC
+DQo+IFsgICAgMS44NDA1MThdIG1tY2JsazFib290MTogbW1jMTowMDAxIFYxMDAwOCBwYXJ0aXRp
+b24gMiA0LjAwIE1pQg0KPiBbICAgIDEuODQ3ODEyXSBtbWNibGsxcnBtYjogbW1jMTowMDAxIFYx
+MDAwOCBwYXJ0aXRpb24gMyA0LjAwIE1pQg0KPiANCj4gSXMgdGhpcyBhIGNvcnJlY3QgZml4Pw0K
+PiANCj4gVGhhbmtzDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZQ0KPiBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQN
+Cj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
