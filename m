@@ -1,80 +1,116 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: imx7: mmc_select_hs200 failed, error -74
-Date: Wed, 17 May 2017 02:10:32 +0000
-Message-ID: <AM4PR0401MB232411A003DC9F9D2F9CAEA490E70@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <CAOMZO5ByTR1C4qUdc+hBcGTFVf-NH2gS5PmH3=w5-TrAoDQVUA@mail.gmail.com>
- <CAOMZO5AXb3-YGc7hGRP_OY8C-Go0pBECbDoQo1SUB1i=t1Xi4w@mail.gmail.com>
+From: Hu Ziji <huziji@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: kill xenon_clean_phy()
+Date: Wed, 17 May 2017 14:50:23 +0800
+Message-ID: <c955067e-b092-7909-0f3d-b22b93741520@marvell.com>
+References: <20170516061720.1755-1-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-he1eur01on0087.outbound.protection.outlook.com ([104.47.0.87]:43104
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751861AbdEQCKg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 May 2017 22:10:36 -0400
-In-Reply-To: <CAOMZO5AXb3-YGc7hGRP_OY8C-Go0pBECbDoQo1SUB1i=t1Xi4w@mail.gmail.com>
-Content-Language: en-US
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:49020 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753151AbdEQGuu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2017 02:50:50 -0400
+In-Reply-To: <20170516061720.1755-1-jszhang@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>, "A.S. Dong" <aisheng.dong@nxp.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Stefan Agner <stefan@agner.ch>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jisheng Zhang <jszhang@marvell.com>, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
-ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBGYWJpbyBFc3RldmFtDQo+IFNlbnQ6IFR1ZXNkYXksIE1heSAxNiwgMjAx
-NyAxMTozNyBQTQ0KPiBUbzogQS5TLiBEb25nIDxhaXNoZW5nLmRvbmdAbnhwLmNvbT4NCj4gQ2M6
-IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgbGludXgtbW1jQHZnZXIu
-a2VybmVsLm9yZzsgVWxmDQo+IEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBTdGVm
-YW4gQWduZXIgPHN0ZWZhbkBhZ25lci5jaD47IGxpbnV4LQ0KPiBhcm0ta2VybmVsQGxpc3RzLmlu
-ZnJhZGVhZC5vcmcNCj4gU3ViamVjdDogUmU6IGlteDc6IG1tY19zZWxlY3RfaHMyMDAgZmFpbGVk
-LCBlcnJvciAtNzQNCj4gDQo+IE9uIFR1ZSwgTWF5IDE2LCAyMDE3IGF0IDEwOjU4IEFNLCBGYWJp
-byBFc3RldmFtIDxmZXN0ZXZhbUBnbWFpbC5jb20+DQo+IHdyb3RlOg0KPiA+IEhpLA0KPiA+DQo+
-ID4gT24gYSBpbXg3cy13YXJwIGJvYXJkIChzZGhjaS1lc2RoYy1pbXguYyBkcml2ZXIpIHJ1bm5p
-bmcgNC4xMi1yYzEgdGhlDQo+ID4gZm9sbG93aW5nIG1tYzEgZXJyb3IgbWVzc2FnZSBpcyBzZWVu
-Og0KPiA+DQo+ID4gWyAgICAxLjc5NjE5Ml0gbW1jMTogbW1jX3NlbGVjdF9oczIwMCBmYWlsZWQs
-IGVycm9yIC03NA0KSGkgRmFiaW8sDQoNCkNhbiB5b3Ugb3BlbiB0aGUgbW1jIGRlYnVnIGFuZCBz
-aG93IHRoZSBmdWxsIGxvZz8NCkJ5IHRoZSB3YXksIHlvdSBzaG91bGQgZmlyc3QgbWFrZSBzdXJl
-IHdoZXRoZXIgdGhlIGVNTUMgY2hpcCB5b3UgdXNlZCBzdXBwb3J0IEhTMjAwLCBhbmQgZG91Ymxl
-DQpjaGVjayB3aGV0aGVyIHRoZSB2Y2NxIHZvbHRhZ2UgaXMgMS44diBvciAxLjJ2LCBIUzIwMCBt
-b2RlIGNhbid0IHdvcmsgb24gMy4zdiBJL08gdm9sdGFnZS4NCg0KQmVzdCBSZWdhcmRzDQpIYWli
-byBDaGVuDQoNCj4gPiBbICAgIDEuODEwMjIwXSBtbWMxOiBuZXcgTU1DIGNhcmQgYXQgYWRkcmVz
-cyAwMDAxDQo+ID4gWyAgICAxLjgyMzA2Nl0gbW1jYmxrMTogbW1jMTowMDAxIFYxMDAwOCA3LjA1
-IEdpQg0KPiA+IFsgICAgMS44MzQxNTVdIG1tY2JsazFib290MDogbW1jMTowMDAxIFYxMDAwOCBw
-YXJ0aXRpb24gMSA0LjAwIE1pQg0KPiA+IFsgICAgMS44NDE2MDhdIG1tY2JsazFib290MTogbW1j
-MTowMDAxIFYxMDAwOCBwYXJ0aXRpb24gMiA0LjAwIE1pQg0KPiA+IFsgICAgMS44NDg5NzFdIG1t
-Y2JsazFycG1iOiBtbWMxOjAwMDEgVjEwMDA4IHBhcnRpdGlvbiAzIDQuMDAgTWlCDQo+ID4gWyAg
-ICAxLjg1OTU3Nl0gIG1tY2JsazE6IHAxIHAyDQo+ID4NCj4gPiBUaGUgcm9vdGZzIGNhbiBiZSBt
-b3VudGVkIGNvcnJlY3RseSBmcm9tIGVNTUMgdGhvdWdoLg0KPiA+DQo+ID4gV2hhdCBpcyB0aGUg
-cHJvcGVyIHdheSB0byBmaXggdGhlICdtbWNfc2VsZWN0X2hzMjAwIGZhaWxlZCcgZXJyb3IgbWVz
-c2FnZT8NCj4gDQo+IHdpdGggdGhlIGZvbGxvd2luZyBjaGFuZ2VzOg0KPiANCj4gLS0tIGEvZHJp
-dmVycy9tbWMvY29yZS9tbWMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+IEBA
-IC0xNDU0LDcgKzE0NTQsNyBAQCBzdGF0aWMgaW50IG1tY19zZWxlY3RfaHMyMDAoc3RydWN0IG1t
-Y19jYXJkICpjYXJkKQ0KPiAgICAgICAgICAgICAgICAgaWYgKG1tY19zZXRfc2lnbmFsX3ZvbHRh
-Z2UoaG9zdCwgb2xkX3NpZ25hbF92b2x0YWdlKSkNCj4gICAgICAgICAgICAgICAgICAgICAgICAg
-ZXJyID0gLUVJTzsNCj4gDQo+IC0gICAgICAgICAgICAgICBwcl9lcnIoIiVzOiAlcyBmYWlsZWQs
-IGVycm9yICVkXG4iLCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksDQo+ICsgICAgICAgICAgICAg
-ICBwcl9kZWJ1ZygiJXM6ICVzIGZhaWxlZCwgZXJyb3IgJWRcbiIsDQo+ICsgbW1jX2hvc3RuYW1l
-KGNhcmQtPmhvc3QpLA0KPiAgICAgICAgICAgICAgICAgICAgICAgIF9fZnVuY19fLCBlcnIpOw0K
-PiAgICAgICAgIH0NCj4gICAgICAgICByZXR1cm4gZXJyOw0KPiBAQCAtMTQ3NCw3ICsxNDc0LDcg
-QEAgc3RhdGljIGludCBtbWNfc2VsZWN0X3RpbWluZyhzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+
-ICAgICAgICAgICAgICAgICBlcnIgPSBtbWNfc2VsZWN0X2hzNDAwZXMoY2FyZCk7DQo+ICAgICAg
-ICAgZWxzZSBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9IUzIw
-MCkNCj4gICAgICAgICAgICAgICAgIGVyciA9IG1tY19zZWxlY3RfaHMyMDAoY2FyZCk7DQo+IC0g
-ICAgICAgZWxzZSBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9I
-UykNCj4gKyAgICAgICBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQ
-RV9IUykNCj4gICAgICAgICAgICAgICAgIGVyciA9IG1tY19zZWxlY3RfaHMoY2FyZCk7DQo+IA0K
-PiAgICAgICAgIGlmIChlcnIgJiYgZXJyICE9IC1FQkFETVNHKQ0KPiANCj4gdGhlIGNhcmQgaXMg
-cHJvYmVkIGFzIEREUiBNTUMgYW5kIHRoZSBlcnJvciBtZXNzYWdlIGlzIGdvbmU6DQo+IA0KPiAj
-IGRtZXNnIHwgZ3JlcCBtbWMxDQo+IFsgICAgMS43MDI3OTddIG1tYzE6IFNESENJIGNvbnRyb2xs
-ZXIgb24gMzBiNjAwMDAudXNkaGMgWzMwYjYwMDAwLnVzZGhjXQ0KPiB1c2luZyBBDQo+IFsgICAg
-MS44MTEyMTFdIG1tYzE6IG5ldyBERFIgTU1DIGNhcmQgYXQgYWRkcmVzcyAwMDAxDQo+IFsgICAg
-MS44MjA3ODZdIG1tY2JsazE6IG1tYzE6MDAwMSBWMTAwMDggNy4wNSBHaUINCj4gWyAgICAxLjgz
-MzM0MF0gbW1jYmxrMWJvb3QwOiBtbWMxOjAwMDEgVjEwMDA4IHBhcnRpdGlvbiAxIDQuMDAgTWlC
-DQo+IFsgICAgMS44NDA1MThdIG1tY2JsazFib290MTogbW1jMTowMDAxIFYxMDAwOCBwYXJ0aXRp
-b24gMiA0LjAwIE1pQg0KPiBbICAgIDEuODQ3ODEyXSBtbWNibGsxcnBtYjogbW1jMTowMDAxIFYx
-MDAwOCBwYXJ0aXRpb24gMyA0LjAwIE1pQg0KPiANCj4gSXMgdGhpcyBhIGNvcnJlY3QgZml4Pw0K
-PiANCj4gVGhhbmtzDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZQ0KPiBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQN
-Cj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On 2017/5/16 14:17, Jisheng Zhang wrote:
+> Currently, the xenon_clean_phy() is only used for freeing phy_params.
+> The phy_params is allocated by devm_kzalloc(), there's no need to free
+> is explicitly.
+> 
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+
+Thanks for the fix.
+
+Acked-by Hu Ziji <huziji@marvell.com>
+
+Best regards,
+Hu Ziji
+
+> ---
+>  drivers/mmc/host/sdhci-xenon-phy.c | 14 +-------------
+>  drivers/mmc/host/sdhci-xenon.c     |  6 +-----
+>  drivers/mmc/host/sdhci-xenon.h     |  1 -
+>  3 files changed, 2 insertions(+), 19 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+> index 6356781f1cca..f7e26b031e76 100644
+> --- a/drivers/mmc/host/sdhci-xenon-phy.c
+> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+> @@ -787,14 +787,6 @@ int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios)
+>  	return ret;
+>  }
+>  
+> -void xenon_clean_phy(struct sdhci_host *host)
+> -{
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -
+> -	kfree(priv->phy_params);
+> -}
+> -
+>  static int xenon_add_phy(struct device_node *np, struct sdhci_host *host,
+>  			 const char *phy_name)
+>  {
+> @@ -819,11 +811,7 @@ static int xenon_add_phy(struct device_node *np, struct sdhci_host *host,
+>  	if (ret)
+>  		return ret;
+>  
+> -	ret = xenon_emmc_phy_parse_param_dt(host, np, priv->phy_params);
+> -	if (ret)
+> -		xenon_clean_phy(host);
+> -
+> -	return ret;
+> +	return xenon_emmc_phy_parse_param_dt(host, np, priv->phy_params);
+>  }
+>  
+>  int xenon_phy_parse_dt(struct device_node *np, struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index 67246655315b..bc1781bb070b 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -486,7 +486,7 @@ static int xenon_probe(struct platform_device *pdev)
+>  
+>  	err = xenon_sdhc_prepare(host);
+>  	if (err)
+> -		goto clean_phy_param;
+> +		goto err_clk;
+>  
+>  	err = sdhci_add_host(host);
+>  	if (err)
+> @@ -496,8 +496,6 @@ static int xenon_probe(struct platform_device *pdev)
+>  
+>  remove_sdhc:
+>  	xenon_sdhc_unprepare(host);
+> -clean_phy_param:
+> -	xenon_clean_phy(host);
+>  err_clk:
+>  	clk_disable_unprepare(pltfm_host->clk);
+>  free_pltfm:
+> @@ -510,8 +508,6 @@ static int xenon_remove(struct platform_device *pdev)
+>  	struct sdhci_host *host = platform_get_drvdata(pdev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  
+> -	xenon_clean_phy(host);
+> -
+>  	sdhci_remove_host(host, 0);
+>  
+>  	xenon_sdhc_unprepare(host);
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 6e6523ea01ce..73debb42dc2f 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -93,7 +93,6 @@ struct xenon_priv {
+>  };
+>  
+>  int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
+> -void xenon_clean_phy(struct sdhci_host *host);
+>  int xenon_phy_parse_dt(struct device_node *np,
+>  		       struct sdhci_host *host);
+>  void xenon_soc_pad_ctrl(struct sdhci_host *host,
+> 
+
