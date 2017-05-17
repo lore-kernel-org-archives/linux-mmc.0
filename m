@@ -1,84 +1,71 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH] mmc: tmio: use SDIO master interrupt bit only when
- allowed
-Date: Wed, 17 May 2017 07:47:18 +0000
-Message-ID: <TY1PR06MB099248E104D6762E9E860BF3D8E70@TY1PR06MB0992.apcprd06.prod.outlook.com>
-References: <20161209165141.26599-1-wsa+renesas@sang-engineering.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: kill xenon_clean_phy()
+Date: Wed, 17 May 2017 17:17:26 +0800
+Message-ID: <20170517171726.2ede556d@xhacker>
+References: <20170516061720.1755-1-jszhang@marvell.com>
+        <20170516122211.GA27959@lunn.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:8004 "EHLO
-        relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752368AbdEQHr1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2017 03:47:27 -0400
-In-Reply-To: <20161209165141.26599-1-wsa+renesas@sang-engineering.com>
-Content-Language: ja-JP
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:54149 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753408AbdEQJWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2017 05:22:33 -0400
+In-Reply-To: <20170516122211.GA27959@lunn.ch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Yasushi SHOJI <yashi@atmark-techno.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Andrew Lunn <andrew@lunn.ch>
+Cc: adrian.hunter@intel.com, huziji@marvell.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Wolfram-san,
 
-> -----Original Message-----
-> From: Wolfram Sang
-> Sent: Saturday, December 10, 2016 1:52 AM
->=20
-> The master bit to enable SDIO interrupts can only be accessed if
-> SCLKDIVEN bit allows that. However, the core uses the SDIO enable
-> callback at times when SCLKDIVEN forbids the change. This leads to
-> "timeout waiting for SD bus idle" messages.
->=20
-> We now activate the master bit in probe once if SDIO is supported. IRQ
-> en-/disabling will be done now by the individual IRQ enablement bits
-> only.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Reviewed-by: Yasushi SHOJI <yashi@atmark-techno.com>
-> ---
->=20
-> No change from RFC, only Rev-by added (which included testing).
->=20
->  drivers/mmc/host/tmio_mmc_pio.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_=
-pio.c
-> index 7ef24ec620b542..526e52719f81b9 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -140,12 +140,10 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_hos=
-t *mmc, int enable)
->=20
->  		host->sdio_irq_mask =3D TMIO_SDIO_MASK_ALL &
->  					~TMIO_SDIO_STAT_IOIRQ;
-> -		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
->  		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
->  	} else if (!enable && host->sdio_irq_enabled) {
->  		host->sdio_irq_mask =3D TMIO_SDIO_MASK_ALL;
->  		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
-> -		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
->=20
->  		host->sdio_irq_enabled =3D false;
->  		pm_runtime_mark_last_busy(mmc_dev(mmc));
-> @@ -1203,7 +1201,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host=
-,
->  	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
->  		_host->sdio_irq_mask =3D TMIO_SDIO_MASK_ALL;
->  		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
-> -		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0000);
-> +		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
->  	}
+On Tue, 16 May 2017 14:22:11 +0200 Andrew Lunn wrote:
 
-I'm afraid but I would like to confirm about this 6 month ago's patch :)
+> On Tue, May 16, 2017 at 02:17:20PM +0800, Jisheng Zhang wrote:
+> > Currently, the xenon_clean_phy() is only used for freeing phy_params.
+> > The phy_params is allocated by devm_kzalloc(), there's no need to free
+> > is explicitly.
+> > 
+> > Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> > ---
+> >  drivers/mmc/host/sdhci-xenon-phy.c | 14 +-------------
+> >  drivers/mmc/host/sdhci-xenon.c     |  6 +-----
+> >  drivers/mmc/host/sdhci-xenon.h     |  1 -
+> >  3 files changed, 2 insertions(+), 19 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+> > index 6356781f1cca..f7e26b031e76 100644
+> > --- a/drivers/mmc/host/sdhci-xenon-phy.c
+> > +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+> > @@ -787,14 +787,6 @@ int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios)
+> >  	return ret;
+> >  }
+> >  
+> > -void xenon_clean_phy(struct sdhci_host *host)
+> > -{
+> > -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> > -
+> > -	kfree(priv->phy_params);  
+> 
+> Hi Jisheng
 
-This patch enables CTL_TRANSACTION_CTL to 0x0001 in tmio_mmc_host_probe().
-But, I have a concern we have to disable/enable the register in suspend/res=
-ume()
-because registers setting is possible to be cleared after resume.
-What do you think?
+Hi Andrew,
 
-Best regards,
-Yoshihiro Shimoda
+> 
+> If the memory has been allocated using the devm_ API, calling kfree
+> here is wrong, and can lead to a double free.
+
+Yes. In fact, I found this issue by unbinding then binding the xenon host.
+
+
+> 
+> So this patch should probably have a fixes: tag. Should it also goto
+> stable?
+
+As pointed out by RMK, the sdhci-xenon driver is merged in current 4.12-rc1,
+so we just need to apply this fix in later rcN.
+
+Thanks,
+Jisheng
 
