@@ -1,26 +1,57 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to
-        block requests
-Date: Thu, 18 May 2017 11:36:14 +0200
-Message-ID: <20170518093614.GB9250@lst.de>
-References: <20170518092936.9277-1-linus.walleij@linaro.org> <20170518092936.9277-4-linus.walleij@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: Outstanding MQ questions from MMC
+Date: Thu, 18 May 2017 11:36:34 +0200
+Message-ID: <CACRpkdaczsqeBE155iXmxqDj5K04mrEnysHeMuzJD8uC-_b3Sw@mail.gmail.com>
+References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
+ <CAK8P3a1CGtj5VSVoMM34VWn781WpS8ZcHpq6n0UfNOWWYEq=QQ@mail.gmail.com>
+ <CAPDyKFqiyEcScuWLVXE9kAa2yQyJCZfbXyAdAQOb081nLjyvvw@mail.gmail.com>
+ <CAK8P3a1yJJ33R9EPPcErLUO2enFGrSJzWmVRwHdHP+3_2iP7ow@mail.gmail.com>
+ <CACRpkdYsWnXLZEpZr74pLB8zjTV4Q=sdAfX+sz0n_E46SaJa9Q@mail.gmail.com>
+ <BY2PR0401MB0901B37DB60608662AE5C631E5050@BY2PR0401MB0901.namprd04.prod.outlook.com>
+ <CACRpkdbstMEC-_JcEfEm1debQRPeYBDmTPm0L_jGFnrgRZg1Zw@mail.gmail.com>
+ <BY2PR0401MB0901B0167734FEFB7F1E5DF6E5040@BY2PR0401MB0901.namprd04.prod.outlook.com>
+ <34FA1610-93EF-441A-B8B9-F1DD6B706398@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170518092936.9277-4-linus.walleij@linaro.org>
+In-Reply-To: <34FA1610-93EF-441A-B8B9-F1DD6B706398@sandisk.com>
 Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Avri Altman <Avri.Altman@sandisk.com>, Arnd Bergmann <arnd@arndb.de>, "ulf. org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, May 18, 2017 at 11:29:34AM +0200, Linus Walleij wrote:
-> We are storing the ioctl() in/out argument as a pointer in
-> the per-request struct mmc_blk_request container.
+On Tue, Apr 18, 2017 at 5:31 PM, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
 
-Btw, for the main ioctl data (not the little reponse field) it might
-make sense to use blk_rq_map_user, which will do a get_user_pages
-on the user data if the alignment fits, and otherwise handle the
-kernel bounce buffering for you.  This should simplify the code
-quite a bit more, and in the case where you can access the user
-memory directly provide a nice little performance boost.
+> There is an additional functionality, which is require the host lock
+> to be held for several write commands - the FFU.
+> In case of FFU, the FW can be download/write in several iterations
+> of Write command (CMD25). This sequence should not be interrupted by regular
+> Write requests.
+> In current driver, both FFU and RPMB can be sent by using mmc_blk_ioctl_multi_cmd().
+
+Both single and multi ioctl()s are funneled into the block layer
+using the driver-specific request ops in the latest iteration of
+my patch set.
+
+It turns out this was a simpler change than I though.
+
+If you check the patch set I realized that I also fixes a userspace
+starvation issue when issueing ioctls() such as for RPMB
+during heavy block I/O.
+
+This usecase:
+
+> dd if=/dev/mmcblk3 of=/dev/null bs=1M &
+> mmc extcs read /dev/mmcblk3
+
+This would previously hang until the dd command was complete before
+issuing the ioctl() command, just waiting for the host lock.
+I guess RPMB has the same problem...
+
+It is now fixed.
+
+If you can verify the v2 patch set (just posted) and provide Tested-by's
+(or bug reports...) it's appreciated.
+
+Yours,
+Linus Walleij
