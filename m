@@ -1,33 +1,99 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 2/6 v2] mmc: core: Allocate per-request data using the
- block layer core
-Date: Thu, 18 May 2017 14:39:51 +0200
-Message-ID: <CACRpkdb3GR3oe6HGd4e2cvAhb_7Hrj6VERxRCRHtuv8fv8ye_g@mail.gmail.com>
-References: <20170518092936.9277-1-linus.walleij@linaro.org>
- <20170518092936.9277-2-linus.walleij@linaro.org> <20170518093239.GA9250@lst.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/5] mmc: core: Allocate per-request data using the block
+ layer core
+Date: Thu, 18 May 2017 15:42:21 +0300
+Message-ID: <eb50dffe-5cb9-d8d3-e218-399de512b074@intel.com>
+References: <20170510082418.10513-1-linus.walleij@linaro.org>
+ <20170510082418.10513-3-linus.walleij@linaro.org>
+ <f432dc3d-f66a-fcfe-fd8f-ac764b29c9db@intel.com>
+ <CACRpkdaZuyZNDV=bjy2maZ0HYMEZCkNctkbEivThNM4jDT_c8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:35453 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755100AbdERMjx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2017 08:39:53 -0400
-Received: by mail-io0-f181.google.com with SMTP id f102so27290759ioi.2
-        for <linux-mmc@vger.kernel.org>; Thu, 18 May 2017 05:39:53 -0700 (PDT)
-In-Reply-To: <20170518093239.GA9250@lst.de>
+Received: from mga11.intel.com ([192.55.52.93]:58850 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754754AbdERMsO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 18 May 2017 08:48:14 -0400
+In-Reply-To: <CACRpkdaZuyZNDV=bjy2maZ0HYMEZCkNctkbEivThNM4jDT_c8Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 
-On Thu, May 18, 2017 at 11:32 AM, Christoph Hellwig <hch@lst.de> wrote:
+On 18/05/17 11:21, Linus Walleij wrote:
+> On Tue, May 16, 2017 at 1:54 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 10/05/17 11:24, Linus Walleij wrote:
+>>> The mmc_queue_req is a per-request state container the MMC core uses
+>>> to carry bounce buffers, pointers to asynchronous requests and so on.
+>>> Currently allocated as a static array of objects, then as a request
+>>> comes in, a mmc_queue_req is assigned to it, and used during the
+>>> lifetime of the request.
+>>>
+>>> This is backwards compared to how other block layer drivers work:
+>>> they usally let the block core provide a per-request struct that get
+>>> allocated right beind the struct request, and which can be obtained
+>>> using the blk_mq_rq_to_pdu() helper. (The _mq_ infix in this function
+>>> name is misleading: it is used by both the old and the MQ block
+>>> layer.)
+>>>
+>>> The per-request struct gets allocated to the size stored in the queue
+>>> variable .cmd_size initialized using the .init_rq_fn() and
+>>> cleaned up using .exit_rq_fn().
+>>>
+>>> The block layer code makes the MMC core rely on this mechanism to
+>>> allocate the per-request mmc_queue_req state container.
+>>>
+>>> Doing this make a lot of complicated queue handling go away.
+>>
+>> Isn't that at the expense of increased memory allocation.
+>>
+>> Have you compared the number of allocations?  It looks to me like the block
+>> layer allocates a minimum of 4 requests in the memory pool which will
+>> increase if there are more in the I/O scheduler, plus 1 for flush.  There
+>> are often 4 queues per eMMC (2x boot,RPMB and main area), so that is 20
+>> requests minimum, up from 2 allocations previously.  For someone using 64K
+>> bounce buffers, you have increased memory allocation by at least 18x64 =
+>> 1152k.  However the I/O scheduler could allocate a lot more.
+> 
+> That is not a realistic example.
+> 
+> As pointed out in patch #1, bounce buffers are used on old systems
+> which have max_segs == 1. No modern hardware has that,
+> they all have multiple segments-capable host controllers and
+> often also DMA engines.
+> 
+> Old systems with max_segs == 1 also have:
+> 
+> - One SD or MMC slot
+> - No eMMC (because it was not yet invented in those times)
+> - So no RPMB or Boot partitions, just main area
+> 
+> If you can point me to a system that has max_segs == 1 and an
+> eMMC mounted, I can look into it and ask the driver maintainers to
+> check if it disturbs them, but I think those simply do not exist.
+> 
+>>> Doing this refactoring is necessary to move the ioctl() operations
+>>> into custom block layer requests tagged with REQ_OP_DRV_[IN|OUT]
+>>
+>> Obviously you could create a per-request data structure with only the
+>> reference to the IOCTL data, and without putting all the memory allocations
+>> there as well.
+> 
+> Not easily, and this is the way all IDE, ATA, SCSI disks etc are
+> doing this so why would be try to be different and maintain a lot
+> of deviant code.
+> 
+> The allocation of extra data is done by the block layer when issueing
+> blk_get_request() so trying to keep the old mechanism of a list of
+> struct mmc_queue_req and trying to pair these with incoming requests
+> inevitably means a lot of extra work, possibly deepening that list or
+> creating out-of-list extra entries and whatnot.
+> 
+> It's better to do what everyone else does and let the core do this
+> allocation of extra data (tag) instead.
 
-> Btw, you can also remove the struct request backpointer in
-> struct mmc_queue_req now - blk_mq_rq_from_pdu will do it for you
-> without the need for a pointer.
+I agree it is much nicer, but the extra bounce buffer allocations still seem
+gratuitous.  Maybe we should allocate them as needed from a memory pool,
+instead of for every request.
 
-Thanks I made a patch for this in the front of my next clean-up
-series.
-
-Yours,
-Linus Walleij
