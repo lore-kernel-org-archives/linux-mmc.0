@@ -1,47 +1,71 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: Outstanding MQ questions from MMC
-Date: Thu, 18 May 2017 11:40:42 +0200
-Message-ID: <20170518094042.GA10016@lst.de>
-References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: sdio: Keep card runtime resumed while adding function devices
+Date: Thu, 18 May 2017 14:42:02 +0300
+Message-ID: <1495107722-13444-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga07.intel.com ([134.134.136.100]:27501 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932765AbdERLry (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 18 May 2017 07:47:54 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wed, Mar 29, 2017 at 05:09:37AM +0200, Linus Walleij wrote:
-> 2. When MMC cards are ejected a serious error condition occurs. So for this
-> reason we spool out the queue with
-> 
-> req->rq_flags |= RQF_QUIET;
-> blk_end_request_all(req, -EIO);
-> 
-> This will shut up a huge amount of console errors for example.
-> I have no clue on how to manage this with MQ. I am currently using
-> 
-> blk_mq_complete_request(mq_rq->req, -EIO);
-> 
-> and nothing else, and it will hit all requests for the ejected card coming
-> in from this point. Is this the right solution? Or is there some medium
-> eject handling I'm not aware of inside the MQ layer? It seems like something
-> that can happen on pluggable harddrives and CDROMS and what not.
+Drivers core will runtime suspend a device with no driver. That means the
+SDIO card will be runtime suspended as soon as it is added. It is then
+runtime resumed to add each function. That is entirely pointless, so add
+pm runtime get/put to keep the SDIO card runtime resumed until the function
+devices have been added.
 
-Hot unplug handling currently is a mess in the block layer (not just the
-mq case).  Especially if you ever requeue an I/O there is tons of
-boilerplate code.  I wish we could move a little more of this into the
-core, but right now I don't have a good idea on how to.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/sdio.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-> 3. Sometimes a read or write gets partially completed. Say we read 12 out
-> of 15 sectors or somthing like that. I have no idea how often this occurs in
-> practice. With the old block layer we did this:
-> 
-> blk_end_request(req, 0, bytes_xfered);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index fae732c870a9..97bedde0610c 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1110,6 +1110,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 		if (err)
+ 			goto remove;
+ 
++		pm_runtime_get_noresume(&card->dev);
++
+ 		/*
+ 		 * Enable runtime PM for this card
+ 		 */
+@@ -1129,7 +1131,7 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 	for (i = 0; i < funcs; i++, card->sdio_funcs++) {
+ 		err = sdio_init_func(host->card, i + 1);
+ 		if (err)
+-			goto remove;
++			goto remove_get;
+ 
+ 		/*
+ 		 * Enable Runtime PM for this func (if supported)
+@@ -1156,6 +1158,10 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 	}
+ 
+ 	mmc_claim_host(host);
++
++	if (host->caps & MMC_CAP_POWER_OFF_CARD)
++		pm_runtime_put(&card->dev);
++
+ 	return 0;
+ 
+ 
+@@ -1163,6 +1169,9 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 	/* Remove without lock if the device has been added. */
+ 	mmc_sdio_remove(host);
+ 	mmc_claim_host(host);
++remove_get:
++	if (host->caps & MMC_CAP_POWER_OFF_CARD)
++		pm_runtime_put(&card->dev);
+ remove:
+ 	/* And with lock if it hasn't been added. */
+ 	mmc_release_host(host);
+-- 
+1.9.1
 
-You can still do this with mq, but you have to open code it.  Take a look
-at scsi_end_request which has opencoded versions of the mq and non-mq
-end_request routines.  Currently it's the only example of blk-mq partial
-completions.
