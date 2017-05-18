@@ -1,61 +1,93 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/5] mmc: core: Delete bounce buffer Kconfig option
-Date: Thu, 18 May 2017 09:48:02 +0200
-Message-ID: <CACRpkdZp3JtnNrxsvtNT7hDB1w5KJomngs-=J8PG5fbDF=e+0w@mail.gmail.com>
+Subject: Re: [PATCH 2/5] mmc: core: Allocate per-request data using the block
+ layer core
+Date: Thu, 18 May 2017 10:01:59 +0200
+Message-ID: <CACRpkdb5kE2ETLFDDAW4zyqo3-y2JD2f87bNPfXc9i9oe5gOyQ@mail.gmail.com>
 References: <20170510082418.10513-1-linus.walleij@linaro.org>
- <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
- <20170510082418.10513-2-linus.walleij@linaro.org> <3202707.f2tzK1cxd8@amdc3058>
+ <20170510082418.10513-3-linus.walleij@linaro.org> <CAPDyKFpdhu3FBe5OP2mR1-3EK0JFPojGKS1F2K_whzZ249Ue8Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <3202707.f2tzK1cxd8@amdc3058>
-Sender: linux-block-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:36220 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751348AbdERICB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2017 04:02:01 -0400
+Received: by mail-io0-f178.google.com with SMTP id o12so23886353iod.3
+        for <linux-mmc@vger.kernel.org>; Thu, 18 May 2017 01:02:01 -0700 (PDT)
+In-Reply-To: <CAPDyKFpdhu3FBe5OP2mR1-3EK0JFPojGKS1F2K_whzZ249Ue8Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 
-On Mon, May 15, 2017 at 4:04 PM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
+On Tue, May 16, 2017 at 11:02 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 10 May 2017 at 10:24, Linus Walleij <linus.walleij@linaro.org> wrote:
 
-> [ I added Daniel, Marc & Steven to cc: ]
+>> @@ -1662,7 +1655,7 @@ static void mmc_blk_rw_try_restart(struct mmc_queue *mq, struct request *req,
+>>         if (mmc_card_removed(mq->card)) {
+>>                 req->rq_flags |= RQF_QUIET;
+>>                 blk_end_request_all(req, -EIO);
+>> -               mmc_queue_req_free(mq, mqrq);
+>> +               mq->qcnt--; /* FIXME: just set to 0? */
+>
+> As mentioned below, perhaps this FIXME is fine to add. As I assume you
+> soon intend to take care of it, right?
 
->> The option CONFIG_MMC_BLOCK_BOUNCE is default y so the
->> majority of platforms in the kernel already have it on, and
->> it then gets turned off at runtime since most of these have
->> a host->max_segs > 1. The few exceptions that have
->> host->max_segs == 1 and still turn off the bounce buffering
->> are those that disable it in their defconfig.
->>
->> Those are the following:
->>
->> arch/arm/configs/colibri_pxa300_defconfig
->> arch/arm/configs/zeus_defconfig
->> - Uses MMC_PXA, drivers/mmc/host/pxamci.c
->> - Sets host->max_segs = NR_SG, which is 1
->> - This needs its bounce buffer deactivated so we set
->>   host->disable_bounce to true in the host driver
+Yes that goes away with my MQ patches (not yet rebased)
+by stopping to try to look when the queue is empty and just
+issue requests asynchronously. I just wanted to point this out,
+that counter is kind of fragile and scary to me.
+
+>> -       for (i = 0; i < qdepth; i++) {
+>> -               mqrq[i].sg = mmc_alloc_sg(max_segs);
+>> -               if (!mqrq[i].sg)
+>> +       /* FIXME: use req_to_mq_rq() everywhere this is dereferenced */
+>
+> Why not do that right now, instead of adding a FIXME comment?
+
+This comment is wrong, just a development artifact I will just delete it.
+
+>>         mq->card = card;
+>> -       mq->queue = blk_init_queue(mmc_request_fn, lock);
+>> +       mq->queue = blk_alloc_queue_node(GFP_KERNEL, NUMA_NO_NODE);
+>
+> Seems like we should use blk_alloc_queue() instead, as it calls
+> blk_alloc_queue_node(gfp_mask, NUMA_NO_NODE) for us.
+
+OK
+
+>> +static inline struct mmc_queue_req *req_to_mq_rq(struct request *rq)
+>
+> To be more consistent with existing function names, perhaps rename this to:
+> req_to_mmc_queue_req()
+>
+>> +{
+>> +       return blk_mq_rq_to_pdu(rq);
+>> +}
+>> +
 >
 > [...]
 >
->> arch/mips/configs/cavium_octeon_defconfig
->> - Uses MMC_CAVIUM_OCTEON, drivers/mmc/host/cavium.c
->> - Sets host->max_segs to 16 or 1
->> - Setting host->disable_bounce to be sure for the 1 case
+>>  struct mmc_queue {
+>> @@ -45,14 +50,15 @@ struct mmc_queue {
+>>         bool                    asleep;
+>>         struct mmc_blk_data     *blkdata;
+>>         struct request_queue    *queue;
+>> -       struct mmc_queue_req    *mqrq;
+>> -       int                     qdepth;
+>> +       /*
+>> +        * FIXME: this counter is not a very reliable way of keeping
+>> +        * track of how many requests that are ongoing. Switch to just
+>> +        * letting the block core keep track of requests and per-request
+>> +        * associated mmc_queue_req data.
+>> +        */
+>>         int                     qcnt;
 >
-> From looking at the code it seems that bounce buffering should
-> be always beneficial to MMC performance when host->max_segs == 1.
->
-> It would be useful to know why these specific defconfigs
-> disable bounce buffering (to save memory?). Maybe the defaults
-> should be changed nowadays?
+> I am not very fond of FIXME comments, however perhaps this one really
+> deserves to be a FIXME because you intend to fix this asap, right?
 
-I agree. But I can't test on pxamci and cavium so I would
-appreciate if the driver maintainers try to remove the
-flag (MMC_CAP_NO_BOUNCE_BUFF in the v2 patch set)
-and see what happens.
-
-I would be happy to cut this special flag altogether, but I am
-also afraid of screwing up some config :/
+Same as the first comment. It is fragile and I don't like it,
+with asynchronous issueing in MQ this goes away.
 
 Yours,
 Linus Walleij
