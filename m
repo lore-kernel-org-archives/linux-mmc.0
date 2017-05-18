@@ -1,43 +1,61 @@
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Subject: RE: [PATCH] mmc: tmio: use SDIO master interrupt bit only when
  allowed
-Date: Thu, 18 May 2017 06:35:08 +0000
-Message-ID: <TY1PR06MB0992F4B8367512C3A9EAFE5ED8E40@TY1PR06MB0992.apcprd06.prod.outlook.com>
+Date: Thu, 18 May 2017 06:36:06 +0000
+Message-ID: <TY1PR06MB09920462AAF6E6F2EEFF2C86D8E40@TY1PR06MB0992.apcprd06.prod.outlook.com>
 References: <20161209165141.26599-1-wsa+renesas@sang-engineering.com>
  <TY1PR06MB099248E104D6762E9E860BF3D8E70@TY1PR06MB0992.apcprd06.prod.outlook.com>
- <20170518061746.GA1454@katana>
+ <CAKntEQ5OGSLUaBCFf-GY44K65q9seCgroNE_6mx5gPnKm25aYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170518061746.GA1454@katana>
+In-Reply-To: <CAKntEQ5OGSLUaBCFf-GY44K65q9seCgroNE_6mx5gPnKm25aYg@mail.gmail.com>
 Content-Language: ja-JP
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Yasushi SHOJI <yashi@atmark-techno.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Yasushi SHOJI <yashi@atmark-techno.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
-
-> From: Wolfram Sang
-> Sent: Thursday, May 18, 2017 3:18 PM
->=20
-> Shimoda-san,
->=20
-> > This patch enables CTL_TRANSACTION_CTL to 0x0001 in tmio_mmc_host_probe=
-().
-> > But, I have a concern we have to disable/enable the register in suspend=
-/resume()
-> > because registers setting is possible to be cleared after resume.
-> > What do you think?
->=20
-> This is very likely true. I'll cook up a patch today.
-
-Thank you very much!
-
-Best regards,
-Yoshihiro Shimoda
-
-> Thanks,
->=20
->    Wolfram
+SGkgU2hvamktc2FuLA0KDQo+IEZyb206IFlhc3VzaGkgU0hPSkkNCj4gU2VudDogVGh1cnNkYXks
+IE1heSAxOCwgMjAxNyAyOjEwIFBNDQo+IA0KPiBIaSwNCj4gDQo+IE9uIFdlZCwgTWF5IDE3LCAy
+MDE3IGF0IDQ6NDcgUE0sIFlvc2hpaGlybyBTaGltb2RhDQo+IDx5b3NoaWhpcm8uc2hpbW9kYS51
+aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4+DQo+ID4+ICBkcml2ZXJzL21tYy9ob3N0L3RtaW9f
+bW1jX3Bpby5jIHwgNyArKysrLS0tDQo+ID4+ICAxIGZpbGUgY2hhbmdlZCwgNCBpbnNlcnRpb25z
+KCspLCAzIGRlbGV0aW9ucygtKQ0KPiA+Pg0KPiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMv
+aG9zdC90bWlvX21tY19waW8uYyBiL2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWNfcGlvLmMNCj4g
+Pj4gaW5kZXggN2VmMjRlYzYyMGI1NDIuLjUyNmU1MjcxOWY4MWI5IDEwMDY0NA0KPiA+PiAtLS0g
+YS9kcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jX3Bpby5jDQo+ID4+ICsrKyBiL2RyaXZlcnMvbW1j
+L2hvc3QvdG1pb19tbWNfcGlvLmMNCj4gPj4gQEAgLTE0MCwxMiArMTQwLDEwIEBAIHN0YXRpYyB2
+b2lkIHRtaW9fbW1jX2VuYWJsZV9zZGlvX2lycShzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgaW50IGVu
+YWJsZSkNCj4gPj4NCj4gPj4gICAgICAgICAgICAgICBob3N0LT5zZGlvX2lycV9tYXNrID0gVE1J
+T19TRElPX01BU0tfQUxMICYNCj4gPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICB+VE1JT19TRElPX1NUQVRfSU9JUlE7DQo+ID4+IC0gICAgICAgICAgICAgc2RfY3RybF93
+cml0ZTE2KGhvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAwMSk7DQo+ID4+ICAgICAgICAg
+ICAgICAgc2RfY3RybF93cml0ZTE2KGhvc3QsIENUTF9TRElPX0lSUV9NQVNLLCBob3N0LT5zZGlv
+X2lycV9tYXNrKTsNCj4gPj4gICAgICAgfSBlbHNlIGlmICghZW5hYmxlICYmIGhvc3QtPnNkaW9f
+aXJxX2VuYWJsZWQpIHsNCj4gPj4gICAgICAgICAgICAgICBob3N0LT5zZGlvX2lycV9tYXNrID0g
+VE1JT19TRElPX01BU0tfQUxMOw0KPiA+PiAgICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUxNiho
+b3N0LCBDVExfU0RJT19JUlFfTUFTSywgaG9zdC0+c2Rpb19pcnFfbWFzayk7DQo+ID4+IC0gICAg
+ICAgICAgICAgc2RfY3RybF93cml0ZTE2KGhvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAw
+MCk7DQo+ID4+DQo+ID4+ICAgICAgICAgICAgICAgaG9zdC0+c2Rpb19pcnFfZW5hYmxlZCA9IGZh
+bHNlOw0KPiA+PiAgICAgICAgICAgICAgIHBtX3J1bnRpbWVfbWFya19sYXN0X2J1c3kobW1jX2Rl
+dihtbWMpKTsNCj4gPj4gQEAgLTEyMDMsNyArMTIwMSw3IEBAIGludCB0bWlvX21tY19ob3N0X3By
+b2JlKHN0cnVjdCB0bWlvX21tY19ob3N0ICpfaG9zdCwNCj4gPj4gICAgICAgaWYgKHBkYXRhLT5m
+bGFncyAmIFRNSU9fTU1DX1NESU9fSVJRKSB7DQo+ID4+ICAgICAgICAgICAgICAgX2hvc3QtPnNk
+aW9faXJxX21hc2sgPSBUTUlPX1NESU9fTUFTS19BTEw7DQo+ID4+ICAgICAgICAgICAgICAgc2Rf
+Y3RybF93cml0ZTE2KF9ob3N0LCBDVExfU0RJT19JUlFfTUFTSywgX2hvc3QtPnNkaW9faXJxX21h
+c2spOw0KPiA+PiAtICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUxNihfaG9zdCwgQ1RMX1RSQU5T
+QUNUSU9OX0NUTCwgMHgwMDAwKTsNCj4gPj4gKyAgICAgICAgICAgICBzZF9jdHJsX3dyaXRlMTYo
+X2hvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAwMSk7DQo+ID4+ICAgICAgIH0NCj4gPg0K
+PiA+IEknbSBhZnJhaWQgYnV0IEkgd291bGQgbGlrZSB0byBjb25maXJtIGFib3V0IHRoaXMgNiBt
+b250aCBhZ28ncyBwYXRjaCA6KQ0KPiA+DQo+ID4gVGhpcyBwYXRjaCBlbmFibGVzIENUTF9UUkFO
+U0FDVElPTl9DVEwgdG8gMHgwMDAxIGluIHRtaW9fbW1jX2hvc3RfcHJvYmUoKS4NCj4gPiBCdXQs
+IEkgaGF2ZSBhIGNvbmNlcm4gd2UgaGF2ZSB0byBkaXNhYmxlL2VuYWJsZSB0aGUgcmVnaXN0ZXIg
+aW4gc3VzcGVuZC9yZXN1bWUoKQ0KPiA+IGJlY2F1c2UgcmVnaXN0ZXJzIHNldHRpbmcgaXMgcG9z
+c2libGUgdG8gYmUgY2xlYXJlZCBhZnRlciByZXN1bWUuDQo+ID4gV2hhdCBkbyB5b3UgdGhpbms/
+DQo+IA0KPiBUaGF0J3MgYSBnb29kIGNhdGNoLg0KPiBJIHN1cHBvc2Ugd2UgbmVlZCB0aGF0LiAg
+SSBkaWRuJ3QgY2hlY2sgaXQgZm9yIHN1c3BlbmQvcmVzdW1lIGF0DQo+IHRoYXR0aW1lLiBNeSBi
+YWQuDQoNClRoYW5rIHlvdSBmb3IgdGhlIHJlcGx5LiBJIGdvdCBpdC4NCldvbGZyYW0tc2FuIHdp
+bGwgdHJ5IHRvIGZpeCB0aGUgaXNzdWUuDQoNCkJlc3QgcmVnYXJkcywNCllvc2hpaGlybyBTaGlt
+b2RhDQoNCj4gVGhhbmtzLA0KPiAtLQ0KPiAgICAgICAgICAgICB5YXNoaQ0K
