@@ -1,104 +1,47 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH 5/5] mmc: cavium: Fix probing race with regulator
-Date: Thu, 18 May 2017 11:39:24 +0200
-Message-ID: <20170518093924.GA27614@hc>
-References: <20170516093655.17746-1-jglauber@cavium.com>
- <20170516093655.17746-6-jglauber@cavium.com>
- <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com>
- <20170516133838.GA20659@hc>
- <CAL_Jsq+p8c-9Sypr6_fAsU2y=uakVhNENJ8XPS0j06Zo=a3caw@mail.gmail.com>
- <20170517134112.GA6216@hc>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: Outstanding MQ questions from MMC
+Date: Thu, 18 May 2017 11:40:42 +0200
+Message-ID: <20170518094042.GA10016@lst.de>
+References: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0076.outbound.protection.outlook.com ([104.47.34.76]:40829
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751548AbdERJjh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 18 May 2017 05:39:37 -0400
+Return-path: <linux-block-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170517134112.GA6216@hc>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <CACRpkdbZrkAqEdP1-QqDww0ZuFcY47Jgj9dPqkG_whrx7pwC-w@mail.gmail.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wed, May 17, 2017 at 03:41:12PM +0200, Jan Glauber wrote:
-> On Tue, May 16, 2017 at 09:37:48AM -0500, Rob Herring wrote:
-> > On Tue, May 16, 2017 at 8:38 AM, Jan Glauber
-> > <jan.glauber@caviumnetworks.com> wrote:
-> > > On Tue, May 16, 2017 at 08:07:50AM -0500, Rob Herring wrote:
-> > >> On Tue, May 16, 2017 at 4:36 AM, Jan Glauber <jglauber@cavium.com> wrote:
-> > >> > If the regulator probing is not yet finished this driver
-> > >> > might catch a -EPROBE_DEFER. Returning after this condition
-> > >> > did not remove the created platform device. On a repeated
-> > >> > call to the probe function the of_platform_device_create
-> > >> > fails.
-> > >> >
-> > >> > Calling of_platform_device_destroy after EPROBE_DEFER resolves
-> > >> > this bug.
-> > >> >
-> > >> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
-> > >> > ---
-> > >> >  drivers/mmc/host/cavium-thunderx.c | 4 +++-
-> > >> >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > >> >
-> > >> > diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
-> > >> > index fe3d772..257535e 100644
-> > >> > --- a/drivers/mmc/host/cavium-thunderx.c
-> > >> > +++ b/drivers/mmc/host/cavium-thunderx.c
-> > >> > @@ -137,8 +137,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
-> > >> >                                 continue;
-> > >> >
-> > >> >                         ret = cvm_mmc_of_slot_probe(&host->slot_pdev[i]->dev, host);
-> > >> > -                       if (ret)
-> > >> > +                       if (ret) {
-> > >> > +                               of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
-> > >>
-> > >> What if this fails after the 1st iteration of the loop. It's only
-> > >> cleaning up the current device.
-> > >
-> > > The platform device is just a dummy device created directly before
-> > > cvm_mmc_of_slot_probe(). So there is no need to cleanup anything else.
-> > 
-> > So if you have 2 slots, the first slot probes successfully and the 2nd
-> > slot defers, then you only need to clean-up the 2nd device/slot? Looks
-> > to me like you are leaking the 1st device you alloc.
+On Wed, Mar 29, 2017 at 05:09:37AM +0200, Linus Walleij wrote:
+> 2. When MMC cards are ejected a serious error condition occurs. So for this
+> reason we spool out the queue with
 > 
-> OK, got it now. My assumption was that your scenario can't happen in
-> reality with EPROBE_DEFER.
+> req->rq_flags |= RQF_QUIET;
+> blk_end_request_all(req, -EIO);
 > 
-> > >
-> > > As far as I've seen it the platform code 'tags' the nodes it already
-> > > used, but I need the same node to be parsed again on -EPROBE_DEFER.
-> > >
-> > >> Use devm_of_platform_populate or
-> > >> of_platform_populate/of_platform_depopulate instead.
-> > >
-> > > I'm not sure one of these will work here.
-> > 
-> > Those functions loop over child nodes and create devices. You are
-> > doing the same thing. You'd just need to create all the devices first
-> > and then probe them all.
+> This will shut up a huge amount of console errors for example.
+> I have no clue on how to manage this with MQ. I am currently using
 > 
-> I'll take a look at devm_of_platform_populate then. If I can use it it
-> will solve the leak issue.
-
-Using [devm_]of_platform_populate/of_platform_depopulate would require
-a platform driver with its prove/remove functions. I don't think this
-would make the driver easier to read as we would then have a platform driver
-within a pci driver.
-
-If it is possible to export the of_platform_device_destroy() I would
-prefer to fix the leak and stay with of_platform_device_create.
-
---Jan
-
-> thanks,
-> Jan
+> blk_mq_complete_request(mq_rq->req, -EIO);
 > 
-> > The whole structure here with the dummy devices and how you are
-> > initializing things is screwy. IMO, you should be creating actual
-> > drivers for the dummy devices.
-> > 
-> > Rob
+> and nothing else, and it will hit all requests for the ejected card coming
+> in from this point. Is this the right solution? Or is there some medium
+> eject handling I'm not aware of inside the MQ layer? It seems like something
+> that can happen on pluggable harddrives and CDROMS and what not.
+
+Hot unplug handling currently is a mess in the block layer (not just the
+mq case).  Especially if you ever requeue an I/O there is tons of
+boilerplate code.  I wish we could move a little more of this into the
+core, but right now I don't have a good idea on how to.
+
+> 3. Sometimes a read or write gets partially completed. Say we read 12 out
+> of 15 sectors or somthing like that. I have no idea how often this occurs in
+> practice. With the old block layer we did this:
+> 
+> blk_end_request(req, 0, bytes_xfered);
+
+You can still do this with mq, but you have to open code it.  Take a look
+at scsi_end_request which has opencoded versions of the mq and non-mq
+end_request routines.  Currently it's the only example of blk-mq partial
+completions.
