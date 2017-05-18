@@ -1,99 +1,98 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/5] mmc: core: Allocate per-request data using the block
- layer core
-Date: Thu, 18 May 2017 15:42:21 +0300
-Message-ID: <eb50dffe-5cb9-d8d3-e218-399de512b074@intel.com>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
- <20170510082418.10513-3-linus.walleij@linaro.org>
- <f432dc3d-f66a-fcfe-fd8f-ac764b29c9db@intel.com>
- <CACRpkdaZuyZNDV=bjy2maZ0HYMEZCkNctkbEivThNM4jDT_c8Q@mail.gmail.com>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH 5/5] mmc: cavium: Fix probing race with regulator
+Date: Thu, 18 May 2017 07:55:23 -0500
+Message-ID: <CAL_JsqLdNQqXfMueKM8gWoVCM-fPgh=tqZyy9CmD56THpHo3Lg@mail.gmail.com>
+References: <20170516093655.17746-1-jglauber@cavium.com> <20170516093655.17746-6-jglauber@cavium.com>
+ <CAL_Jsq+wMnNH0oOy7qpycm+4tTu=zYCVzDSuSTSpkfQY85kDEQ@mail.gmail.com>
+ <20170516133838.GA20659@hc> <CAL_Jsq+p8c-9Sypr6_fAsU2y=uakVhNENJ8XPS0j06Zo=a3caw@mail.gmail.com>
+ <20170517134112.GA6216@hc> <20170518093924.GA27614@hc>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:58850 "EHLO mga11.intel.com"
+Received: from mail.kernel.org ([198.145.29.99]:37548 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754754AbdERMsO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 18 May 2017 08:48:14 -0400
-In-Reply-To: <CACRpkdaZuyZNDV=bjy2maZ0HYMEZCkNctkbEivThNM4jDT_c8Q@mail.gmail.com>
+        id S1753621AbdERMzp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 18 May 2017 08:55:45 -0400
+In-Reply-To: <20170518093924.GA27614@hc>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+To: Jan Glauber <jan.glauber@caviumnetworks.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 18/05/17 11:21, Linus Walleij wrote:
-> On Tue, May 16, 2017 at 1:54 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 10/05/17 11:24, Linus Walleij wrote:
->>> The mmc_queue_req is a per-request state container the MMC core uses
->>> to carry bounce buffers, pointers to asynchronous requests and so on.
->>> Currently allocated as a static array of objects, then as a request
->>> comes in, a mmc_queue_req is assigned to it, and used during the
->>> lifetime of the request.
->>>
->>> This is backwards compared to how other block layer drivers work:
->>> they usally let the block core provide a per-request struct that get
->>> allocated right beind the struct request, and which can be obtained
->>> using the blk_mq_rq_to_pdu() helper. (The _mq_ infix in this function
->>> name is misleading: it is used by both the old and the MQ block
->>> layer.)
->>>
->>> The per-request struct gets allocated to the size stored in the queue
->>> variable .cmd_size initialized using the .init_rq_fn() and
->>> cleaned up using .exit_rq_fn().
->>>
->>> The block layer code makes the MMC core rely on this mechanism to
->>> allocate the per-request mmc_queue_req state container.
->>>
->>> Doing this make a lot of complicated queue handling go away.
+On Thu, May 18, 2017 at 4:39 AM, Jan Glauber
+<jan.glauber@caviumnetworks.com> wrote:
+> On Wed, May 17, 2017 at 03:41:12PM +0200, Jan Glauber wrote:
+>> On Tue, May 16, 2017 at 09:37:48AM -0500, Rob Herring wrote:
+>> > On Tue, May 16, 2017 at 8:38 AM, Jan Glauber
+>> > <jan.glauber@caviumnetworks.com> wrote:
+>> > > On Tue, May 16, 2017 at 08:07:50AM -0500, Rob Herring wrote:
+>> > >> On Tue, May 16, 2017 at 4:36 AM, Jan Glauber <jglauber@cavium.com> wrote:
+>> > >> > If the regulator probing is not yet finished this driver
+>> > >> > might catch a -EPROBE_DEFER. Returning after this condition
+>> > >> > did not remove the created platform device. On a repeated
+>> > >> > call to the probe function the of_platform_device_create
+>> > >> > fails.
+>> > >> >
+>> > >> > Calling of_platform_device_destroy after EPROBE_DEFER resolves
+>> > >> > this bug.
+>> > >> >
+>> > >> > Signed-off-by: Jan Glauber <jglauber@cavium.com>
+>> > >> > ---
+>> > >> >  drivers/mmc/host/cavium-thunderx.c | 4 +++-
+>> > >> >  1 file changed, 3 insertions(+), 1 deletion(-)
+>> > >> >
+>> > >> > diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+>> > >> > index fe3d772..257535e 100644
+>> > >> > --- a/drivers/mmc/host/cavium-thunderx.c
+>> > >> > +++ b/drivers/mmc/host/cavium-thunderx.c
+>> > >> > @@ -137,8 +137,10 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+>> > >> >                                 continue;
+>> > >> >
+>> > >> >                         ret = cvm_mmc_of_slot_probe(&host->slot_pdev[i]->dev, host);
+>> > >> > -                       if (ret)
+>> > >> > +                       if (ret) {
+>> > >> > +                               of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
+>> > >>
+>> > >> What if this fails after the 1st iteration of the loop. It's only
+>> > >> cleaning up the current device.
+>> > >
+>> > > The platform device is just a dummy device created directly before
+>> > > cvm_mmc_of_slot_probe(). So there is no need to cleanup anything else.
+>> >
+>> > So if you have 2 slots, the first slot probes successfully and the 2nd
+>> > slot defers, then you only need to clean-up the 2nd device/slot? Looks
+>> > to me like you are leaking the 1st device you alloc.
 >>
->> Isn't that at the expense of increased memory allocation.
+>> OK, got it now. My assumption was that your scenario can't happen in
+>> reality with EPROBE_DEFER.
 >>
->> Have you compared the number of allocations?  It looks to me like the block
->> layer allocates a minimum of 4 requests in the memory pool which will
->> increase if there are more in the I/O scheduler, plus 1 for flush.  There
->> are often 4 queues per eMMC (2x boot,RPMB and main area), so that is 20
->> requests minimum, up from 2 allocations previously.  For someone using 64K
->> bounce buffers, you have increased memory allocation by at least 18x64 =
->> 1152k.  However the I/O scheduler could allocate a lot more.
-> 
-> That is not a realistic example.
-> 
-> As pointed out in patch #1, bounce buffers are used on old systems
-> which have max_segs == 1. No modern hardware has that,
-> they all have multiple segments-capable host controllers and
-> often also DMA engines.
-> 
-> Old systems with max_segs == 1 also have:
-> 
-> - One SD or MMC slot
-> - No eMMC (because it was not yet invented in those times)
-> - So no RPMB or Boot partitions, just main area
-> 
-> If you can point me to a system that has max_segs == 1 and an
-> eMMC mounted, I can look into it and ask the driver maintainers to
-> check if it disturbs them, but I think those simply do not exist.
-> 
->>> Doing this refactoring is necessary to move the ioctl() operations
->>> into custom block layer requests tagged with REQ_OP_DRV_[IN|OUT]
+>> > >
+>> > > As far as I've seen it the platform code 'tags' the nodes it already
+>> > > used, but I need the same node to be parsed again on -EPROBE_DEFER.
+>> > >
+>> > >> Use devm_of_platform_populate or
+>> > >> of_platform_populate/of_platform_depopulate instead.
+>> > >
+>> > > I'm not sure one of these will work here.
+>> >
+>> > Those functions loop over child nodes and create devices. You are
+>> > doing the same thing. You'd just need to create all the devices first
+>> > and then probe them all.
 >>
->> Obviously you could create a per-request data structure with only the
->> reference to the IOCTL data, and without putting all the memory allocations
->> there as well.
-> 
-> Not easily, and this is the way all IDE, ATA, SCSI disks etc are
-> doing this so why would be try to be different and maintain a lot
-> of deviant code.
-> 
-> The allocation of extra data is done by the block layer when issueing
-> blk_get_request() so trying to keep the old mechanism of a list of
-> struct mmc_queue_req and trying to pair these with incoming requests
-> inevitably means a lot of extra work, possibly deepening that list or
-> creating out-of-list extra entries and whatnot.
-> 
-> It's better to do what everyone else does and let the core do this
-> allocation of extra data (tag) instead.
+>> I'll take a look at devm_of_platform_populate then. If I can use it it
+>> will solve the leak issue.
+>
+> Using [devm_]of_platform_populate/of_platform_depopulate would require
+> a platform driver with its prove/remove functions. I don't think this
+> would make the driver easier to read as we would then have a platform driver
+> within a pci driver.
 
-I agree it is much nicer, but the extra bounce buffer allocations still seem
-gratuitous.  Maybe we should allocate them as needed from a memory pool,
-instead of for every request.
+How is that? of_platform_populate ultimately just calls
+of_platform_device_create.
 
+> If it is possible to export the of_platform_device_destroy() I would
+> prefer to fix the leak and stay with of_platform_device_create.
+
+In any case, we can just export it.
+
+Rob
