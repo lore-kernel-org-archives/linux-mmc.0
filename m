@@ -1,48 +1,23 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 6/6 v2] mmc: queue: delete mmc_req_is_special()
-Date: Thu, 18 May 2017 11:29:36 +0200
-Message-ID: <20170518092936.9277-6-linus.walleij@linaro.org>
-References: <20170518092936.9277-1-linus.walleij@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170518092936.9277-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 2/6 v2] mmc: core: Allocate per-request data using the
+        block layer core
+Date: Thu, 18 May 2017 11:32:39 +0200
+Message-ID: <20170518093239.GA9250@lst.de>
+References: <20170518092936.9277-1-linus.walleij@linaro.org> <20170518092936.9277-2-linus.walleij@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from verein.lst.de ([213.95.11.211]:57769 "EHLO newverein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754978AbdERJcq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 18 May 2017 05:32:46 -0400
+Content-Disposition: inline
+In-Reply-To: <20170518092936.9277-2-linus.walleij@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 
-commit cdf8a6fb48882651049e468e6b16956fb83db86c
-"mmc: block: Introduce queue semantics"
-deleted the last user of mmc_req_is_special() and it was
-a horrible hack to classify requests as "special" or
-"not special" to begin with, so delete the helper.
-
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v1->v2:
-- No changes, just include this patch with in my
-  series.
----
- drivers/mmc/core/queue.h | 8 --------
- 1 file changed, 8 deletions(-)
-
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index 8c76e7118c95..dfe481a8b5ed 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -12,14 +12,6 @@ static inline struct mmc_queue_req *req_to_mmc_queue_req(struct request *rq)
- 	return blk_mq_rq_to_pdu(rq);
- }
- 
--static inline bool mmc_req_is_special(struct request *req)
--{
--	return req &&
--		(req_op(req) == REQ_OP_FLUSH ||
--		 req_op(req) == REQ_OP_DISCARD ||
--		 req_op(req) == REQ_OP_SECURE_ERASE);
--}
--
- struct task_struct;
- struct mmc_blk_data;
- struct mmc_blk_ioc_data;
--- 
-2.9.3
+Btw, you can also remove the struct request backpointer in
+struct mmc_queue_req now - blk_mq_rq_from_pdu will do it for you
+without the need for a pointer.
