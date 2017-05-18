@@ -1,182 +1,188 @@
-From: David Woods <dwoods@mellanox.com>
-Subject: [PATCH 2/2] mmc: core: Use device_property_read instead of of_property_read
-Date: Wed, 17 May 2017 18:17:09 -0400
-Message-ID: <1495059429-15247-2-git-send-email-dwoods@mellanox.com>
-References: <1495059429-15247-1-git-send-email-dwoods@mellanox.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 2/2] mmc: dw_mmc-rockchip: parse
+ rockchip,desired-num-phases from DT
+Date: Thu, 18 May 2017 11:20:15 +0900
+Message-ID: <87542133-3d88-ea4f-03b7-884274964e48@samsung.com>
+References: <1494916134-68043-1-git-send-email-shawn.lin@rock-chips.com>
+        <CGME20170516063039epcas1p49836d3f2fb67c402d6ffd30f7eebef96@epcas1p4.samsung.com>
+        <1494916134-68043-2-git-send-email-shawn.lin@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-il-dmz.mellanox.com ([193.47.165.129]:38669 "EHLO
-        mellanox.co.il" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1754580AbdEQWSI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2017 18:18:08 -0400
-In-Reply-To: <1495059429-15247-1-git-send-email-dwoods@mellanox.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:17115 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750795AbdERCUS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2017 22:20:18 -0400
+In-reply-to: <1494916134-68043-2-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, jh80.chung@samsung.com, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: David Woods <dwoods@mellanox.com>, stable@vger.linux.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 
-Using the device_property interfaces allows mmc drivers to work
-on platforms which run on either device tree or ACPI.
+Hi Shawn,
 
-Signed-off-by: David Woods <dwoods@mellanox.com>
-Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
-Cc: stable@vger.linux.org
----
- drivers/mmc/core/host.c | 72 ++++++++++++++++++++++++-------------------------
- 1 file changed, 35 insertions(+), 37 deletions(-)
+On 05/16/2017 03:28 PM, Shawn Lin wrote:
+> Currently we unconditionally do tuning for each degree, which
+> costs 900ms for each boot and resume.
+> 
+> May someone argue that this is a question of accuracy VS time. But I
+> would say it's a trick of how we need to do decision for our boards.
+> If we don't care the time we spend at all, we could definitely do tuning
+> for each degree. But when we need to improve the user experience, for
+> instance, speed up resuming from S3, we should also have the right to
+> do that. This patch add parsing "rockchip,desired-num-phases", for folks
+> to specify the number of doing tuning. If not specified, 360 will be used
+> as before.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3f8c85d..d2c059e 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
-  */
- int mmc_of_parse(struct mmc_host *host)
- {
--	struct device_node *np;
-+	struct device *dev = host->parent;
- 	u32 bus_width;
- 	int ret;
- 	bool cd_cap_invert, cd_gpio_invert = false;
- 	bool ro_cap_invert, ro_gpio_invert = false;
- 
--	if (!host->parent || !host->parent->of_node)
-+	if (!dev)
- 		return 0;
- 
--	np = host->parent->of_node;
--
- 	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
--	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-+	if (device_property_read_u32(dev, "bus-width", &bus_width) < 0) {
- 		dev_dbg(host->parent,
- 			"\"bus-width\" property is missing, assuming 1 bit.\n");
- 		bus_width = 1;
-@@ -210,7 +208,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* f_max is obtained from the optional "max-frequency" property */
--	of_property_read_u32(np, "max-frequency", &host->f_max);
-+	device_property_read_u32(dev, "max-frequency", &host->f_max);
- 
- 	/*
- 	 * Configure CD and WP pins. They are both by default active low to
-@@ -225,12 +223,12 @@ int mmc_of_parse(struct mmc_host *host)
- 	 */
- 
- 	/* Parse Card Detection */
--	if (of_property_read_bool(np, "non-removable")) {
-+	if (device_property_read_bool(dev, "non-removable")) {
- 		host->caps |= MMC_CAP_NONREMOVABLE;
- 	} else {
--		cd_cap_invert = of_property_read_bool(np, "cd-inverted");
-+		cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
- 
--		if (of_property_read_bool(np, "broken-cd"))
-+		if (device_property_read_bool(dev, "broken-cd"))
- 			host->caps |= MMC_CAP_NEEDS_POLL;
- 
- 		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-@@ -256,7 +254,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* Parse Write Protection */
--	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
-+	ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
- 
- 	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert);
- 	if (!ret)
-@@ -264,64 +262,64 @@ int mmc_of_parse(struct mmc_host *host)
- 	else if (ret != -ENOENT && ret != -ENOSYS)
- 		return ret;
- 
--	if (of_property_read_bool(np, "disable-wp"))
-+	if (device_property_read_bool(dev, "disable-wp"))
- 		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
- 
- 	/* See the comment on CD inversion above */
- 	if (ro_cap_invert ^ ro_gpio_invert)
- 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
- 
--	if (of_property_read_bool(np, "cap-sd-highspeed"))
-+	if (device_property_read_bool(dev, "cap-sd-highspeed"))
- 		host->caps |= MMC_CAP_SD_HIGHSPEED;
--	if (of_property_read_bool(np, "cap-mmc-highspeed"))
-+	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
- 		host->caps |= MMC_CAP_MMC_HIGHSPEED;
--	if (of_property_read_bool(np, "sd-uhs-sdr12"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr12"))
- 		host->caps |= MMC_CAP_UHS_SDR12;
--	if (of_property_read_bool(np, "sd-uhs-sdr25"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr25"))
- 		host->caps |= MMC_CAP_UHS_SDR25;
--	if (of_property_read_bool(np, "sd-uhs-sdr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr50"))
- 		host->caps |= MMC_CAP_UHS_SDR50;
--	if (of_property_read_bool(np, "sd-uhs-sdr104"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr104"))
- 		host->caps |= MMC_CAP_UHS_SDR104;
--	if (of_property_read_bool(np, "sd-uhs-ddr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-ddr50"))
- 		host->caps |= MMC_CAP_UHS_DDR50;
--	if (of_property_read_bool(np, "cap-power-off-card"))
-+	if (device_property_read_bool(dev, "cap-power-off-card"))
- 		host->caps |= MMC_CAP_POWER_OFF_CARD;
--	if (of_property_read_bool(np, "cap-mmc-hw-reset"))
-+	if (device_property_read_bool(dev, "cap-mmc-hw-reset"))
- 		host->caps |= MMC_CAP_HW_RESET;
--	if (of_property_read_bool(np, "cap-sdio-irq"))
-+	if (device_property_read_bool(dev, "cap-sdio-irq"))
- 		host->caps |= MMC_CAP_SDIO_IRQ;
--	if (of_property_read_bool(np, "full-pwr-cycle"))
-+	if (device_property_read_bool(dev, "full-pwr-cycle"))
- 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
--	if (of_property_read_bool(np, "keep-power-in-suspend"))
-+	if (device_property_read_bool(dev, "keep-power-in-suspend"))
- 		host->pm_caps |= MMC_PM_KEEP_POWER;
--	if (of_property_read_bool(np, "wakeup-source") ||
--	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
-+	if (device_property_read_bool(dev, "wakeup-source") ||
-+	    device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
- 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--	if (of_property_read_bool(np, "mmc-ddr-3_3v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
- 		host->caps |= MMC_CAP_3_3V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
- 		host->caps |= MMC_CAP_1_8V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_2v"))
- 		host->caps |= MMC_CAP_1_2V_DDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
-+	if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
- 		host->caps2 |= MMC_CAP2_HS400_ES;
--	if (of_property_read_bool(np, "no-sdio"))
-+	if (device_property_read_bool(dev, "no-sdio"))
- 		host->caps2 |= MMC_CAP2_NO_SDIO;
--	if (of_property_read_bool(np, "no-sd"))
-+	if (device_property_read_bool(dev, "no-sd"))
- 		host->caps2 |= MMC_CAP2_NO_SD;
--	if (of_property_read_bool(np, "no-mmc"))
-+	if (device_property_read_bool(dev, "no-mmc"))
- 		host->caps2 |= MMC_CAP2_NO_MMC;
- 
--	host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
-+	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
- 	if (host->dsr_req && (host->dsr & ~0xffff)) {
- 		dev_err(host->parent,
- 			"device tree specified broken value for DSR: 0x%x, ignoring\n",
--- 
-2.7.2
+Will pick this patch with [PATCH 1/2] after getting acked tags from DT guys.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> ---
+> 
+> Changes in v2:
+> - rename property to rockchip,desired-num-phases
+> 
+>  drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++--------------
+>  1 file changed, 30 insertions(+), 18 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 372fb6e..a3f1c2b 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -25,6 +25,7 @@ struct dw_mci_rockchip_priv_data {
+>  	struct clk		*drv_clk;
+>  	struct clk		*sample_clk;
+>  	int			default_sample_phase;
+> +	int			num_phases;
+>  };
+>  
+>  static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> @@ -133,8 +134,8 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	}
+>  }
+>  
+> -#define NUM_PHASES			360
+> -#define TUNING_ITERATION_TO_PHASE(i)	(DIV_ROUND_UP((i) * 360, NUM_PHASES))
+> +#define TUNING_ITERATION_TO_PHASE(i, num_phases) \
+> +		(DIV_ROUND_UP((i) * 360, num_phases))
+>  
+>  static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  {
+> @@ -159,13 +160,15 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  		return -EIO;
+>  	}
+>  
+> -	ranges = kmalloc_array(NUM_PHASES / 2 + 1, sizeof(*ranges), GFP_KERNEL);
+> +	ranges = kmalloc_array(priv->num_phases / 2 + 1,
+> +			       sizeof(*ranges), GFP_KERNEL);
+>  	if (!ranges)
+>  		return -ENOMEM;
+>  
+>  	/* Try each phase and extract good ranges */
+> -	for (i = 0; i < NUM_PHASES; ) {
+> -		clk_set_phase(priv->sample_clk, TUNING_ITERATION_TO_PHASE(i));
+> +	for (i = 0; i < priv->num_phases; ) {
+> +		clk_set_phase(priv->sample_clk,
+> +			      TUNING_ITERATION_TO_PHASE(i, priv->num_phases));
+>  
+>  		v = !mmc_send_tuning(mmc, opcode, NULL);
+>  
+> @@ -179,7 +182,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  		if (v) {
+>  			ranges[range_count-1].end = i;
+>  			i++;
+> -		} else if (i == NUM_PHASES - 1) {
+> +		} else if (i == priv->num_phases - 1) {
+>  			/* No extra skipping rules if we're at the end */
+>  			i++;
+>  		} else {
+> @@ -188,11 +191,11 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  			 * one since testing bad phases is slow.  Skip
+>  			 * 20 degrees.
+>  			 */
+> -			i += DIV_ROUND_UP(20 * NUM_PHASES, 360);
+> +			i += DIV_ROUND_UP(20 * priv->num_phases, 360);
+>  
+>  			/* Always test the last one */
+> -			if (i >= NUM_PHASES)
+> -				i = NUM_PHASES - 1;
+> +			if (i >= priv->num_phases)
+> +				i = priv->num_phases - 1;
+>  		}
+>  
+>  		prev_v = v;
+> @@ -210,7 +213,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  		range_count--;
+>  	}
+>  
+> -	if (ranges[0].start == 0 && ranges[0].end == NUM_PHASES - 1) {
+> +	if (ranges[0].start == 0 && ranges[0].end == priv->num_phases - 1) {
+>  		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
+>  		dev_info(host->dev, "All phases work, using default phase %d.",
+>  			 priv->default_sample_phase);
+> @@ -222,7 +225,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  		int len = (ranges[i].end - ranges[i].start + 1);
+>  
+>  		if (len < 0)
+> -			len += NUM_PHASES;
+> +			len += priv->num_phases;
+>  
+>  		if (longest_range_len < len) {
+>  			longest_range_len = len;
+> @@ -230,25 +233,30 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>  		}
+>  
+>  		dev_dbg(host->dev, "Good phase range %d-%d (%d len)\n",
+> -			TUNING_ITERATION_TO_PHASE(ranges[i].start),
+> -			TUNING_ITERATION_TO_PHASE(ranges[i].end),
+> +			TUNING_ITERATION_TO_PHASE(ranges[i].start,
+> +						  priv->num_phases),
+> +			TUNING_ITERATION_TO_PHASE(ranges[i].end,
+> +						  priv->num_phases),
+>  			len
+>  		);
+>  	}
+>  
+>  	dev_dbg(host->dev, "Best phase range %d-%d (%d len)\n",
+> -		TUNING_ITERATION_TO_PHASE(ranges[longest_range].start),
+> -		TUNING_ITERATION_TO_PHASE(ranges[longest_range].end),
+> +		TUNING_ITERATION_TO_PHASE(ranges[longest_range].start,
+> +					  priv->num_phases),
+> +		TUNING_ITERATION_TO_PHASE(ranges[longest_range].end,
+> +					  priv->num_phases),
+>  		longest_range_len
+>  	);
+>  
+>  	middle_phase = ranges[longest_range].start + longest_range_len / 2;
+> -	middle_phase %= NUM_PHASES;
+> +	middle_phase %= priv->num_phases;
+>  	dev_info(host->dev, "Successfully tuned phase to %d\n",
+> -		 TUNING_ITERATION_TO_PHASE(middle_phase));
+> +		 TUNING_ITERATION_TO_PHASE(middle_phase, priv->num_phases));
+>  
+>  	clk_set_phase(priv->sample_clk,
+> -		      TUNING_ITERATION_TO_PHASE(middle_phase));
+> +		      TUNING_ITERATION_TO_PHASE(middle_phase,
+> +						priv->num_phases));
+>  
+>  free:
+>  	kfree(ranges);
+> @@ -264,6 +272,10 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+>  	if (!priv)
+>  		return -ENOMEM;
+>  
+> +	if (of_property_read_u32(np, "rockchip,desired-num-phases",
+> +					&priv->num_phases))
+> +		priv->num_phases = 360;
+> +
+>  	if (of_property_read_u32(np, "rockchip,default-sample-phase",
+>  					&priv->default_sample_phase))
+>  		priv->default_sample_phase = 0;
+> 
 
