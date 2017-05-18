@@ -1,242 +1,139 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to block requests
-Date: Thu, 18 May 2017 11:29:34 +0200
-Message-ID: <20170518092936.9277-4-linus.walleij@linaro.org>
+Subject: [PATCH 5/6 v2] mmc: block: move multi-ioctl() to use block layer
+Date: Thu, 18 May 2017 11:29:35 +0200
+Message-ID: <20170518092936.9277-5-linus.walleij@linaro.org>
 References: <20170518092936.9277-1-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:35376 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755158AbdERJaH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2017 05:30:07 -0400
-Received: by mail-wr0-f172.google.com with SMTP id z52so29200240wrc.2
-        for <linux-mmc@vger.kernel.org>; Thu, 18 May 2017 02:30:07 -0700 (PDT)
+Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170518092936.9277-1-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-block-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-This wraps single ioctl() commands into block requests using
-the custom block layer request types REQ_OP_DRV_IN and
-REQ_OP_DRV_OUT.
+This switches also the multiple-command ioctl() call to issue
+all ioctl()s through the block layer instead of going directly
+to the device.
 
-By doing this we are loosening the grip on the big host lock,
-since two calls to mmc_get_card()/mmc_put_card() are removed.
+We extend the passed argument with an argument count and loop
+over all passed commands in the ioctl() issue function called
+from the block layer.
 
-We are storing the ioctl() in/out argument as a pointer in
-the per-request struct mmc_blk_request container. Since we
-now let the block layer allocate this data, blk_get_request()
-will allocate it for us and we can immediately dereference
-it and use it to pass the argument into the block layer.
-
-We refactor the if/else/if/else ladder in mmc_blk_issue_rq()
-as part of the job, keeping some extra attention to the
-case when a NULL req is passed into this function and
-making that pipeline flush more explicit.
-
-Tested on the ux500 with the userspace:
-mmc extcsd read /dev/mmcblk3
-resulting in a successful EXTCSD info dump back to the
-console.
-
-This commit fixes a starvation issue in the MMC/SD stack
-that can be easily provoked in the following way by
-issueing the following commands in sequence:
-
-> dd if=/dev/mmcblk3 of=/dev/null bs=1M &
-> mmc extcs read /dev/mmcblk3
-
-Before this patch, the extcsd read command would hang
-(starve) while waiting for the dd command to finish since
-the block layer was holding the card/host lock.
-
-After this patch, the extcsd ioctl() command is nicely
-interpersed with the rest of the block commands and we
-can issue a bunch of ioctl()s from userspace while there
-is some busy block IO going on without any problems.
-
-Conversely userspace ioctl()s can no longer starve
-the block layer by holding the card/host lock.
+By doing this we are again loosening the grip on the big host
+lock, since two calls to mmc_get_card()/mmc_put_card() are
+removed.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
 ChangeLog v1->v2:
-- Replace the if/else/if/else nest in mmc_blk_issue_rq()
-  with a switch() clause at Ulf's request.
-- Update to the API change for req_to_mmc_queue_req()
+- - Update to the API change for req_to_mmc_queue_req()
 ---
- drivers/mmc/core/block.c | 111 ++++++++++++++++++++++++++++++++++++-----------
- drivers/mmc/core/queue.h |   3 ++
- 2 files changed, 88 insertions(+), 26 deletions(-)
+ drivers/mmc/core/block.c | 38 +++++++++++++++++++++++++-------------
+ drivers/mmc/core/queue.h |  3 ++-
+ 2 files changed, 27 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f4dab1dfd2ab..9fb2bd529156 100644
+index 9fb2bd529156..e9737987956f 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -564,8 +564,10 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+@@ -563,6 +563,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 			     struct mmc_ioc_cmd __user *ic_ptr)
  {
  	struct mmc_blk_ioc_data *idata;
++	struct mmc_blk_ioc_data *idatas[1];
+ 	struct mmc_blk_data *md;
+ 	struct mmc_queue *mq;
+ 	struct mmc_card *card;
+@@ -600,7 +601,9 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	req = blk_get_request(mq->queue,
+ 		idata->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
+ 		__GFP_RECLAIM);
+-	req_to_mmc_queue_req(req)->idata = idata;
++	idatas[0] = idata;
++	req_to_mmc_queue_req(req)->idata = idatas;
++	req_to_mmc_queue_req(req)->ioc_count = 1;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+ 	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
+ 	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
+@@ -622,14 +625,17 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ static void mmc_blk_ioctl_cmd_issue(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_queue_req *mq_rq;
+-	struct mmc_blk_ioc_data *idata;
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	int ioc_err;
++	int i;
+ 
+ 	mq_rq = req_to_mmc_queue_req(req);
+-	idata = mq_rq->idata;
+-	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
++	for (i = 0; i < mq_rq->ioc_count; i++) {
++		ioc_err = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
++		if (ioc_err)
++			break;
++	}
+ 	mq_rq->ioc_result = ioc_err;
+ 
+ 	/* Always switch back to main area after RPMB access */
+@@ -646,8 +652,10 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	struct mmc_ioc_cmd __user *cmds = user->cmds;
+ 	struct mmc_card *card;
  	struct mmc_blk_data *md;
 +	struct mmc_queue *mq;
- 	struct mmc_card *card;
- 	int err = 0, ioc_err = 0;
+ 	int i, err = 0, ioc_err = 0;
+ 	__u64 num_of_cmds;
 +	struct request *req;
  
  	/*
  	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-@@ -591,17 +593,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+@@ -689,21 +697,25 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
  		goto cmd_done;
  	}
  
 -	mmc_get_card(card);
 -
--	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
+-	for (i = 0; i < num_of_cmds && !ioc_err; i++)
+-		ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
 -
 -	/* Always switch back to main area after RPMB access */
 -	if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
 -		mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
--
+ 
 -	mmc_put_card(card);
--
 +	/*
-+	 * Dispatch the ioctl() into the block request queue.
++	 * Dispatch the ioctl()s into the block request queue.
 +	 */
 +	mq = &md->queue;
 +	req = blk_get_request(mq->queue,
-+		idata->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
++		idata[0]->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
 +		__GFP_RECLAIM);
 +	req_to_mmc_queue_req(req)->idata = idata;
++	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
 +	blk_execute_rq(mq->queue, NULL, req, 0);
 +	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
- 	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
-+	blk_put_request(req);
  
+ 	/* copy to user if data and response */
+ 	for (i = 0; i < num_of_cmds && !err; i++)
+ 		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
+ 
++	blk_put_request(req);
++
  cmd_done:
  	mmc_blk_put(md);
-@@ -611,6 +614,31 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	return ioc_err ? ioc_err : err;
- }
- 
-+/*
-+ * The ioctl commands come back from the block layer after it queued it and
-+ * processed it with all other requests and then they get issued in this
-+ * function.
-+ */
-+static void mmc_blk_ioctl_cmd_issue(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_queue_req *mq_rq;
-+	struct mmc_blk_ioc_data *idata;
-+	struct mmc_card *card = mq->card;
-+	struct mmc_blk_data *md = mq->blkdata;
-+	int ioc_err;
-+
-+	mq_rq = req_to_mmc_queue_req(req);
-+	idata = mq_rq->idata;
-+	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
-+	mq_rq->ioc_result = ioc_err;
-+
-+	/* Always switch back to main area after RPMB access */
-+	if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
-+		mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
-+
-+	blk_end_request_all(req, ioc_err);
-+}
-+
- static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 				   struct mmc_ioc_multi_cmd __user *user)
- {
-@@ -1854,23 +1882,54 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	if (req && req_op(req) == REQ_OP_DISCARD) {
--		/* complete ongoing async transfer before issuing discard */
--		if (mq->qcnt)
--			mmc_blk_issue_rw_rq(mq, NULL);
--		mmc_blk_issue_discard_rq(mq, req);
--	} else if (req && req_op(req) == REQ_OP_SECURE_ERASE) {
--		/* complete ongoing async transfer before issuing secure erase*/
--		if (mq->qcnt)
--			mmc_blk_issue_rw_rq(mq, NULL);
--		mmc_blk_issue_secdiscard_rq(mq, req);
--	} else if (req && req_op(req) == REQ_OP_FLUSH) {
--		/* complete ongoing async transfer before issuing flush */
--		if (mq->qcnt)
--			mmc_blk_issue_rw_rq(mq, NULL);
--		mmc_blk_issue_flush(mq, req);
-+	if (req) {
-+		switch (req_op(req)) {
-+		case REQ_OP_DRV_IN:
-+		case REQ_OP_DRV_OUT:
-+			/*
-+			 * Complete ongoing async transfer before issuing
-+			 * ioctl()s
-+			 */
-+			if (mq->qcnt)
-+				mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_ioctl_cmd_issue(mq, req);
-+			break;
-+		case REQ_OP_DISCARD:
-+			/*
-+			 * Complete ongoing async transfer before issuing
-+			 * discard.
-+			 */
-+			if (mq->qcnt)
-+				mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_issue_discard_rq(mq, req);
-+			break;
-+		case REQ_OP_SECURE_ERASE:
-+			/*
-+			 * Complete ongoing async transfer before issuing
-+			 * secure erase.
-+			 */
-+			if (mq->qcnt)
-+				mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_issue_secdiscard_rq(mq, req);
-+			break;
-+		case REQ_OP_FLUSH:
-+			/*
-+			 * Complete ongoing async transfer before issuing
-+			 * flush.
-+			 */
-+			if (mq->qcnt)
-+				mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_issue_flush(mq, req);
-+			break;
-+		default:
-+			/* Normal request, just issue it */
-+			mmc_blk_issue_rw_rq(mq, req);
-+			card->host->context_info.is_waiting_last_req = false;
-+			break;
-+		};
- 	} else {
--		mmc_blk_issue_rw_rq(mq, req);
-+		/* No request, flushing the pipeline with NULL */
-+		mmc_blk_issue_rw_rq(mq, NULL);
- 		card->host->context_info.is_waiting_last_req = false;
- 	}
- 
+ cmd_err:
 diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index dae31bc0c2d3..005ece9ac7cb 100644
+index 005ece9ac7cb..8c76e7118c95 100644
 --- a/drivers/mmc/core/queue.h
 +++ b/drivers/mmc/core/queue.h
-@@ -22,6 +22,7 @@ static inline bool mmc_req_is_special(struct request *req)
- 
- struct task_struct;
- struct mmc_blk_data;
-+struct mmc_blk_ioc_data;
- 
- struct mmc_blk_request {
- 	struct mmc_request	mrq;
-@@ -40,6 +41,8 @@ struct mmc_queue_req {
- 	struct scatterlist	*bounce_sg;
+@@ -42,7 +42,8 @@ struct mmc_queue_req {
  	unsigned int		bounce_sg_len;
  	struct mmc_async_req	areq;
-+	int			ioc_result;
-+	struct mmc_blk_ioc_data	*idata;
+ 	int			ioc_result;
+-	struct mmc_blk_ioc_data	*idata;
++	struct mmc_blk_ioc_data	**idata;
++	unsigned int		ioc_count;
  };
  
  struct mmc_queue {
 -- 
 2.9.3
-
