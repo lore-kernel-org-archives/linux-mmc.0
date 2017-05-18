@@ -1,61 +1,61 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH] mmc: tmio: use SDIO master interrupt bit only when
- allowed
-Date: Thu, 18 May 2017 06:36:06 +0000
-Message-ID: <TY1PR06MB09920462AAF6E6F2EEFF2C86D8E40@TY1PR06MB0992.apcprd06.prod.outlook.com>
-References: <20161209165141.26599-1-wsa+renesas@sang-engineering.com>
- <TY1PR06MB099248E104D6762E9E860BF3D8E70@TY1PR06MB0992.apcprd06.prod.outlook.com>
- <CAKntEQ5OGSLUaBCFf-GY44K65q9seCgroNE_6mx5gPnKm25aYg@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/5] mmc: core: Delete bounce buffer Kconfig option
+Date: Thu, 18 May 2017 09:48:02 +0200
+Message-ID: <CACRpkdZp3JtnNrxsvtNT7hDB1w5KJomngs-=J8PG5fbDF=e+0w@mail.gmail.com>
+References: <20170510082418.10513-1-linus.walleij@linaro.org>
+ <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
+ <20170510082418.10513-2-linus.walleij@linaro.org> <3202707.f2tzK1cxd8@amdc3058>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAKntEQ5OGSLUaBCFf-GY44K65q9seCgroNE_6mx5gPnKm25aYg@mail.gmail.com>
-Content-Language: ja-JP
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Yasushi SHOJI <yashi@atmark-techno.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <3202707.f2tzK1cxd8@amdc3058>
+Sender: linux-block-owner@vger.kernel.org
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>, "Steven J. Hill" <Steven.Hill@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgU2hvamktc2FuLA0KDQo+IEZyb206IFlhc3VzaGkgU0hPSkkNCj4gU2VudDogVGh1cnNkYXks
-IE1heSAxOCwgMjAxNyAyOjEwIFBNDQo+IA0KPiBIaSwNCj4gDQo+IE9uIFdlZCwgTWF5IDE3LCAy
-MDE3IGF0IDQ6NDcgUE0sIFlvc2hpaGlybyBTaGltb2RhDQo+IDx5b3NoaWhpcm8uc2hpbW9kYS51
-aEByZW5lc2FzLmNvbT4gd3JvdGU6DQo+ID4+DQo+ID4+ICBkcml2ZXJzL21tYy9ob3N0L3RtaW9f
-bW1jX3Bpby5jIHwgNyArKysrLS0tDQo+ID4+ICAxIGZpbGUgY2hhbmdlZCwgNCBpbnNlcnRpb25z
-KCspLCAzIGRlbGV0aW9ucygtKQ0KPiA+Pg0KPiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMv
-aG9zdC90bWlvX21tY19waW8uYyBiL2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWNfcGlvLmMNCj4g
-Pj4gaW5kZXggN2VmMjRlYzYyMGI1NDIuLjUyNmU1MjcxOWY4MWI5IDEwMDY0NA0KPiA+PiAtLS0g
-YS9kcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jX3Bpby5jDQo+ID4+ICsrKyBiL2RyaXZlcnMvbW1j
-L2hvc3QvdG1pb19tbWNfcGlvLmMNCj4gPj4gQEAgLTE0MCwxMiArMTQwLDEwIEBAIHN0YXRpYyB2
-b2lkIHRtaW9fbW1jX2VuYWJsZV9zZGlvX2lycShzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgaW50IGVu
-YWJsZSkNCj4gPj4NCj4gPj4gICAgICAgICAgICAgICBob3N0LT5zZGlvX2lycV9tYXNrID0gVE1J
-T19TRElPX01BU0tfQUxMICYNCj4gPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICB+VE1JT19TRElPX1NUQVRfSU9JUlE7DQo+ID4+IC0gICAgICAgICAgICAgc2RfY3RybF93
-cml0ZTE2KGhvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAwMSk7DQo+ID4+ICAgICAgICAg
-ICAgICAgc2RfY3RybF93cml0ZTE2KGhvc3QsIENUTF9TRElPX0lSUV9NQVNLLCBob3N0LT5zZGlv
-X2lycV9tYXNrKTsNCj4gPj4gICAgICAgfSBlbHNlIGlmICghZW5hYmxlICYmIGhvc3QtPnNkaW9f
-aXJxX2VuYWJsZWQpIHsNCj4gPj4gICAgICAgICAgICAgICBob3N0LT5zZGlvX2lycV9tYXNrID0g
-VE1JT19TRElPX01BU0tfQUxMOw0KPiA+PiAgICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUxNiho
-b3N0LCBDVExfU0RJT19JUlFfTUFTSywgaG9zdC0+c2Rpb19pcnFfbWFzayk7DQo+ID4+IC0gICAg
-ICAgICAgICAgc2RfY3RybF93cml0ZTE2KGhvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAw
-MCk7DQo+ID4+DQo+ID4+ICAgICAgICAgICAgICAgaG9zdC0+c2Rpb19pcnFfZW5hYmxlZCA9IGZh
-bHNlOw0KPiA+PiAgICAgICAgICAgICAgIHBtX3J1bnRpbWVfbWFya19sYXN0X2J1c3kobW1jX2Rl
-dihtbWMpKTsNCj4gPj4gQEAgLTEyMDMsNyArMTIwMSw3IEBAIGludCB0bWlvX21tY19ob3N0X3By
-b2JlKHN0cnVjdCB0bWlvX21tY19ob3N0ICpfaG9zdCwNCj4gPj4gICAgICAgaWYgKHBkYXRhLT5m
-bGFncyAmIFRNSU9fTU1DX1NESU9fSVJRKSB7DQo+ID4+ICAgICAgICAgICAgICAgX2hvc3QtPnNk
-aW9faXJxX21hc2sgPSBUTUlPX1NESU9fTUFTS19BTEw7DQo+ID4+ICAgICAgICAgICAgICAgc2Rf
-Y3RybF93cml0ZTE2KF9ob3N0LCBDVExfU0RJT19JUlFfTUFTSywgX2hvc3QtPnNkaW9faXJxX21h
-c2spOw0KPiA+PiAtICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUxNihfaG9zdCwgQ1RMX1RSQU5T
-QUNUSU9OX0NUTCwgMHgwMDAwKTsNCj4gPj4gKyAgICAgICAgICAgICBzZF9jdHJsX3dyaXRlMTYo
-X2hvc3QsIENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAwMSk7DQo+ID4+ICAgICAgIH0NCj4gPg0K
-PiA+IEknbSBhZnJhaWQgYnV0IEkgd291bGQgbGlrZSB0byBjb25maXJtIGFib3V0IHRoaXMgNiBt
-b250aCBhZ28ncyBwYXRjaCA6KQ0KPiA+DQo+ID4gVGhpcyBwYXRjaCBlbmFibGVzIENUTF9UUkFO
-U0FDVElPTl9DVEwgdG8gMHgwMDAxIGluIHRtaW9fbW1jX2hvc3RfcHJvYmUoKS4NCj4gPiBCdXQs
-IEkgaGF2ZSBhIGNvbmNlcm4gd2UgaGF2ZSB0byBkaXNhYmxlL2VuYWJsZSB0aGUgcmVnaXN0ZXIg
-aW4gc3VzcGVuZC9yZXN1bWUoKQ0KPiA+IGJlY2F1c2UgcmVnaXN0ZXJzIHNldHRpbmcgaXMgcG9z
-c2libGUgdG8gYmUgY2xlYXJlZCBhZnRlciByZXN1bWUuDQo+ID4gV2hhdCBkbyB5b3UgdGhpbms/
-DQo+IA0KPiBUaGF0J3MgYSBnb29kIGNhdGNoLg0KPiBJIHN1cHBvc2Ugd2UgbmVlZCB0aGF0LiAg
-SSBkaWRuJ3QgY2hlY2sgaXQgZm9yIHN1c3BlbmQvcmVzdW1lIGF0DQo+IHRoYXR0aW1lLiBNeSBi
-YWQuDQoNClRoYW5rIHlvdSBmb3IgdGhlIHJlcGx5LiBJIGdvdCBpdC4NCldvbGZyYW0tc2FuIHdp
-bGwgdHJ5IHRvIGZpeCB0aGUgaXNzdWUuDQoNCkJlc3QgcmVnYXJkcywNCllvc2hpaGlybyBTaGlt
-b2RhDQoNCj4gVGhhbmtzLA0KPiAtLQ0KPiAgICAgICAgICAgICB5YXNoaQ0K
+On Mon, May 15, 2017 at 4:04 PM, Bartlomiej Zolnierkiewicz
+<b.zolnierkie@samsung.com> wrote:
+
+> [ I added Daniel, Marc & Steven to cc: ]
+
+>> The option CONFIG_MMC_BLOCK_BOUNCE is default y so the
+>> majority of platforms in the kernel already have it on, and
+>> it then gets turned off at runtime since most of these have
+>> a host->max_segs > 1. The few exceptions that have
+>> host->max_segs == 1 and still turn off the bounce buffering
+>> are those that disable it in their defconfig.
+>>
+>> Those are the following:
+>>
+>> arch/arm/configs/colibri_pxa300_defconfig
+>> arch/arm/configs/zeus_defconfig
+>> - Uses MMC_PXA, drivers/mmc/host/pxamci.c
+>> - Sets host->max_segs = NR_SG, which is 1
+>> - This needs its bounce buffer deactivated so we set
+>>   host->disable_bounce to true in the host driver
+>
+> [...]
+>
+>> arch/mips/configs/cavium_octeon_defconfig
+>> - Uses MMC_CAVIUM_OCTEON, drivers/mmc/host/cavium.c
+>> - Sets host->max_segs to 16 or 1
+>> - Setting host->disable_bounce to be sure for the 1 case
+>
+> From looking at the code it seems that bounce buffering should
+> be always beneficial to MMC performance when host->max_segs == 1.
+>
+> It would be useful to know why these specific defconfigs
+> disable bounce buffering (to save memory?). Maybe the defaults
+> should be changed nowadays?
+
+I agree. But I can't test on pxamci and cavium so I would
+appreciate if the driver maintainers try to remove the
+flag (MMC_CAP_NO_BOUNCE_BUFF in the v2 patch set)
+and see what happens.
+
+I would be happy to cut this special flag altogether, but I am
+also afraid of screwing up some config :/
+
+Yours,
+Linus Walleij
