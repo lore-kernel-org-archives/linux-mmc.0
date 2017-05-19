@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 16/41] mmc: omap_hsmmc: Support non-1.8V IO controllers
-Date: Fri, 19 May 2017 13:45:16 +0530
-Message-ID: <20170519081541.26753-17-kishon@ti.com>
+Subject: [PATCH 14/41] mmc: host: omap_hsmmc: Remove *use_dma* member
+Date: Fri, 19 May 2017 13:45:14 +0530
+Message-ID: <20170519081541.26753-15-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,94 +21,125 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony
 Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sekhar Nori <nsekhar@ti.com>
+omap_hsmmc doesn't support polled I/O. So remove *use_dma*
+which is always set to '1'.
 
-OMAP HSMMC driver assumes that if the controller does
-not support dual-volt, then it supports only 1.8V IO.
-
-This assumption can be incorrect. For example, on K2G
-MMC0 supports 3.3V IO only. AM57x Beagle-x15 and IDK
-boards support only 3.3V IO on eMMC interface.
-
-Support device-tree property "no-1-8-v" to for
-controllers which are not dual-voltage and do not
-support 1.8V IO.
-
-Note that lack of support for this property has not
-led to any known regression in affected platforms so
-far. But it will be nice to be in sync with hardware
-configuration.
-
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c            | 15 ++++++++++++---
- include/linux/platform_data/hsmmc-omap.h |  5 +++++
- 2 files changed, 17 insertions(+), 3 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 37 ++++++++++++++++---------------------
+ 1 file changed, 16 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index c6e3efb0f8fb..7c555e3ecce8 100644
+index 7271c7e3144c..90bf097484ae 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -865,6 +865,9 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 		else
- 			hctl = SDVS30;
- 		capa = VS30 | VS18;
-+	} else if (host->pdata->controller_flags & OMAP_HSMMC_NO_1_8_V) {
-+		hctl = SDVS30;
-+		capa = VS30;
- 	} else {
- 		hctl = SDVS18;
- 		capa = VS18;
-@@ -2121,11 +2124,14 @@ static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
+@@ -238,7 +238,7 @@ struct omap_hsmmc_host {
+ 	u32			capa;
+ 	int			irq;
+ 	int			wake_irq;
+-	int			use_dma, dma_ch;
++	int			dma_ch;
+ 	struct dma_chan		*tx_chan;
+ 	struct dma_chan		*rx_chan;
+ 	int			response_busy;
+@@ -658,8 +658,8 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 		 */
+ 		irq_mask &= ~(DCRC_EN | DEB_EN);
  
- 	val = OMAP_HSMMC_READ(host->base, CAPA);
+-	if (host->use_dma)
+-		irq_mask &= ~(BRR_EN | BWR_EN);
++	/* BRR and BWR need not be enabled for DMA */
++	irq_mask &= ~(BRR_EN | BWR_EN);
  
--	/* Only MMC1 supports 3.0V */
--	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
-+	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
- 		val |= (VS30 | VS18);
--	else
-+	} else if (host->pdata->controller_flags & OMAP_HSMMC_NO_1_8_V) {
-+		val |= VS30;
-+		val &= ~VS18;
-+	} else {
- 		val |= VS18;
-+	}
+ 	/* Disable timeout for erases or when using software timeout */
+ 	if (cmd && (cmd->opcode == MMC_ERASE || host->data_timeout))
+@@ -1012,8 +1012,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
+ 		cmdreg |= DP_SELECT | DDIR;
  
- 	OMAP_HSMMC_WRITE(host->base, CAPA, val);
+-	if (host->use_dma)
+-		cmdreg |= DMAE;
++	cmdreg |= DMAE;
+ 
+ 	host->req_in_progress = 1;
+ 	host->last_cmd = cmd->opcode;
+@@ -1040,7 +1039,7 @@ static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_req
+ 
+ 	omap_hsmmc_disable_irq(host);
+ 	/* Do not complete the request if DMA is still in progress */
+-	if (mrq->data && host->use_dma && dma_ch != -1)
++	if (mrq->data && dma_ch != -1)
+ 		return;
+ 	host->mrq = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+@@ -1127,7 +1126,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ 	host->dma_ch = -1;
+ 	spin_unlock_irqrestore(&host->irq_lock, flags);
+ 
+-	if (host->use_dma && dma_ch != -1) {
++	if (dma_ch != -1) {
+ 		struct dma_chan *chan = omap_hsmmc_get_dma_chan(host, host->data);
+ 
+ 		dmaengine_terminate_all(chan);
+@@ -1645,12 +1644,10 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
+ 		return 0;
+ 	}
+ 
+-	if (host->use_dma) {
+-		ret = omap_hsmmc_setup_dma_transfer(host, req);
+-		if (ret != 0) {
+-			dev_err(mmc_dev(host->mmc), "MMC start dma failure\n");
+-			return ret;
+-		}
++	ret = omap_hsmmc_setup_dma_transfer(host, req);
++	if (ret != 0) {
++		dev_err(mmc_dev(host->mmc), "MMC start dma failure\n");
++		return ret;
+ 	}
+ 	return 0;
  }
-@@ -2567,6 +2573,9 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,dual-volt", NULL))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+@@ -1661,7 +1658,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	struct mmc_data *data = mrq->data;
  
-+	if (of_find_property(np, "no-1-8-v", NULL))
-+		pdata->controller_flags |= OMAP_HSMMC_NO_1_8_V;
-+
- 	pdata->gpio_cd = -EINVAL;
- 	pdata->gpio_cod = -EINVAL;
- 	pdata->gpio_wp = -EINVAL;
-diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
-index c3f2a34db97a..d7be21dc9ffd 100644
---- a/include/linux/platform_data/hsmmc-omap.h
-+++ b/include/linux/platform_data/hsmmc-omap.h
-@@ -23,12 +23,17 @@
-  *    for example Advisory 2.1.1.128 "MMC: Multiple Block Read
-  *    Operation Issue" in _OMAP3530/3525/3515/3503 Silicon Errata_
-  *    Revision F (October 2010) (SPRZ278F).
-+ *
-+ * OMAP_HSMMC_NO_1_8_V: The controller does not support 1.8V IO voltage
-+ *    irrespective of what the capability states.
-+ *
-  */
- #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
- #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
- #define OMAP_HSMMC_SWAKEUP_MISSING		BIT(2)
- #define OMAP_HSMMC_REQUIRE_IODELAY		BIT(3)
- #define OMAP_HSMMC_HAS_HWPARAM			BIT(4)
-+#define OMAP_HSMMC_NO_1_8_V			BIT(5)
+-	if (host->use_dma && data->host_cookie) {
++	if (data->host_cookie) {
+ 		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, data);
  
- struct omap_hsmmc_dev_attr {
- 	u8 flags;
+ 		dma_unmap_sg(c->device->dev, data->sg, data->sg_len,
+@@ -1673,19 +1670,18 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
++	struct dma_chan *c = NULL;
+ 
+ 	if (mrq->data->host_cookie) {
+ 		mrq->data->host_cookie = 0;
+ 		return ;
+ 	}
+ 
+-	if (host->use_dma) {
+-		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, mrq->data);
++	c = omap_hsmmc_get_dma_chan(host, mrq->data);
+ 
+-		if (omap_hsmmc_pre_dma_transfer(host, mrq->data,
+-						&host->next_data, c))
+-			mrq->data->host_cookie = 0;
+-	}
++	if (omap_hsmmc_pre_dma_transfer(host, mrq->data,
++					&host->next_data, c))
++		mrq->data->host_cookie = 0;
+ }
+ 
+ /*
+@@ -2547,7 +2543,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->mmc	= mmc;
+ 	host->pdata	= pdata;
+ 	host->dev	= &pdev->dev;
+-	host->use_dma	= 1;
+ 	host->dma_ch	= -1;
+ 	host->irq	= irq;
+ 	host->mapbase	= res->start + pdata->reg_offset;
 -- 
 2.11.0
