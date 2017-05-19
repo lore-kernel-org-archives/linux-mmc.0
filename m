@@ -1,92 +1,76 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 2/6] mmc: tmio: refactor handling mrq
-Date: Fri, 19 May 2017 15:31:51 +0200
-Message-ID: <20170519133155.22945-3-wsa+renesas@sang-engineering.com>
-References: <20170519133155.22945-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170519133155.22945-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert+renesas@glider.be>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 0/6] More MMC block core refactorings
+Date: Fri, 19 May 2017 15:37:26 +0200
+Message-ID: <20170519133732.27470-1-linus.walleij@linaro.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+Sender: linux-block-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Split handling mrq into a seperate function. We need to call it from
-another place soon.
+This series builds on top of the previous series that created
+custom DRV_OP requests for ioctl() operations in MMC.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_core.c | 46 +++++++++++++++++++++++-----------------
- 1 file changed, 26 insertions(+), 20 deletions(-)
+The first patch is a suggestion from Christoph, the second
+builds infrastructure for issuing more, currently orthogonal
+custom operations through the block layer.
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 5f5a4a2d81be7c..bfe70b1cf1e1ea 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -894,12 +894,36 @@ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return ret;
- }
- 
-+static void tmio_process_mrq(struct tmio_mmc_host *host, struct mmc_request *mrq)
-+{
-+	int ret;
-+
-+	if (mrq->data) {
-+		ret = tmio_mmc_start_data(host, mrq->data);
-+		if (ret)
-+			goto fail;
-+	}
-+
-+	ret = tmio_mmc_start_command(host, mrq->cmd);
-+	if (ret)
-+		goto fail;
-+
-+	schedule_delayed_work(&host->delayed_reset_work,
-+			      msecs_to_jiffies(CMDREQ_TIMEOUT));
-+	return;
-+
-+fail:
-+	host->force_pio = false;
-+	host->mrq = NULL;
-+	mrq->cmd->error = ret;
-+	mmc_request_done(host->mmc, mrq);
-+}
-+
- /* Process requests from the MMC layer */
- static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	unsigned long flags;
--	int ret;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -919,25 +943,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	if (mrq->data) {
--		ret = tmio_mmc_start_data(host, mrq->data);
--		if (ret)
--			goto fail;
--	}
--
--	ret = tmio_mmc_start_command(host, mrq->cmd);
--	if (ret)
--		goto fail;
--
--	schedule_delayed_work(&host->delayed_reset_work,
--			      msecs_to_jiffies(CMDREQ_TIMEOUT));
--	return;
--
--fail:
--	host->force_pio = false;
--	host->mrq = NULL;
--	mrq->cmd->error = ret;
--	mmc_request_done(mmc, mrq);
-+	tmio_process_mrq(host, mrq);
- }
- 
- static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+The first operation we move over is pretty uncontroversial
+and straight-forward: it is the operation that
+write-protect-locks the boot partitions from sysfs. This
+is now done through the block layer so we do not need
+to congest and starve in the big MMC lock.
+
+The last two patches are more contoversial: they move the
+two debugfs accesses for reading card status and EXT CSD
+over to using the block layer funnel *if* *present*.
+
+So if the block layer is configured out, these will still
+issue operations directly and take the big MMC lock.
+
+The patch series is fully ABI safe: any scripts or code
+using the debugfs with or without the block layer will
+still work.
+
+However this leaves the mmc_card_get() locks in the block.h
+header for the !CONFIG_MMC_BLOCK case and I'm not really happy
+to keep them around, the idea is to terminate them.
+
+Ways forward after these patches:
+
+- Simply remove the debugfs files for status and ext_csd if
+  the block layer is not there. The debugfs is not ABI after
+  all, and there is an ioctl() to do the same job, and
+  that is what mmc-utils is using.
+
+- Simply remove the debugfs files for status and ext_csd
+  completely - and require users to switch to using the
+  ioctl() mmc-utils way of doing things if they want to
+  inspect their MMC/SD cards.
+
+- Wait and see: when I get to removing the big MMC lock from
+  SDIO I will anyway have to deal with this mess since
+  the big lock is no more a block layer problem, but a
+  problem with the entire MMC/SD/SDIO stack.
+
+In any case: these patches fixes the starvation of the
+boot partition locking and the debugfs access when using
+the block layer heavily at the same time.
+
+Linus Walleij (6):
+  mmc: block: remove req back pointer
+  mmc: block: Tag DRV_OPs with a driver operation type
+  mmc: block: Move DRV OP issue function
+  mmc: block: Move boot partition locking into a driver op
+  mmc: debugfs: Move card status retrieveal into the block layer
+  mmc: debugfs: Move EXT CSD debugfs acces to block layer
+
+ drivers/mmc/core/block.c   | 168 ++++++++++++++++++++++++++++++++-------------
+ drivers/mmc/core/block.h   |  49 +++++++++++++
+ drivers/mmc/core/debugfs.c |  19 +----
+ drivers/mmc/core/queue.c   |  13 ++--
+ drivers/mmc/core/queue.h   |  27 +++++++-
+ 5 files changed, 200 insertions(+), 76 deletions(-)
+
 -- 
-2.11.0
+2.9.3
