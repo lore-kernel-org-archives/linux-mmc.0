@@ -1,106 +1,76 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH v2] mmc: core: Delete an error message for a failed memory
- allocation in four functions
-Date: Fri, 19 May 2017 13:34:44 +0200
-Message-ID: <0ce8f8ac-d340-3f15-a698-ddfa449508e1@users.sourceforge.net>
-References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
- <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com>
- <50f3c642-b866-27f3-1201-5490225116f4@users.sourceforge.net>
- <CAPDyKFraTYQWAqSNdZG_bRpbDiLFw4nigVzC1nkmrfnr2aw2og@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFT PATCH] mmc: tmio: make sure SDIO gets reinitialized after resume
+Date: Fri, 19 May 2017 14:30:52 +0200
+Message-ID: <20170519123052.26565-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.web.de ([212.227.15.4]:53737 "EHLO mout.web.de"
+Received: from sauhun.de ([88.99.104.3]:46482 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750793AbdESLfF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 19 May 2017 07:35:05 -0400
-In-Reply-To: <CAPDyKFraTYQWAqSNdZG_bRpbDiLFw4nigVzC1nkmrfnr2aw2og@mail.gmail.com>
-Content-Language: en-GB
+        id S1752050AbdESMa4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 19 May 2017 08:30:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Tomas Winkler <tomas.winkler@intel.com>, Uri Yanai <uri.yanai@sandisk.com>, Wolfram Sang <wsa@the-dreams.de>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Yasushi SHOJI <yashi@atmark-techno.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Fri, 19 May 2017 13:15:27 +0200
+To achieve that, we set the registers in the generic HW reset routine
+which gets called at both, init and resume. We also make sure to move
+SDIO initialization before reset gets called in probe().
 
-Omit an extra message for a memory allocation failure in these functions.
-
-This issue was detected by using the Coccinelle software.
-
-Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
-Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
 
-v2:
-This refactoring superseded the update suggestion "mmc: core: Delete
-an error message for a failed memory allocation in three functions"
-from 2017-05-13 because another adjustment was requested by Ulf Hansson.
-https://patchwork.kernel.org/patch/9725233/
-https://lkml.org/lkml/2017/5/19/308
+This patch addresses a report I got from Shimoda-san. I can't really test it
+because the SDIO cards I have all require MMC_PM_KEEP_POWER to suspend and
+that we don't support. So, I send this out to ask for testing. At least it
+didn't cause regressions for the setup I used. To make testing easier, this
+is *not* put on top of Simon's SDHI DMA rework patches, so it should apply
+on current upstream and development branches.
 
- drivers/mmc/core/mmc_test.c |  2 --
- drivers/mmc/core/sd.c       | 16 +++-------------
- 2 files changed, 3 insertions(+), 15 deletions(-)
+ drivers/mmc/host/tmio_mmc_pio.c | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index fd1b4b8510b9..7a304a6e5bf1 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -3220,8 +3220,6 @@ static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
- 	df = kmalloc(sizeof(*df), GFP_KERNEL);
- 	if (!df) {
- 		debugfs_remove(file);
--		dev_err(&card->dev,
--			"Can't allocate memory for internal usage.\n");
- 		return -ENOMEM;
- 	}
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index a2d92f10501bdd..5e87fcaa99d430 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -229,6 +229,12 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+ 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
+ 		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
+ 	msleep(10);
++
++	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
++		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
++		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
++	}
++
+ }
  
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index d109634fbfce..1d7542daecbe 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -294,12 +294,8 @@ static int mmc_read_switch(struct mmc_card *card)
- 	err = -EIO;
+ static void tmio_mmc_reset_work(struct work_struct *work)
+@@ -1221,6 +1227,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 	if (_host->native_hotplug)
+ 		pm_runtime_get_noresume(&pdev->dev);
  
- 	status = kmalloc(64, GFP_KERNEL);
--	if (!status) {
--		pr_err("%s: could not allocate a buffer for "
--			"switch capabilities.\n",
--			mmc_hostname(card->host));
-+	if (!status)
- 		return -ENOMEM;
++	_host->sdio_irq_enabled = false;
++	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
++		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
++
+ 	tmio_mmc_clk_stop(_host);
+ 	tmio_mmc_reset(_host);
+ 
+@@ -1237,13 +1247,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 
+ 	_host->sdcard_irq_mask &= ~irq_mask;
+ 
+-	_host->sdio_irq_enabled = false;
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+-		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+-		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
+-		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
 -	}
+-
+ 	spin_lock_init(&_host->lock);
+ 	mutex_init(&_host->ios_lock);
  
- 	/*
- 	 * Find out the card's support bits with a mode 0 operation.
-@@ -359,11 +355,8 @@ int mmc_sd_switch_hs(struct mmc_card *card)
- 		return 0;
- 
- 	status = kmalloc(64, GFP_KERNEL);
--	if (!status) {
--		pr_err("%s: could not allocate a buffer for "
--			"switch capabilities.\n", mmc_hostname(card->host));
-+	if (!status)
- 		return -ENOMEM;
--	}
- 
- 	err = mmc_sd_switch(card, 1, 0, 1, status);
- 	if (err)
-@@ -596,11 +589,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 		return 0;
- 
- 	status = kmalloc(64, GFP_KERNEL);
--	if (!status) {
--		pr_err("%s: could not allocate a buffer for "
--			"switch capabilities.\n", mmc_hostname(card->host));
-+	if (!status)
- 		return -ENOMEM;
--	}
- 
- 	/* Set 4-bit bus width */
- 	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
 -- 
-2.13.0
+2.11.0
 
