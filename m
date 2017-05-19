@@ -1,39 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc: core: Delete an error message for a failed memory allocation
- in three functions
-Date: Fri, 19 May 2017 12:00:09 +0200
-Message-ID: <CAPDyKFraTYQWAqSNdZG_bRpbDiLFw4nigVzC1nkmrfnr2aw2og@mail.gmail.com>
-References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
- <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com> <50f3c642-b866-27f3-1201-5490225116f4@users.sourceforge.net>
+From: Jan Glauber <jan.glauber@caviumnetworks.com>
+Subject: Re: [PATCH 0/5] mmc: cavium: bug fixes for 4.12
+Date: Fri, 19 May 2017 12:42:59 +0200
+Message-ID: <20170519104259.GA7638@hc>
+References: <20170516093655.17746-1-jglauber@cavium.com>
+ <CAPDyKFpaWvvxz3g_tq0WG=_O3e+0MSBnMqmud0Me=0Adf4NUrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:33679 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751274AbdESKAL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2017 06:00:11 -0400
-Received: by mail-qt0-f171.google.com with SMTP id t26so54196653qtg.0
-        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 03:00:10 -0700 (PDT)
-In-Reply-To: <50f3c642-b866-27f3-1201-5490225116f4@users.sourceforge.net>
+Received: from mail-sn1nam02on0069.outbound.protection.outlook.com ([104.47.36.69]:48640
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754196AbdESKnP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 19 May 2017 06:43:15 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpaWvvxz3g_tq0WG=_O3e+0MSBnMqmud0Me=0Adf4NUrg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Tomas Winkler <tomas.winkler@intel.com>, Uri Yanai <uri.yanai@sandisk.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 19 May 2017 at 11:39, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
->> It's a nice cleanup. However I found one more occasion in mmc_test.c,
->> please fix that and re-spin.
->
-> To which source code place does this feedback refer?
->
-> Does it mean that another message removal would make sense in the
-> function =E2=80=9C__mmc_test_register_dbgfs_file=E2=80=9D?
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/d=
-rivers/mmc/core/mmc_test.c?h=3Dv4.11#n3202
+On Fri, May 19, 2017 at 10:30:22AM +0200, Ulf Hansson wrote:
+> On 16 May 2017 at 11:36, Jan Glauber <jglauber@cavium.com> wrote:
+> > Hi Ulf,
+> >
+> > here are some bug fixes for the new mmc driver. The only
+> > non-trivial fix should be the platform thing in patch #4 and #5.
+> >
+> > Tested on OcteonTx and on various MIPS boxes.
+> >
+> > thanks,
+> > Jan
+> >
+> > David Daney (2):
+> >   mmc: cavium-octeon: Fix interrupt enable code
+> >   mmc: cavium-octeon: Use proper GPIO name for power control
+> >
+> > Jan Glauber (3):
+> >   mmc: cavium: Prevent crash with incomplete DT
+> >   of/platform: Make of_platform_device_destroy globally visible
+> >   mmc: cavium: Fix probing race with regulator
+> >
+> >  drivers/mmc/host/cavium-octeon.c   | 4 ++--
+> >  drivers/mmc/host/cavium-thunderx.c | 4 +++-
+> >  drivers/mmc/host/cavium.c          | 8 ++++++--
+> >  drivers/of/platform.c              | 3 ++-
+> >  include/linux/of_platform.h        | 1 +
+> >  5 files changed, 14 insertions(+), 6 deletions(-)
+> >
+> > --
+> > 2.9.0.rc0.21.g7777322
+> >
+> 
+> I picked up patch1 and patch2 for fixes. The rest needs a re-spin.
 
-Yes!
+I'll re-spin the other patches.
 
-Br
-Uffe
+thanks,
+Jan
+
+
+> Thanks and kind regards
+> Uffe
