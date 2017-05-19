@@ -1,67 +1,47 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 34/41] ARM: dts: dra7: Use new dra7-specific compatible string
-Date: Fri, 19 May 2017 13:45:34 +0530
-Message-ID: <20170519081541.26753-35-kishon@ti.com>
+Subject: [PATCH 36/41] ARM: dts: am57xx-idk: Set MMC2 IO voltage to 3.3V
+Date: Fri, 19 May 2017 13:45:36 +0530
+Message-ID: <20170519081541.26753-37-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
 Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Use the new compatible string "ti,dra7-hsmmc" that was specifically
-added for dra7 and dra72. This is required since for dra7 and dra72
-processors iodelay values has to be set unlike other processors.
+From: Sekhar Nori <nsekhar@ti.com>
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+MMC2 interface on AM57xx IDK, connected to
+onboard eMMC, has IO voltage fixed to 3.3V.
+
+Add no-1-8-v device-tree property to mmc2 node
+in the board's device-tree file to reflect
+this.
+
+Note that the AM57xx SoC itself supports
+dual-voltage on MMC2. The limitation above is
+due to the board.
+
 Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra7.dtsi | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ arch/arm/boot/dts/am57xx-idk-common.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-index 38fb1828e26a..40b9eb96cdeb 100644
---- a/arch/arm/boot/dts/dra7.dtsi
-+++ b/arch/arm/boot/dts/dra7.dtsi
-@@ -1035,7 +1035,7 @@
- 		};
+diff --git a/arch/arm/boot/dts/am57xx-idk-common.dtsi b/arch/arm/boot/dts/am57xx-idk-common.dtsi
+index 5d6965ab7339..a8c9e5f714e4 100644
+--- a/arch/arm/boot/dts/am57xx-idk-common.dtsi
++++ b/arch/arm/boot/dts/am57xx-idk-common.dtsi
+@@ -413,6 +413,7 @@
+ 	bus-width = <8>;
+ 	ti,non-removable;
+ 	max-frequency = <96000000>;
++	no-1-8-v;
+ 	/delete-property/ mmc-hs200-1_8v;
+ };
  
- 		mmc1: mmc@4809c000 {
--			compatible = "ti,omap4-hsmmc";
-+			compatible = "ti,dra7-hsmmc", "ti,omap4-hsmmc";
- 			reg = <0x4809c000 0x400>;
- 			interrupts = <GIC_SPI 78 IRQ_TYPE_LEVEL_HIGH>;
- 			ti,hwmods = "mmc1";
-@@ -1049,7 +1049,7 @@
- 		};
- 
- 		mmc2: mmc@480b4000 {
--			compatible = "ti,omap4-hsmmc";
-+			compatible = "ti,dra7-hsmmc", "ti,omap4-hsmmc";
- 			reg = <0x480b4000 0x400>;
- 			interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>;
- 			ti,hwmods = "mmc2";
-@@ -1061,7 +1061,7 @@
- 		};
- 
- 		mmc3: mmc@480ad000 {
--			compatible = "ti,omap4-hsmmc";
-+			compatible = "ti,dra7-hsmmc", "ti,omap4-hsmmc";
- 			reg = <0x480ad000 0x400>;
- 			interrupts = <GIC_SPI 89 IRQ_TYPE_LEVEL_HIGH>;
- 			ti,hwmods = "mmc3";
-@@ -1074,7 +1074,7 @@
- 		};
- 
- 		mmc4: mmc@480d1000 {
--			compatible = "ti,omap4-hsmmc";
-+			compatible = "ti,dra7-hsmmc", "ti,omap4-hsmmc";
- 			reg = <0x480d1000 0x400>;
- 			interrupts = <GIC_SPI 91 IRQ_TYPE_LEVEL_HIGH>;
- 			ti,hwmods = "mmc4";
 -- 
 2.11.0
-
