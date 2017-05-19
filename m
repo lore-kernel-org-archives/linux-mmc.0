@@ -1,146 +1,114 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 35/41] ARM: dts: dra7: Add supported MMC/SD modes in MMC dt nodes
-Date: Fri, 19 May 2017 13:45:35 +0530
-Message-ID: <20170519081541.26753-36-kishon@ti.com>
+Subject: [PATCH 16/41] mmc: omap_hsmmc: Support non-1.8V IO controllers
+Date: Fri, 19 May 2017 13:45:16 +0530
+Message-ID: <20170519081541.26753-17-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On DRA7 family SoCs, MMC1 controller supports SDR104,
-SDR50, DDR50, SDR25 and SDR12 UHS modes (These UHS modes
-are not supported in beagle-x15 because it's not possible
-to switch IO lines supply voltage to 1.8v).
+From: Sekhar Nori <nsekhar@ti.com>
 
-MMC2 controller supports HS200 and DDR modes. (Since some of the
-boards like am57xx-evm reva3, beagle-x15 and am57xx idk has
-3.3v line connected to IO lines, HS200 cannot be supported
-in these boards).
+OMAP HSMMC driver assumes that if the controller does
+not support dual-volt, then it supports only 1.8V IO.
 
-MMC3 controller supports SDR12, SDR25 and SDR50 modes.
+This assumption can be incorrect. For example, on K2G
+MMC0 supports 3.3V IO only. AM57x Beagle-x15 and IDK
+boards support only 3.3V IO on eMMC interface.
 
-MMC4 controller supports SDR12 and SDR25 modes.
+Support device-tree property "no-1-8-v" to for
+controllers which are not dual-voltage and do not
+support 1.8V IO.
 
-Add these supported modes in device-tree file.
+Note that lack of support for this property has not
+led to any known regression in affected platforms so
+far. But it will be nice to be in sync with hardware
+configuration.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/am571x-idk.dts              |  1 +
- arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts |  1 +
- arch/arm/boot/dts/am57xx-beagle-x15.dts       |  6 ++++++
- arch/arm/boot/dts/am57xx-idk-common.dtsi      |  1 +
- arch/arm/boot/dts/dra7.dtsi                   | 14 ++++++++++++++
- 5 files changed, 23 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c            | 15 ++++++++++++---
+ include/linux/platform_data/hsmmc-omap.h |  5 +++++
+ 2 files changed, 17 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm/boot/dts/am571x-idk.dts b/arch/arm/boot/dts/am571x-idk.dts
-index 875291d1bdd7..bdf39d47948f 100644
---- a/arch/arm/boot/dts/am571x-idk.dts
-+++ b/arch/arm/boot/dts/am571x-idk.dts
-@@ -90,4 +90,5 @@
- 	pinctrl-0 = <&mmc2_pins_default>;
- 	pinctrl-1 = <&mmc2_pins_hs>;
- 	pinctrl-2 = <&mmc2_pins_ddr_rev20 &mmc2_iodelay_ddr_conf>;
-+	/delete-property/ mmc-hs200-1_8v;
- };
-diff --git a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-index d1786a8af7ae..e26d3bdda8f2 100644
---- a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-+++ b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-@@ -36,6 +36,7 @@
- 	pinctrl-0 = <&mmc2_pins_default>;
- 	pinctrl-1 = <&mmc2_pins_hs>;
- 	pinctrl-2 = <&mmc2_pins_ddr_3_3v_rev11 &mmc2_iodelay_ddr_3_3v_rev11_conf>;
-+	/delete-property/ mmc-hs200-1_8v;
- };
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index c6e3efb0f8fb..7c555e3ecce8 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -865,6 +865,9 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 		else
+ 			hctl = SDVS30;
+ 		capa = VS30 | VS18;
++	} else if (host->pdata->controller_flags & OMAP_HSMMC_NO_1_8_V) {
++		hctl = SDVS30;
++		capa = VS30;
+ 	} else {
+ 		hctl = SDVS18;
+ 		capa = VS18;
+@@ -2121,11 +2124,14 @@ static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
  
- /* errata i880 "Ethernet RGMII2 Limited to 10/100 Mbps" */
-diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
-index d6689106d2a8..8d9bdf10a7be 100644
---- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
-+++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
-@@ -25,6 +25,11 @@
- 	pinctrl-1 = <&mmc1_pins_hs>;
+ 	val = OMAP_HSMMC_READ(host->base, CAPA);
  
- 	vmmc-supply = <&ldo1_reg>;
-+	/delete-property/ sd-uhs-sdr104;
-+	/delete-property/ sd-uhs-sdr50;
-+	/delete-property/ sd-uhs-ddr50;
-+	/delete-property/ sd-uhs-sdr25;
-+	/delete-property/ sd-uhs-sdr12;
- };
+-	/* Only MMC1 supports 3.0V */
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+ 		val |= (VS30 | VS18);
+-	else
++	} else if (host->pdata->controller_flags & OMAP_HSMMC_NO_1_8_V) {
++		val |= VS30;
++		val &= ~VS18;
++	} else {
+ 		val |= VS18;
++	}
  
- &mmc2 {
-@@ -32,6 +37,7 @@
- 	pinctrl-0 = <&mmc2_pins_default>;
- 	pinctrl-1 = <&mmc2_pins_hs>;
- 	pinctrl-2 = <&mmc2_pins_ddr_3_3v_rev11 &mmc2_iodelay_ddr_3_3v_rev11_conf>;
-+	/delete-property/ mmc-hs200-1_8v;
- };
+ 	OMAP_HSMMC_WRITE(host->base, CAPA, val);
+ }
+@@ -2567,6 +2573,9 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (of_find_property(np, "ti,dual-volt", NULL))
+ 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
  
- /* errata i880 "Ethernet RGMII2 Limited to 10/100 Mbps" */
-diff --git a/arch/arm/boot/dts/am57xx-idk-common.dtsi b/arch/arm/boot/dts/am57xx-idk-common.dtsi
-index 0270b01a8e1d..5d6965ab7339 100644
---- a/arch/arm/boot/dts/am57xx-idk-common.dtsi
-+++ b/arch/arm/boot/dts/am57xx-idk-common.dtsi
-@@ -413,6 +413,7 @@
- 	bus-width = <8>;
- 	ti,non-removable;
- 	max-frequency = <96000000>;
-+	/delete-property/ mmc-hs200-1_8v;
- };
++	if (of_find_property(np, "no-1-8-v", NULL))
++		pdata->controller_flags |= OMAP_HSMMC_NO_1_8_V;
++
+ 	pdata->gpio_cd = -EINVAL;
+ 	pdata->gpio_cod = -EINVAL;
+ 	pdata->gpio_wp = -EINVAL;
+diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
+index c3f2a34db97a..d7be21dc9ffd 100644
+--- a/include/linux/platform_data/hsmmc-omap.h
++++ b/include/linux/platform_data/hsmmc-omap.h
+@@ -23,12 +23,17 @@
+  *    for example Advisory 2.1.1.128 "MMC: Multiple Block Read
+  *    Operation Issue" in _OMAP3530/3525/3515/3503 Silicon Errata_
+  *    Revision F (October 2010) (SPRZ278F).
++ *
++ * OMAP_HSMMC_NO_1_8_V: The controller does not support 1.8V IO voltage
++ *    irrespective of what the capability states.
++ *
+  */
+ #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
+ #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
+ #define OMAP_HSMMC_SWAKEUP_MISSING		BIT(2)
+ #define OMAP_HSMMC_REQUIRE_IODELAY		BIT(3)
+ #define OMAP_HSMMC_HAS_HWPARAM			BIT(4)
++#define OMAP_HSMMC_NO_1_8_V			BIT(5)
  
- &dcan1 {
-diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-index 40b9eb96cdeb..b813db662caf 100644
---- a/arch/arm/boot/dts/dra7.dtsi
-+++ b/arch/arm/boot/dts/dra7.dtsi
-@@ -1046,6 +1046,11 @@
- 			status = "disabled";
- 			pbias-supply = <&pbias_mmc_reg>;
- 			max-frequency = <192000000>;
-+			sd-uhs-sdr104;
-+			sd-uhs-sdr50;
-+			sd-uhs-ddr50;
-+			sd-uhs-sdr25;
-+			sd-uhs-sdr12;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-@@ -1058,6 +1063,10 @@
- 			dma-names = "tx", "rx";
- 			status = "disabled";
- 			max-frequency = <192000000>;
-+			sd-uhs-sdr25;
-+			sd-uhs-sdr12;
-+			mmc-hs200-1_8v;
-+			mmc-ddr-1_8v;
- 		};
- 
- 		mmc3: mmc@480ad000 {
-@@ -1071,6 +1080,9 @@
- 			status = "disabled";
- 			/* Errata i887 limits max-frequency of MMC3 to 64 MHz */
- 			max-frequency = <64000000>;
-+			sd-uhs-sdr12;
-+			sd-uhs-sdr25;
-+			sd-uhs-sdr50;
- 		};
- 
- 		mmc4: mmc@480d1000 {
-@@ -1083,6 +1095,8 @@
- 			dma-names = "tx", "rx";
- 			status = "disabled";
- 			max-frequency = <192000000>;
-+			sd-uhs-sdr12;
-+			sd-uhs-sdr25;
- 		};
- 
- 		mmu0_dsp1: mmu@40d01000 {
+ struct omap_hsmmc_dev_attr {
+ 	u8 flags;
 -- 
 2.11.0
