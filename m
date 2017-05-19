@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 1/6] mmc: block: remove req back pointer
-Date: Fri, 19 May 2017 15:37:27 +0200
-Message-ID: <20170519133732.27470-2-linus.walleij@linaro.org>
+Subject: [PATCH 2/6] mmc: block: Tag DRV_OPs with a driver operation type
+Date: Fri, 19 May 2017 15:37:28 +0200
+Message-ID: <20170519133732.27470-3-linus.walleij@linaro.org>
 References: <20170519133732.27470-1-linus.walleij@linaro.org>
 Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
@@ -10,140 +10,125 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Just as we can use blk_mq_rq_from_pdu() to get the per-request
-tag we can use blk_mq_rq_to_pdu() to get a request from a tag.
-Introduce a static inline helper so we are on the clear what
-is happening.
+We will expand the DRV_OP usage, so we need to know which
+operation we're performing. Tag the operations with an
+enum:ed type and rename the function so it is clear that
+it deals with any command and put a switch statement in
+it. Currently only ioctls are supported.
 
-Suggested-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c |  8 ++++----
- drivers/mmc/core/queue.c | 13 +++++--------
- drivers/mmc/core/queue.h |  8 +++++++-
- 3 files changed, 16 insertions(+), 13 deletions(-)
+ drivers/mmc/core/block.c | 37 ++++++++++++++++++++++++-------------
+ drivers/mmc/core/queue.h |  9 +++++++++
+ 2 files changed, 33 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index e9737987956f..553ab4d1db94 100644
+index 553ab4d1db94..b24e7f5171c9 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1366,7 +1366,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
- 	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
- 						    areq);
- 	struct mmc_blk_request *brq = &mq_mrq->brq;
--	struct request *req = mq_mrq->req;
-+	struct request *req = mmc_queue_req_to_req(mq_mrq);
- 	int need_retune = card->host->need_retune;
- 	bool ecc_err = false;
- 	bool gen_err = false;
-@@ -1473,7 +1473,7 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 	struct mmc_blk_data *md = mq->blkdata;
- 	struct mmc_card *card = md->queue.card;
- 	struct mmc_blk_request *brq = &mqrq->brq;
--	struct request *req = mqrq->req;
-+	struct request *req = mmc_queue_req_to_req(mqrq);
- 
- 	/*
- 	 * Reliable writes are used to implement Forced Unit Access and
-@@ -1578,7 +1578,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- {
- 	u32 readcmd, writecmd;
- 	struct mmc_blk_request *brq = &mqrq->brq;
--	struct request *req = mqrq->req;
-+	struct request *req = mmc_queue_req_to_req(mqrq);
- 	struct mmc_blk_data *md = mq->blkdata;
- 	bool do_rel_wr, do_data_tag;
- 
-@@ -1760,7 +1760,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
- 		 */
- 		mq_rq =	container_of(old_areq, struct mmc_queue_req, areq);
- 		brq = &mq_rq->brq;
--		old_req = mq_rq->req;
-+		old_req = mmc_queue_req_to_req(mq_rq);
- 		type = rq_data_dir(old_req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
- 		mmc_queue_bounce_post(mq_rq);
- 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index c18c41289ecf..4bf9978b707a 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -184,8 +184,6 @@ static int mmc_init_request(struct request_queue *q, struct request *req,
- 	struct mmc_card *card = mq->card;
- 	struct mmc_host *host = card->host;
- 
--	mq_rq->req = req;
--
- 	if (card->bouncesz) {
- 		mq_rq->bounce_buf = kmalloc(card->bouncesz, gfp);
- 		if (!mq_rq->bounce_buf)
-@@ -223,8 +221,6 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
- 
- 	kfree(mq_rq->sg);
- 	mq_rq->sg = NULL;
--
--	mq_rq->req = NULL;
+@@ -602,6 +602,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 		idata->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
+ 		__GFP_RECLAIM);
+ 	idatas[0] = idata;
++	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
+ 	req_to_mmc_queue_req(req)->idata = idatas;
+ 	req_to_mmc_queue_req(req)->ioc_count = 1;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+@@ -618,11 +619,11 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
  }
  
- /**
-@@ -374,12 +370,13 @@ unsigned int mmc_queue_map_sg(struct mmc_queue *mq, struct mmc_queue_req *mqrq)
- 	unsigned int sg_len;
- 	size_t buflen;
- 	struct scatterlist *sg;
-+	struct request *req = mmc_queue_req_to_req(mqrq);
+ /*
+- * The ioctl commands come back from the block layer after it queued it and
++ * The non-block commands come back from the block layer after it queued it and
+  * processed it with all other requests and then they get issued in this
+  * function.
+  */
+-static void mmc_blk_ioctl_cmd_issue(struct mmc_queue *mq, struct request *req)
++static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_queue_req *mq_rq;
+ 	struct mmc_card *card = mq->card;
+@@ -631,18 +632,27 @@ static void mmc_blk_ioctl_cmd_issue(struct mmc_queue *mq, struct request *req)
  	int i;
  
- 	if (!mqrq->bounce_buf)
--		return blk_rq_map_sg(mq->queue, mqrq->req, mqrq->sg);
-+		return blk_rq_map_sg(mq->queue, req, mqrq->sg);
+ 	mq_rq = req_to_mmc_queue_req(req);
+-	for (i = 0; i < mq_rq->ioc_count; i++) {
+-		ioc_err = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
+-		if (ioc_err)
+-			break;
+-	}
+-	mq_rq->ioc_result = ioc_err;
  
--	sg_len = blk_rq_map_sg(mq->queue, mqrq->req, mqrq->bounce_sg);
-+	sg_len = blk_rq_map_sg(mq->queue, req, mqrq->bounce_sg);
+-	/* Always switch back to main area after RPMB access */
+-	if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
+-		mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
++	switch (mq_rq->drv_op) {
++	case MMC_DRV_OP_IOCTL:
++		for (i = 0; i < mq_rq->ioc_count; i++) {
++			ioc_err =
++				__mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
++			if (ioc_err)
++				break;
++		}
++		mq_rq->ioc_result = ioc_err;
++
++		/* Always switch back to main area after RPMB access */
++		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
++			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
  
- 	mqrq->bounce_sg_len = sg_len;
- 
-@@ -401,7 +398,7 @@ void mmc_queue_bounce_pre(struct mmc_queue_req *mqrq)
- 	if (!mqrq->bounce_buf)
- 		return;
- 
--	if (rq_data_dir(mqrq->req) != WRITE)
-+	if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != WRITE)
- 		return;
- 
- 	sg_copy_to_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
-@@ -417,7 +414,7 @@ void mmc_queue_bounce_post(struct mmc_queue_req *mqrq)
- 	if (!mqrq->bounce_buf)
- 		return;
- 
--	if (rq_data_dir(mqrq->req) != READ)
-+	if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != READ)
- 		return;
- 
- 	sg_copy_from_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index dfe481a8b5ed..2793020a3c8c 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -12,6 +12,13 @@ static inline struct mmc_queue_req *req_to_mmc_queue_req(struct request *rq)
- 	return blk_mq_rq_to_pdu(rq);
+-	blk_end_request_all(req, ioc_err);
++		blk_end_request_all(req, ioc_err);
++		break;
++	default:
++		/* Unknown operation */
++		break;
++	}
  }
  
-+struct mmc_queue_req;
-+
-+static inline struct request *mmc_queue_req_to_req(struct mmc_queue_req *mqr)
-+{
-+	return blk_mq_rq_from_pdu(mqr);
-+}
-+
- struct task_struct;
- struct mmc_blk_data;
- struct mmc_blk_ioc_data;
-@@ -26,7 +33,6 @@ struct mmc_blk_request {
+ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+@@ -705,6 +715,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	req = blk_get_request(mq->queue,
+ 		idata[0]->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
+ 		__GFP_RECLAIM);
++	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
+ 	req_to_mmc_queue_req(req)->idata = idata;
+ 	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+@@ -1904,7 +1915,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			 */
+ 			if (mq->qcnt)
+ 				mmc_blk_issue_rw_rq(mq, NULL);
+-			mmc_blk_ioctl_cmd_issue(mq, req);
++			mmc_blk_issue_drv_op(mq, req);
+ 			break;
+ 		case REQ_OP_DISCARD:
+ 			/*
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index 2793020a3c8c..1e6062eb3e07 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -32,6 +32,14 @@ struct mmc_blk_request {
+ 	int			retune_retry_done;
  };
  
++/**
++ * enum mmc_drv_op - enumerates the operations in the mmc_queue_req
++ * @MMC_DRV_OP_IOCTL: ioctl operation
++ */
++enum mmc_drv_op {
++	MMC_DRV_OP_IOCTL,
++};
++
  struct mmc_queue_req {
--	struct request		*req;
  	struct mmc_blk_request	brq;
  	struct scatterlist	*sg;
- 	char			*bounce_buf;
+@@ -39,6 +47,7 @@ struct mmc_queue_req {
+ 	struct scatterlist	*bounce_sg;
+ 	unsigned int		bounce_sg_len;
+ 	struct mmc_async_req	areq;
++	enum mmc_drv_op		drv_op;
+ 	int			ioc_result;
+ 	struct mmc_blk_ioc_data	**idata;
+ 	unsigned int		ioc_count;
 -- 
 2.9.3
