@@ -1,84 +1,62 @@
-From: "Schaefer, Brandon" <brandon.schaefer@flukenetworks.com>
-Subject: Enabling RPMB overwrites setting the boot partition via ioctl
-Date: Fri, 19 May 2017 22:03:40 +0000
-Message-ID: <BN6PR12MB1442FDD4A02698E52489183490E50@BN6PR12MB1442.namprd12.prod.outlook.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 00/41] omap_hsmmc: Add ADMA support and UHS/HS200/DDR
+ support
+Date: Fri, 19 May 2017 15:13:45 -0700
+Message-ID: <20170519221344.GI10472@atomide.com>
+References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-001d2f02.pphosted.com ([148.163.157.190]:59878 "EHLO
-        mx0a-001d2f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753835AbdESWDn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2017 18:03:43 -0400
-Received: from pps.filterd (m0089636.ppops.net [127.0.0.1])
-        by mx0a-001d2f02.pphosted.com (8.16.0.20/8.16.0.20) with SMTP id v4JLvVW0029671
-        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 15:03:43 -0700
-Received: from nam01-bn3-obe.outbound.protection.outlook.com (mail-bn3nam01lp0176.outbound.protection.outlook.com [216.32.180.176])
-        by mx0a-001d2f02.pphosted.com with ESMTP id 2aj49shdwv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT)
-        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 15:03:43 -0700
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170519081541.26753-1-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Linux kernel: 4.1.15 (imx_4.1.15_1.0.0_ga branch)
+Hi,
 
-I've noticed that writing to the boot partition is overwritten by RPMB rela=
-ted functions as it stores this byte (card->ext_csd.part_conf). It is neces=
-sary to update this reference when issuing CMD6 SWITCH through ioctl. See b=
-elow patch for above kernel version:
+* Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> [170519 01:19]:
+> This series adds UHS, HS200, DDR mode and ADMA support to
+> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
+> SoCs.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index be776fa..cbd0533 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -60,7 +60,9 @@ MODULE_ALIAS("mmc:block");
-#define INAND_CMD38_ARG_SECTRIM2 0x88
-#define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout */
-#define MMC_SANITIZE_REQ_TIMEOUT 240000
--#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
-+#define MMC_EXTRACT_SWITCH_MODE_FROM_ARG(x)  (((x) & 0x03000000) >> 24)
-+#define MMC_EXTRACT_INDEX_FROM_ARG(x)        (((x) & 0x00FF0000) >> 16)
-+#define MMC_EXTRACT_VALUE_FROM_ARG(x)        (((x) & 0x0000FF00) >> 8)
+Certainly seems way less intrusive than earlier before the
+dmaengine changes :)
 
- #define mmc_req_rel_wr(req)   (((req->cmd_flags & REQ_FUA) || \
-                                (req->cmd_flags & REQ_META)) && \
-@@ -572,6 +574,24 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev=
-,
-              goto cmd_rel_host;
-       }
+> *) tuning ratio of MMC in dra7 is different from sdhci
 
-+       /* If writing part config register, update struct */
-+       if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) =3D=3D EXT_CSD_PART_CONFIG=
-) &&
-+           (cmd.opcode =3D=3D MMC_SWITCH)) {
-+              u8 mode =3D MMC_EXTRACT_SWITCH_MODE_FROM_ARG(cmd.arg);
-+              u8 value =3D MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg);
-+              switch (mode) {
-+              case MMC_SWITCH_MODE_SET_BITS:
-+                      card->ext_csd.part_config |=3D value;
-+                      break;
-+              case MMC_SWITCH_MODE_CLEAR_BITS:
-+                      card->ext_csd.part_config &=3D ~value;
-+                      break;
-+              case MMC_SWITCH_MODE_WRITE_BYTE:
-+                      card->ext_csd.part_config =3D value;
-+                      break;
-+              }
-+       }
-+
-       /*
-        * According to the SD specs, some commands require a delay after
-        * issuing the command.
-________________________________
-________________________________
+Hmm what's the tuning ratio?
 
+> This series has been tested on beagleboard, pandaboard, beaglebone-black,
+> beaglebone, am335x-evm, am437x-evm, dra7xx-evm, dra72x-evm, am571x-idk
+> and am572x-idk.
 
-Please be advised that this email may contain confidential information. If =
-you are not the intended recipient, please notify us by email by replying t=
-o the sender and delete this message. The sender disclaims that the content=
- of this email constitutes an offer to enter into, or the acceptance of, an=
-y agreement; provided that the foregoing does not invalidate the binding ef=
-fect of any digital or other electronic reproduction of a manual signature =
-that is included in any attachment.
+I gave this a quick try after manally applying next-20170519
+after reverting 67d0687224a9 ("mm: drop HASH_ADAPT"). Looks like
+something is missing as I got:
+
+arch/arm/mach-omap2/pdata-quirks.c:445:23: error:
+'struct omap_hsmmc_platform_data' has no member named 'version'
+...
+
+It's possible I messed up something while manually applying.
+
+> I can split the series to go into Ulf Hansson's tree and Tony's tree 
+> separately if that is required.
+
+Yes please. Maybe send the dts parts first that are ready to
+get merged, like the fixes and all the iodelay configuration.
+
+Then the mmc driver changes as a separate set.
+
+Then third set to follow-up and enable things once the mmc
+driver changes are merged.
+
+Regards,
+
+Tony
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
