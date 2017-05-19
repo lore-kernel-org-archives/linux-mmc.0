@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 3/6] mmc: block: Move DRV OP issue function
-Date: Fri, 19 May 2017 15:37:29 +0200
-Message-ID: <20170519133732.27470-4-linus.walleij@linaro.org>
+Subject: [PATCH 4/6] mmc: block: Move boot partition locking into a driver op
+Date: Fri, 19 May 2017 15:37:30 +0200
+Message-ID: <20170519133732.27470-5-linus.walleij@linaro.org>
 References: <20170519133732.27470-1-linus.walleij@linaro.org>
 Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
@@ -10,106 +10,164 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunt
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We will need to access static functions above the pure block layer
-operations in the file, so move the driver operations issue
-function down so we can see all non-blocklayer symbols.
+This moves the boot partition lock command (issued from sysfs)
+into a custom block layer request, just like the ioctl()s,
+getting rid of yet another instance of mmc_get_card().
+
+Since we now have two operations issuing special DRV_OP's, we
+rename the result variable ->drv_op_result.
+
+Tested by locking the boot partition from userspace:
+> cd /sys/devices/platform/soc/80114000.sdi4_per2/mmc_host/mmc3/
+     mmc3:0001/block/mmcblk3/mmcblk3boot0
+> echo 1 > ro_lock_until_next_power_on
+[  178.645324] mmcblk3boot1: Locking boot partition ro until next power on
+[  178.652221] mmcblk3boot0: Locking boot partition ro until next power on
+
+Also tested this with a huge dd job in the background: it
+is now possible to lock the boot partitions on the card even
+under heavy I/O.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c | 74 ++++++++++++++++++++++++------------------------
- 1 file changed, 37 insertions(+), 37 deletions(-)
+ drivers/mmc/core/block.c | 53 +++++++++++++++++++++++++++---------------------
+ drivers/mmc/core/queue.h |  4 +++-
+ 2 files changed, 33 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index b24e7f5171c9..75b1baacf28b 100644
+index 75b1baacf28b..52635120a0a5 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -618,43 +618,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	return ioc_err ? ioc_err : err;
- }
+@@ -190,6 +190,8 @@ static ssize_t power_ro_lock_store(struct device *dev,
+ 	int ret;
+ 	struct mmc_blk_data *md, *part_md;
+ 	struct mmc_card *card;
++	struct mmc_queue *mq;
++	struct request *req;
+ 	unsigned long set;
  
--/*
-- * The non-block commands come back from the block layer after it queued it and
-- * processed it with all other requests and then they get issued in this
-- * function.
-- */
--static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
--{
--	struct mmc_queue_req *mq_rq;
--	struct mmc_card *card = mq->card;
--	struct mmc_blk_data *md = mq->blkdata;
+ 	if (kstrtoul(buf, 0, &set))
+@@ -199,20 +201,14 @@ static ssize_t power_ro_lock_store(struct device *dev,
+ 		return count;
+ 
+ 	md = mmc_blk_get(dev_to_disk(dev));
++	mq = &md->queue;
+ 	card = md->queue.card;
+ 
+-	mmc_get_card(card);
+-
+-	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
+-				card->ext_csd.boot_ro_lock |
+-				EXT_CSD_BOOT_WP_B_PWR_WP_EN,
+-				card->ext_csd.part_time);
+-	if (ret)
+-		pr_err("%s: Locking boot partition ro until next power on failed: %d\n", md->disk->disk_name, ret);
+-	else
+-		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+-
+-	mmc_put_card(card);
++	/* Dispatch locking to the block layer */
++	req = blk_get_request(mq->queue, REQ_OP_DRV_OUT, __GFP_RECLAIM);
++	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_BOOT_WP;
++	blk_execute_rq(mq->queue, NULL, req, 0);
++	ret = req_to_mmc_queue_req(req)->drv_op_result;
+ 
+ 	if (!ret) {
+ 		pr_info("%s: Locking boot partition ro until next power on\n",
+@@ -606,7 +602,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	req_to_mmc_queue_req(req)->idata = idatas;
+ 	req_to_mmc_queue_req(req)->ioc_count = 1;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+-	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
++	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
+ 	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
+ 	blk_put_request(req);
+ 
+@@ -682,7 +678,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	req_to_mmc_queue_req(req)->idata = idata;
+ 	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+-	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
++	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
+ 
+ 	/* copy to user if data and response */
+ 	for (i = 0; i < num_of_cmds && !err; i++)
+@@ -1195,7 +1191,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_queue_req *mq_rq;
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_blk_data *md = mq->blkdata;
 -	int ioc_err;
--	int i;
--
--	mq_rq = req_to_mmc_queue_req(req);
--
--	switch (mq_rq->drv_op) {
--	case MMC_DRV_OP_IOCTL:
--		for (i = 0; i < mq_rq->ioc_count; i++) {
++	int ret;
+ 	int i;
+ 
+ 	mq_rq = req_to_mmc_queue_req(req);
+@@ -1203,23 +1199,34 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 	switch (mq_rq->drv_op) {
+ 	case MMC_DRV_OP_IOCTL:
+ 		for (i = 0; i < mq_rq->ioc_count; i++) {
 -			ioc_err =
 -				__mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
 -			if (ioc_err)
--				break;
--		}
++			ret = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
++			if (ret)
+ 				break;
+ 		}
 -		mq_rq->ioc_result = ioc_err;
 -
--		/* Always switch back to main area after RPMB access */
--		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
--			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
+ 		/* Always switch back to main area after RPMB access */
+ 		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
+ 			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
 -
 -		blk_end_request_all(req, ioc_err);
--		break;
--	default:
++		break;
++	case MMC_DRV_OP_BOOT_WP:
++		ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
++				 card->ext_csd.boot_ro_lock |
++				 EXT_CSD_BOOT_WP_B_PWR_WP_EN,
++				 card->ext_csd.part_time);
++		if (ret)
++			pr_err("%s: Locking boot partition ro until next power on failed: %d\n",
++			       md->disk->disk_name, ret);
++		else
++			card->ext_csd.boot_ro_lock |=
++				EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+ 		break;
+ 	default:
 -		/* Unknown operation */
--		break;
--	}
--}
--
- static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 				   struct mmc_ioc_multi_cmd __user *user)
- {
-@@ -1222,6 +1185,43 @@ int mmc_access_rpmb(struct mmc_queue *mq)
- 	return false;
++		pr_err("%s: unknown driver specific operation\n",
++		       md->disk->disk_name);
++		ret = -EINVAL;
+ 		break;
+ 	}
++	mq_rq->drv_op_result = ret;
++	blk_end_request_all(req, ret);
  }
  
-+/*
-+ * The non-block commands come back from the block layer after it queued it and
-+ * processed it with all other requests and then they get issued in this
-+ * function.
-+ */
-+static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_queue_req *mq_rq;
-+	struct mmc_card *card = mq->card;
-+	struct mmc_blk_data *md = mq->blkdata;
-+	int ioc_err;
-+	int i;
-+
-+	mq_rq = req_to_mmc_queue_req(req);
-+
-+	switch (mq_rq->drv_op) {
-+	case MMC_DRV_OP_IOCTL:
-+		for (i = 0; i < mq_rq->ioc_count; i++) {
-+			ioc_err =
-+				__mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
-+			if (ioc_err)
-+				break;
-+		}
-+		mq_rq->ioc_result = ioc_err;
-+
-+		/* Always switch back to main area after RPMB access */
-+		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
-+			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
-+
-+		blk_end_request_all(req, ioc_err);
-+		break;
-+	default:
-+		/* Unknown operation */
-+		break;
-+	}
-+}
-+
  static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_blk_data *md = mq->blkdata;
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index 1e6062eb3e07..361b46408e0f 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -35,9 +35,11 @@ struct mmc_blk_request {
+ /**
+  * enum mmc_drv_op - enumerates the operations in the mmc_queue_req
+  * @MMC_DRV_OP_IOCTL: ioctl operation
++ * @MMC_DRV_OP_BOOT_WP: write protect boot partitions
+  */
+ enum mmc_drv_op {
+ 	MMC_DRV_OP_IOCTL,
++	MMC_DRV_OP_BOOT_WP,
+ };
+ 
+ struct mmc_queue_req {
+@@ -48,7 +50,7 @@ struct mmc_queue_req {
+ 	unsigned int		bounce_sg_len;
+ 	struct mmc_async_req	areq;
+ 	enum mmc_drv_op		drv_op;
+-	int			ioc_result;
++	int			drv_op_result;
+ 	struct mmc_blk_ioc_data	**idata;
+ 	unsigned int		ioc_count;
+ };
 -- 
 2.9.3
