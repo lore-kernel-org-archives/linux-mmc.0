@@ -1,117 +1,113 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 4/6] mmc: tmio: move finish_request function further down
-Date: Fri, 19 May 2017 15:31:53 +0200
-Message-ID: <20170519133155.22945-5-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 5/6] mmc: tmio: add CMD23 support
+Date: Fri, 19 May 2017 15:31:54 +0200
+Message-ID: <20170519133155.22945-6-wsa+renesas@sang-engineering.com>
 References: <20170519133155.22945-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:46686 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755569AbdESNcC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 19 May 2017 09:32:02 -0400
 In-Reply-To: <20170519133155.22945-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert+renesas@glider.be>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Plain code move with no changes. Needed for refactoring. Also, looks
-nicer if request and finish_request are next to each other.
-
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/tmio_mmc_core.c | 76 ++++++++++++++++++++--------------------
- 1 file changed, 38 insertions(+), 38 deletions(-)
+ drivers/mmc/host/tmio_mmc_core.c | 41 +++++++++++++++++++++++++++-------------
+ 1 file changed, 28 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 396ce61e634a26..79a973273141ed 100644
+index 79a973273141ed..e1ad461c4b8c8f 100644
 --- a/drivers/mmc/host/tmio_mmc_core.c
 +++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -315,44 +315,6 @@ static void tmio_mmc_reset_work(struct work_struct *work)
- 	mmc_request_done(host->mmc, mrq);
- }
+@@ -368,11 +368,11 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+ 			c |= TRANSFER_MULTI;
  
--static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
--{
--	struct mmc_request *mrq;
--	unsigned long flags;
--
--	spin_lock_irqsave(&host->lock, flags);
--
--	mrq = host->mrq;
--	if (IS_ERR_OR_NULL(mrq)) {
--		spin_unlock_irqrestore(&host->lock, flags);
--		return;
--	}
--
+ 			/*
+-			 * Disable auto CMD12 at IO_RW_EXTENDED when
+-			 * multiple block transfer
++			 * Disable auto CMD12 at IO_RW_EXTENDED and SET_BLOCK_COUNT
++			 * when doing multiple block transfer
+ 			 */
+ 			if ((host->pdata->flags & TMIO_MMC_HAVE_CMD12_CTRL) &&
+-			    (cmd->opcode == SD_IO_RW_EXTENDED))
++			    (cmd->opcode == SD_IO_RW_EXTENDED || host->mrq->sbc))
+ 				c |= NO_CMD12_ISSUE;
+ 		}
+ 		if (data->flags & MMC_DATA_READ)
+@@ -549,7 +549,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
+ 			host->mrq);
+ 	}
+ 
+-	if (stop) {
++	if (stop && !host->mrq->sbc) {
+ 		if (stop->opcode != MMC_STOP_TRANSMISSION || stop->arg)
+ 			dev_err(&host->pdev->dev, "unsupported stop: CMD%u,0x%x. We did CMD12,0\n",
+ 				stop->opcode, stop->arg);
+@@ -857,15 +857,21 @@ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ static void tmio_process_mrq(struct tmio_mmc_host *host, struct mmc_request *mrq)
+ {
++	struct mmc_command *cmd;
+ 	int ret;
+ 
+-	if (mrq->data) {
+-		ret = tmio_mmc_start_data(host, mrq->data);
+-		if (ret)
+-			goto fail;
++	if (mrq->sbc && host->cmd != mrq->sbc) {
++		cmd = mrq->sbc;
++	} else {
++		cmd = mrq->cmd;
++		if (mrq->data) {
++			ret = tmio_mmc_start_data(host, mrq->data);
++			if (ret)
++				goto fail;
++		}
+ 	}
+ 
+-	ret = tmio_mmc_start_command(host, mrq->cmd);
++	ret = tmio_mmc_start_command(host, cmd);
+ 	if (ret)
+ 		goto fail;
+ 
+@@ -920,13 +926,16 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 		return;
+ 	}
+ 
 -	host->cmd = NULL;
 -	host->data = NULL;
 -	host->force_pio = false;
--
--	cancel_delayed_work(&host->delayed_reset_work);
--
--	host->mrq = NULL;
--	spin_unlock_irqrestore(&host->lock, flags);
--
--	if (mrq->cmd->error || (mrq->data && mrq->data->error))
--		tmio_mmc_abort_dma(host);
--
--	if (host->check_scc_error)
--		host->check_scc_error(host);
--
--	mmc_request_done(host->mmc, mrq);
--}
--
--static void tmio_mmc_done_work(struct work_struct *work)
--{
--	struct tmio_mmc_host *host = container_of(work, struct tmio_mmc_host,
--						  done);
--	tmio_mmc_finish_request(host);
--}
--
- /* These are the bitmasks the tmio chip requires to implement the MMC response
-  * types. Note that R1 and R6 are the same in this scheme. */
- #define APP_CMD        0x0040
-@@ -945,6 +907,44 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	tmio_process_mrq(host, mrq);
- }
++	/* If not SET_BLOCK_COUNT, clear old data */
++	if (host->cmd != mrq->sbc) {
++		host->cmd = NULL;
++		host->data = NULL;
++		host->force_pio = false;
++		host->mrq = NULL;
++	}
  
-+static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
-+{
-+	struct mmc_request *mrq;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	mrq = host->mrq;
-+	if (IS_ERR_OR_NULL(mrq)) {
-+		spin_unlock_irqrestore(&host->lock, flags);
+ 	cancel_delayed_work(&host->delayed_reset_work);
+ 
+-	host->mrq = NULL;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	if (mrq->cmd->error || (mrq->data && mrq->data->error))
+@@ -935,6 +944,12 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	if (host->check_scc_error)
+ 		host->check_scc_error(host);
+ 
++	/* If SET_BLOCK_COUNT, continue with main command */
++	if (host->mrq) {
++		tmio_process_mrq(host, mrq);
 +		return;
 +	}
 +
-+	host->cmd = NULL;
-+	host->data = NULL;
-+	host->force_pio = false;
-+
-+	cancel_delayed_work(&host->delayed_reset_work);
-+
-+	host->mrq = NULL;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (mrq->cmd->error || (mrq->data && mrq->data->error))
-+		tmio_mmc_abort_dma(host);
-+
-+	if (host->check_scc_error)
-+		host->check_scc_error(host);
-+
-+	mmc_request_done(host->mmc, mrq);
-+}
-+
-+static void tmio_mmc_done_work(struct work_struct *work)
-+{
-+	struct tmio_mmc_host *host = container_of(work, struct tmio_mmc_host,
-+						  done);
-+	tmio_mmc_finish_request(host);
-+}
-+
- static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
- {
- 	if (!host->clk_enable)
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
 -- 
 2.11.0
+
