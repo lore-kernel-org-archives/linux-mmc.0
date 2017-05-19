@@ -1,76 +1,149 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 0/6] More MMC block core refactorings
-Date: Fri, 19 May 2017 15:37:26 +0200
-Message-ID: <20170519133732.27470-1-linus.walleij@linaro.org>
+Subject: [PATCH 1/6] mmc: block: remove req back pointer
+Date: Fri, 19 May 2017 15:37:27 +0200
+Message-ID: <20170519133732.27470-2-linus.walleij@linaro.org>
+References: <20170519133732.27470-1-linus.walleij@linaro.org>
 Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
 Sender: linux-block-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This series builds on top of the previous series that created
-custom DRV_OP requests for ioctl() operations in MMC.
+Just as we can use blk_mq_rq_from_pdu() to get the per-request
+tag we can use blk_mq_rq_to_pdu() to get a request from a tag.
+Introduce a static inline helper so we are on the clear what
+is happening.
 
-The first patch is a suggestion from Christoph, the second
-builds infrastructure for issuing more, currently orthogonal
-custom operations through the block layer.
+Suggested-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/core/block.c |  8 ++++----
+ drivers/mmc/core/queue.c | 13 +++++--------
+ drivers/mmc/core/queue.h |  8 +++++++-
+ 3 files changed, 16 insertions(+), 13 deletions(-)
 
-The first operation we move over is pretty uncontroversial
-and straight-forward: it is the operation that
-write-protect-locks the boot partitions from sysfs. This
-is now done through the block layer so we do not need
-to congest and starve in the big MMC lock.
-
-The last two patches are more contoversial: they move the
-two debugfs accesses for reading card status and EXT CSD
-over to using the block layer funnel *if* *present*.
-
-So if the block layer is configured out, these will still
-issue operations directly and take the big MMC lock.
-
-The patch series is fully ABI safe: any scripts or code
-using the debugfs with or without the block layer will
-still work.
-
-However this leaves the mmc_card_get() locks in the block.h
-header for the !CONFIG_MMC_BLOCK case and I'm not really happy
-to keep them around, the idea is to terminate them.
-
-Ways forward after these patches:
-
-- Simply remove the debugfs files for status and ext_csd if
-  the block layer is not there. The debugfs is not ABI after
-  all, and there is an ioctl() to do the same job, and
-  that is what mmc-utils is using.
-
-- Simply remove the debugfs files for status and ext_csd
-  completely - and require users to switch to using the
-  ioctl() mmc-utils way of doing things if they want to
-  inspect their MMC/SD cards.
-
-- Wait and see: when I get to removing the big MMC lock from
-  SDIO I will anyway have to deal with this mess since
-  the big lock is no more a block layer problem, but a
-  problem with the entire MMC/SD/SDIO stack.
-
-In any case: these patches fixes the starvation of the
-boot partition locking and the debugfs access when using
-the block layer heavily at the same time.
-
-Linus Walleij (6):
-  mmc: block: remove req back pointer
-  mmc: block: Tag DRV_OPs with a driver operation type
-  mmc: block: Move DRV OP issue function
-  mmc: block: Move boot partition locking into a driver op
-  mmc: debugfs: Move card status retrieveal into the block layer
-  mmc: debugfs: Move EXT CSD debugfs acces to block layer
-
- drivers/mmc/core/block.c   | 168 ++++++++++++++++++++++++++++++++-------------
- drivers/mmc/core/block.h   |  49 +++++++++++++
- drivers/mmc/core/debugfs.c |  19 +----
- drivers/mmc/core/queue.c   |  13 ++--
- drivers/mmc/core/queue.h   |  27 +++++++-
- 5 files changed, 200 insertions(+), 76 deletions(-)
-
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index e9737987956f..553ab4d1db94 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1366,7 +1366,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
+ 						    areq);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+-	struct request *req = mq_mrq->req;
++	struct request *req = mmc_queue_req_to_req(mq_mrq);
+ 	int need_retune = card->host->need_retune;
+ 	bool ecc_err = false;
+ 	bool gen_err = false;
+@@ -1473,7 +1473,7 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+-	struct request *req = mqrq->req;
++	struct request *req = mmc_queue_req_to_req(mqrq);
+ 
+ 	/*
+ 	 * Reliable writes are used to implement Forced Unit Access and
+@@ -1578,7 +1578,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ {
+ 	u32 readcmd, writecmd;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+-	struct request *req = mqrq->req;
++	struct request *req = mmc_queue_req_to_req(mqrq);
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	bool do_rel_wr, do_data_tag;
+ 
+@@ -1760,7 +1760,7 @@ static void mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *new_req)
+ 		 */
+ 		mq_rq =	container_of(old_areq, struct mmc_queue_req, areq);
+ 		brq = &mq_rq->brq;
+-		old_req = mq_rq->req;
++		old_req = mmc_queue_req_to_req(mq_rq);
+ 		type = rq_data_dir(old_req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+ 		mmc_queue_bounce_post(mq_rq);
+ 
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index c18c41289ecf..4bf9978b707a 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -184,8 +184,6 @@ static int mmc_init_request(struct request_queue *q, struct request *req,
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_host *host = card->host;
+ 
+-	mq_rq->req = req;
+-
+ 	if (card->bouncesz) {
+ 		mq_rq->bounce_buf = kmalloc(card->bouncesz, gfp);
+ 		if (!mq_rq->bounce_buf)
+@@ -223,8 +221,6 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
+ 
+ 	kfree(mq_rq->sg);
+ 	mq_rq->sg = NULL;
+-
+-	mq_rq->req = NULL;
+ }
+ 
+ /**
+@@ -374,12 +370,13 @@ unsigned int mmc_queue_map_sg(struct mmc_queue *mq, struct mmc_queue_req *mqrq)
+ 	unsigned int sg_len;
+ 	size_t buflen;
+ 	struct scatterlist *sg;
++	struct request *req = mmc_queue_req_to_req(mqrq);
+ 	int i;
+ 
+ 	if (!mqrq->bounce_buf)
+-		return blk_rq_map_sg(mq->queue, mqrq->req, mqrq->sg);
++		return blk_rq_map_sg(mq->queue, req, mqrq->sg);
+ 
+-	sg_len = blk_rq_map_sg(mq->queue, mqrq->req, mqrq->bounce_sg);
++	sg_len = blk_rq_map_sg(mq->queue, req, mqrq->bounce_sg);
+ 
+ 	mqrq->bounce_sg_len = sg_len;
+ 
+@@ -401,7 +398,7 @@ void mmc_queue_bounce_pre(struct mmc_queue_req *mqrq)
+ 	if (!mqrq->bounce_buf)
+ 		return;
+ 
+-	if (rq_data_dir(mqrq->req) != WRITE)
++	if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != WRITE)
+ 		return;
+ 
+ 	sg_copy_to_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
+@@ -417,7 +414,7 @@ void mmc_queue_bounce_post(struct mmc_queue_req *mqrq)
+ 	if (!mqrq->bounce_buf)
+ 		return;
+ 
+-	if (rq_data_dir(mqrq->req) != READ)
++	if (rq_data_dir(mmc_queue_req_to_req(mqrq)) != READ)
+ 		return;
+ 
+ 	sg_copy_from_buffer(mqrq->bounce_sg, mqrq->bounce_sg_len,
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index dfe481a8b5ed..2793020a3c8c 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -12,6 +12,13 @@ static inline struct mmc_queue_req *req_to_mmc_queue_req(struct request *rq)
+ 	return blk_mq_rq_to_pdu(rq);
+ }
+ 
++struct mmc_queue_req;
++
++static inline struct request *mmc_queue_req_to_req(struct mmc_queue_req *mqr)
++{
++	return blk_mq_rq_from_pdu(mqr);
++}
++
+ struct task_struct;
+ struct mmc_blk_data;
+ struct mmc_blk_ioc_data;
+@@ -26,7 +33,6 @@ struct mmc_blk_request {
+ };
+ 
+ struct mmc_queue_req {
+-	struct request		*req;
+ 	struct mmc_blk_request	brq;
+ 	struct scatterlist	*sg;
+ 	char			*bounce_buf;
 -- 
 2.9.3
