@@ -1,53 +1,29 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 07/41] mmc: host: omap_hsmmc: Allow io voltage switch even for
- fixed vdd
-Date: Fri, 19 May 2017 13:45:07 +0530
-Message-ID: <20170519081541.26753-8-kishon@ti.com>
-References: <20170519081541.26753-1-kishon@ti.com>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: Re: mmc: core: Delete an error message for a failed memory allocation
+ in three functions
+Date: Fri, 19 May 2017 11:39:12 +0200
+Message-ID: <50f3c642-b866-27f3-1201-5490225116f4@users.sourceforge.net>
+References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
+ <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com>
+Content-Language: en-GB
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Tomas Winkler <tomas.winkler@intel.com>, Uri Yanai <uri.yanai@sandisk.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Now that vmmc regulator is made optional, do not bail out if vmmc
-regulator is not found.
+> It's a nice cleanup. However I found one more occasion in mmc_test.c,
+> please fix that and re-spin.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c | 7 -------
- 1 file changed, 7 deletions(-)
+To which source code place does this feedback refer?
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index d8970a7ff4be..d47ef51fbe51 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -416,13 +416,6 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
- 	if (mmc_pdata(host)->set_power)
- 		return mmc_pdata(host)->set_power(host->dev, power_on, iov);
- 
--	/*
--	 * If we don't see a Vcc regulator, assume it's a fixed
--	 * voltage always-on regulator.
--	 */
--	if (!mmc->supply.vmmc)
--		return 0;
--
- 	if (mmc_pdata(host)->before_set_reg)
- 		mmc_pdata(host)->before_set_reg(host->dev, power_on, iov);
- 
--- 
-2.11.0
+Does it mean that another message removal would make sense in the
+function “__mmc_test_register_dbgfs_file”?
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mmc/core/mmc_test.c?h=v4.11#n3202
+
+Regards,
+Markus
