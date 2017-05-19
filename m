@@ -1,153 +1,95 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 01/41] mmc: host: omap_hsmmc: Support pbias and vmmc_aux to switch to 1.8v
-Date: Fri, 19 May 2017 13:45:01 +0530
-Message-ID: <20170519081541.26753-2-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 02/41] mmc: host: omap_hsmmc: Separate setting voltage
+ capabilities from bus power
+Date: Fri, 19 May 2017 13:45:02 +0530
+Message-ID: <20170519081541.26753-3-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170519081541.26753-1-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for vmmc_aux to switch to 1.8v. Also use "iov" instead of
-"vdd" to indicate io voltage. This is in preparation for adding support
-for io signal voltage switch.
+Add a separate function to set the voltage capabilities of the host
+controller. Voltage capabilities should be set only once during
+controller initialization but bus power can be changed every time there
+is a voltage switch and whenever a different card is inserted.
+This allows omap_hsmmc_conf_bus_power to be invoked every time there
+is a voltage switch.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 50 ++++++++++++++++++++++++++++---------------
- 1 file changed, 33 insertions(+), 17 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8c39dccacf39..2000aaa359c8 100644
+index 2000aaa359c8..42954efe12f7 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -244,11 +244,12 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
- 	return mmc_gpio_get_cd(host->mmc);
+@@ -1809,25 +1809,34 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
+ 	return ret;
  }
  
--static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
-+static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int iov)
- {
- 	int ret;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 	struct mmc_ios *ios = &mmc->ios;
-+	int uvoltage;
- 
- 	if (mmc->supply.vmmc) {
- 		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
-@@ -257,7 +258,25 @@ static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
- 	}
- 
- 	/* Enable interface voltage rail, if needed */
--	if (mmc->supply.vqmmc && !host->vqmmc_enabled) {
-+	if (mmc->supply.vqmmc) {
-+		if (host->vqmmc_enabled) {
-+			ret = regulator_disable(mmc->supply.vqmmc);
-+			if (ret) {
-+				dev_err(mmc_dev(mmc),
-+					"vmmc_aux reg disable failed\n");
-+				goto err_vqmmc;
-+			}
-+			host->vqmmc_enabled = 0;
-+		}
++static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
++{
++	u32 val;
 +
-+		uvoltage = (iov == VDD_165_195) ? VDD_1V8 : VDD_3V0;
-+		ret = regulator_set_voltage(mmc->supply.vqmmc, uvoltage,
-+					    uvoltage);
-+		if (ret) {
-+			dev_err(mmc_dev(mmc), "vmmc_aux set voltage failed\n");
-+			goto err_vqmmc;
-+		}
++	val = OMAP_HSMMC_READ(host->base, CAPA);
 +
- 		ret = regulator_enable(mmc->supply.vqmmc);
- 		if (ret) {
- 			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
-@@ -309,22 +328,19 @@ static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
- }
- 
- static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
--				int vdd)
-+				int iov)
++	/* Only MMC1 supports 3.0V */
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
++		val |= (VS30 | VS18);
++	else
++		val |= VS18;
++
++	OMAP_HSMMC_WRITE(host->base, CAPA, val);
++}
++
+ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
  {
- 	int ret;
-+	int uvoltage;
+-	u32 hctl, capa, value;
++	u32 hctl, value;
  
- 	if (!host->pbias)
- 		return 0;
+ 	/* Only MMC1 supports 3.0V */
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
+ 		hctl = SDVS30;
+-		capa = VS30 | VS18;
+-	} else {
++	else
+ 		hctl = SDVS18;
+-		capa = VS18;
+-	}
  
- 	if (power_on) {
--		if (vdd <= VDD_165_195)
--			ret = regulator_set_voltage(host->pbias, VDD_1V8,
--						    VDD_1V8);
--		else
--			ret = regulator_set_voltage(host->pbias, VDD_3V0,
--						    VDD_3V0);
--		if (ret < 0) {
--			dev_err(host->dev, "pbias set voltage fail\n");
-+		uvoltage = (iov <= VDD_165_195) ? VDD_1V8 : VDD_3V0;
-+		ret = regulator_set_voltage(host->pbias, uvoltage, uvoltage);
-+		if (ret) {
-+			dev_err(host->dev, "pbias set voltage failed\n");
- 			return ret;
- 		}
+ 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
+ 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
  
-@@ -351,13 +367,13 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+-	value = OMAP_HSMMC_READ(host->base, CAPA);
+-	OMAP_HSMMC_WRITE(host->base, CAPA, value | capa);
+-
+ 	/* Set SD bus power bit */
+ 	set_sd_bus_power(host);
  }
+@@ -2134,6 +2143,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
  
- static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
--				int vdd)
-+				int iov)
- {
- 	struct mmc_host *mmc = host->mmc;
- 	int ret = 0;
+ 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
  
- 	if (mmc_pdata(host)->set_power)
--		return mmc_pdata(host)->set_power(host->dev, power_on, vdd);
-+		return mmc_pdata(host)->set_power(host->dev, power_on, iov);
++	omap_hsmmc_set_capabilities(host);
+ 	omap_hsmmc_conf_bus_power(host);
  
- 	/*
- 	 * If we don't see a Vcc regulator, assume it's a fixed
-@@ -367,7 +383,7 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
- 		return 0;
- 
- 	if (mmc_pdata(host)->before_set_reg)
--		mmc_pdata(host)->before_set_reg(host->dev, power_on, vdd);
-+		mmc_pdata(host)->before_set_reg(host->dev, power_on, iov);
- 
- 	ret = omap_hsmmc_set_pbias(host, false, 0);
- 	if (ret)
-@@ -387,11 +403,11 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
- 	 * chips/cards need an interface voltage rail too.
- 	 */
- 	if (power_on) {
--		ret = omap_hsmmc_enable_supply(mmc);
-+		ret = omap_hsmmc_enable_supply(mmc, iov);
- 		if (ret)
- 			return ret;
- 
--		ret = omap_hsmmc_set_pbias(host, true, vdd);
-+		ret = omap_hsmmc_set_pbias(host, true, iov);
- 		if (ret)
- 			goto err_set_voltage;
- 	} else {
-@@ -401,7 +417,7 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
- 	}
- 
- 	if (mmc_pdata(host)->after_set_reg)
--		mmc_pdata(host)->after_set_reg(host->dev, power_on, vdd);
-+		mmc_pdata(host)->after_set_reg(host->dev, power_on, iov);
- 
- 	return 0;
- 
+ 	host->rx_chan = dma_request_chan(&pdev->dev, "rx");
 -- 
 2.11.0
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
