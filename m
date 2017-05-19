@@ -1,94 +1,153 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Delete an error message for a failed memory
- allocation in three functions
-Date: Fri, 19 May 2017 09:49:59 +0200
-Message-ID: <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com>
-References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH 01/41] mmc: host: omap_hsmmc: Support pbias and vmmc_aux to switch to 1.8v
+Date: Fri, 19 May 2017 13:45:01 +0530
+Message-ID: <20170519081541.26753-2-kishon@ti.com>
+References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:35211 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751640AbdESHuA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2017 03:50:00 -0400
-Received: by mail-qk0-f180.google.com with SMTP id a72so54813747qkj.2
-        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 00:50:00 -0700 (PDT)
-In-Reply-To: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170519081541.26753-1-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Uri Yanai <uri.yanai@sandisk.com>, Tomas Winkler <tomas.winkler@intel.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 
-On 13 May 2017 at 14:54, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sat, 13 May 2017 14:40:08 +0200
->
-> Omit an extra message for a memory allocation failure in these functions.
->
-> This issue was detected by using the Coccinelle software.
->
-> Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+Add support for vmmc_aux to switch to 1.8v. Also use "iov" instead of
+"vdd" to indicate io voltage. This is in preparation for adding support
+for io signal voltage switch.
 
-It's a nice cleanup. However I found one more occasion in mmc_test.c,
-please fix that and re-spin.
+Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+---
+ drivers/mmc/host/omap_hsmmc.c | 50 ++++++++++++++++++++++++++++---------------
+ 1 file changed, 33 insertions(+), 17 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 8c39dccacf39..2000aaa359c8 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -244,11 +244,12 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
+ 	return mmc_gpio_get_cd(host->mmc);
+ }
+ 
+-static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
++static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int iov)
+ {
+ 	int ret;
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	struct mmc_ios *ios = &mmc->ios;
++	int uvoltage;
+ 
+ 	if (mmc->supply.vmmc) {
+ 		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+@@ -257,7 +258,25 @@ static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
+ 	}
+ 
+ 	/* Enable interface voltage rail, if needed */
+-	if (mmc->supply.vqmmc && !host->vqmmc_enabled) {
++	if (mmc->supply.vqmmc) {
++		if (host->vqmmc_enabled) {
++			ret = regulator_disable(mmc->supply.vqmmc);
++			if (ret) {
++				dev_err(mmc_dev(mmc),
++					"vmmc_aux reg disable failed\n");
++				goto err_vqmmc;
++			}
++			host->vqmmc_enabled = 0;
++		}
++
++		uvoltage = (iov == VDD_165_195) ? VDD_1V8 : VDD_3V0;
++		ret = regulator_set_voltage(mmc->supply.vqmmc, uvoltage,
++					    uvoltage);
++		if (ret) {
++			dev_err(mmc_dev(mmc), "vmmc_aux set voltage failed\n");
++			goto err_vqmmc;
++		}
++
+ 		ret = regulator_enable(mmc->supply.vqmmc);
+ 		if (ret) {
+ 			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
+@@ -309,22 +328,19 @@ static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
+ }
+ 
+ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+-				int vdd)
++				int iov)
+ {
+ 	int ret;
++	int uvoltage;
+ 
+ 	if (!host->pbias)
+ 		return 0;
+ 
+ 	if (power_on) {
+-		if (vdd <= VDD_165_195)
+-			ret = regulator_set_voltage(host->pbias, VDD_1V8,
+-						    VDD_1V8);
+-		else
+-			ret = regulator_set_voltage(host->pbias, VDD_3V0,
+-						    VDD_3V0);
+-		if (ret < 0) {
+-			dev_err(host->dev, "pbias set voltage fail\n");
++		uvoltage = (iov <= VDD_165_195) ? VDD_1V8 : VDD_3V0;
++		ret = regulator_set_voltage(host->pbias, uvoltage, uvoltage);
++		if (ret) {
++			dev_err(host->dev, "pbias set voltage failed\n");
+ 			return ret;
+ 		}
+ 
+@@ -351,13 +367,13 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+ }
+ 
+ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
+-				int vdd)
++				int iov)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	int ret = 0;
+ 
+ 	if (mmc_pdata(host)->set_power)
+-		return mmc_pdata(host)->set_power(host->dev, power_on, vdd);
++		return mmc_pdata(host)->set_power(host->dev, power_on, iov);
+ 
+ 	/*
+ 	 * If we don't see a Vcc regulator, assume it's a fixed
+@@ -367,7 +383,7 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
+ 		return 0;
+ 
+ 	if (mmc_pdata(host)->before_set_reg)
+-		mmc_pdata(host)->before_set_reg(host->dev, power_on, vdd);
++		mmc_pdata(host)->before_set_reg(host->dev, power_on, iov);
+ 
+ 	ret = omap_hsmmc_set_pbias(host, false, 0);
+ 	if (ret)
+@@ -387,11 +403,11 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = omap_hsmmc_enable_supply(mmc);
++		ret = omap_hsmmc_enable_supply(mmc, iov);
+ 		if (ret)
+ 			return ret;
+ 
+-		ret = omap_hsmmc_set_pbias(host, true, vdd);
++		ret = omap_hsmmc_set_pbias(host, true, iov);
+ 		if (ret)
+ 			goto err_set_voltage;
+ 	} else {
+@@ -401,7 +417,7 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
+ 	}
+ 
+ 	if (mmc_pdata(host)->after_set_reg)
+-		mmc_pdata(host)->after_set_reg(host->dev, power_on, vdd);
++		mmc_pdata(host)->after_set_reg(host->dev, power_on, iov);
+ 
+ 	return 0;
+ 
+-- 
+2.11.0
 
-> ---
->  drivers/mmc/core/sd.c | 16 +++-------------
->  1 file changed, 3 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index d109634fbfce..1d7542daecbe 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -294,12 +294,8 @@ static int mmc_read_switch(struct mmc_card *card)
->         err = -EIO;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n",
-> -                       mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         /*
->          * Find out the card's support bits with a mode 0 operation.
-> @@ -359,11 +355,8 @@ int mmc_sd_switch_hs(struct mmc_card *card)
->                 return 0;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n", mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         err = mmc_sd_switch(card, 1, 0, 1, status);
->         if (err)
-> @@ -596,11 +589,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
->                 return 0;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n", mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         /* Set 4-bit bus width */
->         if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
-> --
-> 2.12.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
