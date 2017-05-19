@@ -1,173 +1,213 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 4/6] mmc: block: Move boot partition locking into a driver op
-Date: Fri, 19 May 2017 15:37:30 +0200
-Message-ID: <20170519133732.27470-5-linus.walleij@linaro.org>
+Subject: [PATCH 5/6] mmc: debugfs: Move card status retrieveal into the block layer
+Date: Fri, 19 May 2017 15:37:31 +0200
+Message-ID: <20170519133732.27470-6-linus.walleij@linaro.org>
 References: <20170519133732.27470-1-linus.walleij@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:36565 "EHLO
+        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755276AbdESNiE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2017 09:38:04 -0400
+Received: by mail-lf0-f43.google.com with SMTP id h4so1210801lfj.3
+        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 06:38:03 -0700 (PDT)
 In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Linus Walleij <linus.walleij@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
-This moves the boot partition lock command (issued from sysfs)
-into a custom block layer request, just like the ioctl()s,
-getting rid of yet another instance of mmc_get_card().
+The debugfs file "status" (in e.g. /debug/mmc3/mmc3:0001) is
+only available if and only if the card used is an (e)MMC or
+SD card, not for SDIO, as can be seen from this guard in
+mmc_add_card_debugfs();
 
-Since we now have two operations issuing special DRV_OP's, we
-rename the result variable ->drv_op_result.
+if (mmc_card_mmc(card) || mmc_card_sd(card))
+  (...create debugfs "status" entry...)
 
-Tested by locking the boot partition from userspace:
-> cd /sys/devices/platform/soc/80114000.sdi4_per2/mmc_host/mmc3/
-     mmc3:0001/block/mmcblk3/mmcblk3boot0
-> echo 1 > ro_lock_until_next_power_on
-[  178.645324] mmcblk3boot1: Locking boot partition ro until next power on
-[  178.652221] mmcblk3boot0: Locking boot partition ro until next power on
+Further this debugfs entry suffers from all the same starvation
+issues as the other userspace things, under e.g. a heavy
+dd operation.
 
-Also tested this with a huge dd job in the background: it
-is now possible to lock the boot partitions on the card even
-under heavy I/O.
+It is therefore logical to move this over to the block layer
+when it is enabled, using the new custom requests and issue
+it using the block request queue.
+
+This makes this debugfs card access land under the request
+queue host lock instead of orthogonally taking the lock.
+
+Tested during heavy dd load by cat:in the status file. We
+add IS_ENABLED() guards and keep the code snippet just
+issueing the card status as a static inline in the header
+so we can still have card status working when the block
+layer is compiled out.
+
+Keeping two copies of mmc_dbg_card_status_get() around
+seems to be a necessary evil to be able to have the MMC/SD
+stack working with the block layer disabled: under these
+circumstances, the code must simply take another path.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/block.c | 53 +++++++++++++++++++++++++++---------------------
- drivers/mmc/core/queue.h |  4 +++-
- 2 files changed, 33 insertions(+), 24 deletions(-)
+ drivers/mmc/core/block.c   | 28 ++++++++++++++++++++++++++++
+ drivers/mmc/core/block.h   | 37 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/debugfs.c | 15 ++-------------
+ drivers/mmc/core/queue.h   |  2 ++
+ 4 files changed, 69 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 75b1baacf28b..52635120a0a5 100644
+index 52635120a0a5..8858798d1349 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -190,6 +190,8 @@ static ssize_t power_ro_lock_store(struct device *dev,
- 	int ret;
- 	struct mmc_blk_data *md, *part_md;
- 	struct mmc_card *card;
-+	struct mmc_queue *mq;
-+	struct request *req;
- 	unsigned long set;
- 
- 	if (kstrtoul(buf, 0, &set))
-@@ -199,20 +201,14 @@ static ssize_t power_ro_lock_store(struct device *dev,
- 		return count;
- 
- 	md = mmc_blk_get(dev_to_disk(dev));
-+	mq = &md->queue;
- 	card = md->queue.card;
- 
--	mmc_get_card(card);
--
--	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
--				card->ext_csd.boot_ro_lock |
--				EXT_CSD_BOOT_WP_B_PWR_WP_EN,
--				card->ext_csd.part_time);
--	if (ret)
--		pr_err("%s: Locking boot partition ro until next power on failed: %d\n", md->disk->disk_name, ret);
--	else
--		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
--
--	mmc_put_card(card);
-+	/* Dispatch locking to the block layer */
-+	req = blk_get_request(mq->queue, REQ_OP_DRV_OUT, __GFP_RECLAIM);
-+	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_BOOT_WP;
-+	blk_execute_rq(mq->queue, NULL, req, 0);
-+	ret = req_to_mmc_queue_req(req)->drv_op_result;
- 
- 	if (!ret) {
- 		pr_info("%s: Locking boot partition ro until next power on\n",
-@@ -606,7 +602,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	req_to_mmc_queue_req(req)->idata = idatas;
- 	req_to_mmc_queue_req(req)->ioc_count = 1;
- 	blk_execute_rq(mq->queue, NULL, req, 0);
--	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
-+	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
- 	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
- 	blk_put_request(req);
- 
-@@ -682,7 +678,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	req_to_mmc_queue_req(req)->idata = idata;
- 	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
- 	blk_execute_rq(mq->queue, NULL, req, 0);
--	ioc_err = req_to_mmc_queue_req(req)->ioc_result;
-+	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
- 
- 	/* copy to user if data and response */
- 	for (i = 0; i < num_of_cmds && !err; i++)
-@@ -1195,7 +1191,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+@@ -1191,6 +1191,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
  	struct mmc_queue_req *mq_rq;
  	struct mmc_card *card = mq->card;
  	struct mmc_blk_data *md = mq->blkdata;
--	int ioc_err;
-+	int ret;
++	u32 status;
+ 	int ret;
  	int i;
  
- 	mq_rq = req_to_mmc_queue_req(req);
-@@ -1203,23 +1199,34 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 	switch (mq_rq->drv_op) {
- 	case MMC_DRV_OP_IOCTL:
- 		for (i = 0; i < mq_rq->ioc_count; i++) {
--			ioc_err =
--				__mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
--			if (ioc_err)
-+			ret = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
-+			if (ret)
- 				break;
- 		}
--		mq_rq->ioc_result = ioc_err;
--
- 		/* Always switch back to main area after RPMB access */
- 		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
- 			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
--
--		blk_end_request_all(req, ioc_err);
+@@ -1219,6 +1220,11 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 			card->ext_csd.boot_ro_lock |=
+ 				EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+ 		break;
++	case MMC_DRV_OP_GET_CARD_STATUS:
++		ret = mmc_send_status(card, &status);
++		if (!ret)
++			ret = status;
 +		break;
-+	case MMC_DRV_OP_BOOT_WP:
-+		ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
-+				 card->ext_csd.boot_ro_lock |
-+				 EXT_CSD_BOOT_WP_B_PWR_WP_EN,
-+				 card->ext_csd.part_time);
-+		if (ret)
-+			pr_err("%s: Locking boot partition ro until next power on failed: %d\n",
-+			       md->disk->disk_name, ret);
-+		else
-+			card->ext_csd.boot_ro_lock |=
-+				EXT_CSD_BOOT_WP_B_PWR_WP_EN;
- 		break;
  	default:
--		/* Unknown operation */
-+		pr_err("%s: unknown driver specific operation\n",
-+		       md->disk->disk_name);
-+		ret = -EINVAL;
- 		break;
- 	}
-+	mq_rq->drv_op_result = ret;
-+	blk_end_request_all(req, ret);
+ 		pr_err("%s: unknown driver specific operation\n",
+ 		       md->disk->disk_name);
+@@ -1968,6 +1974,28 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		mmc_put_card(card);
  }
  
- static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
++/* Called from debugfs for MMC/SD cards */
++int mmc_blk_card_status_get(struct mmc_card *card, u64 *val)
++{
++	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
++	struct mmc_queue *mq = &md->queue;
++	struct request *req;
++	int ret;
++
++	/* Ask the block layer about the card status */
++	req = blk_get_request(mq->queue, REQ_OP_DRV_IN, __GFP_RECLAIM);
++	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_CARD_STATUS;
++	blk_execute_rq(mq->queue, NULL, req, 0);
++	ret = req_to_mmc_queue_req(req)->drv_op_result;
++	if (ret >= 0) {
++		*val = ret;
++		ret = 0;
++	}
++
++	return ret;
++}
++EXPORT_SYMBOL(mmc_blk_card_status_get);
++
+ static inline int mmc_blk_readonly(struct mmc_card *card)
+ {
+ 	return mmc_card_readonly(card) ||
+diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
+index 860ca7c8df86..1e26755a864b 100644
+--- a/drivers/mmc/core/block.h
++++ b/drivers/mmc/core/block.h
+@@ -1,9 +1,46 @@
+ #ifndef _MMC_CORE_BLOCK_H
+ #define _MMC_CORE_BLOCK_H
+ 
++#include <linux/kconfig.h>
++#include "core.h"
++#include "mmc_ops.h"
++
+ struct mmc_queue;
+ struct request;
+ 
++#if IS_ENABLED(CONFIG_MMC_BLOCK)
++
+ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
++int mmc_blk_card_status_get(struct mmc_card *card, u64 *val);
++
++#else
++
++/*
++ * Small stub functions to be used when the block layer is not
++ * enabled, e.g. for pure SDIO without MMC/SD configurations.
++ */
++
++static inline void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
++{
++	return;
++}
++
++static inline int mmc_blk_card_status_get(struct mmc_card *card, u64 *val)
++{
++	u32 status;
++	int ret;
++
++	mmc_get_card(card);
++
++	ret = mmc_send_status(card, &status);
++	if (!ret)
++		*val = status;
++
++	mmc_put_card(card);
++
++	return ret;
++}
++
++#endif /* IS_ENABLED(CONFIG_MMC_BLOCK) */
+ 
+ #endif
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index a1fba5732d66..ce5b921c7d96 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -19,6 +19,7 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ 
++#include "block.h"
+ #include "core.h"
+ #include "card.h"
+ #include "host.h"
+@@ -283,19 +284,7 @@ void mmc_remove_host_debugfs(struct mmc_host *host)
+ 
+ static int mmc_dbg_card_status_get(void *data, u64 *val)
+ {
+-	struct mmc_card	*card = data;
+-	u32		status;
+-	int		ret;
+-
+-	mmc_get_card(card);
+-
+-	ret = mmc_send_status(data, &status);
+-	if (!ret)
+-		*val = status;
+-
+-	mmc_put_card(card);
+-
+-	return ret;
++	return mmc_blk_card_status_get(data, val);
+ }
+ DEFINE_SIMPLE_ATTRIBUTE(mmc_dbg_card_status_fops, mmc_dbg_card_status_get,
+ 		NULL, "%08llx\n");
 diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index 1e6062eb3e07..361b46408e0f 100644
+index 361b46408e0f..2b39717453a5 100644
 --- a/drivers/mmc/core/queue.h
 +++ b/drivers/mmc/core/queue.h
-@@ -35,9 +35,11 @@ struct mmc_blk_request {
- /**
+@@ -36,10 +36,12 @@ struct mmc_blk_request {
   * enum mmc_drv_op - enumerates the operations in the mmc_queue_req
   * @MMC_DRV_OP_IOCTL: ioctl operation
-+ * @MMC_DRV_OP_BOOT_WP: write protect boot partitions
+  * @MMC_DRV_OP_BOOT_WP: write protect boot partitions
++ * @MMC_DRV_OP_GET_CARD_STATUS: get card status
   */
  enum mmc_drv_op {
  	MMC_DRV_OP_IOCTL,
-+	MMC_DRV_OP_BOOT_WP,
+ 	MMC_DRV_OP_BOOT_WP,
++	MMC_DRV_OP_GET_CARD_STATUS,
  };
  
  struct mmc_queue_req {
-@@ -48,7 +50,7 @@ struct mmc_queue_req {
- 	unsigned int		bounce_sg_len;
- 	struct mmc_async_req	areq;
- 	enum mmc_drv_op		drv_op;
--	int			ioc_result;
-+	int			drv_op_result;
- 	struct mmc_blk_ioc_data	**idata;
- 	unsigned int		ioc_count;
- };
 -- 
 2.9.3
+
