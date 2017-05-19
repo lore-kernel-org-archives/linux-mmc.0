@@ -1,50 +1,74 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 12/41] mmc: host: omap_hsmmc: Fix error path sequence
-Date: Fri, 19 May 2017 13:45:12 +0530
-Message-ID: <20170519081541.26753-13-kishon@ti.com>
-References: <20170519081541.26753-1-kishon@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 0/6] mmc: renesas-sdhi: refactor DMA support
+Date: Fri, 19 May 2017 10:30:07 +0200
+Message-ID: <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
+References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au> <20170518201436.umh3d22rf25cqh2b@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170518201436.umh3d22rf25cqh2b@ninjato>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Fix the error path sequence so that clk_disable, runtime_disable etc
-are done in the reverse order of how they were enabled.
+On 18 May 2017 at 22:14, Wolfram Sang <wsa@the-dreams.de> wrote:
+> On Wed, May 10, 2017 at 11:25:24AM +0200, Simon Horman wrote:
+>> Hi Wolfram, Hi Ulf, Hi Arnd, Hi all,
+>>
+>> the intention of this patch-set is to refactor the DMA support in
+>> the Renesas SDHI driver in order to make it easier to add support
+>> for using the SDHI hardware with different DMA implementations.
+>>
+>> This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
+>> renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
+>> the reworking of the driver proposed by Arnd[1] in his review of that
+>> patch-set.
+>>
+>> [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
+>>
+>> Unlike that patch-set this patch-set does not add support for
+>> R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
+>>
+>> Changes between RFC and v2:
+>>
+>> * Drop filenames from comment at top of source
+>> * Consistently check for if (host->dma_ops) before using dma_ops.
+>>
+>>
+>> Simon Horman (6):
+>>   mmc: tmio: drop filenames from comment at top of source
+>>   mmc: renesas-sdhi, tmio: make dma more modular
+>>   mmc: tmio: rename tmio_mmc_{pio => core}.c
+>>   mmc: renesas-sdhi: rename tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c
+>>   mmc: renesas-sdhi: rename sh_mobile_sdhi.c => renesas_sdhi_core.c
+>>   mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
+>
+> Thanks Simon for this series! The file layout looks in deed much better
+> now. And some light testing on my Lager didn't show any regressions. I
+> have only minor comments which do not have anything to do with the code,
+> so already here:
+>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
+> The comments:
+>
+> * MAINTAINERS file needs updating because of the new filenames
+> * I'd prefer the _GPL variant of EXPORT_SYMBOL unless we have a reason
+>   to not use it?
+> * maybe this is also a good time to update the Renesas copyrights in
+>   file headers?
+> * checkpatch reports some whitespace errors on patch 6. I assume they
+>   were already there in the code you moved around. Still, it might be
+>   a nice occasion to fix those?
+>
+> Thanks again, nice work!
+>
+>    Wolfram
+>
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+I have applied this for next, assuming Simon addresses Wolfram's
+comments on top.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8114b8b73491..b28f0e9631ce 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2602,16 +2602,16 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- err_slot_name:
- 	mmc_remove_host(mmc);
- err_irq:
--	device_init_wakeup(&pdev->dev, false);
- 	if (!IS_ERR_OR_NULL(host->tx_chan))
- 		dma_release_channel(host->tx_chan);
- 	if (!IS_ERR_OR_NULL(host->rx_chan))
- 		dma_release_channel(host->rx_chan);
-+	if (host->dbclk)
-+		clk_disable_unprepare(host->dbclk);
- 	pm_runtime_dont_use_autosuspend(host->dev);
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
-+	device_init_wakeup(&pdev->dev, false);
- err1:
- err_gpio:
- 	mmc_free_host(mmc);
--- 
-2.11.0
-
+Thanks and kind regards
+Uffe
