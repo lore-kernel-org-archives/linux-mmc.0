@@ -1,74 +1,116 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/6] mmc: renesas-sdhi: refactor DMA support
-Date: Fri, 19 May 2017 10:30:07 +0200
-Message-ID: <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
-References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au> <20170518201436.umh3d22rf25cqh2b@ninjato>
+Subject: Re: [PATCH] mmc: sdhci-xenon: kill xenon_clean_phy()
+Date: Fri, 19 May 2017 10:30:13 +0200
+Message-ID: <CAPDyKFoDgLGnNcOJi83=0G3tOitsyqgoorJGfp1+uhM24YEf7A@mail.gmail.com>
+References: <20170516061720.1755-1-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170518201436.umh3d22rf25cqh2b@ninjato>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:35592 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755168AbdESIaP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2017 04:30:15 -0400
+Received: by mail-qk0-f177.google.com with SMTP id a72so55387991qkj.2
+        for <linux-mmc@vger.kernel.org>; Fri, 19 May 2017 01:30:14 -0700 (PDT)
+In-Reply-To: <20170516061720.1755-1-jszhang@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ziji Hu <huziji@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 18 May 2017 at 22:14, Wolfram Sang <wsa@the-dreams.de> wrote:
-> On Wed, May 10, 2017 at 11:25:24AM +0200, Simon Horman wrote:
->> Hi Wolfram, Hi Ulf, Hi Arnd, Hi all,
->>
->> the intention of this patch-set is to refactor the DMA support in
->> the Renesas SDHI driver in order to make it easier to add support
->> for using the SDHI hardware with different DMA implementations.
->>
->> This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
->> renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
->> the reworking of the driver proposed by Arnd[1] in his review of that
->> patch-set.
->>
->> [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
->>
->> Unlike that patch-set this patch-set does not add support for
->> R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
->>
->> Changes between RFC and v2:
->>
->> * Drop filenames from comment at top of source
->> * Consistently check for if (host->dma_ops) before using dma_ops.
->>
->>
->> Simon Horman (6):
->>   mmc: tmio: drop filenames from comment at top of source
->>   mmc: renesas-sdhi, tmio: make dma more modular
->>   mmc: tmio: rename tmio_mmc_{pio => core}.c
->>   mmc: renesas-sdhi: rename tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c
->>   mmc: renesas-sdhi: rename sh_mobile_sdhi.c => renesas_sdhi_core.c
->>   mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
+On 16 May 2017 at 08:17, Jisheng Zhang <jszhang@marvell.com> wrote:
+> Currently, the xenon_clean_phy() is only used for freeing phy_params.
+> The phy_params is allocated by devm_kzalloc(), there's no need to free
+> is explicitly.
 >
-> Thanks Simon for this series! The file layout looks in deed much better
-> now. And some light testing on my Lager didn't show any regressions. I
-> have only minor comments which do not have anything to do with the code,
-> so already here:
->
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> The comments:
->
-> * MAINTAINERS file needs updating because of the new filenames
-> * I'd prefer the _GPL variant of EXPORT_SYMBOL unless we have a reason
->   to not use it?
-> * maybe this is also a good time to update the Renesas copyrights in
->   file headers?
-> * checkpatch reports some whitespace errors on patch 6. I assume they
->   were already there in the code you moved around. Still, it might be
->   a nice occasion to fix those?
->
-> Thanks again, nice work!
->
->    Wolfram
->
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 
-I have applied this for next, assuming Simon addresses Wolfram's
-comments on top.
+Thanks, applied for fixes!
 
-Thanks and kind regards
+Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-xenon-phy.c | 14 +-------------
+>  drivers/mmc/host/sdhci-xenon.c     |  6 +-----
+>  drivers/mmc/host/sdhci-xenon.h     |  1 -
+>  3 files changed, 2 insertions(+), 19 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+> index 6356781f1cca..f7e26b031e76 100644
+> --- a/drivers/mmc/host/sdhci-xenon-phy.c
+> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
+> @@ -787,14 +787,6 @@ int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios)
+>         return ret;
+>  }
+>
+> -void xenon_clean_phy(struct sdhci_host *host)
+> -{
+> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -       struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -
+> -       kfree(priv->phy_params);
+> -}
+> -
+>  static int xenon_add_phy(struct device_node *np, struct sdhci_host *host,
+>                          const char *phy_name)
+>  {
+> @@ -819,11 +811,7 @@ static int xenon_add_phy(struct device_node *np, struct sdhci_host *host,
+>         if (ret)
+>                 return ret;
+>
+> -       ret = xenon_emmc_phy_parse_param_dt(host, np, priv->phy_params);
+> -       if (ret)
+> -               xenon_clean_phy(host);
+> -
+> -       return ret;
+> +       return xenon_emmc_phy_parse_param_dt(host, np, priv->phy_params);
+>  }
+>
+>  int xenon_phy_parse_dt(struct device_node *np, struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index 67246655315b..bc1781bb070b 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -486,7 +486,7 @@ static int xenon_probe(struct platform_device *pdev)
+>
+>         err = xenon_sdhc_prepare(host);
+>         if (err)
+> -               goto clean_phy_param;
+> +               goto err_clk;
+>
+>         err = sdhci_add_host(host);
+>         if (err)
+> @@ -496,8 +496,6 @@ static int xenon_probe(struct platform_device *pdev)
+>
+>  remove_sdhc:
+>         xenon_sdhc_unprepare(host);
+> -clean_phy_param:
+> -       xenon_clean_phy(host);
+>  err_clk:
+>         clk_disable_unprepare(pltfm_host->clk);
+>  free_pltfm:
+> @@ -510,8 +508,6 @@ static int xenon_remove(struct platform_device *pdev)
+>         struct sdhci_host *host = platform_get_drvdata(pdev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>
+> -       xenon_clean_phy(host);
+> -
+>         sdhci_remove_host(host, 0);
+>
+>         xenon_sdhc_unprepare(host);
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 6e6523ea01ce..73debb42dc2f 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -93,7 +93,6 @@ struct xenon_priv {
+>  };
+>
+>  int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
+> -void xenon_clean_phy(struct sdhci_host *host);
+>  int xenon_phy_parse_dt(struct device_node *np,
+>                        struct sdhci_host *host);
+>  void xenon_soc_pad_ctrl(struct sdhci_host *host,
+> --
+> 2.11.0
+>
