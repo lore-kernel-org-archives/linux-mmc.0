@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 17/41] ARM: dts: dra72-evm: Add vmmc_aux supply to mmc1
-Date: Fri, 19 May 2017 13:45:17 +0530
-Message-ID: <20170519081541.26753-18-kishon@ti.com>
+Subject: [PATCH 39/41] ARM: omap2plus_defconfig: Enable PINCTRL_TI_IODELAY
+Date: Fri, 19 May 2017 13:45:39 +0530
+Message-ID: <20170519081541.26753-40-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,25 +21,26 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony
 Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add vmmc_aux-supply property to mmc1 dt node and populate
-it with ldo1_reg to reflect ldo1_out is connected to mmc1 IO lines.
+Enable PINCTRL_TI_IODELAY since it is required for MMC module in
+DRA7 family of processors to configure "IODelay" values
+depending on the enumerated MMC modes.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra72-evm.dts | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm/configs/omap2plus_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/dra72-evm.dts b/arch/arm/boot/dts/dra72-evm.dts
-index cd9c4ff12654..1c570236a1a0 100644
---- a/arch/arm/boot/dts/dra72-evm.dts
-+++ b/arch/arm/boot/dts/dra72-evm.dts
-@@ -43,3 +43,7 @@
- 	phy_id = <&davinci_mdio>, <3>;
- 	phy-mode = "rgmii";
- };
-+
-+&mmc1 {
-+	vmmc_aux-supply = <&ldo1_reg>;
-+};
+diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
+index a120ae816260..4d92f308349f 100644
+--- a/arch/arm/configs/omap2plus_defconfig
++++ b/arch/arm/configs/omap2plus_defconfig
+@@ -246,6 +246,7 @@ CONFIG_HSI=m
+ CONFIG_OMAP_SSI=m
+ CONFIG_SSI_PROTOCOL=m
+ CONFIG_PINCTRL_SINGLE=y
++CONFIG_PINCTRL_TI_IODELAY=y
+ CONFIG_DEBUG_GPIO=y
+ CONFIG_GPIO_SYSFS=y
+ CONFIG_GPIO_PCA953X=m
 -- 
 2.11.0
