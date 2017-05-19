@@ -1,81 +1,106 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 11/41] mmc: host: omap_hsmmc: Add new compatible string to support dra7
-Date: Fri, 19 May 2017 13:45:11 +0530
-Message-ID: <20170519081541.26753-12-kishon@ti.com>
+Subject: [PATCH 03/41] mmc: host: omap_hsmmc: Program HCTL based on
+ signal_voltage set by mmc core
+Date: Fri, 19 May 2017 13:45:03 +0530
+Message-ID: <20170519081541.26753-4-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add a new compatible string "ti,dra7-hsmmc" to support
-dra7 and dra72 controllers. Also create a new controller flag
-"OMAP_HSMMC_REQUIRE_IODELAY" to specify all controllers that use
-"ti,dra7-hsmmc" require iodealy configuration to be set.
+HCTL is now set based on ios.signal_voltage set by mmc core and not
+hardcoded to 3V0 if OMAP_HSMMC_SUPPORTS_DUAL_VOLT is set. If
+OMAP_HSMMC_SUPPORTS_DUAL_VOLT is set, it means HCTL can be set to either
+3V0 or 1V8. And it should be set to 3V0 or 1V8 depending on
+ios.signal_voltage.
+Also it is now set on power mode status being changed to MMC_POWER_ON.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  1 +
- drivers/mmc/host/omap_hsmmc.c                           | 10 ++++++++++
- include/linux/platform_data/hsmmc-omap.h                |  1 +
- 3 files changed, 12 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c | 16 +++++++---------
+ 1 file changed, 7 insertions(+), 9 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 74166a0d460d..258e25af10f7 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -12,6 +12,7 @@ Required properties:
-  Should be "ti,omap3-hsmmc", for OMAP3 controllers
-  Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
-  Should be "ti,omap4-hsmmc", for OMAP4 controllers
-+ Should be "ti,dra7-hsmmc", for dra7 and dra72 controllers
-  Should be "ti,am33xx-hsmmc", for AM335x controllers
- - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
- 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 7088a88074a8..8114b8b73491 100644
+index 42954efe12f7..893d1624a5a3 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2314,6 +2314,12 @@ static const struct omap_mmc_of_data am33xx_mmc_of_data = {
- 	.controller_flags = OMAP_HSMMC_SWAKEUP_MISSING,
+@@ -229,6 +229,7 @@ struct omap_mmc_of_data {
  };
  
-+static const struct omap_mmc_of_data dra7_mmc_of_data = {
-+	.reg_offset = 0x100,
-+	.controller_flags = OMAP_HSMMC_SWAKEUP_MISSING |
-+			    OMAP_HSMMC_REQUIRE_IODELAY,
-+};
-+
- static const struct of_device_id omap_mmc_of_match[] = {
- 	{
- 		.compatible = "ti,omap2-hsmmc",
-@@ -2333,6 +2339,10 @@ static const struct of_device_id omap_mmc_of_match[] = {
- 		.compatible = "ti,am33xx-hsmmc",
- 		.data = &am33xx_mmc_of_data,
- 	},
-+	{
-+		.compatible = "ti,dra7-hsmmc",
-+		.data = &dra7_mmc_of_data,
-+	},
- 	{},
- };
- MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
-diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
-index 8e981be2e2c2..21832a357654 100644
---- a/include/linux/platform_data/hsmmc-omap.h
-+++ b/include/linux/platform_data/hsmmc-omap.h
-@@ -27,6 +27,7 @@
- #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
- #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
- #define OMAP_HSMMC_SWAKEUP_MISSING		BIT(2)
-+#define OMAP_HSMMC_REQUIRE_IODELAY		BIT(3)
+ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
++static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host, int iov);
  
- struct omap_hsmmc_dev_attr {
- 	u8 flags;
+ static int omap_hsmmc_card_detect(struct device *dev)
+ {
+@@ -1664,6 +1665,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			omap_hsmmc_set_power(host, 1, ios->vdd);
+ 			break;
+ 		case MMC_POWER_ON:
++			omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
+ 			do_send_init_stream = 1;
+ 			break;
+ 		}
+@@ -1824,17 +1826,12 @@ static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
+ 	OMAP_HSMMC_WRITE(host->base, CAPA, val);
+ }
+ 
+-static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
++static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host, int iov)
+ {
+ 	u32 hctl, value;
+ 
+-	/* Only MMC1 supports 3.0V */
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
+-		hctl = SDVS30;
+-	else
+-		hctl = SDVS18;
+-
+ 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
++	hctl = (iov == MMC_SIGNAL_VOLTAGE_180) ? SDVS18 : SDVS30;
+ 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
+ 
+ 	/* Set SD bus power bit */
+@@ -2144,7 +2141,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
+ 
+ 	omap_hsmmc_set_capabilities(host);
+-	omap_hsmmc_conf_bus_power(host);
+ 
+ 	host->rx_chan = dma_request_chan(&pdev->dev, "rx");
+ 	if (IS_ERR(host->rx_chan)) {
+@@ -2281,6 +2277,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+ static int omap_hsmmc_resume(struct device *dev)
+ {
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
++	struct mmc_ios *ios;
+ 
+ 	if (!host)
+ 		return 0;
+@@ -2290,8 +2287,9 @@ static int omap_hsmmc_resume(struct device *dev)
+ 	if (host->dbclk)
+ 		clk_prepare_enable(host->dbclk);
+ 
++	ios = &host->mmc->ios;
+ 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
+-		omap_hsmmc_conf_bus_power(host);
++		omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
+ 
+ 	omap_hsmmc_protect_card(host);
+ 	pm_runtime_mark_last_busy(host->dev);
 -- 
 2.11.0
