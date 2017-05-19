@@ -1,55 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: atmel-mci: Delete an error message for a failed
- memory allocation in atmci_of_init()
-Date: Fri, 19 May 2017 10:32:46 +0200
-Message-ID: <CAPDyKFrgjdwd2Z_19GC1us+SA-4-sjNOnyFWsnPCzt=JGvtwNw@mail.gmail.com>
-References: <199b33a2-6722-fba1-e7ec-5ac016c5bad0@users.sourceforge.net>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 07/41] mmc: host: omap_hsmmc: Allow io voltage switch even for
+ fixed vdd
+Date: Fri, 19 May 2017 13:45:07 +0530
+Message-ID: <20170519081541.26753-8-kishon@ti.com>
+References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <199b33a2-6722-fba1-e7ec-5ac016c5bad0@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 May 2017 at 15:17, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Sat, 13 May 2017 15:05:28 +0200
->
-> Omit an extra message for a memory allocation failure in this function.
->
-> This issue was detected by using the Coccinelle software.
->
-> Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+Now that vmmc regulator is made optional, do not bail out if vmmc
+regulator is not found.
 
-Thanks applied for next!
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 7 -------
+ 1 file changed, 7 deletions(-)
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/atmel-mci.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 388e4a3f13e6..584247464eb8 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -667,10 +667,8 @@ atmci_of_init(struct platform_device *pdev)
->         }
->
->         pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-> -       if (!pdata) {
-> -               dev_err(&pdev->dev, "could not allocate memory for pdata\n");
-> +       if (!pdata)
->                 return ERR_PTR(-ENOMEM);
-> -       }
->
->         for_each_child_of_node(np, cnp) {
->                 if (of_property_read_u32(cnp, "reg", &slot_id)) {
-> --
-> 2.12.3
->
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index d8970a7ff4be..d47ef51fbe51 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -416,13 +416,6 @@ static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
+ 	if (mmc_pdata(host)->set_power)
+ 		return mmc_pdata(host)->set_power(host->dev, power_on, iov);
+ 
+-	/*
+-	 * If we don't see a Vcc regulator, assume it's a fixed
+-	 * voltage always-on regulator.
+-	 */
+-	if (!mmc->supply.vmmc)
+-		return 0;
+-
+ 	if (mmc_pdata(host)->before_set_reg)
+ 		mmc_pdata(host)->before_set_reg(host->dev, power_on, iov);
+ 
+-- 
+2.11.0
