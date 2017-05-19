@@ -1,45 +1,44 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 23/41] ARM: dts: dra72x: Create a common file with MMC/SD IOdelay data
-Date: Fri, 19 May 2017 13:45:23 +0530
-Message-ID: <20170519081541.26753-24-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 24/41] ARM: dts: dra74x: Create a common file with MMC/SD IOdelay data
+Date: Fri, 19 May 2017 13:45:24 +0530
+Message-ID: <20170519081541.26753-25-kishon@ti.com>
 References: <20170519081541.26753-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170519081541.26753-1-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20170519081541.26753-1-kishon@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+From: Sekhar Nori <nsekhar@ti.com>
 
 Add pinmux configuration for MMC module including IODELAY
 values suggested in the data manual for the various supported
 modes.
 
-IOdelay data for both silicon revision 1.0 and 2.0 is
+IOdelay data for both silicon revision 1.1 and 2.0 is
 added here.
 
 The datamanual revisions used are:
- * AM571x Silicon Revision 2.0: SPRS957D, Revised January 2017
- * AM571x Silicon Revision 1.0: SPRS919M, Revised November 2017
- * DRA71x : SPRS960B, Revised February 2017
+* AM572x Silicon Revision 2.0: SPRS953B, Revised November 2016
+* AM572x Silicon Revision 1.1: SPRS915R, Revised November 2016
 
-Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi | 350 ++++++++++++++++++++++++++++++
- 1 file changed, 350 insertions(+)
- create mode 100644 arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi
+ arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi | 648 ++++++++++++++++++++++++++++++
+ 1 file changed, 648 insertions(+)
+ create mode 100644 arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
 
-diff --git a/arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi b/arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi
+diff --git a/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
 new file mode 100644
-index 000000000000..088013c6dc6e
+index 000000000000..1b88332248fd
 --- /dev/null
-+++ b/arch/arm/boot/dts/dra72x-mmc-iodelay.dtsi
-@@ -0,0 +1,350 @@
++++ b/arch/arm/boot/dts/dra74x-mmc-iodelay.dtsi
+@@ -0,0 +1,648 @@
 +/*
-+ * MMC IOdelay values for TI's DRA72x, DRA71x and AM571x SoCs.
++ * MMC IOdelay values for TI's DRA74x, DRA75x and AM572x SoCs.
 + *
 + * Copyright (C) 2017 Texas Instruments Incorporated - http://www.ti.com/
 + *
@@ -65,18 +64,16 @@ index 000000000000..088013c6dc6e
 + *    if the manual calls a mode, DDR50, or DDR or DDR 1.8v or DDR 3.3v,
 + *    we follow that in code too.
 + * c) If the values change between multiple revisions of silicon, we add
-+ *    a revision tag to both the new and old entry. Use 'rev10' for PG 1.0,
++ *    a revision tag to both the new and old entry. Use 'rev11' for PG 1.1,
 + *    'rev20' for PG 2.0 and so on.
 + * d) The node name and node label should be the exact same string. This is
 + *    to curb naming creativity and achieve consistency.
-+ * e) If in future, DRA71x and DRA72x values differ, then add 'dra71_' and
-+ *    'dra72_' tag to entries. Both the new and old entries should gain a tag.
 + *
 + * Datamanual Revisions:
 + *
-+ * AM571x Silicon Revision 2.0: SPRS957D, Revised January 2017
-+ * AM571x Silicon Revision 1.0: SPRS919M, Revised November 2017
-+ * DRA71x : SPRS960B, Revised February 2017
++ * AM572x Silicon Revision 2.0: SPRS953B, Revised November 2016
++ * AM572x Silicon Revision 1.1: SPRS915R, Revised November 2016
++ *
 + */
 +
 +&dra7_pmx_core {
@@ -104,49 +101,38 @@ index 000000000000..088013c6dc6e
 +
 +	mmc1_pins_hs: mmc1_pins_hs {
 +		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_clk.clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_cmd.cmd */
-+			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat0.dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat1.dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat2.dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0) /* mmc1_dat3.dat3 */
++			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_clk.clk */
++			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_cmd.cmd */
++			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_dat0.dat0 */
++			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_dat1.dat1 */
++			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_dat2.dat2 */
++			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0) /* mmc1_dat3.dat3 */
 +		>;
 +	};
 +
 +	mmc1_pins_sdr25: mmc1_pins_sdr25 {
 +		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_clk.clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_cmd.cmd */
-+			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat0.dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat1.dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat2.dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_MODE0)	/* mmc1_dat3.dat3 */
++			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_clk.clk */
++			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_cmd.cmd */
++			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_dat0.dat0 */
++			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_dat1.dat1 */
++			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_dat2.dat2 */
++			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)	/* mmc1_dat3.dat3 */
 +		>;
 +	};
 +
 +	mmc1_pins_sdr50: mmc1_pins_sdr50 {
 +		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_clk.clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_cmd.cmd */
-+			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_dat0.dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_dat1.dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_dat2.dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE15 | MUX_MODE0)	/* mmc1_dat3.dat3 */
++			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_clk.clk */
++			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_cmd.cmd */
++			DRA7XX_CORE_IOPAD(0x375c, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_dat0.dat0 */
++			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_dat1.dat1 */
++			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_dat2.dat2 */
++			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE10 | MUX_MODE0)	/* mmc1_dat3.dat3 */
 +		>;
 +	};
 +
-+	mmc1_pins_ddr50_rev10: mmc1_pins_ddr50_rev10 {
-+		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_clk.mmc1_clk */
-+			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_cmd.mmc1_cmd */
-+			DRA7XX_CORE_IOPAD(0x375C, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_dat0.mmc1_dat0 */
-+			DRA7XX_CORE_IOPAD(0x3760, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_dat1.mmc1_dat1 */
-+			DRA7XX_CORE_IOPAD(0x3764, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_dat2.mmc1_dat2 */
-+			DRA7XX_CORE_IOPAD(0x3768, PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE14 | MUX_MODE0)	/* mmc1_dat3.mmc1_dat3 */
-+		>;
-+	};
-+
-+	mmc1_pins_ddr50_rev20: mmc1_pins_ddr50_rev20 {
++	mmc1_pins_ddr50: mmc1_pins_ddr50 {
 +		pinctrl-single,pins = <
 +			DRA7XX_CORE_IOPAD(0x3754, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* mmc1_clk.clk */
 +			DRA7XX_CORE_IOPAD(0x3758, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* mmc1_cmd.cmd */
@@ -198,22 +184,7 @@ index 000000000000..088013c6dc6e
 +		>;
 +	};
 +
-+	mmc2_pins_ddr_rev10: mmc2_pins_ddr_rev10 {
-+		pinctrl-single,pins = <
-+			DRA7XX_CORE_IOPAD(0x348c, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a19.mmc2_dat4 */
-+			DRA7XX_CORE_IOPAD(0x3490, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a20.mmc2_dat5 */
-+			DRA7XX_CORE_IOPAD(0x3494, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a21.mmc2_dat6 */
-+			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a22.mmc2_dat7 */
-+			DRA7XX_CORE_IOPAD(0x349c, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a23.mmc2_clk */
-+			DRA7XX_CORE_IOPAD(0x34a0, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a24.mmc2_dat0 */
-+			DRA7XX_CORE_IOPAD(0x34a4, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a25.mmc2_dat1 */
-+			DRA7XX_CORE_IOPAD(0x34a8, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a26.mmc2_dat2 */
-+			DRA7XX_CORE_IOPAD(0x34ac, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_a27.mmc2_dat3 */
-+			DRA7XX_CORE_IOPAD(0x34b0, PIN_INPUT_PULLUP | MUX_MODE1)	/* gpmc_cs1.mmc2_cmd */
-+		>;
-+	};
-+
-+	mmc2_pins_ddr_rev20: mmc2_pins_ddr_rev20 {
++	mmc2_pins_ddr_3_3v_rev11: mmc2_pins_ddr_3_3v_rev11 {
 +		pinctrl-single,pins = <
 +			DRA7XX_CORE_IOPAD(0x349c, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a23.mmc2_clk */
 +			DRA7XX_CORE_IOPAD(0x34b0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_cs1.mmc2_cmd */
@@ -225,6 +196,36 @@ index 000000000000..088013c6dc6e
 +			DRA7XX_CORE_IOPAD(0x3490, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a20.mmc2_dat5 */
 +			DRA7XX_CORE_IOPAD(0x3494, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a21.mmc2_dat6 */
 +			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a22.mmc2_dat7 */
++		>;
++	};
++
++	mmc2_pins_ddr_1_8v_rev11: mmc2_pins_ddr_1_8v_rev11 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x349c, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a23.mmc2_clk */
++			DRA7XX_CORE_IOPAD(0x34b0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_cs1.mmc2_cmd */
++			DRA7XX_CORE_IOPAD(0x34a0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a24.mmc2_dat0 */
++			DRA7XX_CORE_IOPAD(0x34a4, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a25.mmc2_dat1 */
++			DRA7XX_CORE_IOPAD(0x34a8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a26.mmc2_dat2 */
++			DRA7XX_CORE_IOPAD(0x34ac, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a27.mmc2_dat3 */
++			DRA7XX_CORE_IOPAD(0x348c, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a19.mmc2_dat4 */
++			DRA7XX_CORE_IOPAD(0x3490, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a20.mmc2_dat5 */
++			DRA7XX_CORE_IOPAD(0x3494, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a21.mmc2_dat6 */
++			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a22.mmc2_dat7 */
++		>;
++	};
++
++	mmc2_pins_ddr_rev20: mmc2_pins_ddr_rev20 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x349c, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a23.mmc2_clk */
++			DRA7XX_CORE_IOPAD(0x34b0, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_cs1.mmc2_cmd */
++			DRA7XX_CORE_IOPAD(0x34a0, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a24.mmc2_dat0 */
++			DRA7XX_CORE_IOPAD(0x34a4, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a25.mmc2_dat1 */
++			DRA7XX_CORE_IOPAD(0x34a8, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a26.mmc2_dat2 */
++			DRA7XX_CORE_IOPAD(0x34ac, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a27.mmc2_dat3 */
++			DRA7XX_CORE_IOPAD(0x348c, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a19.mmc2_dat4 */
++			DRA7XX_CORE_IOPAD(0x3490, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a20.mmc2_dat5 */
++			DRA7XX_CORE_IOPAD(0x3494, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a21.mmc2_dat6 */
++			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT_PULLUP | MUX_MODE1) /* gpmc_a22.mmc2_dat7 */
 +		>;
 +	};
 +
@@ -242,156 +243,448 @@ index 000000000000..088013c6dc6e
 +			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE1) /* gpmc_a22.mmc2_dat7 */
 +		>;
 +	};
++
++	mmc4_pins_default: mmc4_pins_default {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x37e8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_ctsn.mmc4_clk */
++			DRA7XX_CORE_IOPAD(0x37ec, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_rtsn.mmc4_cmd */
++			DRA7XX_CORE_IOPAD(0x37f0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rxd.mmc4_dat0 */
++			DRA7XX_CORE_IOPAD(0x37f4, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_txd.mmc4_dat1 */
++			DRA7XX_CORE_IOPAD(0x37f8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_ctsn.mmc4_dat2 */
++			DRA7XX_CORE_IOPAD(0x37fc, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rtsn.mmc4_dat3 */
++		>;
++	};
++
++	mmc4_pins_hs: mmc4_pins_hs {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x37e8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_ctsn.mmc4_clk */
++			DRA7XX_CORE_IOPAD(0x37ec, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_rtsn.mmc4_cmd */
++			DRA7XX_CORE_IOPAD(0x37f0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rxd.mmc4_dat0 */
++			DRA7XX_CORE_IOPAD(0x37f4, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_txd.mmc4_dat1 */
++			DRA7XX_CORE_IOPAD(0x37f8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_ctsn.mmc4_dat2 */
++			DRA7XX_CORE_IOPAD(0x37fc, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rtsn.mmc4_dat3 */
++		>;
++	};
++
++	mmc3_pins_default: mmc3_pins_default {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x377c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_clk.mmc3_clk */
++			DRA7XX_CORE_IOPAD(0x3780, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_cmd.mmc3_cmd */
++			DRA7XX_CORE_IOPAD(0x3784, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat0.mmc3_dat0 */
++			DRA7XX_CORE_IOPAD(0x3788, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat1.mmc3_dat1 */
++			DRA7XX_CORE_IOPAD(0x378c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat2.mmc3_dat2 */
++			DRA7XX_CORE_IOPAD(0x3790, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat3.mmc3_dat3 */
++		>;
++	};
++
++	mmc3_pins_hs: mmc3_pins_hs {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x377c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_clk.mmc3_clk */
++			DRA7XX_CORE_IOPAD(0x3780, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_cmd.mmc3_cmd */
++			DRA7XX_CORE_IOPAD(0x3784, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat0.mmc3_dat0 */
++			DRA7XX_CORE_IOPAD(0x3788, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat1.mmc3_dat1 */
++			DRA7XX_CORE_IOPAD(0x378c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat2.mmc3_dat2 */
++			DRA7XX_CORE_IOPAD(0x3790, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat3.mmc3_dat3 */
++		>;
++	};
++
++	mmc3_pins_sdr12: mmc3_pins_sdr12 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x377c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_clk.mmc3_clk */
++			DRA7XX_CORE_IOPAD(0x3780, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_cmd.mmc3_cmd */
++			DRA7XX_CORE_IOPAD(0x3784, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat0.mmc3_dat0 */
++			DRA7XX_CORE_IOPAD(0x3788, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat1.mmc3_dat1 */
++			DRA7XX_CORE_IOPAD(0x378c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat2.mmc3_dat2 */
++			DRA7XX_CORE_IOPAD(0x3790, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat3.mmc3_dat3 */
++		>;
++	};
++
++	mmc3_pins_sdr25: mmc3_pins_sdr25 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x377c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_clk.mmc3_clk */
++			DRA7XX_CORE_IOPAD(0x3780, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_cmd.mmc3_cmd */
++			DRA7XX_CORE_IOPAD(0x3784, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat0.mmc3_dat0 */
++			DRA7XX_CORE_IOPAD(0x3788, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat1.mmc3_dat1 */
++			DRA7XX_CORE_IOPAD(0x378c, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat2.mmc3_dat2 */
++			DRA7XX_CORE_IOPAD(0x3790, (PIN_INPUT_PULLUP | MUX_MODE0)) /* mmc3_dat3.mmc3_dat3 */
++		>;
++	};
++
++	mmc3_pins_sdr50: mmc3_pins_sdr50 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x377c, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_clk.mmc3_clk */
++			DRA7XX_CORE_IOPAD(0x3780, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_cmd.mmc3_cmd */
++			DRA7XX_CORE_IOPAD(0x3784, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_dat0.mmc3_dat0 */
++			DRA7XX_CORE_IOPAD(0x3788, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_dat1.mmc3_dat1 */
++			DRA7XX_CORE_IOPAD(0x378c, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_dat2.mmc3_dat2 */
++			DRA7XX_CORE_IOPAD(0x3790, (PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)) /* mmc3_dat3.mmc3_dat3 */
++		>;
++	};
++
++	mmc4_pins_sdr12: mmc4_pins_sdr12 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x37e8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_ctsn.mmc4_clk */
++			DRA7XX_CORE_IOPAD(0x37ec, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_rtsn.mmc4_cmd */
++			DRA7XX_CORE_IOPAD(0x37f0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rxd.mmc4_dat0 */
++			DRA7XX_CORE_IOPAD(0x37f4, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_txd.mmc4_dat1 */
++			DRA7XX_CORE_IOPAD(0x37f8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_ctsn.mmc4_dat2 */
++			DRA7XX_CORE_IOPAD(0x37fc, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rtsn.mmc4_dat3 */
++		>;
++	};
++
++	mmc4_pins_sdr25: mmc4_pins_sdr25 {
++		pinctrl-single,pins = <
++			DRA7XX_CORE_IOPAD(0x37e8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_ctsn.mmc4_clk */
++			DRA7XX_CORE_IOPAD(0x37ec, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart1_rtsn.mmc4_cmd */
++			DRA7XX_CORE_IOPAD(0x37f0, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rxd.mmc4_dat0 */
++			DRA7XX_CORE_IOPAD(0x37f4, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_txd.mmc4_dat1 */
++			DRA7XX_CORE_IOPAD(0x37f8, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_ctsn.mmc4_dat2 */
++			DRA7XX_CORE_IOPAD(0x37fc, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE3) /* uart2_rtsn.mmc4_dat3 */
++		>;
++	};
 +};
 +
 +&dra7_iodelay_core {
 +
-+	/* Corresponds to MMC1_MANUAL1 in datamanual */
-+	mmc1_iodelay_ddr50_conf: mmc1_iodelay_ddr50_conf {
++	/* Corresponds to MMC1_DDR_MANUAL1 in datamanual */
++	mmc1_iodelay_ddr_rev11_conf: mmc1_iodelay_ddr_rev11_conf {
 +		pinctrl-pin-array = <
-+			0x618 A_DELAY_PS(588) G_DELAY_PS(0)	/* CFG_MMC1_CLK_IN */
-+			0x624 A_DELAY_PS(1000) G_DELAY_PS(0)	/* CFG_MMC1_CMD_IN */
-+			0x630 A_DELAY_PS(1375) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_IN */
-+			0x63C A_DELAY_PS(1000) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_IN */
-+			0x648 A_DELAY_PS(1000) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_IN */
-+			0x654 A_DELAY_PS(1000) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_IN */
-+			0x620 A_DELAY_PS(1230) G_DELAY_PS(0)	/* CFG_MMC1_CLK_OUT */
-+			0x62C A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
-+			0x638 A_DELAY_PS(56) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
-+			0x644 A_DELAY_PS(76) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
-+			0x650 A_DELAY_PS(91) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
-+			0x65C A_DELAY_PS(99) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
++			0x618 A_DELAY_PS(572) G_DELAY_PS(540)	/* CFG_MMC1_CLK_IN */
++			0x620 A_DELAY_PS(1525) G_DELAY_PS(0)	/* CFG_MMC1_CLK_OUT */
++			0x624 A_DELAY_PS(0) G_DELAY_PS(600)	/* CFG_MMC1_CMD_IN */
 +			0x628 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
++			0x62c A_DELAY_PS(55) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
++			0x630 A_DELAY_PS(403) G_DELAY_PS(120)	/* CFG_MMC1_DAT0_IN */
 +			0x634 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OEN */
++			0x638 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
++			0x63c A_DELAY_PS(23) G_DELAY_PS(60)	/* CFG_MMC1_DAT1_IN */
 +			0x640 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
-+			0x64C A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
-+			0x658 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
-+		>;
-+	};
-+
-+	/* Corresponds to MMC1_MANUAL2 in datamanual */
-+	mmc1_iodelay_sdr104_rev10_conf: mmc1_iodelay_sdr104_rev10_conf {
-+		pinctrl-pin-array = <
-+			0x620 A_DELAY_PS(560) G_DELAY_PS(365)	/* CFG_MMC1_CLK_OUT */
-+			0x62c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
-+			0x638 A_DELAY_PS(29) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
 +			0x644 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
-+			0x650 A_DELAY_PS(47) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
-+			0x65c A_DELAY_PS(30) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
-+			0x628 A_DELAY_PS(125) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
-+			0x634 A_DELAY_PS(43) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OEN */
-+			0x640 A_DELAY_PS(433) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
-+			0x64c A_DELAY_PS(287) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
-+			0x658 A_DELAY_PS(351) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x648 A_DELAY_PS(25) G_DELAY_PS(60)	/* CFG_MMC1_DAT2_IN */
++			0x64c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
++			0x650 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
++			0x654 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_IN */
++			0x658 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x65c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
 +		>;
 +	};
 +
-+	/* Corresponds to MMC1_MANUAL2 in datamanual */
++	/* Corresponds to MMC1_DDR_MANUAL1 in datamanual */
++	mmc1_iodelay_ddr_rev20_conf: mmc1_iodelay_ddr50_rev20_conf {
++		pinctrl-pin-array = <
++			0x618 A_DELAY_PS(1076) G_DELAY_PS(330)	/* CFG_MMC1_CLK_IN */
++			0x620 A_DELAY_PS(1271) G_DELAY_PS(0)	/* CFG_MMC1_CLK_OUT */
++			0x624 A_DELAY_PS(722) G_DELAY_PS(0)	/* CFG_MMC1_CMD_IN */
++			0x628 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
++			0x62C A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
++			0x630 A_DELAY_PS(751) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_IN */
++			0x634 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OEN */
++			0x638 A_DELAY_PS(20) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
++			0x63C A_DELAY_PS(256) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_IN */
++			0x640 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
++			0x644 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
++			0x648 A_DELAY_PS(263) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_IN */
++			0x64C A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
++			0x650 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
++			0x654 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_IN */
++			0x658 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x65C A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC1_SDR104_MANUAL1 in datamanual */
++	mmc1_iodelay_sdr104_rev11_conf: mmc1_iodelay_sdr104_rev11_conf {
++		pinctrl-pin-array = <
++			0x620 A_DELAY_PS(1063) G_DELAY_PS(17)	/* CFG_MMC1_CLK_OUT */
++			0x628 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
++			0x62c A_DELAY_PS(23) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
++			0x634 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OEN */
++			0x638 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
++			0x640 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
++			0x644 A_DELAY_PS(2) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
++			0x64c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
++			0x650 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
++			0x658 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x65c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC1_SDR104_MANUAL1 in datamanual */
 +	mmc1_iodelay_sdr104_rev20_conf: mmc1_iodelay_sdr104_rev20_conf {
 +		pinctrl-pin-array = <
-+			0x620 A_DELAY_PS(520) G_DELAY_PS(320)	/* CFG_MMC1_CLK_OUT */
++			0x620 A_DELAY_PS(600) G_DELAY_PS(400)	/* CFG_MMC1_CLK_OUT */
++			0x628 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
 +			0x62c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OUT */
-+			0x638 A_DELAY_PS(40) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
-+			0x644 A_DELAY_PS(83) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
-+			0x650 A_DELAY_PS(98) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
-+			0x65c A_DELAY_PS(106) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
-+			0x628 A_DELAY_PS(51) G_DELAY_PS(0)	/* CFG_MMC1_CMD_OEN */
 +			0x634 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OEN */
-+			0x640 A_DELAY_PS(363) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
-+			0x64c A_DELAY_PS(199) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
-+			0x658 A_DELAY_PS(273) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x638 A_DELAY_PS(30) G_DELAY_PS(0)	/* CFG_MMC1_DAT0_OUT */
++			0x640 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OEN */
++			0x644 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT1_OUT */
++			0x64c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OEN */
++			0x650 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT2_OUT */
++			0x658 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OEN */
++			0x65c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC1_DAT3_OUT */
 +		>;
 +	};
 +
-+	/* Corresponds to MMC2_MANUAL1 in datamanual */
-+	mmc2_iodelay_ddr_conf: mmc2_iodelay_ddr_conf {
++	/* Corresponds to MMC2_HS200_MANUAL1 in datamanual */
++	mmc2_iodelay_hs200_rev11_conf: mmc2_iodelay_hs200_rev11_conf {
 +		pinctrl-pin-array = <
-+			0x18c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A19_IN */
-+			0x1a4 A_DELAY_PS(119) G_DELAY_PS(0)	/* CFG_GPMC_A20_IN */
-+			0x1b0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A21_IN */
-+			0x1bc A_DELAY_PS(18) G_DELAY_PS(0)	/* CFG_GPMC_A22_IN */
-+			0x1c8 A_DELAY_PS(894) G_DELAY_PS(0)	/* CFG_GPMC_A23_IN */
-+			0x1d4 A_DELAY_PS(30) G_DELAY_PS(0)	/* CFG_GPMC_A24_IN */
-+			0x1e0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_IN */
-+			0x1ec A_DELAY_PS(23) G_DELAY_PS(0)	/* CFG_GPMC_A26_IN */
-+			0x1f8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_IN */
-+			0x360 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_IN */
-+			0x194 A_DELAY_PS(152) G_DELAY_PS(0)	/* CFG_GPMC_A19_OUT */
-+			0x1ac A_DELAY_PS(206) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
-+			0x1b8 A_DELAY_PS(78) G_DELAY_PS(0)	/* CFG_GPMC_A21_OUT */
-+			0x1c4 A_DELAY_PS(2) G_DELAY_PS(0)	/* CFG_GPMC_A22_OUT */
-+			0x1d0 A_DELAY_PS(266) G_DELAY_PS(0)	/* CFG_GPMC_A23_OUT */
++			0x190 A_DELAY_PS(621) G_DELAY_PS(600)	/* CFG_GPMC_A19_OEN */
++			0x194 A_DELAY_PS(300) G_DELAY_PS(0)	/* CFG_GPMC_A19_OUT */
++			0x1a8 A_DELAY_PS(739) G_DELAY_PS(600)	/* CFG_GPMC_A20_OEN */
++			0x1ac A_DELAY_PS(240) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
++			0x1b4 A_DELAY_PS(812) G_DELAY_PS(600)	/* CFG_GPMC_A21_OEN */
++			0x1b8 A_DELAY_PS(240) G_DELAY_PS(0)	/* CFG_GPMC_A21_OUT */
++			0x1c0 A_DELAY_PS(954) G_DELAY_PS(600)	/* CFG_GPMC_A22_OEN */
++			0x1c4 A_DELAY_PS(60)  G_DELAY_PS(0)	/* CFG_GPMC_A22_OUT */
++			0x1d0 A_DELAY_PS(1340) G_DELAY_PS(420)	/* CFG_GPMC_A23_OUT */
++			0x1d8 A_DELAY_PS(935) G_DELAY_PS(600)	/* CFG_GPMC_A24_OEN */
 +			0x1dc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OUT */
-+			0x1e8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
-+			0x1f4 A_DELAY_PS(43) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
-+			0x200 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
-+			0x368 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OUT */
-+			0x190 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A19_OEN */
-+			0x1a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A20_OEN */
-+			0x1b4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A21_OEN */
-+			0x1c0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A22_OEN */
-+			0x1d8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OEN */
-+			0x1e4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_OEN */
-+			0x1f0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A26_OEN */
-+			0x1fc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OEN */
-+			0x364 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OEN */
-+		>;
++			0x1e4 A_DELAY_PS(525) G_DELAY_PS(600)	/* CFG_GPMC_A25_OEN */
++			0x1e8 A_DELAY_PS(120) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
++			0x1f0 A_DELAY_PS(767) G_DELAY_PS(600)	/* CFG_GPMC_A26_OEN */
++			0x1f4 A_DELAY_PS(225) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
++			0x1fc A_DELAY_PS(565) G_DELAY_PS(600)	/* CFG_GPMC_A27_OEN */
++			0x200 A_DELAY_PS(60) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
++			0x364 A_DELAY_PS(969) G_DELAY_PS(600)	/* CFG_GPMC_CS1_OEN */
++			0x368 A_DELAY_PS(180) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OUT */
++	      >;
 +	};
 +
-+	/* Corresponds to MMC2_MANUAL3 in datamanual */
-+	mmc2_iodelay_hs200_rev10_conf: mmc2_iodelay_hs200_rev10_conf {
-+		pinctrl-pin-array = <
-+			0x194 A_DELAY_PS(150) G_DELAY_PS(95)	/* CFG_GPMC_A19_OUT */
-+			0x1ac A_DELAY_PS(250) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
-+			0x1b8 A_DELAY_PS(125) G_DELAY_PS(0)	/* CFG_GPMC_A21_OUT */
-+			0x1c4 A_DELAY_PS(100) G_DELAY_PS(0)	/* CFG_GPMC_A22_OUT */
-+			0x1d0 A_DELAY_PS(870) G_DELAY_PS(415)	/* CFG_GPMC_A23_OUT */
-+			0x1dc A_DELAY_PS(30) G_DELAY_PS(0)	/* CFG_GPMC_A24_OUT */
-+			0x1e8 A_DELAY_PS(200) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
-+			0x1f4 A_DELAY_PS(200) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
-+			0x200 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
-+			0x368 A_DELAY_PS(240) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OUT */
-+			0x190 A_DELAY_PS(695) G_DELAY_PS(0)	/* CFG_GPMC_A19_OEN */
-+			0x1a8 A_DELAY_PS(924) G_DELAY_PS(0)	/* CFG_GPMC_A20_OEN */
-+			0x1b4 A_DELAY_PS(719) G_DELAY_PS(0)	/* CFG_GPMC_A21_OEN */
-+			0x1c0 A_DELAY_PS(824) G_DELAY_PS(0)	/* CFG_GPMC_A22_OEN */
-+			0x1d8 A_DELAY_PS(877) G_DELAY_PS(0)	/* CFG_GPMC_A24_OEN */
-+			0x1e4 A_DELAY_PS(446) G_DELAY_PS(0)	/* CFG_GPMC_A25_OEN */
-+			0x1f0 A_DELAY_PS(847) G_DELAY_PS(0)	/* CFG_GPMC_A26_OEN */
-+			0x1fc A_DELAY_PS(586) G_DELAY_PS(0)	/* CFG_GPMC_A27_OEN */
-+			0x364 A_DELAY_PS(1039) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OEN */
-+		>;
-+	};
-+
-+	/* Corresponds to MMC2_MANUAL3 in datamanual */
++	/* Corresponds to MMC2_HS200_MANUAL1 in datamanual */
 +	mmc2_iodelay_hs200_rev20_conf: mmc2_iodelay_hs200_rev20_conf {
 +		pinctrl-pin-array = <
-+			0x194 A_DELAY_PS(285) G_DELAY_PS(0)	/* CFG_GPMC_A19_OUT */
-+			0x1ac A_DELAY_PS(189) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
-+			0x1b8 A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_A21_OUT */
-+			0x1c4 A_DELAY_PS(0) G_DELAY_PS(70)	/* CFG_GPMC_A22_OUT */
-+			0x1d0 A_DELAY_PS(730) G_DELAY_PS(360)	/* CFG_GPMC_A23_OUT */
-+			0x1dc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OUT */
-+			0x1e8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
-+			0x1f4 A_DELAY_PS(70) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
-+			0x200 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
-+			0x368 A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_CS1_OUT */
++			0x190 A_DELAY_PS(274) G_DELAY_PS(0)       /* CFG_GPMC_A19_OEN */
++			0x194 A_DELAY_PS(162) G_DELAY_PS(0)       /* CFG_GPMC_A19_OUT */
++			0x1a8 A_DELAY_PS(401) G_DELAY_PS(0)       /* CFG_GPMC_A20_OEN */
++			0x1ac A_DELAY_PS(73) G_DELAY_PS(0)        /* CFG_GPMC_A20_OUT */
++			0x1b4 A_DELAY_PS(465) G_DELAY_PS(0)       /* CFG_GPMC_A21_OEN */
++			0x1b8 A_DELAY_PS(115) G_DELAY_PS(0)       /* CFG_GPMC_A21_OUT */
++			0x1c0 A_DELAY_PS(633) G_DELAY_PS(0)       /* CFG_GPMC_A22_OEN */
++			0x1c4 A_DELAY_PS(47) G_DELAY_PS(0)        /* CFG_GPMC_A22_OUT */
++			0x1d0 A_DELAY_PS(935) G_DELAY_PS(280)     /* CFG_GPMC_A23_OUT */
++			0x1d8 A_DELAY_PS(621) G_DELAY_PS(0)       /* CFG_GPMC_A24_OEN */
++			0x1dc A_DELAY_PS(0) G_DELAY_PS(0)         /* CFG_GPMC_A24_OUT */
++			0x1e4 A_DELAY_PS(183) G_DELAY_PS(0)       /* CFG_GPMC_A25_OEN */
++			0x1e8 A_DELAY_PS(0) G_DELAY_PS(0)         /* CFG_GPMC_A25_OUT */
++			0x1f0 A_DELAY_PS(467) G_DELAY_PS(0)       /* CFG_GPMC_A26_OEN */
++			0x1f4 A_DELAY_PS(0) G_DELAY_PS(0)         /* CFG_GPMC_A26_OUT */
++			0x1fc A_DELAY_PS(262) G_DELAY_PS(0)       /* CFG_GPMC_A27_OEN */
++			0x200 A_DELAY_PS(46) G_DELAY_PS(0)        /* CFG_GPMC_A27_OUT */
++			0x364 A_DELAY_PS(684) G_DELAY_PS(0)       /* CFG_GPMC_CS1_OEN */
++			0x368 A_DELAY_PS(76) G_DELAY_PS(0)        /* CFG_GPMC_CS1_OUT */
++	      >;
++	};
++
++	/* Correspnds to MMC2_DDR_3V3_MANUAL1 in datamanual */
++	mmc2_iodelay_ddr_3_3v_rev11_conf: mmc2_iodelay_ddr_3_3v_rev11_conf {
++		pinctrl-pin-array = <
++			0x18c A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_A19_IN */
 +			0x190 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A19_OEN */
-+			0x1a8 A_DELAY_PS(231) G_DELAY_PS(0)	/* CFG_GPMC_A20_OEN */
-+			0x1b4 A_DELAY_PS(39) G_DELAY_PS(0)	/* CFG_GPMC_A21_OEN */
-+			0x1c0 A_DELAY_PS(91) G_DELAY_PS(0)	/* CFG_GPMC_A22_OEN */
-+			0x1d8 A_DELAY_PS(176) G_DELAY_PS(0)	/* CFG_GPMC_A24_OEN */
++			0x194 A_DELAY_PS(174) G_DELAY_PS(0)	/* CFG_GPMC_A19_OUT */
++			0x1a4 A_DELAY_PS(265) G_DELAY_PS(360)	/* CFG_GPMC_A20_IN */
++			0x1a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A20_OEN */
++			0x1ac A_DELAY_PS(168) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
++			0x1b0 A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_A21_IN */
++			0x1b4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A21_OEN */
++			0x1b8 A_DELAY_PS(136) G_DELAY_PS(0)	/* CFG_GPMC_A21_OUT */
++			0x1bc A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_A22_IN */
++			0x1c0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A22_OEN */
++			0x1c4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A22_OUT */
++			0x1c8 A_DELAY_PS(287) G_DELAY_PS(420)	/* CFG_GPMC_A23_IN */
++			0x1d0 A_DELAY_PS(879) G_DELAY_PS(0)	/* CFG_GPMC_A23_OUT */
++			0x1d4 A_DELAY_PS(144) G_DELAY_PS(240)	/* CFG_GPMC_A24_IN */
++			0x1d8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OEN */
++			0x1dc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OUT */
++			0x1e0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_IN */
 +			0x1e4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_OEN */
-+			0x1f0 A_DELAY_PS(101) G_DELAY_PS(0)	/* CFG_GPMC_A26_OEN */
++			0x1e8 A_DELAY_PS(34) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
++			0x1ec A_DELAY_PS(0) G_DELAY_PS(120)	/* CFG_GPMC_A26_IN */
++			0x1f0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A26_OEN */
++			0x1f4 A_DELAY_PS(120) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
++			0x1f8 A_DELAY_PS(120) G_DELAY_PS(180)	/* CFG_GPMC_A27_IN */
 +			0x1fc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OEN */
-+			0x364 A_DELAY_PS(360) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OEN */
++			0x200 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
++			0x360 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_IN */
++			0x364 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OEN */
++			0x368 A_DELAY_PS(11) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC2_DDR_1V8_MANUAL1 in datamanual */
++	mmc2_iodelay_ddr_1_8v_rev11_conf: mmc2_iodelay_ddr_1_8v_rev11_conf {
++		pinctrl-pin-array = <
++			0x18c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A19_IN */
++			0x190 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A19_OEN */
++			0x194 A_DELAY_PS(174) G_DELAY_PS(0)	/* CFG_GPMC_A19_OUT */
++			0x1a4 A_DELAY_PS(274) G_DELAY_PS(240)	/* CFG_GPMC_A20_IN */
++			0x1a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A20_OEN */
++			0x1ac A_DELAY_PS(168) G_DELAY_PS(0)	/* CFG_GPMC_A20_OUT */
++			0x1b0 A_DELAY_PS(0) G_DELAY_PS(60)	/* CFG_GPMC_A21_IN */
++			0x1b4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A21_OEN */
++			0x1b8 A_DELAY_PS(136) G_DELAY_PS(0)	/* CFG_GPMC_A21_OUT */
++			0x1bc A_DELAY_PS(0) G_DELAY_PS(60)	/* CFG_GPMC_A22_IN */
++			0x1c0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A22_OEN */
++			0x1c4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A22_OUT */
++			0x1c8 A_DELAY_PS(514) G_DELAY_PS(360)	/* CFG_GPMC_A23_IN */
++			0x1d0 A_DELAY_PS(879) G_DELAY_PS(0)	/* CFG_GPMC_A23_OUT */
++			0x1d4 A_DELAY_PS(187) G_DELAY_PS(120)	/* CFG_GPMC_A24_IN */
++			0x1d8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OEN */
++			0x1dc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A24_OUT */
++			0x1e0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_IN */
++			0x1e4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A25_OEN */
++			0x1e8 A_DELAY_PS(34) G_DELAY_PS(0)	/* CFG_GPMC_A25_OUT */
++			0x1ec A_DELAY_PS(0) G_DELAY_PS(60)	/* CFG_GPMC_A26_IN */
++			0x1f0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A26_OEN */
++			0x1f4 A_DELAY_PS(120) G_DELAY_PS(0)	/* CFG_GPMC_A26_OUT */
++			0x1f8 A_DELAY_PS(121) G_DELAY_PS(60)	/* CFG_GPMC_A27_IN */
++			0x1fc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OEN */
++			0x200 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_A27_OUT */
++			0x360 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_IN */
++			0x364 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OEN */
++			0x368 A_DELAY_PS(11) G_DELAY_PS(0)	/* CFG_GPMC_CS1_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC3_MANUAL1 in datamanual */
++	mmc3_iodelay_manual1_rev20_conf: mmc3_iodelay_manual1_conf {
++		pinctrl-pin-array = <
++			0x678 A_DELAY_PS(0) G_DELAY_PS(386)	/* CFG_MMC3_CLK_IN */
++			0x680 A_DELAY_PS(605) G_DELAY_PS(0)	/* CFG_MMC3_CLK_OUT */
++			0x684 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_IN */
++			0x688 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OEN */
++			0x68c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OUT */
++			0x690 A_DELAY_PS(171) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_IN */
++			0x694 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OEN */
++			0x698 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OUT */
++			0x69c A_DELAY_PS(221) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_IN */
++			0x6a0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OEN */
++			0x6a4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OUT */
++			0x6a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_IN */
++			0x6ac A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OEN */
++			0x6b0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OUT */
++			0x6b4 A_DELAY_PS(474) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_IN */
++			0x6b8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OEN */
++			0x6bc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC3_MANUAL1 in datamanual */
++	mmc3_iodelay_manual1_rev11_conf: mmc3_iodelay_manual1_conf {
++		pinctrl-pin-array = <
++			0x678 A_DELAY_PS(406) G_DELAY_PS(0)	/* CFG_MMC3_CLK_IN */
++			0x680 A_DELAY_PS(659) G_DELAY_PS(0)	/* CFG_MMC3_CLK_OUT */
++			0x684 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_IN */
++			0x688 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OEN */
++			0x68c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OUT */
++			0x690 A_DELAY_PS(130) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_IN */
++			0x694 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OEN */
++			0x698 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OUT */
++			0x69c A_DELAY_PS(169) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_IN */
++			0x6a0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OEN */
++			0x6a4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OUT */
++			0x6a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_IN */
++			0x6ac A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OEN */
++			0x6b0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OUT */
++			0x6b4 A_DELAY_PS(457) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_IN */
++			0x6b8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OEN */
++			0x6bc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC4_DS_MANUAL1 in datamanual */
++	mmc4_iodelay_ds_rev11_conf: mmc4_iodelay_ds_rev11_conf {
++		pinctrl-pin-array = <
++			0x840 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_IN */
++			0x848 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_OUT */
++			0x84c A_DELAY_PS(96) G_DELAY_PS(0)	/* CFG_UART1_RTSN_IN */
++			0x850 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OEN */
++			0x854 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OUT */
++			0x870 A_DELAY_PS(582) G_DELAY_PS(0)	/* CFG_UART2_CTSN_IN */
++			0x874 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OEN */
++			0x878 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OUT */
++			0x87c A_DELAY_PS(391) G_DELAY_PS(0)	/* CFG_UART2_RTSN_IN */
++			0x880 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OEN */
++			0x884 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OUT */
++			0x888 A_DELAY_PS(561) G_DELAY_PS(0)	/* CFG_UART2_RXD_IN */
++			0x88c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OEN */
++			0x890 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OUT */
++			0x894 A_DELAY_PS(588) G_DELAY_PS(0)	/* CFG_UART2_TXD_IN */
++			0x898 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OEN */
++			0x89c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC4_DS_MANUAL1 in datamanual */
++	mmc4_iodelay_ds_rev20_conf: mmc4_iodelay_ds_rev20_conf {
++		pinctrl-pin-array = <
++			0x840 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_IN */
++			0x848 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_OUT */
++			0x84c A_DELAY_PS(307) G_DELAY_PS(0)	/* CFG_UART1_RTSN_IN */
++			0x850 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OEN */
++			0x854 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OUT */
++			0x870 A_DELAY_PS(785) G_DELAY_PS(0)	/* CFG_UART2_CTSN_IN */
++			0x874 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OEN */
++			0x878 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OUT */
++			0x87c A_DELAY_PS(613) G_DELAY_PS(0)	/* CFG_UART2_RTSN_IN */
++			0x880 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OEN */
++			0x884 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OUT */
++			0x888 A_DELAY_PS(683) G_DELAY_PS(0)	/* CFG_UART2_RXD_IN */
++			0x88c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OEN */
++			0x890 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OUT */
++			0x894 A_DELAY_PS(835) G_DELAY_PS(0)	/* CFG_UART2_TXD_IN */
++			0x898 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OEN */
++			0x89c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC4_MANUAL1 in datamanual */
++	mmc4_iodelay_sdr12_hs_sdr25_rev11_conf: mmc4_iodelay_sdr12_hs_sdr25_rev11_conf {
++		pinctrl-pin-array = <
++			0x840 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_IN */
++			0x848 A_DELAY_PS(2651) G_DELAY_PS(0)	/* CFG_UART1_CTSN_OUT */
++			0x84c A_DELAY_PS(1572) G_DELAY_PS(0)	/* CFG_UART1_RTSN_IN */
++			0x850 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OEN */
++			0x854 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OUT */
++			0x870 A_DELAY_PS(1913) G_DELAY_PS(0)	/* CFG_UART2_CTSN_IN */
++			0x874 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OEN */
++			0x878 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OUT */
++			0x87c A_DELAY_PS(1721) G_DELAY_PS(0)	/* CFG_UART2_RTSN_IN */
++			0x880 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OEN */
++			0x884 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OUT */
++			0x888 A_DELAY_PS(1891) G_DELAY_PS(0)	/* CFG_UART2_RXD_IN */
++			0x88c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OEN */
++			0x890 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OUT */
++			0x894 A_DELAY_PS(1919) G_DELAY_PS(0)	/* CFG_UART2_TXD_IN */
++			0x898 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OEN */
++			0x89c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OUT */
++		>;
++	};
++
++	/* Corresponds to MMC4_MANUAL1 in datamanual */
++	mmc4_iodelay_sdr12_hs_sdr25_rev20_conf: mmc4_iodelay_sdr12_hs_sdr25_rev20_conf {
++		pinctrl-pin-array = <
++			0x840 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_CTSN_IN */
++			0x848 A_DELAY_PS(1147) G_DELAY_PS(0)	/* CFG_UART1_CTSN_OUT */
++			0x84c A_DELAY_PS(1834) G_DELAY_PS(0)	/* CFG_UART1_RTSN_IN */
++			0x850 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OEN */
++			0x854 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART1_RTSN_OUT */
++			0x870 A_DELAY_PS(2165) G_DELAY_PS(0)	/* CFG_UART2_CTSN_IN */
++			0x874 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OEN */
++			0x878 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_CTSN_OUT */
++			0x87c A_DELAY_PS(1929) G_DELAY_PS(64)	/* CFG_UART2_RTSN_IN */
++			0x880 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OEN */
++			0x884 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RTSN_OUT */
++			0x888 A_DELAY_PS(1935) G_DELAY_PS(128)	/* CFG_UART2_RXD_IN */
++			0x88c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OEN */
++			0x890 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_RXD_OUT */
++			0x894 A_DELAY_PS(2172) G_DELAY_PS(44)	/* CFG_UART2_TXD_IN */
++			0x898 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OEN */
++			0x89c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_UART2_TXD_OUT */
 +		>;
 +	};
 +};
++
 -- 
 2.11.0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
