@@ -1,46 +1,44 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: renesas-sdhi: export renesas_sdhi_probe
-Date: Mon, 22 May 2017 15:33:08 +0200
-Message-ID: <20170522133339.798278-1-arnd@arndb.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: SD combo cards: do you have them? do you use them?
+Date: Mon, 22 May 2017 16:44:53 +0200
+Message-ID: <CACRpkdaHb3Yxp1-xc3W42hDH0x89kUXR4jCc2q2C3QY1mktq-Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:61342 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933201AbdEVNd6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 09:33:58 -0400
+Received: from mail-it0-f44.google.com ([209.85.214.44]:35019 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934376AbdEVOoy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 10:44:54 -0400
+Received: by mail-it0-f44.google.com with SMTP id c15so153178698ith.0
+        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 07:44:54 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
-Cc: Arnd Bergmann <arnd@arndb.de>, Chris Brandt <chris.brandt@renesas.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirq-linux@rere.qmqm.pl>
 
-We now build the sdhi driver in separate modules, which means we
-have to export the symbols that are called from another module:
+SD combo cards are cards that combine SD with an SDIO
+function, such as a memory card that also provides a WiFi
+interface.
 
-ERROR: "renesas_sdhi_remove" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
-ERROR: "renesas_sdhi_probe" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
+In my untrained view, these combo cards, just like stand-alone
+SDIO cards for WiFi, rose to fame between the years 2000
+and 2011 with the advent of Palm Pilots and iPAQ handhelds
+featuring a SD slot but no USB slot. It was thus the one
+standardized connector on the device and it could take one
+card only.
 
-Fixes: 94418768f765 ("mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/renesas_sdhi_core.c | 2 ++
- 1 file changed, 2 insertions(+)
+Support for SD combo card was added by Michal Miroslaw
+in 2010, and it was merged by Andrew Morton before Ulf
+took over as MMC/SD maintainer.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 846ee1a8e5a6..fa6c188e0327 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -638,6 +638,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- eprobe:
- 	return ret;
- }
-+EXPORT_SYMBOL_GPL(renesas_sdhi_probe);
- 
- int renesas_sdhi_remove(struct platform_device *pdev)
- {
-@@ -648,3 +649,4 @@ int renesas_sdhi_remove(struct platform_device *pdev)
- 
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
--- 
-2.9.0
+So: are people using these cards?
 
+I am NOT looking to delete the support for them. I am looking
+for use cases and getting the right hardware.
+
+What kind of hardware combining SD storage and SDIO with
+SD combo cards are just working with Linux? What are
+people using for this? What cards do I need to obtain to
+test things end-to-end with Linux without out-of-tree drivers?
+
+Yours,
+Linus Walleij
