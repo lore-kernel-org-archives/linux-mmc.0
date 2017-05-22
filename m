@@ -1,67 +1,33 @@
-From: Phil Elwell <phil@raspberrypi.org>
-Subject: [PATCH] mmc: spi: disable dma mapping code, as it does not work
-Date: Mon, 22 May 2017 10:09:23 +0100
-Message-ID: <c73b9ba9-1699-2aff-e2fd-b4b4f292a3ca@raspberrypi.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Martin Sperl <kernel@martin.sperl.org>, Heiner Kallweit <hkallweit1@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Jan Glauber <jglauber@cavium.com>
+Subject: [PATCH v2 0/3] mmc: cavium: bug fixes for 4.12
+Date: Mon, 22 May 2017 13:09:18 +0200
+Message-ID: <20170522110921.15395-1-jglauber@cavium.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36518 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753736AbdEVLJi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 07:09:38 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>
 
-since:
-	commit 0589342c27944e50ebd7a54f5215002b6598b748
-	Author: Rob Herring <rob.herring@calxeda.com>
-	Date:   Tue Oct 29 23:36:46 2013 -0500
+Changes to v1:
+- Fixed platform device leak, apply fix also to Octeon driver
+- Use mmc_regulator_get_supply
 
-	     of: set dma_mask to point to coherent_dma_mask
+Jan Glauber (3):
+  mmc: cavium: Prevent crash with incomplete DT
+  of/platform: Make of_platform_device_destroy globally visible
+  mmc: cavium: Fix probing race with regulator
 
-	     Platform devices created by DT code don't initialize dma_mask pointer to
-	     anything. Set it to coherent_dma_mask by default if the architecture
-	     code has not set it.
+ drivers/mmc/host/cavium-octeon.c   | 11 ++++++++++-
+ drivers/mmc/host/cavium-thunderx.c |  6 ++++++
+ drivers/mmc/host/cavium.c          | 25 ++++++++++---------------
+ drivers/of/platform.c              |  3 ++-
+ include/linux/of_platform.h        |  1 +
+ 5 files changed, 29 insertions(+), 17 deletions(-)
 
-the mmc-spi driver no longer detects the sd-cards any longer.
+-- 
+2.9.0.rc0.21.g7777322
 
-This patch disables the offending section in mmc_spi
-so that the driver works again and detects the sd card normally.
-
-There is no real negative impact as the spi-framework
-does no longer rely on driver-provided DMA mappings but
-maps the transfers transparently.
-
-Signed-off-by: Martin Sperl <kernel@martin.sperl.org>
-Submitted-by: Phil Elwell <phil@raspberrypi.org>
----
- drivers/mmc/host/mmc_spi.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
-
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index ae19d83bb9de0..16946e2513afa 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1387,6 +1387,16 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	if (!host->data)
- 		goto fail_nobuf1;
- 
-+	/* for some reason mmc_spi does not work with this enabled
-+	 * it is not needed anyway, as the SPI framework does DMA
-+	 * transfers now automatically
-+	 * the patch that introduced this was:
-+	 * commit 0589342c27944e50ebd7a54f5215002b6598b748
-+	 * Author: Rob Herring <rob.herring@calxeda.com>
-+	 * Date:   Tue Oct 29 23:36:46 2013 -0500
-+	 *      of: set dma_mask to point to coherent_dma_mask
-+	 */
-+#if 0
- 	if (spi->master->dev.parent->dma_mask) {
- 		struct device	*dev = spi->master->dev.parent;
- 
-@@ -1402,6 +1412,7 @@ static int mmc_spi_probe(struct spi_device *spi)
- 				host->data_dma, sizeof(*host->data),
- 				DMA_BIDIRECTIONAL);
- 	}
-+#endif
- 
- 	/* setup message for status/busy readback */
- 	spi_message_init(&host->readback);
