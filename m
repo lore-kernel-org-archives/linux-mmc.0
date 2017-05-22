@@ -1,67 +1,72 @@
 From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v2 2/3] of/platform: Make of_platform_device_destroy globally visible
-Date: Mon, 22 May 2017 13:09:20 +0200
-Message-ID: <20170522110921.15395-3-jglauber@cavium.com>
+Subject: [PATCH v2 3/3] mmc: cavium: Fix probing race with regulator
+Date: Mon, 22 May 2017 13:09:21 +0200
+Message-ID: <20170522110921.15395-4-jglauber@cavium.com>
 References: <20170522110921.15395-1-jglauber@cavium.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34508 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758163AbdEVLJk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 07:09:40 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170522110921.15395-1-jglauber@cavium.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>
+List-Id: linux-mmc@vger.kernel.org
 
-of_platform_device_destroy is the counterpart to
-of_platform_device_create which is a non-static function.
+If the regulator probing is not yet finished this driver
+might catch a -EPROBE_DEFER. Returning after this condition
+did not remove the created platform device. On a repeated
+call to the probe function the of_platform_device_create
+fails.
 
-After creating a platform device it might be neccessary
-to destroy it to deal with -EPROBE_DEFER where a
-repeated of_platform_device_create call would fail otherwise.
-
-Therefore also make of_platform_device_destroy globally visible.
+Calling of_platform_device_destroy after EPROBE_DEFER resolves
+this bug.
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 ---
- drivers/of/platform.c       | 3 ++-
- include/linux/of_platform.h | 1 +
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/cavium-octeon.c   | 11 ++++++++++-
+ drivers/mmc/host/cavium-thunderx.c |  6 ++++++
+ 2 files changed, 16 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/of/platform.c b/drivers/of/platform.c
-index 71fecc2..703a421 100644
---- a/drivers/of/platform.c
-+++ b/drivers/of/platform.c
-@@ -523,7 +523,7 @@ static int __init of_platform_default_populate_init(void)
- arch_initcall_sync(of_platform_default_populate_init);
- #endif
- 
--static int of_platform_device_destroy(struct device *dev, void *data)
-+int of_platform_device_destroy(struct device *dev, void *data)
- {
- 	/* Do not touch devices not populated from the device tree */
- 	if (!dev->of_node || !of_node_check_flag(dev->of_node, OF_POPULATED))
-@@ -544,6 +544,7 @@ static int of_platform_device_destroy(struct device *dev, void *data)
- 	of_node_clear_flag(dev->of_node, OF_POPULATED_BUS);
+diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
+index cbb5663..951d2cd 100644
+--- a/drivers/mmc/host/cavium-octeon.c
++++ b/drivers/mmc/host/cavium-octeon.c
+@@ -288,11 +288,20 @@ static int octeon_mmc_probe(struct platform_device *pdev)
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "Error populating slots\n");
+ 			octeon_mmc_set_shared_power(host, 0);
+-			return ret;
++			goto error;
+ 		}
+ 		i++;
+ 	}
  	return 0;
++
++error:
++	for (i = 0; i < CAVIUM_MAX_MMC; i++) {
++		if (host->slot[i])
++			cvm_mmc_of_slot_remove(host->slot[i]);
++		if (host->slot_pdev[i])
++			of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
++	}
++	return ret;
  }
-+EXPORT_SYMBOL_GPL(of_platform_device_destroy);
  
- /**
-  * of_platform_depopulate() - Remove devices populated from device tree
-diff --git a/include/linux/of_platform.h b/include/linux/of_platform.h
-index dc8224a..e0d1946 100644
---- a/include/linux/of_platform.h
-+++ b/include/linux/of_platform.h
-@@ -64,6 +64,7 @@ extern struct platform_device *of_platform_device_create(struct device_node *np,
- 						   const char *bus_id,
- 						   struct device *parent);
+ static int octeon_mmc_remove(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+index fe3d772..b9cc959 100644
+--- a/drivers/mmc/host/cavium-thunderx.c
++++ b/drivers/mmc/host/cavium-thunderx.c
+@@ -146,6 +146,12 @@ static int thunder_mmc_probe(struct pci_dev *pdev,
+ 	return 0;
  
-+extern int of_platform_device_destroy(struct device *dev, void *data);
- extern int of_platform_bus_probe(struct device_node *root,
- 				 const struct of_device_id *matches,
- 				 struct device *parent);
+ error:
++	for (i = 0; i < CAVIUM_MAX_MMC; i++) {
++		if (host->slot[i])
++			cvm_mmc_of_slot_remove(host->slot[i]);
++		if (host->slot_pdev[i])
++			of_platform_device_destroy(&host->slot_pdev[i]->dev, NULL);
++	}
+ 	clk_disable_unprepare(host->clk);
+ 	return ret;
+ }
 -- 
 2.9.0.rc0.21.g7777322
-
