@@ -1,103 +1,83 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6] More MMC block core refactorings
-Date: Mon, 22 May 2017 14:05:09 +0200
-Message-ID: <CAPDyKFrRXmxKZTngMYtWZCi3ZTuSgRFnnHnxQxB1aEzHdiyc+Q@mail.gmail.com>
-References: <20170519133732.27470-1-linus.walleij@linaro.org>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH 00/41] omap_hsmmc: Add ADMA support and UHS/HS200/DDR
+ support
+Date: Mon, 22 May 2017 17:50:44 +0530
+Message-ID: <d5bdc61e-abb0-7833-ea2f-a3cca4c4033e@ti.com>
+References: <20170519081541.26753-1-kishon@ti.com>
+ <20170519221344.GI10472@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:34319 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752590AbdEVMFK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 08:05:10 -0400
-Received: by mail-qk0-f172.google.com with SMTP id k74so103702538qke.1
-        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 05:05:10 -0700 (PDT)
-In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
+Received: from fllnx210.ext.ti.com ([198.47.19.17]:30931 "EHLO
+        fllnx210.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751938AbdEVMVk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 08:21:40 -0400
+In-Reply-To: <20170519221344.GI10472@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com
 
-On 19 May 2017 at 15:37, Linus Walleij <linus.walleij@linaro.org> wrote:
-> This series builds on top of the previous series that created
-> custom DRV_OP requests for ioctl() operations in MMC.
->
-> The first patch is a suggestion from Christoph, the second
-> builds infrastructure for issuing more, currently orthogonal
-> custom operations through the block layer.
->
-> The first operation we move over is pretty uncontroversial
-> and straight-forward: it is the operation that
-> write-protect-locks the boot partitions from sysfs. This
-> is now done through the block layer so we do not need
-> to congest and starve in the big MMC lock.
->
-> The last two patches are more contoversial: they move the
-> two debugfs accesses for reading card status and EXT CSD
-> over to using the block layer funnel *if* *present*.
->
-> So if the block layer is configured out, these will still
-> issue operations directly and take the big MMC lock.
->
-> The patch series is fully ABI safe: any scripts or code
-> using the debugfs with or without the block layer will
-> still work.
->
-> However this leaves the mmc_card_get() locks in the block.h
-> header for the !CONFIG_MMC_BLOCK case and I'm not really happy
-> to keep them around, the idea is to terminate them.
->
-> Ways forward after these patches:
->
-> - Simply remove the debugfs files for status and ext_csd if
->   the block layer is not there. The debugfs is not ABI after
->   all, and there is an ioctl() to do the same job, and
->   that is what mmc-utils is using.
->
-> - Simply remove the debugfs files for status and ext_csd
->   completely - and require users to switch to using the
->   ioctl() mmc-utils way of doing things if they want to
->   inspect their MMC/SD cards.
+Hi,
 
-I like this approach.
+On Saturday 20 May 2017 03:43 AM, Tony Lindgren wrote:
+> Hi,
+> 
+> * Kishon Vijay Abraham I <kishon@ti.com> [170519 01:19]:
+>> This series adds UHS, HS200, DDR mode and ADMA support to
+>> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
+>> SoCs.
+> 
+> Certainly seems way less intrusive than earlier before the
+> dmaengine changes :)
+> 
+>> *) tuning ratio of MMC in dra7 is different from sdhci
+> 
+> Hmm what's the tuning ratio?
 
-mmc-utils is also far better in parsing the results from ext csd and
-presents the output in a more human readable format.
+For high speed modes like UHS SDR104 and HS200, sampling clock has to adjusted
+according to the position of the data window and it varies depending on the
+host and the card.
+For this we configure the controller with phase delay from 0 to 0x7c (in steps
+of 4) and send the tuning command (CMD19 or CMD21) for which the card responds
+with a known pattern. We keep track of the phase delay's for which we received
+the known patterns (without errors) and select one of the phase delays (3/4th
+ratio from largest consecutive successful phase delay window).
 
-Moreover, people that needs to debug the behavior of a card should
-likely not have a problem with using mmc-utils.
+sdhci driver makes use of the HW feature for tuning (no manual setting of phase
+delays etc). Sdhci has an ops for platform specific tuning but that again has
+to be implemented in omap_hsmmc driver.
+> 
+>> This series has been tested on beagleboard, pandaboard, beaglebone-black,
+>> beaglebone, am335x-evm, am437x-evm, dra7xx-evm, dra72x-evm, am571x-idk
+>> and am572x-idk.
+> 
+> I gave this a quick try after manally applying next-20170519
+> after reverting 67d0687224a9 ("mm: drop HASH_ADAPT"). Looks like
+> something is missing as I got:
+> 
+> arch/arm/mach-omap2/pdata-quirks.c:445:23: error:
+> 'struct omap_hsmmc_platform_data' has no member named 'version'
+> ...
+> 
+> It's possible I messed up something while manually applying.
 
->
-> - Wait and see: when I get to removing the big MMC lock from
->   SDIO I will anyway have to deal with this mess since
->   the big lock is no more a block layer problem, but a
->   problem with the entire MMC/SD/SDIO stack.
->
-> In any case: these patches fixes the starvation of the
-> boot partition locking and the debugfs access when using
-> the block layer heavily at the same time.
->
-> Linus Walleij (6):
->   mmc: block: remove req back pointer
->   mmc: block: Tag DRV_OPs with a driver operation type
->   mmc: block: Move DRV OP issue function
->   mmc: block: Move boot partition locking into a driver op
->   mmc: debugfs: Move card status retrieveal into the block layer
->   mmc: debugfs: Move EXT CSD debugfs acces to block layer
->
->  drivers/mmc/core/block.c   | 168 ++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/core/block.h   |  49 +++++++++++++
->  drivers/mmc/core/debugfs.c |  19 +----
->  drivers/mmc/core/queue.c   |  13 ++--
->  drivers/mmc/core/queue.h   |  27 +++++++-
->  5 files changed, 200 insertions(+), 76 deletions(-)
->
-> --
-> 2.9.3
->
+[PATCH 13/41] mmc: host: omap_hsmmc: Add support to set IODELAY values adds
+version member to 'struct omap_hsmmc_platform_data'.
+> 
+>> I can split the series to go into Ulf Hansson's tree and Tony's tree 
+>> separately if that is required.
+> 
+> Yes please. Maybe send the dts parts first that are ready to
+> get merged, like the fixes and all the iodelay configuration.
+> 
+> Then the mmc driver changes as a separate set.
+> 
+> Then third set to follow-up and enable things once the mmc
+> driver changes are merged.
 
-I decided to pick patch 1->4 at this stage as those looks nice and
-clean. The rest will need a re-spin.
+Sure.
 
-Thanks and kind regards
-Uffe
+Thanks
+Kishon
