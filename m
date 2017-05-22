@@ -1,31 +1,32 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Check the return value from clk_prepare_enable()
-Date: Mon, 22 May 2017 10:21:00 -0300
-Message-ID: <CAOMZO5BA05dqc6uoGFJAoi3vvRjTBaiEC3yzSzRWyfa7-yhh=g@mail.gmail.com>
-References: <1493409604-24716-1-git-send-email-festevam@gmail.com>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH v2 2/3] of/platform: Make of_platform_device_destroy
+ globally visible
+Date: Mon, 22 May 2017 08:30:58 -0500
+Message-ID: <CAL_JsqK=Ss43c-3886pFc3HcbNtOT_15GvmoYOLEZ-M7PW3C8A@mail.gmail.com>
+References: <20170522110921.15395-1-jglauber@cavium.com> <20170522110921.15395-3-jglauber@cavium.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:33009 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758040AbdEVNVB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 09:21:01 -0400
-Received: by mail-oi0-f67.google.com with SMTP id h4so22643794oib.0
-        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 06:21:01 -0700 (PDT)
-In-Reply-To: <1493409604-24716-1-git-send-email-festevam@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170522110921.15395-3-jglauber@cavium.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jan Glauber <jglauber@cavium.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <dongas86@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>
 
-Hi Ulf,
-
-On Fri, Apr 28, 2017 at 5:00 PM, Fabio Estevam <festevam@gmail.com> wrote:
-> From: Fabio Estevam <fabio.estevam@nxp.com>
+On Mon, May 22, 2017 at 6:09 AM, Jan Glauber <jglauber@cavium.com> wrote:
+> of_platform_device_destroy is the counterpart to
+> of_platform_device_create which is a non-static function.
 >
-> clk_prepare_enable() may fail, so we should better check its return value
-> and propagate it in the case of error.
+> After creating a platform device it might be neccessary
+> to destroy it to deal with -EPROBE_DEFER where a
+> repeated of_platform_device_create call would fail otherwise.
 >
-> Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
+> Therefore also make of_platform_device_destroy globally visible.
+>
+> Signed-off-by: Jan Glauber <jglauber@cavium.com>
+> ---
+>  drivers/of/platform.c       | 3 ++-
+>  include/linux/of_platform.h | 1 +
+>  2 files changed, 3 insertions(+), 1 deletion(-)
 
-A gentle ping.
+Acked-by: Rob Herring <robh@kernel.org>
