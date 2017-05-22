@@ -1,77 +1,47 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2 0/6] mmc: renesas-sdhi: refactor DMA support
-Date: Mon, 22 May 2017 13:50:18 +0200
-Message-ID: <20170522115017.GI16822@verge.net.au>
-References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
- <20170518201436.umh3d22rf25cqh2b@ninjato>
- <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
+From: Srinath Mannam <srinath.mannam@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci-iproc: suppress spurious interrupt with
+ Multiblock read
+Date: Mon, 22 May 2017 17:22:55 +0530
+Message-ID: <CABe79T5hKmn49cKEy-KdMQ-S5HMFuhextddV=D_YY+6_QwEPUQ@mail.gmail.com>
+References: <1495126660-25044-1-git-send-email-srinath.mannam@broadcom.com> <58554ec9-1544-318a-e912-3c5f6ee40e90@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa@the-dreams.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:36785 "EHLO
+        mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757470AbdEVLw4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 07:52:56 -0400
+Received: by mail-oi0-f43.google.com with SMTP id h4so157600081oib.3
+        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 04:52:56 -0700 (PDT)
+In-Reply-To: <58554ec9-1544-318a-e912-3c5f6ee40e90@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-On Fri, May 19, 2017 at 10:30:07AM +0200, Ulf Hansson wrote:
-> On 18 May 2017 at 22:14, Wolfram Sang <wsa@the-dreams.de> wrote:
-> > On Wed, May 10, 2017 at 11:25:24AM +0200, Simon Horman wrote:
-> >> Hi Wolfram, Hi Ulf, Hi Arnd, Hi all,
-> >>
-> >> the intention of this patch-set is to refactor the DMA support in
-> >> the Renesas SDHI driver in order to make it easier to add support
-> >> for using the SDHI hardware with different DMA implementations.
-> >>
-> >> This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
-> >> renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
-> >> the reworking of the driver proposed by Arnd[1] in his review of that
-> >> patch-set.
-> >>
-> >> [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
-> >>
-> >> Unlike that patch-set this patch-set does not add support for
-> >> R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
-> >>
-> >> Changes between RFC and v2:
-> >>
-> >> * Drop filenames from comment at top of source
-> >> * Consistently check for if (host->dma_ops) before using dma_ops.
-> >>
-> >>
-> >> Simon Horman (6):
-> >>   mmc: tmio: drop filenames from comment at top of source
-> >>   mmc: renesas-sdhi, tmio: make dma more modular
-> >>   mmc: tmio: rename tmio_mmc_{pio => core}.c
-> >>   mmc: renesas-sdhi: rename tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c
-> >>   mmc: renesas-sdhi: rename sh_mobile_sdhi.c => renesas_sdhi_core.c
-> >>   mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
-> >
-> > Thanks Simon for this series! The file layout looks in deed much better
-> > now. And some light testing on my Lager didn't show any regressions. I
-> > have only minor comments which do not have anything to do with the code,
-> > so already here:
-> >
-> > Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> >
-> > The comments:
-> >
-> > * MAINTAINERS file needs updating because of the new filenames
-> > * I'd prefer the _GPL variant of EXPORT_SYMBOL unless we have a reason
-> >   to not use it?
-> > * maybe this is also a good time to update the Renesas copyrights in
-> >   file headers?
-> > * checkpatch reports some whitespace errors on patch 6. I assume they
-> >   were already there in the code you moved around. Still, it might be
-> >   a nice occasion to fix those?
-> >
-> > Thanks again, nice work!
-> >
-> >    Wolfram
-> >
-> 
-> I have applied this for next, assuming Simon addresses Wolfram's
-> comments on top.
+On Fri, May 19, 2017 at 11:55 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 18/05/17 19:57, Srinath Mannam wrote:
+>> The stingray SDHCI hardware supports ACMD12 and automatically
+>> issues after multi block transfer completed.
+>>
+>> If ACMD12 in SDHCI is disabled, spurious tx done interrupts are seen
+>> on multi block read command with below error message:
+>>
+>> Got data interrupt 0x00000002 even though no data
+>> operation was in progress.
+>>
+>> This patch uses SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 to enable
+>> ACM12 support in SDHCI hardware and suppress spurious interrupt.
+>>
+>> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
+>> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
+>> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks a lot! I will follow-up on Wolfram's comments.
+Thanks Adrian...
+
+Will it be possible to take this for Linux-4.12??
+
+Regards,
+Srinath
