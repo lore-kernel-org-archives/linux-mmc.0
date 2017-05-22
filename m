@@ -1,59 +1,46 @@
-From: Srinath Mannam <srinath.mannam@broadcom.com>
-Subject: Re: [PATCH] mmc: sdhci-iproc: suppress spurious interrupt with
- Multiblock read
-Date: Mon, 22 May 2017 19:03:17 +0530
-Message-ID: <CABe79T4_r0Was5AwFgrnkbazxe4txe9bU73L+rFJTZCC5o=u3g@mail.gmail.com>
-References: <1495126660-25044-1-git-send-email-srinath.mannam@broadcom.com>
- <58554ec9-1544-318a-e912-3c5f6ee40e90@intel.com> <CABe79T5hKmn49cKEy-KdMQ-S5HMFuhextddV=D_YY+6_QwEPUQ@mail.gmail.com>
- <CAPDyKFrDZXHqrb-GcXrgvCMaUAhpOXDd-OdPyRw1Qq54cSxZDg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrDZXHqrb-GcXrgvCMaUAhpOXDd-OdPyRw1Qq54cSxZDg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>, BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: renesas-sdhi: export renesas_sdhi_probe
+Date: Mon, 22 May 2017 15:33:08 +0200
+Message-ID: <20170522133339.798278-1-arnd@arndb.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.187]:61342 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933201AbdEVNd6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 09:33:58 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>
+Cc: Arnd Bergmann <arnd@arndb.de>, Chris Brandt <chris.brandt@renesas.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, May 22, 2017 at 5:31 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 22 May 2017 at 13:52, Srinath Mannam <srinath.mannam@broadcom.com> wrote:
->> On Fri, May 19, 2017 at 11:55 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 18/05/17 19:57, Srinath Mannam wrote:
->>>> The stingray SDHCI hardware supports ACMD12 and automatically
->>>> issues after multi block transfer completed.
->>>>
->>>> If ACMD12 in SDHCI is disabled, spurious tx done interrupts are seen
->>>> on multi block read command with below error message:
->>>>
->>>> Got data interrupt 0x00000002 even though no data
->>>> operation was in progress.
->>>>
->>>> This patch uses SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 to enable
->>>> ACM12 support in SDHCI hardware and suppress spurious interrupt.
->>>>
->>>> Signed-off-by: Srinath Mannam <srinath.mannam@broadcom.com>
->>>> Reviewed-by: Ray Jui <ray.jui@broadcom.com>
->>>> Reviewed-by: Scott Branden <scott.branden@broadcom.com>
->>>
->>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> Thanks Adrian...
->>
->> Will it be possible to take this for Linux-4.12??
->
-> It's queued for 4.13, however are you saying it's a regression for
-> 4.12? Then what commit fixes it?
->
-> Perhaps you even want this to go stable?
->
-> Kind regards
-> Uffe
+We now build the sdhi driver in separate modules, which means we
+have to export the symbols that are called from another module:
 
-Yes, this is regression for 4.12.
-Fixes: b580c52d58d9 ("mmc: sdhci-iproc: add IPROC SDHCI driver")
-Yes we want this to go in stable.
+ERROR: "renesas_sdhi_remove" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
+ERROR: "renesas_sdhi_probe" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
 
-Thank you.
+Fixes: 94418768f765 ("mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Regards,
-Srinath.
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 846ee1a8e5a6..fa6c188e0327 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -638,6 +638,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ eprobe:
+ 	return ret;
+ }
++EXPORT_SYMBOL_GPL(renesas_sdhi_probe);
+ 
+ int renesas_sdhi_remove(struct platform_device *pdev)
+ {
+@@ -648,3 +649,4 @@ int renesas_sdhi_remove(struct platform_device *pdev)
+ 
+ 	return 0;
+ }
++EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
+-- 
+2.9.0
+
