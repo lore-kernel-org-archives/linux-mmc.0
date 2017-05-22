@@ -1,83 +1,92 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 00/41] omap_hsmmc: Add ADMA support and UHS/HS200/DDR
- support
-Date: Mon, 22 May 2017 17:50:44 +0530
-Message-ID: <d5bdc61e-abb0-7833-ea2f-a3cca4c4033e@ti.com>
-References: <20170519081541.26753-1-kishon@ti.com>
- <20170519221344.GI10472@atomide.com>
+From: Avri Altman <Avri.Altman@sandisk.com>
+Subject: RE: [PATCH 0/6] More MMC block core refactorings
+Date: Mon, 22 May 2017 12:44:14 +0000
+Message-ID: <BY2PR0401MB09012CAF1776FF4D3496558CE5F80@BY2PR0401MB0901.namprd04.prod.outlook.com>
+References: <20170519133732.27470-1-linus.walleij@linaro.org>
+ <CAPDyKFrRXmxKZTngMYtWZCi3ZTuSgRFnnHnxQxB1aEzHdiyc+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fllnx210.ext.ti.com ([198.47.19.17]:30931 "EHLO
-        fllnx210.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751938AbdEVMVk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 08:21:40 -0400
-In-Reply-To: <20170519221344.GI10472@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrRXmxKZTngMYtWZCi3ZTuSgRFnnHnxQxB1aEzHdiyc+Q@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com
 
-Hi,
-
-On Saturday 20 May 2017 03:43 AM, Tony Lindgren wrote:
-> Hi,
-> 
-> * Kishon Vijay Abraham I <kishon@ti.com> [170519 01:19]:
->> This series adds UHS, HS200, DDR mode and ADMA support to
->> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
->> SoCs.
-> 
-> Certainly seems way less intrusive than earlier before the
-> dmaengine changes :)
-> 
->> *) tuning ratio of MMC in dra7 is different from sdhci
-> 
-> Hmm what's the tuning ratio?
-
-For high speed modes like UHS SDR104 and HS200, sampling clock has to adjusted
-according to the position of the data window and it varies depending on the
-host and the card.
-For this we configure the controller with phase delay from 0 to 0x7c (in steps
-of 4) and send the tuning command (CMD19 or CMD21) for which the card responds
-with a known pattern. We keep track of the phase delay's for which we received
-the known patterns (without errors) and select one of the phase delays (3/4th
-ratio from largest consecutive successful phase delay window).
-
-sdhci driver makes use of the HW feature for tuning (no manual setting of phase
-delays etc). Sdhci has an ops for platform specific tuning but that again has
-to be implemented in omap_hsmmc driver.
-> 
->> This series has been tested on beagleboard, pandaboard, beaglebone-black,
->> beaglebone, am335x-evm, am437x-evm, dra7xx-evm, dra72x-evm, am571x-idk
->> and am572x-idk.
-> 
-> I gave this a quick try after manally applying next-20170519
-> after reverting 67d0687224a9 ("mm: drop HASH_ADAPT"). Looks like
-> something is missing as I got:
-> 
-> arch/arm/mach-omap2/pdata-quirks.c:445:23: error:
-> 'struct omap_hsmmc_platform_data' has no member named 'version'
-> ...
-> 
-> It's possible I messed up something while manually applying.
-
-[PATCH 13/41] mmc: host: omap_hsmmc: Add support to set IODELAY values adds
-version member to 'struct omap_hsmmc_platform_data'.
-> 
->> I can split the series to go into Ulf Hansson's tree and Tony's tree 
->> separately if that is required.
-> 
-> Yes please. Maybe send the dts parts first that are ready to
-> get merged, like the fixes and all the iodelay configuration.
-> 
-> Then the mmc driver changes as a separate set.
-> 
-> Then third set to follow-up and enable things once the mmc
-> driver changes are merged.
-
-Sure.
-
-Thanks
-Kishon
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIE1heSAyMiwgMjAx
+NyAzOjA1IFBNDQo+IFRvOiBMaW51cyBXYWxsZWlqIDxsaW51cy53YWxsZWlqQGxpbmFyby5vcmc+
+DQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBBZHJpYW4gSHVudGVyIDxhZHJpYW4u
+aHVudGVyQGludGVsLmNvbT47DQo+IGxpbnV4LWJsb2NrQHZnZXIua2VybmVsLm9yZzsgSmVucyBB
+eGJvZSA8YXhib2VAa2VybmVsLmRrPjsgQ2hyaXN0b3BoDQo+IEhlbGx3aWcgPGhjaEBsc3QuZGU+
+OyBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPjsgQmFydGxvbWllag0KPiBab2xuaWVya2ll
+d2ljeiA8Yi56b2xuaWVya2llQHNhbXN1bmcuY29tPjsgUGFvbG8gVmFsZW50ZQ0KPiA8cGFvbG8u
+dmFsZW50ZUBsaW5hcm8ub3JnPjsgQXZyaSBBbHRtYW4gPEF2cmkuQWx0bWFuQHNhbmRpc2suY29t
+Pg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDAvNl0gTW9yZSBNTUMgYmxvY2sgY29yZSByZWZhY3Rv
+cmluZ3MNCj4gDQo+IE9uIDE5IE1heSAyMDE3IGF0IDE1OjM3LCBMaW51cyBXYWxsZWlqIDxsaW51
+cy53YWxsZWlqQGxpbmFyby5vcmc+IHdyb3RlOg0KPiA+IFRoaXMgc2VyaWVzIGJ1aWxkcyBvbiB0
+b3Agb2YgdGhlIHByZXZpb3VzIHNlcmllcyB0aGF0IGNyZWF0ZWQgY3VzdG9tDQo+ID4gRFJWX09Q
+IHJlcXVlc3RzIGZvciBpb2N0bCgpIG9wZXJhdGlvbnMgaW4gTU1DLg0KPiA+DQo+ID4gVGhlIGZp
+cnN0IHBhdGNoIGlzIGEgc3VnZ2VzdGlvbiBmcm9tIENocmlzdG9waCwgdGhlIHNlY29uZCBidWls
+ZHMNCj4gPiBpbmZyYXN0cnVjdHVyZSBmb3IgaXNzdWluZyBtb3JlLCBjdXJyZW50bHkgb3J0aG9n
+b25hbCBjdXN0b20NCj4gPiBvcGVyYXRpb25zIHRocm91Z2ggdGhlIGJsb2NrIGxheWVyLg0KPiA+
+DQo+ID4gVGhlIGZpcnN0IG9wZXJhdGlvbiB3ZSBtb3ZlIG92ZXIgaXMgcHJldHR5IHVuY29udHJv
+dmVyc2lhbCBhbmQNCj4gPiBzdHJhaWdodC1mb3J3YXJkOiBpdCBpcyB0aGUgb3BlcmF0aW9uIHRo
+YXQgd3JpdGUtcHJvdGVjdC1sb2NrcyB0aGUNCj4gPiBib290IHBhcnRpdGlvbnMgZnJvbSBzeXNm
+cy4gVGhpcyBpcyBub3cgZG9uZSB0aHJvdWdoIHRoZSBibG9jayBsYXllcg0KPiA+IHNvIHdlIGRv
+IG5vdCBuZWVkIHRvIGNvbmdlc3QgYW5kIHN0YXJ2ZSBpbiB0aGUgYmlnIE1NQyBsb2NrLg0KPiA+
+DQo+ID4gVGhlIGxhc3QgdHdvIHBhdGNoZXMgYXJlIG1vcmUgY29udG92ZXJzaWFsOiB0aGV5IG1v
+dmUgdGhlIHR3byBkZWJ1Z2ZzDQo+ID4gYWNjZXNzZXMgZm9yIHJlYWRpbmcgY2FyZCBzdGF0dXMg
+YW5kIEVYVCBDU0Qgb3ZlciB0byB1c2luZyB0aGUgYmxvY2sNCj4gPiBsYXllciBmdW5uZWwgKmlm
+KiAqcHJlc2VudCouDQo+ID4NCj4gPiBTbyBpZiB0aGUgYmxvY2sgbGF5ZXIgaXMgY29uZmlndXJl
+ZCBvdXQsIHRoZXNlIHdpbGwgc3RpbGwgaXNzdWUNCj4gPiBvcGVyYXRpb25zIGRpcmVjdGx5IGFu
+ZCB0YWtlIHRoZSBiaWcgTU1DIGxvY2suDQo+ID4NCj4gPiBUaGUgcGF0Y2ggc2VyaWVzIGlzIGZ1
+bGx5IEFCSSBzYWZlOiBhbnkgc2NyaXB0cyBvciBjb2RlIHVzaW5nIHRoZQ0KPiA+IGRlYnVnZnMg
+d2l0aCBvciB3aXRob3V0IHRoZSBibG9jayBsYXllciB3aWxsIHN0aWxsIHdvcmsuDQo+ID4NCj4g
+PiBIb3dldmVyIHRoaXMgbGVhdmVzIHRoZSBtbWNfY2FyZF9nZXQoKSBsb2NrcyBpbiB0aGUgYmxv
+Y2suaCBoZWFkZXIgZm9yDQo+ID4gdGhlICFDT05GSUdfTU1DX0JMT0NLIGNhc2UgYW5kIEknbSBu
+b3QgcmVhbGx5IGhhcHB5IHRvIGtlZXAgdGhlbQ0KPiA+IGFyb3VuZCwgdGhlIGlkZWEgaXMgdG8g
+dGVybWluYXRlIHRoZW0uDQo+ID4NCj4gPiBXYXlzIGZvcndhcmQgYWZ0ZXIgdGhlc2UgcGF0Y2hl
+czoNCj4gPg0KPiA+IC0gU2ltcGx5IHJlbW92ZSB0aGUgZGVidWdmcyBmaWxlcyBmb3Igc3RhdHVz
+IGFuZCBleHRfY3NkIGlmDQo+ID4gICB0aGUgYmxvY2sgbGF5ZXIgaXMgbm90IHRoZXJlLiBUaGUg
+ZGVidWdmcyBpcyBub3QgQUJJIGFmdGVyDQo+ID4gICBhbGwsIGFuZCB0aGVyZSBpcyBhbiBpb2N0
+bCgpIHRvIGRvIHRoZSBzYW1lIGpvYiwgYW5kDQo+ID4gICB0aGF0IGlzIHdoYXQgbW1jLXV0aWxz
+IGlzIHVzaW5nLg0KPiA+DQo+ID4gLSBTaW1wbHkgcmVtb3ZlIHRoZSBkZWJ1Z2ZzIGZpbGVzIGZv
+ciBzdGF0dXMgYW5kIGV4dF9jc2QNCj4gPiAgIGNvbXBsZXRlbHkgLSBhbmQgcmVxdWlyZSB1c2Vy
+cyB0byBzd2l0Y2ggdG8gdXNpbmcgdGhlDQo+ID4gICBpb2N0bCgpIG1tYy11dGlscyB3YXkgb2Yg
+ZG9pbmcgdGhpbmdzIGlmIHRoZXkgd2FudCB0bw0KPiA+ICAgaW5zcGVjdCB0aGVpciBNTUMvU0Qg
+Y2FyZHMuDQo+IA0KPiBJIGxpa2UgdGhpcyBhcHByb2FjaC4NCj4gDQo+IG1tYy11dGlscyBpcyBh
+bHNvIGZhciBiZXR0ZXIgaW4gcGFyc2luZyB0aGUgcmVzdWx0cyBmcm9tIGV4dCBjc2QgYW5kIHBy
+ZXNlbnRzDQo+IHRoZSBvdXRwdXQgaW4gYSBtb3JlIGh1bWFuIHJlYWRhYmxlIGZvcm1hdC4NCj4g
+DQo+IE1vcmVvdmVyLCBwZW9wbGUgdGhhdCBuZWVkcyB0byBkZWJ1ZyB0aGUgYmVoYXZpb3Igb2Yg
+YSBjYXJkIHNob3VsZCBsaWtlbHkNCj4gbm90IGhhdmUgYSBwcm9ibGVtIHdpdGggdXNpbmcgbW1j
+LXV0aWxzLg0KDQpUaG9zZSBkZWJ1Z2ZzIGVudHJpZXMgYXJlIHRoZXJlIGZvciBhZ2VzLCBhbmQg
+dGhlcmUgYXJlIHNvbWUgdXNlci1zcGFjZSB1dGlsaXRpZXMsDQogZS5nLiBmb3IgYmVuY2htYXJr
+aW5nIGV0Yy4gdGhhdCBjb3VudCBvbiBpdCBiZWluZyB0aGVyZSwgDQogYXMgdGhlIGtleSBpZGVu
+dGlmaWNhdGlvbiBjcml0ZXJpYSBpZiBhIG1tYyBkZXZpY2UgaXMgcHJlc2VudC4NCg0KDQo+IA0K
+PiA+DQo+ID4gLSBXYWl0IGFuZCBzZWU6IHdoZW4gSSBnZXQgdG8gcmVtb3ZpbmcgdGhlIGJpZyBN
+TUMgbG9jayBmcm9tDQo+ID4gICBTRElPIEkgd2lsbCBhbnl3YXkgaGF2ZSB0byBkZWFsIHdpdGgg
+dGhpcyBtZXNzIHNpbmNlDQo+ID4gICB0aGUgYmlnIGxvY2sgaXMgbm8gbW9yZSBhIGJsb2NrIGxh
+eWVyIHByb2JsZW0sIGJ1dCBhDQo+ID4gICBwcm9ibGVtIHdpdGggdGhlIGVudGlyZSBNTUMvU0Qv
+U0RJTyBzdGFjay4NCj4gPg0KPiA+IEluIGFueSBjYXNlOiB0aGVzZSBwYXRjaGVzIGZpeGVzIHRo
+ZSBzdGFydmF0aW9uIG9mIHRoZSBib290IHBhcnRpdGlvbg0KPiA+IGxvY2tpbmcgYW5kIHRoZSBk
+ZWJ1Z2ZzIGFjY2VzcyB3aGVuIHVzaW5nIHRoZSBibG9jayBsYXllciBoZWF2aWx5IGF0DQo+ID4g
+dGhlIHNhbWUgdGltZS4NCj4gPg0KPiA+IExpbnVzIFdhbGxlaWogKDYpOg0KPiA+ICAgbW1jOiBi
+bG9jazogcmVtb3ZlIHJlcSBiYWNrIHBvaW50ZXINCj4gPiAgIG1tYzogYmxvY2s6IFRhZyBEUlZf
+T1BzIHdpdGggYSBkcml2ZXIgb3BlcmF0aW9uIHR5cGUNCj4gPiAgIG1tYzogYmxvY2s6IE1vdmUg
+RFJWIE9QIGlzc3VlIGZ1bmN0aW9uDQo+ID4gICBtbWM6IGJsb2NrOiBNb3ZlIGJvb3QgcGFydGl0
+aW9uIGxvY2tpbmcgaW50byBhIGRyaXZlciBvcA0KPiA+ICAgbW1jOiBkZWJ1Z2ZzOiBNb3ZlIGNh
+cmQgc3RhdHVzIHJldHJpZXZlYWwgaW50byB0aGUgYmxvY2sgbGF5ZXINCj4gPiAgIG1tYzogZGVi
+dWdmczogTW92ZSBFWFQgQ1NEIGRlYnVnZnMgYWNjZXMgdG8gYmxvY2sgbGF5ZXINCj4gPg0KPiA+
+ICBkcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMgICB8IDE2OA0KPiArKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9ibG9jay5o
+ICAgfCAgNDkgKysrKysrKysrKysrKw0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL2RlYnVnZnMuYyB8
+ICAxOSArLS0tLQ0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL3F1ZXVlLmMgICB8ICAxMyArKy0tDQo+
+ID4gIGRyaXZlcnMvbW1jL2NvcmUvcXVldWUuaCAgIHwgIDI3ICsrKysrKystDQo+ID4gIDUgZmls
+ZXMgY2hhbmdlZCwgMjAwIGluc2VydGlvbnMoKyksIDc2IGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4g
+LS0NCj4gPiAyLjkuMw0KPiA+DQo+IA0KPiBJIGRlY2lkZWQgdG8gcGljayBwYXRjaCAxLT40IGF0
+IHRoaXMgc3RhZ2UgYXMgdGhvc2UgbG9va3MgbmljZSBhbmQgY2xlYW4uIFRoZQ0KPiByZXN0IHdp
+bGwgbmVlZCBhIHJlLXNwaW4uDQo+IA0KPiBUaGFua3MgYW5kIGtpbmQgcmVnYXJkcw0KPiBVZmZl
+DQo=
