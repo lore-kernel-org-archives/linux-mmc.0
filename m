@@ -1,53 +1,39 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: renesas-sdhi: export renesas_sdhi_probe
-Date: Mon, 22 May 2017 17:51:57 +0200
-Message-ID: <CAPDyKFoCVyL1D9yUgOXO1ETMTEYdFER7WLdixiRedtXs_7238g@mail.gmail.com>
-References: <20170522133339.798278-1-arnd@arndb.de>
+Subject: Re: [PATCH v2 0/3] mmc: cavium: bug fixes for 4.12
+Date: Mon, 22 May 2017 18:04:11 +0200
+Message-ID: <CAPDyKFpdDyv6fKVKCAY-NQ0sbA0f_iGEdGWySq6Um_4HY6_jqw@mail.gmail.com>
+References: <20170522110921.15395-1-jglauber@cavium.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170522133339.798278-1-arnd@arndb.de>
+In-Reply-To: <20170522110921.15395-1-jglauber@cavium.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, Chris Brandt <chris.brandt@renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Jan Glauber <jglauber@cavium.com>
+Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 May 2017 at 15:33, Arnd Bergmann <arnd@arndb.de> wrote:
-> We now build the sdhi driver in separate modules, which means we
-> have to export the symbols that are called from another module:
+On 22 May 2017 at 13:09, Jan Glauber <jglauber@cavium.com> wrote:
+> Changes to v1:
+> - Fixed platform device leak, apply fix also to Octeon driver
+> - Use mmc_regulator_get_supply
 >
-> ERROR: "renesas_sdhi_remove" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
-> ERROR: "renesas_sdhi_probe" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
+> Jan Glauber (3):
+>   mmc: cavium: Prevent crash with incomplete DT
+>   of/platform: Make of_platform_device_destroy globally visible
+>   mmc: cavium: Fix probing race with regulator
 >
-> Fixes: 94418768f765 ("mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+>  drivers/mmc/host/cavium-octeon.c   | 11 ++++++++++-
+>  drivers/mmc/host/cavium-thunderx.c |  6 ++++++
+>  drivers/mmc/host/cavium.c          | 25 ++++++++++---------------
+>  drivers/of/platform.c              |  3 ++-
+>  include/linux/of_platform.h        |  1 +
+>  5 files changed, 29 insertions(+), 17 deletions(-)
+>
+> --
+> 2.9.0.rc0.21.g7777322
+>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/renesas_sdhi_core.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 846ee1a8e5a6..fa6c188e0327 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -638,6 +638,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->  eprobe:
->         return ret;
->  }
-> +EXPORT_SYMBOL_GPL(renesas_sdhi_probe);
->
->  int renesas_sdhi_remove(struct platform_device *pdev)
->  {
-> @@ -648,3 +649,4 @@ int renesas_sdhi_remove(struct platform_device *pdev)
->
->         return 0;
->  }
-> +EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
-> --
-> 2.9.0
->
