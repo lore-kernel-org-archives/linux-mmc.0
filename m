@@ -1,118 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Delete an error message for a failed memory
- allocation in four functions
-Date: Mon, 22 May 2017 14:03:13 +0200
-Message-ID: <CAPDyKFpWXvUenCr3ki3qc80MH3hBKhEgwiu9RMNuqtU-WThJ3w@mail.gmail.com>
-References: <b0978766-199a-942e-43d8-58d2a8a17e1a@users.sourceforge.net>
- <CAPDyKFqhNQdfr19195YfL7f4Jh0u6pGZ9QtSff0C6fe6R9wdjw@mail.gmail.com>
- <50f3c642-b866-27f3-1201-5490225116f4@users.sourceforge.net>
- <CAPDyKFraTYQWAqSNdZG_bRpbDiLFw4nigVzC1nkmrfnr2aw2og@mail.gmail.com> <0ce8f8ac-d340-3f15-a698-ddfa449508e1@users.sourceforge.net>
+Subject: Re: [PATCH 0/6] More MMC block core refactorings
+Date: Mon, 22 May 2017 14:05:09 +0200
+Message-ID: <CAPDyKFrRXmxKZTngMYtWZCi3ZTuSgRFnnHnxQxB1aEzHdiyc+Q@mail.gmail.com>
+References: <20170519133732.27470-1-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:35432 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932919AbdEVMDP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 08:03:15 -0400
-Received: by mail-qt0-f180.google.com with SMTP id v27so99342654qtg.2
-        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 05:03:14 -0700 (PDT)
-In-Reply-To: <0ce8f8ac-d340-3f15-a698-ddfa449508e1@users.sourceforge.net>
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:34319 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752590AbdEVMFK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 08:05:10 -0400
+Received: by mail-qk0-f172.google.com with SMTP id k74so103702538qke.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2017 05:05:10 -0700 (PDT)
+In-Reply-To: <20170519133732.27470-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bojan Prtvar <prtvar.b@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Paul Burton <paul.burton@imgtec.com>, Shawn Lin <shawn.lin@rock-chips.com>, Tomas Winkler <tomas.winkler@intel.com>, Uri Yanai <uri.yanai@sandisk.com>, Wolfram Sang <wsa@the-dreams.de>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 
-On 19 May 2017 at 13:34, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Fri, 19 May 2017 13:15:27 +0200
+On 19 May 2017 at 15:37, Linus Walleij <linus.walleij@linaro.org> wrote:
+> This series builds on top of the previous series that created
+> custom DRV_OP requests for ioctl() operations in MMC.
 >
-> Omit an extra message for a memory allocation failure in these functions.
+> The first patch is a suggestion from Christoph, the second
+> builds infrastructure for issuing more, currently orthogonal
+> custom operations through the block layer.
 >
-> This issue was detected by using the Coccinelle software.
+> The first operation we move over is pretty uncontroversial
+> and straight-forward: it is the operation that
+> write-protect-locks the boot partitions from sysfs. This
+> is now done through the block layer so we do not need
+> to congest and starve in the big MMC lock.
 >
-> Link: http://events.linuxfoundation.org/sites/events/files/slides/LCJ16-Refactor_Strings-WSang_0.pdf
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> The last two patches are more contoversial: they move the
+> two debugfs accesses for reading card status and EXT CSD
+> over to using the block layer funnel *if* *present*.
+>
+> So if the block layer is configured out, these will still
+> issue operations directly and take the big MMC lock.
+>
+> The patch series is fully ABI safe: any scripts or code
+> using the debugfs with or without the block layer will
+> still work.
+>
+> However this leaves the mmc_card_get() locks in the block.h
+> header for the !CONFIG_MMC_BLOCK case and I'm not really happy
+> to keep them around, the idea is to terminate them.
+>
+> Ways forward after these patches:
+>
+> - Simply remove the debugfs files for status and ext_csd if
+>   the block layer is not there. The debugfs is not ABI after
+>   all, and there is an ioctl() to do the same job, and
+>   that is what mmc-utils is using.
+>
+> - Simply remove the debugfs files for status and ext_csd
+>   completely - and require users to switch to using the
+>   ioctl() mmc-utils way of doing things if they want to
+>   inspect their MMC/SD cards.
 
-Thanks, applied for next!
+I like this approach.
 
-Kind regards
+mmc-utils is also far better in parsing the results from ext csd and
+presents the output in a more human readable format.
+
+Moreover, people that needs to debug the behavior of a card should
+likely not have a problem with using mmc-utils.
+
+>
+> - Wait and see: when I get to removing the big MMC lock from
+>   SDIO I will anyway have to deal with this mess since
+>   the big lock is no more a block layer problem, but a
+>   problem with the entire MMC/SD/SDIO stack.
+>
+> In any case: these patches fixes the starvation of the
+> boot partition locking and the debugfs access when using
+> the block layer heavily at the same time.
+>
+> Linus Walleij (6):
+>   mmc: block: remove req back pointer
+>   mmc: block: Tag DRV_OPs with a driver operation type
+>   mmc: block: Move DRV OP issue function
+>   mmc: block: Move boot partition locking into a driver op
+>   mmc: debugfs: Move card status retrieveal into the block layer
+>   mmc: debugfs: Move EXT CSD debugfs acces to block layer
+>
+>  drivers/mmc/core/block.c   | 168 ++++++++++++++++++++++++++++++++-------------
+>  drivers/mmc/core/block.h   |  49 +++++++++++++
+>  drivers/mmc/core/debugfs.c |  19 +----
+>  drivers/mmc/core/queue.c   |  13 ++--
+>  drivers/mmc/core/queue.h   |  27 +++++++-
+>  5 files changed, 200 insertions(+), 76 deletions(-)
+>
+> --
+> 2.9.3
+>
+
+I decided to pick patch 1->4 at this stage as those looks nice and
+clean. The rest will need a re-spin.
+
+Thanks and kind regards
 Uffe
-
-> ---
->
-> v2:
-> This refactoring superseded the update suggestion "mmc: core: Delete
-> an error message for a failed memory allocation in three functions"
-> from 2017-05-13 because another adjustment was requested by Ulf Hansson.
-> https://patchwork.kernel.org/patch/9725233/
-> https://lkml.org/lkml/2017/5/19/308
->
->  drivers/mmc/core/mmc_test.c |  2 --
->  drivers/mmc/core/sd.c       | 16 +++-------------
->  2 files changed, 3 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index fd1b4b8510b9..7a304a6e5bf1 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -3220,8 +3220,6 @@ static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
->         df = kmalloc(sizeof(*df), GFP_KERNEL);
->         if (!df) {
->                 debugfs_remove(file);
-> -               dev_err(&card->dev,
-> -                       "Can't allocate memory for internal usage.\n");
->                 return -ENOMEM;
->         }
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index d109634fbfce..1d7542daecbe 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -294,12 +294,8 @@ static int mmc_read_switch(struct mmc_card *card)
->         err = -EIO;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n",
-> -                       mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         /*
->          * Find out the card's support bits with a mode 0 operation.
-> @@ -359,11 +355,8 @@ int mmc_sd_switch_hs(struct mmc_card *card)
->                 return 0;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n", mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         err = mmc_sd_switch(card, 1, 0, 1, status);
->         if (err)
-> @@ -596,11 +589,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
->                 return 0;
->
->         status = kmalloc(64, GFP_KERNEL);
-> -       if (!status) {
-> -               pr_err("%s: could not allocate a buffer for "
-> -                       "switch capabilities.\n", mmc_hostname(card->host));
-> +       if (!status)
->                 return -ENOMEM;
-> -       }
->
->         /* Set 4-bit bus width */
->         if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
-> --
-> 2.13.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
