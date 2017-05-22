@@ -1,81 +1,77 @@
-From: Jan Glauber <jglauber@cavium.com>
-Subject: [PATCH v2 1/3] mmc: cavium: Prevent crash with incomplete DT
-Date: Mon, 22 May 2017 13:09:19 +0200
-Message-ID: <20170522110921.15395-2-jglauber@cavium.com>
-References: <20170522110921.15395-1-jglauber@cavium.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36535 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754079AbdEVLJj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2017 07:09:39 -0400
-In-Reply-To: <20170522110921.15395-1-jglauber@cavium.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2 0/6] mmc: renesas-sdhi: refactor DMA support
+Date: Mon, 22 May 2017 13:50:18 +0200
+Message-ID: <20170522115017.GI16822@verge.net.au>
+References: <1494408330-28161-1-git-send-email-horms+renesas@verge.net.au>
+ <20170518201436.umh3d22rf25cqh2b@ninjato>
+ <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpTfT=ftio2t957SjpL6wd3S1tztPfBB+SOnW4TsGuB3A@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: David Daney <david.daney@cavium.com>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, "Steven J . Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+List-Id: linux-mmc@vger.kernel.org
 
-In case the DT specifies neither a regulator nor a gpio
-for the shared power the driver will crash accessing the regulator.
-Prevent the crash by checking the regulator before use.
+On Fri, May 19, 2017 at 10:30:07AM +0200, Ulf Hansson wrote:
+> On 18 May 2017 at 22:14, Wolfram Sang <wsa@the-dreams.de> wrote:
+> > On Wed, May 10, 2017 at 11:25:24AM +0200, Simon Horman wrote:
+> >> Hi Wolfram, Hi Ulf, Hi Arnd, Hi all,
+> >>
+> >> the intention of this patch-set is to refactor the DMA support in
+> >> the Renesas SDHI driver in order to make it easier to add support
+> >> for using the SDHI hardware with different DMA implementations.
+> >>
+> >> This is based on earlier work, posted as "[PATCH/RFC v3 0/6] mmc:
+> >> renesas_sdhi: add R-Car Gen-3 DMA support". It attempts to implement
+> >> the reworking of the driver proposed by Arnd[1] in his review of that
+> >> patch-set.
+> >>
+> >> [1] http://www.spinics.net/lists/linux-mmc/msg38004.html
+> >>
+> >> Unlike that patch-set this patch-set does not add support for
+> >> R-Car Gen-3 DMA. Rather it focuses on refactoring the code.
+> >>
+> >> Changes between RFC and v2:
+> >>
+> >> * Drop filenames from comment at top of source
+> >> * Consistently check for if (host->dma_ops) before using dma_ops.
+> >>
+> >>
+> >> Simon Horman (6):
+> >>   mmc: tmio: drop filenames from comment at top of source
+> >>   mmc: renesas-sdhi, tmio: make dma more modular
+> >>   mmc: tmio: rename tmio_mmc_{pio => core}.c
+> >>   mmc: renesas-sdhi: rename tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c
+> >>   mmc: renesas-sdhi: rename sh_mobile_sdhi.c => renesas_sdhi_core.c
+> >>   mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
+> >
+> > Thanks Simon for this series! The file layout looks in deed much better
+> > now. And some light testing on my Lager didn't show any regressions. I
+> > have only minor comments which do not have anything to do with the code,
+> > so already here:
+> >
+> > Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> >
+> > The comments:
+> >
+> > * MAINTAINERS file needs updating because of the new filenames
+> > * I'd prefer the _GPL variant of EXPORT_SYMBOL unless we have a reason
+> >   to not use it?
+> > * maybe this is also a good time to update the Renesas copyrights in
+> >   file headers?
+> > * checkpatch reports some whitespace errors on patch 6. I assume they
+> >   were already there in the code you moved around. Still, it might be
+> >   a nice occasion to fix those?
+> >
+> > Thanks again, nice work!
+> >
+> >    Wolfram
+> >
+> 
+> I have applied this for next, assuming Simon addresses Wolfram's
+> comments on top.
 
-Use mmc_regulator_get_supply() instead of open coding the same
-logic.
-
-Signed-off-by: Jan Glauber <jglauber@cavium.com>
----
- drivers/mmc/host/cavium.c | 25 ++++++++++---------------
- 1 file changed, 10 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-index 58b51ba..b8aaf0f 100644
---- a/drivers/mmc/host/cavium.c
-+++ b/drivers/mmc/host/cavium.c
-@@ -839,14 +839,14 @@ static void cvm_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		cvm_mmc_reset_bus(slot);
- 		if (host->global_pwr_gpiod)
- 			host->set_shared_power(host, 0);
--		else
-+		else if (!IS_ERR(mmc->supply.vmmc))
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 		break;
- 
- 	case MMC_POWER_UP:
- 		if (host->global_pwr_gpiod)
- 			host->set_shared_power(host, 1);
--		else
-+		else if (!IS_ERR(mmc->supply.vmmc))
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
- 		break;
- 	}
-@@ -968,20 +968,15 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
- 		return -EINVAL;
- 	}
- 
--	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
--	if (IS_ERR(mmc->supply.vmmc)) {
--		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
--			return -EPROBE_DEFER;
--		/*
--		 * Legacy Octeon firmware has no regulator entry, fall-back to
--		 * a hard-coded voltage to get a sane OCR.
--		 */
-+	ret = mmc_regulator_get_supply(mmc);
-+	if (ret == -EPROBE_DEFER)
-+		return ret;
-+	/*
-+	 * Legacy Octeon firmware has no regulator entry, fall-back to
-+	 * a hard-coded voltage to get a sane OCR.
-+	 */
-+	if (IS_ERR(mmc->supply.vmmc))
- 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	} else {
--		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
--		if (ret > 0)
--			mmc->ocr_avail = ret;
--	}
- 
- 	/* Common MMC bindings */
- 	ret = mmc_of_parse(mmc);
--- 
-2.9.0.rc0.21.g7777322
-
+Thanks a lot! I will follow-up on Wolfram's comments.
