@@ -1,69 +1,41 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] mmc: tmio: make sure SDIO gets reinitialized after resume
-Date: Tue, 23 May 2017 15:34:08 +0200
-Message-ID: <20170523133408.11651-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 11/41] mmc: host: omap_hsmmc: Add new compatible string
+ to support dra7
+Date: Tue, 23 May 2017 09:44:24 -0500
+Message-ID: <20170523144424.5aj5xl3vlwyuj6ws@rob-hp-laptop>
+References: <20170519081541.26753-1-kishon@ti.com>
+ <20170519081541.26753-12-kishon@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20170519081541.26753-12-kishon@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-doc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, nsekhar@ti.com, Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-To achieve that, we set the registers in the generic HW reset routine
-which gets called at both, init and resume. We also make sure to move
-SDIO initialization before reset gets called in probe().
+On Fri, May 19, 2017 at 01:45:11PM +0530, Kishon Vijay Abraham I wrote:
+> Add a new compatible string "ti,dra7-hsmmc" to support
+> dra7 and dra72 controllers. Also create a new controller flag
+> "OMAP_HSMMC_REQUIRE_IODELAY" to specify all controllers that use
+> "ti,dra7-hsmmc" require iodealy configuration to be set.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  1 +
+>  drivers/mmc/host/omap_hsmmc.c                           | 10 ++++++++++
+>  include/linux/platform_data/hsmmc-omap.h                |  1 +
+>  3 files changed, 12 insertions(+)
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
----
-
-Changes since RFT:
-* added tag from Hayakawa-san (thanks!)
-* rebased to mmc/next (on top of the DMA refactor series)
-
- drivers/mmc/host/tmio_mmc_core.c | 17 ++++++++++-------
- 1 file changed, 10 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index e1ad461c4b8c8f..ed40681253497a 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -265,6 +265,12 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
- 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
- 		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
- 	msleep(10);
-+
-+	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
-+		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
-+		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
-+	}
-+
- }
- 
- static void tmio_mmc_reset_work(struct work_struct *work)
-@@ -1280,6 +1286,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	if (_host->native_hotplug)
- 		pm_runtime_get_noresume(&pdev->dev);
- 
-+	_host->sdio_irq_enabled = false;
-+	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
-+		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
-+
- 	tmio_mmc_clk_stop(_host);
- 	tmio_mmc_reset(_host);
- 
-@@ -1296,13 +1306,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	_host->sdcard_irq_mask &= ~irq_mask;
- 
--	_host->sdio_irq_enabled = false;
--	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
--		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
--		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
--		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
--	}
--
- 	spin_lock_init(&_host->lock);
- 	mutex_init(&_host->ios_lock);
- 
--- 
-2.11.0
+Acked-by: Rob Herring <robh@kernel.org>
