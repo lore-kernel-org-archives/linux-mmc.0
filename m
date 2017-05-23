@@ -1,131 +1,41 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 13/41] mmc: host: omap_hsmmc: Add support to set IODELAY
- values
-Date: Tue, 23 May 2017 09:55:42 -0500
-Message-ID: <20170523145542.s4y5r5t2uynnrv6f@rob-hp-laptop>
-References: <20170519081541.26753-1-kishon@ti.com>
- <20170519081541.26753-14-kishon@ti.com>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: Re: [RFC PATCH] mmc: core: Remove CONFIG_MMC_BLOCK_BOUNCE option.
+Date: Tue, 23 May 2017 20:24:41 +0200
+Message-ID: <e38eb2c8-db91-1a36-925d-aa88be56a40b@ossman.eu>
+References: <20170510082418.10513-1-linus.walleij@linaro.org>
+ <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
+ <20170510082418.10513-2-linus.walleij@linaro.org>
+ <3202707.f2tzK1cxd8@amdc3058>
+ <CACRpkdZp3JtnNrxsvtNT7hDB1w5KJomngs-=J8PG5fbDF=e+0w@mail.gmail.com>
+ <cc8694f6-4955-51d3-6342-107cfbb50ed2@cavium.com>
+ <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170519081541.26753-14-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jonathan Corbet <corbet@lwn.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
+Content-Language: en-GB
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, "Steven J. Hill" <Steven.Hill@cavium.com>, Vinod Koul <vinod.koul@intel.com>
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 19, 2017 at 01:45:13PM +0530, Kishon Vijay Abraham I wrote:
-> The data manual of J6/J6 Eco recommends to set different IODELAY values
-> depending on the mode in which the MMC/SD is enumerated in order to
-> ensure IO timings are met.
+On 23/05/17 11:05, Linus Walleij wrote:
 > 
-> Add support to set the IODELAY values depending on the various MMC
-> modes using the pinctrl APIs.
+> Pierre, what host were you developing this for? Maybe I can try
+> to get the same and test it.
 > 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> [nsekhar@ti.com: introduce OMAP_HSMMC_SETUP_PINCTRL()]
-> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-> ---
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   5 +
->  drivers/mmc/host/omap_hsmmc.c                      | 124 ++++++++++++++++++++-
->  include/linux/platform_data/hsmmc-omap.h           |   3 +
->  3 files changed, 129 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 258e25af10f7..dcf0b777c031 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -20,6 +20,11 @@ Optional properties:
->  ti,dual-volt: boolean, supports dual voltage cards
->  <supply-name>-supply: phandle to the regulator device tree node
->  "supply-name" examples are "vmmc", "vmmc_aux" etc
-> +pinctrl-names: Should be a list of pinctrl state names and can be "sdr104",
-> +"hs200_1_8v", "ddr50", "sdr50", "sdr25", "sdr12", "hs", "ddr_1_8v" or
-> +"default".
-> +pinctrl-<num>: Phandle referencing pin configuration of the sd/emmc controller.
-> +See: Documentation/devicetree/bindings/pinctrl/pinctrl-binding.txt
->  ti,non-removable: non-removable slot (like eMMC)
->  ti,needs-special-reset: Requires a special softreset sequence
->  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
 
-Binding looks fine, but...
+I think the work primarily was done with the Texas Instruments SDHCI 
+host that HP used in their laptops. Ricoh controllers were also popular, 
+but they had some proprietary mode that you had to get them out of.
 
-> @@ -2388,6 +2427,73 @@ static inline struct omap_hsmmc_platform_data
->  }
->  #endif
->  
-> +#define OMAP_HSMMC_SETUP_PINCTRL(capvar, capmask, mode)			\
-> +	do {								\
+If I recall correctly, all early SDHCI controllers needed this feature. 
+I think scatter/gather was a later addition to the spec.
 
-This is kind of ugly. Why not make it a function. Just return 
-pinctrl_state ptr.
+I take it updates to the SD specification hasn't fixed this performance 
+issue?
 
-> +		struct pinctrl_state *s = ERR_PTR(-ENODEV);		\
-> +		char str[20];						\
-> +		char *version = host->pdata->version;			\
-> +									\
-> +		if (!(mmc->capvar & (capmask)))				\
-> +			break;						\
-> +									\
-> +		if (host->pdata->version) {				\
-> +			sprintf(str, "%s-%s", #mode, version);		\
-> +			s = pinctrl_lookup_state(host->pinctrl, str);	\
-> +		}							\
-> +									\
-> +		if (IS_ERR(s)) {					\
-> +			sprintf(str, "%s", #mode);			\
-> +			s = pinctrl_lookup_state(host->pinctrl, str);	\
-> +		}							\
-> +									\
-> +		if (IS_ERR(s)) {					\
-> +			dev_err(host->dev, "no pinctrl state for %s "	\
-> +				"mode\n", #mode);			\
-> +			mmc->capvar &= ~(capmask);			\
-> +		} else {						\
-> +			host->mode##_pinctrl_state = s;			\
-> +		}							\
-> +									\
-> +	} while (0)
-> +
-> +static int omap_hsmmc_get_iodelay_pinctrl_state(struct omap_hsmmc_host *host)
-> +{
-> +	struct mmc_host *mmc = host->mmc;
-> +
-> +	if (!(host->pdata->controller_flags & OMAP_HSMMC_REQUIRE_IODELAY))
-> +		return 0;
-> +
-> +	host->pinctrl = devm_pinctrl_get(host->dev);
-> +	if (IS_ERR(host->pinctrl)) {
-> +		dev_err(host->dev, "Cannot get pinctrl\n");
-> +		return PTR_ERR(host->pinctrl);
-> +	}
-> +
-> +	host->default_pinctrl_state = pinctrl_lookup_state(host->pinctrl,
-> +							   "default");
-> +	if (IS_ERR(host->default_pinctrl_state)) {
-> +		dev_err(host->dev,
-> +			"no pinctrl state for default mode\n");
-> +		return PTR_ERR(host->default_pinctrl_state);
-> +	}
-> +
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_UHS_SDR104,	sdr104);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_UHS_DDR50,	ddr50);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_UHS_SDR50,	sdr50);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_UHS_SDR25,	sdr25);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_UHS_SDR12,	sdr12);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,	MMC_CAP_1_8V_DDR,	ddr_1_8v);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps,
-> +				 MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED,
-> +				 hs);
-> +	OMAP_HSMMC_SETUP_PINCTRL(caps2,	MMC_CAP2_HS200_1_8V_SDR,
-> +				 hs200_1_8v);
-> +
-> +	host->pinctrl_state = host->default_pinctrl_state;
-> +
-> +	return 0;
-> +}
-> +
->  static int omap_hsmmc_probe(struct platform_device *pdev)
->  {
->  	struct omap_hsmmc_platform_data *pdata = pdev->dev.platform_data;
+Regards
+-- 
+Pierre Ossman
