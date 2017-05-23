@@ -1,82 +1,101 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 5/6] mmc: debugfs: Move card status retrieveal into the
- block layer
-Date: Tue, 23 May 2017 13:29:00 +0200
-Message-ID: <CAK8P3a0c4Lhf7RkZJNdn4AX9gF=Y9g0XPnBD+c-=SQnsd=4WHA@mail.gmail.com>
-References: <20170519133732.27470-1-linus.walleij@linaro.org>
- <20170519133732.27470-6-linus.walleij@linaro.org> <CAPDyKFqzjv-C1SWh9_QD+LsHCMeg=R8nSeNgBsbPJ725PSMmDg@mail.gmail.com>
- <CACRpkdb9yRHiaK7qWarPFdLe3ODeQG9Hh8hG7uB6cb=9svkcWg@mail.gmail.com>
- <CAK8P3a3zbHstFvcYjeyPwqb3Hvs3gZEWPy2UGraoK2WmHy1JrQ@mail.gmail.com> <CAPDyKFoBOqcb9pYnb1Wsv+YPOhKLuRVsPxr1QCGetNLn=6y78A@mail.gmail.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: RE: [RFT PATCH] mmc: tmio: make sure SDIO gets reinitialized after
+ resume
+Date: Tue, 23 May 2017 12:15:05 +0000
+Message-ID: <TY1PR06MB0992573FB717D7C90373F1FDD8F90@TY1PR06MB0992.apcprd06.prod.outlook.com>
+References: <20170519123052.26565-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoBOqcb9pYnb1Wsv+YPOhKLuRVsPxr1QCGetNLn=6y78A@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170519123052.26565-1-wsa+renesas@sang-engineering.com>
+Content-Language: ja-JP
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Yasushi SHOJI <yashi@atmark-techno.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, May 23, 2017 at 1:22 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> [...]
->
->>>>> +#if IS_ENABLED(CONFIG_MMC_BLOCK)
->>>>
->>>> What wrong with a regular ifdefs stubs? Why do you need IS_ENABLED()?
->>>
->>> This is because the entire block layer can be compiled as a
->>> module.
->>
->> The block layer cannot be a module, but the MMC layer can.
->>
->>> I'm all for making CONFIG_MMC_BLOCK into a bool... but
->>> don't know how people (Intel laptops) feel about that extra
->>> code in their kernel at all times.
->>
->> I think CONFIG_MMC should remain tristate. However, we could
->> consider making CONFIG_MMC_BLOCK a 'bool' symbol and
->> linking it into the mmc-core module when enabled.
->
-> That is a good idea, no matter what. We should do the same thing for
-> CONFIG_MMC_TEST. There are really no need to have to separate modules,
-> one is more than enough.
+Hi Wolfram-san,
 
-I think for the test module it conceptually makes more sense to
-be separate, though I can see that this requires to be careful
-with the debugfs file lifetime rules.
+> From: Wolfram Sang
+> Sent: Friday, May 19, 2017 9:31 PM
+>=20
+> To achieve that, we set the registers in the generic HW reset routine
+> which gets called at both, init and resume. We also make sure to move
+> SDIO initialization before reset gets called in probe().
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>=20
+> This patch addresses a report I got from Shimoda-san. I can't really test=
+ it
+> because the SDIO cards I have all require MMC_PM_KEEP_POWER to suspend an=
+d
+> that we don't support. So, I send this out to ask for testing. At least i=
+t
+> didn't cause regressions for the setup I used. To make testing easier, th=
+is
+> is *not* put on top of Simon's SDHI DMA rework patches, so it should appl=
+y
+> on current upstream and development branches.
 
->>>> It seems like the life cycle of the card debugfs node is now being
->>>> controlled as when the mmc block device driver has been successfully
->>>> probed. We need to deal with that somehow.
->>>
->>> Only for these two files but yes.
->>>
->>> ext_csd is a bit dubious as it is only available on storage devices
->>> (eMMC) that can not be SD, SDIO or combo cards, and we could make
->>> it only appear if using the block layer.
->>>
->>> The card status however we need to keep if people want it.
->>>
->>> We *COULD* consider just thrashing these debugfs files. It is not
->>> technically ABI and I wonder who is actually using them.
->>
->> I think the ext_csd is extremely useful on storage devices to have
->> exposed to user space in some form. There is a comment saying
->> that we don't store it in RAM at the moment as it is rarely used,
->> but we could change that, as it's only 512 bytes per eMMC device
->> and there is rarely more than one of them. IIRC, the ext_csd is
->> entirely readonly and doesn't change during runtime, so we
->> gain nothing by issuing the commands every time someone reads
->> the debugfs file.
->
-> First, we have mmc utils (going via mmc ioctl), which purpose are
-> exactly for these cases. As a matter of fact it does a better job,
-> since it even present the data in a more human readable format.
->
-> Second, ext csd gets updated very often to control/change some
-> behavior of the device. You must be mixing this up with some of the
-> other card registers.
+Thank you for the patch!
+Hayakawa-san tested this patch on both H3/Salvator-X and E2/ALT.
 
-Ok, it's been a while since I looked at the details, thanks for the
-clarification.
+So,
+Tested-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
 
-     Arnd
+Best regards,
+Yoshihiro Shimoda
+
+>  drivers/mmc/host/tmio_mmc_pio.c | 17 ++++++++++-------
+>  1 file changed, 10 insertions(+), 7 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_=
+pio.c
+> index a2d92f10501bdd..5e87fcaa99d430 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -229,6 +229,12 @@ static void tmio_mmc_reset(struct tmio_mmc_host *hos=
+t)
+>  	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
+>  		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
+>  	msleep(10);
+> +
+> +	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+> +		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+> +		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+> +	}
+> +
+>  }
+>=20
+>  static void tmio_mmc_reset_work(struct work_struct *work)
+> @@ -1221,6 +1227,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_hos=
+t,
+>  	if (_host->native_hotplug)
+>  		pm_runtime_get_noresume(&pdev->dev);
+>=20
+> +	_host->sdio_irq_enabled =3D false;
+> +	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+> +		_host->sdio_irq_mask =3D TMIO_SDIO_MASK_ALL;
+> +
+>  	tmio_mmc_clk_stop(_host);
+>  	tmio_mmc_reset(_host);
+>=20
+> @@ -1237,13 +1247,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_hos=
+t,
+>=20
+>  	_host->sdcard_irq_mask &=3D ~irq_mask;
+>=20
+> -	_host->sdio_irq_enabled =3D false;
+> -	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+> -		_host->sdio_irq_mask =3D TMIO_SDIO_MASK_ALL;
+> -		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
+> -		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0001);
+> -	}
+> -
+>  	spin_lock_init(&_host->lock);
+>  	mutex_init(&_host->ios_lock);
+>=20
+> --
+> 2.11.0
