@@ -1,106 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: spi: disable dma mapping code, as it does not work
-Date: Tue, 23 May 2017 12:23:21 +0200
-Message-ID: <CAPDyKFoNy3cN-tbgN8xU2eT4261zObNsyYzMaCN2V-qsnTW4_Q@mail.gmail.com>
-References: <c73b9ba9-1699-2aff-e2fd-b4b4f292a3ca@raspberrypi.org>
- <CAPDyKFrPZ-aByeigb7KnUFZOnzHdDFyXXcwQrRub30czXW+xKQ@mail.gmail.com> <205f0c9b-1037-437d-f87f-c51c0b58313a@raspberrypi.org>
+From: Avri Altman <Avri.Altman@sandisk.com>
+Subject: RE: [PATCH 5/5] mmc: block: move multi-ioctl() to use block layer
+Date: Tue, 23 May 2017 10:51:42 +0000
+Message-ID: <BY2PR0401MB090174BB8EA9C92BF2711878E5F90@BY2PR0401MB0901.namprd04.prod.outlook.com>
+References: <20170510082418.10513-1-linus.walleij@linaro.org>
+ <20170510082418.10513-6-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:36134 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758496AbdEWKXX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 May 2017 06:23:23 -0400
-Received: by mail-qt0-f180.google.com with SMTP id f55so123304427qta.3
-        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 03:23:22 -0700 (PDT)
-In-Reply-To: <205f0c9b-1037-437d-f87f-c51c0b58313a@raspberrypi.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Phil Elwell <phil@raspberrypi.org>
-Cc: Martin Sperl <kernel@martin.sperl.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 23 May 2017 at 12:11, Phil Elwell <phil@raspberrypi.org> wrote:
-> On 23/05/2017 08:58, Ulf Hansson wrote:
->> On 22 May 2017 at 11:09, Phil Elwell <phil@raspberrypi.org> wrote:
->>> since:
->>>         commit 0589342c27944e50ebd7a54f5215002b6598b748
->>>         Author: Rob Herring <rob.herring@calxeda.com>
->>>         Date:   Tue Oct 29 23:36:46 2013 -0500
->>>
->>>              of: set dma_mask to point to coherent_dma_mask
->>>
->>>              Platform devices created by DT code don't initialize dma_mask pointer to
->>>              anything. Set it to coherent_dma_mask by default if the architecture
->>>              code has not set it.
->>>
->>> the mmc-spi driver no longer detects the sd-cards any longer.
->>>
->>> This patch disables the offending section in mmc_spi
->>> so that the driver works again and detects the sd card normally.
->>>
->>> There is no real negative impact as the spi-framework
->>> does no longer rely on driver-provided DMA mappings but
->>> maps the transfers transparently.
->>>
->>> Signed-off-by: Martin Sperl <kernel@martin.sperl.org>
->>> Submitted-by: Phil Elwell <phil@raspberrypi.org>
->>> ---
->>>  drivers/mmc/host/mmc_spi.c | 11 +++++++++++
->>>  1 file changed, 11 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
->>> index ae19d83bb9de0..16946e2513afa 100644
->>> --- a/drivers/mmc/host/mmc_spi.c
->>> +++ b/drivers/mmc/host/mmc_spi.c
->>> @@ -1387,6 +1387,16 @@ static int mmc_spi_probe(struct spi_device *spi)
->>>         if (!host->data)
->>>                 goto fail_nobuf1;
->>>
->>> +       /* for some reason mmc_spi does not work with this enabled
->>> +        * it is not needed anyway, as the SPI framework does DMA
->>> +        * transfers now automatically
->>> +        * the patch that introduced this was:
->>> +        * commit 0589342c27944e50ebd7a54f5215002b6598b748
->>> +        * Author: Rob Herring <rob.herring@calxeda.com>
->>> +        * Date:   Tue Oct 29 23:36:46 2013 -0500
->>> +        *      of: set dma_mask to point to coherent_dma_mask
->>> +        */
->>> +#if 0
->>>         if (spi->master->dev.parent->dma_mask) {
->>>                 struct device   *dev = spi->master->dev.parent;
->>>
->>> @@ -1402,6 +1412,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->>>                                 host->data_dma, sizeof(*host->data),
->>>                                 DMA_BIDIRECTIONAL);
->>>         }
->>> +#endif
->>>
->>>         /* setup message for status/busy readback */
->>>         spi_message_init(&host->readback);
->>
->> Phil, I am not sure how to go with this.
->>
->> Your change drops the dma implementation in the mmc_spi driver as
->> host->dma_dev now never gets assigned. I do think that makes sense as
->> the dma support should be implemented in the spi master driver and not
->> in the spi client driver, which currently is the case for mmc_spi.
->>
->> Then perhaps a more proper change would be to remove the dma
->> implementation in mmc_spi altogether?
->
-> I don't have enough in-depth SPI knowledge to make that decision - I'm happy to go
-> with what the SPI experts recommend.
 
-Okay. Let's see.
 
->
->> And one more thing, next time also cc the spi-list and Mark Brown, to
->> try to some broader input.
->
-> Thanks for the tip, Ulf - I just went with what scripts/get_maintainer.pl suggested.
-> Perhaps that list needs to be updated?
+> -----Original Message-----
+> From: Avri Altman
+> Sent: Tuesday, May 23, 2017 12:21 PM
+> To: 'Linus Walleij' <linus.walleij@linaro.org>; linux-mmc@vger.kernel.org=
+; Ulf
+> Hansson <ulf.hansson@linaro.org>; Adrian Hunter
+> <adrian.hunter@intel.com>
+> Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>; Christoph
+> Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>; Bartlomiej
+> Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
+> <paolo.valente@linaro.org>
+> Subject: RE: [PATCH 5/5] mmc: block: move multi-ioctl() to use block laye=
+r
+>=20
+>=20
+>=20
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Linus Walleij
+> > Sent: Wednesday, May 10, 2017 11:24 AM
+> > To: linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>;
+> > Adrian Hunter <adrian.hunter@intel.com>
+> > Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>;
+> > Christoph Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>;
+> > Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
+> > <paolo.valente@linaro.org>; Linus Walleij <linus.walleij@linaro.org>
+> > Subject: [PATCH 5/5] mmc: block: move multi-ioctl() to use block layer
+> >
+> > This switches also the multiple-command ioctl() call to issue all
+> > ioctl()s through the block layer instead of going directly to the devic=
+e.
+> >
+> > We extend the passed argument with an argument count and loop over all
+> > passed commands in the ioctl() issue function called from the block lay=
+er.
+> >
+> > By doing this we are again loosening the grip on the big host lock,
+> > since two calls to mmc_get_card()/mmc_put_card() are removed.
+> >
+> > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Tested-by: Avri Altman <Avri.Altman@sandisk.com>
 
-No, this is more a special case I would say.
+Few more words - we used mmc_utils to run ffu (field firmware update) that =
+uses multi-ioctl.
+We used Intel NUC with SanDisk storage - this way we could verify that inde=
+ed our fw is updated properly.
 
-Kind regards
-Uffe
+Cheers,
+Avri
