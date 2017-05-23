@@ -1,81 +1,48 @@
-From: David Woods <dwoods@mellanox.com>
-Subject: Re: [PATCH 2/2] mmc: core: Use device_property_read instead of
- of_property_read
-Date: Tue, 23 May 2017 15:30:33 -0400
-Message-ID: <4803df54-117e-451f-ee88-9e19c1a4def1@mellanox.com>
-References: <1495059429-15247-1-git-send-email-dwoods@mellanox.com>
- <1495059429-15247-2-git-send-email-dwoods@mellanox.com>
- <CAPDyKFq-LSBr79ej06p2F_GcJeOMnuuJvOO0XgjaGCHoU1RpUQ@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V2] mmc: block: Use __mmc_send_status() and drop get_card_status()
+Date: Tue, 23 May 2017 22:53:15 +0200
+Message-ID: <CACRpkdbuU2B60CFME9sU=SbiYRFGr+CWekN3PmMA9DLc9WhBqw@mail.gmail.com>
+References: <1495441438-5129-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0061.outbound.protection.outlook.com ([104.47.2.61]:40160
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1761585AbdEWTaq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 23 May 2017 15:30:46 -0400
-In-Reply-To: <CAPDyKFq-LSBr79ej06p2F_GcJeOMnuuJvOO0XgjaGCHoU1RpUQ@mail.gmail.com>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:34995 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1032788AbdEWUxR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 May 2017 16:53:17 -0400
+Received: by mail-io0-f177.google.com with SMTP id f102so105107584ioi.2
+        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 13:53:17 -0700 (PDT)
+In-Reply-To: <1495441438-5129-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Heiner Kallweit <hkallweit1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, cmetcalf@mellanox.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.linux.org
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 05/19/2017 04:23 AM, Ulf Hansson wrote:
-> On 18 May 2017 at 00:17, David Woods <dwoods@mellanox.com> wrote:
->> Using the device_property interfaces allows mmc drivers to work
->> on platforms which run on either device tree or ACPI.
->>
->> Signed-off-by: David Woods <dwoods@mellanox.com>
->> Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
->> Cc: stable@vger.linux.org
->> ---
->>   drivers/mmc/core/host.c | 72 ++++++++++++++++++++++++-------------------------
->>   1 file changed, 35 insertions(+), 37 deletions(-)
->>
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 3f8c85d..d2c059e 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
->>    */
->>   int mmc_of_parse(struct mmc_host *host)
->>   {
->> -       struct device_node *np;
->> +       struct device *dev = host->parent;
->>          u32 bus_width;
->>          int ret;
->>          bool cd_cap_invert, cd_gpio_invert = false;
->>          bool ro_cap_invert, ro_gpio_invert = false;
->>
->> -       if (!host->parent || !host->parent->of_node)
->> +       if (!dev)
->>                  return 0;
->>
-> So earlier we stopped executing the OF parsing at this point, unless
-> we had valid a of_node pointer. To be safe, I think we need to do
-> something similar here.
+On Mon, May 22, 2017 at 10:23 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+> The only reason to why the mmc block device driver needs to implements its
+> own version of how to get the status of the card, is that it needs to
+> specify a different amount of retries.
 >
-> In other words, perhaps check the result from dev_fwnode(), before continue.
-
-I will add that check.
-
-> [...]
+> Therefore add a new exported function which allows the caller to specify
+> the number of retries and convert everybody to use it, as this simplifies
+> the code.
 >
-> mmc_pwrseq_alloc() is called from mmc_of_parse() which currently only
-> supports OF parsing. I assume you would like to convert that as well?
-> Perhaps that should even be the first step?
-
-Our board does not have a power sequence device, so this is not 
-something I have the hardware available to test.  It's not very clear to 
-me how a pwrseq reference would be represented in ACPI or how to access 
-it with the device_property API.  As it is, of_parse_phandle just 
-returns NULL in the case where there is no parent->of_node.
-
--David Woods
-
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 >
-> Kind regards
-> Uffe
+> Changes in v2:
+>         - Allow callers to specify retries.
 
+Im allergic to __prefixes so I would call this:
 
+> -int mmc_send_status(struct mmc_card *card, u32 *status)
+> +int __mmc_send_status(struct mmc_card *card, u32 *status, unsigned int retries)
+
+mmc_send_status_command()
+
+Either way, it's a clever patch so:
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
