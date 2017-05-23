@@ -1,113 +1,108 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC PATCH] mmc: core: Remove CONFIG_MMC_BLOCK_BOUNCE option.
-Date: Tue, 23 May 2017 12:08:36 +0200
-Message-ID: <CAK8P3a3PQF53XQBPbLmHbHi-GL9u3sJiGHT+vU6ihkVJkXz50Q@mail.gmail.com>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
- <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
- <20170510082418.10513-2-linus.walleij@linaro.org> <3202707.f2tzK1cxd8@amdc3058>
- <CACRpkdZp3JtnNrxsvtNT7hDB1w5KJomngs-=J8PG5fbDF=e+0w@mail.gmail.com>
- <cc8694f6-4955-51d3-6342-107cfbb50ed2@cavium.com> <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
+From: Phil Elwell <phil@raspberrypi.org>
+Subject: Re: [PATCH] mmc: spi: disable dma mapping code, as it does not work
+Date: Tue, 23 May 2017 11:11:40 +0100
+Message-ID: <205f0c9b-1037-437d-f87f-c51c0b58313a@raspberrypi.org>
+References: <c73b9ba9-1699-2aff-e2fd-b4b4f292a3ca@raspberrypi.org>
+ <CAPDyKFrPZ-aByeigb7KnUFZOnzHdDFyXXcwQrRub30czXW+xKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "Steven J. Hill" <Steven.Hill@cavium.com>, Pierre Ossman <pierre@ossman.eu>, Vinod Koul <vinod.koul@intel.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx07-00252a01.pphosted.com ([62.209.51.214]:65235 "EHLO
+        mx07-00252a01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753183AbdEWKLj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 May 2017 06:11:39 -0400
+Received: from pps.filterd (m0102628.ppops.net [127.0.0.1])
+        by mx07-00252a01.pphosted.com (8.16.0.20/8.16.0.20) with SMTP id v4NA5HP4011182
+        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 11:11:37 +0100
+Received: from mail-wm0-f69.google.com (mail-wm0-f69.google.com [74.125.82.69])
+        by mx07-00252a01.pphosted.com with ESMTP id 2ajb6y9h67-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK)
+        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 11:11:37 +0100
+Received: by mail-wm0-f69.google.com with SMTP id k15so9582929wmh.3
+        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 03:11:37 -0700 (PDT)
+In-Reply-To: <CAPDyKFrPZ-aByeigb7KnUFZOnzHdDFyXXcwQrRub30czXW+xKQ@mail.gmail.com>
+Content-Language: en-GB
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Martin Sperl <kernel@martin.sperl.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, May 23, 2017 at 11:05 AM, Linus Walleij
-<linus.walleij@linaro.org> wrote:
-> On Fri, May 19, 2017 at 9:30 AM, Steven J. Hill <Steven.Hill@cavium.com> wrote:
->
->> Remove MMC bounce buffer config option and associated code. This
->> is proposed in addition to Linus' changes to remove the config
->> option. I have tested this on our Octeon hardware platforms.
+On 23/05/2017 08:58, Ulf Hansson wrote:
+> On 22 May 2017 at 11:09, Phil Elwell <phil@raspberrypi.org> wrote:
+>> since:
+>>         commit 0589342c27944e50ebd7a54f5215002b6598b748
+>>         Author: Rob Herring <rob.herring@calxeda.com>
+>>         Date:   Tue Oct 29 23:36:46 2013 -0500
 >>
->> Signed-off-by: Steven J. Hill <Steven.Hill@cavium.com>
->
-> This would have to be rebased as Ulf merged my patch making this
-> a per-host runtime config option. (The Kconfig is gone for example.)
->
-> Bounce buffers were added by Pierre Ossman for kernel 2.6.23 in
-> commit 98ccf14909ba02a41c5925b0b2c92aeeef23d3b9
-> "mmc: bounce requests for simple hosts"
->
-> Quote:
->
->     Some hosts cannot do scatter/gather in hardware. Since not doing sg
->     is such a big performance hit, we (optionally) bounce the requests
->     to a simple linear buffer that we hand over to the driver.
->
->     Signed-off-by: Pierre Ossman <drzeus@drzeus.cx>
->
-> So this runs the risk on reducing performance on simple MMC/SD
-> controllers. Notice: simple, not old.
+>>              of: set dma_mask to point to coherent_dma_mask
+>>
+>>              Platform devices created by DT code don't initialize dma_mask pointer to
+>>              anything. Set it to coherent_dma_mask by default if the architecture
+>>              code has not set it.
+>>
+>> the mmc-spi driver no longer detects the sd-cards any longer.
+>>
+>> This patch disables the offending section in mmc_spi
+>> so that the driver works again and detects the sd card normally.
+>>
+>> There is no real negative impact as the spi-framework
+>> does no longer rely on driver-provided DMA mappings but
+>> maps the transfers transparently.
+>>
+>> Signed-off-by: Martin Sperl <kernel@martin.sperl.org>
+>> Submitted-by: Phil Elwell <phil@raspberrypi.org>
+>> ---
+>>  drivers/mmc/host/mmc_spi.c | 11 +++++++++++
+>>  1 file changed, 11 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+>> index ae19d83bb9de0..16946e2513afa 100644
+>> --- a/drivers/mmc/host/mmc_spi.c
+>> +++ b/drivers/mmc/host/mmc_spi.c
+>> @@ -1387,6 +1387,16 @@ static int mmc_spi_probe(struct spi_device *spi)
+>>         if (!host->data)
+>>                 goto fail_nobuf1;
+>>
+>> +       /* for some reason mmc_spi does not work with this enabled
+>> +        * it is not needed anyway, as the SPI framework does DMA
+>> +        * transfers now automatically
+>> +        * the patch that introduced this was:
+>> +        * commit 0589342c27944e50ebd7a54f5215002b6598b748
+>> +        * Author: Rob Herring <rob.herring@calxeda.com>
+>> +        * Date:   Tue Oct 29 23:36:46 2013 -0500
+>> +        *      of: set dma_mask to point to coherent_dma_mask
+>> +        */
+>> +#if 0
+>>         if (spi->master->dev.parent->dma_mask) {
+>>                 struct device   *dev = spi->master->dev.parent;
+>>
+>> @@ -1402,6 +1412,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+>>                                 host->data_dma, sizeof(*host->data),
+>>                                 DMA_BIDIRECTIONAL);
+>>         }
+>> +#endif
+>>
+>>         /* setup message for status/busy readback */
+>>         spi_message_init(&host->readback);
+> 
+> Phil, I am not sure how to go with this.
+> 
+> Your change drops the dma implementation in the mmc_spi driver as
+> host->dma_dev now never gets assigned. I do think that makes sense as
+> the dma support should be implemented in the spi master driver and not
+> in the spi client driver, which currently is the case for mmc_spi.
+> 
+> Then perhaps a more proper change would be to remove the dma
+> implementation in mmc_spi altogether?
 
-Right, we definitely need to have something that allows us
-to send larger commands to the device for scattered requests.
+I don't have enough in-depth SPI knowledge to make that decision - I'm happy to go
+with what the SPI experts recommend.
 
-It wouldn't hurt to reconsider whether the current method is
-the most efficient way of doing this, but that doesn't seem to
-be a priority to me. If the MMC bounce buffers get in the way
-of the blk-mq conversion, we could try to come up with a
-different implementation as part of that conversion.
+> And one more thing, next time also cc the spi-list and Mark Brown, to
+> try to some broader input.
 
-> We need to know if people are deploying simple controllers still
-> and if this is something that really affects their performance.
->
-> That said: this was put in place because the kernel was sending
-> SG lists that the host DMA could not manage.
->
-> Nowadays we have two mechanisms:
->
-> - DMA engine and DMA-API that help out in managing bounce
->   buffers when used. This means this only is useful for hardware
->   that does autonomous DMA, without any separate DMA engine.
+Thanks for the tip, Ulf - I just went with what scripts/get_maintainer.pl suggested.
+Perhaps that list needs to be updated?
 
-I think the bounce buffers in the DMA-API (swiotlb) should be
-kept separate since it has a completely different purpose of
-bouncing pages within the dma mask, rather than linearizing
-a sglist.
-
-If I read this right, we used to use blk-bounce for highmem
-pages and mmc-bounce for lowmem until 2ff1fa679115 ("mmc_block:
-bounce buffer highmem support") in 2008, now we don't
-use blk-bounce at all if mmc-bounce is in use.
-
-> - CMA that can actually allocate a big chunk of memory: I think
->   this original code is restricted to a 64KB segment because
->   kmalloc() will only guarantee contigous physical memory up to
->   64-128KiB or so. Now we could actually allocate a big badass
->   CMA buffer if that improves the performance, and that would be
->   a per-host setting.
->
-> It would be good to hear from people seeing benefits from bounce
-> buffers about this. What hardware is there that acually sees a
-> significant improvement with bounce buffers?
-
-The mmc-bounce code is active on hosts that have 'max_segs=1'
-(the default unless they override it). These one set it to '1'
-explicitly:
-
-drivers/mmc/host/au1xmmc.c:     mmc->max_segs = AU1XMMC_DESCRIPTOR_COUNT;
-drivers/mmc/host/bfin_sdh.c:    mmc->max_segs = 1; /* only BF51x */
-drivers/mmc/host/sdhci.c:               mmc->max_segs = 1; /* with
-SDHCI_USE_SDMA */
-drivers/mmc/host/ushc.c:        mmc->max_segs      = 1;
-drivers/mmc/host/via-sdmmc.c:   mmc->max_segs = 1;
-
-These have max_segs=1 but ask for bounce buffers to be
-disabled, which will severely limit their performance:
-
-drivers/mmc/host/cavium.c:              mmc->max_segs = 1; /*
-cavium,octeon-6130-mmc */
-drivers/mmc/host/pxamci.c: mmc->max_segs = NR_SG;
-
-These ones don't seem to set it at all, defaulting to '1':
-drivers/mmc/host/cb710-mmc.c
-drivers/mmc/host/moxart-mmc.c
-drivers/mmc/host/sdricoh_cs.c
-drivers/mmc/host/toshsd.c
-
-       Arnd
+Phil
