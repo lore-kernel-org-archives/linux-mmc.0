@@ -1,108 +1,103 @@
-From: Phil Elwell <phil@raspberrypi.org>
-Subject: Re: [PATCH] mmc: spi: disable dma mapping code, as it does not work
-Date: Tue, 23 May 2017 11:11:40 +0100
-Message-ID: <205f0c9b-1037-437d-f87f-c51c0b58313a@raspberrypi.org>
-References: <c73b9ba9-1699-2aff-e2fd-b4b4f292a3ca@raspberrypi.org>
- <CAPDyKFrPZ-aByeigb7KnUFZOnzHdDFyXXcwQrRub30czXW+xKQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 5/6] mmc: debugfs: Move card status retrieveal into the
+ block layer
+Date: Tue, 23 May 2017 12:17:12 +0200
+Message-ID: <CAK8P3a3zbHstFvcYjeyPwqb3Hvs3gZEWPy2UGraoK2WmHy1JrQ@mail.gmail.com>
+References: <20170519133732.27470-1-linus.walleij@linaro.org>
+ <20170519133732.27470-6-linus.walleij@linaro.org> <CAPDyKFqzjv-C1SWh9_QD+LsHCMeg=R8nSeNgBsbPJ725PSMmDg@mail.gmail.com>
+ <CACRpkdb9yRHiaK7qWarPFdLe3ODeQG9Hh8hG7uB6cb=9svkcWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx07-00252a01.pphosted.com ([62.209.51.214]:65235 "EHLO
-        mx07-00252a01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753183AbdEWKLj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 May 2017 06:11:39 -0400
-Received: from pps.filterd (m0102628.ppops.net [127.0.0.1])
-        by mx07-00252a01.pphosted.com (8.16.0.20/8.16.0.20) with SMTP id v4NA5HP4011182
-        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 11:11:37 +0100
-Received: from mail-wm0-f69.google.com (mail-wm0-f69.google.com [74.125.82.69])
-        by mx07-00252a01.pphosted.com with ESMTP id 2ajb6y9h67-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK)
-        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 11:11:37 +0100
-Received: by mail-wm0-f69.google.com with SMTP id k15so9582929wmh.3
-        for <linux-mmc@vger.kernel.org>; Tue, 23 May 2017 03:11:37 -0700 (PDT)
-In-Reply-To: <CAPDyKFrPZ-aByeigb7KnUFZOnzHdDFyXXcwQrRub30czXW+xKQ@mail.gmail.com>
-Content-Language: en-GB
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:36782 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757861AbdEWKRO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 May 2017 06:17:14 -0400
+In-Reply-To: <CACRpkdb9yRHiaK7qWarPFdLe3ODeQG9Hh8hG7uB6cb=9svkcWg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Martin Sperl <kernel@martin.sperl.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
 
-On 23/05/2017 08:58, Ulf Hansson wrote:
-> On 22 May 2017 at 11:09, Phil Elwell <phil@raspberrypi.org> wrote:
->> since:
->>         commit 0589342c27944e50ebd7a54f5215002b6598b748
->>         Author: Rob Herring <rob.herring@calxeda.com>
->>         Date:   Tue Oct 29 23:36:46 2013 -0500
+On Tue, May 23, 2017 at 11:49 AM, Linus Walleij
+<linus.walleij@linaro.org> wrote:
+> On Mon, May 22, 2017 at 9:42 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 19 May 2017 at 15:37, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+>>> The debugfs file "status" (in e.g. /debug/mmc3/mmc3:0001) is
+>>> only available if and only if the card used is an (e)MMC or
+>>> SD card, not for SDIO, as can be seen from this guard in
+>>> mmc_add_card_debugfs();
+>>>
+>>> if (mmc_card_mmc(card) || mmc_card_sd(card))
+>>>   (...create debugfs "status" entry...)
+>>>
+>>> Further this debugfs entry suffers from all the same starvation
+>>> issues as the other userspace things, under e.g. a heavy
+>>> dd operation.
+>>>
+>>> It is therefore logical to move this over to the block layer
+>>> when it is enabled, using the new custom requests and issue
+>>> it using the block request queue.
+>>>
+>>> This makes this debugfs card access land under the request
+>>> queue host lock instead of orthogonally taking the lock.
+>>>
+>>> Tested during heavy dd load by cat:in the status file. We
+>>> add IS_ENABLED() guards and keep the code snippet just
+>>> issueing the card status as a static inline in the header
+>>> so we can still have card status working when the block
+>>> layer is compiled out.
 >>
->>              of: set dma_mask to point to coherent_dma_mask
+>> Seems like a bit of re-factoring/cleanup could help here as
+>> preparation step. I just posted a patch [1] cleaning up how the mmc
+>> block layer fetches the card's status.
 >>
->>              Platform devices created by DT code don't initialize dma_mask pointer to
->>              anything. Set it to coherent_dma_mask by default if the architecture
->>              code has not set it.
+>> Perhaps that could at least simplify a bit for $subject patch,
+>> especially since it also makes mmc_send_status() being exported.
+>
+> OK if you merge your stuff I can iterate my patches on top,
+> no problem.
+>
+>>> +#if IS_ENABLED(CONFIG_MMC_BLOCK)
 >>
->> the mmc-spi driver no longer detects the sd-cards any longer.
->>
->> This patch disables the offending section in mmc_spi
->> so that the driver works again and detects the sd card normally.
->>
->> There is no real negative impact as the spi-framework
->> does no longer rely on driver-provided DMA mappings but
->> maps the transfers transparently.
->>
->> Signed-off-by: Martin Sperl <kernel@martin.sperl.org>
->> Submitted-by: Phil Elwell <phil@raspberrypi.org>
->> ---
->>  drivers/mmc/host/mmc_spi.c | 11 +++++++++++
->>  1 file changed, 11 insertions(+)
->>
->> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
->> index ae19d83bb9de0..16946e2513afa 100644
->> --- a/drivers/mmc/host/mmc_spi.c
->> +++ b/drivers/mmc/host/mmc_spi.c
->> @@ -1387,6 +1387,16 @@ static int mmc_spi_probe(struct spi_device *spi)
->>         if (!host->data)
->>                 goto fail_nobuf1;
->>
->> +       /* for some reason mmc_spi does not work with this enabled
->> +        * it is not needed anyway, as the SPI framework does DMA
->> +        * transfers now automatically
->> +        * the patch that introduced this was:
->> +        * commit 0589342c27944e50ebd7a54f5215002b6598b748
->> +        * Author: Rob Herring <rob.herring@calxeda.com>
->> +        * Date:   Tue Oct 29 23:36:46 2013 -0500
->> +        *      of: set dma_mask to point to coherent_dma_mask
->> +        */
->> +#if 0
->>         if (spi->master->dev.parent->dma_mask) {
->>                 struct device   *dev = spi->master->dev.parent;
->>
->> @@ -1402,6 +1412,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->>                                 host->data_dma, sizeof(*host->data),
->>                                 DMA_BIDIRECTIONAL);
->>         }
->> +#endif
->>
->>         /* setup message for status/busy readback */
->>         spi_message_init(&host->readback);
-> 
-> Phil, I am not sure how to go with this.
-> 
-> Your change drops the dma implementation in the mmc_spi driver as
-> host->dma_dev now never gets assigned. I do think that makes sense as
-> the dma support should be implemented in the spi master driver and not
-> in the spi client driver, which currently is the case for mmc_spi.
-> 
-> Then perhaps a more proper change would be to remove the dma
-> implementation in mmc_spi altogether?
+>> What wrong with a regular ifdefs stubs? Why do you need IS_ENABLED()?
+>
+> This is because the entire block layer can be compiled as a
+> module.
 
-I don't have enough in-depth SPI knowledge to make that decision - I'm happy to go
-with what the SPI experts recommend.
+The block layer cannot be a module, but the MMC layer can.
 
-> And one more thing, next time also cc the spi-list and Mark Brown, to
-> try to some broader input.
+> I'm all for making CONFIG_MMC_BLOCK into a bool... but
+> don't know how people (Intel laptops) feel about that extra
+> code in their kernel at all times.
 
-Thanks for the tip, Ulf - I just went with what scripts/get_maintainer.pl suggested.
-Perhaps that list needs to be updated?
+I think CONFIG_MMC should remain tristate. However, we could
+consider making CONFIG_MMC_BLOCK a 'bool' symbol and
+linking it into the mmc-core module when enabled.
 
-Phil
+>> It seems like the life cycle of the card debugfs node is now being
+>> controlled as when the mmc block device driver has been successfully
+>> probed. We need to deal with that somehow.
+>
+> Only for these two files but yes.
+>
+> ext_csd is a bit dubious as it is only available on storage devices
+> (eMMC) that can not be SD, SDIO or combo cards, and we could make
+> it only appear if using the block layer.
+>
+> The card status however we need to keep if people want it.
+>
+> We *COULD* consider just thrashing these debugfs files. It is not
+> technically ABI and I wonder who is actually using them.
+
+I think the ext_csd is extremely useful on storage devices to have
+exposed to user space in some form. There is a comment saying
+that we don't store it in RAM at the moment as it is rarely used,
+but we could change that, as it's only 512 bytes per eMMC device
+and there is rarely more than one of them. IIRC, the ext_csd is
+entirely readonly and doesn't change during runtime, so we
+gain nothing by issuing the commands every time someone reads
+the debugfs file.
+
+       Arnd
