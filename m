@@ -1,41 +1,81 @@
-From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: [RFC PATCH] mmc: core: Remove CONFIG_MMC_BLOCK_BOUNCE option.
-Date: Tue, 23 May 2017 20:24:41 +0200
-Message-ID: <e38eb2c8-db91-1a36-925d-aa88be56a40b@ossman.eu>
-References: <20170510082418.10513-1-linus.walleij@linaro.org>
- <CGME20170510082450epcas1p148987e484907660670e2f875530c31c8@epcas1p1.samsung.com>
- <20170510082418.10513-2-linus.walleij@linaro.org>
- <3202707.f2tzK1cxd8@amdc3058>
- <CACRpkdZp3JtnNrxsvtNT7hDB1w5KJomngs-=J8PG5fbDF=e+0w@mail.gmail.com>
- <cc8694f6-4955-51d3-6342-107cfbb50ed2@cavium.com>
- <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
+From: David Woods <dwoods@mellanox.com>
+Subject: Re: [PATCH 2/2] mmc: core: Use device_property_read instead of
+ of_property_read
+Date: Tue, 23 May 2017 15:30:33 -0400
+Message-ID: <4803df54-117e-451f-ee88-9e19c1a4def1@mellanox.com>
+References: <1495059429-15247-1-git-send-email-dwoods@mellanox.com>
+ <1495059429-15247-2-git-send-email-dwoods@mellanox.com>
+ <CAPDyKFq-LSBr79ej06p2F_GcJeOMnuuJvOO0XgjaGCHoU1RpUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdYV2KfyRL6eweie3Yb-Em7L9X6Y3k=SOqO107oUX9MNbw@mail.gmail.com>
-Content-Language: en-GB
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, "Steven J. Hill" <Steven.Hill@cavium.com>, Vinod Koul <vinod.koul@intel.com>
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Paolo Valente <paolo.valente@linaro.org>, Daniel Mack <daniel@zonque.org>, Marc Zyngier <marc.zyngier@arm.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db5eur01on0061.outbound.protection.outlook.com ([104.47.2.61]:40160
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1761585AbdEWTaq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 23 May 2017 15:30:46 -0400
+In-Reply-To: <CAPDyKFq-LSBr79ej06p2F_GcJeOMnuuJvOO0XgjaGCHoU1RpUQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Heiner Kallweit <hkallweit1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, cmetcalf@mellanox.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.linux.org
 
-On 23/05/17 11:05, Linus Walleij wrote:
-> 
-> Pierre, what host were you developing this for? Maybe I can try
-> to get the same and test it.
-> 
+On 05/19/2017 04:23 AM, Ulf Hansson wrote:
+> On 18 May 2017 at 00:17, David Woods <dwoods@mellanox.com> wrote:
+>> Using the device_property interfaces allows mmc drivers to work
+>> on platforms which run on either device tree or ACPI.
+>>
+>> Signed-off-by: David Woods <dwoods@mellanox.com>
+>> Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
+>> Cc: stable@vger.linux.org
+>> ---
+>>   drivers/mmc/core/host.c | 72 ++++++++++++++++++++++++-------------------------
+>>   1 file changed, 35 insertions(+), 37 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>> index 3f8c85d..d2c059e 100644
+>> --- a/drivers/mmc/core/host.c
+>> +++ b/drivers/mmc/core/host.c
+>> @@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
+>>    */
+>>   int mmc_of_parse(struct mmc_host *host)
+>>   {
+>> -       struct device_node *np;
+>> +       struct device *dev = host->parent;
+>>          u32 bus_width;
+>>          int ret;
+>>          bool cd_cap_invert, cd_gpio_invert = false;
+>>          bool ro_cap_invert, ro_gpio_invert = false;
+>>
+>> -       if (!host->parent || !host->parent->of_node)
+>> +       if (!dev)
+>>                  return 0;
+>>
+> So earlier we stopped executing the OF parsing at this point, unless
+> we had valid a of_node pointer. To be safe, I think we need to do
+> something similar here.
+>
+> In other words, perhaps check the result from dev_fwnode(), before continue.
 
-I think the work primarily was done with the Texas Instruments SDHCI 
-host that HP used in their laptops. Ricoh controllers were also popular, 
-but they had some proprietary mode that you had to get them out of.
+I will add that check.
 
-If I recall correctly, all early SDHCI controllers needed this feature. 
-I think scatter/gather was a later addition to the spec.
+> [...]
+>
+> mmc_pwrseq_alloc() is called from mmc_of_parse() which currently only
+> supports OF parsing. I assume you would like to convert that as well?
+> Perhaps that should even be the first step?
 
-I take it updates to the SD specification hasn't fixed this performance 
-issue?
+Our board does not have a power sequence device, so this is not 
+something I have the hardware available to test.  It's not very clear to 
+me how a pwrseq reference would be represented in ACPI or how to access 
+it with the device_property API.  As it is, of_parse_phandle just 
+returns NULL in the case where there is no parent->of_node.
 
-Regards
--- 
-Pierre Ossman
+-David Woods
+
+>
+> Kind regards
+> Uffe
+
+
