@@ -1,74 +1,97 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.12 rc3 - take 1/2
-Date: Wed, 24 May 2017 10:40:41 +0200
-Message-ID: <CAPDyKFppbduFunKcU64Cx3Die=XGb3VNR+1Qkm17QBXhAXq6nw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v3 resend 3/3] mmc: sdhci-acpi: Add DMI based blacklist
+Date: Wed, 24 May 2017 12:47:55 +0200
+Message-ID: <20170524104755.25274-4-hdegoede@redhat.com>
+References: <20170524104755.25274-1-hdegoede@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:40058 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S939660AbdEXKsD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 May 2017 06:48:03 -0400
+In-Reply-To: <20170524104755.25274-1-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
 
-Hi Linus,
+Add a DMI based blacklist for systems where probing some sdio interfaces
+is harmful (e.g. causes pci-e based wifi to not work).
 
-Here are a couple of mmc fixes intended for v4.12 rc3. They are based
-on v4.12-rc1.
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist module option
+-Only use a single fix_up_power_dmi_blacklist for the GPDwin further testing
+ has shown that the DMI strings are unique enough that we do not need the
+ bios-date in there
+Changes in v3:
+-Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
+---
+ drivers/mmc/host/sdhci-acpi.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
-If everything goes as expected, I intend to send yet another PR later
-this week with some more fixes, hence take 1/2.
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 3a7d979a306d..45455abc7ca6 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -36,6 +36,7 @@
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/delay.h>
++#include <linux/dmi.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/pm.h>
+@@ -381,6 +382,28 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+ };
+ MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+ 
++static const struct dmi_system_id fix_up_power_dmi_blacklist[] = {
++	{
++		/*
++		 * Match for the GPDwin which unfortunately uses somewhat
++		 * generic dmi strings, which is why we test for 4 strings.
++		 * Comparing against 23 other byt/cht boards, board_vendor
++		 * and board_name are unique to the GPDwin, where as only one
++		 * other board has the same board_serial and 3 others have
++		 * the same default product_name. Also the GPDwin is the
++		 * only device to have both board_ and product_name not set.
++		 */
++		.driver_data = "80860F14:2",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
++			DMI_MATCH(DMI_BOARD_NAME, "Default string"),
++			DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
++		},
++	},
++	{ }
++};
++
+ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+ 							 const char *uid)
+ {
+@@ -403,6 +426,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	acpi_handle handle = ACPI_HANDLE(dev);
+ 	const char *bl = blacklist;
+ 	struct acpi_device *device, *child;
++	const struct dmi_system_id *dmi_id;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+@@ -417,6 +441,12 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	hid = acpi_device_hid(device);
+ 	uid = device->pnp.unique_id;
+ 
++	if (!bl) {
++		dmi_id = dmi_first_match(fix_up_power_dmi_blacklist);
++		if (dmi_id)
++			bl = dmi_id->driver_data;
++	}
++
+ 	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
+ 		return -ENODEV;
+ 
+-- 
+2.13.0
 
-Details are as usual found in the signed tag. Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 2ea659a9ef488125eb46da6eb571de5eae5c43f6:
-
-  Linux 4.12-rc1 (2017-05-13 13:19:49 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.12-rc1
-
-for you to fetch changes up to f5f968f2371ccdebb8a365487649673c9af68d09:
-
-  mmc: sdhci-iproc: suppress spurious interrupt with Multiblock read
-(2017-05-22 18:18:04 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci-xenon: Don't free data for phy allocated by devm*
- - sdhci-iproc: Suppress spurious interrupts
- - cavium: Fix probing race with regulator
- - cavium: Prevent crash with incomplete DT
- - cavium-octeon: Use proper GPIO name for power control
- - cavium-octeon: Fix interrupt enable code
-
-----------------------------------------------------------------
-David Daney (2):
-      mmc: cavium-octeon: Fix interrupt enable code
-      mmc: cavium-octeon: Use proper GPIO name for power control
-
-Jan Glauber (3):
-      mmc: cavium: Prevent crash with incomplete DT
-      of/platform: Make of_platform_device_destroy globally visible
-      mmc: cavium: Fix probing race with regulator
-
-Jisheng Zhang (1):
-      mmc: sdhci-xenon: kill xenon_clean_phy()
-
-Srinath Mannam (1):
-      mmc: sdhci-iproc: suppress spurious interrupt with Multiblock read
-
- drivers/mmc/host/cavium-octeon.c   | 15 ++++++++++++---
- drivers/mmc/host/cavium-thunderx.c |  6 ++++++
- drivers/mmc/host/cavium.c          | 25 ++++++++++---------------
- drivers/mmc/host/sdhci-iproc.c     |  3 ++-
- drivers/mmc/host/sdhci-xenon-phy.c | 14 +-------------
- drivers/mmc/host/sdhci-xenon.c     |  6 +-----
- drivers/mmc/host/sdhci-xenon.h     |  1 -
- drivers/of/platform.c              |  3 ++-
- include/linux/of_platform.h        |  1 +
- 9 files changed, 35 insertions(+), 39 deletions(-)
