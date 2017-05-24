@@ -1,31 +1,59 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH] mmc: host: tighten some of the dependencies on SoC
- drivers
-Date: Wed, 24 May 2017 16:47:04 +0200
-Message-ID: <2ea26581-ec72-cfb4-dc0d-df20562c36d3@i2se.com>
-References: <20170524121556.27819-1-pbrobinson@gmail.com>
+From: "Schaefer, Brandon" <brandon.schaefer@flukenetworks.com>
+Subject: RE: Enabling RPMB overwrites setting the boot partition via ioctl
+Date: Wed, 24 May 2017 19:03:59 +0000
+Message-ID: <BN6PR12MB1442844E61BCAA3FF030F2AD90FE0@BN6PR12MB1442.namprd12.prod.outlook.com>
+References: <BN6PR12MB1442FDD4A02698E52489183490E50@BN6PR12MB1442.namprd12.prod.outlook.com>
+ <CAPDyKFq3tgYgWcO3w_7_1-3CgDWhKq2RWqKygcgBk2CfR8tsHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.135]:54678 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933703AbdEXOrN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 10:47:13 -0400
-In-Reply-To: <20170524121556.27819-1-pbrobinson@gmail.com>
+Received: from mx0a-001d2f02.pphosted.com ([148.163.157.190]:33199 "EHLO
+        mx0a-001d2f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S940867AbdEXT3V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 15:29:21 -0400
+In-Reply-To: <CAPDyKFq3tgYgWcO3w_7_1-3CgDWhKq2RWqKygcgBk2CfR8tsHA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Robinson <pbrobinson@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Bean Huo (beanhuo)" <beanhuo@micron.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-Hi Peter,
-
-Am 24.05.2017 um 14:15 schrieb Peter Robinson:
-> Cleanup and tighten some of the dependencies for SoC specific hardware, remove a
-> duplication on MMC_SDHI, and add COMPILE_TEST where we add SoC specifics to
-> ensure continued build coverage.
-
-i suggest to send a copy to the relevant driver / platform maintainers.
-
-Stefan
-
+SGVsbG8gVWZmZSwNCg0KSSBtb3N0IGxpa2VseSB3aWxsIG5vdCBiZSBhYmxlIHRvIGNvbmZpcm0g
+dGhhdCB0aGUgcHJvYmxlbSBpcyBzdGlsbCBwcmVzZW50IGluIG1tYy1uZXh0IGZvciB5b3UsIEkg
+ZG8gbm90IGhhdmUgaGFyZHdhcmUgYXZhaWxhYmxlIHRvIGRvIHNvLiBMb29raW5nIGF0IHRoZSBj
+b2RlIHRoaXMgYnVnIGRvZXMgc2VlbSB0byBiZSBwcmVzZW50IGFzIGV4dF9jc2QucGFydF9jb25m
+aWcgaXMgbm90IHVwZGF0ZWQgaW4gdGhlIGlvY3RsLCByZWxhdGVkIHRvIDIpIGluIHlvdXIgc3Vt
+bWFyeS4gVGhlcmUgY291bGQgYmUgb3RoZXIgcGxhY2VzIHNpbWlsYXIgdG8gdGhlIHNjZW5hcmlv
+IEkndmUgcmVwb3J0ZWQgZm9yIG90aGVyIHBhcnRzb2YgZXh0IGNzZCwgYnV0IEknbSBub3QgZmFt
+aWxpYXIgZW5vdWdoIHdpdGggZWl0aGVyIG1tYyBzcGVjaWZpY2F0aW9uIG9yIHRoZSBjb2RlIC4N
+Cg0KQXMgZm9yIDEpIGNhbm5vdCBjb25maXJtIGFzIEkndmUgbmV2ZXIgd2l0bmVzc2VkIHRoaXMg
+aXNzdWUuDQoNCj4gSSBhbSBub3Qgc3VyZSBob3cgdG8gZ28gd2l0aCB0aGlzLCBlc3BlY2lhbGx5
+IHNpbmNlIHlvdSBhcmUgcmVmZXJyaW5nIHRvIGFuIG9sZA0KPiBrZXJuZWwsIDQuMS4xNS4gQ2Fu
+IHlvdSBjb25maXJtIHRoYXQgdGhlIHByb2JsZW0gaXMgc3RpbGwgcHJlc2VudCBpbiB0aGUgbXkN
+Cj4gbmV4dCBicmFuY2ggb2YgbXkgbW1jIGdpdCB0cmVlPyBUaGF0IHdvdWxkIGJlIG1vcmUgcmVs
+ZXZhbnQgaW5mb3JtYXRpb24gdG8NCj4gc3RhcnQgd2l0aC4NCj4NCj4gU28gdG8gbW92ZSBmb3J3
+YXJkLCBJIGRlY2lkZSB0byBpbnZlc3RpZ2F0ZSB0aGUgcHJvYmxlbSBhIGJpdC4gSGVyZSdzIG15
+DQo+IHN1bW1hcnk6DQo+DQo+IDEpIFRoZXJlIGFyZSBwcm9ibGVtcyByZWdhcmRpbmcgc3dpdGNo
+aW5nIGJldHdlZW4gcGFydGl0aW9ucyBpbiBnZW5lcmFsLA0KPiBiZWNhdXNlIHRoZSAoZSlNTUMg
+cGFydGl0aW9ucyBpc24ndCBjb3JyZWN0bHkgc2V0IHVwLg0KPiAyKSBUaGUgYXJlIHByb2JsZW1z
+IHJlbGF0ZWQgdG8gd2hlbiB1c2Vyc3BhY2UgdXRpbGl6ZXMgdGhlIG1tYyBiYWNrLWRvb3INCj4g
+KG1tYy1pb2N0bCkgdG8gY2hhbmdlIGV4dCBjc2QsIGJlY2F1c2UgdGhlIG1tYyBjb3JlIGRvbid0
+IGdldCBpbmZvcm1lZA0KPiBhYm91dCB0aGVzZSB1cGRhdGVzLiBGb3IgZXhhbXBsZSwgdGhlIG1t
+YyBjb3JlIG1heSB0aGVuIHRha2Ugd3JvbmcNCj4gZGVjaXNpb25zIGluIHRoZSBzdXNwZW5kL3Jl
+c3VtZSBzZXF1ZW5jZS4NCj4NCj4gSXQgd291bGQgcmVhbGx5IGJlIG5pY2UgdG8gZml4IHRoZXNl
+IHByb2JsZW1zLCBob3dldmVyIEkgbmVlZCBnb29kIHF1YWxpdHkNCj4gcGF0Y2hlcywgYmFzZWQg
+b24gbXkgbW1jIG5leHQgYnJhbmNoIGNvbmZpcm1pbmcgdG8gZml4IHByb2JsZW1zLg0KPg0KDQpJ
+IGNhbiBzdWJtaXQgYSBwYXRjaCBmb3IgdGhlIGJ1ZyBJJ3ZlIHdpdG5lc3NlZCBpZiB5b3UnZCBs
+aWtlLCB3aGljaCBtYXkgZW5kIHVwIGJlaW5nIGEgc2VyaWVzIG9mIHNpbWlsYXIgZml4ZXMgZnJv
+bSBvdGhlcnM/DQoNCkJyYW5kb24NCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQoNClBsZWFzZSBiZSBhZHZpc2VkIHRo
+YXQgdGhpcyBlbWFpbCBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24uIElmIHlv
+dSBhcmUgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHBsZWFzZSBub3RpZnkgdXMgYnkgZW1h
+aWwgYnkgcmVwbHlpbmcgdG8gdGhlIHNlbmRlciBhbmQgZGVsZXRlIHRoaXMgbWVzc2FnZS4gVGhl
+IHNlbmRlciBkaXNjbGFpbXMgdGhhdCB0aGUgY29udGVudCBvZiB0aGlzIGVtYWlsIGNvbnN0aXR1
+dGVzIGFuIG9mZmVyIHRvIGVudGVyIGludG8sIG9yIHRoZSBhY2NlcHRhbmNlIG9mLCBhbnkgYWdy
+ZWVtZW50OyBwcm92aWRlZCB0aGF0IHRoZSBmb3JlZ29pbmcgZG9lcyBub3QgaW52YWxpZGF0ZSB0
+aGUgYmluZGluZyBlZmZlY3Qgb2YgYW55IGRpZ2l0YWwgb3Igb3RoZXIgZWxlY3Ryb25pYyByZXBy
+b2R1Y3Rpb24gb2YgYSBtYW51YWwgc2lnbmF0dXJlIHRoYXQgaXMgaW5jbHVkZWQgaW4gYW55IGF0
+dGFjaG1lbnQuDQo=
