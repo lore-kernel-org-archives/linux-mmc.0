@@ -1,130 +1,48 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH v3 resend 2/3] mmc: sdhci-acpi: Add blacklist module option
-Date: Wed, 24 May 2017 12:47:54 +0200
-Message-ID: <20170524104755.25274-3-hdegoede@redhat.com>
+Subject: [PATCH v3 resend 1/3] mmc: sdhci-acpi: Remove unneeded acpi_bus_get_status() call
+Date: Wed, 24 May 2017 12:47:53 +0200
+Message-ID: <20170524104755.25274-2-hdegoede@redhat.com>
 References: <20170524104755.25274-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55304 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53322 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S939659AbdEXKsC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 24 May 2017 06:48:02 -0400
+        id S939658AbdEXKsB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 May 2017 06:48:01 -0400
 In-Reply-To: <20170524104755.25274-1-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
 
-Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
-powered when probing") introduced unconditional calling of
-acpi_device_fix_up_power() on the mmc controller and its children.
-
-This broke wifi on some systems because acpi_device_fix_up_power()
-was called even for disabled children sometimes leaving gpio-s in
-a state where wifi would not work, this was fixed in
-commit e1d070c3793a ("mmc: sdhci-acpi: Only powered up enabled acpi
-child devices").
-
-Unfortunately on some devices calling acpi_device_fix_up_power()
-still causes issues. Specifically on the GPD-win mini clam-shell PC
-which has a pci-e wifi module, it causes the wifi module to get
-turned off. This is a BIOS bug and I've tried to get the manufacturer
-to fix this but sofar they have not responded (and even if they do
-then we cannot assume all users will update their BIOS).
-
-Since the GPD-win uses a pci-e wifi module the sdhci controller for
-sdio cards really should not get initialized on it at all.
-
-This commit adds a new sdhci_acpi.blacklist module option which can
-be set to an ACPI hid:uid pair, e.g. "80860F14:2" to disable probing
-for the sdhci host matching the hid:uid pair, fixing the wifi not
-working on this machine.
+The acpi-subsys already calls acpi_bus_get_status() and checks that
+device->status.present is set before even registering the platform_device
+so out probe function will never get called if device->status.present is
+false and there is no need for this check.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 Changes in v2:
--Make the module option take a hid:uid pair string, instead of it
- being a boolean option, so that it only applies to one host
-Changes in v3:
--Make the module option skip probing the device entirely (return -ENODEV)
+-This is a new patch replacing "mmc: sdhci-acpi: Check device status
+ before calling fix_up_power()"
 ---
- drivers/mmc/host/sdhci-acpi.c | 36 +++++++++++++++++++++++++++++++++---
- 1 file changed, 33 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-acpi.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 89d9a8c014f5..3a7d979a306d 100644
+index c6a9a1bfaa22..89d9a8c014f5 100644
 --- a/drivers/mmc/host/sdhci-acpi.c
 +++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -83,6 +83,29 @@ struct sdhci_acpi_host {
- 	bool				use_runtime_pm;
- };
+@@ -396,9 +396,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 		if (child->status.present && child->status.enabled)
+ 			acpi_device_fix_up_power(child);
  
-+static char *blacklist;
-+
-+static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
-+				       const char *uid)
-+{
-+	const char *sep;
-+
-+	if (!match)
-+		return false;
-+
-+	sep = strchr(match, ':');
-+	if (!match)
-+		return false;
-+
-+	if (strncmp(match, hid, sep - match))
-+		return false;
-+
-+	if (strcmp(sep + 1, uid))
-+		return false;
-+
-+	return true;
-+}
-+
- static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
- {
- 	return c->slot && (c->slot->flags & flag);
-@@ -378,6 +401,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
- 	acpi_handle handle = ACPI_HANDLE(dev);
-+	const char *bl = blacklist;
- 	struct acpi_device *device, *child;
- 	struct sdhci_acpi_host *c;
- 	struct sdhci_host *host;
-@@ -390,6 +414,12 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (acpi_bus_get_device(handle, &device))
- 		return -ENODEV;
- 
-+	hid = acpi_device_hid(device);
-+	uid = device->pnp.unique_id;
-+
-+	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
-+		return -ENODEV;
-+
- 	/* Power on the SDHCI controller and its children */
- 	acpi_device_fix_up_power(device);
- 	list_for_each_entry(child, &device->children, node)
-@@ -399,9 +429,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+-	if (acpi_bus_get_status(device) || !device->status.present)
+-		return -ENODEV;
+-
  	if (sdhci_acpi_byt_defer(dev))
  		return -EPROBE_DEFER;
  
--	hid = acpi_device_hid(device);
--	uid = device->pnp.unique_id;
--
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem)
- 		return -ENOMEM;
-@@ -580,6 +607,9 @@ static struct platform_driver sdhci_acpi_driver = {
- 
- module_platform_driver(sdhci_acpi_driver);
- 
-+module_param(blacklist, charp, 0444);
-+MODULE_PARM_DESC(blacklist, "ACPI <HID:UID> which should be ignored");
-+
- MODULE_DESCRIPTION("Secure Digital Host Controller Interface ACPI driver");
- MODULE_AUTHOR("Adrian Hunter");
- MODULE_LICENSE("GPL v2");
 -- 
 2.13.0
 
