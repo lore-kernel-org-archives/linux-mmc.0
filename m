@@ -1,59 +1,183 @@
-From: "Schaefer, Brandon" <brandon.schaefer@flukenetworks.com>
-Subject: RE: Enabling RPMB overwrites setting the boot partition via ioctl
-Date: Wed, 24 May 2017 19:03:59 +0000
-Message-ID: <BN6PR12MB1442844E61BCAA3FF030F2AD90FE0@BN6PR12MB1442.namprd12.prod.outlook.com>
-References: <BN6PR12MB1442FDD4A02698E52489183490E50@BN6PR12MB1442.namprd12.prod.outlook.com>
- <CAPDyKFq3tgYgWcO3w_7_1-3CgDWhKq2RWqKygcgBk2CfR8tsHA@mail.gmail.com>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: Re: [RFC 0/2] Add support for Meson MX "SDIO" MMC driver
+Date: Wed, 24 May 2017 22:37:40 +0200
+Message-ID: <CAFBinCCiTXKoZKRfAW_ZZpTv5Fthxia_q6heVgG-uM2-6=rXjg@mail.gmail.com>
+References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+ <CAPDyKFoYPjB1bjRfFCFT3vuzKgzm6-7L2qgNjxGL392cLDe7uA@mail.gmail.com>
+ <CAFBinCDGBZAAx_61eyu1_XM57fX62Mk03TEiO3uTL+i8dfPyZA@mail.gmail.com>
+ <CAPDyKFoC-cCEY+n2383W+JgDANbBMFbsU5cyB51-kG4kbLNNcw@mail.gmail.com> <CAFBinCDocqqo2GNLb2y1XE0ATTEG6TuqO+EZ_-h8=vuTjngr_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-001d2f02.pphosted.com ([148.163.157.190]:33199 "EHLO
-        mx0a-001d2f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S940867AbdEXT3V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 15:29:21 -0400
-In-Reply-To: <CAPDyKFq3tgYgWcO3w_7_1-3CgDWhKq2RWqKygcgBk2CfR8tsHA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35991 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1031752AbdEXUiC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 16:38:02 -0400
+In-Reply-To: <CAFBinCDocqqo2GNLb2y1XE0ATTEG6TuqO+EZ_-h8=vuTjngr_Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Bean Huo (beanhuo)" <beanhuo@micron.com>, Shawn Lin <shawn.lin@rock-chips.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-amlogic@lists.infradead.org
 
-SGVsbG8gVWZmZSwNCg0KSSBtb3N0IGxpa2VseSB3aWxsIG5vdCBiZSBhYmxlIHRvIGNvbmZpcm0g
-dGhhdCB0aGUgcHJvYmxlbSBpcyBzdGlsbCBwcmVzZW50IGluIG1tYy1uZXh0IGZvciB5b3UsIEkg
-ZG8gbm90IGhhdmUgaGFyZHdhcmUgYXZhaWxhYmxlIHRvIGRvIHNvLiBMb29raW5nIGF0IHRoZSBj
-b2RlIHRoaXMgYnVnIGRvZXMgc2VlbSB0byBiZSBwcmVzZW50IGFzIGV4dF9jc2QucGFydF9jb25m
-aWcgaXMgbm90IHVwZGF0ZWQgaW4gdGhlIGlvY3RsLCByZWxhdGVkIHRvIDIpIGluIHlvdXIgc3Vt
-bWFyeS4gVGhlcmUgY291bGQgYmUgb3RoZXIgcGxhY2VzIHNpbWlsYXIgdG8gdGhlIHNjZW5hcmlv
-IEkndmUgcmVwb3J0ZWQgZm9yIG90aGVyIHBhcnRzb2YgZXh0IGNzZCwgYnV0IEknbSBub3QgZmFt
-aWxpYXIgZW5vdWdoIHdpdGggZWl0aGVyIG1tYyBzcGVjaWZpY2F0aW9uIG9yIHRoZSBjb2RlIC4N
-Cg0KQXMgZm9yIDEpIGNhbm5vdCBjb25maXJtIGFzIEkndmUgbmV2ZXIgd2l0bmVzc2VkIHRoaXMg
-aXNzdWUuDQoNCj4gSSBhbSBub3Qgc3VyZSBob3cgdG8gZ28gd2l0aCB0aGlzLCBlc3BlY2lhbGx5
-IHNpbmNlIHlvdSBhcmUgcmVmZXJyaW5nIHRvIGFuIG9sZA0KPiBrZXJuZWwsIDQuMS4xNS4gQ2Fu
-IHlvdSBjb25maXJtIHRoYXQgdGhlIHByb2JsZW0gaXMgc3RpbGwgcHJlc2VudCBpbiB0aGUgbXkN
-Cj4gbmV4dCBicmFuY2ggb2YgbXkgbW1jIGdpdCB0cmVlPyBUaGF0IHdvdWxkIGJlIG1vcmUgcmVs
-ZXZhbnQgaW5mb3JtYXRpb24gdG8NCj4gc3RhcnQgd2l0aC4NCj4NCj4gU28gdG8gbW92ZSBmb3J3
-YXJkLCBJIGRlY2lkZSB0byBpbnZlc3RpZ2F0ZSB0aGUgcHJvYmxlbSBhIGJpdC4gSGVyZSdzIG15
-DQo+IHN1bW1hcnk6DQo+DQo+IDEpIFRoZXJlIGFyZSBwcm9ibGVtcyByZWdhcmRpbmcgc3dpdGNo
-aW5nIGJldHdlZW4gcGFydGl0aW9ucyBpbiBnZW5lcmFsLA0KPiBiZWNhdXNlIHRoZSAoZSlNTUMg
-cGFydGl0aW9ucyBpc24ndCBjb3JyZWN0bHkgc2V0IHVwLg0KPiAyKSBUaGUgYXJlIHByb2JsZW1z
-IHJlbGF0ZWQgdG8gd2hlbiB1c2Vyc3BhY2UgdXRpbGl6ZXMgdGhlIG1tYyBiYWNrLWRvb3INCj4g
-KG1tYy1pb2N0bCkgdG8gY2hhbmdlIGV4dCBjc2QsIGJlY2F1c2UgdGhlIG1tYyBjb3JlIGRvbid0
-IGdldCBpbmZvcm1lZA0KPiBhYm91dCB0aGVzZSB1cGRhdGVzLiBGb3IgZXhhbXBsZSwgdGhlIG1t
-YyBjb3JlIG1heSB0aGVuIHRha2Ugd3JvbmcNCj4gZGVjaXNpb25zIGluIHRoZSBzdXNwZW5kL3Jl
-c3VtZSBzZXF1ZW5jZS4NCj4NCj4gSXQgd291bGQgcmVhbGx5IGJlIG5pY2UgdG8gZml4IHRoZXNl
-IHByb2JsZW1zLCBob3dldmVyIEkgbmVlZCBnb29kIHF1YWxpdHkNCj4gcGF0Y2hlcywgYmFzZWQg
-b24gbXkgbW1jIG5leHQgYnJhbmNoIGNvbmZpcm1pbmcgdG8gZml4IHByb2JsZW1zLg0KPg0KDQpJ
-IGNhbiBzdWJtaXQgYSBwYXRjaCBmb3IgdGhlIGJ1ZyBJJ3ZlIHdpdG5lc3NlZCBpZiB5b3UnZCBs
-aWtlLCB3aGljaCBtYXkgZW5kIHVwIGJlaW5nIGEgc2VyaWVzIG9mIHNpbWlsYXIgZml4ZXMgZnJv
-bSBvdGhlcnM/DQoNCkJyYW5kb24NCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KDQoNClBsZWFzZSBiZSBhZHZpc2VkIHRo
-YXQgdGhpcyBlbWFpbCBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24uIElmIHlv
-dSBhcmUgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHBsZWFzZSBub3RpZnkgdXMgYnkgZW1h
-aWwgYnkgcmVwbHlpbmcgdG8gdGhlIHNlbmRlciBhbmQgZGVsZXRlIHRoaXMgbWVzc2FnZS4gVGhl
-IHNlbmRlciBkaXNjbGFpbXMgdGhhdCB0aGUgY29udGVudCBvZiB0aGlzIGVtYWlsIGNvbnN0aXR1
-dGVzIGFuIG9mZmVyIHRvIGVudGVyIGludG8sIG9yIHRoZSBhY2NlcHRhbmNlIG9mLCBhbnkgYWdy
-ZWVtZW50OyBwcm92aWRlZCB0aGF0IHRoZSBmb3JlZ29pbmcgZG9lcyBub3QgaW52YWxpZGF0ZSB0
-aGUgYmluZGluZyBlZmZlY3Qgb2YgYW55IGRpZ2l0YWwgb3Igb3RoZXIgZWxlY3Ryb25pYyByZXBy
-b2R1Y3Rpb24gb2YgYSBtYW51YWwgc2lnbmF0dXJlIHRoYXQgaXMgaW5jbHVkZWQgaW4gYW55IGF0
-dGFjaG1lbnQuDQo=
+Hi Ulf,
+
+On Thu, May 11, 2017 at 10:44 PM, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+> Hi Ulf,
+>
+> On Thu, May 11, 2017 at 11:39 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 10 May 2017 at 21:22, Martin Blumenstingl
+>> <martin.blumenstingl@googlemail.com> wrote:
+>>> Hi Ulf,
+>>>
+>>> On Wed, May 10, 2017 at 10:44 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> On 6 May 2017 at 19:18, Martin Blumenstingl
+>>>> <martin.blumenstingl@googlemail.com> wrote:
+>>>>> This is the successor to Carlo Caione's "Add support for Amlogic Meson
+>>>>> MMC driver" series (v5) from [0].
+>>>>>
+>>>>> I would like you to specifically review:
+>>>>> - whether I've (ab)used the MMC framework properly (as this is my first
+>>>>>   "larger" contribution to an MMC driver)
+>>>>
+>>>> I take a look soonish.
+>>> thank you!
+>>>
+>>>>> - I think I have improved the locking compared to Carlo's version,
+>>>>>   however I'd still like feedback on whether this looks sane now or if I
+>>>>>   can improve that even further
+>>>>>
+>>>>> (notable) changes since Carlo's latest version are:
+>>>>> - renamed the driver to meson-mx-sdio (Amlogic's reference kernel calls
+>>>>>   the driver "aml_sdio" as there is a second MMC controller in these SoCs
+>>>>>   which they call the "SDHC controller"). do the same with our driver to
+>>>>
+>>>> I don't like to renaming drivers, just because there are a reference
+>>>> kernel using a different name.
+>>>>
+>>>> What's is really the difference between controllers? Why do they have
+>>>> two variants?
+>>> the driver from this thread is for the "SDSC/SDHC/SDXC card and SDIO
+>>> interface with 1-bit and 4-bit data bus width supporting spec version
+>>> 2.x/3.x/4.x DS/HS modes up to UHS-I SDR50" (quote taken from the S805
+>>> datasheet: [0])
+>>> the "other" controller is an "eMMC and MMC card interface with
+>>> 1/4/8-bit data bus width supporting spec version 4.4x/4.5x HS200 (up
+>>> to 100MHz clock), compatible with standard iNAND interface" (again,
+>>> quote taken from the S805 datasheet: [0])
+>>>
+>>>>
+>>>> Can they be managed by the same driver?
+>>>>
+>>>>>   avoid confusion once we add support for the second controller (which uses
+>>>>>   a completely different register layout)
+>>>>
+>>>> Besides that, do they behave differently in some other way?
+>>> both drivers/controllers have a totally different register layout - I
+>>> don't see any way how they both could be handled by one driver (the
+>>> registers for the controllers from this series are not part of the
+>>> documentation, but the registers from the 8-bit capable controller
+>>> are, see page 76 and following from the S805 datasheet: [0])
+>>
+>> Okay, I am starting to understand. :-)
+> good to hear that my explanation made (at least some) sense!
+>
+>> The spec in section 13 describes a controller supporting "MMC/SD/SDIO"
+>> cards. However, there is yet another controller which @subject series
+>> implement support for.
+>> You don't happen to have a public datasheet for this controller as
+>> well? If not, never mind.
+> unfortunately the controller from @subject does not show up in any of
+> the public datasheets, but we have a header file from Amlogic which
+> documents it just as well as the datasheet (probably) would: [0]
+>
+>> Then, meson actually have three different MMC/SD/SDIO controllers, the
+>> one in the S805 spec, the one supported by the recently up-streamed
+>> meson-gx-mmc.c driver - and the one being supported in this series.
+>> Right? And all of them are completely separate and non-compatible?
+> yes, unfortunately it seems that there are three different MMC
+> controller IP blocks from Amlogic
+>
+> let me explain this a bit more in detail:
+> the code-names of the newer (64-bit) SoCs all start with GX (GXBB,
+> GXL, GXM), so we call these "Meson GX".
+> the code-names of the older (32-bit) SoCs (at least the ones which are
+> not too old) all start with Meson X (where X is a number: Meson6,
+> Meson8, Meson8b and Meson8m2), Amlogic's vendor code sometimes calls
+> these "MX" (or Meson MX)
+>
+> the MMC IP blocks in Meson GX SoCs are easy: the same IP block is
+> embedded three times -> the driver for this is meson-gx-mmc.c (already
+> upstream)
+> the MMC IP blocks in Meson MX SoCs are more complicated: 1x 1/4-bit
+> which will be handled by the driver from @subject (meson-mx-sdio.c)
+> and 1x 1/4/8-bit for which there is only the vendor driver (plus the
+> description in the S805 datasheet) available.
+>
+> so it looks like the older Meson MX SoCs may end up with two different
+> drivers, while there's a third driver (for a totally different IP
+> block) for the newer Meson GX SoCs.
+>
+> [snip]
+>>>>> - use the common clock framework internally for managing the MMC clock
+>>>>>   (there is a fixed-factor clock in the controller which takes clk81 as
+>>>>>    input and divides it's clock by two and a divider clock which takes
+>>>>>    the result from the fixed-factor clock as input)
+>>>>> - support the regulators provided by the MMC framework
+>>>>> - support for GPIO-based card-detection and read-only-detection through
+>>>>>   the MMC framework
+>>>>> - use of the <linux/bitfield.h> FIELD_PREP and FIELD_GET macros where it
+>>>>>   make sense (and thus the code easier to read)
+>>>>> - re-worked locking (based on the locking in dw_mmc as that also provides
+>>>>>   multiple "MMC slots")
+>>>>
+>>>> Lots of changes!
+>>>>
+>>>> Before even start to review (or someone else), you really need to make
+>>>> this review-able.
+>>>>
+>>>> So, please, one change per patch - and make sure to write good
+>>>> changelogs. Then I can start to review.
+>>> from the mainline tree's perspective this is a new driver:
+>>
+>> Yes, I get it now.
+>>
+>> I first thought this series was related to the recently up-streamed
+>> meson-gx-mmc.c driver. Apologize for my ignorance.
+> should I put some more context/details in the description (maybe
+> something like: "this is a new driver/binding because the Meson MX
+> SoCs use a different IP block than the Meson GX SoCs (the IP block
+> from the latter is already supported by the meson-gx-mmc driver)"?
+>
+>>> Carlo (the original author) initially sent this driver for review more
+>>> than 14 months ago. unfortunately it was never merged since you
+>>> spotted some issues while reviewing that code, see [1].
+>>
+>> Yes, I recall that now.
+> the 14 month delay was one of the reasons why I decided to re-post it
+> only after all features were implemented
+>
+>>> I would have sent smaller patches for a driver which is already in mainline.
+>>
+>> Right.
+>>
+>>>
+>>> I also wanted to avoid extra complexity for the internal mux if it was
+>>> added later on (if we want to avoid breaking devicetree backwards
+>>> compatibility then the driver would have to support both: parsing from
+>>> the mmc node directly and parsing child "slot" nodes). we won't have
+>>> to change the DT bindings when the first version that will be
+>>> mainlined already has support for the mux
+>>>
+>>> please let me know if there's anything I can do to make the code
+>>> easier to review.
+>>
+>> No worries, let me have a look as is!
+> okay, perfect! just take your time and let me know what needs to be changed.
+I know that you're probably very busy, but I will still ask: did you
+have time to look into this series yet (or do you have any ETA)?
+
+
+Thank you!
+Regards,
+Martin
