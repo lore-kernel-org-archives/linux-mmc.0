@@ -1,43 +1,74 @@
-From: Neil Armstrong <narmstrong@baylibre.com>
-Subject: [PATCH] mmc: mediatek: Fixed size in dma_free_coherent
-Date: Wed, 24 May 2017 09:53:52 +0200
-Message-ID: <1495612432-16669-1-git-send-email-narmstrong@baylibre.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:35132 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1760220AbdEXHyV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 03:54:21 -0400
-Received: by mail-wm0-f41.google.com with SMTP id b84so54025634wmh.0
-        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2017 00:54:20 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.12 rc3 - take 1/2
+Date: Wed, 24 May 2017 10:40:41 +0200
+Message-ID: <CAPDyKFppbduFunKcU64Cx3Die=XGb3VNR+1Qkm17QBXhAXq6nw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, matthias.bgg@gmail.com
-Cc: Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, Neil Armstrong <narmstrong@baylibre.com>
 
-From: Phong LE <ple@baylibre.com>
+Hi Linus,
 
-The dma gpd dma_free_coherent call size in invalid.
+Here are a couple of mmc fixes intended for v4.12 rc3. They are based
+on v4.12-rc1.
 
-Fixes: 208489032bdd ("mmc: mediatek: Add Mediatek MMC driver")
-Signed-off-by: Phong LE <ple@baylibre.com>
-Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
----
- drivers/mmc/host/mtk-sd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+If everything goes as expected, I intend to send yet another PR later
+this week with some more fixes, hence take 1/2.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 5c1e178..5a672a5 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1774,7 +1774,7 @@ static int msdc_drv_remove(struct platform_device *pdev)
- 	pm_runtime_disable(host->dev);
- 	pm_runtime_put_noidle(host->dev);
- 	dma_free_coherent(&pdev->dev,
--			sizeof(struct mt_gpdma_desc),
-+			2 * sizeof(struct mt_gpdma_desc),
- 			host->dma.gpd, host->dma.gpd_addr);
- 	dma_free_coherent(&pdev->dev, MAX_BD_NUM * sizeof(struct mt_bdma_desc),
- 			host->dma.bd, host->dma.bd_addr);
--- 
-2.7.4
+Details are as usual found in the signed tag. Please pull this in!
 
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 2ea659a9ef488125eb46da6eb571de5eae5c43f6:
+
+  Linux 4.12-rc1 (2017-05-13 13:19:49 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.12-rc1
+
+for you to fetch changes up to f5f968f2371ccdebb8a365487649673c9af68d09:
+
+  mmc: sdhci-iproc: suppress spurious interrupt with Multiblock read
+(2017-05-22 18:18:04 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-xenon: Don't free data for phy allocated by devm*
+ - sdhci-iproc: Suppress spurious interrupts
+ - cavium: Fix probing race with regulator
+ - cavium: Prevent crash with incomplete DT
+ - cavium-octeon: Use proper GPIO name for power control
+ - cavium-octeon: Fix interrupt enable code
+
+----------------------------------------------------------------
+David Daney (2):
+      mmc: cavium-octeon: Fix interrupt enable code
+      mmc: cavium-octeon: Use proper GPIO name for power control
+
+Jan Glauber (3):
+      mmc: cavium: Prevent crash with incomplete DT
+      of/platform: Make of_platform_device_destroy globally visible
+      mmc: cavium: Fix probing race with regulator
+
+Jisheng Zhang (1):
+      mmc: sdhci-xenon: kill xenon_clean_phy()
+
+Srinath Mannam (1):
+      mmc: sdhci-iproc: suppress spurious interrupt with Multiblock read
+
+ drivers/mmc/host/cavium-octeon.c   | 15 ++++++++++++---
+ drivers/mmc/host/cavium-thunderx.c |  6 ++++++
+ drivers/mmc/host/cavium.c          | 25 ++++++++++---------------
+ drivers/mmc/host/sdhci-iproc.c     |  3 ++-
+ drivers/mmc/host/sdhci-xenon-phy.c | 14 +-------------
+ drivers/mmc/host/sdhci-xenon.c     |  6 +-----
+ drivers/mmc/host/sdhci-xenon.h     |  1 -
+ drivers/of/platform.c              |  3 ++-
+ include/linux/of_platform.h        |  1 +
+ 9 files changed, 35 insertions(+), 39 deletions(-)
