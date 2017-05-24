@@ -1,39 +1,43 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [RESEND PATCH 1/2] Documentation: rockchip-dw-mshc: add description for rk3328
-Date: Wed, 24 May 2017 08:34:48 +0800
-Message-ID: <1495586089-215607-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+From: Neil Armstrong <narmstrong@baylibre.com>
+Subject: [PATCH] mmc: mediatek: Fixed size in dma_free_coherent
+Date: Wed, 24 May 2017 09:53:52 +0200
+Message-ID: <1495612432-16669-1-git-send-email-narmstrong@baylibre.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:35132 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1760220AbdEXHyV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 03:54:21 -0400
+Received: by mail-wm0-f41.google.com with SMTP id b84so54025634wmh.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2017 00:54:20 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, matthias.bgg@gmail.com
+Cc: Phong LE <ple@baylibre.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, Neil Armstrong <narmstrong@baylibre.com>
 
-Add "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc" for
-dwmmc on rk3328 platform.
+From: Phong LE <ple@baylibre.com>
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+The dma gpd dma_free_coherent call size in invalid.
+
+Fixes: 208489032bdd ("mmc: mediatek: Add Mediatek MMC driver")
+Signed-off-by: Phong LE <ple@baylibre.com>
+Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
 ---
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index 520d61d..18e33cb 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -15,6 +15,7 @@ Required Properties:
- 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
- 	- "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
- 	- "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
-+	- "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3328
- 	- "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
- 	- "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
- 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 5c1e178..5a672a5 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1774,7 +1774,7 @@ static int msdc_drv_remove(struct platform_device *pdev)
+ 	pm_runtime_disable(host->dev);
+ 	pm_runtime_put_noidle(host->dev);
+ 	dma_free_coherent(&pdev->dev,
+-			sizeof(struct mt_gpdma_desc),
++			2 * sizeof(struct mt_gpdma_desc),
+ 			host->dma.gpd, host->dma.gpd_addr);
+ 	dma_free_coherent(&pdev->dev, MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+ 			host->dma.bd, host->dma.bd_addr);
 -- 
-1.9.1
+2.7.4
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
