@@ -1,98 +1,389 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH] mmc: host: tighten some of the dependencies on SoC
- drivers
-Date: Thu, 25 May 2017 08:20:22 +0800
-Message-ID: <201705250829.ZkURSD6Z%fengguang.wu@intel.com>
-References: <20170524121556.27819-1-pbrobinson@gmail.com>
+From: liwei <liwei213@huawei.com>
+Subject: [PATCH] mmc:dw_mmc-k3: add sd support for hi3660
+Date: Thu, 25 May 2017 10:07:34 +0800
+Message-ID: <20170525020734.75623-1-liwei213@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:48478 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932158AbdEYAVY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 24 May 2017 20:21:24 -0400
-Content-Disposition: inline
-In-Reply-To: <20170524121556.27819-1-pbrobinson@gmail.com>
+Received: from szxga03-in.huawei.com ([45.249.212.189]:6898 "EHLO
+        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755090AbdEYCHu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2017 22:07:50 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Wahren <stefan.wahren@i2se.com>, linux-mmc@vger.kernel.org, Peter Robinson <pbrobinson@gmail.com>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, shawn.lin@rock-chips.com, wsa+renesas@sang-engineering.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: guodong.xu@linaro.org
 
-Hi Peter,
+Add sd card support for hi3660 soc
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on v4.12-rc2]
-[cannot apply to next-20170524]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
-
-url:    https://github.com/0day-ci/linux/commits/Peter-Robinson/mmc-host-tighten-some-of-the-dependencies-on-SoC-drivers/20170525-042816
-reproduce:
-        # apt-get install sparse
-        make ARCH=x86_64 allmodconfig
-        make C=1 CF=-D__CHECK_ENDIAN__
-
-
-sparse warnings: (new ones prefixed by >>)
-
-   include/linux/compiler.h:264:8: sparse: attribute 'no_sanitize_address': unknown attribute
-   drivers/mmc/host/tmio_mmc.h:276:9: sparse: undefined identifier 'readsl'
-   drivers/mmc/host/tmio_mmc.h:304:9: sparse: undefined identifier 'writesl'
->> drivers/mmc/host/tmio_mmc.h:276:15: sparse: not a function <noident>
-   drivers/mmc/host/tmio_mmc.h:304:16: sparse: not a function <noident>
-   drivers/mmc/host/tmio_mmc.h:264:9: sparse: undefined identifier 'readsw'
-   drivers/mmc/host/tmio_mmc.h:292:9: sparse: undefined identifier 'writesw'
-   In file included from drivers/mmc/host/tmio_mmc_pio.c:53:0:
-   drivers/mmc/host/tmio_mmc.h: In function 'sd_ctrl_read16_rep':
-   drivers/mmc/host/tmio_mmc.h:264:2: error: implicit declaration of function 'readsw' [-Werror=implicit-function-declaration]
-     readsw(host->ctl + (addr << host->bus_shift), buf, count);
-     ^~~~~~
-   drivers/mmc/host/tmio_mmc.h: In function 'sd_ctrl_read32_rep':
-   drivers/mmc/host/tmio_mmc.h:276:2: error: implicit declaration of function 'readsl' [-Werror=implicit-function-declaration]
-     readsl(host->ctl + (addr << host->bus_shift), buf, count);
-     ^~~~~~
-   drivers/mmc/host/tmio_mmc.h: In function 'sd_ctrl_write16_rep':
-   drivers/mmc/host/tmio_mmc.h:292:2: error: implicit declaration of function 'writesw' [-Werror=implicit-function-declaration]
-     writesw(host->ctl + (addr << host->bus_shift), buf, count);
-     ^~~~~~~
-   drivers/mmc/host/tmio_mmc.h: In function 'sd_ctrl_write32_rep':
-   drivers/mmc/host/tmio_mmc.h:304:2: error: implicit declaration of function 'writesl' [-Werror=implicit-function-declaration]
-     writesl(host->ctl + (addr << host->bus_shift), buf, count);
-     ^~~~~~~
-   cc1: some warnings being treated as errors
-
-vim +276 drivers/mmc/host/tmio_mmc.h
-
-a11862d3 Simon Horman      2011-06-21  260  
-a11862d3 Simon Horman      2011-06-21  261  static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
-a11862d3 Simon Horman      2011-06-21  262  		u16 *buf, int count)
-a11862d3 Simon Horman      2011-06-21  263  {
-7445bf9e Kuninori Morimoto 2015-01-13  264  	readsw(host->ctl + (addr << host->bus_shift), buf, count);
-a11862d3 Simon Horman      2011-06-21  265  }
-a11862d3 Simon Horman      2011-06-21  266  
-2c54506b Wolfram Sang      2016-04-27  267  static inline u32 sd_ctrl_read16_and_16_as_32(struct tmio_mmc_host *host, int addr)
-a11862d3 Simon Horman      2011-06-21  268  {
-7445bf9e Kuninori Morimoto 2015-01-13  269  	return readw(host->ctl + (addr << host->bus_shift)) |
-7445bf9e Kuninori Morimoto 2015-01-13  270  	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
-a11862d3 Simon Horman      2011-06-21  271  }
-a11862d3 Simon Horman      2011-06-21  272  
-8185e51f Chris Brandt      2016-09-12  273  static inline void sd_ctrl_read32_rep(struct tmio_mmc_host *host, int addr,
-8185e51f Chris Brandt      2016-09-12  274  		u32 *buf, int count)
-8185e51f Chris Brandt      2016-09-12  275  {
-8185e51f Chris Brandt      2016-09-12 @276  	readsl(host->ctl + (addr << host->bus_shift), buf, count);
-8185e51f Chris Brandt      2016-09-12  277  }
-8185e51f Chris Brandt      2016-09-12  278  
-a11862d3 Simon Horman      2011-06-21  279  static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr, u16 val)
-a11862d3 Simon Horman      2011-06-21  280  {
-973ed3af Simon Horman      2011-06-21  281  	/* If there is a hook and it returns non-zero then there
-973ed3af Simon Horman      2011-06-21  282  	 * is an error and the write should be skipped
-973ed3af Simon Horman      2011-06-21  283  	 */
-dfe9a229 Kuninori Morimoto 2015-01-13  284  	if (host->write16_hook && host->write16_hook(host, addr))
-
-:::::: The code at line 276 was first introduced by commit
-:::::: 8185e51f358a8dd4801b67e8c66f03eb9eeaba75 mmc: tmio-mmc: add support for 32bit data port
-
-:::::: TO: Chris Brandt <chris.brandt@renesas.com>
-:::::: CC: Ulf Hansson <ulf.hansson@linaro.org>
-
+Signed-off-by: Li Wei <liwei213@huawei.com>
+Signed-off-by: Chen Jun <chenjun14@huawei.com>
 ---
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+ drivers/mmc/host/dw_mmc-k3.c | 314 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 314 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index e38fb0020bb1..a6e13bd83b9f 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -8,6 +8,8 @@
+  * (at your option) any later version.
+  */
+ 
++#include <linux/bitops.h>
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/mmc/host.h>
+@@ -28,7 +30,40 @@
+ #define AO_SCTRL_SEL18		BIT(10)
+ #define AO_SCTRL_CTRL3		0x40C
+ 
++#define DWMMC_SD_ID   1
++#define DWMMC_SDIO_ID 2
++
++#define SOC_SCTRL_SCPERCTRL5    (0x314)
++#define SDCARD_IO_SEL18         BIT(2)
++
++#define GENCLK_DIV (7)
++
++#define GPIO_CLK_ENABLE                   BIT(16)
++#define GPIO_CLK_DIV_MASK                 GENMASK(11, 8)
++#define GPIO_USE_SAMPLE_DLY_MASK          GENMASK(13, 13)
++#define UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)
++#define UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)
++#define UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)
++
++#define SDMMC_UHS_REG_EXT	0x108
++#define SDMMC_ENABLE_SHIFT	0x110
++
++#define TIMING_MODE     3
++#define TIMING_CFG_NUM 10
++
++#define PULL_DOWN BIT(1)
++#define PULL_UP   BIT(0)
++
++#define NUM_PHASES (40)
++
++#define ENABLE_SHIFT_MIN_SMPL (4)
++#define ENABLE_SHIFT_MAX_SMPL (12)
++#define USE_DLY_MIN_SMPL (11)
++#define USE_DLY_MAX_SMPL (14)
++
+ struct k3_priv {
++	u8 ctrl_id;
++	u32 cur_speed;
+ 	struct regmap	*reg;
+ };
+ 
+@@ -38,6 +73,41 @@ static unsigned long dw_mci_hi6220_caps[] = {
+ 	0
+ };
+ 
++struct hs_timing {
++	int drv_phase;
++	int sam_dly;
++	int sam_phase_max;
++	int sam_phase_min;
++};
++
++struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
++	{ /* reserved */ },
++	{ /* SD */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{6, 0,  4,  4,},  /* 1: MMC_HS */
++		{6, 0,  3,  3,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  2,  2,},  /* 4: SDR25 */
++		{4, 0, 11,  0,},  /* 5: SDR50 */
++		{6, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	},
++	{ /* SDIO */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{0},              /* 1: MMC_HS */
++		{6, 0, 15, 15,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  0,  0,},  /* 4: SDR25 */
++		{4, 0, 12,  0,},  /* 5: SDR50 */
++		{5, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	}
++};
++
+ static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ {
+ 	int ret;
+@@ -66,6 +136,10 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
+ 	if (IS_ERR(priv->reg))
+ 		priv->reg = NULL;
+ 
++	priv->ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
++	if (priv->ctrl_id < 0)
++		priv->ctrl_id = 0;
++
+ 	host->priv = priv;
+ 	return 0;
+ }
+@@ -144,7 +218,242 @@ static const struct dw_mci_drv_data hi6220_data = {
+ 	.execute_tuning		= dw_mci_hi6220_execute_tuning,
+ };
+ 
++static void dw_mci_hs_set_timing(struct dw_mci *host, int timing, int sam_phase)
++{
++	int drv_phase;
++	int sam_dly;
++	int ctrl_id;
++	int use_sam_dly = 0;
++	int enable_shift = 0;
++	int reg_value;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++	ctrl_id = priv->ctrl_id;
++
++	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
++	sam_dly   = hs_timing_cfg[ctrl_id][timing].sam_dly;
++	if (sam_phase == -1)
++		sam_phase = (hs_timing_cfg[ctrl_id][timing].sam_phase_max +
++			     hs_timing_cfg[ctrl_id][timing].sam_phase_min) / 2;
++
++	if (timing == MMC_TIMING_UHS_SDR50 ||
++	    timing == MMC_TIMING_UHS_SDR104) {
++		if (sam_phase >= ENABLE_SHIFT_MIN_SMPL &&
++		    sam_phase <= ENABLE_SHIFT_MAX_SMPL)
++			enable_shift = 1;
++	}
++	if (timing == MMC_TIMING_UHS_SDR104) {
++		if (sam_phase >= USE_DLY_MIN_SMPL &&
++		    sam_phase <= USE_DLY_MAX_SMPL)
++			use_sam_dly = 1;
++	}
++
++	mci_writel(host, GPIO, 0x0);
++	usleep_range(5, 10);
++
++	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, sam_phase) |\
++				FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK ,sam_dly) |\
++				FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK,drv_phase);		
++	mci_writel(host, UHS_REG_EXT, reg_value);
++
++	mci_writel(host, ENABLE_SHIFT, enable_shift);
++
++	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |\
++				FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK,use_sam_dly);
++	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
++
++	/* We should delay 1ms wait for timing setting finished. */
++	usleep_range(1000, 2000);
++}
++
++int dw_mci_hi3660_init(struct dw_mci *host)
++{
++	/* set threshold to 512 bytes */
++	mci_writel(host, CDTHRCTL, 0x02000001);
++
++	dw_mci_hs_set_timing(host, MMC_TIMING_LEGACY, -1);
++	host->bus_hz /= (GENCLK_DIV + 1);
++
++	return 0;
++}
++
++static int dw_mci_set_sel18(struct dw_mci *host, bool set)
++{
++	int ret;
++	unsigned int val;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++
++	val = set ? SDCARD_IO_SEL18 : 0;
++	ret = regmap_update_bits(priv->reg, SOC_SCTRL_SCPERCTRL5,
++				 SDCARD_IO_SEL18, val);
++	if (ret) {
++		dev_err(host->dev, "sel18 %u error\n", val);
++		return ret;
++	}
++
++	return 0;
++}
++
++void dw_mci_hi3660_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	int ret;
++	unsigned long wanted;
++	unsigned long actual;
++	struct k3_priv *priv = host->priv;
++
++	if (!ios->clock || ios->clock == priv->cur_speed)
++		return;
++
++	wanted = ios->clock * (GENCLK_DIV + 1);
++	ret = clk_set_rate(host->ciu_clk, wanted);
++	if (ret) {
++		dev_err(host->dev, "failed to set rate %luHz\n", wanted);
++		return;
++	}
++	actual = clk_get_rate(host->ciu_clk);
++
++	dw_mci_hs_set_timing(host, ios->timing, -1);
++	host->bus_hz = actual / (GENCLK_DIV + 1);
++	host->current_speed = 0;
++	priv->cur_speed = host->bus_hz;
++}
++
++static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
++{
++	int i;
++	int interval;
++	unsigned int v;
++	unsigned int len;
++	unsigned int range_start = 0;
++	unsigned int range_length = 0;
++	unsigned int middle_range = 0;
++
++	if (!sample_flag)
++		return -EIO;
++
++	if (~sample_flag == 0)
++		return 0;
++
++	i = ffs(sample_flag) - 1;
++
++	/*A clock cycle is divided into 32 phases, 
++	*each of which is represented by a bit, finding the optimal phase.
++	*/
++	while (i < 32) {
++		v = ror32(sample_flag, i);
++		len = ffs(~v) - 1;
++
++		if (len > range_length) {
++			range_length = len;
++			range_start = i;
++		}
++
++		interval = ffs(v >> len) - 1;
++		if (interval < 0)
++			break;
++
++		i += len + interval;
++	}
++
++	middle_range = range_start + range_length / 2;
++	if (middle_range >= 32)
++		middle_range %= 32;
++
++	return middle_range;
++}
++
++static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
++{
++	int i = 0;
++	struct dw_mci *host = slot->host;
++	struct mmc_host *mmc = slot->mmc;
++	int sam_phase = 0;
++	u32 tuning_sample_flag = 0;
++	int best_clksmpl = 0;
++
++	for (i = 0; i < NUM_PHASES; ++i, ++sam_phase) {
++		sam_phase %= 32;
++
++		mci_writel(host, TMOUT, ~0);
++		dw_mci_hs_set_timing(host, mmc->ios.timing, sam_phase);
++
++		if (!mmc_send_tuning(mmc, opcode, NULL))
++			tuning_sample_flag |= (1 << sam_phase);
++		else
++			tuning_sample_flag &= ~(1 << sam_phase);
++	}
++
++	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);
++	if (best_clksmpl < 0) {
++		dev_err(host->dev, "All phases bad!\n");
++		return -EIO;
++	}
++
++	dw_mci_hs_set_timing(host, mmc->ios.timing, best_clksmpl);
++
++	dev_info(host->dev, "tuning ok best_clksmpl %u tuning_sample_flag %x\n",
++		 best_clksmpl, tuning_sample_flag);
++	return 0;
++}
++
++static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	int ret;
++	int min_uv = 0;
++	int max_uv = 0;
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct k3_priv *priv;
++	struct dw_mci *host;
++
++	host = slot->host;
++	priv = host->priv;
++
++	if (!priv || !priv->reg)
++		return 0;
++
++	if (priv->ctrl_id == DWMMC_SDIO_ID)
++		return 0;
++
++	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
++		ret = dw_mci_set_sel18(host, 0);
++		if (ret)
++			return ret;
++		min_uv = 2950000;
++		max_uv = 2950000;
++	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		ret = dw_mci_set_sel18(host, 1);
++		if (ret)
++			return ret;
++		min_uv = 1800000;
++		max_uv = 1800000;
++	}
++
++	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
++		return 0;
++
++	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
++	if (ret) {
++		dev_dbg(host->dev, "Regulator set error %d: %d - %d\n",
++			ret, min_uv, max_uv);
++		return ret;
++	}
++	return 0;
++}
++
++static const struct dw_mci_drv_data hi3660_data = {
++	.init = dw_mci_hi3660_init,
++	.set_ios = dw_mci_hi3660_set_ios,
++	.parse_dt = dw_mci_hi6220_parse_dt,
++	.execute_tuning = dw_mci_hi3660_execute_tuning,
++	.switch_voltage  = dw_mci_hi3660_switch_voltage,
++};
++
+ static const struct of_device_id dw_mci_k3_match[] = {
++	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
+ 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
+ 	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
+ 	{},
+@@ -155,6 +464,11 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
+ {
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
++	struct reset_control	*rst;
++
++	rst = devm_reset_control_get(&pdev->dev, NULL);
++	if (!IS_ERR(rst))
++		reset_control_reset(rst);
+ 
+ 	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
+ 	drv_data = match->data;
+-- 
+2.11.0
+
