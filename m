@@ -1,69 +1,67 @@
-From: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
-Subject: [PATCH v2] mmc: bcm2835: fix potential null pointer dereferences
-Date: Thu, 25 May 2017 12:04:55 -0500
-Message-ID: <20170525170455.GA6904@embeddedgus>
-References: <20170525114638.Horde.wq7PLKWCg8CwLM5WiWj1Obm@gator4166.hostgator.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.12 rc3 - take 2/2
+Date: Fri, 26 May 2017 15:08:41 +0200
+Message-ID: <CAPDyKFofp6qdgcqha6uNWJz4ApEc2y5dEkEo51LQyq-U3onpgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170525114638.Horde.wq7PLKWCg8CwLM5WiWj1Obm@gator4166.hostgator.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Eric Anholt <eric@anholt.net>
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:36841 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1764382AbdEZNIn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 May 2017 09:08:43 -0400
+Received: by mail-qk0-f169.google.com with SMTP id u75so6680994qka.3
+        for <linux-mmc@vger.kernel.org>; Fri, 26 May 2017 06:08:42 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "arm@kernel.org" <arm@kernel.org>, Arnd Bergmann <arnd@arndb.de>
 
-Null check at line 1165: if (mrq->cmd), implies that mrq->cmd might
-be NULL.
-Add null checks before dereferencing pointer mrq->cmd in order to avoid
-any potential NULL pointer dereference.
+Hi Linus,
 
-Addresses-Coverity-ID: 1408740
-Tested-by: Stefan Wahren <stefan.wahren@i2se.com>
-Signed-off-by: Gustavo A. R. Silva <garsilva@embeddedor.com>
----
-Changes in v2:
- Change subject to make it clear the patch is bcm2835 related.
+Here are a couple of mmc and arm64-dts fixes intended for v4.12 rc3.
+They are based on v4.12-rc2.
 
- drivers/mmc/host/bcm2835.c | 12 +++++++++---
- 1 file changed, 9 insertions(+), 3 deletions(-)
+Details are as usual found in the signed tag. Please pull this in!
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 1f343a4..abba9a2 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1172,7 +1172,10 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
- 		dev_err(dev, "unsupported block size (%d bytes)\n",
- 			mrq->data->blksz);
--		mrq->cmd->error = -EINVAL;
-+
-+		if (mrq->cmd)
-+			mrq->cmd->error = -EINVAL;
-+
- 		mmc_request_done(mmc, mrq);
- 		return;
- 	}
-@@ -1194,7 +1197,10 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			readl(host->ioaddr + SDCMD) & SDCMD_CMD_MASK,
- 			edm);
- 		bcm2835_dumpregs(host);
--		mrq->cmd->error = -EILSEQ;
-+
-+		if (mrq->cmd)
-+			mrq->cmd->error = -EILSEQ;
-+
- 		bcm2835_finish_request(host);
- 		mutex_unlock(&host->mutex);
- 		return;
-@@ -1207,7 +1213,7 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			if (!host->use_busy)
- 				bcm2835_finish_command(host);
- 		}
--	} else if (bcm2835_send_command(host, mrq->cmd)) {
-+	} else if (mrq->cmd && bcm2835_send_command(host, mrq->cmd)) {
- 		if (host->data && host->dma_desc) {
- 			/* DMA transfer starts now, PIO starts after irq */
- 			bcm2835_start_dma(host);
--- 
-2.5.0
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 08332893e37af6ae779367e78e444f8f9571511d:
+
+  Linux 4.12-rc2 (2017-05-21 19:30:23 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.12-rc2
+
+for you to fetch changes up to ea452678734eb782126f999bf5c4fb3e71d3b196:
+
+  arm64: dts: hikey: Fix WiFi support (2017-05-23 14:18:10 +0200)
+
+----------------------------------------------------------------
+This pull request contains fixes to make the WiFi work again for the ARM64
+Hikey board.  Together with a couple of DTS updates for the Hikey board we have
+also extended the mmc pwrseq_simple, to support a new power-off-delay-us DT
+property, as that was required to enable a graceful power off sequence for the
+WiFi chip.
+
+----------------------------------------------------------------
+Daniel Lezcano (2):
+      mfd: dts: hi655x: Add clock binding for the pmic
+      arm64: dts: hikey: Add clock for the pmic mfd
+
+Ulf Hansson (6):
+      mmc: dt: pwrseq-simple: Invent power-off-delay-us
+      mmc: pwrseq_simple: Parse DTS for the power-off-delay-us property
+      arm64: dts: hi6220: Move the fixed_5v_hub regulator to the hikey dts
+      arm64: dts: hikey: Add the SYS_5V and the VDD_3V3 regulators
+      arm64: dts: hi6220: Move board data from the dwmmc nodes to hikey dts
+      arm64: dts: hikey: Fix WiFi support
+
+ .../devicetree/bindings/mfd/hisilicon,hi655x.txt   |  6 ++
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 +
+ arch/arm64/boot/dts/hisilicon/hi6220-hikey.dts     | 78 +++++++++++++++++-----
+ arch/arm64/boot/dts/hisilicon/hi6220.dtsi          | 31 +--------
+ drivers/mmc/core/pwrseq_simple.c                   |  7 ++
+ 5 files changed, 79 insertions(+), 45 deletions(-)
