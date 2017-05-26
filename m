@@ -1,70 +1,93 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [GIT PULL] MMC fixes for v.4.12 rc3 - take 2/2
-Date: Fri, 26 May 2017 09:24:08 -0700
-Message-ID: <CAOesGMj=jG9RHy1WdNFy18kaCY8GjF2-srypigP1wuWzPzw5qQ@mail.gmail.com>
-References: <CAPDyKFofp6qdgcqha6uNWJz4ApEc2y5dEkEo51LQyq-U3onpgQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: David Woods <dwoods@mellanox.com>
+Subject: [PATCH v3 1/2] mmc: dw_mmc: Use device_property_read instead of of_property_read
+Date: Fri, 26 May 2017 17:53:20 -0400
+Message-ID: <1495835601-20327-1-git-send-email-dwoods@mellanox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFofp6qdgcqha6uNWJz4ApEc2y5dEkEo51LQyq-U3onpgQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arm@kernel.org" <arm@kernel.org>, Arnd Bergmann <arnd@arndb.de>
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: David Woods <dwoods@mellanox.com>, stable@vger.linux.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Using the device_property interfaces allows the dw_mmc driver to work
+on platforms which run on either device tree or ACPI.
 
+Signed-off-by: David Woods <dwoods@mellanox.com>
+Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
+Cc: stable@vger.linux.org
+---
+ drivers/mmc/host/dw_mmc.c | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
 
-On Fri, May 26, 2017 at 6:08 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Hi Linus,
->
-> Here are a couple of mmc and arm64-dts fixes intended for v4.12 rc3.
-> They are based on v4.12-rc2.
->
-> Details are as usual found in the signed tag. Please pull this in!
->
-> Kind regards
-> Ulf Hansson
->
->
-> The following changes since commit 08332893e37af6ae779367e78e444f8f9571511d:
->
->   Linux 4.12-rc2 (2017-05-21 19:30:23 -0700)
->
-> are available in the git repository at:
->
->   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.12-rc2
->
-> for you to fetch changes up to ea452678734eb782126f999bf5c4fb3e71d3b196:
->
->   arm64: dts: hikey: Fix WiFi support (2017-05-23 14:18:10 +0200)
->
-> ----------------------------------------------------------------
-> This pull request contains fixes to make the WiFi work again for the ARM64
-> Hikey board.  Together with a couple of DTS updates for the Hikey board we have
-> also extended the mmc pwrseq_simple, to support a new power-off-delay-us DT
-> property, as that was required to enable a graceful power off sequence for the
-> WiFi chip.
->
-> ----------------------------------------------------------------
-> Daniel Lezcano (2):
->       mfd: dts: hi655x: Add clock binding for the pmic
->       arm64: dts: hikey: Add clock for the pmic mfd
->
-> Ulf Hansson (6):
->       mmc: dt: pwrseq-simple: Invent power-off-delay-us
->       mmc: pwrseq_simple: Parse DTS for the power-off-delay-us property
->       arm64: dts: hi6220: Move the fixed_5v_hub regulator to the hikey dts
->       arm64: dts: hikey: Add the SYS_5V and the VDD_3V3 regulators
->       arm64: dts: hi6220: Move board data from the dwmmc nodes to hikey dts
->       arm64: dts: hikey: Fix WiFi support
-
-
-These are a lot of changes to fix a regression. How was it introduced?
-
-It would also have been useful if you pointed out the DT contents was
-already acked by Arnd (I had to go look at the contents since you only
-looped him in, and no other ARM-SoC maintainers).
-
-
--Olof
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index e45129f..efde0f2 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2707,8 +2707,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	host->slot[id] = slot;
+ 
+ 	mmc->ops = &dw_mci_ops;
+-	if (of_property_read_u32_array(host->dev->of_node,
+-				       "clock-freq-min-max", freq, 2)) {
++	if (device_property_read_u32_array(host->dev, "clock-freq-min-max",
++					   freq, 2)) {
+ 		mmc->f_min = DW_MCI_FREQ_MIN;
+ 		mmc->f_max = DW_MCI_FREQ_MAX;
+ 	} else {
+@@ -2808,7 +2808,6 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ {
+ 	int addr_config;
+ 	struct device *dev = host->dev;
+-	struct device_node *np = dev->of_node;
+ 
+ 	/*
+ 	* Check tansfer mode from HCON[17:16]
+@@ -2869,8 +2868,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 		dev_info(host->dev, "Using internal DMA controller.\n");
+ 	} else {
+ 		/* TRANS_MODE_EDMAC: check dma bindings again */
+-		if ((of_property_count_strings(np, "dma-names") < 0) ||
+-		    (!of_find_property(np, "dmas", NULL))) {
++		if ((device_property_read_string_array(dev, "dma-names",
++						       NULL, 0) < 0) ||
++		    !device_property_present(dev, "dmas")) {
+ 			goto no_dma;
+ 		}
+ 		host->dma_ops = &dw_mci_edmac_ops;
+@@ -2937,7 +2937,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ {
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+-	struct device_node *np = dev->of_node;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	int ret;
+ 	u32 clock_frequency;
+@@ -2954,20 +2953,21 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	}
+ 
+ 	/* find out number of slots supported */
+-	of_property_read_u32(np, "num-slots", &pdata->num_slots);
++	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
+ 
+-	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
++	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
+ 		dev_info(dev,
+ 			 "fifo-depth property not found, using value of FIFOTH register as default\n");
+ 
+-	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
++	device_property_read_u32(dev, "card-detect-delay",
++				 &pdata->detect_delay_ms);
+ 
+-	of_property_read_u32(np, "data-addr", &host->data_addr_override);
++	device_property_read_u32(dev, "data-addr", &host->data_addr_override);
+ 
+-	if (of_get_property(np, "fifo-watermark-aligned", NULL))
++	if (device_property_present(dev, "fifo-watermark-aligned"))
+ 		host->wm_aligned = true;
+ 
+-	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
++	if (!device_property_read_u32(dev, "clock-frequency", &clock_frequency))
+ 		pdata->bus_hz = clock_frequency;
+ 
+ 	if (drv_data && drv_data->parse_dt) {
+-- 
+2.7.2
