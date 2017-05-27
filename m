@@ -1,177 +1,40 @@
-From: David Woods <dwoods@mellanox.com>
-Subject: [PATCH v3 2/2] mmc: core: Use device_property_read instead of of_property_read
-Date: Fri, 26 May 2017 17:53:21 -0400
-Message-ID: <1495835601-20327-2-git-send-email-dwoods@mellanox.com>
-References: <1495835601-20327-1-git-send-email-dwoods@mellanox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1495835601-20327-1-git-send-email-dwoods@mellanox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, jh80.chung@samsung.com, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: David Woods <dwoods@mellanox.com>, stable@vger.linux.org
+From: Daniel Drake <drake@endlessm.com>
+Subject: Re: [RFC 0/2] Add support for Meson MX "SDIO" MMC driver
+Date: Fri, 26 May 2017 20:48:57 -0600
+Message-ID: <CAD8Lp46oR0ODa4ybVW-rMPki9126My+ymxigZmjGwxPm2y1L3g@mail.gmail.com>
+References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+ <CAPDyKFoYPjB1bjRfFCFT3vuzKgzm6-7L2qgNjxGL392cLDe7uA@mail.gmail.com>
+ <CAFBinCDGBZAAx_61eyu1_XM57fX62Mk03TEiO3uTL+i8dfPyZA@mail.gmail.com>
+ <CAPDyKFoC-cCEY+n2383W+JgDANbBMFbsU5cyB51-kG4kbLNNcw@mail.gmail.com> <CAFBinCDocqqo2GNLb2y1XE0ATTEG6TuqO+EZ_-h8=vuTjngr_Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:36341 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754746AbdE0Cs7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 May 2017 22:48:59 -0400
+Received: by mail-oi0-f54.google.com with SMTP id h4so32568270oib.3
+        for <linux-mmc@vger.kernel.org>; Fri, 26 May 2017 19:48:59 -0700 (PDT)
+In-Reply-To: <CAFBinCDocqqo2GNLb2y1XE0ATTEG6TuqO+EZ_-h8=vuTjngr_Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Carlo Caione <carlo@caione.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Using the device_property interfaces allows mmc drivers to work
-on platforms which run on either device tree or ACPI.
+On Thu, May 11, 2017 at 2:44 PM, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+> the code-names of the older (32-bit) SoCs (at least the ones which are
+> not too old) all start with Meson X (where X is a number: Meson6,
+> Meson8, Meson8b and Meson8m2), Amlogic's vendor code sometimes calls
+> these "MX" (or Meson MX)
 
-Signed-off-by: David Woods <dwoods@mellanox.com>
-Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
-Cc: stable@vger.linux.org
----
- drivers/mmc/core/host.c | 72 ++++++++++++++++++++++++-------------------------
- 1 file changed, 35 insertions(+), 37 deletions(-)
+Just in case it helps you on any future adventures in the Amlogic
+vendor code: I think this is not quite right. I believe that MX
+specifically refers to Meson6 and no other SoC generation.
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3f8c85d..88fa031 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
-  */
- int mmc_of_parse(struct mmc_host *host)
- {
--	struct device_node *np;
-+	struct device *dev = host->parent;
- 	u32 bus_width;
- 	int ret;
- 	bool cd_cap_invert, cd_gpio_invert = false;
- 	bool ro_cap_invert, ro_gpio_invert = false;
- 
--	if (!host->parent || !host->parent->of_node)
-+	if (!dev || !dev_fwnode(dev))
- 		return 0;
- 
--	np = host->parent->of_node;
--
- 	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
--	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-+	if (device_property_read_u32(dev, "bus-width", &bus_width) < 0) {
- 		dev_dbg(host->parent,
- 			"\"bus-width\" property is missing, assuming 1 bit.\n");
- 		bus_width = 1;
-@@ -210,7 +208,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* f_max is obtained from the optional "max-frequency" property */
--	of_property_read_u32(np, "max-frequency", &host->f_max);
-+	device_property_read_u32(dev, "max-frequency", &host->f_max);
- 
- 	/*
- 	 * Configure CD and WP pins. They are both by default active low to
-@@ -225,12 +223,12 @@ int mmc_of_parse(struct mmc_host *host)
- 	 */
- 
- 	/* Parse Card Detection */
--	if (of_property_read_bool(np, "non-removable")) {
-+	if (device_property_read_bool(dev, "non-removable")) {
- 		host->caps |= MMC_CAP_NONREMOVABLE;
- 	} else {
--		cd_cap_invert = of_property_read_bool(np, "cd-inverted");
-+		cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
- 
--		if (of_property_read_bool(np, "broken-cd"))
-+		if (device_property_read_bool(dev, "broken-cd"))
- 			host->caps |= MMC_CAP_NEEDS_POLL;
- 
- 		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-@@ -256,7 +254,7 @@ int mmc_of_parse(struct mmc_host *host)
- 	}
- 
- 	/* Parse Write Protection */
--	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
-+	ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
- 
- 	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert);
- 	if (!ret)
-@@ -264,64 +262,64 @@ int mmc_of_parse(struct mmc_host *host)
- 	else if (ret != -ENOENT && ret != -ENOSYS)
- 		return ret;
- 
--	if (of_property_read_bool(np, "disable-wp"))
-+	if (device_property_read_bool(dev, "disable-wp"))
- 		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
- 
- 	/* See the comment on CD inversion above */
- 	if (ro_cap_invert ^ ro_gpio_invert)
- 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
- 
--	if (of_property_read_bool(np, "cap-sd-highspeed"))
-+	if (device_property_read_bool(dev, "cap-sd-highspeed"))
- 		host->caps |= MMC_CAP_SD_HIGHSPEED;
--	if (of_property_read_bool(np, "cap-mmc-highspeed"))
-+	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
- 		host->caps |= MMC_CAP_MMC_HIGHSPEED;
--	if (of_property_read_bool(np, "sd-uhs-sdr12"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr12"))
- 		host->caps |= MMC_CAP_UHS_SDR12;
--	if (of_property_read_bool(np, "sd-uhs-sdr25"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr25"))
- 		host->caps |= MMC_CAP_UHS_SDR25;
--	if (of_property_read_bool(np, "sd-uhs-sdr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr50"))
- 		host->caps |= MMC_CAP_UHS_SDR50;
--	if (of_property_read_bool(np, "sd-uhs-sdr104"))
-+	if (device_property_read_bool(dev, "sd-uhs-sdr104"))
- 		host->caps |= MMC_CAP_UHS_SDR104;
--	if (of_property_read_bool(np, "sd-uhs-ddr50"))
-+	if (device_property_read_bool(dev, "sd-uhs-ddr50"))
- 		host->caps |= MMC_CAP_UHS_DDR50;
--	if (of_property_read_bool(np, "cap-power-off-card"))
-+	if (device_property_read_bool(dev, "cap-power-off-card"))
- 		host->caps |= MMC_CAP_POWER_OFF_CARD;
--	if (of_property_read_bool(np, "cap-mmc-hw-reset"))
-+	if (device_property_read_bool(dev, "cap-mmc-hw-reset"))
- 		host->caps |= MMC_CAP_HW_RESET;
--	if (of_property_read_bool(np, "cap-sdio-irq"))
-+	if (device_property_read_bool(dev, "cap-sdio-irq"))
- 		host->caps |= MMC_CAP_SDIO_IRQ;
--	if (of_property_read_bool(np, "full-pwr-cycle"))
-+	if (device_property_read_bool(dev, "full-pwr-cycle"))
- 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
--	if (of_property_read_bool(np, "keep-power-in-suspend"))
-+	if (device_property_read_bool(dev, "keep-power-in-suspend"))
- 		host->pm_caps |= MMC_PM_KEEP_POWER;
--	if (of_property_read_bool(np, "wakeup-source") ||
--	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
-+	if (device_property_read_bool(dev, "wakeup-source") ||
-+	    device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
- 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--	if (of_property_read_bool(np, "mmc-ddr-3_3v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
- 		host->caps |= MMC_CAP_3_3V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
- 		host->caps |= MMC_CAP_1_8V_DDR;
--	if (of_property_read_bool(np, "mmc-ddr-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-ddr-1_2v"))
- 		host->caps |= MMC_CAP_1_2V_DDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs200-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_8v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-1_2v"))
-+	if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
- 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
--	if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
-+	if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
- 		host->caps2 |= MMC_CAP2_HS400_ES;
--	if (of_property_read_bool(np, "no-sdio"))
-+	if (device_property_read_bool(dev, "no-sdio"))
- 		host->caps2 |= MMC_CAP2_NO_SDIO;
--	if (of_property_read_bool(np, "no-sd"))
-+	if (device_property_read_bool(dev, "no-sd"))
- 		host->caps2 |= MMC_CAP2_NO_SD;
--	if (of_property_read_bool(np, "no-mmc"))
-+	if (device_property_read_bool(dev, "no-mmc"))
- 		host->caps2 |= MMC_CAP2_NO_MMC;
- 
--	host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
-+	host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
- 	if (host->dsr_req && (host->dsr & ~0xffff)) {
- 		dev_err(host->parent,
- 			"device tree specified broken value for DSR: 0x%x, ignoring\n",
--- 
-2.7.2
+That said, if both MesonX (==Meson6) and Meson8/Meson8b all share the
+same driver code, having this driver named "mx" makes sense to me,
+especially because it helps distinguish from the GX* chips which
+indeed have something rather different.
+
+Daniel
