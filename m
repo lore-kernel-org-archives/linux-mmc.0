@@ -1,56 +1,50 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [RFC 0/2] Add support for Meson MX "SDIO" MMC driver
-Date: Sat, 27 May 2017 16:25:51 +0200
-Message-ID: <CAFBinCAUEgXZ7PUinrOahpRsg8=m5Um7ju518PiFpqnmPxvQqw@mail.gmail.com>
-References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
- <CAPDyKFoYPjB1bjRfFCFT3vuzKgzm6-7L2qgNjxGL392cLDe7uA@mail.gmail.com>
- <CAFBinCDGBZAAx_61eyu1_XM57fX62Mk03TEiO3uTL+i8dfPyZA@mail.gmail.com>
- <CAPDyKFoC-cCEY+n2383W+JgDANbBMFbsU5cyB51-kG4kbLNNcw@mail.gmail.com>
- <CAFBinCDocqqo2GNLb2y1XE0ATTEG6TuqO+EZ_-h8=vuTjngr_Q@mail.gmail.com> <CAD8Lp46oR0ODa4ybVW-rMPki9126My+ymxigZmjGwxPm2y1L3g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:33577 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752339AbdE0O0N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 May 2017 10:26:13 -0400
-In-Reply-To: <CAD8Lp46oR0ODa4ybVW-rMPki9126My+ymxigZmjGwxPm2y1L3g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH 4/7] mmc: use proper name for the R-Car SoC
+Date: Sun, 28 May 2017 11:30:47 +0200
+Message-ID: <20170528093051.11816-5-wsa+renesas@sang-engineering.com>
+References: <20170528093051.11816-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170528093051.11816-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee.jones@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <drake@endlessm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Carlo Caione <carlo@caione.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Daniel,
+It is 'R-Car', not 'RCar'. No code or binding changes, only descriptive text.
 
-On Sat, May 27, 2017 at 4:48 AM, Daniel Drake <drake@endlessm.com> wrote:
-> On Thu, May 11, 2017 at 2:44 PM, Martin Blumenstingl
-> <martin.blumenstingl@googlemail.com> wrote:
->> the code-names of the older (32-bit) SoCs (at least the ones which are
->> not too old) all start with Meson X (where X is a number: Meson6,
->> Meson8, Meson8b and Meson8m2), Amlogic's vendor code sometimes calls
->> these "MX" (or Meson MX)
->
-> Just in case it helps you on any future adventures in the Amlogic
-> vendor code: I think this is not quite right. I believe that MX
-> specifically refers to Meson6 and no other SoC generation.
-thanks for that hint - I guess that's due to the marketing name of the
-Meson6 SoCs then (AML8726-MX). do you know if there's any codename
-that includes the Meson6 and Meson8 (including Meson8b and Meson8m2)
-families?
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+I suggest this trivial patch should be picked individually per susbsystem.
 
+ drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+ include/linux/mfd/tmio.h             | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-> That said, if both MesonX (==Meson6) and Meson8/Meson8b all share the
-> same driver code, having this driver named "mx" makes sense to me,
-> especially because it helps distinguish from the GX* chips which
-> indeed have something rather different.
-from what I could read in Amlogic's GPL kernel sources the MMC
-controller IP is also used in Meson6 SoCs (and possibly even older
-generations). that said, I don't have any Meson6 hardware, which is
-why I didn't add the "amlogic,meson6-sdio" binding.
-so I guess using the "mx" name here should be OK (nevertheless, I'll
-make sure that I don't use "MX" for anything that's
-Meson8/Meson8b/Meson8m2 specific)
-
-
-Regards,
-Martin
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 846ee1a8e5a675..397b3e29977ea8 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -130,7 +130,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	unsigned int freq, diff, best_freq = 0, diff_min = ~0;
+ 	int i, ret;
+ 
+-	/* tested only on RCar Gen2+ currently; may work for others */
++	/* tested only on R-Car Gen2+ currently; may work for others */
+ 	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+ 		return clk_get_rate(priv->clk);
+ 
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index a1520d88ebf3a3..c83c16b931a886 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -66,7 +66,7 @@
+  */
+ #define TMIO_MMC_SDIO_IRQ		(1 << 2)
+ 
+-/* Some features are only available or tested on RCar Gen2 or later */
++/* Some features are only available or tested on R-Car Gen2 or later */
+ #define TMIO_MMC_MIN_RCAR2		(1 << 3)
+ 
+ /*
+-- 
+2.11.0
