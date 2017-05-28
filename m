@@ -1,37 +1,112 @@
-From: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>
-Subject: [PATCH 0/7] tree-wide: use proper 'R-Car' product name
-Date: Sun, 28 May 2017 11:30:43 +0200
-Message-ID: <20170528093051.11816-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-iio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-iio-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-iio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [v3 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Sun, 28 May 2017 10:11:03 +0000
+Message-ID: <228A75CB-41A6-403F-876E-054041B992E3@sandisk.com>
+References: <1486483202-5515-1-git-send-email-uri.yanai@sandisk.com>
+ <1486483202-5515-4-git-send-email-uri.yanai@sandisk.com>
+ <CAPDyKFodi4gsQ5HVuXeT8SsJhF=u1zfDETcVZLzqaLSE5w2sEw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from esa5.hgst.iphmx.com ([216.71.153.144]:53572 "EHLO
+        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750973AbdE1KLJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 May 2017 06:11:09 -0400
+In-Reply-To: <CAPDyKFodi4gsQ5HVuXeT8SsJhF=u1zfDETcVZLzqaLSE5w2sEw@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <25275CD37FB9304C95BFFAFE9A52A393@namprd04.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Uri Yanai <Uri.Yanai@sandisk.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Small series to get the R-Car product name proper. Based on
-renesas-drivers/master, but can be applied to current linus/master as well.
-Except for the MMC patch, which depends on mmc/next.
-
-Please apply.
-
-Wolfram Sang (7):
-  dmaengine: use proper name for the R-Car SoC
-  i2c: use proper name for the R-Car SoC
-  iio: use proper name for the R-Car SoC
-  mmc: use proper name for the R-Car SoC
-  pci: use proper name for the R-Car SoC
-  [media] soc_camera: rcar_vin: use proper name for the R-Car SoC
-  [media] v4l: rcar_fdp1: use proper name for the R-Car SoC
-
- Documentation/devicetree/bindings/dma/shdma.txt               | 2 +-
- Documentation/devicetree/bindings/iio/adc/renesas,gyroadc.txt | 2 +-
- Documentation/devicetree/bindings/media/rcar_vin.txt          | 4 ++--
- Documentation/devicetree/bindings/pci/rcar-pci.txt            | 2 +-
- drivers/i2c/busses/i2c-rcar.c                                 | 2 +-
- drivers/media/platform/rcar_fdp1.c                            | 2 +-
- drivers/mmc/host/renesas_sdhi_core.c                          | 2 +-
- include/linux/mfd/tmio.h                                      | 2 +-
- 8 files changed, 9 insertions(+), 9 deletions(-)
-
--- 
-2.11.0
+SGkgVWxmLA0KDQpKdXN0IGEgZnJpZW5kbHkgcmVtaW5kZXIg4oCTIGNvdWxkIHlvdSBwbGVhc2Ug
+YWRkIHRoaXMgY2hhbmdlPw0KUGxlYXNlIGxldCBtZSBrbm93IGlmIHlvdSB3YW50IHVzIHRvIHJl
+YmFzZSB0aGlzIGNoYW5nZSB0bw0KdGhlIGxpbnV4LW5leHQ/DQoNClRoYW5rcywNCkFsZXgNCg0K
+T24gMi84LzE3LCAxOjU5IFBNLCAiVWxmIEhhbnNzb24iIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3Jn
+PiB3cm90ZToNCg0KICAgIE9uIDcgRmVicnVhcnkgMjAxNyBhdCAxNzowMCwgVXJpIFlhbmFpIDx1
+cmkueWFuYWlAc2FuZGlzay5jb20+IHdyb3RlOg0KICAgID4gSW4gY2FzZSBvZiBSdW50aW1lIFN1
+c3BlbmQsIGNoZWNrIHRoZSBkZXZpY2UgQktPUFMgbGV2ZWwuDQogICAgPiBSZXR1cm4g4oCTRUJV
+U1kgaWYgZGV2aWNlIG5lZWQgbW9yZSB0aW1lIHRvIGNvbXBsZXRlIGl0cyBpbnRlcm5hbCBCS09Q
+Uy4NCiAgICA+DQogICAgPiBTaWduZWQtb2ZmLWJ5OiBVcmkgWWFuYWkgPHVyaS55YW5haUBzYW5k
+aXNrLmNvbT4NCiAgICA+IFNpZ25lZC1vZmYtYnk6IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJn
+QHNhbmRpc2suY29tPg0KICAgIA0KICAgIFRoaXMgY2hhbmdlIG5lZWRzIHNvbWUgbW9yZSBleHRl
+bnNpdmUgdGVzdGluZyBpbiBsaW51eC1uZXh0LCBidXQgdGhhdA0KICAgIHdvbid0IGJlIHBvc3Np
+YmxlIGFzIGl0J3MgZ2V0dGluZyBjbG9zZXIgdG8gdGhlIG1lcmdlIHdpbmRvdyBmb3IgNC4xMS4N
+CiAgICANCiAgICBUaGVyZWZvcmUsIEkgbGVhdmUgaXQgb3BlbiBmb3IgbW9yZSBkaXNjdXNzaW9u
+cyB1bnRpbCA0LjExIHJjMSBpcyBvdXQuDQogICAgDQogICAgS2luZCByZWdhcmRzDQogICAgVWZm
+ZQ0KICAgIA0KICAgID4gLS0tDQogICAgPg0KICAgID4gQ2hhbmdlcyBpbiB2MzoNCiAgICA+IC0g
+c3RhcnQgd2l0aCBjaGVja2luZyBpZiAqYXV0byogQktPUFMgaXMgZW5hYmxlZA0KICAgID4NCiAg
+ICA+IENoYW5nZXMgaW4gdjI6DQogICAgPiAtIHJldHVybiDigJNFQlVTWSBpbnN0ZWFkIG9mIGRl
+bGF5aW5nIHN1c3BlbmQNCiAgICA+IC0gcmVtb3ZlIGRlZmluZSBFWFRfQ1NEX0JLT1BTX0xFVkVM
+XzENCiAgICA+DQogICAgPiAtLS0NCiAgICA+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgMzAg
+KysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tDQogICAgPiAgMSBmaWxlIGNoYW5nZWQsIDI1
+IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pDQogICAgPg0KICAgID4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQogICAgPiBp
+bmRleCBmNzBmNmExLi40ODg4NjA5IDEwMDY0NA0KICAgID4gLS0tIGEvZHJpdmVycy9tbWMvY29y
+ZS9tbWMuYw0KICAgID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KICAgID4gQEAgLTE5
+NDIsNyArMTk0Miw4IEBAIHN0YXRpYyB2b2lkIG1tY19kZXRlY3Qoc3RydWN0IG1tY19ob3N0ICpo
+b3N0KQ0KICAgID4gICAgICAgICB9DQogICAgPiAgfQ0KICAgID4NCiAgICA+IC1zdGF0aWMgaW50
+IF9tbWNfc3VzcGVuZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIGJvb2wgaXNfc3VzcGVuZCkNCiAg
+ICA+ICtzdGF0aWMgaW50IF9tbWNfc3VzcGVuZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIGJvb2wg
+aXNfc3VzcGVuZCwNCiAgICA+ICsgICAgICAgYm9vbCBpc19ydW50aW1lX3BtKQ0KICAgID4gIHsN
+CiAgICA+ICAgICAgICAgaW50IGVyciA9IDA7DQogICAgPiAgICAgICAgIHVuc2lnbmVkIGludCBu
+b3RpZnlfdHlwZSA9IGlzX3N1c3BlbmQgPyBFWFRfQ1NEX1BPV0VSX09GRl9TSE9SVCA6DQogICAg
+PiBAQCAtMTk1Myw3ICsxOTU0LDI2IEBAIHN0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVjdCBt
+bWNfaG9zdCAqaG9zdCwgYm9vbCBpc19zdXNwZW5kKQ0KICAgID4gICAgICAgICBpZiAobW1jX2Nh
+cmRfc3VzcGVuZGVkKGhvc3QtPmNhcmQpKQ0KICAgID4gICAgICAgICAgICAgICAgIGdvdG8gb3V0
+Ow0KICAgID4NCiAgICA+IC0gICAgICAgaWYgKG1tY19jYXJkX2RvaW5nX2Jrb3BzKGhvc3QtPmNh
+cmQpKSB7DQogICAgPiArICAgICAgIGlmIChtbWNfY2FyZF9kb2luZ19ia29wcyhob3N0LT5jYXJk
+KSB8fA0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+Y2FyZC0+ZXh0X2NzZC5h
+dXRvX2Jrb3BzX2VuKSB7DQogICAgPiArICAgICAgICAgICAgICAgaWYgKGlzX3J1bnRpbWVfcG0p
+IHsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9IG1tY19yZWFkX2Jrb3BzX3N0
+YXR1cyhob3N0LT5jYXJkKTsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChlcnIp
+IHsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCIlczogZXJy
+b3IgJWQgcmVhZGluZyBCS09QUyBTdGF0dXNcbiIsDQogICAgPiArICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQog
+ICAgPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0KICAgID4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgfQ0KICAgID4gKw0KICAgID4gKyAgICAgICAgICAgICAgICAg
+ICAgICAgaWYgKGhvc3QtPmNhcmQtPmV4dF9jc2QucmF3X2Jrb3BzX3N0YXR1cyA+PQ0KICAgID4g
+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQktPUFNfTEVW
+RUxfMikgew0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAvKg0KICAgID4g
+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKiBEZXZpY2Ugc3RpbGwgbmVlZHMgdGlt
+ZSB0byBjb21wbGV0ZQ0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKiBp
+bnRlcm5hbCBCS09QUw0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKi8N
+CiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gLUVCVVNZOw0KICAg
+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCiAgICA+ICsgICAg
+ICAgICAgICAgICAgICAgICAgIH0NCiAgICA+ICsgICAgICAgICAgICAgICB9DQogICAgPiAgICAg
+ICAgICAgICAgICAgZXJyID0gbW1jX3N0b3BfYmtvcHMoaG9zdC0+Y2FyZCk7DQogICAgPiAgICAg
+ICAgICAgICAgICAgaWYgKGVycikNCiAgICA+ICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8g
+b3V0Ow0KICAgID4gQEAgLTE5ODcsNyArMjAwNyw3IEBAIHN0YXRpYyBpbnQgbW1jX3N1c3BlbmQo
+c3RydWN0IG1tY19ob3N0ICpob3N0KQ0KICAgID4gIHsNCiAgICA+ICAgICAgICAgaW50IGVycjsN
+CiAgICA+DQogICAgPiAtICAgICAgIGVyciA9IF9tbWNfc3VzcGVuZChob3N0LCB0cnVlKTsNCiAg
+ICA+ICsgICAgICAgZXJyID0gX21tY19zdXNwZW5kKGhvc3QsIHRydWUsIGZhbHNlKTsNCiAgICA+
+ICAgICAgICAgaWYgKCFlcnIpIHsNCiAgICA+ICAgICAgICAgICAgICAgICBwbV9ydW50aW1lX2Rp
+c2FibGUoJmhvc3QtPmNhcmQtPmRldik7DQogICAgPiAgICAgICAgICAgICAgICAgcG1fcnVudGlt
+ZV9zZXRfc3VzcGVuZGVkKCZob3N0LT5jYXJkLT5kZXYpOw0KICAgID4gQEAgLTIwMzQsNyArMjA1
+NCw3IEBAIHN0YXRpYyBpbnQgbW1jX3NodXRkb3duKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkNCiAg
+ICA+ICAgICAgICAgICAgICAgICBlcnIgPSBfbW1jX3Jlc3VtZShob3N0KTsNCiAgICA+DQogICAg
+PiAgICAgICAgIGlmICghZXJyKQ0KICAgID4gLSAgICAgICAgICAgICAgIGVyciA9IF9tbWNfc3Vz
+cGVuZChob3N0LCBmYWxzZSk7DQogICAgPiArICAgICAgICAgICAgICAgZXJyID0gX21tY19zdXNw
+ZW5kKGhvc3QsIGZhbHNlLCBmYWxzZSk7DQogICAgPg0KICAgID4gICAgICAgICByZXR1cm4gZXJy
+Ow0KICAgID4gIH0NCiAgICA+IEBAIC0yMDU4LDcgKzIwNzgsNyBAQCBzdGF0aWMgaW50IG1tY19y
+dW50aW1lX3N1c3BlbmQoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KICAgID4gICAgICAgICBpZiAo
+IShob3N0LT5jYXBzICYgTU1DX0NBUF9BR0dSRVNTSVZFX1BNKSkNCiAgICA+ICAgICAgICAgICAg
+ICAgICByZXR1cm4gMDsNCiAgICA+DQogICAgPiAtICAgICAgIGVyciA9IF9tbWNfc3VzcGVuZCho
+b3N0LCB0cnVlKTsNCiAgICA+ICsgICAgICAgZXJyID0gX21tY19zdXNwZW5kKGhvc3QsIHRydWUs
+IHRydWUpOw0KICAgID4gICAgICAgICBpZiAoZXJyKQ0KICAgID4gICAgICAgICAgICAgICAgIHBy
+X2VycigiJXM6IGVycm9yICVkIGRvaW5nIGFnZ3Jlc3NpdmUgc3VzcGVuZFxuIiwNCiAgICA+ICAg
+ICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShob3N0KSwgZXJyKTsNCiAgICA+IC0t
+DQogICAgPiAxLjkuMQ0KICAgID4NCiAgICA+IFdlc3Rlcm4gRGlnaXRhbCBDb3Jwb3JhdGlvbiAo
+YW5kIGl0cyBzdWJzaWRpYXJpZXMpIEUtbWFpbCBDb25maWRlbnRpYWxpdHkgTm90aWNlICYgRGlz
+Y2xhaW1lcjoNCiAgICA+DQogICAgPiBUaGlzIGUtbWFpbCBhbmQgYW55IGZpbGVzIHRyYW5zbWl0
+dGVkIHdpdGggaXQgbWF5IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIGxlZ2FsbHkgcHJpdmlsZWdl
+ZCBpbmZvcm1hdGlvbiBvZiBXREMgYW5kL29yIGl0cyBhZmZpbGlhdGVzLCBhbmQgYXJlIGludGVu
+ZGVkIHNvbGVseSBmb3IgdGhlIHVzZSBvZiB0aGUgaW5kaXZpZHVhbCBvciBlbnRpdHkgdG8gd2hp
+Y2ggdGhleSBhcmUgYWRkcmVzc2VkLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBp
+ZW50LCBhbnkgZGlzY2xvc3VyZSwgY29weWluZywgZGlzdHJpYnV0aW9uIG9yIGFueSBhY3Rpb24g
+dGFrZW4gb3Igb21pdHRlZCB0byBiZSB0YWtlbiBpbiByZWxpYW5jZSBvbiBpdCwgaXMgcHJvaGli
+aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBu
+b3RpZnkgdGhlIHNlbmRlciBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIHRoZSBlLW1haWwgaW4gaXRz
+IGVudGlyZXR5IGZyb20geW91ciBzeXN0ZW0uDQogICAgDQoNCg==
