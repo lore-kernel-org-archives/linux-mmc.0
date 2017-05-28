@@ -1,112 +1,97 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [v3 3/3] mmc: Checking BKOPS status prior to Suspend
-Date: Sun, 28 May 2017 10:11:03 +0000
-Message-ID: <228A75CB-41A6-403F-876E-054041B992E3@sandisk.com>
-References: <1486483202-5515-1-git-send-email-uri.yanai@sandisk.com>
- <1486483202-5515-4-git-send-email-uri.yanai@sandisk.com>
- <CAPDyKFodi4gsQ5HVuXeT8SsJhF=u1zfDETcVZLzqaLSE5w2sEw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] MMC fixes for v.4.12 rc3 - take 2/2
+Date: Sun, 28 May 2017 12:26:00 +0200
+Message-ID: <CAPDyKFr8xHRsztpMHjodpQZXH4bNMfVh_ZZvYDLpWS0Rc0JBMQ@mail.gmail.com>
+References: <CAPDyKFofp6qdgcqha6uNWJz4ApEc2y5dEkEo51LQyq-U3onpgQ@mail.gmail.com>
+ <CAOesGMj=jG9RHy1WdNFy18kaCY8GjF2-srypigP1wuWzPzw5qQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:53572 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750973AbdE1KLJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 May 2017 06:11:09 -0400
-In-Reply-To: <CAPDyKFodi4gsQ5HVuXeT8SsJhF=u1zfDETcVZLzqaLSE5w2sEw@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <25275CD37FB9304C95BFFAFE9A52A393@namprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOesGMj=jG9RHy1WdNFy18kaCY8GjF2-srypigP1wuWzPzw5qQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arm@kernel.org" <arm@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Daniel Lezcano <daniel.lezcano@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Uri Yanai <Uri.Yanai@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgVWxmLA0KDQpKdXN0IGEgZnJpZW5kbHkgcmVtaW5kZXIg4oCTIGNvdWxkIHlvdSBwbGVhc2Ug
-YWRkIHRoaXMgY2hhbmdlPw0KUGxlYXNlIGxldCBtZSBrbm93IGlmIHlvdSB3YW50IHVzIHRvIHJl
-YmFzZSB0aGlzIGNoYW5nZSB0bw0KdGhlIGxpbnV4LW5leHQ/DQoNClRoYW5rcywNCkFsZXgNCg0K
-T24gMi84LzE3LCAxOjU5IFBNLCAiVWxmIEhhbnNzb24iIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3Jn
-PiB3cm90ZToNCg0KICAgIE9uIDcgRmVicnVhcnkgMjAxNyBhdCAxNzowMCwgVXJpIFlhbmFpIDx1
-cmkueWFuYWlAc2FuZGlzay5jb20+IHdyb3RlOg0KICAgID4gSW4gY2FzZSBvZiBSdW50aW1lIFN1
-c3BlbmQsIGNoZWNrIHRoZSBkZXZpY2UgQktPUFMgbGV2ZWwuDQogICAgPiBSZXR1cm4g4oCTRUJV
-U1kgaWYgZGV2aWNlIG5lZWQgbW9yZSB0aW1lIHRvIGNvbXBsZXRlIGl0cyBpbnRlcm5hbCBCS09Q
-Uy4NCiAgICA+DQogICAgPiBTaWduZWQtb2ZmLWJ5OiBVcmkgWWFuYWkgPHVyaS55YW5haUBzYW5k
-aXNrLmNvbT4NCiAgICA+IFNpZ25lZC1vZmYtYnk6IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJn
-QHNhbmRpc2suY29tPg0KICAgIA0KICAgIFRoaXMgY2hhbmdlIG5lZWRzIHNvbWUgbW9yZSBleHRl
-bnNpdmUgdGVzdGluZyBpbiBsaW51eC1uZXh0LCBidXQgdGhhdA0KICAgIHdvbid0IGJlIHBvc3Np
-YmxlIGFzIGl0J3MgZ2V0dGluZyBjbG9zZXIgdG8gdGhlIG1lcmdlIHdpbmRvdyBmb3IgNC4xMS4N
-CiAgICANCiAgICBUaGVyZWZvcmUsIEkgbGVhdmUgaXQgb3BlbiBmb3IgbW9yZSBkaXNjdXNzaW9u
-cyB1bnRpbCA0LjExIHJjMSBpcyBvdXQuDQogICAgDQogICAgS2luZCByZWdhcmRzDQogICAgVWZm
-ZQ0KICAgIA0KICAgID4gLS0tDQogICAgPg0KICAgID4gQ2hhbmdlcyBpbiB2MzoNCiAgICA+IC0g
-c3RhcnQgd2l0aCBjaGVja2luZyBpZiAqYXV0byogQktPUFMgaXMgZW5hYmxlZA0KICAgID4NCiAg
-ICA+IENoYW5nZXMgaW4gdjI6DQogICAgPiAtIHJldHVybiDigJNFQlVTWSBpbnN0ZWFkIG9mIGRl
-bGF5aW5nIHN1c3BlbmQNCiAgICA+IC0gcmVtb3ZlIGRlZmluZSBFWFRfQ1NEX0JLT1BTX0xFVkVM
-XzENCiAgICA+DQogICAgPiAtLS0NCiAgICA+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgMzAg
-KysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tDQogICAgPiAgMSBmaWxlIGNoYW5nZWQsIDI1
-IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pDQogICAgPg0KICAgID4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQogICAgPiBp
-bmRleCBmNzBmNmExLi40ODg4NjA5IDEwMDY0NA0KICAgID4gLS0tIGEvZHJpdmVycy9tbWMvY29y
-ZS9tbWMuYw0KICAgID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KICAgID4gQEAgLTE5
-NDIsNyArMTk0Miw4IEBAIHN0YXRpYyB2b2lkIG1tY19kZXRlY3Qoc3RydWN0IG1tY19ob3N0ICpo
-b3N0KQ0KICAgID4gICAgICAgICB9DQogICAgPiAgfQ0KICAgID4NCiAgICA+IC1zdGF0aWMgaW50
-IF9tbWNfc3VzcGVuZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIGJvb2wgaXNfc3VzcGVuZCkNCiAg
-ICA+ICtzdGF0aWMgaW50IF9tbWNfc3VzcGVuZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIGJvb2wg
-aXNfc3VzcGVuZCwNCiAgICA+ICsgICAgICAgYm9vbCBpc19ydW50aW1lX3BtKQ0KICAgID4gIHsN
-CiAgICA+ICAgICAgICAgaW50IGVyciA9IDA7DQogICAgPiAgICAgICAgIHVuc2lnbmVkIGludCBu
-b3RpZnlfdHlwZSA9IGlzX3N1c3BlbmQgPyBFWFRfQ1NEX1BPV0VSX09GRl9TSE9SVCA6DQogICAg
-PiBAQCAtMTk1Myw3ICsxOTU0LDI2IEBAIHN0YXRpYyBpbnQgX21tY19zdXNwZW5kKHN0cnVjdCBt
-bWNfaG9zdCAqaG9zdCwgYm9vbCBpc19zdXNwZW5kKQ0KICAgID4gICAgICAgICBpZiAobW1jX2Nh
-cmRfc3VzcGVuZGVkKGhvc3QtPmNhcmQpKQ0KICAgID4gICAgICAgICAgICAgICAgIGdvdG8gb3V0
-Ow0KICAgID4NCiAgICA+IC0gICAgICAgaWYgKG1tY19jYXJkX2RvaW5nX2Jrb3BzKGhvc3QtPmNh
-cmQpKSB7DQogICAgPiArICAgICAgIGlmIChtbWNfY2FyZF9kb2luZ19ia29wcyhob3N0LT5jYXJk
-KSB8fA0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+Y2FyZC0+ZXh0X2NzZC5h
-dXRvX2Jrb3BzX2VuKSB7DQogICAgPiArICAgICAgICAgICAgICAgaWYgKGlzX3J1bnRpbWVfcG0p
-IHsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9IG1tY19yZWFkX2Jrb3BzX3N0
-YXR1cyhob3N0LT5jYXJkKTsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChlcnIp
-IHsNCiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCIlczogZXJy
-b3IgJWQgcmVhZGluZyBCS09QUyBTdGF0dXNcbiIsDQogICAgPiArICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIGVycik7DQog
-ICAgPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0KICAgID4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgfQ0KICAgID4gKw0KICAgID4gKyAgICAgICAgICAgICAgICAg
-ICAgICAgaWYgKGhvc3QtPmNhcmQtPmV4dF9jc2QucmF3X2Jrb3BzX3N0YXR1cyA+PQ0KICAgID4g
-KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQktPUFNfTEVW
-RUxfMikgew0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAvKg0KICAgID4g
-KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKiBEZXZpY2Ugc3RpbGwgbmVlZHMgdGlt
-ZSB0byBjb21wbGV0ZQ0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKiBp
-bnRlcm5hbCBCS09QUw0KICAgID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKi8N
-CiAgICA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gLUVCVVNZOw0KICAg
-ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCiAgICA+ICsgICAg
-ICAgICAgICAgICAgICAgICAgIH0NCiAgICA+ICsgICAgICAgICAgICAgICB9DQogICAgPiAgICAg
-ICAgICAgICAgICAgZXJyID0gbW1jX3N0b3BfYmtvcHMoaG9zdC0+Y2FyZCk7DQogICAgPiAgICAg
-ICAgICAgICAgICAgaWYgKGVycikNCiAgICA+ICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8g
-b3V0Ow0KICAgID4gQEAgLTE5ODcsNyArMjAwNyw3IEBAIHN0YXRpYyBpbnQgbW1jX3N1c3BlbmQo
-c3RydWN0IG1tY19ob3N0ICpob3N0KQ0KICAgID4gIHsNCiAgICA+ICAgICAgICAgaW50IGVycjsN
-CiAgICA+DQogICAgPiAtICAgICAgIGVyciA9IF9tbWNfc3VzcGVuZChob3N0LCB0cnVlKTsNCiAg
-ICA+ICsgICAgICAgZXJyID0gX21tY19zdXNwZW5kKGhvc3QsIHRydWUsIGZhbHNlKTsNCiAgICA+
-ICAgICAgICAgaWYgKCFlcnIpIHsNCiAgICA+ICAgICAgICAgICAgICAgICBwbV9ydW50aW1lX2Rp
-c2FibGUoJmhvc3QtPmNhcmQtPmRldik7DQogICAgPiAgICAgICAgICAgICAgICAgcG1fcnVudGlt
-ZV9zZXRfc3VzcGVuZGVkKCZob3N0LT5jYXJkLT5kZXYpOw0KICAgID4gQEAgLTIwMzQsNyArMjA1
-NCw3IEBAIHN0YXRpYyBpbnQgbW1jX3NodXRkb3duKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkNCiAg
-ICA+ICAgICAgICAgICAgICAgICBlcnIgPSBfbW1jX3Jlc3VtZShob3N0KTsNCiAgICA+DQogICAg
-PiAgICAgICAgIGlmICghZXJyKQ0KICAgID4gLSAgICAgICAgICAgICAgIGVyciA9IF9tbWNfc3Vz
-cGVuZChob3N0LCBmYWxzZSk7DQogICAgPiArICAgICAgICAgICAgICAgZXJyID0gX21tY19zdXNw
-ZW5kKGhvc3QsIGZhbHNlLCBmYWxzZSk7DQogICAgPg0KICAgID4gICAgICAgICByZXR1cm4gZXJy
-Ow0KICAgID4gIH0NCiAgICA+IEBAIC0yMDU4LDcgKzIwNzgsNyBAQCBzdGF0aWMgaW50IG1tY19y
-dW50aW1lX3N1c3BlbmQoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KICAgID4gICAgICAgICBpZiAo
-IShob3N0LT5jYXBzICYgTU1DX0NBUF9BR0dSRVNTSVZFX1BNKSkNCiAgICA+ICAgICAgICAgICAg
-ICAgICByZXR1cm4gMDsNCiAgICA+DQogICAgPiAtICAgICAgIGVyciA9IF9tbWNfc3VzcGVuZCho
-b3N0LCB0cnVlKTsNCiAgICA+ICsgICAgICAgZXJyID0gX21tY19zdXNwZW5kKGhvc3QsIHRydWUs
-IHRydWUpOw0KICAgID4gICAgICAgICBpZiAoZXJyKQ0KICAgID4gICAgICAgICAgICAgICAgIHBy
-X2VycigiJXM6IGVycm9yICVkIGRvaW5nIGFnZ3Jlc3NpdmUgc3VzcGVuZFxuIiwNCiAgICA+ICAg
-ICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShob3N0KSwgZXJyKTsNCiAgICA+IC0t
-DQogICAgPiAxLjkuMQ0KICAgID4NCiAgICA+IFdlc3Rlcm4gRGlnaXRhbCBDb3Jwb3JhdGlvbiAo
-YW5kIGl0cyBzdWJzaWRpYXJpZXMpIEUtbWFpbCBDb25maWRlbnRpYWxpdHkgTm90aWNlICYgRGlz
-Y2xhaW1lcjoNCiAgICA+DQogICAgPiBUaGlzIGUtbWFpbCBhbmQgYW55IGZpbGVzIHRyYW5zbWl0
-dGVkIHdpdGggaXQgbWF5IGNvbnRhaW4gY29uZmlkZW50aWFsIG9yIGxlZ2FsbHkgcHJpdmlsZWdl
-ZCBpbmZvcm1hdGlvbiBvZiBXREMgYW5kL29yIGl0cyBhZmZpbGlhdGVzLCBhbmQgYXJlIGludGVu
-ZGVkIHNvbGVseSBmb3IgdGhlIHVzZSBvZiB0aGUgaW5kaXZpZHVhbCBvciBlbnRpdHkgdG8gd2hp
-Y2ggdGhleSBhcmUgYWRkcmVzc2VkLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBp
-ZW50LCBhbnkgZGlzY2xvc3VyZSwgY29weWluZywgZGlzdHJpYnV0aW9uIG9yIGFueSBhY3Rpb24g
-dGFrZW4gb3Igb21pdHRlZCB0byBiZSB0YWtlbiBpbiByZWxpYW5jZSBvbiBpdCwgaXMgcHJvaGli
-aXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBu
-b3RpZnkgdGhlIHNlbmRlciBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIHRoZSBlLW1haWwgaW4gaXRz
-IGVudGlyZXR5IGZyb20geW91ciBzeXN0ZW0uDQogICAgDQoNCg==
+Hi Olof,
+
++Daniel
+
+On 26 May 2017 at 18:24, Olof Johansson <olof@lixom.net> wrote:
+> Hi Ulf,
+>
+>
+> On Fri, May 26, 2017 at 6:08 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Hi Linus,
+>>
+>> Here are a couple of mmc and arm64-dts fixes intended for v4.12 rc3.
+>> They are based on v4.12-rc2.
+>>
+>> Details are as usual found in the signed tag. Please pull this in!
+>>
+>> Kind regards
+>> Ulf Hansson
+>>
+>>
+>> The following changes since commit 08332893e37af6ae779367e78e444f8f9571511d:
+>>
+>>   Linux 4.12-rc2 (2017-05-21 19:30:23 -0700)
+>>
+>> are available in the git repository at:
+>>
+>>   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.12-rc2
+>>
+>> for you to fetch changes up to ea452678734eb782126f999bf5c4fb3e71d3b196:
+>>
+>>   arm64: dts: hikey: Fix WiFi support (2017-05-23 14:18:10 +0200)
+>>
+>> ----------------------------------------------------------------
+>> This pull request contains fixes to make the WiFi work again for the ARM64
+>> Hikey board.  Together with a couple of DTS updates for the Hikey board we have
+>> also extended the mmc pwrseq_simple, to support a new power-off-delay-us DT
+>> property, as that was required to enable a graceful power off sequence for the
+>> WiFi chip.
+>>
+>> ----------------------------------------------------------------
+>> Daniel Lezcano (2):
+>>       mfd: dts: hi655x: Add clock binding for the pmic
+>>       arm64: dts: hikey: Add clock for the pmic mfd
+>>
+>> Ulf Hansson (6):
+>>       mmc: dt: pwrseq-simple: Invent power-off-delay-us
+>>       mmc: pwrseq_simple: Parse DTS for the power-off-delay-us property
+>>       arm64: dts: hi6220: Move the fixed_5v_hub regulator to the hikey dts
+>>       arm64: dts: hikey: Add the SYS_5V and the VDD_3V3 regulators
+>>       arm64: dts: hi6220: Move board data from the dwmmc nodes to hikey dts
+>>       arm64: dts: hikey: Fix WiFi support
+>
+>
+> These are a lot of changes to fix a regression. How was it introduced?
+
+It was several releases ago it got broken, exactly which one I can't
+really tell.
+
+I suspect this also is related to an upgrade of the boot loader, as in
+the earlier version of the series there where a pmic clock driver
+included, however it got picked up for 4.12.
+
+Looping in Daniel, just to see if he have some comments on this.
+
+No matter what, I still think it makes sense to pick this for 4.12
+rcs, because it also simplifies for us for how to deal with the
+mmc+arm64 dependency, since this needs to go together (to avoid
+damaging the WiFi chip when power off)
+
+>
+> It would also have been useful if you pointed out the DT contents was
+> already acked by Arnd (I had to go look at the contents since you only
+> looped him in, and no other ARM-SoC maintainers).
+>
+
+Apologize about that! I will make that clear, if/when next time!
+
+>
+> -Olof
+
+Kind regards
+Uffe
