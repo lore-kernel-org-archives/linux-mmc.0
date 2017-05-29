@@ -1,441 +1,111 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc:dw_mmc-k3: add sd support for hi3660
-Date: Mon, 29 May 2017 10:47:09 +0900
-Message-ID: <4878c347-6211-ae5c-9b01-f20a9dd9c44f@samsung.com>
-References: <CGME20170525020759epcas1p2c9ac22bd304a93b61fb3b86b2d052261@epcas1p2.samsung.com>
-        <20170525020734.75623-1-liwei213@huawei.com>
+Subject: Re: [PATCH v3 1/2] mmc: dw_mmc: Use device_property_read instead of
+ of_property_read
+Date: Mon, 29 May 2017 12:21:35 +0900
+Message-ID: <667edf5b-ed1c-1f00-8a00-e2eff7f6205e@samsung.com>
+References: <CGME20170527014552epcas2p16b1befaccf5dff3d7ab534dda60f4191@epcas2p1.samsung.com>
+        <1495835601-20327-1-git-send-email-dwoods@mellanox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:48610 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750837AbdE2BrM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 May 2017 21:47:12 -0400
-In-reply-to: <20170525020734.75623-1-liwei213@huawei.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:16949 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750837AbdE2DVi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 May 2017 23:21:38 -0400
+In-reply-to: <1495835601-20327-1-git-send-email-dwoods@mellanox.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: David Woods <dwoods@mellanox.com>, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, hkallweit1@gmail.com, adrian.hunter@intel.com, cmetcalf@mellanox.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: stable@vger.linux.org
 
-Dear Li,
-
-On 05/25/2017 11:07 AM, liwei wrote:
-> Add sd card support for hi3660 soc
-
-Sorry for sending directly. I can't send the email to you directly.
-I hope you will see this email at mailing.
-
+On 05/27/2017 06:53 AM, David Woods wrote:
+> Using the device_property interfaces allows the dw_mmc driver to work
+> on platforms which run on either device tree or ACPI.
 > 
-> Signed-off-by: Li Wei <liwei213@huawei.com>
-> Signed-off-by: Chen Jun <chenjun14@huawei.com>
+> Signed-off-by: David Woods <dwoods@mellanox.com>
+> Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
+> Cc: stable@vger.linux.org
+
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+Best Regards,
+Jaehoon Chung
+
 > ---
->  drivers/mmc/host/dw_mmc-k3.c | 314 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 314 insertions(+)
+>  drivers/mmc/host/dw_mmc.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index e38fb0020bb1..a6e13bd83b9f 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -8,6 +8,8 @@
->   * (at your option) any later version.
->   */
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index e45129f..efde0f2 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2707,8 +2707,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	host->slot[id] = slot;
 >  
-> +#include <linux/bitops.h>
-> +#include <linux/bitfield.h>
->  #include <linux/clk.h>
->  #include <linux/mfd/syscon.h>
->  #include <linux/mmc/host.h>
-> @@ -28,7 +30,40 @@
->  #define AO_SCTRL_SEL18		BIT(10)
->  #define AO_SCTRL_CTRL3		0x40C
->  
-> +#define DWMMC_SD_ID   1
-
-Not using this defined.
-
-> +#define DWMMC_SDIO_ID 2
-> +
-> +#define SOC_SCTRL_SCPERCTRL5    (0x314)
-> +#define SDCARD_IO_SEL18         BIT(2)
-> +
-> +#define GENCLK_DIV (7)
-> +
-> +#define GPIO_CLK_ENABLE                   BIT(16)
-> +#define GPIO_CLK_DIV_MASK                 GENMASK(11, 8)
-> +#define GPIO_USE_SAMPLE_DLY_MASK          GENMASK(13, 13)
-> +#define UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)
-> +#define UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)
-> +#define UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)
-> +
-> +#define SDMMC_UHS_REG_EXT	0x108
-> +#define SDMMC_ENABLE_SHIFT	0x110
-
-These registers are not K3 specific..right?
-It's common register for dwmmc controller...Move to dwmmc header file.
-
-> +
-> +#define TIMING_MODE     3
-> +#define TIMING_CFG_NUM 10
-> +
-> +#define PULL_DOWN BIT(1)
-> +#define PULL_UP   BIT(0)
-> +
-> +#define NUM_PHASES (40)
-> +
-> +#define ENABLE_SHIFT_MIN_SMPL (4)
-> +#define ENABLE_SHIFT_MAX_SMPL (12)
-> +#define USE_DLY_MIN_SMPL (11)
-> +#define USE_DLY_MAX_SMPL (14)
-> +
->  struct k3_priv {
-> +	u8 ctrl_id;
-> +	u32 cur_speed;
->  	struct regmap	*reg;
->  };
->  
-> @@ -38,6 +73,41 @@ static unsigned long dw_mci_hi6220_caps[] = {
->  	0
->  };
->  
-> +struct hs_timing {
-> +	int drv_phase;
-> +	int sam_dly;
-> +	int sam_phase_max;
-> +	int sam_phase_min;
-
-"sam" means sample? how about smpl?
-
-> +};
-> +
-> +struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
-> +	{ /* reserved */ },
-> +	{ /* SD */
-> +		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
-> +		{6, 0,  4,  4,},  /* 1: MMC_HS */
-> +		{6, 0,  3,  3,},  /* 2: SD_HS */
-> +		{6, 0, 15, 15,},  /* 3: SDR12 */
-> +		{6, 0,  2,  2,},  /* 4: SDR25 */
-> +		{4, 0, 11,  0,},  /* 5: SDR50 */
-> +		{6, 4, 15,  0,},  /* 6: SDR104 */
-> +		{0},              /* 7: DDR50 */
-> +		{0},              /* 8: DDR52 */
-> +		{0},              /* 9: HS200 */
-> +	},
-> +	{ /* SDIO */
-> +		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
-> +		{0},              /* 1: MMC_HS */
-> +		{6, 0, 15, 15,},  /* 2: SD_HS */
-> +		{6, 0, 15, 15,},  /* 3: SDR12 */
-> +		{6, 0,  0,  0,},  /* 4: SDR25 */
-> +		{4, 0, 12,  0,},  /* 5: SDR50 */
-> +		{5, 4, 15,  0,},  /* 6: SDR104 */
-> +		{0},              /* 7: DDR50 */
-> +		{0},              /* 8: DDR52 */
-> +		{0},              /* 9: HS200 */
-> +	}
-> +};
-> +
->  static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	mmc->ops = &dw_mci_ops;
+> -	if (of_property_read_u32_array(host->dev->of_node,
+> -				       "clock-freq-min-max", freq, 2)) {
+> +	if (device_property_read_u32_array(host->dev, "clock-freq-min-max",
+> +					   freq, 2)) {
+>  		mmc->f_min = DW_MCI_FREQ_MIN;
+>  		mmc->f_max = DW_MCI_FREQ_MAX;
+>  	} else {
+> @@ -2808,7 +2808,6 @@ static void dw_mci_init_dma(struct dw_mci *host)
 >  {
+>  	int addr_config;
+>  	struct device *dev = host->dev;
+> -	struct device_node *np = dev->of_node;
+>  
+>  	/*
+>  	* Check tansfer mode from HCON[17:16]
+> @@ -2869,8 +2868,9 @@ static void dw_mci_init_dma(struct dw_mci *host)
+>  		dev_info(host->dev, "Using internal DMA controller.\n");
+>  	} else {
+>  		/* TRANS_MODE_EDMAC: check dma bindings again */
+> -		if ((of_property_count_strings(np, "dma-names") < 0) ||
+> -		    (!of_find_property(np, "dmas", NULL))) {
+> +		if ((device_property_read_string_array(dev, "dma-names",
+> +						       NULL, 0) < 0) ||
+> +		    !device_property_present(dev, "dmas")) {
+>  			goto no_dma;
+>  		}
+>  		host->dma_ops = &dw_mci_edmac_ops;
+> @@ -2937,7 +2937,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  {
+>  	struct dw_mci_board *pdata;
+>  	struct device *dev = host->dev;
+> -	struct device_node *np = dev->of_node;
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
 >  	int ret;
-> @@ -66,6 +136,10 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
->  	if (IS_ERR(priv->reg))
->  		priv->reg = NULL;
+>  	u32 clock_frequency;
+> @@ -2954,20 +2953,21 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  	}
 >  
-> +	priv->ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-> +	if (priv->ctrl_id < 0)
-> +		priv->ctrl_id = 0;
-> +
-
-You have assumption...always.
-mshc0 -> eMMC, 
-mshc1 -> SD
-mshc2 -> SDIO
-
->  	host->priv = priv;
->  	return 0;
->  }
-> @@ -144,7 +218,242 @@ static const struct dw_mci_drv_data hi6220_data = {
->  	.execute_tuning		= dw_mci_hi6220_execute_tuning,
->  };
+>  	/* find out number of slots supported */
+> -	of_property_read_u32(np, "num-slots", &pdata->num_slots);
+> +	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
 >  
-> +static void dw_mci_hs_set_timing(struct dw_mci *host, int timing, int sam_phase)
-> +{
-> +	int drv_phase;
-> +	int sam_dly;
-> +	int ctrl_id;
-> +	int use_sam_dly = 0;
-> +	int enable_shift = 0;
-> +	int reg_value;
-
-
-int? not u32 for register value?
-
-> +	struct k3_priv *priv;
-> +
-> +	priv = host->priv;
-> +	ctrl_id = priv->ctrl_id;
-> +
-> +	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
-> +	sam_dly   = hs_timing_cfg[ctrl_id][timing].sam_dly;
-> +	if (sam_phase == -1)
-> +		sam_phase = (hs_timing_cfg[ctrl_id][timing].sam_phase_max +
-> +			     hs_timing_cfg[ctrl_id][timing].sam_phase_min) / 2;
-> +
-> +	if (timing == MMC_TIMING_UHS_SDR50 ||
-> +	    timing == MMC_TIMING_UHS_SDR104) {
-> +		if (sam_phase >= ENABLE_SHIFT_MIN_SMPL &&
-> +		    sam_phase <= ENABLE_SHIFT_MAX_SMPL)
-> +			enable_shift = 1;
-> +	}
-> +	if (timing == MMC_TIMING_UHS_SDR104) {
-> +		if (sam_phase >= USE_DLY_MIN_SMPL &&
-> +		    sam_phase <= USE_DLY_MAX_SMPL)
-> +			use_sam_dly = 1;
-> +	}
-
-
-Can be use the "switch" statement.
-
-switch (timing) {
-case MMC_TIMING_UHS_SDR104:
-	if (sam_phase >= USE_DLY_MIN_..)
-		use_sam_dly = 1;
-case MMC_TIMING_USE_SDR50:
-	if (sam_phase >= ENABLE...)
-		enable_shift = 1;
-}
-
-> +
-> +	mci_writel(host, GPIO, 0x0);
-> +	usleep_range(5, 10);
-> +
-> +	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, sam_phase) |\
-> +				FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK ,sam_dly) |\
-> +				FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK,drv_phase);		
-> +	mci_writel(host, UHS_REG_EXT, reg_value);
-> +
-> +	mci_writel(host, ENABLE_SHIFT, enable_shift);
-> +
-> +	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |\
-> +				FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK,use_sam_dly);
-> +	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
-> +
-> +	/* We should delay 1ms wait for timing setting finished. */
-> +	usleep_range(1000, 2000);
-> +}
-> +
-> +int dw_mci_hi3660_init(struct dw_mci *host)
-
-Not static?
-
-> +{
-> +	/* set threshold to 512 bytes */
-> +	mci_writel(host, CDTHRCTL, 0x02000001);
-
-Don't use the Magic number as 0x02000001.
-
-> +
-> +	dw_mci_hs_set_timing(host, MMC_TIMING_LEGACY, -1);
-> +	host->bus_hz /= (GENCLK_DIV + 1);
-> +
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_set_sel18(struct dw_mci *host, bool set)
-> +{
-> +	int ret;
-> +	unsigned int val;
-> +	struct k3_priv *priv;
-> +
-> +	priv = host->priv;
-> +
-> +	val = set ? SDCARD_IO_SEL18 : 0;
-> +	ret = regmap_update_bits(priv->reg, SOC_SCTRL_SCPERCTRL5,
-> +				 SDCARD_IO_SEL18, val);
-> +	if (ret) {
-> +		dev_err(host->dev, "sel18 %u error\n", val);
-> +		return ret;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +void dw_mci_hi3660_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> +{
-> +	int ret;
-> +	unsigned long wanted;
-> +	unsigned long actual;
-> +	struct k3_priv *priv = host->priv;
-> +
-> +	if (!ios->clock || ios->clock == priv->cur_speed)
-> +		return;
-> +
-> +	wanted = ios->clock * (GENCLK_DIV + 1);
-> +	ret = clk_set_rate(host->ciu_clk, wanted);
-> +	if (ret) {
-> +		dev_err(host->dev, "failed to set rate %luHz\n", wanted);
-> +		return;
-> +	}
-> +	actual = clk_get_rate(host->ciu_clk);
-> +
-> +	dw_mci_hs_set_timing(host, ios->timing, -1);
-> +	host->bus_hz = actual / (GENCLK_DIV + 1);
-> +	host->current_speed = 0;
-> +	priv->cur_speed = host->bus_hz;
-> +}
-> +
-> +static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
-> +{
-> +	int i;
-> +	int interval;
-> +	unsigned int v;
-> +	unsigned int len;
-> +	unsigned int range_start = 0;
-> +	unsigned int range_length = 0;
-> +	unsigned int middle_range = 0;
-> +
-> +	if (!sample_flag)
-> +		return -EIO;
-> +
-> +	if (~sample_flag == 0)
-> +		return 0;
-> +
-> +	i = ffs(sample_flag) - 1;
-> +
-> +	/*A clock cycle is divided into 32 phases, 
-> +	*each of which is represented by a bit, finding the optimal phase.
-> +	*/
-> +	while (i < 32) {
-> +		v = ror32(sample_flag, i);
-> +		len = ffs(~v) - 1;
-> +
-> +		if (len > range_length) {
-> +			range_length = len;
-> +			range_start = i;
-> +		}
-> +
-> +		interval = ffs(v >> len) - 1;
-> +		if (interval < 0)
-> +			break;
-> +
-> +		i += len + interval;
-> +	}
-> +
-> +	middle_range = range_start + range_length / 2;
-> +	if (middle_range >= 32)
-> +		middle_range %= 32;
-> +
-> +	return middle_range;
-> +}
-> +
-> +static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-> +{
-> +	int i = 0;
-> +	struct dw_mci *host = slot->host;
-> +	struct mmc_host *mmc = slot->mmc;
-> +	int sam_phase = 0;
-> +	u32 tuning_sample_flag = 0;
-> +	int best_clksmpl = 0;
-> +
-> +	for (i = 0; i < NUM_PHASES; ++i, ++sam_phase) {
-> +		sam_phase %= 32;
-> +
-> +		mci_writel(host, TMOUT, ~0);
-> +		dw_mci_hs_set_timing(host, mmc->ios.timing, sam_phase);
-> +
-> +		if (!mmc_send_tuning(mmc, opcode, NULL))
-> +			tuning_sample_flag |= (1 << sam_phase);
-> +		else
-> +			tuning_sample_flag &= ~(1 << sam_phase);
-> +	}
-> +
-> +	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);
-> +	if (best_clksmpl < 0) {
-> +		dev_err(host->dev, "All phases bad!\n");
-> +		return -EIO;
-> +	}
-> +
-> +	dw_mci_hs_set_timing(host, mmc->ios.timing, best_clksmpl);
-> +
-> +	dev_info(host->dev, "tuning ok best_clksmpl %u tuning_sample_flag %x\n",
-> +		 best_clksmpl, tuning_sample_flag);
-> +	return 0;
-> +}
-> +
-> +static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
-> +					struct mmc_ios *ios)
-> +{
-> +	int ret;
-> +	int min_uv = 0;
-> +	int max_uv = 0;
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
-> +	struct k3_priv *priv;
-> +	struct dw_mci *host;
-> +
-> +	host = slot->host;
-> +	priv = host->priv;
-> +
-> +	if (!priv || !priv->reg)
-> +		return 0;
-> +
-> +	if (priv->ctrl_id == DWMMC_SDIO_ID)
-> +		return 0;
-> +
-> +	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-> +		ret = dw_mci_set_sel18(host, 0);
-> +		if (ret)
-> +			return ret;
-> +		min_uv = 2950000;
-> +		max_uv = 2950000;
-> +	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-> +		ret = dw_mci_set_sel18(host, 1);
-> +		if (ret)
-> +			return ret;
-> +		min_uv = 1800000;
-> +		max_uv = 1800000;
-> +	}
-> +
-> +	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
-> +		return 0;
-> +
-> +	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
-> +	if (ret) {
-> +		dev_dbg(host->dev, "Regulator set error %d: %d - %d\n",
-> +			ret, min_uv, max_uv);
-
-use dev_err..this is error message.
-
-> +		return ret;
-> +	}
-> +	return 0;
-> +}
-> +
-> +static const struct dw_mci_drv_data hi3660_data = {
-> +	.init = dw_mci_hi3660_init,
-> +	.set_ios = dw_mci_hi3660_set_ios,
-> +	.parse_dt = dw_mci_hi6220_parse_dt,
-> +	.execute_tuning = dw_mci_hi3660_execute_tuning,
-> +	.switch_voltage  = dw_mci_hi3660_switch_voltage,
-> +};
-> +
->  static const struct of_device_id dw_mci_k3_match[] = {
-> +	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
->  	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
->  	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
->  	{},
-> @@ -155,6 +464,11 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
->  {
->  	const struct dw_mci_drv_data *drv_data;
->  	const struct of_device_id *match;
-> +	struct reset_control	*rst;
-> +
-> +	rst = devm_reset_control_get(&pdev->dev, NULL);
-> +	if (!IS_ERR(rst))
-> +		reset_control_reset(rst);
+> -	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+> +	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
+>  		dev_info(dev,
+>  			 "fifo-depth property not found, using value of FIFOTH register as default\n");
 >  
->  	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
->  	drv_data = match->data;
+> -	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+> +	device_property_read_u32(dev, "card-detect-delay",
+> +				 &pdata->detect_delay_ms);
+>  
+> -	of_property_read_u32(np, "data-addr", &host->data_addr_override);
+> +	device_property_read_u32(dev, "data-addr", &host->data_addr_override);
+>  
+> -	if (of_get_property(np, "fifo-watermark-aligned", NULL))
+> +	if (device_property_present(dev, "fifo-watermark-aligned"))
+>  		host->wm_aligned = true;
+>  
+> -	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+> +	if (!device_property_read_u32(dev, "clock-frequency", &clock_frequency))
+>  		pdata->bus_hz = clock_frequency;
+>  
+>  	if (drv_data && drv_data->parse_dt) {
 > 
 
