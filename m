@@ -1,187 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/2] mmc: core: Use device_property_read instead of of_property_read
-Date: Mon, 29 May 2017 16:42:35 +0200
-Message-ID: <CAPDyKFr=YJYqRPJyB+Wu=X+GiWZLAtemG4-TiEojOEZbgq39Cg@mail.gmail.com>
-References: <1495835601-20327-1-git-send-email-dwoods@mellanox.com> <1495835601-20327-2-git-send-email-dwoods@mellanox.com>
+Subject: Re: [PATCH 4/7] mmc: use proper name for the R-Car SoC
+Date: Mon, 29 May 2017 16:42:41 +0200
+Message-ID: <CAPDyKFoyer03ukhHEGBsQ+Ua639E4dvPp_RJCmYW1Ymap90Pnw@mail.gmail.com>
+References: <20170528093051.11816-1-wsa+renesas@sang-engineering.com> <20170528093051.11816-5-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1495835601-20327-2-git-send-email-dwoods@mellanox.com>
+In-Reply-To: <20170528093051.11816-5-wsa+renesas@sang-engineering.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Woods <dwoods@mellanox.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Heiner Kallweit <hkallweit1@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, cmetcalf@mellanox.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.linux.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>
+Cc: Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 May 2017 at 23:53, David Woods <dwoods@mellanox.com> wrote:
-> Using the device_property interfaces allows mmc drivers to work
-> on platforms which run on either device tree or ACPI.
+On 28 May 2017 at 11:30, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
+> It is 'R-Car', not 'RCar'. No code or binding changes, only descriptive text.
 >
-> Signed-off-by: David Woods <dwoods@mellanox.com>
-> Reviewed-by: Chris Metcalf <cmetcalf@mellanox.com>
-> Cc: stable@vger.linux.org
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
+
+For mfd, Lee, please tell if you have any issues me picking this via
+my mmc tree.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/host.c | 72 ++++++++++++++++++++++++-------------------------
->  1 file changed, 35 insertions(+), 37 deletions(-)
+> I suggest this trivial patch should be picked individually per susbsystem.
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 3f8c85d..88fa031 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -176,19 +176,17 @@ static void mmc_retune_timer(unsigned long data)
+>  drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+>  include/linux/mfd/tmio.h             | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index 846ee1a8e5a675..397b3e29977ea8 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -130,7 +130,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>         unsigned int freq, diff, best_freq = 0, diff_min = ~0;
+>         int i, ret;
+>
+> -       /* tested only on RCar Gen2+ currently; may work for others */
+> +       /* tested only on R-Car Gen2+ currently; may work for others */
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+>                 return clk_get_rate(priv->clk);
+>
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index a1520d88ebf3a3..c83c16b931a886 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -66,7 +66,7 @@
 >   */
->  int mmc_of_parse(struct mmc_host *host)
->  {
-> -       struct device_node *np;
-> +       struct device *dev = host->parent;
->         u32 bus_width;
->         int ret;
->         bool cd_cap_invert, cd_gpio_invert = false;
->         bool ro_cap_invert, ro_gpio_invert = false;
+>  #define TMIO_MMC_SDIO_IRQ              (1 << 2)
 >
-> -       if (!host->parent || !host->parent->of_node)
-> +       if (!dev || !dev_fwnode(dev))
->                 return 0;
+> -/* Some features are only available or tested on RCar Gen2 or later */
+> +/* Some features are only available or tested on R-Car Gen2 or later */
+>  #define TMIO_MMC_MIN_RCAR2             (1 << 3)
 >
-> -       np = host->parent->of_node;
-> -
->         /* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
-> -       if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-> +       if (device_property_read_u32(dev, "bus-width", &bus_width) < 0) {
->                 dev_dbg(host->parent,
->                         "\"bus-width\" property is missing, assuming 1 bit.\n");
->                 bus_width = 1;
-> @@ -210,7 +208,7 @@ int mmc_of_parse(struct mmc_host *host)
->         }
->
->         /* f_max is obtained from the optional "max-frequency" property */
-> -       of_property_read_u32(np, "max-frequency", &host->f_max);
-> +       device_property_read_u32(dev, "max-frequency", &host->f_max);
->
->         /*
->          * Configure CD and WP pins. They are both by default active low to
-> @@ -225,12 +223,12 @@ int mmc_of_parse(struct mmc_host *host)
->          */
->
->         /* Parse Card Detection */
-> -       if (of_property_read_bool(np, "non-removable")) {
-> +       if (device_property_read_bool(dev, "non-removable")) {
->                 host->caps |= MMC_CAP_NONREMOVABLE;
->         } else {
-> -               cd_cap_invert = of_property_read_bool(np, "cd-inverted");
-> +               cd_cap_invert = device_property_read_bool(dev, "cd-inverted");
->
-> -               if (of_property_read_bool(np, "broken-cd"))
-> +               if (device_property_read_bool(dev, "broken-cd"))
->                         host->caps |= MMC_CAP_NEEDS_POLL;
->
->                 ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-> @@ -256,7 +254,7 @@ int mmc_of_parse(struct mmc_host *host)
->         }
->
->         /* Parse Write Protection */
-> -       ro_cap_invert = of_property_read_bool(np, "wp-inverted");
-> +       ro_cap_invert = device_property_read_bool(dev, "wp-inverted");
->
->         ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert);
->         if (!ret)
-> @@ -264,64 +262,64 @@ int mmc_of_parse(struct mmc_host *host)
->         else if (ret != -ENOENT && ret != -ENOSYS)
->                 return ret;
->
-> -       if (of_property_read_bool(np, "disable-wp"))
-> +       if (device_property_read_bool(dev, "disable-wp"))
->                 host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
->
->         /* See the comment on CD inversion above */
->         if (ro_cap_invert ^ ro_gpio_invert)
->                 host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
->
-> -       if (of_property_read_bool(np, "cap-sd-highspeed"))
-> +       if (device_property_read_bool(dev, "cap-sd-highspeed"))
->                 host->caps |= MMC_CAP_SD_HIGHSPEED;
-> -       if (of_property_read_bool(np, "cap-mmc-highspeed"))
-> +       if (device_property_read_bool(dev, "cap-mmc-highspeed"))
->                 host->caps |= MMC_CAP_MMC_HIGHSPEED;
-> -       if (of_property_read_bool(np, "sd-uhs-sdr12"))
-> +       if (device_property_read_bool(dev, "sd-uhs-sdr12"))
->                 host->caps |= MMC_CAP_UHS_SDR12;
-> -       if (of_property_read_bool(np, "sd-uhs-sdr25"))
-> +       if (device_property_read_bool(dev, "sd-uhs-sdr25"))
->                 host->caps |= MMC_CAP_UHS_SDR25;
-> -       if (of_property_read_bool(np, "sd-uhs-sdr50"))
-> +       if (device_property_read_bool(dev, "sd-uhs-sdr50"))
->                 host->caps |= MMC_CAP_UHS_SDR50;
-> -       if (of_property_read_bool(np, "sd-uhs-sdr104"))
-> +       if (device_property_read_bool(dev, "sd-uhs-sdr104"))
->                 host->caps |= MMC_CAP_UHS_SDR104;
-> -       if (of_property_read_bool(np, "sd-uhs-ddr50"))
-> +       if (device_property_read_bool(dev, "sd-uhs-ddr50"))
->                 host->caps |= MMC_CAP_UHS_DDR50;
-> -       if (of_property_read_bool(np, "cap-power-off-card"))
-> +       if (device_property_read_bool(dev, "cap-power-off-card"))
->                 host->caps |= MMC_CAP_POWER_OFF_CARD;
-> -       if (of_property_read_bool(np, "cap-mmc-hw-reset"))
-> +       if (device_property_read_bool(dev, "cap-mmc-hw-reset"))
->                 host->caps |= MMC_CAP_HW_RESET;
-> -       if (of_property_read_bool(np, "cap-sdio-irq"))
-> +       if (device_property_read_bool(dev, "cap-sdio-irq"))
->                 host->caps |= MMC_CAP_SDIO_IRQ;
-> -       if (of_property_read_bool(np, "full-pwr-cycle"))
-> +       if (device_property_read_bool(dev, "full-pwr-cycle"))
->                 host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
-> -       if (of_property_read_bool(np, "keep-power-in-suspend"))
-> +       if (device_property_read_bool(dev, "keep-power-in-suspend"))
->                 host->pm_caps |= MMC_PM_KEEP_POWER;
-> -       if (of_property_read_bool(np, "wakeup-source") ||
-> -           of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
-> +       if (device_property_read_bool(dev, "wakeup-source") ||
-> +           device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
->                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> -       if (of_property_read_bool(np, "mmc-ddr-3_3v"))
-> +       if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
->                 host->caps |= MMC_CAP_3_3V_DDR;
-> -       if (of_property_read_bool(np, "mmc-ddr-1_8v"))
-> +       if (device_property_read_bool(dev, "mmc-ddr-1_8v"))
->                 host->caps |= MMC_CAP_1_8V_DDR;
-> -       if (of_property_read_bool(np, "mmc-ddr-1_2v"))
-> +       if (device_property_read_bool(dev, "mmc-ddr-1_2v"))
->                 host->caps |= MMC_CAP_1_2V_DDR;
-> -       if (of_property_read_bool(np, "mmc-hs200-1_8v"))
-> +       if (device_property_read_bool(dev, "mmc-hs200-1_8v"))
->                 host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
-> -       if (of_property_read_bool(np, "mmc-hs200-1_2v"))
-> +       if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
->                 host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
-> -       if (of_property_read_bool(np, "mmc-hs400-1_8v"))
-> +       if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
->                 host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
-> -       if (of_property_read_bool(np, "mmc-hs400-1_2v"))
-> +       if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
->                 host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
-> -       if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
-> +       if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
->                 host->caps2 |= MMC_CAP2_HS400_ES;
-> -       if (of_property_read_bool(np, "no-sdio"))
-> +       if (device_property_read_bool(dev, "no-sdio"))
->                 host->caps2 |= MMC_CAP2_NO_SDIO;
-> -       if (of_property_read_bool(np, "no-sd"))
-> +       if (device_property_read_bool(dev, "no-sd"))
->                 host->caps2 |= MMC_CAP2_NO_SD;
-> -       if (of_property_read_bool(np, "no-mmc"))
-> +       if (device_property_read_bool(dev, "no-mmc"))
->                 host->caps2 |= MMC_CAP2_NO_MMC;
->
-> -       host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
-> +       host->dsr_req = !device_property_read_u32(dev, "dsr", &host->dsr);
->         if (host->dsr_req && (host->dsr & ~0xffff)) {
->                 dev_err(host->parent,
->                         "device tree specified broken value for DSR: 0x%x, ignoring\n",
+>  /*
 > --
-> 2.7.2
+> 2.11.0
 >
