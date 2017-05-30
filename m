@@ -1,79 +1,86 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 4/7] mmc: use proper name for the R-Car SoC
-Date: Tue, 30 May 2017 08:16:09 +0100
-Message-ID: <20170530071609.p4wrpqywrfllgy4z@dell>
-References: <20170528093051.11816-1-wsa+renesas@sang-engineering.com>
- <20170528093051.11816-5-wsa+renesas@sang-engineering.com>
- <CAPDyKFoyer03ukhHEGBsQ+Ua639E4dvPp_RJCmYW1Ymap90Pnw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: renesas_sdhi_core: on R-Car 2+, make use of CBSY bit
+Date: Tue, 30 May 2017 11:03:46 +0200
+Message-ID: <20170530090346.19088-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:38595 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750946AbdE3HQN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 May 2017 03:16:13 -0400
-Received: by mail-wm0-f52.google.com with SMTP id e127so86293261wmg.1
-        for <linux-mmc@vger.kernel.org>; Tue, 30 May 2017 00:16:12 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoyer03ukhHEGBsQ+Ua639E4dvPp_RJCmYW1Ymap90Pnw@mail.gmail.com>
+Received: from sauhun.de ([88.99.104.3]:58032 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750896AbdE3JD4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 30 May 2017 05:03:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On Mon, 29 May 2017, Ulf Hansson wrote:
+Most registers need to wait until the command is completed, not
+necessarily until the bus is free. At least, R-Car 2+ SoCs can signal
+that via the CBSY bit, so let's use it there instead of SCLKDIVEN to
+save a little bit of delay.
 
-> On 28 May 2017 at 11:30, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
-> > It is 'R-Car', not 'RCar'. No code or binding changes, only descriptive text.
-> >
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> 
-> Thanks, applied for next!
-> 
-> For mfd, Lee, please tell if you have any issues me picking this via
-> my mmc tree.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-I don't, but it is normal procedure to wait for an Ack from all
-Maintainers involved before applying. ;)
+Tested with a Renesas Lager board (H2). Moved big files around across different
+SD cards, re- inserted cards multiple times. All worked fine.
 
-> > ---
-> > I suggest this trivial patch should be picked individually per susbsystem.
-> >
-> >  drivers/mmc/host/renesas_sdhi_core.c | 2 +-
-> >  include/linux/mfd/tmio.h             | 2 +-
-> >  2 files changed, 2 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> > index 846ee1a8e5a675..397b3e29977ea8 100644
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -130,7 +130,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
-> >         unsigned int freq, diff, best_freq = 0, diff_min = ~0;
-> >         int i, ret;
-> >
-> > -       /* tested only on RCar Gen2+ currently; may work for others */
-> > +       /* tested only on R-Car Gen2+ currently; may work for others */
-> >         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
-> >                 return clk_get_rate(priv->clk);
-> >
-> > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> > index a1520d88ebf3a3..c83c16b931a886 100644
-> > --- a/include/linux/mfd/tmio.h
-> > +++ b/include/linux/mfd/tmio.h
-> > @@ -66,7 +66,7 @@
-> >   */
-> >  #define TMIO_MMC_SDIO_IRQ              (1 << 2)
-> >
-> > -/* Some features are only available or tested on RCar Gen2 or later */
-> > +/* Some features are only available or tested on R-Car Gen2 or later */
-> >  #define TMIO_MMC_MIN_RCAR2             (1 << 3)
-> >
-> >  /*
-> >
+@Dirk: can you do some additional testing for your use case? That would be much
+appreciated!
 
+Changes since RFC (from Jan 2016):
+* rebased to latest code base
+* use existing bit defines instead of creating new ones
+
+ drivers/mmc/host/renesas_sdhi_core.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 82150a96639195..288153b5f6835e 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -395,12 +395,14 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
+ 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+ }
+ 
+-static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host)
++static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host, u32 bit)
+ {
+ 	int timeout = 1000;
++	/* CBSY is set when busy, SCLKDIVEN is cleared when busy */
++	u32 wait_state = (bit == TMIO_STAT_CMD_BUSY ? TMIO_STAT_CMD_BUSY : 0);
+ 
+-	while (--timeout && !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
+-			      & TMIO_STAT_SCLKDIVEN))
++	while (--timeout && (sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
++			      & bit) == wait_state)
+ 		udelay(1);
+ 
+ 	if (!timeout) {
+@@ -413,18 +415,23 @@ static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host)
+ 
+ static int renesas_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
+ {
++	u32 bit = TMIO_STAT_SCLKDIVEN;
++
+ 	switch (addr)
+ 	{
+ 	case CTL_SD_CMD:
+ 	case CTL_STOP_INTERNAL_ACTION:
+ 	case CTL_XFER_BLK_COUNT:
+-	case CTL_SD_CARD_CLK_CTL:
+ 	case CTL_SD_XFER_LEN:
+ 	case CTL_SD_MEM_CARD_OPT:
+ 	case CTL_TRANSACTION_CTL:
+ 	case CTL_DMA_ENABLE:
+ 	case EXT_ACC:
+-		return renesas_sdhi_wait_idle(host);
++		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
++			bit = TMIO_STAT_CMD_BUSY;
++		/* fallthrough */
++	case CTL_SD_CARD_CLK_CTL:
++		return renesas_sdhi_wait_idle(host, bit);
+ 	}
+ 
+ 	return 0;
 -- 
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org │ Open source software for ARM SoCs
-Follow Linaro: Facebook | Twitter | Blog
+2.11.0
+
