@@ -1,79 +1,66 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 4/5] mmc: tmio: improve checkpatch cleanness
-Date: Tue, 30 May 2017 21:58:52 +0200
-Message-ID: <20170530195852.7r63hmfbbrwae6kt@ninjato>
-References: <1496148654-20386-1-git-send-email-horms+renesas@verge.net.au>
- <1496148654-20386-5-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH] mmc: renesas_sdhi_core: on R-Car 2+, make use of CBSY bit
+Date: Tue, 30 May 2017 22:02:18 +0200
+Message-ID: <20170530200218.q4s2dlrxusrdgpm2@ninjato>
+References: <20170530090346.19088-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="eacvl5txvugptbn6"
+        protocol="application/pgp-signature"; boundary="nc5ki6rvfvarmpxm"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1496148654-20386-5-git-send-email-horms+renesas@verge.net.au>
+In-Reply-To: <20170530090346.19088-1-wsa+renesas@sang-engineering.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
 
---eacvl5txvugptbn6
+--nc5ki6rvfvarmpxm
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 30, 2017 at 02:50:53PM +0200, Simon Horman wrote:
-> Trivial updates to improve checkpatch cleanness.
+On Tue, May 30, 2017 at 11:03:46AM +0200, Wolfram Sang wrote:
+> Most registers need to wait until the command is completed, not
+> necessarily until the bus is free. At least, R-Car 2+ SoCs can signal
+> that via the CBSY bit, so let's use it there instead of SCLKDIVEN to
+> save a little bit of delay.
 >=20
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>=20
+> Tested with a Renesas Lager board (H2). Moved big files around across dif=
+ferent
+> SD cards, re- inserted cards multiple times. All worked fine.
+>=20
+> @Dirk: can you do some additional testing for your use case? That would b=
+e much
+> appreciated!
 
-Wow, all of them! When I reviewed your DMA refactoring patches, I meant
-to fix only the whitespace issues which were affecting your patches. But
-okay, it is a good timing to fix all of those, because of the said DMA
-refactoring work, the BSP patches won't fit anymore anyhow, so upporting
-them will not become significantly harder.
-
-And while I don't agree with all of checkpatch suggestions, this patch
-increases code readability for sure. I guess, what I am saying is:
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-and
-
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-I moved big files around two SD cards attached simultaneously to two
-card slots on my Renesas Lager (H2).
-
-> -	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio=
-) {
-> +	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) &&
-> +	    !host->force_pio) {
->  		u32 status =3D sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
->  		bool done =3D false;
-
-Let me give just one example where I think the 80 char limit doesn't
-help readability. But no need to fix IMO; as I said, most of the stuff
-is really helpful.
+OK, since Dirk told me he'll need some more time to test it anyhow and
+Simon meanwhile sent some cleanup patches, I'll simply post an updated
+version of this patch once Simon's cleanup patches hit mmc/next. I think
+this will be easiest.
 
 
---eacvl5txvugptbn6
+--nc5ki6rvfvarmpxm
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlktzvwACgkQFA3kzBSg
-KbYz0Q/+O8QXloD++knphFYhtUyTrVcwtUWK5qAGEkN9utbkuiCH8fIZrVg7ykhI
-dZWnGCpbJBAErSeAeG8bfmXXFAaObf3YlDkrAxabbv3IlUpyz46MfnpawTAiVZ5J
-VDxZli0ZeCrxMR5fSWxoKvErBkxB9rlQ/qeicr8UR2tV8mz5yVv1V2dJRlXHmegC
-o046o6HqgBXlR0eExXjCtRn8wkw4nXG+MWAIhU3wO6n28lBfu26zNBiA6acAg5mi
-o8cVg+WlnEzPesCsqhmXcRjCaYhd6FRu1wnjo1GTLFxZG3UMiC64J36tBZrTPHmf
-JspDB6+Q1MRSRe65coCFgRAxvgMy8cyOe0qD4Sn2JLtnNECKj/TxKl1EISdHgSj3
-qIlMd1mBvO8VS4a1yte6FAknU22NsKCDhlGG92/x78E33Y/rnY9qVxUHodmL8eiY
-DQdoFdWeZu/wF1+NDJI2hZ3y/l8k9MpBYFLkp1ex2Zd4klSwLtdbiAMtzLUWEjnp
-jWWc5Z9XIWeYFubc5Pr/0D5lLqUEZlr+/JMopDJVJL/+WGf6im8SpQu4NIOT1hIc
-AiOaA/otq8IFUY0Eyrm8pTG0eUbO9icgHUfoEyjonhtuD/6AjdfH6KdINze+jEnK
-fKAZMRTRJfNRLOMGW9gTRNmUDNPRh0sk6LV04CWitF79yl6urgc=
-=REnM
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlktz8YACgkQFA3kzBSg
+KbbYjg//by1IwNI2J4oayp9h8NiXAc3cFHiisuaCcwVEKPfh7sgI3pmrD84saSZM
+IgsRfQMtwFQUCH3693dsNqwZMP+wMa1J0S65VGLpkek6mLurE9lRCgT0E1k8Vum5
+841E3fO5WBqUYRzNaee51ItDv2SbkDDFT+Do5BJAEs2kVXf6NNIki1ecDUEXl1TP
++yj4SQV3GTSpAoS8/+X3hlQqIAHBUuogMoquHA4OAlIb+SoMXVuMDtnbWixf2S88
+vLAVDorOUTJjzPelDI0XIwiyNYXMajplukk41TlJTFP1SbhS9HZIncWzrXQYJUU9
+TCs7cTlFooWffviKoiSc6zJCuEE9oYvNDInZyMO0B/y4NMBQ3VhPAvjWVzTlOAdv
+chVF+/YW7Y+scKPc8c+TfmDK7bQ4bh4unhMEPprHKh4cUREIphn3InN9di6R0I4W
+KidGzOelrWzOitkJ3fICf6xuHiSRh5mthXUA6vT79FJTpJgWhh7+X3RYV465rhuR
+Mptt8VhY/kmfmXPIZjErxfP1lJkgQBBRMz1HiTpbvCo/5a/texTExe0ouGGhyNm7
+RTxqAs9H6u5CtbKcjWtQbWUKdY4P0vXiaAhnqhAbcq1B4wKkjO+rk+x5SdQgjP/n
+uC+h0TEpueQbOIvTJ9DYoZMIzzSMvAQg2RjtWjV6EmUUrvwgOw8=
+=bYUK
 -----END PGP SIGNATURE-----
 
---eacvl5txvugptbn6--
+--nc5ki6rvfvarmpxm--
