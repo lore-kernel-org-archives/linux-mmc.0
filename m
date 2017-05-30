@@ -1,35 +1,44 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH 1/5] MAINTAINERS: Update files for TMIO/SDHI MMC driver
-Date: Tue, 30 May 2017 14:50:50 +0200
-Message-ID: <1496148654-20386-2-git-send-email-horms+renesas@verge.net.au>
-References: <1496148654-20386-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1496148654-20386-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Subject: [PATCH 0/5] mmc: tmio, renesas-sdhi: cleanups
+Date: Tue, 30 May 2017 14:50:49 +0200
+Message-ID: <1496148654-20386-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:55977 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751718AbdE3MvH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 May 2017 08:51:07 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
-List-Id: linux-mmc@vger.kernel.org
 
-Update files for tmio/sdhi MMC driver to reflect recent filename
-changes.
+Hi,
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- MAINTAINERS | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+this short series provides some cleanups to the tmio and renesas-sdhi
+drivers.
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 053c3bdd1fe5..5b4c477573dd 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -12882,7 +12882,7 @@ M:	Wolfram Sang <wsa+renesas@sang-engineering.com>
- L:	linux-mmc@vger.kernel.org
- S:	Supported
- F:	drivers/mmc/host/tmio_mmc*
--F:	drivers/mmc/host/sh_mobile_sdhi.c
-+F:	drivers/mmc/host/renesas_sdhi*
- F:	include/linux/mfd/tmio.h
- 
- TMP401 HARDWARE MONITOR DRIVER
+* Update files listed in MAINTAINERS
+* Consistently use EXPORT_SYMBOL_GPL
+* Update Renesas related copyrights
+* Improve checkpatch cleanness
+
+Simon Horman (5):
+  MAINTAINERS: Update files for TMIO/SDHI MMC driver
+  mmc: tmio: use EXPORT_SYMBOL_GPL
+  mmc: tmio, renesas-sdhi: update Renesas related copyrights
+  mmc: tmio: improve checkpatch cleanness
+  mmc: renesas-sdhi: improve checkpatch cleanness
+
+ MAINTAINERS                              |   2 +-
+ drivers/mmc/host/renesas_sdhi.h          |   4 +-
+ drivers/mmc/host/renesas_sdhi_core.c     |  53 +++++++-----
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c |  28 ++++---
+ drivers/mmc/host/tmio_mmc.c              |  10 ++-
+ drivers/mmc/host/tmio_mmc.h              |  22 +++--
+ drivers/mmc/host/tmio_mmc_core.c         | 139 ++++++++++++++++++-------------
+ include/linux/mfd/tmio.h                 |  33 ++++----
+ 8 files changed, 167 insertions(+), 124 deletions(-)
+
 -- 
 2.1.4
+
