@@ -1,61 +1,57 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [ulf.hansson-mmc:next 17/49] ERROR: "renesas_sdhi_remove"
- [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
-Date: Tue, 30 May 2017 20:42:21 +0200
-Message-ID: <20170530184219.GA12741@verge.net.au>
-References: <201705300837.5KUEHiHI%fengguang.wu@intel.com>
- <CAPDyKFoK0Q0M7OFe69aYePb6tk3roEfxB+MuW7W+807WgKicxg@mail.gmail.com>
- <CAK8P3a1G2JdkWO=uKGfe9Af97Pn-s9DTL95HsEQ5PLEMm6B+0A@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 1/5] MAINTAINERS: Update files for TMIO/SDHI MMC driver
+Date: Tue, 30 May 2017 21:31:38 +0200
+Message-ID: <20170530193137.qyvwomo3z26zyxyu@ninjato>
+References: <1496148654-20386-1-git-send-email-horms+renesas@verge.net.au>
+ <1496148654-20386-2-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="eijlquza5iqrpxfp"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:59260 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750885AbdE3SmV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 May 2017 14:42:21 -0400
+Received: from sauhun.de ([88.99.104.3]:59809 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750761AbdE3Tbl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 30 May 2017 15:31:41 -0400
 Content-Disposition: inline
-In-Reply-To: <CAK8P3a1G2JdkWO=uKGfe9Af97Pn-s9DTL95HsEQ5PLEMm6B+0A@mail.gmail.com>
+In-Reply-To: <1496148654-20386-2-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "kbuild-all@01.org" <kbuild-all@01.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa-dev@sang-engineering.com>, kbuild test robot <fengguang.wu@intel.com>
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
-On Tue, May 30, 2017 at 11:55:08AM +0200, Arnd Bergmann wrote:
-> On Tue, May 30, 2017 at 11:40 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > +Arnd
-> >
-> > On 30 May 2017 at 02:07, kbuild test robot <fengguang.wu@intel.com> wrote:
-> >> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
-> >> head:   32f392efd4b345819bfab7e64296902b3887f834
-> >> commit: 3e48fdd88e8a52cb11b82534485be954e20877a1 [17/49] mmc: renesas-sdhi: make renesas_sdhi_sys_dmac main module file
-> >> config: arm-allmodconfig (attached as .config)
-> >> compiler: arm-linux-gnueabi-gcc (Debian 6.1.1-9) 6.1.1 20160705
-> >> reproduce:
-> >>         wget https://raw.githubusercontent.com/01org/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-> >>         chmod +x ~/bin/make.cross
-> >>         git checkout 3e48fdd88e8a52cb11b82534485be954e20877a1
-> >>         # save the attached .config to linux build tree
-> >>         make.cross ARCH=arm
-> >>
-> >> Note: the ulf.hansson-mmc/next HEAD 32f392efd4b345819bfab7e64296902b3887f834 builds fine.
-> >>       It only hurts bisectibility.
-> >>
-> >> All errors (new ones prefixed by >>):
-> >>
-> >>>> ERROR: "renesas_sdhi_remove" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
-> >>>> ERROR: "renesas_sdhi_probe" [drivers/mmc/host/renesas_sdhi_sys_dmac.ko] undefined!
-> >>
-> >> ---
-> >> 0-DAY kernel test infrastructure                Open Source Technology Center
-> >> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
-> >
-> > So I decided to fold in Arnd's change to the commit causing the bisect
-> > problem, of course keeping his SOB tag but also adding the below line
-> > before that tag:
-> > "[Arnd: Fixed module build error]"
-> >
-> > Please tell me if you aren't happy with this!
-> 
-> Sure, sounds good.
 
-Thanks, sorry for the fall-out.
+--eijlquza5iqrpxfp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, May 30, 2017 at 02:50:50PM +0200, Simon Horman wrote:
+> Update files for tmio/sdhi MMC driver to reflect recent filename
+> changes.
+>=20
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--eijlquza5iqrpxfp
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlktyJUACgkQFA3kzBSg
+KbZoJg/7BnQN26cC/sFpfjFX02junXWyF/HUSXiy03ecvpfxtjOm8UufpcctrBqH
+1dbxDqBQeY/i5zky6mPH4RYamghUiKzbD5UM/HS9p/pNTu47TxM7A7bwV5RKCcSX
+PIqkyLM7KXNWB2xy1LyqLgRt8OxCpS8X/CtoScTlgUIGCMuC81rcVOtGowUsyEHH
+KuyS5vjx/AdKtAALMoPRQV7Rkwwe7LE4Acn6os8Pnx58dwusfvTGzLhsGhywv7AR
+yhu5IpdMiiy2Ltj83Px+Nco6eLA8BKzNC0By8SivcaOsYD6uh5++/etRARj/A1a/
+E35gkiUvob4IP7ogHmz87Pgr5tiAduYF8i7TulykcXGf+3qe21eku+hiYcdZQhwl
+N6w4KKBZ0cd2r3TpXx/nzFlLjz4gr40RrsXIFBy1cT3tqA9YCSMpvEXSVAY4i7br
+12lbONLnxcbUkwlBoGKi/6mYQsBk0pnBqZtLINPcVY67Tum5k/PqhCOdKyF48kKF
+KHp9dNwLRVNK+Jv3BmLVbzleZUBrQNgHfGL+/TVwD0EeBz13bj/EstLFF05x6Dbv
+8iyRq9ifX+fy4Athtxeb3TGuch/jAhAlv1321tnskNBIg3a8ByaXooPfRX+Cp22K
+ehkl9nmYjiYUUG8Ics6mGaowiGN8hP5fEnx+ztoO/cMv8QhEroY=
+=3ZRE
+-----END PGP SIGNATURE-----
+
+--eijlquza5iqrpxfp--
