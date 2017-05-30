@@ -1,88 +1,36 @@
-From: =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?= <benoit@wsystem.com>
-Subject: [PATCH v3 4/5] mmc: sdhci-esdhc-imx: Allow all supported prescaler values
-Date: Tue, 30 May 2017 11:14:10 +0200
-Message-ID: <1496135651-90007-4-git-send-email-benoit@wsystem.com>
-References: <1496135651-90007-1-git-send-email-benoit@wsystem.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/7] mmc: use proper name for the R-Car SoC
+Date: Tue, 30 May 2017 11:26:37 +0200
+Message-ID: <CAPDyKFox8n3AHUtswLYjyPcTqbxEYiQTDdX6udvWEhx5D+wNNg@mail.gmail.com>
+References: <20170528093051.11816-1-wsa+renesas@sang-engineering.com>
+ <20170528093051.11816-5-wsa+renesas@sang-engineering.com> <CAPDyKFoyer03ukhHEGBsQ+Ua639E4dvPp_RJCmYW1Ymap90Pnw@mail.gmail.com>
+ <20170530071609.p4wrpqywrfllgy4z@dell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1496135651-90007-1-git-send-email-benoit@wsystem.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@nxp.com>, Wolfram Sang <wsa@the-dreams.de>, =?UTF-8?q?Beno=C3=AEt=20Th=C3=A9baudeau?= <benoit@wsystem.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170530071609.p4wrpqywrfllgy4z@dell>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On i.MX, SYSCTL.SDCLKFS may always be set to 0 in order to make the SD
-clock frequency prescaler divide by 1 in SDR mode, even with the eSDHC.
-The previous minimum prescaler value of 2 in SDR mode with the eSDHC was
-a code remnant from PowerPC, which actually has this limitation on
-earlier revisions.
+On 30 May 2017 at 09:16, Lee Jones <lee.jones@linaro.org> wrote:
+> On Mon, 29 May 2017, Ulf Hansson wrote:
+>
+>> On 28 May 2017 at 11:30, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
+>> > It is 'R-Car', not 'RCar'. No code or binding changes, only descriptive text.
+>> >
+>> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>>
+>> Thanks, applied for next!
+>>
+>> For mfd, Lee, please tell if you have any issues me picking this via
+>> my mmc tree.
+>
+> I don't, but it is normal procedure to wait for an Ack from all
+> Maintainers involved before applying. ;)
 
-In DDR mode, the prescaler can divide by up to 512.
+Yeah! However this was that trivial so I went ahead. :-)
 
-The maximum SD clock frequency in High Speed mode is 50 MHz. On i.MX25,
-this change makes it possible to get 48 MHz from the USB PLL
-(240 MHz / 5 / 1) instead of only 40 MHz from the USB PLL
-(240 MHz / 3 / 2) or 33.25 MHz from the AHB clock (133 MHz / 2 / 2).
-
-Signed-off-by: Benoît Thébaudeau <benoit@wsystem.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Fabio Estevam <fabio.estevam@nxp.com>
----
-Changes v1 -> v2: none.
-Changes v2 -> v3: none.
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 18 +++++++-----------
- 1 file changed, 7 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 790e7b2..e31265a 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -674,7 +674,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	unsigned int host_clock = pltfm_host->clock;
--	int pre_div = 2;
-+	int ddr_pre_div = imx_data->is_ddr ? 2 : 1;
-+	int pre_div = 1;
- 	int div = 1;
- 	u32 temp, val;
- 
-@@ -689,28 +690,23 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 		return;
- 	}
- 
--	if (esdhc_is_usdhc(imx_data) && !imx_data->is_ddr)
--		pre_div = 1;
--
- 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
- 	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
- 		| ESDHC_CLOCK_MASK);
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
- 
--	while (host_clock / pre_div / 16 > clock && pre_div < 256)
-+	while (host_clock / (16 * pre_div * ddr_pre_div) > clock &&
-+			pre_div < 256)
- 		pre_div *= 2;
- 
--	while (host_clock / pre_div / div > clock && div < 16)
-+	while (host_clock / (div * pre_div * ddr_pre_div) > clock && div < 16)
- 		div++;
- 
--	host->mmc->actual_clock = host_clock / pre_div / div;
-+	host->mmc->actual_clock = host_clock / (div * pre_div * ddr_pre_div);
- 	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
- 		clock, host->mmc->actual_clock);
- 
--	if (imx_data->is_ddr)
--		pre_div >>= 2;
--	else
--		pre_div >>= 1;
-+	pre_div >>= 1;
- 	div--;
- 
- 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--- 
-2.7.4
+Kind regards
+Uffe
