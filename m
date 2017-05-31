@@ -1,7 +1,7 @@
 From: Andrea Adami <andrea.adami@gmail.com>
-Subject: [PATCH v3 4/9] mtd: nand: sharpsl.c: take in account partition parser types
-Date: Thu,  1 Jun 2017 00:40:53 +0200
-Message-ID: <1496270458-6479-5-git-send-email-andrea.adami@gmail.com>
+Subject: [PATCH v3 6/9] arm: pxa: corgi.c: remove hardcoded partitioning, use sharpslpart parser
+Date: Thu,  1 Jun 2017 00:40:55 +0200
+Message-ID: <1496270458-6479-7-git-send-email-andrea.adami@gmail.com>
 References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
@@ -12,28 +12,66 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
 ---
- drivers/mtd/nand/sharpsl.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ arch/arm/mach-pxa/corgi.c | 31 ++++++++-----------------------
+ 1 file changed, 8 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/mtd/nand/sharpsl.c b/drivers/mtd/nand/sharpsl.c
-index 064ca17..1a76779 100644
---- a/drivers/mtd/nand/sharpsl.c
-+++ b/drivers/mtd/nand/sharpsl.c
-@@ -183,8 +183,13 @@ static int sharpsl_nand_probe(struct platform_device *pdev)
- 	/* Register the partitions */
- 	mtd->name = "sharpsl-nand";
+diff --git a/arch/arm/mach-pxa/corgi.c b/arch/arm/mach-pxa/corgi.c
+index 7270f0d..2412add 100644
+--- a/arch/arm/mach-pxa/corgi.c
++++ b/arch/arm/mach-pxa/corgi.c
+@@ -606,24 +606,6 @@ static void __init corgi_init_spi(void)
+ static inline void corgi_init_spi(void) {}
+ #endif
  
--	err = mtd_device_parse_register(mtd, NULL, NULL,
--					data->partitions, data->nr_partitions);
-+	err = mtd_device_parse_register(&sharpsl->mtd,
-+					data->types ? data->types : NULL,
-+					NULL,
-+					data->partitions ?
-+					data->partitions : NULL,
-+					data->nr_partitions ?
-+					data->nr_partitions : 0);
- 	if (err)
- 		goto err_add;
+-static struct mtd_partition sharpsl_nand_partitions[] = {
+-	{
+-		.name = "System Area",
+-		.offset = 0,
+-		.size = 7 * 1024 * 1024,
+-	},
+-	{
+-		.name = "Root Filesystem",
+-		.offset = 7 * 1024 * 1024,
+-		.size = 25 * 1024 * 1024,
+-	},
+-	{
+-		.name = "Home Filesystem",
+-		.offset = MTDPART_OFS_APPEND,
+-		.size = MTDPART_SIZ_FULL,
+-	},
+-};
+-
+ static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
  
+ static struct nand_bbt_descr sharpsl_bbt = {
+@@ -633,10 +615,16 @@ static struct nand_bbt_descr sharpsl_bbt = {
+ 	.pattern = scan_ff_pattern
+ };
+ 
++static const char * const probes[] = {
++	"cmdlinepart",
++	"ofpart",
++	"sharpslpart",
++	NULL,
++};
++
+ static struct sharpsl_nand_platform_data sharpsl_nand_platform_data = {
+ 	.badblock_pattern	= &sharpsl_bbt,
+-	.partitions		= sharpsl_nand_partitions,
+-	.nr_partitions		= ARRAY_SIZE(sharpsl_nand_partitions),
++	.types			= probes,
+ };
+ 
+ static struct resource sharpsl_nand_resources[] = {
+@@ -750,9 +738,6 @@ static void __init corgi_init(void)
+ 
+ 	platform_scoop_config = &corgi_pcmcia_config;
+ 
+-	if (machine_is_husky())
+-		sharpsl_nand_partitions[1].size = 53 * 1024 * 1024;
+-
+ 	platform_add_devices(devices, ARRAY_SIZE(devices));
+ 
+ 	regulator_has_full_constraints();
 -- 
 2.7.4
