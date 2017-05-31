@@ -1,99 +1,39 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: Bug: sdhost-bcm2835 3f202000.mmc: timeout waiting for hardware
- interrupt.
-Date: Wed, 31 May 2017 21:02:30 +0200 (CEST)
-Message-ID: <151854876.72134.1496257350702@email.1und1.de>
-References: <433605218.311867.1495813840749@email.1und1.de>
- <bc3e84df-1d06-9e46-9f13-0e2b293ce716@raspberrypi.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] mmc: renesas_sdhi_core: on R-Car 2+, make use of CBSY bit
+Date: Wed, 31 May 2017 21:56:12 +0200
+Message-ID: <20170531195611.GE22266@verge.net.au>
+References: <20170530090346.19088-1-wsa+renesas@sang-engineering.com>
+ <20170530200218.q4s2dlrxusrdgpm2@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <bc3e84df-1d06-9e46-9f13-0e2b293ce716-FnsA7b+Nu9XbIbC87yuRow@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
-List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
- <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Phil Elwell <phil-FnsA7b+Nu9XbIbC87yuRow@public.gmane.org>, Gerd Hoffmann <kraxel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170530200218.q4s2dlrxusrdgpm2@ninjato>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, May 30, 2017 at 10:02:18PM +0200, Wolfram Sang wrote:
+> On Tue, May 30, 2017 at 11:03:46AM +0200, Wolfram Sang wrote:
+> > Most registers need to wait until the command is completed, not
+> > necessarily until the bus is free. At least, R-Car 2+ SoCs can signal
+> > that via the CBSY bit, so let's use it there instead of SCLKDIVEN to
+> > save a little bit of delay.
+> > 
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > ---
+> > 
+> > Tested with a Renesas Lager board (H2). Moved big files around across different
+> > SD cards, re- inserted cards multiple times. All worked fine.
+> > 
+> > @Dirk: can you do some additional testing for your use case? That would be much
+> > appreciated!
+> 
+> OK, since Dirk told me he'll need some more time to test it anyhow and
+> Simon meanwhile sent some cleanup patches, I'll simply post an updated
+> version of this patch once Simon's cleanup patches hit mmc/next. I think
+> this will be easiest.
 
-> Phil Elwell <phil-FnsA7b+Nu9XbIbC87yuRow@public.gmane.org> hat am 31. Mai 2017 um 12:17 geschrieben:
-> 
-> 
-> Hi Stefan,
-> 
-> On 26/05/2017 16:50, Stefan Wahren wrote:
-> > Hi,
-> > 
-> > i noticed that the RPI2 with next-20170526 and bcm2835_defconfig doesn't boot from SD card [1]. At least i was able to fix the NULL pointer dereference [2]. Now i'm getting the output see below. I try to narrow this down, but maybe someone already has an idea.
-> >
-> > Regards
-> > Stefan
-> > 
-> > [1] - https://storage.kernelci.org/next/master/next-20170526/arm/bcm2835_defconfig/lab-collabora/boot-bcm2836-rpi-2-b.txt
-> > [2] - https://github.com/lategoodbye/rpi-zero/commit/ff0b8c7e3f6a4d1b6dfe99710fa9ee333e2b8886
-> > 
-> > [    0.328506] sdhci: Secure Digital Host Controller Interface driver
-> > [    0.330949] sdhci: Copyright(c) Pierre Ossman
-> > [    0.471038] sdhost-bcm2835 3f202000.mmc: loaded - DMA enabled (>1)
-> > [    0.473582] sdhci-pltfm: SDHCI platform and OF driver helper
-> > [    0.476764] ledtrig-cpu: registered to indicate activity on CPUs
-> > [    0.479552] usbcore: registered new interface driver usbhid
-> > [    0.481930] usbhid: USB HID core driver
-> > [    0.484411] bcm2835-mbox 3f00b880.mailbox: mailbox enabled
-> > [    0.488231] oprofile: using timer interrupt.
-> > [    0.492227] NET: Registered protocol family 10
-> > [    0.496233] Segment Routing with IPv6
-> > [    0.498773] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
-> > [    0.502518] NET: Registered protocol family 17
-> > [    0.510802] 3f201000.serial: ttyAMA0 at MMIO 0x3f201000 (irq = 87, base_baud = 0) is a PL011 rev2
-> > [    0.852460] mmc0: host does not support reading read-only switch, assuming write-enable
-> > [    0.860971] mmc0: new high speed SDHC card at address 0001
-> > [    0.875465] mmcblk0: mmc0:0001 00000 29.8 GiB
-> > [    1.397285] console [ttyAMA0] enabled
-> > [    1.406137] raspberrypi-firmware soc:firmware: Attached to firmware from 2017-04-27 17:19
-> > [    1.423787] vc4_hdmi 3f902000.hdmi: vc4-hdmi-hifi <-> 3f902000.hdmi mapping ok
-> > [    1.434811]  mmcblk0: p1 p2
-> > [    1.441932] vc4-drm soc:gpu: bound 3f902000.hdmi (ops vc4_hdmi_ops)
-> > [    1.452869] vc4-drm soc:gpu: bound 3f806000.vec (ops vc4_vec_ops)
-> > [    1.462502] vc4-drm soc:gpu: bound 3f400000.hvs (ops vc4_hvs_ops)
-> > [    1.472183] vc4-drm soc:gpu: bound 3f206000.pixelvalve (ops vc4_crtc_ops)
-> > [    1.482493] vc4-drm soc:gpu: bound 3f207000.pixelvalve (ops vc4_crtc_ops)
-> > [    1.492658] vc4-drm soc:gpu: bound 3f807000.pixelvalve (ops vc4_crtc_ops)
-> > [    1.502596] cma: cma_alloc: alloc failed, req-size: 4096 pages, ret: -12
-> > [    1.512404] vc4-drm soc:gpu: failed to allocate buffer with size 16777216
-> > [    1.522337] cma: cma_alloc: alloc failed, req-size: 4096 pages, ret: -12
-> > [    1.532182] vc4-drm soc:gpu: failed to allocate buffer with size 16777216
-> > [    1.542155] [drm:vc4_bo_create] *ERROR* Failed to allocate from CMA:
-> > [    1.551681] [drm] num bos allocated: 0
-> > [    1.558530] [drm] size bos allocated: 0kb
-> > [    1.565612] [drm] num bos used: 0
-> > [    1.571938] [drm] size bos used: 0kb
-> > [    1.578483] [drm] num bos cached: 0
-> > [    1.584922] [drm] size bos cached: 0kb
-> > [    1.591580] vc4_v3d 3fc00000.v3d: Failed to allocate memory for tile binning: -12. You may need to enable CMA or give it more memory.
-> > [    1.609589] vc4-drm soc:gpu: failed to bind 3fc00000.v3d (ops vc4_v3d_ops): -12
-> > [    1.621480] vc4-drm soc:gpu: master bind failed: -12
-> > [    1.629515] vc4_v3d: probe of 3fc00000.v3d failed with error -12
-> > [    1.715334] dwc2 3f980000.usb: DWC OTG Controller
-> > [    1.723064] dwc2 3f980000.usb: new USB bus registered, assigned bus number 1
-> > [    1.733085] dwc2 3f980000.usb: irq 39, io mem 0x3f980000
-> > [    1.742503] hub 1-0:1.0: USB hub found
-> > [    1.749074] hub 1-0:1.0: 1 port detected
-> > [    1.756656] ALSA device list:
-> > [    1.762420]   No soundcards found.
-> > [    1.798146] EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Opts: (null)
-> > [    1.812372] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
-> > [    1.830538] devtmpfs: mounted
-> > [    1.841464] Freeing unused kernel memory: 1024K
-> 
-> Does this jump in time look reasonable to you? To me it looks like the problem we had with max_cpus=1 on an SMP configuration before we marked the first page as reserved. The kernel allocator would eventually allocate page zero for some application (it was usually audio-related), at which point the remaining spinning CPUs would execute semi-random code with interesting side effects. A bogus update to the system clock would be enough to trigger an apparent timeout when in fact the interval was much shorter.
-
-Thanks for the hint. I wrongly assumed that the patch was already in linux-next. With patch applied the hang isn't reproducible.
+Thanks, sorry for the clash - we seem to often hit the SDHI driver
+at about the same time.
