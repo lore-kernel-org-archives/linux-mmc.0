@@ -1,57 +1,51 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 5/7] ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
-Date: Thu, 1 Jun 2017 20:03:59 +0530
-Message-ID: <20170601143401.16852-6-kishon@ti.com>
-References: <20170601143401.16852-1-kishon@ti.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v3 3/9] mfd: tmio.h: support partition parser types
+Date: Thu, 1 Jun 2017 15:35:35 +0100
+Message-ID: <20170601143535.s6ovk5ts3cbehw3f@dell>
+References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
+ <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170601143401.16852-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com
-Cc: Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, kishon@ti.com, Ravikumar Kattekola <rk@ti.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:35508 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751113AbdFAOfl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2017 10:35:41 -0400
+Received: by mail-wm0-f51.google.com with SMTP id b84so161244549wmh.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Jun 2017 07:35:41 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrea Adami <andrea.adami@gmail.com>
+Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-From: Ravikumar Kattekola <rk@ti.com>
+On Thu, 01 Jun 2017, Andrea Adami wrote:
 
-On DRA75x EVM, MMC2 vdd/ios are connected to a common supply fixed at 1.8V
-not 3.3V
+> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
+> ---
+>  include/linux/mfd/tmio.h | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index a1520d8..23bb069 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -139,6 +139,7 @@ struct tmio_nand_data {
+>  	struct nand_bbt_descr	*badblock_pattern;
+>  	struct mtd_partition	*partition;
+>  	unsigned int		num_partitions;
+> +	const char *const	*types;	/* names of parsers to use if any */
 
-Fixes: 6cf02dbb4b71 ("ARM: dts: dra7-evm: Add mmc2 node for eMMC support")
-Signed-off-by: Ravikumar Kattekola <rk@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- arch/arm/boot/dts/dra7-evm.dts | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+Please use kerneldoc instead.
 
-diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
-index 31a9e061ddd0..e5d7e7f5f645 100644
---- a/arch/arm/boot/dts/dra7-evm.dts
-+++ b/arch/arm/boot/dts/dra7-evm.dts
-@@ -25,6 +25,14 @@
- 		stdout-path = &uart1;
- 	};
- 
-+	evm_1v8_sw: fixedregulator-evm_1v8 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "evm_1v8";
-+		vin-supply = <&smps9_reg>;
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+	};
-+
- 	evm_3v3_sd: fixedregulator-sd {
- 		compatible = "regulator-fixed";
- 		regulator-name = "evm_3v3_sd";
-@@ -451,7 +459,7 @@
- 	status = "okay";
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc2_pins_default>;
--	vmmc-supply = <&evm_3v3_sw>;
-+	vmmc-supply = <&evm_1v8_sw>;
- 	bus-width = <8>;
- };
- 
+>  };
+>  
+>  #define FBIO_TMIO_ACC_WRITE	0x7C639300
+
 -- 
-2.11.0
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org │ Open source software for ARM SoCs
+Follow Linaro: Facebook | Twitter | Blog
