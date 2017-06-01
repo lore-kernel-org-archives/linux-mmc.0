@@ -1,48 +1,42 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 3/7] ARM: dts: dra72-evm-revc: Add vmmc_aux supply to mmc1
-Date: Thu, 1 Jun 2017 20:03:57 +0530
-Message-ID: <20170601143401.16852-4-kishon@ti.com>
+Subject: [PATCH 4/7] ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO lines
+Date: Thu, 1 Jun 2017 20:03:58 +0530
+Message-ID: <20170601143401.16852-5-kishon@ti.com>
 References: <20170601143401.16852-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170601143401.16852-1-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com
-Cc: devicetree@vger.kernel.org, kishon@ti.com, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Add vmmc_aux-supply property to mmc1 dt node and populate
-it with ldo1_reg to reflect ldo1_out is connected to mmc1 IO lines.
+The dt binding documentation of omap-hsmmc recommends using
+"vmmc_aux" for IO supply lines. However
+commit 0af28cc92690d8c ("ARM: dts: am57xx-beagle-x15: Add support
+for rev B1") added it as "vmmc-aux". Fix it here.
+
+Fixes: commit 0af28cc92690d8c ("ARM: dts: am57xx-beagle-x15: Add
+support for rev B1")
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra72-evm-revc.dts | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/dra72-evm-revc.dts b/arch/arm/boot/dts/dra72-evm-revc.dts
-index 47dcd527ec58..40a399735533 100644
---- a/arch/arm/boot/dts/dra72-evm-revc.dts
-+++ b/arch/arm/boot/dts/dra72-evm-revc.dts
-@@ -93,6 +93,10 @@
- 	};
+diff --git a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
+index 39a92aff0a0d..6ae94ab52b7b 100644
+--- a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
++++ b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
+@@ -20,7 +20,7 @@
+ 
+ &mmc1 {
+ 	vmmc-supply = <&vdd_3v3>;
+-	vmmc-aux-supply = <&ldo1_reg>;
++	vmmc_aux-supply = <&ldo1_reg>;
  };
  
-+&mmc1 {
-+	vmmc_aux-supply = <&ldo1_reg>;
-+};
-+
- &mmc2 {
- 	vmmc-supply = <&evm_1v8_sw>;
- };
+ /* errata i880 "Ethernet RGMII2 Limited to 10/100 Mbps" */
 -- 
 2.11.0
