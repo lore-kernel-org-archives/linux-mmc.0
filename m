@@ -1,42 +1,31 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 4/7] ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO lines
-Date: Thu, 1 Jun 2017 20:03:58 +0530
-Message-ID: <20170601143401.16852-5-kishon@ti.com>
-References: <20170601143401.16852-1-kishon@ti.com>
+From: "Kipper, Matthew" <Matthew.Kipper@gd-ms.ca>
+Subject: Mixing eMMC "Discard" and "Sanitize"
+Date: Thu, 1 Jun 2017 19:01:09 +0000
+Message-ID: <5386C99C33554A469B5039A08D6430D0385FF00B@ottsvw202.gdcan.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170601143401.16852-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com
-Cc: Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, kishon@ti.com
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp4.gdcanada.com ([209.29.4.47]:18976 "EHLO
+        OTTMGC001.GDCAN.COM" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751083AbdFATBP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2017 15:01:15 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The dt binding documentation of omap-hsmmc recommends using
-"vmmc_aux" for IO supply lines. However
-commit 0af28cc92690d8c ("ARM: dts: am57xx-beagle-x15: Add support
-for rev B1") added it as "vmmc-aux". Fix it here.
+I'm creating an application that relies on an eMMC device's Sanitize feature, and I have a small concern about the implementation of this feature in the kernel.  
 
-Fixes: commit 0af28cc92690d8c ("ARM: dts: am57xx-beagle-x15: Add
-support for rev B1")
+When erasing data from an eMMC device, it seems like the MMC core chooses between three modes: Erase, TRIM and Discard. This can be seen in 'mmc_blk_issue_discard_rq'. Looking through the eMMC 5.1 standard (JESD84-B51), the section covering the Discard operation (6.6.12) says the following: 
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+"When Sanitize is executed, only the portion of the data that was unmapped by a Discard command shall be removed by the Sanitize command. The device cannot guarantee that discarded data is completely removed from the device when Sanitize is applied."
 
-diff --git a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-index 39a92aff0a0d..6ae94ab52b7b 100644
---- a/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-+++ b/arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts
-@@ -20,7 +20,7 @@
- 
- &mmc1 {
- 	vmmc-supply = <&vdd_3v3>;
--	vmmc-aux-supply = <&ldo1_reg>;
-+	vmmc_aux-supply = <&ldo1_reg>;
- };
- 
- /* errata i880 "Ethernet RGMII2 Limited to 10/100 Mbps" */
--- 
-2.11.0
+Reading that, it sounds like if data is removed with Discard, there's no guarantee that a subsequent Sanitize will completely wipe it from the device. This would mean that in the current implementation, calling Sanitize may not have the result that a user would expect.  Can anyone confirm that my interpretation is correct? 
+
+Taking a quick look at the kernel source, one naïve workaround might be to add a flag (e.g. CONFIG_MMC_FULL_SANITIZE) that would force 'mmc_can_discard' to return false. As far as I can tell, this would force the core to always use Erase and TRIM commands, which allows Sanitize to provide a guarantee that it will fully wipe all erased data. 
+
+Does this approach make sense? Would this drastically impact the performance/lifespan of eMMC devices? I don't know much about eMMC devices and even less about the kernel's MMC driver, so I was hoping to get some feedback before going too far with this.
+
+Regards,
+Matthew Kipper 
