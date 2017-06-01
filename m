@@ -1,53 +1,120 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 3/9] mfd: tmio.h: support partition parser types
-Date: Thu, 1 Jun 2017 10:40:13 +0200
-Message-ID: <20170601084013.GD1477@katana>
-References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
- <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="PHCdUe6m4AxPMzOu"
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: sdhci-pci: Add support for Intel CNP
+Date: Thu,  1 Jun 2017 12:10:07 +0300
+Message-ID: <1496308207-3522-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:40484 "EHLO mail.zeus03.de"
+Received: from mga14.intel.com ([192.55.52.115]:18735 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751363AbdFAIkP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Jun 2017 04:40:15 -0400
-Content-Disposition: inline
-In-Reply-To: <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
+        id S1751106AbdFAJQJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Jun 2017 05:16:09 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
+Add PCI ids and enhanced strobe support for Intel CNP. This is combined
+with GLK due to the pending CMDQ support which they both share.
 
---PHCdUe6m4AxPMzOu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 46 ++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci-pci.h      |  3 +++
+ 2 files changed, 48 insertions(+), 1 deletion(-)
 
-On Thu, Jun 01, 2017 at 12:40:52AM +0200, Andrea Adami wrote:
-> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index b3ddc32fa00b..8fa84a013be4 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -543,6 +543,23 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+ 	}
+ }
+ 
++#define INTEL_HS400_ES_REG 0x78
++#define INTEL_HS400_ES_BIT BIT(0)
++
++static void intel_hs400_enhanced_strobe(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 val;
++
++	val = sdhci_readl(host, INTEL_HS400_ES_REG);
++	if (ios->enhanced_strobe)
++		val |= INTEL_HS400_ES_BIT;
++	else
++		val &= ~INTEL_HS400_ES_BIT;
++	sdhci_writel(host, val, INTEL_HS400_ES_REG);
++}
++
+ static const struct sdhci_ops sdhci_intel_byt_ops = {
+ 	.set_clock		= sdhci_set_clock,
+ 	.set_power		= sdhci_intel_set_power,
+@@ -579,6 +596,19 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 	return 0;
+ }
+ 
++static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
++{
++	int ret = byt_emmc_probe_slot(slot);
++
++	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
++		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES,
++		slot->host->mmc_host_ops.hs400_enhanced_strobe =
++						intel_hs400_enhanced_strobe;
++	}
++
++	return ret;
++}
++
+ #ifdef CONFIG_ACPI
+ static int ni_set_max_freq(struct sdhci_pci_slot *slot)
+ {
+@@ -654,6 +684,17 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 	.priv_size	= sizeof(struct intel_host),
+ };
+ 
++static const struct sdhci_pci_fixes sdhci_intel_glk_emmc = {
++	.allow_runtime_pm	= true,
++	.probe_slot		= glk_emmc_probe_slot,
++	.quirks			= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks2		= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++				  SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
++				  SDHCI_QUIRK2_STOP_WITH_TC,
++	.ops			= &sdhci_intel_byt_ops,
++	.priv_size		= sizeof(struct intel_host),
++};
++
+ static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
+@@ -1225,9 +1266,12 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+ 	SDHCI_PCI_DEVICE(INTEL, APL_EMMC,  intel_byt_emmc),
+ 	SDHCI_PCI_DEVICE(INTEL, APL_SDIO,  intel_byt_sdio),
+ 	SDHCI_PCI_DEVICE(INTEL, APL_SD,    intel_byt_sd),
+-	SDHCI_PCI_DEVICE(INTEL, GLK_EMMC,  intel_byt_emmc),
++	SDHCI_PCI_DEVICE(INTEL, GLK_EMMC,  intel_glk_emmc),
+ 	SDHCI_PCI_DEVICE(INTEL, GLK_SDIO,  intel_byt_sdio),
+ 	SDHCI_PCI_DEVICE(INTEL, GLK_SD,    intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, CNP_EMMC,  intel_glk_emmc),
++	SDHCI_PCI_DEVICE(INTEL, CNP_SD,    intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, CNPH_SD,   intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(O2, 8120,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8220,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8221,     o2),
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index e63fb9b3b776..75196a2b5289 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -37,6 +37,9 @@
+ #define PCI_DEVICE_ID_INTEL_GLK_SD	0x31ca
+ #define PCI_DEVICE_ID_INTEL_GLK_EMMC	0x31cc
+ #define PCI_DEVICE_ID_INTEL_GLK_SDIO	0x31d0
++#define PCI_DEVICE_ID_INTEL_CNP_EMMC	0x9dc4
++#define PCI_DEVICE_ID_INTEL_CNP_SD	0x9df5
++#define PCI_DEVICE_ID_INTEL_CNPH_SD	0xa375
+ 
+ #define PCI_DEVICE_ID_SYSKONNECT_8000	0x8000
+ #define PCI_DEVICE_ID_VIA_95D0		0x95d0
+-- 
+1.9.1
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---PHCdUe6m4AxPMzOu
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlkv0uwACgkQFA3kzBSg
-KbYUERAAsBkvIKAYaMBNQYNZJYIdvUYHUPojFsBCc8zgk2cjOlXXTtXQ+XsFqi/r
-kLDwDu7OSSsS+9G307YqVZy3Jx3beP7bm2InwNaPSD88Qfvnc/SiOixwAcyrNeXI
-2UD5JOou8uPMulIDyOQXWIcgGYuFg087roeNpqCyRpFCCGHyXBV96ZbxuXEgfIxC
-59OK5mGaLeZHZ95fXNXCfsWNufxyDspEEK7VP95Sbv45az56wWsvQTTMFEDe9aOI
-T2A1q/8nEsrQsqzPQIspnDvaYdLUbVZCLGIcg6ClJvlvvy8D6cGn3EDvoK3TPxIR
-em2UCuSHMSayoQKrI/hTO392QxGuzB5a9e1bOcYFcGapbpMv0S2GtidfrxjcPCJ8
-6neH8z1N46/EqZx8NNK3IK7FAMKSigeZTGSPc3Mk1QgWV3VPw/nWCkyQTkxxNCL8
-ZYTJ7wdOH1noq4PMj0YHT5//obl3Q8VhKyN3w3Qp92zdC4ZzGs84iwYmaHJlE3RI
-wBhfFAJNe9uzY9DJjIrAYqIc55jDaKqUWnclFdXSQfd8SmQ738pu4WcQZYBxctx6
-Rx9Bl0PODflt2FEwe8AR4ibfM/D0qjaTCS6u3NjisPYLpSUeZLq5Lm3xHsTLsq0k
-5WsZrrZ1LeOuGQ4yShsbvHqbv1k79Msvyos69wH2h7trLbrGrEM=
-=+Nwp
------END PGP SIGNATURE-----
-
---PHCdUe6m4AxPMzOu--
