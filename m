@@ -1,162 +1,75 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: SDHI clock imbalance
-Date: Fri, 2 Jun 2017 12:37:18 +0200
-Message-ID: <CAPDyKFpfff0AwbKwJEhH_-Vkn+i+1bXp5P-OWiZ2O=71s+s5vw@mail.gmail.com>
-References: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
+Subject: Re: [PATCH 0/7] dra7: Fixes for MMC devicetree node
+Date: Fri, 2 Jun 2017 12:50:16 +0200
+Message-ID: <CAPDyKFqHHjZQnnaGLP=xDj3eYgzADDYoomzBuXRviBgh-n2QFw@mail.gmail.com>
+References: <20170601143401.16852-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:34032 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750910AbdFBKhU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2017 06:37:20 -0400
-Received: by mail-qt0-f181.google.com with SMTP id c13so56004892qtc.1
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Jun 2017 03:37:19 -0700 (PDT)
-In-Reply-To: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:35249 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751125AbdFBKuS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2017 06:50:18 -0400
+Received: by mail-qt0-f170.google.com with SMTP id w1so29025598qtg.2
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Jun 2017 03:50:17 -0700 (PDT)
+In-Reply-To: <20170601143401.16852-1-kishon@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 2 June 2017 at 10:47, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Wolfram, Ulf, Simon,
+On 1 June 2017 at 16:33, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> There are the set of fixes that were sent initially as part
+> of [1].
 >
-> While investigating suspend/resume for the R-Car Gen3 clock driver, I
-> noticed a clock imbalance for SDHI on Salvator-X.
+> These are mostly fixes w.r.t populating regulators in
+> mmc dt node. It was working before because the regulators
+> connecting to the IO lines are always on regulators. This will
+> break once we add UHS support where voltage has to be changed
+> dynamically.
 >
-> After boot:
+> Performed enumeration testing on dra72-evm-revc, dra72-evm,
+> dra7-evm, am572x-evm, am571x-idk and am572x-idk.
 >
-> # head -2 /sys/kernel/debug/clk/clk_summary
->    clock         enable_cnt prepare_cnt  rate  accuracy phase
-> -------------------------------------------------------------
-> # grep sd /sys/kernel/debug/clk/clk_summary
->          .sdsrc           3        3 399999984      0 0
->         sd3               1        1     6250000      0 0
->            sdif3          1        2     6250000      0 0
->         sd2               1        1   199999992      0 0
->            sdif2          1        2   199999992      0 0
->         sd1               0        0   199999992      0 0
->            sdif1          0        0   199999992      0 0
->         sd0               1        1     6250000      0 0
->            sdif0          1        2     6250000      0 0
+> This is a preparation series for adding UHS mode support in
+> the above mentioned platforms.
 >
-> After s2idle suspend/resume:
+> [1] -> https://lkml.org/lkml/2017/5/19/196
 >
-> # grep sd /sys/kernel/debug/clk/clk_summary
->          .sdsrc           3        3   399999984      0 0
->         sd3               1        1     6250000      0 0
->            sdif3          2        2     6250000      0 0
->         sd2               1        1   199999992      0 0
->            sdif2          2        2   199999992      0 0
->         sd1               0        0   199999992      0 0
->            sdif1          0        0   199999992      0 0
->         sd0               1        1     6250000      0 0
->            sdif0          2        2     6250000      0 0
+> Kishon Vijay Abraham I (5):
+>   ARM: dts: dra72-evm-common: Correct vmmc-supply for mmc2
+>   ARM: dts: dra72-evm: Add vmmc_aux supply to mmc1
+>   ARM: dts: dra72-evm-revc: Add vmmc_aux supply to mmc1
+>   ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO
+>     lines
+>   ARM: dts: dra7: Add "max-frequency" property to MMC dt nodes
 >
-> Enable counts are 1 before suspend, and 2 after resume.
+> Ravikumar Kattekola (1):
+>   ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
 >
+> Sekhar Nori (1):
+>   ARM: OMAP2+: Add pdata-quirks for MMC/SD on DRA74x EVM
 >
-> Boot: Enabled once (also at hardware level):
->
->     platform_drv_probe
->         renesas_sdhi_sys_dmac_probe
->             renesas_sdhi_probe
->                 tmio_mmc_host_probe
->                     renesas_sdhi_clk_enable
+>  arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts |  2 +-
+>  arch/arm/boot/dts/dra7-evm.dts                | 10 ++++++++-
+>  arch/arm/boot/dts/dra7.dtsi                   |  5 +++++
+>  arch/arm/boot/dts/dra71-evm.dts               | 14 ++++++++++++
+>  arch/arm/boot/dts/dra72-evm-common.dtsi       |  2 --
+>  arch/arm/boot/dts/dra72-evm-revc.dts          | 18 ++++++++++++++++
+>  arch/arm/boot/dts/dra72-evm.dts               | 18 ++++++++++++++++
+>  arch/arm/mach-omap2/pdata-quirks.c            | 31 +++++++++++++++++++++++++++
+>  include/linux/platform_data/hsmmc-omap.h      |  3 +++
+>  9 files changed, 99 insertions(+), 4 deletions(-)
 
-The driver calls pm_runtime_set_active() during ->probe(), which means
-genpd's ->runtime_resume() callback isn't invoked during that point.
-In other words, the clocks managed by the clock domain isn't enabled
-during ->probe() as genpd's doesn't get to run pm_clk_resume() from
-its ->runtime_resume() callback. Unless I am missing something. :-)
+This series add a bunch of new vmmc_aux regulators for the mmc
+controller nodes. I would rather see that omap_hsmmc also converts to
+use the generic mmc binding for this regulator, which is "vqmmc".
 
-I think this is the reason to the following problems. How to fix it?
+To accomplish that, omap_hsmmc needs to convert to use
+mmc_regulator_get_supply(). If the "vqmmc" regulator isn't found, it
+should fallback to try the "vmmc_aux".
 
-The driver needs to call pm_runtime_get_sync() instead of
-pm_runtime_set_active(), however that may requires some careful
-changes if one wants the driver to be able to enable clocks also when
-CONFIG_PM is unset. If not, it's pretty easy, else I would do
-something like below.
-
-Add a "init" flag to host struct, and set that flag before calling
-pm_runtime_get_sync() in ->probe(). When the driver's
-->runtime_resume() callbacks get called when the "init" flag is set,
-just do an early return 0, as t means ->probe() is running and has
-already taken care of the enabling the clock. When probe is done, and
-before dropping runtime usage count with pm_runtime_put(), reset the
-"init" flag.
-
->
->
-> Suspend: Disabled once (also at hardware level):
->
->     suspend_devices_and_enter
->         dpm_suspend_start
->             dpm_suspend
->                 __device_suspend
->                     dpm_run_callback
->                         pm_runtime_force_suspend
->                             genpd_runtime_suspend
->                                 pm_generic_runtime_suspend
->                                     tmio_mmc_host_runtime_suspend
->                                         renesas_sdhi_clk_disable
->
->
-> Resume: Enabled twice (first one enables at hardware level):
->
->     dpm_resume_noirq
->         device_resume_noirq
->             dpm_run_callback
->                 pm_genpd_resume_noirq
->                     pm_runtime_force_resume
->                         genpd_runtime_resume
->                             genpd_start_dev
->                                 pm_clk_resume                   (1)
->                             __genpd_runtime_resume
->                                 pm_generic_runtime_resume
->                                     tmio_mmc_host_runtime_resume
->                                         renesas_sdhi_clk_enable (2)
->
->
-> During subsequent suspends, the clock is disabled twice (last one disables
-> at hardware level), as expected:
->
->     suspend_devices_and_enter
->         dpm_suspend_start
->             dpm_suspend
->                 __device_suspend
->                     dpm_run_callback
->                         pm_runtime_force_suspend
->                             genpd_runtime_suspend
->                                 pm_generic_runtime_suspend
->                                     tmio_mmc_host_runtime_suspend
->                                         renesas_sdhi_clk_disable (1)
->                                 genpd_stop_dev
->                                     pm_clk_suspend               (2)
->
->
-> From now on, the imbalance is gone.
->
-> Note that at boot and initial suspend, genpd does not seem to call into the
-> clock domain operations at all.
-> Presumable some call to pm_runtime_get_sync() is missing?
->
-> Thanks.
->
-> Gr{oetje,eeting}s,
->
->                         Geert
->
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
->
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Can you do that?
 
 Kind regards
 Uffe
