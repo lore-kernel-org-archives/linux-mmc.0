@@ -1,123 +1,56 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: SDHI clock imbalance
-Date: Fri, 2 Jun 2017 10:47:15 +0200
-Message-ID: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: SDHI clock imbalance
+Date: Fri, 2 Jun 2017 11:37:01 +0200
+Message-ID: <20170602093701.3kn52zfmpgy7kcqo@ninjato>
+References: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="ftgcce6j3vacwgov"
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram, Ulf, Simon,
 
-While investigating suspend/resume for the R-Car Gen3 clock driver, I
-noticed a clock imbalance for SDHI on Salvator-X.
+--ftgcce6j3vacwgov
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-After boot:
+Hi Geert,
 
-# head -2 /sys/kernel/debug/clk/clk_summary
-   clock         enable_cnt prepare_cnt  rate  accuracy phase
--------------------------------------------------------------
-# grep sd /sys/kernel/debug/clk/clk_summary
-         .sdsrc           3        3   399999984      0 0
-        sd3               1        1     6250000      0 0
-           sdif3          1        2     6250000      0 0
-        sd2               1        1   199999992      0 0
-           sdif2          1        2   199999992      0 0
-        sd1               0        0   199999992      0 0
-           sdif1          0        0   199999992      0 0
-        sd0               1        1     6250000      0 0
-           sdif0          1        2     6250000      0 0
+> While investigating suspend/resume for the R-Car Gen3 clock driver, I
+> noticed a clock imbalance for SDHI on Salvator-X.
 
-After s2idle suspend/resume:
+Thanks for the heads up! Which branch did you use?
+renesas-drivers/master? This is important since we had quite some
+refactoring going on lately.
 
-# grep sd /sys/kernel/debug/clk/clk_summary
-         .sdsrc           3        3   399999984      0 0
-        sd3               1        1     6250000      0 0
-           sdif3          2        2     6250000      0 0
-        sd2               1        1   199999992      0 0
-           sdif2          2        2   199999992      0 0
-        sd1               0        0   199999992      0 0
-           sdif1          0        0   199999992      0 0
-        sd0               1        1     6250000      0 0
-           sdif0          2        2     6250000      0 0
+Regards,
 
-Enable counts are 1 before suspend, and 2 after resume.
+   Wolfram
 
 
-Boot: Enabled once (also at hardware level):
+--ftgcce6j3vacwgov
+Content-Type: application/pgp-signature; name="signature.asc"
 
-    platform_drv_probe
-        renesas_sdhi_sys_dmac_probe
-            renesas_sdhi_probe
-                tmio_mmc_host_probe
-                    renesas_sdhi_clk_enable
+-----BEGIN PGP SIGNATURE-----
 
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlkxMbkACgkQFA3kzBSg
+KbbXvw//WCZoXZBJ5OaurnKgMqwmohTiV86nD918XC3hsAq9Kb3YmG4Cbcx+LHJ4
+H2bZ7xuliICesfZSrPQ3UNfAC32tJLQ8fvp/4GinjymmDkoAQ2TCiEvFAEbK1X9f
+mvP1CcEIY/wiOttuTe3HKuxXw8BoXmKbER3P5+AHCpDV3tJMfLIMsJn+b/3Jwc52
+lysrqWuFi5MOeBTlJcNBF4VPmL9rM1p5bbER3YAlgF421jh0qZ6JwIjWYoVBt1jY
+SVX2WzduJYSRF3ysrS8S9MYmNh1y40tDpw2PLpb44bSRCiLJl/lvcTM4K7vYvtZN
+v1loHaPEp/vFMMA52oBQdHKFfR1621HkEb8KqtGkjdIEQE1y/0BeEGgrxDSrBqJA
+orFU9ZPBzTdfhznV3sWmDxqvp7k8lJSJ/o4Q3x9KyM0giQkj3gqFMWppAz/Z0G0I
+euR5CFZvscvVVzS5x2OYUqJ8n79X1YPbdFmwJMxpWzOTzicLxgBXMdA1ZbdAOB9V
+1fTU3zjskT7e0lRMKVEs1PSl+ncmKx6jCfXtASQOe1kVwfrCKi/saxvR9QyY8moZ
+qZjkCIbONOqrvCPu4pMQT0a4RVwzKP81ZJLw2VeV19KVfxhJKnisnsSsZTtFo3Cl
+GmDKSfORdGhKg4vsu3AGlTvgBXg4evxZ6Sz7YuXs8fgFzL/nAHY=
+=q/bi
+-----END PGP SIGNATURE-----
 
-Suspend: Disabled once (also at hardware level):
-
-    suspend_devices_and_enter
-        dpm_suspend_start
-            dpm_suspend
-                __device_suspend
-                    dpm_run_callback
-                        pm_runtime_force_suspend
-                            genpd_runtime_suspend
-                                pm_generic_runtime_suspend
-                                    tmio_mmc_host_runtime_suspend
-                                        renesas_sdhi_clk_disable
-
-
-Resume: Enabled twice (first one enables at hardware level):
-
-    dpm_resume_noirq
-        device_resume_noirq
-            dpm_run_callback
-                pm_genpd_resume_noirq
-                    pm_runtime_force_resume
-                        genpd_runtime_resume
-                            genpd_start_dev
-                                pm_clk_resume                   (1)
-                            __genpd_runtime_resume
-                                pm_generic_runtime_resume
-                                    tmio_mmc_host_runtime_resume
-                                        renesas_sdhi_clk_enable (2)
-
-
-During subsequent suspends, the clock is disabled twice (last one disables
-at hardware level), as expected:
-
-    suspend_devices_and_enter
-        dpm_suspend_start
-            dpm_suspend
-                __device_suspend
-                    dpm_run_callback
-                        pm_runtime_force_suspend
-                            genpd_runtime_suspend
-                                pm_generic_runtime_suspend
-                                    tmio_mmc_host_runtime_suspend
-                                        renesas_sdhi_clk_disable (1)
-                                genpd_stop_dev
-                                    pm_clk_suspend               (2)
-
-
->From now on, the imbalance is gone.
-
-Note that at boot and initial suspend, genpd does not seem to call into the
-clock domain operations at all.
-Presumable some call to pm_runtime_get_sync() is missing?
-
-Thanks.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+--ftgcce6j3vacwgov--
