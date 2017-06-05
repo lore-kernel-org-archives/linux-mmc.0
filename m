@@ -1,88 +1,130 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 1/4 v2] mmc: block: Anonymize the drv op data pointer
-Date: Mon,  5 Jun 2017 14:15:19 +0200
-Message-ID: <20170605121522.27678-2-linus.walleij@linaro.org>
+Subject: [PATCH 4/4] mmc: debugfs: Move EXT CSD debugfs acces to block layer
+Date: Mon,  5 Jun 2017 14:15:22 +0200
+Message-ID: <20170605121522.27678-5-linus.walleij@linaro.org>
 References: <20170605121522.27678-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f54.google.com ([209.85.215.54]:34892 "EHLO
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33559 "EHLO
         mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751290AbdFEMPf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 08:15:35 -0400
-Received: by mail-lf0-f54.google.com with SMTP id p189so3737706lfe.2
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Jun 2017 05:15:34 -0700 (PDT)
+        with ESMTP id S1751810AbdFEMPn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 08:15:43 -0400
+Received: by mail-lf0-f54.google.com with SMTP id a136so55611308lfa.0
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Jun 2017 05:15:42 -0700 (PDT)
 In-Reply-To: <20170605121522.27678-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Linus Walleij <linus.walleij@linaro.org>
 
-We have a data pointer for the ioctl() data, but we need to
-pass other data along with the DRV_OP:s, so make this a
-void * so it can be reused.
+Just like the previous commit moving status retriveal for
+MMC and SD cards into the block layer (when active), this
+moves the retrieveal of the EXT CSD from the card from
+the special ext_csd file into the block stack as well.
+
+It has been tested with and without the block layer and
+during heavy load from dd.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
 ChangeLog v1->v2:
-- Break out from the other patch
+- Rebased on the new series, add no stubs.
 ---
- drivers/mmc/core/block.c | 8 +++++---
- drivers/mmc/core/queue.h | 2 +-
- 2 files changed, 6 insertions(+), 4 deletions(-)
+ drivers/mmc/core/block.c   | 21 +++++++++++++++++++++
+ drivers/mmc/core/block.h   |  1 +
+ drivers/mmc/core/debugfs.c |  4 +---
+ drivers/mmc/core/queue.h   |  2 ++
+ 4 files changed, 25 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 64f9fda92229..7a365d7641b5 100644
+index 96fe0640c480..4708f95ebdd0 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -598,7 +598,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 		__GFP_RECLAIM);
- 	idatas[0] = idata;
- 	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
--	req_to_mmc_queue_req(req)->idata = idatas;
-+	req_to_mmc_queue_req(req)->drv_op_data = idatas;
- 	req_to_mmc_queue_req(req)->ioc_count = 1;
- 	blk_execute_rq(mq->queue, NULL, req, 0);
- 	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
-@@ -674,7 +674,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 		idata[0]->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
- 		__GFP_RECLAIM);
- 	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
--	req_to_mmc_queue_req(req)->idata = idata;
-+	req_to_mmc_queue_req(req)->drv_op_data = idata;
- 	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
- 	blk_execute_rq(mq->queue, NULL, req, 0);
- 	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
-@@ -1175,6 +1175,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 	struct mmc_queue_req *mq_rq;
+@@ -1176,6 +1176,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
  	struct mmc_card *card = mq->card;
  	struct mmc_blk_data *md = mq->blkdata;
-+	struct mmc_blk_ioc_data **idata;
+ 	struct mmc_blk_ioc_data **idata;
++	u8 **ext_csd;
+ 	u32 status;
  	int ret;
  	int i;
+@@ -1211,6 +1212,10 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 		if (!ret)
+ 			ret = status;
+ 		break;
++	case MMC_DRV_OP_GET_EXT_CSD:
++		ext_csd = mq_rq->drv_op_data;
++		ret = mmc_get_ext_csd(card, ext_csd);
++		break;
+ 	default:
+ 		pr_err("%s: unknown driver specific operation\n",
+ 		       md->disk->disk_name);
+@@ -1982,6 +1987,22 @@ int mmc_blk_card_status_get(struct mmc_card *card, u64 *val)
+ }
+ EXPORT_SYMBOL(mmc_blk_card_status_get);
  
-@@ -1182,8 +1183,9 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
++/* Called from debugfs for MMC cards */
++int mmc_blk_get_ext_csd(struct mmc_card *card, u8 **ext_csd)
++{
++	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
++	struct mmc_queue *mq = &md->queue;
++	struct request *req;
++
++	/* Ask the block layer about the EXT CSD */
++	req = blk_get_request(mq->queue, REQ_OP_DRV_IN, __GFP_RECLAIM);
++	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_EXT_CSD;
++	req_to_mmc_queue_req(req)->drv_op_data = ext_csd;
++	blk_execute_rq(mq->queue, NULL, req, 0);
++	return req_to_mmc_queue_req(req)->drv_op_result;
++}
++EXPORT_SYMBOL(mmc_blk_get_ext_csd);
++
+ static inline int mmc_blk_readonly(struct mmc_card *card)
+ {
+ 	return mmc_card_readonly(card) ||
+diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
+index 70861f3a059a..377ebbf6a978 100644
+--- a/drivers/mmc/core/block.h
++++ b/drivers/mmc/core/block.h
+@@ -6,5 +6,6 @@ struct request;
  
- 	switch (mq_rq->drv_op) {
- 	case MMC_DRV_OP_IOCTL:
-+		idata = mq_rq->drv_op_data;
- 		for (i = 0; i < mq_rq->ioc_count; i++) {
--			ret = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
-+			ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
- 			if (ret)
- 				break;
- 		}
+ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
+ int mmc_blk_card_status_get(struct mmc_card *card, u64 *val);
++int mmc_blk_get_ext_csd(struct mmc_card *card, u8 **ext_csd);
+ 
+ #endif
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index dca5717c437b..cc1f7085111c 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -305,9 +305,7 @@ static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
+ 	if (!buf)
+ 		return -ENOMEM;
+ 
+-	mmc_get_card(card);
+-	err = mmc_get_ext_csd(card, &ext_csd);
+-	mmc_put_card(card);
++	err = mmc_blk_get_ext_csd(card, &ext_csd);
+ 	if (err)
+ 		goto out_free;
+ 
 diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index 361b46408e0f..cf26a15a64bf 100644
+index c2325c6659f5..04fc89360a7a 100644
 --- a/drivers/mmc/core/queue.h
 +++ b/drivers/mmc/core/queue.h
-@@ -51,7 +51,7 @@ struct mmc_queue_req {
- 	struct mmc_async_req	areq;
- 	enum mmc_drv_op		drv_op;
- 	int			drv_op_result;
--	struct mmc_blk_ioc_data	**idata;
-+	void			*drv_op_data;
- 	unsigned int		ioc_count;
+@@ -37,11 +37,13 @@ struct mmc_blk_request {
+  * @MMC_DRV_OP_IOCTL: ioctl operation
+  * @MMC_DRV_OP_BOOT_WP: write protect boot partitions
+  * @MMC_DRV_OP_GET_CARD_STATUS: get card status
++ * @MMC_DRV_OP_GET_EXT_CSD: get the EXT CSD from an eMMC card
+  */
+ enum mmc_drv_op {
+ 	MMC_DRV_OP_IOCTL,
+ 	MMC_DRV_OP_BOOT_WP,
+ 	MMC_DRV_OP_GET_CARD_STATUS,
++	MMC_DRV_OP_GET_EXT_CSD,
  };
  
+ struct mmc_queue_req {
 -- 
 2.9.4
 
