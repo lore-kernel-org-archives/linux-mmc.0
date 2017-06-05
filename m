@@ -1,70 +1,65 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 1/6] mmc: dw_mmc: deprecated the "num-slots" property
-Date: Mon, 05 Jun 2017 13:41:30 +0900
-Message-ID: <20170605044135.18304-2-jh80.chung@samsung.com>
-References: <20170605044135.18304-1-jh80.chung@samsung.com>
-        <CGME20170605044137epcas1p408ff8655bcf8084e758f358ff0ed632e@epcas1p4.samsung.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v3 3/9] mfd: tmio.h: support partition parser types
+Date: Mon, 5 Jun 2017 08:59:07 +0100
+Message-ID: <20170605075906.2rdf74lzemys77to@dell>
+References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
+ <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
+ <20170601143535.s6ovk5ts3cbehw3f@dell>
+ <CAAQYJAs_EMHUUBObbhOQ6gk4rh=MsO4d2qi9KpDdhMiHMrsyTA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:62593 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751270AbdFEEll (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 00:41:41 -0400
-In-reply-to: <20170605044135.18304-1-jh80.chung@samsung.com>
+Received: from mail-wr0-f182.google.com ([209.85.128.182]:36357 "EHLO
+        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751336AbdFEH7L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 03:59:11 -0400
+Received: by mail-wr0-f182.google.com with SMTP id v111so27165901wrc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Jun 2017 00:59:10 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAAQYJAs_EMHUUBObbhOQ6gk4rh=MsO4d2qi9KpDdhMiHMrsyTA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
+To: Andrea Adami <andrea.adami@gmail.com>
+Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-dwmmc controller is supporting only one slot per a IP.
-Even though DWMMC IP is provided the multiple slot, but there is no
-usage in real world.
-In mmc subsystem, not allow the multiple slot concept.
-Then "num-slots" property is deprecated.
+On Sat, 03 Jun 2017, Andrea Adami wrote:
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c | 21 ++++++++-------------
- 1 file changed, 8 insertions(+), 13 deletions(-)
+> On Thu, Jun 1, 2017 at 4:35 PM, Lee Jones <lee.jones@linaro.org> wrote:
+> > On Thu, 01 Jun 2017, Andrea Adami wrote:
+> >
+> >> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
+> >> ---
+> >>  include/linux/mfd/tmio.h | 1 +
+> >>  1 file changed, 1 insertion(+)
+> >>
+> >> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> >> index a1520d8..23bb069 100644
+> >> --- a/include/linux/mfd/tmio.h
+> >> +++ b/include/linux/mfd/tmio.h
+> >> @@ -139,6 +139,7 @@ struct tmio_nand_data {
+> >>       struct nand_bbt_descr   *badblock_pattern;
+> >>       struct mtd_partition    *partition;
+> >>       unsigned int            num_partitions;
+> >> +     const char *const       *types; /* names of parsers to use if any */
+> >
+> > Please use kerneldoc instead.
+> >
+> Thanks for the review.
+> 
+> tmio.h is not consistent and uses inline comments so I did not change the style.
+> Another round of patches will be necessary to sanitize the comments,
+> out of the scope of this little patchset.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4a0841c..a66edd0 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2973,7 +2973,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	}
- 
- 	/* find out number of slots supported */
--	device_property_read_u32(dev, "num-slots", &pdata->num_slots);
-+	if (device_property_read_u32(dev, "num-slots", &pdata->num_slots))
-+		dev_info(dev, "'num-slots' was deprecated.\n");
- 
- 	if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
- 		dev_info(dev,
-@@ -3203,18 +3204,12 @@ int dw_mci_probe(struct dw_mci *host)
- 	if (ret)
- 		goto err_dmaunmap;
- 
--	if (host->pdata->num_slots)
--		host->num_slots = host->pdata->num_slots;
--	else
--		host->num_slots = 1;
--
--	if (host->num_slots < 1 ||
--	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
--		dev_err(host->dev,
--			"Platform data must supply correct num_slots.\n");
--		ret = -ENODEV;
--		goto err_clk_ciu;
--	}
-+	/*
-+	 * Even though dwmmc IP is provided the multiple slots,
-+	 * there is no use case in mmc subsystem.
-+	 * dwmmc host controller needs to initialize the one slot per an IP.
-+	 */
-+	host->num_slots = 1;
- 
- 	/*
- 	 * Enable interrupts for command done, data over, data empty,
+Will you do the work?
+
+> >>  };
+> >>
+> >>  #define FBIO_TMIO_ACC_WRITE  0x7C639300
+> >
+
 -- 
-2.10.2
-
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org │ Open source software for ARM SoCs
+Follow Linaro: Facebook | Twitter | Blog
