@@ -1,65 +1,95 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v3 3/9] mfd: tmio.h: support partition parser types
-Date: Mon, 5 Jun 2017 08:59:07 +0100
-Message-ID: <20170605075906.2rdf74lzemys77to@dell>
-References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
- <1496270458-6479-4-git-send-email-andrea.adami@gmail.com>
- <20170601143535.s6ovk5ts3cbehw3f@dell>
- <CAAQYJAs_EMHUUBObbhOQ6gk4rh=MsO4d2qi9KpDdhMiHMrsyTA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: [PATCH] mmc: sdhci: Handle return value of clk_prepare_enable
+Date: Mon,  5 Jun 2017 16:18:02 +0530
+Message-ID: <96cf6861af2a91afd7f836f6abcc4d35aa9bb449.1496658958.git.arvind.yadav.cs@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:36357 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751336AbdFEH7L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 03:59:11 -0400
-Received: by mail-wr0-f182.google.com with SMTP id v111so27165901wrc.3
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Jun 2017 00:59:10 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAAQYJAs_EMHUUBObbhOQ6gk4rh=MsO4d2qi9KpDdhMiHMrsyTA@mail.gmail.com>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:34325 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751295AbdFEKsW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2017 06:48:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Sat, 03 Jun 2017, Andrea Adami wrote:
+clk_prepare_enable() can fail here and we must check its return value.
 
-> On Thu, Jun 1, 2017 at 4:35 PM, Lee Jones <lee.jones@linaro.org> wrote:
-> > On Thu, 01 Jun 2017, Andrea Adami wrote:
-> >
-> >> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
-> >> ---
-> >>  include/linux/mfd/tmio.h | 1 +
-> >>  1 file changed, 1 insertion(+)
-> >>
-> >> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> >> index a1520d8..23bb069 100644
-> >> --- a/include/linux/mfd/tmio.h
-> >> +++ b/include/linux/mfd/tmio.h
-> >> @@ -139,6 +139,7 @@ struct tmio_nand_data {
-> >>       struct nand_bbt_descr   *badblock_pattern;
-> >>       struct mtd_partition    *partition;
-> >>       unsigned int            num_partitions;
-> >> +     const char *const       *types; /* names of parsers to use if any */
-> >
-> > Please use kerneldoc instead.
-> >
-> Thanks for the review.
-> 
-> tmio.h is not consistent and uses inline comments so I did not change the style.
-> Another round of patches will be necessary to sanitize the comments,
-> out of the scope of this little patchset.
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 40 ++++++++++++++++++++++++++++++--------
+ 1 file changed, 32 insertions(+), 8 deletions(-)
 
-Will you do the work?
-
-> >>  };
-> >>
-> >>  #define FBIO_TMIO_ACC_WRITE  0x7C639300
-> >
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 23d8b8a..9ab64e73 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1250,9 +1250,17 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 
+ 	pltfm_host->clk = imx_data->clk_per;
+ 	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
+-	clk_prepare_enable(imx_data->clk_per);
+-	clk_prepare_enable(imx_data->clk_ipg);
+-	clk_prepare_enable(imx_data->clk_ahb);
++	err = clk_prepare_enable(imx_data->clk_per);
++	if (err)
++		goto free_sdhci;
++
++	err = clk_prepare_enable(imx_data->clk_ipg);
++	if (err)
++		goto free_clk_per;
++
++	err = clk_prepare_enable(imx_data->clk_ahb);
++	if (err)
++		goto free_clk_ipg;
+ 
+ 	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
+ 	if (IS_ERR(imx_data->pinctrl)) {
+@@ -1314,9 +1322,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+ disable_clk:
+-	clk_disable_unprepare(imx_data->clk_per);
+-	clk_disable_unprepare(imx_data->clk_ipg);
+ 	clk_disable_unprepare(imx_data->clk_ahb);
++free_clk_ipg:
++	clk_disable_unprepare(imx_data->clk_ipg);
++free_clk_per:
++	clk_disable_unprepare(imx_data->clk_per);
+ free_sdhci:
+ 	sdhci_pltfm_free(pdev);
+ 	return err;
+@@ -1393,14 +1403,28 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	int ret;
+ 
+ 	if (!sdhci_sdio_irq_enabled(host)) {
+-		clk_prepare_enable(imx_data->clk_per);
+-		clk_prepare_enable(imx_data->clk_ipg);
++		ret = clk_prepare_enable(imx_data->clk_per);
++		if (ret)
++			return ret;
++		ret = clk_prepare_enable(imx_data->clk_ipg);
++		if (ret)
++			goto free_clk_per;
+ 	}
+-	clk_prepare_enable(imx_data->clk_ahb);
++	ret = clk_prepare_enable(imx_data->clk_ahb);
++	if (ret)
++		goto free_clk_ipg;
+ 
+ 	return sdhci_runtime_resume_host(host);
++
++free_clk_ipg:
++	clk_disable_unprepare(imx_data->clk_ipg);
++free_clk_per:
++	clk_disable_unprepare(imx_data->clk_per);
++	return ret;
++
+ }
+ #endif
+ 
 -- 
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org │ Open source software for ARM SoCs
-Follow Linaro: Facebook | Twitter | Blog
+1.9.1
+
