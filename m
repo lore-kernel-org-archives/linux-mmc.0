@@ -1,111 +1,83 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 0/7] dra7: Fixes for MMC devicetree node
-Date: Tue, 6 Jun 2017 16:06:23 +0530
-Message-ID: <1d15c9e9-f257-fd97-a9a2-055ee90d7e84@ti.com>
-References: <20170601143401.16852-1-kishon@ti.com>
- <CAPDyKFqHHjZQnnaGLP=xDj3eYgzADDYoomzBuXRviBgh-n2QFw@mail.gmail.com>
- <f78dd61c-6689-4dbc-d1db-128f92be8e51@ti.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: SDHI clock imbalance
+Date: Tue, 6 Jun 2017 12:49:44 +0200
+Message-ID: <20170606104944.6zewibifk3xfxetk@ninjato>
+References: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
+ <CAPDyKFpfff0AwbKwJEhH_-Vkn+i+1bXp5P-OWiZ2O=71s+s5vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <f78dd61c-6689-4dbc-d1db-128f92be8e51@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="pibgxcti7gnrdqqq"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:55649 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751388AbdFFKtq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 6 Jun 2017 06:49:46 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpfff0AwbKwJEhH_-Vkn+i+1bXp5P-OWiZ2O=71s+s5vw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Hi Tony,
 
-On Tuesday 06 June 2017 09:47 AM, Kishon Vijay Abraham I wrote:
-> Hi,
-> 
-> On Friday 02 June 2017 04:20 PM, Ulf Hansson wrote:
->> On 1 June 2017 at 16:33, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>> There are the set of fixes that were sent initially as part
->>> of [1].
->>>
->>> These are mostly fixes w.r.t populating regulators in
->>> mmc dt node. It was working before because the regulators
->>> connecting to the IO lines are always on regulators. This will
->>> break once we add UHS support where voltage has to be changed
->>> dynamically.
->>>
->>> Performed enumeration testing on dra72-evm-revc, dra72-evm,
->>> dra7-evm, am572x-evm, am571x-idk and am572x-idk.
->>>
->>> This is a preparation series for adding UHS mode support in
->>> the above mentioned platforms.
->>>
->>> [1] -> https://lkml.org/lkml/2017/5/19/196
->>>
->>> Kishon Vijay Abraham I (5):
->>>   ARM: dts: dra72-evm-common: Correct vmmc-supply for mmc2
->>>   ARM: dts: dra72-evm: Add vmmc_aux supply to mmc1
->>>   ARM: dts: dra72-evm-revc: Add vmmc_aux supply to mmc1
->>>   ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO
->>>     lines
->>>   ARM: dts: dra7: Add "max-frequency" property to MMC dt nodes
->>>
->>> Ravikumar Kattekola (1):
->>>   ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
->>>
->>> Sekhar Nori (1):
->>>   ARM: OMAP2+: Add pdata-quirks for MMC/SD on DRA74x EVM
->>>
->>>  arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts |  2 +-
->>>  arch/arm/boot/dts/dra7-evm.dts                | 10 ++++++++-
->>>  arch/arm/boot/dts/dra7.dtsi                   |  5 +++++
->>>  arch/arm/boot/dts/dra71-evm.dts               | 14 ++++++++++++
->>>  arch/arm/boot/dts/dra72-evm-common.dtsi       |  2 --
->>>  arch/arm/boot/dts/dra72-evm-revc.dts          | 18 ++++++++++++++++
->>>  arch/arm/boot/dts/dra72-evm.dts               | 18 ++++++++++++++++
->>>  arch/arm/mach-omap2/pdata-quirks.c            | 31 +++++++++++++++++++++++++++
->>>  include/linux/platform_data/hsmmc-omap.h      |  3 +++
->>>  9 files changed, 99 insertions(+), 4 deletions(-)
->>
->> This series add a bunch of new vmmc_aux regulators for the mmc
->> controller nodes. I would rather see that omap_hsmmc also converts to
->> use the generic mmc binding for this regulator, which is "vqmmc".
->>
->> To accomplish that, omap_hsmmc needs to convert to use
->> mmc_regulator_get_supply(). If the "vqmmc" regulator isn't found, it
->> should fallback to try the "vmmc_aux".
->>
->> Can you do that?
-> 
-> sure, I'll prepare that change.
+--pibgxcti7gnrdqqq
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-omap3-overo-base.dtsi has the following dt node for mmc.
-/* optional on board WiFi */
-&mmc2 {
-        pinctrl-names = "default";
-        pinctrl-0 = <&mmc2_pins>;
-        vmmc-supply = <&w3cbw003c_npoweron>;
-        vqmmc-supply = <&w3cbw003c_bt_nreset>;
-        vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
-        bus-width = <4>;
-        cap-sdio-irq;
-        non-removable;
-};
 
-It has both "vqmmc-supply" and "vmmc_aux-supply". However omap-hsmmc driver has
-never parsed vqmmc so far. So I'd assume bt was never functional and it's used
-only for wifi.
+> The driver calls pm_runtime_set_active() during ->probe(), which means
+> genpd's ->runtime_resume() callback isn't invoked during that point.
+> In other words, the clocks managed by the clock domain isn't enabled
+> during ->probe() as genpd's doesn't get to run pm_clk_resume() from
+> its ->runtime_resume() callback. Unless I am missing something. :-)
 
-So for the change suggested by Ulf, Can I do something like below, so that we
-can keep wifi functional (ignoring bt since that was never functional)?
--       vqmmc-supply = <&w3cbw003c_bt_nreset>;
--       vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
-+       vqmmc-supply = <&w3cbw003c_wifi_nreset>;
+So, in my words: in that case, the device is not really active since the
+clocks are not enabled?
 
-Thanks
-Kishon
+> I think this is the reason to the following problems. How to fix it?
+>=20
+> The driver needs to call pm_runtime_get_sync() instead of
+> pm_runtime_set_active(), however that may requires some careful
+> changes if one wants the driver to be able to enable clocks also when
+> CONFIG_PM is unset.
+
+We have tmio_mmc_clk_enable() already for that, I'd think. Or am I
+misunderstanding?
+
+> Add a "init" flag to host struct, and set that flag before calling
+> pm_runtime_get_sync() in ->probe(). When the driver's
+> ->runtime_resume() callbacks get called when the "init" flag is set,
+> just do an early return 0, as t means ->probe() is running and has
+> already taken care of the enabling the clock. When probe is done, and
+> before dropping runtime usage count with pm_runtime_put(), reset the
+> "init" flag.
+
+Welllll... I hope we can avoid this ;)
+
+Thanks for your thoughts, Ulf. And thanks to Geert for bringing up the
+issue which I can reproduce here. We need to do a bigger PM
+re-evaluation anyhow, I'll add it to the list...
+
+
+--pibgxcti7gnrdqqq
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlk2iMgACgkQFA3kzBSg
+KbZKsg//Zsq83wzm57qYfVXbkB2ILynMExIDGNJildnJFGyGhiM1IFJ4knKpAIZ8
+8WhFMcd9kY3ORDJbm9/F6e15rI7u9+5DFDrRYxQBlaPFrKB7RgEIQNXR4XcX9/zR
+6zRDnTK+SHT9yjz67KiftJGMxNCwI7h5nqk1qk1VV1AGI2uUwAgvkFp/9jqmXjjw
+cH4Knd8E1Adz/Q8L0ARZwziQmYDYmzgOMgMuVjcZrT+CdcCr7JhjJtbyeKZ4G4pc
+MwPxwLn+YKlvEKpe+cUMTteWzbXtt176vlz+lp9DGCkX/VUp9bcFVwlLMbH9zL/Z
+cyP3A2SmehPilzw/BUmhglFqsQlxWa6+TtBGvoO8t9xjIQvbhlMJMdm5XV88ri0Y
+g2Fclt8i1w2BryXUPks1pO/407gPnjGlkcNlb09POLRyun3+9WPVpT2S0QsjpK2S
+ytE5NVJqeZtKn6OxosEX5wH/4VwfgDfJBs+8uFHWItqzP/duYaoq0RlJ+hJjBQ2h
+KV8PItpvfoXAB8TP9CcFxpXXnzumhj/bv0hIURoBUqE16xoNe4ONMcp5iKFcv9G7
+J7eFt2XcDzWtl7TdtP5pkf82gVY5YepgoiwRH2qZDDnUJYb7YmhcynFgFhOfUWji
+xYa42dXWU2Z9i99MDLZNH92pEZUaK0e/C5CWOyHZ0aYlaCpbzyI=
+=4H7w
+-----END PGP SIGNATURE-----
+
+--pibgxcti7gnrdqqq--
