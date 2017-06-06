@@ -1,83 +1,59 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: SDHI clock imbalance
-Date: Tue, 6 Jun 2017 12:49:44 +0200
-Message-ID: <20170606104944.6zewibifk3xfxetk@ninjato>
-References: <CAMuHMdX7_u_3TFK22inUp367LR3R77S72RAtRWPFnKE9-cUtpw@mail.gmail.com>
- <CAPDyKFpfff0AwbKwJEhH_-Vkn+i+1bXp5P-OWiZ2O=71s+s5vw@mail.gmail.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 0/7] dra7: Fixes for MMC devicetree node
+Date: Tue, 6 Jun 2017 03:51:31 -0700
+Message-ID: <20170606105131.GZ3730@atomide.com>
+References: <20170601143401.16852-1-kishon@ti.com>
+ <CAPDyKFqHHjZQnnaGLP=xDj3eYgzADDYoomzBuXRviBgh-n2QFw@mail.gmail.com>
+ <f78dd61c-6689-4dbc-d1db-128f92be8e51@ti.com>
+ <1d15c9e9-f257-fd97-a9a2-055ee90d7e84@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="pibgxcti7gnrdqqq"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:55649 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751388AbdFFKtq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 6 Jun 2017 06:49:46 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpfff0AwbKwJEhH_-Vkn+i+1bXp5P-OWiZ2O=71s+s5vw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-
-
---pibgxcti7gnrdqqq
 Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <1d15c9e9-f257-fd97-a9a2-055ee90d7e84-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: linux-mmc@vger.kernel.org
 
+* Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> [170606 03:40]:
+> omap3-overo-base.dtsi has the following dt node for mmc.
+> /* optional on board WiFi */
+> &mmc2 {
+>         pinctrl-names = "default";
+>         pinctrl-0 = <&mmc2_pins>;
+>         vmmc-supply = <&w3cbw003c_npoweron>;
+>         vqmmc-supply = <&w3cbw003c_bt_nreset>;
+>         vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
+>         bus-width = <4>;
+>         cap-sdio-irq;
+>         non-removable;
+> };
+> 
+> It has both "vqmmc-supply" and "vmmc_aux-supply". However omap-hsmmc driver has
+> never parsed vqmmc so far. So I'd assume bt was never functional and it's used
+> only for wifi.
 
-> The driver calls pm_runtime_set_active() during ->probe(), which means
-> genpd's ->runtime_resume() callback isn't invoked during that point.
-> In other words, the clocks managed by the clock domain isn't enabled
-> during ->probe() as genpd's doesn't get to run pm_clk_resume() from
-> its ->runtime_resume() callback. Unless I am missing something. :-)
+Hmm yeah the vqmmc-supply probably got copied from some
+other SoC for w3cbw003c.
 
-So, in my words: in that case, the device is not really active since the
-clocks are not enabled?
+> So for the change suggested by Ulf, Can I do something like below, so that we
+> can keep wifi functional (ignoring bt since that was never functional)?
+> -       vqmmc-supply = <&w3cbw003c_bt_nreset>;
+> -       vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
+> +       vqmmc-supply = <&w3cbw003c_wifi_nreset>;
 
-> I think this is the reason to the following problems. How to fix it?
->=20
-> The driver needs to call pm_runtime_get_sync() instead of
-> pm_runtime_set_active(), however that may requires some careful
-> changes if one wants the driver to be able to enable clocks also when
-> CONFIG_PM is unset.
+Optional sdio pins 4 - 8 need separate power and that's
+why we have the vmmc_aux supply to start with. But here
+there are only four pins, so my guess is that only one
+regulator is needed and the the other two are gpio pins
+for wland and bt that nowadays should be handled by the
+mmc power sequence driver.
 
-We have tmio_mmc_clk_enable() already for that, I'd think. Or am I
-misunderstanding?
+Regards,
 
-> Add a "init" flag to host struct, and set that flag before calling
-> pm_runtime_get_sync() in ->probe(). When the driver's
-> ->runtime_resume() callbacks get called when the "init" flag is set,
-> just do an early return 0, as t means ->probe() is running and has
-> already taken care of the enabling the clock. When probe is done, and
-> before dropping runtime usage count with pm_runtime_put(), reset the
-> "init" flag.
-
-Welllll... I hope we can avoid this ;)
-
-Thanks for your thoughts, Ulf. And thanks to Geert for bringing up the
-issue which I can reproduce here. We need to do a bigger PM
-re-evaluation anyhow, I'll add it to the list...
-
-
---pibgxcti7gnrdqqq
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlk2iMgACgkQFA3kzBSg
-KbZKsg//Zsq83wzm57qYfVXbkB2ILynMExIDGNJildnJFGyGhiM1IFJ4knKpAIZ8
-8WhFMcd9kY3ORDJbm9/F6e15rI7u9+5DFDrRYxQBlaPFrKB7RgEIQNXR4XcX9/zR
-6zRDnTK+SHT9yjz67KiftJGMxNCwI7h5nqk1qk1VV1AGI2uUwAgvkFp/9jqmXjjw
-cH4Knd8E1Adz/Q8L0ARZwziQmYDYmzgOMgMuVjcZrT+CdcCr7JhjJtbyeKZ4G4pc
-MwPxwLn+YKlvEKpe+cUMTteWzbXtt176vlz+lp9DGCkX/VUp9bcFVwlLMbH9zL/Z
-cyP3A2SmehPilzw/BUmhglFqsQlxWa6+TtBGvoO8t9xjIQvbhlMJMdm5XV88ri0Y
-g2Fclt8i1w2BryXUPks1pO/407gPnjGlkcNlb09POLRyun3+9WPVpT2S0QsjpK2S
-ytE5NVJqeZtKn6OxosEX5wH/4VwfgDfJBs+8uFHWItqzP/duYaoq0RlJ+hJjBQ2h
-KV8PItpvfoXAB8TP9CcFxpXXnzumhj/bv0hIURoBUqE16xoNe4ONMcp5iKFcv9G7
-J7eFt2XcDzWtl7TdtP5pkf82gVY5YepgoiwRH2qZDDnUJYb7YmhcynFgFhOfUWji
-xYa42dXWU2Z9i99MDLZNH92pEZUaK0e/C5CWOyHZ0aYlaCpbzyI=
-=4H7w
------END PGP SIGNATURE-----
-
---pibgxcti7gnrdqqq--
+Tony
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
