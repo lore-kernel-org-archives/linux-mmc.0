@@ -1,47 +1,39 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 3/3] Documentation: dt-bindings: Document deprecation of
- "vmmc_aux" and using "vqmmc"
-Date: Wed, 7 Jun 2017 14:06:12 +0530
-Message-ID: <20170607083612.14224-4-kishon@ti.com>
-References: <20170607083612.14224-1-kishon@ti.com>
+Subject: [PATCH v2 2/8] ARM: dts: dra72-evm: Add vqmmc supply to mmc1
+Date: Wed, 7 Jun 2017 15:07:43 +0530
+Message-ID: <20170607093749.15656-3-kishon@ti.com>
+References: <20170607093749.15656-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170607083612.14224-1-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170607093749.15656-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Document deprecation of "vmmc_aux" for io regulator and use of generic
-mmc binding "vqmmc" in omap-hsmmc.
+Add vqmmc-supply property to mmc1 dt node and populate
+it with ldo1_reg to reflect ldo1_out is connected to mmc1 IO lines.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/boot/dts/dra72-evm.dts | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 74166a0d460d..0e026c151c1c 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -18,7 +18,7 @@ Required properties:
- Optional properties:
- ti,dual-volt: boolean, supports dual voltage cards
- <supply-name>-supply: phandle to the regulator device tree node
--"supply-name" examples are "vmmc", "vmmc_aux" etc
-+"supply-name" examples are "vmmc", "vmmc_aux"(deprecated)/"vqmmc" etc
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
- ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+diff --git a/arch/arm/boot/dts/dra72-evm.dts b/arch/arm/boot/dts/dra72-evm.dts
+index adbcc570eba9..99fdb3d8445b 100644
+--- a/arch/arm/boot/dts/dra72-evm.dts
++++ b/arch/arm/boot/dts/dra72-evm.dts
+@@ -54,6 +54,10 @@
+ 	phy-mode = "rgmii";
+ };
+ 
++&mmc1 {
++	vqmmc-supply = <&ldo1_reg>;
++};
++
+ &mmc2 {
+ 	vmmc-supply = <&evm_1v8_sw>;
+ };
 -- 
 2.11.0
