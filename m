@@ -1,8 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 1/8] ARM: dts: dra72-evm-common: Correct vmmc-supply for
- mmc2
-Date: Wed, 7 Jun 2017 15:07:42 +0530
-Message-ID: <20170607093749.15656-2-kishon@ti.com>
+Subject: [PATCH v2 5/8] ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
+Date: Wed, 7 Jun 2017 15:07:46 +0530
+Message-ID: <20170607093749.15656-6-kishon@ti.com>
 References: <20170607093749.15656-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,123 +21,46 @@ To: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@
 Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-kernel@vger.kernel.org, Ravikumar Kattekola <rk@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On dra72/dra71 evms, mmc2 vdd/ios are connected to a common 1.8V supply
-not 3.3V. Also the regulator that supplies 1.8V is different on dra71-evm
-so move the supply property from common dtsi to evm specific dts files.
+From: Ravikumar Kattekola <rk@ti.com>
 
-Fixes: a4240d3af677 ("ARM: dts: Add support for dra72-evm rev C (SR2.0)")
+On DRA75x EVM, MMC2 vdd/ios are connected to a common supply fixed at 1.8V
+not 3.3V
+
+Fixes: 6cf02dbb4b71 ("ARM: dts: dra7-evm: Add mmc2 node for eMMC support")
 Signed-off-by: Ravikumar Kattekola <rk@ti.com>
 Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra71-evm.dts         | 14 ++++++++++++++
- arch/arm/boot/dts/dra72-evm-common.dtsi |  2 --
- arch/arm/boot/dts/dra72-evm-revc.dts    | 14 ++++++++++++++
- arch/arm/boot/dts/dra72-evm.dts         | 14 ++++++++++++++
- 4 files changed, 42 insertions(+), 2 deletions(-)
+ arch/arm/boot/dts/dra7-evm.dts | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/dra71-evm.dts b/arch/arm/boot/dts/dra71-evm.dts
-index 4d57a55473af..c7a56b6263a6 100644
---- a/arch/arm/boot/dts/dra71-evm.dts
-+++ b/arch/arm/boot/dts/dra71-evm.dts
-@@ -32,6 +32,16 @@
- 			  3000000 0x1>;
+diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
+index 31a9e061ddd0..e5d7e7f5f645 100644
+--- a/arch/arm/boot/dts/dra7-evm.dts
++++ b/arch/arm/boot/dts/dra7-evm.dts
+@@ -25,6 +25,14 @@
+ 		stdout-path = &uart1;
  	};
  
 +	evm_1v8_sw: fixedregulator-evm_1v8 {
 +		compatible = "regulator-fixed";
 +		regulator-name = "evm_1v8";
++		vin-supply = <&smps9_reg>;
 +		regulator-min-microvolt = <1800000>;
 +		regulator-max-microvolt = <1800000>;
-+		vin-supply = <&lp8732_buck0_reg>;
-+		regulator-always-on;
-+		regulator-boot-on;
 +	};
 +
- 	poweroff: gpio-poweroff {
- 		compatible = "gpio-poweroff";
- 		gpios = <&gpio7 30 GPIO_ACTIVE_HIGH>;
-@@ -165,6 +175,10 @@
- 	vmmc_aux-supply = <&vpo_sd_1v8_3v3>;
- };
- 
-+&mmc2 {
-+	vmmc-supply = <&evm_1v8_sw>;
-+};
-+
- &mac {
- 	mode-gpios = <&pcf_gpio_21 4 GPIO_ACTIVE_LOW>,
- 		     <&pcf_hdmi 9 GPIO_ACTIVE_LOW>,	/* P11 */
-diff --git a/arch/arm/boot/dts/dra72-evm-common.dtsi b/arch/arm/boot/dts/dra72-evm-common.dtsi
-index ad24544adf0f..d97370217eff 100644
---- a/arch/arm/boot/dts/dra72-evm-common.dtsi
-+++ b/arch/arm/boot/dts/dra72-evm-common.dtsi
-@@ -418,8 +418,6 @@
+ 	evm_3v3_sd: fixedregulator-sd {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "evm_3v3_sd";
+@@ -451,7 +459,7 @@
  	status = "okay";
  	pinctrl-names = "default";
  	pinctrl-0 = <&mmc2_pins_default>;
--
 -	vmmc-supply = <&evm_3v3_sw>;
++	vmmc-supply = <&evm_1v8_sw>;
  	bus-width = <8>;
- 	ti,non-removable;
- 	max-frequency = <192000000>;
-diff --git a/arch/arm/boot/dts/dra72-evm-revc.dts b/arch/arm/boot/dts/dra72-evm-revc.dts
-index 3ecac56bf504..47dcd527ec58 100644
---- a/arch/arm/boot/dts/dra72-evm-revc.dts
-+++ b/arch/arm/boot/dts/dra72-evm-revc.dts
-@@ -15,6 +15,16 @@
- 		device_type = "memory";
- 		reg = <0x0 0x80000000 0x0 0x80000000>; /* 2GB */
- 	};
-+
-+	evm_1v8_sw: fixedregulator-evm_1v8 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "evm_1v8";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		vin-supply = <&smps4_reg>;
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
  };
  
- &i2c1 {
-@@ -82,3 +92,7 @@
- 		interrupts = <16 IRQ_TYPE_EDGE_FALLING>;
- 	};
- };
-+
-+&mmc2 {
-+	vmmc-supply = <&evm_1v8_sw>;
-+};
-diff --git a/arch/arm/boot/dts/dra72-evm.dts b/arch/arm/boot/dts/dra72-evm.dts
-index cd9c4ff12654..adbcc570eba9 100644
---- a/arch/arm/boot/dts/dra72-evm.dts
-+++ b/arch/arm/boot/dts/dra72-evm.dts
-@@ -13,6 +13,16 @@
- 		device_type = "memory";
- 		reg = <0x0 0x80000000 0x0 0x40000000>; /* 1024 MB */
- 	};
-+
-+	evm_1v8_sw: fixedregulator-evm_1v8 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "evm_1v8";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		vin-supply = <&smps4_reg>;
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
- };
- 
- &i2c1 {
-@@ -43,3 +53,7 @@
- 	phy_id = <&davinci_mdio>, <3>;
- 	phy-mode = "rgmii";
- };
-+
-+&mmc2 {
-+	vmmc-supply = <&evm_1v8_sw>;
-+};
 -- 
 2.11.0
