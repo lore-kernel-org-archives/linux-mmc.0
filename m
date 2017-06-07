@@ -1,8 +1,8 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 2/3] mmc: host: omap_hsmmc: use mmc_regulator_get_supply() to
- get regulators
-Date: Wed, 7 Jun 2017 14:06:11 +0530
-Message-ID: <20170607083612.14224-3-kishon@ti.com>
+Subject: [PATCH 3/3] Documentation: dt-bindings: Document deprecation of
+ "vmmc_aux" and using "vqmmc"
+Date: Wed, 7 Jun 2017 14:06:12 +0530
+Message-ID: <20170607083612.14224-4-kishon@ti.com>
 References: <20170607083612.14224-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,76 +22,26 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob 
 Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kishon@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In preparation for using the generic mmc binding for io regulator
-("vqmmc"), use mmc_regulator_get_supply() to get vmmc and vqmmc regulators.
-Only if "vqmmc" regulator isn't found, fallback to use "vmmc_aux"
-regulator.
+Document deprecation of "vmmc_aux" for io regulator and use of generic
+mmc binding "vqmmc" in omap-hsmmc.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 34 ++++++++++++++--------------------
- 1 file changed, 14 insertions(+), 20 deletions(-)
+ Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index de82ac0a87e2..f6da8bc0d64f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -466,34 +466,27 @@ static int omap_hsmmc_disable_boot_regulators(struct omap_hsmmc_host *host)
- 
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
--	int ocr_value = 0;
- 	int ret;
- 	struct mmc_host *mmc = host->mmc;
- 
- 	if (mmc_pdata(host)->set_power)
- 		return 0;
- 
--	mmc->supply.vmmc = devm_regulator_get_optional(host->dev, "vmmc");
--	if (IS_ERR(mmc->supply.vmmc)) {
--		ret = PTR_ERR(mmc->supply.vmmc);
--		if ((ret != -ENODEV) && host->dev->of_node)
--			return ret;
--		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
--			PTR_ERR(mmc->supply.vmmc));
--	} else {
--		ocr_value = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
--		if (ocr_value > 0)
--			mmc_pdata(host)->ocr_mask = ocr_value;
--	}
-+	ret = mmc_regulator_get_supply(mmc);
-+	if (ret == -EPROBE_DEFER)
-+		return ret;
- 
- 	/* Allow an aux regulator */
--	mmc->supply.vqmmc = devm_regulator_get_optional(host->dev, "vmmc_aux");
- 	if (IS_ERR(mmc->supply.vqmmc)) {
--		ret = PTR_ERR(mmc->supply.vqmmc);
--		if ((ret != -ENODEV) && host->dev->of_node)
--			return ret;
--		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
--			PTR_ERR(mmc->supply.vqmmc));
-+		mmc->supply.vqmmc = devm_regulator_get_optional(host->dev,
-+								"vmmc_aux");
-+		if (IS_ERR(mmc->supply.vqmmc)) {
-+			ret = PTR_ERR(mmc->supply.vqmmc);
-+			if ((ret != -ENODEV) && host->dev->of_node)
-+				return ret;
-+			dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
-+				PTR_ERR(mmc->supply.vqmmc));
-+		}
- 	}
- 
- 	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
-@@ -2143,7 +2136,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_irq;
- 
--	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
-+	if (mmc_pdata(host)->ocr_mask)
-+		mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
- 
- 	omap_hsmmc_disable_irq(host);
- 
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index 74166a0d460d..0e026c151c1c 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -18,7 +18,7 @@ Required properties:
+ Optional properties:
+ ti,dual-volt: boolean, supports dual voltage cards
+ <supply-name>-supply: phandle to the regulator device tree node
+-"supply-name" examples are "vmmc", "vmmc_aux" etc
++"supply-name" examples are "vmmc", "vmmc_aux"(deprecated)/"vqmmc" etc
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
+ ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
 -- 
 2.11.0
