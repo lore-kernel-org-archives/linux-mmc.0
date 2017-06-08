@@ -1,122 +1,168 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdio: Keep card runtime resumed while adding
- function devices
-Date: Thu, 8 Jun 2017 14:27:26 +0300
-Message-ID: <618cdbd3-70c1-57d5-d4b7-43acdf1397be@intel.com>
-References: <1495107722-13444-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFp5--WEeBsUrEzDUwgraY7stEV1cHxdp3tbk=wwJr9w7A@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v3 resend 2/3] mmc: sdhci-acpi: Add blacklist module
+ option
+Date: Thu, 8 Jun 2017 14:12:04 +0200
+Message-ID: <104672b9-8e7f-10ca-c71d-06fb13552ce9@redhat.com>
+References: <20170524104755.25274-1-hdegoede@redhat.com>
+ <20170524104755.25274-3-hdegoede@redhat.com>
+ <97991ab4-95a6-1903-98ce-0f4197ad5b70@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:45131 "EHLO mga14.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41430 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751439AbdFHLdo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Jun 2017 07:33:44 -0400
-In-Reply-To: <CAPDyKFp5--WEeBsUrEzDUwgraY7stEV1cHxdp3tbk=wwJr9w7A@mail.gmail.com>
+        id S1750822AbdFHMMH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 8 Jun 2017 08:12:07 -0400
+In-Reply-To: <97991ab4-95a6-1903-98ce-0f4197ad5b70@intel.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 07/06/17 17:45, Ulf Hansson wrote:
-> On 18 May 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Drivers core will runtime suspend a device with no driver. That means the
->> SDIO card will be runtime suspended as soon as it is added. It is then
->> runtime resumed to add each function. That is entirely pointless, so add
->> pm runtime get/put to keep the SDIO card runtime resumed until the function
->> devices have been added.
+Hi,
+
+On 07-06-17 14:47, Adrian Hunter wrote:
+> On 24/05/17 13:47, Hans de Goede wrote:
+>> Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
+>> powered when probing") introduced unconditional calling of
+>> acpi_device_fix_up_power() on the mmc controller and its children.
 >>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> Adrian, apologize for the delay!
-> 
+>> This broke wifi on some systems because acpi_device_fix_up_power()
+>> was called even for disabled children sometimes leaving gpio-s in
+>> a state where wifi would not work, this was fixed in
+>> commit e1d070c3793a ("mmc: sdhci-acpi: Only powered up enabled acpi
+>> child devices").
+>>
+>> Unfortunately on some devices calling acpi_device_fix_up_power()
+>> still causes issues. Specifically on the GPD-win mini clam-shell PC
+>> which has a pci-e wifi module, it causes the wifi module to get
+>> turned off. This is a BIOS bug and I've tried to get the manufacturer
+>> to fix this but sofar they have not responded (and even if they do
+>> then we cannot assume all users will update their BIOS).
+>>
+>> Since the GPD-win uses a pci-e wifi module the sdhci controller for
+>> sdio cards really should not get initialized on it at all.
+>>
+>> This commit adds a new sdhci_acpi.blacklist module option which can
+>> be set to an ACPI hid:uid pair, e.g. "80860F14:2" to disable probing
+>> for the sdhci host matching the hid:uid pair, fixing the wifi not
+>> working on this machine.
+>>
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 >> ---
->>  drivers/mmc/core/sdio.c | 11 ++++++++++-
->>  1 file changed, 10 insertions(+), 1 deletion(-)
+>> Changes in v2:
+>> -Make the module option take a hid:uid pair string, instead of it
+>>   being a boolean option, so that it only applies to one host
+>> Changes in v3:
+>> -Make the module option skip probing the device entirely (return -ENODEV)
+>> ---
+>>   drivers/mmc/host/sdhci-acpi.c | 36 +++++++++++++++++++++++++++++++++---
+>>   1 file changed, 33 insertions(+), 3 deletions(-)
 >>
->> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->> index fae732c870a9..97bedde0610c 100644
->> --- a/drivers/mmc/core/sdio.c
->> +++ b/drivers/mmc/core/sdio.c
->> @@ -1110,6 +1110,8 @@ int mmc_attach_sdio(struct mmc_host *host)
->>                 if (err)
->>                         goto remove;
->>
->> +               pm_runtime_get_noresume(&card->dev);
+>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>> index 89d9a8c014f5..3a7d979a306d 100644
+>> --- a/drivers/mmc/host/sdhci-acpi.c
+>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>> @@ -83,6 +83,29 @@ struct sdhci_acpi_host {
+>>   	bool				use_runtime_pm;
+>>   };
+>>   
+>> +static char *blacklist;
+>> +
+>> +static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
+>> +				       const char *uid)
+>> +{
+>> +	const char *sep;
+>> +
+>> +	if (!match)
+>> +		return false;
+>> +
+>> +	sep = strchr(match, ':');
+>> +	if (!match)
 > 
-> Please move this above pm_runtime_set_active(), just to be really sure
-> the device remains active. Thus you also need to update the error
-> path.
+> You mean (!sep)
+> 
+>> +		return false;
+>> +
+>> +	if (strncmp(match, hid, sep - match))
+>> +		return false;
+>> +
+>> +	if (strcmp(sep + 1, uid))
+>> +		return false;
+>> +
+>> +	return true;
+> 
+> This should all go together i.e.
+> 
+> 	return sep && !strncmp(match, hid, sep - match) &&
+> 	       !strcmp(sep + 1, uid);
+> 
+>> +}
+>> +
+>>   static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+>>   {
+>>   	return c->slot && (c->slot->flags & flag);
+>> @@ -378,6 +401,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   {
+>>   	struct device *dev = &pdev->dev;
+>>   	acpi_handle handle = ACPI_HANDLE(dev);
+>> +	const char *bl = blacklist;
+>>   	struct acpi_device *device, *child;
+>>   	struct sdhci_acpi_host *c;
+>>   	struct sdhci_host *host;
+>> @@ -390,6 +414,12 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   	if (acpi_bus_get_device(handle, &device))
+>>   		return -ENODEV;
+>>   
+>> +	hid = acpi_device_hid(device);
+>> +	uid = device->pnp.unique_id;
+>> +
+>> +	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
+> 
+> 'bl' is redundant in this patch.  This should just be
 
-As you wish, but even if there was somehow another code path that could get
-a reference to this device, it couldn't runtime suspend it because it is not
-runtime enabled.
+I forgot to respond to this bit in my previous reply. The bl is there to make
+adding a dmi-quirk table for this easier, so that we can pass in the dmi-quirk
+table version of blacklist is not set on the kernel cmdline.
 
+Regards,
+
+Hans
+
+
+> 
+> 	if (sdhci_acpi_blacklist(hid, uid))
+> 		return -ENODEV;
+> 
+>> +		return -ENODEV;
+>> +
+>>   	/* Power on the SDHCI controller and its children */
+>>   	acpi_device_fix_up_power(device);
+>>   	list_for_each_entry(child, &device->children, node)
+>> @@ -399,9 +429,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   	if (sdhci_acpi_byt_defer(dev))
+>>   		return -EPROBE_DEFER;
+>>   
+>> -	hid = acpi_device_hid(device);
+>> -	uid = device->pnp.unique_id;
+>> -
+>>   	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>>   	if (!iomem)
+>>   		return -ENOMEM;
+>> @@ -580,6 +607,9 @@ static struct platform_driver sdhci_acpi_driver = {
+>>   
+>>   module_platform_driver(sdhci_acpi_driver);
+>>   
+>> +module_param(blacklist, charp, 0444);
+>> +MODULE_PARM_DESC(blacklist, "ACPI <HID:UID> which should be ignored");
+> 
+> Why not allow more than one HID:UID separated by commas.
 > 
 >> +
->>                 /*
->>                  * Enable runtime PM for this card
->>                  */
->> @@ -1129,7 +1131,7 @@ int mmc_attach_sdio(struct mmc_host *host)
->>         for (i = 0; i < funcs; i++, card->sdio_funcs++) {
->>                 err = sdio_init_func(host->card, i + 1);
->>                 if (err)
->> -                       goto remove;
->> +                       goto remove_get;
->>
->>                 /*
->>                  * Enable Runtime PM for this func (if supported)
->> @@ -1156,6 +1158,10 @@ int mmc_attach_sdio(struct mmc_host *host)
->>         }
->>
->>         mmc_claim_host(host);
->> +
->> +       if (host->caps & MMC_CAP_POWER_OFF_CARD)
->> +               pm_runtime_put(&card->dev);
->> +
->>         return 0;
->>
->>
->> @@ -1163,6 +1169,9 @@ int mmc_attach_sdio(struct mmc_host *host)
->>         /* Remove without lock if the device has been added. */
->>         mmc_sdio_remove(host);
->>         mmc_claim_host(host);
->> +remove_get:
->> +       if (host->caps & MMC_CAP_POWER_OFF_CARD)
->> +               pm_runtime_put(&card->dev);
-
-I notice this is wrong here - it needs to be before mmc_sdio_remove()
-because mmc_sdio_remove() deletes the devices.
-
-> 
-> Looking in the error path, I also notice that there is a
-> pm_runtime_disable missing. Would you mind fixing that (as a separate
-> change of course) as well?
-
-We can't call pm_runtime_disable() after mmc_sdio_remove() because
-mmc_sdio_remove() deletes the devices.  device_del() anyway takes care of
-runtime pm (i.e. ends up calling __pm_runtime_disable()).
-
-If we call pm_runtime_disable() before mmc_sdio_remove() then it results in
-the devices staying in the pm state they were in at that point.  The
-->remove() callbacks expect that to be "active" but AFAICT they in turn
-leave the devices "suspended", so we would end up changing the current
-behaviour.
-
-So it looks to me like we don't need to call pm_runtime_disable() and we
-can't call it here without side-effects.
-
-> 
->>  remove:
->>         /* And with lock if it hasn't been added. */
->>         mmc_release_host(host);
->> --
->> 1.9.1
+>>   MODULE_DESCRIPTION("Secure Digital Host Controller Interface ACPI driver");
+>>   MODULE_AUTHOR("Adrian Hunter");
+>>   MODULE_LICENSE("GPL v2");
 >>
 > 
-> Kind regards
-> Uffe
-> 
-
