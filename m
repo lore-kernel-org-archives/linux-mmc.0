@@ -1,121 +1,143 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v3 resend 3/3] mmc: sdhci-acpi: Add DMI based blacklist
-Date: Thu, 8 Jun 2017 20:51:56 +0200
-Message-ID: <4019078a-b371-bc72-dd30-c082773a9901@redhat.com>
-References: <20170524104755.25274-1-hdegoede@redhat.com>
- <20170524104755.25274-4-hdegoede@redhat.com>
- <79b5300b-11a2-33f1-439d-e09a2047d6f3@intel.com>
- <4d4ba40a-043c-3543-33d5-40887b4c3363@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v4 1/2] mmc: sdhci-acpi: Add blacklist module option
+Date: Thu,  8 Jun 2017 20:54:59 +0200
+Message-ID: <20170608185500.3317-1-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49108 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40620 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751393AbdFHSwF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Jun 2017 14:52:05 -0400
-In-Reply-To: <4d4ba40a-043c-3543-33d5-40887b4c3363@redhat.com>
-Content-Language: en-US
+        id S1751448AbdFHSzF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 8 Jun 2017 14:55:05 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
 
-Hi,
+Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
+powered when probing") introduced unconditional calling of
+acpi_device_fix_up_power() on the mmc controller and its children.
 
-On 08-06-17 12:20, Hans de Goede wrote:
-> Hi,
-> 
-> On 07-06-17 15:09, Adrian Hunter wrote:
->> On 24/05/17 13:47, Hans de Goede wrote:
->>> Add a DMI based blacklist for systems where probing some sdio interfaces
->>> is harmful (e.g. causes pci-e based wifi to not work).
->>>
->>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>> ---
->>> Changes in v2:
->>> -Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist module option
->>> -Only use a single fix_up_power_dmi_blacklist for the GPDwin further testing
->>>   has shown that the DMI strings are unique enough that we do not need the
->>>   bios-date in there
->>> Changes in v3:
->>> -Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
->>> ---
->>>   drivers/mmc/host/sdhci-acpi.c | 30 ++++++++++++++++++++++++++++++
->>>   1 file changed, 30 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index 3a7d979a306d..45455abc7ca6 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -36,6 +36,7 @@
->>>   #include <linux/pm.h>
->>>   #include <linux/pm_runtime.h>
->>>   #include <linux/delay.h>
->>> +#include <linux/dmi.h>
->>>   #include <linux/mmc/host.h>
->>>   #include <linux/mmc/pm.h>
->>> @@ -381,6 +382,28 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->>>   };
->>>   MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
->>> +static const struct dmi_system_id fix_up_power_dmi_blacklist[] = {
->>> +    {
->>> +        /*
->>> +         * Match for the GPDwin which unfortunately uses somewhat
->>> +         * generic dmi strings, which is why we test for 4 strings.
->>> +         * Comparing against 23 other byt/cht boards, board_vendor
->>> +         * and board_name are unique to the GPDwin, where as only one
->>> +         * other board has the same board_serial and 3 others have
->>> +         * the same default product_name. Also the GPDwin is the
->>> +         * only device to have both board_ and product_name not set.
->>> +         */
->>> +        .driver_data = "80860F14:2",
->>> +        .matches = {
->>> +            DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
->>> +            DMI_MATCH(DMI_BOARD_NAME, "Default string"),
->>> +            DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
->>> +            DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
->>
->> I can't accept that this is an accurate way to identify the board.
-> 
-> Well as I already mentioned when I first submitted this patch-set this
-> patch-set fixes a regression. When I first installed Linux on this
-> system, the wifi just worked, until this commit got merged:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit?id=db52d4f8a4bde36263a7cc9d46ff20b243562ac9
-> 
-> Given the kernel's no regressions policy I see only 2 ways to fix this
-> something like this patch, or revert the commit causing the regression.
-> 
-> In the CHT dstd's I have 6 out of 8 use the 80860F14 HID rather then
-> the INT33BB HID one, so reverting the commit causing this regression
-> is not really an option.
-> 
-> Note that the quirk not only matches on DMI strings, but also on the
-> 80860F14:2 pair, further narrowing the chance for duplicate matches.
-> 
-> I've access to 29 dmi dumps of Bay / Cherry Trail tablets now and
-> only 3 match DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation") (*),
-> and only 1 out of 29 (the GPD win) matches DMI_MATCH(DMI_BOARD_NAME,
-> "Default string") so after 2 of the 5 checks (including the UID
-> check) we already have only the GPD win matching.
+This broke wifi on some systems because acpi_device_fix_up_power()
+was called even for disabled children sometimes leaving gpio-s in
+a state where wifi would not work, this was fixed in
+commit e1d070c3793a ("mmc: sdhci-acpi: Only powered up enabled acpi
+child devices").
 
-So thinking more about this, one more thing which can be done to
-make sure the dmi match is unique to the GPD win is also check
-the BIOS date, as I did in v1 of this patch set, one problem with
-that is that the manufacturer does tend to update the BIOS date in
-new production batches (*) and I ended up with many classic
-dmi table entries which were all identical except for the bios_date
-field. So for v4 I've coded out the bios-date check as a separate
-check so that we can have an array of bios-dates for a single
-dmi quirk table entry.
+Unfortunately on some devices calling acpi_device_fix_up_power()
+still causes issues. Specifically on the GPD-win mini clam-shell PC
+which has a pci-e wifi module, it causes the wifi module to get
+turned off. This is a BIOS bug and I've tried to get the manufacturer
+to fix this but sofar they have not responded (and even if they do
+then we cannot assume all users will update their BIOS).
 
-Regards,
+Since the GPD-win uses a pci-e wifi module the sdhci controller for
+sdio cards really should not get initialized on it at all.
 
-Hans
+This commit adds a new sdhci_acpi.blacklist module option which can
+be set to an ACPI hid:uid pair, e.g. "80860F14:2" to disable probing
+for the sdhci host matching the hid:uid pair, fixing the wifi not
+working on this machine.
 
-*) I've notified them of the BIOS bug and asked them to fix this
-(as well as provide better dmi strings) they have acknowledged receipt
-of my email and said they would forward it to their engineers, so
-this may get fixed in a later version at which point we don't need
-to add the dates of the fixed and newer bios versions.
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-Make the module option take a hid:uid pair string, instead of it
+ being a boolean option, so that it only applies to one host
+
+Changes in v3:
+-Make the module option skip probing the device entirely (return -ENODEV)
+
+Changes in v4:
+-Fix bad seperator (now hid_end) check
+-Allow passing multiple HID:UID pairs seperated by commas
+---
+ drivers/mmc/host/sdhci-acpi.c | 46 ++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 43 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 89d9a8c014f5..ecc3aefd4643 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -83,6 +83,39 @@ struct sdhci_acpi_host {
+ 	bool				use_runtime_pm;
+ };
+ 
++static char *blacklist;
++
++static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
++				       const char *uid)
++{
++	const char *hid_end, *uid_end, *end;
++
++	if (!match || !hid || !uid)
++		return false;
++
++	end = match + strlen(match);
++
++	do {
++		hid_end = strchr(match, ':');
++		if (!hid_end)
++			return false;
++
++		uid_end = strchr(hid_end, ',');
++		if (!uid_end)
++			uid_end = end;
++
++		if (strlen(hid) == (hid_end - match) &&
++		    strncmp(match, hid, hid_end - match) == 0 &&
++		    strlen(uid) == (uid_end - hid_end - 1) &&
++		    strncmp(hid_end + 1, uid, uid_end - hid_end - 1) == 0)
++			return true;
++
++		match = uid_end + 1;
++	} while (*match);
++
++	return false;
++}
++
+ static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+ {
+ 	return c->slot && (c->slot->flags & flag);
+@@ -378,6 +411,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	acpi_handle handle = ACPI_HANDLE(dev);
++	const char *bl = blacklist;
+ 	struct acpi_device *device, *child;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+@@ -390,6 +424,12 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (acpi_bus_get_device(handle, &device))
+ 		return -ENODEV;
+ 
++	hid = acpi_device_hid(device);
++	uid = device->pnp.unique_id;
++
++	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
++		return -ENODEV;
++
+ 	/* Power on the SDHCI controller and its children */
+ 	acpi_device_fix_up_power(device);
+ 	list_for_each_entry(child, &device->children, node)
+@@ -399,9 +439,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
+ 
+-	hid = acpi_device_hid(device);
+-	uid = device->pnp.unique_id;
+-
+ 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!iomem)
+ 		return -ENOMEM;
+@@ -580,6 +617,9 @@ static struct platform_driver sdhci_acpi_driver = {
+ 
+ module_platform_driver(sdhci_acpi_driver);
+ 
++module_param(blacklist, charp, 0444);
++MODULE_PARM_DESC(blacklist, "ACPI <HID:UID>[,HID:UID] which should be ignored");
++
+ MODULE_DESCRIPTION("Secure Digital Host Controller Interface ACPI driver");
+ MODULE_AUTHOR("Adrian Hunter");
+ MODULE_LICENSE("GPL v2");
+-- 
+2.13.0
+
