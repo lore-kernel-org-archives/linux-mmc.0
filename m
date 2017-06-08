@@ -1,37 +1,40 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 0/8] omap*: Fixes/Cleanups for MMC devicetree node
-Date: Thu, 8 Jun 2017 01:46:20 -0700
-Message-ID: <20170608084619.GH3730@atomide.com>
-References: <20170607093749.15656-1-kishon@ti.com>
- <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 0/6] Move debugfs to block layer, take 3
+Date: Thu,  8 Jun 2017 10:53:57 +0200
+Message-ID: <20170608085403.11795-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:50862 "EHLO muru.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751475AbdFHIqY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Jun 2017 04:46:24 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:35945 "EHLO
+        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751825AbdFHIyN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 04:54:13 -0400
+Received: by mail-lf0-f44.google.com with SMTP id o83so15229140lff.3
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2017 01:54:12 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-* Ulf Hansson <ulf.hansson@linaro.org> [170608 00:24]:
-> If it helps, I can host a branch with the updates on the omap_hsmmc
-> driver, such it can be pulled in from arm soc?
+Changes since last revision:
 
-Great that works for me. Let's just make sure git bisect
-keeps working.
+- Added a necessary EXPORT patch
 
-> I guess you need that as, the DT changes relies on the new vqmmc
-> binding. Or you thing it doesn't matter, because for the current
-> changes that regulator is always an always on regulator?
+- Added a patch on top that moves the debugfs into the block
+  module.
 
-Or maybe we can just add the new regulator, then do a
-follow-up series to remove the old ones?
+Linus Walleij (6):
+  mmc: block: Anonymize the drv op data pointer
+  mmc: debugfs: No blocklayer = no card status and extcsd
+  mmc: ops: export mmc_get_status()
+  mmc: debugfs: Move card status retrieveal into the block layer
+  mmc: debugfs: Move EXT CSD debugfs access to block layer
+  mmc: debugfs: Move block debugfs into block module
 
-Regards,
+ drivers/mmc/core/block.c   | 151 ++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/core/debugfs.c |  90 +--------------------------
+ drivers/mmc/core/mmc_ops.c |   1 +
+ drivers/mmc/core/queue.h   |   6 +-
+ 4 files changed, 155 insertions(+), 93 deletions(-)
 
-Tony
+-- 
+2.9.4
+
