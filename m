@@ -1,61 +1,203 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH/RFC 5/5] mmc: renesas-sdhi: remove gen3 support from sysc dmac driver
-Date: Thu,  8 Jun 2017 15:13:15 +0200
-Message-ID: <1496927595-19521-6-git-send-email-horms+renesas@verge.net.au>
-References: <1496927595-19521-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1496927595-19521-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 3/9] mmc: core: Move mmc_interrupt_hpi() from core.c to mmc_ops.c
+Date: Thu,  8 Jun 2017 15:27:39 +0200
+Message-ID: <1496928465-25004-4-git-send-email-ulf.hansson@linaro.org>
+References: <1496928465-25004-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:35425 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752061AbdFHN14 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 09:27:56 -0400
+Received: by mail-lf0-f49.google.com with SMTP id p189so18037933lfe.2
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2017 06:27:55 -0700 (PDT)
+In-Reply-To: <1496928465-25004-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Gen3 SoCs are now supported by the internal dmac variant of the SDHI driver.
-Remove them from the sys dmac variant where only PIO mode is supported.
+The mmc_interrupt_hpi() is a eMMC specific function, let's move it to
+mmc_ops.c to make that clear. The move also enables us to make
+mmc_send_hpi_cmd() static, so let's do that change as well.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/renesas_sdhi_sys_dmac.c | 21 ---------------------
- 1 file changed, 21 deletions(-)
+ drivers/mmc/core/core.c    | 64 --------------------------------------------
+ drivers/mmc/core/mmc_ops.c | 66 +++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/core/mmc_ops.h |  1 -
+ 3 files changed, 65 insertions(+), 66 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index cc3e0f94b276..1f8863e725aa 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -63,25 +63,6 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
- 	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
- };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d7c934c..de31f30 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -675,70 +675,6 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ EXPORT_SYMBOL(mmc_wait_for_req);
  
--/* Definitions for sampling clocks */
--static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
--	{
--		.clk_rate = 0,
--		.tap = 0x00000300,
--	},
--};
+ /**
+- *	mmc_interrupt_hpi - Issue for High priority Interrupt
+- *	@card: the MMC card associated with the HPI transfer
+- *
+- *	Issued High Priority Interrupt, and check for card status
+- *	until out-of prg-state.
+- */
+-int mmc_interrupt_hpi(struct mmc_card *card)
+-{
+-	int err;
+-	u32 status;
+-	unsigned long prg_wait;
 -
--static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
--	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
--			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
--	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
--			  MMC_CAP_CMD23,
--	.bus_shift	= 2,
--	.scc_offset	= 0x1000,
--	.taps		= rcar_gen3_scc_taps,
--	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
--};
+-	if (!card->ext_csd.hpi_en) {
+-		pr_info("%s: HPI enable bit unset\n", mmc_hostname(card->host));
+-		return 1;
+-	}
 -
- static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-shmobile" },
- 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
-@@ -95,8 +76,6 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
--	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
--	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
+-	mmc_claim_host(card->host);
+-	err = mmc_send_status(card, &status);
+-	if (err) {
+-		pr_err("%s: Get card status fail\n", mmc_hostname(card->host));
+-		goto out;
+-	}
+-
+-	switch (R1_CURRENT_STATE(status)) {
+-	case R1_STATE_IDLE:
+-	case R1_STATE_READY:
+-	case R1_STATE_STBY:
+-	case R1_STATE_TRAN:
+-		/*
+-		 * In idle and transfer states, HPI is not needed and the caller
+-		 * can issue the next intended command immediately
+-		 */
+-		goto out;
+-	case R1_STATE_PRG:
+-		break;
+-	default:
+-		/* In all other states, it's illegal to issue HPI */
+-		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
+-			mmc_hostname(card->host), R1_CURRENT_STATE(status));
+-		err = -EINVAL;
+-		goto out;
+-	}
+-
+-	err = mmc_send_hpi_cmd(card, &status);
+-	if (err)
+-		goto out;
+-
+-	prg_wait = jiffies + msecs_to_jiffies(card->ext_csd.out_of_int_time);
+-	do {
+-		err = mmc_send_status(card, &status);
+-
+-		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
+-			break;
+-		if (time_after(jiffies, prg_wait))
+-			err = -ETIMEDOUT;
+-	} while (!err);
+-
+-out:
+-	mmc_release_host(card->host);
+-	return err;
+-}
+-
+-/**
+  *	mmc_wait_for_cmd - start a command and wait for completion
+  *	@host: MMC host to start command
+  *	@cmd: MMC command to start
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 0648fae..53e4da48 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -807,7 +807,7 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
+ 	return mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
+ }
+ 
+-int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
++static int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ {
+ 	struct mmc_command cmd = {};
+ 	unsigned int opcode;
+@@ -841,6 +841,70 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 	return 0;
+ }
+ 
++/**
++ *	mmc_interrupt_hpi - Issue for High priority Interrupt
++ *	@card: the MMC card associated with the HPI transfer
++ *
++ *	Issued High Priority Interrupt, and check for card status
++ *	until out-of prg-state.
++ */
++int mmc_interrupt_hpi(struct mmc_card *card)
++{
++	int err;
++	u32 status;
++	unsigned long prg_wait;
++
++	if (!card->ext_csd.hpi_en) {
++		pr_info("%s: HPI enable bit unset\n", mmc_hostname(card->host));
++		return 1;
++	}
++
++	mmc_claim_host(card->host);
++	err = mmc_send_status(card, &status);
++	if (err) {
++		pr_err("%s: Get card status fail\n", mmc_hostname(card->host));
++		goto out;
++	}
++
++	switch (R1_CURRENT_STATE(status)) {
++	case R1_STATE_IDLE:
++	case R1_STATE_READY:
++	case R1_STATE_STBY:
++	case R1_STATE_TRAN:
++		/*
++		 * In idle and transfer states, HPI is not needed and the caller
++		 * can issue the next intended command immediately
++		 */
++		goto out;
++	case R1_STATE_PRG:
++		break;
++	default:
++		/* In all other states, it's illegal to issue HPI */
++		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
++			mmc_hostname(card->host), R1_CURRENT_STATE(status));
++		err = -EINVAL;
++		goto out;
++	}
++
++	err = mmc_send_hpi_cmd(card, &status);
++	if (err)
++		goto out;
++
++	prg_wait = jiffies + msecs_to_jiffies(card->ext_csd.out_of_int_time);
++	do {
++		err = mmc_send_status(card, &status);
++
++		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
++			break;
++		if (time_after(jiffies, prg_wait))
++			err = -ETIMEDOUT;
++	} while (!err);
++
++out:
++	mmc_release_host(card->host);
++	return err;
++}
++
+ int mmc_can_ext_csd(struct mmc_card *card)
+ {
+ 	return (card && card->csd.mmca_vsn > CSD_SPEC_VER_3);
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index b8d0552..063500c 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -31,7 +31,6 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid);
+ int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);
+ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+-int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+ int mmc_interrupt_hpi(struct mmc_card *card);
+ int mmc_can_ext_csd(struct mmc_card *card);
+ int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
 -- 
-2.1.4
+2.7.4
+
