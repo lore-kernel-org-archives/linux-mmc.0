@@ -1,93 +1,122 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v3 resend 3/3] mmc: sdhci-acpi: Add DMI based blacklist
-Date: Thu, 8 Jun 2017 12:55:18 +0200
-Message-ID: <79c2dabc-e319-aa54-3501-ff8b7c84974d@redhat.com>
-References: <20170524104755.25274-1-hdegoede@redhat.com>
- <20170524104755.25274-4-hdegoede@redhat.com>
- <79b5300b-11a2-33f1-439d-e09a2047d6f3@intel.com>
- <4d4ba40a-043c-3543-33d5-40887b4c3363@redhat.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdio: Keep card runtime resumed while adding
+ function devices
+Date: Thu, 8 Jun 2017 14:27:26 +0300
+Message-ID: <618cdbd3-70c1-57d5-d4b7-43acdf1397be@intel.com>
+References: <1495107722-13444-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFp5--WEeBsUrEzDUwgraY7stEV1cHxdp3tbk=wwJr9w7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59240 "EHLO mx1.redhat.com"
+Received: from mga14.intel.com ([192.55.52.115]:45131 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750853AbdFHKzU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Jun 2017 06:55:20 -0400
-In-Reply-To: <4d4ba40a-043c-3543-33d5-40887b4c3363@redhat.com>
+        id S1751439AbdFHLdo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 8 Jun 2017 07:33:44 -0400
+In-Reply-To: <CAPDyKFp5--WEeBsUrEzDUwgraY7stEV1cHxdp3tbk=wwJr9w7A@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 08-06-17 12:20, Hans de Goede wrote:
-> Hi,
-> 
-> On 07-06-17 15:09, Adrian Hunter wrote:
->> On 24/05/17 13:47, Hans de Goede wrote:
->>> Add a DMI based blacklist for systems where probing some sdio interfaces
->>> is harmful (e.g. causes pci-e based wifi to not work).
->>>
->>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>> ---
->>> Changes in v2:
->>> -Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist module option
->>> -Only use a single fix_up_power_dmi_blacklist for the GPDwin further testing
->>>   has shown that the DMI strings are unique enough that we do not need the
->>>   bios-date in there
->>> Changes in v3:
->>> -Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
->>> ---
->>>   drivers/mmc/host/sdhci-acpi.c | 30 ++++++++++++++++++++++++++++++
->>>   1 file changed, 30 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index 3a7d979a306d..45455abc7ca6 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -36,6 +36,7 @@
->>>   #include <linux/pm.h>
->>>   #include <linux/pm_runtime.h>
->>>   #include <linux/delay.h>
->>> +#include <linux/dmi.h>
->>>   #include <linux/mmc/host.h>
->>>   #include <linux/mmc/pm.h>
->>> @@ -381,6 +382,28 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->>>   };
->>>   MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
->>> +static const struct dmi_system_id fix_up_power_dmi_blacklist[] = {
->>> +    {
->>> +        /*
->>> +         * Match for the GPDwin which unfortunately uses somewhat
->>> +         * generic dmi strings, which is why we test for 4 strings.
->>> +         * Comparing against 23 other byt/cht boards, board_vendor
->>> +         * and board_name are unique to the GPDwin, where as only one
->>> +         * other board has the same board_serial and 3 others have
->>> +         * the same default product_name. Also the GPDwin is the
->>> +         * only device to have both board_ and product_name not set.
->>> +         */
->>> +        .driver_data = "80860F14:2",
->>> +        .matches = {
->>> +            DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
->>> +            DMI_MATCH(DMI_BOARD_NAME, "Default string"),
->>> +            DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
->>> +            DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
+On 07/06/17 17:45, Ulf Hansson wrote:
+> On 18 May 2017 at 13:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Drivers core will runtime suspend a device with no driver. That means the
+>> SDIO card will be runtime suspended as soon as it is added. It is then
+>> runtime resumed to add each function. That is entirely pointless, so add
+>> pm runtime get/put to keep the SDIO card runtime resumed until the function
+>> devices have been added.
 >>
->> I can't accept that this is an accurate way to identify the board.
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > 
-> Well as I already mentioned when I first submitted this patch-set this
-> patch-set fixes a regression. When I first installed Linux on this
-> system, the wifi just worked, until this commit got merged:
+> Adrian, apologize for the delay!
 > 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit?id=db52d4f8a4bde36263a7cc9d46ff20b243562ac9
+>> ---
+>>  drivers/mmc/core/sdio.c | 11 ++++++++++-
+>>  1 file changed, 10 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index fae732c870a9..97bedde0610c 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -1110,6 +1110,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>                 if (err)
+>>                         goto remove;
+>>
+>> +               pm_runtime_get_noresume(&card->dev);
 > 
-> Given the kernel's no regressions policy I see only 2 ways to fix this
-> something like this patch, or revert the commit causing the regression.
+> Please move this above pm_runtime_set_active(), just to be really sure
+> the device remains active. Thus you also need to update the error
+> path.
 
-p.s.
+As you wish, but even if there was somehow another code path that could get
+a reference to this device, it couldn't runtime suspend it because it is not
+runtime enabled.
 
-Given that this is a regression it would be nice if we could speedup
-the review process of this patch-set a bit so that we can get this
-regression fixed soon. Sofar the review of this patch-set has been
-somewhat slow I must say.
+> 
+>> +
+>>                 /*
+>>                  * Enable runtime PM for this card
+>>                  */
+>> @@ -1129,7 +1131,7 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>         for (i = 0; i < funcs; i++, card->sdio_funcs++) {
+>>                 err = sdio_init_func(host->card, i + 1);
+>>                 if (err)
+>> -                       goto remove;
+>> +                       goto remove_get;
+>>
+>>                 /*
+>>                  * Enable Runtime PM for this func (if supported)
+>> @@ -1156,6 +1158,10 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>         }
+>>
+>>         mmc_claim_host(host);
+>> +
+>> +       if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>> +               pm_runtime_put(&card->dev);
+>> +
+>>         return 0;
+>>
+>>
+>> @@ -1163,6 +1169,9 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>         /* Remove without lock if the device has been added. */
+>>         mmc_sdio_remove(host);
+>>         mmc_claim_host(host);
+>> +remove_get:
+>> +       if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>> +               pm_runtime_put(&card->dev);
+
+I notice this is wrong here - it needs to be before mmc_sdio_remove()
+because mmc_sdio_remove() deletes the devices.
+
+> 
+> Looking in the error path, I also notice that there is a
+> pm_runtime_disable missing. Would you mind fixing that (as a separate
+> change of course) as well?
+
+We can't call pm_runtime_disable() after mmc_sdio_remove() because
+mmc_sdio_remove() deletes the devices.  device_del() anyway takes care of
+runtime pm (i.e. ends up calling __pm_runtime_disable()).
+
+If we call pm_runtime_disable() before mmc_sdio_remove() then it results in
+the devices staying in the pm state they were in at that point.  The
+->remove() callbacks expect that to be "active" but AFAICT they in turn
+leave the devices "suspended", so we would end up changing the current
+behaviour.
+
+So it looks to me like we don't need to call pm_runtime_disable() and we
+can't call it here without side-effects.
+
+> 
+>>  remove:
+>>         /* And with lock if it hasn't been added. */
+>>         mmc_release_host(host);
+>> --
+>> 1.9.1
+>>
+> 
+> Kind regards
+> Uffe
+> 
+
