@@ -1,133 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: Add support for Intel CNP
-Date: Thu, 8 Jun 2017 15:52:26 +0200
-Message-ID: <CAPDyKFouFmBz0L1Qd6=SYFaShDcFn1+Kti9h7gD0SH0VkjoVUQ@mail.gmail.com>
-References: <1496308207-3522-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/6] mmc: dw_mmc: remove the multiple slot concept
+Date: Thu, 8 Jun 2017 15:52:34 +0200
+Message-ID: <CAPDyKFqj7Y59_4buqxc0iG9gp=H_urSEipkF7zDk8uM8DPVbXw@mail.gmail.com>
+References: <CGME20170605044137epcas1p4e7e2b74aa17ea7d7137da7b677bfb282@epcas1p4.samsung.com>
+ <20170605044135.18304-1-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:33193 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751848AbdFHNwc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 09:52:32 -0400
-Received: by mail-qt0-f170.google.com with SMTP id u12so41936716qth.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2017 06:52:32 -0700 (PDT)
-In-Reply-To: <1496308207-3522-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:34137 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751848AbdFHNwf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 09:52:35 -0400
+Received: by mail-qt0-f173.google.com with SMTP id c10so41948122qtd.1
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2017 06:52:35 -0700 (PDT)
+In-Reply-To: <20170605044135.18304-1-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 1 June 2017 at 11:10, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Add PCI ids and enhanced strobe support for Intel CNP. This is combined
-> with GLK due to the pending CMDQ support which they both share.
+On 5 June 2017 at 06:41, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> DWMMC IP is provided the multiple slot.
+> It's only used the one slot per an IP in mmc subsystem.
+> If we can consider only one slot, then dwmmc controller codes can be more simpler than now.
+> This patchset is the first step to remove the multiple slot.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> In future work,
+>    - Remove the entire slot structure.
+>    - Move to slot's members into dwmci host.
+>
+> Jaehoon Chung (6):
+>   mmc: dw_mmc: deprecated the "num-slots" property
+>   mmc: dw_mmc: remove the loop about finding slots
+>   mmc: dw_mmc: change the array of slots
+>   mmc: dw_mmc: remove the 'id' arguments about functions relevant to
+>     slot
+>   mmc: dw_mmc: use the 'slot' instead of 'cur_slot'
+>   mmc: dw_mmc: remove the unnecessary slot variable
+>
+>  drivers/mmc/host/dw_mmc-exynos.c |   4 +-
+>  drivers/mmc/host/dw_mmc.c        | 165 +++++++++++++--------------------------
+>  drivers/mmc/host/dw_mmc.h        |   7 +-
+>  3 files changed, 57 insertions(+), 119 deletions(-)
+>
+> --
+> 2.10.2
+>
 
-Thanks, applied for next!
+This looks good to me, however I couldn't apply them cleanly on my next branch.
+
+Perhaps you have something additional for dw_mmc in you local tree?
+Then never mind, I can pick these via your regular pull request.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 46 ++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci-pci.h      |  3 +++
->  2 files changed, 48 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index b3ddc32fa00b..8fa84a013be4 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -543,6 +543,23 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
->         }
->  }
->
-> +#define INTEL_HS400_ES_REG 0x78
-> +#define INTEL_HS400_ES_BIT BIT(0)
-> +
-> +static void intel_hs400_enhanced_strobe(struct mmc_host *mmc,
-> +                                       struct mmc_ios *ios)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       u32 val;
-> +
-> +       val = sdhci_readl(host, INTEL_HS400_ES_REG);
-> +       if (ios->enhanced_strobe)
-> +               val |= INTEL_HS400_ES_BIT;
-> +       else
-> +               val &= ~INTEL_HS400_ES_BIT;
-> +       sdhci_writel(host, val, INTEL_HS400_ES_REG);
-> +}
-> +
->  static const struct sdhci_ops sdhci_intel_byt_ops = {
->         .set_clock              = sdhci_set_clock,
->         .set_power              = sdhci_intel_set_power,
-> @@ -579,6 +596,19 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
->         return 0;
->  }
->
-> +static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
-> +{
-> +       int ret = byt_emmc_probe_slot(slot);
-> +
-> +       if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
-> +               slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES,
-> +               slot->host->mmc_host_ops.hs400_enhanced_strobe =
-> +                                               intel_hs400_enhanced_strobe;
-> +       }
-> +
-> +       return ret;
-> +}
-> +
->  #ifdef CONFIG_ACPI
->  static int ni_set_max_freq(struct sdhci_pci_slot *slot)
->  {
-> @@ -654,6 +684,17 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
->         .priv_size      = sizeof(struct intel_host),
->  };
->
-> +static const struct sdhci_pci_fixes sdhci_intel_glk_emmc = {
-> +       .allow_runtime_pm       = true,
-> +       .probe_slot             = glk_emmc_probe_slot,
-> +       .quirks                 = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +       .quirks2                = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +                                 SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
-> +                                 SDHCI_QUIRK2_STOP_WITH_TC,
-> +       .ops                    = &sdhci_intel_byt_ops,
-> +       .priv_size              = sizeof(struct intel_host),
-> +};
-> +
->  static const struct sdhci_pci_fixes sdhci_ni_byt_sdio = {
->         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->         .quirks2        = SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-> @@ -1225,9 +1266,12 @@ static int amd_probe(struct sdhci_pci_chip *chip)
->         SDHCI_PCI_DEVICE(INTEL, APL_EMMC,  intel_byt_emmc),
->         SDHCI_PCI_DEVICE(INTEL, APL_SDIO,  intel_byt_sdio),
->         SDHCI_PCI_DEVICE(INTEL, APL_SD,    intel_byt_sd),
-> -       SDHCI_PCI_DEVICE(INTEL, GLK_EMMC,  intel_byt_emmc),
-> +       SDHCI_PCI_DEVICE(INTEL, GLK_EMMC,  intel_glk_emmc),
->         SDHCI_PCI_DEVICE(INTEL, GLK_SDIO,  intel_byt_sdio),
->         SDHCI_PCI_DEVICE(INTEL, GLK_SD,    intel_byt_sd),
-> +       SDHCI_PCI_DEVICE(INTEL, CNP_EMMC,  intel_glk_emmc),
-> +       SDHCI_PCI_DEVICE(INTEL, CNP_SD,    intel_byt_sd),
-> +       SDHCI_PCI_DEVICE(INTEL, CNPH_SD,   intel_byt_sd),
->         SDHCI_PCI_DEVICE(O2, 8120,     o2),
->         SDHCI_PCI_DEVICE(O2, 8220,     o2),
->         SDHCI_PCI_DEVICE(O2, 8221,     o2),
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index e63fb9b3b776..75196a2b5289 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -37,6 +37,9 @@
->  #define PCI_DEVICE_ID_INTEL_GLK_SD     0x31ca
->  #define PCI_DEVICE_ID_INTEL_GLK_EMMC   0x31cc
->  #define PCI_DEVICE_ID_INTEL_GLK_SDIO   0x31d0
-> +#define PCI_DEVICE_ID_INTEL_CNP_EMMC   0x9dc4
-> +#define PCI_DEVICE_ID_INTEL_CNP_SD     0x9df5
-> +#define PCI_DEVICE_ID_INTEL_CNPH_SD    0xa375
->
->  #define PCI_DEVICE_ID_SYSKONNECT_8000  0x8000
->  #define PCI_DEVICE_ID_VIA_95D0         0x95d0
-> --
-> 1.9.1
->
