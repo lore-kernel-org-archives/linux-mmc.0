@@ -1,52 +1,81 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 0/6] mmc: dw_mmc: remove the multiple slot concept
-Date: Fri, 9 Jun 2017 09:38:06 +0800
-Message-ID: <8d44814d-12d4-28af-116d-5a46be72eb01@rock-chips.com>
-References: <CGME20170605044137epcas1p4e7e2b74aa17ea7d7137da7b677bfb282@epcas1p4.samsung.com>
- <20170605044135.18304-1-jh80.chung@samsung.com>
+From: Brian Norris <computersforpeace@gmail.com>
+Subject: Re: [PATCH v3 1/9] mtd: sharpslpart: add sharpslpart MTD partition
+ parser
+Date: Thu, 8 Jun 2017 18:42:40 -0700
+Message-ID: <20170609014240.GM102137@google.com>
+References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
+ <1496270458-6479-2-git-send-email-andrea.adami@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:56714 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751452AbdFIBiT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 21:38:19 -0400
-In-Reply-To: <20170605044135.18304-1-jh80.chung@samsung.com>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:34355 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751445AbdFIBmp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 21:42:45 -0400
+Content-Disposition: inline
+In-Reply-To: <1496270458-6479-2-git-send-email-andrea.adami@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, ulf.hansson@linaro.org
+To: Andrea Adami <andrea.adami@gmail.com>
+Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Jaehoon,
+Oh, one more thing:
 
-On 2017/6/5 12:41, Jaehoon Chung wrote:
-> DWMMC IP is provided the multiple slot.
-> It's only used the one slot per an IP in mmc subsystem.
-> If we can consider only one slot, then dwmmc controller codes can be more simpler than now.
-> This patchset is the first step to remove the multiple slot.
-> 
-> In future work,
->     - Remove the entire slot structure.
->     - Move to slot's members into dwmci host.
-> 
+On Thu, Jun 01, 2017 at 12:40:50AM +0200, Andrea Adami wrote:
+> diff --git a/drivers/mtd/sharpslpart.c b/drivers/mtd/sharpslpart.c
+> new file mode 100644
+> index 0000000..40aebe9
+> --- /dev/null
+> +++ b/drivers/mtd/sharpslpart.c
+> @@ -0,0 +1,132 @@
+> +/*
+> + * MTD partition parser for NAND flash on Sharp SL Series
+> + *
+> + * Copyright (C) 2017 Andrea Adami <andrea.adami@gmail.com>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + */
+> +
+> +#include <linux/kernel.h>
+> +#include <linux/slab.h>
+> +#include <linux/module.h>
+> +#include <linux/mtd/mtd.h>
+> +#include <linux/mtd/partitions.h>
+> +#include "sharpsl_ftl.h"
+> +
+> +/* factory defaults */
+> +#define SHARPSL_NAND_PARTS		3
+> +#define SHARPSL_FTL_PARTITION_SIZE	(7 * 1024 * 1024)
+> +#define PARAM_BLOCK_PARTITIONINFO1	0x00060000
+> +#define PARAM_BLOCK_PARTITIONINFO2	0x00064000
+> +
+> +#define BOOT_MAGIC			be32_to_cpu(0x424f4f54)   /* BOOT */
+> +#define FSRO_MAGIC			be32_to_cpu(0x4653524f)   /* FSRO */
+> +#define FSRW_MAGIC			be32_to_cpu(0x46535257)   /* FSRW */
 
-The whole series looks good to me.
+[...]
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+> +struct sharpsl_nand_partitioninfo {
+> +	u32 start;
+> +	u32 end;
 
-> Jaehoon Chung (6):
->    mmc: dw_mmc: deprecated the "num-slots" property
->    mmc: dw_mmc: remove the loop about finding slots
->    mmc: dw_mmc: change the array of slots
->    mmc: dw_mmc: remove the 'id' arguments about functions relevant to
->      slot
->    mmc: dw_mmc: use the 'slot' instead of 'cur_slot'
->    mmc: dw_mmc: remove the unnecessary slot variable
-> 
->   drivers/mmc/host/dw_mmc-exynos.c |   4 +-
->   drivers/mmc/host/dw_mmc.c        | 165 +++++++++++++--------------------------
->   drivers/mmc/host/dw_mmc.h        |   7 +-
->   3 files changed, 57 insertions(+), 119 deletions(-)
-> 
+I was going to ignore this earlier, but I just noticed that you handle
+endianness for the magic values above, so...
 
+shouldn't you handle endianness for the start and end fields too?
+
+> +	u32 magic;
+> +	u32 reserved;
+> +};
+[...]
+
+Brian
