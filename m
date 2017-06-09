@@ -1,58 +1,52 @@
-From: Brian Norris <computersforpeace@gmail.com>
-Subject: Re: [PATCH v3 0/9] mtd: sharpslpart partition parser
-Date: Thu, 8 Jun 2017 18:35:21 -0700
-Message-ID: <20170609013521.GL102137@google.com>
-References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 0/6] mmc: dw_mmc: remove the multiple slot concept
+Date: Fri, 9 Jun 2017 09:38:06 +0800
+Message-ID: <8d44814d-12d4-28af-116d-5a46be72eb01@rock-chips.com>
+References: <CGME20170605044137epcas1p4e7e2b74aa17ea7d7137da7b677bfb282@epcas1p4.samsung.com>
+ <20170605044135.18304-1-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:35457 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751445AbdFIBf0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 21:35:26 -0400
-Content-Disposition: inline
-In-Reply-To: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.134]:56714 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751452AbdFIBiT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 21:38:19 -0400
+In-Reply-To: <20170605044135.18304-1-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, ulf.hansson@linaro.org
 
-On Thu, Jun 01, 2017 at 12:40:49AM +0200, Andrea Adami wrote:
-> This patchset introduces a simple partition parser for the Sharp SL
-> Series PXA handhelds. More details in the commit text.
+Hi Jaehoon,
+
+On 2017/6/5 12:41, Jaehoon Chung wrote:
+> DWMMC IP is provided the multiple slot.
+> It's only used the one slot per an IP in mmc subsystem.
+> If we can consider only one slot, then dwmmc controller codes can be more simpler than now.
+> This patchset is the first step to remove the multiple slot.
 > 
-> I have set in cc the ARM PXA maintainers because this is the MTD part of
-> a planned wider patchset cleaning the Zaurus board files. The MFD maintainers
-> are also in cc (tmio.h change).
+> In future work,
+>     - Remove the entire slot structure.
+>     - Move to slot's members into dwmci host.
 > 
-> Changelog:
-> v1 initial import of 2.4 sources [1]
-> v2 refactor applying many suggested fixes [2]
-> v3 put the partition parser types in the platform data
+
+The whole series looks good to me.
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> Jaehoon Chung (6):
+>    mmc: dw_mmc: deprecated the "num-slots" property
+>    mmc: dw_mmc: remove the loop about finding slots
+>    mmc: dw_mmc: change the array of slots
+>    mmc: dw_mmc: remove the 'id' arguments about functions relevant to
+>      slot
+>    mmc: dw_mmc: use the 'slot' instead of 'cur_slot'
+>    mmc: dw_mmc: remove the unnecessary slot variable
 > 
-> [1] https://github.com/LinuxPDA/Sharp_FTL_2.4.20
-> [2] https://github.com/LinuxPDA/linux/commits/sharpslpart_v2
+>   drivers/mmc/host/dw_mmc-exynos.c |   4 +-
+>   drivers/mmc/host/dw_mmc.c        | 165 +++++++++++++--------------------------
+>   drivers/mmc/host/dw_mmc.h        |   7 +-
+>   3 files changed, 57 insertions(+), 119 deletions(-)
 > 
-> Andrea Adami (9):
->   mtd: sharpslpart: add sharpslpart MTD partition parser
->   mtd: nand: sharpsl.h: support partition parser types
->   mfd: nand: tmio.h: support partition parser types
->   mtd: nand: sharpsl.c: take in account partition parser types
->   mtd: nand: tmio_nand.c: take in account partition parser types
->   arm: pxa: corgi.c: remove hardcoded partitioning, use sharpslpart
->     parser
->   arm: pxa: tosa.c: remove hardcoded partitioning, use sharpslpart
->     parser
->   arm: pxa: spitz.c: remove hardcoded partitioning, use sharpslpart
->     parser
->   arm: pxa: poodle.c: remove hardcoded partitioning, use sharpslpart
->     parser
 
-Barring my comments on patch 1 and Wolfram's comments on a few of the
-others, for the whole series:
-
-Reviewed-by: Brian Norris <computersforpeace@gmail.com>
-
-Once things are fixed up, this should probably go through MTD.
-
-Brian
