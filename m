@@ -1,68 +1,52 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 2/2] mmc: sdio: Keep card runtime resumed while adding function devices
-Date: Fri,  9 Jun 2017 15:27:18 +0300
-Message-ID: <1497011238-9573-3-git-send-email-adrian.hunter@intel.com>
-References: <1497011238-9573-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: clear interrupt when retune interrupt
+ received
+Date: Fri, 9 Jun 2017 15:46:55 +0300
+Message-ID: <9b1a2764-e348-b032-a61b-e2c09286aa0a@intel.com>
+References: <1496947916-15785-1-git-send-email-troy.kisky@boundarydevices.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:18608 "EHLO mga04.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:35269 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751679AbdFIMdU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Jun 2017 08:33:20 -0400
-In-Reply-To: <1497011238-9573-1-git-send-email-adrian.hunter@intel.com>
+        id S1751573AbdFIMwz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Jun 2017 08:52:55 -0400
+In-Reply-To: <1496947916-15785-1-git-send-email-troy.kisky@boundarydevices.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Troy Kisky <troy.kisky@boundarydevices.com>, aisheng.dong@nxp.com
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, fabio.estevam@nxp.com, gary.bisson@boundarydevices.com
 
-Drivers core will runtime suspend a device with no driver. That means the
-SDIO card will be runtime suspended as soon as it is added. It is then
-runtime resumed to add each function. That is entirely pointless, so add
-pm runtime get/put to keep the SDIO card runtime resumed until the function
-devices have been added.
+On 08/06/17 21:51, Troy Kisky wrote:
+> This lets the loop exit before max_loops reaches 0.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/sdio.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+Needs more explanation.
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index f077fc8219d0..cc43687ca241 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -1104,6 +1104,12 @@ int mmc_attach_sdio(struct mmc_host *host)
- 	 */
- 	if (host->caps & MMC_CAP_POWER_OFF_CARD) {
- 		/*
-+		 * Do not allow runtime suspend until after SDIO function
-+		 * devices are added.
-+		 */
-+		pm_runtime_get_noresume(&card->dev);
-+
-+		/*
- 		 * Let runtime PM core know our card is active
- 		 */
- 		err = pm_runtime_set_active(&card->dev);
-@@ -1155,6 +1161,9 @@ int mmc_attach_sdio(struct mmc_host *host)
- 			goto remove_added;
- 	}
- 
-+	if (host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_put(&card->dev);
-+
- 	mmc_claim_host(host);
- 	return 0;
- 
-@@ -1164,7 +1173,9 @@ int mmc_attach_sdio(struct mmc_host *host)
- remove_added:
- 	/*
- 	 * The devices are being deleted so it is not necessary to disable
--	 * runtime PM.
-+	 * runtime PM. Similarly we also don't pm_runtime_put() the SDIO card
-+	 * because it needs to be active to remove any function devices that
-+	 * were probed, and after that it gets deleted.
- 	 */
- 	mmc_sdio_remove(host);
- 	mmc_claim_host(host);
--- 
-1.9.1
+> 
+> Fixes: f37b20ebc4bc ("mmc: sdhci: add standard hw auto retuning support")
+> 
+> Signed-off-by: Troy Kisky <troy.kisky@boundarydevices.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ecd0d43..e104194 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2687,7 +2687,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  
+>  		/* Clear selected interrupts. */
+>  		mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
+> -				  SDHCI_INT_BUS_POWER);
+> +				  SDHCI_INT_BUS_POWER | SDHCI_INT_RETUNE);
+
+SDHCI_INT_RETUNE is defined to be read-only so why write to it.
+
+>  		sdhci_writel(host, mask, SDHCI_INT_STATUS);
+>  
+>  		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+> 
 
