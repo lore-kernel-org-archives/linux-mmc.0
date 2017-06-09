@@ -1,81 +1,71 @@
-From: Brian Norris <computersforpeace@gmail.com>
-Subject: Re: [PATCH v3 1/9] mtd: sharpslpart: add sharpslpart MTD partition
- parser
-Date: Thu, 8 Jun 2017 18:42:40 -0700
-Message-ID: <20170609014240.GM102137@google.com>
-References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
- <1496270458-6479-2-git-send-email-andrea.adami@gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH/RFC 3/5] mmc: sh_mobile_sdhi: add some SoC specific data
+ for R-Car Gen3
+Date: Fri, 9 Jun 2017 09:34:46 +0200
+Message-ID: <CAMuHMdWrpsRDDqzrxJjt3_V0gjTo9fQiFGRzo=crdaeeHKX2uw@mail.gmail.com>
+References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au> <1496927368-18897-5-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:34355 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751445AbdFIBmp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2017 21:42:45 -0400
-Content-Disposition: inline
-In-Reply-To: <1496270458-6479-2-git-send-email-andrea.adami@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1496927368-18897-5-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Oh, one more thing:
+Hi Simon,
 
-On Thu, Jun 01, 2017 at 12:40:50AM +0200, Andrea Adami wrote:
-> diff --git a/drivers/mtd/sharpslpart.c b/drivers/mtd/sharpslpart.c
-> new file mode 100644
-> index 0000000..40aebe9
-> --- /dev/null
-> +++ b/drivers/mtd/sharpslpart.c
-> @@ -0,0 +1,132 @@
-> +/*
-> + * MTD partition parser for NAND flash on Sharp SL Series
-> + *
-> + * Copyright (C) 2017 Andrea Adami <andrea.adami@gmail.com>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + */
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/slab.h>
-> +#include <linux/module.h>
-> +#include <linux/mtd/mtd.h>
-> +#include <linux/mtd/partitions.h>
-> +#include "sharpsl_ftl.h"
-> +
-> +/* factory defaults */
-> +#define SHARPSL_NAND_PARTS		3
-> +#define SHARPSL_FTL_PARTITION_SIZE	(7 * 1024 * 1024)
-> +#define PARAM_BLOCK_PARTITIONINFO1	0x00060000
-> +#define PARAM_BLOCK_PARTITIONINFO2	0x00064000
-> +
-> +#define BOOT_MAGIC			be32_to_cpu(0x424f4f54)   /* BOOT */
-> +#define FSRO_MAGIC			be32_to_cpu(0x4653524f)   /* FSRO */
-> +#define FSRW_MAGIC			be32_to_cpu(0x46535257)   /* FSRW */
+On Thu, Jun 8, 2017 at 3:09 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
+> To avoid complicate code in own dma code for gen3, this patch
+> adds set max_segs to 1. Then, the tmio driver will get requests
+> as sg_len = 1 only.
 
-[...]
+The above doesn't seem to match with the actual code changes?
 
-> +struct sharpsl_nand_partitioninfo {
-> +	u32 start;
-> +	u32 end;
+> In the performance point of view, the CONFIG_MMC_BLOCK_BOUNCE should
+> be set. Otherwise, mmc block layer will set 4-kbyte each as a request.
 
-I was going to ignore this earlier, but I just noticed that you handle
-endianness for the magic values above, so...
+FWIW, CONFIG_MMC_BLOCK_BOUNCE is no more in -next.
 
-shouldn't you handle endianness for the start and end fields too?
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  drivers/mmc/host/renesas_sdhi.h      | 2 ++
+>  drivers/mmc/host/renesas_sdhi_core.c | 2 ++
+>  2 files changed, 4 insertions(+)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+> index eb3ea15ff92d..6f7233fe32a2 100644
+> --- a/drivers/mmc/host/renesas_sdhi.h
+> +++ b/drivers/mmc/host/renesas_sdhi.h
+> @@ -31,6 +31,8 @@ struct renesas_sdhi_of_data {
+>         int scc_offset;
+>         struct renesas_sdhi_scc *taps;
+>         int taps_num;
+> +       unsigned int max_blk_count;
+> +       unsigned short max_segs;
+>  };
+>
+>  int renesas_sdhi_probe(struct platform_device *pdev,
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index 82150a966391..294bc9705c5f 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -522,6 +522,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                 mmc_data->capabilities |= of_data->capabilities;
+>                 mmc_data->capabilities2 |= of_data->capabilities2;
+>                 mmc_data->dma_rx_offset = of_data->dma_rx_offset;
+> +               mmc_data->max_blk_count = of_data->max_blk_count;
+> +               mmc_data->max_segs = of_data->max_segs;
 
-> +	u32 magic;
-> +	u32 reserved;
-> +};
-[...]
+Gr{oetje,eeting}s,
 
-Brian
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
