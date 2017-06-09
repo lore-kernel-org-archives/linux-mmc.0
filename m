@@ -1,43 +1,54 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v2 0/8] omap*: Fixes/Cleanups for MMC devicetree node
-Date: Fri, 9 Jun 2017 17:51:30 +0530
-Message-ID: <a6ed36ef-9552-3bfb-c863-0819add51850@ti.com>
-References: <20170607093749.15656-1-kishon@ti.com>
- <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
- <20170608084619.GH3730@atomide.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 1/2] mmc: sdio: Tidy error path in mmc_attach_sdio()
+Date: Fri,  9 Jun 2017 15:27:17 +0300
+Message-ID: <1497011238-9573-2-git-send-email-adrian.hunter@intel.com>
+References: <1497011238-9573-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lelnx194.ext.ti.com ([198.47.27.80]:50932 "EHLO
-        lelnx194.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751750AbdFIMWM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 08:22:12 -0400
-In-Reply-To: <20170608084619.GH3730@atomide.com>
+Received: from mga04.intel.com ([192.55.52.120]:18608 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751682AbdFIMdS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Jun 2017 08:33:18 -0400
+In-Reply-To: <1497011238-9573-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Tony,
+The error path deletes the device by calling mmc_sdio_remove() which must
+be called without the host claimed. Simplify the error path so it does just
+that and add a comment about why we don't disable runtime PM.
 
-On Thursday 08 June 2017 02:16 PM, Tony Lindgren wrote:
-> * Ulf Hansson <ulf.hansson@linaro.org> [170608 00:24]:
->> If it helps, I can host a branch with the updates on the omap_hsmmc
->> driver, such it can be pulled in from arm soc?
-> 
-> Great that works for me. Let's just make sure git bisect
-> keeps working.
-> 
->> I guess you need that as, the DT changes relies on the new vqmmc
->> binding. Or you thing it doesn't matter, because for the current
->> changes that regulator is always an always on regulator?
-> 
-> Or maybe we can just add the new regulator, then do a
-> follow-up series to remove the old ones?
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/sdio.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
 
-Since the driver has a fallback mechanism wherein if it's not able to find
-vqmmc, it'll fallback to vmmc_aux, I don't think that's required.
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index fae732c870a9..f077fc8219d0 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1159,15 +1159,14 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 	return 0;
+ 
+ 
+-remove_added:
+-	/* Remove without lock if the device has been added. */
+-	mmc_sdio_remove(host);
+-	mmc_claim_host(host);
+ remove:
+-	/* And with lock if it hasn't been added. */
+ 	mmc_release_host(host);
+-	if (host->card)
+-		mmc_sdio_remove(host);
++remove_added:
++	/*
++	 * The devices are being deleted so it is not necessary to disable
++	 * runtime PM.
++	 */
++	mmc_sdio_remove(host);
+ 	mmc_claim_host(host);
+ err:
+ 	mmc_detach_bus(host);
+-- 
+1.9.1
 
-Thanks
-Kishon
