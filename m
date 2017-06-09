@@ -1,239 +1,326 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3] ARM: dts: omap*: Replace deprecated "vmmc_aux" with "vqmmc"
-Date: Fri, 9 Jun 2017 17:38:18 +0530
-Message-ID: <20170609120818.13667-1-kishon@ti.com>
-References: <20170607093749.15656-9-kishon@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH V2 2/9] mmc: core: Move mmc bkops functions from core.c to mmc_ops.c
+Date: Fri,  9 Jun 2017 14:15:01 +0200
+Message-ID: <1497010501-17302-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lelnx194.ext.ti.com ([198.47.27.80]:50369 "EHLO
-        lelnx194.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751541AbdFIMI7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 08:08:59 -0400
-In-Reply-To: <20170607093749.15656-9-kishon@ti.com>
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:35205 "EHLO
+        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751530AbdFIMPH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 08:15:07 -0400
+Received: by mail-lf0-f50.google.com with SMTP id p189so29055003lfe.2
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2017 05:15:06 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Russell King <linux@armlinux.org.uk>, nsekhar@ti.com, kishon@ti.com
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Replace deprecated "vmmc_aux" with the generic "vqmmc" binding for
-MMC IO supply.
+The mmc_start_bkops(), mmc_stop_bkops() and mmc_read_bkops_status()
+functions are all specific to eMMCs. To make this clear, let's move them
+from from core.c to mmc_ops.c and take the opportunity to make
+mmc_read_bkops_status() static.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+While moving them, get rid of MMC_BKOPS_MAX_TIMEOUT (4 min) and use the
+common default timeout MMC_OPS_TIMEOUT_MS (10 min) instead, as there is no
+need to have specific default timeout for bkops.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
-Changes from v2:
-Rebased on [1].
-[1] -> https://www.spinics.net/lists/arm-kernel/msg586977.html
- arch/arm/boot/dts/am572x-idk.dts               | 2 +-
- arch/arm/boot/dts/dra7-evm.dts                 | 2 +-
- arch/arm/boot/dts/dra71-evm.dts                | 2 +-
- arch/arm/boot/dts/dra72-evm-tps65917.dtsi      | 2 +-
- arch/arm/boot/dts/omap3-beagle-xm.dts          | 2 +-
- arch/arm/boot/dts/omap3-beagle.dts             | 2 +-
- arch/arm/boot/dts/omap3-cm-t3517.dts           | 2 +-
- arch/arm/boot/dts/omap3-cm-t3730.dts           | 2 +-
- arch/arm/boot/dts/omap3-devkit8000-common.dtsi | 2 +-
- arch/arm/boot/dts/omap3-evm-common.dtsi        | 2 +-
- arch/arm/boot/dts/omap3-n900.dts               | 2 +-
- arch/arm/boot/dts/omap3-overo-base.dtsi        | 2 +-
- arch/arm/boot/dts/omap3-tao3530.dtsi           | 2 +-
- arch/arm/boot/dts/omap3-zoom3.dts              | 2 +-
- arch/arm/boot/dts/omap3430-sdp.dts             | 2 +-
- 15 files changed, 15 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm/boot/dts/am572x-idk.dts b/arch/arm/boot/dts/am572x-idk.dts
-index 8350b4b34b08..8d538f5d9a5f 100644
---- a/arch/arm/boot/dts/am572x-idk.dts
-+++ b/arch/arm/boot/dts/am572x-idk.dts
-@@ -79,7 +79,7 @@
- &mmc1 {
- 	status = "okay";
- 	vmmc-supply = <&v3_3d>;
--	vmmc_aux-supply = <&ldo1_reg>;
-+	vqmmc-supply = <&ldo1_reg>;
- 	bus-width = <4>;
- 	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
- };
-diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
-index e5d7e7f5f645..e4c4037e6314 100644
---- a/arch/arm/boot/dts/dra7-evm.dts
-+++ b/arch/arm/boot/dts/dra7-evm.dts
-@@ -446,7 +446,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc1_pins_default>;
- 	vmmc-supply = <&evm_3v3_sd>;
--	vmmc_aux-supply = <&ldo1_reg>;
-+	vqmmc-supply = <&ldo1_reg>;
- 	bus-width = <4>;
- 	/*
- 	 * SDCD signal is not being used here - using the fact that GPIO mode
-diff --git a/arch/arm/boot/dts/dra71-evm.dts b/arch/arm/boot/dts/dra71-evm.dts
-index c7a56b6263a6..02c11e658810 100644
---- a/arch/arm/boot/dts/dra71-evm.dts
-+++ b/arch/arm/boot/dts/dra71-evm.dts
-@@ -172,7 +172,7 @@
- };
+Changes in v2:
+	- Convert mmc_read_bkops_status() to static.
+
+---
+ drivers/mmc/core/core.c    | 118 ---------------------------------------------
+ drivers/mmc/core/mmc_ops.c | 113 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.h |   1 -
+ 3 files changed, 113 insertions(+), 119 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d48be0b..d7c934c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -53,12 +53,6 @@
+ /* If the device is not responding */
+ #define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
  
- &mmc1 {
--	vmmc_aux-supply = <&vpo_sd_1v8_3v3>;
-+	vqmmc-supply = <&vpo_sd_1v8_3v3>;
- };
+-/*
+- * Background operations can take a long time, depending on the housekeeping
+- * operations the card has to perform.
+- */
+-#define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms */
+-
+ /* The max erase timeout, used when host->max_busy_timeout isn't specified */
+ #define MMC_ERASE_TIMEOUT_MS	(60 * 1000) /* 60 s */
  
- &mmc2 {
-diff --git a/arch/arm/boot/dts/dra72-evm-tps65917.dtsi b/arch/arm/boot/dts/dra72-evm-tps65917.dtsi
-index e6df676886c0..57bfe5caf5e4 100644
---- a/arch/arm/boot/dts/dra72-evm-tps65917.dtsi
-+++ b/arch/arm/boot/dts/dra72-evm-tps65917.dtsi
-@@ -146,5 +146,5 @@
- };
+@@ -362,73 +356,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	return 0;
+ }
  
- &mmc1 {
--	vmmc_aux-supply = <&ldo1_reg>;
-+	vqmmc-supply = <&ldo1_reg>;
- };
-diff --git a/arch/arm/boot/dts/omap3-beagle-xm.dts b/arch/arm/boot/dts/omap3-beagle-xm.dts
-index 673cee2234b2..683b96a8f73e 100644
---- a/arch/arm/boot/dts/omap3-beagle-xm.dts
-+++ b/arch/arm/boot/dts/omap3-beagle-xm.dts
-@@ -299,7 +299,7 @@
+-/**
+- *	mmc_start_bkops - start BKOPS for supported cards
+- *	@card: MMC card to start BKOPS
+- *	@form_exception: A flag to indicate if this function was
+- *			 called due to an exception raised by the card
+- *
+- *	Start background operations whenever requested.
+- *	When the urgent BKOPS bit is set in a R1 command response
+- *	then background operations should be started immediately.
+-*/
+-void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+-{
+-	int err;
+-	int timeout;
+-	bool use_busy_signal;
+-
+-	if (!card->ext_csd.man_bkops_en || mmc_card_doing_bkops(card))
+-		return;
+-
+-	err = mmc_read_bkops_status(card);
+-	if (err) {
+-		pr_err("%s: Failed to read bkops status: %d\n",
+-		       mmc_hostname(card->host), err);
+-		return;
+-	}
+-
+-	if (!card->ext_csd.raw_bkops_status)
+-		return;
+-
+-	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2 &&
+-	    from_exception)
+-		return;
+-
+-	mmc_claim_host(card->host);
+-	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+-		timeout = MMC_BKOPS_MAX_TIMEOUT;
+-		use_busy_signal = true;
+-	} else {
+-		timeout = 0;
+-		use_busy_signal = false;
+-	}
+-
+-	mmc_retune_hold(card->host);
+-
+-	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-			EXT_CSD_BKOPS_START, 1, timeout, 0,
+-			use_busy_signal, true, false);
+-	if (err) {
+-		pr_warn("%s: Error %d starting bkops\n",
+-			mmc_hostname(card->host), err);
+-		mmc_retune_release(card->host);
+-		goto out;
+-	}
+-
+-	/*
+-	 * For urgent bkops status (LEVEL_2 and more)
+-	 * bkops executed synchronously, otherwise
+-	 * the operation is in progress
+-	 */
+-	if (!use_busy_signal)
+-		mmc_card_set_doing_bkops(card);
+-	else
+-		mmc_retune_release(card->host);
+-out:
+-	mmc_release_host(card->host);
+-}
+-
+ /*
+  * mmc_wait_data_done() - done callback for data request
+  * @mrq: done data request
+@@ -841,51 +768,6 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
+ EXPORT_SYMBOL(mmc_wait_for_cmd);
  
- &mmc1 {
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <8>;
- };
+ /**
+- *	mmc_stop_bkops - stop ongoing BKOPS
+- *	@card: MMC card to check BKOPS
+- *
+- *	Send HPI command to stop ongoing background operations to
+- *	allow rapid servicing of foreground operations, e.g. read/
+- *	writes. Wait until the card comes out of the programming state
+- *	to avoid errors in servicing read/write requests.
+- */
+-int mmc_stop_bkops(struct mmc_card *card)
+-{
+-	int err = 0;
+-
+-	err = mmc_interrupt_hpi(card);
+-
+-	/*
+-	 * If err is EINVAL, we can't issue an HPI.
+-	 * It should complete the BKOPS.
+-	 */
+-	if (!err || (err == -EINVAL)) {
+-		mmc_card_clr_doing_bkops(card);
+-		mmc_retune_release(card->host);
+-		err = 0;
+-	}
+-
+-	return err;
+-}
+-
+-int mmc_read_bkops_status(struct mmc_card *card)
+-{
+-	int err;
+-	u8 *ext_csd;
+-
+-	mmc_claim_host(card->host);
+-	err = mmc_get_ext_csd(card, &ext_csd);
+-	mmc_release_host(card->host);
+-	if (err)
+-		return err;
+-
+-	card->ext_csd.raw_bkops_status = ext_csd[EXT_CSD_BKOPS_STATUS];
+-	card->ext_csd.raw_exception_status = ext_csd[EXT_CSD_EXP_EVENTS_STATUS];
+-	kfree(ext_csd);
+-	return 0;
+-}
+-
+-/**
+  *	mmc_set_data_timeout - set the timeout for a data command
+  *	@data: data phase for command
+  *	@card: the MMC card associated with the data transfer
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index ae1fc48..a631f74 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -19,6 +19,7 @@
+ #include <linux/mmc/mmc.h>
  
-diff --git a/arch/arm/boot/dts/omap3-beagle.dts b/arch/arm/boot/dts/omap3-beagle.dts
-index 4be85ce59dd1..4d2eaf843fa9 100644
---- a/arch/arm/boot/dts/omap3-beagle.dts
-+++ b/arch/arm/boot/dts/omap3-beagle.dts
-@@ -283,7 +283,7 @@
+ #include "core.h"
++#include "card.h"
+ #include "host.h"
+ #include "mmc_ops.h"
  
- &mmc1 {
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <8>;
- };
+@@ -845,6 +846,118 @@ int mmc_can_ext_csd(struct mmc_card *card)
+ 	return (card && card->csd.mmca_vsn > CSD_SPEC_VER_3);
+ }
  
-diff --git a/arch/arm/boot/dts/omap3-cm-t3517.dts b/arch/arm/boot/dts/omap3-cm-t3517.dts
-index 53ae04f9104d..3d293b345e99 100644
---- a/arch/arm/boot/dts/omap3-cm-t3517.dts
-+++ b/arch/arm/boot/dts/omap3-cm-t3517.dts
-@@ -129,7 +129,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc2_pins>;
- 	vmmc-supply = <&wl12xx_vmmc2>;
--	vmmc_aux-supply = <&wl12xx_vaux2>;
-+	vqmmc-supply = <&wl12xx_vaux2>;
- 	non-removable;
- 	bus-width = <4>;
- 	cap-power-off-card;
-diff --git a/arch/arm/boot/dts/omap3-cm-t3730.dts b/arch/arm/boot/dts/omap3-cm-t3730.dts
-index 2294f5b0aa10..bdf4b7fdda39 100644
---- a/arch/arm/boot/dts/omap3-cm-t3730.dts
-+++ b/arch/arm/boot/dts/omap3-cm-t3730.dts
-@@ -69,7 +69,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc2_pins>;
- 	vmmc-supply = <&wl12xx_vmmc2>;
--	vmmc_aux-supply = <&wl12xx_vaux2>;
-+	vqmmc-supply = <&wl12xx_vaux2>;
- 	non-removable;
- 	bus-width = <4>;
- 	cap-power-off-card;
-diff --git a/arch/arm/boot/dts/omap3-devkit8000-common.dtsi b/arch/arm/boot/dts/omap3-devkit8000-common.dtsi
-index f330c69cc683..4036cef4f9fc 100644
---- a/arch/arm/boot/dts/omap3-devkit8000-common.dtsi
-+++ b/arch/arm/boot/dts/omap3-devkit8000-common.dtsi
-@@ -149,7 +149,7 @@
- 
- &mmc1 {
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <8>;
- };
- 
-diff --git a/arch/arm/boot/dts/omap3-evm-common.dtsi b/arch/arm/boot/dts/omap3-evm-common.dtsi
-index 090475083c2f..b831f2ed1abc 100644
---- a/arch/arm/boot/dts/omap3-evm-common.dtsi
-+++ b/arch/arm/boot/dts/omap3-evm-common.dtsi
-@@ -98,7 +98,7 @@
- &mmc1 {
- 	interrupts-extended = <&intc 83 &omap3_pmx_core 0x11a>;
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <8>;
- };
- 
-diff --git a/arch/arm/boot/dts/omap3-n900.dts b/arch/arm/boot/dts/omap3-n900.dts
-index 49f37084e435..92c1f4ac4040 100644
---- a/arch/arm/boot/dts/omap3-n900.dts
-+++ b/arch/arm/boot/dts/omap3-n900.dts
-@@ -741,7 +741,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc2_pins>;
- 	vmmc-supply = <&vaux3>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <8>;
- 	non-removable;
- 	no-sdio;
-diff --git a/arch/arm/boot/dts/omap3-overo-base.dtsi b/arch/arm/boot/dts/omap3-overo-base.dtsi
-index cd220342a805..f25e158e7163 100644
---- a/arch/arm/boot/dts/omap3-overo-base.dtsi
-+++ b/arch/arm/boot/dts/omap3-overo-base.dtsi
-@@ -181,7 +181,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc2_pins>;
- 	vmmc-supply = <&w3cbw003c_npoweron>;
--	vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
-+	vqmmc-supply = <&w3cbw003c_wifi_nreset>;
- 	bus-width = <4>;
- 	cap-sdio-irq;
- 	non-removable;
-diff --git a/arch/arm/boot/dts/omap3-tao3530.dtsi b/arch/arm/boot/dts/omap3-tao3530.dtsi
-index dc80886b5329..ac6ff9b4db94 100644
---- a/arch/arm/boot/dts/omap3-tao3530.dtsi
-+++ b/arch/arm/boot/dts/omap3-tao3530.dtsi
-@@ -224,7 +224,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc1_pins>;
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	cd-gpios = <&twl_gpio 0 GPIO_ACTIVE_HIGH>;
- 	bus-width = <8>;
- };
-diff --git a/arch/arm/boot/dts/omap3-zoom3.dts b/arch/arm/boot/dts/omap3-zoom3.dts
-index 45e2ce0803de..96d0301a336a 100644
---- a/arch/arm/boot/dts/omap3-zoom3.dts
-+++ b/arch/arm/boot/dts/omap3-zoom3.dts
-@@ -174,7 +174,7 @@
- 
- &mmc1 {
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	bus-width = <4>;
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc1_pins>;
-diff --git a/arch/arm/boot/dts/omap3430-sdp.dts b/arch/arm/boot/dts/omap3430-sdp.dts
-index abd6921143be..908951eb5943 100644
---- a/arch/arm/boot/dts/omap3430-sdp.dts
-+++ b/arch/arm/boot/dts/omap3430-sdp.dts
-@@ -33,7 +33,7 @@
- 
- &mmc1 {
- 	vmmc-supply = <&vmmc1>;
--	vmmc_aux-supply = <&vsim>;
-+	vqmmc-supply = <&vsim>;
- 	/*
- 	 * S6-3 must be in ON position for 8 bit mode to function
- 	 * Else, use 4 bit mode
++/**
++ *	mmc_stop_bkops - stop ongoing BKOPS
++ *	@card: MMC card to check BKOPS
++ *
++ *	Send HPI command to stop ongoing background operations to
++ *	allow rapid servicing of foreground operations, e.g. read/
++ *	writes. Wait until the card comes out of the programming state
++ *	to avoid errors in servicing read/write requests.
++ */
++int mmc_stop_bkops(struct mmc_card *card)
++{
++	int err = 0;
++
++	err = mmc_interrupt_hpi(card);
++
++	/*
++	 * If err is EINVAL, we can't issue an HPI.
++	 * It should complete the BKOPS.
++	 */
++	if (!err || (err == -EINVAL)) {
++		mmc_card_clr_doing_bkops(card);
++		mmc_retune_release(card->host);
++		err = 0;
++	}
++
++	return err;
++}
++
++static int mmc_read_bkops_status(struct mmc_card *card)
++{
++	int err;
++	u8 *ext_csd;
++
++	mmc_claim_host(card->host);
++	err = mmc_get_ext_csd(card, &ext_csd);
++	mmc_release_host(card->host);
++	if (err)
++		return err;
++
++	card->ext_csd.raw_bkops_status = ext_csd[EXT_CSD_BKOPS_STATUS];
++	card->ext_csd.raw_exception_status = ext_csd[EXT_CSD_EXP_EVENTS_STATUS];
++	kfree(ext_csd);
++	return 0;
++}
++
++/**
++ *	mmc_start_bkops - start BKOPS for supported cards
++ *	@card: MMC card to start BKOPS
++ *	@form_exception: A flag to indicate if this function was
++ *			 called due to an exception raised by the card
++ *
++ *	Start background operations whenever requested.
++ *	When the urgent BKOPS bit is set in a R1 command response
++ *	then background operations should be started immediately.
++*/
++void mmc_start_bkops(struct mmc_card *card, bool from_exception)
++{
++	int err;
++	int timeout;
++	bool use_busy_signal;
++
++	if (!card->ext_csd.man_bkops_en || mmc_card_doing_bkops(card))
++		return;
++
++	err = mmc_read_bkops_status(card);
++	if (err) {
++		pr_err("%s: Failed to read bkops status: %d\n",
++		       mmc_hostname(card->host), err);
++		return;
++	}
++
++	if (!card->ext_csd.raw_bkops_status)
++		return;
++
++	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2 &&
++	    from_exception)
++		return;
++
++	mmc_claim_host(card->host);
++	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
++		timeout = MMC_OPS_TIMEOUT_MS;
++		use_busy_signal = true;
++	} else {
++		timeout = 0;
++		use_busy_signal = false;
++	}
++
++	mmc_retune_hold(card->host);
++
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			EXT_CSD_BKOPS_START, 1, timeout, 0,
++			use_busy_signal, true, false);
++	if (err) {
++		pr_warn("%s: Error %d starting bkops\n",
++			mmc_hostname(card->host), err);
++		mmc_retune_release(card->host);
++		goto out;
++	}
++
++	/*
++	 * For urgent bkops status (LEVEL_2 and more)
++	 * bkops executed synchronously, otherwise
++	 * the operation is in progress
++	 */
++	if (!use_busy_signal)
++		mmc_card_set_doing_bkops(card);
++	else
++		mmc_retune_release(card->host);
++out:
++	mmc_release_host(card->host);
++}
++
+ static int mmc_cmdq_switch(struct mmc_card *card, bool enable)
+ {
+ 	u8 val = enable ? EXT_CSD_CMDQ_MODE_ENABLED : 0;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index b8d0552..2e97271 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -43,7 +43,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms);
+ int mmc_stop_bkops(struct mmc_card *card);
+-int mmc_read_bkops_status(struct mmc_card *card);
+ void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+ int mmc_can_reset(struct mmc_card *card);
+ int mmc_flush_cache(struct mmc_card *card);
 -- 
-2.11.0
+2.7.4
 
