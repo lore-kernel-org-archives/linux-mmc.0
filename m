@@ -1,42 +1,63 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH/RFC 5/5] mmc: renesas-sdhi: remove gen3 support from sysc
- dmac driver
-Date: Fri, 9 Jun 2017 17:40:15 +0900
-Message-ID: <CANqRtoTF-xev1F9nC9a_0oLQSE5-M4SnozTyzrndDrbW8fhurw@mail.gmail.com>
-References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
- <1496927368-18897-8-git-send-email-horms+renesas@verge.net.au> <CAMuHMdUUXnpXgoO7O8XtQcusTcHPffkKESVbWO54Yo54179u6A@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH] ARM: dts: omap3-overo: Remove "vqmmc-supply" property from MMC dt node
+Date: Fri, 9 Jun 2017 14:11:41 +0530
+Message-ID: <20170609084141.15582-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:33123 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751412AbdFIIkR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 04:40:17 -0400
-In-Reply-To: <CAMuHMdUUXnpXgoO7O8XtQcusTcHPffkKESVbWO54Yo54179u6A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Florian Vaussard <florian.vaussard-p8DiymsW2f8@public.gmane.org>
+Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Hi Geert and Simon,
+commit 94647a30124e2c7 ("ARM: dts: omap3-overo: Enable WiFi/BT combo")
+while enabling WiFi/BT combo added regulator to trigger the nReset
+signal of the Bluetooth module in vqmmc-supply. However BT should be
+handled by UART. Moreover "vqmmc" is not a defined binding for
+omap_hsmmc. While "vqmmc" in mmc2 hasn't caused any issues so far,
+mmc2 will start to mis-behave once omap_hsmmc defines "vqmmc"
+binding.
 
-On Fri, Jun 9, 2017 at 4:40 PM, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Simon,
->
-> On Thu, Jun 8, 2017 at 3:09 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
->> Gen3 SoCs are now supported by the internal dmac variant of the SDHI driver.
->> Remove them from the sys dmac variant where only PIO mode is supported.
->>
->> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
->
-> Is it possible to fall back to PIO with the new DMAC driver?
-> If not, is this desirable?
+Remove "vqmmc-supply" property in mmc2 here.
 
-I believe R-Car Gen3 SDHI may depending on SoC use either on-chip bus
-mastering DMA or SYS-DMAC via DMA Engine. In both cases fall back to
-PIO is most likely valid. For any given SoC which is better of on-chip
-DMA or SYS-DMAC needs to be investigated together with IPMMU.
+Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+---
+ arch/arm/boot/dts/omap3-overo-base.dtsi | 11 -----------
+ 1 file changed, 11 deletions(-)
 
-Cheers,
+diff --git a/arch/arm/boot/dts/omap3-overo-base.dtsi b/arch/arm/boot/dts/omap3-overo-base.dtsi
+index 401fae838fe9..cd220342a805 100644
+--- a/arch/arm/boot/dts/omap3-overo-base.dtsi
++++ b/arch/arm/boot/dts/omap3-overo-base.dtsi
+@@ -74,16 +74,6 @@
+ 		gpio = <&gpio1 16 GPIO_ACTIVE_HIGH>;		/* gpio_16: WiFi nReset */
+ 		startup-delay-us = <10000>;
+ 	};
+-
+-	/* Regulator to trigger the nReset signal of the Bluetooth module */
+-	w3cbw003c_bt_nreset: regulator-w3cbw003c-bt-nreset {
+-		compatible = "regulator-fixed";
+-		regulator-name = "regulator-w3cbw003c-bt-nreset";
+-		regulator-min-microvolt = <3300000>;
+-		regulator-max-microvolt = <3300000>;
+-		gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;		/* gpio_164: BT nReset */
+-		startup-delay-us = <10000>;
+-	};
+ };
+ 
+ &omap3_pmx_core {
+@@ -191,7 +181,6 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&mmc2_pins>;
+ 	vmmc-supply = <&w3cbw003c_npoweron>;
+-	vqmmc-supply = <&w3cbw003c_bt_nreset>;
+ 	vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
+ 	bus-width = <4>;
+ 	cap-sdio-irq;
+-- 
+2.11.0
 
-/ magnus
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
