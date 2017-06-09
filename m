@@ -1,47 +1,32 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC 4/5] mmc: renesas_sdhi: add support for R-Car Gen3
- SDHI DMAC
-Date: Fri, 9 Jun 2017 09:39:49 +0200
-Message-ID: <CAMuHMdU8fqoi-zh4OKC_40xH3pZy+w_qDjtxm2pRLUsJieFmgw@mail.gmail.com>
-References: <1496927595-19521-1-git-send-email-horms+renesas@verge.net.au> <1496927595-19521-5-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH/RFC 5/5] mmc: renesas-sdhi: remove gen3 support from sysc
+ dmac driver
+Date: Fri, 9 Jun 2017 09:40:46 +0200
+Message-ID: <CAMuHMdUUXnpXgoO7O8XtQcusTcHPffkKESVbWO54Yo54179u6A@mail.gmail.com>
+References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au> <1496927368-18897-8-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1496927595-19521-5-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:35927 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751515AbdFIHks (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 03:40:48 -0400
+In-Reply-To: <1496927368-18897-8-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
 Hi Simon,
 
-On Thu, Jun 8, 2017 at 3:13 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
-> R-Car Gen3 has a dedicated DMA controller for SDHI module. Since
-> the DMAC is in a part of SDHI module and is not suitable as dmaengine,
-
-the DMAC is part of the SDHI module?
-
-> this patch adds a different code as tmio_mmc_dma_gen3.c.
-
-adds different code?
-
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -575,10 +575,27 @@ config MMC_SDHI
->         depends on SUPERH || ARM || ARM64
->         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         select MMC_TMIO_CORE
-> +       select MMC_SDHI_SYS_DMAC if (SUPERH || ARM)
-> +       select MMC_SDHI_INTERNAL_DMAC if ARM64
->         help
->           This provides support for the SDHI SD/SDIO controller found in
->           Renesas SuperH, ARM and ARM64 based SoCs
+On Thu, Jun 8, 2017 at 3:09 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
+> Gen3 SoCs are now supported by the internal dmac variant of the SDHI driver.
+> Remove them from the sys dmac variant where only PIO mode is supported.
 >
-> +config MMC_SDHI_SYS_DMAC
-> +       tristate "DMA support use of SYS DMAC with SDHI SD/SDIO controller"
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-DMA support for SYS_DMAC?
-
+Is it possible to fall back to PIO with the new DMAC driver?
+If not, is this desirable?
 
 Gr{oetje,eeting}s,
 
