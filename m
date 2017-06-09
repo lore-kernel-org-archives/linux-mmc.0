@@ -1,75 +1,122 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] ARM: dts: omap3-overo: Remove "vqmmc-supply" property
- from MMC dt node
-Date: Fri, 9 Jun 2017 12:37:53 +0200
-Message-ID: <CAPDyKFrZvnCPWUxDeewB=BTQPvuMnJ5tUg7CN=VK5=v+e+du4Q@mail.gmail.com>
-References: <20170609084141.15582-1-kishon@ti.com>
+Subject: Re: [PATCH v2 0/8] omap*: Fixes/Cleanups for MMC devicetree node
+Date: Fri, 9 Jun 2017 12:41:03 +0200
+Message-ID: <CAPDyKFpBXbuzb0AELP74UFH2LmWZHXHkr5AAzcCCWMwJ8YUaGw@mail.gmail.com>
+References: <20170607093749.15656-1-kishon@ti.com> <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
+ <4a4c4eb2-d865-25e6-cd53-a74d4f7b1f62@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170609084141.15582-1-kishon-l0cyMroinI0@public.gmane.org>
+In-Reply-To: <4a4c4eb2-d865-25e6-cd53-a74d4f7b1f62-l0cyMroinI0@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Florian Vaussard <florian.vaussard-p8DiymsW2f8@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 June 2017 at 10:41, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
-> commit 94647a30124e2c7 ("ARM: dts: omap3-overo: Enable WiFi/BT combo")
-> while enabling WiFi/BT combo added regulator to trigger the nReset
-> signal of the Bluetooth module in vqmmc-supply. However BT should be
-> handled by UART. Moreover "vqmmc" is not a defined binding for
-> omap_hsmmc. While "vqmmc" in mmc2 hasn't caused any issues so far,
-> mmc2 will start to mis-behave once omap_hsmmc defines "vqmmc"
-> binding.
+On 9 June 2017 at 10:05, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
+> Hi,
 >
-> Remove "vqmmc-supply" property in mmc2 here.
+> On Thursday 08 June 2017 12:50 PM, Ulf Hansson wrote:
+>> On 7 June 2017 at 11:37, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
+>>> There are the set of fixes that were sent initially as part
+>>> of [1].
+>>>
+>>> These are mostly fixes w.r.t populating regulators in
+>>> mmc dt node. It was working before because the regulators
+>>> connecting to the IO lines are always on regulators. This will
+>>> break once we add UHS support where voltage has to be changed
+>>> dynamically.
+>>>
+>>> It also includes a patch to replace all vmmc_aux-supply
+>>> with vqmmc-supply (In omap3-overo-base.dtsi remove the existing
+>>> vqmmc-supply and then replace vmmc_aux-supply with vqmmc-supply).
+>>> This will break old dt compatibility but not sure how better
+>>> to handle this.
+>>>
+>>> Performed enumeration testing on dra72-evm-revc, dra72-evm,
+>>> dra7-evm, am572x-evm, am571x-idk, am572x-idk, omap5-evm,
+>>> pandaboard-es, am43xx-evm, am335x-evm, beagleboard etc.,
+>>>
+>>> This is a preparation series for adding UHS mode support in
+>>> the above mentioned platforms.
+>>>
+>>> Changes from v1:
+>>> *) Included a patch to replace deprecated "vmmc_aux" with
+>>>    "vqmmc"
+>>>
+>>> [1] -> https://lkml.org/lkml/2017/5/19/196
+>>>
+>>> Kishon Vijay Abraham I (6):
+>>>   ARM: dts: dra72-evm-common: Correct vmmc-supply for mmc2
+>>>   ARM: dts: dra72-evm: Add vqmmc supply to mmc1
+>>>   ARM: dts: dra72-evm-revc: Add vqmmc supply to mmc1
+>>>   ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO
+>>>     lines
+>>>   ARM: dts: dra7: Add "max-frequency" property to MMC dt nodes
+>>>   ARM: dts: omap*: Replace deprecated "vmmc_aux" with "vqmmc"
+>>>
+>>> Ravikumar Kattekola (1):
+>>>   ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
+>>>
+>>> Sekhar Nori (1):
+>>>   ARM: OMAP2+: Add pdata-quirks for MMC/SD on DRA74x EVM
+>>>
+>>>  arch/arm/boot/dts/am572x-idk.dts               |  2 +-
+>>>  arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts  |  2 +-
+>>>  arch/arm/boot/dts/dra7-evm.dts                 | 12 ++++++++--
+>>>  arch/arm/boot/dts/dra7.dtsi                    |  5 +++++
+>>>  arch/arm/boot/dts/dra71-evm.dts                | 16 ++++++++++++-
+>>>  arch/arm/boot/dts/dra72-evm-common.dtsi        |  2 --
+>>>  arch/arm/boot/dts/dra72-evm-revc.dts           | 18 +++++++++++++++
+>>>  arch/arm/boot/dts/dra72-evm-tps65917.dtsi      |  2 +-
+>>>  arch/arm/boot/dts/dra72-evm.dts                | 18 +++++++++++++++
+>>>  arch/arm/boot/dts/omap3-beagle-xm.dts          |  2 +-
+>>>  arch/arm/boot/dts/omap3-beagle.dts             |  2 +-
+>>>  arch/arm/boot/dts/omap3-cm-t3517.dts           |  2 +-
+>>>  arch/arm/boot/dts/omap3-cm-t3730.dts           |  2 +-
+>>>  arch/arm/boot/dts/omap3-devkit8000-common.dtsi |  2 +-
+>>>  arch/arm/boot/dts/omap3-evm-common.dtsi        |  2 +-
+>>>  arch/arm/boot/dts/omap3-n900.dts               |  2 +-
+>>>  arch/arm/boot/dts/omap3-overo-base.dtsi        |  3 +--
+>>>  arch/arm/boot/dts/omap3-tao3530.dtsi           |  2 +-
+>>>  arch/arm/boot/dts/omap3-zoom3.dts              |  2 +-
+>>>  arch/arm/boot/dts/omap3430-sdp.dts             |  2 +-
+>>>  arch/arm/mach-omap2/pdata-quirks.c             | 31 ++++++++++++++++++++++++++
+>>>  include/linux/platform_data/hsmmc-omap.h       |  3 +++
+>>>  22 files changed, 114 insertions(+), 20 deletions(-)
+>>>
+>>> --
+>>> 2.11.0
+>>>
+>>
+>> If it helps, I can host a branch with the updates on the omap_hsmmc
+>> driver, such it can be pulled in from arm soc?
+>>
+>> I guess you need that as, the DT changes relies on the new vqmmc
+>> binding. Or you thing it doesn't matter, because for the current
+>> changes that regulator is always an always on regulator?
 >
-> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> Since there is fallback mechanism in omap_hsmmc driver (falls back to
+> vmmc_aux), dt changes shouldn't rely on the omap_hsmmc driver.
 
-Okay, so I assume I also need to carry this in my immutable branch for
-the omap driver changes. More precisely before the driver changes?
+Ahh, I get it.
 
-Wait for Tony to ack this then.
+So no immutable branch needed, although only the DTS changes is need
+for me below.
+
+>
+> However I'll send a fix for omap3-overo-base which used vqmmc incorrectly (that
+> should be merged before omap_hsmmc driver changes) so that git bisect does not
+> break.
+
+Great! Thanks for sorting this out!
+
+>
+> Thanks
+> Kishon
 
 Kind regards
 Uffe
-
-> ---
->  arch/arm/boot/dts/omap3-overo-base.dtsi | 11 -----------
->  1 file changed, 11 deletions(-)
->
-> diff --git a/arch/arm/boot/dts/omap3-overo-base.dtsi b/arch/arm/boot/dts/omap3-overo-base.dtsi
-> index 401fae838fe9..cd220342a805 100644
-> --- a/arch/arm/boot/dts/omap3-overo-base.dtsi
-> +++ b/arch/arm/boot/dts/omap3-overo-base.dtsi
-> @@ -74,16 +74,6 @@
->                 gpio = <&gpio1 16 GPIO_ACTIVE_HIGH>;            /* gpio_16: WiFi nReset */
->                 startup-delay-us = <10000>;
->         };
-> -
-> -       /* Regulator to trigger the nReset signal of the Bluetooth module */
-> -       w3cbw003c_bt_nreset: regulator-w3cbw003c-bt-nreset {
-> -               compatible = "regulator-fixed";
-> -               regulator-name = "regulator-w3cbw003c-bt-nreset";
-> -               regulator-min-microvolt = <3300000>;
-> -               regulator-max-microvolt = <3300000>;
-> -               gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;             /* gpio_164: BT nReset */
-> -               startup-delay-us = <10000>;
-> -       };
->  };
->
->  &omap3_pmx_core {
-> @@ -191,7 +181,6 @@
->         pinctrl-names = "default";
->         pinctrl-0 = <&mmc2_pins>;
->         vmmc-supply = <&w3cbw003c_npoweron>;
-> -       vqmmc-supply = <&w3cbw003c_bt_nreset>;
->         vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
->         bus-width = <4>;
->         cap-sdio-irq;
-> --
-> 2.11.0
->
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
