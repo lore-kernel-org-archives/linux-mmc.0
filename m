@@ -1,40 +1,66 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC 5/5] mmc: renesas-sdhi: remove gen3 support from sysc
- dmac driver
-Date: Fri, 9 Jun 2017 09:40:46 +0200
-Message-ID: <CAMuHMdUUXnpXgoO7O8XtQcusTcHPffkKESVbWO54Yo54179u6A@mail.gmail.com>
-References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au> <1496927368-18897-8-git-send-email-horms+renesas@verge.net.au>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH 0/3] omap_hsmmc: use mmc_regulator_get_supply() to get
+ regulators
+Date: Fri, 9 Jun 2017 13:21:17 +0530
+Message-ID: <19f289a5-cc1d-a14a-130a-ae45710d969e@ti.com>
+References: <20170607083612.14224-1-kishon@ti.com>
+ <CAPDyKFrMnZ0EGjdm4J0mTuaq+dp8eTEr3W-pOCowuwNEV2zwYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:35927 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751515AbdFIHks (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2017 03:40:48 -0400
-In-Reply-To: <1496927368-18897-8-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFrMnZ0EGjdm4J0mTuaq+dp8eTEr3W-pOCowuwNEV2zwYw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Hi Simon,
+Hi Uffe,
 
-On Thu, Jun 8, 2017 at 3:09 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
-> Gen3 SoCs are now supported by the internal dmac variant of the SDHI driver.
-> Remove them from the sys dmac variant where only PIO mode is supported.
->
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+On Thursday 08 June 2017 12:45 PM, Ulf Hansson wrote:
+> On 7 June 2017 at 10:36, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> This series deprecates "vmmc_aux" supply property and uses the generic
+>> "vqmmc" property.
+>>
+>> Not sure how exactly to handle omap3-overo-base.dtsi which already has
+>> both vqmmc-supply and vmmc_aux-supply without breaking old dt
+>> compatibility. (vqmmc-supply seems to have been added there by mistake
+>> from 3.15).
+>>
+>> In the dt series that will follow, will replace all vmmc_aux-supply
+>> with vqmmc-supply (In omap3-overo-base.dtsi remove the existing
+>> vqmmc-supply and then replace vmmc_aux-supply with vqmmc-supply).
+>>
+>> Kishon Vijay Abraham I (3):
+>>   mmc: host: omap_hsmmc: Do not initialize MMC regulators to NULL on
+>>     error
+>>   mmc: host: omap_hsmmc: use mmc_regulator_get_supply() to get
+>>     regulators
+>>   Documentation: dt-bindings: Document deprecation of "vmmc_aux" and
+>>     using "vqmmc"
+>>
+>>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |  2 +-
+>>  drivers/mmc/host/omap_hsmmc.c                      | 55 +++++++++-------------
+>>  2 files changed, 24 insertions(+), 33 deletions(-)
+>>
+>> --
+>> 2.11.0
+>>
+> 
+> Besides the minor comment for patch2 this looks good to me.
+> 
+> In case there are no other comments, and that you agree with my
+> suggested change, you don't need to re-spin.
 
-Is it possible to fall back to PIO with the new DMAC driver?
-If not, is this desirable?
+Your suggested change looks good.
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Thanks
+Kishon
