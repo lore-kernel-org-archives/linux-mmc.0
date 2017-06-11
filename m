@@ -1,120 +1,95 @@
 From: Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: work around broken SDIO with certain WiFi
- chips
-Date: Sat, 10 Jun 2017 13:34:05 +0200
-Message-ID: <e0844236-ba11-3256-c388-ce2405c3b7b8@gmail.com>
-References: <dd12ffc8-e2a4-53bd-caa5-83bb7cbcd5e5@gmail.com>
- <CAFBinCDUNCgwm9YS9w8uQ6i1MX4SR1ZHf-mn8UnObnejjZiQOw@mail.gmail.com>
+Subject: "refcount_t: underflow; use-after-free" when removing a SD card
+Date: Sun, 11 Jun 2017 09:27:06 +0200
+Message-ID: <636ebd78-d813-aad2-bb24-b52ad75ff192@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:33023 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751958AbdFJLgx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Jun 2017 07:36:53 -0400
-Received: by mail-wr0-f196.google.com with SMTP id v104so11846559wrb.0
-        for <linux-mmc@vger.kernel.org>; Sat, 10 Jun 2017 04:36:52 -0700 (PDT)
-In-Reply-To: <CAFBinCDUNCgwm9YS9w8uQ6i1MX4SR1ZHf-mn8UnObnejjZiQOw@mail.gmail.com>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33231 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751784AbdFKH1P (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Jun 2017 03:27:15 -0400
+Received: by mail-wr0-f194.google.com with SMTP id v104so15278836wrb.0
+        for <linux-mmc@vger.kernel.org>; Sun, 11 Jun 2017 00:27:14 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Am 10.06.2017 um 00:06 schrieb Martin Blumenstingl:
-> Hi Heiner,
-> 
-> thanks for finding a solution (it didn't even take you long)!
-> 
-> On Thu, Jun 8, 2017 at 8:43 PM, Heiner Kallweit <hkallweit1@gmail.com> wrote:
->> There have been reports about SDIO failing with certain WiFi chips in
->> descriptor chain mode. SD / eMMC are working fine.
->>
->> So let's fall back to bounce buffer mode for command SD_IO_RW_EXTENDED.
->> This was reported to fix this error.
->>
->> Fixes: 79ed05e329c3 "mmc: meson-gx: add support for descriptor chain mode"
->> Cc: <stable@vger.kernel.org> # 4.12.x
->> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> 
->> ---
->>  drivers/mmc/host/meson-gx-mmc.c | 9 +++++++++
->>  1 file changed, 9 insertions(+)
->>
->> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->> index 1842ed34..4cdbe3c0 100644
->> --- a/drivers/mmc/host/meson-gx-mmc.c
->> +++ b/drivers/mmc/host/meson-gx-mmc.c
->> @@ -210,6 +210,15 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
->>         int i;
->>         bool use_desc_chain_mode = true;
->>
->> +       /*
->> +        * Broken SDIO with AP6335-based WiFi on Khadas VIM Pro has been
-> nit-pick: Khadas VIM Pro uses an Ampak AP6255 (not AP6335)
-> 
-Uups, I obviously mixed up the device with one of the S905-based tv boxes.
-Will fix it.
+When removing a SD card I get the following error. IIRC this did not
+happen when I started testing the Meson GPIO IRQ driver few weeks ago.
 
->> +        * reported. For some strange reason this occurs in descriptor
->> +        * chain mode only. So let's fall back to bounce buffer mode
->> +        * for command SD_IO_RW_EXTENDED.
->> +        */
->> +       if (mrq->cmd->opcode == SD_IO_RW_EXTENDED)
->> +               return;
->> +
->>         for_each_sg(data->sg, sg, data->sg_len, i)
->>                 /* check for 8 byte alignment */
->>                 if (sg->offset & 7) {
->> --
->> 2.13.0
->>
-> for the record: wireless performance with this patch applied is excellent
-> 
-Just curious:
-Do you also experience the lagging mentioned by crow?
+It occurs in card detect polling mode and in cd irq mode as well.
 
-> # iperf3 --client <server ip>
-> Connecting to host <server ip>, port 5201
-> [  4] local <khadas vim ip> port 38352 connected to <server ip> port 5201
-> [ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
-> [  4]   0.00-1.00   sec  8.19 MBytes  68.7 Mbits/sec    0    349 KBytes
-> [  4]   1.00-2.00   sec  8.56 MBytes  71.8 Mbits/sec    1    287 KBytes
-> [  4]   2.00-3.00   sec  8.89 MBytes  74.6 Mbits/sec    0    315 KBytes
-> [  4]   3.00-4.00   sec  8.59 MBytes  72.1 Mbits/sec    0    344 KBytes
-> [  4]   4.00-5.00   sec  9.11 MBytes  76.5 Mbits/sec    0    355 KBytes
-> [  4]   5.00-6.00   sec  8.92 MBytes  74.8 Mbits/sec    0    356 KBytes
-> [  4]   6.00-7.00   sec  8.75 MBytes  73.4 Mbits/sec    0    356 KBytes
-> [  4]   7.00-8.00   sec  8.79 MBytes  73.7 Mbits/sec    0    356 KBytes
-> [  4]   8.00-9.00   sec  8.64 MBytes  72.5 Mbits/sec    0    359 KBytes
-> [  4]   9.00-10.00  sec  8.98 MBytes  75.3 Mbits/sec    0    366 KBytes
-> - - - - - - - - - - - - - - - - - - - - - - - - -
-> [ ID] Interval           Transfer     Bandwidth       Retr
-> [  4]   0.00-10.00  sec  87.4 MBytes  73.3 Mbits/sec    1             sender
-> [  4]   0.00-10.00  sec  87.0 MBytes  73.0 Mbits/sec                  receiver
-> 
-> iperf Done.
-> # iperf3 --client <server ip> -R
-> Connecting to host <server ip>, port 5201
-> Reverse mode, remote host <server ip> is sending
-> [  4] local <khadas vim ip> port 38356 connected to <server ip> port 5201
-> [ ID] Interval           Transfer     Bandwidth
-> [  4]   0.00-1.00   sec  2.04 MBytes  17.1 Mbits/sec
-> [  4]   1.00-2.00   sec  2.17 MBytes  18.2 Mbits/sec
-> [  4]   2.00-3.00   sec  3.85 MBytes  32.3 Mbits/sec
-> [  4]   3.00-4.00   sec  7.60 MBytes  63.8 Mbits/sec
-> [  4]   4.00-5.00   sec  6.90 MBytes  57.9 Mbits/sec
-> [  4]   5.00-6.00   sec  6.46 MBytes  54.2 Mbits/sec
-> [  4]   6.00-7.00   sec  7.49 MBytes  62.9 Mbits/sec
-> [  4]   7.00-8.00   sec  7.11 MBytes  59.7 Mbits/sec
-> [  4]   8.00-9.00   sec  6.58 MBytes  55.2 Mbits/sec
-> [  4]   9.00-10.00  sec  6.83 MBytes  57.3 Mbits/sec
-> - - - - - - - - - - - - - - - - - - - - - - - - -
-> [ ID] Interval           Transfer     Bandwidth       Retr
-> [  4]   0.00-10.00  sec  58.8 MBytes  49.3 Mbits/sec   30             sender
-> [  4]   0.00-10.00  sec  57.4 MBytes  48.2 Mbits/sec                  receiver
-> 
-> iperf Done.
-> 
+Looking at recent changes to the mmc core I didn't find anything
+clearly related to this error.
 
+
+[   32.661577] mmc1: new high speed SDHC card at address 1234
+[   32.669902] mmcblk1: mmc1:1234 SA08G 7.21 GiB
+[   32.674059]  mmcblk1: p1
+[   44.958867] mmc1: card 1234 removed
+[   44.990779] refcount_t: underflow; use-after-free.
+[   44.991112] ------------[ cut here ]------------
+[   44.994658] WARNING: CPU: 0 PID: 1126 at lib/refcount.c:184 refcount_sub_and_test+0xc4/0xe0
+[   45.002850] Modules linked in: dwc2 udc_core fb_sh1106(C) fbtft(C) syscopyarea sysfillrect sysimgblt fb_sys_fops      dwmac_generic realtek fb rtc_ds1307 ir_lirc_codec dwmac_meson8b ir_sony_decoder lirc_dev regmap_i2c at24 usbcore stm     mac_platform phy_meson8b_usb2 stmmac meson_rng spi_gpio meson_ir spi_bitbang rng_core meson_gxbb_wdt meson_saradc rc     _core industrialio usb_common i2c_meson i2c_core leds_gpio nvmem_meson_efuse led_class nvmem_core ipv6
+[   45.041870] CPU: 0 PID: 1126 Comm: kworker/0:4 Tainted: G         C      4.12.0-rc4-next-20170609+ #15
+[   45.051062] Hardware name: Hardkernel ODROID-C2 (DT)
+[   45.056025] Workqueue: events_freezable mmc_rescan
+[   45.060734] task: ffff800071090000 task.stack: ffff800071b70000
+[   45.066625] PC is at refcount_sub_and_test+0xc4/0xe0
+[   45.071532] LR is at refcount_sub_and_test+0xc4/0xe0
+[   45.076431] pc : [<ffff0000083047fc>] lr : [<ffff0000083047fc>] pstate: 00000145
+[   45.083747] sp : ffff800071b73ad0
+[   45.087028] x29: ffff800071b73ad0 x28: 0000000000000000
+[   45.092288] x27: 0000000000000000 x26: ffff0000085f95c8
+[   45.097549] x25: 00000000fffffef7 x24: ffff800071b62818
+[   45.102810] x23: 0000000000000060 x22: 0000000000000004
+[   45.108073] x21: ffff80006deacb00 x20: ffff800071b63000
+[   45.113334] x19: ffff8000712eb918 x18: 0000000000000010
+[   45.118594] x17: 0000ffff80dd19d8 x16: 0000000000000000
+[   45.123856] x15: ffffffffffffffff x14: ffff0000887451f7
+[   45.129117] x13: ffff0000086d8938 x12: ffff000008363150
+[   45.134378] x11: 0000000005f5e0ff x10: 0000000000000005
+[   45.139639] x9 : 00000000ffffffd0 x8 : 6572662d72657466
+[   45.144901] x7 : 612d657375203b77 x6 : 00000000000000d6
+[   45.150160] x5 : 0000000000000000 x4 : 0000000000000000
+[   45.155422] x3 : 0000000000000000 x2 : ffff80007ff807c0
+[   45.160684] x1 : 00008000778b8000 x0 : 0000000000000026
+[   45.165945] Call trace:
+[   45.168384] Exception stack(0xffff800071b73900 to 0xffff800071b73a30)
+[   45.174773] 3900: ffff8000712eb918 0001000000000000 ffff800071b73ad0 ffff0000083047fc
+[   45.182531] 3920: 0000000000000000 0000000000000000 ffff800071b73970 0000000000000000
+[   45.190296] 3940: ffff800071b73ad0 ffff800071b73ad0 ffff800071b73a90 00000000ffffffc8
+[   45.198059] 3960: ffff800071b73990 ffff0000080e98e4 ffff800071b73ad0 ffff800071b73ad0
+[   45.205821] 3980: ffff800071b73a90 00000000ffffffc8 ffff800071b73a40 ffff000008142c30
+[   45.213582] 39a0: 0000000000000026 00008000778b8000 ffff80007ff807c0 0000000000000000
+[   45.221343] 39c0: 0000000000000000 0000000000000000 00000000000000d6 612d657375203b77
+[   45.229106] 39e0: 6572662d72657466 00000000ffffffd0 0000000000000005 0000000005f5e0ff
+[   45.236871] 3a00: ffff000008363150 ffff0000086d8938 ffff0000887451f7 ffffffffffffffff
+[   45.244619] 3a20: 0000000000000000 0000ffff80dd19d8
+[   45.249472] [<ffff0000083047fc>] refcount_sub_and_test+0xc4/0xe0
+[   45.255420] [<ffff00000830482c>] refcount_dec_and_test+0x14/0x20
+[   45.261363] [<ffff0000082ec43c>] kobject_put+0x24/0xe0
+[   45.266461] [<ffff0000082bd4a0>] blk_put_queue+0x10/0x18
+[   45.271716] [<ffff0000082d2f70>] disk_release+0x90/0xb0
+[   45.276900] [<ffff00000837f22c>] device_release+0x34/0x90
+[   45.282234] [<ffff0000082ec48c>] kobject_put+0x74/0xe0
+[   45.287320] [<ffff0000082d2064>] put_disk+0x14/0x28
+[   45.292159] [<ffff0000083f6654>] mmc_blk_put+0x64/0x90
+[   45.297250] [<ffff0000083f7c9c>] mmc_blk_remove_req.part.13+0x74/0x80
+[   45.303626] [<ffff0000083f7e3c>] mmc_blk_remove+0x104/0x198
+[   45.309143] [<ffff0000083e9aec>] mmc_bus_remove+0x1c/0x28
+[   45.314500] [<ffff000008384d3c>] device_release_driver_internal+0x174/0x200
+[   45.321391] [<ffff000008384ddc>] device_release_driver+0x14/0x20
+[   45.327342] [<ffff000008383c2c>] bus_remove_device+0x12c/0x150
+[   45.333131] [<ffff00000838071c>] device_del+0x1ac/0x300
+[   45.338297] [<ffff0000083ea238>] mmc_remove_card+0x48/0x88
+[   45.343739] [<ffff0000083ef340>] mmc_sd_detect+0x38/0x70
+[   45.348990] [<ffff0000083e94ec>] mmc_rescan+0xbc/0x3b8
+[   45.354085] [<ffff0000080bd54c>] process_one_work+0x1dc/0x340
+[   45.359770] [<ffff0000080bd6f8>] worker_thread+0x48/0x480
+[   45.365129] [<ffff0000080c345c>] kthread+0x12c/0x130
+[   45.370040] [<ffff0000080826c0>] ret_from_fork+0x10/0x50
+[   45.375280] ---[ end trace 68e15ca00eff8617 ]---
