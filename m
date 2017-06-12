@@ -1,157 +1,126 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-acpi: Add DMI based blacklist
-Date: Mon, 12 Jun 2017 15:11:47 +0300
-Message-ID: <515f2626-6224-f913-30e3-71b796fea61b@intel.com>
-References: <20170608185500.3317-1-hdegoede@redhat.com>
- <20170608185500.3317-2-hdegoede@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH V2] mmc: core: Remove MMC_CAP2_HC_ERASE_SZ
+Date: Mon, 12 Jun 2017 14:24:10 +0200
+Message-ID: <1497270250-11353-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:53834 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750730AbdFLMRu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 12 Jun 2017 08:17:50 -0400
-In-Reply-To: <20170608185500.3317-2-hdegoede@redhat.com>
-Content-Language: en-US
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:36143 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751962AbdFLMY3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2017 08:24:29 -0400
+Received: by mail-lf0-f47.google.com with SMTP id o83so50103197lff.3
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2017 05:24:28 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 08/06/17 21:55, Hans de Goede wrote:
-> Add a DMI based blacklist for systems where probing some sdio interfaces
-> is harmful (e.g. causes pci-e based wifi to not work).
-> 
-> BugLink: https://bbs.archlinux.org/viewtopic.php?id=224086
-> Fixes: db52d4f8a4bd ("mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus")
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> ---
-> Changes in v2:
-> -Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist module option
-> -Only use a single fix_up_power_dmi_blacklist for the GPDwin further testing
->  has shown that the DMI strings are unique enough that we do not need the
->  bios-date in there
-> 
-> Changes in v3:
-> -Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
-> 
-> Changes in v4:
-> -Rename blacklist to dmi_probe_blacklist as it now blacklists probing,
->  rather then calling acpi_device_fix_up_power.
-> -Also check bios-date against known bios-dates for the GPD win, to avoid
->  possible false positives due to the use of quite generic DMI strings
-> -Add Fixes and BugLink tags
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 64 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 64 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index ecc3aefd4643..3e12a6a8ad99 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -36,6 +36,7 @@
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/delay.h>
-> +#include <linux/dmi.h>
->  
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/pm.h>
-> @@ -83,6 +84,11 @@ struct sdhci_acpi_host {
->  	bool				use_runtime_pm;
->  };
->  
-> +struct dmi_probe_blacklist_data {
-> +	const char *hid_uid;
-> +	const char * const *bios_dates;
-> +};
-> +
->  static char *blacklist;
->  
->  static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
-> @@ -116,6 +122,34 @@ static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
->  	return false;
->  }
->  
-> +static const char *sdhci_acpi_get_dmi_blacklist(const struct dmi_system_id *bl)
-> +{
-> +	const struct dmi_system_id *dmi_id;
-> +	const struct dmi_probe_blacklist_data *bl_data;
-> +	const char *bios_date;
-> +	int i;
-> +
-> +	dmi_id = dmi_first_match(bl);
-> +	if (!dmi_id)
-> +		return NULL;
-> +
-> +	bl_data = dmi_id->driver_data;
-> +
-> +	if (!bl_data->bios_dates)
-> +		return bl_data->hid_uid;
-> +
-> +	bios_date = dmi_get_system_info(DMI_BIOS_DATE);
-> +	if (!bios_date)
-> +		return NULL;
-> +
-> +	for (i = 0; bl_data->bios_dates[i]; i++) {
-> +		if (strcmp(bl_data->bios_dates[i], bios_date) == 0)
-> +			return bl_data->hid_uid;
-> +	}
-> +
-> +	return NULL;
-> +}
-> +
->  static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
->  {
->  	return c->slot && (c->slot->flags & flag);
-> @@ -391,6 +425,33 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->  };
->  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
->  
-> +const struct dmi_probe_blacklist_data gpd_win_bl_data = {
-> +	.hid_uid = "80860F14:2",
-> +	.bios_dates = (const char * const []){
-> +		"10/25/2016", "11/18/2016", "02/21/2017", NULL },
-> +};
-> +
-> +static const struct dmi_system_id dmi_probe_blacklist[] = {
-> +	{
-> +		/*
-> +		 * Match for the GPDwin which unfortunately uses somewhat
-> +		 * generic dmi strings, which is why we test for 4 strings
-> +		 * and a known BIOS date.
-> +		 * Comparing against 29 other byt/cht boards, board_name is
-> +		 * unique to the GPDwin, where as only 2 other boards have the
-> +		 * same board_serial and 3 others have the same board_vendor
-> +		 */
-> +		.driver_data = (void *)&gpd_win_bl_data,
-> +		.matches = {
-> +			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
-> +			DMI_MATCH(DMI_BOARD_NAME, "Default string"),
-> +			DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
-> +			DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
-> +		},
+The MMC_CAP2_HC_ERASE_SZ is used only by a few mmc host drivers. Its intent
+is to enable eMMC's high-capacity erase size, as to improve the behaviour
+of the erase operations.
 
-To me this is matching by accident rather than by design, which is not
-acceptable.
+We should strive to avoid software configuration options that aren't
+necessary, but instead deploy common behaviours. For these reasons, let's
+remove the capability bit for MMC_CAP2_HC_ERASE_SZ and make it the default
+behaviour.
 
-> +	},
-> +	{ }
-> +};
-> +
->  static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
->  							 const char *uid)
->  {
-> @@ -427,6 +488,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  	hid = acpi_device_hid(device);
->  	uid = device->pnp.unique_id;
->  
-> +	if (!bl)
-> +		bl = sdhci_acpi_get_dmi_blacklist(dmi_probe_blacklist);
-> +
->  	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
->  		return -ENODEV;
->  
-> 
+Note that this change doesn't affect eMMCs supporting trim/discard, because
+these commands operates on sectors and takes precedence over erase
+commands.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
+Changes in v2:
+	- Make the behaviour from MMC_CAP2_HC_ERASE_SZ the default.
+	- Update changelog to reflect the change.
+
+---
+ drivers/mmc/core/mmc.c            | 8 ++------
+ drivers/mmc/host/sdhci-acpi.c     | 1 -
+ drivers/mmc/host/sdhci-brcmstb.c  | 3 ---
+ drivers/mmc/host/sdhci-pci-core.c | 4 +---
+ include/linux/mmc/host.h          | 1 -
+ 5 files changed, 3 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e504b66..4ffea14 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1651,12 +1651,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		mmc_set_erase_size(card);
+ 	}
+ 
+-	/*
+-	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
+-	 * bit.  This bit will be lost every time after a reset or power off.
+-	 */
+-	if (card->ext_csd.partition_setting_completed ||
+-	    (card->ext_csd.rev >= 3 && (host->caps2 & MMC_CAP2_HC_ERASE_SZ))) {
++	/* Enable ERASE_GRP_DEF. This bit is lost after a reset or power off. */
++	if (card->ext_csd.rev >= 3) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_ERASE_GROUP_DEF, 1,
+ 				 card->ext_csd.generic_cmd6_time);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 89d9a8c..cf66a3d 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -274,7 +274,6 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+ 		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+ 		   MMC_CAP_CMD_DURING_TFR | MMC_CAP_WAIT_WHILE_BUSY,
+-	.caps2   = MMC_CAP2_HC_ERASE_SZ,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 242c5dc..e2f6383 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -89,9 +89,6 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 		goto err_clk;
+ 	}
+ 
+-	/* Enable MMC_CAP2_HC_ERASE_SZ for better max discard calculations */
+-	host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+-
+ 	sdhci_get_of_property(pdev);
+ 	mmc_of_parse(host->mmc);
+ 
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 8fa84a0..227a5cb 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -347,8 +347,7 @@ static inline void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
+ static int mfd_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE;
+-	slot->host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC |
+-				  MMC_CAP2_HC_ERASE_SZ;
++	slot->host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
+ 	return 0;
+ }
+ 
+@@ -587,7 +586,6 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+ 				 MMC_CAP_CMD_DURING_TFR |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+-	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+ 	slot->hw_reset = sdhci_pci_int_hw_reset;
+ 	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BSW_EMMC)
+ 		slot->host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 9209f95..c81380a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -287,7 +287,6 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
+-#define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+ #define MMC_CAP2_PACKED_RD	(1 << 12)	/* Allow packed read */
+-- 
+2.7.4
 
