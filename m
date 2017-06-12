@@ -1,69 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: meson-gx: work around broken SDIO with certain
- WiFi chips
-Date: Mon, 12 Jun 2017 09:58:33 +0200
-Message-ID: <CAPDyKFoHtjm5-e-CTG4BrWyzayRe3Yir-2Y-bJkLfkyotRgT+Q@mail.gmail.com>
-References: <8ac1f97a-afbb-dde9-7e60-3e51396cb8ff@gmail.com>
+Subject: Re: [PATCH] ARM: dts: omap3-overo: Remove "vqmmc-supply" property
+ from MMC dt node
+Date: Mon, 12 Jun 2017 09:58:49 +0200
+Message-ID: <CAPDyKFqN97jdF+WNbO8dRZofgL8OmLP-d=oUTV7Px=4Tg1BF=A@mail.gmail.com>
+References: <20170609084141.15582-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:33935 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751779AbdFLH6f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2017 03:58:35 -0400
-Received: by mail-qt0-f178.google.com with SMTP id c10so116861248qtd.1
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2017 00:58:34 -0700 (PDT)
-In-Reply-To: <8ac1f97a-afbb-dde9-7e60-3e51396cb8ff@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170609084141.15582-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Florian Vaussard <florian.vaussard@epfl.ch>, linux-omap <linux-omap@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 10 June 2017 at 13:36, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> There have been reports about SDIO failing with certain WiFi chips in
-> descriptor chain mode. SD / eMMC are working fine.
+On 9 June 2017 at 10:41, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> commit 94647a30124e2c7 ("ARM: dts: omap3-overo: Enable WiFi/BT combo")
+> while enabling WiFi/BT combo added regulator to trigger the nReset
+> signal of the Bluetooth module in vqmmc-supply. However BT should be
+> handled by UART. Moreover "vqmmc" is not a defined binding for
+> omap_hsmmc. While "vqmmc" in mmc2 hasn't caused any issues so far,
+> mmc2 will start to mis-behave once omap_hsmmc defines "vqmmc"
+> binding.
 >
-> So let's fall back to bounce buffer mode for command SD_IO_RW_EXTENDED.
-> This was reported to fix the error.
+> Remove "vqmmc-supply" property in mmc2 here.
 >
-> Fixes: 79ed05e329c3 "mmc: meson-gx: add support for descriptor chain mode"
-> Cc: <stable@vger.kernel.org> # 4.12.x
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-> Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
-> v2:
-> - fixed affected WiFi chip: actually it is AP6255
-> - added tested-by
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
+>  arch/arm/boot/dts/omap3-overo-base.dtsi | 11 -----------
+>  1 file changed, 11 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 1842ed34..4cdbe3c0 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -210,6 +210,15 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
->         int i;
->         bool use_desc_chain_mode = true;
+> diff --git a/arch/arm/boot/dts/omap3-overo-base.dtsi b/arch/arm/boot/dts/omap3-overo-base.dtsi
+> index 401fae838fe9..cd220342a805 100644
+> --- a/arch/arm/boot/dts/omap3-overo-base.dtsi
+> +++ b/arch/arm/boot/dts/omap3-overo-base.dtsi
+> @@ -74,16 +74,6 @@
+>                 gpio = <&gpio1 16 GPIO_ACTIVE_HIGH>;            /* gpio_16: WiFi nReset */
+>                 startup-delay-us = <10000>;
+>         };
+> -
+> -       /* Regulator to trigger the nReset signal of the Bluetooth module */
+> -       w3cbw003c_bt_nreset: regulator-w3cbw003c-bt-nreset {
+> -               compatible = "regulator-fixed";
+> -               regulator-name = "regulator-w3cbw003c-bt-nreset";
+> -               regulator-min-microvolt = <3300000>;
+> -               regulator-max-microvolt = <3300000>;
+> -               gpio = <&gpio6 4 GPIO_ACTIVE_HIGH>;             /* gpio_164: BT nReset */
+> -               startup-delay-us = <10000>;
+> -       };
+>  };
 >
-> +       /*
-> +        * Broken SDIO with AP6255-based WiFi on Khadas VIM Pro has been
-> +        * reported. For some strange reason this occurs in descriptor
-> +        * chain mode only. So let's fall back to bounce buffer mode
-> +        * for command SD_IO_RW_EXTENDED.
-> +        */
-> +       if (mrq->cmd->opcode == SD_IO_RW_EXTENDED)
-> +               return;
-> +
->         for_each_sg(data->sg, sg, data->sg_len, i)
->                 /* check for 8 byte alignment */
->                 if (sg->offset & 7) {
+>  &omap3_pmx_core {
+> @@ -191,7 +181,6 @@
+>         pinctrl-names = "default";
+>         pinctrl-0 = <&mmc2_pins>;
+>         vmmc-supply = <&w3cbw003c_npoweron>;
+> -       vqmmc-supply = <&w3cbw003c_bt_nreset>;
+>         vmmc_aux-supply = <&w3cbw003c_wifi_nreset>;
+>         bus-width = <4>;
+>         cap-sdio-irq;
 > --
-> 2.13.0
+> 2.11.0
 >
