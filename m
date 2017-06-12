@@ -1,67 +1,20 @@
-From: "A.S. Dong" <aisheng.dong@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci: clear interrupt when retune interrupt
- received
-Date: Mon, 12 Jun 2017 14:03:11 +0000
-Message-ID: <AM3PR04MB30648B16FD42658D2212F6480CD0@AM3PR04MB306.eurprd04.prod.outlook.com>
-References: <1496947916-15785-1-git-send-email-troy.kisky@boundarydevices.com>
- <9b1a2764-e348-b032-a61b-e2c09286aa0a@intel.com>
- <e43d517d-2a73-e619-eba8-f652da15ccd5@boundarydevices.com>
- <bf88c79a-acde-9780-b90a-b25dc9f9bae2@intel.com>
+From: "Dave Dawes" <dmoore32@student.savannahstate.edu>
+Subject: I Would love to discuse something with you.
+Date: Mon, 12 Jun 2017 07:52:10 -0700
+Message-ID: <CY1PR0101MB1228FB454049651D8411608783CD0@CY1PR0101MB1228.prod.exchangelabs.com>
+Reply-To: ddawes231@qq.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-eopbgr40079.outbound.protection.outlook.com ([40.107.4.79]:26848
-        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
+Received: from mail-cys01nam02hn0238.outbound.protection.outlook.com ([104.47.37.238]:62843
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751954AbdFLODP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 12 Jun 2017 10:03:15 -0400
-In-Reply-To: <bf88c79a-acde-9780-b90a-b25dc9f9bae2@intel.com>
-Content-Language: en-US
+        id S1752677AbdFLOwQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 12 Jun 2017 10:52:16 -0400
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Troy Kisky <troy.kisky@boundarydevices.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@nxp.com>, "gary.bisson@boundarydevices.com" <gary.bisson@boundarydevices.com>
+To: Recipients <dmoore32@student.savannahstate.edu>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZHJpYW4gSHVudGVyIFttYWls
-dG86YWRyaWFuLmh1bnRlckBpbnRlbC5jb21dDQo+IFNlbnQ6IE1vbmRheSwgSnVuZSAxMiwgMjAx
-NyA4OjM0IFBNDQo+IFRvOiBUcm95IEtpc2t5OyBBLlMuIERvbmcNCj4gQ2M6IHVsZi5oYW5zc29u
-QGxpbmFyby5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IEZhYmlvIEVzdGV2YW07DQo+
-IGdhcnkuYmlzc29uQGJvdW5kYXJ5ZGV2aWNlcy5jb20NCj4gU3ViamVjdDogUmU6IFtQQVRDSF0g
-bW1jOiBzZGhjaTogY2xlYXIgaW50ZXJydXB0IHdoZW4gcmV0dW5lIGludGVycnVwdA0KPiByZWNl
-aXZlZA0KPiANCj4gT24gMDkvMDYvMTcgMTg6NDUsIFRyb3kgS2lza3kgd3JvdGU6DQo+ID4gT24g
-Ni85LzIwMTcgNTo0NiBBTSwgQWRyaWFuIEh1bnRlciB3cm90ZToNCj4gPj4gT24gMDgvMDYvMTcg
-MjE6NTEsIFRyb3kgS2lza3kgd3JvdGU6DQo+ID4+PiBUaGlzIGxldHMgdGhlIGxvb3AgZXhpdCBi
-ZWZvcmUgbWF4X2xvb3BzIHJlYWNoZXMgMC4NCj4gPj4NCj4gPj4gTmVlZHMgbW9yZSBleHBsYW5h
-dGlvbi4NCj4gPj4NCj4gPj4+DQo+ID4+PiBGaXhlczogZjM3YjIwZWJjNGJjICgibW1jOiBzZGhj
-aTogYWRkIHN0YW5kYXJkIGh3IGF1dG8gcmV0dW5pbmcNCj4gPj4+IHN1cHBvcnQiKQ0KPiA+Pj4N
-Cj4gPj4+IFNpZ25lZC1vZmYtYnk6IFRyb3kgS2lza3kgPHRyb3kua2lza3lAYm91bmRhcnlkZXZp
-Y2VzLmNvbT4NCj4gPj4+IC0tLQ0KPiA+Pj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8IDIg
-Ky0NCj4gPj4+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkN
-Cj4gPj4+DQo+ID4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIGIvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+ID4+PiBpbmRleCBlY2QwZDQzLi5lMTA0MTk0IDEwMDY0
-NA0KPiA+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+ID4+PiArKysgYi9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLmMNCj4gPj4+IEBAIC0yNjg3LDcgKzI2ODcsNyBAQCBzdGF0aWMg
-aXJxcmV0dXJuX3Qgc2RoY2lfaXJxKGludCBpcnEsIHZvaWQNCj4gPj4+ICpkZXZfaWQpDQo+ID4+
-Pg0KPiA+Pj4gIAkJLyogQ2xlYXIgc2VsZWN0ZWQgaW50ZXJydXB0cy4gKi8NCj4gPj4+ICAJCW1h
-c2sgPSBpbnRtYXNrICYgKFNESENJX0lOVF9DTURfTUFTSyB8IFNESENJX0lOVF9EQVRBX01BU0sg
-fA0KPiA+Pj4gLQkJCQkgIFNESENJX0lOVF9CVVNfUE9XRVIpOw0KPiA+Pj4gKwkJCQkgIFNESENJ
-X0lOVF9CVVNfUE9XRVIgfCBTREhDSV9JTlRfUkVUVU5FKTsNCj4gPj4NCj4gPj4gU0RIQ0lfSU5U
-X1JFVFVORSBpcyBkZWZpbmVkIHRvIGJlIHJlYWQtb25seSBzbyB3aHkgd3JpdGUgdG8gaXQuDQo+
-ID4NCj4gPg0KPiA+IFNESENJX0lOVF9SRVRVTkUgaXMgYml0IDEyDQo+ID4gaG9zdC9zZGhjaS5o
-OiNkZWZpbmUgIFNESENJX0lOVF9SRVRVTkUgIDB4MDAwMDEwMDANCj4gPg0KPiA+IFdoaWNoIGF0
-IGxlYXN0IGZyb20gaS5teDYvaS5teDcgcmVmZXJlbmNlIG1hbnVhbHMsIGlzIGEgd3JpdGUgMSB0
-byBjbGVhcg0KPiBiaXQobWFya2VkIGFzIHcxYykuDQo+IA0KPiBTbyBpdCBkb2Vzbid0IHdvcmsg
-dGhlIHdheSBpdCBpcyBzcGVjaWZpZWQgaW4gdGhlIFNESENJIHNwZWMuDQo+IA0KPiBJdCBzaG91
-bGQgYmUgaGFybWxlc3MgdG8gd3JpdGUgMSwgYnV0IHlvdSBzdGlsbCBuZWVkIHRvIGV4cGxhaW4g
-aG93IHRoZQ0KPiBiaXQgd29ya3Mgb24geW91ciBoYXJkd2FyZS4gIFdoYXQgZG9lcyAiVGhpcyBs
-ZXRzIHRoZSBsb29wIGV4aXQgYmVmb3JlDQo+IG1heF9sb29wcyByZWFjaGVzIDAiIG1lYW4/DQo+
-IA0KDQpDYW4ndCByZW1lbWJlciB0b28gbXVjaCBoaXN0b3J5Lg0KU2ltcGx5IGZyb20gY29kZSBp
-bnNwZWN0aW9uLCBpdCBzZWVtcyB3aXRob3V0IGNsZWFyIFNESENJX0lOVF9SRVRVTkUsDQppdCB3
-aWxsIGxvb3AgbWF4X2xvb3BzLg0KDQpOb3Qgc3VyZSBhYm91dCAiIlRoaXMgbGV0cyB0aGUgbG9v
-cCBleGl0IGJlZm9yZSBtYXhfbG9vcHMgcmVhY2hlcyAwIiBtZWFuPyINCg0KVHJveSwNCldvdWxk
-IHlvdSBoZWxwIGV4cGxhaW4gaXQ/DQoNClJlZ2FyZHMNCkRvbmcgQWlzaGVuZw0KDQo+ID4NCj4g
-Pg0KPiA+DQo+ID4+DQo+ID4+PiAgCQlzZGhjaV93cml0ZWwoaG9zdCwgbWFzaywgU0RIQ0lfSU5U
-X1NUQVRVUyk7DQo+ID4+Pg0KPiA+Pj4gIAkJaWYgKGludG1hc2sgJiAoU0RIQ0lfSU5UX0NBUkRf
-SU5TRVJUIHwgU0RIQ0lfSU5UX0NBUkRfUkVNT1ZFKSkNCj4gew0KPiA+Pj4NCj4gPj4NCj4gPj4N
-Cj4gPg0KPiA+DQoNCg==
+=20
