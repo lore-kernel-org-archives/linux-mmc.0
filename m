@@ -1,92 +1,394 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [PATCH] mmc: meson-gx: work around broken SDIO with certain WiFi chips
-Date: Sun, 11 Jun 2017 22:31:54 +0200
-Message-ID: <CAFBinCBOS7mDja3EdfNViCqzuk_=ur0bQOG+6ZeL-xFQZM7+Ug@mail.gmail.com>
-References: <dd12ffc8-e2a4-53bd-caa5-83bb7cbcd5e5@gmail.com>
- <CAFBinCDUNCgwm9YS9w8uQ6i1MX4SR1ZHf-mn8UnObnejjZiQOw@mail.gmail.com> <e0844236-ba11-3256-c388-ce2405c3b7b8@gmail.com>
+From: liwei <liwei213@huawei.com>
+Subject: [PATCH v3] mmc: dw_mmc-k3: add sd support for hi3660
+Date: Mon, 12 Jun 2017 15:46:02 +0800
+Message-ID: <20170612074602.55280-1-liwei213@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:34412 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751794AbdFKUcQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Jun 2017 16:32:16 -0400
-Received: by mail-wr0-f173.google.com with SMTP id g76so76900190wrd.1
-        for <linux-mmc@vger.kernel.org>; Sun, 11 Jun 2017 13:32:16 -0700 (PDT)
-In-Reply-To: <e0844236-ba11-3256-c388-ce2405c3b7b8@gmail.com>
+Received: from szxga02-in.huawei.com ([45.249.212.188]:7367 "EHLO
+        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751918AbdFLHqR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2017 03:46:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, shawn.lin@rock-chips.com, wsa+renesas@sang-engineering.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: guodong.xu@linaro.org
 
-On Sat, Jun 10, 2017 at 1:34 PM, Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> Am 10.06.2017 um 00:06 schrieb Martin Blumenstingl:
->> Hi Heiner,
->>
->> thanks for finding a solution (it didn't even take you long)!
->>
->> On Thu, Jun 8, 2017 at 8:43 PM, Heiner Kallweit <hkallweit1@gmail.com> wrote:
->>> There have been reports about SDIO failing with certain WiFi chips in
->>> descriptor chain mode. SD / eMMC are working fine.
->>>
->>> So let's fall back to bounce buffer mode for command SD_IO_RW_EXTENDED.
->>> This was reported to fix this error.
->>>
->>> Fixes: 79ed05e329c3 "mmc: meson-gx: add support for descriptor chain mode"
->>> Cc: <stable@vger.kernel.org> # 4.12.x
->>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
->> Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->>
->>> ---
->>>  drivers/mmc/host/meson-gx-mmc.c | 9 +++++++++
->>>  1 file changed, 9 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->>> index 1842ed34..4cdbe3c0 100644
->>> --- a/drivers/mmc/host/meson-gx-mmc.c
->>> +++ b/drivers/mmc/host/meson-gx-mmc.c
->>> @@ -210,6 +210,15 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
->>>         int i;
->>>         bool use_desc_chain_mode = true;
->>>
->>> +       /*
->>> +        * Broken SDIO with AP6335-based WiFi on Khadas VIM Pro has been
->> nit-pick: Khadas VIM Pro uses an Ampak AP6255 (not AP6335)
->>
-> Uups, I obviously mixed up the device with one of the S905-based tv boxes.
-> Will fix it.
->
->>> +        * reported. For some strange reason this occurs in descriptor
->>> +        * chain mode only. So let's fall back to bounce buffer mode
->>> +        * for command SD_IO_RW_EXTENDED.
->>> +        */
->>> +       if (mrq->cmd->opcode == SD_IO_RW_EXTENDED)
->>> +               return;
->>> +
->>>         for_each_sg(data->sg, sg, data->sg_len, i)
->>>                 /* check for 8 byte alignment */
->>>                 if (sg->offset & 7) {
->>> --
->>> 2.13.0
->>>
->> for the record: wireless performance with this patch applied is excellent
->>
-> Just curious:
-> Do you also experience the lagging mentioned by crow?
-I just made a quick ping test:
+Add sd card support for hi3660 soc
 
-Khadas VIM Pro (AP6255, directly connected to my 802.11ac wifi AP):
-30 packets transmitted, 30 received, 0% packet loss, time 29057ms
-rtt min/avg/max/mdev = 2.263/13.614/20.336/4.583 ms
+Major changes in v3:
+ - solve review comments from Heiner Kallweit.
+   *use the GENMASK and FIELD_PREP macros replace the bit shift operation.
+   *use usleep_range() replace udelay() and mdelay().
 
-on my workstation (connected via ethernet to a router running LEDE,
-which is also connected via wifi to my 802.11ac wifi AP):
-30 packets transmitted, 30 received, 0% packet loss, time 29040ms
-rtt min/avg/max/mdev = 1.040/1.405/5.977/0.862 ms
+Signed-off-by: Li Wei <liwei213@huawei.com>
+Signed-off-by: Chen Jun <chenjun14@huawei.com>
+---
+ drivers/mmc/host/dw_mmc-k3.c | 314 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 314 insertions(+)
 
-(distance between my Khadas VIM Pro and my AP vs the router running
-LEDE vs my AP is roughly the same, less than 50cm difference in
-distance, no additional walls etc.)
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index e38fb0020bb1..a6e13bd83b9f 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -8,6 +8,8 @@
+  * (at your option) any later version.
+  */
+ 
++#include <linux/bitops.h>
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/mmc/host.h>
+@@ -28,7 +30,40 @@
+ #define AO_SCTRL_SEL18		BIT(10)
+ #define AO_SCTRL_CTRL3		0x40C
+ 
++#define DWMMC_SD_ID   1
++#define DWMMC_SDIO_ID 2
++
++#define SOC_SCTRL_SCPERCTRL5    (0x314)
++#define SDCARD_IO_SEL18         BIT(2)
++
++#define GENCLK_DIV (7)
++
++#define GPIO_CLK_ENABLE                   BIT(16)
++#define GPIO_CLK_DIV_MASK                 GENMASK(11, 8)
++#define GPIO_USE_SAMPLE_DLY_MASK          GENMASK(13, 13)
++#define UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)
++#define UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)
++#define UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)
++
++#define SDMMC_UHS_REG_EXT	0x108
++#define SDMMC_ENABLE_SHIFT	0x110
++
++#define TIMING_MODE     3
++#define TIMING_CFG_NUM 10
++
++#define PULL_DOWN BIT(1)
++#define PULL_UP   BIT(0)
++
++#define NUM_PHASES (40)
++
++#define ENABLE_SHIFT_MIN_SMPL (4)
++#define ENABLE_SHIFT_MAX_SMPL (12)
++#define USE_DLY_MIN_SMPL (11)
++#define USE_DLY_MAX_SMPL (14)
++
+ struct k3_priv {
++	u8 ctrl_id;
++	u32 cur_speed;
+ 	struct regmap	*reg;
+ };
+ 
+@@ -38,6 +73,41 @@ static unsigned long dw_mci_hi6220_caps[] = {
+ 	0
+ };
+ 
++struct hs_timing {
++	int drv_phase;
++	int sam_dly;
++	int sam_phase_max;
++	int sam_phase_min;
++};
++
++struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
++	{ /* reserved */ },
++	{ /* SD */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{6, 0,  4,  4,},  /* 1: MMC_HS */
++		{6, 0,  3,  3,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  2,  2,},  /* 4: SDR25 */
++		{4, 0, 11,  0,},  /* 5: SDR50 */
++		{6, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	},
++	{ /* SDIO */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{0},              /* 1: MMC_HS */
++		{6, 0, 15, 15,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  0,  0,},  /* 4: SDR25 */
++		{4, 0, 12,  0,},  /* 5: SDR50 */
++		{5, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	}
++};
++
+ static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ {
+ 	int ret;
+@@ -66,6 +136,10 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
+ 	if (IS_ERR(priv->reg))
+ 		priv->reg = NULL;
+ 
++	priv->ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
++	if (priv->ctrl_id < 0)
++		priv->ctrl_id = 0;
++
+ 	host->priv = priv;
+ 	return 0;
+ }
+@@ -144,7 +218,242 @@ static const struct dw_mci_drv_data hi6220_data = {
+ 	.execute_tuning		= dw_mci_hi6220_execute_tuning,
+ };
+ 
++static void dw_mci_hs_set_timing(struct dw_mci *host, int timing, int sam_phase)
++{
++	int drv_phase;
++	int sam_dly;
++	int ctrl_id;
++	int use_sam_dly = 0;
++	int enable_shift = 0;
++	int reg_value;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++	ctrl_id = priv->ctrl_id;
++
++	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
++	sam_dly   = hs_timing_cfg[ctrl_id][timing].sam_dly;
++	if (sam_phase == -1)
++		sam_phase = (hs_timing_cfg[ctrl_id][timing].sam_phase_max +
++			     hs_timing_cfg[ctrl_id][timing].sam_phase_min) / 2;
++
++	if (timing == MMC_TIMING_UHS_SDR50 ||
++	    timing == MMC_TIMING_UHS_SDR104) {
++		if (sam_phase >= ENABLE_SHIFT_MIN_SMPL &&
++		    sam_phase <= ENABLE_SHIFT_MAX_SMPL)
++			enable_shift = 1;
++	}
++	if (timing == MMC_TIMING_UHS_SDR104) {
++		if (sam_phase >= USE_DLY_MIN_SMPL &&
++		    sam_phase <= USE_DLY_MAX_SMPL)
++			use_sam_dly = 1;
++	}
++
++	mci_writel(host, GPIO, 0x0);
++	usleep_range(5, 10);
++
++	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, sam_phase) |\
++				FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK ,sam_dly) |\
++				FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK,drv_phase);		
++	mci_writel(host, UHS_REG_EXT, reg_value);
++
++	mci_writel(host, ENABLE_SHIFT, enable_shift);
++
++	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |\
++				FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK,use_sam_dly);
++	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
++
++	/* We should delay 1ms wait for timing setting finished. */
++	usleep_range(1000, 2000);
++}
++
++int dw_mci_hi3660_init(struct dw_mci *host)
++{
++	/* set threshold to 512 bytes */
++	mci_writel(host, CDTHRCTL, 0x02000001);
++
++	dw_mci_hs_set_timing(host, MMC_TIMING_LEGACY, -1);
++	host->bus_hz /= (GENCLK_DIV + 1);
++
++	return 0;
++}
++
++static int dw_mci_set_sel18(struct dw_mci *host, bool set)
++{
++	int ret;
++	unsigned int val;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++
++	val = set ? SDCARD_IO_SEL18 : 0;
++	ret = regmap_update_bits(priv->reg, SOC_SCTRL_SCPERCTRL5,
++				 SDCARD_IO_SEL18, val);
++	if (ret) {
++		dev_err(host->dev, "sel18 %u error\n", val);
++		return ret;
++	}
++
++	return 0;
++}
++
++void dw_mci_hi3660_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	int ret;
++	unsigned long wanted;
++	unsigned long actual;
++	struct k3_priv *priv = host->priv;
++
++	if (!ios->clock || ios->clock == priv->cur_speed)
++		return;
++
++	wanted = ios->clock * (GENCLK_DIV + 1);
++	ret = clk_set_rate(host->ciu_clk, wanted);
++	if (ret) {
++		dev_err(host->dev, "failed to set rate %luHz\n", wanted);
++		return;
++	}
++	actual = clk_get_rate(host->ciu_clk);
++
++	dw_mci_hs_set_timing(host, ios->timing, -1);
++	host->bus_hz = actual / (GENCLK_DIV + 1);
++	host->current_speed = 0;
++	priv->cur_speed = host->bus_hz;
++}
++
++static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
++{
++	int i;
++	int interval;
++	unsigned int v;
++	unsigned int len;
++	unsigned int range_start = 0;
++	unsigned int range_length = 0;
++	unsigned int middle_range = 0;
++
++	if (!sample_flag)
++		return -EIO;
++
++	if (~sample_flag == 0)
++		return 0;
++
++	i = ffs(sample_flag) - 1;
++
++	/*A clock cycle is divided into 32 phases, 
++	*each of which is represented by a bit, finding the optimal phase.
++	*/
++	while (i < 32) {
++		v = ror32(sample_flag, i);
++		len = ffs(~v) - 1;
++
++		if (len > range_length) {
++			range_length = len;
++			range_start = i;
++		}
++
++		interval = ffs(v >> len) - 1;
++		if (interval < 0)
++			break;
++
++		i += len + interval;
++	}
++
++	middle_range = range_start + range_length / 2;
++	if (middle_range >= 32)
++		middle_range %= 32;
++
++	return middle_range;
++}
++
++static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
++{
++	int i = 0;
++	struct dw_mci *host = slot->host;
++	struct mmc_host *mmc = slot->mmc;
++	int sam_phase = 0;
++	u32 tuning_sample_flag = 0;
++	int best_clksmpl = 0;
++
++	for (i = 0; i < NUM_PHASES; ++i, ++sam_phase) {
++		sam_phase %= 32;
++
++		mci_writel(host, TMOUT, ~0);
++		dw_mci_hs_set_timing(host, mmc->ios.timing, sam_phase);
++
++		if (!mmc_send_tuning(mmc, opcode, NULL))
++			tuning_sample_flag |= (1 << sam_phase);
++		else
++			tuning_sample_flag &= ~(1 << sam_phase);
++	}
++
++	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);
++	if (best_clksmpl < 0) {
++		dev_err(host->dev, "All phases bad!\n");
++		return -EIO;
++	}
++
++	dw_mci_hs_set_timing(host, mmc->ios.timing, best_clksmpl);
++
++	dev_info(host->dev, "tuning ok best_clksmpl %u tuning_sample_flag %x\n",
++		 best_clksmpl, tuning_sample_flag);
++	return 0;
++}
++
++static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	int ret;
++	int min_uv = 0;
++	int max_uv = 0;
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct k3_priv *priv;
++	struct dw_mci *host;
++
++	host = slot->host;
++	priv = host->priv;
++
++	if (!priv || !priv->reg)
++		return 0;
++
++	if (priv->ctrl_id == DWMMC_SDIO_ID)
++		return 0;
++
++	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
++		ret = dw_mci_set_sel18(host, 0);
++		if (ret)
++			return ret;
++		min_uv = 2950000;
++		max_uv = 2950000;
++	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		ret = dw_mci_set_sel18(host, 1);
++		if (ret)
++			return ret;
++		min_uv = 1800000;
++		max_uv = 1800000;
++	}
++
++	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
++		return 0;
++
++	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
++	if (ret) {
++		dev_dbg(host->dev, "Regulator set error %d: %d - %d\n",
++			ret, min_uv, max_uv);
++		return ret;
++	}
++	return 0;
++}
++
++static const struct dw_mci_drv_data hi3660_data = {
++	.init = dw_mci_hi3660_init,
++	.set_ios = dw_mci_hi3660_set_ios,
++	.parse_dt = dw_mci_hi6220_parse_dt,
++	.execute_tuning = dw_mci_hi3660_execute_tuning,
++	.switch_voltage  = dw_mci_hi3660_switch_voltage,
++};
++
+ static const struct of_device_id dw_mci_k3_match[] = {
++	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
+ 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
+ 	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
+ 	{},
+@@ -155,6 +464,11 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
+ {
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
++	struct reset_control	*rst;
++
++	rst = devm_reset_control_get(&pdev->dev, NULL);
++	if (!IS_ERR(rst))
++		reset_control_reset(rst);
+ 
+ 	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
+ 	drv_data = match->data;
+-- 
+2.11.0
 
-so the delay is definitely "higher" than with other devices, but an
-average pin time of ~14ms still doesn't seem to cause any lags for me
