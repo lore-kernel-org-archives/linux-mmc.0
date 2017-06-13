@@ -1,51 +1,38 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH] mmc: queue: Drop call to blk_cleanup_queue()
-Date: Tue, 13 Jun 2017 10:59:06 +0200
-Message-ID: <20170613085906.5726-1-linus.walleij@linaro.org>
+Subject: Re: "refcount_t: underflow; use-after-free" when removing a SD card
+Date: Tue, 13 Jun 2017 11:00:21 +0200
+Message-ID: <CACRpkdZMG1WoJDgiJCEgUcEXXLi6qB-=FL7mc+2WpZTuJeTJJQ@mail.gmail.com>
+References: <636ebd78-d813-aad2-bb24-b52ad75ff192@gmail.com>
+ <CAPDyKFrmKUj2jv_HOxVJfAQD1emzXLv_80__Bddm2_EABqqRVQ@mail.gmail.com>
+ <993cbd83-7e11-7655-ffab-1f352a16fd4b@gmail.com> <e9ff53a6-2863-0d69-ba7c-eab80b9b5552@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f53.google.com ([209.85.215.53]:36763 "EHLO
-        mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752401AbdFMI7Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2017 04:59:24 -0400
-Received: by mail-lf0-f53.google.com with SMTP id o83so65126622lff.3
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2017 01:59:18 -0700 (PDT)
+Received: from mail-it0-f46.google.com ([209.85.214.46]:35173 "EHLO
+        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751859AbdFMJAX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2017 05:00:23 -0400
+Received: by mail-it0-f46.google.com with SMTP id m62so37113389itc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2017 02:00:23 -0700 (PDT)
+In-Reply-To: <e9ff53a6-2863-0d69-ba7c-eab80b9b5552@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-commit 0d8587376878c8da5a4953025e621c5dceb8b76a
-"mmc: core: Allocate per-request data using the block layer core"
-added a call to blk_cleanup_queue() into the mmc_cleanup_queue()
-call.
+On Tue, Jun 13, 2017 at 12:05 AM, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 
-This might look intutitive (and that is why I made the mistake),
-since the cleanup is called if we fail in mmc_init_queue(), but due
-to the nature of the MMC stack we are cleaning up the queue
-inside the stack once the queue has been started.
+>> Mentioned commit added a call to blk_cleanup_queue to mmc_cleanup_queue.
+>> Now blk_cleanup_queue is called twice and I'm not sure whether this is correct.
+>>
+> By the way: Removing the new call to blk_cleanup_queue in mmc_cleanup_queue
+> fixed the issue for me, but whether this is the correct fix I can't tell.
 
-The actual call to blk_cleanup_queue() is in mmc_blk_put() in
-block.c, calling it twice wreaks havoc.
+It's the right fix.
 
-Fixes: 0d8587376878 ("mmc: core: Allocate per-request data using the block layer core")
-Reported-by: Heiner Kallweit <hkallweit1@gmail.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/core/queue.c | 1 -
- 1 file changed, 1 deletion(-)
+I sent a patch with your Reported-by.
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 4bf9978b707a..ba689a2ffc51 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -312,7 +312,6 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	q->queuedata = NULL;
- 	blk_start_queue(q);
- 	spin_unlock_irqrestore(q->queue_lock, flags);
--	blk_cleanup_queue(mq->queue);
- 
- 	mq->card = NULL;
- }
--- 
-2.9.4
+Thanks a lot for reporting this (and suggesting the fix).
 
+Yours,
+Linus Walleij
