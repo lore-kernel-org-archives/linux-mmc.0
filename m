@@ -1,413 +1,217 @@
-From: liwei <liwei213@huawei.com>
-Subject: [PATCH v4] mmc: dw_mmc-k3: add sd support for hi3660
-Date: Tue, 13 Jun 2017 15:25:22 +0800
-Message-ID: <20170613072522.42923-1-liwei213@huawei.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v4 1/2] mmc: sdhci-acpi: Add blacklist module option
+Date: Tue, 13 Jun 2017 09:30:53 +0200
+Message-ID: <a4fa1717-ba0f-4d7f-b8d7-730eafd9ebc3@redhat.com>
+References: <20170608185500.3317-1-hdegoede@redhat.com>
+ <9eb9a1a5-7644-d5ca-e6bb-d20fc29000d0@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from szxga01-in.huawei.com ([45.249.212.187]:8267 "EHLO
-        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752702AbdFMHZc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2017 03:25:32 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:12891 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751955AbdFMHbB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 13 Jun 2017 03:31:01 -0400
+In-Reply-To: <9eb9a1a5-7644-d5ca-e6bb-d20fc29000d0@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, shawn.lin@rock-chips.com, wsa+renesas@sang-engineering.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: guodong.xu@linaro.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-Add sd card support for hi3660 soc
+Hi,
 
-Signed-off-by: Li Wei <liwei213@huawei.com>
-Signed-off-by: Chen Jun <chenjun14@huawei.com>
+On 12-06-17 14:04, Adrian Hunter wrote:
+> On 08/06/17 21:54, Hans de Goede wrote:
+>> Commit e5bbf30733f9 ("mmc: sdhci-acpi: Ensure connected devices are
+>> powered when probing") introduced unconditional calling of
+>> acpi_device_fix_up_power() on the mmc controller and its children.
+>>
+>> This broke wifi on some systems because acpi_device_fix_up_power()
+>> was called even for disabled children sometimes leaving gpio-s in
+>> a state where wifi would not work, this was fixed in
+>> commit e1d070c3793a ("mmc: sdhci-acpi: Only powered up enabled acpi
+>> child devices").
+>>
+>> Unfortunately on some devices calling acpi_device_fix_up_power()
+>> still causes issues. Specifically on the GPD-win mini clam-shell PC
+>> which has a pci-e wifi module, it causes the wifi module to get
+>> turned off. This is a BIOS bug and I've tried to get the manufacturer
+>> to fix this but sofar they have not responded (and even if they do
+>> then we cannot assume all users will update their BIOS).
+>>
+>> Since the GPD-win uses a pci-e wifi module the sdhci controller for
+>> sdio cards really should not get initialized on it at all.
+>>
+>> This commit adds a new sdhci_acpi.blacklist module option which can
+>> be set to an ACPI hid:uid pair, e.g. "80860F14:2" to disable probing
+>> for the sdhci host matching the hid:uid pair, fixing the wifi not
+>> working on this machine.
+>>
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> 
+> The subject reads like it is trying to blacklist a module.  How about "Add
+> module option to blacklist a device"
 
-Major changes in v3:
- - solve review comments from Heiner Kallweit.
-   *use the GENMASK and FIELD_PREP macros replace the bit shift operation.
-   *use usleep_range() replace udelay() and mdelay().
+Sure that works for me.
 
-Major changes in v4:
- - solve review comments from Jaehoon Chung.
-   *move common register for dwmmc controller to dwmmc header file.
-   *modify definitions type of some register variables.
-   *get rid of the magic numbers.
----
- drivers/mmc/host/dw_mmc-k3.c | 313 +++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h    |   2 +
- 2 files changed, 315 insertions(+)
+>> ---
+>> Changes in v2:
+>> -Make the module option take a hid:uid pair string, instead of it
+>>   being a boolean option, so that it only applies to one host
+>>
+>> Changes in v3:
+>> -Make the module option skip probing the device entirely (return -ENODEV)
+>>
+>> Changes in v4:
+>> -Fix bad seperator (now hid_end) check
+>> -Allow passing multiple HID:UID pairs seperated by commas
+>> ---
+>>   drivers/mmc/host/sdhci-acpi.c | 46 ++++++++++++++++++++++++++++++++++++++++---
+>>   1 file changed, 43 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>> index 89d9a8c014f5..ecc3aefd4643 100644
+>> --- a/drivers/mmc/host/sdhci-acpi.c
+>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>> @@ -83,6 +83,39 @@ struct sdhci_acpi_host {
+>>   	bool				use_runtime_pm;
+>>   };
+>>   
+>> +static char *blacklist;
+>> +
+>> +static bool sdhci_acpi_compare_hid_uid(const char *match, const char *hid,
+>> +				       const char *uid)
+>> +{
+>> +	const char *hid_end, *uid_end, *end;
+>> +
+>> +	if (!match || !hid || !uid)
+>> +		return false;
+>> +
+>> +	end = match + strlen(match);
+>> +
+>> +	do {
+>> +		hid_end = strchr(match, ':');
+>> +		if (!hid_end)
+>> +			return false;
+>> +
+>> +		uid_end = strchr(hid_end, ',');
+>> +		if (!uid_end)
+>> +			uid_end = end;
+>> +
+>> +		if (strlen(hid) == (hid_end - match) &&
+>> +		    strncmp(match, hid, hid_end - match) == 0 &&
+>> +		    strlen(uid) == (uid_end - hid_end - 1) &&
+>> +		    strncmp(hid_end + 1, uid, uid_end - hid_end - 1) == 0)
+>> +			return true;
+>> +
+>> +		match = uid_end + 1;
+> 
+> That is off by one when uid_end == end.
 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index e38fb0020bb1..c63e91ab775e 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -8,6 +8,8 @@
-  * (at your option) any later version.
-  */
- 
-+#include <linux/bitops.h>
-+#include <linux/bitfield.h>
- #include <linux/clk.h>
- #include <linux/mfd/syscon.h>
- #include <linux/mmc/host.h>
-@@ -28,7 +30,38 @@
- #define AO_SCTRL_SEL18		BIT(10)
- #define AO_SCTRL_CTRL3		0x40C
- 
-+#define DWMMC_SDIO_ID 2
-+
-+#define SOC_SCTRL_SCPERCTRL5    (0x314)
-+#define SDCARD_IO_SEL18         BIT(2)
-+
-+#define SDCARD_RD_THRESHOLD  (512)
-+
-+#define GENCLK_DIV (7)
-+
-+#define GPIO_CLK_ENABLE                   BIT(16)
-+#define GPIO_CLK_DIV_MASK                 GENMASK(11, 8)
-+#define GPIO_USE_SAMPLE_DLY_MASK          GENMASK(13, 13)
-+#define UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)
-+#define UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)
-+#define UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)
-+
-+#define TIMING_MODE     3
-+#define TIMING_CFG_NUM 10
-+
-+#define PULL_DOWN BIT(1)
-+#define PULL_UP   BIT(0)
-+
-+#define NUM_PHASES (40)
-+
-+#define ENABLE_SHIFT_MIN_SMPL (4)
-+#define ENABLE_SHIFT_MAX_SMPL (12)
-+#define USE_DLY_MIN_SMPL (11)
-+#define USE_DLY_MAX_SMPL (14)
-+
- struct k3_priv {
-+	int ctrl_id;
-+	u32 cur_speed;
- 	struct regmap	*reg;
- };
- 
-@@ -38,6 +71,41 @@ static unsigned long dw_mci_hi6220_caps[] = {
- 	0
- };
- 
-+struct hs_timing {
-+	u32 drv_phase;
-+	u32 smpl_dly;
-+	u32 smpl_phase_max;
-+	u32 smpl_phase_min;
-+};
-+
-+struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
-+	{ /* reserved */ },
-+	{ /* SD */
-+		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
-+		{6, 0,  4,  4,},  /* 1: MMC_HS */
-+		{6, 0,  3,  3,},  /* 2: SD_HS */
-+		{6, 0, 15, 15,},  /* 3: SDR12 */
-+		{6, 0,  2,  2,},  /* 4: SDR25 */
-+		{4, 0, 11,  0,},  /* 5: SDR50 */
-+		{6, 4, 15,  0,},  /* 6: SDR104 */
-+		{0},              /* 7: DDR50 */
-+		{0},              /* 8: DDR52 */
-+		{0},              /* 9: HS200 */
-+	},
-+	{ /* SDIO */
-+		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
-+		{0},              /* 1: MMC_HS */
-+		{6, 0, 15, 15,},  /* 2: SD_HS */
-+		{6, 0, 15, 15,},  /* 3: SDR12 */
-+		{6, 0,  0,  0,},  /* 4: SDR25 */
-+		{4, 0, 12,  0,},  /* 5: SDR50 */
-+		{5, 4, 15,  0,},  /* 6: SDR104 */
-+		{0},              /* 7: DDR50 */
-+		{0},              /* 8: DDR52 */
-+		{0},              /* 9: HS200 */
-+	}
-+};
-+
- static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- {
- 	int ret;
-@@ -66,6 +134,10 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
- 	if (IS_ERR(priv->reg))
- 		priv->reg = NULL;
- 
-+	priv->ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-+	if (priv->ctrl_id < 0)
-+		priv->ctrl_id = 0;
-+
- 	host->priv = priv;
- 	return 0;
- }
-@@ -144,7 +216,243 @@ static const struct dw_mci_drv_data hi6220_data = {
- 	.execute_tuning		= dw_mci_hi6220_execute_tuning,
- };
- 
-+static void dw_mci_hs_set_timing(struct dw_mci *host, int timing, int smpl_phase)
-+{
-+	u32 drv_phase;
-+	u32 smpl_dly;
-+	u32 use_smpl_dly = 0;
-+	u32 enable_shift = 0;
-+	u32 reg_value;
-+	int ctrl_id;
-+	struct k3_priv *priv;
-+
-+	priv = host->priv;
-+	ctrl_id = priv->ctrl_id;
-+
-+	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
-+	smpl_dly   = hs_timing_cfg[ctrl_id][timing].smpl_dly;
-+	if (smpl_phase == -1)
-+		smpl_phase = (hs_timing_cfg[ctrl_id][timing].smpl_phase_max +
-+			     hs_timing_cfg[ctrl_id][timing].smpl_phase_min) / 2;
-+
-+	switch (timing) {
-+	case MMC_TIMING_UHS_SDR104:
-+		if (smpl_phase >= USE_DLY_MIN_SMPL &&
-+		    smpl_phase <= USE_DLY_MAX_SMPL)
-+			use_smpl_dly = 1;
-+	case MMC_TIMING_UHS_SDR50:
-+		if (smpl_phase >= ENABLE_SHIFT_MIN_SMPL &&
-+		    smpl_phase <= ENABLE_SHIFT_MAX_SMPL) {
-+			enable_shift = 1;
-+			break;
-+		}
-+	}	
-+
-+	mci_writel(host, GPIO, 0x0);
-+	usleep_range(5, 10);
-+
-+	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, smpl_phase) |\
-+				FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK ,smpl_dly) |\
-+				FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK,drv_phase);		
-+	mci_writel(host, UHS_REG_EXT, reg_value);
-+
-+	mci_writel(host, ENABLE_SHIFT, enable_shift);
-+
-+	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |\
-+				FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK,use_smpl_dly);
-+	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
-+
-+	/* We should delay 1ms wait for timing setting finished. */
-+	usleep_range(1000, 2000);
-+}
-+
-+static int dw_mci_hi3660_init(struct dw_mci *host)
-+{
-+	mci_writel(host, CDTHRCTL, SDMMC_SET_THLD(SDCARD_RD_THRESHOLD,
-+								SDMMC_CARD_RD_THR_EN));
-+
-+	dw_mci_hs_set_timing(host, MMC_TIMING_LEGACY, -1);
-+	host->bus_hz /= (GENCLK_DIV + 1);
-+
-+	return 0;
-+}
-+
-+static int dw_mci_set_sel18(struct dw_mci *host, bool set)
-+{
-+	int ret;
-+	unsigned int val;
-+	struct k3_priv *priv;
-+
-+	priv = host->priv;
-+
-+	val = set ? SDCARD_IO_SEL18 : 0;
-+	ret = regmap_update_bits(priv->reg, SOC_SCTRL_SCPERCTRL5,
-+				 SDCARD_IO_SEL18, val);
-+	if (ret) {
-+		dev_err(host->dev, "sel18 %u error\n", val);
-+		return ret;
-+	}
-+
-+	return 0;
-+}
-+
-+void dw_mci_hi3660_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	int ret;
-+	unsigned long wanted;
-+	unsigned long actual;
-+	struct k3_priv *priv = host->priv;
-+
-+	if (!ios->clock || ios->clock == priv->cur_speed)
-+		return;
-+
-+	wanted = ios->clock * (GENCLK_DIV + 1);
-+	ret = clk_set_rate(host->ciu_clk, wanted);
-+	if (ret) {
-+		dev_err(host->dev, "failed to set rate %luHz\n", wanted);
-+		return;
-+	}
-+	actual = clk_get_rate(host->ciu_clk);
-+
-+	dw_mci_hs_set_timing(host, ios->timing, -1);
-+	host->bus_hz = actual / (GENCLK_DIV + 1);
-+	host->current_speed = 0;
-+	priv->cur_speed = host->bus_hz;
-+}
-+
-+static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
-+{
-+	int i;
-+	int interval;
-+	unsigned int v;
-+	unsigned int len;
-+	unsigned int range_start = 0;
-+	unsigned int range_length = 0;
-+	unsigned int middle_range = 0;
-+
-+	if (!sample_flag)
-+		return -EIO;
-+
-+	if (~sample_flag == 0)
-+		return 0;
-+
-+	i = ffs(sample_flag) - 1;
-+
-+	/*A clock cycle is divided into 32 phases, 
-+	*each of which is represented by a bit, finding the optimal phase.
-+	*/
-+	while (i < 32) {
-+		v = ror32(sample_flag, i);
-+		len = ffs(~v) - 1;
-+
-+		if (len > range_length) {
-+			range_length = len;
-+			range_start = i;
-+		}
-+
-+		interval = ffs(v >> len) - 1;
-+		if (interval < 0)
-+			break;
-+
-+		i += len + interval;
-+	}
-+
-+	middle_range = range_start + range_length / 2;
-+	if (middle_range >= 32)
-+		middle_range %= 32;
-+
-+	return middle_range;
-+}
-+
-+static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+{
-+	int i = 0;
-+	struct dw_mci *host = slot->host;
-+	struct mmc_host *mmc = slot->mmc;
-+	int smpl_phase = 0;
-+	u32 tuning_sample_flag = 0;
-+	int best_clksmpl = 0;
-+
-+	for (i = 0; i < NUM_PHASES; ++i, ++smpl_phase) {
-+		smpl_phase %= 32;
-+
-+		mci_writel(host, TMOUT, ~0);
-+		dw_mci_hs_set_timing(host, mmc->ios.timing, smpl_phase);
-+
-+		if (!mmc_send_tuning(mmc, opcode, NULL))
-+			tuning_sample_flag |= (1 << smpl_phase);
-+		else
-+			tuning_sample_flag &= ~(1 << smpl_phase);
-+	}
-+
-+	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);
-+	if (best_clksmpl < 0) {
-+		dev_err(host->dev, "All phases bad!\n");
-+		return -EIO;
-+	}
-+
-+	dw_mci_hs_set_timing(host, mmc->ios.timing, best_clksmpl);
-+
-+	dev_info(host->dev, "tuning ok best_clksmpl %u tuning_sample_flag %x\n",
-+		 best_clksmpl, tuning_sample_flag);
-+	return 0;
-+}
-+
-+static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
-+					struct mmc_ios *ios)
-+{
-+	int ret;
-+	int min_uv = 0;
-+	int max_uv = 0;
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct k3_priv *priv;
-+	struct dw_mci *host;
-+
-+	host = slot->host;
-+	priv = host->priv;
-+
-+	if (!priv || !priv->reg)
-+		return 0;
-+
-+	if (priv->ctrl_id == DWMMC_SDIO_ID)
-+		return 0;
-+
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-+		ret = dw_mci_set_sel18(host, 0);
-+		if (ret)
-+			return ret;
-+		min_uv = 2950000;
-+		max_uv = 2950000;
-+	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		ret = dw_mci_set_sel18(host, 1);
-+		if (ret)
-+			return ret;
-+		min_uv = 1800000;
-+		max_uv = 1800000;
-+	}
-+
-+	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
-+		return 0;
-+
-+	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
-+	if (ret) {
-+		dev_err(host->dev, "Regulator set error %d: %d - %d\n",
-+			ret, min_uv, max_uv);
-+		return ret;
-+	}
-+	return 0;
-+}
-+
-+static const struct dw_mci_drv_data hi3660_data = {
-+	.init = dw_mci_hi3660_init,
-+	.set_ios = dw_mci_hi3660_set_ios,
-+	.parse_dt = dw_mci_hi6220_parse_dt,
-+	.execute_tuning = dw_mci_hi3660_execute_tuning,
-+	.switch_voltage  = dw_mci_hi3660_switch_voltage,
-+};
-+
- static const struct of_device_id dw_mci_k3_match[] = {
-+	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
- 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
- 	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
- 	{},
-@@ -155,6 +463,11 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
- {
- 	const struct dw_mci_drv_data *drv_data;
- 	const struct of_device_id *match;
-+	struct reset_control	*rst;
-+
-+	rst = devm_reset_control_get(&pdev->dev, NULL);
-+	if (!IS_ERR(rst))
-+		reset_control_reset(rst);
- 
- 	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
- 	drv_data = match->data;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index ce347361f3dc..7cdcafda8eec 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -319,6 +319,8 @@ struct dw_mci_board {
- #define SDMMC_DSCADDR		0x094
- #define SDMMC_BUFADDR		0x098
- #define SDMMC_CDTHRCTL		0x100
-+#define SDMMC_UHS_REG_EXT	0x108
-+#define SDMMC_ENABLE_SHIFT	0x110
- #define SDMMC_DATA(x)		(x)
- /*
- * Registers to support idmac 64-bit address mode
--- 
-2.11.0
+Right, thank you for catching that.
 
+> But it seems error prone, so how
+> about this:
+
+Hmm, I don't like all the needless malloc/free going
+on there. I will send a v5 with the improved subject you
+suggested and the off-by-one fixed.
+
+Regards,
+
+Hans
+
+
+
+> 
+> 
+> static int __sdhci_acpi_blacklist(char *bl, char *id)
+> {
+> 	char *s;
+> 
+> 	do {
+> 		s = strsep(&bl, ",");
+> 		if (s && !strcmp(s, id))
+> 			return -ENODEV;
+> 	} while (bl);
+> 
+> 	return 0;
+> }
+> 
+> static int sdhci_acpi_blacklist(const char *hid, const char *uid)
+> {
+> 	int ret = -ENOMEM;
+> 	char *bl, *id;
+> 
+> 	if (!blacklist || !hid || !uid)
+> 		return 0;
+> 
+> 	bl = kstrdup(blacklist, GFP_KERNEL);
+> 	id = kasprintf(GFP_KERNEL, "%s:%s", hid, uid);
+> 	if (bl && id)
+> 		ret = __sdhci_acpi_blacklist(bl, id);
+> 	kfree(id);
+> 	kfree(bl);
+> 
+> 	return ret;
+> }
+> 
+> Then:
+> 
+> 	err = sdhci_acpi_blacklist(hid, uid);
+> 	if (err)
+> 		return err;
+> 
+> 
+>> +	} while (*match);
+>> +
+>> +	return false;
+>> +}
+>> +
+>>   static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned int flag)
+>>   {
+>>   	return c->slot && (c->slot->flags & flag);
+>> @@ -378,6 +411,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   {
+>>   	struct device *dev = &pdev->dev;
+>>   	acpi_handle handle = ACPI_HANDLE(dev);
+>> +	const char *bl = blacklist;
+>>   	struct acpi_device *device, *child;
+>>   	struct sdhci_acpi_host *c;
+>>   	struct sdhci_host *host;
+>> @@ -390,6 +424,12 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   	if (acpi_bus_get_device(handle, &device))
+>>   		return -ENODEV;
+>>   
+>> +	hid = acpi_device_hid(device);
+>> +	uid = device->pnp.unique_id;
+>> +
+>> +	if (sdhci_acpi_compare_hid_uid(bl, hid, uid))
+>> +		return -ENODEV;
+>> +
+>>   	/* Power on the SDHCI controller and its children */
+>>   	acpi_device_fix_up_power(device);
+>>   	list_for_each_entry(child, &device->children, node)
+>> @@ -399,9 +439,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>>   	if (sdhci_acpi_byt_defer(dev))
+>>   		return -EPROBE_DEFER;
+>>   
+>> -	hid = acpi_device_hid(device);
+>> -	uid = device->pnp.unique_id;
+>> -
+>>   	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>>   	if (!iomem)
+>>   		return -ENOMEM;
+>> @@ -580,6 +617,9 @@ static struct platform_driver sdhci_acpi_driver = {
+>>   
+>>   module_platform_driver(sdhci_acpi_driver);
+>>   
+>> +module_param(blacklist, charp, 0444);
+>> +MODULE_PARM_DESC(blacklist, "ACPI <HID:UID>[,HID:UID] which should be ignored");
+>> +
+>>   MODULE_DESCRIPTION("Secure Digital Host Controller Interface ACPI driver");
+>>   MODULE_AUTHOR("Adrian Hunter");
+>>   MODULE_LICENSE("GPL v2");
+>>
+> 
