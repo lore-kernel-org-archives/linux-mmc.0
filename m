@@ -1,50 +1,71 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH][mmc-next] mmc: sdhci-pci: make guid intel_dsm_guid static
-Date: Wed, 14 Jun 2017 09:08:03 +0300
-Message-ID: <f9b36c7a-1c69-d825-2bc2-ccb986ab2b22@intel.com>
-References: <20170613131426.8132-1-colin.king@canonical.com>
+From: Richard Leitner <richard.leitner@skidata.com>
+Subject: Re: [PATCH v2] mmc: core: add mmc-card hardware reset enable support
+Date: Wed, 14 Jun 2017 09:25:00 +0200
+Message-ID: <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com>
+References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com>
+ <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
+ <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170613131426.8132-1-colin.king@canonical.com>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Colin King <colin.king@canonical.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Christoph Hellwig <hch@lst.de>
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Bart Van Assche <bart.vanassche@sandisk.com>, Luca Porzio <lporzio@micron.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13/06/17 16:14, Colin King wrote:
-> From: Colin Ian King <colin.king@canonical.com>
+On 04/11/2017 12:43 PM, Ulf Hansson wrote:
+> On 11 April 2017 at 10:17, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> On Tue, Apr 11, 2017 at 9:31 AM, Richard Leitner
+>> <richard.leitner@skidata.com> wrote:
+>>
+>>> Some eMMCs disable their hardware reset line (RST_N) by default. To enable
+>>> it the host must set the corresponding bit in ECSD. An example for such
+>>> a device is the Micron MTFCxGACAANA-4M.
+>>>
+>>> This patch adds a new mmc-card devicetree property to let the host enable
+>>> this feature during card initialization.
+>>>
+>>> Signed-off-by: Richard Leitner <richard.leitner@skidata.com>
+>>
+>> Do we know *WHY* these cards disable their hardware reset lines?
 > 
-> The guid intel_dsm_guid does not need to be in global scope, so make
-> it static.
+> Allow me to make a guess. In case the reset isn't enabled, the
+> internal eMMC card firmware don't monitor the pin for the reset. I
+> guess that could makes sense if SoC vendors has failed to properly
+> connect the pin, avoiding the eMMC card to be reset when it shouldn't.
 > 
-> Cleans up sparse warning:
-> "symbol 'intel_dsm_guid' was not declared. Should it be static?"
+>> If it is just some random over-cautious panic thing we might consider
+>> just force re-enableing it, maybe with a warning in the dmesg, so we can
+>> always reset the card. No DT property needed.
 > 
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+> There is actually already a DT property "cap-mmc-hw-reset"
+> (MMC_CAP_HW_RESET), which tells whether the eMMC reset is supported by
+> the host.
+> 
+> Perhaps we can consider to force-enabling it for the eMMC card, when
+> this property is set for the mmc host!? At least, inventing yet
+> another binding doesn't make sense to me.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+IMHO setting this (permanent) configuration bit should be done
+explicitly and not within another DT property. Otherwise somebody may
+accidentally set this configuration by (for example) including a dtsi
+which has cap-mmc-hw-reset configured.
 
-But this patch is dependent on the guid changes which are not in the mmc
-tree.  It's in a tree of Christoph's I think.
+Nonetheless if the majority agrees to implicitly set it when
+"cap-mmc-hw-reset" is configured I'm fine with that too.
 
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+Another possibility is to don't include it in the kernel at all and
+therefore require the mmc userspace program to configure it...?
+
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 3c02c5b394d6..f1d8385d91f0 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -404,7 +404,7 @@ struct intel_host {
->  	bool	d3_retune;
->  };
->  
-> -const guid_t intel_dsm_guid =
-> +static const guid_t intel_dsm_guid =
->  	GUID_INIT(0xF6C13EA5, 0x65CD, 0x461F,
->  		  0xAB, 0x7A, 0x29, 0xF7, 0xE8, 0xD5, 0xBD, 0x61);
->  
+>> Putting some people who work for eMMC vendors in the To: line so they
+>> can say if they know about this.
 > 
+> Yes, let's see what they say about it.
+
+Any news/comments?
+
+kind regards,
+Richard.L
