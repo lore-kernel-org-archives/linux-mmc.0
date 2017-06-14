@@ -1,142 +1,81 @@
 From: Guodong Xu <guodong.xu@linaro.org>
-Subject: [PATCH v3 05/21] arm64: dts: Add I2C nodes for Hi3660
-Date: Wed, 14 Jun 2017 16:23:22 +0800
-Message-ID: <20170614082338.15673-6-guodong.xu@linaro.org>
+Subject: [PATCH v3 15/21] dt-bindings: PCI: hisi: Add document for PCIe of Kirin SoCs
+Date: Wed, 14 Jun 2017 16:23:32 +0800
+Message-ID: <20170614082338.15673-16-guodong.xu@linaro.org>
 References: <20170614082338.15673-1-guodong.xu@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170614082338.15673-1-guodong.xu@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, mark.rutland@arm.com, xuwei5@hisilicon.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, xuejiancheng@hisilicon.com, peter.griffin@linaro.org, puck.chen@hisilicon.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, arnd@arndb.de
-Cc: devicetree@vger.kernel.org, Guodong Xu <guodong.xu@linaro.org>, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jarkko Nikula <jarkko.nikula@linux.intel.com>, zhangfei.gao@linaro.org, linux-arm-kernel@lists.infradead.org
+Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Xiaowei Song <songxiaowei@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
+From: Xiaowei Song <songxiaowei@hisilicon.com>
 
-Add I2C nodes for Hi3660-hikey960.
+This patch adds document for PCIe of Kirin SoC series.
 
-On HiKey960,
-I2C0, I2C7 are connected to Low Speed Expansion Connector.
-I2C1 is connected to ADV7535.
-I2C3 is connected to USB5734.
-
-Cc: Jarkko Nikula <jarkko.nikula@linux.intel.com>
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+Signed-off-by: Xiaowei Song <songxiaowei@hisilicon.com>
+Acked-by: Rob Herring <robh@kernel.org>
 ---
- arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts | 22 +++++++++
- arch/arm64/boot/dts/hisilicon/hi3660.dtsi         | 56 +++++++++++++++++++++++
- 2 files changed, 78 insertions(+)
+ .../devicetree/bindings/pci/kirin-pcie.txt         | 50 ++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/pci/kirin-pcie.txt
 
-diff --git a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-index 64875a5..1a4d6c5 100644
---- a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-+++ b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-@@ -29,6 +29,28 @@
- 	};
- };
- 
-+&i2c0 {
-+	/* On Low speed expansion */
-+	label = "LS-I2C0";
-+	status = "okay";
-+};
+diff --git a/Documentation/devicetree/bindings/pci/kirin-pcie.txt b/Documentation/devicetree/bindings/pci/kirin-pcie.txt
+new file mode 100644
+index 0000000..68ffa0f
+--- /dev/null
++++ b/Documentation/devicetree/bindings/pci/kirin-pcie.txt
+@@ -0,0 +1,50 @@
++HiSilicon Kirin SoCs PCIe host DT description
 +
-+&i2c1 {
-+	status = "okay";
++Kirin PCIe host controller is based on Designware PCI core.
++It shares common functions with PCIe Designware core driver
++and inherits common properties defined in
++Documentation/devicetree/bindings/pci/designware-pci.txt.
 +
-+	adv7533: adv7533@39 {
-+		status = "ok";
-+		compatible = "adi,adv7533";
-+		reg = <0x39>;
++Additional properties are described here:
++
++Required properties
++- compatible:
++	"hisilicon,kirin960-pcie" for PCIe of Kirin960 SoC
++- reg: Should contain rc_dbi, apb, phy, config registers location and length.
++- reg-names: Must include the following entries:
++  "dbi": controller configuration registers;
++  "apb": apb Ctrl register defined by Kirin;
++  "phy": apb PHY register defined by Kirin;
++  "config": PCIe configuration space registers.
++- reset-gpios: The gpio to generate PCIe perst assert and deassert signal.
++
++Optional properties:
++
++Example based on kirin960:
++
++	pcie@f4000000 {
++		compatible = "hisilicon,kirin-pcie";
++		reg = <0x0 0xf4000000 0x0 0x1000>, <0x0 0xff3fe000 0x0 0x1000>,
++		      <0x0 0xf3f20000 0x0 0x40000>, <0x0 0xF4000000 0 0x2000>;
++		reg-names = "dbi","apb","phy", "config";
++		bus-range = <0x0  0x1>;
++		#address-cells = <3>;
++		#size-cells = <2>;
++		device_type = "pci";
++		ranges = <0x02000000 0x0 0x00000000 0x0 0xf5000000 0x0 0x2000000>;
++		num-lanes = <1>;
++		#interrupt-cells = <1>;
++		interrupt-map-mask = <0xf800 0 0 7>;
++		interrupt-map = <0x0 0 0 1 &gic 0 0 0  282 4>,
++				<0x0 0 0 2 &gic 0 0 0  283 4>,
++				<0x0 0 0 3 &gic 0 0 0  284 4>,
++				<0x0 0 0 4 &gic 0 0 0  285 4>;
++		clocks = <&crg_ctrl HI3660_PCIEPHY_REF>,
++			 <&crg_ctrl HI3660_CLK_GATE_PCIEAUX>,
++			 <&crg_ctrl HI3660_PCLK_GATE_PCIE_PHY>,
++			 <&crg_ctrl HI3660_PCLK_GATE_PCIE_SYS>,
++			 <&crg_ctrl HI3660_ACLK_GATE_PCIE>;
++		clock-names = "pcie_phy_ref", "pcie_aux",
++			      "pcie_apb_phy", "pcie_apb_sys", "pcie_aclk";
++		reset-gpios = <&gpio11 1 0 >;
 +	};
-+};
-+
-+&i2c7 {
-+	/* On Low speed expansion */
-+	label = "LS-I2C1";
-+	status = "okay";
-+};
-+
- &uart5 {
- 	status = "okay";
- };
-diff --git a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-index f55710a..9abe84e 100644
---- a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-+++ b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-@@ -186,6 +186,62 @@
- 			#reset-cells = <2>;
- 		};
- 
-+		i2c0: i2c@ffd71000 {
-+			compatible = "snps,designware-i2c";
-+			reg = <0x0 0xffd71000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clock-frequency = <400000>;
-+			clocks = <&crg_ctrl HI3660_CLK_GATE_I2C0>;
-+			resets = <&iomcu_rst 0x20 3>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c0_pmx_func &i2c0_cfg_func>;
-+			status = "disabled";
-+		};
-+
-+		i2c1: i2c@ffd72000 {
-+			compatible = "snps,designware-i2c";
-+			reg = <0x0 0xffd72000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clock-frequency = <400000>;
-+			clocks = <&crg_ctrl HI3660_CLK_GATE_I2C1>;
-+			resets = <&iomcu_rst 0x20 4>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c1_pmx_func &i2c1_cfg_func>;
-+			status = "disabled";
-+		};
-+
-+		i2c3: i2c@fdf0c000 {
-+			compatible = "snps,designware-i2c";
-+			reg = <0x0 0xfdf0c000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clock-frequency = <400000>;
-+			clocks = <&crg_ctrl HI3660_CLK_GATE_I2C3>;
-+			resets = <&crg_rst 0x78 7>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c3_pmx_func &i2c3_cfg_func>;
-+			status = "disabled";
-+		};
-+
-+		i2c7: i2c@fdf0b000 {
-+			compatible = "snps,designware-i2c";
-+			reg = <0x0 0xfdf0b000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 314 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clock-frequency = <400000>;
-+			clocks = <&crg_ctrl HI3660_CLK_GATE_I2C7>;
-+			resets = <&crg_rst 0x60 14>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c7_pmx_func &i2c7_cfg_func>;
-+			status = "disabled";
-+		};
-+
- 		uart5: serial@fdf05000 {
- 			compatible = "arm,pl011", "arm,primecell";
- 			reg = <0x0 0xfdf05000 0x0 0x1000>;
 -- 
 2.10.2
