@@ -1,76 +1,78 @@
-From: Guodong Xu <guodong.xu@linaro.org>
-Subject: [PATCH v3 21/21] arm64: dts: hi3660-hikey960: add nodes for WiFi
-Date: Wed, 14 Jun 2017 16:23:38 +0800
-Message-ID: <20170614082338.15673-22-guodong.xu@linaro.org>
-References: <20170614082338.15673-1-guodong.xu@linaro.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: block: Move duplicate check
+Date: Wed, 14 Jun 2017 13:48:51 +0200
+Message-ID: <20170614114851.17146-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f44.google.com ([74.125.83.44]:33264 "EHLO
-        mail-pg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932150AbdFNI0K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2017 04:26:10 -0400
-Received: by mail-pg0-f44.google.com with SMTP id f185so72609986pgc.0
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2017 01:26:05 -0700 (PDT)
-In-Reply-To: <20170614082338.15673-1-guodong.xu@linaro.org>
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:34760 "EHLO
+        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752025AbdFNLs6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2017 07:48:58 -0400
+Received: by mail-lf0-f47.google.com with SMTP id v20so90173101lfa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2017 04:48:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, mark.rutland@arm.com, xuwei5@hisilicon.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, xuejiancheng@hisilicon.com, peter.griffin@linaro.org, puck.chen@hisilicon.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, arnd@arndb.de
-Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Guodong Xu <guodong.xu@linaro.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-Add nodes for WiFi. HiKey960 is using TI WL1837MOD module.
+mmc_blk_ioctl() calls either mmc_blk_ioctl_cmd() or
+mmc_blk_ioctl_multi_cmd() and each of these make the same
+check. Factor it into the first call and save one chunk
+of duplicate code.
 
-Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts | 33 +++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ drivers/mmc/core/block.c | 24 ++++++++----------------
+ 1 file changed, 8 insertions(+), 16 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-index cec0b60..6609b0f 100644
---- a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-+++ b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-@@ -145,6 +145,20 @@
- 			};
- 		};
- 	};
-+
-+	wlan_en: wlan-en-1-8v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "wlan-en-regulator";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+
-+		/* GPIO_051_WIFI_EN */
-+		gpio = <&gpio6 3 0>;
-+
-+		/* WLAN card specific delay */
-+		startup-delay-us = <70000>;
-+		enable-active-high;
-+	};
- };
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 1ce6012ce3c1..c80bee4a9cff 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -566,14 +566,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	int err = 0, ioc_err = 0;
+ 	struct request *req;
  
- &i2c0 {
-@@ -208,3 +222,22 @@
- 	vqmmc-supply = <&ldo9>;
- 	status = "okay";
- };
+-	/*
+-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+-	 * whole block device, not on a partition.  This prevents overspray
+-	 * between sibling partitions.
+-	 */
+-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+-		return -EPERM;
+-
+ 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+ 	if (IS_ERR(idata))
+ 		return PTR_ERR(idata);
+@@ -626,14 +618,6 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	__u64 num_of_cmds;
+ 	struct request *req;
+ 
+-	/*
+-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+-	 * whole block device, not on a partition.  This prevents overspray
+-	 * between sibling partitions.
+-	 */
+-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+-		return -EPERM;
+-
+ 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
+ 			   sizeof(num_of_cmds)))
+ 		return -EFAULT;
+@@ -700,6 +684,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+ 	unsigned int cmd, unsigned long arg)
+ {
++	/*
++	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
++	 * whole block device, not on a partition.  This prevents overspray
++	 * between sibling partitions.
++	 */
++	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
++		return -EPERM;
 +
-+&dwmmc2 { /* WIFI */
-+	broken-cd;
-+	/* WL_EN */
-+	vmmc-supply = <&wlan_en>;
-+	ti,non-removable;
-+	non-removable;
-+	#address-cells = <0x1>;
-+	#size-cells = <0x0>;
-+	status = "ok";
-+
-+	wlcore: wlcore@2 {
-+		compatible = "ti,wl1837";
-+		reg = <2>;      /* sdio func num */
-+		/* WL_IRQ, GPIO_179_WL_WAKEUP_AP */
-+		interrupt-parent = <&gpio22>;
-+		interrupts = <3 IRQ_TYPE_EDGE_RISING>;
-+	};
-+};
+ 	switch (cmd) {
+ 	case MMC_IOC_CMD:
+ 		return mmc_blk_ioctl_cmd(bdev,
 -- 
-2.10.2
+2.9.4
 
