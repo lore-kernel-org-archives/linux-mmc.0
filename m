@@ -1,53 +1,89 @@
 From: Guodong Xu <guodong.xu@linaro.org>
-Subject: [PATCH v3 13/21] arm64: dts: hi3660: add sp804 timer node
-Date: Wed, 14 Jun 2017 16:23:30 +0800
-Message-ID: <20170614082338.15673-14-guodong.xu@linaro.org>
+Subject: [PATCH v3 12/21] arm64: dts: hi3660: add spi device nodes
+Date: Wed, 14 Jun 2017 16:23:29 +0800
+Message-ID: <20170614082338.15673-13-guodong.xu@linaro.org>
 References: <20170614082338.15673-1-guodong.xu@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170614082338.15673-1-guodong.xu@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, mark.rutland@arm.com, xuwei5@hisilicon.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, xuejiancheng@hisilicon.com, peter.griffin@linaro.org, puck.chen@hisilicon.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, arnd@arndb.de
-Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Leo Yan <leo.yan@linaro.org>
+Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Wang Xiaoyin <hw.wangxiaoyin@hisilicon.com>, Guodong Xu <guodong.xu@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Leo Yan <leo.yan@linaro.org>
+From: Wang Xiaoyin <hw.wangxiaoyin@hisilicon.com>
 
-The Hi3660 SoC comes with the sp804 timer in addition to the
-architecture timers. These ones are shutdown when reaching a deep idle
-states and a backup timer is needed. The sp804 belongs to another power
-domain and can fulfill the purpose of replacing temporarily an
-architecture timer when the CPU is idle.
+Add spi2 and spi3 device nodes for hi3660, and enable them for hikey960.
 
-Describe it in the device tree, so it can be enabled at boot time.
+On HiKey960:
+ - SPI2 is wired out through low speed expansion connector.
+ - SPI3 is wired out through high speed expansion connector.
 
-Suggested-by: Daniel Lezcano <daniel.lezcano@linaro.org>
-Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
-Signed-off-by: Leo Yan <leo.yan@linaro.org>
+Signed-off-by: Wang Xiaoyin <hw.wangxiaoyin@hisilicon.com>
+Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
 ---
- arch/arm64/boot/dts/hisilicon/hi3660.dtsi | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts | 12 +++++++++
+ arch/arm64/boot/dts/hisilicon/hi3660.dtsi         | 30 +++++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
 
+diff --git a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
+index 9ecf6c6..ca448f0 100644
+--- a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
++++ b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
+@@ -142,3 +142,15 @@
+ 	label = "LS-UART1";
+ 	status = "okay";
+ };
++
++&spi2 {
++	/* On Low speed expansion */
++	label = "LS-SPI0";
++	status = "okay";
++};
++
++&spi3 {
++	/* On High speed expansion */
++	label = "HS-SPI1";
++	status = "okay";
++};
 diff --git a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-index a6b91f1..e138973 100644
+index 3b2a3a7..a6b91f1 100644
 --- a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
 +++ b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-@@ -186,6 +186,17 @@
- 			#reset-cells = <2>;
+@@ -713,5 +713,35 @@
+ 			clocks = <&sctrl HI3660_PCLK_AO_GPIO6>;
+ 			clock-names = "apb_pclk";
  		};
- 
-+		dual_timer0: timer@fff14000 {
-+			compatible = "arm,sp804", "arm,primecell";
-+			reg = <0x0 0xfff14000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 48 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 49 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&crg_ctrl HI3660_OSC32K>,
-+				 <&crg_ctrl HI3660_OSC32K>,
-+				 <&crg_ctrl HI3660_OSC32K>;
-+			clock-names = "timer1", "timer2", "apb_pclk";
++
++		spi2: spi@ffd68000 {
++			compatible = "arm,pl022", "arm,primecell";
++			reg = <0x0 0xffd68000 0x0 0x1000>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			interrupts = <GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&crg_ctrl HI3660_CLK_GATE_SPI2>;
++			clock-names = "apb_pclk";
++			pinctrl-names = "default";
++			pinctrl-0 = <&spi2_pmx_func>;
++			num-cs = <1>;
++			cs-gpios = <&gpio27 2 0>;
++			status = "disabled";
 +		};
 +
- 		i2c0: i2c@ffd71000 {
- 			compatible = "snps,designware-i2c";
- 			reg = <0x0 0xffd71000 0x0 0x1000>;
++		spi3: spi@ff3b3000 {
++			compatible = "arm,pl022", "arm,primecell";
++			reg = <0x0 0xff3b3000 0x0 0x1000>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			interrupts = <GIC_SPI 312 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&crg_ctrl HI3660_CLK_GATE_SPI3>;
++			clock-names = "apb_pclk";
++			pinctrl-names = "default";
++			pinctrl-0 = <&spi3_pmx_func>;
++			num-cs = <1>;
++			cs-gpios = <&gpio18 5 0>;
++			status = "disabled";
++		};
+ 	};
+ };
 -- 
 2.10.2
