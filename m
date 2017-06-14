@@ -1,71 +1,188 @@
-From: Richard Leitner <richard.leitner@skidata.com>
-Subject: Re: [PATCH v2] mmc: core: add mmc-card hardware reset enable support
-Date: Wed, 14 Jun 2017 09:25:00 +0200
-Message-ID: <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com>
-References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com>
- <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
- <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 2/2] mmc: sdhci-acpi: Add DMI based blacklist
+Date: Wed, 14 Jun 2017 10:43:56 +0300
+Message-ID: <1b9deb37-1de0-d019-c325-68916ead29d0@intel.com>
+References: <20170608185500.3317-1-hdegoede@redhat.com>
+ <20170608185500.3317-2-hdegoede@redhat.com>
+ <515f2626-6224-f913-30e3-71b796fea61b@intel.com>
+ <aa7bdfea-ab41-7b74-1153-112962a65287@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Bart Van Assche <bart.vanassche@sandisk.com>, Luca Porzio <lporzio@micron.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:12197 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754263AbdFNHuG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 14 Jun 2017 03:50:06 -0400
+In-Reply-To: <aa7bdfea-ab41-7b74-1153-112962a65287@redhat.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 04/11/2017 12:43 PM, Ulf Hansson wrote:
-> On 11 April 2017 at 10:17, Linus Walleij <linus.walleij@linaro.org> wrote:
->> On Tue, Apr 11, 2017 at 9:31 AM, Richard Leitner
->> <richard.leitner@skidata.com> wrote:
->>
->>> Some eMMCs disable their hardware reset line (RST_N) by default. To enable
->>> it the host must set the corresponding bit in ECSD. An example for such
->>> a device is the Micron MTFCxGACAANA-4M.
+On 12/06/17 16:27, Hans de Goede wrote:
+> Hi,
+> 
+> On 12-06-17 14:11, Adrian Hunter wrote:
+>> On 08/06/17 21:55, Hans de Goede wrote:
+>>> Add a DMI based blacklist for systems where probing some sdio interfaces
+>>> is harmful (e.g. causes pci-e based wifi to not work).
 >>>
->>> This patch adds a new mmc-card devicetree property to let the host enable
->>> this feature during card initialization.
+>>> BugLink: https://bbs.archlinux.org/viewtopic.php?id=224086
+>>> Fixes: db52d4f8a4bd ("mmc: sdhci-acpi: support 80860F14 UID 2 SDIO bus")
+>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>> ---
+>>> Changes in v2:
+>>> -Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist module
+>>> option
+>>> -Only use a single fix_up_power_dmi_blacklist for the GPDwin further testing
+>>>   has shown that the DMI strings are unique enough that we do not need the
+>>>   bios-date in there
 >>>
->>> Signed-off-by: Richard Leitner <richard.leitner@skidata.com>
+>>> Changes in v3:
+>>> -Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
+>>>
+>>> Changes in v4:
+>>> -Rename blacklist to dmi_probe_blacklist as it now blacklists probing,
+>>>   rather then calling acpi_device_fix_up_power.
+>>> -Also check bios-date against known bios-dates for the GPD win, to avoid
+>>>   possible false positives due to the use of quite generic DMI strings
+>>> -Add Fixes and BugLink tags
+>>> ---
+>>>   drivers/mmc/host/sdhci-acpi.c | 64
+>>> +++++++++++++++++++++++++++++++++++++++++++
+>>>   1 file changed, 64 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+>>> index ecc3aefd4643..3e12a6a8ad99 100644
+>>> --- a/drivers/mmc/host/sdhci-acpi.c
+>>> +++ b/drivers/mmc/host/sdhci-acpi.c
+>>> @@ -36,6 +36,7 @@
+>>>   #include <linux/pm.h>
+>>>   #include <linux/pm_runtime.h>
+>>>   #include <linux/delay.h>
+>>> +#include <linux/dmi.h>
+>>>     #include <linux/mmc/host.h>
+>>>   #include <linux/mmc/pm.h>
+>>> @@ -83,6 +84,11 @@ struct sdhci_acpi_host {
+>>>       bool                use_runtime_pm;
+>>>   };
+>>>   +struct dmi_probe_blacklist_data {
+>>> +    const char *hid_uid;
+>>> +    const char * const *bios_dates;
+>>> +};
+>>> +
+>>>   static char *blacklist;
+>>>     static bool sdhci_acpi_compare_hid_uid(const char *match, const char
+>>> *hid,
+>>> @@ -116,6 +122,34 @@ static bool sdhci_acpi_compare_hid_uid(const char
+>>> *match, const char *hid,
+>>>       return false;
+>>>   }
+>>>   +static const char *sdhci_acpi_get_dmi_blacklist(const struct
+>>> dmi_system_id *bl)
+>>> +{
+>>> +    const struct dmi_system_id *dmi_id;
+>>> +    const struct dmi_probe_blacklist_data *bl_data;
+>>> +    const char *bios_date;
+>>> +    int i;
+>>> +
+>>> +    dmi_id = dmi_first_match(bl);
+>>> +    if (!dmi_id)
+>>> +        return NULL;
+>>> +
+>>> +    bl_data = dmi_id->driver_data;
+>>> +
+>>> +    if (!bl_data->bios_dates)
+>>> +        return bl_data->hid_uid;
+>>> +
+>>> +    bios_date = dmi_get_system_info(DMI_BIOS_DATE);
+>>> +    if (!bios_date)
+>>> +        return NULL;
+>>> +
+>>> +    for (i = 0; bl_data->bios_dates[i]; i++) {
+>>> +        if (strcmp(bl_data->bios_dates[i], bios_date) == 0)
+>>> +            return bl_data->hid_uid;
+>>> +    }
+>>> +
+>>> +    return NULL;
+>>> +}
+>>> +
+>>>   static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c, unsigned
+>>> int flag)
+>>>   {
+>>>       return c->slot && (c->slot->flags & flag);
+>>> @@ -391,6 +425,33 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+>>>   };
+>>>   MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>>>   +const struct dmi_probe_blacklist_data gpd_win_bl_data = {
+>>> +    .hid_uid = "80860F14:2",
+>>> +    .bios_dates = (const char * const []){
+>>> +        "10/25/2016", "11/18/2016", "02/21/2017", NULL },
+>>> +};
+>>> +
+>>> +static const struct dmi_system_id dmi_probe_blacklist[] = {
+>>> +    {
+>>> +        /*
+>>> +         * Match for the GPDwin which unfortunately uses somewhat
+>>> +         * generic dmi strings, which is why we test for 4 strings
+>>> +         * and a known BIOS date.
+>>> +         * Comparing against 29 other byt/cht boards, board_name is
+>>> +         * unique to the GPDwin, where as only 2 other boards have the
+>>> +         * same board_serial and 3 others have the same board_vendor
+>>> +         */
+>>> +        .driver_data = (void *)&gpd_win_bl_data,
+>>> +        .matches = {
+>>> +            DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
+>>> +            DMI_MATCH(DMI_BOARD_NAME, "Default string"),
+>>> +            DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
+>>> +            DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
+>>> +        },
 >>
->> Do we know *WHY* these cards disable their hardware reset lines?
+>> To me this is matching by accident rather than by design, which is not
+>> acceptable.
 > 
-> Allow me to make a guess. In case the reset isn't enabled, the
-> internal eMMC card firmware don't monitor the pin for the reset. I
-> guess that could makes sense if SoC vendors has failed to properly
-> connect the pin, avoiding the eMMC card to be reset when it shouldn't.
-> 
->> If it is just some random over-cautious panic thing we might consider
->> just force re-enableing it, maybe with a warning in the dmesg, so we can
->> always reset the card. No DT property needed.
-> 
-> There is actually already a DT property "cap-mmc-hw-reset"
-> (MMC_CAP_HW_RESET), which tells whether the eMMC reset is supported by
-> the host.
-> 
-> Perhaps we can consider to force-enabling it for the eMMC card, when
-> this property is set for the mmc host!? At least, inventing yet
-> another binding doesn't make sense to me.
+> I already explained why we need this dmi quirk in your reply of v3,
+> it would have been nice if you replied there.
 
-IMHO setting this (permanent) configuration bit should be done
-explicitly and not within another DT property. Otherwise somebody may
-accidentally set this configuration by (for example) including a dtsi
-which has cap-mmc-hw-reset configured.
-
-Nonetheless if the majority agrees to implicitly set it when
-"cap-mmc-hw-reset" is configured I'm fine with that too.
-
-Another possibility is to don't include it in the kernel at all and
-therefore require the mmc userspace program to configure it...?
+I understand what you are saying, but that doesn't make the patch
+acceptable, so I cannot Ack it.
 
 > 
->> Putting some people who work for eMMC vendors in the To: line so they
->> can say if they know about this.
+> As I already mentioned when I first submitted this patch-set this
+> patch-set fixes a regression. When I first installed Linux on this
+> system, the wifi just worked, until this commit got merged:
 > 
-> Yes, let's see what they say about it.
+> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit?id=db52d4f8a4bde36263a7cc9d46ff20b243562ac9
+> 
+> 
+> So that gives us 3 options:
 
-Any news/comments?
+In the absence of another solution, the options are:
+	1. get the BIOS fixed
+	2. use the module option to blacklist the bad device
 
-kind regards,
-Richard.L
+> 
+> 1) Revert the commit causing the regressions
+> 2) Do nothing, live with the regression.
+> 3) Add a DMI based quirk
+> 
+> 1. is not an option since that commit is necessary to make wifi work
+> on other devices
+> 
+> 2. is what you seem to be advocating, but since the kernel has a clear
+> no regressions policy that is not an option either
+> 
+> 3. is thus the only option left.
+> 
+> So unless you see a 4th option we really need to go with this patch,
+> note that in this version I've made the chance of false positives
+> for the DMI match even smaller then it was before because it now
+> needs to match a know bios-date too.
+> 
+> Also note that this is being hit be actual users, not just by me, see:
+> 
+> https://bbs.archlinux.org/viewtopic.php?id=224086
+
+
