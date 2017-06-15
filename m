@@ -1,102 +1,142 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 1/5] mmc: block: Move duplicate check
-Date: Thu, 15 Jun 2017 14:12:55 +0200
-Message-ID: <20170615121259.8281-2-linus.walleij@linaro.org>
+Subject: [PATCH 2/5] mmc: block: Refactor mmc_blk_part_switch()
+Date: Thu, 15 Jun 2017 14:12:56 +0200
+Message-ID: <20170615121259.8281-3-linus.walleij@linaro.org>
 References: <20170615121259.8281-1-linus.walleij@linaro.org>
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:36701 "EHLO
+        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752409AbdFOMNM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 08:13:12 -0400
+Received: by mail-lf0-f42.google.com with SMTP id o83so7922801lff.3
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2017 05:13:12 -0700 (PDT)
 In-Reply-To: <20170615121259.8281-1-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-mmc_blk_ioctl() calls either mmc_blk_ioctl_cmd() or
-mmc_blk_ioctl_multi_cmd() and each of these make the same
-check. Factor it into a new helper function, call it on
-both branches of the switch() statement and save a chunk
-of duplicate code.
+Instead of passing a struct mmc_blk_data * to mmc_blk_part_switch()
+let's pass the actual partition type we want to switch to. This
+is necessary in order not to have a block device with a backing
+mmc_blk_data and request queue and all for every hardware partition,
+such as RPMB.
 
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
-ChangeLog v1->v2:
-- We need to check the block device only if an actual
-  well-known ioctl() is coming in, on the path of the
-  switch() statments, only those branches that handle
-  actual ioctl()s. Create a new helper function to check
-  the block device and call that.
----
- drivers/mmc/core/block.c | 36 ++++++++++++++++++++----------------
- 1 file changed, 20 insertions(+), 16 deletions(-)
+ drivers/mmc/core/block.c | 25 +++++++++++++------------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 1ce6012ce3c1..d1b824e65590 100644
+index d1b824e65590..94b97f97be1a 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -566,14 +566,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	int err = 0, ioc_err = 0;
- 	struct request *req;
+@@ -127,7 +127,7 @@ module_param(perdev_minors, int, 0444);
+ MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
  
--	/*
--	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
--	 * whole block device, not on a partition.  This prevents overspray
--	 * between sibling partitions.
--	 */
--	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
--		return -EPERM;
--
- 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
- 	if (IS_ERR(idata))
- 		return PTR_ERR(idata);
-@@ -626,14 +618,6 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	__u64 num_of_cmds;
- 	struct request *req;
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+-				      struct mmc_blk_data *md);
++				      unsigned int part_type);
  
--	/*
--	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
--	 * whole block device, not on a partition.  This prevents overspray
--	 * between sibling partitions.
--	 */
--	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
--		return -EPERM;
--
- 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
- 			   sizeof(num_of_cmds)))
- 		return -EFAULT;
-@@ -697,14 +681,34 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	return ioc_err ? ioc_err : err;
+ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+ {
+@@ -490,7 +490,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 
+ 	mrq.cmd = &cmd;
+ 
+-	err = mmc_blk_part_switch(card, md);
++	err = mmc_blk_part_switch(card, md->part_type);
+ 	if (err)
+ 		return err;
+ 
+@@ -767,29 +767,29 @@ static int mmc_blk_part_switch_post(struct mmc_card *card,
  }
  
-+static int mmc_blk_check_blkdev(struct block_device *bdev)
-+{
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+	return 0;
-+}
-+
- static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
- 	unsigned int cmd, unsigned long arg)
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+-				      struct mmc_blk_data *md)
++				      unsigned int part_type)
  {
-+	int ret;
-+
- 	switch (cmd) {
- 	case MMC_IOC_CMD:
-+		ret = mmc_blk_check_blkdev(bdev);
-+		if (ret)
-+			return ret;
- 		return mmc_blk_ioctl_cmd(bdev,
- 				(struct mmc_ioc_cmd __user *)arg);
- 	case MMC_IOC_MULTI_CMD:
-+		ret = mmc_blk_check_blkdev(bdev);
-+		if (ret)
-+			return ret;
- 		return mmc_blk_ioctl_multi_cmd(bdev,
- 				(struct mmc_ioc_multi_cmd __user *)arg);
- 	default:
+ 	int ret = 0;
+ 	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
+ 
+-	if (main_md->part_curr == md->part_type)
++	if (main_md->part_curr == part_type)
+ 		return 0;
+ 
+ 	if (mmc_card_mmc(card)) {
+ 		u8 part_config = card->ext_csd.part_config;
+ 
+-		ret = mmc_blk_part_switch_pre(card, md->part_type);
++		ret = mmc_blk_part_switch_pre(card, part_type);
+ 		if (ret)
+ 			return ret;
+ 
+ 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+-		part_config |= md->part_type;
++		part_config |= part_type;
+ 
+ 		ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_PART_CONFIG, part_config,
+ 				 card->ext_csd.part_time);
+ 		if (ret) {
+-			mmc_blk_part_switch_post(card, md->part_type);
++			mmc_blk_part_switch_post(card, part_type);
+ 			return ret;
+ 		}
+ 
+@@ -798,7 +798,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 		ret = mmc_blk_part_switch_post(card, main_md->part_curr);
+ 	}
+ 
+-	main_md->part_curr = md->part_type;
++	main_md->part_curr = part_type;
+ 	return ret;
+ }
+ 
+@@ -1141,7 +1141,7 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 		int part_err;
+ 
+ 		main_md->part_curr = main_md->part_type;
+-		part_err = mmc_blk_part_switch(host->card, md);
++		part_err = mmc_blk_part_switch(host->card, md->part_type);
+ 		if (part_err) {
+ 			/*
+ 			 * We have failed to get back into the correct
+@@ -1180,6 +1180,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_queue_req *mq_rq;
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_blk_data *md = mq->blkdata;
++	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
+ 	struct mmc_blk_ioc_data **idata;
+ 	u8 **ext_csd;
+ 	u32 status;
+@@ -1198,7 +1199,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 		}
+ 		/* Always switch back to main area after RPMB access */
+ 		if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
+-			mmc_blk_part_switch(card, dev_get_drvdata(&card->dev));
++			mmc_blk_part_switch(card, main_md->part_type);
+ 		break;
+ 	case MMC_DRV_OP_BOOT_WP:
+ 		ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
+@@ -1906,7 +1907,7 @@ void mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
+ 
+-	ret = mmc_blk_part_switch(card, md);
++	ret = mmc_blk_part_switch(card, md->part_type);
+ 	if (ret) {
+ 		if (req) {
+ 			blk_end_request_all(req, -EIO);
+@@ -2436,7 +2437,7 @@ static void mmc_blk_remove(struct mmc_card *card)
+ 	mmc_blk_remove_parts(card, md);
+ 	pm_runtime_get_sync(&card->dev);
+ 	mmc_claim_host(card->host);
+-	mmc_blk_part_switch(card, md);
++	mmc_blk_part_switch(card, md->part_type);
+ 	mmc_release_host(card->host);
+ 	if (card->type != MMC_TYPE_SD_COMBO)
+ 		pm_runtime_disable(&card->dev);
 -- 
 2.9.4
+
