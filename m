@@ -1,56 +1,84 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 2/6] Documentation: rockchip-dw-mshc: add description for rk3228
-Date: Thu, 15 Jun 2017 09:51:59 +0200
-Message-ID: <2961285.cLXt8uGUMN@diego>
-References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com> <1497510980-23207-3-git-send-email-frank.wang@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V3 00/11] mmc: Add Command Queue support
+Date: Thu, 15 Jun 2017 14:06:28 +0300
+Message-ID: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:32798 "EHLO gloria.sntech.de"
+Received: from mga11.intel.com ([192.55.52.93]:52875 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751141AbdFOHwG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 15 Jun 2017 03:52:06 -0400
-In-Reply-To: <1497510980-23207-3-git-send-email-frank.wang@rock-chips.com>
+        id S1751742AbdFOLMo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 15 Jun 2017 07:12:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Frank Wang <frank.wang@rock-chips.com>
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, wmc@rock-chips.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Frank,
+Hi
 
-Am Donnerstag, 15. Juni 2017, 15:16:16 CEST schrieb Frank Wang:
-> From: Shawn Lin <shawn.lin@rock-chips.com>
-> 
-> Add "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc" for
-> dwmmc on rk322x platform.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt index
-> 520d61d..ce30dff 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> @@ -15,6 +15,7 @@ Required Properties:
->  	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
->  	- "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip
-> RV1108 - "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip
-> RK3036 +	- "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc": for
-> Rockchip RK322X - "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for
-> Rockchip RK3368 - "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for
-> Rockchip RK3399
+Here is V3 of the hardware command queue patches without the software
+command queue patches.
 
-you might want to rebase this patch on top of Ulfs next branch [0],
-as there is also the support for the rk3328 in there now.
-
-Otherwise looks good to me, so
-Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+Is there any chance of this being queued for v4.13?
 
 
+Changes since V2:
+	Dropped patches that have been applied.
+	Re-based
+	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
 
-[0] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/log/?h=next
+Changes since V1:
 
+	"Share mmc request array between partitions" is dependent
+	on changes in "Introduce queue semantics", so added that
+	and block fixes:
+
+	Added "Fix is_waiting_last_req set incorrectly"
+	Added "Fix cmd error reset failure path"
+	Added "Use local var for mqrq_cur"
+	Added "Introduce queue semantics"
+
+Changes since RFC:
+
+	Re-based on next.
+	Added comment about command queue priority.
+	Added some acks and reviews.
+
+
+Adrian Hunter (10):
+      mmc: core: Add mmc_retune_hold_now()
+      mmc: core: Add members to mmc_request and mmc_data for CQE's
+      mmc: host: Add CQE interface
+      mmc: core: Turn off CQE before sending commands
+      mmc: core: Add support for handling CQE requests
+      mmc: mmc: Enable Command Queuing
+      mmc: mmc: Enable CQE's
+      mmc: block: Prepare CQE data
+      mmc: block: Add CQE support
+      mmc: sdhci-pci: Add CQHCI support for Intel GLK
+
+Venkat Gopalakrishnan (1):
+      mmc: cqhci: support for command queue enabled host
+
+ drivers/mmc/core/block.c          |  240 +++++++-
+ drivers/mmc/core/block.h          |    7 +
+ drivers/mmc/core/bus.c            |    7 +
+ drivers/mmc/core/core.c           |  156 ++++-
+ drivers/mmc/core/host.c           |    6 +
+ drivers/mmc/core/host.h           |    1 +
+ drivers/mmc/core/mmc.c            |   30 +-
+ drivers/mmc/core/queue.c          |  273 ++++++++-
+ drivers/mmc/core/queue.h          |   42 +-
+ drivers/mmc/host/Kconfig          |   14 +
+ drivers/mmc/host/Makefile         |    1 +
+ drivers/mmc/host/cqhci.c          | 1146 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci.h          |  240 ++++++++
+ drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
+ include/linux/mmc/core.h          |   18 +-
+ include/linux/mmc/host.h          |   24 +
+ include/trace/events/mmc.h        |   36 +-
+ 17 files changed, 2354 insertions(+), 40 deletions(-)
+ create mode 100644 drivers/mmc/host/cqhci.c
+ create mode 100644 drivers/mmc/host/cqhci.h
+
+
+Regards
+Adrian
