@@ -1,154 +1,46 @@
 From: Frank Wang <frank.wang@rock-chips.com>
-Subject: [PATCH 1/6] ARM: dts: rockchip: add basic dtsi file for RK3229 SoC
-Date: Thu, 15 Jun 2017 15:16:15 +0800
-Message-ID: <1497510980-23207-2-git-send-email-frank.wang@rock-chips.com>
+Subject: [PATCH 5/6] ARM: dts: rockchip: Add io-domain node for rk3228
+Date: Thu, 15 Jun 2017 15:21:47 +0800
+Message-ID: <1497511307-23262-1-git-send-email-frank.wang@rock-chips.com>
 References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from regular1.263xmail.com ([211.150.99.132]:59739 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751016AbdFOHWF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 03:22:05 -0400
 In-Reply-To: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: heiko@sntech.de, robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com
 Cc: linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, wmc@rock-chips.com, Frank Wang <frank.wang@rock-chips.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Due to some tiny differences between RK3228 and RK3229, this patch
-adds a basic dtsi file which includes a new CPU opp table and PSCI
-brought up support for RK3229.
+From: David Wu <david.wu@rock-chips.com>
 
+This patch adds io-domain support for rk3228 SoC.
+
+Signed-off-by: David Wu <david.wu@rock-chips.com>
 Signed-off-by: Frank Wang <frank.wang@rock-chips.com>
 ---
- arch/arm/boot/dts/rk3229-evb.dts |   2 +-
- arch/arm/boot/dts/rk3229.dtsi    | 110 +++++++++++++++++++++++++++++++++++++++
- 2 files changed, 111 insertions(+), 1 deletion(-)
- create mode 100644 arch/arm/boot/dts/rk3229.dtsi
+ arch/arm/boot/dts/rk322x.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/arch/arm/boot/dts/rk3229-evb.dts b/arch/arm/boot/dts/rk3229-evb.dts
-index 1b55192..82e8a53 100644
---- a/arch/arm/boot/dts/rk3229-evb.dts
-+++ b/arch/arm/boot/dts/rk3229-evb.dts
-@@ -40,7 +40,7 @@
+diff --git a/arch/arm/boot/dts/rk322x.dtsi b/arch/arm/boot/dts/rk322x.dtsi
+index 5e7b54c..c2a78f4 100644
+--- a/arch/arm/boot/dts/rk322x.dtsi
++++ b/arch/arm/boot/dts/rk322x.dtsi
+@@ -215,6 +215,11 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
  
- /dts-v1/;
- 
--#include "rk322x.dtsi"
-+#include "rk3229.dtsi"
- 
- / {
- 	model = "Rockchip RK3229 Evaluation board";
-diff --git a/arch/arm/boot/dts/rk3229.dtsi b/arch/arm/boot/dts/rk3229.dtsi
-new file mode 100644
-index 0000000..d43d133
---- /dev/null
-+++ b/arch/arm/boot/dts/rk3229.dtsi
-@@ -0,0 +1,110 @@
-+/*
-+ * Copyright (c) 2017 Fuzhou Rockchip Electronics Co., Ltd
-+ *
-+ * This file is dual-licensed: you can use it either under the terms
-+ * of the GPL or the X11 license, at your option. Note that this dual
-+ * licensing only applies to this file, and not this project as a
-+ * whole.
-+ *
-+ *  a) This library is free software; you can redistribute it and/or
-+ *     modify it under the terms of the GNU General Public License as
-+ *     published by the Free Software Foundation; either version 2 of the
-+ *     License, or (at your option) any later version.
-+ *
-+ *     This library is distributed in the hope that it will be useful,
-+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ *     GNU General Public License for more details.
-+ *
-+ *  Or, alternatively,
-+ *
-+ *  b) Permission is hereby granted, free of charge, to any person
-+ *     obtaining a copy of this software and associated documentation
-+ *     files (the "Software"), to deal in the Software without
-+ *     restriction, including without limitation the rights to use,
-+ *     copy, modify, merge, publish, distribute, sublicense, and/or
-+ *     sell copies of the Software, and to permit persons to whom the
-+ *     Software is furnished to do so, subject to the following
-+ *     conditions:
-+ *
-+ *     The above copyright notice and this permission notice shall be
-+ *     included in all copies or substantial portions of the Software.
-+ *
-+ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-+ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-+ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-+ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-+ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-+ *     OTHER DEALINGS IN THE SOFTWARE.
-+ */
-+
-+#include "rk322x.dtsi"
-+
-+/ {
-+	compatible = "rockchip,rk3229";
-+
-+	/delete-node/ opp-table0;
-+
-+	cpu0_opp_table: opp_table0 {
-+		compatible = "operating-points-v2";
-+		opp-shared;
-+
-+		opp-408000000 {
-+			opp-hz = /bits/ 64 <408000000>;
-+			opp-microvolt = <950000>;
-+			clock-latency-ns = <40000>;
-+			opp-suspend;
++		io_domains: io-domains {
++			compatible = "rockchip,rk3228-io-voltage-domain";
++			status = "disabled";
 +		};
-+		opp-600000000 {
-+			opp-hz = /bits/ 64 <600000000>;
-+			opp-microvolt = <975000>;
-+		};
-+		opp-816000000 {
-+			opp-hz = /bits/ 64 <816000000>;
-+			opp-microvolt = <1000000>;
-+		};
-+		opp-1008000000 {
-+			opp-hz = /bits/ 64 <1008000000>;
-+			opp-microvolt = <1175000>;
-+		};
-+		opp-1200000000 {
-+			opp-hz = /bits/ 64 <1200000000>;
-+			opp-microvolt = <1275000>;
-+		};
-+		opp-1296000000 {
-+			opp-hz = /bits/ 64 <1296000000>;
-+			opp-microvolt = <1325000>;
-+		};
-+		opp-1392000000 {
-+			opp-hz = /bits/ 64 <1392000000>;
-+			opp-microvolt = <1375000>;
-+		};
-+		opp-1464000000 {
-+			opp-hz = /bits/ 64 <1464000000>;
-+			opp-microvolt = <1400000>;
-+		};
-+	};
 +
-+	psci {
-+		compatible = "arm,psci-1.0", "arm,psci-0.2";
-+		method = "smc";
-+	};
-+};
-+
-+&cpu0 {
-+	enable-method = "psci";
-+};
-+
-+&cpu1 {
-+	enable-method = "psci";
-+};
-+
-+&cpu2 {
-+	enable-method = "psci";
-+};
-+
-+&cpu3 {
-+	enable-method = "psci";
-+};
+ 		u2phy0: usb2-phy@760 {
+ 			compatible = "rockchip,rk3228-usb2phy";
+ 			reg = <0x0760 0x0c>;
 -- 
 2.0.0
+
+
