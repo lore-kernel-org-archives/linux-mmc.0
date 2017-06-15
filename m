@@ -1,47 +1,71 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: Remove MMC_CAP2_HC_ERASE_SZ
-Date: Thu, 15 Jun 2017 14:45:49 +0200
-Message-ID: <CACRpkdYcWjW1zv1_5jPZkKGdPU0XpibxbFYA=NziDZui7oBF2Q@mail.gmail.com>
-References: <1497270250-11353-1-git-send-email-ulf.hansson@linaro.org>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 6/6] ARM: dts: rockchip: add efuse device node for rk3228
+Date: Thu, 15 Jun 2017 17:10:38 +0200
+Message-ID: <2537345.MJmYY2BcSn@phil>
+References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com> <1497511396-23308-1-git-send-email-frank.wang@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:35742 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751955AbdFOMpv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 08:45:51 -0400
-Received: by mail-io0-f179.google.com with SMTP id k93so11299809ioi.2
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2017 05:45:50 -0700 (PDT)
-In-Reply-To: <1497270250-11353-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1497511396-23308-1-git-send-email-frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.wu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Mon, Jun 12, 2017 at 2:24 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+Hi Frank,
 
-> The MMC_CAP2_HC_ERASE_SZ is used only by a few mmc host drivers. Its intent
-> is to enable eMMC's high-capacity erase size, as to improve the behaviour
-> of the erase operations.
->
-> We should strive to avoid software configuration options that aren't
-> necessary, but instead deploy common behaviours. For these reasons, let's
-> remove the capability bit for MMC_CAP2_HC_ERASE_SZ and make it the default
-> behaviour.
->
-> Note that this change doesn't affect eMMCs supporting trim/discard, because
-> these commands operates on sectors and takes precedence over erase
-> commands.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Am Donnerstag, 15. Juni 2017, 15:23:16 CEST schrieb Frank Wang:
+> From: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> 
+> Add a efuse node in the device tree for the rk3228 SoC.
+> 
+> Signed-off-by: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 > ---
->
-> Changes in v2:
->         - Make the behaviour from MMC_CAP2_HC_ERASE_SZ the default.
->         - Update changelog to reflect the change.
+>  arch/arm/boot/dts/rk322x.dtsi | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> diff --git a/arch/arm/boot/dts/rk322x.dtsi b/arch/arm/boot/dts/rk322x.dtsi
+> index c2a78f4..dad195e 100644
+> --- a/arch/arm/boot/dts/rk322x.dtsi
+> +++ b/arch/arm/boot/dts/rk322x.dtsi
+> @@ -314,6 +314,23 @@
+>  		status = "disabled";
+>  	};
+>  
+> +	efuse: efuse@11040000 {
+> +		compatible = "rockchip,rk322x-efuse";
 
-Looks correct to me.
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+was this binding included already? Simply because compatibles should
+not contain placeholders, so rockchip,rk3228-efuse please - same for
+the driver side.
 
-Yours,
-Linus Walleij
+
+Heiko
+
+
+> +		reg = <0x11040000 0x20>;
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		clocks = <&cru PCLK_EFUSE_256>;
+> +		clock-names = "pclk_efuse";
+> +
+> +		/* Data cells */
+> +		efuse_id: id@7 {
+> +			reg = <0x7 0x10>;
+> +		};
+> +		cpu_leakage: cpu_leakage@17 {
+> +			reg = <0x17 0x1>;
+> +		};
+> +	};
+> +
+>  	i2c0: i2c@11050000 {
+>  		compatible = "rockchip,rk3228-i2c";
+>  		reg = <0x11050000 0x1000>;
+> 
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
