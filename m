@@ -1,95 +1,53 @@
-From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: RE: [EXT] Re: [PATCH v2] mmc: core: add mmc-card hardware reset
- enable support
-Date: Wed, 14 Jun 2017 16:12:49 +0000
-Message-ID: <6b92d0af00024549a0d22dda039780dd@bowex36d.micron.com>
-References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com>
- <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
- <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
- <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com>
+From: Leo Yan <leo.yan@linaro.org>
+Subject: Re: [PATCH v3 14/21] arm64: dts: hi3660: enable idle states
+Date: Thu, 15 Jun 2017 08:23:58 +0800
+Message-ID: <20170615002358.GD28496@leoy-ThinkPad-T440>
+References: <20170614082338.15673-1-guodong.xu@linaro.org>
+ <20170614082338.15673-15-guodong.xu@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:46372 "EHLO
-        mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752226AbdFNQ1k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2017 12:27:40 -0400
-In-Reply-To: <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170614082338.15673-15-guodong.xu@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Guodong Xu <guodong.xu@linaro.org>
+Cc: robh+dt@kernel.org, mark.rutland@arm.com, xuwei5@hisilicon.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, xuejiancheng@hisilicon.com, peter.griffin@linaro.org, puck.chen@hisilicon.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, arnd@arndb.de, zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Daniel Lezcano <daniel.lezcano@linaro.org>, Kevin Wang <jean.wangtao@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Leitner <richard.leitner@skidata.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Bart Van Assche <bart.vanassche@sandisk.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
 
-SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUmljaGFyZCBMZWl0
-bmVyIFttYWlsdG86cmljaGFyZC5sZWl0bmVyQHNraWRhdGEuY29tXQ0KPiBTZW50OiBXZWRuZXNk
-YXksIEp1bmUgMTQsIDIwMTcgOToyNSBBTQ0KPiBUbzogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29u
-QGxpbmFyby5vcmc+OyBMaW51cyBXYWxsZWlqDQo+IDxsaW51cy53YWxsZWlqQGxpbmFyby5vcmc+
-DQo+IENjOiBCYXJ0IFZhbiBBc3NjaGUgPGJhcnQudmFuYXNzY2hlQHNhbmRpc2suY29tPjsgTHVj
-YSBQb3J6aW8gKGxwb3J6aW8pDQo+IDxscG9yemlvQG1pY3Jvbi5jb20+OyBSb2IgSGVycmluZyA8
-cm9iaCtkdEBrZXJuZWwub3JnPjsgTWFyayBSdXRsYW5kDQo+IDxtYXJrLnJ1dGxhbmRAYXJtLmNv
-bT47IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPjsgQWRyaWFuDQo+IEh1bnRl
-ciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyBKYWVob29uIENodW5nDQo+IDxqaDgwLmNodW5n
-QHNhbXN1bmcuY29tPjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgtDQo+IGtlcm5l
-bEB2Z2VyLmtlcm5lbC5vcmc7IGRldmljZXRyZWVAdmdlci5rZXJuZWwub3JnOyBSaWNoYXJkIExl
-aXRuZXINCj4gPGRldkBnMGhsMW4ubmV0Pg0KPiBTdWJqZWN0OiBbRVhUXSBSZTogW1BBVENIIHYy
-XSBtbWM6IGNvcmU6IGFkZCBtbWMtY2FyZCBoYXJkd2FyZSByZXNldA0KPiBlbmFibGUgc3VwcG9y
-dA0KPiANCj4gT24gMDQvMTEvMjAxNyAxMjo0MyBQTSwgVWxmIEhhbnNzb24gd3JvdGU6DQo+ID4g
-T24gMTEgQXByaWwgMjAxNyBhdCAxMDoxNywgTGludXMgV2FsbGVpaiA8bGludXMud2FsbGVpakBs
-aW5hcm8ub3JnPiB3cm90ZToNCj4gPj4gT24gVHVlLCBBcHIgMTEsIDIwMTcgYXQgOTozMSBBTSwg
-UmljaGFyZCBMZWl0bmVyDQo+ID4+IDxyaWNoYXJkLmxlaXRuZXJAc2tpZGF0YS5jb20+IHdyb3Rl
-Og0KPiA+Pg0KPiA+Pj4gU29tZSBlTU1DcyBkaXNhYmxlIHRoZWlyIGhhcmR3YXJlIHJlc2V0IGxp
-bmUgKFJTVF9OKSBieSBkZWZhdWx0LiBUbw0KPiA+Pj4gZW5hYmxlIGl0IHRoZSBob3N0IG11c3Qg
-c2V0IHRoZSBjb3JyZXNwb25kaW5nIGJpdCBpbiBFQ1NELiBBbg0KPiA+Pj4gZXhhbXBsZSBmb3Ig
-c3VjaCBhIGRldmljZSBpcyB0aGUgTWljcm9uIE1URkN4R0FDQUFOQS00TS4NCj4gPj4+DQoNClRo
-aXMgYmVoYXZpb3IgaXMgbm90IE1pY3JvbiBzcGVjaWZpYyBidXQgaW5zdGVhZCBpdCBpcyBlbmZv
-cmNlZCBieSB0aGUgSmVkZWMgDQpTcGVjaWZpY2F0aW9uLiBBbGwgZU1NQyBtdXN0IGhhdmUgSFcg
-cmVzZXQgZGlzYWJsZWQgYnkgZGVmYXVsdC4NCg0KPiA+Pj4gVGhpcyBwYXRjaCBhZGRzIGEgbmV3
-IG1tYy1jYXJkIGRldmljZXRyZWUgcHJvcGVydHkgdG8gbGV0IHRoZSBob3N0DQo+ID4+PiBlbmFi
-bGUgdGhpcyBmZWF0dXJlIGR1cmluZyBjYXJkIGluaXRpYWxpemF0aW9uLg0KPiA+Pj4NCj4gPj4+
-IFNpZ25lZC1vZmYtYnk6IFJpY2hhcmQgTGVpdG5lciA8cmljaGFyZC5sZWl0bmVyQHNraWRhdGEu
-Y29tPg0KPiA+Pg0KPiA+PiBEbyB3ZSBrbm93ICpXSFkqIHRoZXNlIGNhcmRzIGRpc2FibGUgdGhl
-aXIgaGFyZHdhcmUgcmVzZXQgbGluZXM/DQo+ID4NCj4gPiBBbGxvdyBtZSB0byBtYWtlIGEgZ3Vl
-c3MuIEluIGNhc2UgdGhlIHJlc2V0IGlzbid0IGVuYWJsZWQsIHRoZQ0KPiA+IGludGVybmFsIGVN
-TUMgY2FyZCBmaXJtd2FyZSBkb24ndCBtb25pdG9yIHRoZSBwaW4gZm9yIHRoZSByZXNldC4gSQ0K
-PiA+IGd1ZXNzIHRoYXQgY291bGQgbWFrZXMgc2Vuc2UgaWYgU29DIHZlbmRvcnMgaGFzIGZhaWxl
-ZCB0byBwcm9wZXJseQ0KPiA+IGNvbm5lY3QgdGhlIHBpbiwgYXZvaWRpbmcgdGhlIGVNTUMgY2Fy
-ZCB0byBiZSByZXNldCB3aGVuIGl0IHNob3VsZG4ndC4NCj4gPg0KPiA+PiBJZiBpdCBpcyBqdXN0
-IHNvbWUgcmFuZG9tIG92ZXItY2F1dGlvdXMgcGFuaWMgdGhpbmcgd2UgbWlnaHQgY29uc2lkZXIN
-Cj4gPj4ganVzdCBmb3JjZSByZS1lbmFibGVpbmcgaXQsIG1heWJlIHdpdGggYSB3YXJuaW5nIGlu
-IHRoZSBkbWVzZywgc28gd2UNCj4gPj4gY2FuIGFsd2F5cyByZXNldCB0aGUgY2FyZC4gTm8gRFQg
-cHJvcGVydHkgbmVlZGVkLg0KPiA+DQoNClRoaXMgc3BlY2lmaWNhdGlvbiAoYXMgVWxmIGNvcnJl
-Y3RseSBoaW50ZWQpIG9yaWdpbmF0ZWQgZnJvbSBiYWRseSBjb25uZWN0ZWQgDQpIVyBSZXNldCBw
-aW5zIHdoaWNoIGNhdXNlZCB1bm5lY2Vzc2FyeSBlTU1DIHJlc2V0IGdsaXRjaGVzLg0KRGlzYWJs
-aW5nIHRoaXMgZmVhdHVyZSBpcyBhIGdvb2Qgb3B0aW9uIHRvIGNvbnRhaW4gZ2xpdGNoZXMgYW5k
-IGF2b2lkIA0Kc3lzdGVtIGxldmVsIGJ1Z3MuDQoNCj4gPiBUaGVyZSBpcyBhY3R1YWxseSBhbHJl
-YWR5IGEgRFQgcHJvcGVydHkgImNhcC1tbWMtaHctcmVzZXQiDQo+ID4gKE1NQ19DQVBfSFdfUkVT
-RVQpLCB3aGljaCB0ZWxscyB3aGV0aGVyIHRoZSBlTU1DIHJlc2V0IGlzDQo+IHN1cHBvcnRlZCBi
-eQ0KPiA+IHRoZSBob3N0Lg0KPiA+DQo+ID4gUGVyaGFwcyB3ZSBjYW4gY29uc2lkZXIgdG8gZm9y
-Y2UtZW5hYmxpbmcgaXQgZm9yIHRoZSBlTU1DIGNhcmQsIHdoZW4NCj4gPiB0aGlzIHByb3BlcnR5
-IGlzIHNldCBmb3IgdGhlIG1tYyBob3N0IT8gQXQgbGVhc3QsIGludmVudGluZyB5ZXQNCj4gPiBh
-bm90aGVyIGJpbmRpbmcgZG9lc24ndCBtYWtlIHNlbnNlIHRvIG1lLg0KPiANCj4gSU1ITyBzZXR0
-aW5nIHRoaXMgKHBlcm1hbmVudCkgY29uZmlndXJhdGlvbiBiaXQgc2hvdWxkIGJlIGRvbmUgZXhw
-bGljaXRseQ0KPiBhbmQgbm90IHdpdGhpbiBhbm90aGVyIERUIHByb3BlcnR5LiBPdGhlcndpc2Ug
-c29tZWJvZHkgbWF5IGFjY2lkZW50YWxseQ0KPiBzZXQgdGhpcyBjb25maWd1cmF0aW9uIGJ5IChm
-b3IgZXhhbXBsZSkgaW5jbHVkaW5nIGEgZHRzaSB3aGljaCBoYXMgY2FwLW1tYy0NCj4gaHctcmVz
-ZXQgY29uZmlndXJlZC4NCj4gDQo+IE5vbmV0aGVsZXNzIGlmIHRoZSBtYWpvcml0eSBhZ3JlZXMg
-dG8gaW1wbGljaXRseSBzZXQgaXQgd2hlbiAiY2FwLW1tYy1ody0NCj4gcmVzZXQiIGlzIGNvbmZp
-Z3VyZWQgSSdtIGZpbmUgd2l0aCB0aGF0IHRvby4NCj4gDQo+IEFub3RoZXIgcG9zc2liaWxpdHkg
-aXMgdG8gZG9uJ3QgaW5jbHVkZSBpdCBpbiB0aGUga2VybmVsIGF0IGFsbCBhbmQgdGhlcmVmb3Jl
-DQo+IHJlcXVpcmUgdGhlIG1tYyB1c2Vyc3BhY2UgcHJvZ3JhbSB0byBjb25maWd1cmUgaXQuLi4/
-DQo+IA0KPiA+DQo+ID4+IFB1dHRpbmcgc29tZSBwZW9wbGUgd2hvIHdvcmsgZm9yIGVNTUMgdmVu
-ZG9ycyBpbiB0aGUgVG86IGxpbmUgc28gdGhleQ0KPiA+PiBjYW4gc2F5IGlmIHRoZXkga25vdyBh
-Ym91dCB0aGlzLg0KPiA+DQo+ID4gWWVzLCBsZXQncyBzZWUgd2hhdCB0aGV5IHNheSBhYm91dCBp
-dC4NCg0KSGVyZSBJIGFtIDotKQ0KDQo+IA0KPiBBbnkgbmV3cy9jb21tZW50cz8NCj4gDQoNCklN
-SE8gbW1jLXV0aWwgaXMgd2hlcmUgdGhlIHBhdGNoIHJlYWxseSBzdGFuZHM6IHRoZSBlbmFibGlu
-ZyBpcyBPVFAsIA0KdGhlIHByb2dyYW1tZXIgaGF2ZSB0byB1c2UgbW1jLXV0aWwgb25seSBvbmNl
-IGFuZCB0aGUga2VybmVsIA0Kd2lsbCBiZWhhdmUgYWNjb3JkaW5nbHkuIA0KDQpBbnkgcGxhdGZv
-cm0gdmVuZG9yIG11c3QgY2hlY2sgdGhhdCB0aGUgSFcgUmVzZXQgcGluIGlzIGFjdHVhbGx5DQpD
-b25uZWN0ZWQgQkVGT1JFIGVuYWJsaW5nIHRoaXMgZmVhdHVyZSBvdGhlcndpc2UgdGhlIHN5c3Rl
-bSBtYXkgYmUNCnVuc3RhYmxlLiBBIERUIEJpbmRpbmcgbWF5IGJlIGRhbmdlcm91cyBpZiB0aGlz
-IGNvbmRpdGlvbiBpcyBub3QgbWV0IA0KYXMgd2VsbCBhcyB0aGUgY29kZSBleGVjdXRpb24gYXQg
-ZWFjaCBNTUMgaW5pdCBpcyBob25lc3RseSByZWR1bmRhbnQNCmZvciBhbiBPVFAgbG9jYXRpb24g
-b2YgdGhlIGV4dENTRC4NCg0KQ2hlZXJzLA0KICAgTHVjYQ0KDQo+IGtpbmQgcmVnYXJkcywNCj4g
-UmljaGFyZC5MDQo=
+On Wed, Jun 14, 2017 at 04:23:31PM +0800, Guodong Xu wrote:
+> From: Leo Yan <leo.yan@linaro.org>
+> 
+> On Hi3660 there have two clusters, one is CA53 cluster and another is
+> CA73 cluster. This two clusters have different idle states separately.
+> With Daniel Lezcano's patch (ARM: cpuidle: Support asymmetric idle
+> definition), now ARM idle driver can support different clusters with
+> different idle states.
+> 
+> Base on this, this patch is to bind two clusters idle states on Hi3660.
+> Except the "WFI" states are enabled by default for all CPUs, this patch
+> also binds below extra idle states:
+> 
+> - CA53 CPUs have two more states:
+>   CPU_SLEEP:       CPU power off state
+>   CLUSTER_SLEEP_0: Cluster power off state
+> 
+> - CA73 CPUs have three more states:
+>   CPU_NAP:         CPU retention state
+>   CPU_SLEEP:       CPU power off state
+>   CLUSTER_SLEEP_1: Cluster power off state
+
+Hi Guodong, Wei and all,
+
+As Daniel reminded, this patch is dependent on patch (ARM: cpuidle:
+Support asymmetric idle definition) [1] but his patch has not been
+finally merged yet. So let us hold on this patch for Daniel's patch
+is picked up firstly.
+
+At the meantime welcome the review and comment for this patch ahead.
+
+[1] https://patchwork.kernel.org/patch/9781869/
+
+[...]
+
+Thanks,
+Leo Yan
