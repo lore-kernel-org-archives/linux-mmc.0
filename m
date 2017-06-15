@@ -1,75 +1,61 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 03/11] mmc: host: Add CQE interface
-Date: Thu, 15 Jun 2017 14:06:31 +0300
-Message-ID: <1497524799-18165-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 04/11] mmc: core: Turn off CQE before sending commands
+Date: Thu, 15 Jun 2017 14:06:32 +0300
+Message-ID: <1497524799-18165-5-git-send-email-adrian.hunter@intel.com>
 References: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:52875 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751742AbdFOLM6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 15 Jun 2017 07:12:58 -0400
+        id S1751742AbdFOLND (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 15 Jun 2017 07:13:03 -0400
 In-Reply-To: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Add CQE host operations, capabilities, and host members.
+Turn off the CQE before sending commands, and ensure it is off in any reset
+or power management paths, or re-tuning.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- include/linux/mmc/host.h | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ drivers/mmc/core/core.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ebd1cebbef0c..4dd7ada9b4b9 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -162,6 +162,19 @@ struct mmc_host_ops {
- 				  unsigned int direction, int blk_size);
- };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 26431267a3e2..b0af9db18eef 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -260,6 +260,9 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
  
-+struct mmc_cqe_ops {
-+	int	(*cqe_enable)(struct mmc_host *host, struct mmc_card *card);
-+	void	(*cqe_disable)(struct mmc_host *host);
-+	int	(*cqe_request)(struct mmc_host *host, struct mmc_request *mrq);
-+	void	(*cqe_post_req)(struct mmc_host *host, struct mmc_request *mrq);
-+	void	(*cqe_off)(struct mmc_host *host);
-+	int	(*cqe_wait_for_idle)(struct mmc_host *host);
-+	bool	(*cqe_timeout)(struct mmc_host *host, struct mmc_request *mrq,
-+			       bool *recovery_needed);
-+	void	(*cqe_recovery_start)(struct mmc_host *host);
-+	void	(*cqe_recovery_finish)(struct mmc_host *host);
-+};
+ 	trace_mmc_request_start(host, mrq);
+ 
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
 +
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-@@ -307,6 +320,8 @@ struct mmc_host {
- #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
- #define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
- #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
-+#define MMC_CAP2_CQE		(1 << 23)	/* Has eMMC command queue engine */
-+#define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
+ 	host->ops->request(host, mrq);
+ }
  
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+@@ -982,6 +985,9 @@ int mmc_execute_tuning(struct mmc_card *card)
+ 	if (!host->ops->execute_tuning)
+ 		return 0;
  
-@@ -393,6 +408,15 @@ struct mmc_host {
- 	int			dsr_req;	/* DSR value is valid */
- 	u32			dsr;	/* optional driver stage (DSR) value */
- 
-+	/* Command Queue Engine (CQE) support */
-+	const struct mmc_cqe_ops *cqe_ops;
-+	void			*cqe_private;
-+	void			(*cqe_recovery_notifier)(struct mmc_host *,
-+							 struct mmc_request *);
-+	int			cqe_qdepth;
-+	bool			cqe_enabled;
-+	bool			cqe_on;
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
 +
- 	unsigned long		private[0] ____cacheline_aligned;
- };
+ 	if (mmc_card_mmc(card))
+ 		opcode = MMC_SEND_TUNING_BLOCK_HS200;
+ 	else
+@@ -1021,6 +1027,9 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
+  */
+ void mmc_set_initial_state(struct mmc_host *host)
+ {
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
++
+ 	mmc_retune_disable(host);
  
+ 	if (mmc_host_is_spi(host))
 -- 
 1.9.1
 
