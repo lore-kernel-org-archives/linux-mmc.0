@@ -1,81 +1,41 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH V2 00/22] mmc: Add Command Queue support
-Date: Thu, 15 Jun 2017 11:49:31 +0000
-Message-ID: <AM4PR0401MB2324C8B330EB320BFB35443590C00@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
- <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com>
- <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
- <AM4PR0401MB23244CD809159EF1CD897160901F0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <8009319e-356e-0b69-a30a-31b536f3643a@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: block: Move duplicate check
+Date: Thu, 15 Jun 2017 13:53:30 +0200
+Message-ID: <CACRpkdYLyRf_1Z1AMxWm6+SFpX0O6D+Qu4+ENvZQ84nOaXpk9Q@mail.gmail.com>
+References: <20170614114851.17146-1-linus.walleij@linaro.org> <e31ca826-8391-55b0-4a9b-f5ff0b0c5882@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve1eur01on0086.outbound.protection.outlook.com ([104.47.1.86]:48182
-        "EHLO EUR01-VE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751972AbdFOLte (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 15 Jun 2017 07:49:34 -0400
-In-Reply-To: <8009319e-356e-0b69-a30a-31b536f3643a@intel.com>
-Content-Language: en-US
+Received: from mail-it0-f45.google.com ([209.85.214.45]:35910 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752137AbdFOLxc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 07:53:32 -0400
+Received: by mail-it0-f45.google.com with SMTP id m47so16856214iti.1
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2017 04:53:32 -0700 (PDT)
+In-Reply-To: <e31ca826-8391-55b0-4a9b-f5ff0b0c5882@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZHJpYW4gSHVudGVyIFttYWls
-dG86YWRyaWFuLmh1bnRlckBpbnRlbC5jb21dDQo+IFNlbnQ6IFRodXJzZGF5LCBKdW5lIDE1LCAy
-MDE3IDc6MzggUE0NCj4gVG86IEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT47IExpbnVz
-IFdhbGxlaWoNCj4gPGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZz4NCj4gQ2M6IFVsZiBIYW5zc29u
-IDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgbGludXgtbW1jIDxsaW51eC0NCj4gbW1jQHZnZXIu
-a2VybmVsLm9yZz47IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPjsgTWF0
-ZXVzeg0KPiBOb3dhayA8bWF0ZXVzei5ub3dha0BpbnRlbC5jb20+OyBZdWxpeSBJenJhaWxvdg0K
-PiA8WXVsaXkuSXpyYWlsb3ZAc2FuZGlzay5jb20+OyBKYWVob29uIENodW5nIDxqaDgwLmNodW5n
-QHNhbXN1bmcuY29tPjsNCj4gRG9uZyBBaXNoZW5nIDxkb25nYXM4NkBnbWFpbC5jb20+OyBEYXMg
-QXN1dG9zaA0KPiA8YXN1dG9zaGRAY29kZWF1cm9yYS5vcmc+OyBaaGFuZ2ZlaSBHYW8gPHpoYW5n
-ZmVpLmdhb0BnbWFpbC5jb20+Ow0KPiBEb3JmbWFuIEtvbnN0YW50aW4gPGtkb3JmbWFuQGNvZGVh
-dXJvcmEub3JnPjsgRGF2aWQgR3JpZWdvDQo+IDxkYXZpZC5ncmllZ29AbGluYXJvLm9yZz47IFNh
-aGl0eWEgVHVtbWFsYSA8c3R1bW1hbGFAY29kZWF1cm9yYS5vcmc+Ow0KPiBIYXJqYW5pIFJpdGVz
-aCA8cml0ZXNoaEBjb2RlYXVyb3JhLm9yZz47IFZlbnUgQnlyYXZhcmFzdQ0KPiA8dmJ5cmF2YXJh
-c3VAbnZpZGlhLmNvbT47IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPg0KPiBT
-dWJqZWN0OiBSZTogW1BBVENIIFYyIDAwLzIyXSBtbWM6IEFkZCBDb21tYW5kIFF1ZXVlIHN1cHBv
-cnQNCj4gDQo+IE9uIDI0LzA0LzE3IDEyOjE0LCBCb3VnaCBDaGVuIHdyb3RlOg0KPiA+PiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+PiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiA+PiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
-IE9uIEJlaGFsZiBPZiBMaW51cyBXYWxsZWlqDQo+ID4+IFNlbnQ6IE1vbmRheSwgQXByaWwgMjQs
-IDIwMTcgNDoxMyBQTQ0KPiA+PiBUbzogQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRl
-bC5jb20+DQo+ID4+IENjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IGxp
-bnV4LW1tYyA8bGludXgtDQo+ID4+IG1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBBbGV4IExlbWJlcmcg
-PGFsZXgubGVtYmVyZ0BzYW5kaXNrLmNvbT47DQo+ID4+IE1hdGV1c3ogTm93YWsgPG1hdGV1c3ou
-bm93YWtAaW50ZWwuY29tPjsgWXVsaXkgSXpyYWlsb3YNCj4gPj4gPFl1bGl5Lkl6cmFpbG92QHNh
-bmRpc2suY29tPjsgSmFlaG9vbiBDaHVuZyA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT47DQo+ID4+
-IERvbmcgQWlzaGVuZyA8ZG9uZ2FzODZAZ21haWwuY29tPjsgRGFzIEFzdXRvc2gNCj4gPj4gPGFz
-dXRvc2hkQGNvZGVhdXJvcmEub3JnPjsgWmhhbmdmZWkgR2FvIDx6aGFuZ2ZlaS5nYW9AZ21haWwu
-Y29tPjsNCj4gPj4gRG9yZm1hbiBLb25zdGFudGluIDxrZG9yZm1hbkBjb2RlYXVyb3JhLm9yZz47
-IERhdmlkIEdyaWVnbw0KPiA+PiA8ZGF2aWQuZ3JpZWdvQGxpbmFyby5vcmc+OyBTYWhpdHlhIFR1
-bW1hbGEgPHN0dW1tYWxhQGNvZGVhdXJvcmEub3JnPjsNCj4gPj4gSGFyamFuaSBSaXRlc2ggPHJp
-dGVzaGhAY29kZWF1cm9yYS5vcmc+OyBWZW51IEJ5cmF2YXJhc3UNCj4gPj4gPHZieXJhdmFyYXN1
-QG52aWRpYS5jb20+OyBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4NCj4gPj4g
-U3ViamVjdDogUmU6IFtQQVRDSCBWMiAwMC8yMl0gbW1jOiBBZGQgQ29tbWFuZCBRdWV1ZSBzdXBw
-b3J0DQo+ID4+DQo+ID4+IE9uIFNhdCwgQXByIDIyLCAyMDE3IGF0IDk6NDUgQU0sIEFkcmlhbiBI
-dW50ZXINCj4gPj4gPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPg0KPiA+PiB3cm90ZToNCj4gPj4N
-Cj4gPj4+IFVsZiBhbmQgTGludXMgaGF2ZSBiZWVuIGRvaW5nIGEgZ3JlYXQgam9iIG9mIGtlZXBp
-bmcgdGhpcyBtb3ZpbmcsDQo+ID4+PiBidXQgaXQgd291bGQgYmUgbmljZSB0byBzZWUgc29tZSBv
-dGhlcnMgdGFraW5nIG1vcmUgaW50ZXJlc3QuICBUaGUNCj4gPj4+IGZpcnN0IGNvbW1hbmQgcXVl
-dWUgcGF0Y2hlcyB3ZXJlIHBvc3RlZCBpbiBGZWJydWFyeSAyMDE0LCBvdmVyIDMgeWVhcnMNCj4g
-YWdvIQ0KPiA+Pg0KPiA+PiBJIGFncmVlLg0KPiA+Pg0KPiA+PiBJIHRoaW5rIGJvdGggbWUgJiBV
-bGYgd291bGQgYWxzbyBiZSBkb2luZyBtb3JlIHdvcmsgaWYgd2UgaGFkIGVhc2lseQ0KPiA+PiBh
-Y2Nlc3NpYmxlIGhhcmR3YXJlIHdpdGggdXBzdHJlYW0gaG9zdCBjb250cm9sbGVyIHN1cHBvcnQg
-Zm9yIG5hdGl2ZQ0KPiBjb21tYW5kIHF1ZXVlaW5nLg0KPiA+PiAoSG0sIHdhcyBqdXN0IHJlYWRp
-bmcgaW4gbGliYXRhIGFib3V0IE5DUSAuLi4NCj4gPj4gZMOpamEgdnUgLi4uIGh0dHBzOi8vZW4u
-d2lraXBlZGlhLm9yZy93aWtpL05hdGl2ZV9Db21tYW5kX1F1ZXVpbmcpDQo+ID4+DQo+ID4+IERv
-IHdlIGhhdmUgc29tZSBoYXJkd2FyZSB3aXRoIGhvc3QtYmFja2VkIGNvbW1hbmQgcXVldWVpbmcg
-b3V0DQo+IHRoZXJlDQo+ID4+IHRoYXQgaXMgZWFzaWx5IG9idGFpbmVkIGFuZCBoYXMgdXBzdHJl
-YW0gc3VwcG9ydCBmb3IgdGhlIGJhc2ljIHN5c3RlbT8NCj4gPj4NCj4gPg0KPiA+IFRoZSBjb21p
-bmcgaS5NWDggc3VwcG9ydCBoYXJkd2FyZSBDTURRLCBJIHdpbGwgaGF2ZSBhIHRyeSB3aGVuIEkg
-Z2V0IG9uZQ0KPiBvbiBNYXkgb3IgSnVuZS4NCj4gDQo+IEkgaGF2ZSBzZW50IHVwZGF0ZWQgcGF0
-Y2hlcy4gIFdpbGwgeW91IGhhdmUgYSBjaGFuY2UgdG8gdGVzdCBoYXJkd2FyZSBDTURRPw0KDQpZ
-ZXMsIEkgd2lsbCB0cnkgdG8gYXBwbHkgdGhlc2UgcGF0Y2hlcyBvbiBvdXIgbG9jYWwgNC45IGJy
-YW5jaC4gIFdpbGwgZ2l2ZSB5b3UgdGhlIHRlc3QgcmVzdWx0Lg0KDQpCZXN0IFJlZ2FyZHMsDQpI
-YWlibyBDaGVuDQo=
+On Wed, Jun 14, 2017 at 2:22 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Hi Linus,
+>
+> On 2017/6/14 19:48, Linus Walleij wrote:
+>>
+>> mmc_blk_ioctl() calls either mmc_blk_ioctl_cmd() or
+>> mmc_blk_ioctl_multi_cmd() and each of these make the same
+>> check. Factor it into the first call and save one chunk
+>> of duplicate code.
+>>
+>
+> Probably you still cannot save the check like what this patch
+> does. Refer to commit,
+>
+> 83c742c344c08 ("mmc: block: fix ABI regression of mmc_blk_ioctl")
+
+AHa I see what's happening. I guess I have to make a small
+helper function to check it and inline that instead.
+
+Yours,
+Linus Walleij
