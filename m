@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 04/16] mmc: host: omap_hsmmc: Add voltage switch support for UHS SD card
-Date: Fri, 16 Jun 2017 18:15:32 +0530
-Message-ID: <20170616124544.15046-5-kishon@ti.com>
+Subject: [PATCH 06/16] mmc: host: omap_hsmmc: Add tuning support
+Date: Fri, 16 Jun 2017 18:15:34 +0530
+Message-ID: <20170616124544.15046-7-kishon@ti.com>
 References: <20170616124544.15046-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,263 +12,318 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony
 Cc: Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-UHS SD card IO data line operates at 1.8V when in UHS speed
-mode.
+MMC tuning procedure is required to support SD card
+UHS1-SDR104 mode and EMMC HS200 mode.
 
-Add voltage switch support in order to enumerate UHS cards.
+The tuning function omap_execute_tuning() will only be
+called by the MMC/SD core if the corresponding speed modes
+are supported by the OMAP silicon which is set in the mmc
+host "caps" field.
 
-Also, enable CIRQ before checking for CLEV/DLEV. MMC module can
-sense when the clock lines and data lines are driven high by the
-card, if MMC is active and CIRQ can be used to keep the MMC
-module active. This is required for voltage switching to succeed
-and the card to enumerate in UHS mode.
+Add a separate function to set the UHSMS field to one of
+SDR104, SDR50, DDR50, SDR25 or SDR12 depending on the
+inserted SD card. This is required for tuning to succeed in
+the case of SDR104/HS200 or SDR50.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
+[rk@ti.com: disable DEB interrupt during tuning]
+Signed-off-by: Ravikumar Kattekola <rk@ti.com>
+Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
 Signed-off-by: Sourav Poddar <sourav.poddar@ti.com>
-[kishon@ti.com : cleanup the voltage switch sequence]
+[kishon@ti.com : cleanup the tuning sequence]
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-[nsekhar@ti.com: make card busy functions preempt safe]
+[nsekhar@ti.com: add comment for tuning timeout]
 Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 179 +++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 170 insertions(+), 9 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 200 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 200 insertions(+)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 65330d2263ad..680934d50919 100644
+index 3ca18e28be01..f64148b119df 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -44,6 +44,7 @@
- #include <linux/pm_runtime.h>
- #include <linux/pm_wakeirq.h>
- #include <linux/platform_data/hsmmc-omap.h>
-+#include <linux/mmc/sd.h>
- 
+@@ -18,6 +18,7 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
++#include <linux/slab.h>
+ #include <linux/debugfs.h>
+ #include <linux/dmaengine.h>
+ #include <linux/seq_file.h>
+@@ -49,6 +50,7 @@
  /* OMAP HSMMC Host Controller Registers */
  #define OMAP_HSMMC_SYSSTATUS	0x0014
-@@ -111,6 +112,9 @@
- /* PSTATE */
- #define DLEV_DAT(x)		(1 << (20 + (x)))
+ #define OMAP_HSMMC_CON		0x002C
++#define OMAP_HSMMC_DLL		0x0034
+ #define OMAP_HSMMC_SDMASA	0x0100
+ #define OMAP_HSMMC_BLK		0x0104
+ #define OMAP_HSMMC_ARG		0x0108
+@@ -66,6 +68,7 @@
+ #define OMAP_HSMMC_ISE		0x0138
+ #define OMAP_HSMMC_AC12		0x013C
+ #define OMAP_HSMMC_CAPA		0x0140
++#define OMAP_HSMMC_CAPA2	0x0144
  
-+/* AC12 */
-+#define AC12_V1V8_SIGEN		(1 << 19)
+ #define VS18			(1 << 26)
+ #define VS30			(1 << 25)
+@@ -114,6 +117,26 @@
+ 
+ /* AC12 */
+ #define AC12_V1V8_SIGEN		(1 << 19)
++#define AC12_SCLK_SEL		(1 << 23)
++#define AC12_UHSMC_MASK		(7 << 16)
++#define AC12_UHSMC_SDR12	(0 << 16)
++#define AC12_UHSMC_SDR25	(1 << 16)
++#define AC12_UHSMC_SDR50	(2 << 16)
++#define AC12_UHSMC_SDR104	(3 << 16)
++#define AC12_UHSMC_DDR50	(4 << 16)
++#define AC12_UHSMC_RES		(0x7 << 16)
 +
++/* DLL */
++#define DLL_SWT			(1 << 20)
++#define DLL_FORCE_SR_C_SHIFT	13
++#define DLL_FORCE_SR_C_MASK	0x7f
++#define DLL_FORCE_VALUE		(1 << 12)
++#define DLL_CALIB		(1 << 1)
++
++#define MAX_PHASE_DELAY		0x7c
++
++/* CAPA2 */
++#define CAPA2_TSDR50		(1 << 13)
+ 
  /* Interrupt masks for IE and ISE register */
  #define CC_EN			(1 << 0)
- #define TC_EN			(1 << 1)
-@@ -150,6 +154,13 @@
- #define VDD_1V8			1800000		/* 180000 uV */
- #define VDD_3V0			3000000		/* 300000 uV */
- #define VDD_165_195		(ffs(MMC_VDD_165_195) - 1)
-+#define VDD_30_31		(ffs(MMC_VDD_30_31) - 1)
-+
-+#define CON_CLKEXTFREE		(1 << 16)
-+#define CON_PADEN		(1 << 15)
-+#define PSTATE_CLEV		(1 << 24)
-+#define PSTATE_DLEV		(0xF << 20)
-+#define PSTATE_DLEV_DAT0	(0x1 << 20)
- 
- /*
-  * One controller can have multiple slots, like on some omap boards using
-@@ -177,6 +188,7 @@ struct omap_hsmmc_host {
- 	struct	mmc_host	*mmc;
- 	struct	mmc_request	*mrq;
- 	struct	mmc_command	*cmd;
-+	u32			last_cmd;
- 	struct	mmc_data	*data;
- 	struct	clk		*fclk;
- 	struct	clk		*dbclk;
-@@ -209,6 +221,7 @@ struct omap_hsmmc_host {
- 	unsigned int		flags;
- #define AUTO_CMD23		(1 << 0)        /* Auto CMD23 support */
- #define HSMMC_SDIO_IRQ_ENABLED	(1 << 1)        /* SDIO irq enabled */
-+#define CLKEXTFREE_ENABLED	(1 << 2)        /* CLKEXTFREE enabled */
+@@ -202,6 +225,7 @@ struct omap_hsmmc_host {
+ 	unsigned int		dma_sg_idx;
+ 	unsigned char		bus_mode;
+ 	unsigned char		power_mode;
++	unsigned char		timing;
+ 	int			suspended;
+ 	u32			con;
+ 	u32			hctl;
+@@ -225,6 +249,8 @@ struct omap_hsmmc_host {
  	struct omap_hsmmc_next	next_data;
  	struct	omap_hsmmc_platform_data	*pdata;
  
-@@ -593,6 +606,9 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
- 	if (cmd->opcode == MMC_ERASE)
- 		irq_mask &= ~DTO_EN;
- 
-+	if (host->flags & CLKEXTFREE_ENABLED)
-+		irq_mask |= CIRQ_EN;
++	bool			is_tuning;
 +
- 	spin_lock_irqsave(&host->irq_lock, flags);
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
- 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-@@ -936,6 +952,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 	/* return MMC cover switch state, can be NULL if not supported.
+ 	 *
+ 	 * possible return values:
+@@ -242,6 +268,7 @@ struct omap_mmc_of_data {
+ };
+ 
+ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
++static void omap_hsmmc_disable_tuning(struct omap_hsmmc_host *host);
+ 
+ static int omap_hsmmc_card_detect(struct device *dev)
+ {
+@@ -599,6 +626,15 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 	u32 irq_mask = INT_EN_MASK;
+ 	unsigned long flags;
+ 
++	if (host->is_tuning)
++		/*
++		 * OMAP5/DRA74X/DRA72x Errata i802:
++		 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
++		 * during the tuning procedure. So disable it during the
++		 * tuning procedure.
++		 */
++		irq_mask &= ~(DCRC_EN | DEB_EN);
++
+ 	if (host->use_dma)
+ 		irq_mask &= ~(BRR_EN | BWR_EN);
+ 
+@@ -948,6 +984,11 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 			cmdreg &= ~(DDIR);
+ 	}
+ 
++	/* Tuning command is special. Data Present Select should be set */
++	if ((cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
++	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
++		cmdreg |= DP_SELECT | DDIR;
++
+ 	if (host->use_dma)
  		cmdreg |= DMAE;
  
- 	host->req_in_progress = 1;
-+	host->last_cmd = cmd->opcode;
- 
- 	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
- 	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
-@@ -1735,17 +1752,12 @@ static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
- 	OMAP_HSMMC_WRITE(host->base, CAPA, val);
+@@ -1595,6 +1636,41 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 	omap_hsmmc_start_command(host, req->cmd, req->data);
  }
  
--static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
-+static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host, int iov)
++static void omap_hsmmc_set_timing(struct omap_hsmmc_host *host)
++{
++	u32 val;
++	struct mmc_ios *ios = &host->mmc->ios;
++
++	omap_hsmmc_stop_clock(host);
++
++	val = OMAP_HSMMC_READ(host->base, AC12);
++	val &= ~AC12_UHSMC_MASK;
++	switch (ios->timing) {
++	case MMC_TIMING_UHS_SDR104:
++	case MMC_TIMING_MMC_HS200:
++		val |= AC12_UHSMC_SDR104;
++		break;
++	case MMC_TIMING_UHS_DDR50:
++		val |= AC12_UHSMC_DDR50;
++		break;
++	case MMC_TIMING_UHS_SDR50:
++		val |= AC12_UHSMC_SDR50;
++		break;
++	case MMC_TIMING_UHS_SDR25:
++		val |= AC12_UHSMC_SDR25;
++		break;
++	case MMC_TIMING_UHS_SDR12:
++		val |= AC12_UHSMC_SDR12;
++		break;
++	default:
++		val |= AC12_UHSMC_RES;
++		break;
++	}
++	OMAP_HSMMC_WRITE(host->base, AC12, val);
++
++	omap_hsmmc_start_clock(host);
++}
++
+ /* Routine to configure clock values. Exposed API to core */
+ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  {
- 	u32 hctl, value;
+@@ -1604,6 +1680,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->power_mode != host->power_mode) {
+ 		switch (ios->power_mode) {
+ 		case MMC_POWER_OFF:
++			omap_hsmmc_disable_tuning(host);
+ 			omap_hsmmc_set_power(host, 0, 0);
+ 			break;
+ 		case MMC_POWER_UP:
+@@ -1622,6 +1699,11 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
--	/* Only MMC1 supports 3.0V */
--	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
--		hctl = SDVS30;
--	else
--		hctl = SDVS18;
--
- 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
-+	hctl = (iov == MMC_SIGNAL_VOLTAGE_180) ? SDVS18 : SDVS30;
- 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
+ 	omap_hsmmc_set_clock(host);
  
- 	/* Set SD bus power bit */
-@@ -1762,6 +1774,152 @@ static int omap_hsmmc_multi_io_quirk(struct mmc_card *card,
- 	return blk_size;
++	if (ios->timing != host->timing) {
++		omap_hsmmc_set_timing(host);
++		host->timing = ios->timing;
++	}
++
+ 	if (do_send_init_stream)
+ 		send_init_stream(host);
+ 
+@@ -1920,6 +2002,122 @@ static int omap_hsmmc_card_busy(struct mmc_host *mmc)
+ 	return ret;
  }
  
-+static int omap_hsmmc_start_signal_voltage_switch(struct mmc_host *mmc,
-+						  struct mmc_ios *ios)
-+{
-+	struct omap_hsmmc_host *host;
-+	u32 val = 0;
-+	int ret = 0;
-+
-+	host  = mmc_priv(mmc);
-+
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-+		val = OMAP_HSMMC_READ(host->base, CAPA);
-+		if (!(val & VS30))
-+			return -EOPNOTSUPP;
-+
-+		omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
-+
-+		val = OMAP_HSMMC_READ(host->base, AC12);
-+		val &= ~AC12_V1V8_SIGEN;
-+		OMAP_HSMMC_WRITE(host->base, AC12, val);
-+
-+		ret = omap_hsmmc_set_power(host, 1, VDD_30_31);
-+		if (ret) {
-+			dev_err(mmc_dev(host->mmc), "failed to switch to 3v\n");
-+			return ret;
-+		}
-+
-+		dev_dbg(mmc_dev(host->mmc), " i/o voltage switch to 3V\n");
-+	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		val = OMAP_HSMMC_READ(host->base, CAPA);
-+		if (!(val & VS18))
-+			return -EOPNOTSUPP;
-+
-+		omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
-+
-+		val = OMAP_HSMMC_READ(host->base, AC12);
-+		val |= AC12_V1V8_SIGEN;
-+		OMAP_HSMMC_WRITE(host->base, AC12, val);
-+
-+		ret = omap_hsmmc_set_power(host, 1, VDD_165_195);
-+		if (ret < 0) {
-+			dev_err(mmc_dev(host->mmc), "failed to switch 1.8v\n");
-+			return ret;
-+		}
-+	} else {
-+		return -EOPNOTSUPP;
-+	}
-+
-+	return 0;
-+}
-+
-+static int omap_hsmmc_card_busy_low(struct omap_hsmmc_host *host)
++static inline void omap_hsmmc_set_dll(struct omap_hsmmc_host *host, int count)
 +{
 +	int i;
-+	u32 val;
++	u32 dll;
 +
-+	val = OMAP_HSMMC_READ(host->base, CON);
-+	val &= ~CON_CLKEXTFREE;
-+	val |= CON_PADEN;
-+	OMAP_HSMMC_WRITE(host->base, CON, val);
++	dll = OMAP_HSMMC_READ(host->base, DLL);
++	dll |= DLL_FORCE_VALUE;
++	dll &= ~(DLL_FORCE_SR_C_MASK << DLL_FORCE_SR_C_SHIFT);
++	dll |= (count << DLL_FORCE_SR_C_SHIFT);
++	OMAP_HSMMC_WRITE(host->base, DLL, dll);
 +
-+	/* By observation, card busy status reflects in 100 - 200us */
-+	for (i = 0; i < 5; i++) {
-+		val = OMAP_HSMMC_READ(host->base, PSTATE);
-+		if (!(val & (PSTATE_CLEV | PSTATE_DLEV)))
-+			return true;
-+
-+		usleep_range(100, 200);
++	dll |= DLL_CALIB;
++	OMAP_HSMMC_WRITE(host->base, DLL, dll);
++	for (i = 0; i < 1000; i++) {
++		if (OMAP_HSMMC_READ(host->base, DLL) & DLL_CALIB)
++			break;
 +	}
-+
-+	dev_err(mmc_dev(host->mmc), "card busy\n");
-+
-+	return false;
++	dll &= ~DLL_CALIB;
++	OMAP_HSMMC_WRITE(host->base, DLL, dll);
 +}
 +
-+static int omap_hsmmc_card_busy_high(struct omap_hsmmc_host *host)
++static void omap_hsmmc_disable_tuning(struct omap_hsmmc_host *host)
 +{
-+	int i;
-+	u32 val;
-+	int ret = true;
++	int val;
 +
-+	val = OMAP_HSMMC_READ(host->base, CON);
-+	val |= CLKEXTFREE;
-+	OMAP_HSMMC_WRITE(host->base, CON, val);
++	val = OMAP_HSMMC_READ(host->base, AC12);
++	val &= ~(AC12_SCLK_SEL);
++	OMAP_HSMMC_WRITE(host->base, AC12, val);
 +
-+	host->flags |= CLKEXTFREE_ENABLED;
-+	disable_irq(host->irq);
-+	omap_hsmmc_enable_irq(host, NULL);
-+
-+	/* By observation, card busy status reflects in 100 - 200us */
-+	for (i = 0; i < 5; i++) {
-+		val = OMAP_HSMMC_READ(host->base, PSTATE);
-+		if ((val & PSTATE_CLEV) && (val & PSTATE_DLEV)) {
-+			val = OMAP_HSMMC_READ(host->base, CON);
-+			val &= ~(CON_CLKEXTFREE | CON_PADEN);
-+			OMAP_HSMMC_WRITE(host->base, CON, val);
-+			ret = false;
-+			goto disable_irq;
-+		}
-+
-+		usleep_range(100, 200);
-+	}
-+
-+	dev_err(mmc_dev(host->mmc), "card busy\n");
-+
-+disable_irq:
-+	omap_hsmmc_disable_irq(host);
-+	enable_irq(host->irq);
-+	host->flags &= ~CLKEXTFREE_ENABLED;
-+
-+	return ret;
++	val = OMAP_HSMMC_READ(host->base, DLL);
++	val &= ~(DLL_FORCE_VALUE | DLL_SWT);
++	OMAP_HSMMC_WRITE(host->base, DLL, val);
 +}
 +
-+static int omap_hsmmc_card_busy(struct mmc_host *mmc)
++static int omap_hsmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
 +{
-+	struct omap_hsmmc_host *host;
 +	u32 val;
-+	u32 reg;
++	u8 cur_match, prev_match = 0;
 +	int ret;
++	u32 phase_delay = 0;
++	u32 start_window = 0, max_window = 0;
++	u32 length = 0, max_len = 0;
++	struct mmc_ios *ios = &mmc->ios;
++	struct omap_hsmmc_host *host;
 +
-+	host  = mmc_priv(mmc);
++	/* clock tuning is not needed for upto 52MHz */
++	if (ios->clock <= OMAP_MMC_MAX_CLOCK)
++		return 0;
 +
-+	if (host->last_cmd != SD_SWITCH_VOLTAGE) {
-+		/*
-+		 * PADEN should be set for DLEV to reflect the correct
-+		 * state of data lines atleast for MMC1 on AM57x.
-+		 */
-+		reg = OMAP_HSMMC_READ(host->base, CON);
-+		reg |= CON_PADEN;
-+		OMAP_HSMMC_WRITE(host->base, CON, reg);
-+		val = OMAP_HSMMC_READ(host->base, PSTATE);
-+		reg &= ~CON_PADEN;
-+		OMAP_HSMMC_WRITE(host->base, CON, reg);
-+		if (val & PSTATE_DLEV_DAT0)
-+			return false;
-+		return true;
++	host = mmc_priv(mmc);
++
++	val = OMAP_HSMMC_READ(host->base, CAPA2);
++	if (ios->timing == MMC_TIMING_UHS_SDR50 && !(val & CAPA2_TSDR50))
++		return 0;
++
++	val = OMAP_HSMMC_READ(host->base, DLL);
++	val |= DLL_SWT;
++	OMAP_HSMMC_WRITE(host->base, DLL, val);
++
++	host->is_tuning =  true;
++
++	while (phase_delay <= MAX_PHASE_DELAY) {
++		omap_hsmmc_set_dll(host, phase_delay);
++
++		cur_match = !mmc_send_tuning(mmc, opcode, NULL);
++		if (cur_match) {
++			if (prev_match) {
++				length++;
++			} else {
++				start_window = phase_delay;
++				length = 1;
++			}
++		}
++
++		if (length > max_len) {
++			max_window = start_window;
++			max_len = length;
++		}
++
++		prev_match = cur_match;
++		phase_delay += 4;
++	}
++
++	host->is_tuning = false;
++
++	if (!max_len) {
++		dev_err(mmc_dev(host->mmc), "Unable to find match\n");
++		ret = -EIO;
++		goto tuning_error;
 +	}
 +
 +	val = OMAP_HSMMC_READ(host->base, AC12);
-+	if (val & AC12_V1V8_SIGEN)
-+		ret = omap_hsmmc_card_busy_high(host);
-+	else
-+		ret = omap_hsmmc_card_busy_low(host);
++	if (!(val & AC12_SCLK_SEL)) {
++		ret = -EIO;
++		goto tuning_error;
++	}
++
++	phase_delay = max_window + 4 * ((3 * max_len) >> 2);
++	omap_hsmmc_set_dll(host, phase_delay);
++
++	omap_hsmmc_reset_controller_fsm(host, SRD);
++	omap_hsmmc_reset_controller_fsm(host, SRC);
++
++	return 0;
++
++tuning_error:
++	dev_err(mmc_dev(host->mmc),
++		"Tuning failed. Using fixed sampling clock\n");
++
++	omap_hsmmc_disable_tuning(host);
++	omap_hsmmc_reset_controller_fsm(host, SRD);
++	omap_hsmmc_reset_controller_fsm(host, SRC);
 +
 +	return ret;
 +}
@@ -276,41 +331,21 @@ index 65330d2263ad..680934d50919 100644
  static struct mmc_host_ops omap_hsmmc_ops = {
  	.post_req = omap_hsmmc_post_req,
  	.pre_req = omap_hsmmc_pre_req,
-@@ -1771,6 +1929,8 @@ static struct mmc_host_ops omap_hsmmc_ops = {
- 	.get_ro = mmc_gpio_get_ro,
- 	.init_card = omap_hsmmc_init_card,
+@@ -1931,6 +2129,7 @@ static struct mmc_host_ops omap_hsmmc_ops = {
  	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
-+	.start_signal_voltage_switch = omap_hsmmc_start_signal_voltage_switch,
-+	.card_busy = omap_hsmmc_card_busy,
+ 	.start_signal_voltage_switch = omap_hsmmc_start_signal_voltage_switch,
+ 	.card_busy = omap_hsmmc_card_busy,
++	.execute_tuning = omap_hsmmc_execute_tuning,
  };
  
  #ifdef CONFIG_DEBUG_FS
-@@ -2055,7 +2215,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
- 
- 	omap_hsmmc_set_capabilities(host);
--	omap_hsmmc_conf_bus_power(host);
- 
- 	host->rx_chan = dma_request_chan(&pdev->dev, "rx");
- 	if (IS_ERR(host->rx_chan)) {
-@@ -2193,6 +2352,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- static int omap_hsmmc_resume(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-+	struct mmc_ios *ios;
- 
- 	if (!host)
- 		return 0;
-@@ -2202,8 +2362,9 @@ static int omap_hsmmc_resume(struct device *dev)
- 	if (host->dbclk)
- 		clk_prepare_enable(host->dbclk);
- 
-+	ios = &host->mmc->ios;
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
--		omap_hsmmc_conf_bus_power(host);
-+		omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
- 
- 	omap_hsmmc_protect_card(host);
- 	pm_runtime_mark_last_busy(host->dev);
+@@ -2138,6 +2337,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->mapbase	= res->start + pdata->reg_offset;
+ 	host->base	= base + pdata->reg_offset;
+ 	host->power_mode = MMC_POWER_OFF;
++	host->timing	= 0;
+ 	host->next_data.cookie = 1;
+ 	host->pbias_enabled = 0;
+ 	host->vqmmc_enabled = 0;
 -- 
 2.11.0
