@@ -1,99 +1,47 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 6/6] ARM: dts: rockchip: add efuse device node for rk3228
-Date: Fri, 16 Jun 2017 11:35:12 +0200
-Message-ID: <2264017.eLNdPIXHd9@diego>
-References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com> <2537345.MJmYY2BcSn@phil> <da5fbd76-c9a1-a16f-3ed8-adfd2b1c346f@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
+Date: Fri, 16 Jun 2017 11:47:23 +0200
+Message-ID: <CAPDyKFoWHKNsAnqrnmS-_e6OeTAMx5nGxY5W8ittWGPjriANLg@mail.gmail.com>
+References: <20170615121259.8281-1-linus.walleij@linaro.org>
+ <20170615121259.8281-5-linus.walleij@linaro.org> <20170616074543.GA9125@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <da5fbd76-c9a1-a16f-3ed8-adfd2b1c346f-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.wu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20170616074543.GA9125@lst.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Am Freitag, 16. Juni 2017, 17:24:23 CEST schrieb Frank Wang:
-> Hi Heiko,
-> 
-> On 2017/6/15 23:10, Heiko Stuebner wrote:
-> > Hi Frank,
-> > 
-> > Am Donnerstag, 15. Juni 2017, 15:23:16 CEST schrieb Frank Wang:
-> >> From: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> >> 
-> >> Add a efuse node in the device tree for the rk3228 SoC.
-> >> 
-> >> Signed-off-by: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> >> ---
-> >> 
-> >>   arch/arm/boot/dts/rk322x.dtsi | 17 +++++++++++++++++
-> >>   1 file changed, 17 insertions(+)
-> >> 
-> >> diff --git a/arch/arm/boot/dts/rk322x.dtsi
-> >> b/arch/arm/boot/dts/rk322x.dtsi
-> >> index c2a78f4..dad195e 100644
-> >> --- a/arch/arm/boot/dts/rk322x.dtsi
-> >> +++ b/arch/arm/boot/dts/rk322x.dtsi
-> >> @@ -314,6 +314,23 @@
-> >> 
-> >>   		status = "disabled";
-> >>   	
-> >>   	};
-> >> 
-> >> +	efuse: efuse@11040000 {
-> >> +		compatible = "rockchip,rk322x-efuse";
-> > 
-> > was this binding included already? Simply because compatibles should
-> > not contain placeholders, so rockchip,rk3228-efuse please - same for
-> > the driver side.
-> 
-> Actually, I always remember it should be without placeholders from the
-> first time you commented :-)
-> but I saw that the binding and driver (rockchip,rk322x-efuse) have
-> already been applied, so I send this one keep the same with driver side.
-> Shall I resend a new patch to correct both of them to
-> 'rockchip,rk3228-efuse' ?
+On 16 June 2017 at 09:45, Christoph Hellwig <hch@lst.de> wrote:
+> On Thu, Jun 15, 2017 at 02:12:58PM +0200, Linus Walleij wrote:
+>> Currently the RPMB partition spawns a separate block device
+>> named /dev/mmcblkNrpmb for each device with an RPMB partition,
+>> including the creation of a block queue with its own kernel
+>> thread and all overhead associated with this. On the Ux500
+>> HREFv60 platform, for example, the two eMMCs means that two
+>> block queues with separate threads are created for no use
+>> whatsoever.
+>
+> Yikes!  What an amazingly stupid design decision.
 
-Yes please :-) .
+Unfortunate, there is more. :-)
 
-As it was probably applied for 4.13, changing the compatible shouldn't be
-a problem.
+We are actually registering at least three more block devices per eMMC
+card (two boot partitions, and one general purpose partition). Except
+for the main partition of course.
 
+The difference compared to rpmb from the above, is that those are
+actually general read/write partitions.
 
-Thanks
-Heiko
+So all these partitions are on the same eMMC card, but being I/O
+scheduled separately because there are separate block devices. Yeah,
+starvation, latency, etc - all bad things comes with it. :-)
 
-> 
-> 
-> BR.
-> Frank
-> 
-> > Heiko
-> > 
-> >> +		reg = <0x11040000 0x20>;
-> >> +		#address-cells = <1>;
-> >> +		#size-cells = <1>;
-> >> +		clocks = <&cru PCLK_EFUSE_256>;
-> >> +		clock-names = "pclk_efuse";
-> >> +
-> >> +		/* Data cells */
-> >> +		efuse_id: id@7 {
-> >> +			reg = <0x7 0x10>;
-> >> +		};
-> >> +		cpu_leakage: cpu_leakage@17 {
-> >> +			reg = <0x17 0x1>;
-> >> +		};
-> >> +	};
-> >> +
-> >> 
-> >>   	i2c0: i2c@11050000 {
-> >>   	
-> >>   		compatible = "rockchip,rk3228-i2c";
-> >>   		reg = <0x11050000 0x1000>;
+My point is, this is only the first step in re-working and fixing this
+- and we really appreciate your review!
 
+[...]
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kind regards
+Uffe
