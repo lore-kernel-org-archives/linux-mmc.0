@@ -1,116 +1,52 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/5] mmc: block: Move duplicate check
-Date: Fri, 16 Jun 2017 08:46:39 +0800
-Message-ID: <25c4809f-c07b-5cfb-8b7a-00308ed8de1e@rock-chips.com>
-References: <20170615121259.8281-1-linus.walleij@linaro.org>
- <20170615121259.8281-2-linus.walleij@linaro.org>
+Subject: Re: [PATCH 0/9] mmc: core: Some trivial re-factoring and cleanups
+Date: Fri, 16 Jun 2017 08:49:51 +0800
+Message-ID: <13516833-41bd-ce12-7970-b4af55e3126e@rock-chips.com>
+References: <1496928465-25004-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:54232 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:47270 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751673AbdFPAqq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 20:46:46 -0400
-In-Reply-To: <20170615121259.8281-2-linus.walleij@linaro.org>
+        with ESMTP id S1751673AbdFPAtz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2017 20:49:55 -0400
+In-Reply-To: <1496928465-25004-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi,
+Hi Ulf,
 
-On 2017/6/15 20:12, Linus Walleij wrote:
-> mmc_blk_ioctl() calls either mmc_blk_ioctl_cmd() or
-> mmc_blk_ioctl_multi_cmd() and each of these make the same
-> check. Factor it into a new helper function, call it on
-> both branches of the switch() statement and save a chunk
-> of duplicate code.
+On 2017/6/8 21:27, Ulf Hansson wrote:
+> I have collected some cleanups along the road on the mmc core, now I thought it
+> was time to post them. None of these changes causes any functional changes, but
+> the goal is rather to just make the code more readable and avoid open coding.
 > 
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - We need to check the block device only if an actual
->    well-known ioctl() is coming in, on the path of the
->    switch() statments, only those branches that handle
->    actual ioctl()s. Create a new helper function to check
->    the block device and call that.
+> 
+> Ulf Hansson (9):
+>    mmc: core: Don't export some eMMC specific functions from core.c
+>    mmc: core: Move mmc bkops functions from core.c to mmc_ops.c
+>    mmc: core: Move mmc_interrupt_hpi() from core.c to mmc_ops.c
+>    mmc: core: Move mmc_flush_cache() from core.c to mmc_ops.c
+>    mmc: core: Make mmc_can_reset() static
+>    mmc: core: Remove redundant code in mmc_send_cid()
+>    mmc: core: Re-factor code for sending CID
+>    mmc: core: Drop mmc_all_send_cid() and use mmc_send_cxd_native()
+>      instead
+>    mmc: core: Clarify code for sending CSD
+
+Looks good to me, so
 
 Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-> ---
->   drivers/mmc/core/block.c | 36 ++++++++++++++++++++----------------
->   1 file changed, 20 insertions(+), 16 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 1ce6012ce3c1..d1b824e65590 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -566,14 +566,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->   	int err = 0, ioc_err = 0;
->   	struct request *req;
->   
-> -	/*
-> -	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-> -	 * whole block device, not on a partition.  This prevents overspray
-> -	 * between sibling partitions.
-> -	 */
-> -	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-> -		return -EPERM;
-> -
->   	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
->   	if (IS_ERR(idata))
->   		return PTR_ERR(idata);
-> @@ -626,14 +618,6 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
->   	__u64 num_of_cmds;
->   	struct request *req;
->   
-> -	/*
-> -	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-> -	 * whole block device, not on a partition.  This prevents overspray
-> -	 * between sibling partitions.
-> -	 */
-> -	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-> -		return -EPERM;
-> -
->   	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
->   			   sizeof(num_of_cmds)))
->   		return -EFAULT;
-> @@ -697,14 +681,34 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
->   	return ioc_err ? ioc_err : err;
->   }
->   
-> +static int mmc_blk_check_blkdev(struct block_device *bdev)
-> +{
-> +	/*
-> +	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-> +	 * whole block device, not on a partition.  This prevents overspray
-> +	 * between sibling partitions.
-> +	 */
-> +	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-> +		return -EPERM;
-> +	return 0;
-> +}
-> +
->   static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
->   	unsigned int cmd, unsigned long arg)
->   {
-> +	int ret;
-> +
->   	switch (cmd) {
->   	case MMC_IOC_CMD:
-> +		ret = mmc_blk_check_blkdev(bdev);
-> +		if (ret)
-> +			return ret;
->   		return mmc_blk_ioctl_cmd(bdev,
->   				(struct mmc_ioc_cmd __user *)arg);
->   	case MMC_IOC_MULTI_CMD:
-> +		ret = mmc_blk_check_blkdev(bdev);
-> +		if (ret)
-> +			return ret;
->   		return mmc_blk_ioctl_multi_cmd(bdev,
->   				(struct mmc_ioc_multi_cmd __user *)arg);
->   	default:
+>   drivers/mmc/core/core.c    | 207 -------------------------------------
+>   drivers/mmc/core/mmc.c     |   8 +-
+>   drivers/mmc/core/mmc_ops.c | 250 +++++++++++++++++++++++++++++++++++++++------
+>   drivers/mmc/core/mmc_ops.h |   3 -
+>   drivers/mmc/core/sd.c      |   6 +-
+>   5 files changed, 221 insertions(+), 253 deletions(-)
 > 
 
