@@ -1,77 +1,42 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC 4/5] mmc: renesas_sdhi: add support for R-Car Gen3
- SDHI DMAC
-Date: Fri, 16 Jun 2017 09:32:15 +0200
-Message-ID: <20170616073213.GF22158@verge.net.au>
-References: <1496927595-19521-1-git-send-email-horms+renesas@verge.net.au>
- <1496927595-19521-5-git-send-email-horms+renesas@verge.net.au>
- <CAMuHMdU8fqoi-zh4OKC_40xH3pZy+w_qDjtxm2pRLUsJieFmgw@mail.gmail.com>
- <20170616071201.GD16534@verge.net.au>
- <CAMuHMdWE6pq3XUKq3U2sTDMsjqkk7gYsjyuEskQ_+e+J3vvKWg@mail.gmail.com>
+Subject: Re: [PATCH/RFC 2/5] mmc: tmio: add complete to DMA ops
+Date: Fri, 16 Jun 2017 09:33:31 +0200
+Message-ID: <20170616073330.GG22158@verge.net.au>
+References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
+ <1496927368-18897-4-git-send-email-horms+renesas@verge.net.au>
+ <CAMuHMdUkhkDEqsDZUQ94dFnLU+dFcZ+ed=qHokH3sEWGFdkkuw@mail.gmail.com>
+ <20170616060602.GA16534@verge.net.au>
+ <CAMuHMdV58Gp+M3eDG3wmgcG6S7L=HBoeFY3gNPVAA1HBWATOcw@mail.gmail.com>
+ <20170616070432.GC16534@verge.net.au>
+ <CAMuHMdVpE+2QK2WbfyDCCUq1fzHqnuyAKsGgzj+ZonOwc96w3A@mail.gmail.com>
+ <20170616071354.GE16534@verge.net.au>
+ <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:43728 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752418AbdFPHdw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 03:33:52 -0400
 Content-Disposition: inline
-In-Reply-To: <CAMuHMdWE6pq3XUKq3U2sTDMsjqkk7gYsjyuEskQ_+e+J3vvKWg@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
+In-Reply-To: <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Fri, Jun 16, 2017 at 09:21:04AM +0200, Geert Uytterhoeven wrote:
+On Fri, Jun 16, 2017 at 09:23:15AM +0200, Geert Uytterhoeven wrote:
 > Hi Simon,
 > 
-> On Fri, Jun 16, 2017 at 9:12 AM, Simon Horman <horms@verge.net.au> wrote:
-> > On Fri, Jun 09, 2017 at 09:39:49AM +0200, Geert Uytterhoeven wrote:
-> >> On Thu, Jun 8, 2017 at 3:13 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
-> >> > R-Car Gen3 has a dedicated DMA controller for SDHI module. Since
-> >> > the DMAC is in a part of SDHI module and is not suitable as dmaengine,
+> On Fri, Jun 16, 2017 at 9:13 AM, Simon Horman <horms@verge.net.au> wrote:
+> > Sorry for letting this bug creep in to renesas-drivers.
+> > Do you want a patch against your tree? I will plan to post v2 of
+> > this patchset soon in any case.
 > 
-> >> > --- a/drivers/mmc/host/Kconfig
-> >> > +++ b/drivers/mmc/host/Kconfig
-> 
-> >> > +config MMC_SDHI_SYS_DMAC
-> >> > +       tristate "DMA support use of SYS DMAC with SDHI SD/SDIO controller"
-> >>
-> >> DMA support for SYS_DMAC?
-> >
-> > How about this?
-> >
-> > config MMC_SDHI_SYS_DMAC
-> >         tristate "DMA for SDHI SD/SDIO controllers using SYS-DMAC"
-> 
-> Better!
-> 
-> >         ...
-> >         help
-> >            This provides DMA support for the SDHI SD/SDIO controllers
-> >            using SYS-DMAC via DMA Engine. This supports the controllers
-> 
-> I would drop "the".
+> You can post such a patch to please users of renesas-drivers, but I won't
+> apply it now. I assume the issue will be fixed when next renesas-drivers
+> release is created ;-)
 
-Will do, thanks.
+That is my assumption too :)
 
-> >            found in SuperH and Renesas ARM based SoCs.
-> >
-> > config MMC_SDHI_INTERNAL_DMAC
-> >         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
-> >         ...
-> >         help
-> >            This provides DMA support for the SDHI SD/SDIO controllers
-> >            using on-chip bus mastering. This supports the controllers
-> 
-> Likewise.
-> 
-> >            found in arm64 based SoCs.
-> 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-> 
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
-> 
+I'll see about providing a fix patch too.
