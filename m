@@ -1,89 +1,110 @@
-From: Wei Xu <xuwei5@hisilicon.com>
-Subject: Re: [PATCH v5 15/20] arm64: dts: hisi: add kirin pcie node
-Date: Fri, 16 Jun 2017 15:43:05 +0100
-Message-ID: <5943EE79.1050505@hisilicon.com>
-References: <20170615030417.14059-16-guodong.xu@linaro.org>
- <20170616141322.30466-1-guodong.xu@linaro.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH mmc/next v2 1/2] mmc: tmio: improve checkpatch cleanness
+Date: Fri, 16 Jun 2017 17:53:13 +0200
+Message-ID: <20170616155313.GA5137@verge.net.au>
+References: <1497553214-12914-1-git-send-email-horms+renesas@verge.net.au>
+ <1497553214-12914-2-git-send-email-horms+renesas@verge.net.au>
+ <20170616081445.tqlhod5znrqnxtc3@ninjato>
+ <20170616092010.GB6032@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170616141322.30466-1-guodong.xu@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, robh+dt@kernel.org, mark.rutland@arm.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, arnd@arndb.de, xuejiancheng@hisilicon.com, puck.chen@hisilicon.com
-Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Xiaowei Song <songxiaowei@hisilicon.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:57761 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750846AbdFPPxY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 11:53:24 -0400
+Content-Disposition: inline
+In-Reply-To: <20170616092010.GB6032@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
-Hi Guodong,
-
-On 2017/6/16 15:13, Guodong Xu wrote:
-> From: Xiaowei Song <songxiaowei@hisilicon.com>
+On Fri, Jun 16, 2017 at 11:20:10AM +0200, Simon Horman wrote:
+> On Fri, Jun 16, 2017 at 10:14:45AM +0200, Wolfram Sang wrote:
+> > Hi Simon,
+> > 
+> > > * Don't add bogus ',' after KERN_DEBUG
+> > 
+> > Well...
+> > 
+> > > @@ -127,16 +127,17 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
+> > >  
+> > >  #define STATUS_TO_TEXT(a, status, i) \
+> > >  	do { \
+> > > -		if (status & TMIO_STAT_##a) { \
+> > > -			if (i++) \
+> > > -				printk(" | "); \
+> > > -			printk(#a); \
+> > > +		if ((status) & TMIO_STAT_##a) { \
+> > > +			if ((i)++) \
+> > > +				printk(KERN_DEBUG " | "); \
+> > > +			printk(KERN_DEBUG, #a); \
+> > 
+> > ...still there.
 > 
-> Add PCIe node for hi3660
+> Oops.
 > 
-> Cc: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Xiaowei Song <songxiaowei@hisilicon.com>
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> > > @@ -349,13 +350,22 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+> > >  	}
+> > >  
+> > >  	switch (mmc_resp_type(cmd)) {
+> > > -	case MMC_RSP_NONE: c |= RESP_NONE; break;
+> > > +	case MMC_RSP_NONE:
+> > > +		c |= RESP_NONE;
+> > > +		break;
+> > >  	case MMC_RSP_R1:
+> > >  	case MMC_RSP_R1_NO_CRC:
+> > > -			   c |= RESP_R1;   break;
+> > > -	case MMC_RSP_R1B:  c |= RESP_R1B;  break;
+> > > -	case MMC_RSP_R2:   c |= RESP_R2;   break;
+> > > -	case MMC_RSP_R3:   c |= RESP_R3;   break;
+> > > +		c |= RESP_R1;
+> > > +		break;
+> > > +	case MMC_RSP_R1B:
+> > > +		c |= RESP_R1B;
+> > > +		break;
+> > > +	case MMC_RSP_R2:
+> > > +		c |= RESP_R2;
+> > > +		break;
+> > > +	case MMC_RSP_R3:
+> > > +		c |= RESP_R3;
+> > > +		break;
+> > 
+> > Very personal, I'd prefer the old way but I don't insist.
+
+Sure, I'll leave that as-is.
+I don't mind either way.
+
+> > 
+> > > -			 * Disable auto CMD12 at IO_RW_EXTENDED and SET_BLOCK_COUNT
+> > > -			 * when doing multiple block transfer
+> > > +			 * Disable auto CMD12 at IO_RW_EXTENDED and
+> > > +			 * SET_BLOCK_COUNT when doing multiple block
+> > > +			 * transfer
+> > 
+> > I'd think 'transfer' can go to the previous line?
+
+Moved.
+
+> > >  			if ((host->pdata->flags & TMIO_MMC_HAVE_CMD12_CTRL) &&
+> > > -			    (cmd->opcode == SD_IO_RW_EXTENDED || host->mrq->sbc))
+> > > +			    (cmd->opcode == SD_IO_RW_EXTENDED ||
+> > > +			     host->mrq->sbc))
+> > 
+> > Another subjective taste thingie ;)
+
+Undone.
+
+> > > -		dev_warn_once(&host->pdev->dev,
+> > > -		      "Too many taps, skipping tuning. Please consider updating size of taps field of tmio_mmc_host\n");
+> > > +		dev_warn_once(&host->pdev->dev, "Too many taps, skipping tuning. Please consider updating size of taps field of tmio_mmc_host\n");
+> > 
+> > Dito.
+
+Also undone.
+
+> > What kind of tests did you run with these?
 > 
-> Changes in v5:
->  * fix interrupt-map, to conform to gic's #address-cells = <0>
->  * remove redundant status = "ok"
-> ---
-
-Thanks!
-Applied v5 and dropped the v4 in the hisilicon arm64 dt tree.
-
-BR,
-Wei
-
-
->  arch/arm64/boot/dts/hisilicon/hi3660.dtsi | 36 +++++++++++++++++++++++++++++++
->  1 file changed, 36 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-> index e138973..8183d71 100644
-> --- a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-> +++ b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-> @@ -754,5 +754,41 @@
->  			cs-gpios = <&gpio18 5 0>;
->  			status = "disabled";
->  		};
-> +
-> +		pcie@f4000000 {
-> +			compatible = "hisilicon,kirin960-pcie";
-> +			reg = <0x0 0xf4000000 0x0 0x1000>,
-> +			      <0x0 0xff3fe000 0x0 0x1000>,
-> +			      <0x0 0xf3f20000 0x0 0x40000>,
-> +			      <0x0 0xf5000000 0x0 0x2000>;
-> +			reg-names = "dbi", "apb", "phy", "config";
-> +			bus-range = <0x0  0x1>;
-> +			#address-cells = <3>;
-> +			#size-cells = <2>;
-> +			device_type = "pci";
-> +			ranges = <0x02000000 0x0 0x00000000
-> +				  0x0 0xf6000000
-> +				  0x0 0x02000000>;
-> +			num-lanes = <1>;
-> +			#interrupt-cells = <1>;
-> +			interrupt-map-mask = <0xf800 0 0 7>;
-> +			interrupt-map = <0x0 0 0 1
-> +					 &gic GIC_SPI 282 IRQ_TYPE_LEVEL_HIGH>,
-> +					<0x0 0 0 2
-> +					 &gic GIC_SPI 283 IRQ_TYPE_LEVEL_HIGH>,
-> +					<0x0 0 0 3
-> +					 &gic GIC_SPI 284 IRQ_TYPE_LEVEL_HIGH>,
-> +					<0x0 0 0 4
-> +					 &gic GIC_SPI 285 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks = <&crg_ctrl HI3660_PCIEPHY_REF>,
-> +				 <&crg_ctrl HI3660_CLK_GATE_PCIEAUX>,
-> +				 <&crg_ctrl HI3660_PCLK_GATE_PCIE_PHY>,
-> +				 <&crg_ctrl HI3660_PCLK_GATE_PCIE_SYS>,
-> +				 <&crg_ctrl HI3660_ACLK_GATE_PCIE>;
-> +			clock-names = "pcie_phy_ref", "pcie_aux",
-> +				      "pcie_apb_phy", "pcie_apb_sys",
-> +				      "pcie_aclk";
-> +			reset-gpios = <&gpio11 1 0 >;
-> +		};
->  	};
->  };
+> I checked that Lager boots and that I/O speeds are as expected using dd.
 > 
