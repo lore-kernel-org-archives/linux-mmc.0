@@ -1,47 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
-Date: Fri, 16 Jun 2017 11:47:23 +0200
-Message-ID: <CAPDyKFoWHKNsAnqrnmS-_e6OeTAMx5nGxY5W8ittWGPjriANLg@mail.gmail.com>
-References: <20170615121259.8281-1-linus.walleij@linaro.org>
- <20170615121259.8281-5-linus.walleij@linaro.org> <20170616074543.GA9125@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170616074543.GA9125@lst.de>
-Sender: linux-block-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH mmc/next v2 4/4] mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
+Date: Fri, 16 Jun 2017 11:58:54 +0200
+Message-ID: <1497607134-10241-5-git-send-email-horms+renesas@verge.net.au>
+References: <1497607134-10241-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1497607134-10241-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 June 2017 at 09:45, Christoph Hellwig <hch@lst.de> wrote:
-> On Thu, Jun 15, 2017 at 02:12:58PM +0200, Linus Walleij wrote:
->> Currently the RPMB partition spawns a separate block device
->> named /dev/mmcblkNrpmb for each device with an RPMB partition,
->> including the creation of a block queue with its own kernel
->> thread and all overhead associated with this. On the Ux500
->> HREFv60 platform, for example, the two eMMCs means that two
->> block queues with separate threads are created for no use
->> whatsoever.
->
-> Yikes!  What an amazingly stupid design decision.
+Gen3 SoCs are now supported by the internal DMAC variant of the SDHI driver.
+Remove them from the SYS-DMAC variant where only PIO mode is supported
+for those SoCs.
 
-Unfortunate, there is more. :-)
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+v2
+* Revised changelog
+---
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 21 ---------------------
+ 1 file changed, 21 deletions(-)
 
-We are actually registering at least three more block devices per eMMC
-card (two boot partitions, and one general purpose partition). Except
-for the main partition of course.
-
-The difference compared to rpmb from the above, is that those are
-actually general read/write partitions.
-
-So all these partitions are on the same eMMC card, but being I/O
-scheduled separately because there are separate block devices. Yeah,
-starvation, latency, etc - all bad things comes with it. :-)
-
-My point is, this is only the first step in re-working and fixing this
-- and we really appreciate your review!
-
-[...]
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index d1cfc2370915..2897ee0b444a 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -66,25 +66,6 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
+ };
+ 
+-/* Definitions for sampling clocks */
+-static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
+-	{
+-		.clk_rate = 0,
+-		.tap = 0x00000300,
+-	},
+-};
+-
+-static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+-			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+-			  MMC_CAP_CMD23,
+-	.bus_shift	= 2,
+-	.scc_offset	= 0x1000,
+-	.taps		= rcar_gen3_scc_taps,
+-	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
+-};
+-
+ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
+@@ -98,8 +79,6 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
+-- 
+2.1.4
