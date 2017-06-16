@@ -1,31 +1,81 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH mmc/next v2 0/2] mmc: tmio, renesas-sdhi: cleanups
-Date: Fri, 16 Jun 2017 11:24:35 +0200
-Message-ID: <20170616092435.GC6032@verge.net.au>
-References: <1497553214-12914-1-git-send-email-horms+renesas@verge.net.au>
- <20170616082742.pj5crlavihkewlfd@ninjato>
- <20170616091911.GA6032@verge.net.au>
+From: Frank Wang <frank.wang@rock-chips.com>
+Subject: Re: [PATCH 6/6] ARM: dts: rockchip: add efuse device node for rk3228
+Date: Fri, 16 Jun 2017 17:24:23 +0800
+Message-ID: <da5fbd76-c9a1-a16f-3ed8-adfd2b1c346f@rock-chips.com>
+References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com>
+ <1497511396-23308-1-git-send-email-frank.wang@rock-chips.com>
+ <2537345.MJmYY2BcSn@phil>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170616091911.GA6032@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2537345.MJmYY2BcSn@phil>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, gregkh@linuxfoundation.org
+Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, wmc@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 11:19:12AM +0200, Simon Horman wrote:
-> On Fri, Jun 16, 2017 at 10:27:42AM +0200, Wolfram Sang wrote:
-> > 
-> > > this short series provides some cleanups to the tmio and renesas-sdhi
-> > > drivers to improve their checkpatch cleanness.
-> > 
-> > Is there a dependency on your Gen3 DMA series?
-> 
-> No
+Hi Heiko,
 
-Sorry, that response was a bit short.
+On 2017/6/15 23:10, Heiko Stuebner wrote:
+> Hi Frank,
+>
+> Am Donnerstag, 15. Juni 2017, 15:23:16 CEST schrieb Frank Wang:
+>> From: Finley Xiao <finley.xiao@rock-chips.com>
+>>
+>> Add a efuse node in the device tree for the rk3228 SoC.
+>>
+>> Signed-off-by: Finley Xiao <finley.xiao@rock-chips.com>
+>> ---
+>>   arch/arm/boot/dts/rk322x.dtsi | 17 +++++++++++++++++
+>>   1 file changed, 17 insertions(+)
+>>
+>> diff --git a/arch/arm/boot/dts/rk322x.dtsi b/arch/arm/boot/dts/rk322x.dtsi
+>> index c2a78f4..dad195e 100644
+>> --- a/arch/arm/boot/dts/rk322x.dtsi
+>> +++ b/arch/arm/boot/dts/rk322x.dtsi
+>> @@ -314,6 +314,23 @@
+>>   		status = "disabled";
+>>   	};
+>>   
+>> +	efuse: efuse@11040000 {
+>> +		compatible = "rockchip,rk322x-efuse";
+> was this binding included already? Simply because compatibles should
+> not contain placeholders, so rockchip,rk3228-efuse please - same for
+> the driver side.
 
-The Gen3 DMA series and this series apply independently of each other.
-So I don't see any dependencies between them.
+Actually, I always remember it should be without placeholders from the 
+first time you commented :-)
+but I saw that the binding and driver (rockchip,rk322x-efuse) have 
+already been applied, so I send this one keep the same with driver side.
+Shall I resend a new patch to correct both of them to 
+'rockchip,rk3228-efuse' ?
+
+
+BR.
+Frank
+
+>
+> Heiko
+>
+>
+>> +		reg = <0x11040000 0x20>;
+>> +		#address-cells = <1>;
+>> +		#size-cells = <1>;
+>> +		clocks = <&cru PCLK_EFUSE_256>;
+>> +		clock-names = "pclk_efuse";
+>> +
+>> +		/* Data cells */
+>> +		efuse_id: id@7 {
+>> +			reg = <0x7 0x10>;
+>> +		};
+>> +		cpu_leakage: cpu_leakage@17 {
+>> +			reg = <0x17 0x1>;
+>> +		};
+>> +	};
+>> +
+>>   	i2c0: i2c@11050000 {
+>>   		compatible = "rockchip,rk3228-i2c";
+>>   		reg = <0x11050000 0x1000>;
+>>
