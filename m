@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 11/12] ARM: dts: dra72-evm-revc: Add pinmux configuration for MMC
-Date: Fri, 16 Jun 2017 17:24:38 +0530
-Message-ID: <20170616115439.8508-12-kishon@ti.com>
+Subject: [PATCH 12/12] ARM: dts: dra71-evm: Add pinmux configuration for MMC
+Date: Fri, 16 Jun 2017 17:24:39 +0530
+Message-ID: <20170616115439.8508-13-kishon@ti.com>
 References: <20170616115439.8508-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -15,26 +15,26 @@ List-Id: linux-mmc@vger.kernel.org
 Include dra72x-mmc-iodelay.dtsi which has pinmux and IODelay
 configuration values for the various MMC modes for dra72 SoC
 and use it in the pinctrl properties of MMC devicetree
-nodes present in dra72-evm-revc.dts.
+nodes present in dra71-evm.dts.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra72-evm-revc.dts | 14 ++++++++++++++
+ arch/arm/boot/dts/dra71-evm.dts | 14 ++++++++++++++
  1 file changed, 14 insertions(+)
 
-diff --git a/arch/arm/boot/dts/dra72-evm-revc.dts b/arch/arm/boot/dts/dra72-evm-revc.dts
-index 5532309971ae..670c9c3e6cf0 100644
---- a/arch/arm/boot/dts/dra72-evm-revc.dts
-+++ b/arch/arm/boot/dts/dra72-evm-revc.dts
-@@ -6,6 +6,7 @@
-  * published by the Free Software Foundation.
+diff --git a/arch/arm/boot/dts/dra71-evm.dts b/arch/arm/boot/dts/dra71-evm.dts
+index 02c11e658810..7ef50929efc1 100644
+--- a/arch/arm/boot/dts/dra71-evm.dts
++++ b/arch/arm/boot/dts/dra71-evm.dts
+@@ -7,6 +7,7 @@
   */
+ 
  #include "dra72-evm-common.dtsi"
 +#include "dra72x-mmc-iodelay.dtsi"
  #include <dt-bindings/net/ti-dp83867.h>
  
  / {
-@@ -94,9 +95,22 @@
+@@ -172,10 +173,23 @@
  };
  
  &mmc1 {
@@ -46,7 +46,7 @@ index 5532309971ae..670c9c3e6cf0 100644
 +	pinctrl-4 = <&mmc1_pins_sdr50>;
 +	pinctrl-5 = <&mmc1_pins_ddr50_rev20 &mmc1_iodelay_ddr50_conf>;
 +	pinctrl-6 = <&mmc1_pins_sdr104 &mmc1_iodelay_sdr104_rev20_conf>;
- 	vqmmc-supply = <&ldo1_reg>;
+ 	vqmmc-supply = <&vpo_sd_1v8_3v3>;
  };
  
  &mmc2 {
@@ -57,5 +57,6 @@ index 5532309971ae..670c9c3e6cf0 100644
 +	pinctrl-3 = <&mmc2_pins_hs200 &mmc2_iodelay_hs200_rev20_conf>;
  	vmmc-supply = <&evm_1v8_sw>;
  };
+ 
 -- 
 2.11.0
