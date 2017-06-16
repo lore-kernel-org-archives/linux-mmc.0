@@ -1,42 +1,49 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC 2/5] mmc: tmio: add complete to DMA ops
-Date: Fri, 16 Jun 2017 09:33:31 +0200
-Message-ID: <20170616073330.GG22158@verge.net.au>
-References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
- <1496927368-18897-4-git-send-email-horms+renesas@verge.net.au>
- <CAMuHMdUkhkDEqsDZUQ94dFnLU+dFcZ+ed=qHokH3sEWGFdkkuw@mail.gmail.com>
- <20170616060602.GA16534@verge.net.au>
- <CAMuHMdV58Gp+M3eDG3wmgcG6S7L=HBoeFY3gNPVAA1HBWATOcw@mail.gmail.com>
- <20170616070432.GC16534@verge.net.au>
- <CAMuHMdVpE+2QK2WbfyDCCUq1fzHqnuyAKsGgzj+ZonOwc96w3A@mail.gmail.com>
- <20170616071354.GE16534@verge.net.au>
- <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
+Date: Fri, 16 Jun 2017 09:45:43 +0200
+Message-ID: <20170616074543.GA9125@lst.de>
+References: <20170615121259.8281-1-linus.walleij@linaro.org> <20170615121259.8281-5-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:43728 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752418AbdFPHdw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 03:33:52 -0400
+Return-path: <linux-block-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20170615121259.8281-5-linus.walleij@linaro.org>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Fri, Jun 16, 2017 at 09:23:15AM +0200, Geert Uytterhoeven wrote:
-> Hi Simon,
+On Thu, Jun 15, 2017 at 02:12:58PM +0200, Linus Walleij wrote:
+> Currently the RPMB partition spawns a separate block device
+> named /dev/mmcblkNrpmb for each device with an RPMB partition,
+> including the creation of a block queue with its own kernel
+> thread and all overhead associated with this. On the Ux500
+> HREFv60 platform, for example, the two eMMCs means that two
+> block queues with separate threads are created for no use
+> whatsoever.
+
+Yikes!  What an amazingly stupid design decision.
+
+> This patch tries to amend the situation using the following
+> strategy:
 > 
-> On Fri, Jun 16, 2017 at 9:13 AM, Simon Horman <horms@verge.net.au> wrote:
-> > Sorry for letting this bug creep in to renesas-drivers.
-> > Do you want a patch against your tree? I will plan to post v2 of
-> > this patchset soon in any case.
+> - Stop creating a block device for the RPMB partition/area
 > 
-> You can post such a patch to please users of renesas-drivers, but I won't
-> apply it now. I assume the issue will be fixed when next renesas-drivers
-> release is created ;-)
+> - Instead create a custom, dynamic character device with
+>   the same name.
+> 
+> - Make this new character device support exactly the same
+>   set of ioctl()s as the old block device.
+> 
+> - Wrap the requests back to the same ioctl() handlers, but
+>   issue them on the block queue of the main partition/area,
+>   i.e. /dev/mmcblkN
 
-That is my assumption too :)
+Is it really worth to add all this code to work around the issue?
+We could still keep the block device around and stub out anything
+not needed.
 
-I'll see about providing a fix patch too.
+> Tomas Winkler <tomas.winkler@intel.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+I think some tag is missing before Tomas' name.
