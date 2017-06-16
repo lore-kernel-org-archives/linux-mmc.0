@@ -1,136 +1,75 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 13/16] mmc: host: omap_hsmmc: Remove *use_dma* member
-Date: Fri, 16 Jun 2017 18:15:41 +0530
-Message-ID: <20170616124544.15046-14-kishon@ti.com>
-References: <20170616124544.15046-1-kishon@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170616124544.15046-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, nsekhar@ti.com
-Cc: Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kishon@ti.com
+From: Guodong Xu <guodong.xu@linaro.org>
+Subject: [PATCH v5 15/20] arm64: dts: hisi: add kirin pcie node
+Date: Fri, 16 Jun 2017 22:13:22 +0800
+Message-ID: <20170616141322.30466-1-guodong.xu@linaro.org>
+References: <20170615030417.14059-16-guodong.xu@linaro.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <20170615030417.14059-16-guodong.xu@linaro.org>
+Sender: linux-pci-owner@vger.kernel.org
+To: robh+dt@kernel.org, mark.rutland@arm.com, lee.jones@linaro.org, ulf.hansson@linaro.org, bhelgaas@google.com, xuwei5@hisilicon.com, catalin.marinas@arm.com, will.deacon@arm.com, wangkefeng.wang@huawei.com, arnd@arndb.de, xuejiancheng@hisilicon.com, puck.chen@hisilicon.com
+Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, Xiaowei Song <songxiaowei@hisilicon.com>, Guodong Xu <guodong.xu@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-omap_hsmmc doesn't support polled I/O. So remove *use_dma*
-which is always set to '1'.
+From: Xiaowei Song <songxiaowei@hisilicon.com>
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Add PCIe node for hi3660
+
+Cc: Guodong Xu <guodong.xu@linaro.org>
+Signed-off-by: Xiaowei Song <songxiaowei@hisilicon.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+
+Changes in v5:
+ * fix interrupt-map, to conform to gic's #address-cells = <0>
+ * remove redundant status = "ok"
 ---
- drivers/mmc/host/omap_hsmmc.c | 37 ++++++++++++++++---------------------
- 1 file changed, 16 insertions(+), 21 deletions(-)
+ arch/arm64/boot/dts/hisilicon/hi3660.dtsi | 36 +++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 0887da4f1ff6..f47bade0d6fe 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -238,7 +238,7 @@ struct omap_hsmmc_host {
- 	u32			capa;
- 	int			irq;
- 	int			wake_irq;
--	int			use_dma, dma_ch;
-+	int			dma_ch;
- 	struct dma_chan		*tx_chan;
- 	struct dma_chan		*rx_chan;
- 	int			response_busy;
-@@ -647,8 +647,8 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
- 		 */
- 		irq_mask &= ~(DCRC_EN | DEB_EN);
- 
--	if (host->use_dma)
--		irq_mask &= ~(BRR_EN | BWR_EN);
-+	/* BRR and BWR need not be enabled for DMA */
-+	irq_mask &= ~(BRR_EN | BWR_EN);
- 
- 	/* Disable timeout for erases or when using software timeout */
- 	if (cmd && (cmd->opcode == MMC_ERASE || host->data_timeout))
-@@ -1001,8 +1001,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
- 	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
- 		cmdreg |= DP_SELECT | DDIR;
- 
--	if (host->use_dma)
--		cmdreg |= DMAE;
-+	cmdreg |= DMAE;
- 
- 	host->req_in_progress = 1;
- 	host->last_cmd = cmd->opcode;
-@@ -1029,7 +1028,7 @@ static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_req
- 
- 	omap_hsmmc_disable_irq(host);
- 	/* Do not complete the request if DMA is still in progress */
--	if (mrq->data && host->use_dma && dma_ch != -1)
-+	if (mrq->data && dma_ch != -1)
- 		return;
- 	host->mrq = NULL;
- 	mmc_request_done(host->mmc, mrq);
-@@ -1116,7 +1115,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
- 	host->dma_ch = -1;
- 	spin_unlock_irqrestore(&host->irq_lock, flags);
- 
--	if (host->use_dma && dma_ch != -1) {
-+	if (dma_ch != -1) {
- 		struct dma_chan *chan = omap_hsmmc_get_dma_chan(host, host->data);
- 
- 		dmaengine_terminate_all(chan);
-@@ -1634,12 +1633,10 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
- 		return 0;
- 	}
- 
--	if (host->use_dma) {
--		ret = omap_hsmmc_setup_dma_transfer(host, req);
--		if (ret != 0) {
--			dev_err(mmc_dev(host->mmc), "MMC start dma failure\n");
--			return ret;
--		}
-+	ret = omap_hsmmc_setup_dma_transfer(host, req);
-+	if (ret != 0) {
-+		dev_err(mmc_dev(host->mmc), "MMC start dma failure\n");
-+		return ret;
- 	}
- 	return 0;
- }
-@@ -1650,7 +1647,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = mrq->data;
- 
--	if (host->use_dma && data->host_cookie) {
-+	if (data->host_cookie) {
- 		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, data);
- 
- 		dma_unmap_sg(c->device->dev, data->sg, data->sg_len,
-@@ -1662,19 +1659,18 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	struct dma_chan *c = NULL;
- 
- 	if (mrq->data->host_cookie) {
- 		mrq->data->host_cookie = 0;
- 		return ;
- 	}
- 
--	if (host->use_dma) {
--		struct dma_chan *c = omap_hsmmc_get_dma_chan(host, mrq->data);
-+	c = omap_hsmmc_get_dma_chan(host, mrq->data);
- 
--		if (omap_hsmmc_pre_dma_transfer(host, mrq->data,
--						&host->next_data, c))
--			mrq->data->host_cookie = 0;
--	}
-+	if (omap_hsmmc_pre_dma_transfer(host, mrq->data,
-+					&host->next_data, c))
-+		mrq->data->host_cookie = 0;
- }
- 
- /*
-@@ -2563,7 +2559,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->mmc	= mmc;
- 	host->pdata	= pdata;
- 	host->dev	= &pdev->dev;
--	host->use_dma	= 1;
- 	host->dma_ch	= -1;
- 	host->irq	= irq;
- 	host->mapbase	= res->start + pdata->reg_offset;
+diff --git a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
+index e138973..8183d71 100644
+--- a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
++++ b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
+@@ -754,5 +754,41 @@
+ 			cs-gpios = <&gpio18 5 0>;
+ 			status = "disabled";
+ 		};
++
++		pcie@f4000000 {
++			compatible = "hisilicon,kirin960-pcie";
++			reg = <0x0 0xf4000000 0x0 0x1000>,
++			      <0x0 0xff3fe000 0x0 0x1000>,
++			      <0x0 0xf3f20000 0x0 0x40000>,
++			      <0x0 0xf5000000 0x0 0x2000>;
++			reg-names = "dbi", "apb", "phy", "config";
++			bus-range = <0x0  0x1>;
++			#address-cells = <3>;
++			#size-cells = <2>;
++			device_type = "pci";
++			ranges = <0x02000000 0x0 0x00000000
++				  0x0 0xf6000000
++				  0x0 0x02000000>;
++			num-lanes = <1>;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0xf800 0 0 7>;
++			interrupt-map = <0x0 0 0 1
++					 &gic GIC_SPI 282 IRQ_TYPE_LEVEL_HIGH>,
++					<0x0 0 0 2
++					 &gic GIC_SPI 283 IRQ_TYPE_LEVEL_HIGH>,
++					<0x0 0 0 3
++					 &gic GIC_SPI 284 IRQ_TYPE_LEVEL_HIGH>,
++					<0x0 0 0 4
++					 &gic GIC_SPI 285 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&crg_ctrl HI3660_PCIEPHY_REF>,
++				 <&crg_ctrl HI3660_CLK_GATE_PCIEAUX>,
++				 <&crg_ctrl HI3660_PCLK_GATE_PCIE_PHY>,
++				 <&crg_ctrl HI3660_PCLK_GATE_PCIE_SYS>,
++				 <&crg_ctrl HI3660_ACLK_GATE_PCIE>;
++			clock-names = "pcie_phy_ref", "pcie_aux",
++				      "pcie_apb_phy", "pcie_apb_sys",
++				      "pcie_aclk";
++			reset-gpios = <&gpio11 1 0 >;
++		};
+ 	};
+ };
 -- 
-2.11.0
+2.10.2
