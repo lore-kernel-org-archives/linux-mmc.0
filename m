@@ -1,70 +1,86 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC 4/5] mmc: renesas_sdhi: add support for R-Car Gen3
- SDHI DMAC
-Date: Fri, 16 Jun 2017 09:21:04 +0200
-Message-ID: <CAMuHMdWE6pq3XUKq3U2sTDMsjqkk7gYsjyuEskQ_+e+J3vvKWg@mail.gmail.com>
-References: <1496927595-19521-1-git-send-email-horms+renesas@verge.net.au>
- <1496927595-19521-5-git-send-email-horms+renesas@verge.net.au>
- <CAMuHMdU8fqoi-zh4OKC_40xH3pZy+w_qDjtxm2pRLUsJieFmgw@mail.gmail.com> <20170616071201.GD16534@verge.net.au>
+From: Avri Altman <Avri.Altman@wdc.com>
+Subject: RE: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
+Date: Fri, 16 Jun 2017 07:22:34 +0000
+Message-ID: <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
+References: <20170615121259.8281-1-linus.walleij@linaro.org>
+ <20170615121259.8281-5-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170616071201.GD16534@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:2382 "EHLO
+        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751879AbdFPHWi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 03:22:38 -0400
+In-Reply-To: <20170615121259.8281-5-linus.walleij@linaro.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Simon,
+Hi,
 
-On Fri, Jun 16, 2017 at 9:12 AM, Simon Horman <horms@verge.net.au> wrote:
-> On Fri, Jun 09, 2017 at 09:39:49AM +0200, Geert Uytterhoeven wrote:
->> On Thu, Jun 8, 2017 at 3:13 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
->> > R-Car Gen3 has a dedicated DMA controller for SDHI module. Since
->> > the DMAC is in a part of SDHI module and is not suitable as dmaengine,
-
->> > --- a/drivers/mmc/host/Kconfig
->> > +++ b/drivers/mmc/host/Kconfig
-
->> > +config MMC_SDHI_SYS_DMAC
->> > +       tristate "DMA support use of SYS DMAC with SDHI SD/SDIO controller"
->>
->> DMA support for SYS_DMAC?
+> -----Original Message-----
+> From: Linus Walleij [mailto:linus.walleij@linaro.org]
+> Sent: Thursday, June 15, 2017 3:13 PM
+> To: linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>; Christoph
+> Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>; Bartlomiej
+> Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
+> <paolo.valente@linaro.org>; Avri Altman <Avri.Altman@wdc.com>; Adrian
+> Hunter <adrian.hunter@intel.com>; Linus Walleij <linus.walleij@linaro.org=
 >
-> How about this?
->
-> config MMC_SDHI_SYS_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using SYS-DMAC"
+> Subject: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
+>=20
+> The RPMB partition on the eMMC devices is a special area used for storing
+> cryptographically safe information signed by a special secret key. To wri=
+te
+> and read records from this special area, authentication is needed.
+>=20
+> The RPMB area is *only* and *exclusively* accessed using ioctl():s from
+> userspace. It is not really a block device, as blocks cannot be read or w=
+ritten
+> from the device, also the signed chunks that can be stored on the RPMB ar=
+e
+> actually
+> 256 bytes, not 512 making a block device a real bad fit.
+>=20
+> Currently the RPMB partition spawns a separate block device named
+> /dev/mmcblkNrpmb for each device with an RPMB partition, including the
+> creation of a block queue with its own kernel thread and all overhead
+> associated with this. On the Ux500
+> HREFv60 platform, for example, the two eMMCs means that two block
+> queues with separate threads are created for no use whatsoever.
+>=20
+> I have concluded that this block device design for RPMB is actually prett=
+y
+> wrong. The RPMB area should have been designed to be accessed from
+> /dev/mmcblkN directly, using ioctl()s on the main block device. It is how=
+ever
+> way too late to change that, since userspace expects to open an RPMB
+> device in /dev/mmcblkNrpmb and we cannot break userspace.
+>=20
+Not sure how much you are bound by this.
+Previous attempts, adopting a pragmatic approach - just added another ioctl=
+ number, and used /dev/mmcblkN.
+Moreover, a designated ioctl allows to address more cleanly the rpmb-specif=
+ic needs, that are somehow awkward using multi_cmd.
+Within the context of an RFC, would be interesting to know if someone even =
+used  /dev/mmcblkNrpmb?
 
-Better!
+> Some discussion points:
+>=20
+> I am aware of Tomas Winklers attempts to make RPMB handling into its own
+> subsystem. I have no such ambitions whatsoever, I am only trying to sensi=
+bly
+> accomodate what we already have and handle our RPMB in a way that is not
+> littering the place with weirdo block devices.
 
->         ...
->         help
->            This provides DMA support for the SDHI SD/SDIO controllers
->            using SYS-DMAC via DMA Engine. This supports the controllers
+I think that the key benefit of Tomas's approach, is being so comprehensive=
+.
+Thus enables pmb access of embedded block devices - mmc as well as other.
 
-I would drop "the".
+Cheers,
+Avri
 
->            found in SuperH and Renesas ARM based SoCs.
->
-> config MMC_SDHI_INTERNAL_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
->         ...
->         help
->            This provides DMA support for the SDHI SD/SDIO controllers
->            using on-chip bus mastering. This supports the controllers
-
-Likewise.
-
->            found in arm64 based SoCs.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
