@@ -1,49 +1,107 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
-Date: Fri, 16 Jun 2017 09:45:43 +0200
-Message-ID: <20170616074543.GA9125@lst.de>
-References: <20170615121259.8281-1-linus.walleij@linaro.org> <20170615121259.8281-5-linus.walleij@linaro.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH/RFC 3/5] mmc: sh_mobile_sdhi: add some SoC specific data
+ for R-Car Gen3
+Date: Fri, 16 Jun 2017 09:55:36 +0200
+Message-ID: <20170616075534.GH22158@verge.net.au>
+References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
+ <1496927368-18897-5-git-send-email-horms+renesas@verge.net.au>
+ <CAMuHMdWrpsRDDqzrxJjt3_V0gjTo9fQiFGRzo=crdaeeHKX2uw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20170615121259.8281-5-linus.walleij@linaro.org>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>
+In-Reply-To: <CAMuHMdWrpsRDDqzrxJjt3_V0gjTo9fQiFGRzo=crdaeeHKX2uw@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jun 15, 2017 at 02:12:58PM +0200, Linus Walleij wrote:
-> Currently the RPMB partition spawns a separate block device
-> named /dev/mmcblkNrpmb for each device with an RPMB partition,
-> including the creation of a block queue with its own kernel
-> thread and all overhead associated with this. On the Ux500
-> HREFv60 platform, for example, the two eMMCs means that two
-> block queues with separate threads are created for no use
-> whatsoever.
-
-Yikes!  What an amazingly stupid design decision.
-
-> This patch tries to amend the situation using the following
-> strategy:
+On Fri, Jun 09, 2017 at 09:34:46AM +0200, Geert Uytterhoeven wrote:
+> Hi Simon,
 > 
-> - Stop creating a block device for the RPMB partition/area
+> On Thu, Jun 8, 2017 at 3:09 PM, Simon Horman <horms+renesas@verge.net.au> wrote:
+> > To avoid complicate code in own dma code for gen3, this patch
+> > adds set max_segs to 1. Then, the tmio driver will get requests
+> > as sg_len = 1 only.
 > 
-> - Instead create a custom, dynamic character device with
->   the same name.
+> The above doesn't seem to match with the actual code changes?
 > 
-> - Make this new character device support exactly the same
->   set of ioctl()s as the old block device.
+> > In the performance point of view, the CONFIG_MMC_BLOCK_BOUNCE should
+> > be set. Otherwise, mmc block layer will set 4-kbyte each as a request.
 > 
-> - Wrap the requests back to the same ioctl() handlers, but
->   issue them on the block queue of the main partition/area,
->   i.e. /dev/mmcblkN
+> FWIW, CONFIG_MMC_BLOCK_BOUNCE is no more in -next.
 
-Is it really worth to add all this code to work around the issue?
-We could still keep the block device around and stub out anything
-not needed.
+Thanks.
 
-> Tomas Winkler <tomas.winkler@intel.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+The code has been shuffled around to the point where this patch doesn't
+seem to make much sense as is. I squashed it into the previous patch like this:
 
-I think some tag is missing before Tomas' name.
+mmc: tmio, renesas_sdhi: add max_segs and max_blk_count in tmio_mmc_data
+
+Allow TMIO and SDHI driver implementations to provide values for
+max_segs and max_blk_count.
+
+A follow-up patch will set these values for Renesas Gen3 SoCs
+the using an SDHI driver.
+
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index eb3ea15ff92d..6f7233fe32a2 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -31,6 +31,8 @@ struct renesas_sdhi_of_data {
+ 	int scc_offset;
+ 	struct renesas_sdhi_scc *taps;
+ 	int taps_num;
++	unsigned int max_blk_count;
++	unsigned short max_segs;
+ };
+ 
+ int renesas_sdhi_probe(struct platform_device *pdev,
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index f4690cba3443..75c7bf4f7ca2 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -523,6 +523,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		mmc_data->capabilities |= of_data->capabilities;
+ 		mmc_data->capabilities2 |= of_data->capabilities2;
+ 		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
++		mmc_data->max_blk_count = of_data->max_blk_count;
++		mmc_data->max_segs = of_data->max_segs;
+ 		dma_priv->dma_buswidth = of_data->dma_buswidth;
+ 		host->bus_shift = of_data->bus_shift;
+ 	}
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index fbe38464e7d7..7cb8d3510396 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1248,10 +1248,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 
+ 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
+-	mmc->max_segs = 32;
++	mmc->max_segs = pdata->max_segs ? : 32;
+ 	mmc->max_blk_size = 512;
+-	mmc->max_blk_count = (PAGE_SIZE / mmc->max_blk_size) *
+-		mmc->max_segs;
++	mmc->max_blk_count = pdata->max_blk_count ? :
++		(PAGE_SIZE / mmc->max_blk_size) * mmc->max_segs;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index c83c16b931a8..4e261ea94d6a 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -128,6 +128,8 @@ struct tmio_mmc_data {
+ 	unsigned int			cd_gpio;
+ 	int				alignment_shift;
+ 	dma_addr_t			dma_rx_offset;
++	unsigned int			max_blk_count;
++	unsigned short			max_segs;
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
+ };
