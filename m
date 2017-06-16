@@ -1,42 +1,208 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC 2/5] mmc: tmio: add complete to DMA ops
-Date: Fri, 16 Jun 2017 09:23:15 +0200
-Message-ID: <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
-References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
- <1496927368-18897-4-git-send-email-horms+renesas@verge.net.au>
- <CAMuHMdUkhkDEqsDZUQ94dFnLU+dFcZ+ed=qHokH3sEWGFdkkuw@mail.gmail.com>
- <20170616060602.GA16534@verge.net.au> <CAMuHMdV58Gp+M3eDG3wmgcG6S7L=HBoeFY3gNPVAA1HBWATOcw@mail.gmail.com>
- <20170616070432.GC16534@verge.net.au> <CAMuHMdVpE+2QK2WbfyDCCUq1fzHqnuyAKsGgzj+ZonOwc96w3A@mail.gmail.com>
- <20170616071354.GE16534@verge.net.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170616071354.GE16534@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+From: Quentin Schulz <quentin.schulz@free-electrons.com>
+Subject: [PATCH 1/2] mmc: sdhci-of-at91: factor out clks and presets setting
+Date: Fri, 16 Jun 2017 09:29:28 +0200
+Message-ID: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.free-electrons.com ([62.4.15.54]:54089 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752180AbdFPH3o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 03:29:44 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ludovic.desroches@microchip.com, ulf.hansson@linaro.org
+Cc: Quentin Schulz <quentin.schulz@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
 
-Hi Simon,
+The setting of clocks and presets is currently done in probe only but
+once deep PM support is added, it'll be needed in the resume function.
 
-On Fri, Jun 16, 2017 at 9:13 AM, Simon Horman <horms@verge.net.au> wrote:
-> Sorry for letting this bug creep in to renesas-drivers.
-> Do you want a patch against your tree? I will plan to post v2 of
-> this patchset soon in any case.
+Let's create a function for this setting.
 
-You can post such a patch to please users of renesas-drivers, but I won't
-apply it now. I assume the issue will be fixed when next renesas-drivers
-release is created ;-)
+Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 147 ++++++++++++++++++++++-----------------
+ 1 file changed, 82 insertions(+), 65 deletions(-)
 
-Thanks!
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 7611fd679f1a..fb8c6011f13d 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -128,6 +128,84 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+ 
++static int sdhci_at91_set_clks_presets(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++	unsigned int			caps0, caps1;
++	unsigned int			clk_base, clk_mul;
++	unsigned int			gck_rate, real_gck_rate;
++	unsigned int			preset_div;
++
++	/*
++	 * The mult clock is provided by as a generated clock by the PMC
++	 * controller. In order to set the rate of gck, we have to get the
++	 * base clock rate and the clock mult from capabilities.
++	 */
++	clk_prepare_enable(priv->hclock);
++	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
++	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
++	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
++	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
++	gck_rate = clk_base * 1000000 * (clk_mul + 1);
++	ret = clk_set_rate(priv->gck, gck_rate);
++	if (ret < 0) {
++		dev_err(dev, "failed to set gck");
++		clk_disable_unprepare(priv->hclock);
++		return ret;
++	}
++	/*
++	 * We need to check if we have the requested rate for gck because in
++	 * some cases this rate could be not supported. If it happens, the rate
++	 * is the closest one gck can provide. We have to update the value
++	 * of clk mul.
++	 */
++	real_gck_rate = clk_get_rate(priv->gck);
++	if (real_gck_rate != gck_rate) {
++		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
++		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
++		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
++			  SDHCI_CLOCK_MUL_MASK);
++		/* Set capabilities in r/w mode. */
++		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
++		       host->ioaddr + SDMMC_CACR);
++		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
++		/* Set capabilities in ro mode. */
++		writel(0, host->ioaddr + SDMMC_CACR);
++		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
++			 clk_mul, real_gck_rate);
++	}
++
++	/*
++	 * We have to set preset values because it depends on the clk_mul
++	 * value. Moreover, SDR104 is supported in a degraded mode since the
++	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
++	 * reason, we need to use presets to support SDR104.
++	 */
++	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
++
++	clk_prepare_enable(priv->mainck);
++	clk_prepare_enable(priv->gck);
++
++	return 0;
++}
++
+ #ifdef CONFIG_PM
+ static int sdhci_at91_runtime_suspend(struct device *dev)
+ {
+@@ -192,11 +270,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	struct sdhci_host		*host;
+ 	struct sdhci_pltfm_host		*pltfm_host;
+ 	struct sdhci_at91_priv		*priv;
+-	unsigned int			caps0, caps1;
+-	unsigned int			clk_base, clk_mul;
+-	unsigned int			gck_rate, real_gck_rate;
+ 	int				ret;
+-	unsigned int			preset_div;
+ 
+ 	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
+ 	if (!match)
+@@ -228,66 +302,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return PTR_ERR(priv->gck);
+ 	}
+ 
+-	/*
+-	 * The mult clock is provided by as a generated clock by the PMC
+-	 * controller. In order to set the rate of gck, we have to get the
+-	 * base clock rate and the clock mult from capabilities.
+-	 */
+-	clk_prepare_enable(priv->hclock);
+-	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+-	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+-	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+-	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
+-	gck_rate = clk_base * 1000000 * (clk_mul + 1);
+-	ret = clk_set_rate(priv->gck, gck_rate);
+-	if (ret < 0) {
+-		dev_err(&pdev->dev, "failed to set gck");
+-		goto hclock_disable_unprepare;
+-	}
+-	/*
+-	 * We need to check if we have the requested rate for gck because in
+-	 * some cases this rate could be not supported. If it happens, the rate
+-	 * is the closest one gck can provide. We have to update the value
+-	 * of clk mul.
+-	 */
+-	real_gck_rate = clk_get_rate(priv->gck);
+-	if (real_gck_rate != gck_rate) {
+-		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
+-		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+-		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
+-		/* Set capabilities in r/w mode. */
+-		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+-		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+-		/* Set capabilities in ro mode. */
+-		writel(0, host->ioaddr + SDMMC_CACR);
+-		dev_info(&pdev->dev, "update clk mul to %u as gck rate is %u Hz\n",
+-			 clk_mul, real_gck_rate);
+-	}
+-
+-	/*
+-	 * We have to set preset values because it depends on the clk_mul
+-	 * value. Moreover, SDR104 is supported in a degraded mode since the
+-	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
+-	 * reason, we need to use presets to support SDR104.
+-	 */
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+-
+-	clk_prepare_enable(priv->mainck);
+-	clk_prepare_enable(priv->gck);
++	ret = sdhci_at91_set_clks_presets(&pdev->dev);
++	if (ret)
++		goto sdhci_pltfm_free;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+@@ -335,8 +352,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ clocks_disable_unprepare:
+ 	clk_disable_unprepare(priv->gck);
+ 	clk_disable_unprepare(priv->mainck);
+-hclock_disable_unprepare:
+ 	clk_disable_unprepare(priv->hclock);
++sdhci_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 	return ret;
+ }
+-- 
+2.11.0
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
