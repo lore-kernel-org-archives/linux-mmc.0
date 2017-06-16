@@ -1,86 +1,42 @@
-From: Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
-Date: Fri, 16 Jun 2017 07:22:34 +0000
-Message-ID: <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
-References: <20170615121259.8281-1-linus.walleij@linaro.org>
- <20170615121259.8281-5-linus.walleij@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH/RFC 2/5] mmc: tmio: add complete to DMA ops
+Date: Fri, 16 Jun 2017 09:23:15 +0200
+Message-ID: <CAMuHMdXP8HXxQWfFf=i3j98q529doO7dpfgLBqhZPHeyYzNo_w@mail.gmail.com>
+References: <1496927368-18897-1-git-send-email-horms+renesas@verge.net.au>
+ <1496927368-18897-4-git-send-email-horms+renesas@verge.net.au>
+ <CAMuHMdUkhkDEqsDZUQ94dFnLU+dFcZ+ed=qHokH3sEWGFdkkuw@mail.gmail.com>
+ <20170616060602.GA16534@verge.net.au> <CAMuHMdV58Gp+M3eDG3wmgcG6S7L=HBoeFY3gNPVAA1HBWATOcw@mail.gmail.com>
+ <20170616070432.GC16534@verge.net.au> <CAMuHMdVpE+2QK2WbfyDCCUq1fzHqnuyAKsGgzj+ZonOwc96w3A@mail.gmail.com>
+ <20170616071354.GE16534@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:2382 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751879AbdFPHWi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2017 03:22:38 -0400
-In-Reply-To: <20170615121259.8281-5-linus.walleij@linaro.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170616071354.GE16534@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi,
+Hi Simon,
 
-> -----Original Message-----
-> From: Linus Walleij [mailto:linus.walleij@linaro.org]
-> Sent: Thursday, June 15, 2017 3:13 PM
-> To: linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>; Christoph
-> Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>; Bartlomiej
-> Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
-> <paolo.valente@linaro.org>; Avri Altman <Avri.Altman@wdc.com>; Adrian
-> Hunter <adrian.hunter@intel.com>; Linus Walleij <linus.walleij@linaro.org=
->
-> Subject: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
->=20
-> The RPMB partition on the eMMC devices is a special area used for storing
-> cryptographically safe information signed by a special secret key. To wri=
-te
-> and read records from this special area, authentication is needed.
->=20
-> The RPMB area is *only* and *exclusively* accessed using ioctl():s from
-> userspace. It is not really a block device, as blocks cannot be read or w=
-ritten
-> from the device, also the signed chunks that can be stored on the RPMB ar=
-e
-> actually
-> 256 bytes, not 512 making a block device a real bad fit.
->=20
-> Currently the RPMB partition spawns a separate block device named
-> /dev/mmcblkNrpmb for each device with an RPMB partition, including the
-> creation of a block queue with its own kernel thread and all overhead
-> associated with this. On the Ux500
-> HREFv60 platform, for example, the two eMMCs means that two block
-> queues with separate threads are created for no use whatsoever.
->=20
-> I have concluded that this block device design for RPMB is actually prett=
-y
-> wrong. The RPMB area should have been designed to be accessed from
-> /dev/mmcblkN directly, using ioctl()s on the main block device. It is how=
-ever
-> way too late to change that, since userspace expects to open an RPMB
-> device in /dev/mmcblkNrpmb and we cannot break userspace.
->=20
-Not sure how much you are bound by this.
-Previous attempts, adopting a pragmatic approach - just added another ioctl=
- number, and used /dev/mmcblkN.
-Moreover, a designated ioctl allows to address more cleanly the rpmb-specif=
-ic needs, that are somehow awkward using multi_cmd.
-Within the context of an RFC, would be interesting to know if someone even =
-used  /dev/mmcblkNrpmb?
+On Fri, Jun 16, 2017 at 9:13 AM, Simon Horman <horms@verge.net.au> wrote:
+> Sorry for letting this bug creep in to renesas-drivers.
+> Do you want a patch against your tree? I will plan to post v2 of
+> this patchset soon in any case.
 
-> Some discussion points:
->=20
-> I am aware of Tomas Winklers attempts to make RPMB handling into its own
-> subsystem. I have no such ambitions whatsoever, I am only trying to sensi=
-bly
-> accomodate what we already have and handle our RPMB in a way that is not
-> littering the place with weirdo block devices.
+You can post such a patch to please users of renesas-drivers, but I won't
+apply it now. I assume the issue will be fixed when next renesas-drivers
+release is created ;-)
 
-I think that the key benefit of Tomas's approach, is being so comprehensive=
-.
-Thus enables pmb access of embedded block devices - mmc as well as other.
+Thanks!
 
-Cheers,
-Avri
+Gr{oetje,eeting}s,
 
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
