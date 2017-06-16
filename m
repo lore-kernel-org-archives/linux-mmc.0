@@ -1,28 +1,46 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH mmc/next v2 0/2] mmc: tmio, renesas-sdhi: cleanups
-Date: Fri, 16 Jun 2017 13:52:34 +0200
-Message-ID: <20170616115233.GB13576@verge.net.au>
-References: <1497553214-12914-1-git-send-email-horms+renesas@verge.net.au>
- <20170616082742.pj5crlavihkewlfd@ninjato>
- <20170616091911.GA6032@verge.net.au>
- <20170616092435.GC6032@verge.net.au>
- <20170616092922.52r6m4qjslrbycz7@ninjato>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 01/12] ARM: OMAP2+: Select PINCTRL_TI_IODELAY for SOC_DRA7XX
+Date: Fri, 16 Jun 2017 17:24:28 +0530
+Message-ID: <20170616115439.8508-2-kishon@ti.com>
+References: <20170616115439.8508-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170616092922.52r6m4qjslrbycz7@ninjato>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170616115439.8508-1-kishon@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Tony Lindgren <tony@atomide.com>, nsekhar@ti.com
+Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Rob Herring <robh+dt@kernel.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 11:29:22AM +0200, Wolfram Sang wrote:
-> 
-> > The Gen3 DMA series and this series apply independently of each other.
-> > So I don't see any dependencies between them.
-> 
-> So, this shall go in first, I assume?
+PINCTRL_TI_IODELAY should be enabled so that "pinctrl_dev" can be created
+for pinctrl entries populated with iodelay values in device tree data.
+Select PINCTRL_TI_IODELAY for SOC_DRA7XX here.
 
-I have no specific order in mind. Would you like me to try to order things
-somehow?
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ arch/arm/mach-omap2/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
+index 0465338183c7..e31a5a22e171 100644
+--- a/arch/arm/mach-omap2/Kconfig
++++ b/arch/arm/mach-omap2/Kconfig
+@@ -87,6 +87,7 @@ config SOC_DRA7XX
+ 	select OMAP_INTERCONNECT_BARRIER
+ 	select PM_OPP if PM
+ 	select ZONE_DMA if ARM_LPAE
++	select PINCTRL_TI_IODELAY if OF && PINCTRL
+ 
+ config ARCH_OMAP2PLUS
+ 	bool
+-- 
+2.11.0
