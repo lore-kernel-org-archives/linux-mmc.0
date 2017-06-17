@@ -1,69 +1,56 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH mmc/next v2 2/4] mmc: tmio, renesas-sdhi: add complete to
- DMA ops
-Date: Sat, 17 Jun 2017 17:01:05 +0200
-Message-ID: <20170617150105.esceda3kiavhmu5x@ninjato>
+Subject: Re: [PATCH mmc/next v2 4/4] mmc: renesas-sdhi: remove gen3 support
+ from SYS-DMAC driver
+Date: Sat, 17 Jun 2017 17:01:09 +0200
+Message-ID: <20170617150109.cnmjbsk6cmemw7my@ninjato>
 References: <1497607134-10241-1-git-send-email-horms+renesas@verge.net.au>
- <1497607134-10241-3-git-send-email-horms+renesas@verge.net.au>
+ <1497607134-10241-5-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="u3fa7uv6ufoyadd4"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:45931 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752317AbdFQPBJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 17 Jun 2017 11:01:09 -0400
+        protocol="application/pgp-signature"; boundary="gletfm6imhstwdra"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1497607134-10241-3-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1497607134-10241-5-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Simon Horman <horms+renesas@verge.net.au>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
 
---u3fa7uv6ufoyadd4
+--gletfm6imhstwdra
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jun 16, 2017 at 11:58:52AM +0200, Simon Horman wrote:
-> Add complete to DMA ops to allow DMAC implementation dependent
-> handling of DMA completion.
->=20
-> Also implement the operation for SDHI.
+On Fri, Jun 16, 2017 at 11:58:54AM +0200, Simon Horman wrote:
+> Gen3 SoCs are now supported by the internal DMAC variant of the SDHI driv=
+er.
+> Remove them from the SYS-DMAC variant where only PIO mode is supported
+> for those SoCs.
 >=20
 > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-Codewise, I am all fine with this patch. There is one naming, however:
-
-> +	void (*complete)(struct tmio_mmc_host *host);
-
-I'd rather call it 'dataend'. For internal DMAC, it is the same. But for
-SYS-DMAC there is difference between DATAEND and DMA_COMPLETE. This is
-exactly the reason we have commit 52ad9a8e854ca1 ("mmc: tmio: ensure end
-of DMA and SD access are in sync").
-
-Basically, something like %s/complete/dataend/g would do it for me...
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---u3fa7uv6ufoyadd4
+--gletfm6imhstwdra
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAllFRDEACgkQFA3kzBSg
-KbZHcA//X/bDO+ivuX3fMAylOLTqede/7WGrq6L2qKq+Uk0BNewIuxLbSB2u5s3F
-RaPT5cuVCawp7u6BNujVADqOutXWrRQWpHwVEk2cEhEVb2MAQ0dI8GM7rwDpx9y7
-i+vKWkl4JZlKAji0nyeQI9kbCZ2KBJDXEtyO8IPDlYGaMz0bPd95z6VLBgXFdMWa
-OkTFj/1/vVHuR8k+cpu8ZUnCExIhhIvKDGm/Op4ObjDzsJdLbQPWXoZiRQfX+z7A
-h85XN+kzscGUZSH/FNQnF9lfThAiTHrO7RBEBmqKsjciaIKQF0KGCOUK3Jns+zNz
-TJc/ZanBRhIEckFjGvNxYpE7qPF1jzXrfovQ5D+d+kpkR4IwQKDl6kvv1DvouyZ/
-ivD0eeHIHICQeJmHAU836NA/65TL0BPWRfhvZyqAM75jkwLltCuSXJNoLMm4ge1g
-Gq3cZ3rX2qGDKt04Y0/dsPwYEziNjrggkyzoI687kYnKn7v9Wp+x0rEsoVGw4xk0
-PWCZ+SF6neitdqRnbpNDSy9eXoyLNoUo7POlC5zORZE08t7/Muk3dclgBDJRL4yz
-httZoe0qpmpgiH5f2M4lU6JuCX8eI4jenw3BOp7tcWnPjO/MisgF49cSLBovoEq6
-dHzLtRQiGNqMTLc8zKMAwHIYesmZUsO/uCMhp1Vx1r/RGqoc/p0=
-=109z
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAllFRDUACgkQFA3kzBSg
+KbaejQ//VLPXyQwgt2XpY7RI+SyK367OtgjZ/FbbC/RFLgiKLtQCBIrTmR418CBz
+dqrffyGNmdwAXQ0IotWtjmyoP8y166SrSKYsko2Qeo62ASLuyu4xVKs25Cnjcx4J
+yOpi3Uc9hBfuiTd67YPik+MF9s48sxgt4sLp/n0TNPa4YRf7YtKTdWvolrutGndg
+L7Meq9lSf8c/Ea+tMsjdxAnlWWPd247zLBSDUyNTuGW7u9SBlkvEoSePlrrvd/93
+RLFzHoAzzDC5kV1JPzQL8dVsWTzlJAQnt3Freb2dGyeFFm5dGft7pi7N0gPIwqf8
+svcd2f/i5+G3mwFDxaxLvooerx1+UM8Hw5PP/D6WA/wtSLirV5H66qK6W3mb05ld
+JxtSzvwVW+BzIWHnR23JKv9Eh23ZBFEI07UEl1yKe7pQIsoME8d325MEDtQM9+fZ
+AaYhWQnLb1PCjS1iQz2l8PW4DewrNh8YfvSrZUheD7lZLcJRpccWfOehu+K1K5wa
+RiuVRfef/KTshphkHMTbOkRG8NQMkmVKnvsqwoefHlfhh0iCGbWRLm5pxVRrrQkg
+QL66JmcMdPHob9lDQTQ2lXq5eUGn0aUy1ZXS4/upcOTfmUsCdK5hyWrSA7lNXMNL
+DsTGLK1Q7GfN2tcGwStVY955uXQxa4kyScRe1NlIR7fP1Vpiez8=
+=S3Ql
 -----END PGP SIGNATURE-----
 
---u3fa7uv6ufoyadd4--
+--gletfm6imhstwdra--
