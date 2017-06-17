@@ -1,61 +1,69 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH mmc/next v2 1/4] mmc: tmio, renesas-sdhi: add
- max_{segs,blk_count} to tmio_mmc_data
-Date: Sat, 17 Jun 2017 17:01:01 +0200
-Message-ID: <20170617150101.i2faasygkmnvtn7a@ninjato>
+Subject: Re: [PATCH mmc/next v2 2/4] mmc: tmio, renesas-sdhi: add complete to
+ DMA ops
+Date: Sat, 17 Jun 2017 17:01:05 +0200
+Message-ID: <20170617150105.esceda3kiavhmu5x@ninjato>
 References: <1497607134-10241-1-git-send-email-horms+renesas@verge.net.au>
- <1497607134-10241-2-git-send-email-horms+renesas@verge.net.au>
+ <1497607134-10241-3-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="573kqo2wj5h2xtg2"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="u3fa7uv6ufoyadd4"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:45931 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752317AbdFQPBJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 17 Jun 2017 11:01:09 -0400
 Content-Disposition: inline
-In-Reply-To: <1497607134-10241-2-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
+In-Reply-To: <1497607134-10241-3-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
 
---573kqo2wj5h2xtg2
+--u3fa7uv6ufoyadd4
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jun 16, 2017 at 11:58:51AM +0200, Simon Horman wrote:
-> From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+On Fri, Jun 16, 2017 at 11:58:52AM +0200, Simon Horman wrote:
+> Add complete to DMA ops to allow DMAC implementation dependent
+> handling of DMA completion.
 >=20
-> Allow TMIO and SDHI driver implementations to provide values for
-> max_segs and max_blk_count.
+> Also implement the operation for SDHI.
 >=20
-> A follow-up patch will set these values for Renesas Gen3 SoCs
-> the using an SDHI driver.
->=20
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Codewise, I am all fine with this patch. There is one naming, however:
+
+> +	void (*complete)(struct tmio_mmc_host *host);
+
+I'd rather call it 'dataend'. For internal DMAC, it is the same. But for
+SYS-DMAC there is difference between DATAEND and DMA_COMPLETE. This is
+exactly the reason we have commit 52ad9a8e854ca1 ("mmc: tmio: ensure end
+of DMA and SD access are in sync").
+
+Basically, something like %s/complete/dataend/g would do it for me...
 
 
---573kqo2wj5h2xtg2
+--u3fa7uv6ufoyadd4
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAllFRC0ACgkQFA3kzBSg
-KbZohxAAhK0rzVk1mGnU9/+N4EQ6fmXfqJ/iVvYm66xM7NsTELLQ9WNdZqnUhrsL
-aRYUgZ/vzlcGZYsVTMte+y8mPw0Pm5cuXVLIo/Tg+dfLIdv2E15dC85w2FXRkc4X
-e/zFP/cjEAsatUqKOZYpdzGG2DDzeE682a+TQ3q7+fV3HysMfdbYQm9f1GliitCR
-JuV33njK46xNhkwrR0cyZSAcpnkMgZyrEsj9vywov83RD7JiWvKprb3+Ofox1ygL
-khVgxdBm+HpEw5/3kgfBlMHfT6bGSQb14ALJFUMpET5+TEtRjbcQUIfALT+y9SfD
-UskXz2PbAVb1ZRoUR691+ZiQtvJtwEKz67/0oP22kbvp5b09zxZ0XiqA3LGyq6xi
-x05JaJ8NgOn/LCk0+TVnJTth+mXnmaUqf/QjjQzkporAN3VlW+gsf8nj2vpZ5BFg
-gr3W+8FFGEGNOEi5w35mREg2KsUb5gg2vcg0Eip//jbREGOoIiko/zXhLXkXWNY/
-ImoSI2B+LtI8tBuYh5VjkFGLZV6wRlO4oCUWb1CEHd0c7wTptwG6eeB7s78UZukj
-ZR0S3LAa/9/VUUcOLUPHxfLEOKPqDOvMdbK/ISG+Yikycv7IYNYmaszV5gCDFSDN
-sisfB8OkvUyO1WceM1cCswIRR9ZAGawcStFSPxpXEoUVtXue2Ns=
-=Naet
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAllFRDEACgkQFA3kzBSg
+KbZHcA//X/bDO+ivuX3fMAylOLTqede/7WGrq6L2qKq+Uk0BNewIuxLbSB2u5s3F
+RaPT5cuVCawp7u6BNujVADqOutXWrRQWpHwVEk2cEhEVb2MAQ0dI8GM7rwDpx9y7
+i+vKWkl4JZlKAji0nyeQI9kbCZ2KBJDXEtyO8IPDlYGaMz0bPd95z6VLBgXFdMWa
+OkTFj/1/vVHuR8k+cpu8ZUnCExIhhIvKDGm/Op4ObjDzsJdLbQPWXoZiRQfX+z7A
+h85XN+kzscGUZSH/FNQnF9lfThAiTHrO7RBEBmqKsjciaIKQF0KGCOUK3Jns+zNz
+TJc/ZanBRhIEckFjGvNxYpE7qPF1jzXrfovQ5D+d+kpkR4IwQKDl6kvv1DvouyZ/
+ivD0eeHIHICQeJmHAU836NA/65TL0BPWRfhvZyqAM75jkwLltCuSXJNoLMm4ge1g
+Gq3cZ3rX2qGDKt04Y0/dsPwYEziNjrggkyzoI687kYnKn7v9Wp+x0rEsoVGw4xk0
+PWCZ+SF6neitdqRnbpNDSy9eXoyLNoUo7POlC5zORZE08t7/Muk3dclgBDJRL4yz
+httZoe0qpmpgiH5f2M4lU6JuCX8eI4jenw3BOp7tcWnPjO/MisgF49cSLBovoEq6
+dHzLtRQiGNqMTLc8zKMAwHIYesmZUsO/uCMhp1Vx1r/RGqoc/p0=
+=109z
 -----END PGP SIGNATURE-----
 
---573kqo2wj5h2xtg2--
+--u3fa7uv6ufoyadd4--
