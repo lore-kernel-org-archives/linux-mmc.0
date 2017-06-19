@@ -1,51 +1,78 @@
 From: Tomas Winkler <tomasw@gmail.com>
 Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
-Date: Tue, 20 Jun 2017 00:25:15 +0300
-Message-ID: <CA+i0qc4ERgD=C_rNC5OPiwrJ2Qd0TqSK78BJOwrm743rgf3U5Q@mail.gmail.com>
+Date: Tue, 20 Jun 2017 00:28:48 +0300
+Message-ID: <CA+i0qc6fieNtNW2GD3=PokjyAHMo4GF5jo7ZXWWEe-NYSgtLLg@mail.gmail.com>
 References: <20170615121259.8281-1-linus.walleij@linaro.org>
- <20170615121259.8281-5-linus.walleij@linaro.org> <20170616074543.GA9125@lst.de>
- <CAPDyKFoWHKNsAnqrnmS-_e6OeTAMx5nGxY5W8ittWGPjriANLg@mail.gmail.com>
+ <20170615121259.8281-5-linus.walleij@linaro.org> <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f66.google.com ([209.85.213.66]:35281 "EHLO
-        mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751974AbdFSVZQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2017 17:25:16 -0400
-In-Reply-To: <CAPDyKFoWHKNsAnqrnmS-_e6OeTAMx5nGxY5W8ittWGPjriANLg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Tomas Winkler <tomas.winkler@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Tomas Winkler <tomas.winkler@intel.com>
 
->>> Currently the RPMB partition spawns a separate block device
->>> named /dev/mmcblkNrpmb for each device with an RPMB partition,
->>> including the creation of a block queue with its own kernel
->>> thread and all overhead associated with this. On the Ux500
->>> HREFv60 platform, for example, the two eMMCs means that two
->>> block queues with separate threads are created for no use
->>> whatsoever.
+On Fri, Jun 16, 2017 at 10:22 AM, Avri Altman <Avri.Altman@wdc.com> wrote:
+> Hi,
+>
+>> -----Original Message-----
+>> From: Linus Walleij [mailto:linus.walleij@linaro.org]
+>> Sent: Thursday, June 15, 2017 3:13 PM
+>> To: linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
+>> Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>; Christoph
+>> Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>; Bartlomiej
+>> Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
+>> <paolo.valente@linaro.org>; Avri Altman <Avri.Altman@wdc.com>; Adrian
+>> Hunter <adrian.hunter@intel.com>; Linus Walleij <linus.walleij@linaro.org>
+>> Subject: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
 >>
->> Yikes!  What an amazingly stupid design decision.
->
-> Unfortunate, there is more. :-)
->
-> We are actually registering at least three more block devices per eMMC
-> card (two boot partitions, and one general purpose partition). Except
-> for the main partition of course.
+>> The RPMB partition on the eMMC devices is a special area used for storing
+>> cryptographically safe information signed by a special secret key. To write
+>> and read records from this special area, authentication is needed.
+>>
+>> The RPMB area is *only* and *exclusively* accessed using ioctl():s from
+>> userspace. It is not really a block device, as blocks cannot be read or written
+>> from the device, also the signed chunks that can be stored on the RPMB are
+>> actually
+>> 256 bytes, not 512 making a block device a real bad fit.
+>>
+>> Currently the RPMB partition spawns a separate block device named
+>> /dev/mmcblkNrpmb for each device with an RPMB partition, including the
+>> creation of a block queue with its own kernel thread and all overhead
+>> associated with this. On the Ux500
+>> HREFv60 platform, for example, the two eMMCs means that two block
+>> queues with separate threads are created for no use whatsoever.
+>>
+>> I have concluded that this block device design for RPMB is actually pretty
+>> wrong. The RPMB area should have been designed to be accessed from
+>> /dev/mmcblkN directly, using ioctl()s on the main block device. It is however
+>> way too late to change that, since userspace expects to open an RPMB
+>> device in /dev/mmcblkNrpmb and we cannot break userspace.
+>>
+> Not sure how much you are bound by this.
+> Previous attempts, adopting a pragmatic approach - just added another ioctl number, and used /dev/mmcblkN.
+> Moreover, a designated ioctl allows to address more cleanly the rpmb-specific needs, that are somehow awkward using multi_cmd.
+> Within the context of an RFC, would be interesting to know if someone even used  /dev/mmcblkNrpmb?
 
-Little correction, there are 4 general purpose partition, not one.
+Good question, need to look for TrustyOS and OP-TEE.
 
 >
-> The difference compared to rpmb from the above, is that those are
-> actually general read/write partitions.
+>> Some discussion points:
+>>
+>> I am aware of Tomas Winklers attempts to make RPMB handling into its own
+>> subsystem. I have no such ambitions whatsoever, I am only trying to sensibly
+>> accomodate what we already have and handle our RPMB in a way that is not
+>> littering the place with weirdo block devices.
 >
-> So all these partitions are on the same eMMC card, but being I/O
-> scheduled separately because there are separate block devices. Yeah,
-> starvation, latency, etc - all bad things comes with it. :-)
+> I think that the key benefit of Tomas's approach, is being so comprehensive.
+> Thus enables pmb access of embedded block devices - mmc as well as other.
 
-Actually the worst issue is that emmc is single headed and all the security
-devices and VMs has to go via host for their data.
+My approach came from actual use case, but we cannot probably break
+already working software.
+
+> Cheers,
+> Avri
 >
-> My point is, this is only the first step in re-working and fixing this
-> - and we really appreciate your review!
+Thanks
+Tomas
