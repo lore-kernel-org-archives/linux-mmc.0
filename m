@@ -1,65 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/6 v3] mmc: debugfs: No blocklayer = no card status and extcsd
-Date: Mon, 19 Jun 2017 13:19:29 +0200
-Message-ID: <CAPDyKFp6CUtEX3YOqkVZzkLC7D62iw3k3pLnswdTugwT63Ou9A@mail.gmail.com>
-References: <20170608085403.11795-1-linus.walleij@linaro.org>
- <20170608085403.11795-3-linus.walleij@linaro.org> <CAPDyKFqbS0wLqQiPVPviPZ7o9WsGtQ2=46+e4NY_=MF2Gg6nDA@mail.gmail.com>
- <CACRpkdZR1rkuJpkfcYSF32kY9gp4DrBva9Zyr1fhUK-n=_wzeg@mail.gmail.com>
- <CAPDyKFpan9gyMkgsUK4rihJn79bPyL49s4JN_U_sGgcnLvyyQw@mail.gmail.com> <CACRpkdb17Cm-bS8mbHRfqZtwJL7MJUp6mNiiziUYtJ4WMjVE4w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8
+ and Meson8b SoCs
+Date: Mon, 19 Jun 2017 13:50:39 +0200
+Message-ID: <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com>
+References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+ <20170506171857.16492-3-martin.blumenstingl@googlemail.com>
+ <CAPDyKFrrSLCjbXO9R4VqPpabiFsbE6_RqR=U7otVF4Ncv0jHjQ@mail.gmail.com>
+ <CAFBinCD3modyyOpi3OY5XLhjX0UCuV+WPY2Z=mdvwdMCyeGoqg@mail.gmail.com>
+ <CAPDyKFptXRPk7mVUiRHf=hECDbeyhTxuf3K1M6NkZcVEF0Enww@mail.gmail.com> <CAFBinCD=uH=oQmWAcsMpxtbJCnJZernZx3XoNaPixUUQ7pk76w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:36057 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753838AbdFSLTa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2017 07:19:30 -0400
-Received: by mail-qt0-f178.google.com with SMTP id u19so107820646qta.3
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2017 04:19:30 -0700 (PDT)
-In-Reply-To: <CACRpkdb17Cm-bS8mbHRfqZtwJL7MJUp6mNiiziUYtJ4WMjVE4w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAFBinCD=uH=oQmWAcsMpxtbJCnJZernZx3XoNaPixUUQ7pk76w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 19 June 2017 at 13:14, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Mon, Jun 19, 2017 at 12:04 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 19 June 2017 at 11:25, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
->>> This is not really related, since I have all the debugfs files for the
->>> block layer as static functions in this patch, i.e. if the block layer
->>> is inserted, the debugfs files come up.
+>> [...]
 >>
->> If that would be the case, the I am fine. But, I am not sure. See comment below.
+>>>>> +       if (!(cmd->flags & MMC_RSP_CRC))
+>>>>> +               send |= MESON_MX_SDIO_SEND_RESP_WITHOUT_CRC7;
+>>>>> +
+>>>>> +       if (cmd->flags & MMC_RSP_BUSY)
+>>>>> +               send |= MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY;
+>>>>
+>>>> In case the controller has HW support of busy detection, please
+>>>> consider to enable MMC_CAP_WAIT_WHILE_BUSY for this driver. Then also
+>>>> assign host->max_busy_timeout a good value.
+>>> the IRQS register has bit 4 (CMD_BUSY) - but apart from that there is
+>>> no other documentation (about timeout values, etc.). the vendor driver
+>>> also neither uses MMC_CAP_WAIT_WHILE_BUSY nor host->max_busy_timeout
+>>> should I leave this as it is?
 >>
->>> On a broader note, AFAIK it is already impossible to insert the block
->>> module after the core module (if it was selected as "m" at compile time),
->>> as the block module must be inserted first, or the core module cannot
->>> resolve the symbols it needs from the block module.
+>> Please don't just leave it as is. This is an important thing to get right.
 >>
->> No, this is wrong. It's actually the opposite.
->>
->> Currently there are no dependency from the core module on the block
->> module. However, the block module uses exported functions from the
->> core module, so the dependency is the opposite.
->
-> Aha, I see how you mean.
->
->> This is exactly what I was trying to say, we must not create a
->> circular dependency of the modules.
->
-> I think modprobe resolves circular dependencies by inserting
-> both modules at the same time, actually. insmod will not work.
->
->> To solve this, you must move the entire creation of the debugfs nodes
->> to be done when the block device driver probes, in other words from
->> mmc_blk_probe().
->
-> Yes and this is done in patch 6/6.
->
-> If you think it is dangerous to have this as an intermediary step, we
-> can just squash the patches.
+>> You should be able to explore this area and see how the controller
+>> behaves without too much of documentation. Regarding timeouts, it may
+>> very well be that the controller don't have a timeout, which is why
+>> you need a software timeout. That's not so uncommon actually.
+> during my experiments I've never seen an interrupt when a command
+> timed out (nor could I find information about a timeout register in
+> the documentation). do you have any pointers (like a previous mail
+> where you've explained) how I can "explore the controller's timeout
+> behavior"?
 
-Yes, please do that!
+Sorry, I don't have an pointers.
+
+Anyway. If you do a big erase operation on an SD card, the card should
+signal busy on DAT0 for a rather long time.
+
+You could probably explore how long it takes for the card to respond
+under those circumstances, and try both with and without
+MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY.
+
+Of course you also need to try with and without
+MMC_CAP_WAIT_WHILE_BUSY, as the core may sometimes convert R1B to R1
+responses depending on that cap.
+
+[...]
+
+>>
+>> It shouldn't be that hard to implement, although I strongly recommend
+>> you to address this in a second step. In other words, I suggest you to
+>> drop the entire multiple slot support in the first step, then we can
+>> deal with that on top instead.
+> many thanks for the detailed explanation again!
+> I would be fine with dropping multiple slot support for the moment
+> *if* we can agree on the fact that the devicetree binding can support
+> multiple slots in theory (my idea here is: keep the child-nodes with
+> compatible = "mmc-slot" mandatory - but only allow one such child node
+> for now). I don't want to break DT compatibility after a few
+> weeks/months for a new driver. is that OK for you as well?
+
+That's fine! We already have such a binding available for some other
+mmc controllers. We could even consider to make that binding a generic
+mmc binding.
+
+[...]
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
