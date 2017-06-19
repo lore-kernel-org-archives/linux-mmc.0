@@ -1,97 +1,40 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH mmc/next v2 3/4] mmc: renesas-sdhi: add support for R-Car
- Gen3 SDHI DMAC
-Date: Sat, 17 Jun 2017 22:55:50 +0200
-Message-ID: <20170617205547.GA12971@verge.net.au>
-References: <1497607134-10241-1-git-send-email-horms+renesas@verge.net.au>
- <1497607134-10241-4-git-send-email-horms+renesas@verge.net.au>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 12/16] mmc: host: omap_hsmmc: Add support to set IODELAY
+ values
+Date: Sun, 18 Jun 2017 23:02:57 -0700
+Message-ID: <20170619060256.GK3730@atomide.com>
+References: <20170616124544.15046-1-kishon@ti.com>
+ <20170616124544.15046-13-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:49656 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751053AbdFSGDB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Jun 2017 02:03:01 -0400
 Content-Disposition: inline
-In-Reply-To: <1497607134-10241-4-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <20170616124544.15046-13-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, Jun 16, 2017 at 11:58:53AM +0200, Simon Horman wrote:
-> Add a new variant of the SDHI driver to support R-Car Gen3 with DMA via
-> on-chip bus mastering.  Since the DMAC is in a part of the SDHI module it
-> is not suitable to be used via DMA Engine.
+* Kishon Vijay Abraham I <kishon@ti.com> [170616 05:47]:
+> The data manual of J6/J6 Eco recommends to set different IODELAY values
+> depending on the mode in which the MMC/SD is enumerated in order to
+> ensure IO timings are met.
 > 
-> Clearing of DM_CM_INFO1 after DMA thanks to Dirk Behme
-> 
-> Cc: Dirk Behme <dirk.behme@de.bosch.com>
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> ---
-> v2
-> * Enhanced help text and changelog
-> ---
->  drivers/mmc/host/Kconfig                      |  19 ++
->  drivers/mmc/host/Makefile                     |   8 +-
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 275 ++++++++++++++++++++++++++
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |   2 +-
->  drivers/mmc/host/tmio_mmc.h                   |   1 +
->  5 files changed, 303 insertions(+), 2 deletions(-)
->  create mode 100644 drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5755b69f2f72..81c81ed19735 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -575,10 +575,29 @@ config MMC_SDHI
->  	depends on SUPERH || ARM || ARM64
->  	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->  	select MMC_TMIO_CORE
-> +	select MMC_SDHI_SYS_DMAC if (SUPERH || ARM)
-> +	select MMC_SDHI_INTERNAL_DMAC if ARM64
->  	help
->  	  This provides support for the SDHI SD/SDIO controller found in
->  	  Renesas SuperH, ARM and ARM64 based SoCs
->  
-> +config MMC_SDHI_SYS_DMAC
-> +	tristate "DMA for SDHI SD/SDIO controllers using SYS-DMAC"
-> +	depends on MMC_SDHI
-> +	help
-> +	  This provides DMA support for SDHI SD/SDIO controllers
-> +	  using SYS-DMAC via DMA Engine. This supports the controllers
-> +	  found in SuperH and Renesas ARM based SoCs.
-> +
-> +config MMC_SDHI_INTERNAL_DMAC
-> +	tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
+> Add support to set the IODELAY values depending on the various MMC
+> modes using the pinctrl APIs.
 
-0-day tells me that building fails on arm/allmodconfig due to
-writeq not being defined. I believe this is because it only exists on
-64bit systems. My proposed fix for v3 is:
+This does not seem to apply against Linux next for me for
+the binding. Fixing that, compile fails for me with:
 
-	depends on 64BIT
+drivers/mmc/host/omap_hsmmc.c:2384:13: error:
+'struct omap_hsmmc_platform_data' has no member named 'version'
 
+So will wait for updates before giving this a try.
 
-> +	depends on ARM64 || COMPILE_TEST
-> +	depends on MMC_SDHI
-> +	help
-> +	  This provides DMA support for SDHI SD/SDIO controllers
-> +	  using on-chip bus mastering. This supports the controllers
-> +	  found in arm64 based SoCs.
-> +
->  config MMC_CB710
->  	tristate "ENE CB710 MMC/SD Interface support"
->  	depends on PCI
+Regards,
 
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4d4547116311..8c46766c000c 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-
-...
-
-> +static void
-> +renesas_sdhi_internal_dmac_dm_write(struct tmio_mmc_host *host,
-> +				    int addr, u64 val)
-> +{
-> +	writeq(val, host->ctl + addr);
-> +}
-
-...
+Tony
