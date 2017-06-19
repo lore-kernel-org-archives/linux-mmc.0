@@ -1,402 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-acpi: Add DMI based blacklist
-Date: Mon, 19 Jun 2017 14:59:54 +0300
-Message-ID: <c9b4cc92-a30b-670b-339d-d6c30b0b104f@intel.com>
-References: <20170608185500.3317-1-hdegoede@redhat.com>
- <20170608185500.3317-2-hdegoede@redhat.com>
- <515f2626-6224-f913-30e3-71b796fea61b@intel.com>
- <aa7bdfea-ab41-7b74-1153-112962a65287@redhat.com>
- <1b9deb37-1de0-d019-c325-68916ead29d0@intel.com>
- <b88174e6-a099-5b56-8746-0b3f1b037cb6@redhat.com>
- <625040a0-c64f-11dd-f8db-dbf32a7f8fc1@redhat.com>
- <42f5c7f6-dd83-5d39-7487-14e4e718684d@intel.com>
- <9fb7e843-4c8d-63bd-300a-24846a7724ba@redhat.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 1/6] ARM: dts: rockchip: add basic dtsi file for RK3229 SoC
+Date: Mon, 19 Jun 2017 14:30:47 +0200
+Message-ID: <25831201.s5BUplWuV7@diego>
+References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com> <18070472.si2qlgbqtt@phil> <7e8e2097-d5ca-a594-cb87-1b7b221fd58a@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:8316 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750882AbdFSMF6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Jun 2017 08:05:58 -0400
-In-Reply-To: <9fb7e843-4c8d-63bd-300a-24846a7724ba@redhat.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <7e8e2097-d5ca-a594-cb87-1b7b221fd58a@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Frank Wang <frank.wang@rock-chips.com>
+Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, wmc@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
 
-On 16/06/17 17:37, Hans de Goede wrote:
-> Hi,
-> 
-> On 16-06-17 14:34, Adrian Hunter wrote:
->> On 16/06/17 15:33, Hans de Goede wrote:
->>> Hi,
->>>
->>> On 14-06-17 15:20, Hans de Goede wrote:
->>>> Hi,
->>>>
->>>> On 14-06-17 09:43, Adrian Hunter wrote:
->>>>> On 12/06/17 16:27, Hans de Goede wrote:
->>>>>> Hi,
->>>>>>
->>>>>> On 12-06-17 14:11, Adrian Hunter wrote:
->>>>>>> On 08/06/17 21:55, Hans de Goede wrote:
->>>>>>>> Add a DMI based blacklist for systems where probing some sdio
->>>>>>>> interfaces
->>>>>>>> is harmful (e.g. causes pci-e based wifi to not work).
->>>>>>>>
->>>>>>>> BugLink: https://bbs.archlinux.org/viewtopic.php?id=224086
->>>>>>>> Fixes: db52d4f8a4bd ("mmc: sdhci-acpi: support 80860F14 UID 2 SDIO
->>>>>>>> bus")
->>>>>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>>>>>>> ---
->>>>>>>> Changes in v2:
->>>>>>>> -Adjust for changes in mmc: sdhci-acpi: Add fix_up_power_blacklist
->>>>>>>> module
->>>>>>>> option
->>>>>>>> -Only use a single fix_up_power_dmi_blacklist for the GPDwin further
->>>>>>>> testing
->>>>>>>>     has shown that the DMI strings are unique enough that we do not
->>>>>>>> need the
->>>>>>>>     bios-date in there
->>>>>>>>
->>>>>>>> Changes in v3:
->>>>>>>> -Adjust for changes to "mmc: sdhci-acpi: Add blacklist module option"
->>>>>>>>
->>>>>>>> Changes in v4:
->>>>>>>> -Rename blacklist to dmi_probe_blacklist as it now blacklists probing,
->>>>>>>>     rather then calling acpi_device_fix_up_power.
->>>>>>>> -Also check bios-date against known bios-dates for the GPD win, to
->>>>>>>> avoid
->>>>>>>>     possible false positives due to the use of quite generic DMI
->>>>>>>> strings
->>>>>>>> -Add Fixes and BugLink tags
->>>>>>>> ---
->>>>>>>>     drivers/mmc/host/sdhci-acpi.c | 64
->>>>>>>> +++++++++++++++++++++++++++++++++++++++++++
->>>>>>>>     1 file changed, 64 insertions(+)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/host/sdhci-acpi.c
->>>>>>>> b/drivers/mmc/host/sdhci-acpi.c
->>>>>>>> index ecc3aefd4643..3e12a6a8ad99 100644
->>>>>>>> --- a/drivers/mmc/host/sdhci-acpi.c
->>>>>>>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>>>>>>> @@ -36,6 +36,7 @@
->>>>>>>>     #include <linux/pm.h>
->>>>>>>>     #include <linux/pm_runtime.h>
->>>>>>>>     #include <linux/delay.h>
->>>>>>>> +#include <linux/dmi.h>
->>>>>>>>       #include <linux/mmc/host.h>
->>>>>>>>     #include <linux/mmc/pm.h>
->>>>>>>> @@ -83,6 +84,11 @@ struct sdhci_acpi_host {
->>>>>>>>         bool                use_runtime_pm;
->>>>>>>>     };
->>>>>>>>     +struct dmi_probe_blacklist_data {
->>>>>>>> +    const char *hid_uid;
->>>>>>>> +    const char * const *bios_dates;
->>>>>>>> +};
->>>>>>>> +
->>>>>>>>     static char *blacklist;
->>>>>>>>       static bool sdhci_acpi_compare_hid_uid(const char *match,
->>>>>>>> const char
->>>>>>>> *hid,
->>>>>>>> @@ -116,6 +122,34 @@ static bool sdhci_acpi_compare_hid_uid(const char
->>>>>>>> *match, const char *hid,
->>>>>>>>         return false;
->>>>>>>>     }
->>>>>>>>     +static const char *sdhci_acpi_get_dmi_blacklist(const struct
->>>>>>>> dmi_system_id *bl)
->>>>>>>> +{
->>>>>>>> +    const struct dmi_system_id *dmi_id;
->>>>>>>> +    const struct dmi_probe_blacklist_data *bl_data;
->>>>>>>> +    const char *bios_date;
->>>>>>>> +    int i;
->>>>>>>> +
->>>>>>>> +    dmi_id = dmi_first_match(bl);
->>>>>>>> +    if (!dmi_id)
->>>>>>>> +        return NULL;
->>>>>>>> +
->>>>>>>> +    bl_data = dmi_id->driver_data;
->>>>>>>> +
->>>>>>>> +    if (!bl_data->bios_dates)
->>>>>>>> +        return bl_data->hid_uid;
->>>>>>>> +
->>>>>>>> +    bios_date = dmi_get_system_info(DMI_BIOS_DATE);
->>>>>>>> +    if (!bios_date)
->>>>>>>> +        return NULL;
->>>>>>>> +
->>>>>>>> +    for (i = 0; bl_data->bios_dates[i]; i++) {
->>>>>>>> +        if (strcmp(bl_data->bios_dates[i], bios_date) == 0)
->>>>>>>> +            return bl_data->hid_uid;
->>>>>>>> +    }
->>>>>>>> +
->>>>>>>> +    return NULL;
->>>>>>>> +}
->>>>>>>> +
->>>>>>>>     static inline bool sdhci_acpi_flag(struct sdhci_acpi_host *c,
->>>>>>>> unsigned
->>>>>>>> int flag)
->>>>>>>>     {
->>>>>>>>         return c->slot && (c->slot->flags & flag);
->>>>>>>> @@ -391,6 +425,33 @@ static const struct acpi_device_id
->>>>>>>> sdhci_acpi_ids[] = {
->>>>>>>>     };
->>>>>>>>     MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
->>>>>>>>     +const struct dmi_probe_blacklist_data gpd_win_bl_data = {
->>>>>>>> +    .hid_uid = "80860F14:2",
->>>>>>>> +    .bios_dates = (const char * const []){
->>>>>>>> +        "10/25/2016", "11/18/2016", "02/21/2017", NULL },
->>>>>>>> +};
->>>>>>>> +
->>>>>>>> +static const struct dmi_system_id dmi_probe_blacklist[] = {
->>>>>>>> +    {
->>>>>>>> +        /*
->>>>>>>> +         * Match for the GPDwin which unfortunately uses somewhat
->>>>>>>> +         * generic dmi strings, which is why we test for 4 strings
->>>>>>>> +         * and a known BIOS date.
->>>>>>>> +         * Comparing against 29 other byt/cht boards, board_name is
->>>>>>>> +         * unique to the GPDwin, where as only 2 other boards have the
->>>>>>>> +         * same board_serial and 3 others have the same board_vendor
->>>>>>>> +         */
->>>>>>>> +        .driver_data = (void *)&gpd_win_bl_data,
->>>>>>>> +        .matches = {
->>>>>>>> +            DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
->>>>>>>> +            DMI_MATCH(DMI_BOARD_NAME, "Default string"),
->>>>>>>> +            DMI_MATCH(DMI_BOARD_SERIAL, "Default string"),
->>>>>>>> +            DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
->>>>>>>> +        },
->>>>>>>
->>>>>>> To me this is matching by accident rather than by design, which is not
->>>>>>> acceptable.
->>>>>>
->>>>>> I already explained why we need this dmi quirk in your reply of v3,
->>>>>> it would have been nice if you replied there.
->>>>>
->>>>> I understand what you are saying, but that doesn't make the patch
->>>>> acceptable, so I cannot Ack it.
->>>>>
->>>>>>
->>>>>> As I already mentioned when I first submitted this patch-set this
->>>>>> patch-set fixes a regression. When I first installed Linux on this
->>>>>> system, the wifi just worked, until this commit got merged:
->>>>>>
->>>>>> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit?id=db52d4f8a4bde36263a7cc9d46ff20b243562ac9
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>> So that gives us 3 options:
->>>>>
->>>>> In the absence of another solution, the options are:
->>>>>      1. get the BIOS fixed
->>>>
->>>> a. That is not going to happen (I've already contacted the vendor).
->>>> b. Even if that were to happen, almost no-one will update the BIOS, so
->>>>      this does not help
->>>>
->>>>>      2. use the module option to blacklist the bad device
->>>>
->>>> Needing to use a module-option, where before none was necessary
->>>> is still a regression. I've personally had a commit of mine
->>>> reverted by Torvalds himself because I changed something which
->>>> would require the use a of a kernel cmdline option in certain
->>>> corner-cases where no cmdline option was needed before.
->>>>
->>>> Basically your solutions boil down to my:
->>>>
->>>>>> 2) Do nothing, live with the regression.
->>>>
->>>>>> 2. is what you seem to be advocating, but since the kernel has a clear
->>>>>> no regressions policy that is not an option either
->>>>
->>>> So your advocating we just live with the REGRESSION, because that
->>>> is what this is a REGRESSION and nothing else. That is simply
->>>> not acceptable (and clearly against kernel policy).
->>>>
->>>> I've compared DMI data to 29 other boards using the same chipset
->>>> to prove the DMI match is unique, then since you are still worried
->>>> about the match being too generic I also added BIOS date checking,
->>>> which certainly makes the match more then unique enough, something to
->>>> which you've not even responded...
->>>>
->>>> In the mean time users have been suffering from this regression
->>>> for 3 months now:
->>>> https://bbs.archlinux.org/viewtopic.php?id=224086
->>>>
->>>> I've no words for this, other then that your blocking of fixing
->>>> this REGRESSION, without you even addressing my factual arguments
->>>> why this match is not too generic, vs you're feeling that it is
->>>> too generic, simply is unacceptable.
->>>
->>> To be clear, I understand that needing DMI quirks in the first place
->>> is undesirable, and that this vendor using way too generic strings
->>> is adding extra ugliness to the ugliness of needing DMI quirks in
->>> the first place, so I understand your reluctance here.
->>>
->>> But to me making this "just" work for users trumps my desire to
->>> avoid ugliness like this. I really want to see Linux used by as much
->>> users as possible and in order for that to happen we need to have
->>> Ubunutu / Fedora just work with their hardware, if users first need
->>> to google a kernel cmdline option, then they will just stop using
->>> Linux.
->>
->> Perhaps there is something else we can match on, like the presence of the
->> PCIe wifi device since we only use SDIO for wifi.  Can you send a copy of
->> the ACPI DSDT table, or an acpidump file.  Also lspci output.
-> 
-> Full acpidump is here:
-> 
-> https://fedorapeople.org/~jwrdegoede/GPDwin.acpidump.20161025
-> 
-> dsdt.dsl:
-> 
-> https://fedorapeople.org/~jwrdegoede/GPD-win/dsdt.dsl.orig
-> 
-> lspci -nn:
-> 
-> 00:00.0 Host bridge [0600]: Intel Corporation Atom/Celeron/Pentium Processor
-> x5-E8000/J3xxx/N3xxx Series SoC Transaction Register [8086:2280] (rev 20)
-> 00:02.0 VGA compatible controller [0300]: Intel Corporation
-> Atom/Celeron/Pentium Processor x5-E8000/J3xxx/N3xxx Series PCI Configuration
-> Registers [8086:22b0] (rev 20)
-> 00:0b.0 Signal processing controller [1180]: Intel Corporation
-> Atom/Celeron/Pentium Processor x5-E8000/J3xxx/N3xxx Series Power Management
-> Controller [8086:22dc] (rev 20)
-> 00:14.0 USB controller [0c03]: Intel Corporation Atom/Celeron/Pentium
-> Processor x5-E8000/J3xxx/N3xxx Series USB xHCI Controller [8086:22b5] (rev 20)
-> 00:16.0 USB controller [0c03]: Intel Corporation Device [8086:22b7] (rev 20)
-> 00:1a.0 Encryption controller [1080]: Intel Corporation Atom/Celeron/Pentium
-> Processor x5-E8000/J3xxx/N3xxx Series Trusted Execution Engine [8086:2298]
-> (rev 20)
-> 00:1c.0 PCI bridge [0604]: Intel Corporation Atom/Celeron/Pentium Processor
-> x5-E8000/J3xxx/N3xxx Series PCI Express Port #1 [8086:22c8] (rev 20)
-> 00:1f.0 ISA bridge [0601]: Intel Corporation Atom/Celeron/Pentium Processor
-> x5-E8000/J3xxx/N3xxx Series PCU [8086:229c] (rev 20)
-> 01:00.0 Network controller [0280]: Broadcom Limited BCM4356 802.11ac
-> Wireless Network Adapter [14e4:43ec] (rev 02)
-> 
-> Note that one of the issues with matching on something else
-> is probe ordering, so matching on say a pci device is tricky,
-> what if the pci-bus is not yet (fully) enumerated ?
+Hi Frank,
 
-The PCI bus is first enumerated when the subsystems are initialized
-which is before driver initialization.
+Am Montag, 19. Juni 2017, 18:34:27 CEST schrieb Frank Wang:
+> On 2017/6/18 2:12, Heiko Stuebner wrote:
+> > Am Donnerstag, 15. Juni 2017, 15:16:15 CEST schrieb Frank Wang:
+> >> Due to some tiny differences between RK3228 and RK3229, this patch
+> >> adds a basic dtsi file which includes a new CPU opp table and PSCI
+> >> brought up support for RK3229.
+> >> 
+> >> Signed-off-by: Frank Wang <frank.wang@rock-chips.com>
 
-Does this work?
+[...]
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index cf66a3db71b8..ac678e9fb19a 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -45,6 +45,7 @@
- #include <asm/cpu_device_id.h>
- #include <asm/intel-family.h>
- #include <asm/iosf_mbi.h>
-+#include <linux/pci.h>
- #endif
- 
- #include "sdhci.h"
-@@ -134,6 +135,16 @@ static bool sdhci_acpi_byt(void)
- 	return x86_match_cpu(byt);
- }
- 
-+static bool sdhci_acpi_cht(void)
-+{
-+	static const struct x86_cpu_id cht[] = {
-+		{ X86_VENDOR_INTEL, 6, INTEL_FAM6_ATOM_AIRMONT },
-+		{}
-+	};
-+
-+	return x86_match_cpu(cht);
-+}
-+
- #define BYT_IOSF_SCCEP			0x63
- #define BYT_IOSF_OCP_NETCTRL0		0x1078
- #define BYT_IOSF_OCP_TIMEOUT_BASE	GENMASK(10, 8)
-@@ -178,6 +189,45 @@ static bool sdhci_acpi_byt_defer(struct device *dev)
- 	return false;
- }
- 
-+static bool sdhci_acpi_cht_pci_wifi(unsigned int vendor, unsigned int device,
-+				    unsigned int slot, unsigned int parent_slot)
-+{
-+	struct pci_dev *dev, *parent, *from = NULL;
-+
-+	while (1) {
-+		dev = pci_get_device(vendor, device, from);
-+		pci_dev_put(from);
-+		if (!dev)
-+			break;
-+		parent = pci_upstream_bridge(dev);
-+		if (ACPI_COMPANION(&dev->dev) && PCI_SLOT(dev->devfn) == slot &&
-+		    parent && PCI_SLOT(parent->devfn) == parent_slot &&
-+		    !pci_upstream_bridge(parent)) {
-+			pci_dev_put(dev);
-+			return true;
-+		}
-+		from = dev;
-+	}
-+
-+	return false;
-+}
-+
-+/*
-+ * GPDwin uses PCI wifi which conflicts with SDIO's use of
-+ * acpi_device_fix_up_power() on child device nodes. Identifying GPDwin is
-+ * problematic, but since SDIO is only used for wifi, the presence of the PCI
-+ * wifi card in the expected slot with an ACPI companion node, is used to
-+ * indicate that acpi_device_fix_up_power() should be avoided.
-+ */
-+static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
-+						   const char *uid)
-+{
-+	return sdhci_acpi_cht() &&
-+	       !strcmp(hid, "80860F14") &&
-+	       !strcmp(uid, "2") &&
-+	       sdhci_acpi_cht_pci_wifi(0x14e4, 0x43ec, 0, 28);
-+}
-+
- #else
- 
- static inline void sdhci_acpi_byt_setting(struct device *dev)
-@@ -189,6 +239,12 @@ static inline bool sdhci_acpi_byt_defer(struct device *dev)
- 	return false;
- }
- 
-+static inline bool sdhci_acpi_no_fixup_child_power(const char *hid,
-+						   const char *uid)
-+{
-+	return false;
-+}
-+
- #endif
- 
- static int bxt_get_cd(struct mmc_host *mmc)
-@@ -389,18 +445,20 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (acpi_bus_get_device(handle, &device))
- 		return -ENODEV;
- 
-+	hid = acpi_device_hid(device);
-+	uid = device->pnp.unique_id;
-+
- 	/* Power on the SDHCI controller and its children */
- 	acpi_device_fix_up_power(device);
--	list_for_each_entry(child, &device->children, node)
--		if (child->status.present && child->status.enabled)
--			acpi_device_fix_up_power(child);
-+	if (!sdhci_acpi_no_fixup_child_power(hid, uid)) {
-+		list_for_each_entry(child, &device->children, node)
-+			if (child->status.present && child->status.enabled)
-+				acpi_device_fix_up_power(child);
-+	}
- 
- 	if (sdhci_acpi_byt_defer(dev))
- 		return -EPROBE_DEFER;
- 
--	hid = acpi_device_hid(device);
--	uid = device->pnp.unique_id;
--
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem)
- 		return -ENOMEM;
+> >> +	psci {
+> >> +		compatible = "arm,psci-1.0", "arm,psci-0.2";
+> >> +		method = "smc";
+> >> +	};
+> >> +};
+> >> +
+> >> +&cpu0 {
+> >> +	enable-method = "psci";
+> >> +};
+> > 
+> > Hmm, I don't really understand this.
+> > What method of core-bringup does the rk3228 use? In the current
+> > rk322x.dtsi there is no enable-method at all defined.
+> 
+> For non-security, the same with rk3036 SoC, we use rk3036-smp method to
+> bring-up cores, and for security, we use arm-psci method.
+> As security become more and more important and required, we would prefer
+> using arm-psci method, and it is also an easy way to use.
+> 
+> > So is the rk3228 firmware using a different method than the rk3229?
+> 
+> No, they are the same. How about I move these changes to rk322x.dtsi?
+
+yep, that is what I was getting at with my question ;-)
+
+
+> > And out of curiosity as this is a arm32 without atf, is the psci
+> > implementation (for uboot?) you're using available somewhere?
+> 
+> Ah, it is included in op-tee :-)
+
+Is that super secret or will this be part of the official op-tee [0]
+at some point (Similar to the ATF stuff on arm64)?
+
+
+Heiko
+
+[0] https://github.com/OP-TEE/optee_os/tree/master/core/arch/arm
