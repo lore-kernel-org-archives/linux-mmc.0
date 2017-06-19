@@ -1,51 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH][mmc-next][RESEND] mmc: sdhci-pci: make guid
- intel_dsm_guid static
-Date: Mon, 19 Jun 2017 13:01:38 +0200
-Message-ID: <CAPDyKFo9x8J=gbeVsbRNhNUd48htrjtgV8NEmv83BLDVmMN1Lg@mail.gmail.com>
-References: <20170619105521.19071-1-colin.king@canonical.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 2/6 v3] mmc: debugfs: No blocklayer = no card status and extcsd
+Date: Mon, 19 Jun 2017 13:14:46 +0200
+Message-ID: <CACRpkdb17Cm-bS8mbHRfqZtwJL7MJUp6mNiiziUYtJ4WMjVE4w@mail.gmail.com>
+References: <20170608085403.11795-1-linus.walleij@linaro.org>
+ <20170608085403.11795-3-linus.walleij@linaro.org> <CAPDyKFqbS0wLqQiPVPviPZ7o9WsGtQ2=46+e4NY_=MF2Gg6nDA@mail.gmail.com>
+ <CACRpkdZR1rkuJpkfcYSF32kY9gp4DrBva9Zyr1fhUK-n=_wzeg@mail.gmail.com> <CAPDyKFpan9gyMkgsUK4rihJn79bPyL49s4JN_U_sGgcnLvyyQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170619105521.19071-1-colin.king@canonical.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Colin King <colin.king@canonical.com>
-Cc: Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f49.google.com ([209.85.214.49]:38855 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753711AbdFSLOs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2017 07:14:48 -0400
+Received: by mail-it0-f49.google.com with SMTP id b205so41427369itg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2017 04:14:47 -0700 (PDT)
+In-Reply-To: <CAPDyKFpan9gyMkgsUK4rihJn79bPyL49s4JN_U_sGgcnLvyyQw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 19 June 2017 at 12:55, Colin King <colin.king@canonical.com> wrote:
-> From: Colin Ian King <colin.king@canonical.com>
+On Mon, Jun 19, 2017 at 12:04 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 19 June 2017 at 11:25, Linus Walleij <linus.walleij@linaro.org> wrote:
 
-Both me and Adrian have acked this, so it's fine to pick up by Christoph.
+>> This is not really related, since I have all the debugfs files for the
+>> block layer as static functions in this patch, i.e. if the block layer
+>> is inserted, the debugfs files come up.
+>
+> If that would be the case, the I am fine. But, I am not sure. See comment below.
+>
+>> On a broader note, AFAIK it is already impossible to insert the block
+>> module after the core module (if it was selected as "m" at compile time),
+>> as the block module must be inserted first, or the core module cannot
+>> resolve the symbols it needs from the block module.
+>
+> No, this is wrong. It's actually the opposite.
+>
+> Currently there are no dependency from the core module on the block
+> module. However, the block module uses exported functions from the
+> core module, so the dependency is the opposite.
 
-Kind regards
-Uffe
+Aha, I see how you mean.
 
->
-> The guid intel_dsm_guid does not need to be in global scope, so make
-> it static.
->
-> Cleans up sparse warning:
-> "symbol 'intel_dsm_guid' was not declared. Should it be static?"
->
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 3c02c5b394d6..f1d8385d91f0 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -404,7 +404,7 @@ struct intel_host {
->         bool    d3_retune;
->  };
->
-> -const guid_t intel_dsm_guid =
-> +static const guid_t intel_dsm_guid =
->         GUID_INIT(0xF6C13EA5, 0x65CD, 0x461F,
->                   0xAB, 0x7A, 0x29, 0xF7, 0xE8, 0xD5, 0xBD, 0x61);
->
-> --
-> 2.11.0
->
+> This is exactly what I was trying to say, we must not create a
+> circular dependency of the modules.
+
+I think modprobe resolves circular dependencies by inserting
+both modules at the same time, actually. insmod will not work.
+
+> To solve this, you must move the entire creation of the debugfs nodes
+> to be done when the block device driver probes, in other words from
+> mmc_blk_probe().
+
+Yes and this is done in patch 6/6.
+
+If you think it is dangerous to have this as an intermediary step, we
+can just squash the patches.
+
+Yours,
+Linus Walleij
