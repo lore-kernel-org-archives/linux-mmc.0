@@ -1,78 +1,38 @@
-From: Tomas Winkler <tomasw@gmail.com>
-Subject: Re: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
-Date: Tue, 20 Jun 2017 00:28:48 +0300
-Message-ID: <CA+i0qc6fieNtNW2GD3=PokjyAHMo4GF5jo7ZXWWEe-NYSgtLLg@mail.gmail.com>
-References: <20170615121259.8281-1-linus.walleij@linaro.org>
- <20170615121259.8281-5-linus.walleij@linaro.org> <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
+From: INFO <mguerrero@huv.gov.co>
+Subject: Re: Reply Urgent
+Date: Mon, 19 Jun 2017 14:39:18 -0500
+Message-ID: <20170619143918.2132176qvnaamicm__10828.3828049482$1497917333$gmane$org@correo.huv.gov.co>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <BY2PR0401MB0901F4F7AF2A1137199E872BFCC10@BY2PR0401MB0901.namprd04.prod.outlook.com>
-Sender: linux-block-owner@vger.kernel.org
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Tomas Winkler <tomas.winkler@intel.com>
+Content-Type: text/plain;
+ charset=ISO-8859-1;
+ DelSp="Yes";
+ format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from correo.huv.gov.co ([190.6.160.84]:4695 "EHLO correo.huv.gov.co"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753205AbdFTAIX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Jun 2017 20:08:23 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 16, 2017 at 10:22 AM, Avri Altman <Avri.Altman@wdc.com> wrote:
-> Hi,
->
->> -----Original Message-----
->> From: Linus Walleij [mailto:linus.walleij@linaro.org]
->> Sent: Thursday, June 15, 2017 3:13 PM
->> To: linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: linux-block@vger.kernel.org; Jens Axboe <axboe@kernel.dk>; Christoph
->> Hellwig <hch@lst.de>; Arnd Bergmann <arnd@arndb.de>; Bartlomiej
->> Zolnierkiewicz <b.zolnierkie@samsung.com>; Paolo Valente
->> <paolo.valente@linaro.org>; Avri Altman <Avri.Altman@wdc.com>; Adrian
->> Hunter <adrian.hunter@intel.com>; Linus Walleij <linus.walleij@linaro.org>
->> Subject: [PATCH 4/5] RFC: mmc: block: Convert RPMB to a character device
->>
->> The RPMB partition on the eMMC devices is a special area used for storing
->> cryptographically safe information signed by a special secret key. To write
->> and read records from this special area, authentication is needed.
->>
->> The RPMB area is *only* and *exclusively* accessed using ioctl():s from
->> userspace. It is not really a block device, as blocks cannot be read or written
->> from the device, also the signed chunks that can be stored on the RPMB are
->> actually
->> 256 bytes, not 512 making a block device a real bad fit.
->>
->> Currently the RPMB partition spawns a separate block device named
->> /dev/mmcblkNrpmb for each device with an RPMB partition, including the
->> creation of a block queue with its own kernel thread and all overhead
->> associated with this. On the Ux500
->> HREFv60 platform, for example, the two eMMCs means that two block
->> queues with separate threads are created for no use whatsoever.
->>
->> I have concluded that this block device design for RPMB is actually pretty
->> wrong. The RPMB area should have been designed to be accessed from
->> /dev/mmcblkN directly, using ioctl()s on the main block device. It is however
->> way too late to change that, since userspace expects to open an RPMB
->> device in /dev/mmcblkNrpmb and we cannot break userspace.
->>
-> Not sure how much you are bound by this.
-> Previous attempts, adopting a pragmatic approach - just added another ioctl number, and used /dev/mmcblkN.
-> Moreover, a designated ioctl allows to address more cleanly the rpmb-specific needs, that are somehow awkward using multi_cmd.
-> Within the context of an RFC, would be interesting to know if someone even used  /dev/mmcblkNrpmb?
+Hello,
 
-Good question, need to look for TrustyOS and OP-TEE.
+How are you doing? I have been sent to inform you that, We have an  
+inheritance of a deceased client with your surname. Contact Mr Andrew  
+Bailey Reply Email To: myinfand@gmail.com with your "Full Names" for  
+more info.  Thanks for your understanding.
 
->
->> Some discussion points:
->>
->> I am aware of Tomas Winklers attempts to make RPMB handling into its own
->> subsystem. I have no such ambitions whatsoever, I am only trying to sensibly
->> accomodate what we already have and handle our RPMB in a way that is not
->> littering the place with weirdo block devices.
->
-> I think that the key benefit of Tomas's approach, is being so comprehensive.
-> Thus enables pmb access of embedded block devices - mmc as well as other.
+Reply ASAP thank you.
 
-My approach came from actual use case, but we cannot probably break
-already working software.
+Melissa.
+----------------------------------
+Correo Corporativo Hospital Universitario del Valle E.S.E
+*******************************************************************************
 
-> Cheers,
-> Avri
->
-Thanks
-Tomas
+"Estamos re-dimensionandonos para crecer!"
+
+******************************************************************************
+
+
