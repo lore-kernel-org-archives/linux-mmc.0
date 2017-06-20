@@ -1,132 +1,64 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
-Date: Tue, 20 Jun 2017 12:04:44 +0300
-Message-ID: <453a9fbc-c827-367e-f953-fbc9d6457375@intel.com>
-References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
- <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com>
- <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
- <AM4PR0401MB23244CD809159EF1CD897160901F0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <8009319e-356e-0b69-a30a-31b536f3643a@intel.com>
- <AM4PR0401MB2324C8B330EB320BFB35443590C00@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <AM4PR0401MB232449B222AA0A9FA7603A9B90C50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [EXT] Re: [PATCH v2] mmc: core: add mmc-card hardware reset
+ enable support
+Date: Tue, 20 Jun 2017 11:45:16 +0200
+Message-ID: <CACRpkdb92scfO=tghucfC3RqQpi9K6YSuavte_b-AxH4hS87rQ@mail.gmail.com>
+References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com>
+ <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
+ <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
+ <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com> <6b92d0af00024549a0d22dda039780dd@bowex36d.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:44148 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751041AbdFTJK4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 20 Jun 2017 05:10:56 -0400
-In-Reply-To: <AM4PR0401MB232449B222AA0A9FA7603A9B90C50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6b92d0af00024549a0d22dda039780dd@bowex36d.micron.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Cc: Richard Leitner <richard.leitner@skidata.com>, Ulf Hansson <ulf.hansson@linaro.org>, Bart Van Assche <bart.vanassche@sandisk.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 20/06/17 11:01, Bough Chen wrote:
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Bough Chen
->> Sent: Thursday, June 15, 2017 7:50 PM
->> To: Adrian Hunter <adrian.hunter@intel.com>; Linus Walleij
->> <linus.walleij@linaro.org>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
->> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>; Mateusz
->> Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
->> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
->> Dorfman Konstantin <kdorfman@codeaurora.org>; David Griego
->> <david.griego@linaro.org>; Sahitya Tummala <stummala@codeaurora.org>;
->> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
->> <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-chips.com>
->> Subject: RE: [PATCH V2 00/22] mmc: Add Command Queue support
->>
->>> -----Original Message-----
->>> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->>> Sent: Thursday, June 15, 2017 7:38 PM
->>> To: Bough Chen <haibo.chen@nxp.com>; Linus Walleij
->>> <linus.walleij@linaro.org>
->>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
->>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>;
->> Mateusz
->>> Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->>> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
->>> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
->>> Dorfman Konstantin <kdorfman@codeaurora.org>; David Griego
->>> <david.griego@linaro.org>; Sahitya Tummala <stummala@codeaurora.org>;
->>> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
->>> <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-chips.com>
->>> Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
->>>
->>> On 24/04/17 12:14, Bough Chen wrote:
->>>>> -----Original Message-----
->>>>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->>>>> owner@vger.kernel.org] On Behalf Of Linus Walleij
->>>>> Sent: Monday, April 24, 2017 4:13 PM
->>>>> To: Adrian Hunter <adrian.hunter@intel.com>
->>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
->>>>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>;
->>>>> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->>>>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
->>>>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
->>>>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
->>>>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
->>>>> <kdorfman@codeaurora.org>; David Griego <david.griego@linaro.org>;
->>>>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
->>>>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
->>>>> Shawn Lin <shawn.lin@rock-chips.com>
->>>>> Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
->>>>>
->>>>> On Sat, Apr 22, 2017 at 9:45 AM, Adrian Hunter
->>>>> <adrian.hunter@intel.com>
->>>>> wrote:
->>>>>
->>>>>> Ulf and Linus have been doing a great job of keeping this moving,
->>>>>> but it would be nice to see some others taking more interest.  The
->>>>>> first command queue patches were posted in February 2014, over 3
->>>>>> years
->>> ago!
->>>>>
->>>>> I agree.
->>>>>
->>>>> I think both me & Ulf would also be doing more work if we had
->>>>> easily accessible hardware with upstream host controller support
->>>>> for native
->>> command queueing.
->>>>> (Hm, was just reading in libata about NCQ ...
->>>>> déja vu ... https://en.wikipedia.org/wiki/Native_Command_Queuing)
->>>>>
->>>>> Do we have some hardware with host-backed command queueing out
->>> there
->>>>> that is easily obtained and has upstream support for the basic system?
->>>>>
->>>>
->>>> The coming i.MX8 support hardware CMDQ, I will have a try when I get
->>>> one
->>> on May or June.
->>>
->>> I have sent updated patches.  Will you have a chance to test hardware CMDQ?
->>
->> Yes, I will try to apply these patches on our local 4.9 branch.  Will give you the
->> test result.
->>
-> 
-> Hi Adrian,
-> 
-> i.MX8 still not upstream, and just work on our local 4.9 branch, to test your branch, I need to cherry pick
-> some mmc patches and block layer patches, I'm doing this now, but need some time.
+Hi Luca,
 
-Thanks for the update.  I realize backporting anything related to mmc block
-is now a big task.
+thanks for joining!
 
-> 
-> 
->> Best Regards,
->> Haibo Chen
->>   칻 & ~ &   +-  ݶ  w  ˛   m b  f ȧ   ܨ}   Ơz &j:+v        zZ+  +zf   h   ~    i   z  w   ?
->> & )ߢf
+On Wed, Jun 14, 2017 at 6:12 PM, Luca Porzio (lporzio)
+<lporzio@micron.com> wrote:
 
+> This behavior is not Micron specific but instead it is enforced by the Jedec
+> Specification. All eMMC must have HW reset disabled by default.
+
+That's very good to know.
+
+> This specification (as Ulf correctly hinted) originated from badly connected
+> HW Reset pins which caused unnecessary eMMC reset glitches.
+> Disabling this feature is a good option to contain glitches and avoid
+> system level bugs.
+
+Ah, makes sense.
+
+> IMHO mmc-util is where the patch really stands: the enabling is OTP,
+> the programmer have to use mmc-util only once and the kernel
+> will behave accordingly.
+
+So we should not add it to the device tree.
+
+> Any platform vendor must check that the HW Reset pin is actually
+> Connected BEFORE enabling this feature otherwise the system may be
+> unstable. A DT Binding may be dangerous if this condition is not met
+> as well as the code execution at each MMC init is honestly redundant
+> for an OTP location of the extCSD.
+
+I agree. So the device should be configured during production, or
+a user who know exactly what they are doing may reconfigure it
+using the mmc-utils.
+
+Thus the kernel should just read what the device says and stay with
+that, no DT props or anything.
+
+This makes a lot of sense.
+
+When say ethernet devices need MAC addresses written to their OTP
+we do not put that into the device tree to be programmed either, we assume
+production tools to do that job.
+
+Yours,
+Linus Walleij
