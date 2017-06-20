@@ -1,89 +1,115 @@
-From: Andrea Adami <andrea.adami@gmail.com>
-Subject: Re: [PATCH v3 1/9] mtd: sharpslpart: add sharpslpart MTD partition parser
-Date: Tue, 20 Jun 2017 10:56:32 +0200
-Message-ID: <CAAQYJAuiMd5mViL76x6qwUw_VxSvMmUXbwMTvwmnO+rnifgSzw@mail.gmail.com>
-References: <1496270458-6479-1-git-send-email-andrea.adami@gmail.com>
- <1496270458-6479-2-git-send-email-andrea.adami@gmail.com> <20170609014240.GM102137@google.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: Rebasing mmc/next
+Date: Tue, 20 Jun 2017 11:06:15 +0200
+Message-ID: <CAMuHMdWikrGTaEVWDdpgAN9+DEHXOYUZdtZgssRLDTWsyxa-fw@mail.gmail.com>
+References: <CAMuHMdW=aasYmZz-z+BgT0Qoco6DTyQxN3G1wiWVPETsbkRZTQ@mail.gmail.com>
+ <CAPDyKFpuBJCArAHUL2i=zDL=-Bq908eDJ2_mRy7O=_4bJj2_dw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170609014240.GM102137@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Brian Norris <computersforpeace@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpuBJCArAHUL2i=zDL=-Bq908eDJ2_mRy7O=_4bJj2_dw@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 9, 2017 at 3:42 AM, Brian Norris
-<computersforpeace@gmail.com> wrote:
-> Oh, one more thing:
->
-> On Thu, Jun 01, 2017 at 12:40:50AM +0200, Andrea Adami wrote:
->> diff --git a/drivers/mtd/sharpslpart.c b/drivers/mtd/sharpslpart.c
->> new file mode 100644
->> index 0000000..40aebe9
->> --- /dev/null
->> +++ b/drivers/mtd/sharpslpart.c
->> @@ -0,0 +1,132 @@
->> +/*
->> + * MTD partition parser for NAND flash on Sharp SL Series
->> + *
->> + * Copyright (C) 2017 Andrea Adami <andrea.adami@gmail.com>
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License as published by
->> + * the Free Software Foundation; either version 2 of the License, or
->> + * (at your option) any later version.
->> + *
->> + * This program is distributed in the hope that it will be useful,
->> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> + * GNU General Public License for more details.
->> + *
->> + */
->> +
->> +#include <linux/kernel.h>
->> +#include <linux/slab.h>
->> +#include <linux/module.h>
->> +#include <linux/mtd/mtd.h>
->> +#include <linux/mtd/partitions.h>
->> +#include "sharpsl_ftl.h"
->> +
->> +/* factory defaults */
->> +#define SHARPSL_NAND_PARTS           3
->> +#define SHARPSL_FTL_PARTITION_SIZE   (7 * 1024 * 1024)
->> +#define PARAM_BLOCK_PARTITIONINFO1   0x00060000
->> +#define PARAM_BLOCK_PARTITIONINFO2   0x00064000
->> +
->> +#define BOOT_MAGIC                   be32_to_cpu(0x424f4f54)   /* BOOT */
->> +#define FSRO_MAGIC                   be32_to_cpu(0x4653524f)   /* FSRO */
->> +#define FSRW_MAGIC                   be32_to_cpu(0x46535257)   /* FSRW */
->
-> [...]
->
->> +struct sharpsl_nand_partitioninfo {
->> +     u32 start;
->> +     u32 end;
->
-> I was going to ignore this earlier, but I just noticed that you handle
-> endianness for the magic values above, so...
->
-> shouldn't you handle endianness for the start and end fields too?
->
->> +     u32 magic;
->> +     u32 reserved;
->> +};
-> [...]
->
-> Brian
+Hi Ulf,
 
-Brian,
-I have added a macro so to avoid to repeat le32_to_cpu() for each value.
-This seems even to work as intended...
+On Tue, Jun 20, 2017 at 10:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 20 June 2017 at 09:17, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>> It looks like you rebase mmc/next almost daily. Is there any specific reason
+>> for that?
+>
+> I don't do it daily, but often, yes. :-)
 
-Note that the magics are 'texts' so they appear as BE.
-Some more tests and I'll send v4 of the patch to your attention.
+A few years ago, I got bashed by Linus for rebasing the m68k "for-linus"
+branch on every -rc.
 
-Thanks in advance.
+>> I'm asking because I create a "renesas-drivers" tree on a regular basis
+>> (cfr. e.g. https://www.spinics.net/lists/linux-renesas-soc/msg15111.html).
+>> This tree is meant to ease development of platform support and drivers
+>> for Renesas ARM SoCs. It is created by merging (a) the for-next branches
+>> of various subsystem trees and (b) branches with driver code submitted
+>> or planned for submission to maintainers into the development branch of
+>> Simon Horman's renesas.git tree.
+>
+> If you are asking me to keep my next branch immutable, then please no,
+> I don't like to do that. Reason explained below.
 
+100% immutable is not needed.
 
-Andrea
+> I don't have a problem to share specific renesas mmc branches with
+> you, if that helps?
+
+Hmm, that would be more work on your side. Plus communication overhead.
+
+>> If for (b), people submit driver code based on mmc/next, it may start
+>> to conflict
+>> with subsequent mmc/next releases soon, requiring the submitter or me to
+>> rebase the code before including it in renesas-drivers.
+>>
+>> Most subsystem maintainers don't rebase their for-next branch, unless there's
+>> a very good reason for it (e.g. a serious breakage hindering bisection).
+>
+> I do it for a couple of reasons.
+>
+> First, sometimes I apply changes before people have provided enough
+> tested by tags, to instead allow the changes to be tested in
+> linux-next. This may lead to some situations when I need to re-base my
+> next branch.
+> *) Something breaks, then I need to drop the changes. Revert doesn't
+> play well here, especially if it's a series of changes.
+> **) Avoid breaking bisect.
+
+OK.
+
+> ***) I want to give people cred, adding peoples tested-by, reviewed-by
+> tags, after the changes have been queued on my next branch.
+
+I think you're about the only one who does that ;-)
+
+> Second, even if the changes queued on next has been thoroughly tested,
+> sometimes error reports still show up. I most cases I prefer to avoid
+> breaking bisect, which then leaves me in no other option, but
+> re-basing my branch (to either drop changes or amend them).
+>
+> I guess what I can do, is to host a pre-next branch, which serves as
+> my pre-integration branch, before I moves things to next. However,
+> this does put some more administrative work on me, so I would like to
+> avoid that.
+
+OK.
+
+> I am trying to understand the purpose of your renesas integration
+> tree, and why it's a problem for you to pick up my re-based branch?
+> Could you perhaps elaborate on this?
+
+The purpose is to make it easier for the upstream Renesas kernel team and
+associated testers to consume our work-in-progress.
+
+Hence I merge the for-next branches of selected subsystems, followed by
+topic branches with work-in-progress driver code.
+
+E.g. Simon had asked me to include
+git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
+topic/sdhi-gen3-dma-2017
+That branch was based on your mmc/next.
+
+But by the time I created the renesas-drivers release, mmc/next had been
+rebased.  Hence after merging the new mmc/next, I had to rebase his work:
+https://git.kernel.org/pub/scm/linux/kernel/git/geert/renesas-drivers.git/log/?h=topic/sdhi-gen3-dma-2017-rebased1
+
+I hope this explains our problem.
+
+Thanks!
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
