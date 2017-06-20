@@ -1,71 +1,54 @@
-From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH] mmc: host: sdhci-st: Handle return value of clk_prepare_enable
-Date: Tue, 20 Jun 2017 17:27:00 +0530
-Message-ID: <afbe2d9d649bc78992a72eda7124c093b3055047.1497957783.git.arvind.yadav.cs@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: patrice.chotard@st.com, adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-arm-kernel@lists.infradead.org, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] omap_hsmmc: Reduce max_segs
+Date: Tue, 20 Jun 2017 13:39:04 +0100
+Message-ID: <CAFbHwiSuAAophPr2tyHOq2iWrC1Uo2N+EOuvhiNcc9xERuvZZA@mail.gmail.com>
+References: <20170619093644.16054-1-willn@resin.io>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f68.google.com ([209.85.214.68]:34467 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751742AbdFTMjL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2017 08:39:11 -0400
+In-Reply-To: <20170619093644.16054-1-willn@resin.io>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-omap@vger.kernel.org
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Ravikumar Kattekola <rk@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>
 
-clk_prepare_enable() can fail here and we must check its return value.
+Just adding a few people to CC. I'd love to get some feedback as to
+whether this patch makes sense or not.
 
-Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
----
- drivers/mmc/host/sdhci-st.c | 26 ++++++++++++++++++++++----
- 1 file changed, 22 insertions(+), 4 deletions(-)
+Cheers,
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 68c36c9f..198b4ca 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -394,8 +394,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		goto err_of;
- 	}
- 
--	clk_prepare_enable(clk);
--	clk_prepare_enable(icnclk);
-+	ret = clk_prepare_enable(clk);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Failed to prepare clock\n");
-+		goto err_of;
-+	}
-+
-+	ret = clk_prepare_enable(icnclk);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Failed to prepare icn clock\n");
-+		goto err_icnclk;
-+	}
- 
- 	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
- 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-@@ -429,6 +438,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 
- err_out:
- 	clk_disable_unprepare(icnclk);
-+err_icnclk:
- 	clk_disable_unprepare(clk);
- err_of:
- 	sdhci_pltfm_free(pdev);
-@@ -487,9 +497,17 @@ static int sdhci_st_resume(struct device *dev)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	struct device_node *np = dev->of_node;
-+	int ret;
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
- 
--	clk_prepare_enable(pltfm_host->clk);
--	clk_prepare_enable(pdata->icnclk);
-+	ret = clk_prepare_enable(pdata->icnclk);
-+	if (ret) {
-+		clk_disable_unprepare(pltfm_host->clk);
-+		return ret;
-+	}
- 
- 	if (pdata->rstc)
- 		reset_control_deassert(pdata->rstc);
--- 
-1.9.1
+On Mon, Jun 19, 2017 at 10:36 AM, Will Newton <will.newton@gmail.com> wrote:
+> Reduce max_segs to a value that allows allocation of an entire
+> descriptor list within a single page. This avoids doing a
+> higher order GFP_ATOMIC allocation when setting up a transfer
+> which can potentially fail and lead to I/O failures.
+>
+> Signed-off-by: Will Newton <willn@resin.io>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 1438a72..d5f42d9 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2864,9 +2864,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>                         host->use_adma = true;
+>         }
+>
+> -       /* Since we do only SG emulation, we can have as many segs
+> -        * as we want. */
+> -       mmc->max_segs = 1024;
+> +       /* Set this to a value that allows allocating an entire descriptor
+> +          list within a page (zero order allocation). */
+> +       mmc->max_segs = 64;
+>
+>         mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+>         mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
+> --
+> 2.7.4
+>
