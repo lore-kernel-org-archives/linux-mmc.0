@@ -1,101 +1,108 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
- resume from deepest PM
-Date: Tue, 20 Jun 2017 10:39:36 +0300
-Message-ID: <6acdfd61-afb8-e0cf-b8d3-b2e81bd71569@intel.com>
-References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
- <20170616072929.3266-2-quentin.schulz@free-electrons.com>
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: [PATCH V2 00/22] mmc: Add Command Queue support
+Date: Tue, 20 Jun 2017 08:01:11 +0000
+Message-ID: <AM4PR0401MB232449B222AA0A9FA7603A9B90C50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
+ <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com>
+ <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
+ <AM4PR0401MB23244CD809159EF1CD897160901F0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+ <8009319e-356e-0b69-a30a-31b536f3643a@intel.com>
+ <AM4PR0401MB2324C8B330EB320BFB35443590C00@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:51784 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751998AbdFTHpp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 20 Jun 2017 03:45:45 -0400
-In-Reply-To: <20170616072929.3266-2-quentin.schulz@free-electrons.com>
+Received: from mail-he1eur01on0075.outbound.protection.outlook.com ([104.47.0.75]:6513
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750990AbdFTIBP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 20 Jun 2017 04:01:15 -0400
+In-Reply-To: <AM4PR0401MB2324C8B330EB320BFB35443590C00@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Quentin Schulz <quentin.schulz@free-electrons.com>, ludovic.desroches@microchip.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
+To: Bough Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 16/06/17 10:29, Quentin Schulz wrote:
-> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
-> SoC's SDHCI controller.
-> 
-> When resuming from deepest state, it is required to restore preset
-> registers as the registers are lost since VDD core has been shut down
-> when entering deepest state on the SAMA5D2. The clocks need to be
-> reconfigured as well.
-> 
-> The other registers and init process are taken care of by the SDHCI
-> core.
-> 
-> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
->  1 file changed, 32 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index fb8c6011f13d..300513fc1068 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->  }
->  
->  #ifdef CONFIG_PM
-
-Should be CONFIG_PM_SLEEP for suspend / resume callbacks.
-
-> +static int sdhci_at91_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = sdhci_suspend_host(host);
-> +
-> +	if (host->runtime_suspended)
-> +		return ret;
-
-Suspending while runtime suspended seems like a bad idea.  Have you
-considered just adding sdhci_at91_set_clks_presets() to
-sdhci_at91_runtime_resume()?
-
-> +
-> +	clk_disable_unprepare(priv->gck);
-> +	clk_disable_unprepare(priv->hclock);
-> +	clk_disable_unprepare(priv->mainck);
-> +
-> +	return ret;
-> +}
-> +
-> +static int sdhci_at91_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	int ret;
-> +
-> +	ret = sdhci_at91_set_clks_presets(dev);
-> +	if (ret)
-> +		return ret;
-> +
-> +	return sdhci_resume_host(host);
-> +}
-> +
->  static int sdhci_at91_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->  #endif /* CONFIG_PM */
->  
->  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> -				pm_runtime_force_resume)
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
->  	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
->  			   sdhci_at91_runtime_resume,
->  			   NULL)
-> 
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBCb3VnaCBDaGVuDQo+IFNlbnQ6IFRodXJzZGF5LCBKdW5lIDE1LCAyMDE3
+IDc6NTAgUE0NCj4gVG86IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsg
+TGludXMgV2FsbGVpag0KPiA8bGludXMud2FsbGVpakBsaW5hcm8ub3JnPg0KPiBDYzogVWxmIEhh
+bnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBsaW51eC1tbWMgPGxpbnV4LQ0KPiBtbWNA
+dmdlci5rZXJuZWwub3JnPjsgQWxleCBMZW1iZXJnIDxhbGV4LmxlbWJlcmdAc2FuZGlzay5jb20+
+OyBNYXRldXN6DQo+IE5vd2FrIDxtYXRldXN6Lm5vd2FrQGludGVsLmNvbT47IFl1bGl5IEl6cmFp
+bG92DQo+IDxZdWxpeS5JenJhaWxvdkBzYW5kaXNrLmNvbT47IEphZWhvb24gQ2h1bmcgPGpoODAu
+Y2h1bmdAc2Ftc3VuZy5jb20+Ow0KPiBEb25nIEFpc2hlbmcgPGRvbmdhczg2QGdtYWlsLmNvbT47
+IERhcyBBc3V0b3NoDQo+IDxhc3V0b3NoZEBjb2RlYXVyb3JhLm9yZz47IFpoYW5nZmVpIEdhbyA8
+emhhbmdmZWkuZ2FvQGdtYWlsLmNvbT47DQo+IERvcmZtYW4gS29uc3RhbnRpbiA8a2RvcmZtYW5A
+Y29kZWF1cm9yYS5vcmc+OyBEYXZpZCBHcmllZ28NCj4gPGRhdmlkLmdyaWVnb0BsaW5hcm8ub3Jn
+PjsgU2FoaXR5YSBUdW1tYWxhIDxzdHVtbWFsYUBjb2RlYXVyb3JhLm9yZz47DQo+IEhhcmphbmkg
+Uml0ZXNoIDxyaXRlc2hoQGNvZGVhdXJvcmEub3JnPjsgVmVudSBCeXJhdmFyYXN1DQo+IDx2Ynly
+YXZhcmFzdUBudmlkaWEuY29tPjsgU2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+
+DQo+IFN1YmplY3Q6IFJFOiBbUEFUQ0ggVjIgMDAvMjJdIG1tYzogQWRkIENvbW1hbmQgUXVldWUg
+c3VwcG9ydA0KPiANCj4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IEFk
+cmlhbiBIdW50ZXIgW21haWx0bzphZHJpYW4uaHVudGVyQGludGVsLmNvbV0NCj4gPiBTZW50OiBU
+aHVyc2RheSwgSnVuZSAxNSwgMjAxNyA3OjM4IFBNDQo+ID4gVG86IEJvdWdoIENoZW4gPGhhaWJv
+LmNoZW5AbnhwLmNvbT47IExpbnVzIFdhbGxlaWoNCj4gPiA8bGludXMud2FsbGVpakBsaW5hcm8u
+b3JnPg0KPiA+IENjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IGxpbnV4
+LW1tYyA8bGludXgtDQo+ID4gbW1jQHZnZXIua2VybmVsLm9yZz47IEFsZXggTGVtYmVyZyA8YWxl
+eC5sZW1iZXJnQHNhbmRpc2suY29tPjsNCj4gTWF0ZXVzeg0KPiA+IE5vd2FrIDxtYXRldXN6Lm5v
+d2FrQGludGVsLmNvbT47IFl1bGl5IEl6cmFpbG92DQo+ID4gPFl1bGl5Lkl6cmFpbG92QHNhbmRp
+c2suY29tPjsgSmFlaG9vbiBDaHVuZyA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT47DQo+ID4gRG9u
+ZyBBaXNoZW5nIDxkb25nYXM4NkBnbWFpbC5jb20+OyBEYXMgQXN1dG9zaA0KPiA+IDxhc3V0b3No
+ZEBjb2RlYXVyb3JhLm9yZz47IFpoYW5nZmVpIEdhbyA8emhhbmdmZWkuZ2FvQGdtYWlsLmNvbT47
+DQo+ID4gRG9yZm1hbiBLb25zdGFudGluIDxrZG9yZm1hbkBjb2RlYXVyb3JhLm9yZz47IERhdmlk
+IEdyaWVnbw0KPiA+IDxkYXZpZC5ncmllZ29AbGluYXJvLm9yZz47IFNhaGl0eWEgVHVtbWFsYSA8
+c3R1bW1hbGFAY29kZWF1cm9yYS5vcmc+Ow0KPiA+IEhhcmphbmkgUml0ZXNoIDxyaXRlc2hoQGNv
+ZGVhdXJvcmEub3JnPjsgVmVudSBCeXJhdmFyYXN1DQo+ID4gPHZieXJhdmFyYXN1QG52aWRpYS5j
+b20+OyBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4NCj4gPiBTdWJqZWN0OiBS
+ZTogW1BBVENIIFYyIDAwLzIyXSBtbWM6IEFkZCBDb21tYW5kIFF1ZXVlIHN1cHBvcnQNCj4gPg0K
+PiA+IE9uIDI0LzA0LzE3IDEyOjE0LCBCb3VnaCBDaGVuIHdyb3RlOg0KPiA+ID4+IC0tLS0tT3Jp
+Z2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPj4gRnJvbTogbGludXgtbW1jLW93bmVyQHZnZXIua2Vy
+bmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy0NCj4gPiA+PiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBMaW51cyBXYWxsZWlqDQo+ID4gPj4gU2VudDogTW9uZGF5LCBBcHJpbCAy
+NCwgMjAxNyA0OjEzIFBNDQo+ID4gPj4gVG86IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJA
+aW50ZWwuY29tPg0KPiA+ID4+IENjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9y
+Zz47IGxpbnV4LW1tYyA8bGludXgtDQo+ID4gPj4gbW1jQHZnZXIua2VybmVsLm9yZz47IEFsZXgg
+TGVtYmVyZyA8YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPjsNCj4gPiA+PiBNYXRldXN6IE5vd2Fr
+IDxtYXRldXN6Lm5vd2FrQGludGVsLmNvbT47IFl1bGl5IEl6cmFpbG92DQo+ID4gPj4gPFl1bGl5
+Lkl6cmFpbG92QHNhbmRpc2suY29tPjsgSmFlaG9vbiBDaHVuZw0KPiA+ID4+IDxqaDgwLmNodW5n
+QHNhbXN1bmcuY29tPjsgRG9uZyBBaXNoZW5nIDxkb25nYXM4NkBnbWFpbC5jb20+OyBEYXMNCj4g
+PiA+PiBBc3V0b3NoIDxhc3V0b3NoZEBjb2RlYXVyb3JhLm9yZz47IFpoYW5nZmVpIEdhbw0KPiA+
+ID4+IDx6aGFuZ2ZlaS5nYW9AZ21haWwuY29tPjsgRG9yZm1hbiBLb25zdGFudGluDQo+ID4gPj4g
+PGtkb3JmbWFuQGNvZGVhdXJvcmEub3JnPjsgRGF2aWQgR3JpZWdvIDxkYXZpZC5ncmllZ29AbGlu
+YXJvLm9yZz47DQo+ID4gPj4gU2FoaXR5YSBUdW1tYWxhIDxzdHVtbWFsYUBjb2RlYXVyb3JhLm9y
+Zz47IEhhcmphbmkgUml0ZXNoDQo+ID4gPj4gPHJpdGVzaGhAY29kZWF1cm9yYS5vcmc+OyBWZW51
+IEJ5cmF2YXJhc3UgPHZieXJhdmFyYXN1QG52aWRpYS5jb20+Ow0KPiA+ID4+IFNoYXduIExpbiA8
+c2hhd24ubGluQHJvY2stY2hpcHMuY29tPg0KPiA+ID4+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggVjIg
+MDAvMjJdIG1tYzogQWRkIENvbW1hbmQgUXVldWUgc3VwcG9ydA0KPiA+ID4+DQo+ID4gPj4gT24g
+U2F0LCBBcHIgMjIsIDIwMTcgYXQgOTo0NSBBTSwgQWRyaWFuIEh1bnRlcg0KPiA+ID4+IDxhZHJp
+YW4uaHVudGVyQGludGVsLmNvbT4NCj4gPiA+PiB3cm90ZToNCj4gPiA+Pg0KPiA+ID4+PiBVbGYg
+YW5kIExpbnVzIGhhdmUgYmVlbiBkb2luZyBhIGdyZWF0IGpvYiBvZiBrZWVwaW5nIHRoaXMgbW92
+aW5nLA0KPiA+ID4+PiBidXQgaXQgd291bGQgYmUgbmljZSB0byBzZWUgc29tZSBvdGhlcnMgdGFr
+aW5nIG1vcmUgaW50ZXJlc3QuICBUaGUNCj4gPiA+Pj4gZmlyc3QgY29tbWFuZCBxdWV1ZSBwYXRj
+aGVzIHdlcmUgcG9zdGVkIGluIEZlYnJ1YXJ5IDIwMTQsIG92ZXIgMw0KPiA+ID4+PiB5ZWFycw0K
+PiA+IGFnbyENCj4gPiA+Pg0KPiA+ID4+IEkgYWdyZWUuDQo+ID4gPj4NCj4gPiA+PiBJIHRoaW5r
+IGJvdGggbWUgJiBVbGYgd291bGQgYWxzbyBiZSBkb2luZyBtb3JlIHdvcmsgaWYgd2UgaGFkDQo+
+ID4gPj4gZWFzaWx5IGFjY2Vzc2libGUgaGFyZHdhcmUgd2l0aCB1cHN0cmVhbSBob3N0IGNvbnRy
+b2xsZXIgc3VwcG9ydA0KPiA+ID4+IGZvciBuYXRpdmUNCj4gPiBjb21tYW5kIHF1ZXVlaW5nLg0K
+PiA+ID4+IChIbSwgd2FzIGp1c3QgcmVhZGluZyBpbiBsaWJhdGEgYWJvdXQgTkNRIC4uLg0KPiA+
+ID4+IGTDqWphIHZ1IC4uLiBodHRwczovL2VuLndpa2lwZWRpYS5vcmcvd2lraS9OYXRpdmVfQ29t
+bWFuZF9RdWV1aW5nKQ0KPiA+ID4+DQo+ID4gPj4gRG8gd2UgaGF2ZSBzb21lIGhhcmR3YXJlIHdp
+dGggaG9zdC1iYWNrZWQgY29tbWFuZCBxdWV1ZWluZyBvdXQNCj4gPiB0aGVyZQ0KPiA+ID4+IHRo
+YXQgaXMgZWFzaWx5IG9idGFpbmVkIGFuZCBoYXMgdXBzdHJlYW0gc3VwcG9ydCBmb3IgdGhlIGJh
+c2ljIHN5c3RlbT8NCj4gPiA+Pg0KPiA+ID4NCj4gPiA+IFRoZSBjb21pbmcgaS5NWDggc3VwcG9y
+dCBoYXJkd2FyZSBDTURRLCBJIHdpbGwgaGF2ZSBhIHRyeSB3aGVuIEkgZ2V0DQo+ID4gPiBvbmUN
+Cj4gPiBvbiBNYXkgb3IgSnVuZS4NCj4gPg0KPiA+IEkgaGF2ZSBzZW50IHVwZGF0ZWQgcGF0Y2hl
+cy4gIFdpbGwgeW91IGhhdmUgYSBjaGFuY2UgdG8gdGVzdCBoYXJkd2FyZSBDTURRPw0KPiANCj4g
+WWVzLCBJIHdpbGwgdHJ5IHRvIGFwcGx5IHRoZXNlIHBhdGNoZXMgb24gb3VyIGxvY2FsIDQuOSBi
+cmFuY2guICBXaWxsIGdpdmUgeW91IHRoZQ0KPiB0ZXN0IHJlc3VsdC4NCj4gDQoNCkhpIEFkcmlh
+biwNCg0KaS5NWDggc3RpbGwgbm90IHVwc3RyZWFtLCBhbmQganVzdCB3b3JrIG9uIG91ciBsb2Nh
+bCA0LjkgYnJhbmNoLCB0byB0ZXN0IHlvdXIgYnJhbmNoLCBJIG5lZWQgdG8gY2hlcnJ5IHBpY2sN
+CnNvbWUgbW1jIHBhdGNoZXMgYW5kIGJsb2NrIGxheWVyIHBhdGNoZXMsIEknbSBkb2luZyB0aGlz
+IG5vdywgYnV0IG5lZWQgc29tZSB0aW1lLg0KDQoNCj4gQmVzdCBSZWdhcmRzLA0KPiBIYWlibyBD
+aGVuDQo+IBMgIOy5uxwgJiB+ICYgGCAgKy0gIN22FyAgdyAgy5sgICBtIGIgIGYgyKcgFyAg3Kh9
+ICAgxqB6ICZqOit2ICAgICAgICB6WisgICt6ZiAgIGggICB+ICAgIGkgICB6IB4gdyAgID8NCj4g
+JiAp36IbZg0K
