@@ -1,115 +1,132 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: Rebasing mmc/next
-Date: Tue, 20 Jun 2017 11:06:15 +0200
-Message-ID: <CAMuHMdWikrGTaEVWDdpgAN9+DEHXOYUZdtZgssRLDTWsyxa-fw@mail.gmail.com>
-References: <CAMuHMdW=aasYmZz-z+BgT0Qoco6DTyQxN3G1wiWVPETsbkRZTQ@mail.gmail.com>
- <CAPDyKFpuBJCArAHUL2i=zDL=-Bq908eDJ2_mRy7O=_4bJj2_dw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
+Date: Tue, 20 Jun 2017 12:04:44 +0300
+Message-ID: <453a9fbc-c827-367e-f953-fbc9d6457375@intel.com>
+References: <1489408613-26915-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFp=rrQbSAGMx=UF2abcLmzWjO4syq7eLAmChT_EQNvDgg@mail.gmail.com>
+ <faa2a3d8-e045-8bd1-06c9-e5cf64713035@intel.com>
+ <CACRpkdYBB1ZMnvCKet706bm12B3DWnie=0uDri835R_f81gMUw@mail.gmail.com>
+ <AM4PR0401MB23244CD809159EF1CD897160901F0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+ <8009319e-356e-0b69-a30a-31b536f3643a@intel.com>
+ <AM4PR0401MB2324C8B330EB320BFB35443590C00@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+ <AM4PR0401MB232449B222AA0A9FA7603A9B90C50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpuBJCArAHUL2i=zDL=-Bq908eDJ2_mRy7O=_4bJj2_dw@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:44148 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751041AbdFTJK4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 20 Jun 2017 05:10:56 -0400
+In-Reply-To: <AM4PR0401MB232449B222AA0A9FA7603A9B90C50@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bough Chen <haibo.chen@nxp.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Ulf,
-
-On Tue, Jun 20, 2017 at 10:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 20 June 2017 at 09:17, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
->> It looks like you rebase mmc/next almost daily. Is there any specific reason
->> for that?
->
-> I don't do it daily, but often, yes. :-)
-
-A few years ago, I got bashed by Linus for rebasing the m68k "for-linus"
-branch on every -rc.
-
->> I'm asking because I create a "renesas-drivers" tree on a regular basis
->> (cfr. e.g. https://www.spinics.net/lists/linux-renesas-soc/msg15111.html).
->> This tree is meant to ease development of platform support and drivers
->> for Renesas ARM SoCs. It is created by merging (a) the for-next branches
->> of various subsystem trees and (b) branches with driver code submitted
->> or planned for submission to maintainers into the development branch of
->> Simon Horman's renesas.git tree.
->
-> If you are asking me to keep my next branch immutable, then please no,
-> I don't like to do that. Reason explained below.
-
-100% immutable is not needed.
-
-> I don't have a problem to share specific renesas mmc branches with
-> you, if that helps?
-
-Hmm, that would be more work on your side. Plus communication overhead.
-
->> If for (b), people submit driver code based on mmc/next, it may start
->> to conflict
->> with subsequent mmc/next releases soon, requiring the submitter or me to
->> rebase the code before including it in renesas-drivers.
+On 20/06/17 11:01, Bough Chen wrote:
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Bough Chen
+>> Sent: Thursday, June 15, 2017 7:50 PM
+>> To: Adrian Hunter <adrian.hunter@intel.com>; Linus Walleij
+>> <linus.walleij@linaro.org>
+>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
+>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>; Mateusz
+>> Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
+>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
+>> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
+>> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
+>> Dorfman Konstantin <kdorfman@codeaurora.org>; David Griego
+>> <david.griego@linaro.org>; Sahitya Tummala <stummala@codeaurora.org>;
+>> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
+>> <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-chips.com>
+>> Subject: RE: [PATCH V2 00/22] mmc: Add Command Queue support
 >>
->> Most subsystem maintainers don't rebase their for-next branch, unless there's
->> a very good reason for it (e.g. a serious breakage hindering bisection).
->
-> I do it for a couple of reasons.
->
-> First, sometimes I apply changes before people have provided enough
-> tested by tags, to instead allow the changes to be tested in
-> linux-next. This may lead to some situations when I need to re-base my
-> next branch.
-> *) Something breaks, then I need to drop the changes. Revert doesn't
-> play well here, especially if it's a series of changes.
-> **) Avoid breaking bisect.
+>>> -----Original Message-----
+>>> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+>>> Sent: Thursday, June 15, 2017 7:38 PM
+>>> To: Bough Chen <haibo.chen@nxp.com>; Linus Walleij
+>>> <linus.walleij@linaro.org>
+>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
+>>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>;
+>> Mateusz
+>>> Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
+>>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
+>>> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
+>>> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
+>>> Dorfman Konstantin <kdorfman@codeaurora.org>; David Griego
+>>> <david.griego@linaro.org>; Sahitya Tummala <stummala@codeaurora.org>;
+>>> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
+>>> <vbyravarasu@nvidia.com>; Shawn Lin <shawn.lin@rock-chips.com>
+>>> Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
+>>>
+>>> On 24/04/17 12:14, Bough Chen wrote:
+>>>>> -----Original Message-----
+>>>>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>>>>> owner@vger.kernel.org] On Behalf Of Linus Walleij
+>>>>> Sent: Monday, April 24, 2017 4:13 PM
+>>>>> To: Adrian Hunter <adrian.hunter@intel.com>
+>>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
+>>>>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>;
+>>>>> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
+>>>>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
+>>>>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
+>>>>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
+>>>>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
+>>>>> <kdorfman@codeaurora.org>; David Griego <david.griego@linaro.org>;
+>>>>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
+>>>>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
+>>>>> Shawn Lin <shawn.lin@rock-chips.com>
+>>>>> Subject: Re: [PATCH V2 00/22] mmc: Add Command Queue support
+>>>>>
+>>>>> On Sat, Apr 22, 2017 at 9:45 AM, Adrian Hunter
+>>>>> <adrian.hunter@intel.com>
+>>>>> wrote:
+>>>>>
+>>>>>> Ulf and Linus have been doing a great job of keeping this moving,
+>>>>>> but it would be nice to see some others taking more interest.  The
+>>>>>> first command queue patches were posted in February 2014, over 3
+>>>>>> years
+>>> ago!
+>>>>>
+>>>>> I agree.
+>>>>>
+>>>>> I think both me & Ulf would also be doing more work if we had
+>>>>> easily accessible hardware with upstream host controller support
+>>>>> for native
+>>> command queueing.
+>>>>> (Hm, was just reading in libata about NCQ ...
+>>>>> déja vu ... https://en.wikipedia.org/wiki/Native_Command_Queuing)
+>>>>>
+>>>>> Do we have some hardware with host-backed command queueing out
+>>> there
+>>>>> that is easily obtained and has upstream support for the basic system?
+>>>>>
+>>>>
+>>>> The coming i.MX8 support hardware CMDQ, I will have a try when I get
+>>>> one
+>>> on May or June.
+>>>
+>>> I have sent updated patches.  Will you have a chance to test hardware CMDQ?
+>>
+>> Yes, I will try to apply these patches on our local 4.9 branch.  Will give you the
+>> test result.
+>>
+> 
+> Hi Adrian,
+> 
+> i.MX8 still not upstream, and just work on our local 4.9 branch, to test your branch, I need to cherry pick
+> some mmc patches and block layer patches, I'm doing this now, but need some time.
 
-OK.
+Thanks for the update.  I realize backporting anything related to mmc block
+is now a big task.
 
-> ***) I want to give people cred, adding peoples tested-by, reviewed-by
-> tags, after the changes have been queued on my next branch.
+> 
+> 
+>> Best Regards,
+>> Haibo Chen
+>>   칻 & ~ &   +-  ݶ  w  ˛   m b  f ȧ   ܨ}   Ơz &j:+v        zZ+  +zf   h   ~    i   z  w   ?
+>> & )ߢf
 
-I think you're about the only one who does that ;-)
-
-> Second, even if the changes queued on next has been thoroughly tested,
-> sometimes error reports still show up. I most cases I prefer to avoid
-> breaking bisect, which then leaves me in no other option, but
-> re-basing my branch (to either drop changes or amend them).
->
-> I guess what I can do, is to host a pre-next branch, which serves as
-> my pre-integration branch, before I moves things to next. However,
-> this does put some more administrative work on me, so I would like to
-> avoid that.
-
-OK.
-
-> I am trying to understand the purpose of your renesas integration
-> tree, and why it's a problem for you to pick up my re-based branch?
-> Could you perhaps elaborate on this?
-
-The purpose is to make it easier for the upstream Renesas kernel team and
-associated testers to consume our work-in-progress.
-
-Hence I merge the for-next branches of selected subsystems, followed by
-topic branches with work-in-progress driver code.
-
-E.g. Simon had asked me to include
-git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
-topic/sdhi-gen3-dma-2017
-That branch was based on your mmc/next.
-
-But by the time I created the renesas-drivers release, mmc/next had been
-rebased.  Hence after merging the new mmc/next, I had to rebase his work:
-https://git.kernel.org/pub/scm/linux/kernel/git/geert/renesas-drivers.git/log/?h=topic/sdhi-gen3-dma-2017-rebased1
-
-I hope this explains our problem.
-
-Thanks!
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
