@@ -1,83 +1,49 @@
-From: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 1/6] ARM: dts: rockchip: add basic dtsi file for RK3229
- SoC
-Date: Tue, 20 Jun 2017 15:13:00 +0800
-Message-ID: <354e6995-cc80-660b-41c4-535be85564c4@rock-chips.com>
-References: <1497510980-23207-1-git-send-email-frank.wang@rock-chips.com>
- <18070472.si2qlgbqtt@phil>
- <7e8e2097-d5ca-a594-cb87-1b7b221fd58a@rock-chips.com>
- <25831201.s5BUplWuV7@diego>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Rebasing mmc/next
+Date: Tue, 20 Jun 2017 09:17:51 +0200
+Message-ID: <CAMuHMdW=aasYmZz-z+BgT0Qoco6DTyQxN3G1wiWVPETsbkRZTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <25831201.s5BUplWuV7@diego>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org, =?UTF-8?B?6ZmI5YGl5rSq?= <chenjh-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Kever Yang <kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:36715 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751007AbdFTHRw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2017 03:17:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Hi Heiko,
+Hi Ulf,
 
-On 2017/6/19 20:30, Heiko Stübner wrote:
-> Hi Frank,
->
-> Am Montag, 19. Juni 2017, 18:34:27 CEST schrieb Frank Wang:
->> On 2017/6/18 2:12, Heiko Stuebner wrote:
->>> Am Donnerstag, 15. Juni 2017, 15:16:15 CEST schrieb Frank Wang:
->>>> Due to some tiny differences between RK3228 and RK3229, this patch
->>>> adds a basic dtsi file which includes a new CPU opp table and PSCI
->>>> brought up support for RK3229.
->>>>
->>>> Signed-off-by: Frank Wang<frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> [...]
->
->>>> +	psci {
->>>> +		compatible = "arm,psci-1.0", "arm,psci-0.2";
->>>> +		method = "smc";
->>>> +	};
->>>> +};
->>>> +
->>>> +&cpu0 {
->>>> +	enable-method = "psci";
->>>> +};
->>> Hmm, I don't really understand this.
->>> What method of core-bringup does the rk3228 use? In the current
->>> rk322x.dtsi there is no enable-method at all defined.
->> For non-security, the same with rk3036 SoC, we use rk3036-smp method to
->> bring-up cores, and for security, we use arm-psci method.
->> As security become more and more important and required, we would prefer
->> using arm-psci method, and it is also an easy way to use.
->>
->>> So is the rk3228 firmware using a different method than the rk3229?
->> No, they are the same. How about I move these changes to rk322x.dtsi?
-> yep, that is what I was getting at with my question ;-)
->
->
->>> And out of curiosity as this is a arm32 without atf, is the psci
->>> implementation (for uboot?) you're using available somewhere?
->> Ah, it is included in op-tee :-)
-> Is that super secret or will this be part of the official op-tee [0]
-> at some point (Similar to the ATF stuff on arm64)?
+It looks like you rebase mmc/next almost daily. Is there any specific reason
+for that?
 
-Hmm, the op-tee itself must keep secure, but the psci part in it can be 
-extracted to public, although it may have a bit of secure risk.
-Due to Rockchip have amended the frame of op-tee to support psci, we can 
-try to upstream these changes to official op-tee or push them to source 
-codes of Rockchip in git-hub.
+I'm asking because I create a "renesas-drivers" tree on a regular basis
+(cfr. e.g. https://www.spinics.net/lists/linux-renesas-soc/msg15111.html).
+This tree is meant to ease development of platform support and drivers
+for Renesas ARM SoCs. It is created by merging (a) the for-next branches
+of various subsystem trees and (b) branches with driver code submitted
+or planned for submission to maintainers into the development branch of
+Simon Horman's renesas.git tree.
 
+If for (b), people submit driver code based on mmc/next, it may start
+to conflict
+with subsequent mmc/next releases soon, requiring the submitter or me to
+rebase the code before including it in renesas-drivers.
 
-BR.
-Frank
+Most subsystem maintainers don't rebase their for-next branch, unless there's
+a very good reason for it (e.g. a serious breakage hindering bisection).
 
-> Heiko
->
-> [0]https://github.com/OP-TEE/optee_os/tree/master/core/arch/arm
->
->
+Thanks!
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 --
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
