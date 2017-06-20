@@ -1,239 +1,69 @@
-From: Quentin Schulz <quentin.schulz@free-electrons.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-at91: factor out clks and presets
- setting
-Date: Tue, 20 Jun 2017 10:11:16 +0200
-Message-ID: <984492b5-9deb-3d61-2ca4-d3750879f8d8@free-electrons.com>
-References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
- <3f227676-1f1f-8c4d-43fe-67930ad87459@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 19/21] dt-bindings: mmc: dw_mmc-k3: add document of
+ hi3660 mmc
+Date: Tue, 20 Jun 2017 10:36:53 +0200
+Message-ID: <CAPDyKFo=hqp=j=nWpO8uf_0pGTSKjN0T-ZKqD8cuKp1C3Q2_hA@mail.gmail.com>
+References: <20170614082338.15673-1-guodong.xu@linaro.org> <20170614082338.15673-20-guodong.xu@linaro.org>
+ <CAPDyKFpvJu8_TETWr0Vy4ubDC7NYvi7TxmSLYZyw33qHFsoNaQ@mail.gmail.com> <5947CAD8.4040607@hisilicon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:41149 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751927AbdFTIL2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2017 04:11:28 -0400
-In-Reply-To: <3f227676-1f1f-8c4d-43fe-67930ad87459@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5947CAD8.4040607-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Cc: Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xuejiancheng-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, puck.chen-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, zhangfei <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux PCI <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Li Wei <liwei213>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ludovic.desroches@microchip.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
 
-Hi Adrian,
+Hi Wei,
 
-On 20/06/2017 08:36, Adrian Hunter wrote:
-> On 16/06/17 10:29, Quentin Schulz wrote:
->> The setting of clocks and presets is currently done in probe only but
->> once deep PM support is added, it'll be needed in the resume function.
+On 19 June 2017 at 15:00, Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org> wrote:
+> Hi Ulf,
+>
+> On 2017/6/19 13:43, Ulf Hansson wrote:
+>> On 14 June 2017 at 10:23, Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> Add bindings for hi3660 mmc support
+>>>
+>>> Signed-off-by: Li Wei <liwei213-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+>>> Signed-off-by: Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt | 1 +
+>>>  1 file changed, 1 insertion(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>>> index df37058..8af1afc 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>>> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>>> @@ -12,6 +12,7 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
+>>>  Required Properties:
+>>>
+>>>  * compatible: should be one of the following.
+>>> +  - "hisilicon,hi3660-dw-mshc": for controllers with hi3660 specific extensions.
+>>>    - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extensions.
+>>>    - "hisilicon,hi6220-dw-mshc": for controllers with hi6220 specific extensions.
+>>>
+>>> --
+>>> 2.10.2
+>>>
 >>
->> Let's create a function for this setting.
->>
->> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
-> 
-> Apart from cosmetic comment below:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
->> ---
->>  drivers/mmc/host/sdhci-of-at91.c | 147 ++++++++++++++++++++++-----------------
->>  1 file changed, 82 insertions(+), 65 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
->> index 7611fd679f1a..fb8c6011f13d 100644
->> --- a/drivers/mmc/host/sdhci-of-at91.c
->> +++ b/drivers/mmc/host/sdhci-of-at91.c
->> @@ -128,6 +128,84 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
->>  };
->>  MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
->>  
->> +static int sdhci_at91_set_clks_presets(struct device *dev)
->> +{
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> +	int ret;
->> +	unsigned int			caps0, caps1;
->> +	unsigned int			clk_base, clk_mul;
->> +	unsigned int			gck_rate, real_gck_rate;
->> +	unsigned int			preset_div;
-> 
-> Too much whitespace.
-> 
+>> Thanks, applied for next!
+>
+> Thanks!
+> Last week I had applied the v4 patch set[1]
+> and this patch is included.
+> But it should be fine for the upper gatekeeper to merge
+> since these 2 patch are same.
 
-Simply moved some variables from the original code (see sdhci_at91_probe
-below).
+No, that's not how git works.
 
-Thanks,
-Quentin
+If the patch has the same hash, that would be fine, but that isn't the
+case here as we have two different hashes for the same change.
 
->> +
->> +	/*
->> +	 * The mult clock is provided by as a generated clock by the PMC
->> +	 * controller. In order to set the rate of gck, we have to get the
->> +	 * base clock rate and the clock mult from capabilities.
->> +	 */
->> +	clk_prepare_enable(priv->hclock);
->> +	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
->> +	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
->> +	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
->> +	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
->> +	gck_rate = clk_base * 1000000 * (clk_mul + 1);
->> +	ret = clk_set_rate(priv->gck, gck_rate);
->> +	if (ret < 0) {
->> +		dev_err(dev, "failed to set gck");
->> +		clk_disable_unprepare(priv->hclock);
->> +		return ret;
->> +	}
->> +	/*
->> +	 * We need to check if we have the requested rate for gck because in
->> +	 * some cases this rate could be not supported. If it happens, the rate
->> +	 * is the closest one gck can provide. We have to update the value
->> +	 * of clk mul.
->> +	 */
->> +	real_gck_rate = clk_get_rate(priv->gck);
->> +	if (real_gck_rate != gck_rate) {
->> +		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
->> +		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
->> +		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
->> +			  SDHCI_CLOCK_MUL_MASK);
->> +		/* Set capabilities in r/w mode. */
->> +		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
->> +		       host->ioaddr + SDMMC_CACR);
->> +		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
->> +		/* Set capabilities in ro mode. */
->> +		writel(0, host->ioaddr + SDMMC_CACR);
->> +		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
->> +			 clk_mul, real_gck_rate);
->> +	}
->> +
->> +	/*
->> +	 * We have to set preset values because it depends on the clk_mul
->> +	 * value. Moreover, SDR104 is supported in a degraded mode since the
->> +	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
->> +	 * reason, we need to use presets to support SDR104.
->> +	 */
->> +	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
->> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
->> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
->> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
->> +	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
->> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
->> +	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
->> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
->> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
->> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> +	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
->> +
->> +	clk_prepare_enable(priv->mainck);
->> +	clk_prepare_enable(priv->gck);
->> +
->> +	return 0;
->> +}
->> +
->>  #ifdef CONFIG_PM
->>  static int sdhci_at91_runtime_suspend(struct device *dev)
->>  {
->> @@ -192,11 +270,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->>  	struct sdhci_host		*host;
->>  	struct sdhci_pltfm_host		*pltfm_host;
->>  	struct sdhci_at91_priv		*priv;
->> -	unsigned int			caps0, caps1;
->> -	unsigned int			clk_base, clk_mul;
->> -	unsigned int			gck_rate, real_gck_rate;
->>  	int				ret;
->> -	unsigned int			preset_div;
->>  
->>  	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
->>  	if (!match)
->> @@ -228,66 +302,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->>  		return PTR_ERR(priv->gck);
->>  	}
->>  
->> -	/*
->> -	 * The mult clock is provided by as a generated clock by the PMC
->> -	 * controller. In order to set the rate of gck, we have to get the
->> -	 * base clock rate and the clock mult from capabilities.
->> -	 */
->> -	clk_prepare_enable(priv->hclock);
->> -	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
->> -	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
->> -	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
->> -	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
->> -	gck_rate = clk_base * 1000000 * (clk_mul + 1);
->> -	ret = clk_set_rate(priv->gck, gck_rate);
->> -	if (ret < 0) {
->> -		dev_err(&pdev->dev, "failed to set gck");
->> -		goto hclock_disable_unprepare;
->> -	}
->> -	/*
->> -	 * We need to check if we have the requested rate for gck because in
->> -	 * some cases this rate could be not supported. If it happens, the rate
->> -	 * is the closest one gck can provide. We have to update the value
->> -	 * of clk mul.
->> -	 */
->> -	real_gck_rate = clk_get_rate(priv->gck);
->> -	if (real_gck_rate != gck_rate) {
->> -		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
->> -		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
->> -		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
->> -		/* Set capabilities in r/w mode. */
->> -		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
->> -		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
->> -		/* Set capabilities in ro mode. */
->> -		writel(0, host->ioaddr + SDMMC_CACR);
->> -		dev_info(&pdev->dev, "update clk mul to %u as gck rate is %u Hz\n",
->> -			 clk_mul, real_gck_rate);
->> -	}
->> -
->> -	/*
->> -	 * We have to set preset values because it depends on the clk_mul
->> -	 * value. Moreover, SDR104 is supported in a degraded mode since the
->> -	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
->> -	 * reason, we need to use presets to support SDR104.
->> -	 */
->> -	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
->> -	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> -	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
->> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
->> -	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> -	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
->> -	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
->> -	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> -	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
->> -	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
->> -	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> -	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
->> -	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
->> -	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
->> -	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
->> -
->> -	clk_prepare_enable(priv->mainck);
->> -	clk_prepare_enable(priv->gck);
->> +	ret = sdhci_at91_set_clks_presets(&pdev->dev);
->> +	if (ret)
->> +		goto sdhci_pltfm_free;
->>  
->>  	ret = mmc_of_parse(host->mmc);
->>  	if (ret)
->> @@ -335,8 +352,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->>  clocks_disable_unprepare:
->>  	clk_disable_unprepare(priv->gck);
->>  	clk_disable_unprepare(priv->mainck);
->> -hclock_disable_unprepare:
->>  	clk_disable_unprepare(priv->hclock);
->> +sdhci_pltfm_free:
->>  	sdhci_pltfm_free(pdev);
->>  	return ret;
->>  }
->>
-> 
+To deal with this, I have just dropped the change from my tree and
+leave it to you to carry the patch. Feel free to add my ack for it.
 
--- 
-Quentin Schulz, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
