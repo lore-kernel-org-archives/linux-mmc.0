@@ -1,64 +1,127 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [EXT] Re: [PATCH v2] mmc: core: add mmc-card hardware reset
- enable support
-Date: Tue, 20 Jun 2017 11:45:16 +0200
-Message-ID: <CACRpkdb92scfO=tghucfC3RqQpi9K6YSuavte_b-AxH4hS87rQ@mail.gmail.com>
-References: <1491895862-7952-1-git-send-email-richard.leitner@skidata.com>
- <CACRpkdaBrk91hh3JGZ0vcD3aXO+OHD41xwRKn9prPSOX_SXuWg@mail.gmail.com>
- <CAPDyKFoL5dbs_xKxaBGk2bqd2tOXrhG_SVcBoUpMetsKDdNXxQ@mail.gmail.com>
- <0a29de1a-2635-2bb8-808a-7b9a0197921a@skidata.com> <6b92d0af00024549a0d22dda039780dd@bowex36d.micron.com>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
+ resume from deepest PM
+Date: Tue, 20 Jun 2017 11:49:43 +0200
+Message-ID: <20170620094943.j3qfjocjcjle6sqa@rfolt0960.corp.atmel.com>
+References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
+ <20170616072929.3266-2-quentin.schulz@free-electrons.com>
+ <6acdfd61-afb8-e0cf-b8d3-b2e81bd71569@intel.com>
+ <1989e4f4-6aed-563f-5750-51ddddeb4739@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6b92d0af00024549a0d22dda039780dd@bowex36d.micron.com>
+Content-Disposition: inline
+In-Reply-To: <1989e4f4-6aed-563f-5750-51ddddeb4739@free-electrons.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Cc: Richard Leitner <richard.leitner@skidata.com>, Ulf Hansson <ulf.hansson@linaro.org>, Bart Van Assche <bart.vanassche@sandisk.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Richard Leitner <dev@g0hl1n.net>
+To: Quentin Schulz <quentin.schulz@free-electrons.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, ludovic.desroches@microchip.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Luca,
+On Tue, Jun 20, 2017 at 10:07:06AM +0200, Quentin Schulz wrote:
+> Hi Adrian,
+> 
+> On 20/06/2017 09:39, Adrian Hunter wrote:
+> > On 16/06/17 10:29, Quentin Schulz wrote:
+> >> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
+> >> SoC's SDHCI controller.
+> >>
+> >> When resuming from deepest state, it is required to restore preset
+> >> registers as the registers are lost since VDD core has been shut down
+> >> when entering deepest state on the SAMA5D2. The clocks need to be
+> >> reconfigured as well.
+> >>
+> >> The other registers and init process are taken care of by the SDHCI
+> >> core.
+> >>
+> >> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
+> >>  1 file changed, 32 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> >> index fb8c6011f13d..300513fc1068 100644
+> >> --- a/drivers/mmc/host/sdhci-of-at91.c
+> >> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> >> @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+> >>  }
+> >>  
+> >>  #ifdef CONFIG_PM
+> > 
+> > Should be CONFIG_PM_SLEEP for suspend / resume callbacks.
+> > 
+> 
+> So I let this CONFIG_PM around the runtime_suspend/resume but put
+> another CONFIG_PM_SLEEP around the suspend/resume functions?
+> 
+> >> +static int sdhci_at91_suspend(struct device *dev)
+> >> +{
+> >> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> >> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> >> +	int ret;
+> >> +
+> >> +	ret = sdhci_suspend_host(host);
+> >> +
+> >> +	if (host->runtime_suspended)
+> >> +		return ret;
+> > 
+> > Suspending while runtime suspended seems like a bad idea.  Have you
+> > considered just adding sdhci_at91_set_clks_presets() to
+> > sdhci_at91_runtime_resume()?
+> > 
+> 
+> Adding sdhci_at91_set_clks_presets() to runtime_resume() seems a bad
+> idea as well. You don't need to recompute the clock rate, set it and set
+> the presets registers each time you do a runtime_resume. As the
+> runtime_pm of sdhci has a quite aggressive policy of activation, this
+> seems like a bad idea on the optimization side.
 
-thanks for joining!
+So maybe increment/decrement the device's usage counter. It should be
+safer.
 
-On Wed, Jun 14, 2017 at 6:12 PM, Luca Porzio (lporzio)
-<lporzio@micron.com> wrote:
+Ludovic
 
-> This behavior is not Micron specific but instead it is enforced by the Jedec
-> Specification. All eMMC must have HW reset disabled by default.
-
-That's very good to know.
-
-> This specification (as Ulf correctly hinted) originated from badly connected
-> HW Reset pins which caused unnecessary eMMC reset glitches.
-> Disabling this feature is a good option to contain glitches and avoid
-> system level bugs.
-
-Ah, makes sense.
-
-> IMHO mmc-util is where the patch really stands: the enabling is OTP,
-> the programmer have to use mmc-util only once and the kernel
-> will behave accordingly.
-
-So we should not add it to the device tree.
-
-> Any platform vendor must check that the HW Reset pin is actually
-> Connected BEFORE enabling this feature otherwise the system may be
-> unstable. A DT Binding may be dangerous if this condition is not met
-> as well as the code execution at each MMC init is honestly redundant
-> for an OTP location of the extCSD.
-
-I agree. So the device should be configured during production, or
-a user who know exactly what they are doing may reconfigure it
-using the mmc-utils.
-
-Thus the kernel should just read what the device says and stay with
-that, no DT props or anything.
-
-This makes a lot of sense.
-
-When say ethernet devices need MAC addresses written to their OTP
-we do not put that into the device tree to be programmed either, we assume
-production tools to do that job.
-
-Yours,
-Linus Walleij
+> 
+> Thanks,
+> Quentin
+> 
+> >> +
+> >> +	clk_disable_unprepare(priv->gck);
+> >> +	clk_disable_unprepare(priv->hclock);
+> >> +	clk_disable_unprepare(priv->mainck);
+> >> +
+> >> +	return ret;
+> >> +}
+> >> +
+> >> +static int sdhci_at91_resume(struct device *dev)
+> >> +{
+> >> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> >> +	int ret;
+> >> +
+> >> +	ret = sdhci_at91_set_clks_presets(dev);
+> >> +	if (ret)
+> >> +		return ret;
+> >> +
+> >> +	return sdhci_resume_host(host);
+> >> +}
+> >> +
+> >>  static int sdhci_at91_runtime_suspend(struct device *dev)
+> >>  {
+> >>  	struct sdhci_host *host = dev_get_drvdata(dev);
+> >> @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+> >>  #endif /* CONFIG_PM */
+> >>  
+> >>  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+> >> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> >> -				pm_runtime_force_resume)
+> >> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
+> >>  	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
+> >>  			   sdhci_at91_runtime_resume,
+> >>  			   NULL)
+> >>
+> > 
+> 
+> -- 
+> Quentin Schulz, Free Electrons
+> Embedded Linux and Kernel engineering
+> http://free-electrons.com
