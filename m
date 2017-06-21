@@ -1,338 +1,81 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH mmc/next v3 0/4] mmc: renesas_sdhi: add support for R-Car Gen3 SDHI DMAC
-Date: Wed, 21 Jun 2017 16:00:26 +0200
-Message-ID: <1498053630-7780-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] omap_hsmmc: Reduce max_segs
+Date: Wed, 21 Jun 2017 16:09:45 +0100
+Message-ID: <CAFbHwiRRAdmJ6OL2u32dcYwiS-5jgmqgT9mgnf3FLkyco2A-5Q@mail.gmail.com>
+References: <20170619093644.16054-1-willn@resin.io> <CAFbHwiSuAAophPr2tyHOq2iWrC1Uo2N+EOuvhiNcc9xERuvZZA@mail.gmail.com>
+ <20170621062427.GP3730@atomide.com> <CAFbHwiQO5dHq59Bab4+9A6-QVcjsTVMzNfni0PQDQA1g3YCcgw@mail.gmail.com>
+ <20170621083252.GQ3730@atomide.com> <ec8e0bbd-e278-3067-6340-f7b3db293b05@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f49.google.com ([209.85.214.49]:34948 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752520AbdFUPJr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2017 11:09:47 -0400
+In-Reply-To: <ec8e0bbd-e278-3067-6340-f7b3db293b05@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ravikumar <rk@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>
 
-Hi,
+On Wed, Jun 21, 2017 at 10:16 AM, Ravikumar <rk@ti.com> wrote:
 
-this series adds support for the internal DMAC used by r8a779[56] SoCs.
-This is achieved by adding a new variant of the SDHI driver for this
-DMA controller with compat strings for the r8a779[56] SoCs.
-Compat strings for these SoCs are also removed from the existing SYS DMAC
-variant of the SDHI driver.
+Hi Ravikumar,
 
-Based on mmc/next
+> On Wednesday 21 June 2017 02:02 PM, Tony Lindgren wrote:
+>>
+>> * Will Newton <will.newton@gmail.com> [170621 01:18]:
+>>>
+>>> On Wed, Jun 21, 2017 at 7:24 AM, Tony Lindgren <tony@atomide.com> wrote:
+>>>
+>>> Hi Tony,
+>>>
+>>>> * Will Newton <will.newton@gmail.com> [170620 05:39]:
+>>>>>
+>>>>> Just adding a few people to CC. I'd love to get some feedback as to
+>>>>> whether this patch makes sense or not.
+>>>>>
+>>>>> On Mon, Jun 19, 2017 at 10:36 AM, Will Newton <will.newton@gmail.com>
+>>>>> wrote:
+>>>>>>
+>>>>>> Reduce max_segs to a value that allows allocation of an entire
+>>>>>> descriptor list within a single page. This avoids doing a
+>>>>>> higher order GFP_ATOMIC allocation when setting up a transfer
+>>>>>> which can potentially fail and lead to I/O failures.
+>>>>
+>>>> I recall we only ever have few SG entries so if there is no performance
+>>>> impact I see no reason to lower it to save memory. Care to check
+>>>> if that's the case still?
+>>>
+>>> I have been seeing allocation failures in edma_prep_slave_sg
+>>> allocating the descriptor list of order 3, which from my rough
+>>> calculations is an sg_len of ~800. The memory usage itself doesn't
+>>> seem like a problem but doing a GFP_ATOMIC allocation of higher order
+>>> under I/O load seems like it is always going to cause problems.
+>
+> max_segs= 64  looks like a sensible value to me for edma/sdma, with each
+> param set ~40Bytes - this will ensure to fit in a single page.
+> IIRC, edma splits the list at 20. MAX_NR_SEGS set to 20 in edma.c. So,
+> having a bigger number *may not* guarantee a proportional increase
+> in throughput.
+>
+>> OK
+>>
+>>> I'm not an expert on this code but it looks like the scatterlist is
+>>> created from the queue so if the queue gets full we can get a very
+>>> large scatterlist. The current value of 1024 seems to be something of
+>>> an outlier:
+>
+> When using ADMA, since you allocate the table only once during probe,
+> there'll be no alloc calls at a later time.
+> And increase in number of sg entries would increase efficiency. I've seen
+> as many as 290-300 sg entries being used during file-system init/mount. So,
+> for ADMA, I would say at least max_segs = 512 is a better option since
+> descriptor size is 8B,
+> would still fit in a page.
+> You can over-wirte it under  "if (host->adma)"
 
-Headline performance boost: 9.5MB/s -> 39.7MB/s
-Details below.
+I can't find this member in struct mmc_host on master, is there
+somewhere else I should be looking?
 
-Simon Horman (3):
-  mmc: tmio, renesas-sdhi: add dataend to DMA ops
-  mmc: renesas-sdhi: add support for R-Car Gen3 SDHI DMAC
-  mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
-
-Yoshihiro Shimoda (1):
-  mmc: tmio, renesas-sdhi: add max_{segs,blk_count} to tmio_mmc_data
-
- drivers/mmc/host/Kconfig                      |  19 ++
- drivers/mmc/host/Makefile                     |   8 +-
- drivers/mmc/host/renesas_sdhi.h               |   2 +
- drivers/mmc/host/renesas_sdhi_core.c          |   2 +
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 271 ++++++++++++++++++++++++++
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  29 +--
- drivers/mmc/host/tmio_mmc.h                   |   2 +
- drivers/mmc/host/tmio_mmc_core.c              |  16 +-
- include/linux/mfd/tmio.h                      |   2 +
- 9 files changed, 323 insertions(+), 28 deletions(-)
- create mode 100644 drivers/mmc/host/renesas_sdhi_internal_dmac.c
-
--- 
-2.1.4
-
-
-Salvator-X/M3-W ES1.0
-=====================
-
-With Gen3 DMA Patches
----------------------
-
-97ac7011f8d3 (topic/sdhi-gen3-dma-2017-v3) mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
-
-# dmesg | egrep '(sd|mmc)'
-[    1.419150] sdhci: Secure Digital Host Controller Interface driver
-[    1.425367] sdhci: Copyright(c) Pierre Ossman
-[    1.430237] renesas_sdhi_internal_dmac ee100000.sd: Got CD GPIO
-[    1.436224] renesas_sdhi_internal_dmac ee100000.sd: Got WP GPIO
-[    1.564915] renesas_sdhi_internal_dmac ee140000.sd: mmc0 base at 0xee140000 max clock rate 200 MHz
-[    1.574277] renesas_sdhi_internal_dmac ee160000.sd: Got CD GPIO
-[    1.580250] renesas_sdhi_internal_dmac ee160000.sd: Got WP GPIO
-[    1.595002] sdhci-pltfm: SDHCI platform and OF driver helper
-[    1.643641] renesas_sdhi_internal_dmac ee100000.sd: Got CD GPIO
-[    1.649678] renesas_sdhi_internal_dmac ee100000.sd: Got WP GPIO
-[    1.780987] renesas_sdhi_internal_dmac ee100000.sd: mmc1 base at 0xee100000 max clock rate 200 MHz
-[    1.791301] renesas_sdhi_internal_dmac ee160000.sd: Got CD GPIO
-[    1.797269] renesas_sdhi_internal_dmac ee160000.sd: Got WP GPIO
-[    1.830209] mmc0: new high speed MMC card at address 0001
-[    1.836044] mmcblk0: mmc0:0001 eMMC   28.8 GiB 
-[    1.844818] mmcblk0boot0: mmc0:0001 eMMC   partition 1 4.00 MiB
-[    1.854940] mmcblk0boot1: mmc0:0001 eMMC   partition 2 4.00 MiB
-[    1.866738] mmcblk0rpmb: mmc0:0001 eMMC   partition 3 4.00 MiB
-[    1.877064]  mmcblk0: p1
-[    1.933007] renesas_sdhi_internal_dmac ee160000.sd: mmc2 base at 0xee160000 max clock rate 200 MHz
-[    2.080957] mmc1: new ultra high speed SDR50 SDHC card at address e624
-[    2.087962] mmcblk1: mmc1:e624 SU08G 7.40 GiB 
-[    2.103240]  mmcblk1: p1
-[    2.188956] mmc2: new ultra high speed SDR50 SDHC card at address 0001
-[    2.195833] mmcblk2: mmc2:0001 00000 29.8 GiB 
-[    2.209999]  mmcblk2: p1
-
-# grep sd /proc/interrupts
-100:        396          0     GIC-0 197 Level     ee100000.sd
-101:        676          0     GIC-0 199 Level     ee140000.sd
-102:        394          0     GIC-0 200 Level     ee160000.sd
-178:          0          0  e6053000.gpio  12 Edge      ee100000.sd cd
-197:          0          0  e6054000.gpio  15 Edge      ee160000.sd cd
-
-# cat /sys/devices/platform/soc/ee100000.sd/mmc_host/mmc1/mmc1:*/cid
-035344535530384780b1b8a11200d300
-# dd if=/dev/mmcblk1 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 13.4726 s, 39.8 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 25.1835 s, 21.3 MB/s
-# dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 20.9813 s, 25.6 MB/s
-
-# cat /sys/devices/platform/soc/ee160000.sd/mmc_host/mmc2/mmc2:*/cid
-1b534d3030303030103916141700f600
-# dd if=/dev/mmcblk2 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 17.4752 s, 30.7 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 25.9727 s, 20.7 MB/s
-# dd if=/dev/zero of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 21.4667 s, 25.0 MB/s
-
-# grep sd /proc/interrupts
-100:      90886          0     GIC-0 197 Level     ee100000.sd
-101:        676          0     GIC-0 199 Level     ee140000.sd
-102:      90884          0     GIC-0 200 Level     ee160000.sd
-178:          0          0  e6053000.gpio  12 Edge      ee100000.sd cd
-197:          0          0  e6054000.gpio  15 Edge      ee160000.sd cd
-
-Without Gen3 DMA Patches
-------------------------
-
-2fe35968fecc (mmc/next) mmc: renesas-sdhi: improve checkpatch cleanness
-
-# dmesg | egrep '(sd|mmc)'
-[    1.415665] sdhci: Secure Digital Host Controller Interface driver
-[    1.421875] sdhci: Copyright(c) Pierre Ossman
-[    1.426803] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    1.431720] sh_mobile_sdhi ee100000.sd: Got WP GPIO
-[    1.560977] sh_mobile_sdhi ee140000.sd: mmc0 base at 0xee140000 max clock rate 200 MHz
-[    1.569334] sh_mobile_sdhi ee160000.sd: Got CD GPIO
-[    1.574274] sh_mobile_sdhi ee160000.sd: Got WP GPIO
-[    1.588023] sdhci-pltfm: SDHCI platform and OF driver helper
-[    1.637177] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    1.642138] sh_mobile_sdhi ee100000.sd: Got WP GPIO
-[    1.769034] sh_mobile_sdhi ee100000.sd: mmc1 base at 0xee100000 max clock rate 200 MHz
-[    1.778299] sh_mobile_sdhi ee160000.sd: Got CD GPIO
-[    1.783226] sh_mobile_sdhi ee160000.sd: Got WP GPIO
-[    1.838282] mmc0: new high speed MMC card at address 0001
-[    1.848093] mmcblk0: mmc0:0001 eMMC   28.8 GiB 
-[    1.856812] mmcblk0boot0: mmc0:0001 eMMC   partition 1 4.00 MiB
-[    1.866898] mmcblk0boot1: mmc0:0001 eMMC   partition 2 4.00 MiB
-[    1.876978] mmcblk0rpmb: mmc0:0001 eMMC   partition 3 4.00 MiB
-[    1.886453]  mmcblk0: p1
-[    1.909059] sh_mobile_sdhi ee160000.sd: mmc2 base at 0xee160000 max clock rate 200 MHz
-[    2.085013] mmc1: new ultra high speed SDR50 SDHC card at address e624
-[    2.096042] mmcblk1: mmc1:e624 SU08G 7.40 GiB 
-[    2.225010] mmc2: new ultra high speed SDR50 SDHC card at address 0001
-[    2.231895] mmcblk2: mmc2:0001 00000 29.8 GiB 
-
-# grep sd /proc/interrupts
-100:       1156          0     GIC-0 197 Level     ee100000.sd
-101:       2980          0     GIC-0 199 Level     ee140000.sd
-102:       1158          0     GIC-0 200 Level     ee160000.sd
-178:          0          0  e6053000.gpio  12 Edge      ee100000.sd cd
-197:          0          0  e6054000.gpio  15 Edge      ee160000.sd cd
-
-# cat /sys/devices/platform/soc/ee100000.sd/mmc_host/mmc1/mmc1:*/cid
-035344535530384780b1b8a11200d300
-# dd if=/dev/mmcblk1 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 56.9853 s, 9.4 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 33.6495 s, 16.0 MB/s
-(run twice)
-# dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 28.9672 s, 18.5 MB/s
-
-# cat /sys/devices/platform/soc/ee160000.sd/mmc_host/mmc2/mmc2:*/cid
-1b534d3030303030103916141700f600
-# dd if=/dev/mmcblk2 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 56.6979 s, 9.5 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 32.6627 s, 16.4 MB/s
-# dd if=/dev/zero of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 28.0254 s, 19.2 MB/s
-
-# grep sd /proc/interrupts
-100:    4260209          0     GIC-0 197 Level     ee100000.sd
-101:       2980          0     GIC-0 199 Level     ee140000.sd
-102:    3194148          0     GIC-0 200 Level     ee160000.sd
-178:          0          0  e6053000.gpio  12 Edge      ee100000.sd cd
-197:          0          0  e6054000.gpio  15 Edge      ee160000.sd cd
-
-
-Lager/H2 ES2.0
-==============
-
-With Gen3 DMA Patches
----------------------
-
-97ac7011f8d3 (topic/sdhi-gen3-dma-2017-v3) mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
-
-# dmesg | egrep '(sd|mmc)'
-[    2.310666] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    2.316097] sh_mobile_sdhi ee140000.sd: Got CD GPIO
-[    2.375103] sh_mmcif ee220000.mmc: Chip version 0x0003, clock rate 12MHz
-[    2.481791] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    2.695235] sh_mobile_sdhi ee100000.sd: mmc1 base at 0xee100000 max clock rate 195 MHz
-[    2.703702] sh_mobile_sdhi ee140000.sd: Got CD GPIO
-[    2.783372] mmc0: new high speed MMC card at address 0001
-[    2.789193] mmcblk0: mmc0:0001 MMC08G 7.33 GiB 
-[    2.793912] mmcblk0boot0: mmc0:0001 MMC08G partition 1 2.00 MiB
-[    2.800052] mmcblk0boot1: mmc0:0001 MMC08G partition 2 2.00 MiB
-[    2.807724]  mmcblk0: p1
-[    2.915243] sh_mobile_sdhi ee140000.sd: mmc2 base at 0xee140000 max clock rate 97 MHz
-[    3.152305] mmc1: new ultra high speed SDR104 SDHC card at address 0001
-[    3.159305] mmcblk1: mmc1:0001 00000 29.8 GiB 
-[    3.395217] mmc2: new ultra high speed SDR50 SDHC card at address 0001
-[    3.402084] mmcblk2: mmc2:0001 00000 29.8 GiB 
-
-# grep sd /proc/interrupts
- 99:        325          0          0          0     GIC-0 197 Level     ee100000.sd
-100:        295          0          0          0     GIC-0 199 Level     ee140000.sd
-220:          0          0          0          0  e6053000.gpio   6 Edge      ee100000.sd cd
-236:          0          0          0          0  e6053000.gpio  22 Edge      ee140000.sd cd
-
-# cat /sys/devices/platform/ee100000.sd/mmc_host/mmc1/mmc1:*/cid
-1b534d303030303010ed85537600fc00
-# dd if=/dev/mmcblk1 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 10.7666 s, 49.9 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 25.6582 s, 20.9 MB/s
-# dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 16.8331 s, 31.9 MB/s
-
-# cat /sys/devices/platform/ee140000.sd/mmc_host/mmc2/mmc2:*/cid
-1b534d303030303010f0c957f500fc00
-# dd if=/dev/mmcblk2 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 15.2234 s, 35.3 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 30.2048 s, 17.8 MB/s
-# dd if=/dev/zero of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-536870912 bytes (537 MB) copied, 21.3844 s, 25.1 MB/s
-
-# grep sd /proc/interrupts
- 99:      45879          0          0          0     GIC-0 197 Level     ee100000.sd
-100:      45849          0          0          0     GIC-0 199 Level     ee140000.sd
-220:          0          0          0          0  e6053000.gpio   6 Edge      ee100000.sd cd
-236:          0          0          0          0  e6053000.gpio  22 Edge      ee140000.sd cd
- 99:      46126          0          0          0     GIC-0 197 Level     ee100000.sd
-100:      52421          0          0          0     GIC-0 199 Level     ee140000.sd
-220:          0          0          0          0  e6053000.gpio   6 Edge      ee100000.sd cd
-236:          0          0          0          0  e6053000.gpio  22 Edge      ee140000.sd cd
-
-Without Gen3 DMA Patches
-------------------------
-
-2fe35968fecc (mmc/next) mmc: renesas-sdhi: improve checkpatch cleanness
-
-# dmesg | egrep '(sd|mmc)'
-[    2.311173] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    2.316724] sh_mobile_sdhi ee140000.sd: Got CD GPIO
-[    2.375572] sh_mmcif ee220000.mmc: Chip version 0x0003, clock rate 12MHz
-[    2.482393] sh_mobile_sdhi ee100000.sd: Got CD GPIO
-[    2.695672] sh_mobile_sdhi ee100000.sd: mmc1 base at 0xee100000 max clock rate 195 MHz
-[    2.704159] sh_mobile_sdhi ee140000.sd: Got CD GPIO
-[    2.773784] mmc0: new high speed MMC card at address 0001
-[    2.779592] mmcblk0: mmc0:0001 MMC08G 7.33 GiB 
-[    2.784311] mmcblk0boot0: mmc0:0001 MMC08G partition 1 2.00 MiB
-[    2.790422] mmcblk0boot1: mmc0:0001 MMC08G partition 2 2.00 MiB
-[    2.798127]  mmcblk0: p1
-[    2.915668] sh_mobile_sdhi ee140000.sd: mmc2 base at 0xee140000 max clock rate 97 MHz
-[    3.172995] mmc1: new ultra high speed SDR104 SDHC card at address 0001
-[    3.179996] mmcblk1: mmc1:0001 00000 29.8 GiB 
-[    3.305653] mmc2: new ultra high speed SDR50 SDHC card at address 0001
-[    3.314303] mmcblk2: mmc2:0001 00000 29.8 GiB 
-
-# grep sd /proc/interrupts
- 99:        327          0          0          0     GIC-0 197 Level     ee100000.sd
-100:        289          0          0          0     GIC-0 199 Level     ee140000.sd
-220:          0          0          0          0  e6053000.gpio   6 Edge      ee100000.sd cd
-236:          0          0          0          0  e6053000.gpio  22 Edge      ee140000.sd cd
-
-# cat /sys/devices/platform/ee100000.sd/mmc_host/mmc1/mmc1:*/cid
-1b534d303030303010ed85537600fc00
-# dd if=/dev/mmcblk1 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 10.8066 s, 49.7 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 25.8626 s, 20.8 MB/s
-# dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 16.8923 s, 31.8 MB/s
-
-# cat /sys/devices/platform/ee140000.sd/mmc_host/mmc2/mmc2:*/cid
-1b534d303030303010f0c957f500fc00
-# dd if=/dev/mmcblk2 of=/dev/null bs=1M count=512 iflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 15.2994 s, 35.1 MB/s
-# dd if=/dev/urandom of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 30.2488 s, 17.7 MB/s
-# dd if=/dev/zero of=/dev/mmcblk2 bs=1M count=512 oflag=direct
-512+0 records in
-512+0 records out
-536870912 bytes (537 MB) copied, 21.3787 s, 25.1 MB/s
-
-# grep sd /proc/interrupts
- 99:      45881          0          0          0     GIC-0 197 Level     ee100000.sd
-100:      45843          0          0          0     GIC-0 199 Level     ee140000.sd
-220:          0          0          0          0  e6053000.gpio   6 Edge      ee100000.sd cd
-236:          0          0          0          0  e6053000.gpio  22 Edge      ee140000.sd cd
+Thanks,
