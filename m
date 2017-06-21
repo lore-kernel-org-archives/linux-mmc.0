@@ -1,99 +1,66 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH mmc/next v3 1/4] mmc: tmio, renesas-sdhi: add max_{segs,blk_count} to tmio_mmc_data
-Date: Wed, 21 Jun 2017 16:00:27 +0200
-Message-ID: <1498053630-7780-2-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH mmc/next v3 4/4] mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
+Date: Wed, 21 Jun 2017 16:00:30 +0200
+Message-ID: <1498053630-7780-5-git-send-email-horms+renesas@verge.net.au>
 References: <1498053630-7780-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:41927 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751041AbdFUOAw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2017 10:00:52 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1498053630-7780-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>, Simon Horman <horms+renesas@verge.net.au>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Gen3 SoCs are now supported by the internal DMAC variant of the SDHI driver.
+Remove them from the SYS-DMAC variant where only PIO mode is supported
+for those SoCs.
 
-Allow TMIO and SDHI driver implementations to provide values for
-max_segs and max_blk_count.
-
-A follow-up patch will set these values for Renesas Gen3 SoCs
-the using an SDHI driver.
-
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
 v2
-* Enhanced changelog
-* Include Renesas SDHI changes
+* Revised changelog
 ---
- drivers/mmc/host/renesas_sdhi.h      | 2 ++
- drivers/mmc/host/renesas_sdhi_core.c | 2 ++
- drivers/mmc/host/tmio_mmc_core.c     | 6 +++---
- include/linux/mfd/tmio.h             | 2 ++
- 4 files changed, 9 insertions(+), 3 deletions(-)
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 21 ---------------------
+ 1 file changed, 21 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index ca83acc113b8..b9dfea5d8193 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -31,6 +31,8 @@ struct renesas_sdhi_of_data {
- 	int scc_offset;
- 	struct renesas_sdhi_scc *taps;
- 	int taps_num;
-+	unsigned int max_blk_count;
-+	unsigned short max_segs;
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index b6789f5197b3..62feaacbf996 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -66,25 +66,6 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
  };
  
- int renesas_sdhi_probe(struct platform_device *pdev,
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index a4fb07d0ea91..569bcdd5e653 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -526,6 +526,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		mmc_data->capabilities |= of_data->capabilities;
- 		mmc_data->capabilities2 |= of_data->capabilities2;
- 		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-+		mmc_data->max_blk_count = of_data->max_blk_count;
-+		mmc_data->max_segs = of_data->max_segs;
- 		dma_priv->dma_buswidth = of_data->dma_buswidth;
- 		host->bus_shift = of_data->bus_shift;
- 	}
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 82b80d42f7ae..95c93c227c65 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1252,10 +1252,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
- 	mmc->caps2 |= pdata->capabilities2;
--	mmc->max_segs = 32;
-+	mmc->max_segs = pdata->max_segs ? : 32;
- 	mmc->max_blk_size = 512;
--	mmc->max_blk_count = (PAGE_SIZE / mmc->max_blk_size) *
--		mmc->max_segs;
-+	mmc->max_blk_count = pdata->max_blk_count ? :
-+		(PAGE_SIZE / mmc->max_blk_size) * mmc->max_segs;
- 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
- 	mmc->max_seg_size = mmc->max_req_size;
- 
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 26e8f8c0a6db..18b17a39d465 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -128,6 +128,8 @@ struct tmio_mmc_data {
- 	unsigned int			cd_gpio;
- 	int				alignment_shift;
- 	dma_addr_t			dma_rx_offset;
-+	unsigned int			max_blk_count;
-+	unsigned short			max_segs;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
+-/* Definitions for sampling clocks */
+-static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
+-	{
+-		.clk_rate = 0,
+-		.tap = 0x00000300,
+-	},
+-};
+-
+-static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+-			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
+-	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+-			  MMC_CAP_CMD23,
+-	.bus_shift	= 2,
+-	.scc_offset	= 0x1000,
+-	.taps		= rcar_gen3_scc_taps,
+-	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
+-};
+-
+ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
+@@ -98,8 +79,6 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+-	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
+ 	{},
  };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
 -- 
 2.1.4
-
