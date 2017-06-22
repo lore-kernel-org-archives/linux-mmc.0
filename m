@@ -1,58 +1,56 @@
-From: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [RESEND PATCH v2 7/7] ARM: dts: rockchip: add efuse device node for rk3228
-Date: Thu, 22 Jun 2017 18:32:40 +0800
-Message-ID: <1498127560-6960-1-git-send-email-frank.wang@rock-chips.com>
-References: <1498127402-6705-1-git-send-email-frank.wang@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1498127402-6705-1-git-send-email-frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.wu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+From: Will Newton <will.newton@gmail.com>
+Subject: [PATCH v2] omap_hsmmc: Reduce max_segs for reliability
+Date: Thu, 22 Jun 2017 11:57:53 +0100
+Message-ID: <20170622105753.28708-1-willn@resin.io>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36273 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752743AbdFVK6N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2017 06:58:13 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-omap@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, tony@atomide.com, kishon@ti.com, rk@ti.com, Will Newton <willn@resin.io>
 
-From: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Reduce max_segs to 64, a value that allows allocation of an entire
+EDMA descriptor list within a single page - EDMA descriptors
+are 40 bytes and the header is much larger. This avoids doing a
+higher order GFP_ATOMIC allocation in edma_prep_slave_sg
+when setting up a transfer which can potentially fail due to
+fragmentation under heavy I/O load.
 
-Add a efuse node in the device tree for the rk3228 SoC.
+The current value of 1024 is unusually high in comparison to
+other mmc host drivers which mostly use values of between 1
+and 256. The EDMA driver at present splits lists above 20
+segments in any case so reducing the size of lists we pass to
+it shouldn't add much overhead.
 
-Signed-off-by: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Signed-off-by: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Will Newton <willn@resin.io>
 ---
- arch/arm/boot/dts/rk322x.dtsi | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm/boot/dts/rk322x.dtsi b/arch/arm/boot/dts/rk322x.dtsi
-index bd7ef53..70ca103 100644
---- a/arch/arm/boot/dts/rk322x.dtsi
-+++ b/arch/arm/boot/dts/rk322x.dtsi
-@@ -336,6 +336,23 @@
- 		status = "disabled";
- 	};
+Changes in v2:
+ - More verbose commit message
+ - Rebased onto current master
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 8c39dcc..bbcca93 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2097,9 +2097,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		host->dbclk = NULL;
+ 	}
  
-+	efuse: efuse@11040000 {
-+		compatible = "rockchip,rk3228-efuse";
-+		reg = <0x11040000 0x20>;
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		clocks = <&cru PCLK_EFUSE_256>;
-+		clock-names = "pclk_efuse";
-+
-+		/* Data cells */
-+		efuse_id: id@7 {
-+			reg = <0x7 0x10>;
-+		};
-+		cpu_leakage: cpu_leakage@17 {
-+			reg = <0x17 0x1>;
-+		};
-+	};
-+
- 	i2c0: i2c@11050000 {
- 		compatible = "rockchip,rk3228-i2c";
- 		reg = <0x11050000 0x1000>;
+-	/* Since we do only SG emulation, we can have as many segs
+-	 * as we want. */
+-	mmc->max_segs = 1024;
++	/* Set this to a value that allows allocating an entire descriptor
++	 * list within a page (zero order allocation). */
++	mmc->max_segs = 64;
+ 
+ 	mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+ 	mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
 -- 
-2.0.0
+2.9.4
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
