@@ -1,41 +1,37 @@
 From: Frank Wang <frank.wang@rock-chips.com>
-Subject: [PATCH v2 0/7] add some device nodes support for rk322x SoC
-Date: Thu, 22 Jun 2017 15:20:48 +0800
-Message-ID: <1498116055-20977-1-git-send-email-frank.wang@rock-chips.com>
+Subject: [PATCH v2 3/7] Documentation: rockchip-dw-mshc: add description for rk3228
+Date: Thu, 22 Jun 2017 15:20:51 +0800
+Message-ID: <1498116055-20977-4-git-send-email-frank.wang@rock-chips.com>
+References: <1498116055-20977-1-git-send-email-frank.wang@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1498116055-20977-1-git-send-email-frank.wang@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: heiko@sntech.de, robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, chenjh@rock-chips.com, wmc@rock-chips.com, Frank Wang <frank.wang@rock-chips.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, chenjh@rock-chips.com, wmc@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-These series add sdmmc, sdio, and other device nodes support for
-rk322x SoCs, and also introduce rk3229 basic dtsi file specifically.
+From: Shawn Lin <shawn.lin@rock-chips.com>
 
-Changes from v1:
-- Extracted cpu enable-method from rk3229.dtsi to rk322x.dtsi
-- Updated the 'Reviewed-by' tag from Heiko Stuebner <heiko@sntech.de> for [PATCH v2 3/7].
+Add "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc" for
+dwmmc on rk322x platform.
 
-David Wu (1):
-  ARM: dts: rockchip: Add io-domain node for rk3228
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+---
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-Finley Xiao (1):
-  ARM: dts: rockchip: add efuse device node for rk3228
-
-Frank Wang (2):
-  ARM: dts: rockchip: add cpu enable method for rk3228 SoC
-  ARM: dts: rockchip: add basic dtsi file for RK3229 SoC
-
-Shawn Lin (3):
-  Documentation: rockchip-dw-mshc: add description for rk3228
-  ARM: dts: rockchip: fix compatible string for eMMC node of rk3228 SoC
-  ARM: dts: rockchip: add sdmmc and sdio nodes for rk3228 SoC
-
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  1 +
- arch/arm/boot/dts/rk3229-evb.dts                   |  2 +-
- arch/arm/boot/dts/rk3229.dtsi                      | 89 +++++++++++++++++++++
- arch/arm/boot/dts/rk322x.dtsi                      | 93 +++++++++++++++++++++-
- 4 files changed, 183 insertions(+), 2 deletions(-)
- create mode 100644 arch/arm/boot/dts/rk3229.dtsi
-
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+index 18e33cb..a600833 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+@@ -15,6 +15,7 @@ Required Properties:
+ 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+ 	- "rockchip,rv1108-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RV1108
+ 	- "rockchip,rk3036-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3036
++	- "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK322X
+ 	- "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3328
+ 	- "rockchip,rk3368-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3368
+ 	- "rockchip,rk3399-dw-mshc", "rockchip,rk3288-dw-mshc": for Rockchip RK3399
 -- 
 2.0.0
