@@ -1,75 +1,36 @@
-From: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 1/7] ARM: dts: rockchip: add cpu enable method for rk3228 SoC
-Date: Thu, 22 Jun 2017 15:20:49 +0800
-Message-ID: <1498116055-20977-2-git-send-email-frank.wang@rock-chips.com>
+From: Frank Wang <frank.wang@rock-chips.com>
+Subject: [PATCH v2 4/7] ARM: dts: rockchip: fix compatible string for eMMC node of rk3228 SoC
+Date: Thu, 22 Jun 2017 15:20:52 +0800
+Message-ID: <1498116055-20977-5-git-send-email-frank.wang@rock-chips.com>
 References: <1498116055-20977-1-git-send-email-frank.wang@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1498116055-20977-1-git-send-email-frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.wu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, chenjh-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1498116055-20977-1-git-send-email-frank.wang@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: heiko@sntech.de, robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com
+Cc: linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, charles.chen@rock-chips.com, kevan.lan@rock-chips.com, huangtao@rock-chips.com, finley.xiao@rock-chips.com, david.wu@rock-chips.com, shawn.lin@rock-chips.com, chenjh@rock-chips.com, wmc@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
 
-This patch sets PSCI as the default cpu enable-method for RK3228 SoC.
+From: Shawn Lin <shawn.lin@rock-chips.com>
 
-Signed-off-by: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+This adds amend compatible content for eMMC of RK3228 SoC.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
- arch/arm/boot/dts/rk322x.dtsi | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ arch/arm/boot/dts/rk322x.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/rk322x.dtsi b/arch/arm/boot/dts/rk322x.dtsi
-index 31e04e9..34d175e 100644
+index 34d175e..c4d43ce 100644
 --- a/arch/arm/boot/dts/rk322x.dtsi
 +++ b/arch/arm/boot/dts/rk322x.dtsi
-@@ -70,6 +70,7 @@
- 			#cooling-cells = <2>; /* min followed by max */
- 			clock-latency = <40000>;
- 			clocks = <&cru ARMCLK>;
-+			enable-method = "psci";
- 		};
- 
- 		cpu1: cpu@f01 {
-@@ -78,6 +79,7 @@
- 			reg = <0xf01>;
- 			resets = <&cru SRST_CORE1>;
- 			operating-points-v2 = <&cpu0_opp_table>;
-+			enable-method = "psci";
- 		};
- 
- 		cpu2: cpu@f02 {
-@@ -86,6 +88,7 @@
- 			reg = <0xf02>;
- 			resets = <&cru SRST_CORE2>;
- 			operating-points-v2 = <&cpu0_opp_table>;
-+			enable-method = "psci";
- 		};
- 
- 		cpu3: cpu@f03 {
-@@ -94,6 +97,7 @@
- 			reg = <0xf03>;
- 			resets = <&cru SRST_CORE3>;
- 			operating-points-v2 = <&cpu0_opp_table>;
-+			enable-method = "psci";
- 		};
+@@ -523,7 +523,7 @@
  	};
  
-@@ -151,6 +155,11 @@
- 		interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
- 	};
- 
-+	psci {
-+		compatible = "arm,psci-1.0", "arm,psci-0.2";
-+		method = "smc";
-+	};
-+
- 	timer {
- 		compatible = "arm,armv7-timer";
- 		arm,cpu-registers-not-fw-configured;
+ 	emmc: dwmmc@30020000 {
+-		compatible = "rockchip,rk3288-dw-mshc";
++		compatible = "rockchip,rk3228-dw-mshc", "rockchip,rk3288-dw-mshc";
+ 		reg = <0x30020000 0x4000>;
+ 		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+ 		clock-frequency = <37500000>;
 -- 
 2.0.0
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
