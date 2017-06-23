@@ -1,25 +1,38 @@
-From: Ivan Mikhaylov <ivan@de.ibm.com>
-Subject: [PATCH 0/2] add eMMC support for fsp2 board
-Date: Fri, 23 Jun 2017 18:47:24 +0300
-Message-ID: <20170623154726.15019-1-ivan@de.ibm.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alistair Popple <alistair@popple.id.au>, Matt Porter <mporter@kernel.crashing.org>, Adrian Hunter <adrian.hunter@intel.com>, Patrice Chotard <patrice.chotard@st.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Joel Stanley <joel@jms.id.au>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, linux-mmc@vger.kernel.org, kernel@stlinux.com
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 12/16] mmc: host: omap_hsmmc: Add support to set IODELAY
+ values
+Date: Fri, 23 Jun 2017 13:52:45 -0500
+Message-ID: <20170623185245.e4frut72cf6jhzb4@rob-hp-laptop>
+References: <20170616124544.15046-1-kishon@ti.com>
+ <20170616124544.15046-13-kishon@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170616124544.15046-13-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-fsp2 based on powerpc 476fpe using eMMC arasan, so we added support
-of this inside our dts and also enabled via additional
-dependence for sdhci-st driver in Kconfig.
+On Fri, Jun 16, 2017 at 06:15:40PM +0530, Kishon Vijay Abraham I wrote:
+> The data manual of J6/J6 Eco recommends to set different IODELAY values
+> depending on the mode in which the MMC/SD is enumerated in order to
+> ensure IO timings are met.
+> 
+> Add support to set the IODELAY values depending on the various MMC
+> modes using the pinctrl APIs.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+> ---
+>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   5 +
 
-this code depends on commit c4b56b023daa91953e9ebe91143e6ca156f0bcb7
-which is located in powerpc linux tree in 'next' branch.
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 
-Ivan Mikhaylov (2):
-  mmc/host: add FSP2(ppc476fpe) into depends for sdhci-st
-  44x/fsp2: enable eMMC arasan for fsp2 platform
-
- arch/powerpc/boot/dts/fsp2.dts          |   19 +++++++++++++++++++
- arch/powerpc/configs/44x/fsp2_defconfig |    2 ++
- drivers/mmc/host/Kconfig                |    2 +-
- 3 files changed, 22 insertions(+), 1 deletions(-)
+>  drivers/mmc/host/omap_hsmmc.c                      | 152 ++++++++++++++++++++-
+>  2 files changed, 154 insertions(+), 3 deletions(-)
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
