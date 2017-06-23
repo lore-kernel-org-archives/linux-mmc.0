@@ -1,56 +1,73 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: [PATCH v2] omap_hsmmc: Reduce max_segs for reliability
-Date: Thu, 22 Jun 2017 11:57:53 +0100
-Message-ID: <20170622105753.28708-1-willn@resin.io>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36273 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752743AbdFVK6N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2017 06:58:13 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ivan Mikhaylov <ivan@de.ibm.com>
+Subject: [PATCH 2/2] 44x/fsp2: enable eMMC arasan for fsp2 platform
+Date: Fri, 23 Jun 2017 18:47:26 +0300
+Message-ID: <20170623154726.15019-3-ivan@de.ibm.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alistair Popple <alistair@popple.id.au>, Matt Porter <mporter@kernel.crashing.org>, Adrian Hunter <adrian.hunter@intel.com>, Patrice Chotard <patrice.chotard@st.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Joel Stanley <joel@jms.id.au>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, linux-mmc@vger.kernel.org, kernel@stlinux.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-omap@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, tony@atomide.com, kishon@ti.com, rk@ti.com, Will Newton <willn@resin.io>
 
-Reduce max_segs to 64, a value that allows allocation of an entire
-EDMA descriptor list within a single page - EDMA descriptors
-are 40 bytes and the header is much larger. This avoids doing a
-higher order GFP_ATOMIC allocation in edma_prep_slave_sg
-when setting up a transfer which can potentially fail due to
-fragmentation under heavy I/O load.
+* add mmc0 section into dts for arasan
+* change defconfig appropriately
 
-The current value of 1024 is unusually high in comparison to
-other mmc host drivers which mostly use values of between 1
-and 256. The EDMA driver at present splits lists above 20
-segments in any case so reducing the size of lists we pass to
-it shouldn't add much overhead.
-
-Signed-off-by: Will Newton <willn@resin.io>
+Signed-off-by: Ivan Mikhaylov <ivan@de.ibm.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/powerpc/boot/dts/fsp2.dts          |   19 +++++++++++++++++++
+ arch/powerpc/configs/44x/fsp2_defconfig |    2 ++
+ 2 files changed, 21 insertions(+), 0 deletions(-)
 
-Changes in v2:
- - More verbose commit message
- - Rebased onto current master
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8c39dcc..bbcca93 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2097,9 +2097,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		host->dbclk = NULL;
- 	}
+diff --git a/arch/powerpc/boot/dts/fsp2.dts b/arch/powerpc/boot/dts/fsp2.dts
+index de9d606..6a63026 100644
+--- a/arch/powerpc/boot/dts/fsp2.dts
++++ b/arch/powerpc/boot/dts/fsp2.dts
+@@ -52,6 +52,7 @@
+ 	clocks {
+ 		mmc_clk: mmc_clk {
+ 			compatible = "fixed-clock";
++			#clock-cells = <0>;
+ 			clock-frequency = <50000000>;
+ 			clock-output-names = "mmc_clk";
+ 		};
+@@ -487,6 +488,24 @@
+ 					 /*RXDE*/  4 &UIC1_2 13 0x4>;
+ 		};
  
--	/* Since we do only SG emulation, we can have as many segs
--	 * as we want. */
--	mmc->max_segs = 1024;
-+	/* Set this to a value that allows allocating an entire descriptor
-+	 * list within a page (zero order allocation). */
-+	mmc->max_segs = 64;
- 
- 	mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
- 	mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
++		mmc0: sdhci@020c0000 {
++			compatible	= "st,sdhci-stih407", "st,sdhci";
++			reg		= <0x020c0000 0x20000>;
++			reg-names	= "mmc";
++			interrupts	= <21 0x4>;
++			interrupt-parent = <&UIC1_3>;
++			interrupt-names	= "mmcirq";
++			pinctrl-names	= "default";
++			pinctrl-0	= <>;
++			clock-names	= "mmc";
++			clocks		= <&mmc_clk>;
++			bus-width	= <4>;
++			non-removable;
++			sd-uhs-sdr50;
++			sd-uhs-sdr104;
++			sd-uhs-ddr50;
++		};
++
+ 		opb {
+ 			compatible = "ibm,opb";
+ 			#address-cells = <1>;
+diff --git a/arch/powerpc/configs/44x/fsp2_defconfig b/arch/powerpc/configs/44x/fsp2_defconfig
+index e8e6a69..935aabe 100644
+--- a/arch/powerpc/configs/44x/fsp2_defconfig
++++ b/arch/powerpc/configs/44x/fsp2_defconfig
+@@ -92,8 +92,10 @@ CONFIG_MMC_DEBUG=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SDHCI_OF_ARASAN=y
++CONFIG_MMC_SDHCI_ST=y
+ CONFIG_RTC_CLASS=y
+ CONFIG_RTC_DRV_M41T80=y
++CONFIG_RESET_CONTROLLER=y
+ CONFIG_EXT2_FS=y
+ CONFIG_EXT4_FS=y
+ CONFIG_EXT4_FS_POSIX_ACL=y
 -- 
-2.9.4
-
+1.7.1
