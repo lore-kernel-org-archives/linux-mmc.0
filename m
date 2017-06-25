@@ -1,38 +1,33 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 12/16] mmc: host: omap_hsmmc: Add support to set IODELAY
- values
-Date: Fri, 23 Jun 2017 13:52:45 -0500
-Message-ID: <20170623185245.e4frut72cf6jhzb4@rob-hp-laptop>
-References: <20170616124544.15046-1-kishon@ti.com>
- <20170616124544.15046-13-kishon@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V3 00/11] mmc: Add Command Queue support
+Date: Sun, 25 Jun 2017 22:52:32 +0300
+Message-ID: <20554e0f-4c9e-07f3-9e6b-60974db685d2@intel.com>
+References: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170616124544.15046-13-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:5445 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751136AbdFYT6m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 25 Jun 2017 15:58:42 -0400
+In-Reply-To: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Fri, Jun 16, 2017 at 06:15:40PM +0530, Kishon Vijay Abraham I wrote:
-> The data manual of J6/J6 Eco recommends to set different IODELAY values
-> depending on the mode in which the MMC/SD is enumerated in order to
-> ensure IO timings are met.
+On 06/15/2017 02:06 PM, Adrian Hunter wrote:
+> Hi
 > 
-> Add support to set the IODELAY values depending on the various MMC
-> modes using the pinctrl APIs.
+> Here is V3 of the hardware command queue patches without the software
+> command queue patches.
 > 
-> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-> Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-> ---
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   5 +
+> Is there any chance of this being queued for v4.13?
 
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-
->  drivers/mmc/host/omap_hsmmc.c                      | 152 ++++++++++++++++++++-
->  2 files changed, 154 insertions(+), 3 deletions(-)
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I really don't see any advantage to delaying these patches.  It just
+increases the difficulty of the inevitable backport, something Haibo Chen is
+now experiencing.  The new code in the core is pretty small and
+self-contained, so it is easy to see that there is little impact to anything
+outside cmdq.
