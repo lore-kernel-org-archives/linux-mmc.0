@@ -1,67 +1,63 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH V2] mmc: renesas_sdhi_core: on R-Car 2+, make use of CBSY bit
-Date: Wed, 28 Jun 2017 19:01:42 +0200
-Message-ID: <CAMuHMdXb2a30NjE9td8mNcDdsSpBdSX0_xup3NUWJs4_Q4msxg@mail.gmail.com>
-References: <20170628152156.18881-1-wsa+renesas@sang-engineering.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [RFC PATCH 0/2] mmc: sdhci: Add
+ SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
+Date: Wed, 28 Jun 2017 22:51:57 +0530
+Message-ID: <552ef0ba-91d5-ab9c-d55c-ac008608a689@codeaurora.org>
+References: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170628152156.18881-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
+Content-Language: en-US
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: srinivas.kandagatla@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Hi Srinivas,
 
-On Wed, Jun 28, 2017 at 5:21 PM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Most registers need to wait until the command is completed, not
-> necessarily until the bus is free. At least, R-Car 2+ SoCs can signal
-> that via the CBSY bit, so let's use it there instead of SCLKDIVEN to
-> save a little bit of delay.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->
-> Tested on H2 and M3-W.
->
-> Change since V1:
->
-> Rebased on top of mmc/next with Simon's Gen3 DMA patches.
->
->  drivers/mmc/host/renesas_sdhi_core.c | 17 ++++++++++++-----
->  1 file changed, 12 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 569bcdd5e6537a..be806d3e9afeec 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -398,12 +398,14 @@ static void renesas_sdhi_hw_reset(struct tmio_mmc_host *host)
->                        sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
->  }
->
-> -static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host)
-> +static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host, u32 bit)
->  {
->         int timeout = 1000;
-> +       /* CBSY is set when busy, SCLKDIVEN is cleared when busy */
-> +       u32 wait_state = (bit == TMIO_STAT_CMD_BUSY ? TMIO_STAT_CMD_BUSY : 0);
->
-> -       while (--timeout && !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
-> -                             & TMIO_STAT_SCLKDIVEN))
-> +       while (--timeout && (sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
-> +                             & bit) == wait_state)
+On 6/28/2017 7:05 PM, srinivas.kandagatla@linaro.org wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> 
+> This patchset adds quirk to support cards which have issues when sdma
+> boundary buffer bits are programmed in Block Size Register (0x04)
+> when using ADMA.
 
-Do you have any figures on the number of loops saved?
+Thanks for pointing out the reason of failure without this patch.
+Earlier I could not find the reason.
 
-Gr{oetje,eeting}s,
+Previous discussion link :-
+https://patchwork.kernel.org/patch/9200579/
 
-                        Geert
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+> 
+> First patch adds quirk and second one uses that quirk in msm sdhci driver.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Not sure if quirk will be the right way to go about this, or whether we 
+should make this functionality default since ADMA does not
+uses this (as per spec) ?
+Since other systems should not break (as Adrian was mentioning in the 
+discussion link above).
+
+Adrian/Ulf will know better on this.
+
+> 
+> Tested on DB410c with WLAN SDIO card.
+> 
+> thanks,
+> srini
+> 
+> Srinivas Kandagatla (2):
+>    mmc: sdhci: add quirk SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
+>    mmc: sdhci-msm: enable SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
+> 
+>   drivers/mmc/host/sdhci-msm.c |  3 ++-
+>   drivers/mmc/host/sdhci.c     | 24 ++++++++++++++++++------
+>   drivers/mmc/host/sdhci.h     |  2 ++
+>   3 files changed, 22 insertions(+), 7 deletions(-)
+> 
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
