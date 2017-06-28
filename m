@@ -1,49 +1,67 @@
 From: Andrea Adami <andrea.adami@gmail.com>
-Subject: [PATCH v4 4/9] mtd: nand: sharpsl.c: take in account partition parser
- types
-Date: Wed, 28 Jun 2017 22:30:31 +0200
-Message-ID: <1498681836-3765-5-git-send-email-andrea.adami@gmail.com>
+Subject: [PATCH v4 9/9] ARM: pxa: poodle.c: remove hardcoded partitioning, use sharpslpart parser
+Date: Wed, 28 Jun 2017 22:30:36 +0200
+Message-ID: <1498681836-3765-10-git-send-email-andrea.adami@gmail.com>
 References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mtd@lists.infradead.org
-Cc: Boris Brezillon <boris.brezillon@free-electrons.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, Robert Jarzmik <robert.jarzmik@free.fr>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
+Cc: David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
 ---
- drivers/mtd/nand/sharpsl.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/mach-pxa/poodle.c | 28 ++++++++--------------------
+ 1 file changed, 8 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mtd/nand/sharpsl.c b/drivers/mtd/nand/sharpsl.c
-index 064ca17..87c6fc2 100644
---- a/drivers/mtd/nand/sharpsl.c
-+++ b/drivers/mtd/nand/sharpsl.c
-@@ -183,7 +183,7 @@ static int sharpsl_nand_probe(struct platform_device *pdev)
- 	/* Register the partitions */
- 	mtd->name = "sharpsl-nand";
+diff --git a/arch/arm/mach-pxa/poodle.c b/arch/arm/mach-pxa/poodle.c
+index 62a1191..4881a43 100644
+--- a/arch/arm/mach-pxa/poodle.c
++++ b/arch/arm/mach-pxa/poodle.c
+@@ -333,24 +333,6 @@ static struct pxafb_mach_info poodle_fb_info = {
+ 	.lcd_conn	= LCD_COLOR_TFT_16BPP,
+ };
  
--	err = mtd_device_parse_register(mtd, NULL, NULL,
-+	err = mtd_device_parse_register(mtd, data->types, NULL,
- 					data->partitions, data->nr_partitions);
- 	if (err)
- 		goto err_add;
+-static struct mtd_partition sharpsl_nand_partitions[] = {
+-	{
+-		.name = "System Area",
+-		.offset = 0,
+-		.size = 7 * 1024 * 1024,
+-	},
+-	{
+-		.name = "Root Filesystem",
+-		.offset = 7 * 1024 * 1024,
+-		.size = 22 * 1024 * 1024,
+-	},
+-	{
+-		.name = "Home Filesystem",
+-		.offset = MTDPART_OFS_APPEND,
+-		.size = MTDPART_SIZ_FULL,
+-	},
+-};
+-
+ static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
+ 
+ static struct nand_bbt_descr sharpsl_bbt = {
+@@ -360,10 +342,16 @@ static struct nand_bbt_descr sharpsl_bbt = {
+ 	.pattern = scan_ff_pattern
+ };
+ 
++static const char * const probes[] = {
++	"cmdlinepart",
++	"ofpart",
++	"sharpslpart",
++	NULL,
++};
++
+ static struct sharpsl_nand_platform_data sharpsl_nand_platform_data = {
+ 	.badblock_pattern	= &sharpsl_bbt,
+-	.partitions		= sharpsl_nand_partitions,
+-	.nr_partitions		= ARRAY_SIZE(sharpsl_nand_partitions),
++	.types			= probes,
+ };
+ 
+ static struct resource sharpsl_nand_resources[] = {
 -- 
 2.7.4
-
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
