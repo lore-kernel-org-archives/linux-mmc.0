@@ -1,41 +1,42 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [RFC PATCH 0/2] mmc: sdhci: Add SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
-Date: Wed, 28 Jun 2017 15:35:02 +0200
-Message-ID: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:34895 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752042AbdF1NfO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jun 2017 09:35:14 -0400
-Received: by mail-io0-f169.google.com with SMTP id h134so35636390iof.2
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Jun 2017 06:35:13 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [RFC PATCH 2/2] mmc: sdhci-msm: enable SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
+Date: Wed, 28 Jun 2017 15:35:04 +0200
+Message-ID: <20170628133504.17422-3-srinivas.kandagatla@linaro.org>
+References: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patchset adds quirk to support cards which have issues when sdma
-boundary buffer bits are programmed in Block Size Register (0x04)
-when using ADMA.
+Programming legacy HOST SDMA Buffer Boundary bits in Block Size Register
+(0x04) is not supported in Qualcomm sdhci controllers. Writing to this
+would cause the controller not to transfer last block in case block size
+is 4 bytes or less.
 
-First patch adds quirk and second one uses that quirk in msm sdhci driver.
+This issue was noticed while testing sdio wlan card on Qcom DB410c board.
 
-Tested on DB410c with WLAN SDIO card.
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-thanks,
-srini
-
-Srinivas Kandagatla (2):
-  mmc: sdhci: add quirk SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
-  mmc: sdhci-msm: enable SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
-
- drivers/mmc/host/sdhci-msm.c |  3 ++-
- drivers/mmc/host/sdhci.c     | 24 ++++++++++++++++++------
- drivers/mmc/host/sdhci.h     |  2 ++
- 3 files changed, 22 insertions(+), 7 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 9d601dc0d646..50f650301ae6 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1114,7 +1114,8 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER,
+ 	.ops = &sdhci_msm_ops,
+ };
+ 
 -- 
 2.11.0
-
