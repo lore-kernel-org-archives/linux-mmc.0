@@ -1,204 +1,47 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] mmc: dw_mmc-rockchip: parse
- rockchip,desired-num-phases from DT
-Date: Thu, 29 Jun 2017 09:38:42 +0800
-Message-ID: <35413895-08d3-c916-e5ec-d5c087260391@rock-chips.com>
-References: <1494916134-68043-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20170516063039epcas1p49836d3f2fb67c402d6ffd30f7eebef96@epcas1p4.samsung.com>
- <1494916134-68043-2-git-send-email-shawn.lin@rock-chips.com>
- <87542133-3d88-ea4f-03b7-884274964e48@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87542133-3d88-ea4f-03b7-884274964e48-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: [PATCH] mmc: host: omap_hsmmc: constify dev_pm_ops structures.
+Date: Thu, 29 Jun 2017 13:39:29 +0530
+Message-ID: <8a917dbec5b7eb9fd463cc9b7a596ab831f04965.1498723559.git.arvind.yadav.cs@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:32979 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751638AbdF2IKV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jun 2017 04:10:21 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, dan.carpenter@oracle.com, linus.walleij@linaro.org, hkallweit1@gmail.com
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Jaehoon,
+dev_pm_ops are not supposed to change at runtime. All functions
+working with dev_pm_ops provided by <linux/device.h> work with const
+dev_pm_ops. So mark the non-const structs as const.
 
-On 2017/5/18 10:20, Jaehoon Chung wrote:
-> Hi Shawn,
-> 
-> On 05/16/2017 03:28 PM, Shawn Lin wrote:
->> Currently we unconditionally do tuning for each degree, which
->> costs 900ms for each boot and resume.
->>
->> May someone argue that this is a question of accuracy VS time. But I
->> would say it's a trick of how we need to do decision for our boards.
->> If we don't care the time we spend at all, we could definitely do tuning
->> for each degree. But when we need to improve the user experience, for
->> instance, speed up resuming from S3, we should also have the right to
->> do that. This patch add parsing "rockchip,desired-num-phases", for folks
->> to specify the number of doing tuning. If not specified, 360 will be used
->> as before.
->>
->> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> 
-> Will pick this patch with [PATCH 1/2] after getting acked tags from DT guys.
-> 
+File size before:
+   text	   data	    bss	    dec	    hex	filename
+  11586	    624	      0	  12210	   2fb2	drivers/mmc/host/omap_hsmmc.o
 
-patch 1 was acked by Rob, so I assume these two are material for 4.13?
+File size After adding 'const':
+   text	   data	    bss	    dec	    hex	filename
+  11778	    432	      0	  12210	   2fb2	drivers/mmc/host/omap_hsmmc.o
 
-> Best Regards,
-> Jaehoon Chung
-> 
->>
->> ---
->>
->> Changes in v2:
->> - rename property to rockchip,desired-num-phases
->>
->>   drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++--------------
->>   1 file changed, 30 insertions(+), 18 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
->> index 372fb6e..a3f1c2b 100644
->> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> @@ -25,6 +25,7 @@ struct dw_mci_rockchip_priv_data {
->>   	struct clk		*drv_clk;
->>   	struct clk		*sample_clk;
->>   	int			default_sample_phase;
->> +	int			num_phases;
->>   };
->>   
->>   static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->> @@ -133,8 +134,8 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>   	}
->>   }
->>   
->> -#define NUM_PHASES			360
->> -#define TUNING_ITERATION_TO_PHASE(i)	(DIV_ROUND_UP((i) * 360, NUM_PHASES))
->> +#define TUNING_ITERATION_TO_PHASE(i, num_phases) \
->> +		(DIV_ROUND_UP((i) * 360, num_phases))
->>   
->>   static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   {
->> @@ -159,13 +160,15 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   		return -EIO;
->>   	}
->>   
->> -	ranges = kmalloc_array(NUM_PHASES / 2 + 1, sizeof(*ranges), GFP_KERNEL);
->> +	ranges = kmalloc_array(priv->num_phases / 2 + 1,
->> +			       sizeof(*ranges), GFP_KERNEL);
->>   	if (!ranges)
->>   		return -ENOMEM;
->>   
->>   	/* Try each phase and extract good ranges */
->> -	for (i = 0; i < NUM_PHASES; ) {
->> -		clk_set_phase(priv->sample_clk, TUNING_ITERATION_TO_PHASE(i));
->> +	for (i = 0; i < priv->num_phases; ) {
->> +		clk_set_phase(priv->sample_clk,
->> +			      TUNING_ITERATION_TO_PHASE(i, priv->num_phases));
->>   
->>   		v = !mmc_send_tuning(mmc, opcode, NULL);
->>   
->> @@ -179,7 +182,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   		if (v) {
->>   			ranges[range_count-1].end = i;
->>   			i++;
->> -		} else if (i == NUM_PHASES - 1) {
->> +		} else if (i == priv->num_phases - 1) {
->>   			/* No extra skipping rules if we're at the end */
->>   			i++;
->>   		} else {
->> @@ -188,11 +191,11 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   			 * one since testing bad phases is slow.  Skip
->>   			 * 20 degrees.
->>   			 */
->> -			i += DIV_ROUND_UP(20 * NUM_PHASES, 360);
->> +			i += DIV_ROUND_UP(20 * priv->num_phases, 360);
->>   
->>   			/* Always test the last one */
->> -			if (i >= NUM_PHASES)
->> -				i = NUM_PHASES - 1;
->> +			if (i >= priv->num_phases)
->> +				i = priv->num_phases - 1;
->>   		}
->>   
->>   		prev_v = v;
->> @@ -210,7 +213,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   		range_count--;
->>   	}
->>   
->> -	if (ranges[0].start == 0 && ranges[0].end == NUM_PHASES - 1) {
->> +	if (ranges[0].start == 0 && ranges[0].end == priv->num_phases - 1) {
->>   		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
->>   		dev_info(host->dev, "All phases work, using default phase %d.",
->>   			 priv->default_sample_phase);
->> @@ -222,7 +225,7 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   		int len = (ranges[i].end - ranges[i].start + 1);
->>   
->>   		if (len < 0)
->> -			len += NUM_PHASES;
->> +			len += priv->num_phases;
->>   
->>   		if (longest_range_len < len) {
->>   			longest_range_len = len;
->> @@ -230,25 +233,30 @@ static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>   		}
->>   
->>   		dev_dbg(host->dev, "Good phase range %d-%d (%d len)\n",
->> -			TUNING_ITERATION_TO_PHASE(ranges[i].start),
->> -			TUNING_ITERATION_TO_PHASE(ranges[i].end),
->> +			TUNING_ITERATION_TO_PHASE(ranges[i].start,
->> +						  priv->num_phases),
->> +			TUNING_ITERATION_TO_PHASE(ranges[i].end,
->> +						  priv->num_phases),
->>   			len
->>   		);
->>   	}
->>   
->>   	dev_dbg(host->dev, "Best phase range %d-%d (%d len)\n",
->> -		TUNING_ITERATION_TO_PHASE(ranges[longest_range].start),
->> -		TUNING_ITERATION_TO_PHASE(ranges[longest_range].end),
->> +		TUNING_ITERATION_TO_PHASE(ranges[longest_range].start,
->> +					  priv->num_phases),
->> +		TUNING_ITERATION_TO_PHASE(ranges[longest_range].end,
->> +					  priv->num_phases),
->>   		longest_range_len
->>   	);
->>   
->>   	middle_phase = ranges[longest_range].start + longest_range_len / 2;
->> -	middle_phase %= NUM_PHASES;
->> +	middle_phase %= priv->num_phases;
->>   	dev_info(host->dev, "Successfully tuned phase to %d\n",
->> -		 TUNING_ITERATION_TO_PHASE(middle_phase));
->> +		 TUNING_ITERATION_TO_PHASE(middle_phase, priv->num_phases));
->>   
->>   	clk_set_phase(priv->sample_clk,
->> -		      TUNING_ITERATION_TO_PHASE(middle_phase));
->> +		      TUNING_ITERATION_TO_PHASE(middle_phase,
->> +						priv->num_phases));
->>   
->>   free:
->>   	kfree(ranges);
->> @@ -264,6 +272,10 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
->>   	if (!priv)
->>   		return -ENOMEM;
->>   
->> +	if (of_property_read_u32(np, "rockchip,desired-num-phases",
->> +					&priv->num_phases))
->> +		priv->num_phases = 360;
->> +
->>   	if (of_property_read_u32(np, "rockchip,default-sample-phase",
->>   					&priv->default_sample_phase))
->>   		priv->default_sample_phase = 0;
->>
-> 
-> 
-> _______________________________________________
-> Linux-rockchip mailing list
-> Linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-rockchip
-> 
-> 
-> 
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 8c39dcc..5b391dc 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2342,7 +2342,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+ 	return 0;
+ }
+ 
+-static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
++static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+ 	.runtime_suspend = omap_hsmmc_runtime_suspend,
+ 	.runtime_resume = omap_hsmmc_runtime_resume,
+-- 
+1.9.1
+
