@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 3/3 v4] mmc: debugfs: Move block debugfs into block module
-Date: Fri, 30 Jun 2017 14:06:49 +0200
-Message-ID: <20170630120649.27007-3-linus.walleij@linaro.org>
+Subject: [PATCH 2/3 v4] mmc: ops: export mmc_get_status()
+Date: Fri, 30 Jun 2017 14:06:48 +0200
+Message-ID: <20170630120649.27007-2-linus.walleij@linaro.org>
 References: <20170630120649.27007-1-linus.walleij@linaro.org>
 Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <20170630120649.27007-1-linus.walleij@linaro.org>
@@ -10,354 +10,33 @@ To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-If we don't have the block layer enabled, we do not present card
-status and extcsd in the debugfs.
-
-Debugfs is not ABI, and maintaining files of no relevance for
-non-block devices comes at a high maintenance cost if we shall
-support it with the block layer compiled out.
-
-The debugfs entries suffer from all the same starvation
-issues as the other userspace things, under e.g. a heavy
-dd operation.
-
-The expected number of debugfs users utilizing these two
-debugfs files is already low as there is an ioctl() to get the
-same information using the mmc-tools, and of these few users
-the expected number of people using it on SDIO or combo cards
-are expected to be zero.
-
-It is therefore logical to move this over to the block layer
-when it is enabled, using the new custom requests and issue
-it using the block request queue.
-
-On the other hand it moves some debugfs code from debugfs.c
-and into block.c.
-
-Tested during heavy dd load by cat:in the status file.
+This function retrieves the status of the card with the default
+number of retries. Since the block layer wants to use this, and
+since the block layer is a loadable kernel module, we need to
+export this symbol.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
 ChangeLog v3->v4:
-- Squash all the refactorings of these operations into a big
-  commit simply moving all the debugfs over to the block layer
-  and only creating the files from there.
-- Avoid the whole middle-step of creating #if IS_ENABLED()
-  that was required to move it stepwise from the debugfs file
-  to the block file.
+- No changes just resending
+ChangeLog v2->v3:
+- New patch to fix a build error, enumerating v3 to keep it
+  together with the other patches.
 ---
- drivers/mmc/core/block.c   | 143 +++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/debugfs.c |  89 ----------------------------
- drivers/mmc/core/queue.h   |   4 ++
- 3 files changed, 147 insertions(+), 89 deletions(-)
+ drivers/mmc/core/mmc_ops.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index d410f578b8df..dbfbc76576ea 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -36,6 +36,7 @@
- #include <linux/compat.h>
- #include <linux/pm_runtime.h>
- #include <linux/idr.h>
-+#include <linux/debugfs.h>
- 
- #include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
-@@ -1176,6 +1177,8 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 	struct mmc_card *card = mq->card;
- 	struct mmc_blk_data *md = mq->blkdata;
- 	struct mmc_blk_ioc_data **idata;
-+	u8 **ext_csd;
-+	u32 status;
- 	int ret;
- 	int i;
- 
-@@ -1205,6 +1208,15 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 			card->ext_csd.boot_ro_lock |=
- 				EXT_CSD_BOOT_WP_B_PWR_WP_EN;
- 		break;
-+	case MMC_DRV_OP_GET_CARD_STATUS:
-+		ret = mmc_send_status(card, &status);
-+		if (!ret)
-+			ret = status;
-+		break;
-+	case MMC_DRV_OP_GET_EXT_CSD:
-+		ext_csd = mq_rq->drv_op_data;
-+		ret = mmc_get_ext_csd(card, ext_csd);
-+		break;
- 	default:
- 		pr_err("%s: unknown driver specific operation\n",
- 		       md->disk->disk_name);
-@@ -2236,6 +2248,134 @@ static int mmc_add_disk(struct mmc_blk_data *md)
- 	return ret;
- }
- 
-+#ifdef CONFIG_DEBUG_FS
-+
-+static int mmc_dbg_card_status_get(void *data, u64 *val)
-+{
-+	struct mmc_card *card = data;
-+	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
-+	struct mmc_queue *mq = &md->queue;
-+	struct request *req;
-+	int ret;
-+
-+	/* Ask the block layer about the card status */
-+	req = blk_get_request(mq->queue, REQ_OP_DRV_IN, __GFP_RECLAIM);
-+	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_CARD_STATUS;
-+	blk_execute_rq(mq->queue, NULL, req, 0);
-+	ret = req_to_mmc_queue_req(req)->drv_op_result;
-+	if (ret >= 0) {
-+		*val = ret;
-+		ret = 0;
-+	}
-+
-+	return ret;
-+}
-+DEFINE_SIMPLE_ATTRIBUTE(mmc_dbg_card_status_fops, mmc_dbg_card_status_get,
-+		NULL, "%08llx\n");
-+
-+/* That is two digits * 512 + 1 for newline */
-+#define EXT_CSD_STR_LEN 1025
-+
-+static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
-+{
-+	struct mmc_card *card = inode->i_private;
-+	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
-+	struct mmc_queue *mq = &md->queue;
-+	struct request *req;
-+	char *buf;
-+	ssize_t n = 0;
-+	u8 *ext_csd;
-+	int err, i;
-+
-+	buf = kmalloc(EXT_CSD_STR_LEN + 1, GFP_KERNEL);
-+	if (!buf)
-+		return -ENOMEM;
-+
-+	/* Ask the block layer for the EXT CSD */
-+	req = blk_get_request(mq->queue, REQ_OP_DRV_IN, __GFP_RECLAIM);
-+	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_EXT_CSD;
-+	req_to_mmc_queue_req(req)->drv_op_data = &ext_csd;
-+	blk_execute_rq(mq->queue, NULL, req, 0);
-+	err = req_to_mmc_queue_req(req)->drv_op_result;
-+	if (err) {
-+		pr_err("FAILED %d\n", err);
-+		goto out_free;
-+	}
-+
-+	for (i = 0; i < 512; i++)
-+		n += sprintf(buf + n, "%02x", ext_csd[i]);
-+	n += sprintf(buf + n, "\n");
-+
-+	if (n != EXT_CSD_STR_LEN) {
-+		err = -EINVAL;
-+		goto out_free;
-+	}
-+
-+	filp->private_data = buf;
-+	kfree(ext_csd);
-+	return 0;
-+
-+out_free:
-+	kfree(buf);
-+	return err;
-+}
-+
-+static ssize_t mmc_ext_csd_read(struct file *filp, char __user *ubuf,
-+				size_t cnt, loff_t *ppos)
-+{
-+	char *buf = filp->private_data;
-+
-+	return simple_read_from_buffer(ubuf, cnt, ppos,
-+				       buf, EXT_CSD_STR_LEN);
-+}
-+
-+static int mmc_ext_csd_release(struct inode *inode, struct file *file)
-+{
-+	kfree(file->private_data);
-+	return 0;
-+}
-+
-+static const struct file_operations mmc_dbg_ext_csd_fops = {
-+	.open		= mmc_ext_csd_open,
-+	.read		= mmc_ext_csd_read,
-+	.release	= mmc_ext_csd_release,
-+	.llseek		= default_llseek,
-+};
-+
-+static int mmc_blk_add_debugfs(struct mmc_card *card)
-+{
-+	struct dentry *root;
-+
-+	if (!card->debugfs_root)
-+		return 0;
-+
-+	root = card->debugfs_root;
-+
-+	if (mmc_card_mmc(card) || mmc_card_sd(card)) {
-+		if (!debugfs_create_file("status", S_IRUSR, root, card,
-+					 &mmc_dbg_card_status_fops))
-+			return -EIO;
-+	}
-+
-+	if (mmc_card_mmc(card)) {
-+		if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
-+					 &mmc_dbg_ext_csd_fops))
-+			return -EIO;
-+	}
-+
-+	return 0;
-+}
-+
-+
-+#else
-+
-+static int mmc_blk_add_debugfs(struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+#endif /* CONFIG_DEBUG_FS */
-+
- static int mmc_blk_probe(struct mmc_card *card)
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 5f7c5920231a..b56fa822ab6b 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -83,6 +83,7 @@ int mmc_send_status(struct mmc_card *card, u32 *status)
  {
- 	struct mmc_blk_data *md, *part_md;
-@@ -2272,6 +2412,9 @@ static int mmc_blk_probe(struct mmc_card *card)
- 			goto out;
- 	}
- 
-+	/* Add two debugfs entries */
-+	mmc_blk_add_debugfs(card);
-+
- 	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
- 	pm_runtime_use_autosuspend(&card->dev);
- 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index a1fba5732d66..01e459a34f33 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -281,85 +281,6 @@ void mmc_remove_host_debugfs(struct mmc_host *host)
- 	debugfs_remove_recursive(host->debugfs_root);
+ 	return __mmc_send_status(card, status, MMC_CMD_RETRIES);
  }
++EXPORT_SYMBOL_GPL(mmc_send_status);
  
--static int mmc_dbg_card_status_get(void *data, u64 *val)
--{
--	struct mmc_card	*card = data;
--	u32		status;
--	int		ret;
--
--	mmc_get_card(card);
--
--	ret = mmc_send_status(data, &status);
--	if (!ret)
--		*val = status;
--
--	mmc_put_card(card);
--
--	return ret;
--}
--DEFINE_SIMPLE_ATTRIBUTE(mmc_dbg_card_status_fops, mmc_dbg_card_status_get,
--		NULL, "%08llx\n");
--
--#define EXT_CSD_STR_LEN 1025
--
--static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
--{
--	struct mmc_card *card = inode->i_private;
--	char *buf;
--	ssize_t n = 0;
--	u8 *ext_csd;
--	int err, i;
--
--	buf = kmalloc(EXT_CSD_STR_LEN + 1, GFP_KERNEL);
--	if (!buf)
--		return -ENOMEM;
--
--	mmc_get_card(card);
--	err = mmc_get_ext_csd(card, &ext_csd);
--	mmc_put_card(card);
--	if (err)
--		goto out_free;
--
--	for (i = 0; i < 512; i++)
--		n += sprintf(buf + n, "%02x", ext_csd[i]);
--	n += sprintf(buf + n, "\n");
--
--	if (n != EXT_CSD_STR_LEN) {
--		err = -EINVAL;
--		goto out_free;
--	}
--
--	filp->private_data = buf;
--	kfree(ext_csd);
--	return 0;
--
--out_free:
--	kfree(buf);
--	return err;
--}
--
--static ssize_t mmc_ext_csd_read(struct file *filp, char __user *ubuf,
--				size_t cnt, loff_t *ppos)
--{
--	char *buf = filp->private_data;
--
--	return simple_read_from_buffer(ubuf, cnt, ppos,
--				       buf, EXT_CSD_STR_LEN);
--}
--
--static int mmc_ext_csd_release(struct inode *inode, struct file *file)
--{
--	kfree(file->private_data);
--	return 0;
--}
--
--static const struct file_operations mmc_dbg_ext_csd_fops = {
--	.open		= mmc_ext_csd_open,
--	.read		= mmc_ext_csd_read,
--	.release	= mmc_ext_csd_release,
--	.llseek		= default_llseek,
--};
--
- void mmc_add_card_debugfs(struct mmc_card *card)
+ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
  {
- 	struct mmc_host	*host = card->host;
-@@ -382,16 +303,6 @@ void mmc_add_card_debugfs(struct mmc_card *card)
- 	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
- 		goto err;
- 
--	if (mmc_card_mmc(card) || mmc_card_sd(card))
--		if (!debugfs_create_file("status", S_IRUSR, root, card,
--					&mmc_dbg_card_status_fops))
--			goto err;
--
--	if (mmc_card_mmc(card))
--		if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
--					&mmc_dbg_ext_csd_fops))
--			goto err;
--
- 	return;
- 
- err:
-diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-index cf26a15a64bf..04fc89360a7a 100644
---- a/drivers/mmc/core/queue.h
-+++ b/drivers/mmc/core/queue.h
-@@ -36,10 +36,14 @@ struct mmc_blk_request {
-  * enum mmc_drv_op - enumerates the operations in the mmc_queue_req
-  * @MMC_DRV_OP_IOCTL: ioctl operation
-  * @MMC_DRV_OP_BOOT_WP: write protect boot partitions
-+ * @MMC_DRV_OP_GET_CARD_STATUS: get card status
-+ * @MMC_DRV_OP_GET_EXT_CSD: get the EXT CSD from an eMMC card
-  */
- enum mmc_drv_op {
- 	MMC_DRV_OP_IOCTL,
- 	MMC_DRV_OP_BOOT_WP,
-+	MMC_DRV_OP_GET_CARD_STATUS,
-+	MMC_DRV_OP_GET_EXT_CSD,
- };
- 
- struct mmc_queue_req {
 -- 
 2.9.4
