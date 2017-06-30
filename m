@@ -1,103 +1,88 @@
-From: Ivan Mikhaylov <ivan@de.ibm.com>
-Subject: [PATCH v1 2/2] 44x/fsp2: enable eMMC arasan for fsp2 platform
-Date: Fri, 30 Jun 2017 14:53:31 +0300
-Message-ID: <20170630115331.73869-3-ivan@de.ibm.com>
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Alistair Popple <alistair@popple.id.au>, Matt Porter <mporter@kernel.crashing.org>, Adrian Hunter <adrian.hunter@intel.com>, Patrice Chotard <patrice.chotard@st.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Mackerras <paulus@samba.org>, Joel Stanley <joel@jms.id.au>, linuxppc-dev@lists.ozlabs.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 1/3 v4] mmc: block: Anonymize the drv op data pointer
+Date: Fri, 30 Jun 2017 14:06:47 +0200
+Message-ID: <20170630120649.27007-1-linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:34615 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751649AbdF3MHO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jun 2017 08:07:14 -0400
+Received: by mail-lf0-f45.google.com with SMTP id l13so69096079lfl.1
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jun 2017 05:07:13 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Add mmc0 changes for enabling arasan emmc and change
-defconfig appropriately.
+We have a data pointer for the ioctl() data, but we need to
+pass other data along with the DRV_OP:s, so make this a
+void * so it can be reused.
 
-Signed-off-by: Ivan Mikhaylov <ivan@de.ibm.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- arch/powerpc/boot/dts/fsp2.dts          |   33 +++++++++++++++++-------------
- arch/powerpc/configs/44x/fsp2_defconfig |    2 +
- 2 files changed, 21 insertions(+), 14 deletions(-)
+ChangeLog v3->v4:
+- No changes just resending
+ChangeLog v2->v3:
+- No changes just resending
+---
+ drivers/mmc/core/block.c | 8 +++++---
+ drivers/mmc/core/queue.h | 2 +-
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/arch/powerpc/boot/dts/fsp2.dts b/arch/powerpc/boot/dts/fsp2.dts
-index 475953a..6a63026 100644
---- a/arch/powerpc/boot/dts/fsp2.dts
-+++ b/arch/powerpc/boot/dts/fsp2.dts
-@@ -52,6 +52,7 @@
- 	clocks {
- 		mmc_clk: mmc_clk {
- 			compatible = "fixed-clock";
-+			#clock-cells = <0>;
- 			clock-frequency = <50000000>;
- 			clock-output-names = "mmc_clk";
- 		};
-@@ -359,20 +360,6 @@
- 		interrupts = <31 0x4 15 0x84>;
- 	};
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 3c7efbdc8591..d410f578b8df 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -598,7 +598,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 		__GFP_RECLAIM);
+ 	idatas[0] = idata;
+ 	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
+-	req_to_mmc_queue_req(req)->idata = idatas;
++	req_to_mmc_queue_req(req)->drv_op_data = idatas;
+ 	req_to_mmc_queue_req(req)->ioc_count = 1;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+ 	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
+@@ -674,7 +674,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 		idata[0]->ic.write_flag ? REQ_OP_DRV_OUT : REQ_OP_DRV_IN,
+ 		__GFP_RECLAIM);
+ 	req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_IOCTL;
+-	req_to_mmc_queue_req(req)->idata = idata;
++	req_to_mmc_queue_req(req)->drv_op_data = idata;
+ 	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
+ 	blk_execute_rq(mq->queue, NULL, req, 0);
+ 	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
+@@ -1175,6 +1175,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_queue_req *mq_rq;
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_blk_data *md = mq->blkdata;
++	struct mmc_blk_ioc_data **idata;
+ 	int ret;
+ 	int i;
  
--	mmc0: sdhci@020c0000 {
--		compatible	= "st,sdhci-stih407", "st,sdhci";
--		status		= "disabled";
--		reg		= <0x020c0000 0x20000>;
--		reg-names	= "mmc";
--		interrupt-parent = <&UIC1_3>;
--		interrupts	= <21 0x4 22 0x4>;
--		interrupt-names	= "mmcirq";
--		pinctrl-names	= "default";
--		pinctrl-0	= <>;
--		clock-names	= "mmc";
--		clocks		= <&mmc_clk>;
--	};
--
- 	plb6 {
- 		compatible = "ibm,plb6";
- 		#address-cells = <2>;
-@@ -501,6 +488,24 @@
- 					 /*RXDE*/  4 &UIC1_2 13 0x4>;
- 		};
+@@ -1182,8 +1183,9 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
  
-+		mmc0: sdhci@020c0000 {
-+			compatible	= "st,sdhci-stih407", "st,sdhci";
-+			reg		= <0x020c0000 0x20000>;
-+			reg-names	= "mmc";
-+			interrupts	= <21 0x4>;
-+			interrupt-parent = <&UIC1_3>;
-+			interrupt-names	= "mmcirq";
-+			pinctrl-names	= "default";
-+			pinctrl-0	= <>;
-+			clock-names	= "mmc";
-+			clocks		= <&mmc_clk>;
-+			bus-width	= <4>;
-+			non-removable;
-+			sd-uhs-sdr50;
-+			sd-uhs-sdr104;
-+			sd-uhs-ddr50;
-+		};
-+
- 		opb {
- 			compatible = "ibm,opb";
- 			#address-cells = <1>;
-diff --git a/arch/powerpc/configs/44x/fsp2_defconfig b/arch/powerpc/configs/44x/fsp2_defconfig
-index e8e6a69..935aabe 100644
---- a/arch/powerpc/configs/44x/fsp2_defconfig
-+++ b/arch/powerpc/configs/44x/fsp2_defconfig
-@@ -92,8 +92,10 @@ CONFIG_MMC_DEBUG=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_SDHCI_OF_ARASAN=y
-+CONFIG_MMC_SDHCI_ST=y
- CONFIG_RTC_CLASS=y
- CONFIG_RTC_DRV_M41T80=y
-+CONFIG_RESET_CONTROLLER=y
- CONFIG_EXT2_FS=y
- CONFIG_EXT4_FS=y
- CONFIG_EXT4_FS_POSIX_ACL=y
+ 	switch (mq_rq->drv_op) {
+ 	case MMC_DRV_OP_IOCTL:
++		idata = mq_rq->drv_op_data;
+ 		for (i = 0; i < mq_rq->ioc_count; i++) {
+-			ret = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
++			ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+ 			if (ret)
+ 				break;
+ 		}
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index 361b46408e0f..cf26a15a64bf 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -51,7 +51,7 @@ struct mmc_queue_req {
+ 	struct mmc_async_req	areq;
+ 	enum mmc_drv_op		drv_op;
+ 	int			drv_op_result;
+-	struct mmc_blk_ioc_data	**idata;
++	void			*drv_op_data;
+ 	unsigned int		ioc_count;
+ };
+ 
 -- 
-1.7.1
+2.9.4
+
