@@ -1,33 +1,41 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/4] mmc: tmio: remove obsolete TMIO_BBS
-Date: Fri, 30 Jun 2017 13:30:49 +0200
-Message-ID: <CAMuHMdVaQG5+-XRfycONtC0pgfJNjdnAyf2+62CuopdWrpqDRQ@mail.gmail.com>
-References: <20170630105649.16137-1-wsa+renesas@sang-engineering.com> <20170630105649.16137-2-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170630105649.16137-2-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+From: Ivan Mikhaylov <ivan@de.ibm.com>
+Subject: [PATCH v1 1/2] mmc/host: add FSP2(ppc476fpe) into depends for sdhci-st
+Date: Fri, 30 Jun 2017 14:53:30 +0300
+Message-ID: <20170630115331.73869-2-ivan@de.ibm.com>
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Alistair Popple <alistair@popple.id.au>, Matt Porter <mporter@kernel.crashing.org>, Adrian Hunter <adrian.hunter@intel.com>, Patrice Chotard <patrice.chotard@st.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Mackerras <paulus@samba.org>, Joel Stanley <joel@jms.id.au>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 30, 2017 at 12:56 PM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Since commit 10c7fcbd0f00a0 ("ARM: shmobile: sh7372: Remove ZBOOT
-> MMC/SDHI support"), this define is not needed anymore.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+shdci-st driver can be used for ppc476 fsp2 soc.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Ivan Mikhaylov <ivan@de.ibm.com>
+---
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2eb9701..edf5787 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -354,7 +354,7 @@ config MMC_MOXART
+ 
+ config MMC_SDHCI_ST
+ 	tristate "SDHCI support on STMicroelectronics SoC"
+-	depends on ARCH_STI
++	depends on ARCH_STI || FSP2
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+-- 
+1.7.1
