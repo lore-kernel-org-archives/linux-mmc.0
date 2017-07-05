@@ -1,31 +1,44 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to
-        block requests
-Date: Wed, 5 Jul 2017 21:00:16 +0200
-Message-ID: <20170705190016.GA7008@lst.de>
-References: <20170518092936.9277-1-linus.walleij@linaro.org> <20170518092936.9277-4-linus.walleij@linaro.org> <20170518093614.GB9250@lst.de>
+From: Bertin Paul <bertipau4@gmail.com>
+Subject: Good day...!!
+Date: Wed, 5 Jul 2017 20:34:30 +0000
+Message-ID: <CAOdfs1ePH=-qctn90Uz23eTDz84dQGahPr7SbHjjnueN8GU5Kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-block-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170518093614.GB9250@lst.de>
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:36495 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753214AbdGEUeq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 16:34:46 -0400
+Received: by mail-yb0-f195.google.com with SMTP id 62so10085ybb.3
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Jul 2017 13:34:41 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
+PLEASE RESPONSE URGENT!
 
-On Thu, May 18, 2017 at 11:36:14AM +0200, Christoph Hellwig wrote:
-> On Thu, May 18, 2017 at 11:29:34AM +0200, Linus Walleij wrote:
-> > We are storing the ioctl() in/out argument as a pointer in
-> > the per-request struct mmc_blk_request container.
-> 
-> Btw, for the main ioctl data (not the little reponse field) it might
-> make sense to use blk_rq_map_user, which will do a get_user_pages
-> on the user data if the alignment fits, and otherwise handle the
-> kernel bounce buffering for you.  This should simplify the code
-> quite a bit more, and in the case where you can access the user
-> memory directly provide a nice little performance boost.
+I am Dr.Bertin Paul, the Audit and Account Manager (A.D.B)Bank in
+Ouagadougou Burkina Faso,west africa
 
-Did you get a chance to look into this?
+I have a business transaction for you.In my department i discovered an
+abandoned Sum of US$10.2 Million Dollars.In an account that belongs to
+one of our late foreign customer who died on Air crash with his family
+member. ever Since he died,Nobody to claim the left over balance in
+the account.
+It is therefore upon this discovery that I decided to seek your
+assistance to present you as his business associate for my bank to
+transfer the funds to your account.
+
+If you accept i would give you the guide lines of how we can achieve
+this transfer of the balance $10.2 Million Dollars to your account.
+the fund will be share 50-50%. by both of us.
+if you are capable to handle this transaction please furnish me the
+following information for more details.
+
+Full names:..
+Country:..
+Your pravite phone number:..
+Your Age/Sex:..
+
+My Regards
+Dr Bertin Paul.
+Email: bertpaul147@outlook.fr
