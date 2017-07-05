@@ -1,170 +1,47 @@
-From: Quentin Schulz <quentin.schulz@free-electrons.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
- resume from deepest PM
-Date: Wed, 5 Jul 2017 08:45:19 +0200
-Message-ID: <e48f0c5c-5b73-721b-194c-55dec4da89e8@free-electrons.com>
-References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
- <20170616072929.3266-2-quentin.schulz@free-electrons.com>
- <6acdfd61-afb8-e0cf-b8d3-b2e81bd71569@intel.com>
- <1989e4f4-6aed-563f-5750-51ddddeb4739@free-electrons.com>
- <20170620094943.j3qfjocjcjle6sqa@rfolt0960.corp.atmel.com>
- <b616ff3c-1f2d-4a81-33e9-845506d7af4e@free-electrons.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: mmc_ops: fix a typo for comment of mmc_start_bkops
+Date: Wed, 05 Jul 2017 16:33:11 +0900
+Message-ID: <617d9cef-4fee-443a-2399-ddebf865e439@samsung.com>
+References: <CGME20170704023045epcas2p3d2ecc51795cd3ba785723c418176f2be@epcas2p3.samsung.com>
+        <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b616ff3c-1f2d-4a81-33e9-845506d7af4e@free-electrons.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:29571 "EHLO
+        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750841AbdGEHdO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 03:33:14 -0400
+In-reply-to: <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-Better with the link.
+On 07/04/2017 11:30 AM, Shawn Lin wrote:
+> Just a trivial fix for that found by reading the code.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-On 05/07/2017 08:23, Quentin Schulz wrote:
-> Hi Adrian and Ludovic,
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+> ---
 > 
-> On 20/06/2017 11:49, Ludovic Desroches wrote:
->> On Tue, Jun 20, 2017 at 10:07:06AM +0200, Quentin Schulz wrote:
->>> Hi Adrian,
->>>
->>> On 20/06/2017 09:39, Adrian Hunter wrote:
->>>> On 16/06/17 10:29, Quentin Schulz wrote:
->>>>> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
->>>>> SoC's SDHCI controller.
->>>>>
->>>>> When resuming from deepest state, it is required to restore preset
->>>>> registers as the registers are lost since VDD core has been shut down
->>>>> when entering deepest state on the SAMA5D2. The clocks need to be
->>>>> reconfigured as well.
->>>>>
->>>>> The other registers and init process are taken care of by the SDHCI
->>>>> core.
->>>>>
->>>>> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
->>>>> ---
->>>>>  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
->>>>>  1 file changed, 32 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
->>>>> index fb8c6011f13d..300513fc1068 100644
->>>>> --- a/drivers/mmc/host/sdhci-of-at91.c
->>>>> +++ b/drivers/mmc/host/sdhci-of-at91.c
->>>>> @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->>>>>  }
->>>>>  
->>>>>  #ifdef CONFIG_PM
->>>>
->>>> Should be CONFIG_PM_SLEEP for suspend / resume callbacks.
->>>>
->>>
->>> So I let this CONFIG_PM around the runtime_suspend/resume but put
->>> another CONFIG_PM_SLEEP around the suspend/resume functions?
->>>
->>>>> +static int sdhci_at91_suspend(struct device *dev)
->>>>> +{
->>>>> +	struct sdhci_host *host = dev_get_drvdata(dev);
->>>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>>>> +	int ret;
->>>>> +
->>>>> +	ret = sdhci_suspend_host(host);
->>>>> +
->>>>> +	if (host->runtime_suspended)
->>>>> +		return ret;
->>>>
->>>> Suspending while runtime suspended seems like a bad idea.  Have you
->>>> considered just adding sdhci_at91_set_clks_presets() to
->>>> sdhci_at91_runtime_resume()?
->>>>
->>>
->>> Adding sdhci_at91_set_clks_presets() to runtime_resume() seems a bad
->>> idea as well. You don't need to recompute the clock rate, set it and set
->>> the presets registers each time you do a runtime_resume. As the
->>> runtime_pm of sdhci has a quite aggressive policy of activation, this
->>> seems like a bad idea on the optimization side.
->>
->> So maybe increment/decrement the device's usage counter. It should be
->> safer.
->>
+>  drivers/mmc/core/mmc_ops.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> From what I've understood from the runtime_pm documentation[1], it seems
-> that there is no need in my case to test if the system has been runtime
-> suspended before being suspended. So I think we can safely remove the
-> test and leave the rest as is.
-> 
-> My understanding is the following:
-> If the system is not runtime suspended before doing suspend, then it
-> just does suspend and then resume.
-> => enable and disable clocks are called once each so it is balanced.
-> 
-> If the system is already runtime suspended when suspending, the resume
-> will be called and once the device will be used, the runtime resume will
-> be called.
-> => enable and disable clocks are called twice each (once in runtime and
-> system suspend/resume) so it is balanced.
-> 
-> A few quick tests on my sama5d2_xplained seem to be validating those
-> hypothesis.
-> 
-> Do we agree on removing the `if (host->runtime_suspended)`?
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 5f7c592..6dd8ecd 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -946,7 +946,7 @@ static int mmc_read_bkops_status(struct mmc_card *card)
+>  /**
+>   *	mmc_start_bkops - start BKOPS for supported cards
+>   *	@card: MMC card to start BKOPS
+> - *	@form_exception: A flag to indicate if this function was
+> + *	@from_exception: A flag to indicate if this function was
+>   *			 called due to an exception raised by the card
+>   *
+>   *	Start background operations whenever requested.
 > 
 
-[1]
-http://elixir.free-electrons.com/linux/latest/source/Documentation/power/runtime_pm.txt#L613
-
-> Thanks,
-> Quentin
-> 
->> Ludovic
->>
->>>
->>> Thanks,
->>> Quentin
->>>
->>>>> +
->>>>> +	clk_disable_unprepare(priv->gck);
->>>>> +	clk_disable_unprepare(priv->hclock);
->>>>> +	clk_disable_unprepare(priv->mainck);
->>>>> +
->>>>> +	return ret;
->>>>> +}
->>>>> +
->>>>> +static int sdhci_at91_resume(struct device *dev)
->>>>> +{
->>>>> +	struct sdhci_host *host = dev_get_drvdata(dev);
->>>>> +	int ret;
->>>>> +
->>>>> +	ret = sdhci_at91_set_clks_presets(dev);
->>>>> +	if (ret)
->>>>> +		return ret;
->>>>> +
->>>>> +	return sdhci_resume_host(host);
->>>>> +}
->>>>> +
->>>>>  static int sdhci_at91_runtime_suspend(struct device *dev)
->>>>>  {
->>>>>  	struct sdhci_host *host = dev_get_drvdata(dev);
->>>>> @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->>>>>  #endif /* CONFIG_PM */
->>>>>  
->>>>>  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
->>>>> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
->>>>> -				pm_runtime_force_resume)
->>>>> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
->>>>>  	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
->>>>>  			   sdhci_at91_runtime_resume,
->>>>>  			   NULL)
->>>>>
->>>>
->>>
->>> -- 
->>> Quentin Schulz, Free Electrons
->>> Embedded Linux and Kernel engineering
->>> http://free-electrons.com
-> 
-
--- 
-Quentin Schulz, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
