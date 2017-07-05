@@ -1,62 +1,165 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: SDIO "SD2" vs. SD-card "SD3" interface on BayTrail
-Date: Tue, 04 Jul 2017 18:56:31 +0300
-Message-ID: <1499183791.22624.257.camel@linux.intel.com>
-References: <d7249bf2-b057-0535-334e-71cdc957e9b5@denx.de>
-         <1499176431.22624.255.camel@linux.intel.com>
-         <05ba15dc-b7b0-0760-ee0b-67fec71e9736@denx.de>
+From: Quentin Schulz <quentin.schulz@free-electrons.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
+ resume from deepest PM
+Date: Wed, 5 Jul 2017 08:23:24 +0200
+Message-ID: <b616ff3c-1f2d-4a81-33e9-845506d7af4e@free-electrons.com>
+References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
+ <20170616072929.3266-2-quentin.schulz@free-electrons.com>
+ <6acdfd61-afb8-e0cf-b8d3-b2e81bd71569@intel.com>
+ <1989e4f4-6aed-563f-5750-51ddddeb4739@free-electrons.com>
+ <20170620094943.j3qfjocjcjle6sqa@rfolt0960.corp.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:47307 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752484AbdGDP6F (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 4 Jul 2017 11:58:05 -0400
-In-Reply-To: <05ba15dc-b7b0-0760-ee0b-67fec71e9736@denx.de>
+Received: from mail.free-electrons.com ([62.4.15.54]:41424 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750871AbdGEGX1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 02:23:27 -0400
+In-Reply-To: <20170620094943.j3qfjocjcjle6sqa@rfolt0960.corp.atmel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Roese <sr@denx.de>, linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com
 
-On Tue, 2017-07-04 at 16:12 +0200, Stefan Roese wrote:
-> 
-> On 04.07.2017 15:53, Andy Shevchenko wrote:
-> > On Tue, 2017-07-04 at 14:53 +0200, Stefan Roese wrote:
-> > > Hi,
-> > > 
-> > > we are currently investigating, if its possible to connect a SDIO
-> > > device (WLAN module) to the SD-card interface "SD3" of the
-> > > BayTrail
-> > > SoC instead of the SDIO interface "SD2". The BayTrail manual
-> > > states,
-> > > that the SDIO interface is capable of connecting SDIO devices. Is
-> > > this also possible for the SD-card interface "SD3", even if its
-> > > not
-> > > explicitly mentioned in the manual? If not, why is this not
-> > > possible?
-> > > 
-> > > Any insight on this would be really helpful.
-> > 
-> > Hmm... I have no documentation for SD/SDIO/eMMC for BayTrail except
-> > the
-> > public one. Internally I found some charts that shows similarities
-> > between two. So, taking that into consideration I would suggest to
-> > try
-> > it out on real hardware (MinnowBoard MAX, for example), only
-> > impediment
-> > I can see is the absence of support in the drivers in Linux OS. If
-> > you
-> > need it only in U-Boot, you perhaps may fix it easily.
-> 
-> Its not only for U-Boot unfortunately. Do you think, a quick test in 
-> Linux should be possible by simply swapping the PCI device IDs in
-> sdhci-pci.core.c (PCI_DEVICE_ID_INTEL_BYT_SDIO vs.
-> PCI_DEVICE_ID_INTEL_BYT_SD)?
+Hi Adrian and Ludovic,
 
-If it utilizes ACPI (card detection) I'm not sure you can magically get
-it working, though it worth to try.
+On 20/06/2017 11:49, Ludovic Desroches wrote:
+> On Tue, Jun 20, 2017 at 10:07:06AM +0200, Quentin Schulz wrote:
+>> Hi Adrian,
+>>
+>> On 20/06/2017 09:39, Adrian Hunter wrote:
+>>> On 16/06/17 10:29, Quentin Schulz wrote:
+>>>> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
+>>>> SoC's SDHCI controller.
+>>>>
+>>>> When resuming from deepest state, it is required to restore preset
+>>>> registers as the registers are lost since VDD core has been shut down
+>>>> when entering deepest state on the SAMA5D2. The clocks need to be
+>>>> reconfigured as well.
+>>>>
+>>>> The other registers and init process are taken care of by the SDHCI
+>>>> core.
+>>>>
+>>>> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
+>>>>  1 file changed, 32 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+>>>> index fb8c6011f13d..300513fc1068 100644
+>>>> --- a/drivers/mmc/host/sdhci-of-at91.c
+>>>> +++ b/drivers/mmc/host/sdhci-of-at91.c
+>>>> @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>>>>  }
+>>>>  
+>>>>  #ifdef CONFIG_PM
+>>>
+>>> Should be CONFIG_PM_SLEEP for suspend / resume callbacks.
+>>>
+>>
+>> So I let this CONFIG_PM around the runtime_suspend/resume but put
+>> another CONFIG_PM_SLEEP around the suspend/resume functions?
+>>
+>>>> +static int sdhci_at91_suspend(struct device *dev)
+>>>> +{
+>>>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>>>> +	int ret;
+>>>> +
+>>>> +	ret = sdhci_suspend_host(host);
+>>>> +
+>>>> +	if (host->runtime_suspended)
+>>>> +		return ret;
+>>>
+>>> Suspending while runtime suspended seems like a bad idea.  Have you
+>>> considered just adding sdhci_at91_set_clks_presets() to
+>>> sdhci_at91_runtime_resume()?
+>>>
+>>
+>> Adding sdhci_at91_set_clks_presets() to runtime_resume() seems a bad
+>> idea as well. You don't need to recompute the clock rate, set it and set
+>> the presets registers each time you do a runtime_resume. As the
+>> runtime_pm of sdhci has a quite aggressive policy of activation, this
+>> seems like a bad idea on the optimization side.
+> 
+> So maybe increment/decrement the device's usage counter. It should be
+> safer.
+> 
+
+>From what I've understood from the runtime_pm documentation[1], it seems
+that there is no need in my case to test if the system has been runtime
+suspended before being suspended. So I think we can safely remove the
+test and leave the rest as is.
+
+My understanding is the following:
+If the system is not runtime suspended before doing suspend, then it
+just does suspend and then resume.
+=> enable and disable clocks are called once each so it is balanced.
+
+If the system is already runtime suspended when suspending, the resume
+will be called and once the device will be used, the runtime resume will
+be called.
+=> enable and disable clocks are called twice each (once in runtime and
+system suspend/resume) so it is balanced.
+
+A few quick tests on my sama5d2_xplained seem to be validating those
+hypothesis.
+
+Do we agree on removing the `if (host->runtime_suspended)`?
+
+Thanks,
+Quentin
+
+> Ludovic
+> 
+>>
+>> Thanks,
+>> Quentin
+>>
+>>>> +
+>>>> +	clk_disable_unprepare(priv->gck);
+>>>> +	clk_disable_unprepare(priv->hclock);
+>>>> +	clk_disable_unprepare(priv->mainck);
+>>>> +
+>>>> +	return ret;
+>>>> +}
+>>>> +
+>>>> +static int sdhci_at91_resume(struct device *dev)
+>>>> +{
+>>>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>>>> +	int ret;
+>>>> +
+>>>> +	ret = sdhci_at91_set_clks_presets(dev);
+>>>> +	if (ret)
+>>>> +		return ret;
+>>>> +
+>>>> +	return sdhci_resume_host(host);
+>>>> +}
+>>>> +
+>>>>  static int sdhci_at91_runtime_suspend(struct device *dev)
+>>>>  {
+>>>>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>>>> @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>>>>  #endif /* CONFIG_PM */
+>>>>  
+>>>>  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+>>>> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+>>>> -				pm_runtime_force_resume)
+>>>> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
+>>>>  	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
+>>>>  			   sdhci_at91_runtime_resume,
+>>>>  			   NULL)
+>>>>
+>>>
+>>
+>> -- 
+>> Quentin Schulz, Free Electrons
+>> Embedded Linux and Kernel engineering
+>> http://free-electrons.com
 
 -- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+Quentin Schulz, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
