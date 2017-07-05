@@ -1,71 +1,55 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/2] mmc: block: Preinitialize ret in mmc_blk_issue_drv_op()
-Date: Wed, 5 Jul 2017 17:07:17 +0200
-Message-ID: <CAMuHMdU179SU6ieCBLLRCa=qFEqEF5a5Ut0gdpKyFGCqMOO8aw@mail.gmail.com>
-References: <1499245637-28870-1-git-send-email-geert@linux-m68k.org> <CAK8P3a1ANjdbHt0x=o2WXB9AHbSj1xr1B-GOqzoKUagma3bBnA@mail.gmail.com>
+Subject: [PATCH v2 1/2] mmc: block: Initialize ret in mmc_blk_issue_drv_op() for MMC_DRV_OP_IOCTL
+Date: Wed,  5 Jul 2017 17:09:41 +0200
+Message-ID: <1499267382-28438-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:32831 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751765AbdGEPHT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 11:07:19 -0400
-In-Reply-To: <CAK8P3a1ANjdbHt0x=o2WXB9AHbSj1xr1B-GOqzoKUagma3bBnA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Arnd,
+With gcc 4.1.2:
 
-On Wed, Jul 5, 2017 at 2:06 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Wed, Jul 5, 2017 at 11:07 AM, Geert Uytterhoeven
-> <geert@linux-m68k.org> wrote:
->> With gcc 4.1.2:
->>
->>     drivers/mmc/core/block.c: In function =E2=80=98mmc_blk_issue_drv_op=
-=E2=80=99:
->>     drivers/mmc/core/block.c:1178: warning: =E2=80=98ret=E2=80=99 may be=
- used uninitialized in this function
->>
->> Indeed, if mq_rq->ioc_count is zero, an uninitialized value will be
->> stored in mq_rq->drv_op_result and passed to blk_end_request_all().
->>
->> Can mq_rq->ioc_count be zero?
->>   - mmc_blk_ioctl_cmd() sets ioc_count to 1, so this is safe,
->>   - mmc_blk_ioctl_multi_cmd() obtains ioc_count from user space in
->>     response to the MMC_IOC_MULTI_CMD ioctl, and does allow zero.
->>
->> Preinitialize ret to -EINVAL to fix this for current and future callers.
->>
->> Fixes: 0493f6fe5bdee8ac ("mmc: block: Move boot partition locking into a=
- driver op")
->> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
->> ---
->> I assume -EINVAL is the error we want to return here if ioc_count is
->> zero.
->> Or should it return success (zero), like mmc_blk_ioctl_multi_cmd() used
->> to do?
->
-> I would suggest adding the initialization after "case MMC_DRV_OP_IOCTL:"
-> instead, to keep getting compile-time checks on the state of the 'ret'
-> variable. In that case, returning '0' is probably good.
+    drivers/mmc/core/block.c: In function ‘mmc_blk_issue_drv_op’:
+    drivers/mmc/core/block.c:1178: warning: ‘ret’ may be used uninitialized in this function
 
-Makes sense, I actually did consider that, but went with (shared) -EINVAL.
+Indeed, for MMC_DRV_OP_IOCTL, if mq_rq->ioc_count is zero, an
+uninitialized value will be stored in mq_rq->drv_op_result and passed to
+blk_end_request_all().
 
-Will send v2 shortly.
+Can mq_rq->ioc_count be zero?
+  - mmc_blk_ioctl_cmd() sets ioc_count to 1, so this is safe,
+  - mmc_blk_ioctl_multi_cmd() obtains ioc_count from user space in
+    response to the MMC_IOC_MULTI_CMD ioctl, and does allow zero.
 
-Gr{oetje,eeting}s,
+Initialize ret to zero to fix this for current and future callers.
 
-                        Geert
+Fixes: 0493f6fe5bdee8ac ("mmc: block: Move boot partition locking into a driver op")
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+---
+v2, as suggested by Arnd:
+  - Move the assignment after "case MMC_DRV_OP_IOCTL", to keep getting
+    compile-time checks on the state of the 'ret' variable,
+  - Initialize ret to zero instead of -EINVAL.
+---
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 0cfac2d391073922..4920ea1ece38a9b6 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1182,7 +1182,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 
+ 	switch (mq_rq->drv_op) {
+ 	case MMC_DRV_OP_IOCTL:
+-		for (i = 0; i < mq_rq->ioc_count; i++) {
++		for (i = 0, ret = 0; i < mq_rq->ioc_count; i++) {
+ 			ret = __mmc_blk_ioctl_cmd(card, md, mq_rq->idata[i]);
+ 			if (ret)
+ 				break;
+-- 
+2.7.4
