@@ -1,47 +1,65 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: mmc_ops: fix a typo for comment of mmc_start_bkops
-Date: Wed, 05 Jul 2017 16:33:11 +0900
-Message-ID: <617d9cef-4fee-443a-2399-ddebf865e439@samsung.com>
-References: <CGME20170704023045epcas2p3d2ecc51795cd3ba785723c418176f2be@epcas2p3.samsung.com>
-        <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH 2/2] mmc: block: Let MMC_IOC_MULTI_CMD return zero again for zero entries
+Date: Wed,  5 Jul 2017 11:07:17 +0200
+Message-ID: <1499245637-28870-2-git-send-email-geert@linux-m68k.org>
+References: <1499245637-28870-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:29571 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750841AbdGEHdO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 03:33:14 -0400
-In-reply-to: <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from xavier.telenet-ops.be ([195.130.132.52]:38504 "EHLO
+        xavier.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751913AbdGEJHU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 05:07:20 -0400
+In-Reply-To: <1499245637-28870-1-git-send-email-geert@linux-m68k.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
 
-On 07/04/2017 11:30 AM, Shawn Lin wrote:
-> Just a trivial fix for that found by reading the code.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+With gcc 4.1.2:
 
-Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
+    drivers/mmc/core/block.c: In function ‘mmc_blk_ioctl_cmd_issue’:
+    drivers/mmc/core/block.c:630: warning: ‘ioc_err’ may be used uninitialized in this function
 
-> ---
-> 
->  drivers/mmc/core/mmc_ops.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 5f7c592..6dd8ecd 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -946,7 +946,7 @@ static int mmc_read_bkops_status(struct mmc_card *card)
->  /**
->   *	mmc_start_bkops - start BKOPS for supported cards
->   *	@card: MMC card to start BKOPS
-> - *	@form_exception: A flag to indicate if this function was
-> + *	@from_exception: A flag to indicate if this function was
->   *			 called due to an exception raised by the card
->   *
->   *	Start background operations whenever requested.
-> 
+Indeed, if mq_rq->ioc_count is zero, an uninitialized value will be
+stored in mq_rq->drv_op_result and passed to blk_end_request_all().
+
+Can mq_rq->ioc_count be zero?
+  - mmc_blk_ioctl_cmd() sets ioc_count to 1, so this is safe,
+  - mmc_blk_ioctl_multi_cmd() obtains ioc_count from user space in
+    response to the MMC_IOC_MULTI_CMD ioctl, and does allow zero.
+
+To avoid returning an uninitialized value, and as it is pointless to do
+all this work when the MMC_IOC_MULTI_CMD ioctl is used with zero
+entries, check for this early in mmc_blk_ioctl_multi_cmd(), and return
+zero, like was returned before.
+
+Fixes: 3ecd8cf23f88d5df ("mmc: block: move multi-ioctl() to use block layer")
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+---
+Should mmc_blk_ioctl_multi_cmd() return -EINVAL instead for this case?
+That would change behavior as seen from userspace, though.
+
+Feel free to fold in the previous patch if deemed appropriate.
+---
+ drivers/mmc/core/block.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 9472e89af3efa37e..b236d345d53291f0 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -637,6 +637,9 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 			   sizeof(num_of_cmds)))
+ 		return -EFAULT;
+ 
++	if (!num_of_cmds)
++		return 0;
++
+ 	if (num_of_cmds > MMC_IOC_MAX_CMDS)
+ 		return -EINVAL;
+ 
+-- 
+2.7.4
 
