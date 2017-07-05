@@ -1,68 +1,31 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [PATCH v2 2/2] mmc: block: Let MMC_IOC_MULTI_CMD return zero again for zero entries
-Date: Wed,  5 Jul 2017 17:09:42 +0200
-Message-ID: <1499267382-28438-2-git-send-email-geert@linux-m68k.org>
-References: <1499267382-28438-1-git-send-email-geert@linux-m68k.org>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to
+        block requests
+Date: Wed, 5 Jul 2017 21:00:16 +0200
+Message-ID: <20170705190016.GA7008@lst.de>
+References: <20170518092936.9277-1-linus.walleij@linaro.org> <20170518092936.9277-4-linus.walleij@linaro.org> <20170518093614.GB9250@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from albert.telenet-ops.be ([195.130.137.90]:59802 "EHLO
-        albert.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751680AbdGEPJq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jul 2017 11:09:46 -0400
-In-Reply-To: <1499267382-28438-1-git-send-email-geert@linux-m68k.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170518093614.GB9250@lst.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
 
-With gcc 4.1.2:
+Hi Linus,
 
-    drivers/mmc/core/block.c: In function ‘mmc_blk_ioctl_cmd_issue’:
-    drivers/mmc/core/block.c:630: warning: ‘ioc_err’ may be used uninitialized in this function
+On Thu, May 18, 2017 at 11:36:14AM +0200, Christoph Hellwig wrote:
+> On Thu, May 18, 2017 at 11:29:34AM +0200, Linus Walleij wrote:
+> > We are storing the ioctl() in/out argument as a pointer in
+> > the per-request struct mmc_blk_request container.
+> 
+> Btw, for the main ioctl data (not the little reponse field) it might
+> make sense to use blk_rq_map_user, which will do a get_user_pages
+> on the user data if the alignment fits, and otherwise handle the
+> kernel bounce buffering for you.  This should simplify the code
+> quite a bit more, and in the case where you can access the user
+> memory directly provide a nice little performance boost.
 
-Indeed, if mq_rq->ioc_count is zero, an uninitialized value will be
-stored in mq_rq->drv_op_result and passed to blk_end_request_all().
-
-Can mq_rq->ioc_count be zero?
-  - mmc_blk_ioctl_cmd() sets ioc_count to 1, so this is safe,
-  - mmc_blk_ioctl_multi_cmd() obtains ioc_count from user space in
-    response to the MMC_IOC_MULTI_CMD ioctl, and does allow zero.
-
-To avoid returning an uninitialized value, and as it is pointless to do
-all this work when the MMC_IOC_MULTI_CMD ioctl is used with zero
-entries, check for this early in mmc_blk_ioctl_multi_cmd(), and return
-zero, like was returned before.
-
-Fixes: 3ecd8cf23f88d5df ("mmc: block: move multi-ioctl() to use block layer")
-Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
----
-Should mmc_blk_ioctl_multi_cmd() return -EINVAL instead for this case?
-That would change behavior as seen from userspace, though.
-
-Feel free to fold in the previous patch if deemed appropriate.
-
-v2:
-  - No changes.
----
- drivers/mmc/core/block.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 4920ea1ece38a9b6..e0363223996e6096 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -637,6 +637,9 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 			   sizeof(num_of_cmds)))
- 		return -EFAULT;
- 
-+	if (!num_of_cmds)
-+		return 0;
-+
- 	if (num_of_cmds > MMC_IOC_MAX_CMDS)
- 		return -EINVAL;
- 
--- 
-2.7.4
-
+Did you get a chance to look into this?
