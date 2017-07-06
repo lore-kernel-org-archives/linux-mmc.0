@@ -1,293 +1,421 @@
-From: "liwei (CM)" <liwei213@huawei.com>
-Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0ggdjVdIG1tYzogZHdfbW1jLWszOiBhZGQgc2Qgc3Vw?=
- =?utf-8?Q?port_for_hi3660?=
-Date: Thu, 6 Jul 2017 07:03:12 +0000
-Message-ID: <1699CE87DE933F49876AD744B5DC140F9FFA01@DGGEMM506-MBX.china.huawei.com>
-References: <CGME20170703010627epcas4p112c8b4ab09679a452d72cb5768f7f733@epcas4p1.samsung.com>
- <20170703010610.61097-1-liwei213@huawei.com>
- <d7f48bc0-7ba9-1ada-2c2c-99d038cd8fa5@samsung.com>
- <CAFGCpxzqv3K8Nr8EynHuM_sp_2k+qCbD20uLuxSSc5FEy+HHNQ@mail.gmail.com>
+From: liwei <liwei213@huawei.com>
+Subject: [PATCH v6] mmc: dw_mmc-k3: add sd support for hi3660
+Date: Thu, 6 Jul 2017 15:28:27 +0800
+Message-ID: <20170706072827.15201-1-liwei213@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFGCpxzqv3K8Nr8EynHuM_sp_2k+qCbD20uLuxSSc5FEy+HHNQ@mail.gmail.com>
-Content-Language: zh-CN
 Sender: linux-kernel-owner@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>, "hkallweit1@gmail.com" <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, shawn.lin@rock-chips.com, wsa+renesas@sang-engineering.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: guodong.xu@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGksIEphZWhvb24NClRoYW5rIHlvdSBmb3IgeW91ciBhZHZpY2UgZHVyaW5nIHlvdXIgYnVzeSBz
-Y2hlZHVsZSwNCjEuIk5lZWQgdGhlIHBhdGNoIGZvciBhZGRpbmcgImhpMzY2MC1kdy1tc2hjIiBj
-b21wYXRpYmxlIA0KIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9rMy1kdy1tc2hj
-LnR4dCINClRoaXMgImhpMzY2MC1kdy1tc2hjIiBjb21wYXRpYmxlIHN0cmluZyBoYXMgYmVlbiBp
-bnRlZ3JhdGVkIGludG8gcGxhdGZvcm0gbWFpbnRhaW5lcidzIHRyZWUgdG9nZXRoZXIgd2l0aCBk
-dHMgY2hhbmdlcy4gSXQncyBub3cgaW4gbGludXgtbmV4dCBbMV3vvJtuZWVkIHRoaXMgb25lIG1v
-cmU/DQoNCjIuIEFuZCBhZGRlZCB0aGUgbWlub3IgY29tbWVudHMuDQpJd2lsbCBmaXggdGhlbSBp
-biBwYXRjaCB2Ni4NCg0KVGhhbmsgeW91IHZlcnkgbXVjaC4NCg0KDQotLS0tLemCruS7tuWOn+S7
-ti0tLS0tDQrlj5Hku7bkuro6IEd1b2RvbmcgWHUgW21haWx0bzpndW9kb25nLnh1QGxpbmFyby5v
-cmddIA0K5Y+R6YCB5pe26Ze0OiAyMDE35bm0N+aciDbml6UgMTQ6NDUNCuaUtuS7tuS6ujogSmFl
-aG9vbiBDaHVuZzsgbGl3ZWkgKENNKQ0K5oqE6YCBOiBVbGYgSGFuc3NvbjsgYWRyaWFuLmh1bnRl
-ckBpbnRlbC5jb207IFNoYXduIExpbjsgd3NhK3JlbmVzYXNAc2FuZy1lbmdpbmVlcmluZy5jb207
-IGhrYWxsd2VpdDFAZ21haWwuY29tOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1r
-ZXJuZWxAdmdlci5rZXJuZWwub3JnDQrkuLvpopg6IFJlOiBbUEFUQ0ggdjVdIG1tYzogZHdfbW1j
-LWszOiBhZGQgc2Qgc3VwcG9ydCBmb3IgaGkzNjYwDQoNCk9uIFRodSwgSnVsIDYsIDIwMTcgYXQg
-MToxMyBQTSwgSmFlaG9vbiBDaHVuZyA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT4gd3JvdGU6DQo+
-IEhpLA0KPg0KPiBUbyBHdW9kb25nLCBpZiB5b3UgY2FuIGZvcndhcmQgdGhpcyB0byBMaSBXZWks
-IHBseiBkbyBpdC4gU29ycnkuDQo+DQoNClN1cmUuIFB1dCBMaSBXZWkgaW4gY2MuDQpBbmQgYWRk
-IG15IHJlc3BvbnNlLg0KDQo+IE9uIDA3LzAzLzIwMTcgMTA6MDYgQU0sIGxpd2VpIHdyb3RlOg0K
-Pj4NCj4+IEFkZCBzZCBjYXJkIHN1cHBvcnQgZm9yIGhpMzY2MCBzb2MNCj4NCj4gTmVlZCB0aGUg
-cGF0Y2ggZm9yIGFkZGluZyAiaGkzNjYwLWR3LW1zaGMiIGNvbXBhdGlibGUgDQo+IERvY3VtZW50
-YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9rMy1kdy1tc2hjLnR4dA0KPg0KPiBBbmQgYWRkZWQg
-dGhlIG1pbm9yIGNvbW1lbnRzLg0KPg0KDQpIaSwgSmFlaG9vLA0KDQpUaGlzICJoaTM2NjAtZHct
-bXNoYyIgY29tcGF0aWJsZSBzdHJpbmcgaGFzIGJlZW4gaW50ZWdyYXRlZCBpbnRvIHBsYXRmb3Jt
-IG1haW50YWluZXIncyB0cmVlIHRvZ2V0aGVyIHdpdGggZHRzIGNoYW5nZXMuIEl0J3Mgbm93IGlu
-IGxpbnV4LW5leHQgWzFdLCBhbmQgaW4gTGludXMnIG1hc3RlciBicmFuY2ggWzJdLCB3aWxsIGJl
-IGluIG1haW5saW5lIHY0LjEzLXJjJ3MuDQoNClsxXSBodHRwczovL2dpdC5rZXJuZWwub3JnL3B1
-Yi9zY20vbGludXgva2VybmVsL2dpdC9uZXh0L2xpbnV4LW5leHQuZ2l0L2xvZy9Eb2N1bWVudGF0
-aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL2szLWR3LW1zaGMudHh0P2g9bmV4dC0yMDE3MDcw
-Ng0KWzJdIGh0dHBzOi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0L3Rv
-cnZhbGRzL2xpbnV4LmdpdC90cmVlL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
-bWMvazMtZHctbXNoYy50eHQNCg0KLUd1b2RvbmcNCg0KPj4NCj4+IE1ham9yIGNoYW5nZXMgaW4g
-djM6DQo+PiAgLSBzb2x2ZSByZXZpZXcgY29tbWVudHMgZnJvbSBIZWluZXIgS2FsbHdlaXQuDQo+
-PiAgICAqdXNlIHRoZSBHRU5NQVNLIGFuZCBGSUVMRF9QUkVQIG1hY3JvcyByZXBsYWNlIHRoZSBi
-aXQgc2hpZnQgb3BlcmF0aW9uLg0KPj4gICAgKnVzZSB1c2xlZXBfcmFuZ2UoKSByZXBsYWNlIHVk
-ZWxheSgpIGFuZCBtZGVsYXkoKS4NCj4+DQo+PiBNYWpvciBjaGFuZ2VzIGluIHY0Og0KPj4gIC0g
-c29sdmUgcmV2aWV3IGNvbW1lbnRzIGZyb20gSmFlaG9vbiBDaHVuZy4NCj4+ICAgICptb3ZlIGNv
-bW1vbiByZWdpc3RlciBmb3IgZHdtbWMgY29udHJvbGxlciB0byBkd21tYyBoZWFkZXIgZmlsZS4N
-Cj4+ICAgICptb2RpZnkgZGVmaW5pdGlvbnMgdHlwZSBvZiBzb21lIHJlZ2lzdGVyIHZhcmlhYmxl
-cy4NCj4+ICAgICpnZXQgcmlkIG9mIHRoZSBtYWdpYyBudW1iZXJzLg0KPj4NCj4+IE1ham9yIGNo
-YW5nZXMgaW4gdjU6DQo+PiAgLSBmdXJ0aGVyIGltcHJvdmUgY29kaW5nIHN0eWxlLg0KPj4gLS0t
-DQo+PiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtazMuYyB8IDMxNSArKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+PiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMu
-aCAgICB8ICAgMiArDQo+PiAgMiBmaWxlcyBjaGFuZ2VkLCAzMTcgaW5zZXJ0aW9ucygrKQ0KPj4N
-Cj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jIA0KPj4gYi9kcml2
-ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jIGluZGV4IGUzOGZiMDAyMGJiMS4uYTI4ZWI4YzdkYTgy
-IA0KPj4gMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jDQo+PiAr
-KysgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy1rMy5jDQo+PiBAQCAtOCw2ICs4LDggQEANCj4+
-ICAgKiAoYXQgeW91ciBvcHRpb24pIGFueSBsYXRlciB2ZXJzaW9uLg0KPj4gICAqLw0KPj4NCj4+
-ICsjaW5jbHVkZSA8bGludXgvYml0b3BzLmg+DQo+PiArI2luY2x1ZGUgPGxpbnV4L2JpdGZpZWxk
-Lmg+DQo+PiAgI2luY2x1ZGUgPGxpbnV4L2Nsay5oPg0KPj4gICNpbmNsdWRlIDxsaW51eC9tZmQv
-c3lzY29uLmg+DQo+PiAgI2luY2x1ZGUgPGxpbnV4L21tYy9ob3N0Lmg+DQo+PiBAQCAtMjgsNyAr
-MzAsMzggQEANCj4+ICAjZGVmaW5lIEFPX1NDVFJMX1NFTDE4ICAgICAgICAgICAgICAgQklUKDEw
-KQ0KPj4gICNkZWZpbmUgQU9fU0NUUkxfQ1RSTDMgICAgICAgICAgICAgICAweDQwQw0KPj4NCj4+
-ICsjZGVmaW5lIERXTU1DX1NESU9fSUQgMg0KPj4gKw0KPj4gKyNkZWZpbmUgU09DX1NDVFJMX1ND
-UEVSQ1RSTDUgICAgKDB4MzE0KQ0KPj4gKyNkZWZpbmUgU0RDQVJEX0lPX1NFTDE4ICAgICAgICAg
-QklUKDIpDQo+PiArDQo+PiArI2RlZmluZSBTRENBUkRfUkRfVEhSRVNIT0xEICAoNTEyKQ0KPj4g
-Kw0KPj4gKyNkZWZpbmUgR0VOQ0xLX0RJViAoNykNCj4+ICsNCj4+ICsjZGVmaW5lIEdQSU9fQ0xL
-X0VOQUJMRSAgICAgICAgICAgICAgICAgICBCSVQoMTYpDQo+PiArI2RlZmluZSBHUElPX0NMS19E
-SVZfTUFTSyAgICAgICAgICAgICAgICAgR0VOTUFTSygxMSwgOCkNCj4+ICsjZGVmaW5lIEdQSU9f
-VVNFX1NBTVBMRV9ETFlfTUFTSyAgICAgICAgICBHRU5NQVNLKDEzLCAxMykNCj4+ICsjZGVmaW5l
-IFVIU19SRUdfRVhUX1NBTVBMRV9QSEFTRV9NQVNLICAgICBHRU5NQVNLKDIwLCAxNikNCj4+ICsj
-ZGVmaW5lIFVIU19SRUdfRVhUX1NBTVBMRV9EUlZQSEFTRV9NQVNLICBHRU5NQVNLKDI1LCAyMSkN
-Cj4+ICsjZGVmaW5lIFVIU19SRUdfRVhUX1NBTVBMRV9ETFlfTUFTSyAgICAgICBHRU5NQVNLKDMw
-LCAyNikNCj4+ICsNCj4+ICsjZGVmaW5lIFRJTUlOR19NT0RFICAgICAzDQo+PiArI2RlZmluZSBU
-SU1JTkdfQ0ZHX05VTSAxMA0KPj4gKw0KPj4gKyNkZWZpbmUgUFVMTF9ET1dOIEJJVCgxKQ0KPj4g
-KyNkZWZpbmUgUFVMTF9VUCAgIEJJVCgwKQ0KPj4gKw0KPj4gKyNkZWZpbmUgTlVNX1BIQVNFUyAo
-NDApDQo+PiArDQo+PiArI2RlZmluZSBFTkFCTEVfU0hJRlRfTUlOX1NNUEwgKDQpDQo+PiArI2Rl
-ZmluZSBFTkFCTEVfU0hJRlRfTUFYX1NNUEwgKDEyKQ0KPj4gKyNkZWZpbmUgVVNFX0RMWV9NSU5f
-U01QTCAoMTEpDQo+PiArI2RlZmluZSBVU0VfRExZX01BWF9TTVBMICgxNCkNCj4+ICsNCj4+ICBz
-dHJ1Y3QgazNfcHJpdiB7DQo+PiArICAgICBpbnQgY3RybF9pZDsNCj4+ICsgICAgIHUzMiBjdXJf
-c3BlZWQ7DQo+PiAgICAgICBzdHJ1Y3QgcmVnbWFwICAgKnJlZzsNCj4+ICB9Ow0KPj4NCj4+IEBA
-IC0zOCw2ICs3MSw0MSBAQCBzdGF0aWMgdW5zaWduZWQgbG9uZyBkd19tY2lfaGk2MjIwX2NhcHNb
-XSA9IHsNCj4+ICAgICAgIDANCj4+ICB9Ow0KPj4NCj4+ICtzdHJ1Y3QgaHNfdGltaW5nIHsNCj4+
-ICsgICAgIHUzMiBkcnZfcGhhc2U7DQo+PiArICAgICB1MzIgc21wbF9kbHk7DQo+PiArICAgICB1
-MzIgc21wbF9waGFzZV9tYXg7DQo+PiArICAgICB1MzIgc21wbF9waGFzZV9taW47DQo+PiArfTsN
-Cj4+ICsNCj4+ICtzdHJ1Y3QgaHNfdGltaW5nIGhzX3RpbWluZ19jZmdbVElNSU5HX01PREVdW1RJ
-TUlOR19DRkdfTlVNXSA9IHsNCj4+ICsgICAgIHsgLyogcmVzZXJ2ZWQgKi8gfSwNCj4+ICsgICAg
-IHsgLyogU0QgKi8NCj4+ICsgICAgICAgICAgICAgezcsIDAsIDE1LCAxNSx9LCAgLyogMDogTEVH
-QUNZIDQwMGsgKi8NCj4+ICsgICAgICAgICAgICAgezYsIDAsICA0LCAgNCx9LCAgLyogMTogTU1D
-X0hTICovDQo+PiArICAgICAgICAgICAgIHs2LCAwLCAgMywgIDMsfSwgIC8qIDI6IFNEX0hTICov
-DQo+PiArICAgICAgICAgICAgIHs2LCAwLCAxNSwgMTUsfSwgIC8qIDM6IFNEUjEyICovDQo+PiAr
-ICAgICAgICAgICAgIHs2LCAwLCAgMiwgIDIsfSwgIC8qIDQ6IFNEUjI1ICovDQo+PiArICAgICAg
-ICAgICAgIHs0LCAwLCAxMSwgIDAsfSwgIC8qIDU6IFNEUjUwICovDQo+PiArICAgICAgICAgICAg
-IHs2LCA0LCAxNSwgIDAsfSwgIC8qIDY6IFNEUjEwNCAqLw0KPj4gKyAgICAgICAgICAgICB7MH0s
-ICAgICAgICAgICAgICAvKiA3OiBERFI1MCAqLw0KPj4gKyAgICAgICAgICAgICB7MH0sICAgICAg
-ICAgICAgICAvKiA4OiBERFI1MiAqLw0KPj4gKyAgICAgICAgICAgICB7MH0sICAgICAgICAgICAg
-ICAvKiA5OiBIUzIwMCAqLw0KPj4gKyAgICAgfSwNCj4+ICsgICAgIHsgLyogU0RJTyAqLw0KPj4g
-KyAgICAgICAgICAgICB7NywgMCwgMTUsIDE1LH0sICAvKiAwOiBMRUdBQ1kgNDAwayAqLw0KPj4g
-KyAgICAgICAgICAgICB7MH0sICAgICAgICAgICAgICAvKiAxOiBNTUNfSFMgKi8NCj4+ICsgICAg
-ICAgICAgICAgezYsIDAsIDE1LCAxNSx9LCAgLyogMjogU0RfSFMgKi8NCj4+ICsgICAgICAgICAg
-ICAgezYsIDAsIDE1LCAxNSx9LCAgLyogMzogU0RSMTIgKi8NCj4+ICsgICAgICAgICAgICAgezYs
-IDAsICAwLCAgMCx9LCAgLyogNDogU0RSMjUgKi8NCj4+ICsgICAgICAgICAgICAgezQsIDAsIDEy
-LCAgMCx9LCAgLyogNTogU0RSNTAgKi8NCj4+ICsgICAgICAgICAgICAgezUsIDQsIDE1LCAgMCx9
-LCAgLyogNjogU0RSMTA0ICovDQo+PiArICAgICAgICAgICAgIHswfSwgICAgICAgICAgICAgIC8q
-IDc6IEREUjUwICovDQo+PiArICAgICAgICAgICAgIHswfSwgICAgICAgICAgICAgIC8qIDg6IERE
-UjUyICovDQo+PiArICAgICAgICAgICAgIHswfSwgICAgICAgICAgICAgIC8qIDk6IEhTMjAwICov
-DQo+PiArICAgICB9DQo+PiArfTsNCj4+ICsNCj4+ICBzdGF0aWMgdm9pZCBkd19tY2lfazNfc2V0
-X2lvcyhzdHJ1Y3QgZHdfbWNpICpob3N0LCBzdHJ1Y3QgbW1jX2lvcyANCj4+ICppb3MpICB7DQo+
-PiAgICAgICBpbnQgcmV0Ow0KPj4gQEAgLTY2LDYgKzEzNCwxMCBAQCBzdGF0aWMgaW50IGR3X21j
-aV9oaTYyMjBfcGFyc2VfZHQoc3RydWN0IGR3X21jaSAqaG9zdCkNCj4+ICAgICAgIGlmIChJU19F
-UlIocHJpdi0+cmVnKSkNCj4+ICAgICAgICAgICAgICAgcHJpdi0+cmVnID0gTlVMTDsNCj4+DQo+
-PiArICAgICBwcml2LT5jdHJsX2lkID0gb2ZfYWxpYXNfZ2V0X2lkKGhvc3QtPmRldi0+b2Zfbm9k
-ZSwgIm1zaGMiKTsNCj4+ICsgICAgIGlmIChwcml2LT5jdHJsX2lkIDwgMCkNCj4+ICsgICAgICAg
-ICAgICAgcHJpdi0+Y3RybF9pZCA9IDA7DQo+PiArDQo+PiAgICAgICBob3N0LT5wcml2ID0gcHJp
-djsNCj4+ICAgICAgIHJldHVybiAwOw0KPj4gIH0NCj4+IEBAIC0xNDQsNyArMjE2LDI0NSBAQCBz
-dGF0aWMgY29uc3Qgc3RydWN0IGR3X21jaV9kcnZfZGF0YSBoaTYyMjBfZGF0YSA9IHsNCj4+ICAg
-ICAgIC5leGVjdXRlX3R1bmluZyAgICAgICAgID0gZHdfbWNpX2hpNjIyMF9leGVjdXRlX3R1bmlu
-ZywNCj4+ICB9Ow0KPj4NCj4+ICtzdGF0aWMgdm9pZCBkd19tY2lfaHNfc2V0X3RpbWluZyhzdHJ1
-Y3QgZHdfbWNpICpob3N0LCBpbnQgdGltaW5nLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBpbnQgc21wbF9waGFzZSkgew0KPj4gKyAgICAgdTMyIGRydl9waGFzZTsNCj4+
-ICsgICAgIHUzMiBzbXBsX2RseTsNCj4+ICsgICAgIHUzMiB1c2Vfc21wbF9kbHkgPSAwOw0KPj4g
-KyAgICAgdTMyIGVuYWJsZV9zaGlmdCA9IDA7DQo+PiArICAgICB1MzIgcmVnX3ZhbHVlOw0KPj4g
-KyAgICAgaW50IGN0cmxfaWQ7DQo+PiArICAgICBzdHJ1Y3QgazNfcHJpdiAqcHJpdjsNCj4+ICsN
-Cj4+ICsgICAgIHByaXYgPSBob3N0LT5wcml2Ow0KPj4gKyAgICAgY3RybF9pZCA9IHByaXYtPmN0
-cmxfaWQ7DQo+PiArDQo+PiArICAgICBkcnZfcGhhc2UgPSBoc190aW1pbmdfY2ZnW2N0cmxfaWRd
-W3RpbWluZ10uZHJ2X3BoYXNlOw0KPj4gKyAgICAgc21wbF9kbHkgICA9IGhzX3RpbWluZ19jZmdb
-Y3RybF9pZF1bdGltaW5nXS5zbXBsX2RseTsNCj4+ICsgICAgIGlmIChzbXBsX3BoYXNlID09IC0x
-KQ0KPj4gKyAgICAgICAgICAgICBzbXBsX3BoYXNlID0gKGhzX3RpbWluZ19jZmdbY3RybF9pZF1b
-dGltaW5nXS5zbXBsX3BoYXNlX21heCArDQo+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAN
-Cj4+ICsgaHNfdGltaW5nX2NmZ1tjdHJsX2lkXVt0aW1pbmddLnNtcGxfcGhhc2VfbWluKSAvIDI7
-DQo+PiArDQo+PiArICAgICBzd2l0Y2ggKHRpbWluZykgew0KPj4gKyAgICAgY2FzZSBNTUNfVElN
-SU5HX1VIU19TRFIxMDQ6DQo+PiArICAgICAgICAgICAgIGlmIChzbXBsX3BoYXNlID49IFVTRV9E
-TFlfTUlOX1NNUEwgJiYNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNtcGxfcGhh
-c2UgPD0gVVNFX0RMWV9NQVhfU01QTCkNCj4+ICsgICAgICAgICAgICAgICAgICAgICB1c2Vfc21w
-bF9kbHkgPSAxOw0KPj4gKyAgICAgICAgICAgICAgICAgICAgIC8qIGZhbGx0aHJvdWdoICovDQo+
-PiArICAgICBjYXNlIE1NQ19USU1JTkdfVUhTX1NEUjUwOg0KPj4gKyAgICAgICAgICAgICBpZiAo
-c21wbF9waGFzZSA+PSBFTkFCTEVfU0hJRlRfTUlOX1NNUEwgJiYNCj4+ICsgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHNtcGxfcGhhc2UgPD0gRU5BQkxFX1NISUZUX01BWF9TTVBMKQ0KPj4g
-KyAgICAgICAgICAgICAgICAgICAgIGVuYWJsZV9zaGlmdCA9IDE7DQo+PiArICAgICAgICAgICAg
-IGJyZWFrOw0KPj4gKyAgICAgfQ0KPj4gKw0KPj4gKyAgICAgbWNpX3dyaXRlbChob3N0LCBHUElP
-LCAweDApOw0KPj4gKyAgICAgdXNsZWVwX3JhbmdlKDUsIDEwKTsNCj4+ICsNCj4+ICsgICAgIHJl
-Z192YWx1ZSA9IEZJRUxEX1BSRVAoVUhTX1JFR19FWFRfU0FNUExFX1BIQVNFX01BU0ssIHNtcGxf
-cGhhc2UpIHwNCj4+ICsgICAgICAgICAgICAgICAgIEZJRUxEX1BSRVAoVUhTX1JFR19FWFRfU0FN
-UExFX0RMWV9NQVNLLCBzbXBsX2RseSkgfA0KPj4gKyAgICAgICAgICAgICAgICAgRklFTERfUFJF
-UChVSFNfUkVHX0VYVF9TQU1QTEVfRFJWUEhBU0VfTUFTSywgZHJ2X3BoYXNlKTsNCj4+ICsgICAg
-IG1jaV93cml0ZWwoaG9zdCwgVUhTX1JFR19FWFQsIHJlZ192YWx1ZSk7DQo+PiArDQo+PiArICAg
-ICBtY2lfd3JpdGVsKGhvc3QsIEVOQUJMRV9TSElGVCwgZW5hYmxlX3NoaWZ0KTsNCj4+ICsNCj4+
-ICsgICAgIHJlZ192YWx1ZSA9IEZJRUxEX1BSRVAoR1BJT19DTEtfRElWX01BU0ssIEdFTkNMS19E
-SVYpIHwNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgIEZJRUxEX1BSRVAoR1BJT19VU0Vf
-U0FNUExFX0RMWV9NQVNLLCB1c2Vfc21wbF9kbHkpOw0KPj4gKyAgICAgbWNpX3dyaXRlbChob3N0
-LCBHUElPLCAodW5zaWduZWQgaW50KXJlZ192YWx1ZSB8IA0KPj4gKyBHUElPX0NMS19FTkFCTEUp
-Ow0KPj4gKw0KPj4gKyAgICAgLyogV2Ugc2hvdWxkIGRlbGF5IDFtcyB3YWl0IGZvciB0aW1pbmcg
-c2V0dGluZyBmaW5pc2hlZC4gKi8NCj4+ICsgICAgIHVzbGVlcF9yYW5nZSgxMDAwLCAyMDAwKTsN
-Cj4+ICt9DQo+PiArDQo+PiArc3RhdGljIGludCBkd19tY2lfaGkzNjYwX2luaXQoc3RydWN0IGR3
-X21jaSAqaG9zdCkgew0KPj4gKyAgICAgbWNpX3dyaXRlbChob3N0LCBDRFRIUkNUTCwgU0RNTUNf
-U0VUX1RITEQoU0RDQVJEX1JEX1RIUkVTSE9MRCwNCj4+ICsgICAgICAgICAgICAgICAgIFNETU1D
-X0NBUkRfUkRfVEhSX0VOKSk7DQo+PiArDQo+PiArICAgICBkd19tY2lfaHNfc2V0X3RpbWluZyho
-b3N0LCBNTUNfVElNSU5HX0xFR0FDWSwgLTEpOw0KPj4gKyAgICAgaG9zdC0+YnVzX2h6IC89IChH
-RU5DTEtfRElWICsgMSk7DQo+PiArDQo+PiArICAgICByZXR1cm4gMDsNCj4+ICt9DQo+PiArDQo+
-PiArc3RhdGljIGludCBkd19tY2lfc2V0X3NlbDE4KHN0cnVjdCBkd19tY2kgKmhvc3QsIGJvb2wg
-c2V0KSB7DQo+PiArICAgICBpbnQgcmV0Ow0KPj4gKyAgICAgdW5zaWduZWQgaW50IHZhbDsNCj4+
-ICsgICAgIHN0cnVjdCBrM19wcml2ICpwcml2Ow0KPj4gKw0KPj4gKyAgICAgcHJpdiA9IGhvc3Qt
-PnByaXY7DQo+PiArDQo+PiArICAgICB2YWwgPSBzZXQgPyBTRENBUkRfSU9fU0VMMTggOiAwOw0K
-Pj4gKyAgICAgcmV0ID0gcmVnbWFwX3VwZGF0ZV9iaXRzKHByaXYtPnJlZywgU09DX1NDVFJMX1ND
-UEVSQ1RSTDUsDQo+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RDQVJEX0lPX1NF
-TDE4LCB2YWwpOw0KPj4gKyAgICAgaWYgKHJldCkgew0KPj4gKyAgICAgICAgICAgICBkZXZfZXJy
-KGhvc3QtPmRldiwgInNlbDE4ICV1IGVycm9yXG4iLCB2YWwpOw0KPj4gKyAgICAgICAgICAgICBy
-ZXR1cm4gcmV0Ow0KPj4gKyAgICAgfQ0KPj4gKw0KPj4gKyAgICAgcmV0dXJuIDA7DQo+PiArfQ0K
-Pj4gKw0KPj4gK3ZvaWQgZHdfbWNpX2hpMzY2MF9zZXRfaW9zKHN0cnVjdCBkd19tY2kgKmhvc3Qs
-IHN0cnVjdCBtbWNfaW9zICppb3MpDQo+DQo+IHN0YXRpYz8NCj4NCj4+ICt7DQo+PiArICAgICBp
-bnQgcmV0Ow0KPj4gKyAgICAgdW5zaWduZWQgbG9uZyB3YW50ZWQ7DQo+PiArICAgICB1bnNpZ25l
-ZCBsb25nIGFjdHVhbDsNCj4+ICsgICAgIHN0cnVjdCBrM19wcml2ICpwcml2ID0gaG9zdC0+cHJp
-djsNCj4+ICsNCj4+ICsgICAgIGlmICghaW9zLT5jbG9jayB8fCBpb3MtPmNsb2NrID09IHByaXYt
-PmN1cl9zcGVlZCkNCj4+ICsgICAgICAgICAgICAgcmV0dXJuOw0KPj4gKw0KPj4gKyAgICAgd2Fu
-dGVkID0gaW9zLT5jbG9jayAqIChHRU5DTEtfRElWICsgMSk7DQo+PiArICAgICByZXQgPSBjbGtf
-c2V0X3JhdGUoaG9zdC0+Y2l1X2Nsaywgd2FudGVkKTsNCj4+ICsgICAgIGlmIChyZXQpIHsNCj4+
-ICsgICAgICAgICAgICAgZGV2X2Vycihob3N0LT5kZXYsICJmYWlsZWQgdG8gc2V0IHJhdGUgJWx1
-SHpcbiIsIHdhbnRlZCk7DQo+PiArICAgICAgICAgICAgIHJldHVybjsNCj4+ICsgICAgIH0NCj4+
-ICsgICAgIGFjdHVhbCA9IGNsa19nZXRfcmF0ZShob3N0LT5jaXVfY2xrKTsNCj4+ICsNCj4+ICsg
-ICAgIGR3X21jaV9oc19zZXRfdGltaW5nKGhvc3QsIGlvcy0+dGltaW5nLCAtMSk7DQo+PiArICAg
-ICBob3N0LT5idXNfaHogPSBhY3R1YWwgLyAoR0VOQ0xLX0RJViArIDEpOw0KPj4gKyAgICAgaG9z
-dC0+Y3VycmVudF9zcGVlZCA9IDA7DQo+PiArICAgICBwcml2LT5jdXJfc3BlZWQgPSBob3N0LT5i
-dXNfaHo7IH0NCj4+ICsNCj4+ICtzdGF0aWMgaW50IGR3X21jaV9nZXRfYmVzdF9jbGtzbXBsKHVu
-c2lnbmVkIGludCBzYW1wbGVfZmxhZykgew0KPj4gKyAgICAgaW50IGk7DQo+PiArICAgICBpbnQg
-aW50ZXJ2YWw7DQo+PiArICAgICB1bnNpZ25lZCBpbnQgdjsNCj4+ICsgICAgIHVuc2lnbmVkIGlu
-dCBsZW47DQo+PiArICAgICB1bnNpZ25lZCBpbnQgcmFuZ2Vfc3RhcnQgPSAwOw0KPj4gKyAgICAg
-dW5zaWduZWQgaW50IHJhbmdlX2xlbmd0aCA9IDA7DQo+PiArICAgICB1bnNpZ25lZCBpbnQgbWlk
-ZGxlX3JhbmdlID0gMDsNCj4+ICsNCj4+ICsgICAgIGlmICghc2FtcGxlX2ZsYWcpDQo+PiArICAg
-ICAgICAgICAgIHJldHVybiAtRUlPOw0KPj4gKw0KPj4gKyAgICAgaWYgKH5zYW1wbGVfZmxhZyA9
-PSAwKQ0KPj4gKyAgICAgICAgICAgICByZXR1cm4gMDsNCj4+ICsNCj4+ICsgICAgIGkgPSBmZnMo
-c2FtcGxlX2ZsYWcpIC0gMTsNCj4+ICsNCj4+ICsgICAgIC8qQSBjbG9jayBjeWNsZSBpcyBkaXZp
-ZGVkIGludG8gMzIgcGhhc2VzLA0KPj4gKyAgICAgICplYWNoIG9mIHdoaWNoIGlzIHJlcHJlc2Vu
-dGVkIGJ5IGEgYml0LA0KPj4gKyAgICAgICpmaW5kaW5nIHRoZSBvcHRpbWFsIHBoYXNlLg0KPj4g
-KyAgICAgICovDQo+DQo+IEZpeCB0aGUgY29tbWVudCBzdHlsZS4NCj4NCj4+ICsgICAgIHdoaWxl
-IChpIDwgMzIpIHsNCj4+ICsgICAgICAgICAgICAgdiA9IHJvcjMyKHNhbXBsZV9mbGFnLCBpKTsN
-Cj4+ICsgICAgICAgICAgICAgbGVuID0gZmZzKH52KSAtIDE7DQo+PiArDQo+PiArICAgICAgICAg
-ICAgIGlmIChsZW4gPiByYW5nZV9sZW5ndGgpIHsNCj4+ICsgICAgICAgICAgICAgICAgICAgICBy
-YW5nZV9sZW5ndGggPSBsZW47DQo+PiArICAgICAgICAgICAgICAgICAgICAgcmFuZ2Vfc3RhcnQg
-PSBpOw0KPj4gKyAgICAgICAgICAgICB9DQo+PiArDQo+PiArICAgICAgICAgICAgIGludGVydmFs
-ID0gZmZzKHYgPj4gbGVuKSAtIDE7DQo+PiArICAgICAgICAgICAgIGlmIChpbnRlcnZhbCA8IDAp
-DQo+PiArICAgICAgICAgICAgICAgICAgICAgYnJlYWs7DQo+PiArDQo+PiArICAgICAgICAgICAg
-IGkgKz0gbGVuICsgaW50ZXJ2YWw7DQo+PiArICAgICB9DQo+PiArDQo+PiArICAgICBtaWRkbGVf
-cmFuZ2UgPSByYW5nZV9zdGFydCArIHJhbmdlX2xlbmd0aCAvIDI7DQo+PiArICAgICBpZiAobWlk
-ZGxlX3JhbmdlID49IDMyKQ0KPj4gKyAgICAgICAgICAgICBtaWRkbGVfcmFuZ2UgJT0gMzI7DQo+
-PiArDQo+PiArICAgICByZXR1cm4gbWlkZGxlX3JhbmdlOw0KPj4gK30NCj4+ICsNCj4+ICtzdGF0
-aWMgaW50IGR3X21jaV9oaTM2NjBfZXhlY3V0ZV90dW5pbmcoc3RydWN0IGR3X21jaV9zbG90ICpz
-bG90LCANCj4+ICt1MzIgb3Bjb2RlKSB7DQo+PiArICAgICBpbnQgaSA9IDA7DQo+PiArICAgICBz
-dHJ1Y3QgZHdfbWNpICpob3N0ID0gc2xvdC0+aG9zdDsNCj4+ICsgICAgIHN0cnVjdCBtbWNfaG9z
-dCAqbW1jID0gc2xvdC0+bW1jOw0KPj4gKyAgICAgaW50IHNtcGxfcGhhc2UgPSAwOw0KPj4gKyAg
-ICAgdTMyIHR1bmluZ19zYW1wbGVfZmxhZyA9IDA7DQo+PiArICAgICBpbnQgYmVzdF9jbGtzbXBs
-ID0gMDsNCj4+ICsNCj4+ICsgICAgIGZvciAoaSA9IDA7IGkgPCBOVU1fUEhBU0VTOyArK2ksICsr
-c21wbF9waGFzZSkgew0KPj4gKyAgICAgICAgICAgICBzbXBsX3BoYXNlICU9IDMyOw0KPj4gKw0K
-Pj4gKyAgICAgICAgICAgICBtY2lfd3JpdGVsKGhvc3QsIFRNT1VULCB+MCk7DQo+PiArICAgICAg
-ICAgICAgIGR3X21jaV9oc19zZXRfdGltaW5nKGhvc3QsIG1tYy0+aW9zLnRpbWluZywgDQo+PiAr
-IHNtcGxfcGhhc2UpOw0KPj4gKw0KPj4gKyAgICAgICAgICAgICBpZiAoIW1tY19zZW5kX3R1bmlu
-ZyhtbWMsIG9wY29kZSwgTlVMTCkpDQo+PiArICAgICAgICAgICAgICAgICAgICAgdHVuaW5nX3Nh
-bXBsZV9mbGFnIHw9ICgxIDw8IHNtcGxfcGhhc2UpOw0KPj4gKyAgICAgICAgICAgICBlbHNlDQo+
-PiArICAgICAgICAgICAgICAgICAgICAgdHVuaW5nX3NhbXBsZV9mbGFnICY9IH4oMSA8PCBzbXBs
-X3BoYXNlKTsNCj4+ICsgICAgIH0NCj4+ICsNCj4+ICsgICAgIGJlc3RfY2xrc21wbCA9IGR3X21j
-aV9nZXRfYmVzdF9jbGtzbXBsKHR1bmluZ19zYW1wbGVfZmxhZyk7DQo+PiArICAgICBpZiAoYmVz
-dF9jbGtzbXBsIDwgMCkgew0KPj4gKyAgICAgICAgICAgICBkZXZfZXJyKGhvc3QtPmRldiwgIkFs
-bCBwaGFzZXMgYmFkIVxuIik7DQo+PiArICAgICAgICAgICAgIHJldHVybiAtRUlPOw0KPj4gKyAg
-ICAgfQ0KPj4gKw0KPj4gKyAgICAgZHdfbWNpX2hzX3NldF90aW1pbmcoaG9zdCwgbW1jLT5pb3Mu
-dGltaW5nLCBiZXN0X2Nsa3NtcGwpOw0KPj4gKw0KPj4gKyAgICAgZGV2X2luZm8oaG9zdC0+ZGV2
-LCAidHVuaW5nIG9rIGJlc3RfY2xrc21wbCAldSB0dW5pbmdfc2FtcGxlX2ZsYWcgJXhcbiIsDQo+
-PiArICAgICAgICAgICAgICBiZXN0X2Nsa3NtcGwsIHR1bmluZ19zYW1wbGVfZmxhZyk7DQo+PiAr
-ICAgICByZXR1cm4gMDsNCj4+ICt9DQo+PiArDQo+PiArc3RhdGljIGludCBkd19tY2lfaGkzNjYw
-X3N3aXRjaF92b2x0YWdlKHN0cnVjdCBtbWNfaG9zdCAqbW1jLA0KPj4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBzdHJ1Y3QgbW1jX2lvcyAqaW9zKSB7DQo+PiArICAgICBp
-bnQgcmV0Ow0KPj4gKyAgICAgaW50IG1pbl91diA9IDA7DQo+PiArICAgICBpbnQgbWF4X3V2ID0g
-MDsNCj4+ICsgICAgIHN0cnVjdCBkd19tY2lfc2xvdCAqc2xvdCA9IG1tY19wcml2KG1tYyk7DQo+
-PiArICAgICBzdHJ1Y3QgazNfcHJpdiAqcHJpdjsNCj4+ICsgICAgIHN0cnVjdCBkd19tY2kgKmhv
-c3Q7DQo+PiArDQo+PiArICAgICBob3N0ID0gc2xvdC0+aG9zdDsNCj4+ICsgICAgIHByaXYgPSBo
-b3N0LT5wcml2Ow0KPj4gKw0KPj4gKyAgICAgaWYgKCFwcml2IHx8ICFwcml2LT5yZWcpDQo+PiAr
-ICAgICAgICAgICAgIHJldHVybiAwOw0KPj4gKw0KPj4gKyAgICAgaWYgKHByaXYtPmN0cmxfaWQg
-PT0gRFdNTUNfU0RJT19JRCkNCj4+ICsgICAgICAgICAgICAgcmV0dXJuIDA7DQo+PiArDQo+PiAr
-ICAgICBpZiAoaW9zLT5zaWduYWxfdm9sdGFnZSA9PSBNTUNfU0lHTkFMX1ZPTFRBR0VfMzMwKSB7
-DQo+PiArICAgICAgICAgICAgIHJldCA9IGR3X21jaV9zZXRfc2VsMTgoaG9zdCwgMCk7DQo+PiAr
-ICAgICAgICAgICAgIGlmIChyZXQpDQo+PiArICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJl
-dDsNCj4+ICsgICAgICAgICAgICAgbWluX3V2ID0gMjk1MDAwMDsNCj4+ICsgICAgICAgICAgICAg
-bWF4X3V2ID0gMjk1MDAwMDsNCj4+ICsgICAgIH0gZWxzZSBpZiAoaW9zLT5zaWduYWxfdm9sdGFn
-ZSA9PSBNTUNfU0lHTkFMX1ZPTFRBR0VfMTgwKSB7DQo+PiArICAgICAgICAgICAgIHJldCA9IGR3
-X21jaV9zZXRfc2VsMTgoaG9zdCwgMSk7DQo+PiArICAgICAgICAgICAgIGlmIChyZXQpDQo+PiAr
-ICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIHJldDsNCj4+ICsgICAgICAgICAgICAgbWluX3V2
-ID0gMTgwMDAwMDsNCj4+ICsgICAgICAgICAgICAgbWF4X3V2ID0gMTgwMDAwMDsNCj4+ICsgICAg
-IH0NCj4+ICsNCj4+ICsgICAgIGlmIChJU19FUlJfT1JfTlVMTChtbWMtPnN1cHBseS52cW1tYykp
-DQo+PiArICAgICAgICAgICAgIHJldHVybiAwOw0KPj4gKw0KPj4gKyAgICAgcmV0ID0gcmVndWxh
-dG9yX3NldF92b2x0YWdlKG1tYy0+c3VwcGx5LnZxbW1jLCBtaW5fdXYsIG1heF91dik7DQo+PiAr
-ICAgICBpZiAocmV0KSB7DQo+PiArICAgICAgICAgICAgIGRldl9lcnIoaG9zdC0+ZGV2LCAiUmVn
-dWxhdG9yIHNldCBlcnJvciAlZDogJWQgLSAlZFxuIiwNCj4+ICsgICAgICAgICAgICAgICAgICAg
-ICByZXQsIG1pbl91diwgbWF4X3V2KTsNCj4+ICsgICAgICAgICAgICAgcmV0dXJuIHJldDsNCj4+
-ICsgICAgIH0NCj4+ICsgICAgIHJldHVybiAwOw0KPj4gK30NCj4+ICsNCj4+ICtzdGF0aWMgY29u
-c3Qgc3RydWN0IGR3X21jaV9kcnZfZGF0YSBoaTM2NjBfZGF0YSA9IHsNCj4+ICsgICAgIC5pbml0
-ID0gZHdfbWNpX2hpMzY2MF9pbml0LA0KPj4gKyAgICAgLnNldF9pb3MgPSBkd19tY2lfaGkzNjYw
-X3NldF9pb3MsDQo+PiArICAgICAucGFyc2VfZHQgPSBkd19tY2lfaGk2MjIwX3BhcnNlX2R0LA0K
-Pj4gKyAgICAgLmV4ZWN1dGVfdHVuaW5nID0gZHdfbWNpX2hpMzY2MF9leGVjdXRlX3R1bmluZywN
-Cj4+ICsgICAgIC5zd2l0Y2hfdm9sdGFnZSAgPSBkd19tY2lfaGkzNjYwX3N3aXRjaF92b2x0YWdl
-LCB9Ow0KPj4gKw0KPj4gIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIGR3X21jaV9r
-M19tYXRjaFtdID0gew0KPj4gKyAgICAgeyAuY29tcGF0aWJsZSA9ICJoaXNpbGljb24saGkzNjYw
-LWR3LW1zaGMiLCAuZGF0YSA9IA0KPj4gKyAmaGkzNjYwX2RhdGEsIH0sDQo+PiAgICAgICB7IC5j
-b21wYXRpYmxlID0gImhpc2lsaWNvbixoaTQ1MTEtZHctbXNoYyIsIC5kYXRhID0gJmszX2Rydl9k
-YXRhLCB9LA0KPj4gICAgICAgeyAuY29tcGF0aWJsZSA9ICJoaXNpbGljb24saGk2MjIwLWR3LW1z
-aGMiLCAuZGF0YSA9ICZoaTYyMjBfZGF0YSwgfSwNCj4+ICAgICAgIHt9LA0KPj4gQEAgLTE1NSw2
-ICs0NjUsMTEgQEAgc3RhdGljIGludCBkd19tY2lfazNfcHJvYmUoc3RydWN0IA0KPj4gcGxhdGZv
-cm1fZGV2aWNlICpwZGV2KSAgew0KPj4gICAgICAgY29uc3Qgc3RydWN0IGR3X21jaV9kcnZfZGF0
-YSAqZHJ2X2RhdGE7DQo+PiAgICAgICBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkICptYXRjaDsN
-Cj4+ICsgICAgIHN0cnVjdCByZXNldF9jb250cm9sICAgICpyc3Q7DQo+PiArDQo+PiArICAgICBy
-c3QgPSBkZXZtX3Jlc2V0X2NvbnRyb2xfZ2V0KCZwZGV2LT5kZXYsIE5VTEwpOw0KPj4gKyAgICAg
-aWYgKCFJU19FUlIocnN0KSkNCj4+ICsgICAgICAgICAgICAgcmVzZXRfY29udHJvbF9yZXNldChy
-c3QpOw0KPj4NCj4+ICAgICAgIG1hdGNoID0gb2ZfbWF0Y2hfbm9kZShkd19tY2lfazNfbWF0Y2gs
-IHBkZXYtPmRldi5vZl9ub2RlKTsNCj4+ICAgICAgIGRydl9kYXRhID0gbWF0Y2gtPmRhdGE7DQo+
-PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuaCBiL2RyaXZlcnMvbW1jL2hv
-c3QvZHdfbW1jLmggDQo+PiBpbmRleCBjZTM0NzM2MWYzZGMuLjdjZGNhZmRhOGVlYyAxMDA2NDQN
-Cj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmgNCj4+ICsrKyBiL2RyaXZlcnMvbW1j
-L2hvc3QvZHdfbW1jLmgNCj4+IEBAIC0zMTksNiArMzE5LDggQEAgc3RydWN0IGR3X21jaV9ib2Fy
-ZCB7DQo+PiAgI2RlZmluZSBTRE1NQ19EU0NBRERSICAgICAgICAgICAgICAgIDB4MDk0DQo+PiAg
-I2RlZmluZSBTRE1NQ19CVUZBRERSICAgICAgICAgICAgICAgIDB4MDk4DQo+PiAgI2RlZmluZSBT
-RE1NQ19DRFRIUkNUTCAgICAgICAgICAgICAgIDB4MTAwDQo+PiArI2RlZmluZSBTRE1NQ19VSFNf
-UkVHX0VYVCAgICAweDEwOA0KPj4gKyNkZWZpbmUgU0RNTUNfRU5BQkxFX1NISUZUICAgMHgxMTAN
-Cj4+ICAjZGVmaW5lIFNETU1DX0RBVEEoeCkgICAgICAgICAgICAgICAgKHgpDQo+PiAgLyoNCj4+
-ICAqIFJlZ2lzdGVycyB0byBzdXBwb3J0IGlkbWFjIDY0LWJpdCBhZGRyZXNzIG1vZGUNCj4+DQo+
-DQo=
+From: Li Wei <liwei213@huawei.com>
+
+Add sd card support for hi3660 soc
+
+Signed-off-by: Li Wei <liwei213@huawei.com>
+Signed-off-by: Chen Jun <chenjun14@huawei.com>
+
+Major changes in v3:
+ - solve review comments from Heiner Kallweit.
+   *use the GENMASK and FIELD_PREP macros replace the bit shift operation.
+   *use usleep_range() replace udelay() and mdelay().
+
+Major changes in v4:
+ - solve review comments from Jaehoon Chung.
+   *move common register for dwmmc controller to dwmmc header file.
+   *modify definitions type of some register variables.
+   *get rid of the magic numbers.
+
+Major changes in v5:
+ - further improve coding style.
+
+Major changes in v6:
+ - solve review comments for Jaehoon Chung.
+   *modify dw_mci_hi3660_set_ios() to static.
+   *fix the comment style.
+---
+ drivers/mmc/host/dw_mmc-k3.c | 316 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.h    |   2 +
+ 2 files changed, 318 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index e38fb0020bb1..863bc580eeb8 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -8,6 +8,8 @@
+  * (at your option) any later version.
+  */
+ 
++#include <linux/bitops.h>
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/mmc/host.h>
+@@ -28,7 +30,38 @@
+ #define AO_SCTRL_SEL18		BIT(10)
+ #define AO_SCTRL_CTRL3		0x40C
+ 
++#define DWMMC_SDIO_ID 2
++
++#define SOC_SCTRL_SCPERCTRL5    (0x314)
++#define SDCARD_IO_SEL18         BIT(2)
++
++#define SDCARD_RD_THRESHOLD  (512)
++
++#define GENCLK_DIV (7)
++
++#define GPIO_CLK_ENABLE                   BIT(16)
++#define GPIO_CLK_DIV_MASK                 GENMASK(11, 8)
++#define GPIO_USE_SAMPLE_DLY_MASK          GENMASK(13, 13)
++#define UHS_REG_EXT_SAMPLE_PHASE_MASK     GENMASK(20, 16)
++#define UHS_REG_EXT_SAMPLE_DRVPHASE_MASK  GENMASK(25, 21)
++#define UHS_REG_EXT_SAMPLE_DLY_MASK       GENMASK(30, 26)
++
++#define TIMING_MODE     3
++#define TIMING_CFG_NUM 10
++
++#define PULL_DOWN BIT(1)
++#define PULL_UP   BIT(0)
++
++#define NUM_PHASES (40)
++
++#define ENABLE_SHIFT_MIN_SMPL (4)
++#define ENABLE_SHIFT_MAX_SMPL (12)
++#define USE_DLY_MIN_SMPL (11)
++#define USE_DLY_MAX_SMPL (14)
++
+ struct k3_priv {
++	int ctrl_id;
++	u32 cur_speed;
+ 	struct regmap	*reg;
+ };
+ 
+@@ -38,6 +71,41 @@ static unsigned long dw_mci_hi6220_caps[] = {
+ 	0
+ };
+ 
++struct hs_timing {
++	u32 drv_phase;
++	u32 smpl_dly;
++	u32 smpl_phase_max;
++	u32 smpl_phase_min;
++};
++
++struct hs_timing hs_timing_cfg[TIMING_MODE][TIMING_CFG_NUM] = {
++	{ /* reserved */ },
++	{ /* SD */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{6, 0,  4,  4,},  /* 1: MMC_HS */
++		{6, 0,  3,  3,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  2,  2,},  /* 4: SDR25 */
++		{4, 0, 11,  0,},  /* 5: SDR50 */
++		{6, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	},
++	{ /* SDIO */
++		{7, 0, 15, 15,},  /* 0: LEGACY 400k */
++		{0},              /* 1: MMC_HS */
++		{6, 0, 15, 15,},  /* 2: SD_HS */
++		{6, 0, 15, 15,},  /* 3: SDR12 */
++		{6, 0,  0,  0,},  /* 4: SDR25 */
++		{4, 0, 12,  0,},  /* 5: SDR50 */
++		{5, 4, 15,  0,},  /* 6: SDR104 */
++		{0},              /* 7: DDR50 */
++		{0},              /* 8: DDR52 */
++		{0},              /* 9: HS200 */
++	}
++};
++
+ static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ {
+ 	int ret;
+@@ -66,6 +134,10 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
+ 	if (IS_ERR(priv->reg))
+ 		priv->reg = NULL;
+ 
++	priv->ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
++	if (priv->ctrl_id < 0)
++		priv->ctrl_id = 0;
++
+ 	host->priv = priv;
+ 	return 0;
+ }
+@@ -144,7 +216,246 @@ static const struct dw_mci_drv_data hi6220_data = {
+ 	.execute_tuning		= dw_mci_hi6220_execute_tuning,
+ };
+ 
++static void dw_mci_hs_set_timing(struct dw_mci *host, int timing,
++				     int smpl_phase)
++{
++	u32 drv_phase;
++	u32 smpl_dly;
++	u32 use_smpl_dly = 0;
++	u32 enable_shift = 0;
++	u32 reg_value;
++	int ctrl_id;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++	ctrl_id = priv->ctrl_id;
++
++	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
++	smpl_dly   = hs_timing_cfg[ctrl_id][timing].smpl_dly;
++	if (smpl_phase == -1)
++		smpl_phase = (hs_timing_cfg[ctrl_id][timing].smpl_phase_max +
++			     hs_timing_cfg[ctrl_id][timing].smpl_phase_min) / 2;
++
++	switch (timing) {
++	case MMC_TIMING_UHS_SDR104:
++		if (smpl_phase >= USE_DLY_MIN_SMPL &&
++				smpl_phase <= USE_DLY_MAX_SMPL)
++			use_smpl_dly = 1;
++			/* fallthrough */
++	case MMC_TIMING_UHS_SDR50:
++		if (smpl_phase >= ENABLE_SHIFT_MIN_SMPL &&
++				smpl_phase <= ENABLE_SHIFT_MAX_SMPL)
++			enable_shift = 1;
++		break;
++	}
++
++	mci_writel(host, GPIO, 0x0);
++	usleep_range(5, 10);
++
++	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, smpl_phase) |
++		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK, smpl_dly) |
++		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK, drv_phase);
++	mci_writel(host, UHS_REG_EXT, reg_value);
++
++	mci_writel(host, ENABLE_SHIFT, enable_shift);
++
++	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |
++			     FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK, use_smpl_dly);
++	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
++
++	/* We should delay 1ms wait for timing setting finished. */
++	usleep_range(1000, 2000);
++}
++
++static int dw_mci_hi3660_init(struct dw_mci *host)
++{
++	mci_writel(host, CDTHRCTL, SDMMC_SET_THLD(SDCARD_RD_THRESHOLD,
++		    SDMMC_CARD_RD_THR_EN));
++
++	dw_mci_hs_set_timing(host, MMC_TIMING_LEGACY, -1);
++	host->bus_hz /= (GENCLK_DIV + 1);
++
++	return 0;
++}
++
++static int dw_mci_set_sel18(struct dw_mci *host, bool set)
++{
++	int ret;
++	unsigned int val;
++	struct k3_priv *priv;
++
++	priv = host->priv;
++
++	val = set ? SDCARD_IO_SEL18 : 0;
++	ret = regmap_update_bits(priv->reg, SOC_SCTRL_SCPERCTRL5,
++				 SDCARD_IO_SEL18, val);
++	if (ret) {
++		dev_err(host->dev, "sel18 %u error\n", val);
++		return ret;
++	}
++
++	return 0;
++}
++
++static void dw_mci_hi3660_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	int ret;
++	unsigned long wanted;
++	unsigned long actual;
++	struct k3_priv *priv = host->priv;
++
++	if (!ios->clock || ios->clock == priv->cur_speed)
++		return;
++
++	wanted = ios->clock * (GENCLK_DIV + 1);
++	ret = clk_set_rate(host->ciu_clk, wanted);
++	if (ret) {
++		dev_err(host->dev, "failed to set rate %luHz\n", wanted);
++		return;
++	}
++	actual = clk_get_rate(host->ciu_clk);
++
++	dw_mci_hs_set_timing(host, ios->timing, -1);
++	host->bus_hz = actual / (GENCLK_DIV + 1);
++	host->current_speed = 0;
++	priv->cur_speed = host->bus_hz;
++}
++
++static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
++{
++	int i;
++	int interval;
++	unsigned int v;
++	unsigned int len;
++	unsigned int range_start = 0;
++	unsigned int range_length = 0;
++	unsigned int middle_range = 0;
++
++	if (!sample_flag)
++		return -EIO;
++
++	if (~sample_flag == 0)
++		return 0;
++
++	i = ffs(sample_flag) - 1;
++
++	/*
++	* A clock cycle is divided into 32 phases,
++	* each of which is represented by a bit,
++	* finding the optimal phase.
++	*/
++	while (i < 32) {
++		v = ror32(sample_flag, i);
++		len = ffs(~v) - 1;
++
++		if (len > range_length) {
++			range_length = len;
++			range_start = i;
++		}
++
++		interval = ffs(v >> len) - 1;
++		if (interval < 0)
++			break;
++
++		i += len + interval;
++	}
++
++	middle_range = range_start + range_length / 2;
++	if (middle_range >= 32)
++		middle_range %= 32;
++
++	return middle_range;
++}
++
++static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
++{
++	int i = 0;
++	struct dw_mci *host = slot->host;
++	struct mmc_host *mmc = slot->mmc;
++	int smpl_phase = 0;
++	u32 tuning_sample_flag = 0;
++	int best_clksmpl = 0;
++
++	for (i = 0; i < NUM_PHASES; ++i, ++smpl_phase) {
++		smpl_phase %= 32;
++
++		mci_writel(host, TMOUT, ~0);
++		dw_mci_hs_set_timing(host, mmc->ios.timing, smpl_phase);
++
++		if (!mmc_send_tuning(mmc, opcode, NULL))
++			tuning_sample_flag |= (1 << smpl_phase);
++		else
++			tuning_sample_flag &= ~(1 << smpl_phase);
++	}
++
++	best_clksmpl = dw_mci_get_best_clksmpl(tuning_sample_flag);
++	if (best_clksmpl < 0) {
++		dev_err(host->dev, "All phases bad!\n");
++		return -EIO;
++	}
++
++	dw_mci_hs_set_timing(host, mmc->ios.timing, best_clksmpl);
++
++	dev_info(host->dev, "tuning ok best_clksmpl %u tuning_sample_flag %x\n",
++		 best_clksmpl, tuning_sample_flag);
++	return 0;
++}
++
++static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	int ret;
++	int min_uv = 0;
++	int max_uv = 0;
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct k3_priv *priv;
++	struct dw_mci *host;
++
++	host = slot->host;
++	priv = host->priv;
++
++	if (!priv || !priv->reg)
++		return 0;
++
++	if (priv->ctrl_id == DWMMC_SDIO_ID)
++		return 0;
++
++	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
++		ret = dw_mci_set_sel18(host, 0);
++		if (ret)
++			return ret;
++		min_uv = 2950000;
++		max_uv = 2950000;
++	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		ret = dw_mci_set_sel18(host, 1);
++		if (ret)
++			return ret;
++		min_uv = 1800000;
++		max_uv = 1800000;
++	}
++
++	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
++		return 0;
++
++	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
++	if (ret) {
++		dev_err(host->dev, "Regulator set error %d: %d - %d\n",
++			ret, min_uv, max_uv);
++		return ret;
++	}
++	return 0;
++}
++
++static const struct dw_mci_drv_data hi3660_data = {
++	.init = dw_mci_hi3660_init,
++	.set_ios = dw_mci_hi3660_set_ios,
++	.parse_dt = dw_mci_hi6220_parse_dt,
++	.execute_tuning = dw_mci_hi3660_execute_tuning,
++	.switch_voltage  = dw_mci_hi3660_switch_voltage,
++};
++
+ static const struct of_device_id dw_mci_k3_match[] = {
++	{ .compatible = "hisilicon,hi3660-dw-mshc", .data = &hi3660_data, },
+ 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
+ 	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
+ 	{},
+@@ -155,6 +466,11 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
+ {
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
++	struct reset_control	*rst;
++
++	rst = devm_reset_control_get(&pdev->dev, NULL);
++	if (!IS_ERR(rst))
++		reset_control_reset(rst);
+ 
+ 	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
+ 	drv_data = match->data;
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index ce347361f3dc..7cdcafda8eec 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -319,6 +319,8 @@ struct dw_mci_board {
+ #define SDMMC_DSCADDR		0x094
+ #define SDMMC_BUFADDR		0x098
+ #define SDMMC_CDTHRCTL		0x100
++#define SDMMC_UHS_REG_EXT	0x108
++#define SDMMC_ENABLE_SHIFT	0x110
+ #define SDMMC_DATA(x)		(x)
+ /*
+ * Registers to support idmac 64-bit address mode
+-- 
+2.11.0
