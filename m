@@ -1,63 +1,89 @@
-From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
-Subject: [PATCH] mmc: sdhci-of-arasan: use functions and OFFSETS from sdhci.h
-Date: Fri,  7 Jul 2017 08:43:30 -0400
-Message-ID: <1499431410-11404-1-git-send-email-jeff.dagenais@gmail.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH] mmc: sdhci-xenon: Add Xenon SDHCI specific system-level PM support
+Date: Fri, 7 Jul 2017 11:11:12 -0700
+Message-ID: <1499451072-16513-1-git-send-email-zjwu@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:35480 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751927AbdGGMnn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jul 2017 08:43:43 -0400
-Received: by mail-it0-f65.google.com with SMTP id v193so5166164itc.2
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Jul 2017 05:43:43 -0700 (PDT)
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:47530 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750938AbdGGSJy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jul 2017 14:09:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, michal.simek@xilinx.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, zjwu@marvell.com
+Cc: dougj@marvell.com, ygao@marvell.com, liuw@marvell.com
 
-This increases consistency of the code across the sdhci family.
+Add Xenon specific system-level suspend and resume support.
+Especially during resume, re-configure Xenon specific registers
+since registers setting will be lost in suspend if Xenon is power off.
 
-Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+Tested-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-xenon.c | 42 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 41 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index cdee35a..da9b824 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -33,7 +33,6 @@
- #include "sdhci-pltfm.h"
- #include <linux/of.h>
- 
--#define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
- #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
- 
- #define VENDOR_ENHANCED_STROBE		BIT(0)
-@@ -179,7 +178,7 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
- 	unsigned long freq;
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 
--	div = readl(host->ioaddr + SDHCI_ARASAN_CLK_CTRL_OFFSET);
-+	div = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
- 	div = (div & CLK_CTRL_TIMEOUT_MASK) >> CLK_CTRL_TIMEOUT_SHIFT;
- 
- 	freq = clk_get_rate(pltfm_host->clk);
-@@ -451,13 +450,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
- 	u32 vendor;
- 	struct sdhci_host *host = mmc_priv(mmc);
- 
--	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
- 	if (ios->enhanced_strobe)
- 		vendor |= VENDOR_ENHANCED_STROBE;
- 	else
- 		vendor &= ~VENDOR_ENHANCED_STROBE;
- 
--	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index bc1781b..9f399c4 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -519,6 +519,46 @@ static int xenon_remove(struct platform_device *pdev)
+ 	return 0;
  }
  
- static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
++#ifdef CONFIG_PM_SLEEP
++static int xenon_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable_unprepare(pltfm_host->clk);
++	return ret;
++}
++
++static int xenon_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		return ret;
++
++	/*
++	 * If SoCs power off the entire Xenon, registers setting will
++	 * be lost.
++	 * Re-configure Xenon specific register to enable current SDHC
++	 */
++	ret = xenon_sdhc_prepare(host);
++	if (ret)
++		return ret;
++
++	return sdhci_resume_host(host);
++}
++#endif
++
++static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
++
+ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-ap806-sdhci",},
+ 	{ .compatible = "marvell,armada-cp110-sdhci",},
+@@ -531,7 +571,7 @@ static int xenon_remove(struct platform_device *pdev)
+ 	.driver	= {
+ 		.name	= "xenon-sdhci",
+ 		.of_match_table = sdhci_xenon_dt_ids,
+-		.pm = &sdhci_pltfm_pmops,
++		.pm = &xenon_pmops,
+ 	},
+ 	.probe	= xenon_probe,
+ 	.remove	= xenon_remove,
 -- 
-2.1.4
+1.9.1
 
