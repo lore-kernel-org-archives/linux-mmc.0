@@ -1,56 +1,82 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC]Do we still need CONFIG_MMC_DEBUG
-Date: Tue, 11 Jul 2017 16:53:20 +0200
-Message-ID: <CAPDyKFpeOoHcd9o6uWBm1MNvx0-jcw4=yQ1v1VBBACj4X9s7uA@mail.gmail.com>
-References: <ca8f1189-9c85-5cb0-b7e9-24b6154b27f6@rock-chips.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFT] mmc: tmio: fix CMD12 (STOP) handling
+Date: Tue, 11 Jul 2017 17:00:13 +0200
+Message-ID: <20170711150013.GB6264@katana>
+References: <20170703192823.8116-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFqkGj-ywGciKqxxg6PnPDP3N1G+H-snnimhQPhVDJAFQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="/NkBOFFp2J2Af1nK"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:35424 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932779AbdGKOxV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:53:21 -0400
-Received: by mail-yw0-f180.google.com with SMTP id v193so1731869ywg.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:53:21 -0700 (PDT)
-In-Reply-To: <ca8f1189-9c85-5cb0-b7e9-24b6154b27f6@rock-chips.com>
+Received: from www.zeus03.de ([194.117.254.33]:41580 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755995AbdGKPAQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 11 Jul 2017 11:00:16 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqkGj-ywGciKqxxg6PnPDP3N1G+H-snnimhQPhVDJAFQA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-On 27 June 2017 at 11:32, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi,
->
->    CONFIG_MMC_DEBUG enables mmc core and driver debugging, and most
-> people should N. I didn't find any point to keep this for core.c as
-> it's just for some WARN or BUG detect. And the debug log around it could
-> be replaced with pr_debug which is easily controlled by system log
-> level, otherwise we should re-compile the kernel and flash zImage agian
-> just for debug.
->
-> And for some host drivers, it was used to dump registers as well.
-> For the error cases, I think they could directly output the regs, just
-> like what sdhci did. Right?
->
-> For other cases, for instace, sdhci_add_host uses this macro to dump
-> registers when adding host. I think we just have changed sdhci_dumpregs
-> to use pr_debug and check the log depending on the dynamic log level, so
-> there is no need to still keep it under the context of CONFIG_MMC_DEBUG?
->
-> I just really don't like compile-time debug option and I didn't ever try
-> to enable it frankly. Is it possible for us to get rid of it? :)
-
-Yeah, please remove it!
-
-I had quick look at core.c and there seems to be some odd use of it.
-Please have a look and remove all what is needed.
-
-Kind regards
-Uffe
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Jan =?utf-8?Q?Kl=C3=B6tzke?= <jan.kloetzke@technisat.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>, Kouei Abe <kouei.abe.cp@renesas.com>
 
 
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--/NkBOFFp2J2Af1nK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Jul 11, 2017 at 04:43:28PM +0200, Ulf Hansson wrote:
+> On 3 July 2017 at 21:28, Wolfram Sang <wsa+renesas@sang-engineering.com> =
+wrote:
+> > I always anticipated this code to be not correct, but now I had a test
+> > case to prove it. According to all documentation I have, setting the
+> > TMIO_STOP_STP bit ever only worked during block transfers. This bit is
+> > like manually enforcing an autocmd12 during a so far seamless transfer.
+> > It does NOT work when the block transfer had errors. It also does NOT
+> > work with any other cmd except block commands. For all those, CMD12 has
+> > to be treated like any other command. So, basically, we could use this
+> > bit only for mrq->data->stop cmds. But for these, we happily use the
+> > autocmd12 feature using the TMIO_STOP_SEC bit. As a result, the above
+> > bit is not useful for us and we need to treat CMD12 as a regular cmd
+> > always. Just remove the special handling code. Note that the BSP
+> > recognized this issue as well yet had a more cautious solution to the
+> > problem [1]. Which is understandable but makes CMD12 handling even more
+> > complicated.
+> >
+> > Checked with a Renesas Salvator-X/M3-W which needed to send CMD12 when
+> > retuning one of my SD cards.
+> >
+> > [1] https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas-bsp.g=
+it/commit/?id=3D2838a2ff8ca776f6d18b7fbbe75f3df8dd64183a
+> >
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>=20
+> Thanks, applied for next!
+>=20
+> Should we add a stable tag?
+
+Thanks! I'd like to wait until it gets further testing when it becomes
+upstream.
+
+
+--/NkBOFFp2J2Af1nK
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAllk5/kACgkQFA3kzBSg
+KbZmzA//WO00KIVqlDp5tvSzy4iGFK22EPnCgVx/gO1L//gy2f4YHZHI+ZQjn1pd
+c0/iI+8+aau9r/QUs2UsynZyZmD+j/criJYfTojLPJm3Q89krt0a1u+I5pM3q6Bo
+mULoG6KQMsSjBioezw0kyb9SbpD/C/ft1x8ZlEMPl29Mjteoh51pxvHbQvr9hAnR
+59mQ541v3HcAN/t+AAKthLOgZVEJBmw4bDibwBRzD3/+rGzHs8j39knV5n5wg/g6
+MohMG4TyROAKfcseJNbymW8IT01/3kxXUliH9naGHABlZlQBdjzt8tbpexfwt/J9
+8PeO70GlRLebh1Yg3V3UJR68J/QZuMSC2WOd7EQqSj8FAWuEx3rLP+b8hdvXpha4
+Pukuemz3yu1Gc/hYTdMyXQjtuQbcrBqJfyI50AL/xya4WglFV3htr5yzjALZafAU
+rXRnkxWJGwchRWi4JH+2fCLC7/XKE7FxbpGA6lQz8D1PjbE18L/BMyIjSR241Fjr
+glNemro6vfLFMAVf5X5gakwgsuzZUW6LRgYXRb1XQ3mKieJNHnvCXt952dI0+qq7
+9J8O66/aV4vGHP2hsB82SPYkV5l/UKaynkB23hA44Jm+0sMFRLBPyoiqSRq3iv5p
+3Xft/SWWbqQykFy9SCYCSVE8ElYdnuLuNstIDNAI1yr8evx08ug=
+=I7iG
+-----END PGP SIGNATURE-----
+
+--/NkBOFFp2J2Af1nK--
