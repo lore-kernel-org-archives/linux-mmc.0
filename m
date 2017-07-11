@@ -1,25 +1,34 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmc_ops: fix a typo for comment of mmc_start_bkops
-Date: Tue, 11 Jul 2017 16:43:59 +0200
-Message-ID: <CAPDyKFoasn0+GKHTkb0nE=5LB+2m7sQfHP6VMNzNn3M1=mgpwQ@mail.gmail.com>
-References: <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: mxcmmc: check the return value of mxcmci_finish_data
+Date: Tue, 11 Jul 2017 16:44:25 +0200
+Message-ID: <CAPDyKFrQmARVB0xe=gkeJEYP7XJedy_mvssYsQhZt+ePNhybvQ@mail.gmail.com>
+References: <1499328552-83340-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:36705 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933390AbdGKOoA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:44:00 -0400
-Received: by mail-qk0-f173.google.com with SMTP id p21so2620782qke.3
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:44:00 -0700 (PDT)
-In-Reply-To: <1499135403-56224-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:34076 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933435AbdGKOo0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:44:26 -0400
+Received: by mail-qk0-f178.google.com with SMTP id d78so2749354qkb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:44:26 -0700 (PDT)
+In-Reply-To: <1499328552-83340-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 4 July 2017 at 04:30, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Just a trivial fix for that found by reading the code.
+On 6 July 2017 at 10:09, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> We got a compile warning for mxcmmc,
+>
+> drivers/mmc/host/mxcmmc.c: In function 'mxcmci_data_done':
+> drivers/mmc/host/mxcmmc.c:661:6: warning: variable 'data_error' set but
+> not used [-Wunused-but-set-variable]
+>
+> The easiest method is to remove the data_error. But looking into
+> the code closely, I think we should check the return value of
+> mxcmci_finish_data as if it got data->error(the same as data_error),
+> we shouldn't try to read the response.
 >
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
@@ -30,22 +39,23 @@ Uffe
 
 > ---
 >
->  drivers/mmc/core/mmc_ops.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/mxcmmc.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 5f7c592..6dd8ecd 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -946,7 +946,7 @@ static int mmc_read_bkops_status(struct mmc_card *card)
->  /**
->   *     mmc_start_bkops - start BKOPS for supported cards
->   *     @card: MMC card to start BKOPS
-> - *     @form_exception: A flag to indicate if this function was
-> + *     @from_exception: A flag to indicate if this function was
->   *                      called due to an exception raised by the card
->   *
->   *     Start background operations whenever requested.
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index fb3ca82..3814942 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -681,6 +681,9 @@ static void mxcmci_data_done(struct mxcmci_host *host, unsigned int stat)
+>
+>         spin_unlock_irqrestore(&host->lock, flags);
+>
+> +       if (data_error)
+> +               return;
+> +
+>         mxcmci_read_response(host, stat);
+>         host->cmd = NULL;
+>
 > --
 > 1.9.1
 >
