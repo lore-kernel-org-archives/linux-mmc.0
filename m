@@ -1,52 +1,107 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: mmc: fix switch to 1V8 for hs400es mode
-Date: Tue, 11 Jul 2017 08:38:57 +0800
-Message-ID: <ebe80597-2f95-1e08-937a-255153bfb3fb@rock-chips.com>
-References: <1499418535-10161-1-git-send-email-haibo.chen@nxp.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: Add Xenon SDHCI specific system-level
+ PM support
+Date: Tue, 11 Jul 2017 10:15:31 +0800
+Message-ID: <20170711101531.0212baef@xhacker>
+References: <1499451072-16513-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:57618 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750939AbdGKAiu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2017 20:38:50 -0400
-In-Reply-To: <1499418535-10161-1-git-send-email-haibo.chen@nxp.com>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:43974 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1752333AbdGKCUZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2017 22:20:25 -0400
+In-Reply-To: <1499451072-16513-1-git-send-email-zjwu@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>, ulf.hansson@linaro.org
-Cc: shawn.lin@rock-chips.com, stable@vger.kernel.org, dianders@chromium.org, linux-mmc@vger.kernel.org
+To: Zhoujie Wu <zjwu@marvell.com>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, zmxu@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com
 
-Hi Haibo,
+Hi Zhoujie,
 
-On 2017/7/7 17:08, Haibo Chen wrote:
-> Change the default err value to -EINVAL, otherwise signal voltage
-> will not change to 1V8 if card or controller only support 1V8 for
-> HS400ES mode.
+On Fri, 7 Jul 2017 11:11:12 -0700 Zhoujie Wu wrote:
+
+> Add Xenon specific system-level suspend and resume support.
+> Especially during resume, re-configure Xenon specific registers
+> since registers setting will be lost in suspend if Xenon is power off.
+
+This email shows you are the author of this patch. However,
+IIRC, "Hu Ziji <huziji@marvell.com>" is the author of this patch, you are
+just the committer. We'd better be honest.
+
 > 
 
-This description is misleading as hs400(es) must be running under
-1.8v vqmmc. But the patch itself is correct.
+Hu Ziji has given his Signed off, why do you remove it?
 
-> Fixes: commit 1720d3545b77 ("mmc: core: switch to 1V8 or 1V2 for hs400es mode")
-> Cc: <stable@vger.kernel.org>
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+PS: We'd better send patch after 4.13-rc1 is released.
+
+Thanks
+
+> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> Tested-by: Jisheng Zhang <jszhang@marvell.com>
 > ---
->   drivers/mmc/core/mmc.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-xenon.c | 42 +++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 41 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 92c6167..336a950 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1289,7 +1289,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
->   static int mmc_select_hs400es(struct mmc_card *card)
->   {
->   	struct mmc_host *host = card->host;
-> -	int err = 0;
-> +	int err = -EINVAL;
->   	u8 val;
->   
->   	if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
-> 
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index bc1781b..9f399c4 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -519,6 +519,46 @@ static int xenon_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> +#ifdef CONFIG_PM_SLEEP
+> +static int xenon_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	int ret;
+> +
+> +	ret = sdhci_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +	return ret;
+> +}
+> +
+> +static int xenon_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	int ret;
+> +
+> +	ret = clk_prepare_enable(pltfm_host->clk);
+> +	if (ret)
+> +		return ret;
+> +
+> +	/*
+> +	 * If SoCs power off the entire Xenon, registers setting will
+> +	 * be lost.
+> +	 * Re-configure Xenon specific register to enable current SDHC
+> +	 */
+> +	ret = xenon_sdhc_prepare(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	return sdhci_resume_host(host);
+> +}
+> +#endif
+> +
+> +static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
+> +
+>  static const struct of_device_id sdhci_xenon_dt_ids[] = {
+>  	{ .compatible = "marvell,armada-ap806-sdhci",},
+>  	{ .compatible = "marvell,armada-cp110-sdhci",},
+> @@ -531,7 +571,7 @@ static int xenon_remove(struct platform_device *pdev)
+>  	.driver	= {
+>  		.name	= "xenon-sdhci",
+>  		.of_match_table = sdhci_xenon_dt_ids,
+> -		.pm = &sdhci_pltfm_pmops,
+> +		.pm = &xenon_pmops,
+>  	},
+>  	.probe	= xenon_probe,
+>  	.remove	= xenon_remove,
 
