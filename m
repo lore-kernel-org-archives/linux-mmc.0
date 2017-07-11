@@ -1,142 +1,109 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
- resume from deepest PM
-Date: Tue, 11 Jul 2017 15:33:55 +0200
-Message-ID: <20170711133355.wzdw7nwrr3hpckj3@rfolt0960.corp.atmel.com>
-References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
- <20170616072929.3266-2-quentin.schulz@free-electrons.com>
- <CAPDyKFp2M_t4nCRNyqTm3PEx7tq+hb3TjmGWmg2XkJwbDa4FuQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH 1/2] mmc: sdhci: add quirk SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
+Date: Tue, 11 Jul 2017 15:49:51 +0200
+Message-ID: <CAPDyKFq-wnu2=9TqKBLGEEmbbqVLDKQ+rht8X2j8quNtuMzn9A@mail.gmail.com>
+References: <20170628133504.17422-1-srinivas.kandagatla@linaro.org> <20170628133504.17422-2-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa2.microchip.iphmx.com ([68.232.149.84]:4898 "EHLO
-        esa2.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932401AbdGKNeU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 09:34:20 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp2M_t4nCRNyqTm3PEx7tq+hb3TjmGWmg2XkJwbDa4FuQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20170628133504.17422-2-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Quentin Schulz <quentin.schulz@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, Ludovic Desroches <ludovic.desroches@microchip.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, nicolas.ferre@microchip.com
 
-On Tue, Jul 11, 2017 at 02:42:44PM +0200, Ulf Hansson wrote:
-> On 16 June 2017 at 09:29, Quentin Schulz
-> <quentin.schulz@free-electrons.com> wrote:
-> > This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
-> > SoC's SDHCI controller.
-> >
-> > When resuming from deepest state, it is required to restore preset
-> > registers as the registers are lost since VDD core has been shut down
-> > when entering deepest state on the SAMA5D2. The clocks need to be
-> > reconfigured as well.
-> 
-> Right, so compared to runtime resume there is some additional
-> operations that is needed during system resume. Fair enough.
-> 
-> However by looking at the changes below, you also change the system
-> suspend operations, as it now calls sdhci_suspend_host(). Is that
-> change needed? Then why?
-> 
-> >
-> > The other registers and init process are taken care of by the SDHCI
-> > core.
-> >
-> > Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
-> > ---
-> >  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
-> >  1 file changed, 32 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > index fb8c6011f13d..300513fc1068 100644
-> > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
-> >  }
-> >
-> >  #ifdef CONFIG_PM
-> > +static int sdhci_at91_suspend(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +       int ret;
-> > +
-> > +       ret = sdhci_suspend_host(host);
-> > +
-> 
-> This is wrong, you can't call sdhci_suspend_host() unless the device
-> is runtime resumed...
-> 
-> > +       if (host->runtime_suspended)
-> > +               return ret;
-> 
-> ... and this is weird...
-> 
-> > +
-> > +       clk_disable_unprepare(priv->gck);
-> > +       clk_disable_unprepare(priv->hclock);
-> > +       clk_disable_unprepare(priv->mainck);
-> > +
-> > +       return ret;
-> > +}
-> > +
-> > +static int sdhci_at91_resume(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       int ret;
-> > +
-> > +       ret = sdhci_at91_set_clks_presets(dev);
-> > +       if (ret)
-> > +               return ret;
-> 
-> Instead of doing it like this, I suggest you set a new flag to true
-> here, let's call it "restore_needed".
-> 
-> In the ->runtime_resume() callback, you check the restore_needed flag
-> and performs the extra operations in that case. When that's done, the
-> ->runtime_resume() callback clears the flag, as to avoid the next
-> runtime resume from unnecessary doing the extra operations.
-> 
-> > +
-> > +       return sdhci_resume_host(host);
-> 
-> Remove this and call pm_runtime_force_resume().
-> 
-> > +}
-> > +
-> >  static int sdhci_at91_runtime_suspend(struct device *dev)
-> >  {
-> >         struct sdhci_host *host = dev_get_drvdata(dev);
-> > @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
-> >  #endif /* CONFIG_PM */
-> >
-> >  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> > -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> 
-> Leave the pm_runtime_force_suspend() here, unless you have other
-> reasons not being described in the change log, to change the system
-> suspend operations.
+On 28 June 2017 at 15:35,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> This patch adds quirk to sdhci controllers which are broken when
+> HOST SDMA Buffer Boundary is programmed in Block Size Register (0x04)
+> when using ADMA. Qualcomm sdhci controller is one of such type, writing
+> to this bits is un-supported.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 24 ++++++++++++++++++------
+>  drivers/mmc/host/sdhci.h |  2 ++
+>  2 files changed, 20 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ecd0d4350e8a..d68ff1955761 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -765,6 +765,20 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>         }
+>  }
+>
+> +static void sdhci_set_blk_size_reg(struct sdhci_host *host,
+> +                                  unsigned int sdma_boundary,
+> +                                  unsigned int blksz)
+> +{
+> +       if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER) &&
+> +                       (host->flags & SDHCI_USE_ADMA)) {
+> +               sdhci_writew(host, SDHCI_MAKE_BLKSZ(0, blksz),
+> +                            SDHCI_BLOCK_SIZE);
+> +       } else {
+> +               sdhci_writew(host, SDHCI_MAKE_BLKSZ(sdma_boundary, blksz),
+> +                            SDHCI_BLOCK_SIZE);
+> +       }
+> +}
+> +
+>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>  {
+>         u8 ctrl;
+> @@ -897,8 +911,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>         sdhci_set_transfer_irqs(host);
+>
+>         /* Set the DMA boundary value and block size */
+> -       sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
+> -               data->blksz), SDHCI_BLOCK_SIZE);
+> +       sdhci_set_blk_size_reg(host, SDHCI_DEFAULT_BOUNDARY_ARG, data->blksz);
+>         sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+>  }
+>
+> @@ -2052,9 +2065,9 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+>          */
+>         if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200 &&
+>             mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+> -               sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128), SDHCI_BLOCK_SIZE);
+> +               sdhci_set_blk_size_reg(host, SDHCI_DEFAULT_BOUNDARY_ARG, 128);
+>         else
+> -               sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
+> +               sdhci_set_blk_size_reg(host, SDHCI_DEFAULT_BOUNDARY_ARG, 64);
+>
+>         /*
+>          * The tuning block is sent by the card to the host controller.
+> @@ -2998,8 +3011,7 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
+>                 ctrl |= SDHCI_CTRL_ADMA32;
+>         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>
+> -       sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG, 512),
+> -                    SDHCI_BLOCK_SIZE);
+> +       sdhci_set_blk_size_reg(host, SDHCI_DEFAULT_BOUNDARY_ARG, 512);
+>
+>         /* Set maximum timeout */
+>         sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0469fa191493..9a1343509bb5 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -435,6 +435,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
+>  /* Broken Clock divider zero in controller */
+>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
+> +/* Controller doesn't support sdma boundray buffer setup when using ADMA */
+> +#define SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER       (1<<16)
+>
+>         int irq;                /* Device IRQ */
+>         void __iomem *ioaddr;   /* Mapped address */
+> --
+> 2.11.0
+>
 
-I think we need to keep it to be able to set the restore_needed flag, isn't it?
+This change seems like a reasonable justification for adding a new
+SDHCI quirk, even if we in general wants to avoid that.
 
-Regards
+Adrian?
 
-Ludovic
-
-> 
-> > -                               pm_runtime_force_resume)
-> > +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
-> >         SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
-> >                            sdhci_at91_runtime_resume,
-> >                            NULL)
-> > --
-> > 2.11.0
-> >
-> 
-> Adopting my changes should simplify the code, avoid unnecessary
-> resuming the device but instead deferring that until really needed via
-> runtime PM.
-> 
-> Kind regards
-> Uffe
+Kind regards
+Uffe
