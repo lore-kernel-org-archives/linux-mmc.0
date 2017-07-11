@@ -1,94 +1,52 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: tmio-mmc: fix bad pointer math
-Date: Tue, 11 Jul 2017 19:55:44 +0200
-Message-ID: <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH] mmc: tmio-mmc: fix bad pointer math
+Date: Tue, 11 Jul 2017 19:37:03 +0000
+Message-ID: <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 References: <20170711162911.39114-1-chris.brandt@renesas.com>
+ <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:34090 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755934AbdGKRzq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 13:55:46 -0400
-In-Reply-To: <20170711162911.39114-1-chris.brandt@renesas.com>
+Received: from relmlor3.renesas.com ([210.160.252.173]:16214 "EHLO
+        relmlie2.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S932736AbdGKThI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 15:37:08 -0400
+In-Reply-To: <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Hi Chris,
-
-On Tue, Jul 11, 2017 at 6:29 PM, Chris Brandt <chris.brandt@renesas.com> wrote:
-> The existing code gives an incorrect value.
-> The buffer pointer 'buf' was of type unsigned short *, and 'count' was a
-> number in bytes, so the pointer should have been cast before doing any
-> pointer arithmetic.
->
-> Since we know the code before it is doing as many 4-byte transfers as
-> possible, we just need a pointer to where it left off in the buffer, hence
-> zeroing out the bottom 2 bits of count for out math.
-
-s/out/our/
-
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Fixes: 8185e51f358a: ("mmc: tmio-mmc: add support for 32bit data port")
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 77e7b56a9099..5dfc556ccedf 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -428,7 +428,7 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
->                 if (!(count & 0x3))
->                         return;
->
-> -               buf8 = (u8 *)(buf + (count >> 2));
-> +               buf8 = (u8 *)buf + (count & ~3);
->                 count %= 4;
-
-While correct, this is IMHO still difficult to understand for the casual reader.
-
-Given the code before casts to "u32 *", and uses "count >>2", and the code
-after also casts to "u32 *", what about getting rid of all casts like:
-
-        u32 data = 0;
-        u32 *buf32 = buf;
-
-        if (is_read)
-                sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
-                                   count >> 2);
-        else
-                sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
-                                    count >> 2);
-
-        /* if count was multiple of 4 */
-        if (!(count & 0x3))
-                return;
-
-        buf32 += count >> 2;
-        count %= 4;
-
-        if (is_read) {
-                sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
-                memcpy(buf32, &data, count);
-        } else {
-                memcpy(&data, buf32, count);
-                sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
-        }
-
-                return;
-        }
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+SGkgR2VlcnQsDQoNCg0KT24gVHVlc2RheSwgSnVseSAxMSwgMjAxNywgR2VlcnQgVXl0dGVyaG9l
+dmVuIHdyb3RlOg0KPiA+IHplcm9pbmcgb3V0IHRoZSBib3R0b20gMiBiaXRzIG9mIGNvdW50IGZv
+ciBvdXQgbWF0aC4NCj4gDQo+IHMvb3V0L291ci8NCg0KVGhhbmsgeW91IQ0KDQo+ID4gLSAgICAg
+ICAgICAgICAgIGJ1ZjggPSAodTggKikoYnVmICsgKGNvdW50ID4+IDIpKTsNCj4gPiArICAgICAg
+ICAgICAgICAgYnVmOCA9ICh1OCAqKWJ1ZiArIChjb3VudCAmIH4zKTsNCj4gPiAgICAgICAgICAg
+ICAgICAgY291bnQgJT0gNDsNCj4gDQo+IFdoaWxlIGNvcnJlY3QsIHRoaXMgaXMgSU1ITyBzdGls
+bCBkaWZmaWN1bHQgdG8gdW5kZXJzdGFuZCBmb3IgdGhlIGNhc3VhbA0KPiByZWFkZXIuDQo+IA0K
+PiBHaXZlbiB0aGUgY29kZSBiZWZvcmUgY2FzdHMgdG8gInUzMiAqIiwgYW5kIHVzZXMgImNvdW50
+ID4+MiIsIGFuZCB0aGUgY29kZQ0KPiBhZnRlciBhbHNvIGNhc3RzIHRvICJ1MzIgKiIsIHdoYXQg
+YWJvdXQgZ2V0dGluZyByaWQgb2YgYWxsIGNhc3RzIGxpa2U6DQo+IA0KPiAgICAgICAgIHUzMiBk
+YXRhID0gMDsNCj4gICAgICAgICB1MzIgKmJ1ZjMyID0gYnVmOw0KPiANCj4gICAgICAgICBpZiAo
+aXNfcmVhZCkNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfcmVhZDMyX3JlcChob3N0LCBDVExf
+U0RfREFUQV9QT1JULCBidWYzMiwNCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBjb3VudCA+PiAyKTsNCj4gICAgICAgICBlbHNlDQo+ICAgICAgICAgICAgICAgICBzZF9jdHJs
+X3dyaXRlMzJfcmVwKGhvc3QsIENUTF9TRF9EQVRBX1BPUlQsIGJ1ZjMyLA0KPiAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBjb3VudCA+PiAyKTsNCj4gDQo+ICAgICAgICAgLyog
+aWYgY291bnQgd2FzIG11bHRpcGxlIG9mIDQgKi8NCj4gICAgICAgICBpZiAoIShjb3VudCAmIDB4
+MykpDQo+ICAgICAgICAgICAgICAgICByZXR1cm47DQo+IA0KPiAgICAgICAgIGJ1ZjMyICs9IGNv
+dW50ID4+IDI7DQo+ICAgICAgICAgY291bnQgJT0gNDsNCj4gDQo+ICAgICAgICAgaWYgKGlzX3Jl
+YWQpIHsNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfcmVhZDMyX3JlcChob3N0LCBDVExfU0Rf
+REFUQV9QT1JULCAmZGF0YSwgMSk7DQo+ICAgICAgICAgICAgICAgICBtZW1jcHkoYnVmMzIsICZk
+YXRhLCBjb3VudCk7DQo+ICAgICAgICAgfSBlbHNlIHsNCj4gICAgICAgICAgICAgICAgIG1lbWNw
+eSgmZGF0YSwgYnVmMzIsIGNvdW50KTsNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUz
+Ml9yZXAoaG9zdCwgQ1RMX1NEX0RBVEFfUE9SVCwgJmRhdGEsIDEpOw0KPiAgICAgICAgIH0NCj4g
+DQo+ICAgICAgICAgICAgICAgICByZXR1cm47DQo+ICAgICAgICAgfQ0KPiANCg0KR29vZCBpZGVh
+LiBJIGp1c3QgdHJpZWQgaXQgYW5kIGl0IHNlZW1zIHRvIHdvcmsuIEknbGwgcmVzZW5kIGEgcGF0
+Y2guDQoNCg0KPiAgICAgICAgIHUzMiAqYnVmMzIgPSBidWY7DQoNCkdDQyBkaWRuJ3QgbGlrZSB0
+aGlzIGxpbmUgd2l0aG91dCBjYXN0aW5nIGJ1ZiB0byBhIHUzMiAqLiBJdCB0aHJldyBhbiANCmVy
+cm9yLCBub3QganVzdCBhIHdhcm5pbmcuIEdvIGZpZ3VyZS4NCg0KDQpRdWVzdGlvbjoNCj4gICAg
+ICAgICB1MzIgZGF0YSA9IDA7DQoNCkFueSBzcGVjaWFsIHJlYXNvbiB3aHkgeW91IGFyZSBpbml0
+aWFsaXppbmcgdGhpcyB0byAwPz8/Pw0KDQoNClRoYW5rIHlvdSwNCkNocmlzDQoNCg==
