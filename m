@@ -1,110 +1,91 @@
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: Re: [RFC 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8
- and Meson8b SoCs
-Date: Tue, 11 Jul 2017 23:23:44 +0200
-Message-ID: <CAFBinCA-goSsyq7bo=ozPRnOqc8br4KDJJ_Lao5h==Xneh02nw@mail.gmail.com>
-References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
- <20170506171857.16492-3-martin.blumenstingl@googlemail.com>
- <CAPDyKFrrSLCjbXO9R4VqPpabiFsbE6_RqR=U7otVF4Ncv0jHjQ@mail.gmail.com>
- <CAFBinCD3modyyOpi3OY5XLhjX0UCuV+WPY2Z=mdvwdMCyeGoqg@mail.gmail.com>
- <CAPDyKFptXRPk7mVUiRHf=hECDbeyhTxuf3K1M6NkZcVEF0Enww@mail.gmail.com>
- <CAFBinCD=uH=oQmWAcsMpxtbJCnJZernZx3XoNaPixUUQ7pk76w@mail.gmail.com> <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH v2] mmc: sdhci-xenon: Add Xenon SDHCI specific system-level PM support
+Date: Tue, 11 Jul 2017 14:56:49 -0700
+Message-ID: <1499810209-30505-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:34916 "EHLO
-        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933513AbdGKVYG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 17:24:06 -0400
-In-Reply-To: <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:52245 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S933186AbdGKVzo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 17:55:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Carlo Caione <carlo@endlessm.com>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: Zhoujie Wu <zjwu@marvell.com>, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, Hu Ziji <huziji@marvell.com>
 
-Hi Ulf,
+Add Xenon specific system-level suspend and resume support.
+Especially during resume, re-configure Xenon specific registers
+since registers setting will be lost in suspend if Xenon is power off.
 
-sorry for the delay, I've been pretty busy.
-however, I'll have more time to work in this driver this and next week
+Signed-off-by: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+Tested-by: Jisheng Zhang <jszhang@marvell.com>
+---
+Hu Ziji has left marvell, submit the patch for him.
+ drivers/mmc/host/sdhci-xenon.c | 42 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 41 insertions(+), 1 deletion(-)
 
-On Mon, Jun 19, 2017 at 1:50 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>
->>> [...]
->>>
->>>>>> +       if (!(cmd->flags & MMC_RSP_CRC))
->>>>>> +               send |= MESON_MX_SDIO_SEND_RESP_WITHOUT_CRC7;
->>>>>> +
->>>>>> +       if (cmd->flags & MMC_RSP_BUSY)
->>>>>> +               send |= MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY;
->>>>>
->>>>> In case the controller has HW support of busy detection, please
->>>>> consider to enable MMC_CAP_WAIT_WHILE_BUSY for this driver. Then also
->>>>> assign host->max_busy_timeout a good value.
->>>> the IRQS register has bit 4 (CMD_BUSY) - but apart from that there is
->>>> no other documentation (about timeout values, etc.). the vendor driver
->>>> also neither uses MMC_CAP_WAIT_WHILE_BUSY nor host->max_busy_timeout
->>>> should I leave this as it is?
->>>
->>> Please don't just leave it as is. This is an important thing to get right.
->>>
->>> You should be able to explore this area and see how the controller
->>> behaves without too much of documentation. Regarding timeouts, it may
->>> very well be that the controller don't have a timeout, which is why
->>> you need a software timeout. That's not so uncommon actually.
->> during my experiments I've never seen an interrupt when a command
->> timed out (nor could I find information about a timeout register in
->> the documentation). do you have any pointers (like a previous mail
->> where you've explained) how I can "explore the controller's timeout
->> behavior"?
->
-> Sorry, I don't have an pointers.
->
-> Anyway. If you do a big erase operation on an SD card, the card should
-> signal busy on DAT0 for a rather long time.
-erase operation = mount sd card; rm big_file.bin; sync ?
-or is there some other way?
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index bc1781b..9f399c4 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -519,6 +519,46 @@ static int xenon_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int xenon_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable_unprepare(pltfm_host->clk);
++	return ret;
++}
++
++static int xenon_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		return ret;
++
++	/*
++	 * If SoCs power off the entire Xenon, registers setting will
++	 * be lost.
++	 * Re-configure Xenon specific register to enable current SDHC
++	 */
++	ret = xenon_sdhc_prepare(host);
++	if (ret)
++		return ret;
++
++	return sdhci_resume_host(host);
++}
++#endif
++
++static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
++
+ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-ap806-sdhci",},
+ 	{ .compatible = "marvell,armada-cp110-sdhci",},
+@@ -531,7 +571,7 @@ static int xenon_remove(struct platform_device *pdev)
+ 	.driver	= {
+ 		.name	= "xenon-sdhci",
+ 		.of_match_table = sdhci_xenon_dt_ids,
+-		.pm = &sdhci_pltfm_pmops,
++		.pm = &xenon_pmops,
+ 	},
+ 	.probe	= xenon_probe,
+ 	.remove	= xenon_remove,
+-- 
+1.9.1
 
-> You could probably explore how long it takes for the card to respond
-> under those circumstances, and try both with and without
-> MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY.
-so I simply read the card status through sysfs? or would I need to get
-some of this information from the controller?
-I found that the IRQC register contains a few interesting bits:
-    u32 sdio_force_data:6; /*[13:8]
-        * Write operation: Data forced by software
-        * Read operation: {CLK,CMD,DAT[3:0]}*/
-I dumped these while transferring some data, the values seem to be
-changing constantly (0x3f, 0x1f, 0x20, ...)
-if I interpret those bits correctly then they are the status of the
-corresponding pin
-
-> Of course you also need to try with and without
-> MMC_CAP_WAIT_WHILE_BUSY, as the core may sometimes convert R1B to R1
-> responses depending on that cap.
-so MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY + MMC_CAP_WAIT_WHILE_BUSY should
-go together?
-and MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY should not be set when
-MMC_CAP_WAIT_WHILE_BUSY isn't?
-
-> [...]
->
->>>
->>> It shouldn't be that hard to implement, although I strongly recommend
->>> you to address this in a second step. In other words, I suggest you to
->>> drop the entire multiple slot support in the first step, then we can
->>> deal with that on top instead.
->> many thanks for the detailed explanation again!
->> I would be fine with dropping multiple slot support for the moment
->> *if* we can agree on the fact that the devicetree binding can support
->> multiple slots in theory (my idea here is: keep the child-nodes with
->> compatible = "mmc-slot" mandatory - but only allow one such child node
->> for now). I don't want to break DT compatibility after a few
->> weeks/months for a new driver. is that OK for you as well?
->
-> That's fine! We already have such a binding available for some other
-> mmc controllers. We could even consider to make that binding a generic
-> mmc binding.
-OK, perfect :)
-
-Regards,
-Martin
