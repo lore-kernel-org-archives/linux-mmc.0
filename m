@@ -1,71 +1,74 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v2] omap_hsmmc: Reduce max_segs for reliability
-Date: Mon, 10 Jul 2017 11:00:54 +0100
-Message-ID: <CAFbHwiTN-6jK=KTuwvONMPbs2Cz_sVsH2OqWLBU9eC3YevzDSw@mail.gmail.com>
-References: <20170622105753.28708-1-willn@resin.io> <20170626073508.GS3730@atomide.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: use functions and OFFSETS from
+ sdhci.h
+Date: Tue, 11 Jul 2017 08:34:43 +0800
+Message-ID: <34227296-abfe-9191-3682-5d166ef12938@rock-chips.com>
+References: <1499431410-11404-1-git-send-email-jeff.dagenais@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:36719 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751674AbdGJKA4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2017 06:00:56 -0400
-In-Reply-To: <20170626073508.GS3730@atomide.com>
+Received: from lucky1.263xmail.com ([211.157.147.134]:59048 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750939AbdGKAeh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2017 20:34:37 -0400
+In-Reply-To: <1499431410-11404-1-git-send-email-jeff.dagenais@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kishon Vijay Abraham I <kishon@ti.com>, Ravikumar Kattekola <rk@ti.com>, Will Newton <willn@resin.io>
+To: Jean-Francois Dagenais <jeff.dagenais@gmail.com>, ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, michal.simek@xilinx.com, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org
 
-On Mon, Jun 26, 2017 at 8:35 AM, Tony Lindgren <tony@atomide.com> wrote:
-> * Will Newton <will.newton@gmail.com> [170622 03:58]:
->> Reduce max_segs to 64, a value that allows allocation of an entire
->> EDMA descriptor list within a single page - EDMA descriptors
->> are 40 bytes and the header is much larger. This avoids doing a
->> higher order GFP_ATOMIC allocation in edma_prep_slave_sg
->> when setting up a transfer which can potentially fail due to
->> fragmentation under heavy I/O load.
->>
->> The current value of 1024 is unusually high in comparison to
->> other mmc host drivers which mostly use values of between 1
->> and 256. The EDMA driver at present splits lists above 20
->> segments in any case so reducing the size of lists we pass to
->> it shouldn't add much overhead.
->
-> Thanks for updating the description, makes sense to me. Sounds
-> like we may want to set the size different for ADMA later on if
-> needed and there's nothing preventing that, so:
->
-> Acked-by: Tony Lindgren <tony@atomide.com>
+Hi,
 
-Ping? Does this one look OK?
+On 2017/7/7 20:43, Jean-Francois Dagenais wrote:
+> This increases consistency of the code across the sdhci family.
+> 
 
->>
->> Signed-off-by: Will Newton <willn@resin.io>
->> ---
->>  drivers/mmc/host/omap_hsmmc.c | 6 +++---
->>  1 file changed, 3 insertions(+), 3 deletions(-)
->>
->> Changes in v2:
->>  - More verbose commit message
->>  - Rebased onto current master
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index 8c39dcc..bbcca93 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -2097,9 +2097,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->>               host->dbclk = NULL;
->>       }
->>
->> -     /* Since we do only SG emulation, we can have as many segs
->> -      * as we want. */
->> -     mmc->max_segs = 1024;
->> +     /* Set this to a value that allows allocating an entire descriptor
->> +      * list within a page (zero order allocation). */
->> +     mmc->max_segs = 64;
->>
->>       mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
->>       mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
->> --
->> 2.9.4
->>
+You should rebase your patch on the next of Ulf's mmc tree.
+
+sdhci_arasan_get_timeout_clock was removed.
+
+> Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+> ---
+>   drivers/mmc/host/sdhci-of-arasan.c | 7 +++----
+>   1 file changed, 3 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index cdee35a..da9b824 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -33,7 +33,6 @@
+>   #include "sdhci-pltfm.h"
+>   #include <linux/of.h>
+>   
+> -#define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>   #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+>   
+>   #define VENDOR_ENHANCED_STROBE		BIT(0)
+> @@ -179,7 +178,7 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+>   	unsigned long freq;
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   
+> -	div = readl(host->ioaddr + SDHCI_ARASAN_CLK_CTRL_OFFSET);
+> +	div = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+>   	div = (div & CLK_CTRL_TIMEOUT_MASK) >> CLK_CTRL_TIMEOUT_SHIFT;
+>   
+>   	freq = clk_get_rate(pltfm_host->clk);
+> @@ -451,13 +450,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>   	u32 vendor;
+>   	struct sdhci_host *host = mmc_priv(mmc);
+>   
+> -	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
+>   	if (ios->enhanced_strobe)
+>   		vendor |= VENDOR_ENHANCED_STROBE;
+>   	else
+>   		vendor &= ~VENDOR_ENHANCED_STROBE;
+>   
+> -	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
+>   }
+>   
+>   static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> 
+
