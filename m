@@ -1,68 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: android-goldfish: remove logically dead code in goldfish_mmc_irq()
-Date: Tue, 11 Jul 2017 16:43:18 +0200
-Message-ID: <CAPDyKFrsvJjd4OP8u+tCmHj-tifUWibhV42HQ-9eGs1TiFmVdQ@mail.gmail.com>
-References: <20170628135515.GA5462@embeddedgus>
+Subject: Re: [RFT] mmc: tmio: fix CMD12 (STOP) handling
+Date: Tue, 11 Jul 2017 16:43:28 +0200
+Message-ID: <CAPDyKFqkGj-ywGciKqxxg6PnPDP3N1G+H-snnimhQPhVDJAFQA@mail.gmail.com>
+References: <20170703192823.8116-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170628135515.GA5462@embeddedgus>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170703192823.8116-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, =?UTF-8?B?SmFuIEtsw7Z0emtl?= <jan.kloetzke@technisat.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>, Kouei Abe <kouei.abe.cp@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 28 June 2017 at 15:55, Gustavo A. R. Silva <garsilva@embeddedor.com> wrote:
-> Local variable transfer_error is assigned to a constant value and
-> it is never updated again.
+On 3 July 2017 at 21:28, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
+> I always anticipated this code to be not correct, but now I had a test
+> case to prove it. According to all documentation I have, setting the
+> TMIO_STOP_STP bit ever only worked during block transfers. This bit is
+> like manually enforcing an autocmd12 during a so far seamless transfer.
+> It does NOT work when the block transfer had errors. It also does NOT
+> work with any other cmd except block commands. For all those, CMD12 has
+> to be treated like any other command. So, basically, we could use this
+> bit only for mrq->data->stop cmds. But for these, we happily use the
+> autocmd12 feature using the TMIO_STOP_SEC bit. As a result, the above
+> bit is not useful for us and we need to treat CMD12 as a regular cmd
+> always. Just remove the special handling code. Note that the BSP
+> recognized this issue as well yet had a more cautious solution to the
+> problem [1]. Which is understandable but makes CMD12 handling even more
+> complicated.
 >
-> Remove this variable and the dead code it guards.
+> Checked with a Renesas Salvator-X/M3-W which needed to send CMD12 when
+> retuning one of my SD cards.
 >
-> Addresses-Coverity-ID: 1222110
-> Signed-off-by: Gustavo A. R. Silva <garsilva@embeddedor.com>
+> [1] https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas-bsp.git/commit/?id=2838a2ff8ca776f6d18b7fbbe75f3df8dd64183a
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
+
+Should we add a stable tag?
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/android-goldfish.c | 8 ++------
->  1 file changed, 2 insertions(+), 6 deletions(-)
 >
-> diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-> index 5b3e1c9..63fe509 100644
-> --- a/drivers/mmc/host/android-goldfish.c
-> +++ b/drivers/mmc/host/android-goldfish.c
-> @@ -290,7 +290,6 @@ static irqreturn_t goldfish_mmc_irq(int irq, void *dev_id)
->         u16 status;
->         int end_command = 0;
->         int end_transfer = 0;
-> -       int transfer_error = 0;
->         int state_changed = 0;
->         int cmd_timeout = 0;
+> So, this is a friendly call for further testing to make sure no regressions
+> happen. I also put the authors of the BSP patch to CC to check if this patch
+> also matches their use case. I hope this is fine for these people, please
+> accept my apologies if not. I just really like to have your opinion on this
+> patch.
 >
-> @@ -322,9 +321,7 @@ static irqreturn_t goldfish_mmc_irq(int irq, void *dev_id)
->         if (end_command)
->                 goldfish_mmc_cmd_done(host, host->cmd);
+> Geert, Simon: any chance you can run this patch on your board farms?
 >
-> -       if (transfer_error)
-> -               goldfish_mmc_xfer_done(host, host->data);
-> -       else if (end_transfer) {
-> +       if (end_transfer) {
->                 host->dma_done = 1;
->                 goldfish_mmc_end_of_data(host, host->data);
->         } else if (host->data != NULL) {
-> @@ -347,8 +344,7 @@ static irqreturn_t goldfish_mmc_irq(int irq, void *dev_id)
->                 mmc_detect_change(host->mmc, 0);
->         }
+> In any case: as far as my understanding goes, if I am wrong with my
+> assumptions, the worst case is that for older SoCs CMD12 handling might become
+> a tad more inefficient because we now do in software what was expected to be
+> done in hardware. However, I am quite sure that the HW feature was always
+> over-estimated and CMD12 support is simply broken. For my test case and the BSP
+> patch above, it definately was.
 >
-> -       if (!end_command && !end_transfer &&
-> -           !transfer_error && !state_changed && !cmd_timeout) {
-> +       if (!end_command && !end_transfer && !state_changed && !cmd_timeout) {
->                 status = GOLDFISH_MMC_READ(host, MMC_INT_STATUS);
->                 dev_info(mmc_dev(host->mmc),"spurious irq 0x%04x\n", status);
->                 if (status != 0) {
+> Thanks for any assistance,
+>
+>    Wolfram
+>
+>
+>  drivers/mmc/host/tmio_mmc_core.c | 6 ------
+>  1 file changed, 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 1851c883bfc82a..fbcd56c58bce24 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -355,12 +355,6 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host,
+>         int c = cmd->opcode;
+>         u32 irq_mask = TMIO_MASK_CMD;
+>
+> -       /* CMD12 is handled by hardware */
+> -       if (cmd->opcode == MMC_STOP_TRANSMISSION && !cmd->arg) {
+> -               sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, TMIO_STOP_STP);
+> -               return 0;
+> -       }
+> -
+>         switch (mmc_resp_type(cmd)) {
+>         case MMC_RSP_NONE: c |= RESP_NONE; break;
+>         case MMC_RSP_R1:
 > --
-> 2.5.0
+> 2.11.0
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
