@@ -1,71 +1,133 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: Re: [PATCH] mmc: atmel-mci: remove unused sg_len variable
-Date: Tue, 11 Jul 2017 11:49:03 +0200
-Message-ID: <20170711094903.favkmc5rjb76q2dq@rfolt0960.corp.atmel.com>
-References: <1499330625-108840-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
+ resume from deepest PM
+Date: Tue, 11 Jul 2017 14:42:44 +0200
+Message-ID: <CAPDyKFp2M_t4nCRNyqTm3PEx7tq+hb3TjmGWmg2XkJwbDa4FuQ@mail.gmail.com>
+References: <20170616072929.3266-1-quentin.schulz@free-electrons.com> <20170616072929.3266-2-quentin.schulz@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa4.microchip.iphmx.com ([68.232.154.123]:22071 "EHLO
-        esa4.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752344AbdGKJt2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 05:49:28 -0400
-Content-Disposition: inline
-In-Reply-To: <1499330625-108840-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36370 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755848AbdGKMmv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 08:42:51 -0400
+Received: by mail-qk0-f182.google.com with SMTP id p21so102481068qke.3
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 05:42:46 -0700 (PDT)
+In-Reply-To: <20170616072929.3266-2-quentin.schulz@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>
+To: Quentin Schulz <quentin.schulz@free-electrons.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ludovic Desroches <ludovic.desroches@microchip.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, nicolas.ferre@microchip.com
 
-On Thu, Jul 06, 2017 at 04:43:45PM +0800, Shawn Lin wrote:
-> We got a warning:
-> 
-> drivers/mmc/host/atmel-mci.c:1086:15: warning: variable 'sg_len' set but
-> not used [-Wunused-but-set-variable]
-> 
-> Ideally we should check to see if sg_len is zero but looking
-> into the code closely, I didn't find any possible to do that as
-> atmci_start_request didn't even deploy any error handling for
-> its host->prepare_data hook. So even we return error value for iflags
-> like what other host drivers did, for instance, sdhci and dwmmc, it still
-> need some extra work to improve the code.
-> 
-> Just remove it to silent the warning, although it isn't perfect.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+On 16 June 2017 at 09:29, Quentin Schulz
+<quentin.schulz@free-electrons.com> wrote:
+> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
+> SoC's SDHCI controller.
+>
+> When resuming from deepest state, it is required to restore preset
+> registers as the registers are lost since VDD core has been shut down
+> when entering deepest state on the SAMA5D2. The clocks need to be
+> reconfigured as well.
 
-Thanks
+Right, so compared to runtime resume there is some additional
+operations that is needed during system resume. Fair enough.
 
+However by looking at the changes below, you also change the system
+suspend operations, as it now calls sdhci_suspend_host(). Is that
+change needed? Then why?
+
+>
+> The other registers and init process are taken care of by the SDHCI
+> core.
+>
+> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
 > ---
-> 
->  drivers/mmc/host/atmel-mci.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 97de2d3..53e30b0 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -1083,7 +1083,6 @@ static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
->  atmci_prepare_data_pdc(struct atmel_mci *host, struct mmc_data *data)
+>  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
+>  1 file changed, 32 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index fb8c6011f13d..300513fc1068 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+>  }
+>
+>  #ifdef CONFIG_PM
+> +static int sdhci_at91_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       ret = sdhci_suspend_host(host);
+> +
+
+This is wrong, you can't call sdhci_suspend_host() unless the device
+is runtime resumed...
+
+> +       if (host->runtime_suspended)
+> +               return ret;
+
+... and this is weird...
+
+> +
+> +       clk_disable_unprepare(priv->gck);
+> +       clk_disable_unprepare(priv->hclock);
+> +       clk_disable_unprepare(priv->mainck);
+> +
+> +       return ret;
+> +}
+> +
+> +static int sdhci_at91_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       int ret;
+> +
+> +       ret = sdhci_at91_set_clks_presets(dev);
+> +       if (ret)
+> +               return ret;
+
+Instead of doing it like this, I suggest you set a new flag to true
+here, let's call it "restore_needed".
+
+In the ->runtime_resume() callback, you check the restore_needed flag
+and performs the extra operations in that case. When that's done, the
+->runtime_resume() callback clears the flag, as to avoid the next
+runtime resume from unnecessary doing the extra operations.
+
+> +
+> +       return sdhci_resume_host(host);
+
+Remove this and call pm_runtime_force_resume().
+
+> +}
+> +
+>  static int sdhci_at91_runtime_suspend(struct device *dev)
 >  {
->  	u32 iflags, tmp;
-> -	unsigned int sg_len;
->  	int i;
->  
->  	data->error = -EINPROGRESS;
-> @@ -1108,8 +1107,8 @@ static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
->  
->  	/* Configure PDC */
->  	host->data_size = data->blocks * data->blksz;
-> -	sg_len = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len,
-> -			    mmc_get_dma_dir(data));
-> +	dma_map_sg(&host->pdev->dev, data->sg, data->sg_len,
-> +		   mmc_get_dma_dir(data));
->  
->  	if ((!host->caps.has_rwproof)
->  	    && (host->data->flags & MMC_DATA_WRITE)) {
-> -- 
-> 1.9.1
-> 
-> 
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>  #endif /* CONFIG_PM */
+>
+>  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+
+Leave the pm_runtime_force_suspend() here, unless you have other
+reasons not being described in the change log, to change the system
+suspend operations.
+
+> -                               pm_runtime_force_resume)
+> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, sdhci_at91_resume)
+>         SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
+>                            sdhci_at91_runtime_resume,
+>                            NULL)
+> --
+> 2.11.0
+>
+
+Adopting my changes should simplify the code, avoid unnecessary
+resuming the device but instead deferring that until really needed via
+runtime PM.
+
+Kind regards
+Uffe
