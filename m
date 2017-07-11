@@ -1,52 +1,110 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH] mmc: tmio-mmc: fix bad pointer math
-Date: Tue, 11 Jul 2017 19:37:03 +0000
-Message-ID: <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170711162911.39114-1-chris.brandt@renesas.com>
- <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: Re: [RFC 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8
+ and Meson8b SoCs
+Date: Tue, 11 Jul 2017 23:23:44 +0200
+Message-ID: <CAFBinCA-goSsyq7bo=ozPRnOqc8br4KDJJ_Lao5h==Xneh02nw@mail.gmail.com>
+References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
+ <20170506171857.16492-3-martin.blumenstingl@googlemail.com>
+ <CAPDyKFrrSLCjbXO9R4VqPpabiFsbE6_RqR=U7otVF4Ncv0jHjQ@mail.gmail.com>
+ <CAFBinCD3modyyOpi3OY5XLhjX0UCuV+WPY2Z=mdvwdMCyeGoqg@mail.gmail.com>
+ <CAPDyKFptXRPk7mVUiRHf=hECDbeyhTxuf3K1M6NkZcVEF0Enww@mail.gmail.com>
+ <CAFBinCD=uH=oQmWAcsMpxtbJCnJZernZx3XoNaPixUUQ7pk76w@mail.gmail.com> <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor3.renesas.com ([210.160.252.173]:16214 "EHLO
-        relmlie2.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S932736AbdGKThI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 15:37:08 -0400
-In-Reply-To: <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:34916 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933513AbdGKVYG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 17:24:06 -0400
+In-Reply-To: <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Carlo Caione <carlo@caione.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, Carlo Caione <carlo@endlessm.com>
 
-SGkgR2VlcnQsDQoNCg0KT24gVHVlc2RheSwgSnVseSAxMSwgMjAxNywgR2VlcnQgVXl0dGVyaG9l
-dmVuIHdyb3RlOg0KPiA+IHplcm9pbmcgb3V0IHRoZSBib3R0b20gMiBiaXRzIG9mIGNvdW50IGZv
-ciBvdXQgbWF0aC4NCj4gDQo+IHMvb3V0L291ci8NCg0KVGhhbmsgeW91IQ0KDQo+ID4gLSAgICAg
-ICAgICAgICAgIGJ1ZjggPSAodTggKikoYnVmICsgKGNvdW50ID4+IDIpKTsNCj4gPiArICAgICAg
-ICAgICAgICAgYnVmOCA9ICh1OCAqKWJ1ZiArIChjb3VudCAmIH4zKTsNCj4gPiAgICAgICAgICAg
-ICAgICAgY291bnQgJT0gNDsNCj4gDQo+IFdoaWxlIGNvcnJlY3QsIHRoaXMgaXMgSU1ITyBzdGls
-bCBkaWZmaWN1bHQgdG8gdW5kZXJzdGFuZCBmb3IgdGhlIGNhc3VhbA0KPiByZWFkZXIuDQo+IA0K
-PiBHaXZlbiB0aGUgY29kZSBiZWZvcmUgY2FzdHMgdG8gInUzMiAqIiwgYW5kIHVzZXMgImNvdW50
-ID4+MiIsIGFuZCB0aGUgY29kZQ0KPiBhZnRlciBhbHNvIGNhc3RzIHRvICJ1MzIgKiIsIHdoYXQg
-YWJvdXQgZ2V0dGluZyByaWQgb2YgYWxsIGNhc3RzIGxpa2U6DQo+IA0KPiAgICAgICAgIHUzMiBk
-YXRhID0gMDsNCj4gICAgICAgICB1MzIgKmJ1ZjMyID0gYnVmOw0KPiANCj4gICAgICAgICBpZiAo
-aXNfcmVhZCkNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfcmVhZDMyX3JlcChob3N0LCBDVExf
-U0RfREFUQV9QT1JULCBidWYzMiwNCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICBjb3VudCA+PiAyKTsNCj4gICAgICAgICBlbHNlDQo+ICAgICAgICAgICAgICAgICBzZF9jdHJs
-X3dyaXRlMzJfcmVwKGhvc3QsIENUTF9TRF9EQVRBX1BPUlQsIGJ1ZjMyLA0KPiAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICBjb3VudCA+PiAyKTsNCj4gDQo+ICAgICAgICAgLyog
-aWYgY291bnQgd2FzIG11bHRpcGxlIG9mIDQgKi8NCj4gICAgICAgICBpZiAoIShjb3VudCAmIDB4
-MykpDQo+ICAgICAgICAgICAgICAgICByZXR1cm47DQo+IA0KPiAgICAgICAgIGJ1ZjMyICs9IGNv
-dW50ID4+IDI7DQo+ICAgICAgICAgY291bnQgJT0gNDsNCj4gDQo+ICAgICAgICAgaWYgKGlzX3Jl
-YWQpIHsNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfcmVhZDMyX3JlcChob3N0LCBDVExfU0Rf
-REFUQV9QT1JULCAmZGF0YSwgMSk7DQo+ICAgICAgICAgICAgICAgICBtZW1jcHkoYnVmMzIsICZk
-YXRhLCBjb3VudCk7DQo+ICAgICAgICAgfSBlbHNlIHsNCj4gICAgICAgICAgICAgICAgIG1lbWNw
-eSgmZGF0YSwgYnVmMzIsIGNvdW50KTsNCj4gICAgICAgICAgICAgICAgIHNkX2N0cmxfd3JpdGUz
-Ml9yZXAoaG9zdCwgQ1RMX1NEX0RBVEFfUE9SVCwgJmRhdGEsIDEpOw0KPiAgICAgICAgIH0NCj4g
-DQo+ICAgICAgICAgICAgICAgICByZXR1cm47DQo+ICAgICAgICAgfQ0KPiANCg0KR29vZCBpZGVh
-LiBJIGp1c3QgdHJpZWQgaXQgYW5kIGl0IHNlZW1zIHRvIHdvcmsuIEknbGwgcmVzZW5kIGEgcGF0
-Y2guDQoNCg0KPiAgICAgICAgIHUzMiAqYnVmMzIgPSBidWY7DQoNCkdDQyBkaWRuJ3QgbGlrZSB0
-aGlzIGxpbmUgd2l0aG91dCBjYXN0aW5nIGJ1ZiB0byBhIHUzMiAqLiBJdCB0aHJldyBhbiANCmVy
-cm9yLCBub3QganVzdCBhIHdhcm5pbmcuIEdvIGZpZ3VyZS4NCg0KDQpRdWVzdGlvbjoNCj4gICAg
-ICAgICB1MzIgZGF0YSA9IDA7DQoNCkFueSBzcGVjaWFsIHJlYXNvbiB3aHkgeW91IGFyZSBpbml0
-aWFsaXppbmcgdGhpcyB0byAwPz8/Pw0KDQoNClRoYW5rIHlvdSwNCkNocmlzDQoNCg==
+Hi Ulf,
+
+sorry for the delay, I've been pretty busy.
+however, I'll have more time to work in this driver this and next week
+
+On Mon, Jun 19, 2017 at 1:50 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>>> [...]
+>>>
+>>>>>> +       if (!(cmd->flags & MMC_RSP_CRC))
+>>>>>> +               send |= MESON_MX_SDIO_SEND_RESP_WITHOUT_CRC7;
+>>>>>> +
+>>>>>> +       if (cmd->flags & MMC_RSP_BUSY)
+>>>>>> +               send |= MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY;
+>>>>>
+>>>>> In case the controller has HW support of busy detection, please
+>>>>> consider to enable MMC_CAP_WAIT_WHILE_BUSY for this driver. Then also
+>>>>> assign host->max_busy_timeout a good value.
+>>>> the IRQS register has bit 4 (CMD_BUSY) - but apart from that there is
+>>>> no other documentation (about timeout values, etc.). the vendor driver
+>>>> also neither uses MMC_CAP_WAIT_WHILE_BUSY nor host->max_busy_timeout
+>>>> should I leave this as it is?
+>>>
+>>> Please don't just leave it as is. This is an important thing to get right.
+>>>
+>>> You should be able to explore this area and see how the controller
+>>> behaves without too much of documentation. Regarding timeouts, it may
+>>> very well be that the controller don't have a timeout, which is why
+>>> you need a software timeout. That's not so uncommon actually.
+>> during my experiments I've never seen an interrupt when a command
+>> timed out (nor could I find information about a timeout register in
+>> the documentation). do you have any pointers (like a previous mail
+>> where you've explained) how I can "explore the controller's timeout
+>> behavior"?
+>
+> Sorry, I don't have an pointers.
+>
+> Anyway. If you do a big erase operation on an SD card, the card should
+> signal busy on DAT0 for a rather long time.
+erase operation = mount sd card; rm big_file.bin; sync ?
+or is there some other way?
+
+> You could probably explore how long it takes for the card to respond
+> under those circumstances, and try both with and without
+> MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY.
+so I simply read the card status through sysfs? or would I need to get
+some of this information from the controller?
+I found that the IRQC register contains a few interesting bits:
+    u32 sdio_force_data:6; /*[13:8]
+        * Write operation: Data forced by software
+        * Read operation: {CLK,CMD,DAT[3:0]}*/
+I dumped these while transferring some data, the values seem to be
+changing constantly (0x3f, 0x1f, 0x20, ...)
+if I interpret those bits correctly then they are the status of the
+corresponding pin
+
+> Of course you also need to try with and without
+> MMC_CAP_WAIT_WHILE_BUSY, as the core may sometimes convert R1B to R1
+> responses depending on that cap.
+so MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY + MMC_CAP_WAIT_WHILE_BUSY should
+go together?
+and MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY should not be set when
+MMC_CAP_WAIT_WHILE_BUSY isn't?
+
+> [...]
+>
+>>>
+>>> It shouldn't be that hard to implement, although I strongly recommend
+>>> you to address this in a second step. In other words, I suggest you to
+>>> drop the entire multiple slot support in the first step, then we can
+>>> deal with that on top instead.
+>> many thanks for the detailed explanation again!
+>> I would be fine with dropping multiple slot support for the moment
+>> *if* we can agree on the fact that the devicetree binding can support
+>> multiple slots in theory (my idea here is: keep the child-nodes with
+>> compatible = "mmc-slot" mandatory - but only allow one such child node
+>> for now). I don't want to break DT compatibility after a few
+>> weeks/months for a new driver. is that OK for you as well?
+>
+> That's fine! We already have such a binding available for some other
+> mmc controllers. We could even consider to make that binding a generic
+> mmc binding.
+OK, perfect :)
+
+Regards,
+Martin
