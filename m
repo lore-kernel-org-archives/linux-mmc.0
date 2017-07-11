@@ -1,25 +1,29 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: sdhci-st: Handle return value of clk_prepare_enable
-Date: Tue, 11 Jul 2017 16:42:50 +0200
-Message-ID: <CAPDyKFrxSeZZPWWT7Oo-0XC8iTmyqu_Z4VPhvieVEPBDrhr98Q@mail.gmail.com>
-References: <afbe2d9d649bc78992a72eda7124c093b3055047.1497957783.git.arvind.yadav.cs@gmail.com>
+Subject: Re: [PATCH] mmc: host: omap_hsmmc: constify dev_pm_ops structures.
+Date: Tue, 11 Jul 2017 16:42:55 +0200
+Message-ID: <CAPDyKFqUGoHLt7DqhP_Tz0VKOL83TKfCFW7K21ptwjKAoNdPBg@mail.gmail.com>
+References: <8a917dbec5b7eb9fd463cc9b7a596ab831f04965.1498723559.git.arvind.yadav.cs@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:35549 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933185AbdGKOmv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:42:51 -0400
-Received: by mail-qk0-f172.google.com with SMTP id 16so2648565qkg.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:42:51 -0700 (PDT)
-In-Reply-To: <afbe2d9d649bc78992a72eda7124c093b3055047.1497957783.git.arvind.yadav.cs@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <8a917dbec5b7eb9fd463cc9b7a596ab831f04965.1498723559.git.arvind.yadav.cs@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: Patrice CHOTARD <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, kernel@stlinux.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Linus Walleij <linus.walleij@linaro.org>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On 20 June 2017 at 13:57, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
-> clk_prepare_enable() can fail here and we must check its return value.
+On 29 June 2017 at 10:09, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
+> dev_pm_ops are not supposed to change at runtime. All functions
+> working with dev_pm_ops provided by <linux/device.h> work with const
+> dev_pm_ops. So mark the non-const structs as const.
+>
+> File size before:
+>    text    data     bss     dec     hex filename
+>   11586     624       0   12210    2fb2 drivers/mmc/host/omap_hsmmc.o
+>
+> File size After adding 'const':
+>    text    data     bss     dec     hex filename
+>   11778     432       0   12210    2fb2 drivers/mmc/host/omap_hsmmc.o
 >
 > Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
@@ -29,61 +33,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-st.c | 26 ++++++++++++++++++++++----
->  1 file changed, 22 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/omap_hsmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index 68c36c9f..198b4ca 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -394,8 +394,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
->                 goto err_of;
->         }
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 8c39dcc..5b391dc 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2342,7 +2342,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+>         return 0;
+>  }
 >
-> -       clk_prepare_enable(clk);
-> -       clk_prepare_enable(icnclk);
-> +       ret = clk_prepare_enable(clk);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "Failed to prepare clock\n");
-> +               goto err_of;
-> +       }
-> +
-> +       ret = clk_prepare_enable(icnclk);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "Failed to prepare icn clock\n");
-> +               goto err_icnclk;
-> +       }
->
->         /* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
->         res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-> @@ -429,6 +438,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
->
->  err_out:
->         clk_disable_unprepare(icnclk);
-> +err_icnclk:
->         clk_disable_unprepare(clk);
->  err_of:
->         sdhci_pltfm_free(pdev);
-> @@ -487,9 +497,17 @@ static int sdhci_st_resume(struct device *dev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
->         struct device_node *np = dev->of_node;
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(pltfm_host->clk);
-> +       if (ret)
-> +               return ret;
->
-> -       clk_prepare_enable(pltfm_host->clk);
-> -       clk_prepare_enable(pdata->icnclk);
-> +       ret = clk_prepare_enable(pdata->icnclk);
-> +       if (ret) {
-> +               clk_disable_unprepare(pltfm_host->clk);
-> +               return ret;
-> +       }
->
->         if (pdata->rstc)
->                 reset_control_deassert(pdata->rstc);
+> -static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+> +static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+>         SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+>         .runtime_suspend = omap_hsmmc_runtime_suspend,
+>         .runtime_resume = omap_hsmmc_runtime_resume,
 > --
 > 1.9.1
 >
