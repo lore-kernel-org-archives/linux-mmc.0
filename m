@@ -1,34 +1,32 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxcmmc: check the return value of mxcmci_finish_data
-Date: Tue, 11 Jul 2017 16:44:25 +0200
-Message-ID: <CAPDyKFrQmARVB0xe=gkeJEYP7XJedy_mvssYsQhZt+ePNhybvQ@mail.gmail.com>
-References: <1499328552-83340-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: block: remove unused struct mmc_card *card
+Date: Tue, 11 Jul 2017 16:44:29 +0200
+Message-ID: <CAPDyKFqWZgm=DAO22FeYaKGQLV9frJGn28na1mmiQKV9zLf8hg@mail.gmail.com>
+References: <1499329615-104052-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:34076 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933435AbdGKOo0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:44:26 -0400
-Received: by mail-qk0-f178.google.com with SMTP id d78so2749354qkb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:44:26 -0700 (PDT)
-In-Reply-To: <1499328552-83340-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:34154 "EHLO
+        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933234AbdGKOob (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:44:31 -0400
+Received: by mail-qk0-f175.google.com with SMTP id d78so2752708qkb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:44:30 -0700 (PDT)
+In-Reply-To: <1499329615-104052-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 6 July 2017 at 10:09, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> We got a compile warning for mxcmmc,
+On 6 July 2017 at 10:26, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> It was never used and introduced a long standing compile
+> warning:
 >
-> drivers/mmc/host/mxcmmc.c: In function 'mxcmci_data_done':
-> drivers/mmc/host/mxcmmc.c:661:6: warning: variable 'data_error' set but
-> not used [-Wunused-but-set-variable]
+> drivers/mmc/core/block.c: In function 'power_ro_lock_store':
+> drivers/mmc/core/block.c:191:19: warning: variable 'card' set but not
+> used [-Wunused-but-set-variable]
 >
-> The easiest method is to remove the data_error. But looking into
-> the code closely, I think we should check the return value of
-> mxcmci_finish_data as if it got data->error(the same as data_error),
-> we shouldn't try to read the response.
+> Remove it to fix the warning.
 >
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
@@ -39,23 +37,29 @@ Uffe
 
 > ---
 >
->  drivers/mmc/host/mxcmmc.c | 3 +++
->  1 file changed, 3 insertions(+)
+>  drivers/mmc/core/block.c | 2 --
+>  1 file changed, 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index fb3ca82..3814942 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -681,6 +681,9 @@ static void mxcmci_data_done(struct mxcmci_host *host, unsigned int stat)
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 0cfac2d..4adde50 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -188,7 +188,6 @@ static ssize_t power_ro_lock_store(struct device *dev,
+>  {
+>         int ret;
+>         struct mmc_blk_data *md, *part_md;
+> -       struct mmc_card *card;
+>         struct mmc_queue *mq;
+>         struct request *req;
+>         unsigned long set;
+> @@ -201,7 +200,6 @@ static ssize_t power_ro_lock_store(struct device *dev,
 >
->         spin_unlock_irqrestore(&host->lock, flags);
+>         md = mmc_blk_get(dev_to_disk(dev));
+>         mq = &md->queue;
+> -       card = md->queue.card;
 >
-> +       if (data_error)
-> +               return;
-> +
->         mxcmci_read_response(host, stat);
->         host->cmd = NULL;
->
+>         /* Dispatch locking to the block layer */
+>         req = blk_get_request(mq->queue, REQ_OP_DRV_OUT, __GFP_RECLAIM);
 > --
 > 1.9.1
 >
