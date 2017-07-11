@@ -1,91 +1,94 @@
-From: Zhoujie Wu <zjwu@marvell.com>
-Subject: [PATCH v2] mmc: sdhci-xenon: Add Xenon SDHCI specific system-level PM support
-Date: Tue, 11 Jul 2017 14:56:49 -0700
-Message-ID: <1499810209-30505-1-git-send-email-zjwu@marvell.com>
+From: Andrea Adami <andrea.adami@gmail.com>
+Subject: Re: [PATCH v4 3/9] mfd: tmio.h: support partition parser types
+Date: Wed, 12 Jul 2017 00:42:00 +0200
+Message-ID: <CAAQYJAvCdSG25U6DjiD5owC7GHyGnWyyaLD_R-fzuMGUDZN8pQ@mail.gmail.com>
+References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
+ <1498681836-3765-4-git-send-email-andrea.adami@gmail.com> <20170703112621.rd3ija3efqlq57rg@dell>
+ <CAAQYJAuPpzDb_OV1naHZCovy4LJC0_6gFJKPqo7REt7zZzh0pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:52245 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S933186AbdGKVzo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 17:55:44 -0400
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35330 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754502AbdGKWmC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 18:42:02 -0400
+In-Reply-To: <CAAQYJAuPpzDb_OV1naHZCovy4LJC0_6gFJKPqo7REt7zZzh0pw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
-Cc: Zhoujie Wu <zjwu@marvell.com>, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, Hu Ziji <huziji@marvell.com>
+To: Lee Jones <lee.jones@linaro.org>
+Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Add Xenon specific system-level suspend and resume support.
-Especially during resume, re-configure Xenon specific registers
-since registers setting will be lost in suspend if Xenon is power off.
+On Mon, Jul 3, 2017 at 2:03 PM, Andrea Adami <andrea.adami@gmail.com> wrote=
+:
+> On Mon, Jul 3, 2017 at 1:26 PM, Lee Jones <lee.jones@linaro.org> wrote:
+>> Please use the $SUBJECT line expected by the subsystem.
+>>
+>> `git log --oneline -- $SUBSYSTEM` can help with this.
+>>
+>> You also need a commit log.
+>>
+>
+> Lee,
+>
+> thanks for spotting it.
+> I'll fix the subject and add a little text in these patches touching head=
+ers.
+>
+> I am awaiting for a new review of the big piece of the patch, the
+> ftl/parser, then I'll send a fixed v5.
+>
+>
 
-Signed-off-by: Hu Ziji <huziji@marvell.com>
-Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
-Tested-by: Jisheng Zhang <jszhang@marvell.com>
----
-Hu Ziji has left marvell, submit the patch for him.
- drivers/mmc/host/sdhci-xenon.c | 42 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 41 insertions(+), 1 deletion(-)
+Lee,
 
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index bc1781b..9f399c4 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -519,6 +519,46 @@ static int xenon_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM_SLEEP
-+static int xenon_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	int ret;
-+
-+	ret = sdhci_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+	return ret;
-+}
-+
-+static int xenon_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
-+
-+	/*
-+	 * If SoCs power off the entire Xenon, registers setting will
-+	 * be lost.
-+	 * Re-configure Xenon specific register to enable current SDHC
-+	 */
-+	ret = xenon_sdhc_prepare(host);
-+	if (ret)
-+		return ret;
-+
-+	return sdhci_resume_host(host);
-+}
-+#endif
-+
-+static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
-+
- static const struct of_device_id sdhci_xenon_dt_ids[] = {
- 	{ .compatible = "marvell,armada-ap806-sdhci",},
- 	{ .compatible = "marvell,armada-cp110-sdhci",},
-@@ -531,7 +571,7 @@ static int xenon_remove(struct platform_device *pdev)
- 	.driver	= {
- 		.name	= "xenon-sdhci",
- 		.of_match_table = sdhci_xenon_dt_ids,
--		.pm = &sdhci_pltfm_pmops,
-+		.pm = &xenon_pmops,
- 	},
- 	.probe	= xenon_probe,
- 	.remove	= xenon_remove,
--- 
-1.9.1
+I have looked at the history of mfd/tmio.h but couldn't find
+unambiguous examples.
+Do you prefer
 
+Subject: mfd: tmio: tmio_nand: add partition parsers platform data
+or
+Subject: mfd: tmio: tmio-nand: add partition parsers platform data
+or
+Subject: mfd: tmio: tmio/nand: add partition parsers platform data
+
+Thanks
+Andrea
+
+
+>>> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
+>>> ---
+>>>  include/linux/mfd/tmio.h | 1 +
+>>>  1 file changed, 1 insertion(+)
+>>>
+>>> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+>>> index a1520d8..23bb069 100644
+>>> --- a/include/linux/mfd/tmio.h
+>>> +++ b/include/linux/mfd/tmio.h
+>>> @@ -139,6 +139,7 @@ struct tmio_nand_data {
+>>>       struct nand_bbt_descr   *badblock_pattern;
+>>>       struct mtd_partition    *partition;
+>>>       unsigned int            num_partitions;
+>>> +     const char *const       *types; /* names of parsers to use if any=
+ */
+>>
+>> I'm okay with this if it's suits the MTD folk.
+>>
+>
+> Other than kerneldoc comments there are maybe other little
+> discordances to settle: see above is *partition, num_partitions.
+> In the other header it is *partitions, nr_partitions ...I'll see if
+> oneday I can janiitor this.
+>
+> Regards
+> Andrea
+>
+>>>  };
+>>>
+>>>  #define FBIO_TMIO_ACC_WRITE  0x7C639300
+>>
+>> --
+>> Lee Jones
+>> Linaro STMicroelectronics Landing Team Lead
+>> Linaro.org =E2=94=82 Open source software for ARM SoCs
+>> Follow Linaro: Facebook | Twitter | Blog
