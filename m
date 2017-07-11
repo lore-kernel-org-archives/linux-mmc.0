@@ -1,63 +1,70 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/4] tmio/sdhi: use max sd_buf size & clean header file before
-Date: Tue, 11 Jul 2017 16:43:35 +0200
-Message-ID: <CAPDyKFrjLfWmz=zoUe3P_SdMcmeAqOeprzW1TZ2KeQUEhQtSRg@mail.gmail.com>
-References: <20170630105649.16137-1-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH] mmc: tmio: don't wait on R-Car2+ when handling the clock
+Date: Tue, 11 Jul 2017 16:43:41 +0200
+Message-ID: <CAPDyKFpKPcC_tq5=rrArL20+-Z6faquE4RjB4Ap=TTfe1d3YBA@mail.gmail.com>
+References: <20170628152311.18935-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:33692 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933136AbdGKOnl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:43:41 -0400
-Received: by mail-qk0-f171.google.com with SMTP id v143so2837236qkb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:43:41 -0700 (PDT)
-In-Reply-To: <20170630105649.16137-1-wsa+renesas@sang-engineering.com>
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:34252 "EHLO
+        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933119AbdGKOnm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:43:42 -0400
+Received: by mail-qk0-f180.google.com with SMTP id d78so2713055qkb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:43:42 -0700 (PDT)
+In-Reply-To: <20170628152311.18935-1-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa@the-dreams.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On 30 June 2017 at 12:56, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
-> From: Wolfram Sang <wsa@the-dreams.de>
+On 28 June 2017 at 17:23, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
+> Our hardware engineers confirmed that it is unnecessary to wait when
+> turning the clock on/off. The documentation was a tad vague, so we
+> used to play safe.
 >
-> The main patch is patch 4 which uses the maximum sd_buf size, i.e. 32 bit on
-> Gen2 and 64 bit on Gen3. Instead of a new flag, we use the bus_shift
-> information we already have. See the patch description for details.
->
-> Before fixing this, I wanted to remove a magic value in that function which is
-> done in patch 3.
->
-> When adding the new define, I noticed that some description is missing in the
-> header which is fixed with patch 2.
->
-> When adding the description, I noticed this meanwhile obsolete define which
-> gets removed in patch 1.
->
-> That's the way it went :)
->
-> Tested on Salvator-X/M3-W and Lager/H2.
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+> ---
 >
-> Regards,
+> Tested on H2 and M3-W. Based on top of mmc/next with Simon's Gen3 DMA patches.
 >
->    Wolfram
+>  drivers/mmc/host/tmio_mmc_core.c | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
 >
-> Wolfram Sang (4):
->   mmc: tmio: remove obsolete TMIO_BBS
->   mmc: tmio: add references to bit defines in the header
->   mmc: tmio: no magic values when enabling DMA
->   mmc: sdhi: use maximum width for the sdbuf register
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 77e7b56a909933..1851c883bfc82a 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -207,7 +207,10 @@ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+>  {
+>         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+>                 sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+> -       msleep(host->pdata->flags & TMIO_MMC_MIN_RCAR2 ? 1 : 10);
+> +
+> +       /* HW engineers overrode docs: no sleep needed on R-Car2+ */
+> +       if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> +               msleep(10);
 >
->  drivers/mmc/host/renesas_sdhi_core.c | 5 ++---
->  drivers/mmc/host/tmio_mmc.h          | 7 +++++--
->  2 files changed, 7 insertions(+), 5 deletions(-)
+>         if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
+>                 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
+> @@ -224,7 +227,10 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
 >
+>         sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+>                 sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+> -       msleep(host->pdata->flags & TMIO_MMC_MIN_RCAR2 ? 5 : 10);
+> +
+> +       /* HW engineers overrode docs: no sleep needed on R-Car2+ */
+> +       if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+> +               msleep(10);
+>  }
+>
+>  static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
 > --
 > 2.11.0
 >
