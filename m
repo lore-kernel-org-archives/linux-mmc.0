@@ -1,135 +1,81 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-at91: set clocks and presets after
- resume from deepest PM
-Date: Tue, 11 Jul 2017 15:54:17 +0200
-Message-ID: <CAPDyKFoppYpL=k6k1yVn7nQcVLyG7_YRCOiVORKzzrYK0piEAA@mail.gmail.com>
-References: <20170616072929.3266-1-quentin.schulz@free-electrons.com>
- <20170616072929.3266-2-quentin.schulz@free-electrons.com> <CAPDyKFp2M_t4nCRNyqTm3PEx7tq+hb3TjmGWmg2XkJwbDa4FuQ@mail.gmail.com>
- <20170711133355.wzdw7nwrr3hpckj3@rfolt0960.corp.atmel.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 00/16] omap_hsmmc: Add ADMA support and UHS/HS200/DDR
+ support
+Date: Tue, 11 Jul 2017 19:27:00 +0530
+Message-ID: <fc9c1576-7419-b174-ea42-97ccf4666cee@ti.com>
+References: <20170616124544.15046-1-kishon@ti.com>
+ <CAPDyKFo+ORA=OpdikiUZWj3gpx+ssuqbC5MtqiFJneyJhu84dA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f174.google.com ([209.85.161.174]:35634 "EHLO
-        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752607AbdGKNyT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 09:54:19 -0400
-Received: by mail-yw0-f174.google.com with SMTP id v193so240139ywg.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 06:54:19 -0700 (PDT)
-In-Reply-To: <20170711133355.wzdw7nwrr3hpckj3@rfolt0960.corp.atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFo+ORA=OpdikiUZWj3gpx+ssuqbC5MtqiFJneyJhu84dA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Quentin Schulz <quentin.schulz@free-electrons.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, nicolas.ferre@microchip.com
-Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
 
-On 11 July 2017 at 15:33, Ludovic Desroches
-<ludovic.desroches@microchip.com> wrote:
-> On Tue, Jul 11, 2017 at 02:42:44PM +0200, Ulf Hansson wrote:
->> On 16 June 2017 at 09:29, Quentin Schulz
->> <quentin.schulz@free-electrons.com> wrote:
->> > This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
->> > SoC's SDHCI controller.
->> >
->> > When resuming from deepest state, it is required to restore preset
->> > registers as the registers are lost since VDD core has been shut down
->> > when entering deepest state on the SAMA5D2. The clocks need to be
->> > reconfigured as well.
->>
->> Right, so compared to runtime resume there is some additional
->> operations that is needed during system resume. Fair enough.
->>
->> However by looking at the changes below, you also change the system
->> suspend operations, as it now calls sdhci_suspend_host(). Is that
->> change needed? Then why?
->>
->> >
->> > The other registers and init process are taken care of by the SDHCI
->> > core.
->> >
->> > Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
->> > ---
->> >  drivers/mmc/host/sdhci-of-at91.c | 34 ++++++++++++++++++++++++++++++++--
->> >  1 file changed, 32 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
->> > index fb8c6011f13d..300513fc1068 100644
->> > --- a/drivers/mmc/host/sdhci-of-at91.c
->> > +++ b/drivers/mmc/host/sdhci-of-at91.c
->> > @@ -207,6 +207,37 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->> >  }
->> >
->> >  #ifdef CONFIG_PM
->> > +static int sdhci_at91_suspend(struct device *dev)
->> > +{
->> > +       struct sdhci_host *host = dev_get_drvdata(dev);
->> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> > +       struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> > +       int ret;
->> > +
->> > +       ret = sdhci_suspend_host(host);
->> > +
->>
->> This is wrong, you can't call sdhci_suspend_host() unless the device
->> is runtime resumed...
->>
->> > +       if (host->runtime_suspended)
->> > +               return ret;
->>
->> ... and this is weird...
->>
->> > +
->> > +       clk_disable_unprepare(priv->gck);
->> > +       clk_disable_unprepare(priv->hclock);
->> > +       clk_disable_unprepare(priv->mainck);
->> > +
->> > +       return ret;
->> > +}
->> > +
->> > +static int sdhci_at91_resume(struct device *dev)
->> > +{
->> > +       struct sdhci_host *host = dev_get_drvdata(dev);
->> > +       int ret;
->> > +
->> > +       ret = sdhci_at91_set_clks_presets(dev);
->> > +       if (ret)
->> > +               return ret;
->>
->> Instead of doing it like this, I suggest you set a new flag to true
->> here, let's call it "restore_needed".
->>
->> In the ->runtime_resume() callback, you check the restore_needed flag
->> and performs the extra operations in that case. When that's done, the
->> ->runtime_resume() callback clears the flag, as to avoid the next
->> runtime resume from unnecessary doing the extra operations.
->>
->> > +
->> > +       return sdhci_resume_host(host);
->>
->> Remove this and call pm_runtime_force_resume().
->>
->> > +}
->> > +
->> >  static int sdhci_at91_runtime_suspend(struct device *dev)
->> >  {
->> >         struct sdhci_host *host = dev_get_drvdata(dev);
->> > @@ -256,8 +287,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->> >  #endif /* CONFIG_PM */
->> >
->> >  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
->> > -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
->>
->> Leave the pm_runtime_force_suspend() here, unless you have other
->> reasons not being described in the change log, to change the system
->> suspend operations.
->
-> I think we need to keep it to be able to set the restore_needed flag, isn't it?
+Hi Ulf,
 
-Yeah, perhaps it's better to set the flag from sdhci_at91_suspend()
-and instead leave the resume callback being assigned to
-pm_runtime_force_resume().
+On Tuesday 11 July 2017 06:40 PM, Ulf Hansson wrote:
+> On 16 June 2017 at 14:45, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
+>> This is the final part of the series originally sent as
+>> part of [2].
+>>
+>> This series adds UHS, HS200, DDR mode and ADMA support to
+>> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
+>> SoCs.
+>>
+>> Changes from [2]:
+>> *) No more updating omap2plus_defconfig or multi_v7_defconfig is
+>>    required, so those patches are removed.
+>> *) Addressed Rob Herring's comment on implementing a function
+>>    instead of having a macro while getting pinctrl state.
+>>
+>> This series is created on top of [3], [4], [5] AND [6]
+>> (i.e after
+>>   ARM: dts: omap3-overo: Remove "vqmmc-supply" property from MMC dt node
+>>   omap_hsmmc: use mmc_regulator_get_supply() to get regulators
+>>   omap*: Fixes/Cleanups for MMC devicetree node
+>>   ARM: dts: Add iodelay data for MMC)
+>>
+>> The functionality implemented in this series was sent before ([1]) but
+>> was never followed up since supporting high speed modes in dra7 required
+>> IODelay values to be configured. With IODelay driver being merged into
+>> kernel, sending it as a fresh series with support for configuring IODelay
+>> values.
+> 
+> Is it safe to queue this via mmc tree for 4.14 or is there a
+> dependency I must consider? The above didn't quite tell me that, could
+> you please elaborate.
 
-I guess that is what you meant?
+There is a dependency with https://www.spinics.net/lists/arm-kernel/msg586215.html.
 
-[...]
+I'll resend the series after all the platform data specific stuff is merged.
+> 
+>>
+>> Suggestions of migrating to sdhci driver (from omap_hsmmc driver) is not
+>> addressed since
+>> *) tuning ratio of MMC in dra7 is different from sdhci
+>> *) IOdelay is required for dra7
+>> *) GPIO based card detect is not supported in sdhci
+> 
+> Lots of sdhci drivers calls mmc_of_parse(), and uses the mmc slot gpio
+> APIs, so I don't this this is correct statement.
+> 
+>> *) Some of the registers don't always have correct values as in sdhci
+>>    (like PSTATE).
+>> Supporting all of these in sdhci will result in adding lot of quirks in
+>> sdhci driver.
+> 
+> Is it really that much different? It would be nice if some really took
+> on the challenge of converting omap_hsmmc into an sdhci variant.
 
-Kind regards
-Uffe
+Okay. I'll give that a shot and see how far I can get.
+
+Thanks
+Kishon
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
