@@ -1,89 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFT] mmc: tmio: fix CMD12 (STOP) handling
-Date: Tue, 11 Jul 2017 16:43:28 +0200
-Message-ID: <CAPDyKFqkGj-ywGciKqxxg6PnPDP3N1G+H-snnimhQPhVDJAFQA@mail.gmail.com>
-References: <20170703192823.8116-1-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH 0/4] tmio/sdhi: use max sd_buf size & clean header file before
+Date: Tue, 11 Jul 2017 16:43:35 +0200
+Message-ID: <CAPDyKFrjLfWmz=zoUe3P_SdMcmeAqOeprzW1TZ2KeQUEhQtSRg@mail.gmail.com>
+References: <20170630105649.16137-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20170703192823.8116-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, =?UTF-8?B?SmFuIEtsw7Z0emtl?= <jan.kloetzke@technisat.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>, Kouei Abe <kouei.abe.cp@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:33692 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933136AbdGKOnl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 10:43:41 -0400
+Received: by mail-qk0-f171.google.com with SMTP id v143so2837236qkb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jul 2017 07:43:41 -0700 (PDT)
+In-Reply-To: <20170630105649.16137-1-wsa+renesas@sang-engineering.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Wolfram Sang <wsa@the-dreams.de>
 
-On 3 July 2017 at 21:28, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
-> I always anticipated this code to be not correct, but now I had a test
-> case to prove it. According to all documentation I have, setting the
-> TMIO_STOP_STP bit ever only worked during block transfers. This bit is
-> like manually enforcing an autocmd12 during a so far seamless transfer.
-> It does NOT work when the block transfer had errors. It also does NOT
-> work with any other cmd except block commands. For all those, CMD12 has
-> to be treated like any other command. So, basically, we could use this
-> bit only for mrq->data->stop cmds. But for these, we happily use the
-> autocmd12 feature using the TMIO_STOP_SEC bit. As a result, the above
-> bit is not useful for us and we need to treat CMD12 as a regular cmd
-> always. Just remove the special handling code. Note that the BSP
-> recognized this issue as well yet had a more cautious solution to the
-> problem [1]. Which is understandable but makes CMD12 handling even more
-> complicated.
+On 30 June 2017 at 12:56, Wolfram Sang <wsa+renesas@sang-engineering.com> wrote:
+> From: Wolfram Sang <wsa@the-dreams.de>
 >
-> Checked with a Renesas Salvator-X/M3-W which needed to send CMD12 when
-> retuning one of my SD cards.
+> The main patch is patch 4 which uses the maximum sd_buf size, i.e. 32 bit on
+> Gen2 and 64 bit on Gen3. Instead of a new flag, we use the bus_shift
+> information we already have. See the patch description for details.
 >
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas-bsp.git/commit/?id=2838a2ff8ca776f6d18b7fbbe75f3df8dd64183a
+> Before fixing this, I wanted to remove a magic value in that function which is
+> done in patch 3.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> When adding the new define, I noticed that some description is missing in the
+> header which is fixed with patch 2.
+>
+> When adding the description, I noticed this meanwhile obsolete define which
+> gets removed in patch 1.
+>
+> That's the way it went :)
+>
+> Tested on Salvator-X/M3-W and Lager/H2.
 
 Thanks, applied for next!
-
-Should we add a stable tag?
 
 Kind regards
 Uffe
 
-> ---
 >
-> So, this is a friendly call for further testing to make sure no regressions
-> happen. I also put the authors of the BSP patch to CC to check if this patch
-> also matches their use case. I hope this is fine for these people, please
-> accept my apologies if not. I just really like to have your opinion on this
-> patch.
->
-> Geert, Simon: any chance you can run this patch on your board farms?
->
-> In any case: as far as my understanding goes, if I am wrong with my
-> assumptions, the worst case is that for older SoCs CMD12 handling might become
-> a tad more inefficient because we now do in software what was expected to be
-> done in hardware. However, I am quite sure that the HW feature was always
-> over-estimated and CMD12 support is simply broken. For my test case and the BSP
-> patch above, it definately was.
->
-> Thanks for any assistance,
+> Regards,
 >
 >    Wolfram
 >
+> Wolfram Sang (4):
+>   mmc: tmio: remove obsolete TMIO_BBS
+>   mmc: tmio: add references to bit defines in the header
+>   mmc: tmio: no magic values when enabling DMA
+>   mmc: sdhi: use maximum width for the sdbuf register
 >
->  drivers/mmc/host/tmio_mmc_core.c | 6 ------
->  1 file changed, 6 deletions(-)
+>  drivers/mmc/host/renesas_sdhi_core.c | 5 ++---
+>  drivers/mmc/host/tmio_mmc.h          | 7 +++++--
+>  2 files changed, 7 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 1851c883bfc82a..fbcd56c58bce24 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -355,12 +355,6 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host,
->         int c = cmd->opcode;
->         u32 irq_mask = TMIO_MASK_CMD;
->
-> -       /* CMD12 is handled by hardware */
-> -       if (cmd->opcode == MMC_STOP_TRANSMISSION && !cmd->arg) {
-> -               sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, TMIO_STOP_STP);
-> -               return 0;
-> -       }
-> -
->         switch (mmc_resp_type(cmd)) {
->         case MMC_RSP_NONE: c |= RESP_NONE; break;
->         case MMC_RSP_R1:
 > --
 > 2.11.0
 >
