@@ -1,99 +1,103 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: tmio-mmc: fix bad pointer math
-Date: Wed, 12 Jul 2017 08:50:20 +0200
-Message-ID: <CAMuHMdW6Sz59JNVEp_b6qw0VD_0_JAeetMrN9K2GUcPL++uipA@mail.gmail.com>
-References: <20170711162911.39114-1-chris.brandt@renesas.com>
- <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com> <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 3/9] mfd: tmio.h: support partition parser types
+Date: Wed, 12 Jul 2017 09:58:04 +0100
+Message-ID: <20170712085804.ya5b3trqbipuel3f@dell>
+References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
+ <1498681836-3765-4-git-send-email-andrea.adami@gmail.com>
+ <20170703112621.rd3ija3efqlq57rg@dell>
+ <CAAQYJAuPpzDb_OV1naHZCovy4LJC0_6gFJKPqo7REt7zZzh0pw@mail.gmail.com>
+ <CAAQYJAvCdSG25U6DjiD5owC7GHyGnWyyaLD_R-fzuMGUDZN8pQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:35155 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756611AbdGLGuW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 02:50:22 -0400
-In-Reply-To: <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+Received: from mail-wr0-f174.google.com ([209.85.128.174]:35753 "EHLO
+        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750741AbdGLI6I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 04:58:08 -0400
+Received: by mail-wr0-f174.google.com with SMTP id k67so24192983wrc.2
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Jul 2017 01:58:08 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAAQYJAvCdSG25U6DjiD5owC7GHyGnWyyaLD_R-fzuMGUDZN8pQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <Chris.Brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Andrea Adami <andrea.adami@gmail.com>
+Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Chris,
+On Wed, 12 Jul 2017, Andrea Adami wrote:
 
-On Tue, Jul 11, 2017 at 9:37 PM, Chris Brandt <Chris.Brandt@renesas.com> wrote:
-> On Tuesday, July 11, 2017, Geert Uytterhoeven wrote:
->> > zeroing out the bottom 2 bits of count for out math.
->>
->> s/out/our/
->
-> Thank you!
->
->> > -               buf8 = (u8 *)(buf + (count >> 2));
->> > +               buf8 = (u8 *)buf + (count & ~3);
->> >                 count %= 4;
->>
->> While correct, this is IMHO still difficult to understand for the casual
->> reader.
->>
->> Given the code before casts to "u32 *", and uses "count >>2", and the code
->> after also casts to "u32 *", what about getting rid of all casts like:
->>
->>         u32 data = 0;
->>         u32 *buf32 = buf;
->>
->>         if (is_read)
->>                 sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
->>                                    count >> 2);
->>         else
->>                 sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
->>                                     count >> 2);
->>
->>         /* if count was multiple of 4 */
->>         if (!(count & 0x3))
->>                 return;
->>
->>         buf32 += count >> 2;
->>         count %= 4;
->>
->>         if (is_read) {
->>                 sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
->>                 memcpy(buf32, &data, count);
->>         } else {
->>                 memcpy(&data, buf32, count);
->>                 sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
->>         }
->>
->>                 return;
->>         }
->>
->
-> Good idea. I just tried it and it seems to work. I'll resend a patch.
->
->
->>         u32 *buf32 = buf;
->
-> GCC didn't like this line without casting buf to a u32 *. It threw an
-> error, not just a warning. Go figure.
+> On Mon, Jul 3, 2017 at 2:03 PM, Andrea Adami <andrea.adami@gmail.com> wrote:
+> > On Mon, Jul 3, 2017 at 1:26 PM, Lee Jones <lee.jones@linaro.org> wrote:
+> >> Please use the $SUBJECT line expected by the subsystem.
+> >>
+> >> `git log --oneline -- $SUBSYSTEM` can help with this.
+> >>
+> >> You also need a commit log.
+> >>
+> >
+> > Lee,
+> >
+> > thanks for spotting it.
+> > I'll fix the subject and add a little text in these patches touching headers.
+> >
+> > I am awaiting for a new review of the big piece of the patch, the
+> > ftl/parser, then I'll send a fixed v5.
+> >
+> >
+> 
+> Lee,
+> 
+> I have looked at the history of mfd/tmio.h but couldn't find
+> unambiguous examples.
+> Do you prefer
+> 
+> Subject: mfd: tmio: tmio_nand: add partition parsers platform data
+> or
+> Subject: mfd: tmio: tmio-nand: add partition parsers platform data
+> or
+> Subject: mfd: tmio: tmio/nand: add partition parsers platform data
 
-Sorry, the cast is indeed missing, as buf is not a void *.
+Better to look at the subsystem as a whole.
 
-> Question:
->>         u32 data = 0;
->
-> Any special reason why you are initializing this to 0????
+  `git log --oneline -- drivers/mfd`
 
-I think the original code did that, too. Hmm, I got mislead by the curly braces,
-there's no "0" in between them.
+You will see something like:
 
-It's also a bit safer to not write uninitialized data to the CTL_SD_DATA_PORT
-register.
+  mfd: device-driver: Short subject starting with an uppercase char
+  
+> >>> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
+> >>> ---
+> >>>  include/linux/mfd/tmio.h | 1 +
+> >>>  1 file changed, 1 insertion(+)
+> >>>
+> >>> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> >>> index a1520d8..23bb069 100644
+> >>> --- a/include/linux/mfd/tmio.h
+> >>> +++ b/include/linux/mfd/tmio.h
+> >>> @@ -139,6 +139,7 @@ struct tmio_nand_data {
+> >>>       struct nand_bbt_descr   *badblock_pattern;
+> >>>       struct mtd_partition    *partition;
+> >>>       unsigned int            num_partitions;
+> >>> +     const char *const       *types; /* names of parsers to use if any */
+> >>
+> >> I'm okay with this if it's suits the MTD folk.
+> >>
+> >
+> > Other than kerneldoc comments there are maybe other little
+> > discordances to settle: see above is *partition, num_partitions.
+> > In the other header it is *partitions, nr_partitions ...I'll see if
+> > oneday I can janiitor this.
+> >
+> > Regards
+> > Andrea
+> >
+> >>>  };
+> >>>
+> >>>  #define FBIO_TMIO_ACC_WRITE  0x7C639300
+> >>
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+-- 
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org │ Open source software for ARM SoCs
+Follow Linaro: Facebook | Twitter | Blog
