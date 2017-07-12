@@ -1,113 +1,210 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC 2/2] mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8
- and Meson8b SoCs
-Date: Wed, 12 Jul 2017 15:42:45 +0200
-Message-ID: <CAPDyKFoKaT_3MVF7SrS8bVm7iG=y6K+-R1+YNj=9bTS6qNrcug@mail.gmail.com>
-References: <20170506171857.16492-1-martin.blumenstingl@googlemail.com>
- <20170506171857.16492-3-martin.blumenstingl@googlemail.com>
- <CAPDyKFrrSLCjbXO9R4VqPpabiFsbE6_RqR=U7otVF4Ncv0jHjQ@mail.gmail.com>
- <CAFBinCD3modyyOpi3OY5XLhjX0UCuV+WPY2Z=mdvwdMCyeGoqg@mail.gmail.com>
- <CAPDyKFptXRPk7mVUiRHf=hECDbeyhTxuf3K1M6NkZcVEF0Enww@mail.gmail.com>
- <CAFBinCD=uH=oQmWAcsMpxtbJCnJZernZx3XoNaPixUUQ7pk76w@mail.gmail.com>
- <CAPDyKFrbxMpgDrZXKmrN4fyJWJ_ZML3jPxBs+YDEz=L1kA-BaA@mail.gmail.com> <CAFBinCA-goSsyq7bo=ozPRnOqc8br4KDJJ_Lao5h==Xneh02nw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFBinCA-goSsyq7bo=ozPRnOqc8br4KDJJ_Lao5h==Xneh02nw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Martin Blumenstingl <martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Carlo Caione <carlo-KA+7E9HrN00dnm+yROfE0A@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Carlo Caione <carlo-6IF/jdPJHihWk0Htik3J/w@public.gmane.org>
+From: Quentin Schulz <quentin.schulz@free-electrons.com>
+Subject: [PATCH v2 1/2] mmc: sdhci-of-at91: factor out clks and presets setting
+Date: Wed, 12 Jul 2017 16:15:18 +0200
+Message-ID: <20170712141519.15684-1-quentin.schulz@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.free-electrons.com ([62.4.15.54]:58428 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751882AbdGLOPf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 10:15:35 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ludovic.desroches@microchip.com, ulf.hansson@linaro.org
+Cc: Quentin Schulz <quentin.schulz@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com, cyrille.pitchen@wedev4u.fr
 
-On 11 July 2017 at 23:23, Martin Blumenstingl
-<martin.blumenstingl-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org> wrote:
-> Hi Ulf,
->
-> sorry for the delay, I've been pretty busy.
-> however, I'll have more time to work in this driver this and next week
->
-> On Mon, Jun 19, 2017 at 1:50 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>
->>>> [...]
->>>>
->>>>>>> +       if (!(cmd->flags & MMC_RSP_CRC))
->>>>>>> +               send |= MESON_MX_SDIO_SEND_RESP_WITHOUT_CRC7;
->>>>>>> +
->>>>>>> +       if (cmd->flags & MMC_RSP_BUSY)
->>>>>>> +               send |= MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY;
->>>>>>
->>>>>> In case the controller has HW support of busy detection, please
->>>>>> consider to enable MMC_CAP_WAIT_WHILE_BUSY for this driver. Then also
->>>>>> assign host->max_busy_timeout a good value.
->>>>> the IRQS register has bit 4 (CMD_BUSY) - but apart from that there is
->>>>> no other documentation (about timeout values, etc.). the vendor driver
->>>>> also neither uses MMC_CAP_WAIT_WHILE_BUSY nor host->max_busy_timeout
->>>>> should I leave this as it is?
->>>>
->>>> Please don't just leave it as is. This is an important thing to get right.
->>>>
->>>> You should be able to explore this area and see how the controller
->>>> behaves without too much of documentation. Regarding timeouts, it may
->>>> very well be that the controller don't have a timeout, which is why
->>>> you need a software timeout. That's not so uncommon actually.
->>> during my experiments I've never seen an interrupt when a command
->>> timed out (nor could I find information about a timeout register in
->>> the documentation). do you have any pointers (like a previous mail
->>> where you've explained) how I can "explore the controller's timeout
->>> behavior"?
->>
->> Sorry, I don't have an pointers.
->>
->> Anyway. If you do a big erase operation on an SD card, the card should
->> signal busy on DAT0 for a rather long time.
-> erase operation = mount sd card; rm big_file.bin; sync ?
-> or is there some other way?
+The setting of clocks and presets is currently done in probe only but
+once deep PM support is added, it'll be needed in the resume function.
 
-There is tool called fstrim, maybe you can you that as well.
+Let's create a function for this setting.
 
-Don't forget that the mount options of the fs also matters of what
-will happen for the so called discard operations (translates to erase
-in SD).
+Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 147 ++++++++++++++++++++++-----------------
+ 1 file changed, 82 insertions(+), 65 deletions(-)
 
->
->> You could probably explore how long it takes for the card to respond
->> under those circumstances, and try both with and without
->> MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY.
-> so I simply read the card status through sysfs? or would I need to get
-> some of this information from the controller?
-> I found that the IRQC register contains a few interesting bits:
->     u32 sdio_force_data:6; /*[13:8]
->         * Write operation: Data forced by software
->         * Read operation: {CLK,CMD,DAT[3:0]}*/
-> I dumped these while transferring some data, the values seem to be
-> changing constantly (0x3f, 0x1f, 0x20, ...)
-> if I interpret those bits correctly then they are the status of the
-> corresponding pin
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 7611fd679f1a..fb8c6011f13d 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -128,6 +128,84 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_at91_dt_match);
+ 
++static int sdhci_at91_set_clks_presets(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++	unsigned int			caps0, caps1;
++	unsigned int			clk_base, clk_mul;
++	unsigned int			gck_rate, real_gck_rate;
++	unsigned int			preset_div;
++
++	/*
++	 * The mult clock is provided by as a generated clock by the PMC
++	 * controller. In order to set the rate of gck, we have to get the
++	 * base clock rate and the clock mult from capabilities.
++	 */
++	clk_prepare_enable(priv->hclock);
++	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
++	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
++	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
++	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
++	gck_rate = clk_base * 1000000 * (clk_mul + 1);
++	ret = clk_set_rate(priv->gck, gck_rate);
++	if (ret < 0) {
++		dev_err(dev, "failed to set gck");
++		clk_disable_unprepare(priv->hclock);
++		return ret;
++	}
++	/*
++	 * We need to check if we have the requested rate for gck because in
++	 * some cases this rate could be not supported. If it happens, the rate
++	 * is the closest one gck can provide. We have to update the value
++	 * of clk mul.
++	 */
++	real_gck_rate = clk_get_rate(priv->gck);
++	if (real_gck_rate != gck_rate) {
++		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
++		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
++		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) &
++			  SDHCI_CLOCK_MUL_MASK);
++		/* Set capabilities in r/w mode. */
++		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN,
++		       host->ioaddr + SDMMC_CACR);
++		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
++		/* Set capabilities in ro mode. */
++		writel(0, host->ioaddr + SDMMC_CACR);
++		dev_info(dev, "update clk mul to %u as gck rate is %u Hz\n",
++			 clk_mul, real_gck_rate);
++	}
++
++	/*
++	 * We have to set preset values because it depends on the clk_mul
++	 * value. Moreover, SDR104 is supported in a degraded mode since the
++	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
++	 * reason, we need to use presets to support SDR104.
++	 */
++	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
++
++	clk_prepare_enable(priv->mainck);
++	clk_prepare_enable(priv->gck);
++
++	return 0;
++}
++
+ #ifdef CONFIG_PM
+ static int sdhci_at91_runtime_suspend(struct device *dev)
+ {
+@@ -192,11 +270,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	struct sdhci_host		*host;
+ 	struct sdhci_pltfm_host		*pltfm_host;
+ 	struct sdhci_at91_priv		*priv;
+-	unsigned int			caps0, caps1;
+-	unsigned int			clk_base, clk_mul;
+-	unsigned int			gck_rate, real_gck_rate;
+ 	int				ret;
+-	unsigned int			preset_div;
+ 
+ 	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
+ 	if (!match)
+@@ -228,66 +302,9 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return PTR_ERR(priv->gck);
+ 	}
+ 
+-	/*
+-	 * The mult clock is provided by as a generated clock by the PMC
+-	 * controller. In order to set the rate of gck, we have to get the
+-	 * base clock rate and the clock mult from capabilities.
+-	 */
+-	clk_prepare_enable(priv->hclock);
+-	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
+-	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
+-	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+-	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
+-	gck_rate = clk_base * 1000000 * (clk_mul + 1);
+-	ret = clk_set_rate(priv->gck, gck_rate);
+-	if (ret < 0) {
+-		dev_err(&pdev->dev, "failed to set gck");
+-		goto hclock_disable_unprepare;
+-	}
+-	/*
+-	 * We need to check if we have the requested rate for gck because in
+-	 * some cases this rate could be not supported. If it happens, the rate
+-	 * is the closest one gck can provide. We have to update the value
+-	 * of clk mul.
+-	 */
+-	real_gck_rate = clk_get_rate(priv->gck);
+-	if (real_gck_rate != gck_rate) {
+-		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
+-		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
+-		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
+-		/* Set capabilities in r/w mode. */
+-		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
+-		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
+-		/* Set capabilities in ro mode. */
+-		writel(0, host->ioaddr + SDMMC_CACR);
+-		dev_info(&pdev->dev, "update clk mul to %u as gck rate is %u Hz\n",
+-			 clk_mul, real_gck_rate);
+-	}
+-
+-	/*
+-	 * We have to set preset values because it depends on the clk_mul
+-	 * value. Moreover, SDR104 is supported in a degraded mode since the
+-	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
+-	 * reason, we need to use presets to support SDR104.
+-	 */
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
+-	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+-	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
+-	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+-
+-	clk_prepare_enable(priv->mainck);
+-	clk_prepare_enable(priv->gck);
++	ret = sdhci_at91_set_clks_presets(&pdev->dev);
++	if (ret)
++		goto sdhci_pltfm_free;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+@@ -335,8 +352,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ clocks_disable_unprepare:
+ 	clk_disable_unprepare(priv->gck);
+ 	clk_disable_unprepare(priv->mainck);
+-hclock_disable_unprepare:
+ 	clk_disable_unprepare(priv->hclock);
++sdhci_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 	return ret;
+ }
+-- 
+2.11.0
 
-Okay! So if the controller doesn't fully support HW busy detection,
-you should at least be able to implement the ->card_busy() host ops,
-which is used to poll the DAT0 line for busy detection.
-
->
->> Of course you also need to try with and without
->> MMC_CAP_WAIT_WHILE_BUSY, as the core may sometimes convert R1B to R1
->> responses depending on that cap.
-> so MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY + MMC_CAP_WAIT_WHILE_BUSY should
-> go together?
-> and MESON_MX_SDIO_SEND_CHECK_DAT0_BUSY should not be set when
-> MMC_CAP_WAIT_WHILE_BUSY isn't?
-
-Yeah, something like that.
-
-So if you controller fully supports HW busy detection, the driver
-should set MMC_CAP_WAIT_WHILE_BUSY and then act accordingly when R1B
-responses are expected.
-
-[...]
-
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
