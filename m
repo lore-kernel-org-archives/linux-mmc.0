@@ -1,98 +1,99 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [PATCH v2] mmc: sdhci-xenon: Add Xenon SDHCI specific
- system-level PM support
-Date: Wed, 12 Jul 2017 09:17:16 +0800
-Message-ID: <20170712091716.33950436@xhacker>
-References: <1499810209-30505-1-git-send-email-zjwu@marvell.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: tmio-mmc: fix bad pointer math
+Date: Wed, 12 Jul 2017 08:50:20 +0200
+Message-ID: <CAMuHMdW6Sz59JNVEp_b6qw0VD_0_JAeetMrN9K2GUcPL++uipA@mail.gmail.com>
+References: <20170711162911.39114-1-chris.brandt@renesas.com>
+ <CAMuHMdX=Y5cpNiSd1wwXV_SOCpBs64+VpHnE_Svgd2E6P8Gm6w@mail.gmail.com> <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:39066 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1754675AbdGLBWA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2017 21:22:00 -0400
-In-Reply-To: <1499810209-30505-1-git-send-email-zjwu@marvell.com>
+Received: from mail-it0-f45.google.com ([209.85.214.45]:35155 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756611AbdGLGuW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 02:50:22 -0400
+In-Reply-To: <SG2PR06MB11651FF11350240AA95EDCD28AAE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, zmxu@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Tue, 11 Jul 2017 14:56:49 -0700 Zhoujie Wu wrote:
+Hi Chris,
 
-> Add Xenon specific system-level suspend and resume support.
-> Especially during resume, re-configure Xenon specific registers
-> since registers setting will be lost in suspend if Xenon is power off.
+On Tue, Jul 11, 2017 at 9:37 PM, Chris Brandt <Chris.Brandt@renesas.com> wrote:
+> On Tuesday, July 11, 2017, Geert Uytterhoeven wrote:
+>> > zeroing out the bottom 2 bits of count for out math.
+>>
+>> s/out/our/
+>
+> Thank you!
+>
+>> > -               buf8 = (u8 *)(buf + (count >> 2));
+>> > +               buf8 = (u8 *)buf + (count & ~3);
+>> >                 count %= 4;
+>>
+>> While correct, this is IMHO still difficult to understand for the casual
+>> reader.
+>>
+>> Given the code before casts to "u32 *", and uses "count >>2", and the code
+>> after also casts to "u32 *", what about getting rid of all casts like:
+>>
+>>         u32 data = 0;
+>>         u32 *buf32 = buf;
+>>
+>>         if (is_read)
+>>                 sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
+>>                                    count >> 2);
+>>         else
+>>                 sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
+>>                                     count >> 2);
+>>
+>>         /* if count was multiple of 4 */
+>>         if (!(count & 0x3))
+>>                 return;
+>>
+>>         buf32 += count >> 2;
+>>         count %= 4;
+>>
+>>         if (is_read) {
+>>                 sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+>>                 memcpy(buf32, &data, count);
+>>         } else {
+>>                 memcpy(&data, buf32, count);
+>>                 sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+>>         }
+>>
+>>                 return;
+>>         }
+>>
+>
+> Good idea. I just tried it and it seems to work. I'll resend a patch.
+>
+>
+>>         u32 *buf32 = buf;
+>
+> GCC didn't like this line without casting buf to a u32 *. It threw an
+> error, not just a warning. Go figure.
 
-Sorry, the author is still not correct.
+Sorry, the cast is indeed missing, as buf is not a void *.
 
-> 
-> Signed-off-by: Hu Ziji <huziji@marvell.com>
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
-> Tested-by: Jisheng Zhang <jszhang@marvell.com>
-> ---
-> Hu Ziji has left marvell, submit the patch for him.
->  drivers/mmc/host/sdhci-xenon.c | 42 +++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 41 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index bc1781b..9f399c4 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -519,6 +519,46 @@ static int xenon_remove(struct platform_device *pdev)
->  	return 0;
->  }
->  
-> +#ifdef CONFIG_PM_SLEEP
-> +static int xenon_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
-> +
-> +	ret = sdhci_suspend_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +	return ret;
-> +}
-> +
-> +static int xenon_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret)
-> +		return ret;
-> +
-> +	/*
-> +	 * If SoCs power off the entire Xenon, registers setting will
-> +	 * be lost.
-> +	 * Re-configure Xenon specific register to enable current SDHC
-> +	 */
-> +	ret = xenon_sdhc_prepare(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	return sdhci_resume_host(host);
-> +}
-> +#endif
-> +
-> +static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
-> +
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap806-sdhci",},
->  	{ .compatible = "marvell,armada-cp110-sdhci",},
-> @@ -531,7 +571,7 @@ static int xenon_remove(struct platform_device *pdev)
->  	.driver	= {
->  		.name	= "xenon-sdhci",
->  		.of_match_table = sdhci_xenon_dt_ids,
-> -		.pm = &sdhci_pltfm_pmops,
-> +		.pm = &xenon_pmops,
->  	},
->  	.probe	= xenon_probe,
->  	.remove	= xenon_remove,
+> Question:
+>>         u32 data = 0;
+>
+> Any special reason why you are initializing this to 0????
 
+I think the original code did that, too. Hmm, I got mislead by the curly braces,
+there's no "0" in between them.
+
+It's also a bit safer to not write uninitialized data to the CTL_SD_DATA_PORT
+register.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
