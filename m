@@ -1,62 +1,90 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v2] mmc: tmio-mmc: fix bad pointer math
-Date: Wed, 12 Jul 2017 17:24:33 +0200
-Message-ID: <CAMuHMdVPRjno3h=PVWMAnte5-_13Ha93CAno26=wwswgDt+smw@mail.gmail.com>
-References: <20170712132701.69983-1-chris.brandt@renesas.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: Rebasing mmc/next
+Date: Wed, 12 Jul 2017 17:26:13 +0200
+Message-ID: <CAPDyKFq-dku-WRbMJq0eUo0ESRH33fUCGGHMs=Ohej82su1x3Q@mail.gmail.com>
+References: <CAMuHMdW=aasYmZz-z+BgT0Qoco6DTyQxN3G1wiWVPETsbkRZTQ@mail.gmail.com>
+ <CAPDyKFpuBJCArAHUL2i=zDL=-Bq908eDJ2_mRy7O=_4bJj2_dw@mail.gmail.com> <CAMuHMdWikrGTaEVWDdpgAN9+DEHXOYUZdtZgssRLDTWsyxa-fw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:35629 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752879AbdGLPYg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 11:24:36 -0400
-In-Reply-To: <20170712132701.69983-1-chris.brandt@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdWikrGTaEVWDdpgAN9+DEHXOYUZdtZgssRLDTWsyxa-fw@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On Wed, Jul 12, 2017 at 3:27 PM, Chris Brandt <chris.brandt@renesas.com> wrote:
-> The existing code gives an incorrect pointer value.
-> The buffer pointer 'buf' was of type unsigned short *, and 'count' was a
-> number in bytes. A cast of buf should have been used.
+On 20 June 2017 at 11:06, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> Hi Ulf,
 >
-> However,instead of casting, just change the code to use u32 pointers.
+> On Tue, Jun 20, 2017 at 10:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 20 June 2017 at 09:17, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>>> It looks like you rebase mmc/next almost daily. Is there any specific reason
+>>> for that?
+>>
+>> I don't do it daily, but often, yes. :-)
 >
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Fixes: 8185e51f358a: ("mmc: tmio-mmc: add support for 32bit data port")
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+> A few years ago, I got bashed by Linus for rebasing the m68k "for-linus"
+> branch on every -rc.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Perhaps something to be discussed a kernel/mainainer-summit, cause at
+the moment I don't think there is given policy.
 
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
+>
+>>> I'm asking because I create a "renesas-drivers" tree on a regular basis
+>>> (cfr. e.g. https://www.spinics.net/lists/linux-renesas-soc/msg15111.html).
+>>> This tree is meant to ease development of platform support and drivers
+>>> for Renesas ARM SoCs. It is created by merging (a) the for-next branches
+>>> of various subsystem trees and (b) branches with driver code submitted
+>>> or planned for submission to maintainers into the development branch of
+>>> Simon Horman's renesas.git tree.
+>>
+>> If you are asking me to keep my next branch immutable, then please no,
+>> I don't like to do that. Reason explained below.
+>
+> 100% immutable is not needed.
+>
+>> I don't have a problem to share specific renesas mmc branches with
+>> you, if that helps?
+>
+> Hmm, that would be more work on your side. Plus communication overhead.
 
->                 if (is_read) {
->                         sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT,
-> -                                          (u32 *)data, 1);
-> +                                          &data, 1);
+OK.
 
-I would use the opportunity to merge the two above lines, now they fit
-on a single line.
+[...]
 
-> +                       memcpy(buf32, &data, count);
->                 } else {
-> -                       memcpy(data, buf8, count);
-> +                       memcpy(&data, buf32, count);
->                         sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT,
-> -                                           (u32 *)data, 1);
-> +                                           &data, 1);
+>
+>> I am trying to understand the purpose of your renesas integration
+>> tree, and why it's a problem for you to pick up my re-based branch?
+>> Could you perhaps elaborate on this?
+>
+> The purpose is to make it easier for the upstream Renesas kernel team and
+> associated testers to consume our work-in-progress.
+>
+> Hence I merge the for-next branches of selected subsystems, followed by
+> topic branches with work-in-progress driver code.
+>
+> E.g. Simon had asked me to include
+> git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
+> topic/sdhi-gen3-dma-2017
+> That branch was based on your mmc/next.
 
-Likewise.
+I guess there are two other options to deal with this.
 
-Gr{oetje,eeting}s,
+1) Don't merge my next branch, in case there is another branch based
+on it. Instead, in this case, it will be Simon's responsibility of
+re-basing his branch on top of mmc next, as to get the latest changes.
+2) Base your WIP branches on top of some commit from Linus tree. Then
+you can keep merging my next branch and any other "for-next" branch
+that is often being re-based.
 
-                        Geert
+>
+> But by the time I created the renesas-drivers release, mmc/next had been
+> rebased.  Hence after merging the new mmc/next, I had to rebase his work:
+> https://git.kernel.org/pub/scm/linux/kernel/git/geert/renesas-drivers.git/log/?h=topic/sdhi-gen3-dma-2017-rebased1
+>
+> I hope this explains our problem.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Yeah, thanks for the explanation - and apologize for the delay.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Uffe
