@@ -1,62 +1,55 @@
-From: Chris Paterson <chris.paterson2@renesas.com>
-Subject: [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
-Date: Wed, 12 Jul 2017 11:03:25 +0100
-Message-ID: <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
-References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor1.renesas.com ([210.160.252.171]:64407 "EHLO
-        relmlie4.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1755271AbdGLKEM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 06:04:12 -0400
-In-Reply-To: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH mmc/next v3 0/4] mmc: renesas_sdhi: add support for R-Car
+ Gen3 SDHI DMAC
+Date: Wed, 12 Jul 2017 12:12:22 +0200
+Message-ID: <20170712101220.GA5428@verge.net.au>
+References: <1498053630-7780-1-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFqBUi36_AAOHmNhH-0p4jD9wNLOor19k0g0H3s78_geyg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqBUi36_AAOHmNhH-0p4jD9wNLOor19k0g0H3s78_geyg@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Russell King <linux@armlinux.org.uk>
-Cc: Biju Das <biju.das@bp.renesas.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Paterson <chris.paterson2@renesas.com>
 
-Define the iwg20m board dependent part of the MMCIF0 device node.
+On Tue, Jul 11, 2017 at 04:43:00PM +0200, Ulf Hansson wrote:
+> On 21 June 2017 at 16:00, Simon Horman <horms+renesas@verge.net.au> wrote:
+> > Hi,
+> >
+> > this series adds support for the internal DMAC used by r8a779[56] SoCs.
+> > This is achieved by adding a new variant of the SDHI driver for this
+> > DMA controller with compat strings for the r8a779[56] SoCs.
+> > Compat strings for these SoCs are also removed from the existing SYS DMAC
+> > variant of the SDHI driver.
+> >
+> > Based on mmc/next
+> >
+> > Headline performance boost: 9.5MB/s -> 39.7MB/s
+> > Details below.
+> >
+> > Simon Horman (3):
+> >   mmc: tmio, renesas-sdhi: add dataend to DMA ops
+> >   mmc: renesas-sdhi: add support for R-Car Gen3 SDHI DMAC
+> >   mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
+> >
+> > Yoshihiro Shimoda (1):
+> >   mmc: tmio, renesas-sdhi: add max_{segs,blk_count} to tmio_mmc_data
+> >
+> >  drivers/mmc/host/Kconfig                      |  19 ++
+> >  drivers/mmc/host/Makefile                     |   8 +-
+> >  drivers/mmc/host/renesas_sdhi.h               |   2 +
+> >  drivers/mmc/host/renesas_sdhi_core.c          |   2 +
+> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 271 ++++++++++++++++++++++++++
+> >  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  29 +--
+> >  drivers/mmc/host/tmio_mmc.h                   |   2 +
+> >  drivers/mmc/host/tmio_mmc_core.c              |  16 +-
+> >  include/linux/mfd/tmio.h                      |   2 +
+> >  9 files changed, 323 insertions(+), 28 deletions(-)
+> >  create mode 100644 drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> 
+> Thanks, applied patch 1->3 for next!
 
-Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
-
-diff --git a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-index 001ca91..ffce1b6 100644
---- a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-+++ b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-@@ -22,8 +22,34 @@
- 		device_type = "memory";
- 		reg = <2 0x00000000 0 0x20000000>;
- 	};
-+
-+	reg_3p3v: 3p3v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "3P3V";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-always-on;
-+		regulator-boot-on;
-+	};
- };
- 
- &extal_clk {
- 	clock-frequency = <20000000>;
- };
-+
-+&pfc {
-+	mmcif0_pins: mmc {
-+		groups = "mmc_data8", "mmc_ctrl";
-+		function = "mmc";
-+	};
-+};
-+
-+&mmcif0 {
-+		pinctrl-0 = <&mmcif0_pins>;
-+		pinctrl-names = "default";
-+
-+		vmmc-supply = <&reg_3p3v>;
-+		bus-width = <8>;
-+		non-removable;
-+		status = "okay";
-+};
--- 
-1.9.1
-
+Great, thanks.
