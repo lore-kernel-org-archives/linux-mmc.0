@@ -1,103 +1,27 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v4 3/9] mfd: tmio.h: support partition parser types
-Date: Wed, 12 Jul 2017 09:58:04 +0100
-Message-ID: <20170712085804.ya5b3trqbipuel3f@dell>
-References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
- <1498681836-3765-4-git-send-email-andrea.adami@gmail.com>
- <20170703112621.rd3ija3efqlq57rg@dell>
- <CAAQYJAuPpzDb_OV1naHZCovy4LJC0_6gFJKPqo7REt7zZzh0pw@mail.gmail.com>
- <CAAQYJAvCdSG25U6DjiD5owC7GHyGnWyyaLD_R-fzuMGUDZN8pQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:35753 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750741AbdGLI6I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2017 04:58:08 -0400
-Received: by mail-wr0-f174.google.com with SMTP id k67so24192983wrc.2
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jul 2017 01:58:08 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAAQYJAvCdSG25U6DjiD5owC7GHyGnWyyaLD_R-fzuMGUDZN8pQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chris Paterson <chris.paterson2@renesas.com>
+Subject: [PATCH 0/3] Add MMCIF0 support for r8a7743/iwg20m
+Date: Wed, 12 Jul 2017 11:03:22 +0100
+Message-ID: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Russell King <linux@armlinux.org.uk>
+Cc: Biju Das <biju.das@bp.renesas.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Paterson <chris.paterson2@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, 12 Jul 2017, Andrea Adami wrote:
+This series adds MMCIF0 support for the r8a7743 SoC and the iWave-RZG1M-20M
+Qseven SOM.
 
-> On Mon, Jul 3, 2017 at 2:03 PM, Andrea Adami <andrea.adami@gmail.com> wrote:
-> > On Mon, Jul 3, 2017 at 1:26 PM, Lee Jones <lee.jones@linaro.org> wrote:
-> >> Please use the $SUBJECT line expected by the subsystem.
-> >>
-> >> `git log --oneline -- $SUBSYSTEM` can help with this.
-> >>
-> >> You also need a commit log.
-> >>
-> >
-> > Lee,
-> >
-> > thanks for spotting it.
-> > I'll fix the subject and add a little text in these patches touching headers.
-> >
-> > I am awaiting for a new review of the big piece of the patch, the
-> > ftl/parser, then I'll send a fixed v5.
-> >
-> >
-> 
-> Lee,
-> 
-> I have looked at the history of mfd/tmio.h but couldn't find
-> unambiguous examples.
-> Do you prefer
-> 
-> Subject: mfd: tmio: tmio_nand: add partition parsers platform data
-> or
-> Subject: mfd: tmio: tmio-nand: add partition parsers platform data
-> or
-> Subject: mfd: tmio: tmio/nand: add partition parsers platform data
+This series is based on renesas-devel-20170711-v4.12.
 
-Better to look at the subsystem as a whole.
+Chris Paterson (3):
+  dt-bindings: mmc: sh_mmcif: Document r8a7743 DT bindings
+  ARM: dts: r8a7743: Add MMCIF0 support
+  ARM: dts: iwg20m: Add MMCIF0 support
 
-  `git log --oneline -- drivers/mfd`
-
-You will see something like:
-
-  mfd: device-driver: Short subject starting with an uppercase char
-  
-> >>> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
-> >>> ---
-> >>>  include/linux/mfd/tmio.h | 1 +
-> >>>  1 file changed, 1 insertion(+)
-> >>>
-> >>> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> >>> index a1520d8..23bb069 100644
-> >>> --- a/include/linux/mfd/tmio.h
-> >>> +++ b/include/linux/mfd/tmio.h
-> >>> @@ -139,6 +139,7 @@ struct tmio_nand_data {
-> >>>       struct nand_bbt_descr   *badblock_pattern;
-> >>>       struct mtd_partition    *partition;
-> >>>       unsigned int            num_partitions;
-> >>> +     const char *const       *types; /* names of parsers to use if any */
-> >>
-> >> I'm okay with this if it's suits the MTD folk.
-> >>
-> >
-> > Other than kerneldoc comments there are maybe other little
-> > discordances to settle: see above is *partition, num_partitions.
-> > In the other header it is *partitions, nr_partitions ...I'll see if
-> > oneday I can janiitor this.
-> >
-> > Regards
-> > Andrea
-> >
-> >>>  };
-> >>>
-> >>>  #define FBIO_TMIO_ACC_WRITE  0x7C639300
-> >>
+ .../devicetree/bindings/mmc/renesas,mmcif.txt      |  3 ++-
+ arch/arm/boot/dts/r8a7743-iwg20m.dtsi              | 26 ++++++++++++++++++++++
+ arch/arm/boot/dts/r8a7743.dtsi                     | 16 +++++++++++++
+ 3 files changed, 44 insertions(+), 1 deletion(-)
 
 -- 
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org │ Open source software for ARM SoCs
-Follow Linaro: Facebook | Twitter | Blog
+1.9.1
