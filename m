@@ -1,52 +1,72 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
-Date: Wed, 12 Jul 2017 13:52:49 +0200
-Message-ID: <CAMuHMdXMFkXopGiLOVf0jDDQTKig-wFrgMOKrf14341h85kPNw@mail.gmail.com>
-References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com> <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1499853805-5915-4-git-send-email-chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Chris Brandt <chris.brandt@renesas.com>
+Subject: [PATCH v2] mmc: tmio-mmc: fix bad pointer math
+Date: Wed, 12 Jul 2017 06:27:01 -0700
+Message-ID: <20170712132701.69983-1-chris.brandt@renesas.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chris,
+The existing code gives an incorrect pointer value.
+The buffer pointer 'buf' was of type unsigned short *, and 'count' was a
+number in bytes. A cast of buf should have been used.
 
-On Wed, Jul 12, 2017 at 12:03 PM, Chris Paterson
-<chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> Define the iwg20m board dependent part of the MMCIF0 device node.
->
-> Signed-off-by: Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
->
-> diff --git a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> index 001ca91..ffce1b6 100644
-> --- a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> +++ b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
+However,instead of casting, just change the code to use u32 pointers.
 
-> +&pfc {
-> +       mmcif0_pins: mmc {
-> +               groups = "mmc_data8", "mmc_ctrl";
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Fixes: 8185e51f358a: ("mmc: tmio-mmc: add support for 32bit data port")
+Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+---
+v2:
+ * Use u32 pointers instead of casting
+---
+ drivers/mmc/host/tmio_mmc_core.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-"mmc_data8" is not correct, as D6/D7 of the eMMC are not connected to GP6_28
-resp. GP6_29, but to GP6_6 resp. GP6_7.
-So it should be "mmc_data8_b".
-
-Unfortunately the latter pin group isn't supported by the PFC driver yet.
-Cooking a patch...
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 77e7b56a9099..e4e35b6e2db5 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -415,30 +415,31 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
+ 	 * Transfer the data
+ 	 */
+ 	if (host->pdata->flags & TMIO_MMC_32BIT_DATA_PORT) {
+-		u8 data[4] = { };
++		u32 data = 0;
++		u32 *buf32 = (u32 *)buf;
+ 
+ 		if (is_read)
+-			sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
++			sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
+ 					   count >> 2);
+ 		else
+-			sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
++			sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
+ 					    count >> 2);
+ 
+ 		/* if count was multiple of 4 */
+ 		if (!(count & 0x3))
+ 			return;
+ 
+-		buf8 = (u8 *)(buf + (count >> 2));
++		buf32 += count >> 2;
+ 		count %= 4;
+ 
+ 		if (is_read) {
+ 			sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT,
+-					   (u32 *)data, 1);
+-			memcpy(buf8, data, count);
++					   &data, 1);
++			memcpy(buf32, &data, count);
+ 		} else {
+-			memcpy(data, buf8, count);
++			memcpy(&data, buf32, count);
+ 			sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT,
+-					    (u32 *)data, 1);
++					    &data, 1);
+ 		}
+ 
+ 		return;
+-- 
+2.13.0
