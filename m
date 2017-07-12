@@ -1,55 +1,30 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH mmc/next v3 0/4] mmc: renesas_sdhi: add support for R-Car
- Gen3 SDHI DMAC
-Date: Wed, 12 Jul 2017 12:12:22 +0200
-Message-ID: <20170712101220.GA5428@verge.net.au>
-References: <1498053630-7780-1-git-send-email-horms+renesas@verge.net.au>
- <CAPDyKFqBUi36_AAOHmNhH-0p4jD9wNLOor19k0g0H3s78_geyg@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sh_mmcif: Document r8a7743 DT bindings
+Date: Wed, 12 Jul 2017 13:20:07 +0200
+Message-ID: <CAMuHMdX0TZ7KKzGDq8t2jMwMciEf30KKW2tE5fieqJ2D7+feqw@mail.gmail.com>
+References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com> <1499853805-5915-2-git-send-email-chris.paterson2@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqBUi36_AAOHmNhH-0p4jD9wNLOor19k0g0H3s78_geyg@mail.gmail.com>
+In-Reply-To: <1499853805-5915-2-git-send-email-chris.paterson2@renesas.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Chris Paterson <chris.paterson2@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Russell King <linux@armlinux.org.uk>, Biju Das <biju.das@bp.renesas.com>, Linux MMC List <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 11, 2017 at 04:43:00PM +0200, Ulf Hansson wrote:
-> On 21 June 2017 at 16:00, Simon Horman <horms+renesas@verge.net.au> wrote:
-> > Hi,
-> >
-> > this series adds support for the internal DMAC used by r8a779[56] SoCs.
-> > This is achieved by adding a new variant of the SDHI driver for this
-> > DMA controller with compat strings for the r8a779[56] SoCs.
-> > Compat strings for these SoCs are also removed from the existing SYS DMAC
-> > variant of the SDHI driver.
-> >
-> > Based on mmc/next
-> >
-> > Headline performance boost: 9.5MB/s -> 39.7MB/s
-> > Details below.
-> >
-> > Simon Horman (3):
-> >   mmc: tmio, renesas-sdhi: add dataend to DMA ops
-> >   mmc: renesas-sdhi: add support for R-Car Gen3 SDHI DMAC
-> >   mmc: renesas-sdhi: remove gen3 support from SYS-DMAC driver
-> >
-> > Yoshihiro Shimoda (1):
-> >   mmc: tmio, renesas-sdhi: add max_{segs,blk_count} to tmio_mmc_data
-> >
-> >  drivers/mmc/host/Kconfig                      |  19 ++
-> >  drivers/mmc/host/Makefile                     |   8 +-
-> >  drivers/mmc/host/renesas_sdhi.h               |   2 +
-> >  drivers/mmc/host/renesas_sdhi_core.c          |   2 +
-> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 271 ++++++++++++++++++++++++++
-> >  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  29 +--
-> >  drivers/mmc/host/tmio_mmc.h                   |   2 +
-> >  drivers/mmc/host/tmio_mmc_core.c              |  16 +-
-> >  include/linux/mfd/tmio.h                      |   2 +
-> >  9 files changed, 323 insertions(+), 28 deletions(-)
-> >  create mode 100644 drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> 
-> Thanks, applied patch 1->3 for next!
+On Wed, Jul 12, 2017 at 12:03 PM, Chris Paterson
+<chris.paterson2@renesas.com> wrote:
+> Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
 
-Great, thanks.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
