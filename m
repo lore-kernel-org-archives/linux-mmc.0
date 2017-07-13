@@ -1,71 +1,89 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci-xenon: Add Xenon SDHCI specific
- system-level PM support
-Date: Thu, 13 Jul 2017 11:52:54 +0200
-Message-ID: <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
-References: <1499897779-12338-1-git-send-email-zjwu@marvell.com>
- <CAPDyKFpOcDOi8+nPsw0dk_rhcvzP94C9Mmp+RX=hfLvNqEs6sg@mail.gmail.com> <20170713172559.6dd2d65a@xhacker>
+Subject: Re: [PATCH v3] mmc: tmio-mmc: fix bad pointer math
+Date: Thu, 13 Jul 2017 12:01:07 +0200
+Message-ID: <CAPDyKFpaDn4uim4k7UdLw_W=zODu0dqurxuNCE2+yCrr=y_iWw@mail.gmail.com>
+References: <20170712154001.75712-1-chris.brandt@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:34271 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbdGMJwz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2017 05:52:55 -0400
-Received: by mail-qk0-f182.google.com with SMTP id d78so45883200qkb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2017 02:52:55 -0700 (PDT)
-In-Reply-To: <20170713172559.6dd2d65a@xhacker>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20170712154001.75712-1-chris.brandt@renesas.com>
+Sender: stable-owner@vger.kernel.org
+To: Chris Brandt <chris.brandt@renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: Zhoujie Wu <zjwu@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 13 July 2017 at 11:25, Jisheng Zhang <jszhang@marvell.com> wrote:
-> Hi Ulf,
+On 12 July 2017 at 17:40, Chris Brandt <chris.brandt@renesas.com> wrote:
+> The existing code gives an incorrect pointer value.
+> The buffer pointer 'buf' was of type unsigned short *, and 'count' was a
+> number in bytes. A cast of buf should have been used.
 >
-> On Thu, 13 Jul 2017 11:18:32 +0200 Ulf Hansson wrote:
+> However, instead of casting, just change the code to use u32 pointers.
 >
->> On 13 July 2017 at 00:16, Zhoujie Wu <zjwu@marvell.com> wrote:
->> > From: Hu Ziji <huziji@marvell.com>
->> >
->> > Add Xenon specific system-level suspend and resume support.
->> > Especially during resume, re-configure Xenon specific registers
->> > since registers setting will be lost in suspend if Xenon is power off.
->>
->> I recommend to start with deploying runtime PM support instead of
->> system PM support. Then on top of such change, you should make use of
->> the runtime PM centric path to get system sleep support for "free"
->> (and thus all the nice benefits).
->
-> I'm not sure whether runtime PM is useful for xenon case. The xenon HW
-> support ACG(Auto Clock Gating) and SDCLK-Off-While-Idle features, that's
-> to say we even don't need to do anything but achieve the runtime PM gains.
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Fixes: 8185e51f358a: ("mmc: tmio-mmc: add support for 32bit data port")
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Yeah, but that's only internally managed by mmc controller. The clock
-will not be unprepared/disabled, from clock tree point of view. Isn't
-that also worth doing?
+Thanks, applied for fixes and added a stable tag.
 
 Kind regards
 Uffe
 
+> ---
+> v3:
+>  * Merged lines
+>  * Added Reviewed-by
+> v2:
+>  * Use u32 pointers instead of casting
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 19 +++++++++----------
+>  1 file changed, 9 insertions(+), 10 deletions(-)
 >
-> Thanks,
-> Jisheng
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 77e7b56a9099..db779732fd2e 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -415,30 +415,29 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
+>          * Transfer the data
+>          */
+>         if (host->pdata->flags & TMIO_MMC_32BIT_DATA_PORT) {
+> -               u8 data[4] = { };
+> +               u32 data = 0;
+> +               u32 *buf32 = (u32 *)buf;
 >
->>
->> Please have a look at sdhci-of-at91 for a good reference.
->> Regarding sdhci-of-at91, there is currently a patch [1], which adds
->> dealing with restoring context of registers after a system resume.
->> Similar to what you need.
->>
->> Kind regards
->> Uffe
->>
->> [1]
->> https://patchwork.kernel.org/patch/9837951/
->>
->> [...]
->>
->> Kind regards
->> Uffe
+>                 if (is_read)
+> -                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
+> +                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
+>                                            count >> 2);
+>                 else
+> -                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
+> +                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
+>                                             count >> 2);
+>
+>                 /* if count was multiple of 4 */
+>                 if (!(count & 0x3))
+>                         return;
+>
+> -               buf8 = (u8 *)(buf + (count >> 2));
+> +               buf32 += count >> 2;
+>                 count %= 4;
+>
+>                 if (is_read) {
+> -                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT,
+> -                                          (u32 *)data, 1);
+> -                       memcpy(buf8, data, count);
+> +                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+> +                       memcpy(buf32, &data, count);
+>                 } else {
+> -                       memcpy(data, buf8, count);
+> -                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT,
+> -                                           (u32 *)data, 1);
+> +                       memcpy(&data, buf32, count);
+> +                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+>                 }
+>
+>                 return;
+> --
+> 2.13.0
+>
 >
