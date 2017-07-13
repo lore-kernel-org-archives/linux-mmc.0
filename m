@@ -1,58 +1,96 @@
-From: Ye Xiaolong <xiaolong.ye-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [kbuild-all] [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
-Date: Thu, 13 Jul 2017 16:46:00 +0800
-Message-ID: <20170713084600.GA1787@yexl-desktop>
-References: <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
- <201707130850.0py1QazG%fengguang.wu@intel.com>
- <20170713075414.GF5580@verge.net.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170713075414.GF5580-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Cc: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: block: Block new req entering queue after its cleanup
+Date: Thu, 13 Jul 2017 11:17:58 +0200
+Message-ID: <20170713091758.2975-1-linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:33258 "EHLO
+        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750854AbdGMJSM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2017 05:18:12 -0400
+Received: by mail-lf0-f46.google.com with SMTP id z78so33189295lff.0
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2017 02:18:12 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Grzegorz Sluja <grzegorzx.sluja@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 07/13, Simon Horman wrote:
->On Thu, Jul 13, 2017 at 08:25:56AM +0800, kbuild test robot wrote:
->> Hi Chris,
->> 
->> [auto build test ERROR on renesas/next]
->> [also build test ERROR on next-20170712]
->> [cannot apply to v4.12]
->> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
->> 
->> url:    https://github.com/0day-ci/linux/commits/Chris-Paterson/Add-MMCIF0-support-for-r8a7743-iwg20m/20170713-042814
->> base:   https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git next
->> config: arm-at91_dt_defconfig (attached as .config)
->> compiler: arm-linux-gnueabi-gcc (Debian 6.1.1-9) 6.1.1 20160705
->> reproduce:
->>         wget https://raw.githubusercontent.com/01org/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
->>         chmod +x ~/bin/make.cross
->>         # save the attached .config to linux build tree
->>         make.cross ARCH=arm 
->> 
->> All errors (new ones prefixed by >>):
->> 
->> >> Error: arch/arm/boot/dts/r8a7743-iwg20m.dtsi:40.1-5 Label or path pfc not found
->>    FATAL ERROR: Syntax error parsing input tree
->
->This seems to be a false positive. The node in question is present in
->the devel branch which is the base of these changes.
+From: Grzegorz Sluja <grzegorzx.sluja@intel.com>
 
-Thanks for the feedback, we'll update 0day's configuration accordingly.
+commit 304419d8a7e9204c5d19b704467b814df8c8f5b1
+'mmc: core: Allocate per-request data using the block layer core'
+refactored mechanism of queue handling caused mmc_init_request() can
+be called just after mmc_cleanup_queue() caused null pointer dereference:
 
-Thanks,
-Xiaolong
->
->
->_______________________________________________
->kbuild-all mailing list
->kbuild-all-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
->https://lists.01.org/mailman/listinfo/kbuild-all
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+dmesg:
+[  683.123791] BUG: unable to handle kernel NULL pointer dereference at (null)
+[  683.123801] IP: mmc_init_request+0x2c/0xf0 [mmc_block]
+...
+[  683.123905] Call Trace:
+[  683.123913]  alloc_request_size+0x4f/0x70
+[  683.123919]  mempool_alloc+0x5f/0x150
+[  683.123925]  ? __enqueue_entity+0x6c/0x70
+[  683.123928]  get_request+0x3ad/0x720
+[  683.123933]  ? prepare_to_wait_event+0x110/0x110
+[  683.123937]  blk_queue_bio+0xc1/0x3a0
+[  683.123940]  generic_make_request+0xf8/0x2a0
+[  683.123942]  submit_bio+0x75/0x150
+[  683.123947]  submit_bio_wait+0x51/0x70
+[  683.123951]  blkdev_issue_flush+0x5c/0x90
+[  683.123956]  ext4_sync_fs+0x171/0x1b0
+[  683.123961]  sync_filesystem+0x73/0x90
+[  683.123965]  fsync_bdev+0x24/0x50
+[  683.123971]  invalidate_partition+0x24/0x50
+[  683.123973]  del_gendisk+0xb2/0x2a0
+[  683.123977]  mmc_blk_remove_req.part.38+0x71/0xa0 [mmc_block]
+[  683.123980]  mmc_blk_remove+0xba/0x190 [mmc_block]
+[  683.123990]  mmc_bus_remove+0x1a/0x20 [mmc_core]
+[  683.123995]  device_release_driver_internal+0x141/0x200
+[  683.123999]  device_release_driver+0x12/0x20
+[  683.124001]  bus_remove_device+0xfd/0x170
+[  683.124004]  device_del+0x1e8/0x330
+[  683.124012]  mmc_remove_card+0x60/0xc0 [mmc_core]
+[  683.124019]  mmc_remove+0x19/0x30 [mmc_core]
+[  683.124025]  mmc_stop_host+0xfb/0x1a0 [mmc_core]
+[  683.124032]  mmc_remove_host+0x1a/0x40 [mmc_core]
+[  683.124037]  sdhci_remove_host+0x2e/0x1c0 [mmc_sdhci]
+[  683.124042]  sdhci_pci_remove_slot+0x3f/0x80 [sdhci_pci]
+[  683.124045]  sdhci_pci_remove+0x39/0x70 [sdhci_pci]
+[  683.124049]  pci_device_remove+0x39/0xc0
+[  683.124052]  device_release_driver_internal+0x141/0x200
+[  683.124056]  driver_detach+0x3f/0x80
+[  683.124059]  bus_remove_driver+0x55/0xd0
+[  683.124062]  driver_unregister+0x2c/0x50
+[  683.124065]  pci_unregister_driver+0x29/0x90
+[  683.124069]  sdhci_driver_exit+0x10/0x4f3 [sdhci_pci]
+[  683.124073]  SyS_delete_module+0x171/0x250
+[  683.124078]  entry_SYSCALL_64_fastpath+0x1e/0xa9
+
+Set queue DYING flag just before its cleaning blocked new req entering
+the queue afterwards.
+
+Signed-off-by: Grzegorz Sluja <grzegorzx.sluja@intel.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+Hi Ulf, forwarding an important fix from Grzegorz at Intel, please
+apply!
+
+Linus
+---
+ drivers/mmc/core/block.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 0cfac2d39107..5ddde7dc9075 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2167,6 +2167,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		 * from being accepted.
+ 		 */
+ 		card = md->queue.card;
++		blk_set_queue_dying(md->queue.queue);
+ 		mmc_cleanup_queue(&md->queue);
+ 		if (md->disk->flags & GENHD_FL_UP) {
+ 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+-- 
+2.9.4
+
