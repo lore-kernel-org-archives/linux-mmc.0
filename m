@@ -1,89 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: tmio-mmc: fix bad pointer math
-Date: Thu, 13 Jul 2017 12:01:07 +0200
-Message-ID: <CAPDyKFpaDn4uim4k7UdLw_W=zODu0dqurxuNCE2+yCrr=y_iWw@mail.gmail.com>
-References: <20170712154001.75712-1-chris.brandt@renesas.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sh_mmcif: Document r8a7743 DT bindings
+Date: Thu, 13 Jul 2017 12:06:03 +0200
+Message-ID: <CAPDyKFq1m6WEk-Hr9cm8L5EM3k1bXx-+bUXyosfh9SMDW39vhg@mail.gmail.com>
+References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com> <1499853805-5915-2-git-send-email-chris.paterson2@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170712154001.75712-1-chris.brandt@renesas.com>
-Sender: stable-owner@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Dan Carpenter <dan.carpenter@oracle.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1499853805-5915-2-git-send-email-chris.paterson2@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Paterson <chris.paterson2@renesas.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Russell King <linux@armlinux.org.uk>, Biju Das <biju.das@bp.renesas.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 July 2017 at 17:40, Chris Brandt <chris.brandt@renesas.com> wrote:
-> The existing code gives an incorrect pointer value.
-> The buffer pointer 'buf' was of type unsigned short *, and 'count' was a
-> number in bytes. A cast of buf should have been used.
+On 12 July 2017 at 12:03, Chris Paterson <chris.paterson2@renesas.com> wrote:
+> Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
 >
-> However, instead of casting, just change the code to use u32 pointers.
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> index c32dc5a..703e18c 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> @@ -11,6 +11,7 @@ Required properties:
+>         - "renesas,mmcif-r7s72100" for the MMCIF found in r7s72100 SoCs
+>         - "renesas,mmcif-r8a73a4" for the MMCIF found in r8a73a4 SoCs
+>         - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+> +       - "renesas,mmcif-r8a7743" for the MMCIF found in r8a7743 SoCs
+>         - "renesas,mmcif-r8a7778" for the MMCIF found in r8a7778 SoCs
+>         - "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+>         - "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+> @@ -21,7 +22,7 @@ Required properties:
+>  - interrupts: Some SoCs have only 1 shared interrupt, while others have either
+>    2 or 3 individual interrupts (error, int, card detect). Below is the number
+>    of interrupts for each SoC:
+> -    1: r8a73a4, r8a7778, r8a7790, r8a7791, r8a7793, r8a7794
+> +    1: r8a73a4, r8a7743, r8a7778, r8a7790, r8a7791, r8a7793, r8a7794
+>      2: r8a7740, sh73a0
+>      3: r7s72100
 >
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Fixes: 8185e51f358a: ("mmc: tmio-mmc: add support for 32bit data port")
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> --
+> 1.9.1
+>
 
-Thanks, applied for fixes and added a stable tag.
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
-> v3:
->  * Merged lines
->  * Added Reviewed-by
-> v2:
->  * Use u32 pointers instead of casting
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 19 +++++++++----------
->  1 file changed, 9 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 77e7b56a9099..db779732fd2e 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -415,30 +415,29 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
->          * Transfer the data
->          */
->         if (host->pdata->flags & TMIO_MMC_32BIT_DATA_PORT) {
-> -               u8 data[4] = { };
-> +               u32 data = 0;
-> +               u32 *buf32 = (u32 *)buf;
->
->                 if (is_read)
-> -                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
-> +                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, buf32,
->                                            count >> 2);
->                 else
-> -                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
-> +                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, buf32,
->                                             count >> 2);
->
->                 /* if count was multiple of 4 */
->                 if (!(count & 0x3))
->                         return;
->
-> -               buf8 = (u8 *)(buf + (count >> 2));
-> +               buf32 += count >> 2;
->                 count %= 4;
->
->                 if (is_read) {
-> -                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT,
-> -                                          (u32 *)data, 1);
-> -                       memcpy(buf8, data, count);
-> +                       sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
-> +                       memcpy(buf32, &data, count);
->                 } else {
-> -                       memcpy(data, buf8, count);
-> -                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT,
-> -                                           (u32 *)data, 1);
-> +                       memcpy(&data, buf32, count);
-> +                       sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
->                 }
->
->                 return;
-> --
-> 2.13.0
->
->
