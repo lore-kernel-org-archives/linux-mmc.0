@@ -1,60 +1,122 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
-Date: Thu, 13 Jul 2017 10:02:29 +0200
-Message-ID: <20170713080228.GI5580@verge.net.au>
-References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com>
- <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
- <CAMuHMdXMFkXopGiLOVf0jDDQTKig-wFrgMOKrf14341h85kPNw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Quentin Schulz <quentin.schulz@free-electrons.com>
+Subject: [PATCH v3 2/2] mmc: sdhci-of-at91: set clocks and presets after resume from deepest PM
+Date: Thu, 13 Jul 2017 10:04:18 +0200
+Message-ID: <20170713080418.12048-2-quentin.schulz@free-electrons.com>
+References: <20170713080418.12048-1-quentin.schulz@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:49073 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750846AbdGMICd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2017 04:02:33 -0400
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdXMFkXopGiLOVf0jDDQTKig-wFrgMOKrf14341h85kPNw@mail.gmail.com>
+Received: from mail.free-electrons.com ([62.4.15.54]:49243 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751018AbdGMIEw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2017 04:04:52 -0400
+In-Reply-To: <20170713080418.12048-1-quentin.schulz@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Chris Paterson <chris.paterson2@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Magnus Damm <magnus.damm@gmail.com>, Russell King <linux@armlinux.org.uk>, Biju Das <biju.das@bp.renesas.com>, Linux MMC List <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: adrian.hunter@intel.com, ludovic.desroches@microchip.com, ulf.hansson@linaro.org
+Cc: Quentin Schulz <quentin.schulz@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, thomas.petazzoni@free-electrons.com, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com, cyrille.pitchen@wedev4u.fr
 
-On Wed, Jul 12, 2017 at 01:52:49PM +0200, Geert Uytterhoeven wrote:
-> Hi Chris,
-> 
-> On Wed, Jul 12, 2017 at 12:03 PM, Chris Paterson
-> <chris.paterson2@renesas.com> wrote:
-> > Define the iwg20m board dependent part of the MMCIF0 device node.
-> >
-> > Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
-> >
-> > diff --git a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> > index 001ca91..ffce1b6 100644
-> > --- a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> 
-> > +&pfc {
-> > +       mmcif0_pins: mmc {
-> > +               groups = "mmc_data8", "mmc_ctrl";
-> 
-> "mmc_data8" is not correct, as D6/D7 of the eMMC are not connected to GP6_28
-> resp. GP6_29, but to GP6_6 resp. GP6_7.
-> So it should be "mmc_data8_b".
-> 
-> Unfortunately the latter pin group isn't supported by the PFC driver yet.
-> Cooking a patch...
+This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
+SoC's SDHCI controller.
 
-The above notwithstanding I have applied this patch for v4.14.
+When resuming from deepest state, it is required to restore preset
+registers as the registers are lost since VDD core has been shut down
+when entering deepest state on the SAMA5D2. The clocks need to be
+reconfigured as well.
 
-This is under the assumption that:
-a) the relevant (pfc) driver changes will appear in v4.14 and;
-b) there is no regression introduced in having this change present
-   without the driver changes
+The other registers and init process are taken care of by the SDHCI
+core.
 
-An implication of the above is that the new feature will not work
-until both the driver and DTS changes are in the same tree. But that the
-trees with each of those changes continue to work at least as well as they
-did before.
+Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+---
 
-Please test the devel branch that I push later today to make sure there
-are no regressions.
+v3:
+  - pm_runtime_force_suspend before setting restore_needed flag,
+
+v2:
+  - use runtime_resume as system_resume,
+  - set a flag to tell when restoring presets is needed,
+  - use a flag to tell runtime_resume to restore presets,
+  - surround sdhci_at91_suspend with ifdef CONFIG_PM_SLEEP instead of CONFIG_PM,
+
+ drivers/mmc/host/sdhci-of-at91.c | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index fb8c6011f13d..88e9b5f35a62 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -41,6 +41,7 @@ struct sdhci_at91_priv {
+ 	struct clk *hclock;
+ 	struct clk *gck;
+ 	struct clk *mainck;
++	bool restore_needed;
+ };
+ 
+ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+@@ -206,6 +207,22 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_at91_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = pm_runtime_force_suspend(dev);
++
++	priv->restore_needed = true;
++
++	return ret;
++}
++#endif /* CONFIG_PM_SLEEP */
++
+ #ifdef CONFIG_PM
+ static int sdhci_at91_runtime_suspend(struct device *dev)
+ {
+@@ -233,6 +250,15 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+ 
++	if (priv->restore_needed) {
++		ret = sdhci_at91_set_clks_presets(dev);
++		if (ret)
++			return ret;
++
++		priv->restore_needed = false;
++		goto out;
++	}
++
+ 	ret = clk_prepare_enable(priv->mainck);
+ 	if (ret) {
+ 		dev_err(dev, "can't enable mainck\n");
+@@ -251,13 +277,13 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 		return ret;
+ 	}
+ 
++out:
+ 	return sdhci_runtime_resume_host(host);
+ }
+ #endif /* CONFIG_PM */
+ 
+ static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, pm_runtime_force_resume)
+ 	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
+ 			   sdhci_at91_runtime_resume,
+ 			   NULL)
+@@ -306,6 +332,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto sdhci_pltfm_free;
+ 
++	priv->restore_needed = false;
++
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		goto clocks_disable_unprepare;
+-- 
+2.11.0
+
