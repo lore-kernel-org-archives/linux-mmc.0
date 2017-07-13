@@ -1,55 +1,57 @@
-From: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Subject: Re: [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
-Date: Thu, 13 Jul 2017 10:12:14 +0200
-Message-ID: <20170713081213.GL5580@verge.net.au>
-References: <1499853805-5915-1-git-send-email-chris.paterson2@renesas.com>
- <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
- <CAMuHMdXMFkXopGiLOVf0jDDQTKig-wFrgMOKrf14341h85kPNw@mail.gmail.com>
- <20170713080228.GI5580@verge.net.au>
+From: Ye Xiaolong <xiaolong.ye-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [kbuild-all] [PATCH 3/3] ARM: dts: iwg20m: Add MMCIF0 support
+Date: Thu, 13 Jul 2017 16:46:00 +0800
+Message-ID: <20170713084600.GA1787@yexl-desktop>
+References: <1499853805-5915-4-git-send-email-chris.paterson2@renesas.com>
+ <201707130850.0py1QazG%fengguang.wu@intel.com>
+ <20170713075414.GF5580@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20170713080228.GI5580-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+In-Reply-To: <20170713075414.GF5580-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Renesas <linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+Cc: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jul 13, 2017 at 10:02:29AM +0200, Simon Horman wrote:
-> On Wed, Jul 12, 2017 at 01:52:49PM +0200, Geert Uytterhoeven wrote:
-> > Hi Chris,
-> > 
-> > On Wed, Jul 12, 2017 at 12:03 PM, Chris Paterson
-> > <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org> wrote:
-> > > Define the iwg20m board dependent part of the MMCIF0 device node.
-> > >
-> > > Signed-off-by: Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>
-> > >
-> > > diff --git a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> > > index 001ca91..ffce1b6 100644
-> > > --- a/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> > > +++ b/arch/arm/boot/dts/r8a7743-iwg20m.dtsi
-> > 
-> > > +&pfc {
-> > > +       mmcif0_pins: mmc {
-> > > +               groups = "mmc_data8", "mmc_ctrl";
-> > 
-> > "mmc_data8" is not correct, as D6/D7 of the eMMC are not connected to GP6_28
-> > resp. GP6_29, but to GP6_6 resp. GP6_7.
-> > So it should be "mmc_data8_b".
-> > 
-> > Unfortunately the latter pin group isn't supported by the PFC driver yet.
-> > Cooking a patch...
-> 
-> The above notwithstanding I have applied this patch for v4.14.
+On 07/13, Simon Horman wrote:
+>On Thu, Jul 13, 2017 at 08:25:56AM +0800, kbuild test robot wrote:
+>> Hi Chris,
+>> 
+>> [auto build test ERROR on renesas/next]
+>> [also build test ERROR on next-20170712]
+>> [cannot apply to v4.12]
+>> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+>> 
+>> url:    https://github.com/0day-ci/linux/commits/Chris-Paterson/Add-MMCIF0-support-for-r8a7743-iwg20m/20170713-042814
+>> base:   https://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git next
+>> config: arm-at91_dt_defconfig (attached as .config)
+>> compiler: arm-linux-gnueabi-gcc (Debian 6.1.1-9) 6.1.1 20160705
+>> reproduce:
+>>         wget https://raw.githubusercontent.com/01org/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+>>         chmod +x ~/bin/make.cross
+>>         # save the attached .config to linux build tree
+>>         make.cross ARCH=arm 
+>> 
+>> All errors (new ones prefixed by >>):
+>> 
+>> >> Error: arch/arm/boot/dts/r8a7743-iwg20m.dtsi:40.1-5 Label or path pfc not found
+>>    FATAL ERROR: Syntax error parsing input tree
+>
+>This seems to be a false positive. The node in question is present in
+>the devel branch which is the base of these changes.
 
-...
+Thanks for the feedback, we'll update 0day's configuration accordingly.
 
-Sorry, I think I need more coffee.
-
-I misread Geert's comment above. I have dropped this patch.
-Please post a corrected v2 of this patch.
+Thanks,
+Xiaolong
+>
+>
+>_______________________________________________
+>kbuild-all mailing list
+>kbuild-all-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+>https://lists.01.org/mailman/listinfo/kbuild-all
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
