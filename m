@@ -1,130 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-of-at91: set clocks and presets after
- resume from deepest PM
-Date: Thu, 13 Jul 2017 12:06:11 +0200
-Message-ID: <CAPDyKFrj8PMZNPxL5VBRPGs0ScYfvC2QULbza9Tp6r0OH1vwfA@mail.gmail.com>
-References: <20170713080418.12048-1-quentin.schulz@free-electrons.com> <20170713080418.12048-2-quentin.schulz@free-electrons.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [EXT] Re: [PATCH v3] mmc: sdhci-xenon: Add Xenon SDHCI specific
+ system-level PM support
+Date: Thu, 13 Jul 2017 18:13:23 +0800
+Message-ID: <20170713181323.14dd0615@xhacker>
+References: <1499897779-12338-1-git-send-email-zjwu@marvell.com>
+        <CAPDyKFpOcDOi8+nPsw0dk_rhcvzP94C9Mmp+RX=hfLvNqEs6sg@mail.gmail.com>
+        <20170713172559.6dd2d65a@xhacker>
+        <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170713080418.12048-2-quentin.schulz@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Quentin Schulz <quentin.schulz@free-electrons.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ludovic Desroches <ludovic.desroches@microchip.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, nicolas.ferre@microchip.com, cyrille.pitchen@wedev4u.fr
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:41723 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751193AbdGMKSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2017 06:18:14 -0400
+In-Reply-To: <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Zhoujie Wu <zjwu@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 13 July 2017 at 10:04, Quentin Schulz
-<quentin.schulz@free-electrons.com> wrote:
-> This adds deepest (Backup+Self-Refresh) PM support to the ATMEL SAMA5D2
-> SoC's SDHCI controller.
->
-> When resuming from deepest state, it is required to restore preset
-> registers as the registers are lost since VDD core has been shut down
-> when entering deepest state on the SAMA5D2. The clocks need to be
-> reconfigured as well.
->
-> The other registers and init process are taken care of by the SDHCI
-> core.
->
-> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
-> Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+On Thu, 13 Jul 2017 11:52:54 +0200 Ulf Hansson wrote:
 
-Thanks, applied for next!
+> On 13 July 2017 at 11:25, Jisheng Zhang <jszhang@marvell.com> wrote:
+> > Hi Ulf,
+> >
+> > On Thu, 13 Jul 2017 11:18:32 +0200 Ulf Hansson wrote:
+> >  
+> >> On 13 July 2017 at 00:16, Zhoujie Wu <zjwu@marvell.com> wrote:  
+> >> > From: Hu Ziji <huziji@marvell.com>
+> >> >
+> >> > Add Xenon specific system-level suspend and resume support.
+> >> > Especially during resume, re-configure Xenon specific registers
+> >> > since registers setting will be lost in suspend if Xenon is power off.  
+> >>
+> >> I recommend to start with deploying runtime PM support instead of
+> >> system PM support. Then on top of such change, you should make use of
+> >> the runtime PM centric path to get system sleep support for "free"
+> >> (and thus all the nice benefits).  
+> >
+> > I'm not sure whether runtime PM is useful for xenon case. The xenon HW
+> > support ACG(Auto Clock Gating) and SDCLK-Off-While-Idle features, that's
+> > to say we even don't need to do anything but achieve the runtime PM gains.  
+> 
+> Yeah, but that's only internally managed by mmc controller. The clock
+> will not be unprepared/disabled, from clock tree point of view. Isn't
+> that also worth doing?
+> 
 
-Kind regards
-Uffe
+The HW is clock gated, the difference is clock itself. From power saving
+point of view, the gain is nearly zero. From latency point of view, could
+runtime PM introduce extra latency? I.E the time spent on
+sdhci_runtime_suspend_host and sdhci_runtime_resume_host.
 
-
-> ---
->
-> v3:
->   - pm_runtime_force_suspend before setting restore_needed flag,
->
-> v2:
->   - use runtime_resume as system_resume,
->   - set a flag to tell when restoring presets is needed,
->   - use a flag to tell runtime_resume to restore presets,
->   - surround sdhci_at91_suspend with ifdef CONFIG_PM_SLEEP instead of CONFIG_PM,
->
->  drivers/mmc/host/sdhci-of-at91.c | 32 ++++++++++++++++++++++++++++++--
->  1 file changed, 30 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index fb8c6011f13d..88e9b5f35a62 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -41,6 +41,7 @@ struct sdhci_at91_priv {
->         struct clk *hclock;
->         struct clk *gck;
->         struct clk *mainck;
-> +       bool restore_needed;
->  };
->
->  static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
-> @@ -206,6 +207,22 @@ static int sdhci_at91_set_clks_presets(struct device *dev)
->         return 0;
->  }
->
-> +#ifdef CONFIG_PM_SLEEP
-> +static int sdhci_at91_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       ret = pm_runtime_force_suspend(dev);
-> +
-> +       priv->restore_needed = true;
-> +
-> +       return ret;
-> +}
-> +#endif /* CONFIG_PM_SLEEP */
-> +
->  #ifdef CONFIG_PM
->  static int sdhci_at91_runtime_suspend(struct device *dev)
->  {
-> @@ -233,6 +250,15 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->         struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         int ret;
->
-> +       if (priv->restore_needed) {
-> +               ret = sdhci_at91_set_clks_presets(dev);
-> +               if (ret)
-> +                       return ret;
-> +
-> +               priv->restore_needed = false;
-> +               goto out;
-> +       }
-> +
->         ret = clk_prepare_enable(priv->mainck);
->         if (ret) {
->                 dev_err(dev, "can't enable mainck\n");
-> @@ -251,13 +277,13 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->                 return ret;
->         }
->
-> +out:
->         return sdhci_runtime_resume_host(host);
->  }
->  #endif /* CONFIG_PM */
->
->  static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> -                               pm_runtime_force_resume)
-> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_at91_suspend, pm_runtime_force_resume)
->         SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
->                            sdhci_at91_runtime_resume,
->                            NULL)
-> @@ -306,6 +332,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->         if (ret)
->                 goto sdhci_pltfm_free;
->
-> +       priv->restore_needed = false;
-> +
->         ret = mmc_of_parse(host->mmc);
->         if (ret)
->                 goto clocks_disable_unprepare;
-> --
-> 2.11.0
->
+Thanks,
+Jisheng
