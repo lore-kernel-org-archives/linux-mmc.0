@@ -1,110 +1,144 @@
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH 06/11] mmc: sunxi: Support MMC DDR52 transfer
- mode with new timing mode
-Date: Fri, 14 Jul 2017 14:42:57 +0800
-Message-ID: <20170714064302.20383-7-wens@csie.org>
-References: <20170714064302.20383-1-wens@csie.org>
-Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [EXT] Re: [PATCH v3] mmc: sdhci-xenon: Add Xenon SDHCI specific
+ system-level PM support
+Date: Fri, 14 Jul 2017 11:09:10 +0200
+Message-ID: <CAPDyKFoAAUK+R3B2H38+sXC6FazdxnB2mdWOc0fqB-hYROnu6g@mail.gmail.com>
+References: <1499897779-12338-1-git-send-email-zjwu@marvell.com>
+ <CAPDyKFpOcDOi8+nPsw0dk_rhcvzP94C9Mmp+RX=hfLvNqEs6sg@mail.gmail.com>
+ <20170713172559.6dd2d65a@xhacker> <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
+ <20170713181323.14dd0615@xhacker> <CAPDyKFrkLR64tZVVTjQpXx0rwHwVtMJS6w7PBh0i--+mSyB=uA@mail.gmail.com>
+ <CAPDyKFq3XFNsdOByWjqEUQj=uYm5J0WqLYh4RdQJpt2SKGmqDw@mail.gmail.com> <5967E9FB.80508@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBCMILY6JWQBBBAGQUHFQKGQEUQXGA5A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170714064302.20383-1-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:34076 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751340AbdGNJJQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2017 05:09:16 -0400
+Received: by mail-qt0-f180.google.com with SMTP id 32so57521398qtv.1
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2017 02:09:16 -0700 (PDT)
+In-Reply-To: <5967E9FB.80508@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhoujie Wu <zjwu@marvell.com>
+Cc: Jisheng Zhang <jszhang@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>
 
-The MMC controller can support DDR52 transfers under the new timing
-mode. According to the BSP kernel, the module clock has to be double
-the card clock, regardless of the bus width. The default timings in
-the hardware can be used.
+On 13 July 2017 at 23:45, Zhoujie Wu <zjwu@marvell.com> wrote:
+>
+>
+> On 07/13/2017 04:03 AM, Ulf Hansson wrote:
+>>
+>> On 13 July 2017 at 12:48, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>
+>>> On 13 July 2017 at 12:13, Jisheng Zhang <jszhang@marvell.com> wrote:
+>>>>
+>>>> On Thu, 13 Jul 2017 11:52:54 +0200 Ulf Hansson wrote:
+>>>>
+>>>>> On 13 July 2017 at 11:25, Jisheng Zhang <jszhang@marvell.com> wrote:
+>>>>>>
+>>>>>> Hi Ulf,
+>>>>>>
+>>>>>> On Thu, 13 Jul 2017 11:18:32 +0200 Ulf Hansson wrote:
+>>>>>>
+>>>>>>> On 13 July 2017 at 00:16, Zhoujie Wu <zjwu@marvell.com> wrote:
+>>>>>>>>
+>>>>>>>> From: Hu Ziji <huziji@marvell.com>
+>>>>>>>>
+>>>>>>>> Add Xenon specific system-level suspend and resume support.
+>>>>>>>> Especially during resume, re-configure Xenon specific registers
+>>>>>>>> since registers setting will be lost in suspend if Xenon is power
+>>>>>>>> off.
+>>>>>>>
+>>>>>>> I recommend to start with deploying runtime PM support instead of
+>>>>>>> system PM support. Then on top of such change, you should make use of
+>>>>>>> the runtime PM centric path to get system sleep support for "free"
+>>>>>>> (and thus all the nice benefits).
+>>>>>>
+>>>>>> I'm not sure whether runtime PM is useful for xenon case. The xenon HW
+>>>>>> support ACG(Auto Clock Gating) and SDCLK-Off-While-Idle features,
+>>>>>> that's
+>>>>>> to say we even don't need to do anything but achieve the runtime PM
+>>>>>> gains.
+>>>>>
+>>>>> Yeah, but that's only internally managed by mmc controller. The clock
+>>>>> will not be unprepared/disabled, from clock tree point of view. Isn't
+>>>>> that also worth doing?
+>>>>>
+>>>> The HW is clock gated, the difference is clock itself. From power saving
+>>>> point of view, the gain is nearly zero. From latency point of view,
+>>>> could
+>>>
+>>> I assume the clock you are talking about is the "core" clock? I then
+>>> assumes that clock is used as the interface clock for the card?
+>>>
+>>> That makes me wonder, don't you have other device clocks to manage as
+>>> well? Clocks that is provided to the controller to make it functional?
+>
+> At first, really appreciate your quick and valuable feedback.
+> The core clock in this driver is the clock provided by SOC to sdh
+> controller, and there is a divider inside the controller to generate sdclk
+> which provides to sd/emmc card.
+> Actually there are two runtime power saving features inside the controller
+> per my understanding.
+> sdclk_idle_enable will cut the clock to sd/emmc card if sd bus idle for some
+> time. auto_clkgate_enable means HW will auto gate the clock to sdh
+> controller core logic.
 
-This also reworks the code setting the internal divider, getting rid
-of a extra conditional.
+I am not sure I get the second part here. The clock to shd is enabled
+via a call to clk_prepare_enable(). Unless you explicitly call
+clk_disable_unprepare() for it, no? How can any outer logic know when
+it can be gated?
 
-Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
----
- drivers/mmc/host/sunxi-mmc.c | 30 ++++++++++++++++++------------
- 1 file changed, 18 insertions(+), 12 deletions(-)
+> With SW runtime pm mechanism, compares with HW auto clock gating, the only
+> difference is SW cut the source of sdh clock tree, external clock gating vs
+> internal clock gating, there will be some benefits, but limited.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 56e45c65b52d..7b6f5f49620e 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -751,7 +751,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- {
- 	struct mmc_host *mmc = host->mmc;
- 	long rate;
--	u32 rval, clock = ios->clock;
-+	u32 rval, clock = ios->clock, div = 1;
- 	int ret;
- 
- 	ret = sunxi_mmc_oclk_onoff(host, 0);
-@@ -764,10 +764,21 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	if (!ios->clock)
- 		return 0;
- 
--	/* 8 bit DDR requires a higher module clock */
-+	/*
-+	 * Under the old timing mode, 8 bit DDR requires the module
-+	 * clock to be double the card clock. Under the new timing
-+	 * mode, all DDR modes require a doubled module clock.
-+	 *
-+	 * We currently only support the standard MMC DDR52 mode.
-+	 * This block should be updated once support for other DDR
-+	 * modes is added.
-+	 */
- 	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
--	    ios->bus_width == MMC_BUS_WIDTH_8)
-+	    (host->use_new_timings ||
-+	     ios->bus_width == MMC_BUS_WIDTH_8)) {
-+		div = 2;
- 		clock <<= 1;
-+	}
- 
- 	if (host->use_new_timings) {
- 		ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
-@@ -795,15 +806,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 		return ret;
- 	}
- 
--	/* clear internal divider */
-+	/* set internal divider */
- 	rval = mmc_readl(host, REG_CLKCR);
- 	rval &= ~0xff;
--	/* set internal divider for 8 bit eMMC DDR, so card clock is right */
--	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
--	    ios->bus_width == MMC_BUS_WIDTH_8) {
--		rval |= 1;
--		rate >>= 1;
--	}
-+	rval |= div - 1;
- 	mmc_writel(host, REG_CLKCR, rval);
- 
- 	if (host->use_new_timings) {
-@@ -834,7 +840,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 		return ret;
- 
- 	/* And we just enabled our clock back */
--	mmc->actual_clock = rate;
-+	mmc->actual_clock = rate / div;
- 
- 	return 0;
- }
-@@ -1300,7 +1306,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
- 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
- 
--	if (host->cfg->clk_delays)
-+	if (host->cfg->clk_delays || host->use_new_timings)
- 		mmc->caps      |= MMC_CAP_1_8V_DDR;
- 
- 	ret = mmc_of_parse(mmc);
--- 
-2.13.2
+Right.
+
+> Previously we enabled the runtime pm mechanism in our mobile products, which
+> were using the same IP(some old version, including 3 sdh slots) with auto
+> clock gating feature(the driver is sdhci-pxav3.c).  The saving of power was
+> about 2~3mA@vcc_main_1.05V(28nm chip) with 3 sdh slots inside soc. No more
+> than 1mA/1sdh slot.
+
+1 mA/sdh slot is a great reason to deploy runtime PM support. For a
+battery driven device that would be a significant improvement.
+
+Back in the days when I worked at ST-Ericssion, we were chasing uA
+when optimizing for power-save. :-)
+
+> I read sdhci-of-at91 driver and your recommended patch, I got your point is
+> using a light way for system sleep based on runtime pm feature. From SW
+> perspective, kill two birds with one stone, it is good.
+
+Right.
+
+> But considering about the benefits, it is not that urgent to take runtime pm
+> feature as a must, it is a better to have feature. System standby is a must
+> feature, without this patch, the system can't work well after resume.
+> Do you think it is reasonable to add complete standby support at first, then
+> take runtime pm as a next step?
+
+You can do that, but why? And will then the "next step" ever happen?
+
+Do you really want to spend efforts in getting something working for
+system suspend only, while you instead easily could deploy both
+runtime PM and system PM support at the same time?
+
+>
+>> Besides the clocks, you have the xenon mmc phy. Can't that also be put
+>> that in some low power mode at request in-activity?
+>
+> For the phy behavior, currently I don't see any SW operation for the lpm, I
+> will check with HW guys about the behaviour.
+
+Great, that would really be interesting from a runtime PM point of view.
+
+Perhaps then also ask if re-configuring the phy via xenon_phy_adj(),
+makes sense when powering off the card? Because currently you seems to
+keep the latest configuration, even if the mmc core decides to power
+off the card during system sleep. Unless I am reading the code wrong
+from the ->set_ios() ops.
+
+Kind regards
+Uffe
