@@ -1,115 +1,178 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 05/11] mmc: sunxi: Support controllers that can use both
- old and new timings
-Date: Fri, 14 Jul 2017 11:57:35 +0200
-Message-ID: <CAPDyKFqe1hFmfWziu04fW=cQa0EGvT11YzuJ0f-eHy6+u7vutQ@mail.gmail.com>
-References: <20170714064302.20383-1-wens@csie.org> <20170714064302.20383-6-wens@csie.org>
- <CAPDyKFoLTXJ10EJRfPPggJBg8bh9BpdwTnew-WL0G7LpnO43Pg@mail.gmail.com> <CAGb2v64gjLSdb83fR9OCZthtgMQz-UkmMhT9OmJkq3Xp6mJ-aA@mail.gmail.com>
+From: Ziji Hu <davidhuzj@gmail.com>
+Subject: Re: [EXT] Re: [PATCH v3] mmc: sdhci-xenon: Add Xenon SDHCI specific
+ system-level PM support
+Date: Fri, 14 Jul 2017 18:25:17 +0800
+Message-ID: <CAG18LKhrm8jvB6G5+_YQS4sYmnAo+HHwhMGVb2N2Wq6uqemzaQ@mail.gmail.com>
+References: <1499897779-12338-1-git-send-email-zjwu@marvell.com>
+ <CAPDyKFpOcDOi8+nPsw0dk_rhcvzP94C9Mmp+RX=hfLvNqEs6sg@mail.gmail.com>
+ <20170713172559.6dd2d65a@xhacker> <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
+ <20170713181323.14dd0615@xhacker> <CAPDyKFrkLR64tZVVTjQpXx0rwHwVtMJS6w7PBh0i--+mSyB=uA@mail.gmail.com>
+ <CAPDyKFq3XFNsdOByWjqEUQj=uYm5J0WqLYh4RdQJpt2SKGmqDw@mail.gmail.com>
+ <5967E9FB.80508@marvell.com> <CAPDyKFoAAUK+R3B2H38+sXC6FazdxnB2mdWOc0fqB-hYROnu6g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34211 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753422AbdGNJ5g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2017 05:57:36 -0400
-Received: by mail-qk0-f171.google.com with SMTP id d78so71263649qkb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2017 02:57:36 -0700 (PDT)
-In-Reply-To: <CAGb2v64gjLSdb83fR9OCZthtgMQz-UkmMhT9OmJkq3Xp6mJ-aA@mail.gmail.com>
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:34659 "EHLO
+        mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752602AbdGNKZT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2017 06:25:19 -0400
+Received: by mail-oi0-f53.google.com with SMTP id l130so67969072oib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2017 03:25:18 -0700 (PDT)
+In-Reply-To: <CAPDyKFoAAUK+R3B2H38+sXC6FazdxnB2mdWOc0fqB-hYROnu6g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Zhoujie Wu <zjwu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>
 
-On 14 July 2017 at 11:40, Chen-Yu Tsai <wens@csie.org> wrote:
-> On Fri, Jul 14, 2017 at 5:26 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 14 July 2017 at 08:42, Chen-Yu Tsai <wens@csie.org> wrote:
->>> On the SoCs that introduced the new timing mode for MMC controllers,
->>> both the old (where the clock delays are set in the CCU) and new
->>> (where the clock delays are set in the MMC controller) timing modes
->>> are available, and we have to support them both. However there are
->>> two bits that control which mode is active. One is in the CCU, the
->>> other is in the MMC controller. The settings on both sides must be
->>> the same, or nothing will work.
->>>
->>> The CCU's get/set_phase callbacks return -ENOTSUPP when the new
->>> timing mode is active. This provides a way to know which mode is
->>> active on that side, and we can set the bit on the MMC controller
->>> side accordingly.
->
-> Argh... I forgot to update the commit log... :(
->
->>>
->>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->>> ---
->>>  drivers/mmc/host/sunxi-mmc.c | 34 ++++++++++++++++++++++++++++++----
->>>  1 file changed, 30 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->>> index 0fb4e4c119e1..56e45c65b52d 100644
->>> --- a/drivers/mmc/host/sunxi-mmc.c
->>> +++ b/drivers/mmc/host/sunxi-mmc.c
->>> @@ -22,6 +22,7 @@
->>>  #include <linux/err.h>
->>>
->>>  #include <linux/clk.h>
->>> +#include <linux/clk/sunxi-ng.h>
+2017-07-14 17:09 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 13 July 2017 at 23:45, Zhoujie Wu <zjwu@marvell.com> wrote:
 >>
->> I don't like this. This looks like an SoC specific hack.
 >>
->>>  #include <linux/gpio.h>
->>>  #include <linux/platform_device.h>
->>>  #include <linux/spinlock.h>
->>> @@ -259,7 +260,7 @@ struct sunxi_mmc_cfg {
->>>         /* Does DATA0 needs to be masked while the clock is updated */
->>>         bool mask_data0;
+>> On 07/13/2017 04:03 AM, Ulf Hansson wrote:
 >>>
->>> -       bool needs_new_timings;
->>> +       bool has_new_timings;
->>>  };
->>>
->>>  struct sunxi_mmc_host {
->>> @@ -293,6 +294,9 @@ struct sunxi_mmc_host {
->>>
->>>         /* vqmmc */
->>>         bool            vqmmc_enabled;
->>> +
->>> +       /* timings */
->>> +       bool            use_new_timings;
->>>  };
->>>
->>>  static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
->>> @@ -714,7 +718,7 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
->>>  {
->>>         int index;
->>>
->>> -       if (!host->cfg->clk_delays)
->>> +       if (host->use_new_timings)
->>>                 return 0;
->>>
->>>         /* determine delays */
->>> @@ -765,6 +769,15 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->>>             ios->bus_width == MMC_BUS_WIDTH_8)
->>>                 clock <<= 1;
->>>
->>> +       if (host->use_new_timings) {
->>> +               ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
+>>> On 13 July 2017 at 12:48, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>
+>>>> On 13 July 2017 at 12:13, Jisheng Zhang <jszhang@marvell.com> wrote:
+>>>>>
+>>>>> On Thu, 13 Jul 2017 11:52:54 +0200 Ulf Hansson wrote:
+>>>>>
+>>>>>> On 13 July 2017 at 11:25, Jisheng Zhang <jszhang@marvell.com> wrote:
+>>>>>>>
+>>>>>>> Hi Ulf,
+>>>>>>>
+>>>>>>> On Thu, 13 Jul 2017 11:18:32 +0200 Ulf Hansson wrote:
+>>>>>>>
+>>>>>>>> On 13 July 2017 at 00:16, Zhoujie Wu <zjwu@marvell.com> wrote:
+>>>>>>>>>
+>>>>>>>>> From: Hu Ziji <huziji@marvell.com>
+>>>>>>>>>
+>>>>>>>>> Add Xenon specific system-level suspend and resume support.
+>>>>>>>>> Especially during resume, re-configure Xenon specific registers
+>>>>>>>>> since registers setting will be lost in suspend if Xenon is power
+>>>>>>>>> off.
+>>>>>>>>
+>>>>>>>> I recommend to start with deploying runtime PM support instead of
+>>>>>>>> system PM support. Then on top of such change, you should make use of
+>>>>>>>> the runtime PM centric path to get system sleep support for "free"
+>>>>>>>> (and thus all the nice benefits).
+>>>>>>>
+>>>>>>> I'm not sure whether runtime PM is useful for xenon case. The xenon HW
+>>>>>>> support ACG(Auto Clock Gating) and SDCLK-Off-While-Idle features,
+>>>>>>> that's
+>>>>>>> to say we even don't need to do anything but achieve the runtime PM
+>>>>>>> gains.
+>>>>>>
+>>>>>> Yeah, but that's only internally managed by mmc controller. The clock
+>>>>>> will not be unprepared/disabled, from clock tree point of view. Isn't
+>>>>>> that also worth doing?
+>>>>>>
+>>>>> The HW is clock gated, the difference is clock itself. From power saving
+>>>>> point of view, the gain is nearly zero. From latency point of view,
+>>>>> could
+>>>>
+>>>> I assume the clock you are talking about is the "core" clock? I then
+>>>> assumes that clock is used as the interface clock for the card?
+>>>>
+>>>> That makes me wonder, don't you have other device clocks to manage as
+>>>> well? Clocks that is provided to the controller to make it functional?
 >>
->> Can't this be solved through some other generic API/interface?
+>> At first, really appreciate your quick and valuable feedback.
+>> The core clock in this driver is the clock provided by SOC to sdh
+>> controller, and there is a divider inside the controller to generate sdclk
+>> which provides to sd/emmc card.
+>> Actually there are two runtime power saving features inside the controller
+>> per my understanding.
+>> sdclk_idle_enable will cut the clock to sd/emmc card if sd bus idle for some
+>> time. auto_clkgate_enable means HW will auto gate the clock to sdh
+>> controller core logic.
 >
-> The old discussion is here: https://lkml.org/lkml/2017/5/5/77
+> I am not sure I get the second part here. The clock to shd is enabled
+> via a call to clk_prepare_enable(). Unless you explicitly call
+> clk_disable_unprepare() for it, no? How can any outer logic know when
+> it can be gated?
 >
-> It is possible to piggy back on existing API, but as Maxime mentioned
-> back in the discussion, it is confusing.
+>> With SW runtime pm mechanism, compares with HW auto clock gating, the only
+>> difference is SW cut the source of sdh clock tree, external clock gating vs
+>> internal clock gating, there will be some benefits, but limited.
 >
-> IIRC Mike said (via Maxime) an SoC specific call was the easy way
-> to handle this. I don't think there's anything generic about this.
-> Even if you could have a _set_mode callback for the clks, the modes
-> would be SoC specific anyway.
+> Right.
+>
+>> Previously we enabled the runtime pm mechanism in our mobile products, which
+>> were using the same IP(some old version, including 3 sdh slots) with auto
+>> clock gating feature(the driver is sdhci-pxav3.c).  The saving of power was
+>> about 2~3mA@vcc_main_1.05V(28nm chip) with 3 sdh slots inside soc. No more
+>> than 1mA/1sdh slot.
+>
+> 1 mA/sdh slot is a great reason to deploy runtime PM support. For a
+> battery driven device that would be a significant improvement.
+>
+> Back in the days when I worked at ST-Ericssion, we were chasing uA
+> when optimizing for power-save. :-)
+>
+>> I read sdhci-of-at91 driver and your recommended patch, I got your point is
+>> using a light way for system sleep based on runtime pm feature. From SW
+>> perspective, kill two birds with one stone, it is good.
+>
+> Right.
+>
+>> But considering about the benefits, it is not that urgent to take runtime pm
+>> feature as a must, it is a better to have feature. System standby is a must
+>> feature, without this patch, the system can't work well after resume.
+>> Do you think it is reasonable to add complete standby support at first, then
+>> take runtime pm as a next step?
+>
+> You can do that, but why? And will then the "next step" ever happen?
+>
+> Do you really want to spend efforts in getting something working for
+> system suspend only, while you instead easily could deploy both
+> runtime PM and system PM support at the same time?
+>
 
-Right. But it would benefit that we can keep drivers generic, as they
-are using generic APIs/interfaces. I prefer that.
+As the author of this patch, I'd like to argue for myself here, although it is
+not my task any more. :p
+The reason of implementing system PM firstly, is definitely NOT that
+runtime PM is
+unnecessary. Instead, I was just not able to.
 
-Anyway, let me try to dig up the earlier discussion.
+Internal customers in Marvell and external customers previously just required
+simple system PM. Thus I decided to meet customers requirement at first.
+Otherwise, I didn't have any platform to verify runtime PM even if runtime PM
+is completed.
 
-Kind regards
-Uffe
+Those SoCs implementation vary a lot. Thus I was actually not sure
+what a generic Xenon runtime PM should look like for all those Marvell products.
+I previously planed to implement runtime PM when I got enough resources
+(boards/BSP/supports) from customers.
+
+>>
+>>> Besides the clocks, you have the xenon mmc phy. Can't that also be put
+>>> that in some low power mode at request in-activity?
+>>
+>> For the phy behavior, currently I don't see any SW operation for the lpm, I
+>> will check with HW guys about the behaviour.
+>
+> Great, that would really be interesting from a runtime PM point of view.
+>
+> Perhaps then also ask if re-configuring the phy via xenon_phy_adj(),
+> makes sense when powering off the card? Because currently you seems to
+> keep the latest configuration, even if the mmc core decides to power
+> off the card during system sleep. Unless I am reading the code wrong
+> from the ->set_ios() ops.
+>
+
+    As I know, PHY HW will also automatically enter standby mode
+(power saving mode)
+when ACG/SDCLK-off-while-idle are triggered. Actually there is no SW interface
+to "enable" or "disable" PHY. It requires confirm from HW bros.
+
+    xenon_phy_adj() will set PHY based on current timing. For example,
+when coming back
+from resume, xenon_phy_adj() will re-configure PHY for legacy timing.
+    Thus it is unnecessary to clean PHY setting before sleep.
+
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
