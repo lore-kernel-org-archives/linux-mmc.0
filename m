@@ -1,61 +1,51 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
-Date: Mon, 17 Jul 2017 08:33:49 +0200
-Message-ID: <60af517b-4a86-9150-901f-7e640bb517d9@xilinx.com>
-References: <20170717012332.16505-1-jeff.dagenais@gmail.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 01/11] ARM: dts: sun8i: a83t: Switch to CCU
+ device tree binding macros
+Date: Mon, 17 Jul 2017 11:06:51 +0200
+Message-ID: <20170717090651.olohxjjzte4whvvz@flea>
+References: <20170714064302.20383-1-wens@csie.org>
+ <20170714064302.20383-2-wens@csie.org>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0047.outbound.protection.outlook.com ([104.47.36.47]:4416
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751253AbdGQGeA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 17 Jul 2017 02:34:00 -0400
-In-Reply-To: <20170717012332.16505-1-jeff.dagenais@gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="rk2jjb2pk3dt7sqe"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBNX4WHFQKGQEIPOIZLA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20170714064302.20383-2-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Francois Dagenais <jeff.dagenais@gmail.com>, adrian.hunter@intel.com, michal.simek@xilinx.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
 
-On 17.7.2017 03:23, Jean-Francois Dagenais wrote:
-> This increases consistency of the code across the sdhci family.
+
+--rk2jjb2pk3dt7sqe
+Content-Type: text/plain; charset="UTF-8"
+Content-Disposition: inline
+
+On Fri, Jul 14, 2017 at 02:42:52PM +0800, Chen-Yu Tsai wrote:
+> Now that the CCU device tree binding headers have been merged, we can
+> use the properly named macros in the device tree, instead of raw
+> numbers.
 > 
-> v2: rebased onto ulfh/mmc/next and tweaked headline accordingly.
-
-Information about patch version shouldn't be the part of commit message
-but they should be placed below ---.
-
-Thanks,
-Michal
-
-
-> 
-> Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index b13c0a7d50e4..528a5d24c0bc 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -216,13 +216,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	u32 vendor;
->  	struct sdhci_host *host = mmc_priv(mmc);
->  
-> -	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-> +	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
->  	if (ios->enhanced_strobe)
->  		vendor |= VENDOR_ENHANCED_STROBE;
->  	else
->  		vendor &= ~VENDOR_ENHANCED_STROBE;
->  
-> -	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-> +	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
->  }
->  
->  static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> 
+> This patch is included as it is a pre-requisite to the other device
+> tree changes in this series. It is however independent, and should
+> be applied as a fix for 4.13-rc, not for -next, and preferably sooner
+> than later.
 
+Applied as a fix for 4.13, thanks!
+Maxime
+
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+--rk2jjb2pk3dt7sqe--
