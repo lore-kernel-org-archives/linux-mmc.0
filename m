@@ -1,71 +1,62 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH 05/11] mmc: sunxi: Support controllers that
- can use both old and new timings
-Date: Mon, 17 Jul 2017 11:20:45 +0200
-Message-ID: <20170717092045.3hidokuo6w7cgorw@flea>
+Subject: Re: [PATCH 08/11] ARM: dts: sun8i: a83t: Add MMC
+ controller device nodes
+Date: Mon, 17 Jul 2017 11:22:09 +0200
+Message-ID: <20170717092209.r55enf4ub7ttwpdy@flea>
 References: <20170714064302.20383-1-wens@csie.org>
- <20170714064302.20383-6-wens@csie.org>
- <CAPDyKFoLTXJ10EJRfPPggJBg8bh9BpdwTnew-WL0G7LpnO43Pg@mail.gmail.com>
- <CAGb2v64gjLSdb83fR9OCZthtgMQz-UkmMhT9OmJkq3Xp6mJ-aA@mail.gmail.com>
- <CAPDyKFqe1hFmfWziu04fW=cQa0EGvT11YzuJ0f-eHy6+u7vutQ@mail.gmail.com>
+ <20170714064302.20383-9-wens@csie.org>
 Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="4ehpzjnyhte6weth"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBB6ECWLFQKGQEPND3H7I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="p3pxdnobiellbeqz"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBS4DWLFQKGQEEEZLQ3A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqe1hFmfWziu04fW=cQa0EGvT11YzuJ0f-eHy6+u7vutQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20170714064302.20383-9-wens-jdAy2FN1RRM@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
 List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
  <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---4ehpzjnyhte6weth
+--p3pxdnobiellbeqz
 Content-Type: text/plain; charset="UTF-8"
 Content-Disposition: inline
 
-On Fri, Jul 14, 2017 at 11:57:35AM +0200, Ulf Hansson wrote:
-> >>> +       if (host->use_new_timings) {
-> >>> +               ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
-> >>
-> >> Can't this be solved through some other generic API/interface?
-> >
-> > The old discussion is here: https://lkml.org/lkml/2017/5/5/77
-> >
-> > It is possible to piggy back on existing API, but as Maxime mentioned
-> > back in the discussion, it is confusing.
-> >
-> > IIRC Mike said (via Maxime) an SoC specific call was the easy way
-> > to handle this. I don't think there's anything generic about this.
-> > Even if you could have a _set_mode callback for the clks, the modes
-> > would be SoC specific anyway.
+Hi,
+
+On Fri, Jul 14, 2017 at 02:42:59PM +0800, Chen-Yu Tsai wrote:
+> The A83T has 3 MMC controllers. The third one is a bit special, as it
+> supports a wider 8-bit bus, and a "new timing mode".
 > 
-> Right. But it would benefit that we can keep drivers generic, as they
-> are using generic APIs/interfaces. I prefer that.
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> ---
+>  arch/arm/boot/dts/sun8i-a83t.dtsi | 57 +++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 57 insertions(+)
 > 
-> Anyway, let me try to dig up the earlier discussion.
+> diff --git a/arch/arm/boot/dts/sun8i-a83t.dtsi b/arch/arm/boot/dts/sun8i-a83t.dtsi
+> index beed05e10a3b..085312d0c521 100644
+> --- a/arch/arm/boot/dts/sun8i-a83t.dtsi
+> +++ b/arch/arm/boot/dts/sun8i-a83t.dtsi
+> @@ -182,6 +182,63 @@
+>  			#dma-cells = <1>;
+>  		};
+>  
+> +		mmc0: mmc@1c0f000 {
+> +			compatible = "allwinner,sun7i-a20-mmc";
 
-There's really not any generic way to support that. Even if we reuse
-some other function (clk_set_phase/clk_get_phase was suggested), and
-use error codes and / or values to differentiate between two modes,
-this will be very much implementation-specific as well, and any other
-SoC that in theory would be using that will very likely to not
-implement the same behaviour for its clocks.
+Ideally, we should have an A83T compatible here too, just in case.
 
-And this driver is only used on one SoC family, so it's not really a
-big deal anyway.
-
+Thanks!
 Maxime
 
 -- 
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
---4ehpzjnyhte6weth--
+--p3pxdnobiellbeqz--
