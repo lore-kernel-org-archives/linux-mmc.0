@@ -1,18 +1,18 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH 02/11] clk: sunxi-ng: Add interface to query
- or configure MMC timing modes.
-Date: Mon, 17 Jul 2017 11:09:45 +0200
-Message-ID: <20170717090945.qh2uekguzgv5lo36@flea>
+Subject: Re: [PATCH 03/11] clk: sunxi-ng: a83t: Support new
+ timing mode for mmc2 clock
+Date: Mon, 17 Jul 2017 11:14:02 +0200
+Message-ID: <20170717091402.3qb3fhdyhfbv6t66@flea>
 References: <20170714064302.20383-1-wens@csie.org>
- <20170714064302.20383-3-wens@csie.org>
+ <20170714064302.20383-4-wens@csie.org>
 Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="okw2fn4jzuimsdrc"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBZH5WHFQKGQEPEDRWFQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="om4kxkl4nhgdhtcm"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBZP7WHFQKGQEFMKJCII-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <20170714064302.20383-3-wens-jdAy2FN1RRM@public.gmane.org>
+In-Reply-To: <20170714064302.20383-4-wens-jdAy2FN1RRM@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
@@ -24,80 +24,80 @@ Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael T
 List-Id: linux-mmc@vger.kernel.org
 
 
---okw2fn4jzuimsdrc
+--om4kxkl4nhgdhtcm
 Content-Type: text/plain; charset="UTF-8"
 Content-Disposition: inline
 
 Hi,
 
-On Fri, Jul 14, 2017 at 02:42:53PM +0800, Chen-Yu Tsai wrote:
-> Starting with the A83T SoC, Allwinner introduced a new timing mode for
-> its MMC clocks. The new mode changes how the MMC controller sample and
-> output clocks are delayed to match chip and board specifics. There are
-> two controls for this, one on the CCU side controlling how the clocks
-> behave, and one in the MMC controller controlling what inputs to take
-> and how to route them.
+On Fri, Jul 14, 2017 at 02:42:54PM +0800, Chen-Yu Tsai wrote:
+> The MMC2 clock supports a new timing mode. When the new mode is active,
+> the output clock rate is halved.
 > 
-> In the old mode, the MMC clock had 2 child clocks providing the output
-> and sample clocks, which could be delayed by a number of clock cycles
-> measured from the MMC clock's parent.
-> 
-> With the new mode, the 2 delay clocks are no longer active. Instead,
-> the delays and associated controls are moved into the MMC controller.
-> The output of the MMC clock is also halved.
-> 
-> The difference in how things are wired between the modes means that the
-> clock controls and the MMC controls must match. To achieve this in a
-> clear, explicit way, we introduce two functions for the MMC driver to
-> use: one queries the hardware for the current mode set, and the other
-> allows the MMC driver to request a mode.
-> 
-> With newer SoCs such as the A64, the old mode is all but removed. Hence
-> we support two variations, one where the mode can be toggled, and the
-> other where the clock is fixed in the new mode.
+> This patch sets the feature flag for the new timing mode, and adds
+> a pre-divider based on the mode bit.
 > 
 > Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 > ---
->  drivers/clk/sunxi-ng/Makefile         |  1 +
->  drivers/clk/sunxi-ng/ccu_common.h     |  2 +
->  drivers/clk/sunxi-ng/ccu_mmc_timing.c | 73 +++++++++++++++++++++++++++++++++++
->  include/linux/clk/sunxi-ng.h          | 20 ++++++++++
->  4 files changed, 96 insertions(+)
->  create mode 100644 drivers/clk/sunxi-ng/ccu_mmc_timing.c
->  create mode 100644 include/linux/clk/sunxi-ng.h
+>  drivers/clk/sunxi-ng/ccu-sun8i-a83t.c | 38 +++++++++++++++++++++++++++--------
+>  1 file changed, 30 insertions(+), 8 deletions(-)
 > 
-> diff --git a/drivers/clk/sunxi-ng/Makefile b/drivers/clk/sunxi-ng/Makefile
-> index 0c45fa50283d..45a5910379a5 100644
-> --- a/drivers/clk/sunxi-ng/Makefile
-> +++ b/drivers/clk/sunxi-ng/Makefile
-> @@ -1,5 +1,6 @@
->  # Common objects
->  lib-$(CONFIG_SUNXI_CCU)		+= ccu_common.o
-> +lib-$(CONFIG_SUNXI_CCU)		+= ccu_mmc_timing.o
->  lib-$(CONFIG_SUNXI_CCU)		+= ccu_reset.o
+> diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
+> index 947f9f6e05d2..ee6688e9b361 100644
+> --- a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
+> +++ b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
+> @@ -418,14 +418,36 @@ static SUNXI_CCU_PHASE(mmc1_sample_clk, "mmc1-sample", "mmc1",
+>  static SUNXI_CCU_PHASE(mmc1_output_clk, "mmc1-output", "mmc1",
+>  		       0x08c, 8, 3, 0);
 >  
->  # Base clock types
-> diff --git a/drivers/clk/sunxi-ng/ccu_common.h b/drivers/clk/sunxi-ng/ccu_common.h
-> index d6fdd7a789aa..88981e7fd978 100644
-> --- a/drivers/clk/sunxi-ng/ccu_common.h
-> +++ b/drivers/clk/sunxi-ng/ccu_common.h
-> @@ -23,6 +23,8 @@
->  #define CCU_FEATURE_FIXED_POSTDIV	BIT(3)
->  #define CCU_FEATURE_ALL_PREDIV		BIT(4)
->  #define CCU_FEATURE_LOCK_REG		BIT(5)
-> +#define CCU_FEATURE_MMC_TIMING_SWITCH	BIT(6)
-> +#define CCU_FEATURE_MMC_ALWAYS_NEW	BIT(7)
+> -/* TODO Support MMC2 clock's new timing mode. */
+> -static SUNXI_CCU_MP_WITH_MUX_GATE(mmc2_clk, "mmc2", mod0_default_parents,
+> -				  0x090,
+> -				  0, 4,		/* M */
+> -				  16, 2,	/* P */
+> -				  24, 2,	/* mux */
+> -				  BIT(31),	/* gate */
+> -				  0);
+> +/*
+> + * MMC2 supports both old and new timing modes. When the new timing
+> + * mode is active, the output clock rate is halved by two. Here we
+> + * treat it as a variable pre-divider. Note that the pre-divider is
+> + * _not_ included in the possible factors during a set clock rate
+> + * operation. It is only read out.
+> + */
+> +static const struct ccu_mux_var_prediv mmc2_new_timing_predivs[] = {
+> +	{ .index = 0, .shift = 30, .width = 1 },
+> +	{ .index = 1, .shift = 30, .width = 1 },
+> +};
+> +static struct ccu_mp mmc2_clk = {
+> +	.enable = BIT(31),
+> +	.m      = _SUNXI_CCU_DIV(0, 4),
+> +	.p      = _SUNXI_CCU_DIV(16, 2),
+> +	.mux    = {
+> +		.shift  = 24,
+> +		.width  = 2,
+> +		.var_predivs    = mmc2_new_timing_predivs,
+> +		.n_var_predivs  = ARRAY_SIZE(mmc2_new_timing_predivs),
+> +	},
+> +	.common         = {
+> +		.reg            = 0x090,
+> +		.features	= CCU_FEATURE_MMC_TIMING_SWITCH,
+> +		.hw.init        = CLK_HW_INIT_PARENTS("mmc2",
+> +						      mod0_default_parents,
+> +						      &ccu_mp_ops,
+> +						      CLK_GET_RATE_NOCACHE),
+> +	},
+> +};
 
-I'm not really sure we need the ALWAYS_NEW bit here. In the case where
-the clocks cannot operate in the old mode any more, we won't even
-query the clocks, since we know that it's not needed at all.
+Treating the new bit seems a bit of a hack to me. It only works
+because we're not evaluating the various pre-dividers during a
+determine_rate (and set_rate), but it might change in the future, and
+we will break all our eMMC controllers then.
 
-Pretty much just like what we're doing for old-mode-only clocks at the
-moment.
-
-I guess the only thing we should indentify is whether the clock can
-switch between the two, or not, and the MMC_TIMING_SWITCH bit is
-already perfect for that.
+Since they're quite special, I was thinking about creating a new MMC
+clock type? We're going to use it on a number of SoCs, and we'll be
+able to model it properly, without crippling the regular and generic
+MP clocks.
 
 Maxime
 
@@ -105,4 +105,4 @@ Maxime
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
---okw2fn4jzuimsdrc--
+--om4kxkl4nhgdhtcm--
