@@ -1,48 +1,64 @@
-From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
-Subject: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
-Date: Sun, 16 Jul 2017 21:23:32 -0400
-Message-ID: <20170717012332.16505-1-jeff.dagenais@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:36375 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751208AbdGQBXh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Jul 2017 21:23:37 -0400
-Received: by mail-it0-f66.google.com with SMTP id k3so16894462ita.3
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Jul 2017 18:23:36 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+Subject: Re: [PATCH] mmc: mxcmmc: fix error return code in mxcmci_probe()
+Date: Sun, 16 Jul 2017 23:53:22 -0500
+Message-ID: <58cd3a01-d2a4-936f-d19e-120f4824e798@embeddedor.com>
+References: <20170707055928.GA11041@embeddedgus>
+ <CAPDyKFpBf+ryXUTW8xscUvudqvLVgwK4LpURLEhA5ue-UkkSEw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpBf+ryXUTW8xscUvudqvLVgwK4LpURLEhA5ue-UkkSEw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, michal.simek@xilinx.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Jean-Francois Dagenais <jeff.dagenais@gmail.com>
 
-This increases consistency of the code across the sdhci family.
+Hi Ulf,
 
-v2: rebased onto ulfh/mmc/next and tweaked headline accordingly.
+On 07/11/2017 09:43 AM, Ulf Hansson wrote:
+> On 7 July 2017 at 07:59, Gustavo A. R. Silva <garsilva@embeddedor.com> wrote:
+>> platform_get_irq() returns an error code, but the mxcmmc driver
+>> ignores it and always returns -EINVAL. This is not correct,
+>> and prevents -EPROBE_DEFER from being propagated properly.
+>>
+>> Print error message and propagate the return value of
+>> platform_get_irq on failure.
+>>
+>> Signed-off-by: Gustavo A. R. Silva <garsilva@embeddedor.com>
+>
+> Thanks, applied for next!
+>
 
-Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Thank you!
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index b13c0a7d50e4..528a5d24c0bc 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -216,13 +216,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
- 	u32 vendor;
- 	struct sdhci_host *host = mmc_priv(mmc);
- 
--	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
- 	if (ios->enhanced_strobe)
- 		vendor |= VENDOR_ENHANCED_STROBE;
- 	else
- 		vendor &= ~VENDOR_ENHANCED_STROBE;
- 
--	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
- }
- 
- static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> Kind regards
+> Uffe
+>
+>> ---
+>>  drivers/mmc/host/mxcmmc.c | 6 ++++--
+>>  1 file changed, 4 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+>> index fb3ca82..f3c2832 100644
+>> --- a/drivers/mmc/host/mxcmmc.c
+>> +++ b/drivers/mmc/host/mxcmmc.c
+>> @@ -1014,8 +1014,10 @@ static int mxcmci_probe(struct platform_device *pdev)
+>>
+>>         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>>         irq = platform_get_irq(pdev, 0);
+>> -       if (irq < 0)
+>> -               return -EINVAL;
+>> +       if (irq < 0) {
+>> +               dev_err(&pdev->dev, "failed to get IRQ: %d\n", irq);
+>> +               return irq;
+>> +       }
+>>
+>>         mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+>>         if (!mmc)
+>> --
+>> 2.5.0
+>>
+
 -- 
-2.11.0
-
+Gustavo A. R. Silva
