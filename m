@@ -1,33 +1,32 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 07/11] mmc: sunxi: Add support for A83T eMMC (MMC2)
-Date: Mon, 17 Jul 2017 13:51:26 -0500
-Message-ID: <20170717185126.rrhriqckjextpaxj@rob-hp-laptop>
-References: <20170714064302.20383-1-wens@csie.org>
- <20170714064302.20383-8-wens@csie.org>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RESEND PATCH v2 7/7] ARM: dts: rockchip: add efuse device node for rk3228
+Date: Mon, 17 Jul 2017 21:16:20 +0200
+Message-ID: <4816350.S9q04trJsa@phil>
+References: <1498127402-6705-1-git-send-email-frank.wang@rock-chips.com> <1498127560-6960-1-git-send-email-frank.wang@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-clk-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170714064302.20383-8-wens@csie.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1498127560-6960-1-git-send-email-frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, charles.chen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kevan.lan-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, david.wu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wmc-TNX95d0MmH7DzftRWevZcw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jul 14, 2017 at 02:42:58PM +0800, Chen-Yu Tsai wrote:
-> The third MMC controller (MMC2) on the Allwinner A83T SoC is slightly
-> different. It supports a wider 8-bit bus, has a dedicated controllable
-> reset pin for eMMC, and a "new timing mode" which is supposed to deliver
-> better signals and thus better performance.
+Am Donnerstag, 22. Juni 2017, 18:32:40 CEST schrieb Frank Wang:
+> From: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 > 
-> Add a compatible for this one to use the new timing mode not found in the
-> other controllers.
+> Add a efuse node in the device tree for the rk3228 SoC.
 > 
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
+> Signed-off-by: Finley Xiao <finley.xiao-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Signed-off-by: Frank Wang <frank.wang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-Acked-by: Rob Herring <robh@kernel.org>
+with the compatible change applied to Greg's tree,
+I've now applied this one for 4.14.
 
->  drivers/mmc/host/sunxi-mmc.c                        | 8 ++++++++
->  2 files changed, 9 insertions(+)
+
+Heiko
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
