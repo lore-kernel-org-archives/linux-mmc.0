@@ -1,60 +1,48 @@
-From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH] mmc: atmel-mci: add missing of_node_put
-Date: Sat, 15 Jul 2017 18:27:41 +0200
-Message-ID: <1500136061-12135-1-git-send-email-Julia.Lawall@lip6.fr>
+From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+Subject: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
+Date: Sun, 16 Jul 2017 21:23:32 -0400
+Message-ID: <20170717012332.16505-1-jeff.dagenais@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail2-relais-roc.national.inria.fr ([192.134.164.83]:47196 "EHLO
-        mail2-relais-roc.national.inria.fr" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751088AbdGOQwl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Jul 2017 12:52:41 -0400
+Received: from mail-it0-f66.google.com ([209.85.214.66]:36375 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751208AbdGQBXh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Jul 2017 21:23:37 -0400
+Received: by mail-it0-f66.google.com with SMTP id k3so16894462ita.3
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Jul 2017 18:23:36 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@microchip.com>
-Cc: kernel-janitors@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: adrian.hunter@intel.com, michal.simek@xilinx.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, Jean-Francois Dagenais <jeff.dagenais@gmail.com>
 
-for_each_child_of_node performs an of_node_get on each iteration, so a
-break out the loop requires an of_node_put.
+This increases consistency of the code across the sdhci family.
 
-The semantic patch that fixes this problem is as follows
-(http://coccinelle.lip6.fr):
+v2: rebased onto ulfh/mmc/next and tweaked headline accordingly.
 
-// <smpl>
-@@
-local idexpression n;
-expression e,e1;
-iterator name for_each_child_of_node;
-@@
-
- for_each_child_of_node(e1,n) {
-   ...
-(
-   of_node_put(n);
-|
-   e = n
-|
-+  of_node_put(n);
-?  break;
-)
-   ...
- }
-... when != n
-// </smpl>
-
-Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-
+Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
 ---
- drivers/mmc/host/atmel-mci.c |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-of-arasan.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff -u -p a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -673,6 +673,7 @@ atmci_of_init(struct platform_device *pd
- 		if (slot_id >= ATMCI_MAX_NR_SLOTS) {
- 			dev_warn(&pdev->dev, "can't have more than %d slots\n",
- 			         ATMCI_MAX_NR_SLOTS);
-+			of_node_put(cnp);
- 			break;
- 		}
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index b13c0a7d50e4..528a5d24c0bc 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -216,13 +216,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 	u32 vendor;
+ 	struct sdhci_host *host = mmc_priv(mmc);
  
+-	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
++	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
+ 	if (ios->enhanced_strobe)
+ 		vendor |= VENDOR_ENHANCED_STROBE;
+ 	else
+ 		vendor &= ~VENDOR_ENHANCED_STROBE;
+ 
+-	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
++	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
+ }
+ 
+ static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+-- 
+2.11.0
 
