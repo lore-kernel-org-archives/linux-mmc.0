@@ -1,36 +1,33 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [RFC PATCH 1/2] mmc: sdhci: add quirk
- SDHCI_QUIRK2_BROKEN_SDMA_BOUNDARY_BUFFER
-Date: Mon, 17 Jul 2017 17:50:26 +0100
-Message-ID: <08df140f-0630-f7ce-3e1a-9837f24e1796@linaro.org>
-References: <20170628133504.17422-1-srinivas.kandagatla@linaro.org>
- <20170628133504.17422-2-srinivas.kandagatla@linaro.org>
- <CAPDyKFq-wnu2=9TqKBLGEEmbbqVLDKQ+rht8X2j8quNtuMzn9A@mail.gmail.com>
- <2440f065-ccd4-4575-4443-2acd1c23d6c4@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 07/11] mmc: sunxi: Add support for A83T eMMC (MMC2)
+Date: Mon, 17 Jul 2017 13:51:26 -0500
+Message-ID: <20170717185126.rrhriqckjextpaxj@rob-hp-laptop>
+References: <20170714064302.20383-1-wens@csie.org>
+ <20170714064302.20383-8-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <2440f065-ccd4-4575-4443-2acd1c23d6c4@intel.com>
-Content-Language: en-US
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170714064302.20383-8-wens@csie.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 List-Id: linux-mmc@vger.kernel.org
 
+On Fri, Jul 14, 2017 at 02:42:58PM +0800, Chen-Yu Tsai wrote:
+> The third MMC controller (MMC2) on the Allwinner A83T SoC is slightly
+> different. It supports a wider 8-bit bus, has a dedicated controllable
+> reset pin for eMMC, and a "new timing mode" which is supposed to deliver
+> better signals and thus better performance.
+> 
+> Add a compatible for this one to use the new timing mode not found in the
+> other controllers.
+> 
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
 
+Acked-by: Rob Herring <robh@kernel.org>
 
-On 17/07/17 13:47, Adrian Hunter wrote:
->> This change seems like a reasonable justification for adding a new
->> SDHCI quirk, even if we in general wants to avoid that.
->>
->> Adrian?
-> If we add a quirk for every register we end up with a very ugly version of
-> CONFIG_MMC_SDHCI_IO_ACCESSORS.  So CONFIG_MMC_SDHCI_IO_ACCESSORS is a better
-> option.  Another possibility is to add a member to struct sdhci_host,
-> initialized to SDHCI_DEFAULT_BOUNDARY_ARG, and write that.  Drivers could
-> then change the value if necessary.
-Second option seems to be better one. I will give it a try and see!
-
-thanks,
-srini
+>  drivers/mmc/host/sunxi-mmc.c                        | 8 ++++++++
+>  2 files changed, 9 insertions(+)
