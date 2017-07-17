@@ -1,42 +1,42 @@
-From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
-Date: Mon, 17 Jul 2017 09:26:22 -0400
-Message-ID: <EA8CC489-5889-42AD-B43E-0CDDF9EFAB4D@gmail.com>
-References: <20170717012332.16505-1-jeff.dagenais@gmail.com> <60af517b-4a86-9150-901f-7e640bb517d9@xilinx.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:34161 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751278AbdGQN0Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2017 09:26:24 -0400
-Received: by mail-io0-f169.google.com with SMTP id r36so42972142ioi.1
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2017 06:26:24 -0700 (PDT)
-In-Reply-To: <60af517b-4a86-9150-901f-7e640bb517d9@xilinx.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: [PATCH] mmc: host: via-sdmmc: constify pci_device_id.
+Date: Mon, 17 Jul 2017 22:01:33 +0530
+Message-ID: <6e5268522c9f41b6f6b6d9a3f70212b641042bb1.1500309009.git.arvind.yadav.cs@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: brucechang@via.com.tw, HaraldWelte@viatech.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: linux-mmc@vger.kernel.org
 
+pci_device_id are not supposed to change at runtime. All functions
+working with pci_device_id provided by <linux/pci.h> work with
+const pci_device_id. So mark the non-const structs as const.
 
-> On Jul 17, 2017, at 02:33, Michal Simek <michal.simek@xilinx.com> =
-wrote:
->=20
-> Information about patch version shouldn't be the part of commit =
-message
-> but they should be placed below ---.
+File size before:
+   text	   data	    bss	    dec	    hex	filename
+   6952	    880	      0	   7832	   1e98	drivers/mmc/host/via-sdmmc.o
 
-Sorry, still perfecting this mailing patches art. Wish it was merge =
-requests on
-github... less decorum and chances to get it wrong!
+File size After adding 'const':
+   text	   data	    bss	    dec	    hex	filename
+   7032	    800	      0	   7832	   1e98	drivers/mmc/host/via-sdmmc.o
 
-I had put the "-v2" switch on "git send-email" but it didn't appear in =
-the
-commit msg??
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+---
+ drivers/mmc/host/via-sdmmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Also, I got a "kbuild test robot" build regression notice, but the =
-contained
-errors seem unrelated to my patch... Should I do anything about that?
-
-Should I formulate a v3?=
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 6380044..a838bf5 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -323,7 +323,7 @@ struct via_crdr_mmc_host {
+ /* some devices need a very long delay for power to stabilize */
+ #define VIA_CRDR_QUIRK_300MS_PWRDELAY	0x0001
+ 
+-static struct pci_device_id via_ids[] = {
++static const struct pci_device_id via_ids[] = {
+ 	{PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_9530,
+ 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0,},
+ 	{0,}
+-- 
+2.7.4
