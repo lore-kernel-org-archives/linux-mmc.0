@@ -1,143 +1,99 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 03/11] clk: sunxi-ng: a83t: Support new timing mode for
- mmc2 clock
-Date: Tue, 18 Jul 2017 16:47:58 +0200
-Message-ID: <20170718144758.os7yy6saulb65gam@flea>
-References: <20170714064302.20383-1-wens@csie.org>
- <20170714064302.20383-4-wens@csie.org>
- <20170717091402.3qb3fhdyhfbv6t66@flea>
- <CAGb2v67Ofdr9zL=o82F6-90meYZGaYtr_zy7y-OeBH30n1gERQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="d6rflvqdhkw7nwh6"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAGb2v67Ofdr9zL=o82F6-90meYZGaYtr_zy7y-OeBH30n1gERQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+From: Rob Herring <robh@kernel.org>
+Subject: [PATCH] mmc: Convert to using %pOF instead of full_name
+Date: Tue, 18 Jul 2017 16:43:16 -0500
+Message-ID: <20170718214339.7774-36-robh@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:35057 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752809AbdGRVon (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 17:44:43 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Ludovic Desroches <ludovic.desroches@microchip.com>, Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org
 
+Now that we have a custom printf format specifier, convert users of
+full_name to use %pOF instead. This is preparation to remove storing
+of the full path string for each node.
 
---d6rflvqdhkw7nwh6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
+Cc: Jan Glauber <jglauber@cavium.com>
+Cc: David Daney <david.daney@cavium.com>
+Cc: "Steven J. Hill" <Steven.Hill@cavium.com>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/core/core.c      | 8 ++++----
+ drivers/mmc/host/atmel-mci.c | 4 ++--
+ drivers/mmc/host/cavium.c    | 6 ++----
+ 3 files changed, 8 insertions(+), 10 deletions(-)
 
-On Mon, Jul 17, 2017 at 06:12:35PM +0800, Chen-Yu Tsai wrote:
-> On Mon, Jul 17, 2017 at 5:14 PM, Maxime Ripard
-> <maxime.ripard@free-electrons.com> wrote:
-> > Hi,
-> >
-> > On Fri, Jul 14, 2017 at 02:42:54PM +0800, Chen-Yu Tsai wrote:
-> >> The MMC2 clock supports a new timing mode. When the new mode is active,
-> >> the output clock rate is halved.
-> >>
-> >> This patch sets the feature flag for the new timing mode, and adds
-> >> a pre-divider based on the mode bit.
-> >>
-> >> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> >> ---
-> >>  drivers/clk/sunxi-ng/ccu-sun8i-a83t.c | 38 ++++++++++++++++++++++++++=
-+--------
-> >>  1 file changed, 30 insertions(+), 8 deletions(-)
-> >>
-> >> diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c b/drivers/clk/sunxi=
--ng/ccu-sun8i-a83t.c
-> >> index 947f9f6e05d2..ee6688e9b361 100644
-> >> --- a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-> >> +++ b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-> >> @@ -418,14 +418,36 @@ static SUNXI_CCU_PHASE(mmc1_sample_clk, "mmc1-sa=
-mple", "mmc1",
-> >>  static SUNXI_CCU_PHASE(mmc1_output_clk, "mmc1-output", "mmc1",
-> >>                      0x08c, 8, 3, 0);
-> >>
-> >> -/* TODO Support MMC2 clock's new timing mode. */
-> >> -static SUNXI_CCU_MP_WITH_MUX_GATE(mmc2_clk, "mmc2", mod0_default_pare=
-nts,
-> >> -                               0x090,
-> >> -                               0, 4,         /* M */
-> >> -                               16, 2,        /* P */
-> >> -                               24, 2,        /* mux */
-> >> -                               BIT(31),      /* gate */
-> >> -                               0);
-> >> +/*
-> >> + * MMC2 supports both old and new timing modes. When the new timing
-> >> + * mode is active, the output clock rate is halved by two. Here we
-> >> + * treat it as a variable pre-divider. Note that the pre-divider is
-> >> + * _not_ included in the possible factors during a set clock rate
-> >> + * operation. It is only read out.
-> >> + */
-> >> +static const struct ccu_mux_var_prediv mmc2_new_timing_predivs[] =3D {
-> >> +     { .index =3D 0, .shift =3D 30, .width =3D 1 },
-> >> +     { .index =3D 1, .shift =3D 30, .width =3D 1 },
-> >> +};
-> >> +static struct ccu_mp mmc2_clk =3D {
-> >> +     .enable =3D BIT(31),
-> >> +     .m      =3D _SUNXI_CCU_DIV(0, 4),
-> >> +     .p      =3D _SUNXI_CCU_DIV(16, 2),
-> >> +     .mux    =3D {
-> >> +             .shift  =3D 24,
-> >> +             .width  =3D 2,
-> >> +             .var_predivs    =3D mmc2_new_timing_predivs,
-> >> +             .n_var_predivs  =3D ARRAY_SIZE(mmc2_new_timing_predivs),
-> >> +     },
-> >> +     .common         =3D {
-> >> +             .reg            =3D 0x090,
-> >> +             .features       =3D CCU_FEATURE_MMC_TIMING_SWITCH,
-> >> +             .hw.init        =3D CLK_HW_INIT_PARENTS("mmc2",
-> >> +                                                   mod0_default_paren=
-ts,
-> >> +                                                   &ccu_mp_ops,
-> >> +                                                   CLK_GET_RATE_NOCAC=
-HE),
-> >> +     },
-> >> +};
-> >
-> > Treating the new bit seems a bit of a hack to me. It only works
-> > because we're not evaluating the various pre-dividers during a
-> > determine_rate (and set_rate), but it might change in the future, and
-> > we will break all our eMMC controllers then.
-> >
-> > Since they're quite special, I was thinking about creating a new MMC
-> > clock type? We're going to use it on a number of SoCs, and we'll be
-> > able to model it properly, without crippling the regular and generic
-> > MP clocks.
->=20
-> Yes that should be doable. I could put them in the same file and
-> reuse all the existing MP clocks stuff by wrapping them in new
-> functions that check the timing mode bit.
->=20
-> Would that work for you?
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 26431267a3e2..6b4117615ad6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1137,11 +1137,11 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+ 	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+ 	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+ 	if (!voltage_ranges) {
+-		pr_debug("%s: voltage-ranges unspecified\n", np->full_name);
++		pr_debug("%pOF: voltage-ranges unspecified\n", np);
+ 		return 0;
+ 	}
+ 	if (!num_ranges) {
+-		pr_err("%s: voltage-ranges empty\n", np->full_name);
++		pr_err("%pOF: voltage-ranges empty\n", np);
+ 		return -EINVAL;
+ 	}
 
-Yep, it does.
+@@ -1153,8 +1153,8 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+ 				be32_to_cpu(voltage_ranges[j]),
+ 				be32_to_cpu(voltage_ranges[j + 1]));
+ 		if (!ocr_mask) {
+-			pr_err("%s: voltage-range #%d is invalid\n",
+-				np->full_name, i);
++			pr_err("%pOF: voltage-range #%d is invalid\n",
++				np, i);
+ 			return -EINVAL;
+ 		}
+ 		*mask |= ocr_mask;
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 97de2d32ba84..b7c1cd384306 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -665,8 +665,8 @@ atmci_of_init(struct platform_device *pdev)
 
-Thanks!
-Maxime
+ 	for_each_child_of_node(np, cnp) {
+ 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
+-			dev_warn(&pdev->dev, "reg property is missing for %s\n",
+-				 cnp->full_name);
++			dev_warn(&pdev->dev, "reg property is missing for %pOF\n",
++				 cnp);
+ 			continue;
+ 		}
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
+diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+index 3686d77c717b..27fb625cbcf3 100644
+--- a/drivers/mmc/host/cavium.c
++++ b/drivers/mmc/host/cavium.c
+@@ -957,14 +957,12 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
 
---d6rflvqdhkw7nwh6
-Content-Type: application/pgp-signature; name="signature.asc"
+ 	ret = of_property_read_u32(node, "reg", &id);
+ 	if (ret) {
+-		dev_err(dev, "Missing or invalid reg property on %s\n",
+-			of_node_full_name(node));
++		dev_err(dev, "Missing or invalid reg property on %pOF\n", node);
+ 		return ret;
+ 	}
 
------BEGIN PGP SIGNATURE-----
+ 	if (id >= CAVIUM_MAX_MMC || slot->host->slot[id]) {
+-		dev_err(dev, "Invalid reg property on %s\n",
+-			of_node_full_name(node));
++		dev_err(dev, "Invalid reg property on %pOF\n", node);
+ 		return -EINVAL;
+ 	}
 
-iQIcBAEBAgAGBQJZbh+eAAoJEBx+YmzsjxAgYzUQALmJsQfE5j1Lzlfzc+2qF+sL
-J/ngdYRK5zhKPf/6txw7zWXSIWm9GAHmnett+4ZQMfvg7D2pr757FzlvzVM1syLw
-V1kAy1GNIPc8SgzQLvwNCQq9pYLxyQLHW2iqFUuNKravbU5CILRkXAvgVVNKnftO
-VAAVCLWPyYqpjsipzUJRqKBKEwQpZlTRpHaDpx8oV8vjDuV2fR8syDU+8qeR2fkN
-1R0zpIXYMQIzxl7z0/+ibaST91iAVcQ/JK1RZXzL1s6UfDK+i4+NJ4POA202B2VE
-GD0wk8c4BJ3Rxo1iPypD5nX+H9CSfQh+jlDX6xMONO83Qld6uahEp1acDnO6e0CJ
-4xx4dxn3aYQ6N6GzyNNgjU/EEIPqhMSZbEdqw/5hvetebAYJ9uVa2r9OVWdHkcv9
-tzpFVYNK+mI/5wcXWMuQNCa2SeyPr4X9WzKu1vidNT/8oTblND/wRRB1+wR+wNDM
-lEJGAgFDhRkP6+loIsCPZ5h2SwVc8XKn35oS/2n4qEpM4DOTWyL04fR/J32ULc1C
-LNsh66GiGCGD0QPH1RaKGgiHJKqlsnh5YoTbSrPPjsUkDXTVT/lnFE77HJ8qc+I9
-ZDyIlcpCSyhTl2dTTh4PiIYp+qn9yuFwFWBy2fwKn/bv0PGgCsUWPGk2KcBuHWg5
-IN5e4OGYLs1tqUYZ0X0w
-=RUB8
------END PGP SIGNATURE-----
+--
+2.11.0
 
---d6rflvqdhkw7nwh6--
