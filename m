@@ -1,60 +1,77 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH 0/6] Try to get rid of CONFIG_MMC_DEBUG
-Date: Tue, 18 Jul 2017 16:59:30 +0800
-Message-ID: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 1/6] mmc: core: remove check of host->removed for rescan routine
+Date: Tue, 18 Jul 2017 16:59:31 +0800
+Message-ID: <1500368376-160272-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:56527 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:56170 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751322AbdGRI76 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 04:59:58 -0400
+        with ESMTP id S1751322AbdGRJAR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 05:00:17 -0400
+In-Reply-To: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
+The intention of this check was to prevent the conflict between
+hotplug and removing driver for whatever reason. Currently it
+doesn't improve anything and the following rescan process could
+still saftly perform the scan flow. So these code seems pointless
+now and let's remove them.
 
-CONFIG_MMC_DEBUG was introduced long time ago and mostly
-it's a all-or-none proposition for compile-time. By looking
-at how the mmc core use it, it's obviously pointless to still
-carry on this option.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-But referring to the host drivers, it's hard to say should we
-remove it now. The following drivers[1] will print some extra log
-on irq context for debugging. Probably folks still need to debug
-it sometimes but making it default behaviour seems to introduce some
-unnecessary burden for their drivers I guess. Anyway, we downgrade this
-option for hosts only and ask the following added host drivers to use
-this for debugging instead of adding their private macro to activate
-their debug functions.
-
-This patchset also cleanup wbsd and sdhci as it doesn't seem sensible to
-use CONFIG_MMC_DEBUG for their cases.
-
-[1]:
-drivers/mmc/host/s3cmci.c
-drivers/mmc/host/omap.c
-drivers/mmc/host/omap_hsmmc.c
-drivers/mmc/host/tmio_mmc_core.c
-
-
-
-Shawn Lin (6):
-  mmc: core: remove check of host->removed for rescan routine
-  mmc: core: always check the length of sglist with total data size
-  mmc: core: turn the pr_info under CONFIG_MMC_DEBUG into pr_debug
-  mmc: Kconfig: downgrade CONFIG_MMC_DEBUG for host drivers only
-  mmc: wbsd: remove CONFIG_MMC_DEBUG from the driver
-  mmc: sdhci: remove CONFIG_MMC_DEBUG from the driver
-
- drivers/mmc/Kconfig      |  7 -------
- drivers/mmc/Makefile     |  2 --
- drivers/mmc/core/core.c  | 35 +++++++----------------------------
- drivers/mmc/host/Kconfig |  9 +++++++++
- drivers/mmc/host/sdhci.c |  8 --------
- drivers/mmc/host/wbsd.c  |  2 --
+ drivers/mmc/core/core.c  | 13 -------------
  include/linux/mmc/host.h |  3 ---
- 7 files changed, 16 insertions(+), 50 deletions(-)
+ 2 files changed, 16 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 2643126..b311ec9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1769,13 +1769,6 @@ void mmc_detach_bus(struct mmc_host *host)
+ static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+ 				bool cd_irq)
+ {
+-#ifdef CONFIG_MMC_DEBUG
+-	unsigned long flags;
+-	spin_lock_irqsave(&host->lock, flags);
+-	WARN_ON(host->removed);
+-	spin_unlock_irqrestore(&host->lock, flags);
+-#endif
+-
+ 	/*
+ 	 * If the device is configured as wakeup, we prevent a new sleep for
+ 	 * 5 s to give provision for user space to consume the event.
+@@ -2646,12 +2639,6 @@ void mmc_start_host(struct mmc_host *host)
+ 
+ void mmc_stop_host(struct mmc_host *host)
+ {
+-#ifdef CONFIG_MMC_DEBUG
+-	unsigned long flags;
+-	spin_lock_irqsave(&host->lock, flags);
+-	host->removed = 1;
+-	spin_unlock_irqrestore(&host->lock, flags);
+-#endif
+ 	if (host->slot.cd_irq >= 0) {
+ 		if (host->slot.cd_wake_enabled)
+ 			disable_irq_wake(host->slot.cd_irq);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index ebd1ceb..4617c21 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -328,9 +328,6 @@ struct mmc_host {
+ 	unsigned int		use_spi_crc:1;
+ 	unsigned int		claimed:1;	/* host exclusively claimed */
+ 	unsigned int		bus_dead:1;	/* bus has been released */
+-#ifdef CONFIG_MMC_DEBUG
+-	unsigned int		removed:1;	/* host is being removed */
+-#endif
+ 	unsigned int		can_retune:1;	/* re-tuning can be used */
+ 	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
 -- 
 1.9.1
 
