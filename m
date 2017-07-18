@@ -1,135 +1,60 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] Documentation: dw-mshc: deprecate num-slots
-Date: Tue, 18 Jul 2017 16:31:38 +0800
-Message-ID: <1500366698-117167-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 0/6] Try to get rid of CONFIG_MMC_DEBUG
+Date: Tue, 18 Jul 2017 16:59:30 +0800
+Message-ID: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:58963 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.130]:56527 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751349AbdGRIcL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 04:32:11 -0400
+        with ESMTP id S1751322AbdGRI76 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 04:59:58 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-dwmmc host driver already deprecate it in the driver
-but didn't modify the documentation to reflect the fact.
-This patch deprecates it and clean up num-slots from the
-examples of all variant host drivers.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+CONFIG_MMC_DEBUG was introduced long time ago and mostly
+it's a all-or-none proposition for compile-time. By looking
+at how the mmc core use it, it's obviously pointless to still
+carry on this option.
 
- Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt |  1 -
- Documentation/devicetree/bindings/mmc/img-dw-mshc.txt    |  1 -
- Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt     |  2 --
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt         | 16 +++++++---------
- Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt     |  1 -
- 5 files changed, 7 insertions(+), 14 deletions(-)
+But referring to the host drivers, it's hard to say should we
+remove it now. The following drivers[1] will print some extra log
+on irq context for debugging. Probably folks still need to debug
+it sometimes but making it default behaviour seems to introduce some
+unnecessary burden for their drivers I guess. Anyway, we downgrade this
+option for hosts only and ask the following added host drivers to use
+this for debugging instead of adding their private macro to activate
+their debug functions.
 
-diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-index aad9844..a58c173 100644
---- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-@@ -78,7 +78,6 @@ Example:
- 	};
- 
- 	dwmmc0@12200000 {
--		num-slots = <1>;
- 		cap-mmc-highspeed;
- 		cap-sd-highspeed;
- 		broken-cd;
-diff --git a/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-index 85de99f..c54e577 100644
---- a/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-@@ -24,6 +24,5 @@ Example:
- 
- 		fifo-depth = <0x20>;
- 		bus-width = <4>;
--		num-slots = <1>;
- 		disable-wp;
- 	};
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-index 8af1afc..07242d1 100644
---- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -36,7 +36,6 @@ Example:
- 
- 	/* Board portion */
- 	dwmmc0@fcd03000 {
--		num-slots = <1>;
- 		vmmc-supply = <&ldo12>;
- 		fifo-depth = <0x100>;
- 		pinctrl-names = "default";
-@@ -52,7 +51,6 @@ Example:
- 
- 	dwmmc_1: dwmmc1@f723e000 {
- 		compatible = "hisilicon,hi6220-dw-mshc";
--		num-slots = <0x1>;
- 		bus-width = <0x4>;
- 		disable-wp;
- 		cap-sd-highspeed;
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index 9cb55ca..ef3e5f1 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -12,12 +12,12 @@ Required Properties:
- * #address-cells: should be 1.
- * #size-cells: should be 0.
- 
--# Slots: The slot specific information are contained within child-nodes with
--  each child-node representing a supported slot. There should be atleast one
--  child node representing a card slot. The name of the child node representing
--  the slot is recommended to be slot@n where n is the unique number of the slot
--  connected to the controller. The following are optional properties which
--  can be included in the slot child node.
-+# Slots (DEPRECATED): The slot specific information are contained within
-+  child-nodes with each child-node representing a supported slot. There should
-+  be atleast one child node representing a card slot. The name of the child node
-+  representing the slot is recommended to be slot@n where n is the unique number
-+  of the slot connected to the controller. The following are optional properties
-+  which can be included in the slot child node.
- 
- 	* reg: specifies the physical slot number. The valid values of this
- 	  property is 0 to (num-slots -1), where num-slots is the value
-@@ -63,7 +63,7 @@ Optional properties:
-   clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
- 	  (Use the "max-frequency" instead of "clock-freq-min-max".)
- 
--* num-slots: specifies the number of slots supported by the controller.
-+* num-slots (DEPRECATED): specifies the number of slots supported by the controller.
-   The number of physical slots actually used could be equal or less than the
-   value specified by num-slots. If this property is not specified, the value
-   of num-slot property is assumed to be 1.
-@@ -124,7 +124,6 @@ board specific portions as listed below.
- 	dwmmc0@12200000 {
- 		clock-frequency = <400000000>;
- 		clock-freq-min-max = <400000 200000000>;
--		num-slots = <1>;
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
-@@ -139,7 +138,6 @@ board specific portions as listed below.
- 	dwmmc0@12200000 {
- 		clock-frequency = <400000000>;
- 		clock-freq-min-max = <400000 200000000>;
--		num-slots = <1>;
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
-diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-index eaade0e..906819a 100644
---- a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-@@ -25,7 +25,6 @@ Example:
- 		clock-frequency = <50000000>;
- 		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
- 		clock-names = "biu", "ciu";
--		num-slots = <1>;
- 		max-frequency = <50000000>;
- 		cap-sdio-irq;
- 		cap-sd-highspeed;
+This patchset also cleanup wbsd and sdhci as it doesn't seem sensible to
+use CONFIG_MMC_DEBUG for their cases.
+
+[1]:
+drivers/mmc/host/s3cmci.c
+drivers/mmc/host/omap.c
+drivers/mmc/host/omap_hsmmc.c
+drivers/mmc/host/tmio_mmc_core.c
+
+
+
+Shawn Lin (6):
+  mmc: core: remove check of host->removed for rescan routine
+  mmc: core: always check the length of sglist with total data size
+  mmc: core: turn the pr_info under CONFIG_MMC_DEBUG into pr_debug
+  mmc: Kconfig: downgrade CONFIG_MMC_DEBUG for host drivers only
+  mmc: wbsd: remove CONFIG_MMC_DEBUG from the driver
+  mmc: sdhci: remove CONFIG_MMC_DEBUG from the driver
+
+ drivers/mmc/Kconfig      |  7 -------
+ drivers/mmc/Makefile     |  2 --
+ drivers/mmc/core/core.c  | 35 +++++++----------------------------
+ drivers/mmc/host/Kconfig |  9 +++++++++
+ drivers/mmc/host/sdhci.c |  8 --------
+ drivers/mmc/host/wbsd.c  |  2 --
+ include/linux/mmc/host.h |  3 ---
+ 7 files changed, 16 insertions(+), 50 deletions(-)
+
 -- 
 1.9.1
 
