@@ -1,275 +1,90 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH V3 00/11] mmc: Add Command Queue support
-Date: Wed, 19 Jul 2017 11:29:50 +0000
-Message-ID: <AM4PR0401MB2324BEA5561C080B697B714590A60@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
- <f2428951-3cf3-273f-33a3-c0b3147be2be@rock-chips.com>
- <AM4PR0401MB2324236198EFAB4D89190AD890A60@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <9168c429-125e-e810-b3b1-1c0500f3b822@rock-chips.com>
- <21a4c300-0323-ddef-7b5c-3821e701f256@rock-chips.com>
+From: Ludovic Desroches <ludovic.desroches@microchip.com>
+Subject: Re: vmmc-supply
+Date: Wed, 19 Jul 2017 14:39:30 +0200
+Message-ID: <20170719123930.33j2ep3yfgrhigw4@rfolt0960.corp.atmel.com>
+References: <d8b762f1-efb1-21df-0760-505eb9ff2a03@mnementh.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0055.outbound.protection.outlook.com ([104.47.2.55]:31700
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754030AbdGSL3x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Jul 2017 07:29:53 -0400
-In-Reply-To: <21a4c300-0323-ddef-7b5c-3821e701f256@rock-chips.com>
-Content-Language: en-US
+Received: from esa2.microchip.iphmx.com ([68.232.149.84]:51256 "EHLO
+        esa2.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751991AbdGSMkR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 08:40:17 -0400
+Content-Disposition: inline
+In-Reply-To: <d8b762f1-efb1-21df-0760-505eb9ff2a03@mnementh.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.or>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Ian Molton <ian@mnementh.co.uk>
+Cc: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Shawn Lin
-> Sent: Wednesday, July 19, 2017 4:43 PM
-> To: Bough Chen <haibo.chen@nxp.com>; Adrian Hunter
-> <adrian.hunter@intel.com>; Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>; Alex
-> Lemberg <alex.lemberg@sandisk.com>; Mateusz Nowak
-> <mateusz.nowak@intel.com>; Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>;
-> Jaehoon Chung <jh80.chung@samsung.com>; Dong Aisheng
-> <dongas86@gmail.com>; Das Asutosh <asutoshd@codeaurora.org>; Zhangfei
-> Gao <zhangfei.gao@gmail.com>; Dorfman Konstantin
-> <kdorfman@codeaurora.or>; Sahitya Tummala <stummala@codeaurora.org>;
-> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
-> <vbyravarasu@nvidia.com>; Linus Walleij <linus.walleij@linaro.org>
-> Subject: Re: [PATCH V3 00/11] mmc: Add Command Queue support
->=20
-> Hi Bough,
->=20
-> On 2017/7/19 15:44, Shawn Lin wrote:
-> > Hi Bough,
-> >
-> > On 2017/7/19 13:48, Bough Chen wrote:
-> >>
-> >>> -----Original Message-----
-> >>> From: Shawn Lin [mailto:shawn.lin@rock-chips.com]
-> >>> Sent: Wednesday, July 19, 2017 11:42 AM
-> >>> To: Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
-> >>> <ulf.hansson@linaro.org>
-> >>> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>;
-> >>> Bough Chen <haibo.chen@nxp.com>; Alex Lemberg
-> >>> <alex.lemberg@sandisk.com>; Mateusz Nowak
-> <mateusz.nowak@intel.com>;
-> >>> Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
-> >>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
-> >>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
-> >>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
-> >>> <kdorfman@codeaurora.org>; David Griego <david.griego@linaro.org>;
-> >>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
-> >>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
-> >>> Linus Walleij <linus.walleij@linaro.org>
-> >>> Subject: Re: [PATCH V3 00/11] mmc: Add Command Queue support
-> >>>
-> >>> Hi Adrian,
-> >>>
-> >>> On 2017/6/15 19:06, Adrian Hunter wrote:
-> >>>> Hi
-> >>>>
-> >>>> Here is V3 of the hardware command queue patches without the
-> >>>> software command queue patches.
-> >>>>
-> >>>
-> >>> I can now boot my board with v4.13 finally this morning[1] and apply
-> >>> this patchset and add my private patch for supporting CQE for
-> >>> sdhci-of-arasan.
-> >>> Great to see it works and I don't see any regression until now. I
-> >>> need more test but I would appreciate it if Ulf can pick all these
-> >>> up into linux-next that folks can help to test and not need to
-> >>> manually apply them. And it will be easy for me to submit patch for
-> >>> sdhci-of-arasan to support CQE later.
-> >>>
-> >>> I haven't have time to review all these, but I will do it next week.
-> >>> And I will also try to run more iozone/fio to see how much it gains
-> >>> when enabling CQE, comparing to non-CQE support.
-> >>>
-> >>> But at least currently feels free to add:
-> >>>
-> >>> Tested-by: Shawn Lin <shawn.lin@rock-chip.com>
-> >>>
-> >> Hi Shawn,
-> >>
-> >> Do you enable Runtime PM for cqhci? On my side, once enable cqhci
-> >> runtime PM, always get timeout issue, I'm debug this issue these days.
-> >> If not add runtime PM support for cqhci, everything work fine
-> >> including DCMD.
-> >>
-> >
-> > Aha, no!
-> >
-> > I said "I need more test" which should include runtime PM. As you
-> > could see sdhci-of-arsan still lacks proper runtime PM support, so I
-> > will try to hack it locally and re-test cqe then.
-> >
->=20
-> Well, I add runtime PM  support for sdhci-of-arasan locally and re-test C=
-QE
-> again. All thing work well as expected for two hours!
->=20
->=20
+Hi Ian,
 
-Hi Adrian,
+On Wed, Jul 12, 2017 at 04:28:19PM +0100, Ian Molton wrote:
+> Hi folks,
+> 
+> I'm working on a SDIO wifi card and I'm attempting to figure out how on
+> earth voltage regulation works for MMC slots.
+> 
+> The mmc host is an imx6ul
+> 
+> In its DT, it has the following:
+> 
+> &usdhc1 {
+>         #address-cells = <1>;
+>         #size-cells = <0>;
+>         pinctrl-names = "default", "state_100mhz", "state_200mhz";
+>         pinctrl-0 = <&pinctrl_usdhc1>;
+>         pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
+>         pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
+>         no-1-8-v;
+>         keep-power-in-suspend;
+>         enable-sdio-wakeup;
+>         vmmc-supply = <&reg_sd1_vmmc>;
+>         non-removable;
+>         status = "okay";
+> }
+> 
+> Its working, however I cannot seem to get it to turn off power to the
+> slot. I would expect that if the card is probed and no driver wants to
+> attach, the slot can be turned off.
+> 
 
-After debug, I find the root cause of the runtime PM issue for imx8, it is =
-our IC limitation, when we do=20
-__cqhci_disable(),  clear CQHCI_ENABLE of register CQHCI_CFG, it will impac=
-t the sdhci register 0x48, disable DMA and disable block count.  When I res=
-tore these bits, cqhci runtime suspend/resume works well.=20
+I don't think your regulator will be turned off automatically, you may rely on
+your bootloader to do it. MMC core will turn it on. I let you dig into the
+code. Regulator state is updated when calling set_ios() depending on
+ios power_mode.
 
-So now I'd like to add:
+> cat /sys/class/regulator/regulator.5/state tells me the regulator is
+> enabled, and num_users is 1
+> 
+> whats really puzzling me is that nowhere in the code does git grep show
+> *any* attempt to look up a regulator called vmmc-supply, or a dt
+> property with the same name. Unless I'm being blind...
+> 
 
-Tested-by: Haibo Chen <haibo.chen@nxp.com>
+Have a look to of_get_regulator.
 
-[    1.311132] sdhci: Secure Digital Host Controller Interface driver
-[    1.317324] sdhci: Copyright(c) Pierre Ossman
-[    1.322082] sdhci-pltfm: SDHCI platform and OF driver helper
-[    1.328626] mmc0: CQHCI version 5.10
-[    1.375351] mmc0: SDHCI controller on 5b010000.usdhc [5b010000.usdhc] us=
-ing ADMA
-[    1.391558] galcore 80000000.imx8_gpu_ss: bound 53100000.gpu (ops gpu_op=
-s)
-[    1.398450] Galcore version 6.2.2.93313
-[    1.477485] ledtrig-cpu: registered to indicate activity on CPUs
- [    1.477984] mmc0: Command Queue Engine enabled
-[    1.478008] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-[    1.478585] mmcblk0: mmc0:0001 032G34 29.1 GiB
-[    1.478741] mmcblk0boot0: mmc0:0001 032G34 partition 1 8.00 MiB
-[    1.478892] mmcblk0boot1: mmc0:0001 032G34 partition 2 8.00 MiB
-[    1.479039] mmcblk0rpmb: mmc0:0001 032G34 partition 3 4.00 MiB
+Regards
 
+Ludovic
 
-> > Thanks.
-> >
-> >
-> >> Haibo Chen
-> >>> Thanks.
-> >>>
-> >>> [1]:
-> >>>
-> >>> [    2.859981] Synopsys Designware Multimedia Card Interface Driver
-> >>> [    2.924875] sdhci-pltfm: SDHCI platform and OF driver helper
-> >>> [    2.994768] mmc0: CQHCI version 5.10
-> >>> [    3.053787] mmc0: SDHCI controller on fe330000.sdhci [fe330000.sdh=
-ci]
-> >>> using ADMA
-> >>> [    3.073534] ledtrig-cpu: registered to indicate activity on CPUs
-> >>> [    3.079239] usbcore: registered new interface driver usbhid
-> >>> [    3.080183] usbhid: USB HID core driver
-> >>> [    3.094221] NET: Registered protocol family 17
-> >>> [    3.095069] 9pnet: Installing 9P2000 support
-> >>> [    3.095710] Key type dns_resolver registered
-> >>> [    3.098371] registered taskstats version 1
-> >>> [    3.155130] hctosys: unable to open rtc device (rtc0)
-> >>> [    3.166186] mmc0: Command Queue Engine enabled
-> >>> [    3.168514] mmc0: new HS400 Enhanced strobe MMC card at address
-> 0001
-> >>> [    3.188861] mmcblk0: mmc0:0001 AJNB4R 14.6 GiB
-> >>> [    3.200381] mmcblk0boot0: mmc0:0001 AJNB4R partition 1 4.00 MiB
-> >>> [    3.200702] ALSA device list:
-> >>> [    3.200747]   No soundcards found.
-> >>> [    3.204146] ttyS2 - failed to request DMA
-> >>> [    3.212363] mmcblk0boot1: mmc0:0001 AJNB4R partition 2 4.00 MiB
-> >>> [    3.221031] mmcblk0rpmb: mmc0:0001 AJNB4R partition 3 4.00 MiB
-> >>> [    3.277636]  mmcblk0: p1 p2 p3 p4 p5 p6 p7
-> >>> [    3.522777] EXT4-fs (mmcblk0p7): recovery complete
-> >>> [    3.523907] EXT4-fs (mmcblk0p7): mounted filesystem with ordered d=
-ata
-> >>> mode. Opts: (null)
-> >>> [    3.524699] VFS: Mounted root (ext4 filesystem) on device 179:7.
-> >>>
-> >>>
-> >>>> Is there any chance of this being queued for v4.13?
-> >>>>
-> >>>>
-> >>>> Changes since V2:
-> >>>>     Dropped patches that have been applied.
-> >>>>     Re-based
-> >>>>     Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
-> >>>>
-> >>>> Changes since V1:
-> >>>>
-> >>>>     "Share mmc request array between partitions" is dependent
-> >>>>     on changes in "Introduce queue semantics", so added that
-> >>>>     and block fixes:
-> >>>>
-> >>>>     Added "Fix is_waiting_last_req set incorrectly"
-> >>>>     Added "Fix cmd error reset failure path"
-> >>>>     Added "Use local var for mqrq_cur"
-> >>>>     Added "Introduce queue semantics"
-> >>>>
-> >>>> Changes since RFC:
-> >>>>
-> >>>>     Re-based on next.
-> >>>>     Added comment about command queue priority.
-> >>>>     Added some acks and reviews.
-> >>>>
-> >>>>
-> >>>> Adrian Hunter (10):
-> >>>>         mmc: core: Add mmc_retune_hold_now()
-> >>>>         mmc: core: Add members to mmc_request and mmc_data for CQE's
-> >>>>         mmc: host: Add CQE interface
-> >>>>         mmc: core: Turn off CQE before sending commands
-> >>>>         mmc: core: Add support for handling CQE requests
-> >>>>         mmc: mmc: Enable Command Queuing
-> >>>>         mmc: mmc: Enable CQE's
-> >>>>         mmc: block: Prepare CQE data
-> >>>>         mmc: block: Add CQE support
-> >>>>         mmc: sdhci-pci: Add CQHCI support for Intel GLK
-> >>>>
-> >>>> Venkat Gopalakrishnan (1):
-> >>>>         mmc: cqhci: support for command queue enabled host
-> >>>>
-> >>>>    drivers/mmc/core/block.c          |  240 +++++++-
-> >>>>    drivers/mmc/core/block.h          |    7 +
-> >>>>    drivers/mmc/core/bus.c            |    7 +
-> >>>>    drivers/mmc/core/core.c           |  156 ++++-
-> >>>>    drivers/mmc/core/host.c           |    6 +
-> >>>>    drivers/mmc/core/host.h           |    1 +
-> >>>>    drivers/mmc/core/mmc.c            |   30 +-
-> >>>>    drivers/mmc/core/queue.c          |  273 ++++++++-
-> >>>>    drivers/mmc/core/queue.h          |   42 +-
-> >>>>    drivers/mmc/host/Kconfig          |   14 +
-> >>>>    drivers/mmc/host/Makefile         |    1 +
-> >>>>    drivers/mmc/host/cqhci.c          | 1146
-> >>> +++++++++++++++++++++++++++++++++++++
-> >>>>    drivers/mmc/host/cqhci.h          |  240 ++++++++
-> >>>>    drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
-> >>>>    include/linux/mmc/core.h          |   18 +-
-> >>>>    include/linux/mmc/host.h          |   24 +
-> >>>>    include/trace/events/mmc.h        |   36 +-
-> >>>>    17 files changed, 2354 insertions(+), 40 deletions(-)
-> >>>>    create mode 100644 drivers/mmc/host/cqhci.c
-> >>>>    create mode 100644 drivers/mmc/host/cqhci.h
-> >>>>
-> >>>>
-> >>>> Regards
-> >>>> Adrian
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> >>>> in the body of a message to majordomo@vger.kernel.org More
-> >>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>>>
-> >>>>
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> >> in the body of a message to majordomo@vger.kernel.org More majordomo
-> >> info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >>
-> >
-> >
-> >
->=20
+> I assume the of regulator code is looking up the parent device and
+> enabling the regulator for me, but then I cannot see how the MMC core /
+> host driver might control the regulator.
+> 
+> Is this all as it is expected to be?
+> 
+> What I'd like is for an attempt to load the wifi module to cause the MMC
+> host to turn on the power and let the card try to re-enumerate/probe,
+> and for driver unloading to cause the card to get turned off again.
+> 
+> I cant see a good way to toggle slot power from userspace either -
+> although I may just be missing this?
+> 
+> TIA for comments,
+> 
+> -Ian
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
-he
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
