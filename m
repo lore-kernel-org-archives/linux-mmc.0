@@ -1,148 +1,183 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] Documentation: dw-mshc: deprecate num-slots
-Date: Wed, 19 Jul 2017 19:29:26 +0900
-Message-ID: <cf3c6814-227a-3da7-47fc-2f353a833a65@samsung.com>
-References: <CGME20170718083221epcas4p15af5a6c253dc83a58c39e431dc536bc1@epcas4p1.samsung.com>
-        <1500366698-117167-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc: introduce timer for broken command
+ transfer over scheme
+Date: Wed, 19 Jul 2017 19:30:36 +0900
+Message-ID: <27c58edd-d041-d04d-aa21-a1b6f9fa0610@samsung.com>
+References: <CGME20170711093941epcas5p31f50fb8d4df37e515bbfb377af29d755@epcas5p3.samsung.com>
+        <1499765917-228806-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:19218 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753526AbdGSK3a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 06:29:30 -0400
-In-reply-to: <1500366698-117167-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:31105 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753374AbdGSKai (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 06:30:38 -0400
+In-reply-to: <1499765917-228806-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Ziyuan Xu <xzy.xu@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>
 
-Dear Shawn,
+Hi Shawn,
 
-On 07/18/2017 05:31 PM, Shawn Lin wrote:
-> dwmmc host driver already deprecate it in the driver
-> but didn't modify the documentation to reflect the fact.
-> This patch deprecates it and clean up num-slots from the
-> examples of all variant host drivers.
+On 07/11/2017 06:38 PM, Shawn Lin wrote:
+> From: Addy Ke <addy.ke@rock-chips.com>
 > 
+> Per the databook of designware mmc controller 2.70a, table 3-2, cmd
+> done interrupt should be fired as soon as the the cmd is sent via
+> cmd line. And the response timeout interrupt should be generated
+> unconditioinally as well if the controller doesn't receive the resp.
+> However that doesn't seem to meet the fact of rockchip specified Soc
+> platforms using dwmmc. We have continuously found the the cmd done or
+> response timeout interrupt missed somehow which took us a long time to
+> understand what was happening. Finally we narrow down the root to
+> the reconstruction of sample circuit for dwmmc IP introduced by
+> rockchip and the buggy design sweeps over all the existing rockchip
+> Socs using dwmmc disastrously.
+> 
+> It seems no way to work around this bug without the proper break-out
+> mechanism so that we seek for a parallel pair the same as the handling
+> for missing data response timeout, namely dto timer. Adding this cto
+> timer seems easily to handle this bug but it's hard to restrict the code
+> under the rockchip specified context. So after merging this patch, it
+> sets up the cto timer for all the platforms using dwmmc IP which isn't
+> ideal but at least we don't advertise new quirk here. Fortunately, no
+> obvious performance regression was found by test and the pre-existing
+> similar catch-all timer for sdhci has proved it's an acceptant way to
+> make the code as robust as possible.
+> 
+> Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=196321
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+> [shawn.lin: rewrite the code and the commit msg throughout]
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks you for sending patch! 
+Will pick this after testing with my targets.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Best Regards,
+Jaehoon Chung
 
+> 
 > ---
 > 
->  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt |  1 -
->  Documentation/devicetree/bindings/mmc/img-dw-mshc.txt    |  1 -
->  Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt     |  2 --
->  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt         | 16 +++++++---------
->  Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt     |  1 -
->  5 files changed, 7 insertions(+), 14 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 48 +++++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.h |  2 ++
+>  2 files changed, 50 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index aad9844..a58c173 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -78,7 +78,6 @@ Example:
->  	};
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a9dfb26..2f6121e 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -398,6 +398,21 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
+>  	return cmdr;
+>  }
 >  
->  	dwmmc0@12200000 {
-> -		num-slots = <1>;
->  		cap-mmc-highspeed;
->  		cap-sd-highspeed;
->  		broken-cd;
-> diff --git a/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-> index 85de99f..c54e577 100644
-> --- a/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
-> @@ -24,6 +24,5 @@ Example:
+> +static inline void dw_mci_set_cto(struct dw_mci *host)
+> +{
+> +	unsigned int cto_clks;
+> +	unsigned int cto_ms;
+> +
+> +	cto_clks = mci_readl(host, TMOUT) & 0xff;
+> +	cto_ms = DIV_ROUND_UP(cto_clks, host->bus_hz / 1000);
+> +
+> +	/* add a bit spare time */
+> +	cto_ms += 10;
+> +
+> +	mod_timer(&host->cto_timer,
+> +		  jiffies + msecs_to_jiffies(cto_ms) + 1);
+> +}
+> +
+>  static void dw_mci_start_command(struct dw_mci *host,
+>  				 struct mmc_command *cmd, u32 cmd_flags)
+>  {
+> @@ -410,6 +425,10 @@ static void dw_mci_start_command(struct dw_mci *host,
+>  	wmb(); /* drain writebuffer */
+>  	dw_mci_wait_while_busy(host, cmd_flags);
 >  
->  		fifo-depth = <0x20>;
->  		bus-width = <4>;
-> -		num-slots = <1>;
->  		disable-wp;
->  	};
-> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> index 8af1afc..07242d1 100644
-> --- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> @@ -36,7 +36,6 @@ Example:
+> +	/* response expected command only */
+> +	if (cmd_flags & SDMMC_CMD_RESP_EXP)
+> +		dw_mci_set_cto(host);
+> +
+>  	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
+>  }
 >  
->  	/* Board portion */
->  	dwmmc0@fcd03000 {
-> -		num-slots = <1>;
->  		vmmc-supply = <&ldo12>;
->  		fifo-depth = <0x100>;
->  		pinctrl-names = "default";
-> @@ -52,7 +51,6 @@ Example:
+> @@ -2599,6 +2618,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  		}
 >  
->  	dwmmc_1: dwmmc1@f723e000 {
->  		compatible = "hisilicon,hi6220-dw-mshc";
-> -		num-slots = <0x1>;
->  		bus-width = <0x4>;
->  		disable-wp;
->  		cap-sd-highspeed;
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> index 9cb55ca..ef3e5f1 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> @@ -12,12 +12,12 @@ Required Properties:
->  * #address-cells: should be 1.
->  * #size-cells: should be 0.
+>  		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
+> +			del_timer(&host->cto_timer);
+>  			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+>  			host->cmd_status = pending;
+>  			smp_wmb(); /* drain writebuffer */
+> @@ -2642,6 +2662,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  		}
 >  
-> -# Slots: The slot specific information are contained within child-nodes with
-> -  each child-node representing a supported slot. There should be atleast one
-> -  child node representing a card slot. The name of the child node representing
-> -  the slot is recommended to be slot@n where n is the unique number of the slot
-> -  connected to the controller. The following are optional properties which
-> -  can be included in the slot child node.
-> +# Slots (DEPRECATED): The slot specific information are contained within
-> +  child-nodes with each child-node representing a supported slot. There should
-> +  be atleast one child node representing a card slot. The name of the child node
-> +  representing the slot is recommended to be slot@n where n is the unique number
-> +  of the slot connected to the controller. The following are optional properties
-> +  which can be included in the slot child node.
+>  		if (pending & SDMMC_INT_CMD_DONE) {
+> +			del_timer(&host->cto_timer);
+>  			mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
+>  			dw_mci_cmd_interrupt(host, pending);
+>  		}
+> @@ -2914,6 +2935,30 @@ static void dw_mci_cmd11_timer(unsigned long arg)
+>  	tasklet_schedule(&host->tasklet);
+>  }
 >  
->  	* reg: specifies the physical slot number. The valid values of this
->  	  property is 0 to (num-slots -1), where num-slots is the value
-> @@ -63,7 +63,7 @@ Optional properties:
->    clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
->  	  (Use the "max-frequency" instead of "clock-freq-min-max".)
+> +static void dw_mci_cto_timer(unsigned long arg)
+> +{
+> +	struct dw_mci *host = (struct dw_mci *)arg;
+> +
+> +	switch (host->state) {
+> +	case STATE_SENDING_CMD11:
+> +	case STATE_SENDING_CMD:
+> +	case STATE_SENDING_STOP:
+> +		/*
+> +		 * If CMD_DONE interrupt does NOT come in sending command
+> +		 * state, we should notify the driver to terminate current
+> +		 * transfer and report a command timeout to the core.
+> +		 */
+> +		host->cmd_status = SDMMC_INT_RTO;
+> +		set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
+> +		tasklet_schedule(&host->tasklet);
+> +		break;
+> +	default:
+> +		dev_warn(host->dev, "Unexpected command timeout, state %d\n",
+> +			 host->state);
+> +		break;
+> +	}
+> +}
+> +
+>  static void dw_mci_dto_timer(unsigned long arg)
+>  {
+>  	struct dw_mci *host = (struct dw_mci *)arg;
+> @@ -3085,6 +3130,9 @@ int dw_mci_probe(struct dw_mci *host)
+>  	setup_timer(&host->cmd11_timer,
+>  		    dw_mci_cmd11_timer, (unsigned long)host);
 >  
-> -* num-slots: specifies the number of slots supported by the controller.
-> +* num-slots (DEPRECATED): specifies the number of slots supported by the controller.
->    The number of physical slots actually used could be equal or less than the
->    value specified by num-slots. If this property is not specified, the value
->    of num-slot property is assumed to be 1.
-> @@ -124,7 +124,6 @@ board specific portions as listed below.
->  	dwmmc0@12200000 {
->  		clock-frequency = <400000000>;
->  		clock-freq-min-max = <400000 200000000>;
-> -		num-slots = <1>;
->  		broken-cd;
->  		fifo-depth = <0x80>;
->  		card-detect-delay = <200>;
-> @@ -139,7 +138,6 @@ board specific portions as listed below.
->  	dwmmc0@12200000 {
->  		clock-frequency = <400000000>;
->  		clock-freq-min-max = <400000 200000000>;
-> -		num-slots = <1>;
->  		broken-cd;
->  		fifo-depth = <0x80>;
->  		card-detect-delay = <200>;
-> diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-> index eaade0e..906819a 100644
-> --- a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-> @@ -25,7 +25,6 @@ Example:
->  		clock-frequency = <50000000>;
->  		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
->  		clock-names = "biu", "ciu";
-> -		num-slots = <1>;
->  		max-frequency = <50000000>;
->  		cap-sdio-irq;
->  		cap-sd-highspeed;
+> +	setup_timer(&host->cto_timer,
+> +		    dw_mci_cto_timer, (unsigned long)host);
+> +
+>  	setup_timer(&host->dto_timer,
+>  		    dw_mci_dto_timer, (unsigned long)host);
+>  
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 75da375..4210927 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -126,6 +126,7 @@ struct dw_mci_dma_slave {
+>   * @irq: The irq value to be passed to request_irq.
+>   * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+>   * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
+> + * @cto_timer: Timer for broken command transfer over scheme.
+>   * @dto_timer: Timer for broken data transfer over scheme.
+>   *
+>   * Locking
+> @@ -232,6 +233,7 @@ struct dw_mci {
+>  	int			sdio_id0;
+>  
+>  	struct timer_list       cmd11_timer;
+> +	struct timer_list       cto_timer;
+>  	struct timer_list       dto_timer;
+>  };
+>  
 > 
 
