@@ -1,101 +1,59 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH 6/6] mmc: sdhci: remove CONFIG_MMC_DEBUG from the
- driver
-Date: Wed, 19 Jul 2017 08:32:34 +0800
-Message-ID: <9e8e1a62-84ca-ce43-5b8d-debcda6e103c@rock-chips.com>
-References: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
- <1500368503-160501-1-git-send-email-shawn.lin@rock-chips.com>
- <1500368503-160501-2-git-send-email-shawn.lin@rock-chips.com>
- <b21d0902-826c-c4b2-0bf0-7ff453a9bfa6@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [RESEND PATCH] arc: remove num-slots from arc platforms
+Date: Wed, 19 Jul 2017 08:39:09 +0800
+Message-ID: <1500424749-206304-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:37496 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:55726 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751560AbdGSAcj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 20:32:39 -0400
-In-Reply-To: <b21d0902-826c-c4b2-0bf0-7ff453a9bfa6@intel.com>
+        with ESMTP id S1751560AbdGSAjh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 20:39:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Vineet Gupta <vgupta@synopsys.com>, Alexey Brodkin <abrodkin@synopsys.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Adrian,
+dwmmc driver deprecated num-slots and plan to get rid
+of it finally. Just move a step to cleanup it from DT.
 
-On 2017/7/18 17:38, Adrian Hunter wrote:
-> On 18/07/17 12:01, Shawn Lin wrote:
->> sdhci uses CONFIG_MMC_DEBUG for showing ADMA descriptor
->> when occurring ADMA error. And it's also used to  dump the
->> registers whenever calling sdhci_add_host.
->>
->> On one hand, I don't see any burden to always print the state
->> ADMA descriptor as it's rare and will help folks better understand
->> what was happening when seeing ADMA error.
->>
->> On the other, git-blame points out that CONFIG_MMC_DEBUG for
->> sdhci_add_host was added since it's merged for the first time.
->> I don't know what exactly the intention was, but I guess folks
->> don't need it at all? IMHO, it's another all-or-none proposition.
->> I'd prefer to remove this sdhci_dumpregs from sdhci_add_host totally.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> ---
->>
->>   drivers/mmc/host/sdhci.c | 8 --------
->>   1 file changed, 8 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ecd0d43..82f1761 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2502,7 +2502,6 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
->>   		sdhci_finish_command(host);
->>   }
->>   
->> -#ifdef CONFIG_MMC_DEBUG
->>   static void sdhci_adma_show_error(struct sdhci_host *host)
->>   {
->>   	void *desc = host->adma_table;
->> @@ -2530,9 +2529,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
->>   			break;
->>   	}
->>   }
->> -#else
->> -static void sdhci_adma_show_error(struct sdhci_host *host) { }
->> -#endif
->>   
->>   static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->>   {
->> @@ -3747,10 +3743,6 @@ int __sdhci_add_host(struct sdhci_host *host)
->>   		goto untasklet;
->>   	}
->>   
->> -#ifdef CONFIG_MMC_DEBUG
->> -	sdhci_dumpregs(host);
->> -#endif
-> 
-> We should still DBG() the interesting registers like SDHCI_HOST_VERSION,
-> SDHCI_PRESENT_STATE, SDHCI_CAPABILITIES, SDHCI_CAPABILITIES_1.  Better to do
-> it earlier on though, like in sdhci_setup_host() after checking
-> mmc_regulator_get_supply().
-> 
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
+Acked-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+Hi Ulf,
 
-Okay. So would you like to kill the CONFIG_MMC_DEBUG around
-this dempregs and keep the output log always there OR you still
-want to keep it under CONFIG_MMC_DEBUG?
+Vineet prefer this patch to go via mmc tree where the driver's
+conversion happened. So could you pick it up?
 
+ arch/arc/boot/dts/axs10x_mb.dtsi     | 1 -
+ arch/arc/boot/dts/vdk_axs10x_mb.dtsi | 1 -
+ 2 files changed, 2 deletions(-)
 
-Thanks.
+diff --git a/arch/arc/boot/dts/axs10x_mb.dtsi b/arch/arc/boot/dts/axs10x_mb.dtsi
+index 41cfb29..82e26ad 100644
+--- a/arch/arc/boot/dts/axs10x_mb.dtsi
++++ b/arch/arc/boot/dts/axs10x_mb.dtsi
+@@ -101,7 +101,6 @@
+ 		mmc@0x15000 {
+ 			compatible = "altr,socfpga-dw-mshc";
+ 			reg = < 0x15000 0x400 >;
+-			num-slots = < 1 >;
+ 			fifo-depth = < 16 >;
+ 			card-detect-delay = < 200 >;
+ 			clocks = <&apbclk>, <&mmcclk>;
+diff --git a/arch/arc/boot/dts/vdk_axs10x_mb.dtsi b/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
+index 459fc65..48bb4b4 100644
+--- a/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
++++ b/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
+@@ -104,7 +104,6 @@
+ 		mmc@0x15000 {
+ 			compatible = "snps,dw-mshc";
+ 			reg = <0x15000 0x400>;
+-			num-slots = <1>;
+ 			fifo-depth = <1024>;
+ 			card-detect-delay = <200>;
+ 			clocks = <&apbclk>, <&mmcclk>;
+-- 
+1.9.1
 
->> -
->>   	ret = sdhci_led_register(host);
->>   	if (ret) {
->>   		pr_err("%s: Failed to register LED device: %d\n",
->>
-> 
-> 
-> 
-> 
 
