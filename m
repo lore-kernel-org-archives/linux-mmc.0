@@ -1,50 +1,64 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
-Date: Wed, 19 Jul 2017 11:12:45 -0700
-Message-ID: <CAD=FV=WszhdQ8NY8atSzzhNfbZxjPzU8SthGiiHgQJO=942xAw@mail.gmail.com>
-References: <1488406307-8952-1-git-send-email-linux@roeck-us.net> <CAPDyKFq61A0AgO=P0yVCYFDwym=32yVRAJG9rT0tBnyNjXEyaw@mail.gmail.com>
+From: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Wed, 19 Jul 2017 21:15:15 +0200
+Message-ID: <20170719211515.46a1196c@windsurf>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq61A0AgO=P0yVCYFDwym=32yVRAJG9rT0tBnyNjXEyaw@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Guenter Roeck <linux@roeck-us.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>, Brian Norris <briannorris@chromium.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20170719152646.25903-1-p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Peter Chen <Peter.Chen-3arQi8VN3Tc@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Marc Dietrich <marvin24-Mmb7MZpHnFY@public.gmane.org>, Rakesh Iyer <riyer-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Peter Meerwald-Stadler <pmeerw-jW+XmwGofnusTnJN9+BGXg@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Xinliang Liu <z.liuxinliang-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Chanwoo Choi <cw00.choi-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Jiri Slaby <jslaby-IBi9RG/b67k@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Vincent Abriou <vincent.abriou-qxv4g6HH51o@public.gmane.org>, Bin Liu <b-liu-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hello,
 
-On Tue, Mar 14, 2017 at 9:22 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 1 March 2017 at 23:11, Guenter Roeck <linux@roeck-us.net> wrote:
->> HS400-ES devices fail to initialize with the following error messages.
->>
->> mmc1: power class selection to bus width 8 ddr 0 failed
->> mmc1: error -110 whilst initialising MMC card
->>
->> This was seen on Samsung Chromebook Plus. Code analysis points to
->> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
->> high-speed mode"), which attempts to set the bus width for all but
->> HS200 devices unconditionally. However, for HS400-ES, the bus width
->> is already selected.
->>
->> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
->> Cc: Douglas Anderson <dianders@chromium.org>
->> Cc: Brian Norris <briannorris@chromium.org>
->> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
->> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
->
-> Sorry for the delay. Been traveling.
->
-> Applied for fixes, thanks!
+On Wed, 19 Jul 2017 17:25:04 +0200, Philipp Zabel wrote:
+> The reset control API has two modes: exclusive access, where the driver
+> expects to have full and immediate control over the state of the reset
+> line, and shared (clock-like) access, where drivers only request reset
+> deassertion while active, but don't care about the state of the reset line
+> while inactive.
+> 
+> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
+> reset lines") started to transition the reset control request API calls
+> to explicitly state whether the driver needs exclusive or shared reset
+> control behavior.
+> 
+> This series converts all drivers that currently implicitly request
+> exclusive reset controls to the corresponding explicit API call. It is,
+> for the most part, generated from the following semantic patch:
+> 
+> @@
+> expression rstc, dev, id;
+> @@
+> -rstc = reset_control_get(dev, id);
+> +rstc = reset_control_get_exclusive(dev, id);
 
-+stable
+I don't know if it has been discussed in the past, so forgive me if it
+has been. Have you considered adding a "int flags" argument to the
+existing reset_control_get_*() functions, rather than introducing
+separate exclusive variants ?
 
-The commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
-high-speed mode") got backported to many stable branches, so probably
-this commit 773dc118756b ("mmc: core: Fix access to HS400-ES devices")
-also needs to get picked to the same stable branches.
+Indeed, with a "int flags" argument you could in the future add more
+variants/behaviors without actually multiplying the number of
+functions. Something like the "flags" argument for request_irq() for
+example.
 
-In the very least v4.9 and v4.4 stable includes the broken patch but
-not this fix.
+Best regards,
 
--Doug
+Thomas
+-- 
+Thomas Petazzoni, CTO, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
