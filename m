@@ -1,49 +1,50 @@
-From: Philipp Zabel <p.zabel@pengutronix.de>
-Subject: [PATCH 039/102] mmc: sdhci-st: explicitly request exclusive reset control
-Date: Wed, 19 Jul 2017 17:25:43 +0200
-Message-ID: <20170719152646.25903-40-p.zabel@pengutronix.de>
-References: <20170719152646.25903-1-p.zabel@pengutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.4.pengutronix.de ([92.198.50.35]:51835 "EHLO
-        metis.ext.4.pengutronix.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932741AbdGSP2x (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 11:28:53 -0400
-In-Reply-To: <20170719152646.25903-1-p.zabel@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: core: Fix access to HS400-ES devices
+Date: Wed, 19 Jul 2017 11:12:45 -0700
+Message-ID: <CAD=FV=WszhdQ8NY8atSzzhNfbZxjPzU8SthGiiHgQJO=942xAw@mail.gmail.com>
+References: <1488406307-8952-1-git-send-email-linux@roeck-us.net> <CAPDyKFq61A0AgO=P0yVCYFDwym=32yVRAJG9rT0tBnyNjXEyaw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFq61A0AgO=P0yVCYFDwym=32yVRAJG9rT0tBnyNjXEyaw@mail.gmail.com>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Guenter Roeck <linux@roeck-us.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Anssi Hannula <anssi.hannula@bitwise.fi>, Brian Norris <briannorris@chromium.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Philipp Zabel <p.zabel@pengutronix.de>, Patrice Chotard <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
-reset lines") started to transition the reset control request API calls
-to explicitly state whether the driver needs exclusive or shared reset
-control behavior. Convert all drivers requesting exclusive resets to the
-explicit API call so the temporary transition helpers can be removed.
+Hi,
 
-No functional changes.
+On Tue, Mar 14, 2017 at 9:22 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 1 March 2017 at 23:11, Guenter Roeck <linux@roeck-us.net> wrote:
+>> HS400-ES devices fail to initialize with the following error messages.
+>>
+>> mmc1: power class selection to bus width 8 ddr 0 failed
+>> mmc1: error -110 whilst initialising MMC card
+>>
+>> This was seen on Samsung Chromebook Plus. Code analysis points to
+>> commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
+>> high-speed mode"), which attempts to set the bus width for all but
+>> HS200 devices unconditionally. However, for HS400-ES, the bus width
+>> is already selected.
+>>
+>> Cc: Anssi Hannula <anssi.hannula@bitwise.fi>
+>> Cc: Douglas Anderson <dianders@chromium.org>
+>> Cc: Brian Norris <briannorris@chromium.org>
+>> Fixes: 3d4ef329757c ("mmc: core: fix multi-bit bus width ...")
+>> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+>
+> Sorry for the delay. Been traveling.
+>
+> Applied for fixes, thanks!
 
-Cc: Patrice Chotard <patrice.chotard@st.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
----
- drivers/mmc/host/sdhci-st.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
++stable
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 68c36c9fa2318..ad1ab0777d5f6 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -371,7 +371,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 	if (IS_ERR(icnclk))
- 		icnclk = NULL;
- 
--	rstc = devm_reset_control_get(&pdev->dev, NULL);
-+	rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
- 	if (IS_ERR(rstc))
- 		rstc = NULL;
- 	else
--- 
-2.11.0
+The commit 3d4ef329757c ("mmc: core: fix multi-bit bus width without
+high-speed mode") got backported to many stable branches, so probably
+this commit 773dc118756b ("mmc: core: Fix access to HS400-ES devices")
+also needs to get picked to the same stable branches.
 
+In the very least v4.9 and v4.4 stable includes the broken patch but
+not this fix.
+
+-Doug
