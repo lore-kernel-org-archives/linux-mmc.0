@@ -1,129 +1,275 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH 05/11] mmc: sunxi: Support controllers that
- can use both old and new timings
-Date: Wed, 19 Jul 2017 13:28:56 +0200
-Message-ID: <20170719112856.7vjcsel5cj6f5s5h@flea>
-References: <20170714064302.20383-1-wens@csie.org>
- <20170714064302.20383-6-wens@csie.org>
- <20170717091747.kcrlifbp7meihszm@flea>
- <CAGb2v67VmdfrMNLFH=6hhbGAHr15e0q4toDUbJ17d3exS3maFw@mail.gmail.com>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: [PATCH V3 00/11] mmc: Add Command Queue support
+Date: Wed, 19 Jul 2017 11:29:50 +0000
+Message-ID: <AM4PR0401MB2324BEA5561C080B697B714590A60@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+References: <1497524799-18165-1-git-send-email-adrian.hunter@intel.com>
+ <f2428951-3cf3-273f-33a3-c0b3147be2be@rock-chips.com>
+ <AM4PR0401MB2324236198EFAB4D89190AD890A60@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+ <9168c429-125e-e810-b3b1-1c0500f3b822@rock-chips.com>
+ <21a4c300-0323-ddef-7b5c-3821e701f256@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="bd2jix6f475lfyof"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBA4FXXFQKGQEXWIGCBQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Content-Disposition: inline
-In-Reply-To: <CAGb2v67VmdfrMNLFH=6hhbGAHr15e0q4toDUbJ17d3exS3maFw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-clk <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Id: linux-mmc@vger.kernel.org
-
-
---bd2jix6f475lfyof
-Content-Type: text/plain; charset="UTF-8"
-Content-Disposition: inline
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db5eur01on0055.outbound.protection.outlook.com ([104.47.2.55]:31700
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754030AbdGSL3x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Jul 2017 07:29:53 -0400
+In-Reply-To: <21a4c300-0323-ddef-7b5c-3821e701f256@rock-chips.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.or>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Wed, Jul 19, 2017 at 04:59:23PM +0800, Chen-Yu Tsai wrote:
-> On Mon, Jul 17, 2017 at 5:17 PM, Maxime Ripard
-> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> > Hi,
-> >
-> > On Fri, Jul 14, 2017 at 02:42:56PM +0800, Chen-Yu Tsai wrote:
-> >> On the SoCs that introduced the new timing mode for MMC controllers,
-> >> both the old (where the clock delays are set in the CCU) and new
-> >> (where the clock delays are set in the MMC controller) timing modes
-> >> are available, and we have to support them both. However there are
-> >> two bits that control which mode is active. One is in the CCU, the
-> >> other is in the MMC controller. The settings on both sides must be
-> >> the same, or nothing will work.
-> >>
-> >> The CCU's get/set_phase callbacks return -ENOTSUPP when the new
-> >> timing mode is active. This provides a way to know which mode is
-> >> active on that side, and we can set the bit on the MMC controller
-> >> side accordingly.
-> >>
-> >> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-> >> ---
-> >>  drivers/mmc/host/sunxi-mmc.c | 34 ++++++++++++++++++++++++++++++----
-> >>  1 file changed, 30 insertions(+), 4 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc=
-.c
-> >> index 0fb4e4c119e1..56e45c65b52d 100644
-> >> --- a/drivers/mmc/host/sunxi-mmc.c
-> >> +++ b/drivers/mmc/host/sunxi-mmc.c
-> >> @@ -22,6 +22,7 @@
-> >>  #include <linux/err.h>
-> >>
-> >>  #include <linux/clk.h>
-> >> +#include <linux/clk/sunxi-ng.h>
-> >>  #include <linux/gpio.h>
-> >>  #include <linux/platform_device.h>
-> >>  #include <linux/spinlock.h>
-> >> @@ -259,7 +260,7 @@ struct sunxi_mmc_cfg {
-> >>       /* Does DATA0 needs to be masked while the clock is updated */
-> >>       bool mask_data0;
-> >>
-> >> -     bool needs_new_timings;
-> >> +     bool has_new_timings;
-> >
-> > I think we should have both, it's a bit different. Newer SoCs like the
-> > A64 can only operate using new timings, while the older ones can
-> > operate in both modes.
-> >
-> > In one case, we're forced to use it, in the other one it's a
-> > policy. We should differentiate both cases.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Shawn Lin
+> Sent: Wednesday, July 19, 2017 4:43 PM
+> To: Bough Chen <haibo.chen@nxp.com>; Adrian Hunter
+> <adrian.hunter@intel.com>; Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>; Alex
+> Lemberg <alex.lemberg@sandisk.com>; Mateusz Nowak
+> <mateusz.nowak@intel.com>; Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>;
+> Jaehoon Chung <jh80.chung@samsung.com>; Dong Aisheng
+> <dongas86@gmail.com>; Das Asutosh <asutoshd@codeaurora.org>; Zhangfei
+> Gao <zhangfei.gao@gmail.com>; Dorfman Konstantin
+> <kdorfman@codeaurora.or>; Sahitya Tummala <stummala@codeaurora.org>;
+> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
+> <vbyravarasu@nvidia.com>; Linus Walleij <linus.walleij@linaro.org>
+> Subject: Re: [PATCH V3 00/11] mmc: Add Command Queue support
 >=20
-> For the A64's case, the limit is implied by not having any clk_delays.
+> Hi Bough,
+>=20
+> On 2017/7/19 15:44, Shawn Lin wrote:
+> > Hi Bough,
+> >
+> > On 2017/7/19 13:48, Bough Chen wrote:
+> >>
+> >>> -----Original Message-----
+> >>> From: Shawn Lin [mailto:shawn.lin@rock-chips.com]
+> >>> Sent: Wednesday, July 19, 2017 11:42 AM
+> >>> To: Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
+> >>> <ulf.hansson@linaro.org>
+> >>> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>;
+> >>> Bough Chen <haibo.chen@nxp.com>; Alex Lemberg
+> >>> <alex.lemberg@sandisk.com>; Mateusz Nowak
+> <mateusz.nowak@intel.com>;
+> >>> Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
+> >>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
+> >>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
+> >>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
+> >>> <kdorfman@codeaurora.org>; David Griego <david.griego@linaro.org>;
+> >>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
+> >>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
+> >>> Linus Walleij <linus.walleij@linaro.org>
+> >>> Subject: Re: [PATCH V3 00/11] mmc: Add Command Queue support
+> >>>
+> >>> Hi Adrian,
+> >>>
+> >>> On 2017/6/15 19:06, Adrian Hunter wrote:
+> >>>> Hi
+> >>>>
+> >>>> Here is V3 of the hardware command queue patches without the
+> >>>> software command queue patches.
+> >>>>
+> >>>
+> >>> I can now boot my board with v4.13 finally this morning[1] and apply
+> >>> this patchset and add my private patch for supporting CQE for
+> >>> sdhci-of-arasan.
+> >>> Great to see it works and I don't see any regression until now. I
+> >>> need more test but I would appreciate it if Ulf can pick all these
+> >>> up into linux-next that folks can help to test and not need to
+> >>> manually apply them. And it will be easy for me to submit patch for
+> >>> sdhci-of-arasan to support CQE later.
+> >>>
+> >>> I haven't have time to review all these, but I will do it next week.
+> >>> And I will also try to run more iozone/fio to see how much it gains
+> >>> when enabling CQE, comparing to non-CQE support.
+> >>>
+> >>> But at least currently feels free to add:
+> >>>
+> >>> Tested-by: Shawn Lin <shawn.lin@rock-chip.com>
+> >>>
+> >> Hi Shawn,
+> >>
+> >> Do you enable Runtime PM for cqhci? On my side, once enable cqhci
+> >> runtime PM, always get timeout issue, I'm debug this issue these days.
+> >> If not add runtime PM support for cqhci, everything work fine
+> >> including DCMD.
+> >>
+> >
+> > Aha, no!
+> >
+> > I said "I need more test" which should include runtime PM. As you
+> > could see sdhci-of-arsan still lacks proper runtime PM support, so I
+> > will try to hack it locally and re-test cqe then.
+> >
+>=20
+> Well, I add runtime PM  support for sdhci-of-arasan locally and re-test C=
+QE
+> again. All thing work well as expected for two hours!
+>=20
+>=20
 
-FWIW, I'm really not a big fan of that either :)
+Hi Adrian,
 
-Explicit is better than implicit.=C2=A9
+After debug, I find the root cause of the runtime PM issue for imx8, it is =
+our IC limitation, when we do=20
+__cqhci_disable(),  clear CQHCI_ENABLE of register CQHCI_CFG, it will impac=
+t the sdhci register 0x48, disable DMA and disable block count.  When I res=
+tore these bits, cqhci runtime suspend/resume works well.=20
 
-> But yes, I'll keep "needs_new_timings", and rename the new option to
-> "has_timing_switch" to make things clearer.
+So now I'd like to add:
 
-Great, thanks!
-Maxime
+Tested-by: Haibo Chen <haibo.chen@nxp.com>
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
+[    1.311132] sdhci: Secure Digital Host Controller Interface driver
+[    1.317324] sdhci: Copyright(c) Pierre Ossman
+[    1.322082] sdhci-pltfm: SDHCI platform and OF driver helper
+[    1.328626] mmc0: CQHCI version 5.10
+[    1.375351] mmc0: SDHCI controller on 5b010000.usdhc [5b010000.usdhc] us=
+ing ADMA
+[    1.391558] galcore 80000000.imx8_gpu_ss: bound 53100000.gpu (ops gpu_op=
+s)
+[    1.398450] Galcore version 6.2.2.93313
+[    1.477485] ledtrig-cpu: registered to indicate activity on CPUs
+ [    1.477984] mmc0: Command Queue Engine enabled
+[    1.478008] mmc0: new HS400 Enhanced strobe MMC card at address 0001
+[    1.478585] mmcblk0: mmc0:0001 032G34 29.1 GiB
+[    1.478741] mmcblk0boot0: mmc0:0001 032G34 partition 1 8.00 MiB
+[    1.478892] mmcblk0boot1: mmc0:0001 032G34 partition 2 8.00 MiB
+[    1.479039] mmcblk0rpmb: mmc0:0001 032G34 partition 3 4.00 MiB
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
 
---bd2jix6f475lfyof
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBAgAGBQJZb0J4AAoJEBx+YmzsjxAglo8QALargjCFyEB5hU3tIpW6Ra7E
-c0XfzP2gdl60I5JiNl/iEuI+maNS6rwON70hmq0JW58rmCc1pGDf5WoLfT8U8tKi
-GwXhMqHpCHBpX5y+x5YDdEgOTEiKAVNotmtEgZkaIEnolsxUvYiMD8iTmoYUW6PD
-OKSt1HLXCmpsdx0vpYNiHAi0JpEpwBa+WTuzdas6+g4FF4WLx6fhqG03FvwIQ74d
-gainmHvUhWMzir8XXq9tSsV9aslCYCn8WmCQT6YWEMdmlxWDUHXxAI1lytd9GosE
-kuR4Y//zRk9M9KZuaNeGxy9Pp5+dK0ReX48GkcXTNz0L9hdk7qr1YYW6Xe046i0L
-Fliu7OZMw4mAOM0rqHZO5UIONTQ8ltl5N0/ZjsI1T9+A73Zi/+cpHWj9V6Gx8Uj9
-aZV8b+mYwptJQOACR74EYWVdTn/EPFFT1MDuBfppE88BMPJaBf4LnZw6Aid/8Q/G
-gpULc33RIAmu4sQHJvo4FOOAQ/3uWj0FZQYgkPHFsMXrdswHFbzRvzU0LSCjbuRn
-mDUM/aKdJFBPPfhT++5nvCt55sGvczf6i8FVYBg5bigzFoeNUiXNFQ2KAEcAx27q
-Z5Yko/t0O6QCSrifvbr206TkIuYnHCRIrcTpzTGq49QRizbz/nAwBrI1Bg8MZQgO
-lbb/OtQWwY9RjweQIgqa
-=D0Fp
------END PGP SIGNATURE-----
-
---bd2jix6f475lfyof--
+> > Thanks.
+> >
+> >
+> >> Haibo Chen
+> >>> Thanks.
+> >>>
+> >>> [1]:
+> >>>
+> >>> [    2.859981] Synopsys Designware Multimedia Card Interface Driver
+> >>> [    2.924875] sdhci-pltfm: SDHCI platform and OF driver helper
+> >>> [    2.994768] mmc0: CQHCI version 5.10
+> >>> [    3.053787] mmc0: SDHCI controller on fe330000.sdhci [fe330000.sdh=
+ci]
+> >>> using ADMA
+> >>> [    3.073534] ledtrig-cpu: registered to indicate activity on CPUs
+> >>> [    3.079239] usbcore: registered new interface driver usbhid
+> >>> [    3.080183] usbhid: USB HID core driver
+> >>> [    3.094221] NET: Registered protocol family 17
+> >>> [    3.095069] 9pnet: Installing 9P2000 support
+> >>> [    3.095710] Key type dns_resolver registered
+> >>> [    3.098371] registered taskstats version 1
+> >>> [    3.155130] hctosys: unable to open rtc device (rtc0)
+> >>> [    3.166186] mmc0: Command Queue Engine enabled
+> >>> [    3.168514] mmc0: new HS400 Enhanced strobe MMC card at address
+> 0001
+> >>> [    3.188861] mmcblk0: mmc0:0001 AJNB4R 14.6 GiB
+> >>> [    3.200381] mmcblk0boot0: mmc0:0001 AJNB4R partition 1 4.00 MiB
+> >>> [    3.200702] ALSA device list:
+> >>> [    3.200747]   No soundcards found.
+> >>> [    3.204146] ttyS2 - failed to request DMA
+> >>> [    3.212363] mmcblk0boot1: mmc0:0001 AJNB4R partition 2 4.00 MiB
+> >>> [    3.221031] mmcblk0rpmb: mmc0:0001 AJNB4R partition 3 4.00 MiB
+> >>> [    3.277636]  mmcblk0: p1 p2 p3 p4 p5 p6 p7
+> >>> [    3.522777] EXT4-fs (mmcblk0p7): recovery complete
+> >>> [    3.523907] EXT4-fs (mmcblk0p7): mounted filesystem with ordered d=
+ata
+> >>> mode. Opts: (null)
+> >>> [    3.524699] VFS: Mounted root (ext4 filesystem) on device 179:7.
+> >>>
+> >>>
+> >>>> Is there any chance of this being queued for v4.13?
+> >>>>
+> >>>>
+> >>>> Changes since V2:
+> >>>>     Dropped patches that have been applied.
+> >>>>     Re-based
+> >>>>     Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
+> >>>>
+> >>>> Changes since V1:
+> >>>>
+> >>>>     "Share mmc request array between partitions" is dependent
+> >>>>     on changes in "Introduce queue semantics", so added that
+> >>>>     and block fixes:
+> >>>>
+> >>>>     Added "Fix is_waiting_last_req set incorrectly"
+> >>>>     Added "Fix cmd error reset failure path"
+> >>>>     Added "Use local var for mqrq_cur"
+> >>>>     Added "Introduce queue semantics"
+> >>>>
+> >>>> Changes since RFC:
+> >>>>
+> >>>>     Re-based on next.
+> >>>>     Added comment about command queue priority.
+> >>>>     Added some acks and reviews.
+> >>>>
+> >>>>
+> >>>> Adrian Hunter (10):
+> >>>>         mmc: core: Add mmc_retune_hold_now()
+> >>>>         mmc: core: Add members to mmc_request and mmc_data for CQE's
+> >>>>         mmc: host: Add CQE interface
+> >>>>         mmc: core: Turn off CQE before sending commands
+> >>>>         mmc: core: Add support for handling CQE requests
+> >>>>         mmc: mmc: Enable Command Queuing
+> >>>>         mmc: mmc: Enable CQE's
+> >>>>         mmc: block: Prepare CQE data
+> >>>>         mmc: block: Add CQE support
+> >>>>         mmc: sdhci-pci: Add CQHCI support for Intel GLK
+> >>>>
+> >>>> Venkat Gopalakrishnan (1):
+> >>>>         mmc: cqhci: support for command queue enabled host
+> >>>>
+> >>>>    drivers/mmc/core/block.c          |  240 +++++++-
+> >>>>    drivers/mmc/core/block.h          |    7 +
+> >>>>    drivers/mmc/core/bus.c            |    7 +
+> >>>>    drivers/mmc/core/core.c           |  156 ++++-
+> >>>>    drivers/mmc/core/host.c           |    6 +
+> >>>>    drivers/mmc/core/host.h           |    1 +
+> >>>>    drivers/mmc/core/mmc.c            |   30 +-
+> >>>>    drivers/mmc/core/queue.c          |  273 ++++++++-
+> >>>>    drivers/mmc/core/queue.h          |   42 +-
+> >>>>    drivers/mmc/host/Kconfig          |   14 +
+> >>>>    drivers/mmc/host/Makefile         |    1 +
+> >>>>    drivers/mmc/host/cqhci.c          | 1146
+> >>> +++++++++++++++++++++++++++++++++++++
+> >>>>    drivers/mmc/host/cqhci.h          |  240 ++++++++
+> >>>>    drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
+> >>>>    include/linux/mmc/core.h          |   18 +-
+> >>>>    include/linux/mmc/host.h          |   24 +
+> >>>>    include/trace/events/mmc.h        |   36 +-
+> >>>>    17 files changed, 2354 insertions(+), 40 deletions(-)
+> >>>>    create mode 100644 drivers/mmc/host/cqhci.c
+> >>>>    create mode 100644 drivers/mmc/host/cqhci.h
+> >>>>
+> >>>>
+> >>>> Regards
+> >>>> Adrian
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> >>>> in the body of a message to majordomo@vger.kernel.org More
+> >>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>>
+> >>>>
+> >>>>
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> >> in the body of a message to majordomo@vger.kernel.org More majordomo
+> >> info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> >>
+> >
+> >
+> >
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
+he
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
