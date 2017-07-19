@@ -1,42 +1,101 @@
-From: "Steven J. Hill" <Steven.Hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] mmc: Convert to using %pOF instead of full_name
-Date: Tue, 18 Jul 2017 17:43:11 -0500
-Message-ID: <af2d485c-b8fc-da0d-689b-c8fdf2863401@cavium.com>
-References: <20170718214339.7774-36-robh@kernel.org>
- <f997ecad-7e8f-b807-494a-7c458cd8ff90@caviumnetworks.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RFC PATCH 6/6] mmc: sdhci: remove CONFIG_MMC_DEBUG from the
+ driver
+Date: Wed, 19 Jul 2017 08:32:34 +0800
+Message-ID: <9e8e1a62-84ca-ce43-5b8d-debcda6e103c@rock-chips.com>
+References: <1500368376-160272-1-git-send-email-shawn.lin@rock-chips.com>
+ <1500368503-160501-1-git-send-email-shawn.lin@rock-chips.com>
+ <1500368503-160501-2-git-send-email-shawn.lin@rock-chips.com>
+ <b21d0902-826c-c4b2-0bf0-7ff453a9bfa6@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <f997ecad-7e8f-b807-494a-7c458cd8ff90-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ludovic Desroches <ludovic.desroches-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>, Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.133]:37496 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751560AbdGSAcj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jul 2017 20:32:39 -0400
+In-Reply-To: <b21d0902-826c-c4b2-0bf0-7ff453a9bfa6@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org
 
-On 07/18/2017 05:00 PM, David Daney wrote:
-> On 07/18/2017 02:43 PM, Rob Herring wrote:
->> Now that we have a custom printf format specifier, convert users of
->> full_name to use %pOF instead. This is preparation to remove storing
->> of the full path string for each node.
+Hi Adrian,
+
+On 2017/7/18 17:38, Adrian Hunter wrote:
+> On 18/07/17 12:01, Shawn Lin wrote:
+>> sdhci uses CONFIG_MMC_DEBUG for showing ADMA descriptor
+>> when occurring ADMA error. And it's also used to  dump the
+>> registers whenever calling sdhci_add_host.
 >>
->> Signed-off-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
->> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Cc: Ludovic Desroches <ludovic.desroches-UWL1GkI3JZL3oGB3hsPCZA@public.gmane.org>
->> Cc: Jan Glauber <jglauber-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->> Cc: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->> Cc: "Steven J. Hill" <Steven.Hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> On one hand, I don't see any burden to always print the state
+>> ADMA descriptor as it's rare and will help folks better understand
+>> what was happening when seeing ADMA error.
+>>
+>> On the other, git-blame points out that CONFIG_MMC_DEBUG for
+>> sdhci_add_host was added since it's merged for the first time.
+>> I don't know what exactly the intention was, but I guess folks
+>> don't need it at all? IMHO, it's another all-or-none proposition.
+>> I'd prefer to remove this sdhci_dumpregs from sdhci_add_host totally.
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> ---
+>>
+>>   drivers/mmc/host/sdhci.c | 8 --------
+>>   1 file changed, 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index ecd0d43..82f1761 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2502,7 +2502,6 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+>>   		sdhci_finish_command(host);
+>>   }
+>>   
+>> -#ifdef CONFIG_MMC_DEBUG
+>>   static void sdhci_adma_show_error(struct sdhci_host *host)
+>>   {
+>>   	void *desc = host->adma_table;
+>> @@ -2530,9 +2529,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
+>>   			break;
+>>   	}
+>>   }
+>> -#else
+>> -static void sdhci_adma_show_error(struct sdhci_host *host) { }
+>> -#endif
+>>   
+>>   static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>   {
+>> @@ -3747,10 +3743,6 @@ int __sdhci_add_host(struct sdhci_host *host)
+>>   		goto untasklet;
+>>   	}
+>>   
+>> -#ifdef CONFIG_MMC_DEBUG
+>> -	sdhci_dumpregs(host);
+>> -#endif
 > 
-> For the Cavium bits, I haven't tested them, but they look fine, so ...
+> We should still DBG() the interesting registers like SDHCI_HOST_VERSION,
+> SDHCI_PRESENT_STATE, SDHCI_CAPABILITIES, SDHCI_CAPABILITIES_1.  Better to do
+> it earlier on though, like in sdhci_setup_host() after checking
+> mmc_regulator_get_supply().
 > 
-> Acked-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> 
-Tested and work on our platforms....
 
-Tested-by: Steven J. Hill <Steven.Hill-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Okay. So would you like to kill the CONFIG_MMC_DEBUG around
+this dempregs and keep the output log always there OR you still
+want to keep it under CONFIG_MMC_DEBUG?
+
+
+Thanks.
+
+>> -
+>>   	ret = sdhci_led_register(host);
+>>   	if (ret) {
+>>   		pr_err("%s: Failed to register LED device: %d\n",
+>>
+> 
+> 
+> 
+> 
+
