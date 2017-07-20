@@ -1,144 +1,62 @@
-From: Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
 Subject: Re: [PATCH] powerpc/asm/cacheflush: Cleanup cacheflush function params
-Date: Thu, 20 Jul 2017 21:43:34 +1000
-Message-ID: <87mv7zgwpl.fsf@concordia.ellerman.id.au>
+Date: Thu, 20 Jul 2017 14:07:46 +0200
+Message-ID: <CAMuHMdXU-R8kBs_xp7XDK0pnC5fakpghchuEPD8jtEcHLmgyHg@mail.gmail.com>
 References: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
+ <87mv7zgwpl.fsf@concordia.ellerman.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170720062850.2195-1-matthew.brown.dev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Brown <matthew.brown.dev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <87mv7zgwpl.fsf@concordia.ellerman.id.au>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Michael Ellerman <mpe@ellerman.id.au>
+Cc: USB list <linux-usb@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, DRI Development <dri-devel@lists.freedesktop.org>, Matt Brown <matthew.brown.dev@gmail.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, MTD Maling List <linux-mtd@lists.infradead.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Matt,
-
-Thanks for tackling this mess.
-
-Matt Brown <matthew.brown.dev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> writes:
-> The cacheflush prototypes currently use start and stop values and each
-> call requires typecasting the address to an unsigned long.
-> This patch changes the cacheflush prototypes to follow the x86 style of
-> using a base and size values, with base being a void pointer.
->
-> All callers of the cacheflush functions, including drivers, have been
-> modified to conform to the new prototypes.
->
-> The 64 bit cacheflush functions which were implemented in assembly code
-> (flush_dcache_range, flush_inval_dcache_range) have been translated into
-> C for readability and coherence.
->
-> Signed-off-by: Matt Brown <matthew.brown.dev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/powerpc/include/asm/cacheflush.h        | 47 +++++++++++++++++--------
->  arch/powerpc/kernel/misc_64.S                | 52 ----------------------------
->  arch/powerpc/mm/dma-noncoherent.c            | 15 ++++----
->  arch/powerpc/platforms/512x/mpc512x_shared.c | 10 +++---
->  arch/powerpc/platforms/85xx/smp.c            |  6 ++--
->  arch/powerpc/sysdev/dart_iommu.c             |  5 +--
->  drivers/ata/pata_bf54x.c                     |  3 +-
->  drivers/char/agp/uninorth-agp.c              |  6 ++--
->  drivers/gpu/drm/drm_cache.c                  |  3 +-
->  drivers/macintosh/smu.c                      | 15 ++++----
->  drivers/mmc/host/bfin_sdh.c                  |  3 +-
->  drivers/mtd/nand/bf5xx_nand.c                |  6 ++--
->  drivers/soc/fsl/qbman/dpaa_sys.h             |  2 +-
->  drivers/soc/fsl/qbman/qman_ccsr.c            |  3 +-
->  drivers/spi/spi-bfin5xx.c                    | 10 +++---
->  drivers/tty/serial/mpsc.c                    | 46 ++++++++----------------
->  drivers/usb/musb/blackfin.c                  |  6 ++--
-
-I think you want to trim that to powerpc only drivers for now at least.
-
-> diff --git a/arch/powerpc/include/asm/cacheflush.h b/arch/powerpc/include/asm/cacheflush.h
-> index 11843e3..b8f04c3 100644
-> --- a/arch/powerpc/include/asm/cacheflush.h
-> +++ b/arch/powerpc/include/asm/cacheflush.h
-> @@ -51,13 +51,13 @@ static inline void __flush_dcache_icache_phys(unsigned long physaddr)
->   * Write any modified data cache blocks out to memory and invalidate them.
->   * Does not invalidate the corresponding instruction cache blocks.
->   */
-> -static inline void flush_dcache_range(unsigned long start, unsigned long stop)
-> +static inline void flush_dcache_range(void *start, unsigned long size)
->  {
-> -	void *addr = (void *)(start & ~(L1_CACHE_BYTES - 1));
-> -	unsigned long size = stop - (unsigned long)addr + (L1_CACHE_BYTES - 1);
-> +	void *addr = (void *)((u32)start & ~(L1_CACHE_BYTES - 1));
-
-unsigned long would be nicer than u32.
-
-And ALIGN_DOWN() should work here I think.
-
-> +	unsigned long len = size + (L1_CACHE_BYTES - 1);
-
-And ALIGN?
-
-> @@ -83,22 +83,39 @@ static inline void clean_dcache_range(unsigned long start, unsigned long stop)
->   * to invalidate the cache so the PPC core doesn't get stale data
->   * from the CPM (no cache snooping here :-).
->   */
-> -static inline void invalidate_dcache_range(unsigned long start,
-> -					   unsigned long stop)
-> +static inline void invalidate_dcache_range(void *start, unsigned long size)
->  {
-> -	void *addr = (void *)(start & ~(L1_CACHE_BYTES - 1));
-> -	unsigned long size = stop - (unsigned long)addr + (L1_CACHE_BYTES - 1);
-> +	void *addr = (void *)((u32)start & ~(L1_CACHE_BYTES - 1));
-> +	unsigned long len = size + (L1_CACHE_SHIFT - 1);
->  	unsigned long i;
->  
-> -	for (i = 0; i < size >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-> +	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
->  		dcbi(addr);
->  	mb();	/* sync */
->  }
->  
->  #endif /* CONFIG_PPC32 */
->  #ifdef CONFIG_PPC64
-> -extern void flush_dcache_range(unsigned long start, unsigned long stop);
-> -extern void flush_inval_dcache_range(unsigned long start, unsigned long stop);
-> +static inline void flush_dcache_range(void *start, unsigned long size)
-> +{
-> +	void *addr = (void *)((u64)start & ~(L1_CACHE_BYTES - 1));
-> +	unsigned long len = size + (L1_CACHE_BYTES - 1);
-> +	unsigned long i;
-> +
-> +	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-> +		dcbf(addr);
-> +	mb();	/* sync */
-> +}
-
-I'd probably prefer a precursor patch to do the asm -> C conversion, but
-I guess that's a pain because then you have to implement both the old
-and new logic in C.
-
-Also L1_CACHE_SHIFT is not necessarily == DCACHEL1BLOCKSIZE.
-
-Finally it would be good to see what code the compiler generates out of
-this, and see how it compares to the asm version. Not because it's
-particularly performance critical (hopefully) but just so we know.
-
-> diff --git a/arch/powerpc/platforms/512x/mpc512x_shared.c b/arch/powerpc/platforms/512x/mpc512x_shared.c
-> index 6b4f4cb..0f3a7d9 100644
-> --- a/arch/powerpc/platforms/512x/mpc512x_shared.c
-> +++ b/arch/powerpc/platforms/512x/mpc512x_shared.c
-> @@ -254,8 +254,8 @@ static void __init mpc512x_init_diu(void)
->  	}
->  	memcpy(&diu_shared_fb.ad0, vaddr, sizeof(struct diu_ad));
->  	/* flush fb area descriptor */
-> -	dst = (unsigned long)&diu_shared_fb.ad0;
-> -	flush_dcache_range(dst, dst + sizeof(struct diu_ad) - 1);
-> +	dst = &diu_shared_fb.ad0;
-
-Do you even need dst anymore?
-
-> +	flush_dcache_range(dst, sizeof(struct diu_ad) - 1);
-                                                        ^
-                  You shouldn't be subtracting 1 any more.
-
-
-cheers
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gVGh1LCBKdWwgMjAsIDIwMTcgYXQgMTo0MyBQTSwgTWljaGFlbCBFbGxlcm1hbiA8bXBlQGVs
+bGVybWFuLmlkLmF1PiB3cm90ZToKPiBNYXR0IEJyb3duIDxtYXR0aGV3LmJyb3duLmRldkBnbWFp
+bC5jb20+IHdyaXRlczoKPj4gVGhlIGNhY2hlZmx1c2ggcHJvdG90eXBlcyBjdXJyZW50bHkgdXNl
+IHN0YXJ0IGFuZCBzdG9wIHZhbHVlcyBhbmQgZWFjaAo+PiBjYWxsIHJlcXVpcmVzIHR5cGVjYXN0
+aW5nIHRoZSBhZGRyZXNzIHRvIGFuIHVuc2lnbmVkIGxvbmcuCj4+IFRoaXMgcGF0Y2ggY2hhbmdl
+cyB0aGUgY2FjaGVmbHVzaCBwcm90b3R5cGVzIHRvIGZvbGxvdyB0aGUgeDg2IHN0eWxlIG9mCj4+
+IHVzaW5nIGEgYmFzZSBhbmQgc2l6ZSB2YWx1ZXMsIHdpdGggYmFzZSBiZWluZyBhIHZvaWQgcG9p
+bnRlci4KPj4KPj4gQWxsIGNhbGxlcnMgb2YgdGhlIGNhY2hlZmx1c2ggZnVuY3Rpb25zLCBpbmNs
+dWRpbmcgZHJpdmVycywgaGF2ZSBiZWVuCj4+IG1vZGlmaWVkIHRvIGNvbmZvcm0gdG8gdGhlIG5l
+dyBwcm90b3R5cGVzLgo+Pgo+PiBUaGUgNjQgYml0IGNhY2hlZmx1c2ggZnVuY3Rpb25zIHdoaWNo
+IHdlcmUgaW1wbGVtZW50ZWQgaW4gYXNzZW1ibHkgY29kZQo+PiAoZmx1c2hfZGNhY2hlX3Jhbmdl
+LCBmbHVzaF9pbnZhbF9kY2FjaGVfcmFuZ2UpIGhhdmUgYmVlbiB0cmFuc2xhdGVkIGludG8KPj4g
+QyBmb3IgcmVhZGFiaWxpdHkgYW5kIGNvaGVyZW5jZS4KCj4+IC0tLSBhL2FyY2gvcG93ZXJwYy9p
+bmNsdWRlL2FzbS9jYWNoZWZsdXNoLmgKPj4gKysrIGIvYXJjaC9wb3dlcnBjL2luY2x1ZGUvYXNt
+L2NhY2hlZmx1c2guaAo+PiBAQCAtNTEsMTMgKzUxLDEzIEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBf
+X2ZsdXNoX2RjYWNoZV9pY2FjaGVfcGh5cyh1bnNpZ25lZCBsb25nIHBoeXNhZGRyKQo+PiAgICog
+V3JpdGUgYW55IG1vZGlmaWVkIGRhdGEgY2FjaGUgYmxvY2tzIG91dCB0byBtZW1vcnkgYW5kIGlu
+dmFsaWRhdGUgdGhlbS4KPj4gICAqIERvZXMgbm90IGludmFsaWRhdGUgdGhlIGNvcnJlc3BvbmRp
+bmcgaW5zdHJ1Y3Rpb24gY2FjaGUgYmxvY2tzLgo+PiAgICovCj4+IC1zdGF0aWMgaW5saW5lIHZv
+aWQgZmx1c2hfZGNhY2hlX3JhbmdlKHVuc2lnbmVkIGxvbmcgc3RhcnQsIHVuc2lnbmVkIGxvbmcg
+c3RvcCkKPj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBmbHVzaF9kY2FjaGVfcmFuZ2Uodm9pZCAqc3Rh
+cnQsIHVuc2lnbmVkIGxvbmcgc2l6ZSkKPj4gIHsKPj4gLSAgICAgdm9pZCAqYWRkciA9ICh2b2lk
+ICopKHN0YXJ0ICYgfihMMV9DQUNIRV9CWVRFUyAtIDEpKTsKPj4gLSAgICAgdW5zaWduZWQgbG9u
+ZyBzaXplID0gc3RvcCAtICh1bnNpZ25lZCBsb25nKWFkZHIgKyAoTDFfQ0FDSEVfQllURVMgLSAx
+KTsKPj4gKyAgICAgdm9pZCAqYWRkciA9ICh2b2lkICopKCh1MzIpc3RhcnQgJiB+KEwxX0NBQ0hF
+X0JZVEVTIC0gMSkpOwo+Cj4gdW5zaWduZWQgbG9uZyB3b3VsZCBiZSBuaWNlciB0aGFuIHUzMi4K
+CkluZGVlZC4gVGhhdCB3b3VsZCBtYWtlIHRoaXMgd29yayBvbiBwcGM2NCwgdG9vLgpBZnRlciB3
+aGljaCBwcGM2NCBoYXMgYW4gaWRlbnRpY2FsIGNvcHkgKHU2NCA9IHVuc2lnbmVkIGxvbmcgb24g
+cHBjNjQpIGJlbG93PwoKR3J7b2V0amUsZWV0aW5nfXMsCgogICAgICAgICAgICAgICAgICAgICAg
+ICBHZWVydAoKLS0KR2VlcnQgVXl0dGVyaG9ldmVuIC0tIFRoZXJlJ3MgbG90cyBvZiBMaW51eCBi
+ZXlvbmQgaWEzMiAtLSBnZWVydEBsaW51eC1tNjhrLm9yZwoKSW4gcGVyc29uYWwgY29udmVyc2F0
+aW9ucyB3aXRoIHRlY2huaWNhbCBwZW9wbGUsIEkgY2FsbCBteXNlbGYgYSBoYWNrZXIuIEJ1dAp3
+aGVuIEknbSB0YWxraW5nIHRvIGpvdXJuYWxpc3RzIEkganVzdCBzYXkgInByb2dyYW1tZXIiIG9y
+IHNvbWV0aGluZyBsaWtlIHRoYXQuCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLS0g
+TGludXMgVG9ydmFsZHMKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Au
+b3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRl
+dmVsCg==
