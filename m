@@ -1,8 +1,8 @@
 From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH v2 07/10] ARM: dts: sun8i: a83t: Add MMC
- controller device nodes
-Date: Thu, 20 Jul 2017 11:44:49 +0800
-Message-ID: <20170720034452.15920-8-wens@csie.org>
+Subject: [PATCH v2 05/10] mmc: sunxi: Support MMC DDR52 transfer
+ mode with new timing mode
+Date: Thu, 20 Jul 2017 11:44:47 +0800
+Message-ID: <20170720034452.15920-6-wens@csie.org>
 References: <20170720034452.15920-1-wens@csie.org>
 Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
@@ -20,83 +20,91 @@ To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.o
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The A83T has 3 MMC controllers. The third one is a bit special, as it
-supports a wider 8-bit bus, and a "new timing mode".
+The MMC controller can support DDR52 transfers under the new timing
+mode. According to the BSP kernel, the module clock has to be double
+the card clock, regardless of the bus width. The default timings in
+the hardware can be used.
+
+This also reworks the code setting the internal divider, getting rid
+of a extra conditional.
 
 Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 ---
- arch/arm/boot/dts/sun8i-a83t.dtsi | 59 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 30 ++++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm/boot/dts/sun8i-a83t.dtsi b/arch/arm/boot/dts/sun8i-a83t.dtsi
-index beed05e10a3b..21ab668abfac 100644
---- a/arch/arm/boot/dts/sun8i-a83t.dtsi
-+++ b/arch/arm/boot/dts/sun8i-a83t.dtsi
-@@ -182,6 +182,65 @@
- 			#dma-cells = <1>;
- 		};
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index c8a60e43dc43..11587a69a1fd 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -755,7 +755,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	long rate;
+-	u32 rval, clock = ios->clock;
++	u32 rval, clock = ios->clock, div = 1;
+ 	int ret;
  
-+		mmc0: mmc@1c0f000 {
-+			compatible = "allwinner,sun8i-a83t-mmc",
-+				     "allwinner,sun7i-a20-mmc";
-+			reg = <0x01c0f000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC0>,
-+				 <&ccu CLK_MMC0>,
-+				 <&ccu CLK_MMC0_OUTPUT>,
-+				 <&ccu CLK_MMC0_SAMPLE>;
-+			clock-names = "ahb",
-+				      "mmc",
-+				      "output",
-+				      "sample";
-+			resets = <&ccu RST_BUS_MMC0>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 60 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
-+
-+		mmc1: mmc@1c10000 {
-+			compatible = "allwinner,sun8i-a83t-mmc",
-+				     "allwinner,sun7i-a20-mmc";
-+			reg = <0x01c10000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC1>,
-+				 <&ccu CLK_MMC1>,
-+				 <&ccu CLK_MMC1_OUTPUT>,
-+				 <&ccu CLK_MMC1_SAMPLE>;
-+			clock-names = "ahb",
-+				      "mmc",
-+				      "output",
-+				      "sample";
-+			resets = <&ccu RST_BUS_MMC1>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
-+
-+		mmc2: mmc@1c11000 {
-+			compatible = "allwinner,sun8i-a83t-emmc";
-+			reg = <0x01c11000 0x1000>;
-+			clocks = <&ccu CLK_BUS_MMC2>,
-+				 <&ccu CLK_MMC2>,
-+				 <&ccu CLK_MMC2_OUTPUT>,
-+				 <&ccu CLK_MMC2_SAMPLE>;
-+			clock-names = "ahb",
-+				      "mmc",
-+				      "output",
-+				      "sample";
-+			resets = <&ccu RST_BUS_MMC2>;
-+			reset-names = "ahb";
-+			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+		};
-+
- 		ccu: clock@1c20000 {
- 			compatible = "allwinner,sun8i-a83t-ccu";
- 			reg = <0x01c20000 0x400>;
+ 	ret = sunxi_mmc_oclk_onoff(host, 0);
+@@ -768,10 +768,21 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	if (!ios->clock)
+ 		return 0;
+ 
+-	/* 8 bit DDR requires a higher module clock */
++	/*
++	 * Under the old timing mode, 8 bit DDR requires the module
++	 * clock to be double the card clock. Under the new timing
++	 * mode, all DDR modes require a doubled module clock.
++	 *
++	 * We currently only support the standard MMC DDR52 mode.
++	 * This block should be updated once support for other DDR
++	 * modes is added.
++	 */
+ 	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
+-	    ios->bus_width == MMC_BUS_WIDTH_8)
++	    (host->use_new_timings ||
++	     ios->bus_width == MMC_BUS_WIDTH_8)) {
++		div = 2;
+ 		clock <<= 1;
++	}
+ 
+ 	if (host->use_new_timings) {
+ 		ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
+@@ -799,15 +810,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 		return ret;
+ 	}
+ 
+-	/* clear internal divider */
++	/* set internal divider */
+ 	rval = mmc_readl(host, REG_CLKCR);
+ 	rval &= ~0xff;
+-	/* set internal divider for 8 bit eMMC DDR, so card clock is right */
+-	if (ios->timing == MMC_TIMING_MMC_DDR52 &&
+-	    ios->bus_width == MMC_BUS_WIDTH_8) {
+-		rval |= 1;
+-		rate >>= 1;
+-	}
++	rval |= div - 1;
+ 	mmc_writel(host, REG_CLKCR, rval);
+ 
+ 	if (host->use_new_timings) {
+@@ -838,7 +844,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 		return ret;
+ 
+ 	/* And we just enabled our clock back */
+-	mmc->actual_clock = rate;
++	mmc->actual_clock = rate / div;
+ 
+ 	return 0;
+ }
+@@ -1315,7 +1321,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+ 
+-	if (host->cfg->clk_delays)
++	if (host->cfg->clk_delays || host->use_new_timings)
+ 		mmc->caps      |= MMC_CAP_1_8V_DDR;
+ 
+ 	ret = mmc_of_parse(mmc);
 -- 
 2.13.2
