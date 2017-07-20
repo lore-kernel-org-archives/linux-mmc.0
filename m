@@ -1,12 +1,12 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFT PATCH] mmc: sdhci-of-arasan: Add command queue support
-Date: Thu, 20 Jul 2017 09:43:18 +0800
-Message-ID: <1500514998-183947-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RESEND RFT PATCH] mmc: sdhci-of-arasan: Add command queue support
+Date: Thu, 20 Jul 2017 09:48:01 +0800
+Message-ID: <1500515281-192739-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:56127 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:47912 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932089AbdGTBn7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 21:43:59 -0400
+        with ESMTP id S932089AbdGTBse (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 21:48:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-rockchip@lists.infradead.org
@@ -21,6 +21,8 @@ http://www.spinics.net/lists/linux-mmc/msg44648.html
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 ---
+Sorry, the previous patch has one nit introduced when
+manually amend the patch a bit after it's generated.
 
  drivers/mmc/host/Kconfig           |   1 +
  drivers/mmc/host/sdhci-of-arasan.c | 199 ++++++++++++++++++++++++++++++++++---
@@ -34,7 +36,7 @@ index 2242633..a14efcb 100644
  	depends on MMC_SDHCI_PLTFM
  	depends on OF
  	depends on COMMON_CLK
-+	select MMC_CQHC
++	select MMC_CQHCI
  	help
  	  This selects the Arasan Secure Digital Host Controller Interface
  	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
