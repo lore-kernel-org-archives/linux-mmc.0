@@ -1,684 +1,246 @@
-From: Matt Brown <matthew.brown.dev@gmail.com>
-Subject: [PATCH] powerpc/asm/cacheflush: Cleanup cacheflush function params
-Date: Thu, 20 Jul 2017 16:28:50 +1000
-Message-ID: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
-Return-path: <linux-ide-owner@vger.kernel.org>
-Sender: linux-ide-owner@vger.kernel.org
-To: linuxppc-dev@lists.ozlabs.org, linux-ide@vger.kernel.org, dri-devel@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Thu, 20 Jul 2017 08:56:42 +0200
+Message-ID: <20170720065642.rk44kcjkzppg6uqr@flea>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============5377596179865870267=="
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20170719152646.25903-1-p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Peter Chen <Peter.Chen-3arQi8VN3Tc@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Marc Dietrich <marvin24-Mmb7MZpHnFY@public.gmane.org>, Rakesh Iyer <riyer-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Peter Meerwald-Stadler <pmeerw-jW+XmwGofnusTnJN9+BGXg@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wim Van Sebroeck <wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Xinliang Liu <z.liuxinliang-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Chanwoo Choi <cw00.choi-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Jiri Slaby <jslaby-IBi9RG/b67k@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Vincent Abriou <vincent.abriou-qxv4g6HH51o@public.gmane.org>, Bin Liu <b-liu-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TaqPxH82wqD4g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The cacheflush prototypes currently use start and stop values and each
-call requires typecasting the address to an unsigned long.
-This patch changes the cacheflush prototypes to follow the x86 style of
-using a base and size values, with base being a void pointer.
 
-All callers of the cacheflush functions, including drivers, have been
-modified to conform to the new prototypes.
+--===============5377596179865870267==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="r7njpeniu6ypk76n"
+Content-Disposition: inline
 
-The 64 bit cacheflush functions which were implemented in assembly code
-(flush_dcache_range, flush_inval_dcache_range) have been translated into
-C for readability and coherence.
 
-Signed-off-by: Matt Brown <matthew.brown.dev@gmail.com>
----
- arch/powerpc/include/asm/cacheflush.h        | 47 +++++++++++++++++--------
- arch/powerpc/kernel/misc_64.S                | 52 ----------------------------
- arch/powerpc/mm/dma-noncoherent.c            | 15 ++++----
- arch/powerpc/platforms/512x/mpc512x_shared.c | 10 +++---
- arch/powerpc/platforms/85xx/smp.c            |  6 ++--
- arch/powerpc/sysdev/dart_iommu.c             |  5 +--
- drivers/ata/pata_bf54x.c                     |  3 +-
- drivers/char/agp/uninorth-agp.c              |  6 ++--
- drivers/gpu/drm/drm_cache.c                  |  3 +-
- drivers/macintosh/smu.c                      | 15 ++++----
- drivers/mmc/host/bfin_sdh.c                  |  3 +-
- drivers/mtd/nand/bf5xx_nand.c                |  6 ++--
- drivers/soc/fsl/qbman/dpaa_sys.h             |  2 +-
- drivers/soc/fsl/qbman/qman_ccsr.c            |  3 +-
- drivers/spi/spi-bfin5xx.c                    | 10 +++---
- drivers/tty/serial/mpsc.c                    | 46 ++++++++----------------
- drivers/usb/musb/blackfin.c                  |  6 ++--
- 17 files changed, 86 insertions(+), 152 deletions(-)
+--r7njpeniu6ypk76n
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/arch/powerpc/include/asm/cacheflush.h b/arch/powerpc/include/asm/cacheflush.h
-index 11843e3..b8f04c3 100644
---- a/arch/powerpc/include/asm/cacheflush.h
-+++ b/arch/powerpc/include/asm/cacheflush.h
-@@ -51,13 +51,13 @@ static inline void __flush_dcache_icache_phys(unsigned long physaddr)
-  * Write any modified data cache blocks out to memory and invalidate them.
-  * Does not invalidate the corresponding instruction cache blocks.
-  */
--static inline void flush_dcache_range(unsigned long start, unsigned long stop)
-+static inline void flush_dcache_range(void *start, unsigned long size)
- {
--	void *addr = (void *)(start & ~(L1_CACHE_BYTES - 1));
--	unsigned long size = stop - (unsigned long)addr + (L1_CACHE_BYTES - 1);
-+	void *addr = (void *)((u32)start & ~(L1_CACHE_BYTES - 1));
-+	unsigned long len = size + (L1_CACHE_BYTES - 1);
- 	unsigned long i;
- 
--	for (i = 0; i < size >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-+	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
- 		dcbf(addr);
- 	mb();	/* sync */
- }
-@@ -67,13 +67,13 @@ static inline void flush_dcache_range(unsigned long start, unsigned long stop)
-  * Does not invalidate the corresponding cache lines (especially for
-  * any corresponding instruction cache).
-  */
--static inline void clean_dcache_range(unsigned long start, unsigned long stop)
-+static inline void clean_dcache_range(void *start, unsigned long size)
- {
--	void *addr = (void *)(start & ~(L1_CACHE_BYTES - 1));
--	unsigned long size = stop - (unsigned long)addr + (L1_CACHE_BYTES - 1);
-+	void *addr = (void *)((u32)start & ~(L1_CACHE_BYTES - 1));
-+	unsigned long len = size + (L1_CACHE_BYTES  - 1);
- 	unsigned long i;
- 
--	for (i = 0; i < size >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-+	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
- 		dcbst(addr);
- 	mb();	/* sync */
- }
-@@ -83,22 +83,39 @@ static inline void clean_dcache_range(unsigned long start, unsigned long stop)
-  * to invalidate the cache so the PPC core doesn't get stale data
-  * from the CPM (no cache snooping here :-).
-  */
--static inline void invalidate_dcache_range(unsigned long start,
--					   unsigned long stop)
-+static inline void invalidate_dcache_range(void *start, unsigned long size)
- {
--	void *addr = (void *)(start & ~(L1_CACHE_BYTES - 1));
--	unsigned long size = stop - (unsigned long)addr + (L1_CACHE_BYTES - 1);
-+	void *addr = (void *)((u32)start & ~(L1_CACHE_BYTES - 1));
-+	unsigned long len = size + (L1_CACHE_SHIFT - 1);
- 	unsigned long i;
- 
--	for (i = 0; i < size >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-+	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
- 		dcbi(addr);
- 	mb();	/* sync */
- }
- 
- #endif /* CONFIG_PPC32 */
- #ifdef CONFIG_PPC64
--extern void flush_dcache_range(unsigned long start, unsigned long stop);
--extern void flush_inval_dcache_range(unsigned long start, unsigned long stop);
-+static inline void flush_dcache_range(void *start, unsigned long size)
-+{
-+	void *addr = (void *)((u64)start & ~(L1_CACHE_BYTES - 1));
-+	unsigned long len = size + (L1_CACHE_BYTES - 1);
-+	unsigned long i;
-+
-+	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-+		dcbf(addr);
-+	mb();	/* sync */
-+}
-+static inline void flush_inval_dcache_range(void *start, unsigned long size)
-+{
-+	void *addr = (void *)((u64)start & ~(L1_CACHE_BYTES - 1));
-+	unsigned long len = size + (L1_CACHE_BYTES - 1);
-+	unsigned long i;
-+
-+	for (i = 0; i < len >> L1_CACHE_SHIFT; i++, addr += L1_CACHE_BYTES)
-+		dcbi(addr);
-+	mb();	/* sync */
-+}
- #endif
- 
- #define copy_to_user_page(vma, page, vaddr, dst, src, len) \
-diff --git a/arch/powerpc/kernel/misc_64.S b/arch/powerpc/kernel/misc_64.S
-index 0ed5c55..a4ebeec 100644
---- a/arch/powerpc/kernel/misc_64.S
-+++ b/arch/powerpc/kernel/misc_64.S
-@@ -114,58 +114,6 @@ _ASM_NOKPROBE_SYMBOL(flush_icache_range)
- EXPORT_SYMBOL(flush_icache_range)
- 
- /*
-- * Like above, but only do the D-cache.
-- *
-- * flush_dcache_range(unsigned long start, unsigned long stop)
-- *
-- *    flush all bytes from start to stop-1 inclusive
-- */
--_GLOBAL_TOC(flush_dcache_range)
--
--/*
-- * Flush the data cache to memory 
-- * 
-- * Different systems have different cache line sizes
-- */
-- 	ld	r10,PPC64_CACHES@toc(r2)
--	lwz	r7,DCACHEL1BLOCKSIZE(r10)	/* Get dcache block size */
--	addi	r5,r7,-1
--	andc	r6,r3,r5		/* round low to line bdy */
--	subf	r8,r6,r4		/* compute length */
--	add	r8,r8,r5		/* ensure we get enough */
--	lwz	r9,DCACHEL1LOGBLOCKSIZE(r10)	/* Get log-2 of dcache block size */
--	srw.	r8,r8,r9		/* compute line count */
--	beqlr				/* nothing to do? */
--	mtctr	r8
--0:	dcbst	0,r6
--	add	r6,r6,r7
--	bdnz	0b
--	sync
--	blr
--EXPORT_SYMBOL(flush_dcache_range)
--
--_GLOBAL(flush_inval_dcache_range)
-- 	ld	r10,PPC64_CACHES@toc(r2)
--	lwz	r7,DCACHEL1BLOCKSIZE(r10)	/* Get dcache block size */
--	addi	r5,r7,-1
--	andc	r6,r3,r5		/* round low to line bdy */
--	subf	r8,r6,r4		/* compute length */
--	add	r8,r8,r5		/* ensure we get enough */
--	lwz	r9,DCACHEL1LOGBLOCKSIZE(r10)/* Get log-2 of dcache block size */
--	srw.	r8,r8,r9		/* compute line count */
--	beqlr				/* nothing to do? */
--	sync
--	isync
--	mtctr	r8
--0:	dcbf	0,r6
--	add	r6,r6,r7
--	bdnz	0b
--	sync
--	isync
--	blr
--
--
--/*
-  * Flush a particular page from the data cache to RAM.
-  * Note: this is necessary because the instruction cache does *not*
-  * snoop from the data cache.
-diff --git a/arch/powerpc/mm/dma-noncoherent.c b/arch/powerpc/mm/dma-noncoherent.c
-index 3825284..5fd3171 100644
---- a/arch/powerpc/mm/dma-noncoherent.c
-+++ b/arch/powerpc/mm/dma-noncoherent.c
-@@ -204,9 +204,9 @@ __dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t
- 	 * kernel direct-mapped region for device DMA.
- 	 */
- 	{
--		unsigned long kaddr = (unsigned long)page_address(page);
-+		void *kaddr = page_address(page);
- 		memset(page_address(page), 0, size);
--		flush_dcache_range(kaddr, kaddr + size);
-+		flush_dcache_range(kaddr, size);
- 	}
- 
- 	/*
-@@ -316,9 +316,6 @@ EXPORT_SYMBOL(__dma_free_coherent);
-  */
- void __dma_sync(void *vaddr, size_t size, int direction)
- {
--	unsigned long start = (unsigned long)vaddr;
--	unsigned long end   = start + size;
--
- 	switch (direction) {
- 	case DMA_NONE:
- 		BUG();
-@@ -328,15 +325,15 @@ void __dma_sync(void *vaddr, size_t size, int direction)
- 		 * the potential for discarding uncommitted data from the cache
- 		 */
- 		if ((start | end) & (L1_CACHE_BYTES - 1))
--			flush_dcache_range(start, end);
-+			flush_dcache_range(vaddr, size);
- 		else
--			invalidate_dcache_range(start, end);
-+			invalidate_dcache_range(vaddr, size);
- 		break;
- 	case DMA_TO_DEVICE:		/* writeback only */
--		clean_dcache_range(start, end);
-+		clean_dcache_range(vaddr, size);
- 		break;
- 	case DMA_BIDIRECTIONAL:	/* writeback and invalidate */
--		flush_dcache_range(start, end);
-+		flush_dcache_range(vaddr, size);
- 		break;
- 	}
- }
-diff --git a/arch/powerpc/platforms/512x/mpc512x_shared.c b/arch/powerpc/platforms/512x/mpc512x_shared.c
-index 6b4f4cb..0f3a7d9 100644
---- a/arch/powerpc/platforms/512x/mpc512x_shared.c
-+++ b/arch/powerpc/platforms/512x/mpc512x_shared.c
-@@ -225,7 +225,7 @@ static void __init mpc512x_init_diu(void)
- 	phys_addr_t desc;
- 	void __iomem *vaddr;
- 	unsigned long mode, pix_fmt, res, bpp;
--	unsigned long dst;
-+	void *dst;
- 
- 	np = of_find_compatible_node(NULL, NULL, "fsl,mpc5121-diu");
- 	if (!np) {
-@@ -254,8 +254,8 @@ static void __init mpc512x_init_diu(void)
- 	}
- 	memcpy(&diu_shared_fb.ad0, vaddr, sizeof(struct diu_ad));
- 	/* flush fb area descriptor */
--	dst = (unsigned long)&diu_shared_fb.ad0;
--	flush_dcache_range(dst, dst + sizeof(struct diu_ad) - 1);
-+	dst = &diu_shared_fb.ad0;
-+	flush_dcache_range(dst, sizeof(struct diu_ad) - 1);
- 
- 	res = in_be32(&diu_reg->disp_size);
- 	pix_fmt = in_le32(vaddr);
-@@ -274,8 +274,8 @@ static void __init mpc512x_init_diu(void)
- 	}
- 	memcpy(&diu_shared_fb.gamma, vaddr, sizeof(diu_shared_fb.gamma));
- 	/* flush gamma table */
--	dst = (unsigned long)&diu_shared_fb.gamma;
--	flush_dcache_range(dst, dst + sizeof(diu_shared_fb.gamma) - 1);
-+	dst = &diu_shared_fb.gamma;
-+	flush_dcache_range(dst, sizeof(diu_shared_fb.gamma) - 1);
- 
- 	iounmap(vaddr);
- 	out_be32(&diu_reg->gamma, virt_to_phys(&diu_shared_fb.gamma));
-diff --git a/arch/powerpc/platforms/85xx/smp.c b/arch/powerpc/platforms/85xx/smp.c
-index f51fd35..645edc9 100644
---- a/arch/powerpc/platforms/85xx/smp.c
-+++ b/arch/powerpc/platforms/85xx/smp.c
-@@ -166,14 +166,12 @@ static void qoriq_cpu_kill(unsigned int cpu)
-  */
- static inline void flush_spin_table(void *spin_table)
- {
--	flush_dcache_range((ulong)spin_table,
--		(ulong)spin_table + sizeof(struct epapr_spin_table));
-+	flush_dcache_range(spin_table, sizeof(struct epapr_spin_table));
- }
- 
- static inline u32 read_spin_table_addr_l(void *spin_table)
- {
--	flush_dcache_range((ulong)spin_table,
--		(ulong)spin_table + sizeof(struct epapr_spin_table));
-+	flush_dcache_range(spin_table, sizeof(struct epapr_spin_table));
- 	return in_be32(&((struct epapr_spin_table *)spin_table)->addr_l);
- }
- 
-diff --git a/arch/powerpc/sysdev/dart_iommu.c b/arch/powerpc/sysdev/dart_iommu.c
-index 3573d54..149b6e8 100644
---- a/arch/powerpc/sysdev/dart_iommu.c
-+++ b/arch/powerpc/sysdev/dart_iommu.c
-@@ -152,12 +152,13 @@ static void dart_cache_sync(unsigned int *base, unsigned int count)
- 	 * comment in Darwin indicating that the memory controller
- 	 * can prefetch unmapped memory under some circumstances.
- 	 */
-+	unsigned long size = (count + 1) * sizeof(unsigned int);
- 	unsigned long start = (unsigned long)base;
--	unsigned long end = start + (count + 1) * sizeof(unsigned int);
-+	unsigned long end = start + size;
- 	unsigned int tmp;
- 
- 	/* Perform a standard cache flush */
--	flush_inval_dcache_range(start, end);
-+	flush_inval_dcache_range(base, size);
- 
- 	/*
- 	 * Perform the sequence described in the CPC925 manual to
-diff --git a/drivers/ata/pata_bf54x.c b/drivers/ata/pata_bf54x.c
-index 0e55a8d..485e070 100644
---- a/drivers/ata/pata_bf54x.c
-+++ b/drivers/ata/pata_bf54x.c
-@@ -866,8 +866,7 @@ static void bfin_bmdma_setup(struct ata_queued_cmd *qc)
- 	/* Set the last descriptor to stop mode */
- 	dma_desc_cpu[qc->n_elem - 1].cfg &= ~(DMAFLOW | NDSIZE);
- 
--	flush_dcache_range((unsigned int)dma_desc_cpu,
--		(unsigned int)dma_desc_cpu +
-+	flush_dcache_range(dma_desc_cpu,
- 			qc->n_elem * sizeof(struct dma_desc_array));
- 
- 	/* Enable ATA DMA operation*/
-diff --git a/drivers/char/agp/uninorth-agp.c b/drivers/char/agp/uninorth-agp.c
-index fdced54..e46eae2 100644
---- a/drivers/char/agp/uninorth-agp.c
-+++ b/drivers/char/agp/uninorth-agp.c
-@@ -186,8 +186,7 @@ static int uninorth_insert_memory(struct agp_memory *mem, off_t pg_start, int ty
- 		else
- 			gp[i] =	cpu_to_le32((page_to_phys(mem->pages[i]) & 0xFFFFF000UL) |
- 					    0x1UL);
--		flush_dcache_range((unsigned long)__va(page_to_phys(mem->pages[i])),
--				   (unsigned long)__va(page_to_phys(mem->pages[i]))+0x1000);
-+		flush_dcache_range(__va(page_to_phys(mem->pages[i])), 0x1000);
- 	}
- 	mb();
- 	uninorth_tlbflush(mem);
-@@ -416,8 +415,7 @@ static int uninorth_create_gatt_table(struct agp_bridge_data *bridge)
- 
- 	bridge->gatt_table_real = (u32 *) table;
- 	/* Need to clear out any dirty data still sitting in caches */
--	flush_dcache_range((unsigned long)table,
--			   (unsigned long)table_end + 1);
-+	flush_dcache_range(table,  (unsigned long)(table_end - table) + 1);
- 	bridge->gatt_table = vmap(uninorth_priv.pages_arr, (1 << page_order), 0, PAGE_KERNEL_NCG);
- 
- 	if (bridge->gatt_table == NULL)
-diff --git a/drivers/gpu/drm/drm_cache.c b/drivers/gpu/drm/drm_cache.c
-index 3bd76e9..5b8062f 100644
---- a/drivers/gpu/drm/drm_cache.c
-+++ b/drivers/gpu/drm/drm_cache.c
-@@ -100,8 +100,7 @@ drm_clflush_pages(struct page *pages[], unsigned long num_pages)
- 			continue;
- 
- 		page_virtual = kmap_atomic(page);
--		flush_dcache_range((unsigned long)page_virtual,
--				   (unsigned long)page_virtual + PAGE_SIZE);
-+		flush_dcache_range(page_virtual, PAGE_SIZE);
- 		kunmap_atomic(page_virtual);
- 	}
- #else
-diff --git a/drivers/macintosh/smu.c b/drivers/macintosh/smu.c
-index 1ac6642..e92507d 100644
---- a/drivers/macintosh/smu.c
-+++ b/drivers/macintosh/smu.c
-@@ -111,8 +111,9 @@ static void smu_i2c_retry(unsigned long data);
- 
- static void smu_start_cmd(void)
- {
--	unsigned long faddr, fend;
- 	struct smu_cmd *cmd;
-+	unsigned long flen;
-+	void *faddr;
- 
- 	if (list_empty(&smu->cmd_list))
- 		return;
-@@ -132,9 +133,9 @@ static void smu_start_cmd(void)
- 	memcpy(smu->cmd_buf->data, cmd->data_buf, cmd->data_len);
- 
- 	/* Flush command and data to RAM */
--	faddr = (unsigned long)smu->cmd_buf;
--	fend = faddr + smu->cmd_buf->length + 2;
--	flush_inval_dcache_range(faddr, fend);
-+	faddr = smu->cmd_buf;
-+	flen = smu->cmd_buf->length + 2;
-+	flush_inval_dcache_range(faddr, flen);
- 
- 
- 	/* We also disable NAP mode for the duration of the command
-@@ -186,8 +187,8 @@ static irqreturn_t smu_db_intr(int irq, void *arg)
- 		goto bail;
- 
- 	if (rc == 0) {
--		unsigned long faddr;
- 		int reply_len;
-+		void *faddr;
- 		u8 ack;
- 
- 		/* CPU might have brought back the cache line, so we need
-@@ -195,8 +196,8 @@ static irqreturn_t smu_db_intr(int irq, void *arg)
- 		 * flush the entire buffer for now as we haven't read the
- 		 * reply length (it's only 2 cache lines anyway)
- 		 */
--		faddr = (unsigned long)smu->cmd_buf;
--		flush_inval_dcache_range(faddr, faddr + 256);
-+		faddr = smu->cmd_buf;
-+		flush_inval_dcache_range(faddr, 256);
- 
- 		/* Now check ack */
- 		ack = (~cmd->cmd) & 0xff;
-diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index 526231e..479a5cc 100644
---- a/drivers/mmc/host/bfin_sdh.c
-+++ b/drivers/mmc/host/bfin_sdh.c
-@@ -175,8 +175,7 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
- 				host->sg_cpu[i].x_modify);
- 		}
- 	}
--	flush_dcache_range((unsigned int)host->sg_cpu,
--		(unsigned int)host->sg_cpu +
-+	flush_dcache_range(host->sg_cpu,
- 			host->dma_len * sizeof(struct dma_desc_array));
- 	/* Set the last descriptor to stop mode */
- 	host->sg_cpu[host->dma_len - 1].cfg &= ~(DMAFLOW | NDSIZE);
-diff --git a/drivers/mtd/nand/bf5xx_nand.c b/drivers/mtd/nand/bf5xx_nand.c
-index 3962f55..6f485a4 100644
---- a/drivers/mtd/nand/bf5xx_nand.c
-+++ b/drivers/mtd/nand/bf5xx_nand.c
-@@ -492,11 +492,9 @@ static void bf5xx_nand_dma_rw(struct mtd_info *mtd,
- 	 * can be introduced to your driver.
- 	 */
- 	if (is_read)
--		invalidate_dcache_range((unsigned int)buf,
--				(unsigned int)(buf + chip->ecc.size));
-+		invalidate_dcache_range(buf, chip->ecc.size);
- 	else
--		flush_dcache_range((unsigned int)buf,
--				(unsigned int)(buf + chip->ecc.size));
-+		flush_dcache_range(buf, chip->ecc.size);
- 
- 	/*
- 	 * This register must be written before each page is
-diff --git a/drivers/soc/fsl/qbman/dpaa_sys.h b/drivers/soc/fsl/qbman/dpaa_sys.h
-index 2ce394a..e49a961 100644
---- a/drivers/soc/fsl/qbman/dpaa_sys.h
-+++ b/drivers/soc/fsl/qbman/dpaa_sys.h
-@@ -56,7 +56,7 @@
- static inline void dpaa_flush(void *p)
- {
- #ifdef CONFIG_PPC
--	flush_dcache_range((unsigned long)p, (unsigned long)p+64);
-+	flush_dcache_range(p, 64);
- #elif defined(CONFIG_ARM32)
- 	__cpuc_flush_dcache_area(p, 64);
- #elif defined(CONFIG_ARM64)
-diff --git a/drivers/soc/fsl/qbman/qman_ccsr.c b/drivers/soc/fsl/qbman/qman_ccsr.c
-index 90bc40c..ba10979 100644
---- a/drivers/soc/fsl/qbman/qman_ccsr.c
-+++ b/drivers/soc/fsl/qbman/qman_ccsr.c
-@@ -450,8 +450,7 @@ static int zero_priv_mem(struct device *dev, struct device_node *node,
- 		return -ENOMEM;
- 
- 	memset_io(tmpp, 0, sz);
--	flush_dcache_range((unsigned long)tmpp,
--			   (unsigned long)tmpp + sz);
-+	flush_dcache_range(tmpp, sz);
- 	iounmap(tmpp);
- 
- 	return 0;
-diff --git a/drivers/spi/spi-bfin5xx.c b/drivers/spi/spi-bfin5xx.c
-index 249c7a3..7e90746 100644
---- a/drivers/spi/spi-bfin5xx.c
-+++ b/drivers/spi/spi-bfin5xx.c
-@@ -730,9 +730,8 @@ static void bfin_spi_pump_transfers(unsigned long data)
- 
- 			/* invalidate caches, if needed */
- 			if (bfin_addr_dcacheable((unsigned long) drv_data->rx))
--				invalidate_dcache_range((unsigned long) drv_data->rx,
--							(unsigned long) (drv_data->rx +
--							drv_data->len_in_bytes));
-+				invalidate_dcache_range(drv_data->rx,
-+							drv_data->len_in_bytes);
- 
- 			dma_config |= WNR;
- 			dma_start_addr = (unsigned long)drv_data->rx;
-@@ -743,9 +742,8 @@ static void bfin_spi_pump_transfers(unsigned long data)
- 
- 			/* flush caches, if needed */
- 			if (bfin_addr_dcacheable((unsigned long) drv_data->tx))
--				flush_dcache_range((unsigned long) drv_data->tx,
--						(unsigned long) (drv_data->tx +
--						drv_data->len_in_bytes));
-+				flush_dcache_range(drv_data->tx,
-+						drv_data->len_in_bytes);
- 
- 			dma_start_addr = (unsigned long)drv_data->tx;
- 			cr |= BIT_CTL_TIMOD_DMA_TX;
-diff --git a/drivers/tty/serial/mpsc.c b/drivers/tty/serial/mpsc.c
-index 67ffecc..eaab3b3 100644
---- a/drivers/tty/serial/mpsc.c
-+++ b/drivers/tty/serial/mpsc.c
-@@ -529,8 +529,7 @@ static void mpsc_sdma_start_tx(struct mpsc_port_info *pi)
- 				DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			invalidate_dcache_range((ulong)txre,
--					(ulong)txre + MPSC_TXRE_SIZE);
-+			invalidate_dcache_range(txre, MPSC_TXRE_SIZE);
- #endif
- 
- 		if (be32_to_cpu(txre->cmdstat) & SDMA_DESC_CMDSTAT_O) {
-@@ -875,9 +874,7 @@ static void mpsc_init_rings(struct mpsc_port_info *pi)
- 			MPSC_DMA_ALLOC_SIZE, DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			flush_dcache_range((ulong)pi->dma_region,
--					(ulong)pi->dma_region
--					+ MPSC_DMA_ALLOC_SIZE);
-+			flush_dcache_range(pi->dma_region, MPSC_DMA_ALLOC_SIZE);
- #endif
- 
- 	return;
-@@ -950,8 +947,7 @@ static int mpsc_rx_intr(struct mpsc_port_info *pi, unsigned long *flags)
- 			DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 	if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--		invalidate_dcache_range((ulong)rxre,
--				(ulong)rxre + MPSC_RXRE_SIZE);
-+		invalidate_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 
- 	/*
-@@ -984,8 +980,7 @@ static int mpsc_rx_intr(struct mpsc_port_info *pi, unsigned long *flags)
- 				DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			invalidate_dcache_range((ulong)bp,
--					(ulong)bp + MPSC_RXBE_SIZE);
-+			invalidate_dcache_range(bp, MPSC_RXBE_SIZE);
- #endif
- 
- 		/*
-@@ -1060,8 +1055,7 @@ static int mpsc_rx_intr(struct mpsc_port_info *pi, unsigned long *flags)
- 				DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			flush_dcache_range((ulong)rxre,
--					(ulong)rxre + MPSC_RXRE_SIZE);
-+			flush_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 
- 		/* Advance to next descriptor */
-@@ -1072,8 +1066,7 @@ static int mpsc_rx_intr(struct mpsc_port_info *pi, unsigned long *flags)
- 				DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			invalidate_dcache_range((ulong)rxre,
--					(ulong)rxre + MPSC_RXRE_SIZE);
-+			invalidate_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 		rc = 1;
- 	}
-@@ -1106,8 +1099,7 @@ static void mpsc_setup_tx_desc(struct mpsc_port_info *pi, u32 count, u32 intr)
- 			DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 	if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--		flush_dcache_range((ulong)txre,
--				(ulong)txre + MPSC_TXRE_SIZE);
-+		flush_dcache_range(txre, MPSC_TXRE_SIZE);
- #endif
- }
- 
-@@ -1153,8 +1145,7 @@ static void mpsc_copy_tx_data(struct mpsc_port_info *pi)
- 				DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			flush_dcache_range((ulong)bp,
--					(ulong)bp + MPSC_TXBE_SIZE);
-+			flush_dcache_range(bp, MPSC_TXBE_SIZE);
- #endif
- 		mpsc_setup_tx_desc(pi, i, 1);
- 
-@@ -1179,8 +1170,7 @@ static int mpsc_tx_intr(struct mpsc_port_info *pi)
- 				DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			invalidate_dcache_range((ulong)txre,
--					(ulong)txre + MPSC_TXRE_SIZE);
-+			invalidate_dcache_range(txre, MPSC_TXRE_SIZE);
- #endif
- 
- 		while (!(be32_to_cpu(txre->cmdstat) & SDMA_DESC_CMDSTAT_O)) {
-@@ -1198,8 +1188,7 @@ static int mpsc_tx_intr(struct mpsc_port_info *pi)
- 					MPSC_TXRE_SIZE, DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 			if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--				invalidate_dcache_range((ulong)txre,
--						(ulong)txre + MPSC_TXRE_SIZE);
-+				invalidate_dcache_range(txre, MPSC_TXRE_SIZE);
- #endif
- 		}
- 
-@@ -1580,8 +1569,7 @@ static int mpsc_get_poll_char(struct uart_port *port)
- 			       MPSC_RXRE_SIZE, DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			invalidate_dcache_range((ulong)rxre,
--			(ulong)rxre + MPSC_RXRE_SIZE);
-+			invalidate_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 		/*
- 		 * Loop through Rx descriptors handling ones that have
-@@ -1596,8 +1584,7 @@ static int mpsc_get_poll_char(struct uart_port *port)
- 				       MPSC_RXBE_SIZE, DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 			if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--				invalidate_dcache_range((ulong)bp,
--					(ulong)bp + MPSC_RXBE_SIZE);
-+				invalidate_dcache_range(bp, MPSC_RXBE_SIZE);
- #endif
- 			if ((unlikely(cmdstat & (SDMA_DESC_CMDSTAT_BR |
- 			 SDMA_DESC_CMDSTAT_FR | SDMA_DESC_CMDSTAT_OR))) &&
-@@ -1622,8 +1609,7 @@ static int mpsc_get_poll_char(struct uart_port *port)
- 				       MPSC_RXRE_SIZE, DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 			if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--				flush_dcache_range((ulong)rxre,
--					   (ulong)rxre + MPSC_RXRE_SIZE);
-+				flush_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 
- 			/* Advance to next descriptor */
-@@ -1635,8 +1621,7 @@ static int mpsc_get_poll_char(struct uart_port *port)
- 				       MPSC_RXRE_SIZE, DMA_FROM_DEVICE);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 			if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--				invalidate_dcache_range((ulong)rxre,
--						(ulong)rxre + MPSC_RXRE_SIZE);
-+				invalidate_dcache_range(rxre, MPSC_RXRE_SIZE);
- #endif
- 		}
- 
-@@ -1748,8 +1733,7 @@ static void mpsc_console_write(struct console *co, const char *s, uint count)
- 				DMA_BIDIRECTIONAL);
- #if defined(CONFIG_PPC32) && !defined(CONFIG_NOT_COHERENT_CACHE)
- 		if (pi->cache_mgmt) /* GT642[46]0 Res #COMM-2 */
--			flush_dcache_range((ulong)bp,
--					(ulong)bp + MPSC_TXBE_SIZE);
-+			flush_dcache_range(bp, MPSC_TXBE_SIZE);
- #endif
- 		mpsc_setup_tx_desc(pi, i, 0);
- 		pi->txr_head = (pi->txr_head + 1) & (MPSC_TXR_ENTRIES - 1);
-diff --git a/drivers/usb/musb/blackfin.c b/drivers/usb/musb/blackfin.c
-index 4418574..092a011 100644
---- a/drivers/usb/musb/blackfin.c
-+++ b/drivers/usb/musb/blackfin.c
-@@ -90,8 +90,7 @@ static void bfin_write_fifo(struct musb_hw_ep *hw_ep, u16 len, const u8 *src)
- 	if (!ANOMALY_05000380 && epnum != 0) {
- 		u16 dma_reg;
- 
--		flush_dcache_range((unsigned long)src,
--			(unsigned long)(src + len));
-+		flush_dcache_range(src, len);
- 
- 		/* Setup DMA address register */
- 		dma_reg = (u32)src;
-@@ -144,8 +143,7 @@ static void bfin_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
- 	if (ANOMALY_05000467 && epnum != 0) {
- 		u16 dma_reg;
- 
--		invalidate_dcache_range((unsigned long)dst,
--			(unsigned long)(dst + len));
-+		invalidate_dcache_range(dst, len);
- 
- 		/* Setup DMA address register */
- 		dma_reg = (u32)dst;
--- 
-2.9.3
+On Wed, Jul 19, 2017 at 05:25:04PM +0200, Philipp Zabel wrote:
+> The reset control API has two modes: exclusive access, where the driver
+> expects to have full and immediate control over the state of the reset
+> line, and shared (clock-like) access, where drivers only request reset
+> deassertion while active, but don't care about the state of the reset line
+> while inactive.
+>=20
+> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
+> reset lines") started to transition the reset control request API calls
+> to explicitly state whether the driver needs exclusive or shared reset
+> control behavior.
+>=20
+> This series converts all drivers that currently implicitly request
+> exclusive reset controls to the corresponding explicit API call. It is,
+> for the most part, generated from the following semantic patch:
+>=20
+> @@
+> expression rstc, dev, id;
+> @@
+> -rstc =3D reset_control_get(dev, id);
+> +rstc =3D reset_control_get_exclusive(dev, id);
+> @@
+> expression rstc, dev, id;
+> @@
+> -rstc =3D reset_control_get_optional(dev, id);
+> +rstc =3D reset_control_get_optional_exclusive(dev, id);
+> @@
+> expression rstc, node, id;
+> @@
+> -rstc =3D of_reset_control_get(node, id);
+> +rstc =3D of_reset_control_get_exclusive(node, id);
+> @@
+> expression rstc, node, index;
+> @@
+> -rstc =3D of_reset_control_get_by_index(node, index);
+> +rstc =3D of_reset_control_get_exclusive_by_index(node, index);
+> @@
+> expression rstc, dev, id;
+> @@
+> -rstc =3D devm_reset_control_get(dev, id);
+> +rstc =3D devm_reset_control_get_exclusive(dev, id);
+> @@
+> expression rstc, dev, id;
+> @@
+> -rstc =3D devm_reset_control_get_optional(dev, id);
+> +rstc =3D devm_reset_control_get_optional_exclusive(dev, id);
+> @@
+> expression rstc, dev, index;
+> @@
+> -rstc =3D devm_reset_control_get_by_index(dev, index);
+> +rstc =3D devm_reset_control_get_exclusive_by_index(dev, index);
+>=20
+> After all driver patches are applied, the temporary transition helpers
+> can be removed.
+>=20
+> regards
+> Philipp
+>=20
+> Philipp Zabel (102):
+>   ARM: rockchip: explicitly request exclusive reset control
+>   ARM: socfpga: explicitly request exclusive reset control
+>   MIPS: pci-mt7620: explicitly request exclusive reset control
+>   ahci: st: explicitly request exclusive reset control
+>   ata: sata_gemini: explicitly request exclusive reset control
+>   ata: ahci_tegra: explicitly request exclusive reset control
+>   bus: sunxi-rsb: explicitly request exclusive reset control
+>   bus: tegra-gmi: explicitly request exclusive reset control
+>   clk: sunxi: explicitly request exclusive reset control
+>   clk: tegra: explicitly request exclusive reset control
+>   clocksource/drivers/timer-stm32: explicitly request exclusive reset
+>     control
+>   clocksource/drivers/sun5i: explicitly request exclusive reset control
+>   crypto: rockchip: explicitly request exclusive reset control
+>   crypto: sun4i-ss - request exclusive reset control
+>   PM / devfreq: tegra: explicitly request exclusive reset control
+>   dmaengine: stm32-dma: explicitly request exclusive reset control
+>   dmaengine: sun6i: explicitly request exclusive reset control
+>   dmaengine: tegra-apb: explicitly request exclusive reset control
+>   drm: kirin: explicitly request exclusive reset control
+>   drm/nouveau/tegra: explicitly request exclusive reset control
+>   drm/rockchip: explicitly request exclusive reset control
+>   drm/sti: explicitly request exclusive reset control
+>   drm/stm: explicitly request exclusive reset control
+>   drm/sun4i: explicitly request exclusive reset control
+>   drm/tegra: explicitly request exclusive reset control
+>   gpu: host1x: explicitly request exclusive reset control
+>   i2c: mv64xxx: explicitly request exclusive reset control
+>   i2c: stm32f4: explicitly request exclusive reset control
+>   i2c: sun6i-pw2i: explicitly request exclusive reset control
+>   i2c: tegra: explicitly request exclusive reset control
+>   iio: adc: rockchip_saradc: explicitly request exclusive reset control
+>   iio: dac: stm32-dac-core: explicitly request exclusive reset control
+>   Input: tegra-kbc - request exclusive reset control
+>   coda: explicitly request exclusive reset control
+>   st-rc: explicitly request exclusive reset control
+>   stm32-dcmi: explicitly request exclusive reset control
+>   rc: sunxi-cir: explicitly request exclusive reset control
+>   mmc: dw_mmc: explicitly request exclusive reset control
+>   mmc: sdhci-st: explicitly request exclusive reset control
+>   mmc: sunxi: explicitly request exclusive reset control
+>   mmc: tegra: explicitly request exclusive reset control
+>   mtd: nand: sunxi: explicitly request exclusive reset control
+>   mtd: spi-nor: stm32-quadspi: explicitly request exclusive reset
+>     control
+>   net: dsa: mt7530: explicitly request exclusive reset control
+>   net: ethernet: hisi_femac: explicitly request exclusive reset control
+>   net: ethernet: hix5hd2_gmac: explicitly request exclusive reset
+>     control
+>   net: stmmac: explicitly request exclusive reset control
+>   net: stmmac: dwc-qos: explicitly request exclusive reset control
+>   ath10k: explicitly request exclusive reset control
+>   nvmem: lpc18xx-eeprom: explicitly request exclusive reset control
+>   PCI: dwc: pcie-qcom: explicitly request exclusive reset control
+>   PCI: imx6: explicitly request exclusive reset control
+>   PCI: tegra: explicitly request exclusive reset control
+>   PCI: rockchip: explicitly request exclusive reset control
+>   phy: berlin-usb: explicitly request exclusive reset control
+>   PCI: mediatek: explicitly request exclusive reset control
+>   phy: qcom-usb-hs: explicitly request exclusive reset control
+>   phy: rockchip-pcie: explicitly request exclusive reset control
+>   phy: rockchip-typec: explicitly request exclusive reset control
+>   phy: rockchip-usb: explicitly request exclusive reset control
+>   phy: sun4i-usb: explicitly request exclusive reset control
+>   phy: sun9i-usb: explicitly request exclusive reset control
+>   phy: tegra: explicitly request exclusive reset control
+>   phy: qcom-qmp: explicitly request exclusive reset control
+>   phy: qcom-qusb2: explicitly request exclusive reset control
+>   pinctrl: stm32: explicitly request exclusive reset control
+>   pinctrl: sunxi: explicitly request exclusive reset control
+>   pinctrl: tegra: explicitly request exclusive reset control
+>   pwm: hibvt: explicitly request exclusive reset control
+>   pwm: tegra: explicitly request exclusive reset control
+>   remoteproc/keystone: explicitly request exclusive reset control
+>   remoteproc: qcom: explicitly request exclusive reset control
+>   remoteproc: st: explicitly request exclusive reset control
+>   soc: mediatek: PMIC wrap: explicitly request exclusive reset control
+>   soc/tegra: pmc: explicitly request exclusive reset control
+>   spi: stm32: explicitly request exclusive reset control
+>   spi: sun6i: explicitly request exclusive reset control
+>   spi: tegra20-slink: explicitly request exclusive reset control
+>   spi: tegra114: explicitly request exclusive reset control
+>   spi: tegra20-sflash: explicitly request exclusive reset control
+>   staging: nvec: explicitly request exclusive reset control
+>   thermal: rockchip: explicitly request exclusive reset control
+>   thermal: tegra: explicitly request exclusive reset control
+>   serial: 8250_dw: explicitly request exclusive reset control
+>   serial: tegra: explicitly request exclusive reset control
+>   usb: chipidea: msm: explicitly request exclusive reset control
+>   usb: dwc2: explicitly request exclusive reset control
+>   usb: host: ehci-tegra: explicitly request exclusive reset control
+>   usb: host: xhci-tegra: explicitly request exclusive reset control
+>   usb: musb: sunxi: explicitly request exclusive reset control
+>   usb: phy: msm: explicitly request exclusive reset control
+>   usb: phy: qcom-8x16-usb: explicitly request exclusive reset control
+>   watchdog: asm9260: explicitly request exclusive reset control
+>   watchdog: mt7621: explicitly request exclusive reset control
+>   watchdog: rt2880: explicitly request exclusive reset control
+>   watchdog: zx2967: explicitly request exclusive reset control
+>   ASoC: img: explicitly request exclusive reset control
+>   ASoC: stm32: explicitly request exclusive reset control
+>   ASoC: sun4i: explicitly request exclusive reset control
+>   ASoC: tegra: explicitly request exclusive reset control
+>   Documentation: devres: add explicit exclusive/shared reset control
+>     request calls
+>   reset: finish transition to explicit exclusive reset control requests
 
+
+For all sunxi patches:
+Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--r7njpeniu6ypk76n
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBAgAGBQJZcFQqAAoJEBx+YmzsjxAgwxEQAKaA2PoiKgEsYRpaVjOFH5dP
+l8MoHlOl2ACw1Bcvb1uos6F4QxR6DqX1vZCIEZcuPzwJsF4gmwQdA70BxFUP53Ec
+zUPP2txp1pHYft+zBbzXIrTT5oWC6kJ8S1e9QowDdSZNvi59c0ux0ai7sbCZtXA9
+x/h58qsTYOqiWZAld1uC2+PWte2edFvmp97pfooG7UZZOyhGQJa3EFxWFWENC80m
+9NwFkjXZXrtCwsioXfaBbkkbSy+Gejogh7HpVw7bk6nHJqm/rpCS4aFfFsd/72Fz
+H8vE4yhnY616G3JrMS8c0u7RKG0pEvfu47IU3IlAdK/WWDK99mC9sjhcc1fHT3st
+r6T0abU9Bf2WFmgg+lYwHV1/KUDKO6+2U/I5Vybj/TehRMzqlyHkDr8isJ4XjZLh
+Q32np3ChPOdDa5yl+RFL32ICpVKv2iEdfwOPBPCAFyfnlOIDvt8yxLyzaIcDxcL8
+76GhA5g/gNmNr/XUUOY6HznbpyrBtsHYKzRRyk8j6RBowVQlG/7ZNhE7cMF1aYIk
+LnXgccb7XvEWvuNT0/5XOg6I1LrnBs8Pu9ox0N8aMIaJvBMlLqP38ur2EcxwpfuK
+PJxqTzLfErn0NwJrAgQtAMJwDt0gGcEgs46tHLh4SJalVyMH7BFtSDLKRN6Yx3OS
+8tJMPtQfcXBSZ/fWFOkD
+=0VL8
+-----END PGP SIGNATURE-----
+
+--r7njpeniu6ypk76n--
+
+
+--===============5377596179865870267==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Linux-mediatek mailing list
+Linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+http://lists.infradead.org/mailman/listinfo/linux-mediatek
+
+--===============5377596179865870267==--
