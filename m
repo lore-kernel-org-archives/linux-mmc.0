@@ -1,364 +1,202 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RESEND RFT PATCH] mmc: sdhci-of-arasan: Add command queue support
-Date: Thu, 20 Jul 2017 09:48:01 +0800
-Message-ID: <1500515281-192739-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:47912 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932089AbdGTBse (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2017 21:48:34 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Subject: [PATCH v2 01/10] clk: sunxi-ng: Add interface to query
+ or configure MMC timing modes.
+Date: Thu, 20 Jul 2017 11:44:43 +0800
+Message-ID: <20170720034452.15920-2-wens@csie.org>
+References: <20170720034452.15920-1-wens@csie.org>
+Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBCMILY6JWQBBBOGOYDFQKGQEAJ75LTI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20170720034452.15920-1-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-rockchip@lists.infradead.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Just for folks who are interested in testing CQE using RK3399
-platforms. And This patch depends on the unmerged CQE support
-for mmc core which could be found here:
+Starting with the A83T SoC, Allwinner introduced a new timing mode for
+its MMC clocks. The new mode changes how the MMC controller sample and
+output clocks are delayed to match chip and board specifics. There are
+two controls for this, one on the CCU side controlling how the clocks
+behave, and one in the MMC controller controlling what inputs to take
+and how to route them.
 
-http://www.spinics.net/lists/linux-mmc/msg44648.html
+In the old mode, the MMC clock had 2 child clocks providing the output
+and sample clocks, which could be delayed by a number of clock cycles
+measured from the MMC clock's parent.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+With the new mode, the 2 delay clocks are no longer active. Instead,
+the delays and associated controls are moved into the MMC controller.
+The output of the MMC clock is also halved.
 
+The difference in how things are wired between the modes means that the
+clock controls and the MMC controls must match. To achieve this in a
+clear, explicit way, we introduce two functions for the MMC driver to
+use: one queries the hardware for the current mode set, and the other
+allows the MMC driver to request a mode.
+
+Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 ---
-Sorry, the previous patch has one nit introduced when
-manually amend the patch a bit after it's generated.
+ drivers/clk/sunxi-ng/Makefile         |  1 +
+ drivers/clk/sunxi-ng/ccu_common.h     |  5 +++
+ drivers/clk/sunxi-ng/ccu_mmc_timing.c | 73 +++++++++++++++++++++++++++++++++++
+ include/linux/clk/sunxi-ng.h          | 35 +++++++++++++++++
+ 4 files changed, 114 insertions(+)
+ create mode 100644 drivers/clk/sunxi-ng/ccu_mmc_timing.c
+ create mode 100644 include/linux/clk/sunxi-ng.h
 
- drivers/mmc/host/Kconfig           |   1 +
- drivers/mmc/host/sdhci-of-arasan.c | 199 ++++++++++++++++++++++++++++++++++---
- 2 files changed, 186 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2242633..a14efcb 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -123,6 +123,7 @@ config MMC_SDHCI_OF_ARASAN
- 	depends on MMC_SDHCI_PLTFM
- 	depends on OF
- 	depends on COMMON_CLK
-+	select MMC_CQHCI
- 	help
- 	  This selects the Arasan Secure Digital Host Controller Interface
- 	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index b13c0a7..02e198b 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -24,10 +24,13 @@
- #include <linux/module.h>
- #include <linux/of_device.h>
- #include <linux/phy/phy.h>
-+#include <linux/pm_runtime.h>
- #include <linux/regmap.h>
--#include "sdhci-pltfm.h"
- #include <linux/of.h>
+diff --git a/drivers/clk/sunxi-ng/Makefile b/drivers/clk/sunxi-ng/Makefile
+index 0c45fa50283d..45a5910379a5 100644
+--- a/drivers/clk/sunxi-ng/Makefile
++++ b/drivers/clk/sunxi-ng/Makefile
+@@ -1,5 +1,6 @@
+ # Common objects
+ lib-$(CONFIG_SUNXI_CCU)		+= ccu_common.o
++lib-$(CONFIG_SUNXI_CCU)		+= ccu_mmc_timing.o
+ lib-$(CONFIG_SUNXI_CCU)		+= ccu_reset.o
  
-+#include "cqhci.h"
-+#include "sdhci-pltfm.h"
+ # Base clock types
+diff --git a/drivers/clk/sunxi-ng/ccu_common.h b/drivers/clk/sunxi-ng/ccu_common.h
+index d6fdd7a789aa..1e2761c53f06 100644
+--- a/drivers/clk/sunxi-ng/ccu_common.h
++++ b/drivers/clk/sunxi-ng/ccu_common.h
+@@ -23,6 +23,11 @@
+ #define CCU_FEATURE_FIXED_POSTDIV	BIT(3)
+ #define CCU_FEATURE_ALL_PREDIV		BIT(4)
+ #define CCU_FEATURE_LOCK_REG		BIT(5)
++#define CCU_FEATURE_MMC_TIMING_SWITCH	BIT(6)
++#define CCU_FEATURE_MMC_ALWAYS_NEW	BIT(7)
 +
- #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
++/* MMC timing mode switch bit */
++#define CCU_MMC_NEW_TIMING_MODE		BIT(30)
  
- #define VENDOR_ENHANCED_STROBE		BIT(0)
-@@ -89,7 +92,7 @@ struct sdhci_arasan_data {
- 	struct clk	*clk_ahb;
- 	struct phy	*phy;
- 	bool		is_phy_on;
--
-+	bool		has_cqe;
- 	struct clk_hw	sdcardclk_hw;
- 	struct clk      *sdcardclk;
+ struct device_node;
  
-@@ -262,23 +265,70 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
- 	return -EINVAL;
- }
- 
--static struct sdhci_ops sdhci_arasan_ops = {
-+static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
+diff --git a/drivers/clk/sunxi-ng/ccu_mmc_timing.c b/drivers/clk/sunxi-ng/ccu_mmc_timing.c
+new file mode 100644
+index 000000000000..c5e86061c613
+--- /dev/null
++++ b/drivers/clk/sunxi-ng/ccu_mmc_timing.c
+@@ -0,0 +1,73 @@
++/*
++ * Copyright (c) 2017 Chen-Yu Tsai. All rights reserved.
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/clk-provider.h>
++#include <linux/clk/sunxi-ng.h>
++
++#include "ccu_common.h"
++
++/**
++ * sunxi_ccu_set_mmc_timing_mode: Configure the MMC clock timing mode
++ * @clk: clock to be configured
++ * @new_mode: true for new timing mode introduced in A83T and later
++ *
++ * Returns 0 on success, -ENOTSUPP if the clock does not support
++ * switching modes.
++ */
++int sunxi_ccu_set_mmc_timing_mode(struct clk *clk, bool new_mode)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	int cmd_error = 0;
-+	int data_error = 0;
++	struct clk_hw *hw = __clk_get_hw(clk);
++	struct ccu_common *cm = hw_to_ccu_common(hw);
++	unsigned long flags;
++	u32 val;
 +
-+	if (!sdhci_arasan->has_cqe)
-+		return 0;
++	if (!(cm->features & CCU_FEATURE_MMC_TIMING_SWITCH))
++		return -ENOTSUPP;
 +
-+	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
-+		return intmask;
++	spin_lock_irqsave(cm->lock, flags);
 +
-+	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
++	val = readl(cm->base + cm->reg);
++	if (new_mode)
++		val |= CCU_MMC_NEW_TIMING_MODE;
++	else
++		val &= ~CCU_MMC_NEW_TIMING_MODE;
++	writel(val, cm->base + cm->reg);
++
++	spin_unlock_irqrestore(cm->lock, flags);
 +
 +	return 0;
 +}
++EXPORT_SYMBOL_GPL(sunxi_ccu_set_mmc_timing_mode);
 +
-+static void sdhci_arasan_dumpregs(struct mmc_host *mmc)
++/**
++ * sunxi_ccu_set_mmc_timing_mode: Get the current MMC clock timing mode
++ * @clk: clock to query
++ *
++ * Returns 0 if the clock is in old timing mode, > 0 if it is in
++ * new timing mode, and -ENOTSUPP if the clock does not support
++ * this function.
++ */
++int sunxi_ccu_get_mmc_timing_mode(struct clk *clk)
 +{
-+	sdhci_dumpregs(mmc_priv(mmc));
++	struct clk_hw *hw = __clk_get_hw(clk);
++	struct ccu_common *cm = hw_to_ccu_common(hw);
++
++	if (cm->features & CCU_FEATURE_MMC_ALWAYS_NEW)
++		return 1;
++
++	if (!(cm->features & CCU_FEATURE_MMC_TIMING_SWITCH))
++		return -ENOTSUPP;
++
++	return !!(readl(cm->base + cm->reg) & CCU_MMC_NEW_TIMING_MODE);
++}
++EXPORT_SYMBOL_GPL(sunxi_ccu_get_mmc_timing_mode);
+diff --git a/include/linux/clk/sunxi-ng.h b/include/linux/clk/sunxi-ng.h
+new file mode 100644
+index 000000000000..990f760f70e5
+--- /dev/null
++++ b/include/linux/clk/sunxi-ng.h
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (c) 2017 Chen-Yu Tsai. All rights reserved.
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef _LINUX_CLK_SUNXI_NG_H_
++#define _LINUX_CLK_SUNXI_NG_H_
++
++#include <linux/errno.h>
++
++#ifdef CONFIG_SUNXI_CCU
++int sunxi_ccu_set_mmc_timing_mode(struct clk *clk, bool new_mode);
++int sunxi_ccu_get_mmc_timing_mode(struct clk *clk);
++#else
++static inline int sunxi_ccu_set_mmc_timing_mode(struct clk *clk,
++						bool new_mode)
++{
++	return -ENOTSUPP;
 +}
 +
-+static void sdhci_arasan_cqe_enable(struct mmc_host *mmc)
++static inline int sunxi_ccu_get_mmc_timing_mode(struct clk *clk)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	u32 reg;
-+
-+	/*
-+	 * CQE gets stuck if it sees Buffer Read Enable bit set, which can be
-+	 * the case after tuning, so ensure the buffer is drained.
-+	 */
-+	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+	while (reg & SDHCI_DATA_AVAILABLE) {
-+		sdhci_readl(host, SDHCI_BUFFER);
-+		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+	}
-+
-+	sdhci_cqe_enable(mmc);
++	return -ENOTSUPP;
 +}
++#endif
 +
-+static const struct cqhci_host_ops sdhci_arasan_cqhci_ops = {
-+	.enable         = sdhci_arasan_cqe_enable,
-+	.disable        = sdhci_cqe_disable,
-+	.dumpregs       = sdhci_arasan_dumpregs,
-+};
-+
-+static struct sdhci_ops sdhci_arasan_cqe_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.irq = sdhci_arasan_cqhci_irq,
- };
- 
--static struct sdhci_pltfm_data sdhci_arasan_pdata = {
--	.ops = &sdhci_arasan_ops,
-+static struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
-+	.ops = &sdhci_arasan_cqe_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
--#ifdef CONFIG_PM_SLEEP
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-  * @dev:	Address of the device structure
-@@ -286,7 +336,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
-  *
-  * Put the device in a low power state.
-  */
--static int sdhci_arasan_suspend(struct device *dev)
-+static int __maybe_unused sdhci_arasan_suspend(struct device *dev)
- {
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
-@@ -297,6 +347,12 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
- 		mmc_retune_needed(host->mmc);
- 
-+	if (sdhci_arasan->has_cqe) {
-+		ret = cqhci_suspend(host->mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
- 		return ret;
-@@ -324,7 +380,7 @@ static int sdhci_arasan_suspend(struct device *dev)
-  *
-  * Resume operation after suspend
-  */
--static int sdhci_arasan_resume(struct device *dev)
-+static int __maybe_unused sdhci_arasan_resume(struct device *dev)
- {
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
-@@ -353,12 +409,70 @@ static int sdhci_arasan_resume(struct device *dev)
- 		sdhci_arasan->is_phy_on = true;
- 	}
- 
--	return sdhci_resume_host(host);
-+	ret = sdhci_resume_host(host);
-+	if (ret) {
-+		dev_err(dev, "Cannot resume host.\n");
-+		return ret;
-+	}
-+
-+	if (sdhci_arasan->has_cqe)
-+		return cqhci_resume(host->mmc);
-+
-+	return 0;
-+}
-+
-+static int __maybe_unused sdhci_arasan_runtime_suspend(struct device *dev)
-+{
-+	struct platform_device *pdev = to_platform_device(dev);
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	if (sdhci_arasan->has_cqe) {
-+		ret = cqhci_suspend(host->mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+
-+	return 0;
-+}
-+
-+static int __maybe_unused sdhci_arasan_runtime_resume(struct device *dev)
-+{
-+	struct platform_device *pdev = to_platform_device(dev);
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	clk_prepare_enable(pltfm_host->clk);
-+	clk_prepare_enable(sdhci_arasan->clk_ahb);
-+
-+	ret = sdhci_runtime_resume_host(host);
-+	if (ret)
-+		return ret;
-+
-+	if (sdhci_arasan->has_cqe)
-+		return cqhci_resume(host->mmc);
-+
-+	return 0;
- }
--#endif /* ! CONFIG_PM_SLEEP */
- 
--static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
--			 sdhci_arasan_resume);
-+static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend,
-+				sdhci_arasan_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-+			   sdhci_arasan_runtime_resume,
-+			   NULL)
-+};
- 
- static const struct of_device_id sdhci_arasan_of_match[] = {
- 	/* SoC-specific compatible strings w/ soc_ctl_map */
-@@ -556,6 +670,49 @@ static void sdhci_arasan_unregister_sdclk(struct device *dev)
- 	of_clk_del_provider(dev->of_node);
- }
- 
-+static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
-+{
-+	struct sdhci_host *host = sdhci_arasan->host;
-+	struct cqhci_host *cq_host;
-+	bool dma64;
-+	int ret;
-+
-+	if (!sdhci_arasan->has_cqe)
-+		return sdhci_add_host(host);
-+
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		return ret;
-+
-+	cq_host = devm_kzalloc(host->mmc->parent,
-+			       sizeof(*cq_host), GFP_KERNEL);
-+	if (!cq_host) {
-+		ret = -ENOMEM;
-+		goto cleanup;
-+	}
-+
-+	cq_host->mmio = host->ioaddr + 0x200;
-+	cq_host->ops = &sdhci_arasan_cqhci_ops;
-+
-+	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-+	if (dma64)
-+		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-+
-+	ret = cqhci_init(cq_host, host->mmc, dma64);
-+	if (ret)
-+		goto cleanup;
-+
-+	ret = __sdhci_add_host(host);
-+	if (ret)
-+		goto cleanup;
-+
-+	return 0;
-+
-+cleanup:
-+	sdhci_cleanup_host(host);
-+	return ret;
-+}
-+
- static int sdhci_arasan_probe(struct platform_device *pdev)
- {
- 	int ret;
-@@ -567,8 +724,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	struct sdhci_arasan_data *sdhci_arasan;
- 	struct device_node *np = pdev->dev.of_node;
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
-+	host = sdhci_pltfm_init(pdev, &sdhci_arasan_cqe_pdata,
- 				sizeof(*sdhci_arasan));
-+
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
-@@ -619,6 +777,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
- 	sdhci_get_of_property(pdev);
- 
- 	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
-@@ -663,12 +827,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 					sdhci_arasan_hs400_enhanced_strobe;
- 		host->mmc_host_ops.start_signal_voltage_switch =
- 					sdhci_arasan_voltage_switch;
-+		sdhci_arasan->has_cqe = true;
-+		host->mmc->caps2 |= MMC_CAP2_CQE;
- 	}
- 
--	ret = sdhci_add_host(host);
-+	ret = sdhci_arasan_add_host(sdhci_arasan);
- 	if (ret)
- 		goto err_add_host;
- 
-+	pm_runtime_put(&pdev->dev);
- 	return 0;
- 
- err_add_host:
-@@ -677,6 +844,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- unreg_clk:
- 	sdhci_arasan_unregister_sdclk(&pdev->dev);
- clk_disable_all:
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- 	clk_disable_unprepare(clk_xin);
- clk_dis_ahb:
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-@@ -704,6 +874,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	ret = sdhci_pltfm_unregister(pdev);
- 
- 	clk_disable_unprepare(clk_ahb);
-+	pm_runtime_disable(&pdev->dev);
- 
- 	return ret;
- }
++#endif
 -- 
-1.9.1
-
-
+2.13.2
