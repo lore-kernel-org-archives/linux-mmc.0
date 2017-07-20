@@ -1,49 +1,57 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] powerpc/asm/cacheflush: Cleanup cacheflush function params
-Date: Thu, 20 Jul 2017 09:00:41 +0200
-Message-ID: <CAMuHMdVxnqD-90fDH+dqo8iJ94etcLHih27cqdVppi_AbFzbbw@mail.gmail.com>
-References: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Thu, 20 Jul 2017 10:11:57 +0200
+Message-ID: <20170720081157.GA11630@kroah.com>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Matt Brown <matthew.brown.dev@gmail.com>
-Cc: USB list <linux-usb@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, DRI Development <dri-devel@lists.freedesktop.org>, linux-spi <linux-spi@vger.kernel.org>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, MTD Maling List <linux-mtd@lists.infradead.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170719152646.25903-1-p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Peter Chen <Peter.Chen-3arQi8VN3Tc@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Marc Dietrich <marvin24-Mmb7MZpHnFY@public.gmane.org>, Rakesh Iyer <riyer-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Peter Meerwald-Stadler <pmeerw-jW+XmwGofnusTnJN9+BGXg@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wim Van Sebroeck <wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Xinliang Liu <z.liuxinliang-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Chanwoo Choi <cw00.choi-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Jiri Slaby <jslaby-IBi9RG/b67k@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Vincent Abriou <vincent.abriou-qxv4g6HH51o@public.gmane.org>, Bin Liu <b-liu-l0cyMroinI0@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel@
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVGh1LCBKdWwgMjAsIDIwMTcgYXQgODoyOCBBTSwgTWF0dCBCcm93biA8bWF0dGhldy5icm93
-bi5kZXZAZ21haWwuY29tPiB3cm90ZToKPiBUaGUgY2FjaGVmbHVzaCBwcm90b3R5cGVzIGN1cnJl
-bnRseSB1c2Ugc3RhcnQgYW5kIHN0b3AgdmFsdWVzIGFuZCBlYWNoCj4gY2FsbCByZXF1aXJlcyB0
-eXBlY2FzdGluZyB0aGUgYWRkcmVzcyB0byBhbiB1bnNpZ25lZCBsb25nLgo+IFRoaXMgcGF0Y2gg
-Y2hhbmdlcyB0aGUgY2FjaGVmbHVzaCBwcm90b3R5cGVzIHRvIGZvbGxvdyB0aGUgeDg2IHN0eWxl
-IG9mCj4gdXNpbmcgYSBiYXNlIGFuZCBzaXplIHZhbHVlcywgd2l0aCBiYXNlIGJlaW5nIGEgdm9p
-ZCBwb2ludGVyLgo+Cj4gQWxsIGNhbGxlcnMgb2YgdGhlIGNhY2hlZmx1c2ggZnVuY3Rpb25zLCBp
-bmNsdWRpbmcgZHJpdmVycywgaGF2ZSBiZWVuCj4gbW9kaWZpZWQgdG8gY29uZm9ybSB0byB0aGUg
-bmV3IHByb3RvdHlwZXMuCj4KPiBUaGUgNjQgYml0IGNhY2hlZmx1c2ggZnVuY3Rpb25zIHdoaWNo
-IHdlcmUgaW1wbGVtZW50ZWQgaW4gYXNzZW1ibHkgY29kZQo+IChmbHVzaF9kY2FjaGVfcmFuZ2Us
-IGZsdXNoX2ludmFsX2RjYWNoZV9yYW5nZSkgaGF2ZSBiZWVuIHRyYW5zbGF0ZWQgaW50bwo+IEMg
-Zm9yIHJlYWRhYmlsaXR5IGFuZCBjb2hlcmVuY2UuCj4KPiBTaWduZWQtb2ZmLWJ5OiBNYXR0IEJy
-b3duIDxtYXR0aGV3LmJyb3duLmRldkBnbWFpbC5jb20+Cgo+ICBkcml2ZXJzL3NwaS9zcGktYmZp
-bjV4eC5jICAgICAgICAgICAgICAgICAgICB8IDEwICsrKy0tLQo+ICBkcml2ZXJzL3VzYi9tdXNi
-L2JsYWNrZmluLmMgICAgICAgICAgICAgICAgICB8ICA2ICsrLS0KClRoZXNlIGFyZSB1c2VkIG9u
-IGJsYWNrZmluLCBzbyBjaGFuZ2luZyB0aGVtIHdpdGhvdXQgY2hhbmdpbmcgdGhlIGJsYWNrZmlu
-CmNhY2hlIG9wcyB3aWxsIGJyZWFrIHRoZSBidWlsZC4KCkdye29ldGplLGVldGluZ31zLAoKICAg
-ICAgICAgICAgICAgICAgICAgICAgR2VlcnQKCi0tCkdlZXJ0IFV5dHRlcmhvZXZlbiAtLSBUaGVy
-ZSdzIGxvdHMgb2YgTGludXggYmV5b25kIGlhMzIgLS0gZ2VlcnRAbGludXgtbTY4ay5vcmcKCklu
-IHBlcnNvbmFsIGNvbnZlcnNhdGlvbnMgd2l0aCB0ZWNobmljYWwgcGVvcGxlLCBJIGNhbGwgbXlz
-ZWxmIGEgaGFja2VyLiBCdXQKd2hlbiBJJ20gdGFsa2luZyB0byBqb3VybmFsaXN0cyBJIGp1c3Qg
-c2F5ICJwcm9ncmFtbWVyIiBvciBzb21ldGhpbmcgbGlrZSB0aGF0LgogICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIC0tIExpbnVzIFRvcnZhbGRzCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVs
-QGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWls
-bWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
+On Wed, Jul 19, 2017 at 05:25:04PM +0200, Philipp Zabel wrote:
+> The reset control API has two modes: exclusive access, where the driver
+> expects to have full and immediate control over the state of the reset
+> line, and shared (clock-like) access, where drivers only request reset
+> deassertion while active, but don't care about the state of the reset line
+> while inactive.
+> 
+> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
+> reset lines") started to transition the reset control request API calls
+> to explicitly state whether the driver needs exclusive or shared reset
+> control behavior.
+> 
+> This series converts all drivers that currently implicitly request
+> exclusive reset controls to the corresponding explicit API call. It is,
+> for the most part, generated from the following semantic patch:
+
+Hey, I'm all for large api changes, but this really seems ackward, isn't
+there a "better" way to do this?
+
+Why not, as you say the "implicit" request is exclusive, just leave
+everything alone and state that the "reset_control_get()" call is
+exclusive and make the shared one the "odd" usage as that seems to not
+be the normal case.
+
+That should be a much smaller patch right?
+
+That way you don't break everything here, and require 100+ patches to
+just change the name of a function from one to another and do nothing
+else.
+
+thanks,
+
+greg k-h
