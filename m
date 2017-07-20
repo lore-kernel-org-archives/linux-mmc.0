@@ -1,62 +1,76 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] powerpc/asm/cacheflush: Cleanup cacheflush function params
-Date: Thu, 20 Jul 2017 14:07:46 +0200
-Message-ID: <CAMuHMdXU-R8kBs_xp7XDK0pnC5fakpghchuEPD8jtEcHLmgyHg@mail.gmail.com>
-References: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
- <87mv7zgwpl.fsf@concordia.ellerman.id.au>
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Thu, 20 Jul 2017 14:55:12 +0200
+Message-ID: <1500555312.2354.75.camel@pengutronix.de>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
+         <20170719211515.46a1196c@windsurf>
+         <1500543415.2354.37.camel@pengutronix.de>
+         <20170720123640.43c2ce01@windsurf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <87mv7zgwpl.fsf@concordia.ellerman.id.au>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Michael Ellerman <mpe@ellerman.id.au>
-Cc: USB list <linux-usb@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, DRI Development <dri-devel@lists.freedesktop.org>, Matt Brown <matthew.brown.dev@gmail.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, MTD Maling List <linux-mtd@lists.infradead.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <20170720123640.43c2ce01@windsurf>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, Andrew Lunn <andrew@lunn.ch>, Prashant Gaikwad <pgaikwad@nvidia.com>, Heiko Stuebner <heiko@sntech.de>, Peter Chen <Peter.Chen@nxp.com>, Linus Walleij <linus.walleij@linaro.org>, dri-devel@lists.freedesktop.org, Marc Dietrich <marvin24@gmx.de>, Rakesh Iyer <riyer@nvidia.com>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, linux-clk@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, Wolfram Sang <wsa@the-dreams.de>, Xinliang Liu <z.liuxinliang@hisilicon.com>, Chanwoo Choi <cw00.choi@samsung.com>, Alan Stern <stern@rowland.harvard.edu>, Jiri Slaby <jslaby@suse.com>, Michael Turquette <mturquette@baylibre.com>, Guenter Roeck <linux@roeck-us.net>, Ohad Ben-Cohen <ohad@wizery.com>, linux-pm@vger.kernel.org, Thomas Gleixner <tglx>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVGh1LCBKdWwgMjAsIDIwMTcgYXQgMTo0MyBQTSwgTWljaGFlbCBFbGxlcm1hbiA8bXBlQGVs
-bGVybWFuLmlkLmF1PiB3cm90ZToKPiBNYXR0IEJyb3duIDxtYXR0aGV3LmJyb3duLmRldkBnbWFp
-bC5jb20+IHdyaXRlczoKPj4gVGhlIGNhY2hlZmx1c2ggcHJvdG90eXBlcyBjdXJyZW50bHkgdXNl
-IHN0YXJ0IGFuZCBzdG9wIHZhbHVlcyBhbmQgZWFjaAo+PiBjYWxsIHJlcXVpcmVzIHR5cGVjYXN0
-aW5nIHRoZSBhZGRyZXNzIHRvIGFuIHVuc2lnbmVkIGxvbmcuCj4+IFRoaXMgcGF0Y2ggY2hhbmdl
-cyB0aGUgY2FjaGVmbHVzaCBwcm90b3R5cGVzIHRvIGZvbGxvdyB0aGUgeDg2IHN0eWxlIG9mCj4+
-IHVzaW5nIGEgYmFzZSBhbmQgc2l6ZSB2YWx1ZXMsIHdpdGggYmFzZSBiZWluZyBhIHZvaWQgcG9p
-bnRlci4KPj4KPj4gQWxsIGNhbGxlcnMgb2YgdGhlIGNhY2hlZmx1c2ggZnVuY3Rpb25zLCBpbmNs
-dWRpbmcgZHJpdmVycywgaGF2ZSBiZWVuCj4+IG1vZGlmaWVkIHRvIGNvbmZvcm0gdG8gdGhlIG5l
-dyBwcm90b3R5cGVzLgo+Pgo+PiBUaGUgNjQgYml0IGNhY2hlZmx1c2ggZnVuY3Rpb25zIHdoaWNo
-IHdlcmUgaW1wbGVtZW50ZWQgaW4gYXNzZW1ibHkgY29kZQo+PiAoZmx1c2hfZGNhY2hlX3Jhbmdl
-LCBmbHVzaF9pbnZhbF9kY2FjaGVfcmFuZ2UpIGhhdmUgYmVlbiB0cmFuc2xhdGVkIGludG8KPj4g
-QyBmb3IgcmVhZGFiaWxpdHkgYW5kIGNvaGVyZW5jZS4KCj4+IC0tLSBhL2FyY2gvcG93ZXJwYy9p
-bmNsdWRlL2FzbS9jYWNoZWZsdXNoLmgKPj4gKysrIGIvYXJjaC9wb3dlcnBjL2luY2x1ZGUvYXNt
-L2NhY2hlZmx1c2guaAo+PiBAQCAtNTEsMTMgKzUxLDEzIEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBf
-X2ZsdXNoX2RjYWNoZV9pY2FjaGVfcGh5cyh1bnNpZ25lZCBsb25nIHBoeXNhZGRyKQo+PiAgICog
-V3JpdGUgYW55IG1vZGlmaWVkIGRhdGEgY2FjaGUgYmxvY2tzIG91dCB0byBtZW1vcnkgYW5kIGlu
-dmFsaWRhdGUgdGhlbS4KPj4gICAqIERvZXMgbm90IGludmFsaWRhdGUgdGhlIGNvcnJlc3BvbmRp
-bmcgaW5zdHJ1Y3Rpb24gY2FjaGUgYmxvY2tzLgo+PiAgICovCj4+IC1zdGF0aWMgaW5saW5lIHZv
-aWQgZmx1c2hfZGNhY2hlX3JhbmdlKHVuc2lnbmVkIGxvbmcgc3RhcnQsIHVuc2lnbmVkIGxvbmcg
-c3RvcCkKPj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBmbHVzaF9kY2FjaGVfcmFuZ2Uodm9pZCAqc3Rh
-cnQsIHVuc2lnbmVkIGxvbmcgc2l6ZSkKPj4gIHsKPj4gLSAgICAgdm9pZCAqYWRkciA9ICh2b2lk
-ICopKHN0YXJ0ICYgfihMMV9DQUNIRV9CWVRFUyAtIDEpKTsKPj4gLSAgICAgdW5zaWduZWQgbG9u
-ZyBzaXplID0gc3RvcCAtICh1bnNpZ25lZCBsb25nKWFkZHIgKyAoTDFfQ0FDSEVfQllURVMgLSAx
-KTsKPj4gKyAgICAgdm9pZCAqYWRkciA9ICh2b2lkICopKCh1MzIpc3RhcnQgJiB+KEwxX0NBQ0hF
-X0JZVEVTIC0gMSkpOwo+Cj4gdW5zaWduZWQgbG9uZyB3b3VsZCBiZSBuaWNlciB0aGFuIHUzMi4K
-CkluZGVlZC4gVGhhdCB3b3VsZCBtYWtlIHRoaXMgd29yayBvbiBwcGM2NCwgdG9vLgpBZnRlciB3
-aGljaCBwcGM2NCBoYXMgYW4gaWRlbnRpY2FsIGNvcHkgKHU2NCA9IHVuc2lnbmVkIGxvbmcgb24g
-cHBjNjQpIGJlbG93PwoKR3J7b2V0amUsZWV0aW5nfXMsCgogICAgICAgICAgICAgICAgICAgICAg
-ICBHZWVydAoKLS0KR2VlcnQgVXl0dGVyaG9ldmVuIC0tIFRoZXJlJ3MgbG90cyBvZiBMaW51eCBi
-ZXlvbmQgaWEzMiAtLSBnZWVydEBsaW51eC1tNjhrLm9yZwoKSW4gcGVyc29uYWwgY29udmVyc2F0
-aW9ucyB3aXRoIHRlY2huaWNhbCBwZW9wbGUsIEkgY2FsbCBteXNlbGYgYSBoYWNrZXIuIEJ1dAp3
-aGVuIEknbSB0YWxraW5nIHRvIGpvdXJuYWxpc3RzIEkganVzdCBzYXkgInByb2dyYW1tZXIiIG9y
-IHNvbWV0aGluZyBsaWtlIHRoYXQuCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLS0g
-TGludXMgVG9ydmFsZHMKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18KZHJpLWRldmVsIG1haWxpbmcgbGlzdApkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Au
-b3JnCmh0dHBzOi8vbGlzdHMuZnJlZWRlc2t0b3Aub3JnL21haWxtYW4vbGlzdGluZm8vZHJpLWRl
-dmVsCg==
+Hi Thomas,
+
+On Thu, 2017-07-20 at 12:36 +0200, Thomas Petazzoni wrote:
+> Hello,
+> 
+> On Thu, 20 Jul 2017 11:36:55 +0200, Philipp Zabel wrote:
+> 
+> > > I don't know if it has been discussed in the past, so forgive me if it
+> > > has been. Have you considered adding a "int flags" argument to the
+> > > existing reset_control_get_*() functions, rather than introducing
+> > > separate exclusive variants ?
+> > > 
+> > > Indeed, with a "int flags" argument you could in the future add more
+> > > variants/behaviors without actually multiplying the number of
+> > > functions. Something like the "flags" argument for request_irq() for
+> > > example.  
+> > 
+> > I can't find the discussion right now, but I remember we had talked
+> > about this in the past.
+> > Behind the scenes, all the inline API functions already call common
+> > entry points with flags (well, currently separate bool parameters for
+> > shared and optional).
+> > One reason against exposing those as an int flags in the user facing API
+> > is the possibility to accidentally provide a wrong value.
+> 
+> This is a quite strange argument. You could also accidentally use the
+> wrong variant of the function, just like you could use the wrong flag.
+
+You can't accidentally use no flag at all or a completely bogus value
+with the "plethora of inline functions" variant.
+
+> Once again, the next time you have another parameter for those reset
+> functions, beyond the exclusive/shared variant, you will multiply again
+> by two the number of functions ? You already have the  exclusive/shared
+> and optional/mandatory variants, so 4 variants. When you'll add a new
+> parameter, you'll have 8 variants. Doesn't seem really good.
+
+I'd rather avoid adding more variants, if possible. The complexity
+increases regardless of whether the API is expressed as a bunch of
+functions or as a single function with a bunch of flags.
+
+> What about reset_control_get(struct device *, const char *, int flags)
+> to replace all those variants ?
+
+While I like how this looks, unfortunately (devm_)reset_control_get
+already exists without the flags, so we can't change to that with a
+gentle transition.
+
+regards
+Philipp
