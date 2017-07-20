@@ -1,8 +1,7 @@
 From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH v2 10/10] ARM: dts: sun8i: a83t: h8homlet:
- Enable micro-SD card and onboard eMMC
-Date: Thu, 20 Jul 2017 11:44:52 +0800
-Message-ID: <20170720034452.15920-11-wens@csie.org>
+Subject: [PATCH v2 06/10] mmc: sunxi: Add support for A83T eMMC (MMC2)
+Date: Thu, 20 Jul 2017 11:44:48 +0800
+Message-ID: <20170720034452.15920-7-wens@csie.org>
 References: <20170720034452.15920-1-wens@csie.org>
 Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
@@ -20,52 +19,58 @@ To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.o
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The H8 homlet has a micro-SD card slot connected to mmc0,
-and onboard eMMC from FORESEE, connected to mmc2.
+The third MMC controller (MMC2) on the Allwinner A83T SoC is slightly
+different. It supports a wider 8-bit bus, has a dedicated controllable
+reset pin for eMMC, and a "new timing mode" which is supposed to deliver
+better signals and thus better performance.
+
+Add a compatible for this one to use the new timing mode not found in the
+other controllers.
 
 Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- .../boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts   | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+ Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
+ drivers/mmc/host/sunxi-mmc.c                        | 8 ++++++++
+ 2 files changed, 9 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts b/arch/arm/boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts
-index aecdeeb368ed..7afbaa4eea8d 100644
---- a/arch/arm/boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts
-+++ b/arch/arm/boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts
-@@ -43,6 +43,7 @@
- 
- /dts-v1/;
- #include "sun8i-a83t.dtsi"
-+#include "sunxi-common-regulators.dtsi"
- 
- / {
- 	model = "Allwinner A83T H8Homlet Proto Dev Board v2.0";
-@@ -57,6 +58,26 @@
- 	};
+diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+index 7d53a799f140..63b57e2a10fb 100644
+--- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+@@ -12,6 +12,7 @@ Required properties:
+    * "allwinner,sun4i-a10-mmc"
+    * "allwinner,sun5i-a13-mmc"
+    * "allwinner,sun7i-a20-mmc"
++   * "allwinner,sun8i-a83t-emmc"
+    * "allwinner,sun9i-a80-mmc"
+    * "allwinner,sun50i-a64-emmc"
+    * "allwinner,sun50i-a64-mmc"
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 11587a69a1fd..de187ed77040 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1117,6 +1117,13 @@ static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
+ 	.can_calibrate = false,
  };
  
-+&mmc0 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc0_pins>;
-+	vmmc-supply = <&reg_vcc3v0>;
-+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>; /* PF6 */
-+	bus-width = <4>;
-+	cd-inverted;
-+	status = "okay";
++static const struct sunxi_mmc_cfg sun8i_a83t_emmc_cfg = {
++	.idma_des_size_bits = 16,
++	.clk_delays = sunxi_mmc_clk_delays,
++	.can_calibrate = false,
++	.has_timings_switch = true,
 +};
 +
-+&mmc2 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc2_8bit_emmc_pins>;
-+	vmmc-supply = <&reg_vcc3v0>;
-+	bus-width = <8>;
-+	non-removable;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
-+
- &uart0 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&uart0_pb_pins>;
+ static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
+ 	.idma_des_size_bits = 16,
+ 	.clk_delays = sun9i_mmc_clk_delays,
+@@ -1141,6 +1148,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun4i-a10-mmc", .data = &sun4i_a10_cfg },
+ 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
+ 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
++	{ .compatible = "allwinner,sun8i-a83t-emmc", .data = &sun8i_a83t_emmc_cfg },
+ 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
 -- 
 2.13.2
