@@ -1,56 +1,117 @@
 From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH v2 03/10] clk: sunxi-ng: a83t: Support new timing mode for mmc2 clock
-Date: Thu, 20 Jul 2017 11:44:45 +0800
-Message-ID: <20170720034452.15920-4-wens@csie.org>
-References: <20170720034452.15920-1-wens@csie.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170720034452.15920-1-wens-jdAy2FN1RRM@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Subject: [PATCH v2 00/10] ARM: sun8i: a83t: Add support for MMC controllers
+Date: Thu, 20 Jul 2017 11:44:42 +0800
+Message-ID: <20170720034452.15920-1-wens@csie.org>
+Reply-To: wens-jdAy2FN1RRM@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBCMILY6JWQBBBOGOYDFQKGQEAJ75LTI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
 To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The MMC2 clock supports a new timing mode. When the new mode is active,
-the output clock rate is halved.
+Hi everyone,
 
-This patch sets the feature flag for the new timing mode, and adds
-a pre-divider based on the mode bit.
+This is v2 of my MMC controller support series.
 
-Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
----
- drivers/clk/sunxi-ng/ccu-sun8i-a83t.c | 15 +++++++--------
- 1 file changed, 7 insertions(+), 8 deletions(-)
+Changes since v1:
 
-diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-index 947f9f6e05d2..c5656e4f2a38 100644
---- a/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-+++ b/drivers/clk/sunxi-ng/ccu-sun8i-a83t.c
-@@ -418,14 +418,13 @@ static SUNXI_CCU_PHASE(mmc1_sample_clk, "mmc1-sample", "mmc1",
- static SUNXI_CCU_PHASE(mmc1_output_clk, "mmc1-output", "mmc1",
- 		       0x08c, 8, 3, 0);
- 
--/* TODO Support MMC2 clock's new timing mode. */
--static SUNXI_CCU_MP_WITH_MUX_GATE(mmc2_clk, "mmc2", mod0_default_parents,
--				  0x090,
--				  0, 4,		/* M */
--				  16, 2,	/* P */
--				  24, 2,	/* mux */
--				  BIT(31),	/* gate */
--				  0);
-+static SUNXI_CCU_MP_MMC_WITH_MUX_GATE(mmc2_clk, "mmc2", mod0_default_parents,
-+				      0x090,
-+				      0, 4,	/* M */
-+				      16, 2,	/* P */
-+				      24, 2,	/* mux */
-+				      BIT(31),	/* gate */
-+				      CLK_GET_RATE_NOCACHE);
- 
- static SUNXI_CCU_PHASE(mmc2_sample_clk, "mmc2-sample", "mmc2",
- 		       0x090, 20, 3, 0);
+  - Fix patches already applied have been dropped
+
+  - V2 now exports sunxi-ng mmc timing mode API functions
+    (in case mmc driver is built as a module)
+
+  - Added stub functions for the timing mode API functions,
+    in case sunxi-ng clk driver is not enabled
+
+  - Added special class of MP clocks that consider the timing mode
+    bit when calculating clock rates
+
+  - Convert A83T MMC2 clock to use special MP_MMC clock
+
+  - Keep feature bits for "has timing mode switch" and "needs new
+    timing mode" in the mmc driver separate.
+
+  - Add SoC specific compatible strings for MMC0/1 in the device tree
+
+  - Updated commit message for patch "mmc: sunxi: Support controllers
+    that can use both old and new timings"
+
+  - Added acks from Rob
+
+
+The MMC driver changes have compile time dependencies on the clk driver
+changes. What would be a good way to merge this? An immutable branch?
+
+The device tree changes don't depend on anything other than the
+"Switch to CCU device tree binding macros" patch from v1. I hope we
+can merge those ASAP, so I can send other patches on top of them.
+
+
+Original cover letter from v1:
+
+This series adds support for the MMC controllers on the A83T. The A83T's
+MMC controller adds what they call the "new timing mode". It moves the
+MMC clock delay lines into the controller itself. There are some minor
+changes to how the clock rate is calculated. The new mode give better
+performance and stability for eMMC applications. This mode is only
+found on the eMMC facing controller (or MMC2 on this chip).
+
+This mode is also found on the A64, but on that chip, the controller
+is fixed to that mode. On the A83t, the user is free to use the old
+or new mode, but the new mode is recommended. There are two switches,
+one in the clock controller, the other in the MMC controller, that
+must be set in tandem.
+
+The main part of this series adds custom functions to the sunxi-ng
+clk driver, allowing the MMC driver to query and configure the mode.
+The MMC driver can then support timing mode switching, and thus, the
+MMC2 controller on the A83t.
+
+The other bits are some related cleanups, and the usual device tree
+changes.
+
+Please have a look.
+
+
+Regards
+ChenYu
+
+Chen-Yu Tsai (10):
+  clk: sunxi-ng: Add interface to query or configure MMC timing modes.
+  clk: sunxi-ng: Add MP_MMC clocks that support MMC timing modes
+    switching
+  clk: sunxi-ng: a83t: Support new timing mode for mmc2 clock
+  mmc: sunxi: Support controllers that can use both old and new timings
+  mmc: sunxi: Support MMC DDR52 transfer mode with new timing mode
+  mmc: sunxi: Add support for A83T eMMC (MMC2)
+  ARM: dts: sun8i: a83t: Add MMC controller device nodes
+  ARM: dts: sun8i: a83t: Add pingroup for 8-bit eMMC on mmc2
+  ARM: dts: sun8i: a83t: cubietruck-plus: Enable micro-SD card and eMMC
+  ARM: dts: sun8i: a83t: h8homlet: Enable micro-SD card and onboard eMMC
+
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |  1 +
+ .../boot/dts/sun8i-a83t-allwinner-h8homlet-v2.dts  | 21 ++++++
+ arch/arm/boot/dts/sun8i-a83t-cubietruck-plus.dts   | 27 +++++++
+ arch/arm/boot/dts/sun8i-a83t.dtsi                  | 68 ++++++++++++++++++
+ drivers/clk/sunxi-ng/Makefile                      |  1 +
+ drivers/clk/sunxi-ng/ccu-sun8i-a83t.c              | 15 ++--
+ drivers/clk/sunxi-ng/ccu_common.h                  |  5 ++
+ drivers/clk/sunxi-ng/ccu_mmc_timing.c              | 73 +++++++++++++++++++
+ drivers/clk/sunxi-ng/ccu_mp.c                      | 80 +++++++++++++++++++++
+ drivers/clk/sunxi-ng/ccu_mp.h                      | 24 +++++++
+ drivers/mmc/host/sunxi-mmc.c                       | 83 ++++++++++++++++++----
+ include/linux/clk/sunxi-ng.h                       | 35 +++++++++
+ 12 files changed, 411 insertions(+), 22 deletions(-)
+ create mode 100644 drivers/clk/sunxi-ng/ccu_mmc_timing.c
+ create mode 100644 include/linux/clk/sunxi-ng.h
+
 -- 
 2.13.2
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
