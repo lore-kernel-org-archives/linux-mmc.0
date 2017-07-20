@@ -1,7 +1,8 @@
 From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH v2 06/10] mmc: sunxi: Add support for A83T eMMC (MMC2)
-Date: Thu, 20 Jul 2017 11:44:48 +0800
-Message-ID: <20170720034452.15920-7-wens@csie.org>
+Subject: [PATCH v2 08/10] ARM: dts: sun8i: a83t: Add pingroup
+ for 8-bit eMMC on mmc2
+Date: Thu, 20 Jul 2017 11:44:50 +0800
+Message-ID: <20170720034452.15920-9-wens@csie.org>
 References: <20170720034452.15920-1-wens@csie.org>
 Reply-To: wens-jdAy2FN1RRM@public.gmane.org
 Mime-Version: 1.0
@@ -19,58 +20,32 @@ To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.o
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The third MMC controller (MMC2) on the Allwinner A83T SoC is slightly
-different. It supports a wider 8-bit bus, has a dedicated controllable
-reset pin for eMMC, and a "new timing mode" which is supposed to deliver
-better signals and thus better performance.
-
-Add a compatible for this one to use the new timing mode not found in the
-other controllers.
+mmc2 can support 8-bit eMMC chips, with a dedicated reset line.
 
 Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
- drivers/mmc/host/sunxi-mmc.c                        | 8 ++++++++
- 2 files changed, 9 insertions(+)
+ arch/arm/boot/dts/sun8i-a83t.dtsi | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-index 7d53a799f140..63b57e2a10fb 100644
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -12,6 +12,7 @@ Required properties:
-    * "allwinner,sun4i-a10-mmc"
-    * "allwinner,sun5i-a13-mmc"
-    * "allwinner,sun7i-a20-mmc"
-+   * "allwinner,sun8i-a83t-emmc"
-    * "allwinner,sun9i-a80-mmc"
-    * "allwinner,sun50i-a64-emmc"
-    * "allwinner,sun50i-a64-mmc"
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 11587a69a1fd..de187ed77040 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1117,6 +1117,13 @@ static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
- 	.can_calibrate = false,
- };
+diff --git a/arch/arm/boot/dts/sun8i-a83t.dtsi b/arch/arm/boot/dts/sun8i-a83t.dtsi
+index 21ab668abfac..d9b4372dbdf3 100644
+--- a/arch/arm/boot/dts/sun8i-a83t.dtsi
++++ b/arch/arm/boot/dts/sun8i-a83t.dtsi
+@@ -271,6 +271,15 @@
+ 				bias-pull-up;
+ 			};
  
-+static const struct sunxi_mmc_cfg sun8i_a83t_emmc_cfg = {
-+	.idma_des_size_bits = 16,
-+	.clk_delays = sunxi_mmc_clk_delays,
-+	.can_calibrate = false,
-+	.has_timings_switch = true,
-+};
++			mmc2_8bit_emmc_pins: mmc2-8bit-emmc-pins {
++				pins = "PC5", "PC6", "PC8", "PC9",
++				       "PC10", "PC11", "PC12", "PC13",
++				       "PC14", "PC15", "PC16";
++				function = "mmc2";
++				drive-strength = <30>;
++				bias-pull-up;
++			};
 +
- static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = sun9i_mmc_clk_delays,
-@@ -1141,6 +1148,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", .data = &sun4i_a10_cfg },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
- 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
-+	{ .compatible = "allwinner,sun8i-a83t-emmc", .data = &sun8i_a83t_emmc_cfg },
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
+ 			spdif_tx_pin: spdif-tx-pin {
+ 				pins = "PE18";
+ 				function = "spdif";
 -- 
 2.13.2
