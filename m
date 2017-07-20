@@ -1,96 +1,36 @@
-From: Quentin Schulz <quentin.schulz@free-electrons.com>
-Subject: Re: [PATCH 1/2] staging: net: wireless: add ESP8089 WiFi driver
-Date: Fri, 21 Jul 2017 19:05:26 +0200
-Message-ID: <37e6e8f9-8f36-cb78-276d-01f4656c6e47@free-electrons.com>
-References: <20170721143502.1991-1-quentin.schulz@free-electrons.com>
- <20170721143502.1991-2-quentin.schulz@free-electrons.com>
- <20170721150133.GA18198@kroah.com>
- <ab1c22b6-9208-6f99-9422-688195ad98f7@free-electrons.com>
- <34C896A9-0FFE-4174-8E08-A07A12C4A7ED@holtmann.org>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Thu, 20 Jul 2017 22:32:49 +0200
+Message-ID: <1687646.TMvigZNUOP__4187.64552237025$1500660934$gmane$org@phil>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <34C896A9-0FFE-4174-8E08-A07A12C4A7ED@holtmann.org>
-Content-Language: en-US
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Marcel Holtmann <marcel@holtmann.org>
-Cc: devel@driverdev.osuosl.org, Ulf Hansson <ulf.hansson@linaro.org>, baolin.wang@linaro.org, Greg KH <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, kernel list <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, wens@csie.org, icenowy@aosc.xyz, maxime.ripard@free-electrons.com, shawn.lin@rock-chips.com
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20170719152646.25903-1-p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Peter Chen <Peter.Chen-3arQi8VN3Tc@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Marc Dietrich <marvin24-Mmb7MZpHnFY@public.gmane.org>, Rakesh Iyer <riyer-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Peter Meerwald-Stadler <pmeerw-jW+XmwGofnusTnJN9+BGXg@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wim Van Sebroeck <wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Xinliang Liu <z.liuxinliang-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Chanwoo Choi <cw00.choi-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Jiri Slaby <jslaby-IBi9RG/b67k@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Vincent Abriou <vincent.abriou-qxv4g6HH51o@public.gmane.org>, Bin Liu <b-liu-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Marcel,
+Hi,
 
-On 21/07/2017 18:52, Marcel Holtmann wrote:
-> Hi Quentin,
-> 
->>>> The Espressif ESP8089 WiFi chips can be often found in cheap tablets.
->>>> There is one in A23 Polaroid tablets for example.
->>>>
->>>> The chip is often embedded as an eMMC SDIO device.
->>>>
->>>> The code was taken from an out-of-tree repository and has seen a first
->>>> pass in the cleanup process.
->>>>
->>>> At the moment, there is no publicly available datasheet for this chip.
->>>>
->>>> Cc: Hans de Goede <hdegoede@redhat.com>
->>>> Cc: Icenowy Zheng <icenowy@aosc.xyz>
->>>> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
->>>
->>> Staging drivers need a TODO file that lists what has to be done to the
->>> code to get it out of staging.  Why not just take a day or so and fix up
->>> the remaining issues and get it into the "real" part of the kernel
->>> correctly?
->>>
->>
->> OK, I'll work on a TODO list. Is there anything else I should know about
->> staging drivers so I can address everything at the same time?
->>
->> From a driver that has already been cleaned up a bit by Icenowy and
->> Hans, it took me between 10 and 15 working days to this step, which I
->> estimate to be around 50% of total clean up (and we're only speaking
->> about coding style and dead code mainly, nothing about a bit of code
->> review, code robustness...). I find the code not really easy to follow
->> (might be because I'm a beginner in the subsystem as well).
->>
->> I might not be the most efficient person in cleaning up drivers but I'm
->> pretty sure this isn't a one day cleanup. (Would be happy to be proven
->> otherwise :) ), else I would have done it as you suggest.
-> 
-> even if it takes you 1 month to clean it up, get it reviewed on linux-wireless and target wireless-drivers instead of staging. When I had a brief a look at your patch, it didn't look like staging material to me.
-> 
+>   crypto: rockchip: explicitly request exclusive reset control
+>   iio: adc: rockchip_saradc: explicitly request exclusive reset control
+>   PCI: rockchip: explicitly request exclusive reset control
+>   phy: rockchip-pcie: explicitly request exclusive reset control
+>   phy: rockchip-typec: explicitly request exclusive reset control
+>   phy: rockchip-usb: explicitly request exclusive reset control
+>   thermal: rockchip: explicitly request exclusive reset control
 
-We don't have a client supporting this effort and I don't think the
-company I work for would support this effort (maybe it would, but
-definitely spread over a long long period), so we're talking about 10-15
-working days spread over my free time/week-end, that isn't for in one
-month :) I could use help for sure on this driver, that's why I posted
-it in staging.
+for the driver-related Rockchip changes
 
-I've done the cleanup on a per-file basis so maybe you looked at one of
-the cleaned up files?
-
-Just to be sure, you're telling me that I should post it as is on
-linux-wireless and then work with the reviews? Or are you telling me to
-take "1 month to clean it up" and then post it on linux-wireless?
-
-Thanks,
-Quentin
-
-> Regards
-> 
-> Marcel
-> 
-
--- 
-Quentin Schulz, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
+Acked-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
