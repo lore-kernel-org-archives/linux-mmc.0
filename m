@@ -1,63 +1,130 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 06/11] mmc: mmc: Enable Command Queuing
-Date: Fri, 21 Jul 2017 12:49:39 +0300
-Message-ID: <1500630584-22852-7-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 08/11] mmc: block: Prepare CQE data
+Date: Fri, 21 Jul 2017 12:49:41 +0300
+Message-ID: <1500630584-22852-9-git-send-email-adrian.hunter@intel.com>
 References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga05.intel.com ([192.55.52.43]:29961 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753762AbdGUJ4j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 Jul 2017 05:56:39 -0400
+        id S1753762AbdGUJ4t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 Jul 2017 05:56:49 -0400
 In-Reply-To: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Enable the Command Queue if the host controller supports i a command queue
-engine. It is not compatible with Packed Commands, so do not enable that
-at the same time.
+Enhance mmc_blk_data_prep() to support CQE requests.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc.c | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
+ drivers/mmc/core/block.c | 45 ++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 34 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4ffea14b7eb6..2ff0caf92bc8 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1783,6 +1783,20 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		}
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 40f0d596ed54..915290c74363 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -36,6 +36,7 @@
+ #include <linux/compat.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/idr.h>
++#include <linux/ioprio.h>
+ 
+ #include <linux/mmc/ioctl.h>
+ #include <linux/mmc/card.h>
+@@ -1485,25 +1486,27 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ }
+ 
+ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+-			      int disable_multi, bool *do_rel_wr,
+-			      bool *do_data_tag)
++			      int disable_multi, bool *do_rel_wr_p,
++			      bool *do_data_tag_p)
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+ 	struct request *req = mmc_queue_req_to_req(mqrq);
++	bool do_rel_wr, do_data_tag;
+ 
+ 	/*
+ 	 * Reliable writes are used to implement Forced Unit Access and
+ 	 * are supported only on MMCs.
+ 	 */
+-	*do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+-		     rq_data_dir(req) == WRITE &&
+-		     (md->flags & MMC_BLK_REL_WR);
++	do_rel_wr = (req->cmd_flags & REQ_FUA) &&
++		    rq_data_dir(req) == WRITE &&
++		    (md->flags & MMC_BLK_REL_WR);
+ 
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+ 
+ 	brq->mrq.data = &brq->data;
++	brq->mrq.tag = req->tag;
+ 
+ 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+ 	brq->stop.arg = 0;
+@@ -1518,6 +1521,15 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 
+ 	brq->data.blksz = 512;
+ 	brq->data.blocks = blk_rq_sectors(req);
++	brq->data.blk_addr = blk_rq_pos(req);
++
++	/*
++	 * The command queue supports 2 priorities: "high" (1) and "simple" (0).
++	 * The eMMC will give "high" priority tasks priority over "simple"
++	 * priority tasks. Here we give priority to IOPRIO_CLASS_RT.
++	 */
++	if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
++		brq->data.flags |= MMC_DATA_PRIO;
+ 
+ 	/*
+ 	 * The block layer doesn't support all sector count
+@@ -1547,18 +1559,23 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
  	}
  
-+	/* Enable Command Queue if supported */
-+	card->ext_csd.cmdq_en = false;
-+	if (card->ext_csd.cmdq_support && host->caps2 & MMC_CAP2_CQE) {
-+		err = mmc_cmdq_enable(card);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+		if (err) {
-+			pr_warn("%s: Enabling CMDQ failed\n",
-+				mmc_hostname(card->host));
-+			card->ext_csd.cmdq_support = false;
-+			card->ext_csd.cmdq_depth = 0;
-+			err = 0;
-+		}
+-	if (*do_rel_wr)
++	if (do_rel_wr) {
+ 		mmc_apply_rel_rw(brq, card, req);
++		brq->data.flags |= MMC_DATA_REL_WR;
 +	}
+ 
  	/*
- 	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
- 	 * disabled for a time, so a flag is needed to indicate to re-enable the
-@@ -1796,7 +1810,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	 * Data tag is used only during writing meta data to speed
+ 	 * up write and any subsequent read of this meta data
  	 */
- 	if (card->ext_csd.max_packed_writes >= 3 &&
- 	    card->ext_csd.max_packed_reads >= 5 &&
--	    host->caps2 & MMC_CAP2_PACKED_CMD) {
-+	    host->caps2 & MMC_CAP2_PACKED_CMD &&
-+	    !card->ext_csd.cmdq_en) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				EXT_CSD_EXP_EVENTS_CTRL,
- 				EXT_CSD_PACKED_EVENT_EN,
+-	*do_data_tag = card->ext_csd.data_tag_unit_size &&
+-		       (req->cmd_flags & REQ_META) &&
+-		       (rq_data_dir(req) == WRITE) &&
+-		       ((brq->data.blocks * brq->data.blksz) >=
+-			card->ext_csd.data_tag_unit_size);
++	do_data_tag = card->ext_csd.data_tag_unit_size &&
++		      (req->cmd_flags & REQ_META) &&
++		      (rq_data_dir(req) == WRITE) &&
++		      ((brq->data.blocks * brq->data.blksz) >=
++		       card->ext_csd.data_tag_unit_size);
++
++	if (do_data_tag)
++		brq->data.flags |= MMC_DATA_DAT_TAG;
+ 
+ 	mmc_set_data_timeout(&brq->data, card);
+ 
+@@ -1587,6 +1604,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	mqrq->areq.mrq = &brq->mrq;
+ 
+ 	mmc_queue_bounce_pre(mqrq);
++
++	if (do_rel_wr_p)
++		*do_rel_wr_p = do_rel_wr;
++
++	if (do_data_tag_p)
++		*do_data_tag_p = do_data_tag;
+ }
+ 
+ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 -- 
 1.9.1
 
