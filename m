@@ -1,51 +1,70 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v2 05/10] mmc: sunxi: Support MMC DDR52
- transfer mode with new timing mode
-Date: Fri, 21 Jul 2017 09:21:16 +0200
-Message-ID: <20170721072116.bub4fxqq2zg6kj3t@flea>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v2 06/10] mmc: sunxi: Add support for A83T eMMC (MMC2)
+Date: Fri, 21 Jul 2017 09:21:41 +0200
+Message-ID: <20170721072141.uxvp7c6c5s64akdp@flea>
 References: <20170720034452.15920-1-wens@csie.org>
- <20170720034452.15920-6-wens@csie.org>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+ <20170720034452.15920-7-wens@csie.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="l5oxp2yqvksnbrtt"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBB6GWY3FQKGQERXKSGEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+        protocol="application/pgp-signature"; boundary="wmny666cvwncqeiy"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.free-electrons.com ([62.4.15.54]:60608 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751995AbdGUHVw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2017 03:21:52 -0400
 Content-Disposition: inline
-In-Reply-To: <20170720034452.15920-6-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20170720034452.15920-7-wens@csie.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 
 
---l5oxp2yqvksnbrtt
-Content-Type: text/plain; charset="UTF-8"
+--wmny666cvwncqeiy
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jul 20, 2017 at 11:44:47AM +0800, Chen-Yu Tsai wrote:
-> The MMC controller can support DDR52 transfers under the new timing
-> mode. According to the BSP kernel, the module clock has to be double
-> the card clock, regardless of the bus width. The default timings in
-> the hardware can be used.
-> 
-> This also reworks the code setting the internal divider, getting rid
-> of a extra conditional.
-> 
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+On Thu, Jul 20, 2017 at 11:44:48AM +0800, Chen-Yu Tsai wrote:
+> The third MMC controller (MMC2) on the Allwinner A83T SoC is slightly
+> different. It supports a wider 8-bit bus, has a dedicated controllable
+> reset pin for eMMC, and a "new timing mode" which is supposed to deliver
+> better signals and thus better performance.
+>=20
+> Add a compatible for this one to use the new timing mode not found in the
+> other controllers.
+>=20
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> Acked-by: Rob Herring <robh@kernel.org>
 
-Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 
 Thanks!
 Maxime
 
--- 
+--=20
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
---l5oxp2yqvksnbrtt--
+
+--wmny666cvwncqeiy
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBAgAGBQJZcauFAAoJEBx+YmzsjxAgcf0P/0We3BnYu0uVelHU1TBqvhLs
+D+O+G/ugJ6mI93Mqc+rrlGlHKXcpi96og+Rh4W7ZxuI5/2kK1+ScHalyYjLWDQuD
+I2bi8sfWb3fJCColFhgTfet/mIZaNewqcz1N/ziJnUpZdqYapWeewNHdNbnXXWsQ
+NK0jq9YHcgMJQF0Fn1pp2gOAdVpOA7jBfX2YPRNY+8rDvI+48mh3GB/OrHM7l033
+r+7ZFvRdqhCge7wRQAQMN3+Pm/2zXA+VcQc+sjrHGLIIJq0kpJXOJpP7kpQj9zF7
+eqItmU8q2ArqcfNNBbGsF7iMGTLY1L6hY0gt7suA2iQMFdjmbdwhsvMqclGvOw/+
+NtHz7dreoV17T8QII2AOZ+9S4z9gp7Bed+sDS475d4g81aqSQYJchSoA/YA3fDb/
+LoONePc2a9Wk/apOGxQk/QjZ7GFdiutQ05k3ZlnrO3t5YZOa+FZTplerXoBSSEH6
+NRi+G2ddlDijOASRdJ5j6TLZpLGc9cvVmqDN6f5b9rkT6cAEU7B+WJvvAG4JtbOz
+zdaF3rtCRREIfhIB5lUPeZZF215CzsdMuy8/fhzCV4U+/kWx9NUt1wOuFfh9BRmQ
+oeALELdzj8uRbUES2sLl5s6o3JbpsMBEzKcP1IhTMn2pCtFPKv43Q7L9WqZ8JAcz
++uKcftQ1X4d2qIrYDO+/
+=nDLZ
+-----END PGP SIGNATURE-----
+
+--wmny666cvwncqeiy--
