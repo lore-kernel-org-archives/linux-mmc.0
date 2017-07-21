@@ -1,18 +1,18 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v2 04/10] mmc: sunxi: Support controllers
- that can use both old and new timings
-Date: Fri, 21 Jul 2017 09:20:39 +0200
-Message-ID: <20170721072039.qsko2vtradiosdqk@flea>
+Subject: Re: [PATCH v2 05/10] mmc: sunxi: Support MMC DDR52
+ transfer mode with new timing mode
+Date: Fri, 21 Jul 2017 09:21:16 +0200
+Message-ID: <20170721072116.bub4fxqq2zg6kj3t@flea>
 References: <20170720034452.15920-1-wens@csie.org>
- <20170720034452.15920-5-wens@csie.org>
+ <20170720034452.15920-6-wens@csie.org>
 Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="5aoxigudzrnhotcx"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBUWWY3FQKGQETANORBA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="l5oxp2yqvksnbrtt"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBB6GWY3FQKGQERXKSGEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <20170720034452.15920-5-wens-jdAy2FN1RRM@public.gmane.org>
+In-Reply-To: <20170720034452.15920-6-wens-jdAy2FN1RRM@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
@@ -24,23 +24,18 @@ Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael T
 List-Id: linux-mmc@vger.kernel.org
 
 
---5aoxigudzrnhotcx
+--l5oxp2yqvksnbrtt
 Content-Type: text/plain; charset="UTF-8"
 Content-Disposition: inline
 
-On Thu, Jul 20, 2017 at 11:44:46AM +0800, Chen-Yu Tsai wrote:
-> On the SoCs that introduced the new timing mode for MMC controllers,
-> both the old (where the clock delays are set in the CCU) and new
-> (where the clock delays are set in the MMC controller) timing modes
-> are available, and we have to support them both. However there are
-> two bits that control which mode is active. One is in the CCU, the
-> other is in the MMC controller. The settings on both sides must be
-> the same, or nothing will work.
+On Thu, Jul 20, 2017 at 11:44:47AM +0800, Chen-Yu Tsai wrote:
+> The MMC controller can support DDR52 transfers under the new timing
+> mode. According to the BSP kernel, the module clock has to be double
+> the card clock, regardless of the bus width. The default timings in
+> the hardware can be used.
 > 
-> The sunxi-ng clock driver provides an API to query and set the
-> active timing mode. At probe time, we try to set the active mode
-> to the "new timing mode". If it succeeds, we can then use the MMC
-> controller in the new mode. If not, we fall back to the old mode.
+> This also reworks the code setting the internal divider, getting rid
+> of a extra conditional.
 > 
 > Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
@@ -48,8 +43,9 @@ Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.g
 
 Thanks!
 Maxime
+
 -- 
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
---5aoxigudzrnhotcx--
+--l5oxp2yqvksnbrtt--
