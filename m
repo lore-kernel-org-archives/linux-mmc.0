@@ -1,17 +1,17 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
 Subject: Re: [PATCH V4 09/11] mmc: block: Add CQE support
-Date: Sat, 22 Jul 2017 17:23:49 +0800
-Message-ID: <5cb8d795-329e-d546-47ba-e068662b7996@rock-chips.com>
+Date: Sat, 22 Jul 2017 17:26:03 +0800
+Message-ID: <3ab2144f-8009-ff5b-e739-6b7ed14786f7@rock-chips.com>
 References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
  <1500630584-22852-10-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:45546 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:50145 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752127AbdGVJY3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jul 2017 05:24:29 -0400
+        with ESMTP id S1752187AbdGVJ0m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jul 2017 05:26:42 -0400
 In-Reply-To: <1500630584-22852-10-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -25,8 +25,8 @@ On 2017/7/21 17:49, Adrian Hunter wrote:
 > 	- optionally using DCMD for flush requests
 
 That doesn't seem to be fact when I was looking into
-the patch 10, as it always prepare DCMD with QBR
-whenever not finding mrq->data. Do I miss something?
+patch 10 as it always fire DCMD with QBR whenever seeing
+!mrq->data. Do I miss something?
 
 > 	- manually issuing discard requests
 > 	- issuing read / write requests to the CQE
