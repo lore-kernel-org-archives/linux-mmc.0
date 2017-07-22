@@ -1,57 +1,64 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 038/102] mmc: dw_mmc: explicitly request exclusive reset
- control
-Date: Sat, 22 Jul 2017 21:13:52 +0800
-Message-ID: <dac26040-0480-6331-5971-8c09c9848b7f@rock-chips.com>
-References: <20170719152646.25903-1-p.zabel@pengutronix.de>
- <20170719152646.25903-39-p.zabel@pengutronix.de>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
+Date: Sat, 22 Jul 2017 21:17:48 +0800
+Message-ID: <2a5b8508-486a-8f02-8e6a-6259261bef01@rock-chips.com>
+References: <20170717012332.16505-1-jeff.dagenais@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:34056 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.130]:34763 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752154AbdGVNO2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jul 2017 09:14:28 -0400
-In-Reply-To: <20170719152646.25903-39-p.zabel@pengutronix.de>
+        with ESMTP id S1750838AbdGVNSX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jul 2017 09:18:23 -0400
+In-Reply-To: <20170717012332.16505-1-jeff.dagenais@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Jean-Francois Dagenais <jeff.dagenais@gmail.com>, ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, michal.simek@xilinx.com, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org
 
-On 2017/7/19 23:25, Philipp Zabel wrote:
-> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
-> reset lines") started to transition the reset control request API calls
-> to explicitly state whether the driver needs exclusive or shared reset
-> control behavior. Convert all drivers requesting exclusive resets to the
-> explicit API call so the temporary transition helpers can be removed.
+ÔÚ 2017/7/17 9:23, Jean-Francois Dagenais Ð´µÀ:
+> This increases consistency of the code across the sdhci family.
 >
-> No functional changes.
+> v2: rebased onto ulfh/mmc/next and tweaked headline accordingly.
 >
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+> Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+
+Apart from the msg above,
 
 Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-> ---
->  drivers/mmc/host/dw_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+And I included your patch for my other test for sdhci-of-arasan this
+afternoon, so
+
+Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+
+
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index b13c0a7d50e4..528a5d24c0bc 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -216,13 +216,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  	u32 vendor;
+>  	struct sdhci_host *host = mmc_priv(mmc);
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index a9dfb26972f21..7c1e2dbc76776 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2950,7 +2950,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  		return ERR_PTR(-ENOMEM);
+> -	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +	vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
+>  	if (ios->enhanced_strobe)
+>  		vendor |= VENDOR_ENHANCED_STROBE;
+>  	else
+>  		vendor &= ~VENDOR_ENHANCED_STROBE;
 >
->  	/* find reset controller when exist */
-> -	pdata->rstc = devm_reset_control_get_optional(dev, "reset");
-> +	pdata->rstc = devm_reset_control_get_optional_exclusive(dev, "reset");
->  	if (IS_ERR(pdata->rstc)) {
->  		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
->  			return ERR_PTR(-EPROBE_DEFER);
+> -	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +	sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
+>  }
+>
+>  static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
 >
 
 
