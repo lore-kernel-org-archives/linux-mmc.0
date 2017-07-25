@@ -1,46 +1,65 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v3 09/10] ARM: dts: sun8i: a83t:
- cubietruck-plus: Enable micro-SD card and eMMC
-Date: Tue, 25 Jul 2017 09:38:49 +0200
-Message-ID: <20170725073849.f3c6kee4s3bsspta@flea>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v3 10/10] ARM: dts: sun8i: a83t: h8homlet: Enable
+ micro-SD card and onboard eMMC
+Date: Tue, 25 Jul 2017 09:39:07 +0200
+Message-ID: <20170725073907.ykcarlb6fv2tlytc@flea>
 References: <20170724135905.28855-1-wens@csie.org>
- <20170724135905.28855-10-wens@csie.org>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+ <20170724135905.28855-11-wens@csie.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="32vs6hzgjww7f5ku"
-Return-path: <linux-sunxi+bncBDSJBYGBRIMBBFHL3PFQKGQEWYH4MZQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+        protocol="application/pgp-signature"; boundary="rzyeyouhr346tdlv"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.free-electrons.com ([62.4.15.54]:42152 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750980AbdGYHjS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2017 03:39:18 -0400
 Content-Disposition: inline
-In-Reply-To: <20170724135905.28855-10-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20170724135905.28855-11-wens@csie.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 
 
---32vs6hzgjww7f5ku
-Content-Type: text/plain; charset="UTF-8"
+--rzyeyouhr346tdlv
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jul 24, 2017 at 09:59:04PM +0800, Chen-Yu Tsai wrote:
-> Now that we support the MMC controllers on the A83T SoC, we can enable
-> them on some boards.
-> 
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+On Mon, Jul 24, 2017 at 09:59:05PM +0800, Chen-Yu Tsai wrote:
+> The H8 homlet has a micro-SD card slot connected to mmc0,
+> and onboard eMMC from FORESEE, connected to mmc2.
+>=20
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
-Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 
 Thanks!
 Maxime
 
--- 
+--=20
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
---32vs6hzgjww7f5ku--
+
+--rzyeyouhr346tdlv
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBAgAGBQJZdvWbAAoJEBx+YmzsjxAgXo4QAMDIWXwb/pYl+CaJCmcpDmoZ
+qo/EXfGBcG8h6Fwkz20ZNEBt8VR+fm4GOBIhFWAryKQ2u1Z/4CcDCfvGOslMSPcm
+uR1duPEc0n8J63dD+IABBpP2EwIXwOd6qz85Iu5y/oCB2OsO5olwtwy7Xlvm2ujT
+NfB642sKXsEMa+Gb2WpGgq0OpzQJAJYKv4nybMRS9lC/KXAoaqYr2+9vjXimHARG
+3VBXmrf0jBc7GnF0ixZZRz6GDgxv9KdI5wNJKQrFly7ofFHc4EPs9uZAZ2pBnSIg
+DCKI7xmF8I86BF4DeacUE1Aapu4vCV5IzoOoTJsOt0e0+/PJD3HcEGCwita+D4qi
+wU5dUz9NT0PijbbJS+knv/2b/m/HoxlF+IxztvgsCFf46M8Hr0L2jUnhx76lu2P6
+Bw0ovDrXd1238BV3NR82mxGPwRaukbD/NebDG7RTProeaEEzt7wIul2hAQfK2K50
+LLaHGhh7UJQ+5CVkaAYdvMQAWO6zLQcT4YtaK6m3prKAKcs4ldm1CwNWewK7ip0T
+kZ3tcjwVOhsqVZe7uQ5KBT775qAEqFT781QhGJj4ICA9CkpCpjgDLKtCpoQMUqm3
+v4aXv5aNnFVTY8vt9UX2LmoLVWT7jG0puJemTtVQ5qk2hFbqg0f87yAyVPRR80DV
+W95cPZBB89R8zZXE0XvL
+=4mMg
+-----END PGP SIGNATURE-----
+
+--rzyeyouhr346tdlv--
