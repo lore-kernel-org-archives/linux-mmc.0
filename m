@@ -1,75 +1,79 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1] sdhci: pci: Fix up power if device has ACPI companion
-Date: Tue, 25 Jul 2017 10:12:43 +0300
-Message-ID: <380b2033-1a58-0685-2ea2-51fa58c937de@intel.com>
-References: <20170724150750.12217-1-andriy.shevchenko@linux.intel.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v3 01/10] clk: sunxi-ng: Add interface to query or
+ configure MMC timing modes.
+Date: Tue, 25 Jul 2017 09:32:29 +0200
+Message-ID: <20170725073229.fbm7ead455oudftc@flea>
+References: <20170724135905.28855-1-wens@csie.org>
+ <20170724135905.28855-2-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:54589 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750756AbdGYHT1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Jul 2017 03:19:27 -0400
-In-Reply-To: <20170724150750.12217-1-andriy.shevchenko@linux.intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="wzyrrs3i7h2wwp77"
+Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170724135905.28855-2-wens@csie.org>
+Sender: linux-clk-owner@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 24/07/17 18:07, Andy Shevchenko wrote:
-> Fix up a power state in case PCI device has an ACPI companion.
-> 
-> Do it only for Intel Merrifield for now.
-> 
-> This is almost copy'n'paste of part of sdhci_acpi_probe() and might be
-> split out to a helper function in the future.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--wzyrrs3i7h2wwp77
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->  drivers/mmc/host/sdhci-pci-core.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index e1721ac37919..2c853cfa8389 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -730,6 +730,24 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
->  #define INTEL_MRFLD_SD		2
->  #define INTEL_MRFLD_SDIO	3
->  
-> +#ifdef CONFIG_ACPI
-> +static void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot)
-> +{
-> +	struct acpi_device *device, *child;
-> +
-> +	device = ACPI_COMPANION(&slot->chip->pdev->dev);
-> +	if (!device)
-> +		return;
-> +
-> +	acpi_device_fix_up_power(device);
-> +	list_for_each_entry(child, &device->children, node)
-> +		if (child->status.present && child->status.enabled)
-> +			acpi_device_fix_up_power(child);
-> +}
-> +#else
-> +static inline void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot) {}
-> +#endif
-> +
->  static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
->  {
->  	unsigned int func = PCI_FUNC(slot->chip->pdev->devfn);
-> @@ -751,6 +769,8 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
->  	default:
->  		return -ENODEV;
->  	}
-> +
-> +	intel_mrfld_mmc_fix_up_power_slot(slot);
->  	return 0;
->  }
->  
-> 
+On Mon, Jul 24, 2017 at 09:58:56PM +0800, Chen-Yu Tsai wrote:
+> Starting with the A83T SoC, Allwinner introduced a new timing mode for
+> its MMC clocks. The new mode changes how the MMC controller sample and
+> output clocks are delayed to match chip and board specifics. There are
+> two controls for this, one on the CCU side controlling how the clocks
+> behave, and one in the MMC controller controlling what inputs to take
+> and how to route them.
+>=20
+> In the old mode, the MMC clock had 2 child clocks providing the output
+> and sample clocks, which could be delayed by a number of clock cycles
+> measured from the MMC clock's parent.
+>=20
+> With the new mode, the 2 delay clocks are no longer active. Instead,
+> the delays and associated controls are moved into the MMC controller.
+> The output of the MMC clock is also halved.
+>=20
+> The difference in how things are wired between the modes means that the
+> clock controls and the MMC controls must match. To achieve this in a
+> clear, explicit way, we introduce two functions for the MMC driver to
+> use: one queries the hardware for the current mode set, and the other
+> allows the MMC driver to request a mode.
+>=20
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+
+Thanks!
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--wzyrrs3i7h2wwp77
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBAgAGBQJZdvQNAAoJEBx+YmzsjxAgo7sP/A7YmHobs5IO97Mpq4X53u7Z
+XC6NfQLYXxSAidX+g/Uusrt+R6RdAdyuKZdrNq0AuxA5lhLbAAb910IiTOH0vATJ
+zFQLp3VhpNE2OhyU8eoQyO9OWRNLEVRQrSIj6vwpm1AVYT5sDx8+DCBbLxvnEf7k
+fafo+tmnQqIU2qgD0yGnDLsOrVTYHotyHmHCigdi4uVxfpa9i4cfYKlycoi7h9YQ
+65iZPdFiDf5pvUEVQUDCh8H+b5wik6S/W1DDYEBuWeg7dwdVEZAL1gHRYm4gwgOn
+027/Hefy7+WNj6OEiEGas1/bzJ9Y0afK4eWHgzIjiOzeqeaJeGKRmesy+RoeOkOJ
+CAobLroRSzGzToibhA/8dRNZV9mCmonVOOGWRAwtJz5ght7WN5VXhJaoFQWmphaI
+AQnlJuby7eEn26IVQ4b/IwiZsDXovphgUH031ND6jXJWo9KT/yHkaEFUm4yS+qPx
+j3GGfEyyaZ/1oSqI47g2mVrLia8nFRRPLcZSD5Y3a1qxjF0n/q/aD9Be3Xb391Gn
+N/m7qIJNplHo46KvIM9G6alh6irBjY728438xr2BrSXG1t6oOtz3noBMX9nr/gie
+ENJGOM6+edKcOEjuBgy7B5xZfLbBcBIEnN3CfImHwUZKSCLNjJhPWTsKk+g4fgHG
+BNx4jrO48UqdBNxXYu9o
+=5sjE
+-----END PGP SIGNATURE-----
+
+--wzyrrs3i7h2wwp77--
