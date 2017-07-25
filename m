@@ -1,57 +1,75 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v1] sdhci: acpi: Use new method to get ACPI companion
-Date: Tue, 25 Jul 2017 09:56:58 +0300
-Message-ID: <722d50ff-937d-3184-7b1a-c51ee8dde25f@intel.com>
-References: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v1] sdhci: pci: Fix up power if device has ACPI companion
+Date: Tue, 25 Jul 2017 10:12:43 +0300
+Message-ID: <380b2033-1a58-0685-2ea2-51fa58c937de@intel.com>
+References: <20170724150750.12217-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:48392 "EHLO mga01.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:54589 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751091AbdGYHDf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 25 Jul 2017 03:03:35 -0400
-In-Reply-To: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
+        id S1750756AbdGYHT1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Jul 2017 03:19:27 -0400
+In-Reply-To: <20170724150750.12217-1-andriy.shevchenko@linux.intel.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 24/07/17 17:59, Andy Shevchenko wrote:
-> ACPI_COMPANION() macro reduces a code to get a companion device out of
-> struct device.
+On 24/07/17 18:07, Andy Shevchenko wrote:
+> Fix up a power state in case PCI device has an ACPI companion.
 > 
-> Use it instead of an old method.
+> Do it only for Intel Merrifield for now.
+> 
+> This is almost copy'n'paste of part of sdhci_acpi_probe() and might be
+> split out to a helper function in the future.
 > 
 > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pci-core.c | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index ac678e9fb19a..4bbce8919c30 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -432,7 +432,6 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
->  static int sdhci_acpi_probe(struct platform_device *pdev)
->  {
->  	struct device *dev = &pdev->dev;
-> -	acpi_handle handle = ACPI_HANDLE(dev);
->  	struct acpi_device *device, *child;
->  	struct sdhci_acpi_host *c;
->  	struct sdhci_host *host;
-> @@ -442,7 +441,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  	const char *uid;
->  	int err;
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index e1721ac37919..2c853cfa8389 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -730,6 +730,24 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  #define INTEL_MRFLD_SD		2
+>  #define INTEL_MRFLD_SDIO	3
 >  
-> -	if (acpi_bus_get_device(handle, &device))
-> +	device = ACPI_COMPANION(dev);
+> +#ifdef CONFIG_ACPI
+> +static void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot)
+> +{
+> +	struct acpi_device *device, *child;
+> +
+> +	device = ACPI_COMPANION(&slot->chip->pdev->dev);
 > +	if (!device)
+> +		return;
+> +
+> +	acpi_device_fix_up_power(device);
+> +	list_for_each_entry(child, &device->children, node)
+> +		if (child->status.present && child->status.enabled)
+> +			acpi_device_fix_up_power(child);
+> +}
+> +#else
+> +static inline void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot) {}
+> +#endif
+> +
+>  static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>  	unsigned int func = PCI_FUNC(slot->chip->pdev->devfn);
+> @@ -751,6 +769,8 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>  	default:
 >  		return -ENODEV;
+>  	}
+> +
+> +	intel_mrfld_mmc_fix_up_power_slot(slot);
+>  	return 0;
+>  }
 >  
->  	hid = acpi_device_hid(device);
 > 
 
