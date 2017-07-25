@@ -1,65 +1,103 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v3 10/10] ARM: dts: sun8i: a83t: h8homlet: Enable
- micro-SD card and onboard eMMC
-Date: Tue, 25 Jul 2017 09:39:07 +0200
-Message-ID: <20170725073907.ykcarlb6fv2tlytc@flea>
-References: <20170724135905.28855-1-wens@csie.org>
- <20170724135905.28855-11-wens@csie.org>
+From: Kalle Valo <kvalo@codeaurora.org>
+Subject: Re: [PATCH 1/2] staging: net: wireless: add ESP8089 WiFi driver
+Date: Tue, 25 Jul 2017 11:31:22 +0300
+Message-ID: <87k22wyl2d.fsf@purkki.adurom.net>
+References: <20170721143502.1991-1-quentin.schulz@free-electrons.com>
+ <20170721143502.1991-2-quentin.schulz@free-electrons.com>
+ <20170721150133.GA18198@kroah.com>
+ <ab1c22b6-9208-6f99-9422-688195ad98f7@free-electrons.com>
+ <34C896A9-0FFE-4174-8E08-A07A12C4A7ED@holtmann.org>
+ <37e6e8f9-8f36-cb78-276d-01f4656c6e47@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="rzyeyouhr346tdlv"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:42152 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbdGYHjS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2017 03:39:18 -0400
-Content-Disposition: inline
-In-Reply-To: <20170724135905.28855-11-wens@csie.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <37e6e8f9-8f36-cb78-276d-01f4656c6e47@free-electrons.com>
+ (Quentin Schulz's message of "Fri, 21 Jul 2017 19:05:26 +0200")
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Quentin Schulz <quentin.schulz@free-electrons.com>
+Cc: devel@driverdev.osuosl.org, Ulf Hansson <ulf.hansson@linaro.org>, baolin.wang@linaro.org, Greg KH <gregkh@linuxfoundation.org>, Marcel Holtmann <marcel@holtmann.org>, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, kernel list <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, wens@csie.org, icenowy@aosc.xyz, linux-wireless@vger.kernel.org, shawn.lin@rock-chips.com, Linus Walleij <linus.walleij@linaro.org>, maxime.ripard@free-electrons.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 
+(adding linux-wireless)
 
---rzyeyouhr346tdlv
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Quentin Schulz <quentin.schulz@free-electrons.com> writes:
 
-On Mon, Jul 24, 2017 at 09:59:05PM +0800, Chen-Yu Tsai wrote:
-> The H8 homlet has a micro-SD card slot connected to mmc0,
-> and onboard eMMC from FORESEE, connected to mmc2.
->=20
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> Hi Marcel,
+>
+> On 21/07/2017 18:52, Marcel Holtmann wrote:
+>> Hi Quentin,
+>> 
+>>>>> The Espressif ESP8089 WiFi chips can be often found in cheap tablets.
+>>>>> There is one in A23 Polaroid tablets for example.
+>>>>>
+>>>>> The chip is often embedded as an eMMC SDIO device.
+>>>>>
+>>>>> The code was taken from an out-of-tree repository and has seen a first
+>>>>> pass in the cleanup process.
+>>>>>
+>>>>> At the moment, there is no publicly available datasheet for this chip.
+>>>>>
+>>>>> Cc: Hans de Goede <hdegoede@redhat.com>
+>>>>> Cc: Icenowy Zheng <icenowy@aosc.xyz>
+>>>>> Signed-off-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+>>>>
+>>>> Staging drivers need a TODO file that lists what has to be done to the
+>>>> code to get it out of staging.  Why not just take a day or so and fix up
+>>>> the remaining issues and get it into the "real" part of the kernel
+>>>> correctly?
+>>>>
+>>>
+>>> OK, I'll work on a TODO list. Is there anything else I should know about
+>>> staging drivers so I can address everything at the same time?
+>>>
+>>> From a driver that has already been cleaned up a bit by Icenowy and
+>>> Hans, it took me between 10 and 15 working days to this step, which I
+>>> estimate to be around 50% of total clean up (and we're only speaking
+>>> about coding style and dead code mainly, nothing about a bit of code
+>>> review, code robustness...). I find the code not really easy to follow
+>>> (might be because I'm a beginner in the subsystem as well).
+>>>
+>>> I might not be the most efficient person in cleaning up drivers but I'm
+>>> pretty sure this isn't a one day cleanup. (Would be happy to be proven
+>>> otherwise :) ), else I would have done it as you suggest.
+>> 
+>> even if it takes you 1 month to clean it up, get it reviewed on
+>> linux-wireless and target wireless-drivers instead of staging. When I
+>> had a brief a look at your patch, it didn't look like staging
+>> material to me.
 
-Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+I did only a 30 sec review (right now no time for proper review because
+I have quite a lot of catching up after vacation) but based on what I
+saw the driver looks promising. So I agree with Marcel, you should try
+to submit this via linux-wireless first and only use staging as the last
+resort.
 
-Thanks!
-Maxime
+> We don't have a client supporting this effort and I don't think the
+> company I work for would support this effort (maybe it would, but
+> definitely spread over a long long period), so we're talking about 10-15
+> working days spread over my free time/week-end, that isn't for in one
+> month :) I could use help for sure on this driver, that's why I posted
+> it in staging.
+>
+> I've done the cleanup on a per-file basis so maybe you looked at one of
+> the cleaned up files?
+>
+> Just to be sure, you're telling me that I should post it as is on
+> linux-wireless and then work with the reviews? Or are you telling me to
+> take "1 month to clean it up" and then post it on linux-wireless?
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
+I recommend to post the patch to linux-wireless now and see what
+comments you get. Then I can also when a proper review and have better
+guidance.
 
---rzyeyouhr346tdlv
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBAgAGBQJZdvWbAAoJEBx+YmzsjxAgXo4QAMDIWXwb/pYl+CaJCmcpDmoZ
-qo/EXfGBcG8h6Fwkz20ZNEBt8VR+fm4GOBIhFWAryKQ2u1Z/4CcDCfvGOslMSPcm
-uR1duPEc0n8J63dD+IABBpP2EwIXwOd6qz85Iu5y/oCB2OsO5olwtwy7Xlvm2ujT
-NfB642sKXsEMa+Gb2WpGgq0OpzQJAJYKv4nybMRS9lC/KXAoaqYr2+9vjXimHARG
-3VBXmrf0jBc7GnF0ixZZRz6GDgxv9KdI5wNJKQrFly7ofFHc4EPs9uZAZ2pBnSIg
-DCKI7xmF8I86BF4DeacUE1Aapu4vCV5IzoOoTJsOt0e0+/PJD3HcEGCwita+D4qi
-wU5dUz9NT0PijbbJS+knv/2b/m/HoxlF+IxztvgsCFf46M8Hr0L2jUnhx76lu2P6
-Bw0ovDrXd1238BV3NR82mxGPwRaukbD/NebDG7RTProeaEEzt7wIul2hAQfK2K50
-LLaHGhh7UJQ+5CVkaAYdvMQAWO6zLQcT4YtaK6m3prKAKcs4ldm1CwNWewK7ip0T
-kZ3tcjwVOhsqVZe7uQ5KBT775qAEqFT781QhGJj4ICA9CkpCpjgDLKtCpoQMUqm3
-v4aXv5aNnFVTY8vt9UX2LmoLVWT7jG0puJemTtVQ5qk2hFbqg0f87yAyVPRR80DV
-W95cPZBB89R8zZXE0XvL
-=4mMg
------END PGP SIGNATURE-----
-
---rzyeyouhr346tdlv--
+-- 
+Kalle Valo
