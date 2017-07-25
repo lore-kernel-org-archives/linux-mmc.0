@@ -1,88 +1,57 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: block: bypass the queue even if usage is present for hotplug
-Date: Tue, 25 Jul 2017 09:11:28 +0800
-Message-ID: <1500945088-202242-1-git-send-email-shawn.lin@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v1] sdhci: acpi: Use new method to get ACPI companion
+Date: Tue, 25 Jul 2017 09:56:58 +0300
+Message-ID: <722d50ff-937d-3184-7b1a-c51ee8dde25f@intel.com>
+References: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:34878 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753510AbdGYBMM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jul 2017 21:12:12 -0400
+Received: from mga01.intel.com ([192.55.52.88]:48392 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751091AbdGYHDf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 25 Jul 2017 03:03:35 -0400
+In-Reply-To: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Grzegorz Sluja <grzegorzx.sluja@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, stable@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-commit 304419d8a7e ("mmc: core: Allocate per-request data using
-the block layer core") refactored mechanism of queue handling
-caused mmc_init_request() can be called just after mmc_cleanup_queue()
-caused null pointer dereference.
+On 24/07/17 17:59, Andy Shevchenko wrote:
+> ACPI_COMPANION() macro reduces a code to get a companion device out of
+> struct device.
+> 
+> Use it instead of an old method.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-commit bbdc74dc19e09a ("mmc: block: Prevent new req entering queue
-after its cleanup")tried to fix the problem. However it actually miss
-one corner case.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-We could still reproduce the issue mentioned with these steps:
-(1) insert a SD card and mount it
-(2) hotplug it, so it will leave md->usage still be counted
-(3) reboot the system which will sync data and umount the card
-
-[Unable to handle kernel NULL pointer dereference at virtual address
-00000000
-[user pgtable: 4k pages, 48-bit VAs, pgd = ffff80007bab3000
-[[0000000000000000] *pgd=000000007a828003, *pud=0000000078dce003,
-*pmd=000000007aab6003, *pte=0000000000000000
-[Internal error: Oops: 96000007 [#1] PREEMPT SMP
-[Modules linked in:
-[CPU: 3 PID: 3507 Comm: umount Tainted: G        W
-4.13.0-rc1-next-20170720-00012-g9d9bf45 #33
-[Hardware name: Firefly-RK3399 Board (DT)
-[task: ffff80007a1de200 task.stack: ffff80007a01c000
-[PC is at mmc_init_request+0x14/0xc4
-[LR is at alloc_request_size+0x4c/0x74
-[pc : [<ffff0000087d7150>] lr : [<ffff000008378fe0>] pstate: 600001c5
-[sp : ffff80007a01f8f0
-
-....
-
-[[<ffff0000087d7150>] mmc_init_request+0x14/0xc4
-[[<ffff000008378fe0>] alloc_request_size+0x4c/0x74
-[[<ffff00000817ac28>] mempool_create_node+0xb8/0x17c
-[[<ffff00000837aadc>] blk_init_rl+0x9c/0x120
-[[<ffff000008396580>] blkg_alloc+0x110/0x234
-[[<ffff000008396ac8>] blkg_create+0x424/0x468
-[[<ffff00000839877c>] blkg_lookup_create+0xd8/0x14c
-[[<ffff0000083796bc>] generic_make_request_checks+0x368/0x3b0
-[[<ffff00000837b050>] generic_make_request+0x1c/0x240
-
-So mmc_blk_put wouldn't calling blk_cleanup_queue which actually
-the QUEUE_FLAG_DYING and QUEUE_FLAG_BYPASS should stay. Block core
-expect blk_queue_bypass_{start, end} internally to bypass/drain the
-queue before actually dying the queue, so it didn't expose API to
-set the queue bypass. I think we should set QUEUE_FLAG_BYPASS whenever
-queue is removed, although the md->usage is still counted, as no dispatch
-queue could be found then.
-
-commit 304419d8a7e9 ("mmc: core: Allocate per-request data using the block layer core")
-Cc: stable@vger.kernel.org
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
- drivers/mmc/core/block.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 40f0d59..a11bead 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2168,6 +2168,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 		 * from being accepted.
- 		 */
- 		card = md->queue.card;
-+		queue_flag_set(QUEUE_FLAG_BYPASS, md->queue.queue);
- 		blk_set_queue_dying(md->queue.queue);
- 		mmc_cleanup_queue(&md->queue);
- 		if (md->disk->flags & GENHD_FL_UP) {
--- 
-1.9.1
-
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index ac678e9fb19a..4bbce8919c30 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -432,7 +432,6 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+>  static int sdhci_acpi_probe(struct platform_device *pdev)
+>  {
+>  	struct device *dev = &pdev->dev;
+> -	acpi_handle handle = ACPI_HANDLE(dev);
+>  	struct acpi_device *device, *child;
+>  	struct sdhci_acpi_host *c;
+>  	struct sdhci_host *host;
+> @@ -442,7 +441,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	const char *uid;
+>  	int err;
+>  
+> -	if (acpi_bus_get_device(handle, &device))
+> +	device = ACPI_COMPANION(dev);
+> +	if (!device)
+>  		return -ENODEV;
+>  
+>  	hid = acpi_device_hid(device);
+> 
 
