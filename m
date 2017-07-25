@@ -1,70 +1,49 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v3 02/10] clk: sunxi-ng: Add MP_MMC clocks that support
- MMC timing modes switching
-Date: Tue, 25 Jul 2017 09:32:50 +0200
-Message-ID: <20170725073250.vpxugsrlxzhsn2tb@flea>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v3 03/10] clk: sunxi-ng: a83t: Support new
+ timing mode for mmc2 clock
+Date: Tue, 25 Jul 2017 09:33:11 +0200
+Message-ID: <20170725073311.kyfsvf4xzrzlhgp5@flea>
 References: <20170724135905.28855-1-wens@csie.org>
- <20170724135905.28855-3-wens@csie.org>
+ <20170724135905.28855-4-wens@csie.org>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="tn4bdhsbqikmo5hf"
-Return-path: <linux-clk-owner@vger.kernel.org>
+	protocol="application/pgp-signature"; boundary="jhwtdsaj52mmq6xp"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBQXI3PFQKGQEUGV64ZY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Content-Disposition: inline
-In-Reply-To: <20170724135905.28855-3-wens@csie.org>
-Sender: linux-clk-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
+In-Reply-To: <20170724135905.28855-4-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---tn4bdhsbqikmo5hf
-Content-Type: text/plain; charset=us-ascii
+--jhwtdsaj52mmq6xp
+Content-Type: text/plain; charset="UTF-8"
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jul 24, 2017 at 09:58:57PM +0800, Chen-Yu Tsai wrote:
-> All of our MMC clocks are of the MP clock type. A few MMC clocks on some
-> SoCs, such as MMC2 on the A83T, support new/old timing mode switching.
->=20
-> From a clock rate point of view, when the new timing mode is active. the
-> output clock rate is halved.
->=20
-> This patch adds a special wrapper class of clocks, MP_MMC, around the
-> generic MP type clocks. The rate related callbacks in ccu_mp_mmc_ops
-> for this class look at the timing mode bit and apply the /2 post-divider
-> when needed, before passing it through to the generic class ops,
-> ccu_mp_ops.
->=20
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+On Mon, Jul 24, 2017 at 09:58:58PM +0800, Chen-Yu Tsai wrote:
+> The MMC2 clock supports a new timing mode. When the new mode is active,
+> the output clock rate is halved.
+> 
+> This patch sets the feature flag for the new timing mode, and adds
+> a pre-divider based on the mode bit.
+> 
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
-Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 
 Thanks!
 Maxime
 
---=20
+-- 
 Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
-
---tn4bdhsbqikmo5hf
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAEBAgAGBQJZdvQiAAoJEBx+YmzsjxAgElMP/jeTumezFSsUsQzj7Tiu2zr8
-0oWLqezsVZDipu3q6+dFqFICL3I66XcyujtujLg/lxVfRjqUAH8DPRuTLKGXDECe
-dZFqpgEK+WezwElK4Qy8/bxbr1XDjjDRMt2FJ9YgTw/Q9NDRINEYeTH3NNQNsBhq
-cJzdRihw6e0IT4SAkoLIUEmLtggVYji5C0d6j2VzjRcokROdwj267VxReUkyOl30
-h2JJC9VLzkDwZmN8tu6dMmJDP4FLh3u1BlWivCRGHdnFV7tL6IJH3z2C/t2Mt5MP
-s01ZrGR93+GkM/PZ2OiitNshJugypj2iuEwArBKEkJi5qiZUPyz+aMjzw7ADqOdi
-1/meSfL1rx/b0VjJdSoW0I+2QncL8utr1IG0DTQa+g/jiCd7JoKTd3QeULdHA6rN
-OOKM2LfjMbtd4pqjCCBGSmd/E1Er+EQ0I0JZIwkOM7pTKI+4m1oP9MJvWpybDxDz
-v0u2Hbt/+fiSVh1qnujAKhnHArcm6JcoZLjwlH5I+unOnb8lj7lRWL69SffKjma/
-H7dk3RaSB1YBQYvHaCJGOWXHeuRdOhcaFffHQMK6H2uuq8V0/3Pn7ouHxUwCGvMZ
-Fhp8DxUS8d2odReORr/hRt5nMzTO9dVDEQkvwgkDzR7/fI0pDi8aYHPEG3gsnIui
-YcZIybpgJ7ct3bIEb7AQ
-=Ufib
------END PGP SIGNATURE-----
-
---tn4bdhsbqikmo5hf--
+--jhwtdsaj52mmq6xp--
