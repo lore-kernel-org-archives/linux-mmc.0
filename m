@@ -1,101 +1,53 @@
-From: Ludovic Desroches <ludovic.desroches@microchip.com>
-Subject: [PATCH] mmc: sdhci-of-at91: force card detect value for non removable devices
-Date: Wed, 26 Jul 2017 16:02:46 +0200
-Message-ID: <20170726140246.4775-1-ludovic.desroches@microchip.com>
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: Re: [PATCH v3 00/10] ARM: sun8i: a83t: Add support for MMC controllers
+Date: Wed, 26 Jul 2017 22:09:41 +0800
+Message-ID: <CAGb2v66DQ3H2Mta7h+t1P+UzSRLnMABRebeYcopaPkN0gOiwxA@mail.gmail.com>
+References: <20170724135905.28855-1-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from esa2.microchip.iphmx.com ([68.232.149.84]:36675 "EHLO
-        esa2.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751421AbdGZODk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2017 10:03:40 -0400
+Received: from smtp.csie.ntu.edu.tw ([140.112.30.61]:41076 "EHLO
+        smtp.csie.ntu.edu.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750826AbdGZOKJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2017 10:10:09 -0400
+In-Reply-To: <20170724135905.28855-1-wens@csie.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, alexandre.belloni@free-electrons.com, nicolas.ferre@microchip.com, Ludovic Desroches <ludovic.desroches@microchip.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>
+Cc: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
 
-When the device is non removable, the card detect signal is often use
-for another purpose i.e. muxed to another SoC peripheral or used as a
-GPIO. It could lead to wrong behaviors depending the defaut value of
-this signal if not muxed to the SDHCI controller.
+On Mon, Jul 24, 2017 at 9:58 PM, Chen-Yu Tsai <wens@csie.org> wrote:
+> Hi everyone,
+>
+> This is v3 of my MMC controller support series.
+>
 
-Fixes: bb5f8ea4d514 ("mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC")
-Signed-off-by: Ludovic Desroches <ludovic.desroches@microchip.com>
----
- drivers/mmc/host/sdhci-of-at91.c | 36 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 35 insertions(+), 1 deletion(-)
+[...]
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 88e9b5f35a62..6a389f35396e 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -31,6 +31,7 @@
- 
- #define SDMMC_MC1R	0x204
- #define		SDMMC_MC1R_DDR		BIT(3)
-+#define		SDMMC_MC1R_FCD		BIT(7)
- #define SDMMC_CACR	0x230
- #define		SDMMC_CACR_CAPWREN	BIT(0)
- #define		SDMMC_CACR_KEY		(0x46 << 8)
-@@ -44,6 +45,15 @@ struct sdhci_at91_priv {
- 	bool restore_needed;
- };
- 
-+static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
-+{
-+	u8 mc1r;
-+
-+	mc1r = readb(host->ioaddr + SDMMC_MC1R);
-+	mc1r |= SDMMC_MC1R_FCD;
-+	writeb(mc1r, host->ioaddr + SDMMC_MC1R);
-+}
-+
- static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	u16 clk;
-@@ -111,10 +121,18 @@ void sdhci_at91_set_uhs_signaling(struct sdhci_host *host, unsigned int timing)
- 	sdhci_set_uhs_signaling(host, timing);
- }
- 
-+static void sdhci_at91_reset(struct sdhci_host *host, u8 mask)
-+{
-+	sdhci_reset(host, mask);
-+
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+		sdhci_at91_set_force_card_detect(host);
-+}
-+
- static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
- 	.set_clock		= sdhci_at91_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
--	.reset			= sdhci_reset,
-+	.reset			= sdhci_at91_reset,
- 	.set_uhs_signaling	= sdhci_at91_set_uhs_signaling,
- 	.set_power		= sdhci_at91_set_power,
- };
-@@ -369,6 +387,22 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 	}
- 
-+	/*
-+	 * If the device attached to the MMC bus is not removable, it is safer
-+	 * to set the Force Card Detect bit. People often don't connect the
-+	 * card detect signal and use this pin for another purpose. If the card
-+	 * detect pin is not muxed to SDHCI controller, a default value is
-+	 * used. This value can be different from a SoC revision to another
-+	 * one. Problems come when this default value is not card present. To
-+	 * avoid this case, if the device is non removable then the card
-+	 * detection procedure using the SDMCC_CD signal is bypassed.
-+	 * This bit is resetted when a software reset for all command is
-+	 * performed so we need to implement our own reset function to set back
-+	 * this bit.
-+	 */
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+		sdhci_at91_set_force_card_detect(host);
-+
- 	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
--- 
-2.12.2
+> Chen-Yu Tsai (10):
+>   clk: sunxi-ng: Add interface to query or configure MMC timing modes.
+>   clk: sunxi-ng: Add MP_MMC clocks that support MMC timing modes
+>     switching
+>   clk: sunxi-ng: a83t: Support new timing mode for mmc2 clock
+>   mmc: sunxi: Support controllers that can use both old and new timings
+>   mmc: sunxi: Support MMC DDR52 transfer mode with new timing mode
+>   mmc: sunxi: Add support for A83T eMMC (MMC2)
 
+So this series seems to be ready for inclusion, unless Ulf has further
+concerns about the clk usage.
+
+The first mmc patch have build time dependencies on the first clk patch.
+Shall we put the clk patch on a separate immutable branch for both trees
+to pull? Or we could just merge everything through the mmc tree? I don't
+think we'll touch this part of the sunxi-ng clk driver for the remainder
+of this cycle.
+
+
+Regards
+ChenYu
+
+
+>   ARM: dts: sun8i: a83t: Add MMC controller device nodes
+>   ARM: dts: sun8i: a83t: Add pingroup for 8-bit eMMC on mmc2
+>   ARM: dts: sun8i: a83t: cubietruck-plus: Enable micro-SD card and eMMC
+>   ARM: dts: sun8i: a83t: h8homlet: Enable micro-SD card and onboard eMMC
