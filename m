@@ -1,34 +1,31 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 041/102] mmc: tegra: explicitly request exclusive reset control
-Date: Thu, 27 Jul 2017 16:49:05 +0200
-Message-ID: <CAPDyKFqaae9L=H68kFZDXdwLj=ofuorWvpR8w-0ye3k4RPN7nw@mail.gmail.com>
-References: <20170719152646.25903-1-p.zabel@pengutronix.de> <20170719152646.25903-42-p.zabel@pengutronix.de>
+Subject: Re: [PATCH v1] sdhci: acpi: Use new method to get ACPI companion
+Date: Thu, 27 Jul 2017 16:49:15 +0200
+Message-ID: <CAPDyKFqk54683ffm=g4Pefr6iveY5eHxzHu1KQPTGUczTKoA4Q@mail.gmail.com>
+References: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170719152646.25903-42-p.zabel@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:38401 "EHLO
+        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751990AbdG0OtR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:49:17 -0400
+Received: by mail-qk0-f179.google.com with SMTP id x191so37505655qka.5
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:49:16 -0700 (PDT)
+In-Reply-To: <20170724145958.34478-1-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 19 July 2017 at 17:25, Philipp Zabel <p.zabel@pengutronix.de> wrote:
-> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
-> reset lines") started to transition the reset control request API calls
-> to explicitly state whether the driver needs exclusive or shared reset
-> control behavior. Convert all drivers requesting exclusive resets to the
-> explicit API call so the temporary transition helpers can be removed.
+On 24 July 2017 at 16:59, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+> ACPI_COMPANION() macro reduces a code to get a companion device out of
+> struct device.
 >
-> No functional changes.
+> Use it instead of an old method.
 >
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Thierry Reding <thierry.reding@gmail.com>
-> Cc: Jonathan Hunter <jonathanh@nvidia.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-tegra@vger.kernel.org
-> Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
-
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
 Thanks, applied for next!
 
@@ -36,23 +33,31 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-acpi.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 7f93079c7a3ad..f668a6fa17654 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -508,7 +508,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->         clk_prepare_enable(clk);
->         pltfm_host->clk = clk;
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index ac678e9fb19a..4bbce8919c30 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -432,7 +432,6 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
+>  static int sdhci_acpi_probe(struct platform_device *pdev)
+>  {
+>         struct device *dev = &pdev->dev;
+> -       acpi_handle handle = ACPI_HANDLE(dev);
+>         struct acpi_device *device, *child;
+>         struct sdhci_acpi_host *c;
+>         struct sdhci_host *host;
+> @@ -442,7 +441,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>         const char *uid;
+>         int err;
 >
-> -       tegra_host->rst = devm_reset_control_get(&pdev->dev, "sdhci");
-> +       tegra_host->rst = devm_reset_control_get_exclusive(&pdev->dev,
-> +                                                          "sdhci");
->         if (IS_ERR(tegra_host->rst)) {
->                 rc = PTR_ERR(tegra_host->rst);
->                 dev_err(&pdev->dev, "failed to get reset control: %d\n", rc);
+> -       if (acpi_bus_get_device(handle, &device))
+> +       device = ACPI_COMPANION(dev);
+> +       if (!device)
+>                 return -ENODEV;
+>
+>         hid = acpi_device_hid(device);
 > --
-> 2.11.0
+> 2.13.2
 >
