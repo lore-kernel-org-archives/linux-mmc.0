@@ -1,31 +1,37 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: remove unused struct sdhci_host variable
-Date: Thu, 27 Jul 2017 16:48:16 +0200
-Message-ID: <CAPDyKFrrLfPJi0a30K=eiNwtyfZ6eC42PDEqhHURUWRZWPTtOg@mail.gmail.com>
-References: <1500599990-170932-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: host: via-sdmmc: constify pci_device_id.
+Date: Thu, 27 Jul 2017 16:48:32 +0200
+Message-ID: <CAPDyKFoOi++MwDDV4PC8bCnESLpzY5wvQGf4qVoZH+TdjBcNDw@mail.gmail.com>
+References: <6e5268522c9f41b6f6b6d9a3f70212b641042bb1.1500309009.git.arvind.yadav.cs@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:35355 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751679AbdG0OsS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:48:18 -0400
-Received: by mail-qk0-f181.google.com with SMTP id d145so97639615qkc.2
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:48:17 -0700 (PDT)
-In-Reply-To: <1500599990-170932-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:33945 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751643AbdG0Osd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:48:33 -0400
+Received: by mail-qk0-f173.google.com with SMTP id u139so42269244qka.1
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:48:33 -0700 (PDT)
+In-Reply-To: <6e5268522c9f41b6f6b6d9a3f70212b641042bb1.1500309009.git.arvind.yadav.cs@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Cc: brucechang@via.com.tw, HaraldWelte@viatech.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 21 July 2017 at 03:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> It was never used and introduce a warning
+On 17 July 2017 at 18:31, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
+> pci_device_id are not supposed to change at runtime. All functions
+> working with pci_device_id provided by <linux/pci.h> work with
+> const pci_device_id. So mark the non-const structs as const.
 >
-> drivers/mmc/host/sdhci-acpi.c: In function 'sdhci_acpi_sdio_probe_slot':
-> drivers/mmc/host/sdhci-acpi.c:297:21: warning: variable 'host' set but
-> not used [-Wunused-but-set-variable]
+> File size before:
+>    text    data     bss     dec     hex filename
+>    6952     880       0    7832    1e98 drivers/mmc/host/via-sdmmc.o
 >
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> File size After adding 'const':
+>    text    data     bss     dec     hex filename
+>    7032     800       0    7832    1e98 drivers/mmc/host/via-sdmmc.o
+>
+> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
 Thanks, applied for next!
 
@@ -33,33 +39,22 @@ Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/host/via-sdmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
->  drivers/mmc/host/sdhci-acpi.c | 3 ---
->  1 file changed, 3 deletions(-)
+> diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+> index 6380044..a838bf5 100644
+> --- a/drivers/mmc/host/via-sdmmc.c
+> +++ b/drivers/mmc/host/via-sdmmc.c
+> @@ -323,7 +323,7 @@ struct via_crdr_mmc_host {
+>  /* some devices need a very long delay for power to stabilize */
+>  #define VIA_CRDR_QUIRK_300MS_PWRDELAY  0x0001
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index ac678e9..2b1df88 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -294,13 +294,10 @@ static int sdhci_acpi_sdio_probe_slot(struct platform_device *pdev,
->                                       const char *hid, const char *uid)
->  {
->         struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-> -       struct sdhci_host *host;
->
->         if (!c || !c->host)
->                 return 0;
->
-> -       host = c->host;
-> -
->         /* Platform specific code during sdio probe slot goes here */
->
->         return 0;
+> -static struct pci_device_id via_ids[] = {
+> +static const struct pci_device_id via_ids[] = {
+>         {PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_9530,
+>           PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0,},
+>         {0,}
 > --
-> 1.9.1
+> 2.7.4
 >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
