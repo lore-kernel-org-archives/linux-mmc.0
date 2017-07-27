@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 040/102] mmc: sunxi: explicitly request exclusive reset control
-Date: Thu, 27 Jul 2017 16:48:55 +0200
-Message-ID: <CAPDyKFqcGup5T5=D=1+S9bHTFNOnNqHwmnU7aWC4voHqYO=Z-Q@mail.gmail.com>
-References: <20170719152646.25903-1-p.zabel@pengutronix.de> <20170719152646.25903-41-p.zabel@pengutronix.de>
+Subject: Re: [PATCH 039/102] mmc: sdhci-st: explicitly request exclusive reset control
+Date: Thu, 27 Jul 2017 16:49:00 +0200
+Message-ID: <CAPDyKFo5mKZefG0jdd=qo0n+qup5HyjpH_DgehyNHnXuZDdCtQ@mail.gmail.com>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de> <20170719152646.25903-40-p.zabel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170719152646.25903-41-p.zabel@pengutronix.de>
+In-Reply-To: <20170719152646.25903-40-p.zabel@pengutronix.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Patrice Chotard <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 On 19 July 2017 at 17:25, Philipp Zabel <p.zabel@pengutronix.de> wrote:
@@ -21,9 +21,9 @@ On 19 July 2017 at 17:25, Philipp Zabel <p.zabel@pengutronix.de> wrote:
 >
 > No functional changes.
 >
+> Cc: Patrice Chotard <patrice.chotard@st.com>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
-> Cc: Chen-Yu Tsai <wens@csie.org>
 > Cc: linux-mmc@vger.kernel.org
 > Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 
@@ -34,23 +34,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-st.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index d6fa2214aaae8..522b09d446494 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1168,7 +1168,8 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->                 }
->         }
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 68c36c9fa2318..ad1ab0777d5f6 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -371,7 +371,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>         if (IS_ERR(icnclk))
+>                 icnclk = NULL;
 >
-> -       host->reset = devm_reset_control_get_optional(&pdev->dev, "ahb");
-> +       host->reset = devm_reset_control_get_optional_exclusive(&pdev->dev,
-> +                                                               "ahb");
->         if (PTR_ERR(host->reset) == -EPROBE_DEFER)
->                 return PTR_ERR(host->reset);
->
+> -       rstc = devm_reset_control_get(&pdev->dev, NULL);
+> +       rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
+>         if (IS_ERR(rstc))
+>                 rstc = NULL;
+>         else
 > --
 > 2.11.0
 >
