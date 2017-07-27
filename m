@@ -1,29 +1,36 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Convert to using %pOF instead of full_name
-Date: Thu, 27 Jul 2017 16:48:45 +0200
-Message-ID: <CAPDyKFpyj8ntOcHvwGb6bJ4ndgGqdk-ZUOMkUFXtYGtuChyDtg@mail.gmail.com>
-References: <20170718214339.7774-36-robh@kernel.org>
+Subject: Re: [PATCH 038/102] mmc: dw_mmc: explicitly request exclusive reset control
+Date: Thu, 27 Jul 2017 16:48:50 +0200
+Message-ID: <CAPDyKFp5Hu1jfhv3YnZQbC7khrr_DoKn2MKnbHmVwLMTR5GEsA@mail.gmail.com>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de> <20170719152646.25903-39-p.zabel@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170718214339.7774-36-robh@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@microchip.com>, Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:35455 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751668AbdG0Osw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:48:52 -0400
+Received: by mail-qt0-f175.google.com with SMTP id p3so62168490qtg.2
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:48:52 -0700 (PDT)
+In-Reply-To: <20170719152646.25903-39-p.zabel@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philipp Zabel <p.zabel@pengutronix.de>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 18 July 2017 at 23:43, Rob Herring <robh@kernel.org> wrote:
-> Now that we have a custom printf format specifier, convert users of
-> full_name to use %pOF instead. This is preparation to remove storing
-> of the full path string for each node.
+On 19 July 2017 at 17:25, Philipp Zabel <p.zabel@pengutronix.de> wrote:
+> Commit a53e35db70d1 ("reset: Ensure drivers are explicit when requesting
+> reset lines") started to transition the reset control request API calls
+> to explicitly state whether the driver needs exclusive or shared reset
+> control behavior. Convert all drivers requesting exclusive resets to the
+> explicit API call so the temporary transition helpers can be removed.
 >
-> Signed-off-by: Rob Herring <robh@kernel.org>
+> No functional changes.
+>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
-> Cc: Jan Glauber <jglauber@cavium.com>
-> Cc: David Daney <david.daney@cavium.com>
-> Cc: "Steven J. Hill" <Steven.Hill@cavium.com>
 > Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 
 Thanks, applied for next!
 
@@ -31,76 +38,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c      | 8 ++++----
->  drivers/mmc/host/atmel-mci.c | 4 ++--
->  drivers/mmc/host/cavium.c    | 6 ++----
->  3 files changed, 8 insertions(+), 10 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 26431267a3e2..6b4117615ad6 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1137,11 +1137,11 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
->         voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
->         num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
->         if (!voltage_ranges) {
-> -               pr_debug("%s: voltage-ranges unspecified\n", np->full_name);
-> +               pr_debug("%pOF: voltage-ranges unspecified\n", np);
->                 return 0;
->         }
->         if (!num_ranges) {
-> -               pr_err("%s: voltage-ranges empty\n", np->full_name);
-> +               pr_err("%pOF: voltage-ranges empty\n", np);
->                 return -EINVAL;
->         }
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a9dfb26972f21..7c1e2dbc76776 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2950,7 +2950,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>                 return ERR_PTR(-ENOMEM);
 >
-> @@ -1153,8 +1153,8 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
->                                 be32_to_cpu(voltage_ranges[j]),
->                                 be32_to_cpu(voltage_ranges[j + 1]));
->                 if (!ocr_mask) {
-> -                       pr_err("%s: voltage-range #%d is invalid\n",
-> -                               np->full_name, i);
-> +                       pr_err("%pOF: voltage-range #%d is invalid\n",
-> +                               np, i);
->                         return -EINVAL;
->                 }
->                 *mask |= ocr_mask;
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 97de2d32ba84..b7c1cd384306 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -665,8 +665,8 @@ atmci_of_init(struct platform_device *pdev)
->
->         for_each_child_of_node(np, cnp) {
->                 if (of_property_read_u32(cnp, "reg", &slot_id)) {
-> -                       dev_warn(&pdev->dev, "reg property is missing for %s\n",
-> -                                cnp->full_name);
-> +                       dev_warn(&pdev->dev, "reg property is missing for %pOF\n",
-> +                                cnp);
->                         continue;
->                 }
->
-> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-> index 3686d77c717b..27fb625cbcf3 100644
-> --- a/drivers/mmc/host/cavium.c
-> +++ b/drivers/mmc/host/cavium.c
-> @@ -957,14 +957,12 @@ static int cvm_mmc_of_parse(struct device *dev, struct cvm_mmc_slot *slot)
->
->         ret = of_property_read_u32(node, "reg", &id);
->         if (ret) {
-> -               dev_err(dev, "Missing or invalid reg property on %s\n",
-> -                       of_node_full_name(node));
-> +               dev_err(dev, "Missing or invalid reg property on %pOF\n", node);
->                 return ret;
->         }
->
->         if (id >= CAVIUM_MAX_MMC || slot->host->slot[id]) {
-> -               dev_err(dev, "Invalid reg property on %s\n",
-> -                       of_node_full_name(node));
-> +               dev_err(dev, "Invalid reg property on %pOF\n", node);
->                 return -EINVAL;
->         }
->
+>         /* find reset controller when exist */
+> -       pdata->rstc = devm_reset_control_get_optional(dev, "reset");
+> +       pdata->rstc = devm_reset_control_get_optional_exclusive(dev, "reset");
+>         if (IS_ERR(pdata->rstc)) {
+>                 if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
+>                         return ERR_PTR(-EPROBE_DEFER);
 > --
 > 2.11.0
 >
