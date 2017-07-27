@@ -1,72 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND PATCH] arc: remove num-slots from arc platforms
-Date: Thu, 27 Jul 2017 16:48:04 +0200
-Message-ID: <CAPDyKFrNCRn101-abORYmVXR9iZVo2dNu2VB13Nz_VAetey=TQ@mail.gmail.com>
-References: <1500424749-206304-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: use io functions from sdhci.h
+Date: Thu, 27 Jul 2017 16:48:11 +0200
+Message-ID: <CAPDyKFqYqjLPUrJDGMueN3SXv1zAQS9Vb26MZjHdUpUqtDav7Q@mail.gmail.com>
+References: <20170717012332.16505-1-jeff.dagenais@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36944 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751530AbdG0OsG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:48:06 -0400
-Received: by mail-qk0-f176.google.com with SMTP id z18so23064366qka.4
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:48:05 -0700 (PDT)
-In-Reply-To: <1500424749-206304-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:36322 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751530AbdG0OsN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2017 10:48:13 -0400
+Received: by mail-qk0-f169.google.com with SMTP id d136so108087739qkg.3
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Jul 2017 07:48:12 -0700 (PDT)
+In-Reply-To: <20170717012332.16505-1-jeff.dagenais@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Vineet Gupta <vgupta@synopsys.com>, Alexey Brodkin <abrodkin@synopsys.com>
+To: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 19 July 2017 at 02:39, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> dwmmc driver deprecated num-slots and plan to get rid
-> of it finally. Just move a step to cleanup it from DT.
+On 17 July 2017 at 03:23, Jean-Francois Dagenais
+<jeff.dagenais@gmail.com> wrote:
+> This increases consistency of the code across the sdhci family.
 >
-> Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-> Acked-by: Vineet Gupta <Vineet.Gupta1@synopsys.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> Hi Ulf,
+> v2: rebased onto ulfh/mmc/next and tweaked headline accordingly.
 >
-> Vineet prefer this patch to go via mmc tree where the driver's
-> conversion happened. So could you pick it up?
+> Signed-off-by: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
 
-Sure, thanks, applied for next!
+Thanks applied for next, by dropping the version history from the change log.
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
->  arch/arc/boot/dts/axs10x_mb.dtsi     | 1 -
->  arch/arc/boot/dts/vdk_axs10x_mb.dtsi | 1 -
->  2 files changed, 2 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index b13c0a7d50e4..528a5d24c0bc 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -216,13 +216,13 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>         u32 vendor;
+>         struct sdhci_host *host = mmc_priv(mmc);
 >
-> diff --git a/arch/arc/boot/dts/axs10x_mb.dtsi b/arch/arc/boot/dts/axs10x_mb.dtsi
-> index 41cfb29..82e26ad 100644
-> --- a/arch/arc/boot/dts/axs10x_mb.dtsi
-> +++ b/arch/arc/boot/dts/axs10x_mb.dtsi
-> @@ -101,7 +101,6 @@
->                 mmc@0x15000 {
->                         compatible = "altr,socfpga-dw-mshc";
->                         reg = < 0x15000 0x400 >;
-> -                       num-slots = < 1 >;
->                         fifo-depth = < 16 >;
->                         card-detect-delay = < 200 >;
->                         clocks = <&apbclk>, <&mmcclk>;
-> diff --git a/arch/arc/boot/dts/vdk_axs10x_mb.dtsi b/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
-> index 459fc65..48bb4b4 100644
-> --- a/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
-> +++ b/arch/arc/boot/dts/vdk_axs10x_mb.dtsi
-> @@ -104,7 +104,6 @@
->                 mmc@0x15000 {
->                         compatible = "snps,dw-mshc";
->                         reg = <0x15000 0x400>;
-> -                       num-slots = <1>;
->                         fifo-depth = <1024>;
->                         card-detect-delay = <200>;
->                         clocks = <&apbclk>, <&mmcclk>;
+> -       vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +       vendor = sdhci_readl(host, SDHCI_ARASAN_VENDOR_REGISTER);
+>         if (ios->enhanced_strobe)
+>                 vendor |= VENDOR_ENHANCED_STROBE;
+>         else
+>                 vendor &= ~VENDOR_ENHANCED_STROBE;
+>
+> -       writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+> +       sdhci_writel(host, vendor, SDHCI_ARASAN_VENDOR_REGISTER);
+>  }
+>
+>  static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
 > --
-> 1.9.1
->
+> 2.11.0
 >
