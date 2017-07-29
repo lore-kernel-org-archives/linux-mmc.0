@@ -1,7 +1,7 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 07/12] mmc: usdhi6rol0: constify mmc_host_ops structures
-Date: Sat, 29 Jul 2017 07:59:36 +0200
-Message-ID: <1501307981-29745-8-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 05/12] mmc: sh_mmcif: constify mmc_host_ops structures
+Date: Sat, 29 Jul 2017 07:59:34 +0200
+Message-ID: <1501307981-29745-6-git-send-email-Julia.Lawall@lip6.fr>
 References: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
@@ -48,19 +48,19 @@ static
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/mmc/host/usdhi6rol0.c |    2 +-
+ drivers/mmc/host/sh_mmcif.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 1bd5f1a..64da6a8 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1185,7 +1185,7 @@ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return ret;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 4062d6b..53fb18b 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1079,7 +1079,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	host->state = STATE_IDLE;
  }
  
--static struct mmc_host_ops usdhi6_ops = {
-+static const struct mmc_host_ops usdhi6_ops = {
- 	.request	= usdhi6_request,
- 	.set_ios	= usdhi6_set_ios,
- 	.get_cd		= usdhi6_get_cd,
+-static struct mmc_host_ops sh_mmcif_ops = {
++static const struct mmc_host_ops sh_mmcif_ops = {
+ 	.request	= sh_mmcif_request,
+ 	.set_ios	= sh_mmcif_set_ios,
+ 	.get_cd		= mmc_gpio_get_cd,
