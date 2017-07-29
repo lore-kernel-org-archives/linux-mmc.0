@@ -1,13 +1,13 @@
-From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 10/12] mmc: sdricoh_cs: constify mmc_host_ops structures
-Date: Sat, 29 Jul 2017 07:59:39 +0200
-Message-ID: <1501307981-29745-11-git-send-email-Julia.Lawall@lip6.fr>
+From: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
+Subject: [PATCH 08/12] mmc: vub300: constify mmc_host_ops structures
+Date: Sat, 29 Jul 2017 07:59:37 +0200
+Message-ID: <1501307981-29745-9-git-send-email-Julia.Lawall@lip6.fr>
 References: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sascha Sommer <saschasommer@freenet.de>
-Cc: bhumirks@gmail.com, kernel-janitors@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>
+Cc: bhumirks-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 The mmc_host_ops structure is only stored in the ops field of an
@@ -45,22 +45,27 @@ static
  struct mmc_host_ops i = { ... };
 // </smpl>
 
-Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+Signed-off-by: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
 
 ---
- drivers/mmc/host/sdricoh_cs.c |    2 +-
+ drivers/mmc/host/vub300.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
-index 70cb00a..9e46039 100644
---- a/drivers/mmc/host/sdricoh_cs.c
-+++ b/drivers/mmc/host/sdricoh_cs.c
-@@ -385,7 +385,7 @@ static int sdricoh_get_ro(struct mmc_host *mmc)
- 	return (status & STATUS_CARD_LOCKED);
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index fbeea1a..6e08597 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -2079,7 +2079,7 @@ static void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ 	dev_info(&vub300->udev->dev, "NO host QUIRKS for this card\n");
  }
  
--static struct mmc_host_ops sdricoh_ops = {
-+static const struct mmc_host_ops sdricoh_ops = {
- 	.request = sdricoh_request,
- 	.set_ios = sdricoh_set_ios,
- 	.get_ro = sdricoh_get_ro,
+-static struct mmc_host_ops vub300_mmc_ops = {
++static const struct mmc_host_ops vub300_mmc_ops = {
+ 	.request = vub300_mmc_request,
+ 	.set_ios = vub300_mmc_set_ios,
+ 	.get_ro = vub300_mmc_get_ro,
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
