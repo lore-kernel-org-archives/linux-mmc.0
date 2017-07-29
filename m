@@ -1,24 +1,13 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 02/12] mmc: s3cmci: constify mmc_host_ops structures
-Date: Sat, 29 Jul 2017 07:59:31 +0200
-Message-ID: <1501307981-29745-3-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 07/12] mmc: usdhi6rol0: constify mmc_host_ops structures
+Date: Sat, 29 Jul 2017 07:59:36 +0200
+Message-ID: <1501307981-29745-8-git-send-email-Julia.Lawall@lip6.fr>
 References: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ben Dooks <ben-linux@fluff.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bhumirks@gmail.com, linux-arm-kernel@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: bhumirks@gmail.com, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 The mmc_host_ops structure is only stored in the ops field of an
@@ -59,19 +48,19 @@ static
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/mmc/host/s3cmci.c |    2 +-
+ drivers/mmc/host/usdhi6rol0.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 8896bf5..f7f157a 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1313,7 +1313,7 @@ static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	s3cmci_check_sdio_irq(host);
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 1bd5f1a..64da6a8 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -1185,7 +1185,7 @@ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return ret;
  }
  
--static struct mmc_host_ops s3cmci_ops = {
-+static const struct mmc_host_ops s3cmci_ops = {
- 	.request	= s3cmci_request,
- 	.set_ios	= s3cmci_set_ios,
- 	.get_ro		= mmc_gpio_get_ro,
+-static struct mmc_host_ops usdhi6_ops = {
++static const struct mmc_host_ops usdhi6_ops = {
+ 	.request	= usdhi6_request,
+ 	.set_ios	= usdhi6_set_ios,
+ 	.get_cd		= usdhi6_get_cd,
