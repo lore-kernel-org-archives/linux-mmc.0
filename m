@@ -1,7 +1,7 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 04/12] mmc: moxart: constify mmc_host_ops structures
-Date: Sat, 29 Jul 2017 07:59:33 +0200
-Message-ID: <1501307981-29745-5-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 03/12] mmc: davinci: constify mmc_host_ops structures
+Date: Sat, 29 Jul 2017 07:59:32 +0200
+Message-ID: <1501307981-29745-4-git-send-email-Julia.Lawall@lip6.fr>
 References: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
@@ -48,19 +48,19 @@ static
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/mmc/host/moxart-mmc.c |    2 +-
+ drivers/mmc/host/davinci_mmc.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index d4dc55a..a0670e9 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -546,7 +546,7 @@ static int moxart_get_ro(struct mmc_host *mmc)
- 	return !!(readl(host->base + REG_STATUS) & WRITE_PROT);
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 621ce47..351330d 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1062,7 +1062,7 @@ static void mmc_davinci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	}
  }
  
--static struct mmc_host_ops moxart_ops = {
-+static const struct mmc_host_ops moxart_ops = {
- 	.request = moxart_request,
- 	.set_ios = moxart_set_ios,
- 	.get_ro = moxart_get_ro,
+-static struct mmc_host_ops mmc_davinci_ops = {
++static const struct mmc_host_ops mmc_davinci_ops = {
+ 	.request	= mmc_davinci_request,
+ 	.set_ios	= mmc_davinci_set_ios,
+ 	.get_cd		= mmc_davinci_get_cd,
