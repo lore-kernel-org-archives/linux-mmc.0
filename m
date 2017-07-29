@@ -1,7 +1,7 @@
 From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 05/12] mmc: sh_mmcif: constify mmc_host_ops structures
-Date: Sat, 29 Jul 2017 07:59:34 +0200
-Message-ID: <1501307981-29745-6-git-send-email-Julia.Lawall@lip6.fr>
+Subject: [PATCH 04/12] mmc: moxart: constify mmc_host_ops structures
+Date: Sat, 29 Jul 2017 07:59:33 +0200
+Message-ID: <1501307981-29745-5-git-send-email-Julia.Lawall@lip6.fr>
 References: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501307981-29745-1-git-send-email-Julia.Lawall@lip6.fr>
@@ -48,19 +48,19 @@ static
 Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 ---
- drivers/mmc/host/sh_mmcif.c |    2 +-
+ drivers/mmc/host/moxart-mmc.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 4062d6b..53fb18b 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1079,7 +1079,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	host->state = STATE_IDLE;
+diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+index d4dc55a..a0670e9 100644
+--- a/drivers/mmc/host/moxart-mmc.c
++++ b/drivers/mmc/host/moxart-mmc.c
+@@ -546,7 +546,7 @@ static int moxart_get_ro(struct mmc_host *mmc)
+ 	return !!(readl(host->base + REG_STATUS) & WRITE_PROT);
  }
  
--static struct mmc_host_ops sh_mmcif_ops = {
-+static const struct mmc_host_ops sh_mmcif_ops = {
- 	.request	= sh_mmcif_request,
- 	.set_ios	= sh_mmcif_set_ios,
- 	.get_cd		= mmc_gpio_get_cd,
+-static struct mmc_host_ops moxart_ops = {
++static const struct mmc_host_ops moxart_ops = {
+ 	.request = moxart_request,
+ 	.set_ios = moxart_set_ios,
+ 	.get_ro = moxart_get_ro,
