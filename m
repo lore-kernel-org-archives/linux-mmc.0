@@ -1,39 +1,42 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to block requests
-Date: Mon, 31 Jul 2017 15:44:07 +0200
-Message-ID: <CACRpkdb-ZpznKqKD8L=YqLrOM4ZH0qc2Lb5=UFxH3DLCV_tTqw@mail.gmail.com>
-References: <20170518092936.9277-1-linus.walleij@linaro.org>
- <20170518092936.9277-4-linus.walleij@linaro.org> <20170518093614.GB9250@lst.de>
- <20170705190016.GA7008@lst.de>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: mmc: UHS Voltage switch and operating frequency question
+Date: Mon, 31 Jul 2017 18:20:04 +0200
+Message-ID: <1501518004.2759.5.camel@baylibre.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <20170705190016.GA7008@lst.de>
-Sender: linux-block-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38420 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751054AbdGaQUH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jul 2017 12:20:07 -0400
+Received: by mail-wm0-f46.google.com with SMTP id m85so174776417wma.1
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jul 2017 09:20:06 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
 
-On Wed, Jul 5, 2017 at 9:00 PM, Christoph Hellwig <hch@lst.de> wrote:
-> On Thu, May 18, 2017 at 11:36:14AM +0200, Christoph Hellwig wrote:
->> On Thu, May 18, 2017 at 11:29:34AM +0200, Linus Walleij wrote:
->> > We are storing the ioctl() in/out argument as a pointer in
->> > the per-request struct mmc_blk_request container.
->>
->> Btw, for the main ioctl data (not the little reponse field) it might
->> make sense to use blk_rq_map_user, which will do a get_user_pages
->> on the user data if the alignment fits, and otherwise handle the
->> kernel bounce buffering for you.  This should simplify the code
->> quite a bit more, and in the case where you can access the user
->> memory directly provide a nice little performance boost.
->
-> Did you get a chance to look into this?
+Hi Ulf,
 
-Sorry, just back from vacation.
+I am working on adding signal voltage switch callback to the meson mmc driver.
+While testing, I noticed that a few cards fail to exit the busy state after the
+voltage switch.
 
-I am rebasing my MMC patch stack, so I will take this opportunity to
-also look at this during the week. I just need to make sure I find the
-right userspace calls to exercise it.
+After tinkering with the driver a bit, I noticed that increasing the clock
+frequency from 400kHz to 1MHz solve the problem. Strange, isn't it ?
 
-Yours,
-Linus Walleij
+I'm don't know MMC that much but is it possible that some card require a minimum
+operating frequency to enter UHS mode ?
+
+The simplified spec (Part 1 - Physical Layer) says that before CMD11, we should
+have had CMD41 (Init Command) . After CMD41, the card should be operating at
+Default Speed or SDR12. 
+
+I believe that in both case, the frequency is "up to 25Mhz" ? This would be the
+maximum, but is there a minimum ? 400kHz seems pretty low compared to 25Mhz ...
+
+I hope you will able to shed light on this :)
+
+Best Regards
+jerome
