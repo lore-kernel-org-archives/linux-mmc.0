@@ -1,80 +1,89 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 10/11] mmc: cqhci: support for command queue enabled
- host
-Date: Mon, 31 Jul 2017 10:43:06 +0300
-Message-ID: <7dde61a4-6b4a-39cf-f34f-27666280492a@intel.com>
-References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
- <1500630584-22852-11-git-send-email-adrian.hunter@intel.com>
- <AM4PR0401MB2324C6913207B78E8A71C24190BB0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <56c06a10-db37-d3e1-e9d6-5bdd214c7efd@intel.com>
- <36c36b83-08ff-df50-41af-d73ea6e57fdb@intel.com>
- <AM4PR0401MB2324CD0F80CECD1E3208B44290B20@AM4PR0401MB2324.eurprd04.prod.outlook.com>
- <c55921b3-48ed-e57b-0ac9-737a1c39931d@intel.com>
- <AM4PR0401MB2324363A89645B23D4D2D8D990B20@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+From: Christophe LEROY <christophe.leroy@c-s.fr>
+Subject: Re: [PATCH] powerpc/asm/cacheflush: Cleanup cacheflush function params
+Date: Mon, 31 Jul 2017 10:41:35 +0200
+Message-ID: <25421c43-7371-c23e-e784-f4df61400cd0@c-s.fr>
+References: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:56795 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750933AbdGaHw7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 31 Jul 2017 03:52:59 -0400
-In-Reply-To: <AM4PR0401MB2324363A89645B23D4D2D8D990B20@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20170720062850.2195-1-matthew.brown.dev@gmail.com>
+Content-Language: fr
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Matt Brown <matthew.brown.dev@gmail.com>, linuxppc-dev@lists.ozlabs.org, linux-ide@vger.kernel.org, dri-devel@lists.freedesktop.org, adi-buildroot-devel@lists.sourceforge.net, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 31/07/17 10:18, Bough Chen wrote:
->> -----Original Message-----
->> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->> Sent: Monday, July 31, 2017 3:04 PM
->> To: Bough Chen <haibo.chen@nxp.com>; Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Alex Lemberg
->> <alex.lemberg@sandisk.com>; Mateusz Nowak <mateusz.nowak@intel.com>;
->> Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
->> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
->> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
->> <zhangfei.gao@gmail.com>; Dorfman Konstantin
->> <kdorfman@codeaurora.org>; Sahitya Tummala <stummala@codeaurora.org>;
->> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
->> <vbyravarasu@nvidia.com>; Linus Walleij <linus.walleij@linaro.org>; Shawn Lin
->> <shawn.lin@rock-chips.com>
->> Subject: Re: [PATCH V4 10/11] mmc: cqhci: support for command queue
->> enabled host
->>
->> On 31/07/17 10:03, Bough Chen wrote:
->>>> -----Original Message-----
->>>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->>>> owner@vger.kernel.org] On Behalf Of Adrian Hunter
->>>> Sent: Monday, July 31, 2017 2:41 PM
->>>> To: Bough Chen <haibo.chen@nxp.com>; Ulf Hansson
->>>> <ulf.hansson@linaro.org>
->>>> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Alex Lemberg
->>>> <alex.lemberg@sandisk.com>; Mateusz Nowak
->> <mateusz.nowak@intel.com>;
->>>> Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
->>>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
->>>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
->>>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
->>>> <kdorfman@codeaurora.org>; Sahitya Tummala
->> <stummala@codeaurora.org>;
->>>> Harjani Ritesh <riteshh@codeaurora.org>; Venu Byravarasu
->>>> <vbyravarasu@nvidia.com>; Linus Walleij <linus.walleij@linaro.org>;
->>>> Shawn Lin <shawn.lin@rock-chips.com>
->>>> Subject: Re: [PATCH V4 10/11] mmc: cqhci: support for command queue
->>>> enabled host
->>>>
->>>>
->>>> How is it going?
->>>
->>> Yes, the ->enable() callback is a good place to set the i.mx special
->>> config, now CMDQ can works well On our i.MX8.
->>
->> So your tested-by still applies, also to V4?
-> 
-> Yes, sure.
-> 
-
-Thank you!
+CgpMZSAyMC8wNy8yMDE3IMOgIDA4OjI4LCBNYXR0IEJyb3duIGEgw6ljcml0IDoKPiBUaGUgY2Fj
+aGVmbHVzaCBwcm90b3R5cGVzIGN1cnJlbnRseSB1c2Ugc3RhcnQgYW5kIHN0b3AgdmFsdWVzIGFu
+ZCBlYWNoCj4gY2FsbCByZXF1aXJlcyB0eXBlY2FzdGluZyB0aGUgYWRkcmVzcyB0byBhbiB1bnNp
+Z25lZCBsb25nLgo+IFRoaXMgcGF0Y2ggY2hhbmdlcyB0aGUgY2FjaGVmbHVzaCBwcm90b3R5cGVz
+IHRvIGZvbGxvdyB0aGUgeDg2IHN0eWxlIG9mCj4gdXNpbmcgYSBiYXNlIGFuZCBzaXplIHZhbHVl
+cywgd2l0aCBiYXNlIGJlaW5nIGEgdm9pZCBwb2ludGVyLgo+IAo+IEFsbCBjYWxsZXJzIG9mIHRo
+ZSBjYWNoZWZsdXNoIGZ1bmN0aW9ucywgaW5jbHVkaW5nIGRyaXZlcnMsIGhhdmUgYmVlbgo+IG1v
+ZGlmaWVkIHRvIGNvbmZvcm0gdG8gdGhlIG5ldyBwcm90b3R5cGVzLgo+IAo+IFRoZSA2NCBiaXQg
+Y2FjaGVmbHVzaCBmdW5jdGlvbnMgd2hpY2ggd2VyZSBpbXBsZW1lbnRlZCBpbiBhc3NlbWJseSBj
+b2RlCj4gKGZsdXNoX2RjYWNoZV9yYW5nZSwgZmx1c2hfaW52YWxfZGNhY2hlX3JhbmdlKSBoYXZl
+IGJlZW4gdHJhbnNsYXRlZCBpbnRvCj4gQyBmb3IgcmVhZGFiaWxpdHkgYW5kIGNvaGVyZW5jZS4K
+PiAKPiBTaWduZWQtb2ZmLWJ5OiBNYXR0IEJyb3duIDxtYXR0aGV3LmJyb3duLmRldkBnbWFpbC5j
+b20+Cj4gLS0tCj4gICBhcmNoL3Bvd2VycGMvaW5jbHVkZS9hc20vY2FjaGVmbHVzaC5oICAgICAg
+ICB8IDQ3ICsrKysrKysrKysrKysrKysrLS0tLS0tLS0KPiAgIGFyY2gvcG93ZXJwYy9rZXJuZWwv
+bWlzY182NC5TICAgICAgICAgICAgICAgIHwgNTIgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LQo+ICAgYXJjaC9wb3dlcnBjL21tL2RtYS1ub25jb2hlcmVudC5jICAgICAgICAgICAgfCAxNSAr
+KysrLS0tLQo+ICAgYXJjaC9wb3dlcnBjL3BsYXRmb3Jtcy81MTJ4L21wYzUxMnhfc2hhcmVkLmMg
+fCAxMCArKystLS0KPiAgIGFyY2gvcG93ZXJwYy9wbGF0Zm9ybXMvODV4eC9zbXAuYyAgICAgICAg
+ICAgIHwgIDYgKystLQo+ICAgYXJjaC9wb3dlcnBjL3N5c2Rldi9kYXJ0X2lvbW11LmMgICAgICAg
+ICAgICAgfCAgNSArLS0KPiAgIGRyaXZlcnMvYXRhL3BhdGFfYmY1NHguYyAgICAgICAgICAgICAg
+ICAgICAgIHwgIDMgKy0KPiAgIGRyaXZlcnMvY2hhci9hZ3AvdW5pbm9ydGgtYWdwLmMgICAgICAg
+ICAgICAgIHwgIDYgKystLQo+ICAgZHJpdmVycy9ncHUvZHJtL2RybV9jYWNoZS5jICAgICAgICAg
+ICAgICAgICAgfCAgMyArLQo+ICAgZHJpdmVycy9tYWNpbnRvc2gvc211LmMgICAgICAgICAgICAg
+ICAgICAgICAgfCAxNSArKysrLS0tLQo+ICAgZHJpdmVycy9tbWMvaG9zdC9iZmluX3NkaC5jICAg
+ICAgICAgICAgICAgICAgfCAgMyArLQo+ICAgZHJpdmVycy9tdGQvbmFuZC9iZjV4eF9uYW5kLmMg
+ICAgICAgICAgICAgICAgfCAgNiArKy0tCj4gICBkcml2ZXJzL3NvYy9mc2wvcWJtYW4vZHBhYV9z
+eXMuaCAgICAgICAgICAgICB8ICAyICstCj4gICBkcml2ZXJzL3NvYy9mc2wvcWJtYW4vcW1hbl9j
+Y3NyLmMgICAgICAgICAgICB8ICAzICstCj4gICBkcml2ZXJzL3NwaS9zcGktYmZpbjV4eC5jICAg
+ICAgICAgICAgICAgICAgICB8IDEwICsrKy0tLQo+ICAgZHJpdmVycy90dHkvc2VyaWFsL21wc2Mu
+YyAgICAgICAgICAgICAgICAgICAgfCA0NiArKysrKysrKy0tLS0tLS0tLS0tLS0tLS0KPiAgIGRy
+aXZlcnMvdXNiL211c2IvYmxhY2tmaW4uYyAgICAgICAgICAgICAgICAgIHwgIDYgKystLQo+ICAg
+MTcgZmlsZXMgY2hhbmdlZCwgODYgaW5zZXJ0aW9ucygrKSwgMTUyIGRlbGV0aW9ucygtKQo+IAoK
+Wy4uLl0KCj4gZGlmZiAtLWdpdCBhL2FyY2gvcG93ZXJwYy9tbS9kbWEtbm9uY29oZXJlbnQuYyBi
+L2FyY2gvcG93ZXJwYy9tbS9kbWEtbm9uY29oZXJlbnQuYwo+IGluZGV4IDM4MjUyODQuLjVmZDMx
+NzEgMTAwNjQ0Cj4gLS0tIGEvYXJjaC9wb3dlcnBjL21tL2RtYS1ub25jb2hlcmVudC5jCj4gKysr
+IGIvYXJjaC9wb3dlcnBjL21tL2RtYS1ub25jb2hlcmVudC5jCj4gQEAgLTIwNCw5ICsyMDQsOSBA
+QCBfX2RtYV9hbGxvY19jb2hlcmVudChzdHJ1Y3QgZGV2aWNlICpkZXYsIHNpemVfdCBzaXplLCBk
+bWFfYWRkcl90ICpoYW5kbGUsIGdmcF90Cj4gICAJICoga2VybmVsIGRpcmVjdC1tYXBwZWQgcmVn
+aW9uIGZvciBkZXZpY2UgRE1BLgo+ICAgCSAqLwo+ICAgCXsKPiAtCQl1bnNpZ25lZCBsb25nIGth
+ZGRyID0gKHVuc2lnbmVkIGxvbmcpcGFnZV9hZGRyZXNzKHBhZ2UpOwo+ICsJCXZvaWQgKmthZGRy
+ID0gcGFnZV9hZGRyZXNzKHBhZ2UpOwo+ICAgCQltZW1zZXQocGFnZV9hZGRyZXNzKHBhZ2UpLCAw
+LCBzaXplKTsKPiAtCQlmbHVzaF9kY2FjaGVfcmFuZ2Uoa2FkZHIsIGthZGRyICsgc2l6ZSk7Cj4g
+KwkJZmx1c2hfZGNhY2hlX3JhbmdlKGthZGRyLCBzaXplKTsKPiAgIAl9Cj4gICAKPiAgIAkvKgo+
+IEBAIC0zMTYsOSArMzE2LDYgQEAgRVhQT1JUX1NZTUJPTChfX2RtYV9mcmVlX2NvaGVyZW50KTsK
+PiAgICAqLwo+ICAgdm9pZCBfX2RtYV9zeW5jKHZvaWQgKnZhZGRyLCBzaXplX3Qgc2l6ZSwgaW50
+IGRpcmVjdGlvbikKPiAgIHsKPiAtCXVuc2lnbmVkIGxvbmcgc3RhcnQgPSAodW5zaWduZWQgbG9u
+Zyl2YWRkcjsKPiAtCXVuc2lnbmVkIGxvbmcgZW5kICAgPSBzdGFydCArIHNpemU7Cj4gLQo+ICAg
+CXN3aXRjaCAoZGlyZWN0aW9uKSB7Cj4gICAJY2FzZSBETUFfTk9ORToKPiAgIAkJQlVHKCk7Cj4g
+QEAgLTMyOCwxNSArMzI1LDE1IEBAIHZvaWQgX19kbWFfc3luYyh2b2lkICp2YWRkciwgc2l6ZV90
+IHNpemUsIGludCBkaXJlY3Rpb24pCj4gICAJCSAqIHRoZSBwb3RlbnRpYWwgZm9yIGRpc2NhcmRp
+bmcgdW5jb21taXR0ZWQgZGF0YSBmcm9tIHRoZSBjYWNoZQo+ICAgCQkgKi8KPiAgIAkJaWYgKChz
+dGFydCB8IGVuZCkgJiAoTDFfQ0FDSEVfQllURVMgLSAxKSkKCkhvdyBjYW4gdGhlIGFib3ZlIGNv
+bXBpbGUgd2hlbiAnc3RhcnQnIGFuZCAnZW5kJyBhcmUgcmVtb3ZlZCA/ClNob3VsZG4ndCBpdCBi
+ZSByZXBsYWNlZCBieQoKaWYgKCh2YWRkciB8IHNpemUpICYgKEwxX0NBQ0hFX0JZVEVTIC0gMSkp
+Cgo+IC0JCQlmbHVzaF9kY2FjaGVfcmFuZ2Uoc3RhcnQsIGVuZCk7Cj4gKwkJCWZsdXNoX2RjYWNo
+ZV9yYW5nZSh2YWRkciwgc2l6ZSk7Cj4gICAJCWVsc2UKPiAtCQkJaW52YWxpZGF0ZV9kY2FjaGVf
+cmFuZ2Uoc3RhcnQsIGVuZCk7Cj4gKwkJCWludmFsaWRhdGVfZGNhY2hlX3JhbmdlKHZhZGRyLCBz
+aXplKTsKPiAgIAkJYnJlYWs7Cj4gICAJY2FzZSBETUFfVE9fREVWSUNFOgkJLyogd3JpdGViYWNr
+IG9ubHkgKi8KPiAtCQljbGVhbl9kY2FjaGVfcmFuZ2Uoc3RhcnQsIGVuZCk7Cj4gKwkJY2xlYW5f
+ZGNhY2hlX3JhbmdlKHZhZGRyLCBzaXplKTsKPiAgIAkJYnJlYWs7Cj4gICAJY2FzZSBETUFfQklE
+SVJFQ1RJT05BTDoJLyogd3JpdGViYWNrIGFuZCBpbnZhbGlkYXRlICovCj4gLQkJZmx1c2hfZGNh
+Y2hlX3JhbmdlKHN0YXJ0LCBlbmQpOwo+ICsJCWZsdXNoX2RjYWNoZV9yYW5nZSh2YWRkciwgc2l6
+ZSk7Cj4gICAJCWJyZWFrOwo+ICAgCX0KPiAgIH0KClsuLi5dCgpDaHJpc3RvcGhlCgpfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVs
+IG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDov
+L2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
