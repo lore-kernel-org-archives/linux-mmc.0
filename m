@@ -1,181 +1,46 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 3/3] mmc: sdhci-cadence: add suspend / resume support
-Date: Mon, 31 Jul 2017 21:56:49 +0900
-Message-ID: <1501505809-393-4-git-send-email-yamada.masahiro@socionext.com>
-References: <1501505809-393-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-07.nifty.com ([210.131.2.74]:52619 "EHLO
-        conuserg-07.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751446AbdGaM6U (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jul 2017 08:58:20 -0400
-In-Reply-To: <1501505809-393-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 0/3] mmc: sdhci: refactor PM in sdhci-pltfm and support PM for
+ cadence port
+Date: Mon, 31 Jul 2017 21:56:46 +0900
+Message-ID: <1501505809-393-1-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Barry Song <baohua@kernel.org>, Florian Fainelli <f.fainelli@gmail.com>, Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, bcm-kernel-feedback-list@broadcom.com, Gregory Fong <gregory.0xf0@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <computersforpeace@gmail.com>, linux-arm-kernel@lists.infradead.org, Piotr Sroka <piotrs@cadence.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Currently, the probe function initializes the PHY, but PHY settings
-are lost during the sleep state.  Restore the PHY registers when
-resuming.
 
-To facilitate this, split sdhci_cdns_phy_init() into the DT parse
-part and PHY update part so that the latter can be invoked from the
-resume hook.
+[1] adds clk handling for suspend/resume hooks of sdhci-pltfm.
+    This also cleans up sdhci-brcmstb.c and sdhci-sirf.c
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+[2] exports suspend / resume, which will be used by [3]
 
+[3] implements suspend / resume for sdhci-cadence.c
+
+
+
+Masahiro Yamada (3):
+  mmc: sdhci: enable/disable the clock in sdhci_pltfm_suspend/resume
+  mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
+  mmc: sdhci-cadence: add suspend / resume support
+
+ drivers/mmc/host/sdhci-brcmstb.c | 37 +------------------
  drivers/mmc/host/sdhci-cadence.c | 77 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 68 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-pltfm.c   | 22 ++++++++++--
+ drivers/mmc/host/sdhci-pltfm.h   |  2 ++
+ drivers/mmc/host/sdhci-sirf.c    | 39 +-------------------
+ 5 files changed, 91 insertions(+), 86 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 19d5698244b5..7473766801a5 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -67,9 +67,16 @@
-  */
- #define SDHCI_CDNS_MAX_TUNING_LOOP	40
- 
-+struct sdhci_cdns_phy_param {
-+	u8 addr;
-+	u8 data;
-+};
-+
- struct sdhci_cdns_priv {
- 	void __iomem *hrs_addr;
- 	bool enhanced_strobe;
-+	unsigned int nr_phy_params;
-+	struct sdhci_cdns_phy_param phy_params[0];
- };
- 
- struct sdhci_cdns_phy_cfg {
-@@ -115,9 +122,22 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
- 	return 0;
- }
- 
--static int sdhci_cdns_phy_init(struct device_node *np,
--			       struct sdhci_cdns_priv *priv)
-+static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
- {
-+	unsigned int count = 0;
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
-+		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
-+			count++;
-+
-+	return count;
-+}
-+
-+static void sdhci_cdns_phy_param_parse(struct device_node *np,
-+				       struct sdhci_cdns_priv *priv)
-+{
-+	struct sdhci_cdns_phy_param *p = priv->phy_params;
- 	u32 val;
- 	int ret, i;
- 
-@@ -127,9 +147,19 @@ static int sdhci_cdns_phy_init(struct device_node *np,
- 		if (ret)
- 			continue;
- 
--		ret = sdhci_cdns_write_phy_reg(priv,
--					       sdhci_cdns_phy_cfgs[i].addr,
--					       val);
-+		p->addr = sdhci_cdns_phy_cfgs[i].addr;
-+		p->data = val;
-+		p++;
-+	}
-+}
-+
-+static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-+{
-+	int ret, i;
-+
-+	for (i = 0; i < priv->nr_phy_params; i++) {
-+		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
-+					       priv->phy_params[i].data);
- 		if (ret)
- 			return ret;
- 	}
-@@ -302,6 +332,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_cdns_priv *priv;
- 	struct clk *clk;
-+	size_t priv_size;
-+	unsigned int nr_phy_params;
- 	int ret;
- 	struct device *dev = &pdev->dev;
- 
-@@ -313,7 +345,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		return ret;
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, sizeof(*priv));
-+	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
-+	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
-+	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
- 		goto disable_clk;
-@@ -322,7 +356,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->clk = clk;
- 
--	priv = sdhci_cdns_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
-+	priv->nr_phy_params = nr_phy_params;
- 	priv->hrs_addr = host->ioaddr;
- 	priv->enhanced_strobe = false;
- 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
-@@ -336,7 +371,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto free;
- 
--	ret = sdhci_cdns_phy_init(dev->of_node, priv);
-+	sdhci_cdns_phy_param_parse(dev->of_node, priv);
-+
-+	ret = sdhci_cdns_phy_init(priv);
- 	if (ret)
- 		goto free;
- 
-@@ -353,6 +390,28 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	return ret;
- }
- 
-+static int __maybe_unused sdhci_cdns_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
-+
-+	ret = sdhci_cdns_phy_init(priv);
-+	if (ret)
-+		return ret;
-+
-+	return sdhci_resume_host(host);
-+}
-+
-+static const struct dev_pm_ops sdhci_cdns_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
-+};
-+
- static const struct of_device_id sdhci_cdns_match[] = {
- 	{ .compatible = "socionext,uniphier-sd4hc" },
- 	{ .compatible = "cdns,sd4hc" },
-@@ -363,7 +422,7 @@ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
- static struct platform_driver sdhci_cdns_driver = {
- 	.driver = {
- 		.name = "sdhci-cdns",
--		.pm = &sdhci_pltfm_pmops,
-+		.pm = &sdhci_cdns_pm_ops,
- 		.of_match_table = sdhci_cdns_match,
- 	},
- 	.probe = sdhci_cdns_probe,
 -- 
 2.7.4
-
