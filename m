@@ -1,31 +1,39 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v5 05/14] MIPS: ingenic: Enable pinctrl for all ingenic SoCs
-Date: Mon, 31 Jul 2017 15:29:00 +0200
-Message-ID: <CACRpkdZKAR-Ya-j-g=uyb24s1KqyEhbKOxzi=BdAaa29L1BO+w@mail.gmail.com>
-References: <20170402204244.14216-2-paul@crapouillou.net> <20170428200824.10906-1-paul@crapouillou.net>
- <20170428200824.10906-6-paul@crapouillou.net> <CACRpkdauf5c2i4o5i8QY8YHPNjizkvTu6kAbnquWiP_=v2=KdQ@mail.gmail.com>
- <1499013301.1477.0@smtp.crapouillou.net> <CACRpkdb=Zti+C+2me_WP0=m6z12G5Kz+W_cPcZsw=CVzBO_wAg@mail.gmail.com>
- <20170703135555.GA686@linux-mips.org>
+Subject: Re: [PATCH 4/6 v2] mmc: block: move single ioctl() commands to block requests
+Date: Mon, 31 Jul 2017 15:44:07 +0200
+Message-ID: <CACRpkdb-ZpznKqKD8L=YqLrOM4ZH0qc2Lb5=UFxH3DLCV_tTqw@mail.gmail.com>
+References: <20170518092936.9277-1-linus.walleij@linaro.org>
+ <20170518092936.9277-4-linus.walleij@linaro.org> <20170518093614.GB9250@lst.de>
+ <20170705190016.GA7008@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <20170703135555.GA686@linux-mips.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ralf Baechle <ralf@linux-mips.org>
-Cc: Paul Cercueil <paul@crapouillou.net>, Alexandre Courbot <gnurou@gmail.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Thierry Reding <thierry.reding@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Maarten ter Huurne <maarten@treewalker.org>, Lars-Peter Clausen <lars@metafoo.de>, Paul Burton <paul.burton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux MIPS <linux-mips@linux-mips.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20170705190016.GA7008@lst.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, Arnd Bergmann <arnd@arndb.de>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Paolo Valente <paolo.valente@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jul 3, 2017 at 3:55 PM, Ralf Baechle <ralf@linux-mips.org> wrote:
-> On Mon, Jul 03, 2017 at 11:07:09AM +0200, Linus Walleij wrote:
+On Wed, Jul 5, 2017 at 9:00 PM, Christoph Hellwig <hch@lst.de> wrote:
+> On Thu, May 18, 2017 at 11:36:14AM +0200, Christoph Hellwig wrote:
+>> On Thu, May 18, 2017 at 11:29:34AM +0200, Linus Walleij wrote:
+>> > We are storing the ioctl() in/out argument as a pointer in
+>> > the per-request struct mmc_blk_request container.
+>>
+>> Btw, for the main ioctl data (not the little reponse field) it might
+>> make sense to use blk_rq_map_user, which will do a get_user_pages
+>> on the user data if the alignment fits, and otherwise handle the
+>> kernel bounce buffering for you.  This should simplify the code
+>> quite a bit more, and in the case where you can access the user
+>> memory directly provide a nice little performance boost.
 >
->> > There has been no word from Ralf, is this going into 4.13?
->
-> Acked-by: Ralf Baechle <ralf@linux-mips.org>
->
-> for the whole series.
+> Did you get a chance to look into this?
 
-Thanks Ralf, I missed to add this in, but everything seems to have
-landed smoothly in v4.13.
+Sorry, just back from vacation.
+
+I am rebasing my MMC patch stack, so I will take this opportunity to
+also look at this during the week. I just need to make sure I find the
+right userspace calls to exercise it.
 
 Yours,
 Linus Walleij
