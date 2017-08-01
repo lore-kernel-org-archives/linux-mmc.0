@@ -1,107 +1,59 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: mmc: UHS Voltage switch and operating frequency question
-Date: Tue, 01 Aug 2017 18:56:22 +0200
-Message-ID: <1501606582.2759.11.camel@baylibre.com>
-References: <1501518004.2759.5.camel@baylibre.com>
-         <03c65837-6d3c-c822-f505-838e90f34295@rock-chips.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH] mmc: sdhci: ignore 3.3v voltage switch if ios.vdd is 0
+Date: Tue, 1 Aug 2017 16:58:21 -0700
+Message-ID: <1501631901-1304-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:35162 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751755AbdHAQ4Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2017 12:56:24 -0400
-Received: by mail-wm0-f49.google.com with SMTP id m85so20367133wma.0
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Aug 2017 09:56:24 -0700 (PDT)
-In-Reply-To: <03c65837-6d3c-c822-f505-838e90f34295@rock-chips.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:56124 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751600AbdHAXzp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2017 19:55:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com, Zhoujie Wu <zjwu@marvell.com>
 
-On Tue, 2017-08-01 at 08:38 +0800, Shawn Lin wrote:
-> On 2017/8/1 0:20, Jerome Brunet wrote:
-> > Hi Ulf,
-> > 
-> > I am working on adding signal voltage switch callback to the meson mmc
-> > driver.
-> > While testing, I noticed that a few cards fail to exit the busy state after
-> > the
-> > voltage switch.
-> > 
-> > After tinkering with the driver a bit, I noticed that increasing the clock
-> > frequency from 400kHz to 1MHz solve the problem. Strange, isn't it ?
-> 
+One issue was found on a removable high speed sd card with
+runtime pm enabled.
+When SD card is unplugged, it keep printing "Switching to 3.3V
+signalling voltage failed".
+And found below sequence triggers the error.
 
-Thanks for your reply Shawn !
+mmc_rescan
+	-> mmc_sd_detect
+		-> mmc_power_off  -- mmc->ios.vdd is update to 0.
+	-> mmc_claim_host
+		-> sdhci_runtime_resume_host
+			-> sdhci_start_signal_voltage_switch
+				-> mmc_regulator_set_vqmmc
+					-> mmc_ocrbitnum_to_vdd
 
-> AFAICT, most of the internal circuit of card is running against the
-> input clock from host. So if you increase your clock, cards will finish
-> thier logic switch faster.
+When mmc_ocrbitnum_to_vdd is called, the mmc->ios.vdd is 0, so it
+always return -EINVAL. The signal switch will always fail and
+print out warning.
 
-Yeah that would be my understanding as well
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+---
+Hi Ulf,
+	Not sure if this is the best way to fix it. Please help to suggest. Thanks.
 
->  Note that the spec does state that 400KHz is
-> the max freq for indentification mode. But the fact is that almost all
-> cards could accept higher frequecncy.
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Agreed. but I'm not talking about the frequency used during identification.
-The step I'm referring to is after CMD41, during CMD11. After CMD11, the spec
-says that the frequency is up to "default speed or SDR12" so 25Mhz. 
-
-If id mode is limited to 400kHz, it is clearly a different stage.
-
-> 
-> For you issue, please try to hack mmc_set_uhs_voltage to increase the
-> delay there to see if that could solve your problem.
-> 
-
-Ohhh believe me, I did :) however these 2 cards are quite stubborn 
-
-> > 
-> > I'm don't know MMC that much but is it possible that some card require a
-> > minimum
-> > operating frequency to enter UHS mode ?
-> > 
-> 
-> We shoule never give a hypothesis beyond the scope of spec.
-I don't get what you mean ? 
-
-> 
-> > The simplified spec (Part 1 - Physical Layer) says that before CMD11, we
-> > should
-> > have had CMD41 (Init Command) . After CMD41, the card should be operating at
-> > Default Speed or SDR12.
-> > 
-> > I believe that in both case, the frequency is "up to 25Mhz" ? This would be
-> > the
-> > maximum, but is there a minimum ? 400kHz seems pretty low compared to 25Mhz
-> > ...
-> > 
-> 
-> 400KHz is good for work unless your IP has limitation for that.
-Ip seems to be fine at 400KHz with every other cards, including uhs ones.
-The 2 "annoying" cards switch to UHS mode fine on a laptop.
-
-It the combination of the ip and the cards which seems broken, whatever the
-delays I put here and there.
-
-For a reason I don't understand, increasing the minimal frequency from 400Khz to
-1MHz make these cards work very nicely.
-
-> 
-> > I hope you will able to shed light on this :)
-> > 
-> > Best Regards
-> > jerome
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> > 
-> 
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ecd0d43..011ebbe 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1878,7 +1878,7 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 		ctrl &= ~SDHCI_CTRL_VDD_180;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+-		if (!IS_ERR(mmc->supply.vqmmc)) {
++		if ((!IS_ERR(mmc->supply.vqmmc)) && mmc->ios.vdd) {
+ 			ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 			if (ret) {
+ 				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+-- 
+1.9.1
 
