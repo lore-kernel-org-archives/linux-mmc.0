@@ -1,99 +1,166 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2 1/2] mmc: sdhci: add sdma_buffer_boundary_arg member to sdhci_host
-Date: Wed,  2 Aug 2017 10:38:06 +0200
-Message-ID: <20170802083807.26280-2-srinivas.kandagatla@linaro.org>
-References: <20170802083807.26280-1-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170802083807.26280-1-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: mmc: UHS Voltage switch and operating frequency question
+Date: Wed, 02 Aug 2017 11:20:34 +0200
+Message-ID: <1501665634.2759.14.camel@baylibre.com>
+References: <1501518004.2759.5.camel@baylibre.com>
+         <03c65837-6d3c-c822-f505-838e90f34295@rock-chips.com>
+         <1501606582.2759.11.camel@baylibre.com>
+         <2b79f5e8-2a60-128a-0e24-011e8f4e122f@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37600 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752323AbdHBJUh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 05:20:37 -0400
+Received: by mail-wm0-f54.google.com with SMTP id t201so36129662wmt.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Aug 2017 02:20:36 -0700 (PDT)
+In-Reply-To: <2b79f5e8-2a60-128a-0e24-011e8f4e122f@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On Wed, 2017-08-02 at 10:54 +0800, Shawn Lin wrote:
+> On 2017/8/2 0:56, Jerome Brunet wrote:
+> > On Tue, 2017-08-01 at 08:38 +0800, Shawn Lin wrote:
+> > > On 2017/8/1 0:20, Jerome Brunet wrote:
+> > > > Hi Ulf,
+> > > > 
+> > > > I am working on adding signal voltage switch callback to the meson mmc
+> > > > driver.
+> > > > While testing, I noticed that a few cards fail to exit the busy state
+> > > > after
+> > > > the
+> > > > voltage switch.
+> > > > 
+> > > > After tinkering with the driver a bit, I noticed that increasing the
+> > > > clock
+> > > > frequency from 400kHz to 1MHz solve the problem. Strange, isn't it ?
+> > 
+> > Thanks for your reply Shawn !
+> > 
+> > > AFAICT, most of the internal circuit of card is running against the
+> > > input clock from host. So if you increase your clock, cards will finish
+> > > thier logic switch faster.
+> > 
+> > Yeah that would be my understanding as well
+> > 
+> > >   Note that the spec does state that 400KHz is
+> > > the max freq for indentification mode. But the fact is that almost all
+> > > cards could accept higher frequecncy.
+> > 
+> > Agreed. but I'm not talking about the frequency used during identification.
+> > The step I'm referring to is after CMD41, during CMD11. After CMD11, the
+> > spec
+> 
+> I also notice you said "a few cards fail to exit teh busy state after
+> the voltage switch". That implies that card didn't finish voltage switch
+> at all, so it shouldn't argue for increasing the clk as the spec only
+> say "cmd11 invlokes voltage switching squence. If it is *completed*, the
+> card enters SDR12(default)." and "Completion of voltage switch sequence
+> is checked by high level of DAT[3:0]"
 
-This patch adds sdma_buffer_boundary_arg member to struct sdhci_host to
-give more flexibility to drivers to control the sdma boundary buffer value
-and also to fix issue on some sdhci controllers which are broken when
-HOST SDMA Buffer Boundary is programmed in Block Size Register (0x04)
-when using ADMA. Qualcomm sdhci controller is one of such type, writing
-to this bits is un-supported.
+I understand increasing the frequency does not make much sense, but it makes it
+works. I'm trying to understand why ... hopefully it will lead to a real
+solution.
 
-Default value of sdma_buffer_boundary_arg is set to SDHCI_DEFAULT_BOUNDARY_ARG.
+> 
+> So these two cards are probably still in id mode or some un-documented
+> state, I guess. No hints for that per the spec but you should try to
+> make sure the behaviour of your contrller follows the whole requirement
+> of SD spec "4.2.4.2 Timing to Switch Signal Voltage".... especially
+> to see if your 1.8v is stable within 5ms...
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/sdhci.c | 14 ++++++++++----
- drivers/mmc/host/sdhci.h |  3 +++
- 2 files changed, 13 insertions(+), 4 deletions(-)
+Unfortunately section "4.2.4.2 Timing to Switch Signal Voltage" is blank in the
+simplified (freely available) spec. I could not get my hands on the full spec
+yet.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ecd0d4350e8a..4a7b5dcfc55b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -897,7 +897,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	sdhci_set_transfer_irqs(host);
- 
- 	/* Set the DMA boundary value and block size */
--	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
-+	sdhci_writew(host, SDHCI_MAKE_BLKSZ(host->sdma_buffer_boundary_arg,
- 		data->blksz), SDHCI_BLOCK_SIZE);
- 	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
- }
-@@ -2037,6 +2037,7 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
- 	struct mmc_command cmd = {};
- 	struct mmc_request mrq = {};
- 	unsigned long flags;
-+	u32 barg = host->sdma_buffer_boundary_arg;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -2052,9 +2053,11 @@ static void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
- 	 */
- 	if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200 &&
- 	    mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128), SDHCI_BLOCK_SIZE);
-+		sdhci_writew(host,
-+			     SDHCI_MAKE_BLKSZ(barg, 128), SDHCI_BLOCK_SIZE);
- 	else
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
-+		sdhci_writew(host,
-+			     SDHCI_MAKE_BLKSZ(barg, 64), SDHCI_BLOCK_SIZE);
- 
- 	/*
- 	 * The tuning block is sent by the card to the host controller.
-@@ -2998,7 +3001,8 @@ void sdhci_cqe_enable(struct mmc_host *mmc)
- 		ctrl |= SDHCI_CTRL_ADMA32;
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- 
--	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG, 512),
-+	sdhci_writew(host,
-+		     SDHCI_MAKE_BLKSZ(host->sdma_buffer_boundary_arg, 512),
- 		     SDHCI_BLOCK_SIZE);
- 
- 	/* Set maximum timeout */
-@@ -3119,6 +3123,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host->tuning_delay = -1;
- 
-+	host->sdma_buffer_boundary_arg = SDHCI_DEFAULT_BOUNDARY_ARG;
-+
- 	return host;
- }
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0469fa191493..6ff2294e55b3 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -541,6 +541,9 @@ struct sdhci_host {
- 	/* Delay (ms) between tuning commands */
- 	int			tuning_delay;
- 
-+	/* Host SDMA buffer boundary. */
-+	u32			sdma_buffer_boundary_arg;
-+
- 	unsigned long private[0] ____cacheline_aligned;
- };
- 
--- 
-2.11.0
+Unsettled regulator was one of my first guesses. The regulator setup on my board
+needs some time to settle when switch from 3.3v to 1.8v, around 70ms.
+I made sure to delay the return of the host voltage_switch callback until the
+voltage is stable at 1.8v.
+
+This probably is a bit long but, at this stage, the clock is gated so the card
+should not see the difference, right ?
+
+So on return of "mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180)", the
+voltage should be stable at 1.8v and we will the get the 10ms (even if spec says
+5ms apparently) before re-enabling the clock.
+
+
+Again, Thanks for helping out Shawn !
+Cheers
+Jerome
+
+> 
+> 
+> > says that the frequency is up to "default speed or SDR12" so 25Mhz >
+> > If id mode is limited to 400kHz, it is clearly a different stage.
+> > 
+> > > 
+> > > For you issue, please try to hack mmc_set_uhs_voltage to increase the
+> > > delay there to see if that could solve your problem.
+> > > 
+> > 
+> > Ohhh believe me, I did :) however these 2 cards are quite stubborn
+> > 
+> > > > 
+> > > > I'm don't know MMC that much but is it possible that some card require a
+> > > > minimum
+> > > > operating frequency to enter UHS mode ?
+> > > > 
+> > > 
+> > > We shoule never give a hypothesis beyond the scope of spec.
+> > 
+> > I don't get what you mean ?
+> > 
+> > > 
+> > > > The simplified spec (Part 1 - Physical Layer) says that before CMD11, we
+> > > > should
+> > > > have had CMD41 (Init Command) . After CMD41, the card should be
+> > > > operating at
+> > > > Default Speed or SDR12.
+> > > > 
+> > > > I believe that in both case, the frequency is "up to 25Mhz" ? This would
+> > > > be
+> > > > the
+> > > > maximum, but is there a minimum ? 400kHz seems pretty low compared to
+> > > > 25Mhz
+> > > > ...
+> > > > 
+> > > 
+> > > 400KHz is good for work unless your IP has limitation for that.
+> > 
+> > Ip seems to be fine at 400KHz with every other cards, including uhs ones.
+> > The 2 "annoying" cards switch to UHS mode fine on a laptop.
+> > 
+> > It the combination of the ip and the cards which seems broken, whatever the
+> > delays I put here and there.
+> > 
+> > For a reason I don't understand, increasing the minimal frequency from
+> > 400Khz to
+> > 1MHz make these cards work very nicely.
+> > 
+> > > 
+> > > > I hope you will able to shed light on this :)
+> > > > 
+> > > > Best Regards
+> > > > jerome
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > 
+> > > > 
+> > > > 
+> > > 
+> > > 
+> > 
+> > 
+> > 
+> > 
+> 
+> 
+
