@@ -1,125 +1,149 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: mmc: UHS Voltage switch and operating frequency question
-Date: Wed, 2 Aug 2017 10:54:06 +0800
-Message-ID: <2b79f5e8-2a60-128a-0e24-011e8f4e122f@rock-chips.com>
-References: <1501518004.2759.5.camel@baylibre.com>
- <03c65837-6d3c-c822-f505-838e90f34295@rock-chips.com>
- <1501606582.2759.11.camel@baylibre.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 1/2] mmc: core: correct taac parameter according to the specification
+Date: Wed,  2 Aug 2017 11:12:42 +0800
+Message-ID: <1501643563-16094-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:44888 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.133]:35684 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751815AbdHBCyS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2017 22:54:18 -0400
-In-Reply-To: <1501606582.2759.11.camel@baylibre.com>
+        with ESMTP id S1751347AbdHBDNI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2017 23:13:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 2017/8/2 0:56, Jerome Brunet wrote:
-> On Tue, 2017-08-01 at 08:38 +0800, Shawn Lin wrote:
->> On 2017/8/1 0:20, Jerome Brunet wrote:
->>> Hi Ulf,
->>>
->>> I am working on adding signal voltage switch callback to the meson mmc
->>> driver.
->>> While testing, I noticed that a few cards fail to exit the busy state after
->>> the
->>> voltage switch.
->>>
->>> After tinkering with the driver a bit, I noticed that increasing the clock
->>> frequency from 400kHz to 1MHz solve the problem. Strange, isn't it ?
->>
-> 
-> Thanks for your reply Shawn !
-> 
->> AFAICT, most of the internal circuit of card is running against the
->> input clock from host. So if you increase your clock, cards will finish
->> thier logic switch faster.
-> 
-> Yeah that would be my understanding as well
-> 
->>   Note that the spec does state that 400KHz is
->> the max freq for indentification mode. But the fact is that almost all
->> cards could accept higher frequecncy.
-> 
-> Agreed. but I'm not talking about the frequency used during identification.
-> The step I'm referring to is after CMD41, during CMD11. After CMD11, the spec
+Per the spec of JESD84-B51, section 7.3, replce tacc with taac to
+fix the obvious typo.
 
-I also notice you said "a few cards fail to exit teh busy state after
-the voltage switch". That implies that card didn't finish voltage switch
-at all, so it shouldn't argue for increasing the clk as the spec only
-say "cmd11 invlokes voltage switching squence. If it is *completed*, the
-card enters SDR12(default)." and "Completion of voltage switch sequence
-is checked by high level of DAT[3:0]"
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-So these two cards are probably still in id mode or some un-documented
-state, I guess. No hints for that per the spec but you should try to
-make sure the behaviour of your contrller follows the whole requirement
-of SD spec "4.2.4.2 Timing to Switch Signal Voltage".... especially
-to see if your 1.8v is stable within 5ms...
+ drivers/mmc/core/core.c  | 14 +++++++-------
+ drivers/mmc/core/mmc.c   |  8 ++++----
+ drivers/mmc/core/sd.c    | 12 ++++++------
+ include/linux/mmc/card.h |  4 ++--
+ 4 files changed, 19 insertions(+), 19 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 15623cc..6177eb0 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -733,8 +733,8 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+ 	if (data->flags & MMC_DATA_WRITE)
+ 		mult <<= card->csd.r2w_factor;
+ 
+-	data->timeout_ns = card->csd.tacc_ns * mult;
+-	data->timeout_clks = card->csd.tacc_clks * mult;
++	data->timeout_ns = card->csd.taac_ns * mult;
++	data->timeout_clks = card->csd.taac_clks * mult;
+ 
+ 	/*
+ 	 * SD cards also have an upper limit on the timeout.
+@@ -1859,14 +1859,14 @@ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 	} else {
+ 		/* CSD Erase Group Size uses write timeout */
+ 		unsigned int mult = (10 << card->csd.r2w_factor);
+-		unsigned int timeout_clks = card->csd.tacc_clks * mult;
++		unsigned int timeout_clks = card->csd.taac_clks * mult;
+ 		unsigned int timeout_us;
+ 
+-		/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
+-		if (card->csd.tacc_ns < 1000000)
+-			timeout_us = (card->csd.tacc_ns * mult) / 1000;
++		/* Avoid overflow: e.g. taac_ns=80000000 mult=1280 */
++		if (card->csd.taac_ns < 1000000)
++			timeout_us = (card->csd.taac_ns * mult) / 1000;
+ 		else
+-			timeout_us = (card->csd.tacc_ns / 1000) * mult;
++			timeout_us = (card->csd.taac_ns / 1000) * mult;
+ 
+ 		/*
+ 		 * ios.clock is only a target.  The real clock rate might be
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 4ffea14..adb5c88 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -41,11 +41,11 @@
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-static const unsigned int tacc_exp[] = {
++static const unsigned int taac_exp[] = {
+ 	1,	10,	100,	1000,	10000,	100000,	1000000, 10000000,
+ };
+ 
+-static const unsigned int tacc_mant[] = {
++static const unsigned int taac_mant[] = {
+ 	0,	10,	12,	13,	15,	20,	25,	30,
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+@@ -153,8 +153,8 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	csd->mmca_vsn	 = UNSTUFF_BITS(resp, 122, 4);
+ 	m = UNSTUFF_BITS(resp, 115, 4);
+ 	e = UNSTUFF_BITS(resp, 112, 3);
+-	csd->tacc_ns	 = (tacc_exp[e] * tacc_mant[m] + 9) / 10;
+-	csd->tacc_clks	 = UNSTUFF_BITS(resp, 104, 8) * 100;
++	csd->taac_ns	 = (taac_exp[e] * taac_mant[m] + 9) / 10;
++	csd->taac_clks	 = UNSTUFF_BITS(resp, 104, 8) * 100;
+ 
+ 	m = UNSTUFF_BITS(resp, 99, 4);
+ 	e = UNSTUFF_BITS(resp, 96, 3);
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index a1b0aa1..4fd1620 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -39,11 +39,11 @@
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-static const unsigned int tacc_exp[] = {
++static const unsigned int taac_exp[] = {
+ 	1,	10,	100,	1000,	10000,	100000,	1000000, 10000000,
+ };
+ 
+-static const unsigned int tacc_mant[] = {
++static const unsigned int taac_mant[] = {
+ 	0,	10,	12,	13,	15,	20,	25,	30,
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+@@ -111,8 +111,8 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	case 0:
+ 		m = UNSTUFF_BITS(resp, 115, 4);
+ 		e = UNSTUFF_BITS(resp, 112, 3);
+-		csd->tacc_ns	 = (tacc_exp[e] * tacc_mant[m] + 9) / 10;
+-		csd->tacc_clks	 = UNSTUFF_BITS(resp, 104, 8) * 100;
++		csd->taac_ns	 = (taac_exp[e] * taac_mant[m] + 9) / 10;
++		csd->taac_clks	 = UNSTUFF_BITS(resp, 104, 8) * 100;
+ 
+ 		m = UNSTUFF_BITS(resp, 99, 4);
+ 		e = UNSTUFF_BITS(resp, 96, 3);
+@@ -148,8 +148,8 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 		 */
+ 		mmc_card_set_blockaddr(card);
+ 
+-		csd->tacc_ns	 = 0; /* Unused */
+-		csd->tacc_clks	 = 0; /* Unused */
++		csd->taac_ns	 = 0; /* Unused */
++		csd->taac_clks	 = 0; /* Unused */
+ 
+ 		m = UNSTUFF_BITS(resp, 99, 4);
+ 		e = UNSTUFF_BITS(resp, 96, 3);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 46c73e9..279b390 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -29,8 +29,8 @@ struct mmc_csd {
+ 	unsigned char		structure;
+ 	unsigned char		mmca_vsn;
+ 	unsigned short		cmdclass;
+-	unsigned short		tacc_clks;
+-	unsigned int		tacc_ns;
++	unsigned short		taac_clks;
++	unsigned int		taac_ns;
+ 	unsigned int		c_size;
+ 	unsigned int		r2w_factor;
+ 	unsigned int		max_dtr;
+-- 
+1.9.1
 
-> says that the frequency is up to "default speed or SDR12" so 25Mhz >
-> If id mode is limited to 400kHz, it is clearly a different stage.
-> 
->>
->> For you issue, please try to hack mmc_set_uhs_voltage to increase the
->> delay there to see if that could solve your problem.
->>
-> 
-> Ohhh believe me, I did :) however these 2 cards are quite stubborn
-> 
->>>
->>> I'm don't know MMC that much but is it possible that some card require a
->>> minimum
->>> operating frequency to enter UHS mode ?
->>>
->>
->> We shoule never give a hypothesis beyond the scope of spec.
-> I don't get what you mean ?
-> 
->>
->>> The simplified spec (Part 1 - Physical Layer) says that before CMD11, we
->>> should
->>> have had CMD41 (Init Command) . After CMD41, the card should be operating at
->>> Default Speed or SDR12.
->>>
->>> I believe that in both case, the frequency is "up to 25Mhz" ? This would be
->>> the
->>> maximum, but is there a minimum ? 400kHz seems pretty low compared to 25Mhz
->>> ...
->>>
->>
->> 400KHz is good for work unless your IP has limitation for that.
-> Ip seems to be fine at 400KHz with every other cards, including uhs ones.
-> The 2 "annoying" cards switch to UHS mode fine on a laptop.
-> 
-> It the combination of the ip and the cards which seems broken, whatever the
-> delays I put here and there.
-> 
-> For a reason I don't understand, increasing the minimal frequency from 400Khz to
-> 1MHz make these cards work very nicely.
-> 
->>
->>> I hope you will able to shed light on this :)
->>>
->>> Best Regards
->>> jerome
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>
->>
-> 
-> 
-> 
-> 
 
