@@ -1,32 +1,28 @@
 From: Zhoujie Wu <zjwu@marvell.com>
 Subject: Re: [PATCH] mmc: sdhci: ignore 3.3v voltage switch if ios.vdd is
  0
-Date: Wed, 2 Aug 2017 15:33:06 -0700
-Message-ID: <59825322.3030805@marvell.com>
+Date: Wed, 2 Aug 2017 16:12:47 -0700
+Message-ID: <59825C6F.4060402@marvell.com>
 References: <1501631901-1304-1-git-send-email-zjwu@marvell.com>
- <877eymbeuf.fsf@free-electrons.com>
+ <9bae1ec1-9c40-d496-d6c9-b874844995fc@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:39558 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751062AbdHBWdL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 18:33:11 -0400
-In-Reply-To: <877eymbeuf.fsf@free-electrons.com>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:48223 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751073AbdHBXM5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 19:12:57 -0400
+In-Reply-To: <9bae1ec1-9c40-d496-d6c9-b874844995fc@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>, ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, thomas.petazzoni@free-electrons.com
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-Hi Gregory,
-Thanks for your response.
+Hi Adrian,
 
-On 08/02/2017 12:36 AM, Gregory CLEMENT wrote:
-> Hi Zhoujie, Adrian and Ulf,
->   
->   On mar., août 01 2017, Zhoujie Wu <zjwu@marvell.com> wrote:
->
+On 08/02/2017 12:28 AM, Adrian Hunter wrote:
+> On 02/08/17 02:58, Zhoujie Wu wrote:
 >> One issue was found on a removable high speed sd card with
 >> runtime pm enabled.
 >> When SD card is unplugged, it keep printing "Switching to 3.3V
@@ -39,6 +35,27 @@ On 08/02/2017 12:36 AM, Gregory CLEMENT wrote:
 >> 	-> mmc_claim_host
 >> 		-> sdhci_runtime_resume_host
 >> 			-> sdhci_start_signal_voltage_switch
+> We ought to be able to skip restoring the I/O state when the power is off i.e.:
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index cf2166e4190d..4a70f2f765b6 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2934,7 +2934,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+>
+>   	sdhci_init(host, 0);
+>
+> -	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
+> +	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
+> +	    mmc->ios.power_mode != MMC_POWER_OFF) {
+>   		/* Force clock and power re-program */
+>   		host->pwr = 0;
+>   		host->clock = 0;
+
+Your suggestion works and better than mine. I will do more tests and 
+update the patch later. thanks.
+>
+>
 >> 				-> mmc_regulator_set_vqmmc
 >> 					-> mmc_ocrbitnum_to_vdd
 >>
@@ -49,43 +66,8 @@ On 08/02/2017 12:36 AM, Gregory CLEMENT wrote:
 >> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
 >> ---
 >> Hi Ulf,
->> 	Not sure if this is the best way to fix it. Please help to
->> suggest. Thanks.
-> I don't know if there is a link, but I observed that when the kernel
-> boot with an UHS SD Card plugged (and after a warm reset) then the bus
-> speed is only "High Speed". Whereas if I plugged it while the kernel is
-> running the "Ultra " speed is detected.
->
-> I observed that with the sdhci-xenon driver, but I don't have any other
-> UHS capable controller available to compare it and to know if it is
-> something at sdhci level or at xenon level.
-
-I observed the same behavior as you. I added some logs and I found the 
-difference comes from when init card mmc_sd_get_cid got different ocr 
-response from SD card.
-
-When boot up board with sd card plugged, SD card ocr response didn't set 
-S18A bit(bit24 of rocr), so driver won't switch to uhs mode.
-
-[    4.162597] ocr = 41200000
-
-[    4.236465] rocr = c0ff8000
-
-If I unplugged the card and plugged it again, this time SD ocr response 
-set S18A bit(bit24 of rocr), then driver will switch to uhs mode after that.
-
-[   33.817272] ocr = 41200000
-
-[   33.920454] rocr = c1ff8000
-
-Currently I have no idea why SD card response different in these two 
-cases. I will check more details later.
-
->
-> Thanks,
->
-> Gregory
->
+>> 	Not sure if this is the best way to fix it. Please help to suggest. Thanks.
+>>
 >>   drivers/mmc/host/sdhci.c | 2 +-
 >>   1 file changed, 1 insertion(+), 1 deletion(-)
 >>
@@ -102,7 +84,5 @@ cases. I will check more details later.
 >>   			ret = mmc_regulator_set_vqmmc(mmc, ios);
 >>   			if (ret) {
 >>   				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
->> -- 
->> 1.9.1
 >>
 
