@@ -1,42 +1,96 @@
-From: Jagan Teki <jagannadh.teki@gmail.com>
-Subject: rk3288: mmcblk0: error -110 sending status command, retrying
-Date: Wed, 2 Aug 2017 16:39:50 +0530
-Message-ID: <CAD6G_RRgPB_FVTr0OUdtUXeViben6pSakEcskzwQXkqUeaT2kw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:35448 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752744AbdHBLJx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 07:09:53 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH mmc/next] mmc: renesas-sdhi: provide a whitelist for Gen3 SoC ES versions
+Date: Wed,  2 Aug 2017 14:48:42 +0200
+Message-ID: <1501678122-13956-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>
-Cc: linux-mmc@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi,
+Provide a whitelist for Gen3 SoC ES versions for both the SYS DMAC and
+internal DMAC variants of the SDHI driver.  This is to allow drivers to
+only initialise for Gen3 SoC ES versions for which they are the appropriate
+DMAC implementation.  Currently internal DMAC is the appropriate
+implementation for all supported Gen3 SoC ES versions.
 
-Did anyone observing error -110 and -84 during boot on rk3288 target?
-full log here[1] and used dts node is[2].
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 15 +++++++++++++++
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 15 +++++++++++++++
+ 2 files changed, 30 insertions(+)
 
-Proper card detection is done, once we insert after console came-up
-# [   39.635614] mmc0: card 59b4 removed
-[   40.645537] mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req
-400000Hz, actual 400000HZ div = 0)
-[   41.004559] mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot
-req 50000000Hz, actual 50000000HZ div = 0)
-[   41.015553] mmc0: new high speed SDXC card at address 59b4
-[   41.022015] mmcblk0: mmc0:59b4 MS    59.1 GiB
-[   41.028458]  mmcblk0: p1 p2
-
-Any help?
-
-[1] https://paste.ubuntu.com/25225486/
-[2] https://paste.ubuntu.com/25225915/
-
-thanks!
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index a26c6ed8e029..6717003888e2 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -18,6 +18,7 @@
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
++#include <linux/sys_soc.h>
+ 
+ #include "renesas_sdhi.h"
+ #include "tmio_mmc.h"
+@@ -241,8 +242,22 @@ static struct tmio_mmc_dma_ops renesas_sdhi_internal_dmac_dma_ops = {
+ 	.dataend = renesas_sdhi_internal_dmac_dataend_dma,
+ };
+ 
++/*
++ * Whitelist of specific R-Car Gen3 SoC ES versions to use this DMAC
++ * implementation as others may use a different implementation.
++ */
++static const struct soc_device_attribute gen3_soc_whitelist[] = {
++        { .soc_id = "r8a7795", .revision = "ES1.*" },
++        { .soc_id = "r8a7795", .revision = "ES2.0" },
++        { .soc_id = "r8a7796", .revision = "ES1.0" },
++        { /* sentinel */ }
++};
++
+ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+ {
++	if (!soc_device_match(gen3_soc_whitelist))
++		return -ENODEV;
++
+ 	return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
+ }
+ 
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index b6789f5197b3..718cb8a9d2ce 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -18,8 +18,10 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
++#include <linux/of_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
++#include <linux/sys_soc.h>
+ 
+ #include "renesas_sdhi.h"
+ #include "tmio_mmc.h"
+@@ -459,8 +461,21 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_sys_dmac_dma_ops = {
+ 	.dataend = renesas_sdhi_sys_dmac_dataend_dma,
+ };
+ 
++/*
++ * Whitelist of specific R-Car Gen3 SoC ES versions to use this DMAC
++ * implementation. Currently empty as all supported ES versions use
++ * the internal DMAC.
++ */
++static const struct soc_device_attribute gen3_soc_whitelist[] = {
++        { /* sentinel */ }
++};
++
+ static int renesas_sdhi_sys_dmac_probe(struct platform_device *pdev)
+ {
++	if (of_device_get_match_data(&pdev->dev) == &of_rcar_gen3_compatible &&
++	    !soc_device_match(gen3_soc_whitelist))
++		return -ENODEV;
++
+ 	return renesas_sdhi_probe(pdev, &renesas_sdhi_sys_dmac_dma_ops);
+ }
+ 
 -- 
-Jagan Teki
-Free Software Engineer | www.openedev.com
-U-Boot, Linux | Upstream Maintainer
-Hyderabad, India.
+2.1.4
