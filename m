@@ -1,106 +1,183 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH V4 00/11] mmc: Add Command Queue support
-Date: Thu, 3 Aug 2017 08:50:16 +0800
-Message-ID: <2a5b96c7-7d95-7661-a01b-701d7d9c445c@rock-chips.com>
-References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH v2 4/4] mmc: sdhci-cadence: add suspend / resume support
+Date: Thu,  3 Aug 2017 10:44:16 +0900
+Message-ID: <1501724656-12435-5-git-send-email-yamada.masahiro@socionext.com>
+References: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:35799 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751185AbdHCAu1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 20:50:27 -0400
-In-Reply-To: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
+Received: from conuserg-08.nifty.com ([210.131.2.75]:27878 "EHLO
+        conuserg-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751190AbdHCBpE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 21:45:04 -0400
+In-Reply-To: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Adrian,
+Currently, the probe function initializes the PHY, but PHY settings
+are lost during the sleep state.  Restore the PHY registers when
+resuming.
 
-On 2017/7/21 17:49, Adrian Hunter wrote:
-> Hi
-> 
-> Here is V4 of the hardware command queue patches without the software
-> command queue patches.
-> 
-> 
+To facilitate this, split sdhci_cdns_phy_init() into the DT parse
+part and PHY update part so that the latter can be invoked from the
+resume hook.
 
-After looking into the changes in details for some days, it looks
-awsome to me. And my boards are still alive after more than one week's
-test. Can't wait to enable it for 4.14 :)
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
+Changes in v2: None
 
-> Changes since V3:
-> 	Adjusted ...blk_end_request...() for new block status codes
-> 	Fixed CQHCI transaction descriptor for "no DCMD" case
-> 
-> Changes since V2:
-> 	Dropped patches that have been applied.
-> 	Re-based
-> 	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
-> 
-> Changes since V1:
-> 
-> 	"Share mmc request array between partitions" is dependent
-> 	on changes in "Introduce queue semantics", so added that
-> 	and block fixes:
-> 
-> 	Added "Fix is_waiting_last_req set incorrectly"
-> 	Added "Fix cmd error reset failure path"
-> 	Added "Use local var for mqrq_cur"
-> 	Added "Introduce queue semantics"
-> 
-> Changes since RFC:
-> 
-> 	Re-based on next.
-> 	Added comment about command queue priority.
-> 	Added some acks and reviews.
-> 
-> 
-> Adrian Hunter (10):
->        mmc: core: Add mmc_retune_hold_now()
->        mmc: core: Add members to mmc_request and mmc_data for CQE's
->        mmc: host: Add CQE interface
->        mmc: core: Turn off CQE before sending commands
->        mmc: core: Add support for handling CQE requests
->        mmc: mmc: Enable Command Queuing
->        mmc: mmc: Enable CQE's
->        mmc: block: Prepare CQE data
->        mmc: block: Add CQE support
->        mmc: sdhci-pci: Add CQHCI support for Intel GLK
-> 
-> Venkat Gopalakrishnan (1):
->        mmc: cqhci: support for command queue enabled host
-> 
->   drivers/mmc/core/block.c          |  240 +++++++-
->   drivers/mmc/core/block.h          |    7 +
->   drivers/mmc/core/bus.c            |    7 +
->   drivers/mmc/core/core.c           |  156 ++++-
->   drivers/mmc/core/host.c           |    6 +
->   drivers/mmc/core/host.h           |    1 +
->   drivers/mmc/core/mmc.c            |   30 +-
->   drivers/mmc/core/queue.c          |  273 ++++++++-
->   drivers/mmc/core/queue.h          |   42 +-
->   drivers/mmc/host/Kconfig          |   14 +
->   drivers/mmc/host/Makefile         |    1 +
->   drivers/mmc/host/cqhci.c          | 1146 +++++++++++++++++++++++++++++++++++++
->   drivers/mmc/host/cqhci.h          |  240 ++++++++
->   drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
->   include/linux/mmc/core.h          |   18 +-
->   include/linux/mmc/host.h          |   24 +
->   include/trace/events/mmc.h        |   36 +-
->   17 files changed, 2354 insertions(+), 40 deletions(-)
->   create mode 100644 drivers/mmc/host/cqhci.c
->   create mode 100644 drivers/mmc/host/cqhci.h
-> 
-> 
-> Regards
-> Adrian
-> 
-> 
-> 
+ drivers/mmc/host/sdhci-cadence.c | 77 +++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 68 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 19d5698244b5..7473766801a5 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -67,9 +67,16 @@
+  */
+ #define SDHCI_CDNS_MAX_TUNING_LOOP	40
+ 
++struct sdhci_cdns_phy_param {
++	u8 addr;
++	u8 data;
++};
++
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
+ 	bool enhanced_strobe;
++	unsigned int nr_phy_params;
++	struct sdhci_cdns_phy_param phy_params[0];
+ };
+ 
+ struct sdhci_cdns_phy_cfg {
+@@ -115,9 +122,22 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 	return 0;
+ }
+ 
+-static int sdhci_cdns_phy_init(struct device_node *np,
+-			       struct sdhci_cdns_priv *priv)
++static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+ {
++	unsigned int count = 0;
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
++		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
++			count++;
++
++	return count;
++}
++
++static void sdhci_cdns_phy_param_parse(struct device_node *np,
++				       struct sdhci_cdns_priv *priv)
++{
++	struct sdhci_cdns_phy_param *p = priv->phy_params;
+ 	u32 val;
+ 	int ret, i;
+ 
+@@ -127,9 +147,19 @@ static int sdhci_cdns_phy_init(struct device_node *np,
+ 		if (ret)
+ 			continue;
+ 
+-		ret = sdhci_cdns_write_phy_reg(priv,
+-					       sdhci_cdns_phy_cfgs[i].addr,
+-					       val);
++		p->addr = sdhci_cdns_phy_cfgs[i].addr;
++		p->data = val;
++		p++;
++	}
++}
++
++static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
++{
++	int ret, i;
++
++	for (i = 0; i < priv->nr_phy_params; i++) {
++		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
++					       priv->phy_params[i].data);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -302,6 +332,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_cdns_priv *priv;
+ 	struct clk *clk;
++	size_t priv_size;
++	unsigned int nr_phy_params;
+ 	int ret;
+ 	struct device *dev = &pdev->dev;
+ 
+@@ -313,7 +345,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
+-	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, sizeof(*priv));
++	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
++	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
++	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
+ 	if (IS_ERR(host)) {
+ 		ret = PTR_ERR(host);
+ 		goto disable_clk;
+@@ -322,7 +356,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->clk = clk;
+ 
+-	priv = sdhci_cdns_priv(host);
++	priv = sdhci_pltfm_priv(pltfm_host);
++	priv->nr_phy_params = nr_phy_params;
+ 	priv->hrs_addr = host->ioaddr;
+ 	priv->enhanced_strobe = false;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+@@ -336,7 +371,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto free;
+ 
+-	ret = sdhci_cdns_phy_init(dev->of_node, priv);
++	sdhci_cdns_phy_param_parse(dev->of_node, priv);
++
++	ret = sdhci_cdns_phy_init(priv);
+ 	if (ret)
+ 		goto free;
+ 
+@@ -353,6 +390,28 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	return ret;
+ }
+ 
++static int __maybe_unused sdhci_cdns_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		return ret;
++
++	ret = sdhci_cdns_phy_init(priv);
++	if (ret)
++		return ret;
++
++	return sdhci_resume_host(host);
++}
++
++static const struct dev_pm_ops sdhci_cdns_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
++};
++
+ static const struct of_device_id sdhci_cdns_match[] = {
+ 	{ .compatible = "socionext,uniphier-sd4hc" },
+ 	{ .compatible = "cdns,sd4hc" },
+@@ -363,7 +422,7 @@ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
+ static struct platform_driver sdhci_cdns_driver = {
+ 	.driver = {
+ 		.name = "sdhci-cdns",
+-		.pm = &sdhci_pltfm_pmops,
++		.pm = &sdhci_cdns_pm_ops,
+ 		.of_match_table = sdhci_cdns_match,
+ 	},
+ 	.probe = sdhci_cdns_probe,
+-- 
+2.7.4
 
