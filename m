@@ -1,119 +1,113 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 00/16] omap_hsmmc: Add ADMA support and UHS/HS200/DDR
- support
-Date: Thu, 3 Aug 2017 13:55:30 +0300
-Message-ID: <1a668e7a-49b6-227c-def6-1cf9e21068cd@intel.com>
-References: <20170616124544.15046-1-kishon@ti.com>
- <CAPDyKFo+ORA=OpdikiUZWj3gpx+ssuqbC5MtqiFJneyJhu84dA@mail.gmail.com>
- <fc9c1576-7419-b174-ea42-97ccf4666cee@ti.com>
- <27776609-2425-9423-3eaa-dc128c4b07f0@ti.com>
- <CAPDyKFp1oenb0Kq-SCf-ezG9p3gY9xUSq6-S_SQ4DpoRiKiOdA@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v2 0/8] omap*: Fixes/Cleanups for MMC devicetree node
+Date: Thu, 3 Aug 2017 16:48:58 +0530
+Message-ID: <e9c1cce6-5d6d-3762-8a84-28f36fa3bc33@ti.com>
+References: <20170607093749.15656-1-kishon@ti.com>
+ <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp1oenb0Kq-SCf-ezG9p3gY9xUSq6-S_SQ4DpoRiKiOdA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <CAPDyKFrJh9qAz6q2-TH8rMshuMjDTkT5pHP==FUUH9KZEOehOQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, linux-omap <linux-omap@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/08/17 13:40, Ulf Hansson wrote:
-> +Adrian
-> 
-> On 20 July 2017 at 15:36, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->> Hi Ulf,
->>
->> On Tuesday 11 July 2017 07:27 PM, Kishon Vijay Abraham I wrote:
->>> Hi Ulf,
->>>
->>> On Tuesday 11 July 2017 06:40 PM, Ulf Hansson wrote:
->>>> On 16 June 2017 at 14:45, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>>>> This is the final part of the series originally sent as
->>>>> part of [2].
->>>>>
->>>>> This series adds UHS, HS200, DDR mode and ADMA support to
->>>>> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
->>>>> SoCs.
->>>>>
->>>>> Changes from [2]:
->>>>> *) No more updating omap2plus_defconfig or multi_v7_defconfig is
->>>>>    required, so those patches are removed.
->>>>> *) Addressed Rob Herring's comment on implementing a function
->>>>>    instead of having a macro while getting pinctrl state.
->>>>>
->>>>> This series is created on top of [3], [4], [5] AND [6]
->>>>> (i.e after
->>>>>   ARM: dts: omap3-overo: Remove "vqmmc-supply" property from MMC dt node
->>>>>   omap_hsmmc: use mmc_regulator_get_supply() to get regulators
->>>>>   omap*: Fixes/Cleanups for MMC devicetree node
->>>>>   ARM: dts: Add iodelay data for MMC)
->>>>>
->>>>> The functionality implemented in this series was sent before ([1]) but
->>>>> was never followed up since supporting high speed modes in dra7 required
->>>>> IODelay values to be configured. With IODelay driver being merged into
->>>>> kernel, sending it as a fresh series with support for configuring IODelay
->>>>> values.
->>>>
->>>> Is it safe to queue this via mmc tree for 4.14 or is there a
->>>> dependency I must consider? The above didn't quite tell me that, could
->>>> you please elaborate.
->>>
->>> There is a dependency with https://www.spinics.net/lists/arm-kernel/msg586215.html.
->>>
->>> I'll resend the series after all the platform data specific stuff is merged.
->>>>
->>>>>
->>>>> Suggestions of migrating to sdhci driver (from omap_hsmmc driver) is not
->>>>> addressed since
->>>>> *) tuning ratio of MMC in dra7 is different from sdhci
->>>>> *) IOdelay is required for dra7
->>>>> *) GPIO based card detect is not supported in sdhci
->>>>
->>>> Lots of sdhci drivers calls mmc_of_parse(), and uses the mmc slot gpio
->>>> APIs, so I don't this this is correct statement.
->>>>
->>>>> *) Some of the registers don't always have correct values as in sdhci
->>>>>    (like PSTATE).
->>>>> Supporting all of these in sdhci will result in adding lot of quirks in
->>>>> sdhci driver.
->>>>
->>>> Is it really that much different? It would be nice if some really took
->>>> on the challenge of converting omap_hsmmc into an sdhci variant.
->>>
->>> Okay. I'll give that a shot and see how far I can get.
->>
->> I created a sdhci variant and was able to get it working with high speed mode
->> in dra7.
-> 
-> That's very nice!
-> 
->>
->> I have a query on sdhci_set_power_noreg() in sdhci.c. sdhci_set_power_noreg
->> sets SDHCI_POWER_CONTROL based on *vdd* value. However SDHCI_POWER_CONTROL is
->> for setting bus voltage and need not be based on *vdd*. IMHO
->> SDHCI_POWER_CONTROL should be set based on "ios->signal_voltage".
-> 
-> According to the implementation in sdhci_set_power_noreg(), I
-> understand it as the SDHCI_POWER_CONTROL register actually controls
-> the power to the card (VDD) and the not the I/O voltage level
-> (ios->signal_voltage).
-> 
-> However, if I read the SDHCI spec, it seems to be mentioning the "SD
-> bus voltage", which to me is about the I/O voltage level. So either
-> the spec is unclear or the code is wrong. :-)
-> 
-> Are you saying that the omap_hsmmc variant is using the
-> SDHCI_POWER_CONTROL to control the I/O voltage level?
-> 
-> I am wondering how other variants use it. Perhaps most variants
-> actually have an external regulator and thus calls
-> sdhci_set_power_reg() instead.
-> 
-> Looping in Adrian, to see if he has some thoughts on this.
+Hi Tony.
 
-The spec is clear enough.  SDHCI_POWER_CONTROL is set based on the card's OCR.
+On Thursday 08 June 2017 12:50 PM, Ulf Hansson wrote:
+> On 7 June 2017 at 11:37, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> There are the set of fixes that were sent initially as part
+>> of [1].
+>>
+>> These are mostly fixes w.r.t populating regulators in
+>> mmc dt node. It was working before because the regulators
+>> connecting to the IO lines are always on regulators. This will
+>> break once we add UHS support where voltage has to be changed
+>> dynamically.
+>>
+>> It also includes a patch to replace all vmmc_aux-supply
+>> with vqmmc-supply (In omap3-overo-base.dtsi remove the existing
+>> vqmmc-supply and then replace vmmc_aux-supply with vqmmc-supply).
+>> This will break old dt compatibility but not sure how better
+>> to handle this.
+>>
+>> Performed enumeration testing on dra72-evm-revc, dra72-evm,
+>> dra7-evm, am572x-evm, am571x-idk, am572x-idk, omap5-evm,
+>> pandaboard-es, am43xx-evm, am335x-evm, beagleboard etc.,
+>>
+>> This is a preparation series for adding UHS mode support in
+>> the above mentioned platforms.
+>>
+>> Changes from v1:
+>> *) Included a patch to replace deprecated "vmmc_aux" with
+>>    "vqmmc"
 
-Signal voltage is defined by "1.8V Signaling Enable" in "Host Control 2
-Register".
+Have you already merged this series in your for-next? I could see all the
+patches except "ARM: dts: omap*: Replace deprecated "vmmc_aux" with "vqmmc" in
+your for-next.
+
+Do you want me to resend the entire series or only "ARM: dts: omap*: Replace
+deprecated "vmmc_aux" with "vqmmc"?
+
+Please note having vqmmc property is required when we move to sdhci driver.
+
+Thanks
+Kishon
+>>
+>> [1] -> https://lkml.org/lkml/2017/5/19/196
+>>
+>> Kishon Vijay Abraham I (6):
+>>   ARM: dts: dra72-evm-common: Correct vmmc-supply for mmc2
+>>   ARM: dts: dra72-evm: Add vqmmc supply to mmc1
+>>   ARM: dts: dra72-evm-revc: Add vqmmc supply to mmc1
+>>   ARM: dts: am57xx-beagle-x15-revb1: Fix supply name used for MMC1 IO
+>>     lines
+>>   ARM: dts: dra7: Add "max-frequency" property to MMC dt nodes
+>>   ARM: dts: omap*: Replace deprecated "vmmc_aux" with "vqmmc"
+>>
+>> Ravikumar Kattekola (1):
+>>   ARM: dts: dra7-evm: Correct the vmmc-supply for mmc2
+>>
+>> Sekhar Nori (1):
+>>   ARM: OMAP2+: Add pdata-quirks for MMC/SD on DRA74x EVM
+>>
+>>  arch/arm/boot/dts/am572x-idk.dts               |  2 +-
+>>  arch/arm/boot/dts/am57xx-beagle-x15-revb1.dts  |  2 +-
+>>  arch/arm/boot/dts/dra7-evm.dts                 | 12 ++++++++--
+>>  arch/arm/boot/dts/dra7.dtsi                    |  5 +++++
+>>  arch/arm/boot/dts/dra71-evm.dts                | 16 ++++++++++++-
+>>  arch/arm/boot/dts/dra72-evm-common.dtsi        |  2 --
+>>  arch/arm/boot/dts/dra72-evm-revc.dts           | 18 +++++++++++++++
+>>  arch/arm/boot/dts/dra72-evm-tps65917.dtsi      |  2 +-
+>>  arch/arm/boot/dts/dra72-evm.dts                | 18 +++++++++++++++
+>>  arch/arm/boot/dts/omap3-beagle-xm.dts          |  2 +-
+>>  arch/arm/boot/dts/omap3-beagle.dts             |  2 +-
+>>  arch/arm/boot/dts/omap3-cm-t3517.dts           |  2 +-
+>>  arch/arm/boot/dts/omap3-cm-t3730.dts           |  2 +-
+>>  arch/arm/boot/dts/omap3-devkit8000-common.dtsi |  2 +-
+>>  arch/arm/boot/dts/omap3-evm-common.dtsi        |  2 +-
+>>  arch/arm/boot/dts/omap3-n900.dts               |  2 +-
+>>  arch/arm/boot/dts/omap3-overo-base.dtsi        |  3 +--
+>>  arch/arm/boot/dts/omap3-tao3530.dtsi           |  2 +-
+>>  arch/arm/boot/dts/omap3-zoom3.dts              |  2 +-
+>>  arch/arm/boot/dts/omap3430-sdp.dts             |  2 +-
+>>  arch/arm/mach-omap2/pdata-quirks.c             | 31 ++++++++++++++++++++++++++
+>>  include/linux/platform_data/hsmmc-omap.h       |  3 +++
+>>  22 files changed, 114 insertions(+), 20 deletions(-)
+>>
+>> --
+>> 2.11.0
+>>
+> 
+> If it helps, I can host a branch with the updates on the omap_hsmmc
+> driver, such it can be pulled in from arm soc?
+> 
+> I guess you need that as, the DT changes relies on the new vqmmc
+> binding. Or you thing it doesn't matter, because for the current
+> changes that regulator is always an always on regulator?
+> 
+> Br
+> Uffe
+> 
