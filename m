@@ -1,76 +1,36 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: core: not need to check timeout for SDHC
-Date: Thu, 3 Aug 2017 12:51:57 +0200
-Message-ID: <CAPDyKFrRvmRN41cMHwnWjMUdGwcMJtru2k-8AEHgaiFYEo59Nw@mail.gmail.com>
-References: <1501643563-16094-1-git-send-email-shawn.lin@rock-chips.com> <1501643563-16094-2-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] Revert "mmc: sdhi: use maximum width for the sdbuf register"
+Date: Thu, 3 Aug 2017 12:52:23 +0200
+Message-ID: <CAPDyKFrpiXz0PM9uZZS8mC3ULBs2VNqfhpqwFM2QH+MZp6uG+A@mail.gmail.com>
+References: <20170803094947.1490-1-wsa+renesas@sang-engineering.com> <20170803095355.GA3251@katana>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:35769 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751820AbdHCKv6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Aug 2017 06:51:58 -0400
-Received: by mail-qk0-f178.google.com with SMTP id d145so5227652qkc.2
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Aug 2017 03:51:58 -0700 (PDT)
-In-Reply-To: <1501643563-16094-2-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20170803095355.GA3251@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Biju Das <biju.das@bp.renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 2 August 2017 at 05:12, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Per the SD physical layer simplified specification V4.10,
-> section 4.6.2, the taac and nasc for SDHC are always fixed and
-> the software should use the recommended value for timeout.
-> When parsing the CSD, we sanely set them to zero for SDHC, the
-> additional check of SDHC in mmc_set_data_timeout is bogus since
-> all the calculation for timeout_ns and timeout_clk is zero as well,
-> so the we could safely remove it and let the following check to
-> cover it.
-
-For SD cards with CSD structure version set to 0 (old cards) we are
-using the taac/nasc values. Perhaps you can clarify that in the above
-changelog.
-
+On 3 August 2017 at 11:53, Wolfram Sang <wsa@the-dreams.de> wrote:
+> On Thu, Aug 03, 2017 at 11:49:47AM +0200, Wolfram Sang wrote:
+>> This reverts commit 785b215250310c690142abb1bdbb0767b8487c49. There is a
+>> secondary SDHI instance on Gen2 with has a 32-bit wide SDBUF register
+>> while all other registers are 16 bit apart. So, the logic used here does
+>> not apply and we need to rethink this and start cleanly from scratch.
+>>
+>> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
+> Extra info for Ulf: I can't work on that in the next days, so I thought
+> it would be good to ASAP fix the regression in mmc/next at least.
 >
->  drivers/mmc/core/core.c | 10 +++-------
->  1 file changed, 3 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 6177eb0..bcd72b4 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -761,14 +761,10 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
->                         limit_us = 100000;
->
->                 /*
-> -                * SDHC cards always use these fixed values.
-> +                * Assign limit value if invalid. Note that for the SDHC case,
-> +                * we set taac and nasc to zero when parsing CSD, so it's safe
-> +                * to fall through here.
->                  */
-> -               if (timeout_us > limit_us || mmc_card_blockaddr(card)) {
 
-I think the mmc_card_blockaddr() here is what make this a bit strange.
-Because as you are saying, in those cases the taac/nasc are set to
-zero.
+Instead of applying this revert, I decided to just drop the original
+commit from my next branch.
 
-So in principle we should at least be able to remove the check for the
-mmc_card_blockaddr(), but don't you think we need to keep the other
-check for "timeout_us > limit_us", to still cope with legacy cards?
-
-> -                       data->timeout_ns = limit_us * 1000;
-> -                       data->timeout_clks = 0;
-> -               }
-> -
-> -               /* assign limit value if invalid */
->                 if (timeout_us == 0)
->                         data->timeout_ns = limit_us * 1000;
->         }
-> --
+While working on new version of how to deal with the 32/16 bit
+register correctly, please try to include Biju Das in the changelog as
+to give him cred from his help with testing.
 
 Kind regards
 Uffe
