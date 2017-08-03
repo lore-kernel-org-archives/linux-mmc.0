@@ -1,46 +1,77 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: Potentially invalid memory accesses in file drivers/mmc/core/block.c
-Date: Thu, 3 Aug 2017 09:46:18 +0200
-Message-ID: <CACRpkdZmenuHSes+o9NtuzYBtobrs7g6-X3=NG2ar1Zot2wFXw@mail.gmail.com>
-References: <003501d30289$89f86990$9de93cb0$@Domain>
+Subject: Re: [PATCH] mmc: block: bypass the queue even if usage is present for hotplug
+Date: Thu, 3 Aug 2017 09:57:53 +0200
+Message-ID: <CACRpkdbHRhhf_yfmzWPHhbYRKsd_8DuTNkMJFTYu-Y7T75k-+w@mail.gmail.com>
+References: <1500945088-202242-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:38455 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751083AbdHCHqU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Aug 2017 03:46:20 -0400
-Received: by mail-io0-f176.google.com with SMTP id g71so3831784ioe.5
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Aug 2017 00:46:20 -0700 (PDT)
-In-Reply-To: <003501d30289$89f86990$9de93cb0$@Domain>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1500945088-202242-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: stable-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grzegorz Sluja <grzegorzx.sluja@intel.com>, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shaobo <shaobo@cs.utah.edu>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jens Axboe <axboe@fb.com>, Geert Uytterhoeven <geert@linux-m68k.org>
 
-On Sat, Jul 22, 2017 at 3:37 AM, Shaobo <shaobo@cs.utah.edu> wrote:
+On Tue, Jul 25, 2017 at 3:11 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 
-> My name is Shaobo He and I am a graduate student at University of Utah. I am
-> using a static analysis tool to search for null pointer dereferences and
-> came across a couple of potentially invalid memory accesses in the file
-> drivers/mmc/core/block.c: in function `force_ro_store`, function
-> `mmc_blk_get` can return a NULL pointer. However, there are a couple of
-> conditions that can make the error path infeasible. I was wondering if you
-> could confirm this. Especially if the condition
-> `dev_to_disk(dev)->private_data && dev_to_disk(dev)->private_data->usage !=
-> 0` serves as a reasonable precondition of function `force_ro_store`.
+> commit 304419d8a7e ("mmc: core: Allocate per-request data using
+> the block layer core") refactored mechanism of queue handling
+> caused mmc_init_request() can be called just after mmc_cleanup_queue()
+> caused null pointer dereference.
 >
-> Please let me know if it makes sense. I am looking forward to your reply.
+> commit bbdc74dc19e09a ("mmc: block: Prevent new req entering queue
+> after its cleanup")tried to fix the problem. However it actually miss
+> one corner case.
+>
+> We could still reproduce the issue mentioned with these steps:
+> (1) insert a SD card and mount it
+> (2) hotplug it, so it will leave md->usage still be counted
+> (3) reboot the system which will sync data and umount the card
+>
+> [Unable to handle kernel NULL pointer dereference at virtual address
+> 00000000
+> [user pgtable: 4k pages, 48-bit VAs, pgd = ffff80007bab3000
+> [[0000000000000000] *pgd=000000007a828003, *pud=0000000078dce003,
+> *pmd=000000007aab6003, *pte=0000000000000000
+> [Internal error: Oops: 96000007 [#1] PREEMPT SMP
+> [Modules linked in:
+> [CPU: 3 PID: 3507 Comm: umount Tainted: G        W
+> 4.13.0-rc1-next-20170720-00012-g9d9bf45 #33
+> [Hardware name: Firefly-RK3399 Board (DT)
+> [task: ffff80007a1de200 task.stack: ffff80007a01c000
+> [PC is at mmc_init_request+0x14/0xc4
+> [LR is at alloc_request_size+0x4c/0x74
+> [pc : [<ffff0000087d7150>] lr : [<ffff000008378fe0>] pstate: 600001c5
+> [sp : ffff80007a01f8f0
+>
+> ....
+>
+> [[<ffff0000087d7150>] mmc_init_request+0x14/0xc4
+> [[<ffff000008378fe0>] alloc_request_size+0x4c/0x74
+> [[<ffff00000817ac28>] mempool_create_node+0xb8/0x17c
+> [[<ffff00000837aadc>] blk_init_rl+0x9c/0x120
+> [[<ffff000008396580>] blkg_alloc+0x110/0x234
+> [[<ffff000008396ac8>] blkg_create+0x424/0x468
+> [[<ffff00000839877c>] blkg_lookup_create+0xd8/0x14c
+> [[<ffff0000083796bc>] generic_make_request_checks+0x368/0x3b0
+> [[<ffff00000837b050>] generic_make_request+0x1c/0x240
+>
+> So mmc_blk_put wouldn't calling blk_cleanup_queue which actually
+> the QUEUE_FLAG_DYING and QUEUE_FLAG_BYPASS should stay. Block core
+> expect blk_queue_bypass_{start, end} internally to bypass/drain the
+> queue before actually dying the queue, so it didn't expose API to
+> set the queue bypass. I think we should set QUEUE_FLAG_BYPASS whenever
+> queue is removed, although the md->usage is still counted, as no dispatch
+> queue could be found then.
+>
+> commit 304419d8a7e9 ("mmc: core: Allocate per-request data using the block layer core")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-I can solidly confirm that the kernel is full och NULL pointer violations.
-But pointing out the problems is rarely helpful as that pushes the work of
-fixing them to others.
+WOW good catch there Shawn!
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-When you find specific cases, send patches to fix the issue to the respective
-subsystem maintainer(s). It is the best way to illustrate the problem you see
-and at the same time propose a solution.
-
-You have reached the right list.
+Ulf: please pick this up for fixes.
 
 Yours,
 Linus Walleij
