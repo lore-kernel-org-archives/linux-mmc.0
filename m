@@ -1,56 +1,116 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: add static to local functions
-Date: Thu, 3 Aug 2017 13:31:50 +0300
-Message-ID: <9cd06301-68c1-ce6f-c156-52a4f86ba7dd@intel.com>
-References: <1501502446-13931-1-git-send-email-yamada.masahiro@socionext.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 00/16] omap_hsmmc: Add ADMA support and UHS/HS200/DDR support
+Date: Thu, 3 Aug 2017 12:40:10 +0200
+Message-ID: <CAPDyKFp1oenb0Kq-SCf-ezG9p3gY9xUSq6-S_SQ4DpoRiKiOdA@mail.gmail.com>
+References: <20170616124544.15046-1-kishon@ti.com> <CAPDyKFo+ORA=OpdikiUZWj3gpx+ssuqbC5MtqiFJneyJhu84dA@mail.gmail.com>
+ <fc9c1576-7419-b174-ea42-97ccf4666cee@ti.com> <27776609-2425-9423-3eaa-dc128c4b07f0@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:26090 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751241AbdHCKiM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 3 Aug 2017 06:38:12 -0400
-In-Reply-To: <1501502446-13931-1-git-send-email-yamada.masahiro@socionext.com>
-Content-Language: en-US
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:37644 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751916AbdHCKkM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Aug 2017 06:40:12 -0400
+Received: by mail-qt0-f171.google.com with SMTP id 16so5048277qtz.4
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Aug 2017 03:40:11 -0700 (PDT)
+In-Reply-To: <27776609-2425-9423-3eaa-dc128c4b07f0@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 31/07/17 15:00, Masahiro Yamada wrote:
-> Detected by sparse.
-> 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
++Adrian
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On 20 July 2017 at 15:36, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> Hi Ulf,
+>
+> On Tuesday 11 July 2017 07:27 PM, Kishon Vijay Abraham I wrote:
+>> Hi Ulf,
+>>
+>> On Tuesday 11 July 2017 06:40 PM, Ulf Hansson wrote:
+>>> On 16 June 2017 at 14:45, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>>> This is the final part of the series originally sent as
+>>>> part of [2].
+>>>>
+>>>> This series adds UHS, HS200, DDR mode and ADMA support to
+>>>> omap_hsmmc driver used to improve the throughput of MMC/SD in dra7
+>>>> SoCs.
+>>>>
+>>>> Changes from [2]:
+>>>> *) No more updating omap2plus_defconfig or multi_v7_defconfig is
+>>>>    required, so those patches are removed.
+>>>> *) Addressed Rob Herring's comment on implementing a function
+>>>>    instead of having a macro while getting pinctrl state.
+>>>>
+>>>> This series is created on top of [3], [4], [5] AND [6]
+>>>> (i.e after
+>>>>   ARM: dts: omap3-overo: Remove "vqmmc-supply" property from MMC dt node
+>>>>   omap_hsmmc: use mmc_regulator_get_supply() to get regulators
+>>>>   omap*: Fixes/Cleanups for MMC devicetree node
+>>>>   ARM: dts: Add iodelay data for MMC)
+>>>>
+>>>> The functionality implemented in this series was sent before ([1]) but
+>>>> was never followed up since supporting high speed modes in dra7 required
+>>>> IODelay values to be configured. With IODelay driver being merged into
+>>>> kernel, sending it as a fresh series with support for configuring IODelay
+>>>> values.
+>>>
+>>> Is it safe to queue this via mmc tree for 4.14 or is there a
+>>> dependency I must consider? The above didn't quite tell me that, could
+>>> you please elaborate.
+>>
+>> There is a dependency with https://www.spinics.net/lists/arm-kernel/msg586215.html.
+>>
+>> I'll resend the series after all the platform data specific stuff is merged.
+>>>
+>>>>
+>>>> Suggestions of migrating to sdhci driver (from omap_hsmmc driver) is not
+>>>> addressed since
+>>>> *) tuning ratio of MMC in dra7 is different from sdhci
+>>>> *) IOdelay is required for dra7
+>>>> *) GPIO based card detect is not supported in sdhci
+>>>
+>>> Lots of sdhci drivers calls mmc_of_parse(), and uses the mmc slot gpio
+>>> APIs, so I don't this this is correct statement.
+>>>
+>>>> *) Some of the registers don't always have correct values as in sdhci
+>>>>    (like PSTATE).
+>>>> Supporting all of these in sdhci will result in adding lot of quirks in
+>>>> sdhci driver.
+>>>
+>>> Is it really that much different? It would be nice if some really took
+>>> on the challenge of converting omap_hsmmc into an sdhci variant.
+>>
+>> Okay. I'll give that a shot and see how far I can get.
+>
+> I created a sdhci variant and was able to get it working with high speed mode
+> in dra7.
 
-> ---
-> 
->  drivers/mmc/host/sdhci-msm.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 9d601dc0d646..f35db061ee4c 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -611,7 +611,7 @@ static void msm_hc_select_hs400(struct sdhci_host *host)
->   * HS400 - divided clock (free running MCLK/2)
->   * All other modes - default (free running MCLK)
->   */
-> -void sdhci_msm_hc_select_mode(struct sdhci_host *host)
-> +static void sdhci_msm_hc_select_mode(struct sdhci_host *host)
->  {
->  	struct mmc_ios ios = host->mmc->ios;
->  
-> @@ -1049,7 +1049,7 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
->   * instead directly control the GCC clock as per
->   * HW recommendation.
->   **/
-> -void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
-> +static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	u16 clk;
->  	/*
-> 
+That's very nice!
 
+>
+> I have a query on sdhci_set_power_noreg() in sdhci.c. sdhci_set_power_noreg
+> sets SDHCI_POWER_CONTROL based on *vdd* value. However SDHCI_POWER_CONTROL is
+> for setting bus voltage and need not be based on *vdd*. IMHO
+> SDHCI_POWER_CONTROL should be set based on "ios->signal_voltage".
+
+According to the implementation in sdhci_set_power_noreg(), I
+understand it as the SDHCI_POWER_CONTROL register actually controls
+the power to the card (VDD) and the not the I/O voltage level
+(ios->signal_voltage).
+
+However, if I read the SDHCI spec, it seems to be mentioning the "SD
+bus voltage", which to me is about the I/O voltage level. So either
+the spec is unclear or the code is wrong. :-)
+
+Are you saying that the omap_hsmmc variant is using the
+SDHCI_POWER_CONTROL to control the I/O voltage level?
+
+I am wondering how other variants use it. Perhaps most variants
+actually have an external regulator and thus calls
+sdhci_set_power_reg() instead.
+
+Looping in Adrian, to see if he has some thoughts on this.
+
+Kind regards
+Uffe
