@@ -1,74 +1,36 @@
-From: Jagan Teki <jagannadh.teki@gmail.com>
-Subject: Re: rk3288: mmcblk0: error -110 sending status command, retrying
-Date: Thu, 3 Aug 2017 15:05:55 +0530
-Message-ID: <CAD6G_RQQJ+i7OPO3M0HvvsjgoP52uHNvtur419eBDtBf9JzKgg@mail.gmail.com>
-References: <CAD6G_RRgPB_FVTr0OUdtUXeViben6pSakEcskzwQXkqUeaT2kw@mail.gmail.com>
- <18c3b93d-9db2-eb82-8232-7d141e00324e@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <18c3b93d-9db2-eb82-8232-7d141e00324e@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] Revert "mmc: sdhi: use maximum width for the sdbuf register"
+Date: Thu,  3 Aug 2017 11:49:47 +0200
+Message-ID: <20170803094947.1490-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Biju Das <biju.das@bp.renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 3, 2017 at 1:48 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> On 2017/8/2 19:09, Jagan Teki wrote:
->>
->> Hi,
->>
->> Did anyone observing error -110 and -84 during boot on rk3288 target?
->> full log here[1] and used dts node is[2].
->
->
-> -100 is -ETIMEDOUT and -84 is CRC error. So that seems much likely HW
-> relevant. Have you check the SI of SD slot?
+This reverts commit 785b215250310c690142abb1bdbb0767b8487c49. There is a
+secondary SDHI instance on Gen2 with has a 32-bit wide SDBUF register
+while all other registers are 16 bit apart. So, the logic used here does
+not apply and we need to rethink this and start cleanly from scratch.
 
-Does it means Serial Interface of SD, if yes. I've been added sdio0
-for the same.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-&sdio0 {
-        bus-width = <4>;
-        disable-wp;
-        non-removable;
-        pinctrl-names = "default";
-        pinctrl-0 = <&sdio0_bus4>, <&sdio0_cmd>, <&sdio0_clk>;
-        vmmc-supply = <&vcc_wl>;
-        vqmmc-supply = <&vccio_wl>;
-        status = "okay";
-};
-
->
-> You don't enable UHS mode so the tuning process won't help.
-
-For UHS switch I've added vqmmc-supply
-        vccio_sd: vccio-sd-regulator {
-                compatible = "regulator-fixed";
-                regulator-name = "vccio_sd";
-                regulator-min-microvolt = <3300000>;
-                regulator-max-microvolt = <3300000>;
-                vin-supply = <&vcc_io>;
-        };
-
-And the slot detecting still 50MHz and timeout still effecting.
-# fdisk -l
-[  120.572927] mmcblk0: error -110 sending status command, retrying
-[  120.579880] mmcblk0: error -110 sending status command, retrying
-[  120.586707] mmcblk0: error -110 sending status command, aborting
-[  120.596373] mmc_host mmc0: Regulator set non-error 0 - 3.3 V
-[  120.627875] mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req
-400000Hz, actual 400000HZ div = 0)
-[  120.701757] mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot
-req 50000000Hz, actual 50000000HZ div = 0)
-Disk /dev/mmcblk0: 59 GB, 63483936768 bytes, 123992064 sectors
-1937376 cylinders, 4 heads, 16 sectors/track
-Units: cylinders of 64 * 512 = 32768 bytes
-
-thanks!
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 48da28dfef6465..dd215723fa4312 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -461,7 +461,8 @@ static void renesas_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
+ {
+ 	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? DMA_ENABLE_DMASDRW : 0);
+ 
+-	renesas_sdhi_sdbuf_width(host, enable ? (16 << host->bus_shift) : 16);
++	/* enable 32bit access if DMA mode if possibile */
++	renesas_sdhi_sdbuf_width(host, enable ? 32 : 16);
+ }
+ 
+ int renesas_sdhi_probe(struct platform_device *pdev,
 -- 
-Jagan Teki
-Free Software Engineer | www.openedev.com
-U-Boot, Linux | Upstream Maintainer
-Hyderabad, India.
+2.11.0
