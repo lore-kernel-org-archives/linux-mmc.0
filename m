@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2 3/4] mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
-Date: Thu,  3 Aug 2017 10:44:15 +0900
-Message-ID: <1501724656-12435-4-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v2 2/4] mmc: sdhci: remove #indef CONFIG_PM around function declarations
+Date: Thu,  3 Aug 2017 10:44:14 +0900
+Message-ID: <1501724656-12435-3-git-send-email-yamada.masahiro@socionext.com>
 References: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,62 +10,37 @@ To: linux-mmc@vger.kernel.org
 Cc: Piotr Sroka <piotrs@cadence.com>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This will be useful when drivers want to reuse only the suspend/resume
-callbacks instead of whole of sdhci_pltfm_pmops.
+We need not surround declarations with #ifdef.  Besides, drivers may
+want to call these from PM callbacks marked with __maybe_unused.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
-Changes in v2: None
+Changes in v2:
+  - Newly added
 
- drivers/mmc/host/sdhci-pltfm.c | 6 ++++--
- drivers/mmc/host/sdhci-pltfm.h | 2 ++
- 2 files changed, 6 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.h | 4 ----
+ 1 file changed, 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index be9a79d62e22..a34eacac612f 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -209,7 +209,7 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
- EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
- 
- #ifdef CONFIG_PM_SLEEP
--static int sdhci_pltfm_suspend(struct device *dev)
-+int sdhci_pltfm_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -226,8 +226,9 @@ static int sdhci_pltfm_suspend(struct device *dev)
- 
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
- 
--static int sdhci_pltfm_resume(struct device *dev)
-+int sdhci_pltfm_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -239,6 +240,7 @@ static int sdhci_pltfm_resume(struct device *dev)
- 
- 	return sdhci_resume_host(host);
- }
-+EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
- #endif
- 
- const struct dev_pm_ops sdhci_pltfm_pmops = {
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 957839d0fe37..1e91fb1c020e 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -109,6 +109,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
- 	return host->private;
- }
- 
-+int sdhci_pltfm_suspend(struct device *dev);
-+int sdhci_pltfm_resume(struct device *dev);
- extern const struct dev_pm_ops sdhci_pltfm_pmops;
- 
- #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0469fa191493..773b38127da2 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -709,15 +709,11 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
+ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
+-
+-#ifdef CONFIG_PM
+ int sdhci_suspend_host(struct sdhci_host *host);
+ int sdhci_resume_host(struct sdhci_host *host);
+ void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+ int sdhci_runtime_suspend_host(struct sdhci_host *host);
+ int sdhci_runtime_resume_host(struct sdhci_host *host);
+-#endif
+-
+ void sdhci_cqe_enable(struct mmc_host *mmc);
+ void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
+ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
 -- 
 2.7.4
