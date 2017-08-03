@@ -1,46 +1,50 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2 2/4] mmc: sdhci: remove #indef CONFIG_PM around function declarations
-Date: Thu,  3 Aug 2017 10:44:14 +0900
-Message-ID: <1501724656-12435-3-git-send-email-yamada.masahiro@socionext.com>
-References: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v2 0/4] mmc: sdhci: refactor PM in sdhci-pltfm add support PM
+ for cadence port
+Date: Thu,  3 Aug 2017 10:44:12 +0900
+Message-ID: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Adrian Hunter <adrian.hunter@intel.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Barry Song <baohua@kernel.org>, Florian Fainelli <f.fainelli@gmail.com>, Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, bcm-kernel-feedback-list@broadcom.com, Gregory Fong <gregory.0xf0@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <computersforpeace@gmail.com>, linux-arm-kernel@lists.infradead.org, Piotr Sroka <piotrs@cadence.com>
 List-Id: linux-mmc@vger.kernel.org
 
-We need not surround declarations with #ifdef.  Besides, drivers may
-want to call these from PM callbacks marked with __maybe_unused.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+[1] adds clk handling for suspend/resume hooks of sdhci-pltfm.
+    This also cleans up sdhci-brcmstb.c and sdhci-sirf.c
 
-Changes in v2:
-  - Newly added
+[2] Drop unneeded #ifdef CONFIG_PM, which will be used by [4]
 
- drivers/mmc/host/sdhci.h | 4 ----
- 1 file changed, 4 deletions(-)
+[3] exports suspend / resume, which will be used by [4]
 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0469fa191493..773b38127da2 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -709,15 +709,11 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
- int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 				      struct mmc_ios *ios);
- void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
--
--#ifdef CONFIG_PM
- int sdhci_suspend_host(struct sdhci_host *host);
- int sdhci_resume_host(struct sdhci_host *host);
- void sdhci_enable_irq_wakeups(struct sdhci_host *host);
- int sdhci_runtime_suspend_host(struct sdhci_host *host);
- int sdhci_runtime_resume_host(struct sdhci_host *host);
--#endif
--
- void sdhci_cqe_enable(struct mmc_host *mmc);
- void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
- bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+[4] implements suspend / resume for sdhci-cadence.c
+
+
+
+Masahiro Yamada (4):
+  mmc: sdhci: enable/disable the clock in sdhci_pltfm_suspend/resume
+  mmc: sdhci: remove #indef CONFIG_PM around function declarations
+  mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
+  mmc: sdhci-cadence: add suspend / resume support
+
+ drivers/mmc/host/sdhci-brcmstb.c | 37 +------------------
+ drivers/mmc/host/sdhci-cadence.c | 77 +++++++++++++++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci-pltfm.c   | 22 ++++++++++--
+ drivers/mmc/host/sdhci-pltfm.h   |  2 ++
+ drivers/mmc/host/sdhci-sirf.c    | 39 +-------------------
+ drivers/mmc/host/sdhci.h         |  4 ---
+ 6 files changed, 91 insertions(+), 90 deletions(-)
+
 -- 
 2.7.4
