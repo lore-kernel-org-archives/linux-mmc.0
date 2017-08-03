@@ -1,88 +1,106 @@
-From: Zhoujie Wu <zjwu@marvell.com>
-Subject: Re: [PATCH] mmc: sdhci: ignore 3.3v voltage switch if ios.vdd is
- 0
-Date: Wed, 2 Aug 2017 16:12:47 -0700
-Message-ID: <59825C6F.4060402@marvell.com>
-References: <1501631901-1304-1-git-send-email-zjwu@marvell.com>
- <9bae1ec1-9c40-d496-d6c9-b874844995fc@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH V4 00/11] mmc: Add Command Queue support
+Date: Thu, 3 Aug 2017 08:50:16 +0800
+Message-ID: <2a5b96c7-7d95-7661-a01b-701d7d9c445c@rock-chips.com>
+References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:48223 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751073AbdHBXM5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 19:12:57 -0400
-In-Reply-To: <9bae1ec1-9c40-d496-d6c9-b874844995fc@intel.com>
+Received: from lucky1.263xmail.com ([211.157.147.133]:35799 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751185AbdHCAu1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2017 20:50:27 -0400
+In-Reply-To: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
 Hi Adrian,
 
-On 08/02/2017 12:28 AM, Adrian Hunter wrote:
-> On 02/08/17 02:58, Zhoujie Wu wrote:
->> One issue was found on a removable high speed sd card with
->> runtime pm enabled.
->> When SD card is unplugged, it keep printing "Switching to 3.3V
->> signalling voltage failed".
->> And found below sequence triggers the error.
->>
->> mmc_rescan
->> 	-> mmc_sd_detect
->> 		-> mmc_power_off  -- mmc->ios.vdd is update to 0.
->> 	-> mmc_claim_host
->> 		-> sdhci_runtime_resume_host
->> 			-> sdhci_start_signal_voltage_switch
-> We ought to be able to skip restoring the I/O state when the power is off i.e.:
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index cf2166e4190d..4a70f2f765b6 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2934,7 +2934,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
->
->   	sdhci_init(host, 0);
->
-> -	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
-> +	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
-> +	    mmc->ios.power_mode != MMC_POWER_OFF) {
->   		/* Force clock and power re-program */
->   		host->pwr = 0;
->   		host->clock = 0;
+On 2017/7/21 17:49, Adrian Hunter wrote:
+> Hi
+> 
+> Here is V4 of the hardware command queue patches without the software
+> command queue patches.
+> 
+> 
 
-Your suggestion works and better than mine. I will do more tests and 
-update the patch later. thanks.
->
->
->> 				-> mmc_regulator_set_vqmmc
->> 					-> mmc_ocrbitnum_to_vdd
->>
->> When mmc_ocrbitnum_to_vdd is called, the mmc->ios.vdd is 0, so it
->> always return -EINVAL. The signal switch will always fail and
->> print out warning.
->>
->> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
->> ---
->> Hi Ulf,
->> 	Not sure if this is the best way to fix it. Please help to suggest. Thanks.
->>
->>   drivers/mmc/host/sdhci.c | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ecd0d43..011ebbe 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1878,7 +1878,7 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->>   		ctrl &= ~SDHCI_CTRL_VDD_180;
->>   		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>   
->> -		if (!IS_ERR(mmc->supply.vqmmc)) {
->> +		if ((!IS_ERR(mmc->supply.vqmmc)) && mmc->ios.vdd) {
->>   			ret = mmc_regulator_set_vqmmc(mmc, ios);
->>   			if (ret) {
->>   				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
->>
+After looking into the changes in details for some days, it looks
+awsome to me. And my boards are still alive after more than one week's
+test. Can't wait to enable it for 4.14 :)
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> Changes since V3:
+> 	Adjusted ...blk_end_request...() for new block status codes
+> 	Fixed CQHCI transaction descriptor for "no DCMD" case
+> 
+> Changes since V2:
+> 	Dropped patches that have been applied.
+> 	Re-based
+> 	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
+> 
+> Changes since V1:
+> 
+> 	"Share mmc request array between partitions" is dependent
+> 	on changes in "Introduce queue semantics", so added that
+> 	and block fixes:
+> 
+> 	Added "Fix is_waiting_last_req set incorrectly"
+> 	Added "Fix cmd error reset failure path"
+> 	Added "Use local var for mqrq_cur"
+> 	Added "Introduce queue semantics"
+> 
+> Changes since RFC:
+> 
+> 	Re-based on next.
+> 	Added comment about command queue priority.
+> 	Added some acks and reviews.
+> 
+> 
+> Adrian Hunter (10):
+>        mmc: core: Add mmc_retune_hold_now()
+>        mmc: core: Add members to mmc_request and mmc_data for CQE's
+>        mmc: host: Add CQE interface
+>        mmc: core: Turn off CQE before sending commands
+>        mmc: core: Add support for handling CQE requests
+>        mmc: mmc: Enable Command Queuing
+>        mmc: mmc: Enable CQE's
+>        mmc: block: Prepare CQE data
+>        mmc: block: Add CQE support
+>        mmc: sdhci-pci: Add CQHCI support for Intel GLK
+> 
+> Venkat Gopalakrishnan (1):
+>        mmc: cqhci: support for command queue enabled host
+> 
+>   drivers/mmc/core/block.c          |  240 +++++++-
+>   drivers/mmc/core/block.h          |    7 +
+>   drivers/mmc/core/bus.c            |    7 +
+>   drivers/mmc/core/core.c           |  156 ++++-
+>   drivers/mmc/core/host.c           |    6 +
+>   drivers/mmc/core/host.h           |    1 +
+>   drivers/mmc/core/mmc.c            |   30 +-
+>   drivers/mmc/core/queue.c          |  273 ++++++++-
+>   drivers/mmc/core/queue.h          |   42 +-
+>   drivers/mmc/host/Kconfig          |   14 +
+>   drivers/mmc/host/Makefile         |    1 +
+>   drivers/mmc/host/cqhci.c          | 1146 +++++++++++++++++++++++++++++++++++++
+>   drivers/mmc/host/cqhci.h          |  240 ++++++++
+>   drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
+>   include/linux/mmc/core.h          |   18 +-
+>   include/linux/mmc/host.h          |   24 +
+>   include/trace/events/mmc.h        |   36 +-
+>   17 files changed, 2354 insertions(+), 40 deletions(-)
+>   create mode 100644 drivers/mmc/host/cqhci.c
+>   create mode 100644 drivers/mmc/host/cqhci.h
+> 
+> 
+> Regards
+> Adrian
+> 
+> 
+> 
 
