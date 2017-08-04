@@ -1,45 +1,51 @@
-From: Icenowy Zheng <icenowy@aosc.io>
-Subject: [PATCH 1/2] mmc: sunxi: fix support for new timings mode only SoCs
-Date: Sat,  5 Aug 2017 05:35:54 +0800
-Message-ID: <20170804213555.6024-1-icenowy@aosc.io>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hermes.aosc.io ([199.195.250.187]:36103 "EHLO hermes.aosc.io"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751260AbdHDVgJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 4 Aug 2017 17:36:09 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Subject: [PATCH 2/2] mmc: sunxi: fix new timings mode on A64
+ EMMC (MMC2) controller
+Date: Sat,  5 Aug 2017 05:35:55 +0800
+Message-ID: <20170804213555.6024-2-icenowy@aosc.io>
+References: <20170804213555.6024-1-icenowy@aosc.io>
+Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sunxi+bncBDS6XAN6ZADRBTORSPGAKGQEB7GSRAQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20170804213555.6024-1-icenowy-h8G6r0blFSE@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com, Icenowy Zheng <icenowy@aosc.io>
 
-The A83T MMC support code introduces the timings mode switch, however
-such a switch doesn't exist on new SoCs with only new timings mode.
+The configuration struct of A64 EMMC(MMC2) compatible used to
+have the needs_new_timings variable missing, which lead to NULL
+pointer dereference now when trying to set up the old timings mode, as
+the old timings mode doesn't exist at all on A64.
 
-Only execute the switch if the SoC really have the timings mode switch,
-to fix the regression shown on new timings mode only SoCs (A64, H5,
-etc).
+Fix this issue by adding this variable and setting it to true in
+the configuration struct.
 
-Fixes: b0600daebf31 ("mmc: sunxi: Support controllers that can use both
-old and new timings")
+Fixes: 4fb3ce07eafa ("mmc: sunxi: Add EMMC (MMC2) controller compatible")
 
-Signed-off-by: Icenowy Zheng <icenowy@aosc.io>
+Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
 ---
- drivers/mmc/host/sunxi-mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sunxi-mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 3777517982dd..59aba93beffb 100644
+index 59aba93beffb..4ad643e37014 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -784,7 +784,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 		clock <<= 1;
- 	}
+@@ -1142,6 +1142,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
+ 	.idma_des_size_bits = 13,
+ 	.clk_delays = NULL,
+ 	.can_calibrate = true,
++	.needs_new_timings = true,
+ };
  
--	if (host->use_new_timings) {
-+	if (host->use_new_timings && host->cfg->has_timings_switch) {
- 		ret = sunxi_ccu_set_mmc_timing_mode(host->clk_mmc, true);
- 		if (ret) {
- 			dev_err(mmc_dev(mmc),
+ static const struct of_device_id sunxi_mmc_of_match[] = {
 -- 
 2.13.0
-
