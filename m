@@ -1,7 +1,7 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH 07/14] mmc: meson-gx: rework clk_set function
-Date: Fri,  4 Aug 2017 19:43:46 +0200
-Message-ID: <20170804174353.16486-8-jbrunet@baylibre.com>
+Subject: [PATCH 06/14] mmc: meson-gx: rework set_ios function
+Date: Fri,  4 Aug 2017 19:43:45 +0200
+Message-ID: <20170804174353.16486-7-jbrunet@baylibre.com>
 References: <20170804174353.16486-1-jbrunet@baylibre.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170804174353.16486-1-jbrunet@baylibre.com>
@@ -10,77 +10,74 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, C
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Clean-up clk_set function to prepare the next changes (DDR and clk-stop)
+Remove conditional write of cfg register. Warn if set_clk fails for some
+reason. Consistently use host->dev instead of mixing with mmc_dev(mmc)
 
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 30 +++++++++---------------------
- 1 file changed, 9 insertions(+), 21 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 22 +++++++++-------------
+ 1 file changed, 9 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 18fff28025d8..8f9ba5190c18 100644
+index 61668891b4fc..18fff28025d8 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -139,7 +139,7 @@ struct meson_host {
- 	struct clk *core_clk;
- 	struct clk_mux mux;
- 	struct clk *mux_clk;
--	unsigned long current_clock;
-+	unsigned long req_rate;
+@@ -445,8 +445,8 @@ static void meson_mmc_set_tuning_params(struct mmc_host *mmc)
+ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+-	u32 bus_width;
+-	u32 val, orig;
++	u32 bus_width, val;
++	int err;
  
- 	struct clk_divider cfg_div;
- 	struct clk *cfg_div_clk;
-@@ -275,29 +275,18 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
- 	int ret;
- 	u32 cfg;
+ 	/*
+ 	 * GPIO regulator, only controls switching between 1v8 and
+@@ -474,7 +474,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			int ret = regulator_enable(mmc->supply.vqmmc);
  
--	if (clk_rate) {
--		if (WARN_ON(clk_rate > mmc->f_max))
--			clk_rate = mmc->f_max;
--		else if (WARN_ON(clk_rate < mmc->f_min))
--			clk_rate = mmc->f_min;
--	}
--
--	if (clk_rate == host->current_clock)
-+	/* Same request - bail-out */
-+	if (host->req_rate == clk_rate)
- 		return 0;
- 
- 	/* stop clock */
- 	cfg = readl(host->regs + SD_EMMC_CFG);
--	if (!(cfg & CFG_STOP_CLOCK)) {
--		cfg |= CFG_STOP_CLOCK;
--		writel(cfg, host->regs + SD_EMMC_CFG);
--	}
--
--	dev_dbg(host->dev, "change clock rate %u -> %lu\n",
--		mmc->actual_clock, clk_rate);
-+	cfg |= CFG_STOP_CLOCK;
-+	writel(cfg, host->regs + SD_EMMC_CFG);
-+	host->req_rate = 0;
- 
- 	if (!clk_rate) {
- 		mmc->actual_clock = 0;
--		host->current_clock = 0;
- 		/* return with clock being stopped */
- 		return 0;
- 	}
-@@ -309,13 +298,12 @@ static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
- 		return ret;
+ 			if (ret < 0)
+-				dev_err(mmc_dev(mmc),
++				dev_err(host->dev,
+ 					"failed to enable vqmmc regulator\n");
+ 			else
+ 				host->vqmmc_enabled = true;
+@@ -483,9 +483,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
  	}
  
-+	host->req_rate = clk_rate;
- 	mmc->actual_clock = clk_get_rate(host->cfg_div_clk);
--	host->current_clock = clk_rate;
+-
+-	meson_mmc_clk_set(host, ios->clock);
+-
+ 	/* Bus width */
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_1:
+@@ -504,8 +501,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	}
  
-+	dev_dbg(host->dev, "clk rate: %u Hz\n", mmc->actual_clock);
- 	if (clk_rate != mmc->actual_clock)
--		dev_dbg(host->dev,
--			"divider requested rate %lu != actual rate %u\n",
--			clk_rate, mmc->actual_clock);
-+		dev_dbg(host->dev, "requested rate was %lu\n", clk_rate);
+ 	val = readl(host->regs + SD_EMMC_CFG);
+-	orig = val;
+-
+ 	val &= ~CFG_BUS_WIDTH_MASK;
+ 	val |= FIELD_PREP(CFG_BUS_WIDTH_MASK, bus_width);
  
- 	/* (re)start clock */
- 	cfg = readl(host->regs + SD_EMMC_CFG);
+@@ -519,11 +514,12 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->timing == MMC_TIMING_MMC_HS400)
+ 		val |= CFG_CHK_DS;
+ 
+-	if (val != orig) {
+-		writel(val, host->regs + SD_EMMC_CFG);
+-		dev_dbg(host->dev, "%s: SD_EMMC_CFG: 0x%08x -> 0x%08x\n",
+-			__func__, orig, val);
+-	}
++	err = meson_mmc_clk_set(host, ios->clock);
++	if (err)
++		dev_err(host->dev, "Failed to set clock: %d\n,", err);
++
++	writel(val, host->regs + SD_EMMC_CFG);
++	dev_dbg(host->dev, "SD_EMMC_CFG:  0x%08x\n", val);
+ }
+ 
+ static void meson_mmc_request_done(struct mmc_host *mmc,
 -- 
 2.9.4
