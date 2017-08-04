@@ -1,51 +1,53 @@
-From: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
-Subject: [PATCH 2/2] mmc: sunxi: fix new timings mode on A64
- EMMC (MMC2) controller
-Date: Sat,  5 Aug 2017 05:35:55 +0800
-Message-ID: <20170804213555.6024-2-icenowy@aosc.io>
-References: <20170804213555.6024-1-icenowy@aosc.io>
-Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
+Date: Sat, 5 Aug 2017 00:10:29 +0200
+Message-ID: <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com>
+References: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRBTORSPGAKGQEB7GSRAQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170804213555.6024-1-icenowy-h8G6r0blFSE@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-The configuration struct of A64 EMMC(MMC2) compatible used to
-have the needs_new_timings variable missing, which lead to NULL
-pointer dereference now when trying to set up the old timings mode, as
-the old timings mode doesn't exist at all on A64.
+On Fri, Aug 4, 2017 at 3:34 PM, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> Include mmci_qcom_dml.h from mmci_qcom_dml.c to fix the following
+> sparse warnings:
+>
+>   CHECK   drivers/mmc/host/mmci_qcom_dml.c
+> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
+> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
+>
+> Fixing them causes redefintion of dml_start_xfer error, revealing another
+> problem in the header.  #ifdef CONFIG_MMC_QCOM_DML is wrong because this
+> driver is tristate.  (CONFIG_MMC_QCOM_DML_MODULE is defined when it is
+> built as a module)
+>
+> Since dml_hw_init() is called from mmci.c, IS_REACHABLE() is needed to
+> cater to all the combinations.
+>
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Fix this issue by adding this variable and setting it to true in
-the configuration struct.
+I think this is still not a good solution, it will just turn a link error into
+an unusable system at runtime when the DML code is a loadable module
+but not used. Also, the symbols are not exported, so it won't work when both
+are built as modules.
+How about linking the DML code into the mmci module and making that
+Kconfig option a 'bool'?
 
-Fixes: 4fb3ce07eafa ("mmc: sunxi: Add EMMC (MMC2) controller compatible")
+Another small problem I found is the use of writel_relaxed() that might
+be unsafe here and is not explained anywhere.
 
-Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
----
- drivers/mmc/host/sunxi-mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+Finally, I can't find any record of the 9cb15142d0e3 ("mmc: mmci:
+Add qcom dml support to the driver.") patch in the archives of the relevant
+mailing lists I'm subscribed to (linux-mmc, linux-kernel or linux-arm-kernel).
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 59aba93beffb..4ad643e37014 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1142,6 +1142,7 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
- 	.idma_des_size_bits = 13,
- 	.clk_delays = NULL,
- 	.can_calibrate = true,
-+	.needs_new_timings = true,
- };
- 
- static const struct of_device_id sunxi_mmc_of_match[] = {
--- 
-2.13.0
+Was it posted there recently? Was Russell on Cc on the patch?
+The only record I find using google is for the patch from 2014, in
+https://patchwork.kernel.org/patch/4638221/ Ulf said he queued the
+patch for linux-3.18.
+
+      Arnd
