@@ -1,68 +1,51 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
-Date: Fri,  4 Aug 2017 22:34:23 +0900
-Message-ID: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: [PATCH 00/14] mmc: meson-gx: driver fixups and upgrade
+Date: Fri,  4 Aug 2017 19:43:39 +0200
+Message-ID: <20170804174353.16486-1-jbrunet@baylibre.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-10.nifty.com ([210.131.2.77]:45329 "EHLO
-        conuserg-10.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752523AbdHDNfB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2017 09:35:01 -0400
+Received: from mail-wr0-f176.google.com ([209.85.128.176]:37826 "EHLO
+        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752260AbdHDRoB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2017 13:44:01 -0400
+Received: by mail-wr0-f176.google.com with SMTP id 33so19261386wrz.4
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2017 10:44:00 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Include mmci_qcom_dml.h from mmci_qcom_dml.c to fix the following
-sparse warnings:
+The patchset features several bugfixes, rework and upgrade for the
+meson-gx MMC driver.
 
-  CHECK   drivers/mmc/host/mmci_qcom_dml.c
-drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
-drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
+The main goal is to improve readability and enable new high speed
+modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
 
-Fixing them causes redefintion of dml_start_xfer error, revealing another
-problem in the header.  #ifdef CONFIG_MMC_QCOM_DML is wrong because this
-driver is tristate.  (CONFIG_MMC_QCOM_DML_MODULE is defined when it is
-built as a module)
+While full speed SDR104 is stable with most cards, a few seems to
+require an even more precise tuning. For this, we'll probably have
+to implement per-line delay calibration.
 
-Since dml_hw_init() is called from mmci.c, IS_REACHABLE() is needed to
-cater to all the combinations.
+This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
+gxl-s905x-libretech
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+Jerome Brunet (14):
+  mmc: meson-gx: fix mux mask definition
+  mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
+  mmc: meson-gx: clean up some constants
+  mmc: meson-gx: use _irqsave variant of spinlock
+  mmc: meson-gx: cfg init overwrite values
+  mmc: meson-gx: rework set_ios function
+  mmc: meson-gx: rework clk_set function
+  mmc: meson-gx: rework clock init function
+  mmc: meson-gx: simplify interrupt handler
+  mmc: meson-gx: implement card_busy callback
+  mmc: meson-gx: rework tuning function
+  mmc: meson-gx: fix dual data rate mode frequencies
+  mmc: meson-gx: work around clk-stop issue
+  mmc: meson-gx: implement voltage switch callback
 
-Changes in v2:
-  - Fix error reported by kbuild test robot
-   (this patch is intended to replace commit 64f0aacb in linux-mmc/fixes
+ drivers/mmc/host/meson-gx-mmc.c | 611 ++++++++++++++++++++++++++--------------
+ 1 file changed, 396 insertions(+), 215 deletions(-)
 
- drivers/mmc/host/mmci_qcom_dml.c | 1 +
- drivers/mmc/host/mmci_qcom_dml.h | 2 +-
- 2 files changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 00750c9d3514..95de699853d2 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -18,6 +18,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
- #include "mmci.h"
-+#include "mmci_qcom_dml.h"
- 
- /* Registers */
- #define DML_CONFIG			0x00
-diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-index 6e405d09d534..d5e88f102ba3 100644
---- a/drivers/mmc/host/mmci_qcom_dml.h
-+++ b/drivers/mmc/host/mmci_qcom_dml.h
-@@ -15,7 +15,7 @@
- #ifndef __MMC_QCOM_DML_H__
- #define __MMC_QCOM_DML_H__
- 
--#ifdef CONFIG_MMC_QCOM_DML
-+#if IS_REACHABLE(CONFIG_MMC_QCOM_DML)
- int dml_hw_init(struct mmci_host *host, struct device_node *np);
- void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
- #else
 -- 
-2.7.4
+2.9.4
 
