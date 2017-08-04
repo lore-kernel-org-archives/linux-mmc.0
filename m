@@ -1,51 +1,39 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH 00/14] mmc: meson-gx: driver fixups and upgrade
-Date: Fri,  4 Aug 2017 19:43:39 +0200
-Message-ID: <20170804174353.16486-1-jbrunet@baylibre.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f176.google.com ([209.85.128.176]:37826 "EHLO
-        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752260AbdHDRoB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2017 13:44:01 -0400
-Received: by mail-wr0-f176.google.com with SMTP id 33so19261386wrz.4
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2017 10:44:00 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 02/14] mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
+Date: Fri,  4 Aug 2017 19:43:41 +0200
+Message-ID: <20170804174353.16486-3-jbrunet@baylibre.com>
+References: <20170804174353.16486-1-jbrunet@baylibre.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170804174353.16486-1-jbrunet@baylibre.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-The patchset features several bugfixes, rework and upgrade for the
-meson-gx MMC driver.
+Remove CLK_DIVIDER_ALLOW_ZERO. This flag means that a 1 based divider
+with a 0 value will behave as a bypass clock
 
-The main goal is to improve readability and enable new high speed
-modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
+The mmc divider does not behave like this, a 0 value disables the clock
+Remove this flag so CCF never allows a 0 value on this clock
 
-While full speed SDR104 is stable with most cards, a few seems to
-require an even more precise tuning. For this, we'll probably have
-to implement per-line delay calibration.
+Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
-gxl-s905x-libretech
-
-Jerome Brunet (14):
-  mmc: meson-gx: fix mux mask definition
-  mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
-  mmc: meson-gx: clean up some constants
-  mmc: meson-gx: use _irqsave variant of spinlock
-  mmc: meson-gx: cfg init overwrite values
-  mmc: meson-gx: rework set_ios function
-  mmc: meson-gx: rework clk_set function
-  mmc: meson-gx: rework clock init function
-  mmc: meson-gx: simplify interrupt handler
-  mmc: meson-gx: implement card_busy callback
-  mmc: meson-gx: rework tuning function
-  mmc: meson-gx: fix dual data rate mode frequencies
-  mmc: meson-gx: work around clk-stop issue
-  mmc: meson-gx: implement voltage switch callback
-
- drivers/mmc/host/meson-gx-mmc.c | 611 ++++++++++++++++++++++++++--------------
- 1 file changed, 396 insertions(+), 215 deletions(-)
-
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 4217287923d4..d480a8052a06 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -389,7 +389,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	host->cfg_div.width = __builtin_popcountl(CLK_DIV_MASK);
+ 	host->cfg_div.hw.init = &init;
+ 	host->cfg_div.flags = CLK_DIVIDER_ONE_BASED |
+-		CLK_DIVIDER_ROUND_CLOSEST | CLK_DIVIDER_ALLOW_ZERO;
++		CLK_DIVIDER_ROUND_CLOSEST;
+ 
+ 	host->cfg_div_clk = devm_clk_register(host->dev, &host->cfg_div.hw);
+ 	if (WARN_ON(PTR_ERR_OR_ZERO(host->cfg_div_clk)))
 -- 
 2.9.4
-
