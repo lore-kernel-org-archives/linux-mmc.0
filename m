@@ -1,68 +1,73 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH 10/14] mmc: meson-gx: implement card_busy callback
-Date: Fri,  4 Aug 2017 19:43:49 +0200
-Message-ID: <20170804174353.16486-11-jbrunet@baylibre.com>
+Subject: [PATCH 05/14] mmc: meson-gx: cfg init overwrite values
+Date: Fri,  4 Aug 2017 19:43:44 +0200
+Message-ID: <20170804174353.16486-6-jbrunet@baylibre.com>
 References: <20170804174353.16486-1-jbrunet@baylibre.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:35540 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753146AbdHDRoP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2017 13:44:15 -0400
-Received: by mail-wm0-f49.google.com with SMTP id m85so25330699wma.0
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2017 10:44:14 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170804174353.16486-1-jbrunet@baylibre.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-The card_busy callback is important to then add the voltage switch
-callback as it allow to verify that the card is done dealing with
-the voltage switch
+cfg init function overwrite values set in the clk init function
+Remove the cfg pokes from the clk init. Actually, trying to use
+the CLK_AUTO, like initially tried in clk_init, would break
+the card initialization
+
+BEWARE not to poke the cfg register while the divider value in clk
+register is 0. It crashes the SoC.
 
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/host/meson-gx-mmc.c | 14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index d876b80db27d..33ab341a8b33 100644
+index a399fbd415f4..61668891b4fc 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -76,6 +76,7 @@
+@@ -337,7 +337,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	int i, ret = 0;
+ 	const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
+ 	const char *clk_div_parents[1];
+-	u32 clk_reg, cfg;
++	u32 clk_reg;
  
- #define SD_EMMC_STATUS 0x48
- #define   STATUS_BUSY BIT(31)
-+#define   STATUS_DATI GENMASK(23, 16)
+ 	/* get the mux parents */
+ 	for (i = 0; i < MUX_CLK_NUM_PARENTS; i++) {
+@@ -403,12 +403,6 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	clk_reg &= ~CLK_ALWAYS_ON;
+ 	writel(clk_reg, host->regs + SD_EMMC_CLOCK);
  
- #define SD_EMMC_IRQ_EN 0x4c
- #define   IRQ_RXD_ERR_MASK GENMASK(7, 0)
-@@ -845,6 +846,17 @@ static void meson_mmc_cfg_init(struct meson_host *host)
- 	writel(cfg, host->regs + SD_EMMC_CFG);
- }
+-	/* Ensure clock starts in "auto" mode, not "always on" */
+-	cfg = readl(host->regs + SD_EMMC_CFG);
+-	cfg &= ~CFG_CLK_ALWAYS_ON;
+-	cfg |= CFG_AUTO_CLK;
+-	writel(cfg, host->regs + SD_EMMC_CFG);
+-
+ 	ret = clk_prepare_enable(host->cfg_div_clk);
+ 	if (ret)
+ 		return ret;
+@@ -958,6 +952,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_core_clk;
  
-+static int meson_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct meson_host *host = mmc_priv(mmc);
-+	u32 regval;
++	/* set config to sane default */
++	meson_mmc_cfg_init(host);
 +
-+	regval = readl(host->regs + SD_EMMC_STATUS);
-+
-+	/* We are only interrested in lines 0 to 3, so mask the other ones */
-+	return !(FIELD_GET(STATUS_DATI, regval) & 0xf);
-+}
-+
- static const struct mmc_host_ops meson_mmc_ops = {
- 	.request	= meson_mmc_request,
- 	.set_ios	= meson_mmc_set_ios,
-@@ -852,6 +864,7 @@ static const struct mmc_host_ops meson_mmc_ops = {
- 	.pre_req	= meson_mmc_pre_req,
- 	.post_req	= meson_mmc_post_req,
- 	.execute_tuning = meson_mmc_execute_tuning,
-+	.card_busy	= meson_mmc_card_busy,
- };
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
  
- static int meson_mmc_probe(struct platform_device *pdev)
+@@ -966,9 +963,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_STATUS);
+ 	writel(IRQ_EN_MASK, host->regs + SD_EMMC_IRQ_EN);
+ 
+-	/* set config to sane default */
+-	meson_mmc_cfg_init(host);
+-
+ 	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
+ 					meson_mmc_irq_thread, IRQF_SHARED,
+ 					NULL, host);
 -- 
 2.9.4
-
