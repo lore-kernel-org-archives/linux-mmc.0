@@ -1,69 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
-Date: Sun, 6 Aug 2017 12:10:44 +0200
-Message-ID: <CAPDyKFr_Fyo28Y03QLOoR2Rm6kauUn0dHkOXHnyFokBXQaLbww@mail.gmail.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix
+ #ifdef
+Date: Sun, 6 Aug 2017 11:26:53 +0100
+Message-ID: <3b5755df-b94b-741e-81d1-9a13c6f18fd1@linaro.org>
 References: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
  <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com>
- <CAK7LNAR8Kqnb18D2UYto5R1CLrMx_YgJMmKOm7OsiOgd7XcWbA@mail.gmail.com> <CAK8P3a0NbHMfm62r83M-mDD91tdohKYJqRntBvnEUWMRP_mUaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:34336 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751258AbdHFKKp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2017 06:10:45 -0400
-Received: by mail-qk0-f173.google.com with SMTP id u139so27808466qka.1
-        for <linux-mmc@vger.kernel.org>; Sun, 06 Aug 2017 03:10:45 -0700 (PDT)
-In-Reply-To: <CAK8P3a0NbHMfm62r83M-mDD91tdohKYJqRntBvnEUWMRP_mUaQ@mail.gmail.com>
+Received: from mail-wr0-f181.google.com ([209.85.128.181]:33961 "EHLO
+        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751258AbdHFK05 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2017 06:26:57 -0400
+Received: by mail-wr0-f181.google.com with SMTP id 12so30096852wrb.1
+        for <linux-mmc@vger.kernel.org>; Sun, 06 Aug 2017 03:26:56 -0700 (PDT)
+In-Reply-To: <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
+Cc: linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
 
-On 6 August 2017 at 11:32, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Sun, Aug 6, 2017 at 4:58 AM, Masahiro Yamada
-> <yamada.masahiro@socionext.com> wrote:
->> 2017-08-05 7:10 GMT+09:00 Arnd Bergmann <arnd@arndb.de>:
->>> On Fri, Aug 4, 2017 at 3:34 PM, Masahiro Yamada
->>> <yamada.masahiro@socionext.com> wrote:
->>>> Include mmci_qcom_dml.h from mmci_qcom_dml.c to fix the following
->>>> sparse warnings:
->>>>
->>>>   CHECK   drivers/mmc/host/mmci_qcom_dml.c
->>>> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
->>>> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
->>>>
->>>> Fixing them causes redefintion of dml_start_xfer error, revealing another
->>>> problem in the header.  #ifdef CONFIG_MMC_QCOM_DML is wrong because this
->>>> driver is tristate.  (CONFIG_MMC_QCOM_DML_MODULE is defined when it is
->>>> built as a module)
->>>>
->>>> Since dml_hw_init() is called from mmci.c, IS_REACHABLE() is needed to
->>>> cater to all the combinations.
->>>>
->>>> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->>>
->>> I think this is still not a good solution, it will just turn a link error into
->>> an unusable system at runtime when the DML code is a loadable module
->>> but not used. Also, the symbols are not exported, so it won't work when both
->>> are built as modules.
->>> How about linking the DML code into the mmci module and making that
->>> Kconfig option a 'bool'?
->>
->>
->> You are right.
->> My patch does not solve the root of the problem.
->>
->> It turned out not so trivial as I had first expected.
->>
->> I'd like somebody else to take care of it
->> because I am not familiar with this driver.
->
-> Maybe it's best if Ulf just reverts the broken commit, and then we start
-> over with reviewing the patch properly.
 
-The broken commit is reverted, however I will just drop both the bad
-commit and its revert next time I rebase my next branch.
 
-Kind regards
-Uffe
+On 04/08/17 23:10, Arnd Bergmann wrote:
+> How about linking the DML code into the mmci module and making that
+> Kconfig option a 'bool'?
+
+
+Yes, I think making this bool and exporting the two symbols should fix 
+this. It does not make sense to make dml helpers a module anyway.
+
+If it sounds okay, I can send a proper patch to fix this.
+
+------------------------>cut<-----------------------------------
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 5755b69..3345384 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -15,7 +15,7 @@ config MMC_ARMMMCI
+           If unsure, say N.
+
+  config MMC_QCOM_DML
+-       tristate "Qualcomm Data Mover for SD Card Controller"
++       bool "Qualcomm Data Mover for SD Card Controller"
+         depends on MMC_ARMMMCI && QCOM_BAM_DMA
+         default y
+         help
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c 
+b/drivers/mmc/host/mmci_qcom_dml.c
+index 00750c9..e7d9c74 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -97,6 +97,7 @@ void dml_start_xfer(struct mmci_host *host, struct 
+mmc_data *data)
+         /* make sure the dml is configured before dma is triggered */
+         wmb();
+  }
++EXPORT_SYMBOL_GPL(dml_start_xfer);
+
+  static int of_get_dml_pipe_index(struct device_node *np, const char *name)
+  {
+@@ -175,3 +176,4 @@ int dml_hw_init(struct mmci_host *host, struct 
+device_node *np)
+
+         return 0;
+------------------------>cut<-----------------------------------
+
+
+thanks,
+srini
