@@ -1,85 +1,61 @@
-From: Icenowy Zheng <icenowy@aosc.io>
-Subject: Re: [linux-sunxi] [PATCH 2/2] mmc: sunxi: fix new timings mode on A64 EMMC (MMC2) controller
-Date: Sun, 06 Aug 2017 11:20:49 +0800
-Message-ID: <8F9C9945-2AB8-4E2D-82BE-97D7A9E6DD6A@aosc.io>
-References: <20170804213555.6024-1-icenowy@aosc.io> <20170804213555.6024-2-icenowy@aosc.io> <20170806023954.wwaredjwcm2p5pw7@wens.csie.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
+Date: Sun, 6 Aug 2017 11:32:41 +0200
+Message-ID: <CAK8P3a0NbHMfm62r83M-mDD91tdohKYJqRntBvnEUWMRP_mUaQ@mail.gmail.com>
+References: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
+ <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com> <CAK7LNAR8Kqnb18D2UYto5R1CLrMx_YgJMmKOm7OsiOgd7XcWbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170806023954.wwaredjwcm2p5pw7@wens.csie.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f196.google.com ([209.85.216.196]:34779 "EHLO
+        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751258AbdHFJcn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2017 05:32:43 -0400
+In-Reply-To: <CAK7LNAR8Kqnb18D2UYto5R1CLrMx_YgJMmKOm7OsiOgd7XcWbA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
 
+On Sun, Aug 6, 2017 at 4:58 AM, Masahiro Yamada
+<yamada.masahiro@socionext.com> wrote:
+> 2017-08-05 7:10 GMT+09:00 Arnd Bergmann <arnd@arndb.de>:
+>> On Fri, Aug 4, 2017 at 3:34 PM, Masahiro Yamada
+>> <yamada.masahiro@socionext.com> wrote:
+>>> Include mmci_qcom_dml.h from mmci_qcom_dml.c to fix the following
+>>> sparse warnings:
+>>>
+>>>   CHECK   drivers/mmc/host/mmci_qcom_dml.c
+>>> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
+>>> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
+>>>
+>>> Fixing them causes redefintion of dml_start_xfer error, revealing another
+>>> problem in the header.  #ifdef CONFIG_MMC_QCOM_DML is wrong because this
+>>> driver is tristate.  (CONFIG_MMC_QCOM_DML_MODULE is defined when it is
+>>> built as a module)
+>>>
+>>> Since dml_hw_init() is called from mmci.c, IS_REACHABLE() is needed to
+>>> cater to all the combinations.
+>>>
+>>> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+>>
+>> I think this is still not a good solution, it will just turn a link error into
+>> an unusable system at runtime when the DML code is a loadable module
+>> but not used. Also, the symbols are not exported, so it won't work when both
+>> are built as modules.
+>> How about linking the DML code into the mmci module and making that
+>> Kconfig option a 'bool'?
+>
+>
+> You are right.
+> My patch does not solve the root of the problem.
+>
+> It turned out not so trivial as I had first expected.
+>
+> I'd like somebody else to take care of it
+> because I am not familiar with this driver.
 
+Maybe it's best if Ulf just reverts the broken commit, and then we start
+over with reviewing the patch properly.
 
-于 2017年8月6日 GMT+08:00 上午10:39:54, Chen-Yu Tsai <wens@csie.org> 写到:
->On Sat, Aug 05, 2017 at 05:35:55AM +0800, Icenowy Zheng wrote:
->> The configuration struct of A64 EMMC(MMC2) compatible used to
->> have the needs_new_timings variable missing, which lead to NULL
->> pointer dereference now when trying to set up the old timings mode,
->as
->> the old timings mode doesn't exist at all on A64.
->
->I'm not familiar with the A64's eMMC controller. The datasheet says
->it does not have the timing switch register. It does not say whether
->it is always in the old or new timing mode. "needs_new_timings"
->probably meant that the switch has to be set.
-
-As I know, it supports DDR mode, but the CCU has no clk delays.
-So it should be the new timings mode.
-
->
->This fix doesn't really fix the underlying issue, which is the check
->for clk_delays was incorrectly replaced. sun4i/sun5i is also broken.
->
->Could you try this patch instead:
->
-><---
->
->From 23b841a11294cb6a0cf1e146616b068f60c2ec7d Mon Sep 17 00:00:00 2001
->From: Chen-Yu Tsai <wens@csie.org>
->Date: Sun, 6 Aug 2017 10:24:47 +0800
->Subject: [PATCH] mmc: sunxi: Fix NULL pointer reference on clk_delays
->
->Some SoCs do not support clk delays for MMC in the clock control unit.
->These include the old controllers in A10/A10s/A13/R8, and the new eMMC
->controller in A64. The config structure for these controllers do not
->specify clk_delays, but the check for this was replaced in commit
->b0600daebf31 ("mmc: sunxi: Support controllers that can use both old
->and new timings").
->
->This patch adds back the check for clk_delays, and also adds comments
->for both checks in sunxi_mmc_clk_set_phase().
->
->Fixes: b0600daebf31 ("mmc: sunxi: Support controllers that can use
->		      both old and new timings")
->Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->---
-> drivers/mmc/host/sunxi-mmc.c | 5 +++++
-> 1 file changed, 5 insertions(+)
->
->diff --git a/drivers/mmc/host/sunxi-mmc.c
->b/drivers/mmc/host/sunxi-mmc.c
->index 3777517982dd..020547e5fa45 100644
->--- a/drivers/mmc/host/sunxi-mmc.c
->+++ b/drivers/mmc/host/sunxi-mmc.c
->@@ -722,9 +722,14 @@ static int sunxi_mmc_clk_set_phase(struct
->sunxi_mmc_host *host,
-> {
-> 	int index;
-> 
->+	/* No need to set clk controller delays under new timings */
-> 	if (host->use_new_timings)
-> 		return 0;
-> 
->+	/* Some old controllers don't support delays */
->+	if (!host->cfg->clk_delays)
->+		return 0;
->+
-> 	/* determine delays */
-> 	if (rate <= 400000) {
-> 		index = SDXC_CLK_400K;
+         Arnd
