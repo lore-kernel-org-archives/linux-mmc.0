@@ -1,63 +1,216 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
-Date: Sun, 6 Aug 2017 11:58:38 +0900
-Message-ID: <CAK7LNAR8Kqnb18D2UYto5R1CLrMx_YgJMmKOm7OsiOgd7XcWbA@mail.gmail.com>
-References: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com> <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: See SD ECC errors with 4.13-rc kernel
+Date: Sun, 6 Aug 2017 11:14:03 +0800
+Message-ID: <20170806031357.GX31819@dragon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:37280 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751219AbdHFDPQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 5 Aug 2017 23:15:16 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi Arnd,
+Hi Wolfram,
 
+I'm seeing SD card errors on Hikey board with 4.13-rc kernel.  Full log
+can be found at the bottom.
 
+As it's never seen before with 4.12, I ran bisect down to the following
+commits.
 
-2017-08-05 7:10 GMT+09:00 Arnd Bergmann <arnd@arndb.de>:
-> On Fri, Aug 4, 2017 at 3:34 PM, Masahiro Yamada
-> <yamada.masahiro@socionext.com> wrote:
->> Include mmci_qcom_dml.h from mmci_qcom_dml.c to fix the following
->> sparse warnings:
->>
->>   CHECK   drivers/mmc/host/mmci_qcom_dml.c
->> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
->> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
->>
->> Fixing them causes redefintion of dml_start_xfer error, revealing another
->> problem in the header.  #ifdef CONFIG_MMC_QCOM_DML is wrong because this
->> driver is tristate.  (CONFIG_MMC_QCOM_DML_MODULE is defined when it is
->> built as a module)
->>
->> Since dml_hw_init() is called from mmci.c, IS_REACHABLE() is needed to
->> cater to all the combinations.
->>
->> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->
-> I think this is still not a good solution, it will just turn a link error into
-> an unusable system at runtime when the DML code is a loadable module
-> but not used. Also, the symbols are not exported, so it won't work when both
-> are built as modules.
-> How about linking the DML code into the mmci module and making that
-> Kconfig option a 'bool'?
+9820a5b11101 (mmc: core: for data errors, take response of stop cmd into account)
+a04e6bae9e6f (mmc: core: check also R1 response for stop commands)
 
+I understand that the commits might just expose the problem with my
+platform (dw_mmc-k3 driver, Kingston 16GB UHS-I card).  But I'd like to
+fix the problem, so I appreciate it if you can give some suggestion on
+where I should start looking into.  Thanks.
 
-You are right.
-My patch does not solve the root of the problem.
+Shawn
 
-It turned out not so trivial as I had first expected.
+---
 
-I'd like somebody else to take care of it
-because I am not familiar with this driver.
+[    4.906950] VFS: Mounted root (ext4 filesystem) readonly on device 179:258.
+[    4.921943] Freeing unused kernel memory: 576K
+SELinux:  Could not open policy file <= /etc/selinux/targeted/policy/policy.31:  No such file or directory
 
-(My first motivation was clean-up sparse reports,
-and I thought it was easy to fix it, but it was not.)
+Welcome to Debian GNU/Linux 8 (jessie)!
 
+[    5.404283] mmcblk1: error -5 sending stop command, original cmd response 0x900, card status 0x900
+[    5.418355] mmcblk1: error -5 transferring data, sector 31268856, nr 8, cmd response 0x900, card status 0x80000b00
+[    5.459775] mmc_host mmc1: Bus speed (slot 0) = 24800000Hz (slot req 400000Hz, actual 400000HZ div = 31)
+[    5.523587] mmc_host mmc1: Bus speed (slot 0) = 49600000Hz (slot req 50000000Hz, actual 49600000HZ div = 0)
+[    5.543513] mmcblk1: error -5 sending stop command, original cmd response 0x900, card status 0x900
+[    5.561422] mmcblk1: error -5 transferring data, sector 31268856, nr 8, cmd response 0x900, card status 0x80000b00
+[    5.580871] mmcblk1: retrying using single block read
+Cannot add dependency job for unit display-manager.service, ignoring: Unit display-manager.service failed to load: No such file or directory.
+         Expecting device dev-ttyAMA3.device...
+[  OK  ] Reached target Remote File Systems (Pre).
+[  OK  ] Reached target Encrypted Volumes.
+[  OK  ] Reached target Swap.
+         Expecting device dev-disk-by\x2dpartlabel-boot.device...
+[  OK  ] Created slice Root Slice.
+[  OK  ] Created slice User and Session Slice.
+[  OK  ] Listening on Delayed Shutdown Socket.
+[  OK  ] Listening on /dev/initctl Compatibility Named Pipe.
+[  OK  ] Listening on Journal Socket (/dev/log).
+[  OK  ] Listening on udev Control Socket.
+[  OK  ] Listening on udev Kernel Socket.
+[  OK  ] Listening on Journal Socket.
+[  OK  ] Created slice System Slice.
+         Starting File System Check on Root Device...
+[  OK  ] Created slice system-getty.slice.
+[  OK  ] Created slice system-serial\x2dgetty.slice.
+         Starting Increase datagram queue length...
+         Starting Nameserver information manager...
+         Mounting Debug File System...
+         Starting udev Coldplug all Devices...
+         Starting Create Static Device Nodes in /dev...
+         Mounting Huge Pages File System...
+         Starting Load Kernel Modules...
+         Mounting POSIX Message Queue File System...
+[  OK  ] Reached target Slices.
+[  OK  ] Started Load Kernel Modules.
+         Mounting FUSE Control File System...
+         Starting Apply Kernel Variables...
+         Mounting Configuration File System...
+[    6.212549] mmcblk1: error -5 sending stop command, original cmd response 0x900, card status 0x900
+[    6.230979] mmcblk1: error -5 transferring data, sector 31268856, nr 8, cmd response 0x900, card status 0x80000b00
+[    6.275381] mmc_host mmc1: Bus speed (slot 0) = 24800000Hz (slot req 400000Hz, actual 400000HZ div = 31)
+[    6.343205] mmc_host mmc1: Bus speed (slot 0) = 49600000Hz (slot req 50000000Hz, actual 49600000HZ div = 0)
+[    6.364615] mmcblk1: error -5 sending stop command, original cmd response 0x900, card status 0x900
+[    6.384189] mmcblk1: error -5 transferring data, sector 31268856, nr 8, cmd response 0x900, card status 0x80000b00
+[    6.405302] mmcblk1: retrying using single block read
+[  OK  ] Started udev Coldplug all Devices.
+[  OK  ] Mounted Huge Pages File System.
+[  OK  ] Mounted Debug File System.
+[  OK  ] Mounted FUSE Control File System.
+[  OK  ] Mounted POSIX Message Queue File System.
+[  OK  ] Mounted Configuration File System.
+[  OK  ] Started Increase datagram queue length.
+[  OK  ] Listening on Syslog Socket.
+         Starting Journal Service...
+[  OK  ] Started Journal Service.
+[  OK  ] Started Nameserver information manager.
+[  OK  ] Started Apply Kernel Variables.
+[  OK  ] Started Create Static Device Nodes in /dev.
+         Starting udev Kernel Device Manager...
+[    6.597344] systemd-udevd[2082]: starting version 215
+[  OK  ] Started udev Kernel Device Manager.
+         Starting Copy rules generated while the root was ro...
+         Starting LSB: Set preliminary keymap...
+[  OK  ] Started Copy rules generated while the root was ro.
+[    6.866318] systemd-fsck[1346]: system: clean, 65196/974848 files, 427653/3891968 blocks
+[  OK  ] Started File System Check on Root Device.
+[  OK  ] Found device /dev/ttyAMA3.
+[  OK  ] Started LSB: Set preliminary keymap.
+         Starting Remount Root and Kernel File Systems...
+[  OK  ] Reached target Sound Card.
+[  OK  ] Found device /dev/disk/by-partlabel/boot.
+[    9.331908] EXT4-fs (mmcblk1p2): re-mounted. Opts: errors=remount-ro
+[  OK  ] Started Remount Root and Kernel File Systems.
+         Starting Load/Save Random Seed...
+[  OK  ] Reached target Local File Systems (Pre).
+         Mounting /boot/efi...
+[  OK  ] Mounted /boot/efi.
+[  OK  ] Reached target Local File Systems.
+         Starting Create Volatile Files and Directories...
+         Starting Tell Plymouth To Write Out Runtime Data...
+[  OK  ] Reached target Remote File Systems.
+         Starting Trigger Flushing of Journal to Persistent Storage...
+         Starting LSB: Prepare console...
+[  OK  ] Started Tell Plymouth To Write Out Runtime Data.
+[  OK  ] Started Load/Save Random Seed.
+         Starting LSB: Raise network interfaces....
+[  OK  ] Started Create Volatile Files and Directories.
+[    9.568943] systemd-journald[2076]: Received request to flush runtime journal from PID 1
+         Starting Update UTMP about System Boot/Shutdown...
+[  OK  ] Started Trigger Flushing of Journal to Persistent Storage.
+[  OK  ] Started Update UTMP about System Boot/Shutdown.
+[  OK  ] Started LSB: Prepare console.
+         Starting LSB: Set console font and keymap...
+[  OK  ] Started LSB: Raise network interfaces..
+[  OK  ] Reached target Network.
+[  OK  ] Reached target Network is Online.
+[  OK  ] Started LSB: Set console font and keymap.
+[  OK  ] Reached target System Initialization.
+[  OK  ] Listening on D-Bus System Message Bus Socket.
+[  OK  ] Listening on ACPID Listen Socket.
+[  OK  ] Reached target Sockets.
+[  OK  ] Reached target Timers.
+         Starting Restore Sound Card State...
+[  OK  ] Reached target Paths.
+[  OK  ] Reached target Basic System.
+         Starting Restore /etc/resolv.conf if the system cras...s shut down....
+         Starting Modem Manager...
+         Starting Initialize hardware monitoring sensors...
+         Starting Regular background program processing daemon...
+[  OK  ] Started Regular background program processing daemon.
+         Starting Network Manager...
+         Starting OpenBSD Secure Shell server...
+[  OK  ] Started OpenBSD Secure Shell server.
+         Starting /etc/rc.local Compatibility...
+         Starting Login Service...
+         Starting LSB: exim Mail Transport Agent...
+         Starting LSB: SANE network scanner server...
+         Starting LSB: Load kernel modules needed to enable cpufreq scaling...
+         Starting LSB: Advanced IEEE 802.11 management daemon...
+         Starting LSB: network benchmark...
+         Starting D-Bus System Message Bus...
+[  OK  ] Started D-Bus System Message Bus.
+         Starting System Logging Service...
+         Starting Permit User Sessions...
+         Starting ACPI event daemon...
+[  OK  ] Started ACPI event daemon.
+[  OK  ] Started Restore Sound Card State.
+[  OK  ] Started Restore /etc/resolv.conf if the system crash...was shut down..
+[  OK  ] Started /etc/rc.local Compatibility.
+[  OK  ] Started LSB: SANE network scanner server.
+[  OK  ] Started LSB: Load kernel modules needed to enable cpufreq scaling.
+[  OK  ] Started LSB: Advanced IEEE 802.11 management daemon.
+[  OK  ] Started LSB: network benchmark.
+[  OK  ] Started Permit User Sessions.
+[  OK  ] Started Initialize hardware monitoring sensors.
+[  OK  ] Started System Logging Service.
+[  OK  ] Started Login Service.
+         Starting Authenticate and Authorize Users to Run Privileged Tasks...
+         Starting LSB: set CPUFreq kernel parameters...
+         Starting Wait for Plymouth Boot Screen to Quit...
+         Starting Terminate Plymouth Boot Screen...
+[  OK  ] Started Wait for Plymouth Boot Screen to Quit.
+[  OK  ] Started Terminate Plymouth Boot Screen.
+         Starting Getty on tty1...
+[  OK  ] Started Getty on tty1.
+         Starting Serial Getty on ttyAMA3...
+[  OK  ] Started Serial Getty on ttyAMA3.
+[  OK  ] Reached target Login Prompts.
+[  OK  ] Started LSB: set CPUFreq kernel parameters.
+[  OK  ] Started Authenticate and Authorize Users to Run Privileged Tasks.
+[  OK  ] Started Network Manager.
+[  OK  ] Started Modem Manager.
+[  OK  ] Started LSB: exim Mail Transport Agent.
+[  OK  ] Reached target Multi-User System.
+[  OK  ] Reached target Graphical Interface.
+         Starting Update UTMP about System Runlevel Changes...
+[  OK  ] Start
+Debian GNU/Linux 8 linaro-developer ttyAMA3
 
+linaro-developer login: root (automatic login)
 
+Last login: Thu Jan  1 00:00:34 UTC 1970 on ttyAMA3
+Linux linaro-developer 4.13.0-rc1-00021-g6e300ca3015c-dirty #70 SMP PREEMPT Wed Aug 2 [   12.715455] random: crng init done
+17:08:14 CST 2017 aarch64
 
--- 
-Best Regards
-Masahiro Yamada
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+root@linaro-developer:~# 
+
