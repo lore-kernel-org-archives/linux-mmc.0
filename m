@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 5/7] dt-bindings: ti-omap-hsmmc: Document new compatible for sdhci omap
-Date: Mon, 7 Aug 2017 21:31:40 +0530
-Message-ID: <20170807160142.12134-6-kishon@ti.com>
+Subject: [RFC PATCH 4/7] mmc: sdhci: Add quirk to indicate broken POWER_CONTROL
+Date: Mon, 7 Aug 2017 21:31:39 +0530
+Message-ID: <20170807160142.12134-5-kishon@ti.com>
 References: <20170807160142.12134-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,25 +12,53 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob 
 Cc: kishon@ti.com, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Document the new compatible string "ti,dra7-sdhci" to be used for
-MMC controllers in DRA7 and DRA72 SoCs.
+TI's implementation of sdhci controller used in DRA7 SoC's uses
+POWER_CONTROL register for configuring IO voltage and not
+for core voltage (vdd) which is it's intended use. Add a quirk
+to indicate broken POWER_CONTROL register.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci.c | 6 ++++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 8 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 0e026c151c1c..db80fdfd05d7 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -13,6 +13,7 @@ Required properties:
-  Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
-  Should be "ti,omap4-hsmmc", for OMAP4 controllers
-  Should be "ti,am33xx-hsmmc", for AM335x controllers
-+ Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
- - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index d5050ec42481..a7465a56e6b5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1419,6 +1419,9 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
  
- Optional properties:
+ 	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_CONTROL)
++		return;
++
+ 	if (mode != MMC_POWER_OFF)
+ 		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+ 	else
+@@ -1430,6 +1433,9 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ {
+ 	u8 pwr = 0;
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_CONTROL)
++		return;
++
+ 	if (mode != MMC_POWER_OFF) {
+ 		switch (1 << vdd) {
+ 		case MMC_VDD_165_195:
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 39c7a2723906..ba94cca7c892 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -439,6 +439,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_NO_CRC_STRIPPING			(1<<16)
+ /* Controller has bad caps bits, but really supports DMA */
+ #define SDHCI_QUIRK2_FORCE_ADMA				(1<<17)
++/* Controller uses POWER_CONTROL for managing IO voltage and not core voltage */
++#define SDHCI_QUIRK2_BROKEN_POWER_CONTROL		(1<<18)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 2.11.0
