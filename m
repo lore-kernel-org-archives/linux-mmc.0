@@ -1,194 +1,100 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 02/11] mmc: core: Add members to mmc_request and
- mmc_data for CQE's
-Date: Mon, 7 Aug 2017 15:51:10 +0200
-Message-ID: <CAPDyKFo+0h5j8iRrrsr3yQe3FQ-zG+tr68n_XU3ZHJDS_eT+9A@mail.gmail.com>
-References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com> <1500630584-22852-3-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 03/11] mmc: host: Add CQE interface
+Date: Mon, 7 Aug 2017 15:55:06 +0200
+Message-ID: <CAPDyKFoyyZYY=0z06PCk6VC4onRArK9vC5=xgKSALo5_iW4=1A@mail.gmail.com>
+References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com> <1500630584-22852-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36303 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751870AbdHGNvM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2017 09:51:12 -0400
-Received: by mail-qk0-f176.google.com with SMTP id d136so2792444qkg.3
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2017 06:51:12 -0700 (PDT)
-In-Reply-To: <1500630584-22852-3-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:38128 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751247AbdHGNzH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2017 09:55:07 -0400
+Received: by mail-qt0-f178.google.com with SMTP id t37so2758755qtg.5
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2017 06:55:07 -0700 (PDT)
+In-Reply-To: <1500630584-22852-4-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
 On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Most of the information needed to issue requests to a CQE is already in
-> struct mmc_request and struct mmc_data. Add data block address, some flags,
-> and the task id (tag), and allow for cmd being NULL which it is for CQE
-> tasks.
+> Add CQE host operations, capabilities, and host members.
+
+I think adding these new interfaces deserves a bit more descriptive changelog.
+
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->  include/linux/mmc/core.h   | 13 +++++++++++--
->  include/trace/events/mmc.h | 36 +++++++++++++++++++++++-------------
->  2 files changed, 34 insertions(+), 15 deletions(-)
+>  include/linux/mmc/host.h | 24 ++++++++++++++++++++++++
+>  1 file changed, 24 insertions(+)
 >
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index a0c63ea28796..bf1788a224e6 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -122,11 +122,18 @@ struct mmc_data {
->         unsigned int            timeout_clks;   /* data timeout (in clocks) */
->         unsigned int            blksz;          /* data block size */
->         unsigned int            blocks;         /* number of blocks */
-> +       unsigned int            blk_addr;       /* block address */
->         int                     error;          /* data error */
->         unsigned int            flags;
->
-> -#define MMC_DATA_WRITE (1 << 8)
-> -#define MMC_DATA_READ  (1 << 9)
-> +#define MMC_DATA_WRITE         BIT(8)
-> +#define MMC_DATA_READ          BIT(9)
-> +/* Extra flags used by CQE */
-> +#define MMC_DATA_QBR           BIT(10)         /* CQE queue barrier*/
-> +#define MMC_DATA_PRIO          BIT(11)         /* CQE high priority */
-
-Regarding high priority data requests. I think this can be debated a
-bit on how it should be implemented.
-
-If possible, may I suggest we move adding the support for this to the
-end of the series? In that way we can discuss it separately and it
-won't block us moving forward.
-
-> +#define MMC_DATA_REL_WR                BIT(12)         /* Reliable write */
-
-What has this bit to do with CQE?
-
-> +#define MMC_DATA_DAT_TAG       BIT(13)         /* Tag request */
-> +#define MMC_DATA_FORCED_PRG    BIT(14)         /* Forced programming */
->
->         unsigned int            bytes_xfered;
->
-> @@ -153,6 +160,8 @@ struct mmc_request {
->
->         /* Allow other commands during this ongoing data transfer or busy wait */
->         bool                    cap_cmd_during_tfr;
-> +
-> +       int                     tag;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ebd1cebbef0c..4dd7ada9b4b9 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -162,6 +162,19 @@ struct mmc_host_ops {
+>                                   unsigned int direction, int blk_size);
 >  };
 >
->  struct mmc_card;
-> diff --git a/include/trace/events/mmc.h b/include/trace/events/mmc.h
-> index a72f9b94c80b..f30a99ac65b6 100644
-> --- a/include/trace/events/mmc.h
-> +++ b/include/trace/events/mmc.h
-> @@ -29,8 +29,10 @@
->                 __field(unsigned int,           sbc_flags)
->                 __field(unsigned int,           sbc_retries)
->                 __field(unsigned int,           blocks)
-> +               __field(unsigned int,           blk_addr)
->                 __field(unsigned int,           blksz)
->                 __field(unsigned int,           data_flags)
-> +               __field(int,                    tag)
->                 __field(unsigned int,           can_retune)
->                 __field(unsigned int,           doing_retune)
->                 __field(unsigned int,           retune_now)
-> @@ -42,10 +44,10 @@
->         ),
+> +struct mmc_cqe_ops {
+
+Could you please add a small comment to each new callback. Even if the
+names gives a good hint on they are used, some additional information
+would be nice.
+
+> +       int     (*cqe_enable)(struct mmc_host *host, struct mmc_card *card);
+> +       void    (*cqe_disable)(struct mmc_host *host);
+> +       int     (*cqe_request)(struct mmc_host *host, struct mmc_request *mrq);
+> +       void    (*cqe_post_req)(struct mmc_host *host, struct mmc_request *mrq);
+> +       void    (*cqe_off)(struct mmc_host *host);
+
+What differs between ->cqe_off() and ->cqe_disable()? Do we need both?
+
+> +       int     (*cqe_wait_for_idle)(struct mmc_host *host);
+
+The name sounds like you will poll the host to understand when the
+card becomes idle.
+
+Is that so? Then when is this needed?
+
+> +       bool    (*cqe_timeout)(struct mmc_host *host, struct mmc_request *mrq,
+> +                              bool *recovery_needed);
+> +       void    (*cqe_recovery_start)(struct mmc_host *host);
+> +       void    (*cqe_recovery_finish)(struct mmc_host *host);
+> +};
+> +
+>  struct mmc_async_req {
+>         /* active mmc request */
+>         struct mmc_request      *mrq;
+> @@ -307,6 +320,8 @@ struct mmc_host {
+>  #define MMC_CAP2_HS400_ES      (1 << 20)       /* Host supports enhanced strobe */
+>  #define MMC_CAP2_NO_SD         (1 << 21)       /* Do not send SD commands during initialization */
+>  #define MMC_CAP2_NO_MMC                (1 << 22)       /* Do not send (e)MMC commands during initialization */
+> +#define MMC_CAP2_CQE           (1 << 23)       /* Has eMMC command queue engine */
+> +#define MMC_CAP2_CQE_DCMD      (1 << 24)       /* CQE can issue a direct command */
 >
->         TP_fast_assign(
-> -               __entry->cmd_opcode = mrq->cmd->opcode;
-> -               __entry->cmd_arg = mrq->cmd->arg;
-> -               __entry->cmd_flags = mrq->cmd->flags;
-> -               __entry->cmd_retries = mrq->cmd->retries;
-> +               __entry->cmd_opcode = mrq->cmd ? mrq->cmd->opcode : 0;
-> +               __entry->cmd_arg = mrq->cmd ? mrq->cmd->arg : 0;
-> +               __entry->cmd_flags = mrq->cmd ? mrq->cmd->flags : 0;
-> +               __entry->cmd_retries = mrq->cmd ? mrq->cmd->retries : 0;
->                 __entry->stop_opcode = mrq->stop ? mrq->stop->opcode : 0;
->                 __entry->stop_arg = mrq->stop ? mrq->stop->arg : 0;
->                 __entry->stop_flags = mrq->stop ? mrq->stop->flags : 0;
-> @@ -56,7 +58,9 @@
->                 __entry->sbc_retries = mrq->sbc ? mrq->sbc->retries : 0;
->                 __entry->blksz = mrq->data ? mrq->data->blksz : 0;
->                 __entry->blocks = mrq->data ? mrq->data->blocks : 0;
-> +               __entry->blk_addr = mrq->data ? mrq->data->blk_addr : 0;
->                 __entry->data_flags = mrq->data ? mrq->data->flags : 0;
-> +               __entry->tag = mrq->tag;
->                 __entry->can_retune = host->can_retune;
->                 __entry->doing_retune = host->doing_retune;
->                 __entry->retune_now = host->retune_now;
-> @@ -71,8 +75,8 @@
->                   "cmd_opcode=%u cmd_arg=0x%x cmd_flags=0x%x cmd_retries=%u "
->                   "stop_opcode=%u stop_arg=0x%x stop_flags=0x%x stop_retries=%u "
->                   "sbc_opcode=%u sbc_arg=0x%x sbc_flags=0x%x sbc_retires=%u "
-> -                 "blocks=%u block_size=%u data_flags=0x%x "
-> -                 "can_retune=%u doing_retune=%u retune_now=%u "
-> +                 "blocks=%u block_size=%u blk_addr=%u data_flags=0x%x "
-> +                 "tag=%d can_retune=%u doing_retune=%u retune_now=%u "
->                   "need_retune=%d hold_retune=%d retune_period=%u",
->                   __get_str(name), __entry->mrq,
->                   __entry->cmd_opcode, __entry->cmd_arg,
-> @@ -81,7 +85,8 @@
->                   __entry->stop_flags, __entry->stop_retries,
->                   __entry->sbc_opcode, __entry->sbc_arg,
->                   __entry->sbc_flags, __entry->sbc_retries,
-> -                 __entry->blocks, __entry->blksz, __entry->data_flags,
-> +                 __entry->blocks, __entry->blk_addr,
-> +                 __entry->blksz, __entry->data_flags, __entry->tag,
->                   __entry->can_retune, __entry->doing_retune,
->                   __entry->retune_now, __entry->need_retune,
->                   __entry->hold_retune, __entry->retune_period)
-> @@ -108,6 +113,7 @@
->                 __field(unsigned int,           sbc_retries)
->                 __field(unsigned int,           bytes_xfered)
->                 __field(int,                    data_err)
-> +               __field(int,                    tag)
->                 __field(unsigned int,           can_retune)
->                 __field(unsigned int,           doing_retune)
->                 __field(unsigned int,           retune_now)
-> @@ -119,10 +125,13 @@
->         ),
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
 >
->         TP_fast_assign(
-> -               __entry->cmd_opcode = mrq->cmd->opcode;
-> -               __entry->cmd_err = mrq->cmd->error;
-> -               memcpy(__entry->cmd_resp, mrq->cmd->resp, 4);
-> -               __entry->cmd_retries = mrq->cmd->retries;
-> +               __entry->cmd_opcode = mrq->cmd ? mrq->cmd->opcode : 0;
-> +               __entry->cmd_err = mrq->cmd ? mrq->cmd->error : 0;
-> +               __entry->cmd_resp[0] = mrq->cmd ? mrq->cmd->resp[0] : 0;
-> +               __entry->cmd_resp[1] = mrq->cmd ? mrq->cmd->resp[1] : 0;
-> +               __entry->cmd_resp[2] = mrq->cmd ? mrq->cmd->resp[2] : 0;
-> +               __entry->cmd_resp[3] = mrq->cmd ? mrq->cmd->resp[3] : 0;
-> +               __entry->cmd_retries = mrq->cmd ? mrq->cmd->retries : 0;
->                 __entry->stop_opcode = mrq->stop ? mrq->stop->opcode : 0;
->                 __entry->stop_err = mrq->stop ? mrq->stop->error : 0;
->                 __entry->stop_resp[0] = mrq->stop ? mrq->stop->resp[0] : 0;
-> @@ -139,6 +148,7 @@
->                 __entry->sbc_retries = mrq->sbc ? mrq->sbc->retries : 0;
->                 __entry->bytes_xfered = mrq->data ? mrq->data->bytes_xfered : 0;
->                 __entry->data_err = mrq->data ? mrq->data->error : 0;
-> +               __entry->tag = mrq->tag;
->                 __entry->can_retune = host->can_retune;
->                 __entry->doing_retune = host->doing_retune;
->                 __entry->retune_now = host->retune_now;
-> @@ -154,7 +164,7 @@
->                   "cmd_retries=%u stop_opcode=%u stop_err=%d "
->                   "stop_resp=0x%x 0x%x 0x%x 0x%x stop_retries=%u "
->                   "sbc_opcode=%u sbc_err=%d sbc_resp=0x%x 0x%x 0x%x 0x%x "
-> -                 "sbc_retries=%u bytes_xfered=%u data_err=%d "
-> +                 "sbc_retries=%u bytes_xfered=%u data_err=%d tag=%d "
->                   "can_retune=%u doing_retune=%u retune_now=%u need_retune=%d "
->                   "hold_retune=%d retune_period=%u",
->                   __get_str(name), __entry->mrq,
-> @@ -170,7 +180,7 @@
->                   __entry->sbc_resp[0], __entry->sbc_resp[1],
->                   __entry->sbc_resp[2], __entry->sbc_resp[3],
->                   __entry->sbc_retries,
-> -                 __entry->bytes_xfered, __entry->data_err,
-> +                 __entry->bytes_xfered, __entry->data_err, __entry->tag,
->                   __entry->can_retune, __entry->doing_retune,
->                   __entry->retune_now, __entry->need_retune,
->                   __entry->hold_retune, __entry->retune_period)
+> @@ -393,6 +408,15 @@ struct mmc_host {
+>         int                     dsr_req;        /* DSR value is valid */
+>         u32                     dsr;    /* optional driver stage (DSR) value */
+>
+> +       /* Command Queue Engine (CQE) support */
+> +       const struct mmc_cqe_ops *cqe_ops;
+> +       void                    *cqe_private;
+> +       void                    (*cqe_recovery_notifier)(struct mmc_host *,
+> +                                                        struct mmc_request *);
+
+Please add a comment here to understand how this callback is going to be used.
+
+> +       int                     cqe_qdepth;
+> +       bool                    cqe_enabled;
+> +       bool                    cqe_on;
+> +
+>         unsigned long           private[0] ____cacheline_aligned;
+>  };
+>
 > --
 > 1.9.1
 >
