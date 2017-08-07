@@ -1,56 +1,50 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3] mmc: core: remove the check of mmc_card_blockaddr for SD cards
-Date: Mon,  7 Aug 2017 10:07:14 +0800
-Message-ID: <1502071634-94106-1-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: See SD ECC errors with 4.13-rc kernel
+Date: Mon, 7 Aug 2017 13:12:19 +0800
+Message-ID: <20170807051218.GY31819@dragon>
+References: <20170806031357.GX31819@dragon>
+ <8f77f49c-118e-0aa0-41d8-b62db50fdb6a@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:45918 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751411AbdHGCIC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2017 22:08:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59580 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751424AbdHGFNf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 7 Aug 2017 01:13:35 -0400
+Content-Disposition: inline
+In-Reply-To: <8f77f49c-118e-0aa0-41d8-b62db50fdb6a@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-Per the SD physical layer simplified specification V4.10,
-section 4.6.2, CSD version 1.0 SD card should use taac, nsac
-and r2w_factor for calculating the data access time. But the
-taac and nsac for SDHC(CSD version 2.0) are always fixed and
-the software should use the recommended value for timeout. When
-parsing the CSD, we sanely set them to zero for SDHC(CSD version
-2.0), all the calculation for timeout_ns and timeout_clk is zero
-as well. So what we actually want to limit here is either SDHC
-case or unreasonable timeout reported by the cards. In principle
-we should at least be able to remove the bogus check for the
-mmc_card_blockaddr.
+On Mon, Aug 07, 2017 at 09:34:18AM +0800, Shawn Lin wrote:
+> + Jaehoon,
+> 
+> On 2017/8/6 11:14, Shawn Guo wrote:
+> >Hi Wolfram,
+> >
+> >I'm seeing SD card errors on Hikey board with 4.13-rc kernel.  Full log
+> >can be found at the bottom.
+> >
+> >As it's never seen before with 4.12, I ran bisect down to the following
+> >commits.
+> >
+> >9820a5b11101 (mmc: core: for data errors, take response of stop cmd into account)
+> >a04e6bae9e6f (mmc: core: check also R1 response for stop commands)
+> >
+> >I understand that the commits might just expose the problem with my
+> >platform (dw_mmc-k3 driver, Kingston 16GB UHS-I card).  But I'd like to
+> >fix the problem, so I appreciate it if you can give some suggestion on
+> >where I should start looking into.  Thanks.
+> 
+> I did slove this last week but haven't had time to sent out the patch
+> until now.
+> 
+> Could you try this?
+> 
+> https://patchwork.kernel.org/patch/9884197/
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Yes, it fixes my problem.  Thanks for the patch.
 
----
-
-Changes in v3:
-- still keep data->timeout_clks = 0 for hosts
-
-Changes in v2:
-- rephrase the changelog and only remove mmc_card_blockaddr.
-
- drivers/mmc/core/core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6177eb0..5dd1c00 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -763,7 +763,7 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
- 		/*
- 		 * SDHC cards always use these fixed values.
- 		 */
--		if (timeout_us > limit_us || mmc_card_blockaddr(card)) {
-+		if (timeout_us > limit_us) {
- 			data->timeout_ns = limit_us * 1000;
- 			data->timeout_clks = 0;
- 		}
--- 
-1.9.1
-
-
+Shawn
