@@ -1,61 +1,41 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH 4/5] mmc: sdhci-of-arasan: constify sdhci_pltfm_data and
- sdhci_ops structures
-Date: Mon, 7 Aug 2017 14:50:38 +0200
-Message-ID: <4a087f6a-a51c-2add-402f-2d377457482e@xilinx.com>
-References: <1502099444-10473-1-git-send-email-Julia.Lawall@lip6.fr>
- <1502099444-10473-5-git-send-email-Julia.Lawall@lip6.fr>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: Potentially invalid memory accesses in file drivers/mmc/core/block.c
+Date: Mon, 7 Aug 2017 14:53:42 +0200
+Message-ID: <CACRpkdYEbEbrtzH1=cyn7f+-c1yjj_kgBxn=NAVsz4A1dbVojQ@mail.gmail.com>
+References: <003501d30289$89f86990$9de93cb0$@Domain> <CACRpkdZmenuHSes+o9NtuzYBtobrs7g6-X3=NG2ar1Zot2wFXw@mail.gmail.com>
+ <000501d30c89$f964ebf0$ec2ec3d0$@cs.utah.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <1502099444-10473-5-git-send-email-Julia.Lawall@lip6.fr>
-Content-Language: en-US
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Julia Lawall <Julia.Lawall@lip6.fr>, Michal Simek <michal.simek@xilinx.com>
-Cc: bhumirks@gmail.com, kernel-janitors@vger.kernel.org, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:36721 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751247AbdHGMxo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2017 08:53:44 -0400
+Received: by mail-io0-f169.google.com with SMTP id g35so2202536ioi.3
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2017 05:53:44 -0700 (PDT)
+In-Reply-To: <000501d30c89$f964ebf0$ec2ec3d0$@cs.utah.edu>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shaobo <shaobo@cs.utah.edu>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jens Axboe <axboe@fb.com>, Geert Uytterhoeven <geert@linux-m68k.org>
 
-On 7.8.2017 11:50, Julia Lawall wrote:
-> The sdhci_pltfm_data structure is only passed as the second argument
-> of sdhci_pltfm_init, which is const, while the sdhci_ops structure
-> is only stored in the ops field of a sdhci_pltfm_data structure,
-> which is also const.  Thus both kinds of structures can be const as
-> well.
-> 
-> Done with the help of Coccinelle.
-> 
-> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-> 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c |    4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 528a5d2..0720ea7 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -262,7 +262,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
->  	return -EINVAL;
->  }
->  
-> -static struct sdhci_ops sdhci_arasan_ops = {
-> +static const struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
-> @@ -271,7 +271,7 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> -static struct sdhci_pltfm_data sdhci_arasan_pdata = {
-> +static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
->  	.ops = &sdhci_arasan_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> 
+On Thu, Aug 3, 2017 at 8:54 PM, Shaobo <shaobo@cs.utah.edu> wrote:
 
-Acked-by: Michal Simek <michal.simek@xilinx.com>
+> Thanks for your reply. While I appreciate your suggestions, I'm a little confused because honestly
+> I don't know if I was pointing out a real issue since the bug occurs under certain conditions.
 
-Thanks,
-Michal
+If you can reproduce the bug, try fixing it and see if it goes away?
+
+If it goes away you are likely right so just include the description
+with your patch.
+
+I don't understand really.
+
+Following the code flow as you have described it in verbatim text is too hard
+as it requires us to take out the code and scrutinize it while reading your
+mail.
+
+It is much easier to read a patch, so please send a patch.
+
+Yours,
+Linus Walleij
