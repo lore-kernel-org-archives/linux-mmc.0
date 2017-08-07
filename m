@@ -1,159 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 08/11] mmc: block: Prepare CQE data
-Date: Mon, 7 Aug 2017 17:24:44 +0200
-Message-ID: <CAPDyKFpxn_uWquhs9GubL591OSCH2odhAqXUhsyPcQgVHLBPtw@mail.gmail.com>
-References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com> <1500630584-22852-9-git-send-email-adrian.hunter@intel.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [RFC PATCH 2/7] mmc: sdhci: Add quirk to indicate controller supports ADMA2
+Date: Mon, 7 Aug 2017 21:31:37 +0530
+Message-ID: <20170807160142.12134-3-kishon@ti.com>
+References: <20170807160142.12134-1-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:36476 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751408AbdHGPYp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2017 11:24:45 -0400
-Received: by mail-qt0-f174.google.com with SMTP id v29so4493683qtv.3
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2017 08:24:45 -0700 (PDT)
-In-Reply-To: <1500630584-22852-9-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170807160142.12134-1-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: kishon@ti.com, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Enhance mmc_blk_data_prep() to support CQE requests.
+TI's implementation of sdhci controller used in DRA7 SoC's doesn't
+have SDHCI_CAN_DO_ADMA2 set in CAPA register though it supports
+ADMA2. Add quirk to support using ADMA2 even if the controller reports
+incorrect capability in CAPA.
 
-Please try to be a bit more descriptive.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/block.c | 45 ++++++++++++++++++++++++++++++++++-----------
->  1 file changed, 34 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 40f0d596ed54..915290c74363 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -36,6 +36,7 @@
->  #include <linux/compat.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/idr.h>
-> +#include <linux/ioprio.h>
->
->  #include <linux/mmc/ioctl.h>
->  #include <linux/mmc/card.h>
-> @@ -1485,25 +1486,27 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
->  }
->
->  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
-> -                             int disable_multi, bool *do_rel_wr,
-> -                             bool *do_data_tag)
-> +                             int disable_multi, bool *do_rel_wr_p,
-> +                             bool *do_data_tag_p)
->  {
->         struct mmc_blk_data *md = mq->blkdata;
->         struct mmc_card *card = md->queue.card;
->         struct mmc_blk_request *brq = &mqrq->brq;
->         struct request *req = mmc_queue_req_to_req(mqrq);
-> +       bool do_rel_wr, do_data_tag;
->
->         /*
->          * Reliable writes are used to implement Forced Unit Access and
->          * are supported only on MMCs.
->          */
-> -       *do_rel_wr = (req->cmd_flags & REQ_FUA) &&
-> -                    rq_data_dir(req) == WRITE &&
-> -                    (md->flags & MMC_BLK_REL_WR);
-> +       do_rel_wr = (req->cmd_flags & REQ_FUA) &&
-> +                   rq_data_dir(req) == WRITE &&
-> +                   (md->flags & MMC_BLK_REL_WR);
->
->         memset(brq, 0, sizeof(struct mmc_blk_request));
->
->         brq->mrq.data = &brq->data;
-> +       brq->mrq.tag = req->tag;
->
->         brq->stop.opcode = MMC_STOP_TRANSMISSION;
->         brq->stop.arg = 0;
-> @@ -1518,6 +1521,15 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->
->         brq->data.blksz = 512;
->         brq->data.blocks = blk_rq_sectors(req);
-> +       brq->data.blk_addr = blk_rq_pos(req);
-> +
-> +       /*
-> +        * The command queue supports 2 priorities: "high" (1) and "simple" (0).
-> +        * The eMMC will give "high" priority tasks priority over "simple"
-> +        * priority tasks. Here we give priority to IOPRIO_CLASS_RT.
-> +        */
-> +       if (IOPRIO_PRIO_CLASS(req_get_ioprio(req)) == IOPRIO_CLASS_RT)
-> +               brq->data.flags |= MMC_DATA_PRIO;
-
-As I said earlier. I suggest you move the things related to priority
-last in the series. Then we can discuss them separately, not blocking
-anything else.
-
->
->         /*
->          * The block layer doesn't support all sector count
-> @@ -1547,18 +1559,23 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->                                                 brq->data.blocks);
->         }
->
-> -       if (*do_rel_wr)
-> +       if (do_rel_wr) {
->                 mmc_apply_rel_rw(brq, card, req);
-> +               brq->data.flags |= MMC_DATA_REL_WR;
-> +       }
->
->         /*
->          * Data tag is used only during writing meta data to speed
->          * up write and any subsequent read of this meta data
->          */
-> -       *do_data_tag = card->ext_csd.data_tag_unit_size &&
-> -                      (req->cmd_flags & REQ_META) &&
-> -                      (rq_data_dir(req) == WRITE) &&
-> -                      ((brq->data.blocks * brq->data.blksz) >=
-> -                       card->ext_csd.data_tag_unit_size);
-> +       do_data_tag = card->ext_csd.data_tag_unit_size &&
-> +                     (req->cmd_flags & REQ_META) &&
-> +                     (rq_data_dir(req) == WRITE) &&
-> +                     ((brq->data.blocks * brq->data.blksz) >=
-> +                      card->ext_csd.data_tag_unit_size);
-> +
-> +       if (do_data_tag)
-> +               brq->data.flags |= MMC_DATA_DAT_TAG;
->
->         mmc_set_data_timeout(&brq->data, card);
->
-> @@ -1587,6 +1604,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->         mqrq->areq.mrq = &brq->mrq;
->
->         mmc_queue_bounce_pre(mqrq);
-> +
-> +       if (do_rel_wr_p)
-
-I guess you don't need to make this conditional, let's just do the
-below assignment.
-
-> +               *do_rel_wr_p = do_rel_wr;
-> +
-> +       if (do_data_tag_p)
-
-Ditto.
-
-> +               *do_data_tag_p = do_data_tag;
->  }
->
->  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
-> --
-> 1.9.1
->
-
-I like the clarification this change introduces, as to assign the two
-out parameters the values of the two local variables. However, could
-you perhaps make that change being a separate patch, which should come
-prior $subject patch in the series. That would make it more evident on
-what changes are really for CQE.
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ece3751d2a25..fff0baadbc3e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3264,7 +3264,8 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 	}
+ 
+ 	if ((host->version >= SDHCI_SPEC_200) &&
+-		(host->caps & SDHCI_CAN_DO_ADMA2))
++		((host->caps & SDHCI_CAN_DO_ADMA2) ||
++		(host->quirks2 & SDHCI_QUIRK2_FORCE_ADMA)))
+ 		host->flags |= SDHCI_USE_ADMA;
+ 
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 6905131f603d..d778034e324d 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -437,6 +437,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+ /* Controller does not have CRC stripped in Command Response */
+ #define SDHCI_QUIRK2_NO_CRC_STRIPPING			(1<<16)
++/* Controller has bad caps bits, but really supports DMA */
++#define SDHCI_QUIRK2_FORCE_ADMA				(1<<17)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+-- 
+2.11.0
