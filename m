@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 2/7] mmc: sdhci: Add quirk to indicate controller supports ADMA2
-Date: Mon, 7 Aug 2017 21:31:37 +0530
-Message-ID: <20170807160142.12134-3-kishon@ti.com>
+Subject: [RFC PATCH 5/7] dt-bindings: ti-omap-hsmmc: Document new compatible for sdhci omap
+Date: Mon, 7 Aug 2017 21:31:40 +0530
+Message-ID: <20170807160142.12134-6-kishon@ti.com>
 References: <20170807160142.12134-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,43 +12,25 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob 
 Cc: kishon@ti.com, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-TI's implementation of sdhci controller used in DRA7 SoC's doesn't
-have SDHCI_CAN_DO_ADMA2 set in CAPA register though it supports
-ADMA2. Add quirk to support using ADMA2 even if the controller reports
-incorrect capability in CAPA.
+Document the new compatible string "ti,dra7-sdhci" to be used for
+MMC controllers in DRA7 and DRA72 SoCs.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/sdhci.c | 3 ++-
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ece3751d2a25..fff0baadbc3e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3264,7 +3264,8 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	}
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index 0e026c151c1c..db80fdfd05d7 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -13,6 +13,7 @@ Required properties:
+  Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
+  Should be "ti,omap4-hsmmc", for OMAP4 controllers
+  Should be "ti,am33xx-hsmmc", for AM335x controllers
++ Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+ - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
  
- 	if ((host->version >= SDHCI_SPEC_200) &&
--		(host->caps & SDHCI_CAN_DO_ADMA2))
-+		((host->caps & SDHCI_CAN_DO_ADMA2) ||
-+		(host->quirks2 & SDHCI_QUIRK2_FORCE_ADMA)))
- 		host->flags |= SDHCI_USE_ADMA;
- 
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6905131f603d..d778034e324d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -437,6 +437,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
- /* Controller does not have CRC stripped in Command Response */
- #define SDHCI_QUIRK2_NO_CRC_STRIPPING			(1<<16)
-+/* Controller has bad caps bits, but really supports DMA */
-+#define SDHCI_QUIRK2_FORCE_ADMA				(1<<17)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ Optional properties:
 -- 
 2.11.0
