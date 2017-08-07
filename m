@@ -1,57 +1,69 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2] mmc: mmci_qcom_dml: include mmci_qcom_dml.h and fix #ifdef
-Date: Sun, 6 Aug 2017 22:41:42 +0200
-Message-ID: <CAK8P3a1K7hCejjFQhnS8tbLP0+dZH15W1bzUCZpP-SHtyJaaAQ@mail.gmail.com>
-References: <1501853664-10752-1-git-send-email-yamada.masahiro@socionext.com>
- <CAK8P3a0r7jPBF_eAMrm7u-3N224zPsd4k=SeAqXFVViXBUOhnw@mail.gmail.com> <3b5755df-b94b-741e-81d1-9a13c6f18fd1@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3b5755df-b94b-741e-81d1-9a13c6f18fd1@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Russell King - ARM Linux <linux@armlinux.org.uk>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
+Date: Mon,  7 Aug 2017 09:32:45 +0800
+Message-ID: <1502069565-114396-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:55981 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751375AbdHGBdX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2017 21:33:23 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Sun, Aug 6, 2017 at 12:26 PM, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
->
->
-> On 04/08/17 23:10, Arnd Bergmann wrote:
->>
->> How about linking the DML code into the mmci module and making that
->> Kconfig option a 'bool'?
->
->
->
-> Yes, I think making this bool and exporting the two symbols should fix this.
-> It does not make sense to make dml helpers a module anyway.
->
-> If it sounds okay, I can send a proper patch to fix this.
+We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+mode as it is expected behaviour and most of the backup partition
+tables should be located near some the last blocks which will always
+make open-ending read exceed the capcity of cards.
 
-I would say making dml a 'bool' option is not ok unless you also change
-the Makefile to link it into the same module as the base mmci driver.
+Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+Fixes: a04e6bae9e6f (mmc: core: check also R1 response for stop commands)
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-The alternative is to export the symbols and then always build the
-dml code as a module when the mmci driver is a module, as below.
+ drivers/mmc/core/block.c | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
 
-Or even just move all the code into the base driver, and call it only
-using an if(IS_ENABLED()) check for the bool symbol.
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 40f0d59..25343aa 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1369,10 +1369,19 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 	 R1_CC_ERROR |		/* Card controller error */		\
+ 	 R1_ERROR)		/* General/unknown error */
+ 
+-static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
++static bool mmc_blk_has_cmd_err(struct mmc_card *card, struct mmc_command *cmd)
+ {
+-	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+-		cmd->error = -EIO;
++	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
++
++	if (!cmd->error && cmd->resp[0] & CMD_ERRORS) {
++		/*
++		 * Prevent the OUT_OF_RANGE error for open-ending
++		 * multiple block operations as it's normal behaviour.
++		 */
++		if (!(!(md->flags & MMC_BLK_CMD23) &&
++		     cmd->resp[0] & R1_OUT_OF_RANGE))
++			cmd->error = -EIO;
++	}
+ 
+ 	return cmd->error;
+ }
+@@ -1398,8 +1407,8 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 	 * stop.error indicates a problem with the stop command.  Data
+ 	 * may have been transferred, or may still be transferring.
+ 	 */
+-	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+-	    brq->data.error) {
++	if (brq->sbc.error || brq->cmd.error ||
++	    mmc_blk_has_cmd_err(card, &brq->stop) || brq->data.error) {
+ 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+-- 
+1.9.1
 
-       Arnd
 
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 8c46766c000c..5c996cba9f25 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -3,7 +3,9 @@
- #
-
- obj-$(CONFIG_MMC_ARMMMCI) += mmci.o
--obj-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
-+ifdef CONFIG_MMC_QCOM_DML
-+obj-$(CONFIG_MMC_ARMMMCI) += mmci_qcom_dml.o
-+endif
- obj-$(CONFIG_MMC_PXA) += pxamci.o
- obj-$(CONFIG_MMC_MXC) += mxcmmc.o
- obj-$(CONFIG_MMC_MXS) += mxs-mmc.o
