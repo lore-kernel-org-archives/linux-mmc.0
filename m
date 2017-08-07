@@ -1,149 +1,95 @@
-From: icenowy-h8G6r0blFSE@public.gmane.org
-Subject: Re: [PATCH 2/2] mmc: sunxi: fix new timings mode on A64
- EMMC (MMC2) controller
-Date: Mon, 07 Aug 2017 14:59:24 +0800
-Message-ID: <4ec3370b8c33eb8a411e9b6ee228a9f7@aosc.io>
-References: <20170804213555.6024-1-icenowy@aosc.io>
- <20170804213555.6024-2-icenowy@aosc.io>
- <20170806023954.wwaredjwcm2p5pw7@wens.csie.org>
-Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [EXT] Re: [PATCH v3] mmc: sdhci-xenon: Add Xenon SDHCI specific
+ system-level PM support
+Date: Mon, 7 Aug 2017 11:18:21 +0200
+Message-ID: <CAPDyKFr5GOoW63+JHyYga9XBs_ANSSkr+KY_cjewW4DKv9ggqQ@mail.gmail.com>
+References: <1499897779-12338-1-git-send-email-zjwu@marvell.com>
+ <CAPDyKFpOcDOi8+nPsw0dk_rhcvzP94C9Mmp+RX=hfLvNqEs6sg@mail.gmail.com>
+ <20170713172559.6dd2d65a@xhacker> <CAPDyKFrDq6sMH9ciHnW0sEu+hCrS1j978XjZtMe=EAssO5xihA@mail.gmail.com>
+ <20170713181323.14dd0615@xhacker> <CAPDyKFrkLR64tZVVTjQpXx0rwHwVtMJS6w7PBh0i--+mSyB=uA@mail.gmail.com>
+ <CAPDyKFq3XFNsdOByWjqEUQj=uYm5J0WqLYh4RdQJpt2SKGmqDw@mail.gmail.com>
+ <5967E9FB.80508@marvell.com> <CAPDyKFoAAUK+R3B2H38+sXC6FazdxnB2mdWOc0fqB-hYROnu6g@mail.gmail.com>
+ <CAG18LKhrm8jvB6G5+_YQS4sYmnAo+HHwhMGVb2N2Wq6uqemzaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRBUM7UDGAKGQE6VZA2HA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170806023954.wwaredjwcm2p5pw7-SLa5LZP+eSXNLxjTenLetw@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:33457 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752367AbdHGJSX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2017 05:18:23 -0400
+Received: by mail-qk0-f178.google.com with SMTP id a77so36359751qkb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2017 02:18:22 -0700 (PDT)
+In-Reply-To: <CAG18LKhrm8jvB6G5+_YQS4sYmnAo+HHwhMGVb2N2Wq6uqemzaQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ziji Hu <davidhuzj@gmail.com>
+Cc: Zhoujie Wu <zjwu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, "Wei(SOCP) Liu" <liuw@marvell.com>
 
-=E5=9C=A8 2017-08-06 10:39=EF=BC=8CChen-Yu Tsai =E5=86=99=E9=81=93=EF=BC=9A
-> On Sat, Aug 05, 2017 at 05:35:55AM +0800, Icenowy Zheng wrote:
->> The configuration struct of A64 EMMC(MMC2) compatible used to
->> have the needs_new_timings variable missing, which lead to NULL
->> pointer dereference now when trying to set up the old timings mode, as
->> the old timings mode doesn't exist at all on A64.
->=20
-> I'm not familiar with the A64's eMMC controller. The datasheet says
-> it does not have the timing switch register. It does not say whether
-> it is always in the old or new timing mode. "needs_new_timings"
-> probably meant that the switch has to be set.
->=20
-> This fix doesn't really fix the underlying issue, which is the check
-> for clk_delays was incorrectly replaced. sun4i/sun5i is also broken.
->=20
-> Could you try this patch instead:
->=20
-> <---
->=20
-> From 23b841a11294cb6a0cf1e146616b068f60c2ec7d Mon Sep 17 00:00:00 2001
-> From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-> Date: Sun, 6 Aug 2017 10:24:47 +0800
-> Subject: [PATCH] mmc: sunxi: Fix NULL pointer reference on clk_delays
->=20
-> Some SoCs do not support clk delays for MMC in the clock control unit.
-> These include the old controllers in A10/A10s/A13/R8, and the new eMMC
-> controller in A64. The config structure for these controllers do not
-> specify clk_delays, but the check for this was replaced in commit
-> b0600daebf31 ("mmc: sunxi: Support controllers that can use both old
-> and new timings").
->=20
-> This patch adds back the check for clk_delays, and also adds comments
-> for both checks in sunxi_mmc_clk_set_phase().
->=20
-> Fixes: b0600daebf31 ("mmc: sunxi: Support controllers that can use
-> 		      both old and new timings")
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+[...]
 
-Successfully tested on A64 (SoPine with baseboard and eMMC module).
+>>> But considering about the benefits, it is not that urgent to take runtime pm
+>>> feature as a must, it is a better to have feature. System standby is a must
+>>> feature, without this patch, the system can't work well after resume.
+>>> Do you think it is reasonable to add complete standby support at first, then
+>>> take runtime pm as a next step?
+>>
+>> You can do that, but why? And will then the "next step" ever happen?
+>>
+>> Do you really want to spend efforts in getting something working for
+>> system suspend only, while you instead easily could deploy both
+>> runtime PM and system PM support at the same time?
+>>
+>
+> As the author of this patch, I'd like to argue for myself here, although it is
+> not my task any more. :p
+> The reason of implementing system PM firstly, is definitely NOT that
+> runtime PM is
+> unnecessary. Instead, I was just not able to.
+>
+> Internal customers in Marvell and external customers previously just required
+> simple system PM. Thus I decided to meet customers requirement at first.
+> Otherwise, I didn't have any platform to verify runtime PM even if runtime PM
+> is completed.
+>
+> Those SoCs implementation vary a lot. Thus I was actually not sure
+> what a generic Xenon runtime PM should look like for all those Marvell products.
+> I previously planed to implement runtime PM when I got enough resources
+> (boards/BSP/supports) from customers.
 
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 5 +++++
->  1 file changed, 5 insertions(+)
->=20
-> diff --git a/drivers/mmc/host/sunxi-mmc.c=20
-> b/drivers/mmc/host/sunxi-mmc.c
-> index 3777517982dd..020547e5fa45 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -722,9 +722,14 @@ static int sunxi_mmc_clk_set_phase(struct
-> sunxi_mmc_host *host,
->  {
->  	int index;
->=20
-> +	/* No need to set clk controller delays under new timings */
->  	if (host->use_new_timings)
->  		return 0;
->=20
-> +	/* Some old controllers don't support delays */
-> +	if (!host->cfg->clk_delays)
-> +		return 0;
-> +
->  	/* determine delays */
->  	if (rate <=3D 400000) {
->  		index =3D SDXC_CLK_400K;
-> --
-> 2.13.3
->=20
-> <---
->=20
-> Separately we should ask what is the proper set of config flags that
-> describes the A64 EMMC controller.
->=20
-> Regards
-> ChenYu
->=20
->>=20
->> Fix this issue by adding this variable and setting it to true in
->> the configuration struct.
->>=20
->> Fixes: 4fb3ce07eafa ("mmc: sunxi: Add EMMC (MMC2) controller=20
->> compatible")
->>=20
->> Signed-off-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
->> ---
->>  drivers/mmc/host/sunxi-mmc.c | 1 +
->>  1 file changed, 1 insertion(+)
->>=20
->> diff --git a/drivers/mmc/host/sunxi-mmc.c=20
->> b/drivers/mmc/host/sunxi-mmc.c
->> index 59aba93beffb..4ad643e37014 100644
->> --- a/drivers/mmc/host/sunxi-mmc.c
->> +++ b/drivers/mmc/host/sunxi-mmc.c
->> @@ -1142,6 +1142,7 @@ static const struct sunxi_mmc_cfg=20
->> sun50i_a64_emmc_cfg =3D {
->>  	.idma_des_size_bits =3D 13,
->>  	.clk_delays =3D NULL,
->>  	.can_calibrate =3D true,
->> +	.needs_new_timings =3D true,
->>  };
->>=20
->>  static const struct of_device_id sunxi_mmc_of_match[] =3D {
->> --
->> 2.13.0
->>=20
->> --
->> You received this message because you are subscribed to the Google=20
->> Groups "linux-sunxi" group.
->> To unsubscribe from this group and stop receiving emails from it, send=
-=20
->> an email to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
->> For more options, visit https://groups.google.com/d/optout.
->=20
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+If saving power during system sleep makes sense, then it seems odd
+that one don't want to care about saving power in runtime as well.
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+Anyway, I rest my case and I won't prevent you from adding only system
+sleep support.
+
+>
+>>>
+>>>> Besides the clocks, you have the xenon mmc phy. Can't that also be put
+>>>> that in some low power mode at request in-activity?
+>>>
+>>> For the phy behavior, currently I don't see any SW operation for the lpm, I
+>>> will check with HW guys about the behaviour.
+>>
+>> Great, that would really be interesting from a runtime PM point of view.
+>>
+>> Perhaps then also ask if re-configuring the phy via xenon_phy_adj(),
+>> makes sense when powering off the card? Because currently you seems to
+>> keep the latest configuration, even if the mmc core decides to power
+>> off the card during system sleep. Unless I am reading the code wrong
+>> from the ->set_ios() ops.
+>>
+>
+>     As I know, PHY HW will also automatically enter standby mode
+> (power saving mode)
+> when ACG/SDCLK-off-while-idle are triggered. Actually there is no SW interface
+> to "enable" or "disable" PHY. It requires confirm from HW bros.
+>
+>     xenon_phy_adj() will set PHY based on current timing. For example,
+> when coming back
+> from resume, xenon_phy_adj() will re-configure PHY for legacy timing.
+>     Thus it is unnecessary to clean PHY setting before sleep.
+
+Okay, thanks for clarifying.
+
+Kind regards
+Uffe
