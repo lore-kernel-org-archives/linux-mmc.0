@@ -1,48 +1,76 @@
 From: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Subject: [PATCH] mmc: wmt-sdmmc: Handle return value of clk_prepare_enable
-Date: Tue,  8 Aug 2017 11:16:38 +0530
-Message-ID: <0d9fccf8e14a639274115cc43a97804ef059d8b1.1502171094.git.arvind.yadav.cs@gmail.com>
+Subject: [PATCH] mmc: mxcmmc: Handle return value of clk_prepare_enable
+Date: Tue,  8 Aug 2017 11:27:43 +0530
+Message-ID: <97f19cf864fa688cbb92a06b90120f4faee04e7d.1502171736.git.arvind.yadav.cs@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:38712 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750736AbdHHFrC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 01:47:02 -0400
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:33188 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750776AbdHHF6H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 01:58:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux@prisktech.co.nz, ulf.hansson@linaro.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
 clk_prepare_enable() can fail here and we must check its return value.
 
 Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
- drivers/mmc/host/wmt-sdmmc.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mxcmmc.c | 25 +++++++++++++++++++------
+ 1 file changed, 19 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 21ebba8..e64f930 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -856,7 +856,9 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 		goto fail5;
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index fb3ca82..c016820 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1098,8 +1098,13 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		goto out_free;
  	}
  
--	clk_prepare_enable(priv->clk_sdmmc);
-+	ret = clk_prepare_enable(priv->clk_sdmmc);
+-	clk_prepare_enable(host->clk_per);
+-	clk_prepare_enable(host->clk_ipg);
++	ret = clk_prepare_enable(host->clk_per);
 +	if (ret)
-+		goto fail6;
++		goto out_free;
++
++	ret = clk_prepare_enable(host->clk_ipg);
++	if (ret)
++		goto out_clk_per_put;
  
- 	/* configure the controller to a known 'ready' state */
- 	wmt_reset_hardware(mmc);
-@@ -866,6 +868,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	dev_info(&pdev->dev, "WMT SDHC Controller initialized\n");
+ 	mxcmci_softreset(host);
  
- 	return 0;
-+fail6:
-+	clk_put(priv->clk_sdmmc);
- fail5:
- 	free_irq(dma_irq, priv);
- fail4:
+@@ -1168,8 +1173,9 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		dma_release_channel(host->dma);
+ 
+ out_clk_put:
+-	clk_disable_unprepare(host->clk_per);
+ 	clk_disable_unprepare(host->clk_ipg);
++out_clk_per_put:
++	clk_disable_unprepare(host->clk_per);
+ 
+ out_free:
+ 	mmc_free_host(mmc);
+@@ -1212,10 +1218,17 @@ static int __maybe_unused mxcmci_resume(struct device *dev)
+ {
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct mxcmci_host *host = mmc_priv(mmc);
++	int ret;
+ 
+-	clk_prepare_enable(host->clk_per);
+-	clk_prepare_enable(host->clk_ipg);
+-	return 0;
++	ret = clk_prepare_enable(host->clk_per);
++	if (ret)
++		return ret;
++
++	ret = clk_prepare_enable(host->clk_ipg);
++	if (ret)
++		clk_disable_unprepare(host->clk_per);
++
++	return ret;
+ }
+ 
+ static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
 -- 
 1.9.1
 
