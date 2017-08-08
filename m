@@ -1,83 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxcmmc: Handle return value of clk_prepare_enable
-Date: Tue, 8 Aug 2017 12:38:46 +0200
-Message-ID: <CAPDyKFqgMUHx+A24PrXd==DYc1bt76xk=bC24mLk4v5vY039tw@mail.gmail.com>
-References: <97f19cf864fa688cbb92a06b90120f4faee04e7d.1502171736.git.arvind.yadav.cs@gmail.com>
+Subject: Re: [PATCH v8 1/2] mmc: dw_mmc: move controller reset before driver init
+Date: Tue, 8 Aug 2017 12:46:57 +0200
+Message-ID: <CAPDyKFp5RJJvss9tiOy6_SMRUSyzS_1SVhK4gMpogxcUsS+iaw@mail.gmail.com>
+References: <20170802031742.60363-1-liwei213@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <97f19cf864fa688cbb92a06b90120f4faee04e7d.1502171736.git.arvind.yadav.cs@gmail.com>
+In-Reply-To: <20170802031742.60363-1-liwei213@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arvind Yadav <arvind.yadav.cs@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Li Wei <liwei213@huawei.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Guodong Xu <guodong.xu@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 August 2017 at 07:57, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
-> clk_prepare_enable() can fail here and we must check its return value.
+On 2 August 2017 at 05:17, Li Wei <liwei213@huawei.com> wrote:
+> This commit modifies dw_mci_probe(), it moves reset assertion before
+> drv_data->init(host)
 >
-> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
+> Some driver needs to access controller registers in its .init() ops. So,
+> in order to make such access safe, we should do controller reset before
+> .init() being called.
+>
+> Signed-off-by: Wei Li <liwei213@huawei.com>
+> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+> Signed-off-by: Chen Jun <chenjun14@huawei.com>
 
-Thanks, applied for next!
+This looks good to me. However, I need an ack from Jaehoon to pick this up.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mxcmmc.c | 25 +++++++++++++++++++------
->  1 file changed, 19 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index fb3ca82..c016820 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1098,8 +1098,13 @@ static int mxcmci_probe(struct platform_device *pdev)
->                 goto out_free;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a9dfb26972f2..f2fa928e1a12 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3067,6 +3067,12 @@ int dw_mci_probe(struct dw_mci *host)
+>                 goto err_clk_ciu;
 >         }
 >
-> -       clk_prepare_enable(host->clk_per);
-> -       clk_prepare_enable(host->clk_ipg);
-> +       ret = clk_prepare_enable(host->clk_per);
-> +       if (ret)
-> +               goto out_free;
+> +       if (!IS_ERR(host->pdata->rstc)) {
+> +               reset_control_assert(host->pdata->rstc);
+> +               usleep_range(10, 50);
+> +               reset_control_deassert(host->pdata->rstc);
+> +       }
 > +
-> +       ret = clk_prepare_enable(host->clk_ipg);
-> +       if (ret)
-> +               goto out_clk_per_put;
+>         if (drv_data && drv_data->init) {
+>                 ret = drv_data->init(host);
+>                 if (ret) {
+> @@ -3076,12 +3082,6 @@ int dw_mci_probe(struct dw_mci *host)
+>                 }
+>         }
 >
->         mxcmci_softreset(host);
+> -       if (!IS_ERR(host->pdata->rstc)) {
+> -               reset_control_assert(host->pdata->rstc);
+> -               usleep_range(10, 50);
+> -               reset_control_deassert(host->pdata->rstc);
+> -       }
+> -
+>         setup_timer(&host->cmd11_timer,
+>                     dw_mci_cmd11_timer, (unsigned long)host);
 >
-> @@ -1168,8 +1173,9 @@ static int mxcmci_probe(struct platform_device *pdev)
->                 dma_release_channel(host->dma);
->
->  out_clk_put:
-> -       clk_disable_unprepare(host->clk_per);
->         clk_disable_unprepare(host->clk_ipg);
-> +out_clk_per_put:
-> +       clk_disable_unprepare(host->clk_per);
->
->  out_free:
->         mmc_free_host(mmc);
-> @@ -1212,10 +1218,17 @@ static int __maybe_unused mxcmci_resume(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct mxcmci_host *host = mmc_priv(mmc);
-> +       int ret;
->
-> -       clk_prepare_enable(host->clk_per);
-> -       clk_prepare_enable(host->clk_ipg);
-> -       return 0;
-> +       ret = clk_prepare_enable(host->clk_per);
-> +       if (ret)
-> +               return ret;
-> +
-> +       ret = clk_prepare_enable(host->clk_ipg);
-> +       if (ret)
-> +               clk_disable_unprepare(host->clk_per);
-> +
-> +       return ret;
->  }
->
->  static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
 > --
-> 1.9.1
+> 2.11.0
 >
