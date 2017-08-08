@@ -1,66 +1,136 @@
-From: icenowy-h8G6r0blFSE@public.gmane.org
-Subject: Re: Re: [PATCH v2] mmc: sunxi: Fix NULL pointer
- reference on clk_delays
-Date: Tue, 08 Aug 2017 15:11:27 +0800
-Message-ID: <b9e0274b343e329d82f789a76d62c25c@aosc.io>
-References: <20170808070244.27410-1-wens@csie.org>
- <bbd4680dc97d9913ff6a49e68c360d21@aosc.io>
- <CAGb2v65qN9OFCnjSRH-=a-XnKEfOJXh=Gvv02vtPydgVEnKuGw@mail.gmail.com>
-Reply-To: icenowy-h8G6r0blFSE@public.gmane.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 00/11] mmc: Add Command Queue support
+Date: Tue, 8 Aug 2017 12:26:28 +0300
+Message-ID: <08f77620-3efa-0532-9146-27bcae00b19a@intel.com>
+References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpSq+nNCud=XmnQN_s5Hjfh1LVrA=5enwOw1PrN=n8-yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDS6XAN6ZADRBIGIUXGAKGQE3ZVOLXY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <CAGb2v65qN9OFCnjSRH-=a-XnKEfOJXh=Gvv02vtPydgVEnKuGw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:45687 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751925AbdHHJcy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 8 Aug 2017 05:32:54 -0400
+In-Reply-To: <CAPDyKFpSq+nNCud=XmnQN_s5Hjfh1LVrA=5enwOw1PrN=n8-yw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-=E5=9C=A8 2017-08-08 15:10=EF=BC=8CChen-Yu Tsai =E5=86=99=E9=81=93=EF=BC=9A
-> On Tue, Aug 8, 2017 at 3:07 PM,  <icenowy-h8G6r0blFSE@public.gmane.org> wrote:
->> =E5=9C=A8 2017-08-08 15:02=EF=BC=8CChen-Yu Tsai =E5=86=99=E9=81=93=EF=BC=
-=9A
->>>=20
->>> Some SoCs do not support clk delays for MMC in the clock control=20
->>> unit.
->>> These include the old controllers in A10/A10s/A13/R8, and the new=20
->>> eMMC
->>> controller in A64. The config structure for these controllers do not
->>> specify clk_delays, but the check for this was replaced in commit
->>> b0600daebf31 ("mmc: sunxi: Support controllers that can use both old
->>> and new timings").
->>>=20
->>> This patch adds back the check for clk_delays, and also adds comments
->>> for both checks in sunxi_mmc_clk_set_phase().
->>>=20
->>> Fixes: b0600daebf31 ("mmc: sunxi: Support controllers that can use
->>>                       both old and new timings")
->>> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
->>=20
->>=20
->> Should I add a Tested-by here?
->=20
-> If you tested it, then yes. :)
+On 07/08/17 16:41, Ulf Hansson wrote:
+> On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Hi
+>>
+>> Here is V4 of the hardware command queue patches without the software
+>> command queue patches.
+> 
+> Adrian, again apologize for the delay.
+> 
+> I am reviewing the series now and my intent is to provide comments on
+> each change separately during the week.
+> 
+> However, a couple of overall thoughts:
+> 
+> *) Could you please post some fresh performance measurements, such we
+> can get some real proof on why CMDQ is worth to be merged? If not
+> increased throughput, perhaps we can show some decreased I/O requests
+> latency!?
 
-I tested it on A64 MMC2.
+HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
+2% drop in sequential read speed but no change to sequential write.
 
-So:
+> 
+> **) I have spoken to Linus W offlist - and he is still working on the
+> blkmq port. Although we first need to continue with the
+> re-factorization of the mmc block/core code, to minimize the bad
+> impact of our big mmc claim host lock. We should expect a
+> re-submission of his series quite soonish. However, it's also likely
+> that we need yet another round of re-factoring, before we can complete
+> the port to blkmq.
+> 
+> ***) The reason for bringing up **), is of course because I think
+> deploying CMDQ support would be better done on top of the blkmq
+> interface as it's better suited for these kind of device types. My
+> goal is to reach a better maintenance situation, using more modern mmc
+> block code. We have spoken about this before, however of course I also
+> don't want to delay the CMDQ series. Anyway, let's move forward and
+> see what path we end up taking.
 
-Tested-by: Icenowy Zheng <icenowy-h8G6r0blFSE@public.gmane.org>
+There is no advantage to holding up HW CMDQ.
 
->=20
-> ChenYu
+> 
+>>
+>>
+>> Changes since V3:
+>>         Adjusted ...blk_end_request...() for new block status codes
+>>         Fixed CQHCI transaction descriptor for "no DCMD" case
+>>
+>> Changes since V2:
+>>         Dropped patches that have been applied.
+>>         Re-based
+>>         Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
+>>
+>> Changes since V1:
+>>
+>>         "Share mmc request array between partitions" is dependent
+>>         on changes in "Introduce queue semantics", so added that
+>>         and block fixes:
+>>
+>>         Added "Fix is_waiting_last_req set incorrectly"
+>>         Added "Fix cmd error reset failure path"
+>>         Added "Use local var for mqrq_cur"
+>>         Added "Introduce queue semantics"
+>>
+>> Changes since RFC:
+>>
+>>         Re-based on next.
+>>         Added comment about command queue priority.
+>>         Added some acks and reviews.
+>>
+>>
+>> Adrian Hunter (10):
+>>       mmc: core: Add mmc_retune_hold_now()
+>>       mmc: core: Add members to mmc_request and mmc_data for CQE's
+>>       mmc: host: Add CQE interface
+>>       mmc: core: Turn off CQE before sending commands
+>>       mmc: core: Add support for handling CQE requests
+>>       mmc: mmc: Enable Command Queuing
+>>       mmc: mmc: Enable CQE's
+>>       mmc: block: Prepare CQE data
+>>       mmc: block: Add CQE support
+>>       mmc: sdhci-pci: Add CQHCI support for Intel GLK
+>>
+>> Venkat Gopalakrishnan (1):
+>>       mmc: cqhci: support for command queue enabled host
+>>
+>>  drivers/mmc/core/block.c          |  240 +++++++-
+>>  drivers/mmc/core/block.h          |    7 +
+>>  drivers/mmc/core/bus.c            |    7 +
+>>  drivers/mmc/core/core.c           |  156 ++++-
+>>  drivers/mmc/core/host.c           |    6 +
+>>  drivers/mmc/core/host.h           |    1 +
+>>  drivers/mmc/core/mmc.c            |   30 +-
+>>  drivers/mmc/core/queue.c          |  273 ++++++++-
+>>  drivers/mmc/core/queue.h          |   42 +-
+>>  drivers/mmc/host/Kconfig          |   14 +
+>>  drivers/mmc/host/Makefile         |    1 +
+>>  drivers/mmc/host/cqhci.c          | 1146 +++++++++++++++++++++++++++++++++++++
+>>  drivers/mmc/host/cqhci.h          |  240 ++++++++
+>>  drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
+>>  include/linux/mmc/core.h          |   18 +-
+>>  include/linux/mmc/host.h          |   24 +
+>>  include/trace/events/mmc.h        |   36 +-
+>>  17 files changed, 2354 insertions(+), 40 deletions(-)
+>>  create mode 100644 drivers/mmc/host/cqhci.c
+>>  create mode 100644 drivers/mmc/host/cqhci.h
+>>
+>>
+>> Regards
+>> Adrian
+> 
+> Kind regards
+> Uffe
+> 
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
