@@ -1,51 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] omap/hsmmc: constify dev_pm_ops
-Date: Tue, 8 Aug 2017 13:34:10 +0200
-Message-ID: <CAPDyKFrSTG5yWwfJfbZzBTTqsLAitbXQ_5C-Nkg-Htmr_K7NpQ@mail.gmail.com>
-References: <1502190857-3762-1-git-send-email-doug.lkml@gmail.com>
+Subject: Re: [PATCH v2] mmc: mmc: correct the logic for setting HS400ES signal voltage
+Date: Tue, 8 Aug 2017 13:34:40 +0200
+Message-ID: <CAPDyKFrTYZU2cpAhPU4rYcEmGrCSGqiYDLJ16FHT8+FSACtMtQ@mail.gmail.com>
+References: <1502189641-29092-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:34702 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752104AbdHHLeM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 07:34:12 -0400
-Received: by mail-qk0-f176.google.com with SMTP id u139so17714506qka.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Aug 2017 04:34:11 -0700 (PDT)
-In-Reply-To: <1502190857-3762-1-git-send-email-doug.lkml@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1502189641-29092-1-git-send-email-haibo.chen@nxp.com>
+Sender: stable-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, "# 4.0+" <stable@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Wilson <doug.lkml@gmail.com>
-Cc: linux-omap <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Wilson <doug.wilson@gmail.com>
 
-On 8 August 2017 at 13:14, Doug Wilson <doug.lkml@gmail.com> wrote:
-> dev_pm_ops is not supposed to change at runtime. Marking it
-> constant.
+On 8 August 2017 at 12:54, Haibo Chen <haibo.chen@nxp.com> wrote:
+> Change the default err value to -EINVAL, make sure the card only
+> has type EXT_CSD_CARD_TYPE_HS400_1_8V also do the signal voltage
+> setting when select hs400es mode.
 >
-> Signed-off-by: Doug Wilson <doug.wilson@gmail.com>
+> Fixes: commit 1720d3545b77 ("mmc: core: switch to 1V8 or 1V2 for hs400es mode")
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-This doesn't apply on my next branch, please re-base it.
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 2 +-
+>  drivers/mmc/core/mmc.c | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 04ff3c9..a280c7f 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2322,7 +2322,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
->         return 0;
->  }
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 30a13f0..83d9468 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1289,7 +1289,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>  static int mmc_select_hs400es(struct mmc_card *card)
+>  {
+>         struct mmc_host *host = card->host;
+> -       int err = 0;
+> +       int err = -EINVAL;
+>         u8 val;
 >
-> -static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
-> +static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
->         SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
->         .runtime_suspend = omap_hsmmc_runtime_suspend,
->         .runtime_resume = omap_hsmmc_runtime_resume,
+>         if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
 > --
-> 2.7.4
+> 1.9.1
 >
