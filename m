@@ -1,136 +1,56 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 00/11] mmc: Add Command Queue support
-Date: Tue, 8 Aug 2017 12:26:28 +0300
-Message-ID: <08f77620-3efa-0532-9146-27bcae00b19a@intel.com>
-References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFpSq+nNCud=XmnQN_s5Hjfh1LVrA=5enwOw1PrN=n8-yw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmc: fix switch to 1V8 for hs400es mode
+Date: Tue, 8 Aug 2017 12:12:30 +0200
+Message-ID: <CAPDyKFpE+=wYYd9Giub9eKCD5Jf9Z-Now8T9jBataGE3teD82w@mail.gmail.com>
+References: <1499418535-10161-1-git-send-email-haibo.chen@nxp.com> <ebe80597-2f95-1e08-937a-255153bfb3fb@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:45687 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751925AbdHHJcy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Aug 2017 05:32:54 -0400
-In-Reply-To: <CAPDyKFpSq+nNCud=XmnQN_s5Hjfh1LVrA=5enwOw1PrN=n8-yw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <ebe80597-2f95-1e08-937a-255153bfb3fb@rock-chips.com>
+Sender: stable-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Haibo Chen <haibo.chen@nxp.com>, "# 4.0+" <stable@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 07/08/17 16:41, Ulf Hansson wrote:
-> On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Hi
+On 11 July 2017 at 02:38, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Hi Haibo,
+>
+> On 2017/7/7 17:08, Haibo Chen wrote:
 >>
->> Here is V4 of the hardware command queue patches without the software
->> command queue patches.
-> 
-> Adrian, again apologize for the delay.
-> 
-> I am reviewing the series now and my intent is to provide comments on
-> each change separately during the week.
-> 
-> However, a couple of overall thoughts:
-> 
-> *) Could you please post some fresh performance measurements, such we
-> can get some real proof on why CMDQ is worth to be merged? If not
-> increased throughput, perhaps we can show some decreased I/O requests
-> latency!?
+>> Change the default err value to -EINVAL, otherwise signal voltage
+>> will not change to 1V8 if card or controller only support 1V8 for
+>> HS400ES mode.
+>>
+>
+> This description is misleading as hs400(es) must be running under
+> 1.8v vqmmc. But the patch itself is correct.
+>
+>
+>> Fixes: commit 1720d3545b77 ("mmc: core: switch to 1V8 or 1V2 for hs400es
+>> mode")
+>> Cc: <stable@vger.kernel.org>
+>> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+>> ---
+>>   drivers/mmc/core/mmc.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 92c6167..336a950 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1289,7 +1289,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+>>   static int mmc_select_hs400es(struct mmc_card *card)
+>>   {
+>>         struct mmc_host *host = card->host;
+>> -       int err = 0;
+>> +       int err = -EINVAL;
+>>         u8 val;
+>>         if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
+>>
+>
 
-HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
-2% drop in sequential read speed but no change to sequential write.
+Seems like Haibo has been busy. Shawn, if you think it's important,
+could you pick up this and re-submit?
 
-> 
-> **) I have spoken to Linus W offlist - and he is still working on the
-> blkmq port. Although we first need to continue with the
-> re-factorization of the mmc block/core code, to minimize the bad
-> impact of our big mmc claim host lock. We should expect a
-> re-submission of his series quite soonish. However, it's also likely
-> that we need yet another round of re-factoring, before we can complete
-> the port to blkmq.
-> 
-> ***) The reason for bringing up **), is of course because I think
-> deploying CMDQ support would be better done on top of the blkmq
-> interface as it's better suited for these kind of device types. My
-> goal is to reach a better maintenance situation, using more modern mmc
-> block code. We have spoken about this before, however of course I also
-> don't want to delay the CMDQ series. Anyway, let's move forward and
-> see what path we end up taking.
-
-There is no advantage to holding up HW CMDQ.
-
-> 
->>
->>
->> Changes since V3:
->>         Adjusted ...blk_end_request...() for new block status codes
->>         Fixed CQHCI transaction descriptor for "no DCMD" case
->>
->> Changes since V2:
->>         Dropped patches that have been applied.
->>         Re-based
->>         Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
->>
->> Changes since V1:
->>
->>         "Share mmc request array between partitions" is dependent
->>         on changes in "Introduce queue semantics", so added that
->>         and block fixes:
->>
->>         Added "Fix is_waiting_last_req set incorrectly"
->>         Added "Fix cmd error reset failure path"
->>         Added "Use local var for mqrq_cur"
->>         Added "Introduce queue semantics"
->>
->> Changes since RFC:
->>
->>         Re-based on next.
->>         Added comment about command queue priority.
->>         Added some acks and reviews.
->>
->>
->> Adrian Hunter (10):
->>       mmc: core: Add mmc_retune_hold_now()
->>       mmc: core: Add members to mmc_request and mmc_data for CQE's
->>       mmc: host: Add CQE interface
->>       mmc: core: Turn off CQE before sending commands
->>       mmc: core: Add support for handling CQE requests
->>       mmc: mmc: Enable Command Queuing
->>       mmc: mmc: Enable CQE's
->>       mmc: block: Prepare CQE data
->>       mmc: block: Add CQE support
->>       mmc: sdhci-pci: Add CQHCI support for Intel GLK
->>
->> Venkat Gopalakrishnan (1):
->>       mmc: cqhci: support for command queue enabled host
->>
->>  drivers/mmc/core/block.c          |  240 +++++++-
->>  drivers/mmc/core/block.h          |    7 +
->>  drivers/mmc/core/bus.c            |    7 +
->>  drivers/mmc/core/core.c           |  156 ++++-
->>  drivers/mmc/core/host.c           |    6 +
->>  drivers/mmc/core/host.h           |    1 +
->>  drivers/mmc/core/mmc.c            |   30 +-
->>  drivers/mmc/core/queue.c          |  273 ++++++++-
->>  drivers/mmc/core/queue.h          |   42 +-
->>  drivers/mmc/host/Kconfig          |   14 +
->>  drivers/mmc/host/Makefile         |    1 +
->>  drivers/mmc/host/cqhci.c          | 1146 +++++++++++++++++++++++++++++++++++++
->>  drivers/mmc/host/cqhci.h          |  240 ++++++++
->>  drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
->>  include/linux/mmc/core.h          |   18 +-
->>  include/linux/mmc/host.h          |   24 +
->>  include/trace/events/mmc.h        |   36 +-
->>  17 files changed, 2354 insertions(+), 40 deletions(-)
->>  create mode 100644 drivers/mmc/host/cqhci.c
->>  create mode 100644 drivers/mmc/host/cqhci.h
->>
->>
->> Regards
->> Adrian
-> 
-> Kind regards
-> Uffe
-> 
-
+Kind regards
+Uffe
