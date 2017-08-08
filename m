@@ -1,51 +1,55 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/2] mmc: sdhci: Add sdma_boundary to sdhci_host
-Date: Tue, 8 Aug 2017 12:38:35 +0200
-Message-ID: <CAPDyKFq5nGRqZQgYyp-UZZ-VbXTLNW3YseoDATh93JpDku4ibw@mail.gmail.com>
-References: <20170803124614.21788-1-srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH] mmc: wmt-sdmmc: Handle return value of clk_prepare_enable
+Date: Tue, 8 Aug 2017 12:38:40 +0200
+Message-ID: <CAPDyKFrwMO6QFz0dau4UZZa6p_NqKZGBR0Wzc=ZCGQ1r12RuFw@mail.gmail.com>
+References: <0d9fccf8e14a639274115cc43a97804ef059d8b1.1502171094.git.arvind.yadav.cs@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170803124614.21788-1-srinivas.kandagatla@linaro.org>
+In-Reply-To: <0d9fccf8e14a639274115cc43a97804ef059d8b1.1502171094.git.arvind.yadav.cs@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+To: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Cc: Tony Prisk <linux@prisktech.co.nz>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 August 2017 at 14:46,  <srinivas.kandagatla@linaro.org> wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On 8 August 2017 at 07:46, Arvind Yadav <arvind.yadav.cs@gmail.com> wrote:
+> clk_prepare_enable() can fail here and we must check its return value.
 >
-> This patchset adds fix to support sdhci controller which have issues
-> when sdma boundary buffer bits are programmed in Block Size Register (0x04)
-> when using ADMA.
->
-> First patch adds member to struct sdhci_host to allow drivers to
-> specify sdma_buffer_boundary value that it can support and second
-> one sets sdma_boundary to zero in msm sdhci driver.
->
-> Tested on DB410c with WLAN SDIO card.
->
-> thanks,
-> srini
->
-> Changes since v2:
->         - Chanaged local variable to fix line wrap.
->         - Changed sdma_buffer_boundary_arg to sdma_boundary suggested by Adrian
->
-> Srinivas Kandagatla (2):
->   mmc: sdhci: add sdma_boundary member to struct sdhci_host
->   mmc: sdhci-msm: set sdma_boundary to zero
->
->  drivers/mmc/host/sdhci-msm.c |  1 +
->  drivers/mmc/host/sdhci.c     | 13 ++++++++-----
->  drivers/mmc/host/sdhci.h     |  3 +++
->  3 files changed, 12 insertions(+), 5 deletions(-)
->
-> --
-> 2.9.3
->
+> Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 21ebba8..e64f930 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -856,7 +856,9 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>                 goto fail5;
+>         }
+>
+> -       clk_prepare_enable(priv->clk_sdmmc);
+> +       ret = clk_prepare_enable(priv->clk_sdmmc);
+> +       if (ret)
+> +               goto fail6;
+>
+>         /* configure the controller to a known 'ready' state */
+>         wmt_reset_hardware(mmc);
+> @@ -866,6 +868,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>         dev_info(&pdev->dev, "WMT SDHC Controller initialized\n");
+>
+>         return 0;
+> +fail6:
+> +       clk_put(priv->clk_sdmmc);
+>  fail5:
+>         free_irq(dma_irq, priv);
+>  fail4:
+> --
+> 1.9.1
+>
