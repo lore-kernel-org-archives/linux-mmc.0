@@ -1,85 +1,63 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
- cards
-Date: Tue, 8 Aug 2017 20:54:45 +0200
-Message-ID: <20170808185445.GA2170@katana>
-References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
- <20170803074351.GC19671@verge.net.au>
- <20170803155357.GA3826@verge.net.au>
- <20170803155520.GB3826@verge.net.au>
+From: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Subject: [PATCH] mmc/block: fix lockdep splat when removing mmc_block module
+Date: Wed, 09 Aug 2017 01:48:59 +0200
+Message-ID: <c684886f6f54531687e375fd81c36886f4013b41.1502235933.git.mirq-linux@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="Dxnq1zWXvFF0Q93v"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:58386 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752295AbdHHSyr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Aug 2017 14:54:47 -0400
-Content-Disposition: inline
-In-Reply-To: <20170803155520.GB3826@verge.net.au>
+Received: from 78-11-180-123.static.ip.netia.com.pl ([78.11.180.123]:35728
+        "EHLO rere.qmqm.pl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751989AbdHIACD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 20:02:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: linux-mmc@vger.kernel.org
 
+Fix lockdep splat introduced in v4.13-rc4.
 
---Dxnq1zWXvFF0Q93v
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+[  266.297226] ------------[ cut here ]------------
+[  266.300078] WARNING: CPU: 2 PID: 176 at /mnt/src/jaja/git/tf300t/include/linux/blkdev.h:657 mmc_blk_remove_req+0xd0/0xe8 [mmc_block]
+[  266.302937] Modules linked in: mmc_block(-) sdhci_tegra sdhci_pltfm sdhci pwrseq_simple pwrseq_emmc mmc_core
+[  266.305941] CPU: 2 PID: 176 Comm: rmmod Tainted: G        W       4.13.0-rc4mq-00208-gb691e67724b8-dirty #694
+[  266.308852] Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
+[  266.311719] [<b011144c>] (unwind_backtrace) from [<b010ca54>] (show_stack+0x18/0x1c)
+[  266.314664] [<b010ca54>] (show_stack) from [<b062e3f4>] (dump_stack+0x84/0x98)
+[  266.317644] [<b062e3f4>] (dump_stack) from [<b01214f4>] (__warn+0xf4/0x10c)
+[  266.320542] [<b01214f4>] (__warn) from [<b01215d4>] (warn_slowpath_null+0x28/0x30)
+[  266.323534] [<b01215d4>] (warn_slowpath_null) from [<af067858>] (mmc_blk_remove_req+0xd0/0xe8 [mmc_block])
+[  266.326568] [<af067858>] (mmc_blk_remove_req [mmc_block]) from [<af068f40>] (mmc_blk_remove_parts.constprop.6+0x50/0x64 [mmc_block])
+[  266.329678] [<af068f40>] (mmc_blk_remove_parts.constprop.6 [mmc_block]) from [<af0693b8>] (mmc_blk_remove+0x24/0x140 [mmc_block])
+[  266.332894] [<af0693b8>] (mmc_blk_remove [mmc_block]) from [<af0052ec>] (mmc_bus_remove+0x20/0x28 [mmc_core])
+[  266.336198] [<af0052ec>] (mmc_bus_remove [mmc_core]) from [<b046aa64>] (device_release_driver_internal+0x164/0x200)
+[  266.339367] [<b046aa64>] (device_release_driver_internal) from [<b046ab54>] (driver_detach+0x40/0x74)
+[  266.342537] [<b046ab54>] (driver_detach) from [<b046982c>] (bus_remove_driver+0x68/0xdc)
+[  266.345660] [<b046982c>] (bus_remove_driver) from [<af06ad40>] (mmc_blk_exit+0xc/0x2cc [mmc_block])
+[  266.348875] [<af06ad40>] (mmc_blk_exit [mmc_block]) from [<b01aee30>] (SyS_delete_module+0x1c4/0x254)
+[  266.352068] [<b01aee30>] (SyS_delete_module) from [<b0108480>] (ret_fast_syscall+0x0/0x34)
+[  266.355308] ---[ end trace f68728a0d3053b72 ]---
 
+Fixes: 7c84b8b43d3d ("mmc: block: bypass the queue even if usage is present for hotplug")
+Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+---
+ drivers/mmc/core/block.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-> As it is an "RFT" I'm happy to apply it if you repost
-> it or otherwise indicate that is what you would like to happen.
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index e5938c791330..f1bbfd389367 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2170,7 +2170,9 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		 * from being accepted.
+ 		 */
+ 		card = md->queue.card;
++		spin_lock_irq(md->queue.queue->queue_lock);
+ 		queue_flag_set(QUEUE_FLAG_BYPASS, md->queue.queue);
++		spin_unlock_irq(md->queue.queue->queue_lock);
+ 		blk_set_queue_dying(md->queue.queue);
+ 		mmc_cleanup_queue(&md->queue);
+ 		if (md->disk->flags & GENHD_FL_UP) {
+-- 
+2.11.0
 
-As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
-
-H3:
-- one slot worked flawlessly
-- one slot could load FW but failed to read status
-(with SDR50: both slots work)
-
-M3-W:
-- both slots could not load the firmware
-(with SDR50: one slot works, one fails to load FW)
-
-The cards, however, were correctly identified as SDR104 and there were
-no tuning errors and no other SDHI related warnings.
-
-Changing TDSEL in the PFC did not change anything.
-
-The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
-length of 100mm. Measuring a direct line from the SoC to the slots,
-I'd think we are very much on the edge of that. And given the length
-of the SDIO adapter, we are surely exceeding that :(
-
-Maybe we should do more tests with more boards? On the other hand, it
-seems the WiFi card is running out of the specs.
-
-So much for now. I'll sleep over it and try to get more data tomorrow.
-
-Regards,
-
-   Wolfram
-
-
---Dxnq1zWXvFF0Q93v
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmKCPAACgkQFA3kzBSg
-KbZ/YhAAtAb8x24atSDy3O3RlAqNRqJ7SJhXTxB3aF0KfwWcUQsyVpcUKRpBltNB
-5PboVOwsTjH7y3gIcf5Ed3WUHHqWqPqlQMP2rmNYWN/B6ryAmXv1DIq9ZOo2bDB0
-d0IInhgoFQibsFott+nV0jpFX+TrCFa8ehLV98M4mZFaKdpJjMVLsza2ey1EyaBT
-5E8waEMjq+Q9n0jwLiyubesEFKP82rQ2tl6UKepooqrMc23Zg3wYtPmqHuXMQLHe
-+6RPhlwjSRcu1mvbOaQKAD4mDXX1K+7RDwSwQPpZxkpKHLPH8fv8ND4xMb5oJCu0
-CbBVtL42hTm4AIPyRzNT4LMqnyJTfMv0QZtkzyeFQIZGJJYutFHtbnQTheT9m7Lc
-IjvZIl7mQeNbmWNyIn5xQBAFbIyIJ7AN20GTsNYb4dlntU42n/+5Nqn+/YY6kIps
-jjxkczvTlKBPQG8Ii+8tKNcoUMmqGhu/czadsT6OgaO7EaPd/Tk4yjRzIdRKNkBM
-VesldVUsVKt6kKxHCFfxyanfO8n7T7kwS+87GYTlr5gz/LWsVMkD/x7AyhubMQjM
-4EUW46ZbCgUyStUDTIEA3KanutCbOjh4bZITyC2VaqaQGmgyukRqeT26tMBalr/3
-BXyrKD1Jw2nGuW/dukZ7HXmKaHxykzBL3qzSrz4zPLSNmm+yCAI=
-=BTMy
------END PGP SIGNATURE-----
-
---Dxnq1zWXvFF0Q93v--
