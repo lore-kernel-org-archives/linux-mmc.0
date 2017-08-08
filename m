@@ -1,51 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
- open-ending mode
-Date: Tue, 8 Aug 2017 19:02:09 +0200
-Message-ID: <CAPDyKFo7a1snT6kiDu8TmvMEOnhMUuXkr44Q9PxyyJJ2O4gTog@mail.gmail.com>
-References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFqqjyOmAQkaa6DjJKs+BF-sOdN_jAtAR4CZg+vYVCLt0w@mail.gmail.com> <20170808114757.GB1674@katana>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
+ cards
+Date: Tue, 8 Aug 2017 20:54:45 +0200
+Message-ID: <20170808185445.GA2170@katana>
+References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
+ <20170803074351.GC19671@verge.net.au>
+ <20170803155357.GA3826@verge.net.au>
+ <20170803155520.GB3826@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="Dxnq1zWXvFF0Q93v"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f179.google.com ([209.85.216.179]:33093 "EHLO
-        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751833AbdHHRCK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 13:02:10 -0400
-Received: by mail-qt0-f179.google.com with SMTP id a18so23259941qta.0
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Aug 2017 10:02:10 -0700 (PDT)
-In-Reply-To: <20170808114757.GB1674@katana>
+Received: from www.zeus03.de ([194.117.254.33]:58386 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752295AbdHHSyr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 8 Aug 2017 14:54:47 -0400
+Content-Disposition: inline
+In-Reply-To: <20170803155520.GB3826@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 8 August 2017 at 13:47, Wolfram Sang <wsa@the-dreams.de> wrote:
-> On Tue, Aug 08, 2017 at 12:37:31PM +0200, Ulf Hansson wrote:
->> On 8 August 2017 at 02:27, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> > We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
->> > mode as it is expected behaviour and most of the backup partition
->> > tables should be located near some of the last blocks which will
->> > always make open-ending read exceed the capacity of cards.
->> >
->> > Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
->> > Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
->> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> > Tested-by: Shawn Guo <shawnguo@kernel.org>
->> > Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
->>
->> Thanks, applied for fixes!
->
-> Ulf, I would like some more discussion about this patch but need time to
-> think about it some more. I'll try to have my answer ready by this
-> evening, but I'd appreciate to have at least one day to respond to a
-> patch. Otherwise it is difficult for me to focus on the other work I
-> have. Could that meet your workflow?
 
-My apologies, trying to catch up with everything and I was too fast. :-)
+--Dxnq1zWXvFF0Q93v
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-I have dropped the change from my fixes and next branch. Awaiting an
-ack/reviewed by from you first before I apply again.
 
-Kind regards
-Uffe
+> As it is an "RFT" I'm happy to apply it if you repost
+> it or otherwise indicate that is what you would like to happen.
+
+As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
+
+H3:
+- one slot worked flawlessly
+- one slot could load FW but failed to read status
+(with SDR50: both slots work)
+
+M3-W:
+- both slots could not load the firmware
+(with SDR50: one slot works, one fails to load FW)
+
+The cards, however, were correctly identified as SDR104 and there were
+no tuning errors and no other SDHI related warnings.
+
+Changing TDSEL in the PFC did not change anything.
+
+The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
+length of 100mm. Measuring a direct line from the SoC to the slots,
+I'd think we are very much on the edge of that. And given the length
+of the SDIO adapter, we are surely exceeding that :(
+
+Maybe we should do more tests with more boards? On the other hand, it
+seems the WiFi card is running out of the specs.
+
+So much for now. I'll sleep over it and try to get more data tomorrow.
+
+Regards,
+
+   Wolfram
+
+
+--Dxnq1zWXvFF0Q93v
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmKCPAACgkQFA3kzBSg
+KbZ/YhAAtAb8x24atSDy3O3RlAqNRqJ7SJhXTxB3aF0KfwWcUQsyVpcUKRpBltNB
+5PboVOwsTjH7y3gIcf5Ed3WUHHqWqPqlQMP2rmNYWN/B6ryAmXv1DIq9ZOo2bDB0
+d0IInhgoFQibsFott+nV0jpFX+TrCFa8ehLV98M4mZFaKdpJjMVLsza2ey1EyaBT
+5E8waEMjq+Q9n0jwLiyubesEFKP82rQ2tl6UKepooqrMc23Zg3wYtPmqHuXMQLHe
++6RPhlwjSRcu1mvbOaQKAD4mDXX1K+7RDwSwQPpZxkpKHLPH8fv8ND4xMb5oJCu0
+CbBVtL42hTm4AIPyRzNT4LMqnyJTfMv0QZtkzyeFQIZGJJYutFHtbnQTheT9m7Lc
+IjvZIl7mQeNbmWNyIn5xQBAFbIyIJ7AN20GTsNYb4dlntU42n/+5Nqn+/YY6kIps
+jjxkczvTlKBPQG8Ii+8tKNcoUMmqGhu/czadsT6OgaO7EaPd/Tk4yjRzIdRKNkBM
+VesldVUsVKt6kKxHCFfxyanfO8n7T7kwS+87GYTlr5gz/LWsVMkD/x7AyhubMQjM
+4EUW46ZbCgUyStUDTIEA3KanutCbOjh4bZITyC2VaqaQGmgyukRqeT26tMBalr/3
+BXyrKD1Jw2nGuW/dukZ7HXmKaHxykzBL3qzSrz4zPLSNmm+yCAI=
+=BTMy
+-----END PGP SIGNATURE-----
+
+--Dxnq1zWXvFF0Q93v--
