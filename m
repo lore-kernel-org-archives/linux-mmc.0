@@ -1,41 +1,48 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 1/2] ARM: dts: am571x-idk: Fix GPIO polarity for MMC1 card detect
-Date: Tue, 8 Aug 2017 10:50:56 +0530
-Message-ID: <20170808052057.24433-1-kishon@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Arvind Yadav <arvind.yadav.cs@gmail.com>
+Subject: [PATCH] mmc: wmt-sdmmc: Handle return value of clk_prepare_enable
+Date: Tue,  8 Aug 2017 11:16:38 +0530
+Message-ID: <0d9fccf8e14a639274115cc43a97804ef059d8b1.1502171094.git.arvind.yadav.cs@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fllnx209.ext.ti.com ([198.47.19.16]:60874 "EHLO
-        fllnx209.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750849AbdHHFVz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 01:21:55 -0400
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:38712 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750736AbdHHFrC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 01:47:02 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux@prisktech.co.nz, ulf.hansson@linaro.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-The GPIO polarity for MMC1 card detect is set to '0' which means
-active-high. However the polarity should be active-low. Fix it
-here.
+clk_prepare_enable() can fail here and we must check its return value.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Arvind Yadav <arvind.yadav.cs@gmail.com>
 ---
- arch/arm/boot/dts/am571x-idk.dts | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/wmt-sdmmc.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/am571x-idk.dts b/arch/arm/boot/dts/am571x-idk.dts
-index 7b207835b2d1..adc70fb091a2 100644
---- a/arch/arm/boot/dts/am571x-idk.dts
-+++ b/arch/arm/boot/dts/am571x-idk.dts
-@@ -68,7 +68,7 @@
- 	status = "okay";
- 	vmmc-supply = <&ldo1_reg>;
- 	bus-width = <4>;
--	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
-+	cd-gpios = <&gpio6 27 GPIO_ACTIVE_LOW>; /* gpio 219 */
- };
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 21ebba8..e64f930 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -856,7 +856,9 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 		goto fail5;
+ 	}
  
- &omap_dwc3_2 {
+-	clk_prepare_enable(priv->clk_sdmmc);
++	ret = clk_prepare_enable(priv->clk_sdmmc);
++	if (ret)
++		goto fail6;
+ 
+ 	/* configure the controller to a known 'ready' state */
+ 	wmt_reset_hardware(mmc);
+@@ -866,6 +868,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	dev_info(&pdev->dev, "WMT SDHC Controller initialized\n");
+ 
+ 	return 0;
++fail6:
++	clk_put(priv->clk_sdmmc);
+ fail5:
+ 	free_irq(dma_irq, priv);
+ fail4:
 -- 
-2.11.0
+1.9.1
 
