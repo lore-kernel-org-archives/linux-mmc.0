@@ -1,29 +1,35 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: omap_hsmmc: Add CMD23 capability to omap_hsmmc driver
-Date: Tue, 8 Aug 2017 12:37:25 +0200
-Message-ID: <CAPDyKFo7dyYFTBtwshqk7p46jUMr_2J55iC=NVi6-a0r2G_bcw@mail.gmail.com>
-References: <20170808051815.24219-1-kishon@ti.com>
+Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Tue, 8 Aug 2017 12:37:31 +0200
+Message-ID: <CAPDyKFqqjyOmAQkaa6DjJKs+BF-sOdN_jAtAR4CZg+vYVCLt0w@mail.gmail.com>
+References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170808051815.24219-1-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:35960 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751464AbdHHKhd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 06:37:33 -0400
+Received: by mail-qk0-f172.google.com with SMTP id d136so17253680qkg.3
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Aug 2017 03:37:32 -0700 (PDT)
+In-Reply-To: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On 8 August 2017 at 07:18, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> omap_hsmmc driver always relied on CMD12 to stop transmission.
-> However if CMD12 is not issued at the correct timing, the card will
-> indicate a out of range error. With certain cards in some of the
-> DRA7 based boards, -EIO error is observed. By Adding CMD23 capability,
-> the MMC core will send MMC_SET_BLOCK_COUNT command before
-> MMC_READ_MULTIPLE_BLOCK/MMC_WRITE_MULTIPLE_BLOCK commands.
+On 8 August 2017 at 02:27, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+> mode as it is expected behaviour and most of the backup partition
+> tables should be located near some of the last blocks which will
+> always make open-ending read exceed the capacity of cards.
 >
-> commit a04e6bae9e6f12 ("mmc: core: check also R1 response for
-> stop commands") exposed this bug in omap_hsmmc driver.
->
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+> Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Tested-by: Shawn Guo <shawnguo@kernel.org>
+> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
 Thanks, applied for fixes!
 
@@ -31,22 +37,70 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 04ff3c97a535..2ab4788d021f 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2086,7 +2086,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->         mmc->max_seg_size = mmc->max_req_size;
+> Changes in v2:
+> - fix a typo and introduce STOP_ERROR
+> - reword the comment and always include a description from the spec if possible
 >
->         mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -                    MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
-> +                    MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  drivers/mmc/core/block.c | 30 +++++++++++++++++++++++-------
+>  1 file changed, 23 insertions(+), 7 deletions(-)
 >
->         mmc->caps |= mmc_pdata(host)->caps;
->         if (mmc->caps & MMC_CAP_8_BIT_DATA)
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index a11bead..38267a0 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1360,18 +1360,34 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>         }
+>  }
+>
+> -#define CMD_ERRORS                                                     \
+> -       (R1_OUT_OF_RANGE |      /* Command argument out of range */     \
+> -        R1_ADDRESS_ERROR |     /* Misaligned address */                \
+> +#define STOP_ERRORS                                                    \
+> +       (R1_ADDRESS_ERROR |     /* Misaligned address */                \
+>          R1_BLOCK_LEN_ERROR |   /* Transferred block length incorrect */\
+>          R1_WP_VIOLATION |      /* Tried to write to protected block */ \
+>          R1_CARD_ECC_FAILED |   /* Card ECC failed */                   \
+>          R1_CC_ERROR |          /* Card controller error */             \
+>          R1_ERROR)              /* General/unknown error */
+>
+> -static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
+> +#define CMD_ERRORS (STOP_ERRORS | \
+> +                   R1_OUT_OF_RANGE) /* Command argument out of range */
+> +
+> +static bool mmc_blk_has_cmd_err(struct mmc_card *card, struct mmc_command *cmd)
+>  {
+> -       if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+> +       struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
+> +       u32 error = (md->flags & MMC_BLK_CMD23) ? CMD_ERRORS : STOP_ERRORS;
+> +
+> +       /*
+> +        * Per the SD specification(physical layer version 4.10),
+> +        * section 4.3.3, it explicitly states that "When the last
+> +        * block of user area is read using CMD18, the host should
+> +        * ignore OUT_OF_RANGE error that may occur even the sequence
+> +        * is correct". And JESD84-B51 for eMMC also has a similar
+> +        * statement on section 6.8.3. As CMD23 is optional for either
+> +        * cards or hosts, so we need to check the MMC_BLK_CMD23 flag
+> +        * to prevent the OUT_OF_RANGE error for open-ending multiple
+> +        * block operations as it's normal behaviour.
+> +        */
+> +       if (!cmd->error && cmd->resp[0] & error)
+>                 cmd->error = -EIO;
+>
+>         return cmd->error;
+> @@ -1398,8 +1414,8 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+>          * stop.error indicates a problem with the stop command.  Data
+>          * may have been transferred, or may still be transferring.
+>          */
+> -       if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+> -           brq->data.error) {
+> +       if (brq->sbc.error || brq->cmd.error ||
+> +           mmc_blk_has_cmd_err(card, &brq->stop) || brq->data.error) {
+>                 switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+>                 case ERR_RETRY:
+>                         return MMC_BLK_RETRY;
 > --
-> 2.11.0
+> 1.9.1
+>
 >
