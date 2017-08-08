@@ -1,39 +1,46 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sunxi: Fix NULL pointer reference
- on clk_delays
-Date: Tue, 8 Aug 2017 12:37:44 +0200
-Message-ID: <CAPDyKFr+Ajx5yBcTR2555w-7tamSY8ozpn-1S2gWCQSZaGAWcQ@mail.gmail.com>
-References: <20170808070244.27410-1-wens@csie.org>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci: ignore restoring the I/O state if MMC_POWER_OFF
+Date: Tue, 8 Aug 2017 12:38:07 +0200
+Message-ID: <CAPDyKFr1U+tG8tf6o_xjxA384GzNTAeBMZWCj2SQ2gKHh_30Og@mail.gmail.com>
+References: <1501788520-26244-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDF57NG2XIHRB6NIU3GAKGQEF3EK6CI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170808070244.27410-1-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:33894 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752227AbdHHKiI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 06:38:08 -0400
+Received: by mail-qk0-f177.google.com with SMTP id u139so17117186qka.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Aug 2017 03:38:08 -0700 (PDT)
+In-Reply-To: <1501788520-26244-1-git-send-email-zjwu@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhoujie Wu <zjwu@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jimmy Xu <zmxu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Wilson Ding <dingwei@marvell.com>, Kostya Porotchkin <kostap@marvell.com>, Hanna Hawa <hannah@marvell.com>, hongd@marvell.com, Doug Jones <dougj@marvell.com>, Ryan Gao <ygao@marvell.com>, "Wei(SOCP) Liu" <liuw@marvell.com>, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 8 August 2017 at 09:02, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
-> Some SoCs do not support clk delays for MMC in the clock control unit.
-> These include the old controllers in A10/A10s/A13/R8, and the new eMMC
-> controller in A64. The config structure for these controllers do not
-> specify clk_delays, but the check for this was replaced in commit
-> b0600daebf31 ("mmc: sunxi: Support controllers that can use both old
-> and new timings").
+On 3 August 2017 at 21:28, Zhoujie Wu <zjwu@marvell.com> wrote:
+> One issue was found on a removable high speed sd card with
+> runtime pm enabled.
+> When SD card is unplugged, it keep printing "Switching to 3.3V
+> signalling voltage failed".
+> And found below sequence triggers the error.
 >
-> This patch adds back the check for clk_delays, and also adds comments
-> for both checks in sunxi_mmc_clk_set_phase().
+> mmc_rescan
+>         -> mmc_sd_detect
+>                 -> mmc_power_off  -- mmc->ios.vdd is updated to 0.
+>         -> mmc_claim_host
+>                 -> sdhci_runtime_resume_host
+>                         -> sdhci_start_signal_voltage_switch
+>                                 -> mmc_regulator_set_vqmmc
+>                                         -> mmc_ocrbitnum_to_vdd
 >
-> Fixes: b0600daebf31 ("mmc: sunxi: Support controllers that can use
->                       both old and new timings")
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> When mmc_ocrbitnum_to_vdd is called, the mmc->ios.vdd is 0, so it
+> always return -EINVAL. The signal switch will always fail and
+> print out warning.
+> Ignore restoring the I/O state when runtime resume if MMC_POWER_OFF.
+>
+> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Thanks, applied for next!
 
@@ -41,40 +48,27 @@ Kind regards
 Uffe
 
 > ---
-> This fixes an mmc regression on A10/A10s/A13/R8 and A64 introduced
-> by the A83T mmc patches.
+> This patch is the updated version for my previous patch
+> mmc: sdhci: ignore 3.3v voltage switch if ios.vdd is 0.
+> Suggested by Adrian, so added his name in signed-off-by as well.
 >
-> v1 was inlined in a reply to "mmc: sunxi: fix new timings mode on A64
-> EMMC (MMC2) controller"
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> Changes since v1:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 98700f9..c3f67f1 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2934,7 +2934,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
 >
->   - Polished comments
+>         sdhci_init(host, 0);
 >
-> I've tested this on my A10 Cubieboard and A20 Cubieboard2.
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 3777517982dd..9dc6d726ec49 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -722,9 +722,14 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
->  {
->         int index;
->
-> +       /* clk controller delays not used under new timings mode */
->         if (host->use_new_timings)
->                 return 0;
->
-> +       /* some old controllers don't support delays */
-> +       if (!host->cfg->clk_delays)
-> +               return 0;
-> +
->         /* determine delays */
->         if (rate <= 400000) {
->                 index = SDXC_CLK_400K;
+> -       if (mmc->ios.power_mode != MMC_POWER_UNDEFINED) {
+> +       if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
+> +           mmc->ios.power_mode != MMC_POWER_OFF) {
+>                 /* Force clock and power re-program */
+>                 host->pwr = 0;
+>                 host->clock = 0;
 > --
-> 2.13.3
+> 1.9.1
 >
