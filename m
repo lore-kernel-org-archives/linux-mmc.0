@@ -1,39 +1,37 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFT 2/2] mmc: renesas_sdhi: document version of RZ/A1 instance
-Date: Wed,  9 Aug 2017 21:14:52 +0200
-Message-ID: <20170809191452.5254-3-wsa+renesas@sang-engineering.com>
-References: <20170809191452.5254-1-wsa+renesas@sang-engineering.com>
+From: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Subject: [PATCH 0/4] mmc/sdhci: sdhci_set_bus_width() cleanup
+Date: Wed, 09 Aug 2017 22:36:03 +0200
+Message-ID: <cover.1502310654.git.mirq-linux@rere.qmqm.pl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([88.99.104.3]:33419 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751560AbdHITPA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 9 Aug 2017 15:15:00 -0400
-In-Reply-To: <20170809191452.5254-1-wsa+renesas@sang-engineering.com>
+Received: from 78-11-180-123.static.ip.netia.com.pl ([78.11.180.123]:60468
+        "EHLO rere.qmqm.pl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751958AbdHIUgG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2017 16:36:06 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-We don't use this new define yet, but it is helpful to document which
-versions we know of.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 1 +
- 1 file changed, 1 insertion(+)
+Some SDHCI drivers are reimplementing sdhci_set_bus_width() just because
+they support 8-bit bus but don't advertise full SDHCI 3.0 compliance.
+This unnecessarily duplicates the function. Let's remove those duplicates.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index e46504edc9fcb4..d0554088adfc41 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -40,6 +40,7 @@
- #define EXT_ACC           0xe4
- 
- #define SDHI_VER_GEN2_SDR50	0x490c
-+#define SDHI_VER_RZ_A1		0x820b
- /* very old datasheets said 0x490c for SDR104, too. They are wrong! */
- #define SDHI_VER_GEN2_SDR104	0xcb0d
- #define SDHI_VER_GEN3_SD	0xcc10
+Michał Mirosław (4):
+  sdhci: key 8BITBUS bit off MMC_CAP_8_BIT_DATA
+  mmc/sdhci-tegra: use generic sdhci_set_bus_width()
+  mmc/sdhci-pci: use generic sdhci_set_bus_width()
+  mmc/sdhci-s3c: use generic sdhci_set_bus_width()
+
+ drivers/mmc/host/sdhci-pci-core.c | 30 +++---------------------------
+ drivers/mmc/host/sdhci-s3c.c      | 34 +---------------------------------
+ drivers/mmc/host/sdhci-tegra.c    | 23 ++---------------------
+ drivers/mmc/host/sdhci.c          |  5 ++---
+ 4 files changed, 8 insertions(+), 84 deletions(-)
+
 -- 
 2.11.0
 
