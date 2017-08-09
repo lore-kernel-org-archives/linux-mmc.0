@@ -1,7 +1,7 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 09/11] mmc: block: Add CQE support
-Date: Wed, 9 Aug 2017 11:30:56 +0300
-Message-ID: <b273977b-dcb7-1c0b-aef5-c7c835d9d50f@intel.com>
+From: Bough Chen <haibo.chen@nxp.com>
+Subject: RE: [PATCH V4 09/11] mmc: block: Add CQE support
+Date: Wed, 9 Aug 2017 09:41:44 +0000
+Message-ID: <AM4PR0401MB232412543292CEB7299FA807908B0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
  <1500630584-22852-10-git-send-email-adrian.hunter@intel.com>
  <AM4PR0401MB2324BC179C08C1CF2A2013E8908A0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
@@ -9,189 +9,203 @@ References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
  <d75f784a-bdb2-8eb6-c23f-c74f0585c3f8@intel.com>
  <AM4PR0401MB23240F1551DA4B2F0BB36B51908B0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
  <dae0fb15-a55b-e1c4-c968-075e3e95285b@intel.com>
+ <b273977b-dcb7-1c0b-aef5-c7c835d9d50f@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:7015 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752324AbdHIIhY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 9 Aug 2017 04:37:24 -0400
-In-Reply-To: <dae0fb15-a55b-e1c4-c968-075e3e95285b@intel.com>
+Received: from mail-he1eur01on0079.outbound.protection.outlook.com ([104.47.0.79]:11102
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752533AbdHIJls (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 9 Aug 2017 05:41:48 -0400
+In-Reply-To: <b273977b-dcb7-1c0b-aef5-c7c835d9d50f@intel.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 09/08/17 11:16, Adrian Hunter wrote:
-> On 09/08/17 10:57, Bough Chen wrote:
->>> -----Original Message-----
->>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->>> owner@vger.kernel.org] On Behalf Of Adrian Hunter
->>> Sent: Wednesday, August 09, 2017 1:58 PM
->>> To: Shawn Lin <shawn.lin@rock-chips.com>; Bough Chen
->>> <haibo.chen@nxp.com>
->>> Cc: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-
->>> mmc@vger.kernel.org>; Alex Lemberg <alex.lemberg@sandisk.com>; Mateusz
->>> Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->>> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
->>> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
->>> Dorfman Konstantin <kdorfman@codeaurora.org>; Sahitya Tummala
->>> <stummala@codeaurora.org>; Harjani Ritesh <riteshh@codeaurora.org>; Venu
->>> Byravarasu <vbyravarasu@nvidia.com>; Linus Walleij <linus.walleij@linaro.org>
->>> Subject: Re: [PATCH V4 09/11] mmc: block: Add CQE support
->>>
->>> On 09/08/17 03:55, Shawn Lin wrote:
->>>> Hi,
->>>>
->>>> On 2017/8/8 20:07, Bough Chen wrote:
->>>>>> -----Original Message-----
->>>>>> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->>>>>> Sent: Friday, July 21, 2017 5:50 PM
->>>>>> To: Ulf Hansson <ulf.hansson@linaro.org>
->>>>>> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Bough Chen
->>>>>> <haibo.chen@nxp.com>; Alex Lemberg <alex.lemberg@sandisk.com>;
->>>>>> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->>>>>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung
->>>>>> <jh80.chung@samsung.com>; Dong Aisheng <dongas86@gmail.com>; Das
->>>>>> Asutosh <asutoshd@codeaurora.org>; Zhangfei Gao
->>>>>> <zhangfei.gao@gmail.com>; Dorfman Konstantin
->>>>>> <kdorfman@codeaurora.org>; David Griego <david.griego@linaro.org>;
->>>>>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
->>>>>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
->>>>>> Linus Walleij <linus.walleij@linaro.org>; Shawn Lin
->>>>>> <shawn.lin@rock-chips.com>
->>>>>> Subject: [PATCH V4 09/11] mmc: block: Add CQE support
->>>>>>
->>>>>> Add CQE support to the block driver, including:
->>>>>>     - optionally using DCMD for flush requests
->>>>>>     - manually issuing discard requests
->>>>>>     - issuing read / write requests to the CQE
->>>>>>     - supporting block-layer timeouts
->>>>>>     - handling recovery
->>>>>>     - supporting re-tuning
->>>>>>
->>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>>>> ---
->>>>>>   drivers/mmc/core/block.c | 195
->>> ++++++++++++++++++++++++++++++++-
->>>>>>   drivers/mmc/core/block.h |   7 ++
->>>>>>   drivers/mmc/core/queue.c | 273
->>>>>> ++++++++++++++++++++++++++++++++++++++++++++++-
->>>>>>   drivers/mmc/core/queue.h |  42 +++++++-
->>>>>>   4 files changed, 510 insertions(+), 7 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->>>>>> index
->>>>>> 915290c74363..2d25115637b7 100644
->>>>>> --- a/drivers/mmc/core/block.c
->>>>>> +++ b/drivers/mmc/core/block.c
->>>>>> @@ -109,6 +109,7 @@ struct mmc_blk_data {
->>>>>>   #define MMC_BLK_WRITE        BIT(1)
->>>>>>   #define MMC_BLK_DISCARD        BIT(2)
->>>>>>   #define MMC_BLK_SECDISCARD    BIT(3)
->>>>>> +#define MMC_BLK_CQE_RECOVERY    BIT(4)
->>>>>>
->>>>>>       /*
->>>>>>        * Only set in main mmc_blk_data associated @@ -1612,6
->>>>>> +1613,198 @@ static void mmc_blk_data_prep(struct mmc_queue *mq,
->>>>>> struct mmc_queue_req *mqrq,
->>>>>>           *do_data_tag_p = do_data_tag;
->>>>>>   }
->>>>>>
->>>>>> +#define MMC_CQE_RETRIES 2
->>>>
->>>>
->>>>>> +        blk_queue_rq_timed_out(mq->queue, mmc_cqe_timed_out);
->>>>>> +        blk_queue_rq_timeout(mq->queue, 60 * HZ);
->>>>>
->>>>
->>>> ------8<-------
->>>>
->>>>> Hi Adrian,
->>>>>
->>>>> These days I'm doing CMDQ stress test, and find one issue.
->>>>> On our i.MX8QXP-ARM2 board, the RAM is 3GB. eMMC is 32GB.
->>>>> I use command 'free -m' get the total memory is 2800M, and the free
->>>>> memory is 2500M.
->>>>>
->>>>> I use 'mkfs.ext4' to format ext4 file system on the eMMC under
->>>>> HS400ES CMDQ mode, works fine.
->>>>>
->>>>> When I use the following command to stress test CMDQ, it works fine.
->>>>> bonnie++ -d /run/media/mmcblk0p1/ -u 0:0 -s 2048 -r 1024
->>>>>
->>>>> But when I change to use a large file size to do the same stress
->>>>> test, using
->>>>> bonnie++ -d /run/media/mmcblk0p1/ -u 0:0 -s 4096 -r 2048
->>>>> or
->>>>> bonnie++ -d /run/media/mmcblk0p1/ -u 0:0 -s 5600
->>>>>
->>>>> I get the following dump message.  According to the log,
->>>>> mmc_cqe_timed_out() was trigged.
->>>>> Seems mmc was blocked in somewhere.
->>>>> Then I try to debug this issue, and open MMC_DEBUG in config, do the
->>>>> same test, print the detail Command sending information on the
->>>>> console, but finally can't reproduce.
->>>
->>> mmc_cqe_timed_out() is a 60 second timeout provided by the block layer.
->>> Refer "blk_queue_rq_timeout(mq->queue, 60 * HZ)" in mmc_init_queue().
->>> 60s is quite a long time so I would first want to determine if the task was really
->>> queued that long.  I would instrument some code into cqhci_request() to
->>> record the start time on struct mmc_request, and then print the time taken
->>> when there is a problem.
->>>
->>
->> Hi Adrian, 
->>
->> According to your suggestion, I add the following code to print the time.
->> When issue happens, seems the request really pending for over 60s!
->>
->> done
->> Writing intelligently...[  689.209548] mmc0: cqhci: timeout for tag 9
->> [  689.213658] the mrq all use 62123742 us
->> [  689.217487] mmc0: cqhci: ============ CQHCI REGISTER DUMP ===========
->> [  689.223927] mmc0: cqhci: Caps:      0x0000310a | Version:  0x00000510
->> [  689.230363] mmc0: cqhci: Config:    0x00001001 | Control:  0x00000000
->> [  689.236800] mmc0: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
->> [  689.243238] mmc0: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
->> [  689.249675] mmc0: cqhci: TDL base:  0x90079000 | TDL up32: 0x00000000
->> [  689.256113] mmc0: cqhci: Doorbell:  0x1fffffff | TCN:      0x00000000
->> [  689.262550] mmc0: cqhci: Dev queue: 0x1fffefff | Dev Pend: 0x1fff7fff
->> [  689.268988] mmc0: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
->> [  689.275425] mmc0: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
->> [  689.281862] mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
->> [  689.288300] mmc0: cqhci: Resp idx:  0x0000002f | Resp arg: 0x00000900
->> [  689.294737] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
->> [  689.301176] mmc0: sdhci: Sys addr:  0xb602f000 | Version:  0x00000002
->> [  689.307612] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000400
->> [  689.314050] mmc0: sdhci: Argument:  0x000f0400 | Trn mode: 0x00000023
->> [  689.320487] mmc0: sdhci: Present:   0x01fd858f | Host ctl: 0x00000030
->> [  689.326925] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
->> [  689.333362] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
->> [  689.339800] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
->> [  689.346237] mmc0: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
->> [  689.352674] mmc0: sdhci: AC12 err:  0x00000000 | Slot int: 0x00000502
->> [  689.359113] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
->> [  689.365549] mmc0: sdhci: Cmd:       0x00002c1a | Max curr: 0x00ffffff
->> [  689.371987] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
->> [  689.378424] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d02700
->> [  689.384861] mmc0: sdhci: Host ctl2: 0x00000008
->> [  689.389302] mmc0: sdhci: ADMA Err:  0x00000009 | ADMA Ptr: 0x9009a400
->> [  689.395737] mmc0: sdhci: ============================================
->> [  689.402212] mmc0: running CQE recovery
-> 
-> Tag 9 has been queued (bit set in Dev Pend) which means it is up to the eMMC
-> to select it for execution.  You should dump the times for the other mrq's
-> to see how long they have been waiting and try to determine if anything is
-> being processed.
-> 
-> If the eMMC is just taking a really long time to process tasks we could
-> extend the timeout, but it is hard to see how that is acceptable to a final
-> product.  At this point it looks like the eMMC may have a flaw in the way it
-> selects tasks for execution.
-
-No, that is wrong sorry, the task is in the QSR (Dev queue) so it is the CQE
-that has not selected it.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmdd
+IE9uIEJlaGFsZiBPZiBBZHJpYW4gSHVudGVyDQo+IFNlbnQ6IFdlZG5lc2RheSwgQXVndXN0IDA5
+LCAyMDE3IDQ6MzEgUE0NCj4gVG86IEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT47IFNo
+YXduIExpbiA8c2hhd24ubGluQHJvY2stDQo+IGNoaXBzLmNvbT4NCj4gQ2M6IFVsZiBIYW5zc29u
+IDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgbGludXgtbW1jIDxsaW51eC0NCj4gbW1jQHZnZXIu
+a2VybmVsLm9yZz47IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPjsgTWF0
+ZXVzeg0KPiBOb3dhayA8bWF0ZXVzei5ub3dha0BpbnRlbC5jb20+OyBZdWxpeSBJenJhaWxvdg0K
+PiA8WXVsaXkuSXpyYWlsb3ZAc2FuZGlzay5jb20+OyBKYWVob29uIENodW5nIDxqaDgwLmNodW5n
+QHNhbXN1bmcuY29tPjsNCj4gRG9uZyBBaXNoZW5nIDxkb25nYXM4NkBnbWFpbC5jb20+OyBEYXMg
+QXN1dG9zaA0KPiA8YXN1dG9zaGRAY29kZWF1cm9yYS5vcmc+OyBaaGFuZ2ZlaSBHYW8gPHpoYW5n
+ZmVpLmdhb0BnbWFpbC5jb20+Ow0KPiBEb3JmbWFuIEtvbnN0YW50aW4gPGtkb3JmbWFuQGNvZGVh
+dXJvcmEub3JnPjsgU2FoaXR5YSBUdW1tYWxhDQo+IDxzdHVtbWFsYUBjb2RlYXVyb3JhLm9yZz47
+IEhhcmphbmkgUml0ZXNoIDxyaXRlc2hoQGNvZGVhdXJvcmEub3JnPjsgVmVudQ0KPiBCeXJhdmFy
+YXN1IDx2YnlyYXZhcmFzdUBudmlkaWEuY29tPjsgTGludXMgV2FsbGVpaiA8bGludXMud2FsbGVp
+akBsaW5hcm8ub3JnPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIFY0IDA5LzExXSBtbWM6IGJsb2Nr
+OiBBZGQgQ1FFIHN1cHBvcnQNCj4gDQo+IE9uIDA5LzA4LzE3IDExOjE2LCBBZHJpYW4gSHVudGVy
+IHdyb3RlOg0KPiA+IE9uIDA5LzA4LzE3IDEwOjU3LCBCb3VnaCBDaGVuIHdyb3RlOg0KPiA+Pj4g
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4+IEZyb206IGxpbnV4LW1tYy1vd25lckB2
+Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpsaW51eC1tbWMtDQo+ID4+PiBvd25lckB2Z2VyLmtlcm5l
+bC5vcmddIE9uIEJlaGFsZiBPZiBBZHJpYW4gSHVudGVyDQo+ID4+PiBTZW50OiBXZWRuZXNkYXks
+IEF1Z3VzdCAwOSwgMjAxNyAxOjU4IFBNDQo+ID4+PiBUbzogU2hhd24gTGluIDxzaGF3bi5saW5A
+cm9jay1jaGlwcy5jb20+OyBCb3VnaCBDaGVuDQo+ID4+PiA8aGFpYm8uY2hlbkBueHAuY29tPg0K
+PiA+Pj4gQ2M6IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgbGludXgtbW1j
+IDxsaW51eC0NCj4gPj4+IG1tY0B2Z2VyLmtlcm5lbC5vcmc+OyBBbGV4IExlbWJlcmcgPGFsZXgu
+bGVtYmVyZ0BzYW5kaXNrLmNvbT47DQo+ID4+PiBNYXRldXN6IE5vd2FrIDxtYXRldXN6Lm5vd2Fr
+QGludGVsLmNvbT47IFl1bGl5IEl6cmFpbG92DQo+ID4+PiA8WXVsaXkuSXpyYWlsb3ZAc2FuZGlz
+ay5jb20+OyBKYWVob29uIENodW5nDQo+ID4+PiA8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT47IERv
+bmcgQWlzaGVuZyA8ZG9uZ2FzODZAZ21haWwuY29tPjsgRGFzDQo+ID4+PiBBc3V0b3NoIDxhc3V0
+b3NoZEBjb2RlYXVyb3JhLm9yZz47IFpoYW5nZmVpIEdhbw0KPiA+Pj4gPHpoYW5nZmVpLmdhb0Bn
+bWFpbC5jb20+OyBEb3JmbWFuIEtvbnN0YW50aW4NCj4gPj4+IDxrZG9yZm1hbkBjb2RlYXVyb3Jh
+Lm9yZz47IFNhaGl0eWEgVHVtbWFsYQ0KPiA+Pj4gPHN0dW1tYWxhQGNvZGVhdXJvcmEub3JnPjsg
+SGFyamFuaSBSaXRlc2ggPHJpdGVzaGhAY29kZWF1cm9yYS5vcmc+Ow0KPiA+Pj4gVmVudSBCeXJh
+dmFyYXN1IDx2YnlyYXZhcmFzdUBudmlkaWEuY29tPjsgTGludXMgV2FsbGVpag0KPiA+Pj4gPGxp
+bnVzLndhbGxlaWpAbGluYXJvLm9yZz4NCj4gPj4+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggVjQgMDkv
+MTFdIG1tYzogYmxvY2s6IEFkZCBDUUUgc3VwcG9ydA0KPiA+Pj4NCj4gPj4+IE9uIDA5LzA4LzE3
+IDAzOjU1LCBTaGF3biBMaW4gd3JvdGU6DQo+ID4+Pj4gSGksDQo+ID4+Pj4NCj4gPj4+PiBPbiAy
+MDE3LzgvOCAyMDowNywgQm91Z2ggQ2hlbiB3cm90ZToNCj4gPj4+Pj4+IC0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQo+ID4+Pj4+PiBGcm9tOiBBZHJpYW4gSHVudGVyIFttYWlsdG86YWRyaWFu
+Lmh1bnRlckBpbnRlbC5jb21dDQo+ID4+Pj4+PiBTZW50OiBGcmlkYXksIEp1bHkgMjEsIDIwMTcg
+NTo1MCBQTQ0KPiA+Pj4+Pj4gVG86IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3Jn
+Pg0KPiA+Pj4+Pj4gQ2M6IGxpbnV4LW1tYyA8bGludXgtbW1jQHZnZXIua2VybmVsLm9yZz47IEJv
+dWdoIENoZW4NCj4gPj4+Pj4+IDxoYWliby5jaGVuQG54cC5jb20+OyBBbGV4IExlbWJlcmcgPGFs
+ZXgubGVtYmVyZ0BzYW5kaXNrLmNvbT47DQo+ID4+Pj4+PiBNYXRldXN6IE5vd2FrIDxtYXRldXN6
+Lm5vd2FrQGludGVsLmNvbT47IFl1bGl5IEl6cmFpbG92DQo+ID4+Pj4+PiA8WXVsaXkuSXpyYWls
+b3ZAc2FuZGlzay5jb20+OyBKYWVob29uIENodW5nDQo+ID4+Pj4+PiA8amg4MC5jaHVuZ0BzYW1z
+dW5nLmNvbT47IERvbmcgQWlzaGVuZyA8ZG9uZ2FzODZAZ21haWwuY29tPjsNCj4gRGFzDQo+ID4+
+Pj4+PiBBc3V0b3NoIDxhc3V0b3NoZEBjb2RlYXVyb3JhLm9yZz47IFpoYW5nZmVpIEdhbw0KPiA+
+Pj4+Pj4gPHpoYW5nZmVpLmdhb0BnbWFpbC5jb20+OyBEb3JmbWFuIEtvbnN0YW50aW4NCj4gPj4+
+Pj4+IDxrZG9yZm1hbkBjb2RlYXVyb3JhLm9yZz47IERhdmlkIEdyaWVnbw0KPiA+Pj4+Pj4gPGRh
+dmlkLmdyaWVnb0BsaW5hcm8ub3JnPjsgU2FoaXR5YSBUdW1tYWxhDQo+ID4+Pj4+PiA8c3R1bW1h
+bGFAY29kZWF1cm9yYS5vcmc+OyBIYXJqYW5pIFJpdGVzaA0KPiA+Pj4+Pj4gPHJpdGVzaGhAY29k
+ZWF1cm9yYS5vcmc+OyBWZW51IEJ5cmF2YXJhc3UNCj4gPj4+Pj4+IDx2YnlyYXZhcmFzdUBudmlk
+aWEuY29tPjsgTGludXMgV2FsbGVpag0KPiA+Pj4+Pj4gPGxpbnVzLndhbGxlaWpAbGluYXJvLm9y
+Zz47IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPg0KPiA+Pj4+Pj4gU3ViamVj
+dDogW1BBVENIIFY0IDA5LzExXSBtbWM6IGJsb2NrOiBBZGQgQ1FFIHN1cHBvcnQNCj4gPj4+Pj4+
+DQo+ID4+Pj4+PiBBZGQgQ1FFIHN1cHBvcnQgdG8gdGhlIGJsb2NrIGRyaXZlciwgaW5jbHVkaW5n
+Og0KPiA+Pj4+Pj4gICAgIC0gb3B0aW9uYWxseSB1c2luZyBEQ01EIGZvciBmbHVzaCByZXF1ZXN0
+cw0KPiA+Pj4+Pj4gICAgIC0gbWFudWFsbHkgaXNzdWluZyBkaXNjYXJkIHJlcXVlc3RzDQo+ID4+
+Pj4+PiAgICAgLSBpc3N1aW5nIHJlYWQgLyB3cml0ZSByZXF1ZXN0cyB0byB0aGUgQ1FFDQo+ID4+
+Pj4+PiAgICAgLSBzdXBwb3J0aW5nIGJsb2NrLWxheWVyIHRpbWVvdXRzDQo+ID4+Pj4+PiAgICAg
+LSBoYW5kbGluZyByZWNvdmVyeQ0KPiA+Pj4+Pj4gICAgIC0gc3VwcG9ydGluZyByZS10dW5pbmcN
+Cj4gPj4+Pj4+DQo+ID4+Pj4+PiBTaWduZWQtb2ZmLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJpYW4u
+aHVudGVyQGludGVsLmNvbT4NCj4gPj4+Pj4+IC0tLQ0KPiA+Pj4+Pj4gICBkcml2ZXJzL21tYy9j
+b3JlL2Jsb2NrLmMgfCAxOTUNCj4gPj4+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+LQ0KPiA+Pj4+Pj4gICBkcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmggfCAgIDcgKysNCj4gPj4+Pj4+
+ICAgZHJpdmVycy9tbWMvY29yZS9xdWV1ZS5jIHwgMjczDQo+ID4+Pj4+PiArKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLQ0KPiA+Pj4+Pj4gICBkcml2ZXJzL21t
+Yy9jb3JlL3F1ZXVlLmggfCAgNDIgKysrKysrKy0NCj4gPj4+Pj4+ICAgNCBmaWxlcyBjaGFuZ2Vk
+LCA1MTAgaW5zZXJ0aW9ucygrKSwgNyBkZWxldGlvbnMoLSkNCj4gPj4+Pj4+DQo+ID4+Pj4+PiBk
+aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9ibG9jay5jIGIvZHJpdmVycy9tbWMvY29yZS9i
+bG9jay5jDQo+ID4+Pj4+PiBpbmRleA0KPiA+Pj4+Pj4gOTE1MjkwYzc0MzYzLi4yZDI1MTE1NjM3
+YjcgMTAwNjQ0DQo+ID4+Pj4+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMNCj4gPj4+
+Pj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KPiA+Pj4+Pj4gQEAgLTEwOSw2ICsx
+MDksNyBAQCBzdHJ1Y3QgbW1jX2Jsa19kYXRhIHsNCj4gPj4+Pj4+ICAgI2RlZmluZSBNTUNfQkxL
+X1dSSVRFICAgICAgICBCSVQoMSkNCj4gPj4+Pj4+ICAgI2RlZmluZSBNTUNfQkxLX0RJU0NBUkQg
+ICAgICAgIEJJVCgyKQ0KPiA+Pj4+Pj4gICAjZGVmaW5lIE1NQ19CTEtfU0VDRElTQ0FSRCAgICBC
+SVQoMykNCj4gPj4+Pj4+ICsjZGVmaW5lIE1NQ19CTEtfQ1FFX1JFQ09WRVJZICAgIEJJVCg0KQ0K
+PiA+Pj4+Pj4NCj4gPj4+Pj4+ICAgICAgIC8qDQo+ID4+Pj4+PiAgICAgICAgKiBPbmx5IHNldCBp
+biBtYWluIG1tY19ibGtfZGF0YSBhc3NvY2lhdGVkIEBAIC0xNjEyLDYNCj4gPj4+Pj4+ICsxNjEz
+LDE5OCBAQCBzdGF0aWMgdm9pZCBtbWNfYmxrX2RhdGFfcHJlcChzdHJ1Y3QgbW1jX3F1ZXVlDQo+
+ICptcSwNCj4gPj4+Pj4+IHN0cnVjdCBtbWNfcXVldWVfcmVxICptcXJxLA0KPiA+Pj4+Pj4gICAg
+ICAgICAgICpkb19kYXRhX3RhZ19wID0gZG9fZGF0YV90YWc7DQo+ID4+Pj4+PiAgIH0NCj4gPj4+
+Pj4+DQo+ID4+Pj4+PiArI2RlZmluZSBNTUNfQ1FFX1JFVFJJRVMgMg0KPiA+Pj4+DQo+ID4+Pj4N
+Cj4gPj4+Pj4+ICsgICAgICAgIGJsa19xdWV1ZV9ycV90aW1lZF9vdXQobXEtPnF1ZXVlLCBtbWNf
+Y3FlX3RpbWVkX291dCk7DQo+ID4+Pj4+PiArICAgICAgICBibGtfcXVldWVfcnFfdGltZW91dCht
+cS0+cXVldWUsIDYwICogSFopOw0KPiA+Pj4+Pg0KPiA+Pj4+DQo+ID4+Pj4gLS0tLS0tODwtLS0t
+LS0tDQo+ID4+Pj4NCj4gPj4+Pj4gSGkgQWRyaWFuLA0KPiA+Pj4+Pg0KPiA+Pj4+PiBUaGVzZSBk
+YXlzIEknbSBkb2luZyBDTURRIHN0cmVzcyB0ZXN0LCBhbmQgZmluZCBvbmUgaXNzdWUuDQo+ID4+
+Pj4+IE9uIG91ciBpLk1YOFFYUC1BUk0yIGJvYXJkLCB0aGUgUkFNIGlzIDNHQi4gZU1NQyBpcyAz
+MkdCLg0KPiA+Pj4+PiBJIHVzZSBjb21tYW5kICdmcmVlIC1tJyBnZXQgdGhlIHRvdGFsIG1lbW9y
+eSBpcyAyODAwTSwgYW5kIHRoZQ0KPiA+Pj4+PiBmcmVlIG1lbW9yeSBpcyAyNTAwTS4NCj4gPj4+
+Pj4NCj4gPj4+Pj4gSSB1c2UgJ21rZnMuZXh0NCcgdG8gZm9ybWF0IGV4dDQgZmlsZSBzeXN0ZW0g
+b24gdGhlIGVNTUMgdW5kZXINCj4gPj4+Pj4gSFM0MDBFUyBDTURRIG1vZGUsIHdvcmtzIGZpbmUu
+DQo+ID4+Pj4+DQo+ID4+Pj4+IFdoZW4gSSB1c2UgdGhlIGZvbGxvd2luZyBjb21tYW5kIHRvIHN0
+cmVzcyB0ZXN0IENNRFEsIGl0IHdvcmtzIGZpbmUuDQo+ID4+Pj4+IGJvbm5pZSsrIC1kIC9ydW4v
+bWVkaWEvbW1jYmxrMHAxLyAtdSAwOjAgLXMgMjA0OCAtciAxMDI0DQo+ID4+Pj4+DQo+ID4+Pj4+
+IEJ1dCB3aGVuIEkgY2hhbmdlIHRvIHVzZSBhIGxhcmdlIGZpbGUgc2l6ZSB0byBkbyB0aGUgc2Ft
+ZSBzdHJlc3MNCj4gPj4+Pj4gdGVzdCwgdXNpbmcNCj4gPj4+Pj4gYm9ubmllKysgLWQgL3J1bi9t
+ZWRpYS9tbWNibGswcDEvIC11IDA6MCAtcyA0MDk2IC1yIDIwNDgNCj4gPj4+Pj4gb3INCj4gPj4+
+Pj4gYm9ubmllKysgLWQgL3J1bi9tZWRpYS9tbWNibGswcDEvIC11IDA6MCAtcyA1NjAwDQo+ID4+
+Pj4+DQo+ID4+Pj4+IEkgZ2V0IHRoZSBmb2xsb3dpbmcgZHVtcCBtZXNzYWdlLiAgQWNjb3JkaW5n
+IHRvIHRoZSBsb2csDQo+ID4+Pj4+IG1tY19jcWVfdGltZWRfb3V0KCkgd2FzIHRyaWdnZWQuDQo+
+ID4+Pj4+IFNlZW1zIG1tYyB3YXMgYmxvY2tlZCBpbiBzb21ld2hlcmUuDQo+ID4+Pj4+IFRoZW4g
+SSB0cnkgdG8gZGVidWcgdGhpcyBpc3N1ZSwgYW5kIG9wZW4gTU1DX0RFQlVHIGluIGNvbmZpZywg
+ZG8NCj4gPj4+Pj4gdGhlIHNhbWUgdGVzdCwgcHJpbnQgdGhlIGRldGFpbCBDb21tYW5kIHNlbmRp
+bmcgaW5mb3JtYXRpb24gb24gdGhlDQo+ID4+Pj4+IGNvbnNvbGUsIGJ1dCBmaW5hbGx5IGNhbid0
+IHJlcHJvZHVjZS4NCj4gPj4+DQo+ID4+PiBtbWNfY3FlX3RpbWVkX291dCgpIGlzIGEgNjAgc2Vj
+b25kIHRpbWVvdXQgcHJvdmlkZWQgYnkgdGhlIGJsb2NrIGxheWVyLg0KPiA+Pj4gUmVmZXIgImJs
+a19xdWV1ZV9ycV90aW1lb3V0KG1xLT5xdWV1ZSwgNjAgKiBIWikiIGluDQo+IG1tY19pbml0X3F1
+ZXVlKCkuDQo+ID4+PiA2MHMgaXMgcXVpdGUgYSBsb25nIHRpbWUgc28gSSB3b3VsZCBmaXJzdCB3
+YW50IHRvIGRldGVybWluZSBpZiB0aGUNCj4gPj4+IHRhc2sgd2FzIHJlYWxseSBxdWV1ZWQgdGhh
+dCBsb25nLiAgSSB3b3VsZCBpbnN0cnVtZW50IHNvbWUgY29kZSBpbnRvDQo+ID4+PiBjcWhjaV9y
+ZXF1ZXN0KCkgdG8gcmVjb3JkIHRoZSBzdGFydCB0aW1lIG9uIHN0cnVjdCBtbWNfcmVxdWVzdCwg
+YW5kDQo+ID4+PiB0aGVuIHByaW50IHRoZSB0aW1lIHRha2VuIHdoZW4gdGhlcmUgaXMgYSBwcm9i
+bGVtLg0KPiA+Pj4NCj4gPj4NCj4gPj4gSGkgQWRyaWFuLA0KPiA+Pg0KPiA+PiBBY2NvcmRpbmcg
+dG8geW91ciBzdWdnZXN0aW9uLCBJIGFkZCB0aGUgZm9sbG93aW5nIGNvZGUgdG8gcHJpbnQgdGhl
+IHRpbWUuDQo+ID4+IFdoZW4gaXNzdWUgaGFwcGVucywgc2VlbXMgdGhlIHJlcXVlc3QgcmVhbGx5
+IHBlbmRpbmcgZm9yIG92ZXIgNjBzIQ0KPiA+Pg0KPiA+PiBkb25lDQo+ID4+IFdyaXRpbmcgaW50
+ZWxsaWdlbnRseS4uLlsgIDY4OS4yMDk1NDhdIG1tYzA6IGNxaGNpOiB0aW1lb3V0IGZvciB0YWcg
+OQ0KPiA+PiBbICA2ODkuMjEzNjU4XSB0aGUgbXJxIGFsbCB1c2UgNjIxMjM3NDIgdXMgWyAgNjg5
+LjIxNzQ4N10gbW1jMDoNCj4gPj4gY3FoY2k6ID09PT09PT09PT09PSBDUUhDSSBSRUdJU1RFUiBE
+VU1QID09PT09PT09PT09DQo+ID4+IFsgIDY4OS4yMjM5MjddIG1tYzA6IGNxaGNpOiBDYXBzOiAg
+ICAgIDB4MDAwMDMxMGEgfCBWZXJzaW9uOiAgMHgwMDAwMDUxMA0KPiA+PiBbICA2ODkuMjMwMzYz
+XSBtbWMwOiBjcWhjaTogQ29uZmlnOiAgICAweDAwMDAxMDAxIHwgQ29udHJvbDogIDB4MDAwMDAw
+MDANCj4gPj4gWyAgNjg5LjIzNjgwMF0gbW1jMDogY3FoY2k6IEludCBzdGF0OiAgMHgwMDAwMDAw
+MCB8IEludCBlbmFiOiAweDAwMDAwMDA2DQo+ID4+IFsgIDY4OS4yNDMyMzhdIG1tYzA6IGNxaGNp
+OiBJbnQgc2lnOiAgIDB4MDAwMDAwMDYgfCBJbnQgQ29hbDogMHgwMDAwMDAwMA0KPiA+PiBbICA2
+ODkuMjQ5Njc1XSBtbWMwOiBjcWhjaTogVERMIGJhc2U6ICAweDkwMDc5MDAwIHwgVERMIHVwMzI6
+IDB4MDAwMDAwMDANCj4gPj4gWyAgNjg5LjI1NjExM10gbW1jMDogY3FoY2k6IERvb3JiZWxsOiAg
+MHgxZmZmZmZmZiB8IFRDTjogICAgICAweDAwMDAwMDAwDQo+ID4+IFsgIDY4OS4yNjI1NTBdIG1t
+YzA6IGNxaGNpOiBEZXYgcXVldWU6IDB4MWZmZmVmZmYgfCBEZXYgUGVuZDogMHgxZmZmN2ZmZg0K
+PiA+PiBbICA2ODkuMjY4OTg4XSBtbWMwOiBjcWhjaTogVGFzayBjbHI6ICAweDAwMDAwMDAwIHwg
+U1NDMTogICAgIDB4MDAwMTEwMDANCj4gPj4gWyAgNjg5LjI3NTQyNV0gbW1jMDogY3FoY2k6IFNT
+QzI6ICAgICAgMHgwMDAwMDAwMSB8IERDTUQgcnNwOiAweDAwMDAwODAwDQo+ID4+IFsgIDY4OS4y
+ODE4NjJdIG1tYzA6IGNxaGNpOiBSRUQgbWFzazogIDB4ZmRmOWEwODAgfCBURVJSSTogICAgMHgw
+MDAwMDAwMA0KPiA+PiBbICA2ODkuMjg4MzAwXSBtbWMwOiBjcWhjaTogUmVzcCBpZHg6ICAweDAw
+MDAwMDJmIHwgUmVzcCBhcmc6DQo+ID4+IDB4MDAwMDA5MDAgWyAgNjg5LjI5NDczN10gbW1jMDog
+c2RoY2k6ID09PT09PT09PT09PSBTREhDSSBSRUdJU1RFUg0KPiA+PiBEVU1QID09PT09PT09PT09
+IFsgIDY4OS4zMDExNzZdIG1tYzA6IHNkaGNpOiBTeXMgYWRkcjogIDB4YjYwMmYwMDAgfA0KPiA+
+PiBWZXJzaW9uOiAgMHgwMDAwMDAwMiBbICA2ODkuMzA3NjEyXSBtbWMwOiBzZGhjaTogQmxrIHNp
+emU6DQo+ID4+IDB4MDAwMDAyMDAgfCBCbGsgY250OiAgMHgwMDAwMDQwMCBbICA2ODkuMzE0MDUw
+XSBtbWMwOiBzZGhjaTogQXJndW1lbnQ6DQo+IDB4MDAwZjA0MDAgfCBUcm4gbW9kZTogMHgwMDAw
+MDAyMw0KPiA+PiBbICA2ODkuMzIwNDg3XSBtbWMwOiBzZGhjaTogUHJlc2VudDogICAweDAxZmQ4
+NThmIHwgSG9zdCBjdGw6IDB4MDAwMDAwMzANCj4gPj4gWyAgNjg5LjMyNjkyNV0gbW1jMDogc2Ro
+Y2k6IFBvd2VyOiAgICAgMHgwMDAwMDAwMiB8IEJsayBnYXA6ICAweDAwMDAwMDgwDQo+ID4+IFsg
+IDY4OS4zMzMzNjJdIG1tYzA6IHNkaGNpOiBXYWtlLXVwOiAgIDB4MDAwMDAwMDggfCBDbG9jazog
+ICAgMHgwMDAwMDAwZg0KPiA+PiBbICA2ODkuMzM5ODAwXSBtbWMwOiBzZGhjaTogVGltZW91dDog
+ICAweDAwMDAwMDhmIHwgSW50IHN0YXQ6IDB4MDAwMDAwMDANCj4gPj4gWyAgNjg5LjM0NjIzN10g
+bW1jMDogc2RoY2k6IEludCBlbmFiOiAgMHgxMDdmNDAwMCB8IFNpZyBlbmFiOg0KPiA+PiAweDEw
+N2Y0MDAwIFsgIDY4OS4zNTI2NzRdIG1tYzA6IHNkaGNpOiBBQzEyIGVycjogIDB4MDAwMDAwMDAg
+fCBTbG90IGludDoNCj4gMHgwMDAwMDUwMg0KPiA+PiBbICA2ODkuMzU5MTEzXSBtbWMwOiBzZGhj
+aTogQ2FwczogICAgICAweDA3ZWIwMDAwIHwgQ2Fwc18xOiAgIDB4ODAwMGI0MDcNCj4gPj4gWyAg
+Njg5LjM2NTU0OV0gbW1jMDogc2RoY2k6IENtZDogICAgICAgMHgwMDAwMmMxYSB8IE1heCBjdXJy
+OiAweDAwZmZmZmZmDQo+ID4+IFsgIDY4OS4zNzE5ODddIG1tYzA6IHNkaGNpOiBSZXNwWzBdOiAg
+IDB4MDAwMDA5MDAgfCBSZXNwWzFdOiAgMHhmZmZmZmZmZg0KPiA+PiBbICA2ODkuMzc4NDI0XSBt
+bWMwOiBzZGhjaTogUmVzcFsyXTogICAweDMyOGY1OTAzIHwgUmVzcFszXTogIDB4MDBkMDI3MDAN
+Cj4gPj4gWyAgNjg5LjM4NDg2MV0gbW1jMDogc2RoY2k6IEhvc3QgY3RsMjogMHgwMDAwMDAwOCBb
+ICA2ODkuMzg5MzAyXQ0KPiA+PiBtbWMwOiBzZGhjaTogQURNQSBFcnI6ICAweDAwMDAwMDA5IHwg
+QURNQSBQdHI6IDB4OTAwOWE0MDAgWw0KPiA+PiA2ODkuMzk1NzM3XSBtbWMwOiBzZGhjaToNCj4g
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NCj4gPj4gWyAgNjg5
+LjQwMjIxMl0gbW1jMDogcnVubmluZyBDUUUgcmVjb3ZlcnkNCj4gPg0KPiA+IFRhZyA5IGhhcyBi
+ZWVuIHF1ZXVlZCAoYml0IHNldCBpbiBEZXYgUGVuZCkgd2hpY2ggbWVhbnMgaXQgaXMgdXAgdG8N
+Cj4gPiB0aGUgZU1NQyB0byBzZWxlY3QgaXQgZm9yIGV4ZWN1dGlvbi4gIFlvdSBzaG91bGQgZHVt
+cCB0aGUgdGltZXMgZm9yDQo+ID4gdGhlIG90aGVyIG1ycSdzIHRvIHNlZSBob3cgbG9uZyB0aGV5
+IGhhdmUgYmVlbiB3YWl0aW5nIGFuZCB0cnkgdG8NCj4gPiBkZXRlcm1pbmUgaWYgYW55dGhpbmcg
+aXMgYmVpbmcgcHJvY2Vzc2VkLg0KPiA+DQo+ID4gSWYgdGhlIGVNTUMgaXMganVzdCB0YWtpbmcg
+YSByZWFsbHkgbG9uZyB0aW1lIHRvIHByb2Nlc3MgdGFza3Mgd2UNCj4gPiBjb3VsZCBleHRlbmQg
+dGhlIHRpbWVvdXQsIGJ1dCBpdCBpcyBoYXJkIHRvIHNlZSBob3cgdGhhdCBpcyBhY2NlcHRhYmxl
+DQo+ID4gdG8gYSBmaW5hbCBwcm9kdWN0LiAgQXQgdGhpcyBwb2ludCBpdCBsb29rcyBsaWtlIHRo
+ZSBlTU1DIG1heSBoYXZlIGENCj4gPiBmbGF3IGluIHRoZSB3YXkgaXQgc2VsZWN0cyB0YXNrcyBm
+b3IgZXhlY3V0aW9uLg0KPiANCj4gTm8sIHRoYXQgaXMgd3Jvbmcgc29ycnksIHRoZSB0YXNrIGlz
+IGluIHRoZSBRU1IgKERldiBxdWV1ZSkgc28gaXQgaXMgdGhlIENRRSB0aGF0DQo+IGhhcyBub3Qg
+c2VsZWN0ZWQgaXQuDQoNClRoZSB0aW1lb3V0IHRhZyBpcyA5LCBmb3IgRGV2IHF1ZXVlOiAweDFm
+ZmZlZmZmLCBiaXQgOSBpcyAxLCBtZWFucyB0YXNrIDkgYWxyZWFkeSBxdWV1ZSBpbiBlTU1DLiAN
+CkZvciBEZXYgUGVuZDogMHgxZmZmN2ZmZiwgdGhlIGJpdCA5IGlzIGFsc28gMSwgIHdoaWNoIG1l
+YW5zIENRRSBhbHJlYWR5IHNlbmQgQ01ENDQgYW5kIENNRDQ1LCBidXQgc3RpbGwNCm5vdCBzZW5k
+IENNRDQ2LzQ3LiAgU2VlbXMgb3VyIENRRSBwZW5kaW5nIHRhZyA5IGZvciBvdmVyIDYwcyEgSSB3
+aWxsIGNoZWNrIHdpdGggb3VyIElDIGd1eXMgdG8gY29uZmlybQ0KdGhlIGhhcmR3YXJlIG1lY2hh
+bmlzbS4NCg0KDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZQ0KPiBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4g
+aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
