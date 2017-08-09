@@ -1,125 +1,63 @@
-From: "liwei (CM)" <liwei213@huawei.com>
-Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0ggdjggMi8yXSBtbWM6IGR3X21tYy1rMzogYWRkIHNk?=
- =?utf-8?Q?_support_for_hi3660?=
-Date: Wed, 9 Aug 2017 03:04:55 +0000
-Message-ID: <1699CE87DE933F49876AD744B5DC140FA0F4D9@DGGEMM506-MBS.china.huawei.com>
-References: <20170802031742.60363-1-liwei213@huawei.com>
- <20170802031742.60363-2-liwei213@huawei.com>
- <CAPDyKFom6yjj8+OU2B9cR+SaehtoZ_4JMtkETKfz5JWu4OkmZw@mail.gmail.com>
+From: Li Wei <liwei213@huawei.com>
+Subject: [PATCH v9 1/2] mmc: dw_mmc: move controller reset before driver init
+Date: Wed, 9 Aug 2017 11:25:18 +0800
+Message-ID: <20170809032519.96219-1-liwei213@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from szxga03-in.huawei.com ([45.249.212.189]:10401 "EHLO
-        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752265AbdHIDFY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 23:05:24 -0400
-In-Reply-To: <CAPDyKFom6yjj8+OU2B9cR+SaehtoZ_4JMtkETKfz5JWu4OkmZw@mail.gmail.com>
-Content-Language: zh-CN
+Received: from szxga04-in.huawei.com ([45.249.212.190]:3475 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752526AbdHIDZ1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2017 23:25:27 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Heiner Kallweit <hkallweit1@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Guodong Xu <guodong.xu@linaro.org>
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, shawn.lin@rock-chips.com, wsa+renesas@sang-engineering.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: guodong.xu@linaro.org
 
-SGksIFVsZg0KVGhhbmsgeW91IHZlcnkgbXVjaCBmb3IgeW91ciBhZHZpY2UuDQoxLiBWZXJzaW9u
-IGhpc3RvcnkgaXMgcmVhbGx5IGdyZWF0IGluZm9ybWF0aW9uLCBob3dldmVyIGl0IGRvZXNuJ3Qg
-YmVsb25nIGluc2lkZSB0aGUgY2hhbmdlIGxvZyBpdHNlZmwuIEluc3RlYWQgYWRkICItLS0iIGFu
-ZCBhIG5ld2xpbmUgaGVyZSwgdGhlbiBwdXQgaXQgYWxsIGJlbG93IHRoYXQuDQrjgJBMaVdlaeOA
-kU9L77yMSSB3aWxsIGZpeCBpdDsNCg0KMi4gV2UgaGF2ZSBhbiBBUEksIG1tY19yZWd1bGF0b3Jf
-c2V0X3ZxbW1jKCksIHRoYXQgeW91IHByb2JhYmx5IHNob3VsZCB1c2UgaGVyZSBpbnN0ZWFkLg0K
-44CQTGlXZWnjgJFZZXMsIHlvdSBhcmUgcmlnaHQuSSB1c2UgbW1jX3JlZ3VsYXRvcl9zZXRfdnFt
-bWMoKSBpbnN0ZWFkIGFuZCB0ZXN0IE9LLCBJIHdpbGwgbW9kaWZ5IGl0IGluIHBhdGNoIHY5Ow0K
-DQozLiBPdmVyYWxsIHRoZSBjb2RlIGxvb2tzIG9rYXkgdG8gbWUsIGhvd2V2ZXIgSSBhbSB3b25k
-ZXJpbmcgYWJvdXQgdGhlIHJlbGF0aW9uc2hpcCB3aXRoIHRoZSBvcmlnaW5hbCBrMyBkcml2ZXIg
-Y29kZSBhbmQgaGk2MjIwIGNvZGUuIEFsbW9zdCBubyBjb2RlIGlzIGJlaW5nIHJlLXVzZWQgYmV0
-d2VlbiB0aGUgZGlmZmVyZW50IHZhcmlhbnRzLiBXaHkgaXMgdGhhdD8NCuOAkExpV2Vp44CRU28g
-ZmFyLCBpdCBzZWVtcyB0aGF0IGR3X21jaV9oaTM2NjBfc2V0X2lvcygpIGFuZCBkd19tY2lfaGkz
-NjYwX3N3aXRjaF92b2x0YWdlKCkgYXJlIG5vdCByZS11c2VkLCBJIHRoaW5rIHRoZSBtYWluIHJl
-YXNvbiBpcyB0aGF0IEhpMzY2MCBzdXBwb3J0IHVocy1zZHIxMi8tdWhzLXNkcjI1L3Vocy1zZHI1
-MC91aHMtc2RyMTA0LCBPbiB0aGUgb3RoZXIgaGFuZCwgDQp3ZSBoYXZlIGN1c3RvbSByZWdpc3Rl
-ciBzZXR0aW5ncywgc3VjaCBhczoNCiNkZWZpbmUgQU9fU0NUUkxfU0VMMTgJCUJJVCgxMCkNCiNk
-ZWZpbmUgQU9fU0NUUkxfQ1RSTDMJCTB4NDBDDQojZGVmaW5lIFNPQ19TQ1RSTF9TQ1BFUkNUUkw1
-ICAgICgweDMxNCkNCiNkZWZpbmUgU0RDQVJEX0lPX1NFTDE4ICAgICAgICAgQklUKDIpDQpTbyB3
-ZSBjYW4ndCBtZXJnZSByZWxldmFudCBjb2RlLg0KDQpQbGVhc2UgaGVscCByZXZpZXcgcGF0Y2gg
-djksIHRoYW5rIHlvdSENCg0KLS0tLS3pgq7ku7bljp/ku7YtLS0tLQ0K5Y+R5Lu25Lq6OiBVbGYg
-SGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddIA0K5Y+R6YCB5pe26Ze0OiAy
-MDE35bm0OOaciDjml6UgMTk6MDQNCuaUtuS7tuS6ujogbGl3ZWkgKENNKQ0K5oqE6YCBOiBBZHJp
-YW4gSHVudGVyOyBKYWVob29uIENodW5nOyBTaGF3biBMaW47IFdvbGZyYW0gU2FuZzsgSGVpbmVy
-IEthbGx3ZWl0OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5r
-ZXJuZWwub3JnOyBHdW9kb25nIFh1DQrkuLvpopg6IFJlOiBbUEFUQ0ggdjggMi8yXSBtbWM6IGR3
-X21tYy1rMzogYWRkIHNkIHN1cHBvcnQgZm9yIGhpMzY2MA0KDQpPbiAyIEF1Z3VzdCAyMDE3IGF0
-IDA1OjE3LCBMaSBXZWkgPGxpd2VpMjEzQGh1YXdlaS5jb20+IHdyb3RlOg0KPiBBZGQgc2QgY2Fy
-ZCBzdXBwb3J0IGZvciBoaTM2NjAgc29jDQo+DQo+IFNpZ25lZC1vZmYtYnk6IExpIFdlaSA8bGl3
-ZWkyMTNAaHVhd2VpLmNvbT4NCj4gU2lnbmVkLW9mZi1ieTogQ2hlbiBKdW4gPGNoZW5qdW4xNEBo
-dWF3ZWkuY29tPg0KPg0KPiBNYWpvciBjaGFuZ2VzIGluIHYzOg0KPiAgLSBzb2x2ZSByZXZpZXcg
-Y29tbWVudHMgZnJvbSBIZWluZXIgS2FsbHdlaXQuDQo+ICAgICp1c2UgdGhlIEdFTk1BU0sgYW5k
-IEZJRUxEX1BSRVAgbWFjcm9zIHJlcGxhY2UgdGhlIGJpdCBzaGlmdCBvcGVyYXRpb24uDQo+ICAg
-ICp1c2UgdXNsZWVwX3JhbmdlKCkgcmVwbGFjZSB1ZGVsYXkoKSBhbmQgbWRlbGF5KCkuDQo+DQo+
-IE1ham9yIGNoYW5nZXMgaW4gdjQ6DQo+ICAtIHNvbHZlIHJldmlldyBjb21tZW50cyBmcm9tIEph
-ZWhvb24gQ2h1bmcuDQo+ICAgICptb3ZlIGNvbW1vbiByZWdpc3RlciBmb3IgZHdtbWMgY29udHJv
-bGxlciB0byBkd21tYyBoZWFkZXIgZmlsZS4NCj4gICAgKm1vZGlmeSBkZWZpbml0aW9ucyB0eXBl
-IG9mIHNvbWUgcmVnaXN0ZXIgdmFyaWFibGVzLg0KPiAgICAqZ2V0IHJpZCBvZiB0aGUgbWFnaWMg
-bnVtYmVycy4NCj4NCj4gTWFqb3IgY2hhbmdlcyBpbiB2NToNCj4gIC0gZnVydGhlciBpbXByb3Zl
-IGNvZGluZyBzdHlsZS4NCj4NCj4gTWFqb3IgY2hhbmdlcyBpbiB2NjoNCj4gIC0gc29sdmUgcmV2
-aWV3IGNvbW1lbnRzIGZvciBKYWVob29uIENodW5nLg0KPiAgICAqbW9kaWZ5IGR3X21jaV9oaTM2
-NjBfc2V0X2lvcygpIHRvIHN0YXRpYy4NCj4gICAgKmZpeCB0aGUgY29tbWVudCBzdHlsZS4NCj4N
-Cj4gTWFqb3IgY2hhbmdlcyBpbiB2NzoNCj4gIC0gc29sdmUgcmV2aWV3IGNvbW1lbnRzIGZvciBK
-b2huIFN0dWx0ei4NCj4gICAgKnJlbW92ZSByZXNldCBjb2RlIGluIGR3X21tYy1rMy5jLHVzZSBy
-ZXNldCBpbiBjb3JlIG1tYy4NCj4NCj4gTWFqb3IgY2hhbmdlcyBpbiB2ODoNCj4gIC0gbW9kaWZ5
-IHBhdGNoIHY3IG5hbWUgYW5kIGRlcGVuZGVuY3kgb3JkZXIuDQoNClZlcnNpb24gaGlzdG9yeSBp
-cyByZWFsbHkgZ3JlYXQgaW5mb3JtYXRpb24sIGhvd2V2ZXIgaXQgZG9lc24ndCBiZWxvbmcgaW5z
-aWRlIHRoZSBjaGFuZ2UgbG9nIGl0c2VmbC4gSW5zdGVhZCBhZGQgIi0tLSIgYW5kIGEgbmV3bGlu
-ZSBoZXJlLCB0aGVuIHB1dCBpdCBhbGwgYmVsb3cgdGhhdC4NCg0KWy4uLl0NCg0KPiArc3RhdGlj
-IGludCBkd19tY2lfaGkzNjYwX3N3aXRjaF92b2x0YWdlKHN0cnVjdCBtbWNfaG9zdCAqbW1jLA0K
-PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RydWN0IG1tY19pb3Mg
-Kmlvcykgew0KPiArICAgICAgIGludCByZXQ7DQo+ICsgICAgICAgaW50IG1pbl91diA9IDA7DQo+
-ICsgICAgICAgaW50IG1heF91diA9IDA7DQo+ICsgICAgICAgc3RydWN0IGR3X21jaV9zbG90ICpz
-bG90ID0gbW1jX3ByaXYobW1jKTsNCj4gKyAgICAgICBzdHJ1Y3QgazNfcHJpdiAqcHJpdjsNCj4g
-KyAgICAgICBzdHJ1Y3QgZHdfbWNpICpob3N0Ow0KPiArDQo+ICsgICAgICAgaG9zdCA9IHNsb3Qt
-Pmhvc3Q7DQo+ICsgICAgICAgcHJpdiA9IGhvc3QtPnByaXY7DQo+ICsNCj4gKyAgICAgICBpZiAo
-IXByaXYgfHwgIXByaXYtPnJlZykNCj4gKyAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiArDQo+
-ICsgICAgICAgaWYgKHByaXYtPmN0cmxfaWQgPT0gRFdNTUNfU0RJT19JRCkNCj4gKyAgICAgICAg
-ICAgICAgIHJldHVybiAwOw0KPiArDQo+ICsgICAgICAgaWYgKGlvcy0+c2lnbmFsX3ZvbHRhZ2Ug
-PT0gTU1DX1NJR05BTF9WT0xUQUdFXzMzMCkgew0KPiArICAgICAgICAgICAgICAgcmV0ID0gZHdf
-bWNpX3NldF9zZWwxOChob3N0LCAwKTsNCj4gKyAgICAgICAgICAgICAgIGlmIChyZXQpDQo+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIHJldHVybiByZXQ7DQo+ICsgICAgICAgICAgICAgICBtaW5f
-dXYgPSAyOTUwMDAwOw0KPiArICAgICAgICAgICAgICAgbWF4X3V2ID0gMjk1MDAwMDsNCj4gKyAg
-ICAgICB9IGVsc2UgaWYgKGlvcy0+c2lnbmFsX3ZvbHRhZ2UgPT0gTU1DX1NJR05BTF9WT0xUQUdF
-XzE4MCkgew0KPiArICAgICAgICAgICAgICAgcmV0ID0gZHdfbWNpX3NldF9zZWwxOChob3N0LCAx
-KTsNCj4gKyAgICAgICAgICAgICAgIGlmIChyZXQpDQo+ICsgICAgICAgICAgICAgICAgICAgICAg
-IHJldHVybiByZXQ7DQo+ICsgICAgICAgICAgICAgICBtaW5fdXYgPSAxODAwMDAwOw0KPiArICAg
-ICAgICAgICAgICAgbWF4X3V2ID0gMTgwMDAwMDsNCj4gKyAgICAgICB9DQo+ICsNCj4gKyAgICAg
-ICBpZiAoSVNfRVJSX09SX05VTEwobW1jLT5zdXBwbHkudnFtbWMpKQ0KPiArICAgICAgICAgICAg
-ICAgcmV0dXJuIDA7DQo+ICsNCj4gKyAgICAgICByZXQgPSByZWd1bGF0b3Jfc2V0X3ZvbHRhZ2Uo
-bW1jLT5zdXBwbHkudnFtbWMsIG1pbl91diwgDQo+ICsgbWF4X3V2KTsNCg0KV2UgaGF2ZSBhbiBB
-UEksIG1tY19yZWd1bGF0b3Jfc2V0X3ZxbW1jKCksIHRoYXQgeW91IHByb2JhYmx5IHNob3VsZCB1
-c2UgaGVyZSBpbnN0ZWFkLg0KDQo+ICsgICAgICAgaWYgKHJldCkgew0KPiArICAgICAgICAgICAg
-ICAgZGV2X2Vycihob3N0LT5kZXYsICJSZWd1bGF0b3Igc2V0IGVycm9yICVkOiAlZCAtICVkXG4i
-LA0KPiArICAgICAgICAgICAgICAgICAgICAgICByZXQsIG1pbl91diwgbWF4X3V2KTsNCj4gKyAg
-ICAgICAgICAgICAgIHJldHVybiByZXQ7DQo+ICsgICAgICAgfQ0KPiArICAgICAgIHJldHVybiAw
-Ow0KPiArfQ0KPiArDQo+ICtzdGF0aWMgY29uc3Qgc3RydWN0IGR3X21jaV9kcnZfZGF0YSBoaTM2
-NjBfZGF0YSA9IHsNCj4gKyAgICAgICAuaW5pdCA9IGR3X21jaV9oaTM2NjBfaW5pdCwNCj4gKyAg
-ICAgICAuc2V0X2lvcyA9IGR3X21jaV9oaTM2NjBfc2V0X2lvcywNCj4gKyAgICAgICAucGFyc2Vf
-ZHQgPSBkd19tY2lfaGk2MjIwX3BhcnNlX2R0LA0KPiArICAgICAgIC5leGVjdXRlX3R1bmluZyA9
-IGR3X21jaV9oaTM2NjBfZXhlY3V0ZV90dW5pbmcsDQo+ICsgICAgICAgLnN3aXRjaF92b2x0YWdl
-ICA9IGR3X21jaV9oaTM2NjBfc3dpdGNoX3ZvbHRhZ2UsIH07DQo+ICsNCj4gIHN0YXRpYyBjb25z
-dCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIGR3X21jaV9rM19tYXRjaFtdID0gew0KPiArICAgICAgIHsg
-LmNvbXBhdGlibGUgPSAiaGlzaWxpY29uLGhpMzY2MC1kdy1tc2hjIiwgLmRhdGEgPSANCj4gKyAm
-aGkzNjYwX2RhdGEsIH0sDQo+ICAgICAgICAgeyAuY29tcGF0aWJsZSA9ICJoaXNpbGljb24saGk0
-NTExLWR3LW1zaGMiLCAuZGF0YSA9ICZrM19kcnZfZGF0YSwgfSwNCj4gICAgICAgICB7IC5jb21w
-YXRpYmxlID0gImhpc2lsaWNvbixoaTYyMjAtZHctbXNoYyIsIC5kYXRhID0gJmhpNjIyMF9kYXRh
-LCB9LA0KPiAgICAgICAgIHt9LA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kd19t
-bWMuaCBiL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmggDQo+IGluZGV4IDc1ZGEzNzU2OTU1ZC4u
-NTQwMzc1OGJmNjIxIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5oDQo+
-ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmgNCj4gQEAgLTMxNCw2ICszMTQsOCBAQCBz
-dHJ1Y3QgZHdfbWNpX2JvYXJkIHsNCj4gICNkZWZpbmUgU0RNTUNfRFNDQUREUiAgICAgICAgICAw
-eDA5NA0KPiAgI2RlZmluZSBTRE1NQ19CVUZBRERSICAgICAgICAgIDB4MDk4DQo+ICAjZGVmaW5l
-IFNETU1DX0NEVEhSQ1RMICAgICAgICAgMHgxMDANCj4gKyNkZWZpbmUgU0RNTUNfVUhTX1JFR19F
-WFQgICAgICAweDEwOA0KPiArI2RlZmluZSBTRE1NQ19FTkFCTEVfU0hJRlQgICAgIDB4MTEwDQo+
-ICAjZGVmaW5lIFNETU1DX0RBVEEoeCkgICAgICAgICAgKHgpDQo+ICAvKg0KPiAgKiBSZWdpc3Rl
-cnMgdG8gc3VwcG9ydCBpZG1hYyA2NC1iaXQgYWRkcmVzcyBtb2RlDQo+IC0tDQo+IDIuMTEuMA0K
-Pg0KDQpPdmVyYWxsIHRoZSBjb2RlIGxvb2tzIG9rYXkgdG8gbWUsIGhvd2V2ZXIgSSBhbSB3b25k
-ZXJpbmcgYWJvdXQgdGhlIHJlbGF0aW9uc2hpcCB3aXRoIHRoZSBvcmlnaW5hbCBrMyBkcml2ZXIg
-Y29kZSBhbmQgaGk2MjIwIGNvZGUuIEFsbW9zdCBubyBjb2RlIGlzIGJlaW5nIHJlLXVzZWQgYmV0
-d2VlbiB0aGUgZGlmZmVyZW50IHZhcmlhbnRzLiBXaHkgaXMgdGhhdD8NCg0KS2luZCByZWdhcmRz
-DQpVZmZlDQo=
+This commit modifies dw_mci_probe(), it moves reset assertion before
+drv_data->init(host)
+
+Some driver needs to access controller registers in its .init() ops. So,
+in order to make such access safe, we should do controller reset before
+.init() being called.
+
+Signed-off-by: Wei Li <liwei213@huawei.com>
+Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+Signed-off-by: Chen Jun <chenjun14@huawei.com>
+---
+ drivers/mmc/host/dw_mmc.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a9dfb26972f2..f2fa928e1a12 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3067,6 +3067,12 @@ int dw_mci_probe(struct dw_mci *host)
+ 		goto err_clk_ciu;
+ 	}
+ 
++	if (!IS_ERR(host->pdata->rstc)) {
++		reset_control_assert(host->pdata->rstc);
++		usleep_range(10, 50);
++		reset_control_deassert(host->pdata->rstc);
++	}
++
+ 	if (drv_data && drv_data->init) {
+ 		ret = drv_data->init(host);
+ 		if (ret) {
+@@ -3076,12 +3082,6 @@ int dw_mci_probe(struct dw_mci *host)
+ 		}
+ 	}
+ 
+-	if (!IS_ERR(host->pdata->rstc)) {
+-		reset_control_assert(host->pdata->rstc);
+-		usleep_range(10, 50);
+-		reset_control_deassert(host->pdata->rstc);
+-	}
+-
+ 	setup_timer(&host->cmd11_timer,
+ 		    dw_mci_cmd11_timer, (unsigned long)host);
+ 
+-- 
+2.11.0
+
