@@ -1,70 +1,36 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH] mmc: mmci: stop building qcom dml as module
-Date: Thu, 10 Aug 2017 16:54:18 +0200
-Message-ID: <20170810145418.4430-1-srinivas.kandagatla@linaro.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 1/2] ARM: dts: am571x-idk: Fix GPIO polarity for MMC1
+ card detect
+Date: Thu, 10 Aug 2017 08:13:29 -0700
+Message-ID: <20170810151329.GC8569@atomide.com>
+References: <20170808052057.24433-1-kishon@ti.com>
+ <20170809220800.GJ3934@atomide.com>
+ <f75b361c-a8a8-f6c0-dd8a-cca5522e5181@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <f75b361c-a8a8-f6c0-dd8a-cca5522e5181@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: arnd@arndb.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+* Kishon Vijay Abraham I <kishon@ti.com> [170810 00:46]:
+> Tony,
+> 
+> On Thursday 10 August 2017 03:38 AM, Tony Lindgren wrote:
+> > * Kishon Vijay Abraham I <kishon@ti.com> [170807 22:22]:
+> >> The GPIO polarity for MMC1 card detect is set to '0' which means
+> >> active-high. However the polarity should be active-low. Fix it
+> >> here.
+> > 
+> > Can these wait for v4.14 merge window or do these fix known
+> > issues?
+> 
+> These can go in the next merge window. I didn't observe any issue without this
+> in omap_hsmmc driver.
 
-It does not make sense for qcom dml code to be a seperate module, as
-this has just 2 helper functions specific to qcom, and used directly by
-mmci driver, so just compile this along with main mmci driver.
+OK applying both into omap-for-v4.14/dt thanks.
 
-This would also fix issues arrising due to Kconfig combinations between
-mmci and qcom dml.
-
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/Kconfig         | 2 +-
- drivers/mmc/host/Makefile        | 5 +++--
- drivers/mmc/host/mmci_qcom_dml.h | 2 +-
- 3 files changed, 5 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 5755b69..3345384 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -15,7 +15,7 @@ config MMC_ARMMMCI
- 	  If unsure, say N.
- 
- config MMC_QCOM_DML
--	tristate "Qualcomm Data Mover for SD Card Controller"
-+	bool "Qualcomm Data Mover for SD Card Controller"
- 	depends on MMC_ARMMMCI && QCOM_BAM_DMA
- 	default y
- 	help
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4d45471..ef12fd2 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -2,8 +2,9 @@
- # Makefile for MMC/SD host controller drivers
- #
- 
--obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
--obj-$(CONFIG_MMC_QCOM_DML)	+= mmci_qcom_dml.o
-+obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
-+armmmci-y := mmci.o
-+armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
- obj-$(CONFIG_MMC_PXA)		+= pxamci.o
- obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
-diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-index 6e405d0..9df32eb 100644
---- a/drivers/mmc/host/mmci_qcom_dml.h
-+++ b/drivers/mmc/host/mmci_qcom_dml.h
-@@ -15,7 +15,7 @@
- #ifndef __MMC_QCOM_DML_H__
- #define __MMC_QCOM_DML_H__
- 
--#ifdef CONFIG_MMC_QCOM_DML
-+#if IS_ENABLED(CONFIG_MMC_QCOM_DML)
- int dml_hw_init(struct mmci_host *host, struct device_node *np);
- void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
- #else
--- 
-2.9.3
+Tony
