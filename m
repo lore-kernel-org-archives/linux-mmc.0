@@ -1,72 +1,97 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 08/13] mmc: mmc: Enable CQE's
-Date: Thu, 10 Aug 2017 15:08:13 +0300
-Message-ID: <1502366898-23691-9-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 09/13] mmc: block: Use local variables in mmc_blk_data_prep()
+Date: Thu, 10 Aug 2017 15:08:14 +0300
+Message-ID: <1502366898-23691-10-git-send-email-adrian.hunter@intel.com>
 References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga07.intel.com ([134.134.136.100]:61492 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752435AbdHJMPT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 10 Aug 2017 08:15:19 -0400
+        id S1752435AbdHJMPX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Aug 2017 08:15:23 -0400
 In-Reply-To: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Enable or disable CQE when a card is added or removed respectively.
+Use local variables in mmc_blk_data_prep() in preparation for adding CQE
+support which doesn't use the output variables.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/bus.c |  7 +++++++
- drivers/mmc/core/mmc.c | 12 ++++++++++++
- 2 files changed, 19 insertions(+)
+ drivers/mmc/core/block.c | 29 ++++++++++++++++++-----------
+ 1 file changed, 18 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 301246513a37..a4b49e25fe96 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -369,10 +369,17 @@ int mmc_add_card(struct mmc_card *card)
-  */
- void mmc_remove_card(struct mmc_card *card)
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index a11beadda26f..bd7a899979d4 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1485,21 +1485,22 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ }
+ 
+ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+-			      int disable_multi, bool *do_rel_wr,
+-			      bool *do_data_tag)
++			      int disable_multi, bool *do_rel_wr_p,
++			      bool *do_data_tag_p)
  {
-+	struct mmc_host *host = card->host;
-+
- #ifdef CONFIG_DEBUG_FS
- 	mmc_remove_card_debugfs(card);
- #endif
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mqrq->brq;
+ 	struct request *req = mmc_queue_req_to_req(mqrq);
++	bool do_rel_wr, do_data_tag;
  
-+	if (host->cqe_enabled) {
-+		host->cqe_ops->cqe_disable(host);
-+		host->cqe_enabled = false;
-+	}
-+
- 	if (mmc_card_present(card)) {
- 		if (mmc_host_is_spi(card->host)) {
- 			pr_info("%s: SPI card removed\n",
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6f6e57d04971..93c61c1fce10 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1807,6 +1807,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	/*
+ 	 * Reliable writes are used to implement Forced Unit Access and
+ 	 * are supported only on MMCs.
  	 */
- 	card->reenable_cmdq = card->ext_csd.cmdq_en;
+-	*do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+-		     rq_data_dir(req) == WRITE &&
+-		     (md->flags & MMC_BLK_REL_WR);
++	do_rel_wr = (req->cmd_flags & REQ_FUA) &&
++		    rq_data_dir(req) == WRITE &&
++		    (md->flags & MMC_BLK_REL_WR);
  
-+	if (card->ext_csd.cmdq_en && !host->cqe_enabled) {
-+		err = host->cqe_ops->cqe_enable(host, card);
-+		if (err) {
-+			pr_err("%s: Failed to enable CQE, error %d\n",
-+				mmc_hostname(host), err);
-+		} else {
-+			host->cqe_enabled = true;
-+			pr_info("%s: Command Queue Engine enabled\n",
-+				mmc_hostname(host));
-+		}
-+	}
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+ 
+@@ -1547,18 +1548,18 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 						brq->data.blocks);
+ 	}
+ 
+-	if (*do_rel_wr)
++	if (do_rel_wr)
+ 		mmc_apply_rel_rw(brq, card, req);
+ 
+ 	/*
+ 	 * Data tag is used only during writing meta data to speed
+ 	 * up write and any subsequent read of this meta data
+ 	 */
+-	*do_data_tag = card->ext_csd.data_tag_unit_size &&
+-		       (req->cmd_flags & REQ_META) &&
+-		       (rq_data_dir(req) == WRITE) &&
+-		       ((brq->data.blocks * brq->data.blksz) >=
+-			card->ext_csd.data_tag_unit_size);
++	do_data_tag = card->ext_csd.data_tag_unit_size &&
++		      (req->cmd_flags & REQ_META) &&
++		      (rq_data_dir(req) == WRITE) &&
++		      ((brq->data.blocks * brq->data.blksz) >=
++		       card->ext_csd.data_tag_unit_size);
+ 
+ 	mmc_set_data_timeout(&brq->data, card);
+ 
+@@ -1587,6 +1588,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 	mqrq->areq.mrq = &brq->mrq;
+ 
+ 	mmc_queue_bounce_pre(mqrq);
 +
- 	if (!oldcard)
- 		host->card = card;
++	if (do_rel_wr_p)
++		*do_rel_wr_p = do_rel_wr;
++
++	if (do_data_tag_p)
++		*do_data_tag_p = do_data_tag;
+ }
  
+ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 -- 
 1.9.1
 
