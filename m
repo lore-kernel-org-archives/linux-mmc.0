@@ -1,72 +1,120 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: renesas_sdhi: use extra flag for CBSY usage
-Date: Thu, 10 Aug 2017 10:46:58 +0200
-Message-ID: <20170810084658.GC2175@katana>
-References: <20170809190041.1052-1-wsa+renesas@sang-engineering.com>
- <20170810075850.GD16647@verge.net.au>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 07/11] mmc: mmc: Enable CQE's
+Date: Thu, 10 Aug 2017 12:49:20 +0300
+Message-ID: <fc32caa5-fd58-4b45-c40a-3e4976b412a6@intel.com>
+References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
+ <1500630584-22852-8-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFq93Q132JPVpXFFGFcQA_CjM6v2sZ2Ci69pZ3kr3fZoMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="Fig2xvG2VGoz8o/s"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170810075850.GD16647@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Chris Brandt <chris.brandt@renesas.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Lee Jones <lee.jones@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:13036 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750909AbdHJJ5I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Aug 2017 05:57:08 -0400
+In-Reply-To: <CAPDyKFq93Q132JPVpXFFGFcQA_CjM6v2sZ2Ci69pZ3kr3fZoMA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
+On 07/08/17 17:51, Ulf Hansson wrote:
+> On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Enable or disable CQE when a card is added or removed respectively.
+> 
+> As a standalone change, this is hard to understand.
+> 
+> Perhaps if you squash this with some the patche calling ->cqe_off()
+> and the one actually setting ext_csd.cmdq_en, I can get a better
+> picture.
 
---Fig2xvG2VGoz8o/s
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+No they are not related.
 
-On Thu, Aug 10, 2017 at 09:58:50AM +0200, Simon Horman wrote:
-> On Wed, Aug 09, 2017 at 09:00:41PM +0200, Wolfram Sang wrote:
-> > There is one SDHI instance on Gen2 which does not have the CBSY bit.
-> > So, turn CBSY usage into an extra flag and set it accordingly. This has
-> > the additional advantage that we can also set it for other incarnations
-> > later.
->=20
-> What is the run-time effect, if any, of this change?
+> 
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/bus.c |  7 +++++++
+>>  drivers/mmc/core/mmc.c | 13 +++++++++++++
+>>  2 files changed, 20 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+>> index 301246513a37..a4b49e25fe96 100644
+>> --- a/drivers/mmc/core/bus.c
+>> +++ b/drivers/mmc/core/bus.c
+>> @@ -369,10 +369,17 @@ int mmc_add_card(struct mmc_card *card)
+>>   */
+>>  void mmc_remove_card(struct mmc_card *card)
+>>  {
+>> +       struct mmc_host *host = card->host;
+>> +
+>>  #ifdef CONFIG_DEBUG_FS
+>>         mmc_remove_card_debugfs(card);
+>>  #endif
+>>
+>> +       if (host->cqe_enabled) {
+>> +               host->cqe_ops->cqe_disable(host);
+>> +               host->cqe_enabled = false;
+>> +       }
+>> +
+> 
+> This doesn't feel like the correct place to disable cqe.
+> 
+> Primarily because I don't think you enable cqe in mmc_add_card(), so
+> this isn't consistent.
 
-The run-time effect is that a few cycles are saved because CBSY signals
-ready a bit earlier than SCLKDIVEN. Though, the more important aspect is
-that docs explicitly say to wait for CBSY. That's why this change was
-requested although I don't think it will matter much in practice.
+mmc_add_card() and mmc_remove_card() are not paired functions. Instead
+mmc_remove_card() is on the error path of the ..._init_card() functions and
+consequently this is the best place for cqe->disable().
 
-> > Chris: according to the specs I have, we can enable it for RZ as well. =
-I'll
-> > send a patch for that in a minute. If you could test this on top of thi=
-s one,
-> > that would be much appreciated! Thanks.
->=20
-> I take it from the above you did a pass of the available documentation to
-> see which SoCs support this feature. If so, thanks!
+> 
+>>         if (mmc_card_present(card)) {
+>>                 if (mmc_host_is_spi(card->host)) {
+>>                         pr_info("%s: SPI card removed\n",
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 2ff0caf92bc8..92c6167d64e0 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1804,6 +1804,19 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>          */
+>>         card->reenable_cmdq = card->ext_csd.cmdq_en;
+>>
+>> +       if (card->ext_csd.cmdq_en && (host->caps2 & MMC_CAP2_CQE) &&
+>> +           !host->cqe_enabled) {
+> 
+> I assume card->ext_csd.cmdq_en can't be set, unless the MMC_CAP2_CQE
+> bit also is set. So there should be no reason to check it here again?
 
-I don't have docs for R-Car Gen1 SDHI. But given that even Gen2 has one
-SDHI instance without CBSY and Gen1 is older, my educated guess is that
-it does not have CBSY.
+Yes, it is a left-over from software command queue support.  I will remove it.
 
+> 
+> Also, can ever host->cqe_enabled be true in this path? If so, isn't
+> that wrong by itself?
 
---Fig2xvG2VGoz8o/s
-Content-Type: application/pgp-signature; name="signature.asc"
+No, it can be set on the reset path.
 
------BEGIN PGP SIGNATURE-----
+> 
+>> +               err = host->cqe_ops->cqe_enable(host, card);
+>> +               if (err) {
+>> +                       pr_err("%s: Failed to enable CQE, error %d\n",
+>> +                               mmc_hostname(host), err);
+>> +               } else {
+>> +                       host->cqe_enabled = true;
+>> +                       pr_info("%s: Command Queue Engine enabled\n",
+>> +                               mmc_hostname(host));
+>> +               }
+>> +       }
+>> +
+>>         /*
+>>          * The mandatory minimum values are defined for packed command.
+>>          * read: 5, write: 3
+>> --
+>> 1.9.1
+>>
+> 
+> Kind regards
+> Uffe
+> 
 
-iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmMHYIACgkQFA3kzBSg
-KbZKCg/8CNr/CkrksMUU/DDHU3L4vgpcRLpHXnVHFmoJzb1rS01p75CSYLGq6TwS
-R9sDTPHbvxfQoK/C01JC2WfKiKygtCRbS9/1vro6KgaNKNcj8cGN91f7KoKvJ8w8
-+7K1DCiCrZSvJ+d2H+6NEPIhrpVqCdLuHgKvh3vySRyGeIHVni3wFT7ZrDmvzvVp
-7OG7Qg8q8TjL6MkQefjzJvZhBAbhXGvYLkdEXjg+63jlQ48JEdfZmObJRsATOQ5S
-cJlvd5sLYtA13s3eqth960Amkynt0n+McwSJeqZA3F3A1LgB0kMWli/WLTe5ReWE
-pTPSGZX33KORbrJ8hQ/0vc98s0kPm0IfQLFHT7v/dGLDZIvRhr6m0izE+On8tq1/
-SSgyy38p0MykwL5/CH2phy2PDyKdHHPNn1NQUyB/e6/dfHZJx1W0imBhjcB0Z3pm
-etsvocRE/i0QdVQ+X01UkNE5+syM86X6zGLWcnAEc7bYxGT8SDbGZPPtT0UG4WcM
-CwbMJ1+Gf3wZfrgo1uKg5s6FUSLZr+SiNA2vTVmjc7+6LqZrVsjq5JQOSHsybpPH
-ohhFgHxWJZYcfuiMh66Vybusmrx2RUujOUh+yqwvSVMZBn188oT2H5tJcNyCxf7k
-P3t8f9+KnMSG7oJb8aG4z+XgPJJwd5jEI3TAB6GVe40wrC6azPg=
-=GhaQ
------END PGP SIGNATURE-----
-
---Fig2xvG2VGoz8o/s--
