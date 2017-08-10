@@ -1,109 +1,244 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 03/13] mmc: host: Add CQE interface
-Date: Thu, 10 Aug 2017 15:08:08 +0300
-Message-ID: <1502366898-23691-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 05/13] mmc: core: Add support for handling CQE requests
+Date: Thu, 10 Aug 2017 15:08:10 +0300
+Message-ID: <1502366898-23691-6-git-send-email-adrian.hunter@intel.com>
 References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga07.intel.com ([134.134.136.100]:61492 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752392AbdHJMO6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 10 Aug 2017 08:14:58 -0400
+        id S1753131AbdHJMPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Aug 2017 08:15:06 -0400
 In-Reply-To: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Add CQE host operations, capabilities, and host members.
+Add core support for handling CQE requests, including starting, completing
+and recovering.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- include/linux/mmc/host.h | 59 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+ drivers/mmc/core/core.c  | 169 +++++++++++++++++++++++++++++++++++++++++++++--
+ include/linux/mmc/core.h |   5 ++
+ 2 files changed, 169 insertions(+), 5 deletions(-)
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 4617c21f97f7..89e1d7e2953e 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -162,6 +162,50 @@ struct mmc_host_ops {
- 				  unsigned int direction, int blk_size);
- };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 29544aa2824a..9483d0bf39bf 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -266,7 +266,8 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	host->ops->request(host, mrq);
+ }
  
-+struct mmc_cqe_ops {
-+	/* Allocate resources, and make the CQE operational */
-+	int	(*cqe_enable)(struct mmc_host *host, struct mmc_card *card);
-+	/* Free resources, and make the CQE non-operational */
-+	void	(*cqe_disable)(struct mmc_host *host);
-+	/*
-+	 * Issue a read, write or DCMD request to the CQE. Also deal with the
-+	 * effect of ->cqe_off().
-+	 */
-+	int	(*cqe_request)(struct mmc_host *host, struct mmc_request *mrq);
-+	/* Free resources (e.g. DMA mapping) associated with the request */
-+	void	(*cqe_post_req)(struct mmc_host *host, struct mmc_request *mrq);
-+	/*
-+	 * Prepare the CQE and host controller to accept non-CQ commands. There
-+	 * is no corresponding ->cqe_on(), instead ->cqe_request() is required
-+	 * to deal with that.
-+	 */
-+	void	(*cqe_off)(struct mmc_host *host);
-+	/*
-+	 * Wait for all CQE tasks to complete. Return an error if recovery
-+	 * becomes necessary.
-+	 */
-+	int	(*cqe_wait_for_idle)(struct mmc_host *host);
-+	/*
-+	 * Notify CQE that a request has timed out. Return false if the request
-+	 * completed or true if a timeout happened in which case indicate if
-+	 * recovery is needed.
-+	 */
-+	bool	(*cqe_timeout)(struct mmc_host *host, struct mmc_request *mrq,
-+			       bool *recovery_needed);
-+	/*
-+	 * Stop all CQE activity and prepare the CQE and host controller to
-+	 * accept recovery commands.
-+	 */
-+	void	(*cqe_recovery_start)(struct mmc_host *host);
-+	/*
-+	 * Clear the queue and call mmc_cqe_request_done() on all requests.
-+	 * Requests that errored will have the error set on the mmc_request
-+	 * (data->error or cmd->error for DCMD).  Requests that did not error
-+	 * will have zero data bytes transferred.
-+	 */
-+	void	(*cqe_recovery_finish)(struct mmc_host *host);
-+};
+-static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
++static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq,
++			     bool cqe)
+ {
+ 	if (mrq->sbc) {
+ 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+@@ -275,9 +276,12 @@ static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
+ 	}
+ 
+ 	if (mrq->cmd) {
+-		pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+-			 mmc_hostname(host), mrq->cmd->opcode, mrq->cmd->arg,
+-			 mrq->cmd->flags);
++		pr_debug("%s: starting %sCMD%u arg %08x flags %08x\n",
++			 mmc_hostname(host), cqe ? "CQE direct " : "",
++			 mrq->cmd->opcode, mrq->cmd->arg, mrq->cmd->flags);
++	} else if (cqe) {
++		pr_debug("%s: starting CQE transfer for tag %d blkaddr %u\n",
++			 mmc_hostname(host), mrq->tag, mrq->data->blk_addr);
+ 	}
+ 
+ 	if (mrq->data) {
+@@ -342,7 +346,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (mmc_card_removed(host->card))
+ 		return -ENOMEDIUM;
+ 
+-	mmc_mrq_pr_debug(host, mrq);
++	mmc_mrq_pr_debug(host, mrq, false);
+ 
+ 	WARN_ON(!host->claimed);
+ 
+@@ -482,6 +486,161 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+ }
+ EXPORT_SYMBOL(mmc_wait_for_req_done);
+ 
++/*
++ * mmc_cqe_start_req - Start a CQE request.
++ * @host: MMC host to start the request
++ * @mrq: request to start
++ *
++ * Start the request, re-tuning if needed and it is possible. Returns an error
++ * code if the request fails to start or -EBUSY if CQE is busy.
++ */
++int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
++{
++	int err;
 +
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-@@ -307,6 +351,8 @@ struct mmc_host {
- #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
- #define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
- #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
-+#define MMC_CAP2_CQE		(1 << 23)	/* Has eMMC command queue engine */
-+#define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
-@@ -390,6 +436,19 @@ struct mmc_host {
- 	int			dsr_req;	/* DSR value is valid */
- 	u32			dsr;	/* optional driver stage (DSR) value */
- 
-+	/* Command Queue Engine (CQE) support */
-+	const struct mmc_cqe_ops *cqe_ops;
-+	void			*cqe_private;
 +	/*
-+	 * Notify uppers layers (e.g. mmc block driver) that CQE needs recovery
-+	 * due to an error associated with the mmc_request.
++	 * CQE cannot process re-tuning commands. Caller must hold retuning
++	 * while CQE is in use.  Re-tuning can happen here only when CQE has no
++	 * active requests i.e. this is the first.  Note, re-tuning will call
++	 * ->cqe_off().
 +	 */
-+	void			(*cqe_recovery_notifier)(struct mmc_host *,
-+							 struct mmc_request *);
-+	int			cqe_qdepth;
-+	bool			cqe_enabled;
-+	bool			cqe_on;
++	err = mmc_retune(host);
++	if (err)
++		goto out_err;
 +
- 	unsigned long		private[0] ____cacheline_aligned;
- };
++	mrq->host = host;
++
++	mmc_mrq_pr_debug(host, mrq, true);
++
++	err = mmc_mrq_prep(host, mrq);
++	if (err)
++		goto out_err;
++
++	err = host->cqe_ops->cqe_request(host, mrq);
++	if (err)
++		goto out_err;
++
++	trace_mmc_request_start(host, mrq);
++
++	return 0;
++
++out_err:
++	if (mrq->cmd) {
++		pr_debug("%s: failed to start CQE direct CMD%u, error %d\n",
++			 mmc_hostname(host), mrq->cmd->opcode, err);
++	} else {
++		pr_debug("%s: failed to start CQE transfer for tag %d, error %d\n",
++			 mmc_hostname(host), mrq->tag, err);
++	}
++	return err;
++}
++EXPORT_SYMBOL(mmc_cqe_start_req);
++
++static void __mmc_cqe_request_done(struct mmc_host *host,
++				   struct mmc_request *mrq)
++{
++	mmc_should_fail_request(host, mrq);
++
++	/* Flag re-tuning needed on CRC errors */
++	if ((mrq->cmd && mrq->cmd->error == -EILSEQ) ||
++	    (mrq->data && mrq->data->error == -EILSEQ))
++		mmc_retune_needed(host);
++
++	trace_mmc_request_done(host, mrq);
++
++	if (mrq->cmd) {
++		pr_debug("%s: CQE req done (direct CMD%u): %d\n",
++			 mmc_hostname(host), mrq->cmd->opcode, mrq->cmd->error);
++	} else {
++		pr_debug("%s: CQE transfer done tag %d\n",
++			 mmc_hostname(host), mrq->tag);
++	}
++
++	if (mrq->data) {
++		pr_debug("%s:     %d bytes transferred: %d\n",
++			 mmc_hostname(host),
++			 mrq->data->bytes_xfered, mrq->data->error);
++	}
++}
++
++/**
++ *	mmc_cqe_request_done - CQE has finished processing an MMC request
++ *	@host: MMC host which completed request
++ *	@mrq: MMC request which completed
++ *
++ *	CQE drivers should call this function when they have completed
++ *	their processing of a request.
++ */
++void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq)
++{
++	__mmc_cqe_request_done(host, mrq);
++
++	mrq->done(mrq);
++}
++EXPORT_SYMBOL(mmc_cqe_request_done);
++
++/**
++ *	mmc_cqe_post_req - CQE post process of a completed MMC request
++ *	@host: MMC host
++ *	@mrq: MMC request to be processed
++ */
++void mmc_cqe_post_req(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (host->cqe_ops->cqe_post_req)
++		host->cqe_ops->cqe_post_req(host, mrq);
++}
++EXPORT_SYMBOL(mmc_cqe_post_req);
++
++/* Arbitrary 1 second timeout */
++#define MMC_CQE_RECOVERY_TIMEOUT	1000
++
++/*
++ * mmc_cqe_recovery - Recover from CQE errors.
++ * @host: MMC host to recover
++ *
++ * Recovery consists of stopping CQE, stopping eMMC, discarding the queue in
++ * in eMMC, and discarding the queue in CQE. CQE must call
++ * mmc_cqe_request_done() on all requests. An error is returned if the eMMC
++ * fails to discard its queue.
++ */
++int mmc_cqe_recovery(struct mmc_host *host)
++{
++	struct mmc_command cmd;
++	int err;
++
++	mmc_retune_hold_now(host);
++
++	/*
++	 * Recovery is expected seldom, if at all, but it reduces performance,
++	 * so make sure it is not completely silent.
++	 */
++	pr_warn("%s: running CQE recovery\n", mmc_hostname(host));
++
++	host->cqe_ops->cqe_recovery_start(host);
++
++	memset(&cmd, 0, sizeof(cmd));
++	cmd.opcode       = MMC_STOP_TRANSMISSION,
++	cmd.flags        = MMC_RSP_R1B | MMC_CMD_AC,
++	cmd.flags       &= ~MMC_RSP_CRC; /* Ignore CRC */
++	cmd.busy_timeout = MMC_CQE_RECOVERY_TIMEOUT,
++	mmc_wait_for_cmd(host, &cmd, 0);
++
++	memset(&cmd, 0, sizeof(cmd));
++	cmd.opcode       = MMC_CMDQ_TASK_MGMT;
++	cmd.arg          = 1; /* Discard entire queue */
++	cmd.flags        = MMC_RSP_R1B | MMC_CMD_AC;
++	cmd.flags       &= ~MMC_RSP_CRC; /* Ignore CRC */
++	cmd.busy_timeout = MMC_CQE_RECOVERY_TIMEOUT,
++	err = mmc_wait_for_cmd(host, &cmd, 0);
++
++	host->cqe_ops->cqe_recovery_finish(host);
++
++	mmc_retune_release(host);
++
++	return err;
++}
++EXPORT_SYMBOL(mmc_cqe_recovery);
++
+ /**
+  *	mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
+  *	@host: MMC host
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index bf1788a224e6..1974fcfd4284 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -174,6 +174,11 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+ 		int retries);
+ 
++int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq);
++void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
++void mmc_cqe_post_req(struct mmc_host *host, struct mmc_request *mrq);
++int mmc_cqe_recovery(struct mmc_host *host);
++
+ int mmc_hw_reset(struct mmc_host *host);
+ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
  
 -- 
 1.9.1
