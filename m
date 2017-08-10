@@ -1,133 +1,299 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc: renesas_sdhi: use extra flag for CBSY usage
-Date: Thu, 10 Aug 2017 09:58:50 +0200
-Message-ID: <20170810075850.GD16647@verge.net.au>
-References: <20170809190041.1052-1-wsa+renesas@sang-engineering.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 05/11] mmc: core: Add support for handling CQE requests
+Date: Thu, 10 Aug 2017 10:53:05 +0300
+Message-ID: <85f7717b-2b10-42e5-4ed6-1031dea07ce5@intel.com>
+References: <1500630584-22852-1-git-send-email-adrian.hunter@intel.com>
+ <1500630584-22852-6-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFqbxcPw27Gs=s6dQwc1mw_Ksd4MJMJNqMNA7s=BuUZWFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170809190041.1052-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Chris Brandt <chris.brandt@renesas.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Lee Jones <lee.jones@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:59561 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750868AbdHJH7d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 10 Aug 2017 03:59:33 -0400
+In-Reply-To: <CAPDyKFqbxcPw27Gs=s6dQwc1mw_Ksd4MJMJNqMNA7s=BuUZWFA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Wed, Aug 09, 2017 at 09:00:41PM +0200, Wolfram Sang wrote:
-> There is one SDHI instance on Gen2 which does not have the CBSY bit.
-> So, turn CBSY usage into an extra flag and set it accordingly. This has
-> the additional advantage that we can also set it for other incarnations
-> later.
-
-What is the run-time effect, if any, of this change?
-
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Code looks good:
-
-Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
-
-> ---
+On 07/08/17 17:21, Ulf Hansson wrote:
+> On 21 July 2017 at 11:49, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Add core support for handling CQE requests, including starting, completing
+>> and recovering.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/core.c  | 147 +++++++++++++++++++++++++++++++++++++++++++++--
+>>  include/linux/mmc/core.h |   5 ++
+>>  2 files changed, 147 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index b0af9db18eef..5a9d837599a1 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -266,7 +266,8 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>         host->ops->request(host, mrq);
+>>  }
+>>
+>> -static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
+>> +static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq,
+>> +                            bool cqe)
+>>  {
+>>         if (mrq->sbc) {
+>>                 pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+>> @@ -275,9 +276,12 @@ static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq)
+>>         }
+>>
+>>         if (mrq->cmd) {
+>> -               pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+>> -                        mmc_hostname(host), mrq->cmd->opcode, mrq->cmd->arg,
+>> -                        mrq->cmd->flags);
+>> +               pr_debug("%s: starting %sCMD%u arg %08x flags %08x\n",
+>> +                        mmc_hostname(host), cqe ? "CQE direct " : "",
+>> +                        mrq->cmd->opcode, mrq->cmd->arg, mrq->cmd->flags);
+>> +       } else if (cqe) {
+>> +               pr_debug("%s: starting CQE transfer for tag %d blkaddr %u\n",
+>> +                        mmc_hostname(host), mrq->tag, mrq->data->blk_addr);
+>>         }
+>>
+>>         if (mrq->data) {
+>> @@ -345,7 +349,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>         if (mmc_card_removed(host->card))
+>>                 return -ENOMEDIUM;
+>>
+>> -       mmc_mrq_pr_debug(host, mrq);
+>> +       mmc_mrq_pr_debug(host, mrq, false);
+>>
+>>         WARN_ON(!host->claimed);
+>>
+>> @@ -485,6 +489,139 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+>>  }
+>>  EXPORT_SYMBOL(mmc_wait_for_req_done);
+>>
 > 
-> Tested on a M3-W Salvator-X and H2 Lager (with both SDHI instances). I could
-> move large files around without problems. Note that on the special incarnation
-> without the CBSY bit, the old code still worked, so there might be a CBSY bit.
-> But it is not documented, so we better play safe.
+> As this is an exported function, could you please add some function
+> header information.
+
+OK
+
 > 
-> Chris: according to the specs I have, we can enable it for RZ as well. I'll
-> send a patch for that in a minute. If you could test this on top of this one,
-> that would be much appreciated! Thanks.
-
-I take it from the above you did a pass of the available documentation to
-see which SoCs support this feature. If so, thanks!
-
->  drivers/mmc/host/renesas_sdhi_core.c          | 6 +++++-
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 6 ++++--
->  include/linux/mfd/tmio.h                      | 3 +++
->  4 files changed, 14 insertions(+), 4 deletions(-)
+>> +int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>> +{
+>> +       int err;
+>> +
+>> +       /* Caller must hold retuning while CQE is in use */
 > 
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index a252145097d6a5..e46504edc9fcb4 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -429,7 +429,7 @@ static int renesas_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
->  	case CTL_TRANSACTION_CTL:
->  	case CTL_DMA_ENABLE:
->  	case EXT_ACC:
-> -		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> +		if (host->pdata->flags & TMIO_MMC_HAVE_CBSY)
->  			bit = TMIO_STAT_CMD_BUSY;
->  		/* fallthrough */
->  	case CTL_SD_CARD_CLK_CTL:
-> @@ -589,6 +589,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->  	if (ret < 0)
->  		goto efree;
->  
-> +	/* One Gen2 SDHI incarnation does NOT have a CBSY bit */
-> +	if (sd_ctrl_read16(host, CTL_VERSION) == SDHI_VER_GEN2_SDR50)
-> +		mmc_data->flags &= ~TMIO_MMC_HAVE_CBSY;
-> +
->  	/* Enable tuning iff we have an SCC and a supported mode */
->  	if (of_data && of_data->scc_offset &&
->  	    (host->mmc->caps & MMC_CAP_UHS_SDR104 ||
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 6717003888e292..fa4e71d3b47d47 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -72,7 +72,8 @@ static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
->  
->  static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
-> -			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
-> +			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_HAVE_CBSY |
-> +			  TMIO_MMC_MIN_RCAR2,
->  	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_CMD23,
->  	.bus_shift	= 2,
+> Would be nice to get some more clarification on *why* this is needed.
+> Can you please extend the comment a bit on that?
 
-Keeping the above of_rcar_gen3_compatible structure in sync with the one
-below may get painful at some point. Perhaps we should consider a common
-location for it? (Yes, I know this is my handiwork)
+OK
 
-> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> index 718cb8a9d2ce8d..9b77f521cd2c2f 100644
-> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> @@ -58,7 +58,8 @@ static struct renesas_sdhi_scc rcar_gen2_scc_taps[] = {
->  
->  static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
-> -			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
-> +			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_HAVE_CBSY |
-> +			  TMIO_MMC_MIN_RCAR2,
->  	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_CMD23,
->  	.dma_buswidth	= DMA_SLAVE_BUSWIDTH_4_BYTES,
-> @@ -78,7 +79,8 @@ static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
->  
->  static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
-> -			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
-> +			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_HAVE_CBSY |
-> +			  TMIO_MMC_MIN_RCAR2,
->  	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_CMD23,
->  	.bus_shift	= 2,
-> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> index 18b17a39d465ed..b572955e6de6ab 100644
-> --- a/include/linux/mfd/tmio.h
-> +++ b/include/linux/mfd/tmio.h
-> @@ -107,6 +107,9 @@
->   */
->  #define TMIO_MMC_CLK_ACTUAL		BIT(10)
->  
-> +/* Some controllers have a CBSY bit */
-> +#define TMIO_MMC_HAVE_CBSY		BIT(11)
-> +
->  int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
->  int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
->  void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
-> -- 
-> 2.11.0
 > 
+>> +       err = mmc_retune(host);
+>> +       if (err)
+>> +               goto out_err;
+>> +
+>> +       mrq->host = host;
+>> +
+>> +       mmc_mrq_pr_debug(host, mrq, true);
+>> +
+>> +       err = mmc_mrq_prep(host, mrq);
+>> +       if (err)
+>> +               goto out_err;
+>> +
+>> +       err = host->cqe_ops->cqe_request(host, mrq);
+>> +       if (err)
+>> +               goto out_err;
+>> +
+>> +       trace_mmc_request_start(host, mrq);
+>> +
+>> +       return 0;
+>> +
+>> +out_err:
+>> +       if (mrq->cmd) {
+>> +               pr_debug("%s: failed to start CQE direct CMD%u, error %d\n",
+>> +                        mmc_hostname(host), mrq->cmd->opcode, err);
+>> +       } else {
+>> +               pr_debug("%s: failed to start CQE transfer for tag %d, error %d\n",
+>> +                        mmc_hostname(host), mrq->tag, err);
+>> +       }
+>> +       return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_cqe_start_req);
+>> +
+>> +static void __mmc_cqe_request_done(struct mmc_host *host,
+>> +                                  struct mmc_request *mrq)
+>> +{
+>> +       mmc_should_fail_request(host, mrq);
+>> +
+>> +       /* Flag re-tuning needed on CRC errors */
+>> +       if ((mrq->cmd && mrq->cmd->error == -EILSEQ) ||
+>> +           (mrq->data && mrq->data->error == -EILSEQ))
+>> +               mmc_retune_needed(host);
+>> +
+>> +       trace_mmc_request_done(host, mrq);
+>> +
+>> +       if (mrq->cmd) {
+>> +               pr_debug("%s: CQE req done (direct CMD%u): %d\n",
+>> +                        mmc_hostname(host), mrq->cmd->opcode, mrq->cmd->error);
+>> +       } else {
+>> +               pr_debug("%s: CQE transfer done tag %d\n",
+>> +                        mmc_hostname(host), mrq->tag);
+>> +       }
+>> +
+>> +       if (mrq->data) {
+>> +               pr_debug("%s:     %d bytes transferred: %d\n",
+>> +                        mmc_hostname(host),
+>> +                        mrq->data->bytes_xfered, mrq->data->error);
+>> +       }
+>> +}
+>> +
+>> +/**
+>> + *     mmc_cqe_request_done - CQE has finished processing an MMC request
+>> + *     @host: MMC host which completed request
+>> + *     @mrq: MMC request which completed
+>> + *
+>> + *     CQE drivers should call this function when they have completed
+>> + *     their processing of a request.
+>> + */
+>> +void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq)
+>> +{
+>> +       __mmc_cqe_request_done(host, mrq);
+>> +
+>> +       mrq->done(mrq);
+>> +}
+>> +EXPORT_SYMBOL(mmc_cqe_request_done);
+>> +
+>> +/**
+>> + *     mmc_cqe_post_req - CQE post process of a completed MMC request
+>> + *     @host: MMC host
+>> + *     @mrq: MMC request to be processed
+>> + */
+>> +void mmc_cqe_post_req(struct mmc_host *host, struct mmc_request *mrq)
+>> +{
+>> +       if (host->cqe_ops->cqe_post_req)
+>> +               host->cqe_ops->cqe_post_req(host, mrq);
+>> +}
+>> +EXPORT_SYMBOL(mmc_cqe_post_req);
+>> +
+>> +/* Arbitrary 1 second timeout */
+>> +#define MMC_CQE_RECOVERY_TIMEOUT       1000
+> 
+> Why 1 second?
+
+As it says it is arbitrary.  The CQHCI specification does not provide a
+value.  It "feels" like a reasonable time to wait.
+
+> 
+> Nitpick:
+> I am bit reluctant to use the terminology of "recovery". In then end
+> it's about a request timeout and then act by doing a graceful abort.
+
+No it is about any kind of error including data CRC's.  CQE requests have 2
+retries and there is re-tuning if needed, so there is recovery from CRC errors.
+
+> 
+>> +
+> 
+> Please add function header.
+> 
+>> +int mmc_cqe_recovery(struct mmc_host *host)
+>> +{
+>> +       struct mmc_command cmd;
+>> +       int err;
+>> +
+>> +       mmc_retune_hold_now(host);
+>> +
+>> +       /*
+>> +        * Recovery is expected seldom, if at all, but it reduces performance,
+>> +        * so make sure it is not completely silent.
+>> +        */
+>> +       pr_warn("%s: running CQE recovery\n", mmc_hostname(host));
+>> +
+>> +       host->cqe_ops->cqe_recovery_start(host);
+> 
+> What is expected to be done by the host from this callback?
+
+We are going to send commands to the card, so CQE must prepare for that.
+
+> 
+> I have been thinking about deploying a common data request timeout
+> behavior in the mmc core. In principle calling
+> wait_for_completion_timeout() instead of just wait_for_completion().
+
+We should increasingly be moving to asynchronous processing so we have to
+support the path where there is no thread sitting waiting. i.e. the
+wait_for...() functions should not be the focus.
+
+Also the block layer has it's own timeout mechanism and we should use that
+for the block driver - in the case of blk-mq I don't think it is optional.
+
+> To deal with that, one would also need to invent a new host ops
+> callback to allow the host driver to restore its HW to a know state.
+> Very similar to what you also seems to need here for CQE.
+> 
+> I was just thinking that part of this code/callbacks could be re-used
+> for other non-CQE data requests that timeouts. Do you think that could
+> makes sense?
+
+We need to keep CQE host ops separate because, design-wise, it is simpler
+and more flexible to treat the CQE as a separate entity.  Then,
+theoretically, any driver can use any CQE implementation.  Even if we never
+have more than 1 CQE implementation, it still forces a cleaner API.
+
+> 
+>> +
+>> +       memset(&cmd, 0, sizeof(cmd));
+>> +       cmd.opcode       = MMC_STOP_TRANSMISSION,
+>> +       cmd.flags        = MMC_RSP_R1B | MMC_CMD_AC,
+>> +       cmd.flags       &= ~MMC_RSP_CRC; /* Ignore CRC */
+>> +       cmd.busy_timeout = MMC_CQE_RECOVERY_TIMEOUT,
+>> +       mmc_wait_for_cmd(host, &cmd, 0);
+>> +
+>> +       memset(&cmd, 0, sizeof(cmd));
+>> +       cmd.opcode       = MMC_CMDQ_TASK_MGMT;
+>> +       cmd.arg          = 1; /* Discard entire queue */
+>> +       cmd.flags        = MMC_RSP_R1B | MMC_CMD_AC;
+>> +       cmd.flags       &= ~MMC_RSP_CRC; /* Ignore CRC */
+>> +       cmd.busy_timeout = MMC_CQE_RECOVERY_TIMEOUT,
+>> +       err = mmc_wait_for_cmd(host, &cmd, 0);
+>> +
+>> +       host->cqe_ops->cqe_recovery_finish(host);
+>> +
+>> +       mmc_retune_release(host);
+>> +
+>> +       return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_cqe_recovery);
+>> +
+>>  /**
+>>   *     mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
+>>   *     @host: MMC host
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index bf1788a224e6..1974fcfd4284 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -174,6 +174,11 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
+>>  int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>>                 int retries);
+>>
+>> +int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq);
+>> +void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
+>> +void mmc_cqe_post_req(struct mmc_host *host, struct mmc_request *mrq);
+>> +int mmc_cqe_recovery(struct mmc_host *host);
+>> +
+>>  int mmc_hw_reset(struct mmc_host *host);
+>>  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+>>
+>> --
+>> 1.9.1
+>>
+> 
+> Kind regards
+> Uffe
+> 
+
