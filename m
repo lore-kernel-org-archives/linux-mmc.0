@@ -1,37 +1,70 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [RFT 0/2] mmc: renesas_sdhi: small patches for RZ/A1
-Date: Thu, 10 Aug 2017 12:59:05 +0000
-Message-ID: <SG2PR06MB116509EEC14B9FF771BA28308A880@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170809191452.5254-1-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:49261 "EHLO
-        relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751914AbdHJM7J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2017 08:59:09 -0400
-In-Reply-To: <20170809191452.5254-1-wsa+renesas@sang-engineering.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: srinivas.kandagatla@linaro.org
+Subject: [PATCH] mmc: mmci: stop building qcom dml as module
+Date: Thu, 10 Aug 2017 16:54:18 +0200
+Message-ID: <20170810145418.4430-1-srinivas.kandagatla@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: arnd@arndb.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 
-Hello Wolfram,
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
+It does not make sense for qcom dml code to be a seperate module, as
+this has just 2 helper functions specific to qcom, and used directly by
+mmci driver, so just compile this along with main mmci driver.
 
-On Wednesday, August 09, 2017, Wolfram Sang wrote:
-> Here is a small series to improve RZ support for SDHI. I don't have that
-> platform currently, so I hope Chris has some time to check these simple
-> patches. It is based on top of the patch just sent out:
-> "[PATCH] mmc: renesas_sdhi: use extra flag for CBSY usage"
+This would also fix issues arrising due to Kconfig combinations between
+mmci and qcom dml.
 
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
+ drivers/mmc/host/Kconfig         | 2 +-
+ drivers/mmc/host/Makefile        | 5 +++--
+ drivers/mmc/host/mmci_qcom_dml.h | 2 +-
+ 3 files changed, 5 insertions(+), 4 deletions(-)
 
-I applied the 3 patches and tested with an SD Card. No issues.
-
-Thank you for considering RZ!
-
-
-Chris
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 5755b69..3345384 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -15,7 +15,7 @@ config MMC_ARMMMCI
+ 	  If unsure, say N.
+ 
+ config MMC_QCOM_DML
+-	tristate "Qualcomm Data Mover for SD Card Controller"
++	bool "Qualcomm Data Mover for SD Card Controller"
+ 	depends on MMC_ARMMMCI && QCOM_BAM_DMA
+ 	default y
+ 	help
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 4d45471..ef12fd2 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -2,8 +2,9 @@
+ # Makefile for MMC/SD host controller drivers
+ #
+ 
+-obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
+-obj-$(CONFIG_MMC_QCOM_DML)	+= mmci_qcom_dml.o
++obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
++armmmci-y := mmci.o
++armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
+ obj-$(CONFIG_MMC_PXA)		+= pxamci.o
+ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
+ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
+index 6e405d0..9df32eb 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.h
++++ b/drivers/mmc/host/mmci_qcom_dml.h
+@@ -15,7 +15,7 @@
+ #ifndef __MMC_QCOM_DML_H__
+ #define __MMC_QCOM_DML_H__
+ 
+-#ifdef CONFIG_MMC_QCOM_DML
++#if IS_ENABLED(CONFIG_MMC_QCOM_DML)
+ int dml_hw_init(struct mmci_host *host, struct device_node *np);
+ void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
+ #else
+-- 
+2.9.3
