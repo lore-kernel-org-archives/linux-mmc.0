@@ -1,48 +1,102 @@
-From: Boris Brezillon <boris.brezillon@free-electrons.com>
-Subject: Re: [PATCH v4 2/9] mtd: nand: sharpsl.h: support partition parser
- types
-Date: Sun, 13 Aug 2017 09:40:19 +0200
-Message-ID: <20170813094019.2fced1d1@bbrezillon>
-References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
-        <1498681836-3765-3-git-send-email-andrea.adami@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Mon, 14 Aug 2017 08:41:52 +0800
+Message-ID: <a89b0c9b-b28f-a4f7-d6aa-aefc9a86176d@rock-chips.com>
+References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([62.4.15.54]:53168 "EHLO
-        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750921AbdHMHkX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Aug 2017 03:40:23 -0400
-In-Reply-To: <1498681836-3765-3-git-send-email-andrea.adami@gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.133]:37363 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751395AbdHNAl4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Aug 2017 20:41:56 -0400
+In-Reply-To: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Le Wed, 28 Jun 2017 22:30:29 +0200,
-Andrea Adami <andrea.adami@gmail.com> a écrit :
 
-Please add a commit message explaining why you're doing that.
-
-> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
-> ---
->  include/linux/mtd/sharpsl.h | 1 +
->  1 file changed, 1 insertion(+)
+On 2017/8/8 8:27, Shawn Lin wrote:
+> We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+> mode as it is expected behaviour and most of the backup partition
+> tables should be located near some of the last blocks which will
+> always make open-ending read exceed the capacity of cards.
 > 
-> diff --git a/include/linux/mtd/sharpsl.h b/include/linux/mtd/sharpsl.h
-> index 65e91d0..c0e0be2 100644
-> --- a/include/linux/mtd/sharpsl.h
-> +++ b/include/linux/mtd/sharpsl.h
-> @@ -17,4 +17,5 @@ struct sharpsl_nand_platform_data {
->  	const struct mtd_ooblayout_ops *ecc_layout;
->  	struct mtd_partition	*partitions;
->  	unsigned int		nr_partitions;
-> +	const char *const	*types;	/* names of parsers to use if any */
+> Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+> Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Tested-by: Shawn Guo <shawnguo@kernel.org>
+> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-types is not really descriptive here. How about 'part_parsers' or
-something clearly reflecting the purpose of this field.
+Just ping to make sure this fix won't be missing from the TODO list.
 
-BTW, try to avoid putting comments on the same line.
 
->  };
+> ---
+> 
+> Changes in v2:
+> - fix a typo and introduce STOP_ERROR
+> - reword the comment and always include a description from the spec if possible
+> 
+>   drivers/mmc/core/block.c | 30 +++++++++++++++++++++++-------
+>   1 file changed, 23 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index a11bead..38267a0 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1360,18 +1360,34 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>   	}
+>   }
+>   
+> -#define CMD_ERRORS							\
+> -	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
+> -	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
+> +#define STOP_ERRORS							\
+> +	(R1_ADDRESS_ERROR |	/* Misaligned address */		\
+>   	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
+>   	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
+>   	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
+>   	 R1_CC_ERROR |		/* Card controller error */		\
+>   	 R1_ERROR)		/* General/unknown error */
+>   
+> -static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
+> +#define CMD_ERRORS (STOP_ERRORS | \
+> +		    R1_OUT_OF_RANGE) /* Command argument out of range */
+> +
+> +static bool mmc_blk_has_cmd_err(struct mmc_card *card, struct mmc_command *cmd)
+>   {
+> -	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+> +	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
+> +	u32 error = (md->flags & MMC_BLK_CMD23) ? CMD_ERRORS : STOP_ERRORS;
+> +
+> +	/*
+> +	 * Per the SD specification(physical layer version 4.10),
+> +	 * section 4.3.3, it explicitly states that "When the last
+> +	 * block of user area is read using CMD18, the host should
+> +	 * ignore OUT_OF_RANGE error that may occur even the sequence
+> +	 * is correct". And JESD84-B51 for eMMC also has a similar
+> +	 * statement on section 6.8.3. As CMD23 is optional for either
+> +	 * cards or hosts, so we need to check the MMC_BLK_CMD23 flag
+> +	 * to prevent the OUT_OF_RANGE error for open-ending multiple
+> +	 * block operations as it's normal behaviour.
+> +	 */
+> +	if (!cmd->error && cmd->resp[0] & error)
+>   		cmd->error = -EIO;
+>   
+>   	return cmd->error;
+> @@ -1398,8 +1414,8 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+>   	 * stop.error indicates a problem with the stop command.  Data
+>   	 * may have been transferred, or may still be transferring.
+>   	 */
+> -	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+> -	    brq->data.error) {
+> +	if (brq->sbc.error || brq->cmd.error ||
+> +	    mmc_blk_has_cmd_err(card, &brq->stop) || brq->data.error) {
+>   		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+>   		case ERR_RETRY:
+>   			return MMC_BLK_RETRY;
+> 
 
