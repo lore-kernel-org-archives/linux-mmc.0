@@ -1,8 +1,8 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH v2 1/4] mmc: sdhci: enable/disable the clock in
  sdhci_pltfm_suspend/resume
-Date: Mon, 14 Aug 2017 13:28:21 +0300
-Message-ID: <1ff5bfa4-e7bf-3f52-de4d-fa34e87ffad7@intel.com>
+Date: Mon, 14 Aug 2017 13:28:34 +0300
+Message-ID: <ec385fc0-a17e-7ee4-2414-be9de131ecdc@intel.com>
 References: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
  <1501724656-12435-2-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
@@ -27,7 +27,7 @@ On 03/08/17 04:44, Masahiro Yamada wrote:
 > 
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-I would like to some see Acks from other driver maintainers including ones
+I would like to see some Acks from other driver maintainers including ones
 that did not previously clk_disable_unprepare(pltfm_host->clk) in suspend
 but now do. e.g. sdhci-tegra
 
