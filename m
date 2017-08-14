@@ -1,192 +1,60 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/4] mmc: sdhci: enable/disable the clock in
- sdhci_pltfm_suspend/resume
-Date: Mon, 14 Aug 2017 13:28:34 +0300
-Message-ID: <ec385fc0-a17e-7ee4-2414-be9de131ecdc@intel.com>
+Subject: Re: [PATCH v2 2/4] mmc: sdhci: remove #indef CONFIG_PM around
+ function declarations
+Date: Mon, 14 Aug 2017 13:29:49 +0300
+Message-ID: <e7e49120-ffcc-27a4-5533-d6e83e25c9df@intel.com>
 References: <1501724656-12435-1-git-send-email-yamada.masahiro@socionext.com>
- <1501724656-12435-2-git-send-email-yamada.masahiro@socionext.com>
+ <1501724656-12435-3-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1501724656-12435-2-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:42340 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752896AbdHNKgQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 14 Aug 2017 06:36:16 -0400
+In-Reply-To: <1501724656-12435-3-git-send-email-yamada.masahiro@socionext.com>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org, Brian Norris <computersforpeace@gmail.com>, bcm-kernel-feedback-list@broadcom.com, Barry Song <baohua@kernel.org>, Florian Fainelli <f.fainelli@gmail.com>, Gregory Fong <gregory.0xf0@gmail.com>, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
 On 03/08/17 04:44, Masahiro Yamada wrote:
-> This commit provides similar cleanups as commit 83eacdfa2529 ("mmc:
-> sdhci: disable the clock in sdhci_pltfm_unregister()") did for
-> unregister hooks.
-> 
-> Some drivers duplicate code to handle pltfm_host->clk in their own
-> hooks.  The clock can be handled in sdhci_pltfm.c so that drivers
-> can reuse sdhci_pltfm_pmops.
+> We need not surround declarations with #ifdef.  Besides, drivers may
+> want to call these from PM callbacks marked with __maybe_unused.
+
+No, we use #ifdef not __maybe_unused, and removing the #ifdef is misleading.
+
 > 
 > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-I would like to see some Acks from other driver maintainers including ones
-that did not previously clk_disable_unprepare(pltfm_host->clk) in suspend
-but now do. e.g. sdhci-tegra
-
 > ---
 > 
 > Changes in v2:
->   - Fix build error reported by kbuild test robot
+>   - Newly added
 > 
->  drivers/mmc/host/sdhci-brcmstb.c | 37 +------------------------------------
->  drivers/mmc/host/sdhci-pltfm.c   | 16 +++++++++++++++-
->  drivers/mmc/host/sdhci-sirf.c    | 39 +--------------------------------------
->  3 files changed, 17 insertions(+), 75 deletions(-)
+>  drivers/mmc/host/sdhci.h | 4 ----
+>  1 file changed, 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index e2f638338e8f..6d461fcdd663 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -21,41 +21,6 @@
->  
->  #include "sdhci-pltfm.h"
->  
-> -#ifdef CONFIG_PM_SLEEP
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0469fa191493..773b38127da2 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -709,15 +709,11 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+>  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  				      struct mmc_ios *ios);
+>  void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
 > -
-> -static int sdhci_brcmstb_suspend(struct device *dev)
-> -{
-> -	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	int res;
-> -
-> -	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> -		mmc_retune_needed(host->mmc);
-> -
-> -	res = sdhci_suspend_host(host);
-> -	if (res)
-> -		return res;
-> -	clk_disable_unprepare(pltfm_host->clk);
-> -	return res;
-> -}
-> -
-> -static int sdhci_brcmstb_resume(struct device *dev)
-> -{
-> -	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	int err;
-> -
-> -	err = clk_prepare_enable(pltfm_host->clk);
-> -	if (err)
-> -		return err;
-> -	return sdhci_resume_host(host);
-> -}
-> -
-> -#endif /* CONFIG_PM_SLEEP */
-> -
-> -static SIMPLE_DEV_PM_OPS(sdhci_brcmstb_pmops, sdhci_brcmstb_suspend,
-> -			sdhci_brcmstb_resume);
-> -
->  static const struct sdhci_ops sdhci_brcmstb_ops = {
->  	.set_clock = sdhci_set_clock,
->  	.set_bus_width = sdhci_set_bus_width,
-> @@ -131,7 +96,7 @@ MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
->  static struct platform_driver sdhci_brcmstb_driver = {
->  	.driver		= {
->  		.name	= "sdhci-brcmstb",
-> -		.pm	= &sdhci_brcmstb_pmops,
-> +		.pm	= &sdhci_pltfm_pmops,
->  		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
->  	},
->  	.probe		= sdhci_brcmstb_probe,
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index e090d8c42ddb..be9a79d62e22 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -212,16 +212,30 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
->  static int sdhci_pltfm_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
->  
->  	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
->  		mmc_retune_needed(host->mmc);
->  
-> -	return sdhci_suspend_host(host);
-> +	ret = sdhci_suspend_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +
-> +	return 0;
->  }
->  
->  static int sdhci_pltfm_resume(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret)
-> +		return ret;
->  
->  	return sdhci_resume_host(host);
->  }
-> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-> index c251c6c0a112..0c7aa89df4e2 100644
-> --- a/drivers/mmc/host/sdhci-sirf.c
-> +++ b/drivers/mmc/host/sdhci-sirf.c
-> @@ -230,43 +230,6 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
->  	return ret;
->  }
->  
-> -#ifdef CONFIG_PM_SLEEP
-> -static int sdhci_sirf_suspend(struct device *dev)
-> -{
-> -	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	int ret;
-> -
-> -	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> -		mmc_retune_needed(host->mmc);
-> -
-> -	ret = sdhci_suspend_host(host);
-> -	if (ret)
-> -		return ret;
-> -
-> -	clk_disable(pltfm_host->clk);
-> -
-> -	return 0;
-> -}
-> -
-> -static int sdhci_sirf_resume(struct device *dev)
-> -{
-> -	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	int ret;
-> -
-> -	ret = clk_enable(pltfm_host->clk);
-> -	if (ret) {
-> -		dev_dbg(dev, "Resume: Error enabling clock\n");
-> -		return ret;
-> -	}
-> -
-> -	return sdhci_resume_host(host);
-> -}
+> -#ifdef CONFIG_PM
+>  int sdhci_suspend_host(struct sdhci_host *host);
+>  int sdhci_resume_host(struct sdhci_host *host);
+>  void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+>  int sdhci_runtime_suspend_host(struct sdhci_host *host);
+>  int sdhci_runtime_resume_host(struct sdhci_host *host);
 > -#endif
 > -
-> -static SIMPLE_DEV_PM_OPS(sdhci_sirf_pm_ops, sdhci_sirf_suspend, sdhci_sirf_resume);
-> -
->  static const struct of_device_id sdhci_sirf_of_match[] = {
->  	{ .compatible = "sirf,prima2-sdhc" },
->  	{ }
-> @@ -277,7 +240,7 @@ static struct platform_driver sdhci_sirf_driver = {
->  	.driver		= {
->  		.name	= "sdhci-sirf",
->  		.of_match_table = sdhci_sirf_of_match,
-> -		.pm	= &sdhci_sirf_pm_ops,
-> +		.pm	= &sdhci_pltfm_pmops,
->  	},
->  	.probe		= sdhci_sirf_probe,
->  	.remove		= sdhci_pltfm_unregister,
+>  void sdhci_cqe_enable(struct mmc_host *mmc);
+>  void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
+>  bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
 > 
+
