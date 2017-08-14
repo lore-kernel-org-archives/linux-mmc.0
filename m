@@ -1,40 +1,79 @@
-From: Biju Das <biju.das@bp.renesas.com>
-Subject: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 14 Aug 2017 12:19:41 +0100
-Message-ID: <1502709581-26546-1-git-send-email-biju.das@bp.renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: fix SDHCI_QUIRK_NO_HISPD_BIT handling
+Date: Mon, 14 Aug 2017 14:34:26 +0300
+Message-ID: <5ef4d0ff-7a97-3616-aeb1-e39ce096d038@intel.com>
+References: <1502256755-37752-1-git-send-email-yangbo.lu@nxp.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:63541 "EHLO
-        relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752680AbdHNLeY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 07:34:24 -0400
+Received: from mga01.intel.com ([192.55.52.88]:52415 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752843AbdHNLkx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 14 Aug 2017 07:40:53 -0400
+In-Reply-To: <1502256755-37752-1-git-send-email-yangbo.lu@nxp.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
-Cc: Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Biju Das <biju.das@bp.renesas.com>
+To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
-Add support for r8a7743/5 SoC.Renesas RZ/G1[ME] (R8A7743/5) SDHI
-is identical to the R-Car Gen2 family.
+On 09/08/17 08:32, Yangbo Lu wrote:
+> SD controller with SDHCI_QUIRK_NO_HISPD_BIT quirk probably
+> use high speed enable bit for other purpose. So this bit
+> shouldn't be changed for high speed enabling for this type of
+> SD controller.
+> 
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-Signed-off-by: Biju Das <biju.das@bp.renesas.com>
----
-This patch is compiled and tested against mmc/next.
+Apart from the duplicate parenthesis.
 
- drivers/mmc/host/renesas_sdhi_sys_dmac.c | 2 ++
- 1 file changed, 2 insertions(+)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index 718cb8a..f709f7f 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -95,6 +95,8 @@
- 	{ .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a7743", .data = &of_rcar_gen2_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a7745", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
--- 
-1.9.1
+> ---
+>  drivers/mmc/host/sdhci.c | 27 ++++++++++++++-------------
+>  1 file changed, 14 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a1ad2dd..25393b9 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1641,19 +1641,20 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  
+>  	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>  
+> -	if ((ios->timing == MMC_TIMING_SD_HS ||
+> -	     ios->timing == MMC_TIMING_MMC_HS ||
+> -	     ios->timing == MMC_TIMING_MMC_HS400 ||
+> -	     ios->timing == MMC_TIMING_MMC_HS200 ||
+> -	     ios->timing == MMC_TIMING_MMC_DDR52 ||
+> -	     ios->timing == MMC_TIMING_UHS_SDR50 ||
+> -	     ios->timing == MMC_TIMING_UHS_SDR104 ||
+> -	     ios->timing == MMC_TIMING_UHS_DDR50 ||
+> -	     ios->timing == MMC_TIMING_UHS_SDR25)
+> -	    && !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+> -		ctrl |= SDHCI_CTRL_HISPD;
+> -	else
+> -		ctrl &= ~SDHCI_CTRL_HISPD;
+> +	if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
+> +		if ((ios->timing == MMC_TIMING_SD_HS ||
+
+Duplicate parenthesis.
+
+> +		     ios->timing == MMC_TIMING_MMC_HS ||
+> +		     ios->timing == MMC_TIMING_MMC_HS400 ||
+> +		     ios->timing == MMC_TIMING_MMC_HS200 ||
+> +		     ios->timing == MMC_TIMING_MMC_DDR52 ||
+> +		     ios->timing == MMC_TIMING_UHS_SDR50 ||
+> +		     ios->timing == MMC_TIMING_UHS_SDR104 ||
+> +		     ios->timing == MMC_TIMING_UHS_DDR50 ||
+> +		     ios->timing == MMC_TIMING_UHS_SDR25))
+> +			ctrl |= SDHCI_CTRL_HISPD;
+> +		else
+> +			ctrl &= ~SDHCI_CTRL_HISPD;
+> +	}
+>  
+>  	if (host->version >= SDHCI_SPEC_300) {
+>  		u16 clk, ctrl_2;
+> 
 
