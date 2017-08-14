@@ -1,49 +1,53 @@
-From: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH v2 1/4] mmc: sdhci: key 8BITBUS bit off MMC_CAP_8_BIT_DATA
-Date: Mon, 14 Aug 2017 22:00:24 +0200
-Message-ID: <48d72c32067a8e4ae50c77ee9cc5c077bb2809ae.1502740497.git.mirq-linux@rere.qmqm.pl>
-References: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 78-11-180-123.static.ip.netia.com.pl ([78.11.180.123]:46900
-        "EHLO rere.qmqm.pl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751389AbdHNUA0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 16:00:26 -0400
-In-Reply-To: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrea Adami <andrea.adami@gmail.com>
+Subject: [PATCH v5 0/9] mtd: sharpslpart partition parser
+Date: Mon, 14 Aug 2017 22:48:31 +0200
+Message-ID: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mtd@lists.infradead.org
+Cc: David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Boris Brezillon <boris.brezillon@free-electrons.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-Hosts supporting 8-bit bus are marked accordingly. If MMC_CAP_8_BIT_DATA
-is not among host capabilities, 8BITBUS bit will never be set and it
-is not cleared in case some non-SDHCI3 host uses it for something else.
+This patchset introduces a simple partition parser for the Sharp SL
+Series PXA handhelds. More details in the commit text.
 
-Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+I have set in cc the ARM PXA maintainers because this is the MTD part of
+a planned wider patchset cleaning the Zaurus board files. The MFD maintainers
+are also in cc (tmio.h change).
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ecd0d4350e8a..cca21246cf61 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1544,10 +1544,9 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width)
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 	if (width == MMC_BUS_WIDTH_8) {
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
--		if (host->version >= SDHCI_SPEC_300)
--			ctrl |= SDHCI_CTRL_8BITBUS;
-+		ctrl |= SDHCI_CTRL_8BITBUS;
- 	} else {
--		if (host->version >= SDHCI_SPEC_300)
-+		if (host->mmc->caps & MMC_CAP_8_BIT_DATA)
- 			ctrl &= ~SDHCI_CTRL_8BITBUS;
- 		if (width == MMC_BUS_WIDTH_4)
- 			ctrl |= SDHCI_CTRL_4BITBUS;
+Changelog:
+v1 firt version, initial import of 2.4 sources
+v2 refactor applying many suggested fixes
+v3 put the partition parser types in the platform data
+v4 refactor after ML review
+v5 fix commit messages and subject texts, remove global, fixes after v4 review
+
+GPL sources: http://support.ezaurus.com/developer/source/source_dl.asp
+
+Andrea Adami (9):
+  mtd: sharpslpart: Add sharpslpart partition parser
+  mtd: nand: sharpsl: Add partition parsers platform data
+  mfd: tmio: Add partition parsers platform data
+  mtd: nand: sharpsl: Register partitions using the parsers
+  mtd: nand: tmio: Register partitions using the parsers
+  ARM: pxa/corgi: Remove hardcoded partitioning, use sharpslpart parser
+  ARM: pxa/tosa: Remove hardcoded partitioning, use sharpslpart parser
+  ARM: pxa/spitz: Remove hardcoded partitioning, use sharpslpart parser
+  ARM: pxa/poodle: Remove hardcoded partitioning, use sharpslpart parser
+
+ arch/arm/mach-pxa/corgi.c         |  31 +---
+ arch/arm/mach-pxa/poodle.c        |  28 +--
+ arch/arm/mach-pxa/spitz.c         |  34 +---
+ arch/arm/mach-pxa/tosa.c          |  28 +--
+ drivers/mtd/nand/sharpsl.c        |   2 +-
+ drivers/mtd/nand/tmio_nand.c      |   4 +-
+ drivers/mtd/parsers/Kconfig       |   8 +
+ drivers/mtd/parsers/Makefile      |   1 +
+ drivers/mtd/parsers/sharpslpart.c | 376 ++++++++++++++++++++++++++++++++++++++
+ include/linux/mfd/tmio.h          |   1 +
+ include/linux/mtd/sharpsl.h       |   1 +
+ 11 files changed, 424 insertions(+), 90 deletions(-)
+ create mode 100644 drivers/mtd/parsers/sharpslpart.c
+
 -- 
-2.11.0
-
+2.7.4
