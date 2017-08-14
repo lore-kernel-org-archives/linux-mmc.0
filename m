@@ -1,80 +1,49 @@
 From: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH v2 2/4] mmc: sdhci-tegra: use generic sdhci_set_bus_width()
+Subject: [PATCH v2 1/4] mmc: sdhci: key 8BITBUS bit off MMC_CAP_8_BIT_DATA
 Date: Mon, 14 Aug 2017 22:00:24 +0200
-Message-ID: <7d6cf1b81c67e3448edbab526e36bfdca737fc45.1502740497.git.mirq-linux@rere.qmqm.pl>
+Message-ID: <48d72c32067a8e4ae50c77ee9cc5c077bb2809ae.1502740497.git.mirq-linux@rere.qmqm.pl>
 References: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 78-11-180-123.static.ip.netia.com.pl ([78.11.180.123]:46920
+Received: from 78-11-180-123.static.ip.netia.com.pl ([78.11.180.123]:46900
         "EHLO rere.qmqm.pl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751575AbdHNUA1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 16:00:27 -0400
+        with ESMTP id S1751389AbdHNUA0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 16:00:26 -0400
 In-Reply-To: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
 Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-Now that sdhci_set_bus_width() supports 8-bit bus widths based on the
-MMC_CAP_8_BIT_DATA capability flag, replace the tegra version with the
-generic sdhci version.
+Hosts supporting 8-bit bus are marked accordingly. If MMC_CAP_8_BIT_DATA
+is not among host capabilities, 8BITBUS bit will never be set and it
+is not cleared in case some non-SDHCI3 host uses it for something else.
 
 Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 23 ++---------------------
- 1 file changed, 2 insertions(+), 21 deletions(-)
+ drivers/mmc/host/sdhci.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 7f93079c7a3a..9a589b6a53dd 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -190,25 +190,6 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	tegra_host->ddr_signaling = false;
- }
- 
--static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
--{
--	u32 ctrl;
--
--	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--	if ((host->mmc->caps & MMC_CAP_8_BIT_DATA) &&
--	    (bus_width == MMC_BUS_WIDTH_8)) {
--		ctrl &= ~SDHCI_CTRL_4BITBUS;
--		ctrl |= SDHCI_CTRL_8BITBUS;
--	} else {
--		ctrl &= ~SDHCI_CTRL_8BITBUS;
--		if (bus_width == MMC_BUS_WIDTH_4)
--			ctrl |= SDHCI_CTRL_4BITBUS;
--		else
--			ctrl &= ~SDHCI_CTRL_4BITBUS;
--	}
--	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--}
--
- static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
- {
- 	u32 val;
-@@ -323,7 +304,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
- 	.read_w     = tegra_sdhci_readw,
- 	.write_l    = tegra_sdhci_writel,
- 	.set_clock  = tegra_sdhci_set_clock,
--	.set_bus_width = tegra_sdhci_set_bus_width,
-+	.set_bus_width = sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
- 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-@@ -371,7 +352,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
- 	.write_w    = tegra_sdhci_writew,
- 	.write_l    = tegra_sdhci_writel,
- 	.set_clock  = tegra_sdhci_set_clock,
--	.set_bus_width = tegra_sdhci_set_bus_width,
-+	.set_bus_width = sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
- 	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ecd0d4350e8a..cca21246cf61 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1544,10 +1544,9 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width)
+ 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 	if (width == MMC_BUS_WIDTH_8) {
+ 		ctrl &= ~SDHCI_CTRL_4BITBUS;
+-		if (host->version >= SDHCI_SPEC_300)
+-			ctrl |= SDHCI_CTRL_8BITBUS;
++		ctrl |= SDHCI_CTRL_8BITBUS;
+ 	} else {
+-		if (host->version >= SDHCI_SPEC_300)
++		if (host->mmc->caps & MMC_CAP_8_BIT_DATA)
+ 			ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 		if (width == MMC_BUS_WIDTH_4)
+ 			ctrl |= SDHCI_CTRL_4BITBUS;
 -- 
 2.11.0
 
