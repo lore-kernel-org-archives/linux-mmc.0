@@ -1,63 +1,51 @@
-From: Andrea Adami <andrea.adami@gmail.com>
-Subject: Re: [PATCH v4 2/9] mtd: nand: sharpsl.h: support partition parser types
-Date: Mon, 14 Aug 2017 15:40:58 +0200
-Message-ID: <CAAQYJAsYNUB5G4jw7-P2jFq3i0PdUejpvwA9XC-Wyv4nVDPVMA@mail.gmail.com>
-References: <1498681836-3765-1-git-send-email-andrea.adami@gmail.com>
- <1498681836-3765-3-git-send-email-andrea.adami@gmail.com> <20170813094019.2fced1d1@bbrezillon>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Mon, 14 Aug 2017 16:22:14 +0200
+Message-ID: <CAMuHMdVDqgbwKzxFoxajLLFHZC80NT5vrDLnpb9sFj+DL-1zDw@mail.gmail.com>
+References: <1502709581-26546-1-git-send-email-biju.das@bp.renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34863 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751313AbdHNNlA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 09:41:00 -0400
-In-Reply-To: <20170813094019.2fced1d1@bbrezillon>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1502709581-26546-1-git-send-email-biju.das@bp.renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Biju Das <biju.das@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Boris Brezillon <boris.brezillon@free-electrons.com>
-Cc: linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Marek Vasut <marek.vasut@gmail.com>, Richard Weinberger <richard@nod.at>, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Lee Jones <lee.jones@linaro.org>, Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Sun, Aug 13, 2017 at 9:40 AM, Boris Brezillon
-<boris.brezillon@free-electrons.com> wrote:
-> Le Wed, 28 Jun 2017 22:30:29 +0200,
-> Andrea Adami <andrea.adami@gmail.com> a =C3=A9crit :
+On Mon, Aug 14, 2017 at 1:19 PM, Biju Das <biju.das@bp.renesas.com> wrote:
+> Add support for r8a7743/5 SoC.Renesas RZ/G1[ME] (R8A7743/5) SDHI
+> is identical to the R-Car Gen2 family.
 >
-> Please add a commit message explaining why you're doing that.
+> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
+> ---
+> This patch is compiled and tested against mmc/next.
 >
-Sure, I have added a short text.
-
->> Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
->> ---
->>  include/linux/mtd/sharpsl.h | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/include/linux/mtd/sharpsl.h b/include/linux/mtd/sharpsl.h
->> index 65e91d0..c0e0be2 100644
->> --- a/include/linux/mtd/sharpsl.h
->> +++ b/include/linux/mtd/sharpsl.h
->> @@ -17,4 +17,5 @@ struct sharpsl_nand_platform_data {
->>       const struct mtd_ooblayout_ops *ecc_layout;
->>       struct mtd_partition    *partitions;
->>       unsigned int            nr_partitions;
->> +     const char *const       *types; /* names of parsers to use if any =
-*/
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> types is not really descriptive here. How about 'part_parsers' or
-> something clearly reflecting the purpose of this field.
+> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> index 718cb8a..f709f7f 100644
+> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> @@ -95,6 +95,8 @@
+>         { .compatible = "renesas,sdhi-r7s72100", .data = &of_rz_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+> +       { .compatible = "renesas,sdhi-r8a7743", .data = &of_rcar_gen2_compatible, },
+> +       { .compatible = "renesas,sdhi-r8a7745", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
 
-I took this line somewhere from a pending mtd patch.
-I wasn't convinced of the name and   part_parsers   is better.
+I guess we want generic R-Car Gen2/3 compatible values here, too?
 
->
-> BTW, try to avoid putting comments on the same line.
-Yeah, we talked about these janitoring needs. Removed.
+Gr{oetje,eeting}s,
 
->
->>  };
->
+                        Geert
 
-Please review v5 (coming soon).
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-Thanks
-Andrea
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
