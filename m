@@ -1,13 +1,13 @@
 From: Andrea Adami <andrea.adami@gmail.com>
-Subject: [PATCH v5 8/9] ARM: pxa/spitz: Remove hardcoded partitioning, use sharpslpart parser
-Date: Mon, 14 Aug 2017 22:48:39 +0200
-Message-ID: <1502743720-28672-9-git-send-email-andrea.adami@gmail.com>
+Subject: [PATCH v5 9/9] ARM: pxa/poodle: Remove hardcoded partitioning, use sharpslpart parser
+Date: Mon, 14 Aug 2017 22:48:40 +0200
+Message-ID: <1502743720-28672-10-git-send-email-andrea.adami@gmail.com>
 References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:35318 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752692AbdHNUs5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 16:48:57 -0400
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35664 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752624AbdHNUs7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 16:48:59 -0400
 In-Reply-To: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -21,26 +21,29 @@ written in NAND. This is done here in the board file.
 
 Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
 ---
- arch/arm/mach-pxa/spitz.c | 34 +++++++++-------------------------
- 1 file changed, 9 insertions(+), 25 deletions(-)
+ arch/arm/mach-pxa/poodle.c | 28 ++++++++--------------------
+ 1 file changed, 8 insertions(+), 20 deletions(-)
 
-diff --git a/arch/arm/mach-pxa/spitz.c b/arch/arm/mach-pxa/spitz.c
-index 67d66c7..defefa3 100644
---- a/arch/arm/mach-pxa/spitz.c
-+++ b/arch/arm/mach-pxa/spitz.c
-@@ -739,21 +739,6 @@ static inline void spitz_lcd_init(void) {}
-  * NAND Flash
-  ******************************************************************************/
- #if defined(CONFIG_MTD_NAND_SHARPSL) || defined(CONFIG_MTD_NAND_SHARPSL_MODULE)
--static struct mtd_partition spitz_nand_partitions[] = {
+diff --git a/arch/arm/mach-pxa/poodle.c b/arch/arm/mach-pxa/poodle.c
+index 62a1191..fd01d6b 100644
+--- a/arch/arm/mach-pxa/poodle.c
++++ b/arch/arm/mach-pxa/poodle.c
+@@ -333,24 +333,6 @@ static struct pxafb_mach_info poodle_fb_info = {
+ 	.lcd_conn	= LCD_COLOR_TFT_16BPP,
+ };
+ 
+-static struct mtd_partition sharpsl_nand_partitions[] = {
 -	{
 -		.name = "System Area",
 -		.offset = 0,
 -		.size = 7 * 1024 * 1024,
--	}, {
+-	},
+-	{
 -		.name = "Root Filesystem",
 -		.offset = 7 * 1024 * 1024,
--	}, {
+-		.size = 22 * 1024 * 1024,
+-	},
+-	{
 -		.name = "Home Filesystem",
 -		.offset = MTDPART_OFS_APPEND,
 -		.size = MTDPART_SIZ_FULL,
@@ -49,9 +52,9 @@ index 67d66c7..defefa3 100644
 -
  static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
  
- static struct nand_bbt_descr spitz_nand_bbt = {
-@@ -808,10 +793,16 @@ static const struct mtd_ooblayout_ops akita_ooblayout_ops = {
- 	.free = akita_ooblayout_free,
+ static struct nand_bbt_descr sharpsl_bbt = {
+@@ -360,10 +342,16 @@ static struct nand_bbt_descr sharpsl_bbt = {
+ 	.pattern = scan_ff_pattern
  };
  
 +static const char * const probes[] = {
@@ -61,30 +64,14 @@ index 67d66c7..defefa3 100644
 +	NULL,
 +};
 +
- static struct sharpsl_nand_platform_data spitz_nand_pdata = {
- 	.badblock_pattern	= &spitz_nand_bbt,
--	.partitions		= spitz_nand_partitions,
--	.nr_partitions		= ARRAY_SIZE(spitz_nand_partitions),
+ static struct sharpsl_nand_platform_data sharpsl_nand_platform_data = {
+ 	.badblock_pattern	= &sharpsl_bbt,
+-	.partitions		= sharpsl_nand_partitions,
+-	.nr_partitions		= ARRAY_SIZE(sharpsl_nand_partitions),
 +	.part_parsers		= probes,
  };
  
- static struct resource spitz_nand_resources[] = {
-@@ -834,14 +825,7 @@ static struct platform_device spitz_nand_device = {
- 
- static void __init spitz_nand_init(void)
- {
--	if (machine_is_spitz()) {
--		spitz_nand_partitions[1].size = 5 * 1024 * 1024;
--	} else if (machine_is_akita()) {
--		spitz_nand_partitions[1].size = 58 * 1024 * 1024;
--		spitz_nand_bbt.len = 1;
--		spitz_nand_pdata.ecc_layout = &akita_ooblayout_ops;
--	} else if (machine_is_borzoi()) {
--		spitz_nand_partitions[1].size = 32 * 1024 * 1024;
-+	if (machine_is_akita() || machine_is_borzoi()) {
- 		spitz_nand_bbt.len = 1;
- 		spitz_nand_pdata.ecc_layout = &akita_ooblayout_ops;
- 	}
+ static struct resource sharpsl_nand_resources[] = {
 -- 
 2.7.4
 
