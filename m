@@ -1,104 +1,55 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: support ESDHC_CAPABILITIES_1
- accessing
-Date: Mon, 14 Aug 2017 14:43:40 +0300
-Message-ID: <22824813-5eef-6d88-f936-139e8a2f9561@intel.com>
-References: <1502281490-975-1-git-send-email-yangbo.lu@nxp.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:5100 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753181AbdHNLuH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 14 Aug 2017 07:50:07 -0400
-In-Reply-To: <1502281490-975-1-git-send-email-yangbo.lu@nxp.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+Subject: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Mon, 14 Aug 2017 12:39:26 +0100
+Message-ID: <1502710766-44361-1-git-send-email-biju.das@bp.renesas.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: Xiaobo Xie <xiaobo.xie@nxp.com>
 
-On 09/08/17 15:24, Yangbo Lu wrote:
-> eSDHC is not a standard SD host controller. SDHCI_CAPABILITIES_1
-> register address is 0x44 while it's 0x114 (ESDHC_CAPABILITIES_1)
-> for eSDHC.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
+is identical to the R-Car Gen2 family.
 
-Apart from the redundant parenthesis:
+Signed-off-by: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+---
+This patch is compiled and tested againt linux next tag
+next-20170811. This patch depend on the driver change
+[PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
+https://patchwork.kernel.org/patch/9898611/
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> ---
->  drivers/mmc/host/sdhci-esdhc.h    |  3 +++
->  drivers/mmc/host/sdhci-of-esdhc.c | 23 +++++++++++++++++++++--
->  2 files changed, 24 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> index c4bbd74..98898a3 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -53,6 +53,9 @@
->  #define ESDHC_CLOCK_HCKEN		0x00000002
->  #define ESDHC_CLOCK_IPGEN		0x00000001
->  
-> +/* Host Controller Capabilities Register 2 */
-> +#define ESDHC_CAPABILITIES_1		0x114
-> +
->  /* Tuning Block Control Register */
->  #define ESDHC_TBCTL			0x120
->  #define ESDHC_TB_EN			0x00000004
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index d10f831..cd85a18 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -86,6 +86,17 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  		return ret;
->  	}
->  
-> +	/*
-> +	 * DTS properties of mmc host are used to enable each speed mode
-> +	 * according to soc and board capability. So clean up
-> +	 * SDR50/SDR104/DDR50 support bits here.
-> +	 */
-> +	if (spec_reg == SDHCI_CAPABILITIES_1) {
-> +		ret = value & (~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-Redundant parenthesis.
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 4fd8b7a..0d507ec 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -15,6 +15,8 @@ Required properties:
+ 		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
+ 		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+ 		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
++		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
++		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
+ 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+@@ -34,8 +36,8 @@ Required properties:
+ 	  "core" and "cd". If the controller only has 1 clock, naming is not
+ 	  required.
+ 	  Below is the number clocks for each supported SoC:
+-	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
+-	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
++	   1: SH73A0, R8A73A4, R8A7740, R8A7743, R8A7745, R8A7778, R8A7779,
++	      R8A7790, R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
+ 	   2: R7S72100
+ 
+ Optional properties:
+-- 
+1.9.1
 
-> +				 SDHCI_SUPPORT_DDR50));
-> +		return ret;
-> +	}
-> +
->  	ret = value;
->  	return ret;
->  }
-> @@ -249,7 +260,11 @@ static u32 esdhc_be_readl(struct sdhci_host *host, int reg)
->  	u32 ret;
->  	u32 value;
->  
-> -	value = ioread32be(host->ioaddr + reg);
-> +	if (reg == SDHCI_CAPABILITIES_1)
-> +		value = ioread32be(host->ioaddr + ESDHC_CAPABILITIES_1);
-> +	else
-> +		value = ioread32be(host->ioaddr + reg);
-> +
->  	ret = esdhc_readl_fixup(host, reg, value);
->  
->  	return ret;
-> @@ -260,7 +275,11 @@ static u32 esdhc_le_readl(struct sdhci_host *host, int reg)
->  	u32 ret;
->  	u32 value;
->  
-> -	value = ioread32(host->ioaddr + reg);
-> +	if (reg == SDHCI_CAPABILITIES_1)
-> +		value = ioread32(host->ioaddr + ESDHC_CAPABILITIES_1);
-> +	else
-> +		value = ioread32(host->ioaddr + reg);
-> +
->  	ret = esdhc_readl_fixup(host, reg, value);
->  
->  	return ret;
-> 
-
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
