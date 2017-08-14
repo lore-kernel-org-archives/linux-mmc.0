@@ -1,40 +1,59 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v10 1/2] mmc: dw_mmc: move controller reset before driver
- init
-Date: Mon, 14 Aug 2017 09:18:36 +0800
-Message-ID: <e1297f68-112e-1a93-d769-ad06b04714cd@rock-chips.com>
-References: <20170811080624.42173-1-liwei213@huawei.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
+ cards
+Date: Mon, 14 Aug 2017 07:10:23 +0200
+Message-ID: <20170814051022.GC5654@verge.net.au>
+References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
+ <20170803074351.GC19671@verge.net.au>
+ <20170803155357.GA3826@verge.net.au>
+ <20170803155520.GB3826@verge.net.au>
+ <20170808185445.GA2170@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:38039 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752133AbdHNBSj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Aug 2017 21:18:39 -0400
-In-Reply-To: <20170811080624.42173-1-liwei213@huawei.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170808185445.GA2170@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Li Wei <liwei213@huawei.com>, ulf.hansson@linaro.org, jh80.chung@samsung.com, hkallweit1@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, guodong.xu@linaro.org
 
-Trim cc
-
-On 2017/8/11 16:06, Li Wei wrote:
-> This commit modifies dw_mci_probe(), it moves reset assertion before
-> drv_data->init(host)
+On Tue, Aug 08, 2017 at 08:54:45PM +0200, Wolfram Sang wrote:
 > 
-> Some driver needs to access controller registers in its .init() ops. So,
-> in order to make such access safe, we should do controller reset before
-> .init() being called.
+> > As it is an "RFT" I'm happy to apply it if you repost
+> > it or otherwise indicate that is what you would like to happen.
 > 
+> As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
+> 
+> H3:
+> - one slot worked flawlessly
+> - one slot could load FW but failed to read status
+> (with SDR50: both slots work)
+> 
+> M3-W:
+> - both slots could not load the firmware
+> (with SDR50: one slot works, one fails to load FW)
+> 
+> The cards, however, were correctly identified as SDR104 and there were
+> no tuning errors and no other SDHI related warnings.
+> 
+> Changing TDSEL in the PFC did not change anything.
+> 
+> The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
+> length of 100mm. Measuring a direct line from the SoC to the slots,
+> I'd think we are very much on the edge of that. And given the length
+> of the SDIO adapter, we are surely exceeding that :(
+> 
+> Maybe we should do more tests with more boards? On the other hand, it
+> seems the WiFi card is running out of the specs.
+> 
+> So much for now. I'll sleep over it and try to get more data tomorrow.
 
-LGTM
+Thanks. Unfortunately my H3 is out of arms length but I can arrange
+some testing if it is helpful.
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Is one possibility to enable it for the slots listed above that are now
+thought to work but not for the other one?
 
-> Signed-off-by: Wei Li <liwei213@huawei.com>
-> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Chen Jun <chenjun14@huawei.com>
-> ---
-
+The SDR50 failure on M3-W seems particularly troubling as that
+has been enabled in upstream for a while, right?
