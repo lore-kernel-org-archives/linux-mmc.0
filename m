@@ -1,55 +1,53 @@
-From: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
-Subject: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 14 Aug 2017 12:39:26 +0100
-Message-ID: <1502710766-44361-1-git-send-email-biju.das@bp.renesas.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, Wolfram Sang <wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/4] sdhci: key 8BITBUS bit off MMC_CAP_8_BIT_DATA
+Date: Mon, 14 Aug 2017 14:58:58 +0300
+Message-ID: <5fe67188-e8ad-3062-7f93-0f9bdac2d27a@intel.com>
+References: <cover.1502310654.git.mirq-linux@rere.qmqm.pl>
+ <96ece1eb7b8f6e188e3975f75754aeaf195f3dc0.1502310654.git.mirq-linux@rere.qmqm.pl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <96ece1eb7b8f6e188e3975f75754aeaf195f3dc0.1502310654.git.mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
+Content-Language: en-US
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jonathan Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
-is identical to the R-Car Gen2 family.
+On 09/08/17 23:36, Michał Mirosław wrote:
+> 
+> Hosts supporting 8-bit bus are marked accordingly. If MMC_CAP_8_BIT_DATA
+> is not among host capabilities, 8BITBUS bit will never be set and it
+> is not cleared in case some non-SDHCI3 host uses it for something else.
+> 
+> Signed-off-by: Michał Mirosław <mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
 
-Signed-off-by: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
----
-This patch is compiled and tested againt linux next tag
-next-20170811. This patch depend on the driver change
-[PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
-https://patchwork.kernel.org/patch/9898611/
+Subject should begin "mmc: sdhci: "...
 
+Otherwise:
 
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index 4fd8b7a..0d507ec 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -15,6 +15,8 @@ Required properties:
- 		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
- 		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
- 		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
-+		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
-+		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
- 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
- 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
- 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-@@ -34,8 +36,8 @@ Required properties:
- 	  "core" and "cd". If the controller only has 1 clock, naming is not
- 	  required.
- 	  Below is the number clocks for each supported SoC:
--	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
--	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
-+	   1: SH73A0, R8A73A4, R8A7740, R8A7743, R8A7745, R8A7778, R8A7779,
-+	      R8A7790, R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
- 	   2: R7S72100
- 
- Optional properties:
--- 
-1.9.1
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ---
+>  drivers/mmc/host/sdhci.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ecd0d4350e8a..cca21246cf61 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1544,10 +1544,9 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width)
+>  	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>  	if (width == MMC_BUS_WIDTH_8) {
+>  		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> -		if (host->version >= SDHCI_SPEC_300)
+> -			ctrl |= SDHCI_CTRL_8BITBUS;
+> +		ctrl |= SDHCI_CTRL_8BITBUS;
+>  	} else {
+> -		if (host->version >= SDHCI_SPEC_300)
+> +		if (host->mmc->caps & MMC_CAP_8_BIT_DATA)
+>  			ctrl &= ~SDHCI_CTRL_8BITBUS;
+>  		if (width == MMC_BUS_WIDTH_4)
+>  			ctrl |= SDHCI_CTRL_4BITBUS;
+> 
