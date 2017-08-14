@@ -1,59 +1,47 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
- cards
-Date: Mon, 14 Aug 2017 07:10:23 +0200
-Message-ID: <20170814051022.GC5654@verge.net.au>
-References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
- <20170803074351.GC19671@verge.net.au>
- <20170803155357.GA3826@verge.net.au>
- <20170803155520.GB3826@verge.net.au>
- <20170808185445.GA2170@katana>
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Subject: Re: [PATCH 000/102] Convert drivers to explicit reset API
+Date: Mon, 14 Aug 2017 09:36:38 +0200
+Message-ID: <1502696198.2287.7.camel@pengutronix.de>
+References: <20170719152646.25903-1-p.zabel@pengutronix.de>
+         <20170719211515.46a1196c@windsurf>
+         <1500543415.2354.37.camel@pengutronix.de>
+         <20170720123640.43c2ce01@windsurf>
+         <1500555312.2354.75.camel@pengutronix.de>
+         <CAKdAkRTx8jd8UToz5_EgMmdW3V47i2uo++YvVB_yzytqSA=P1Q@mail.gmail.com>
+         <CACRpkdaXOv7mX+b-q1K34CB5w0SWPXCKa21wHaxL7qjf91PJXQ@mail.gmail.com>
+         <1500885221.2391.50.camel@pengutronix.de>
+         <20170812114357.v4ru75dw5hq7wemx@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170808185445.GA2170@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <20170812114357.v4ru75dw5hq7wemx@ninjato>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
 To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, lkml <linux-kernel@vger.kernel.org>, Andrew Lunn <andrew@lunn.ch>, Prashant Gaikwad <pgaikwad@nvidia.com>, Heiko Stuebner <heiko@sntech.de>, Peter Chen <Peter.Chen@nxp.com>, DRI <dri-devel@lists.freedesktop.org>, Marc Dietrich <marvin24@gmx.de>, Rakesh Iyer <riyer@nvidia.com>, Peter Meerwald-Stadler <pmeerw@pmeerw.net>, linux-clk <linux-clk@vger.kernel.org>, Wim Van Sebroeck <wim@iguana.be>, Xinliang Liu <z.liuxinliang@hisilicon.com>, Chanwoo Choi <cw00.choi@samsung.com>, Alan Stern <stern@rowland.harvard.edu>, Jiri Slaby <jslaby@suse.com>, Michael Turquette <mturquette@baylibre.com>, Guenter
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 08, 2017 at 08:54:45PM +0200, Wolfram Sang wrote:
+On Sat, 2017-08-12 at 13:43 +0200, Wolfram Sang wrote:
+> > Thanks for the hint and the references. It seems this turned out
+> > okay,
+> > but I wouldn't dare to introduce such macro horror^Wmagic.
+> > I'd rather have all users converted to the _exclusive/_shared
+> > function
+> > calls and maybe then replace the internal __reset_control_get with
+> > Thomas' suggestion.
 > 
-> > As it is an "RFT" I'm happy to apply it if you repost
-> > it or otherwise indicate that is what you would like to happen.
-> 
-> As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
-> 
-> H3:
-> - one slot worked flawlessly
-> - one slot could load FW but failed to read status
-> (with SDR50: both slots work)
-> 
-> M3-W:
-> - both slots could not load the firmware
-> (with SDR50: one slot works, one fails to load FW)
-> 
-> The cards, however, were correctly identified as SDR104 and there were
-> no tuning errors and no other SDHI related warnings.
-> 
-> Changing TDSEL in the PFC did not change anything.
-> 
-> The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
-> length of 100mm. Measuring a direct line from the SoC to the slots,
-> I'd think we are very much on the edge of that. And given the length
-> of the SDIO adapter, we are surely exceeding that :(
-> 
-> Maybe we should do more tests with more boards? On the other hand, it
-> seems the WiFi card is running out of the specs.
-> 
-> So much for now. I'll sleep over it and try to get more data tomorrow.
+> I didn't follow the discussion closely. Shall I still apply the i2c
+> patches?
 
-Thanks. Unfortunately my H3 is out of arms length but I can arrange
-some testing if it is helpful.
+Yes, please.
 
-Is one possibility to enable it for the slots listed above that are now
-thought to work but not for the other one?
-
-The SDR50 failure on M3-W seems particularly troubling as that
-has been enabled in upstream for a while, right?
+regards
+Philipp
