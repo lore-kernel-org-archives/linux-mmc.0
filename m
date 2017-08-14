@@ -1,66 +1,51 @@
-From: Chris Paterson <Chris.Paterson2@renesas.com>
-Subject: RE: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 14 Aug 2017 15:23:50 +0000
-Message-ID: <TY1PR06MB0702B9EC39D190BC811CBD99B78C0@TY1PR06MB0702.apcprd06.prod.outlook.com>
-References: <1502709581-26546-1-git-send-email-biju.das@bp.renesas.com>
- <CAMuHMdVDqgbwKzxFoxajLLFHZC80NT5vrDLnpb9sFj+DL-1zDw@mail.gmail.com>
- <TY1PR06MB070269842CD923E4DE4FE6EDB78C0@TY1PR06MB0702.apcprd06.prod.outlook.com>
- <CAMuHMdWHMLi-yiVmzQCYRHSnJpuokBREo6QFF2z-zaviZVxFNA@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: renesas_sdhi: use extra flag for CBSY usage
+Date: Mon, 14 Aug 2017 17:26:43 +0200
+Message-ID: <20170814152643.3oua647mp3nwdybd@ninjato>
+References: <20170809190041.1052-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdW+HtXwtYbOrHToWc80q+B=v_4s-8Vb8WhP4akeFY31uQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="eoceya6xakxoptnw"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWHMLi-yiVmzQCYRHSnJpuokBREo6QFF2z-zaviZVxFNA@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdW+HtXwtYbOrHToWc80q+B=v_4s-8Vb8WhP4akeFY31uQ@mail.gmail.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Biju Das <biju.das@bp.renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Dirk Behme <dirk.behme@de.bosch.com>, Chris Brandt <chris.brandt@renesas.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Lee Jones <lee.jones@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGVsbG8gR2VlcnQsDQoNCj4gRnJvbTogZ2VlcnQudXl0dGVyaG9ldmVuQGdtYWlsLmNvbSBbbWFp
-bHRvOmdlZXJ0LnV5dHRlcmhvZXZlbkBnbWFpbC5jb21dDQo+IE9uIEJlaGFsZiBPZiBHZWVydCBV
-eXR0ZXJob2V2ZW4NCj4gDQo+IEhpIENocmlzLA0KPiANCj4gT24gTW9uLCBBdWcgMTQsIDIwMTcg
-YXQgNToxNSBQTSwgQ2hyaXMgUGF0ZXJzb24NCj4gPENocmlzLlBhdGVyc29uMkByZW5lc2FzLmNv
-bT4gd3JvdGU6DQo+ID4+IEZyb206IGdlZXJ0LnV5dHRlcmhvZXZlbkBnbWFpbC5jb20NCj4gPj4g
-W21haWx0bzpnZWVydC51eXR0ZXJob2V2ZW5AZ21haWwuY29tXQ0KPiA+PiBPbiBCZWhhbGYgT2Yg
-R2VlcnQgVXl0dGVyaG9ldmVuDQo+ID4+IFNlbnQ6IDE0IEF1Z3VzdCAyMDE3IDE1OjIyDQo+ID4+
-DQo+ID4+IE9uIE1vbiwgQXVnIDE0LCAyMDE3IGF0IDE6MTkgUE0sIEJpanUgRGFzIDxiaWp1LmRh
-c0BicC5yZW5lc2FzLmNvbT4NCj4gd3JvdGU6DQo+ID4+ID4gQWRkIHN1cHBvcnQgZm9yIHI4YTc3
-NDMvNSBTb0MuUmVuZXNhcyBSWi9HMVtNRV0gKFI4QTc3NDMvNSkgU0RISSBpcw0KPiA+PiA+IGlk
-ZW50aWNhbCB0byB0aGUgUi1DYXIgR2VuMiBmYW1pbHkuDQo+ID4+ID4NCj4gPj4gPiBTaWduZWQt
-b2ZmLWJ5OiBCaWp1IERhcyA8YmlqdS5kYXNAYnAucmVuZXNhcy5jb20+DQo+ID4+ID4gLS0tDQo+
-ID4+ID4gVGhpcyBwYXRjaCBpcyBjb21waWxlZCBhbmQgdGVzdGVkIGFnYWluc3QgbW1jL25leHQu
-DQo+ID4+ID4NCj4gPj4gPiAgZHJpdmVycy9tbWMvaG9zdC9yZW5lc2FzX3NkaGlfc3lzX2RtYWMu
-YyB8IDIgKysNCj4gPj4gPiAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKQ0KPiA+PiA+
-DQo+ID4+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX3N5c19k
-bWFjLmMNCj4gPj4gPiBiL2RyaXZlcnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX3N5c19kbWFjLmMN
-Cj4gPj4gPiBpbmRleCA3MThjYjhhLi5mNzA5ZjdmIDEwMDY0NA0KPiA+PiA+IC0tLSBhL2RyaXZl
-cnMvbW1jL2hvc3QvcmVuZXNhc19zZGhpX3N5c19kbWFjLmMNCj4gPj4gPiArKysgYi9kcml2ZXJz
-L21tYy9ob3N0L3JlbmVzYXNfc2RoaV9zeXNfZG1hYy5jDQo+ID4+ID4gQEAgLTk1LDYgKzk1LDgg
-QEANCj4gPj4gPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAicmVuZXNhcyxzZGhpLXI3czcyMTAw
-IiwgLmRhdGEgPSAmb2ZfcnpfY29tcGF0aWJsZSwNCj4gfSwNCj4gPj4gPiAgICAgICAgIHsgLmNv
-bXBhdGlibGUgPSAicmVuZXNhcyxzZGhpLXI4YTc3NzgiLCAuZGF0YSA9DQo+ID4+ICZvZl9yY2Fy
-X2dlbjFfY29tcGF0aWJsZSwgfSwNCj4gPj4gPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAicmVu
-ZXNhcyxzZGhpLXI4YTc3NzkiLCAuZGF0YSA9DQo+ID4+ID4gJm9mX3JjYXJfZ2VuMV9jb21wYXRp
-YmxlLCB9LA0KPiA+PiA+ICsgICAgICAgeyAuY29tcGF0aWJsZSA9ICJyZW5lc2FzLHNkaGktcjhh
-Nzc0MyIsIC5kYXRhID0NCj4gPj4gJm9mX3JjYXJfZ2VuMl9jb21wYXRpYmxlLCB9LA0KPiA+PiA+
-ICsgICAgICAgeyAuY29tcGF0aWJsZSA9ICJyZW5lc2FzLHNkaGktcjhhNzc0NSIsIC5kYXRhID0N
-Cj4gPj4gPiArICZvZl9yY2FyX2dlbjJfY29tcGF0aWJsZSwgfSwNCj4gPj4gPiAgICAgICAgIHsg
-LmNvbXBhdGlibGUgPSAicmVuZXNhcyxzZGhpLXI4YTc3OTAiLCAuZGF0YSA9DQo+ID4+ICZvZl9y
-Y2FyX2dlbjJfY29tcGF0aWJsZSwgfSwNCj4gPj4gPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAi
-cmVuZXNhcyxzZGhpLXI4YTc3OTEiLCAuZGF0YSA9DQo+ID4+ICZvZl9yY2FyX2dlbjJfY29tcGF0
-aWJsZSwgfSwNCj4gPj4gPiAgICAgICAgIHsgLmNvbXBhdGlibGUgPSAicmVuZXNhcyxzZGhpLXI4
-YTc3OTIiLCAuZGF0YSA9DQo+ID4+ID4gJm9mX3JjYXJfZ2VuMl9jb21wYXRpYmxlLCB9LA0KPiA+
-Pg0KPiA+PiBJIGd1ZXNzIHdlIHdhbnQgZ2VuZXJpYyBSLUNhciBHZW4yLzMgY29tcGF0aWJsZSB2
-YWx1ZXMgaGVyZSwgdG9vPw0KPiA+DQo+ID4gWWVzLCBidXQgSSBhc3N1bWUgdGhhdCBzaG91bGQg
-YmUgYSBzZXBhcmF0ZSBwYXRjaCBzdWJtaXR0ZWQgaW5zdGVhZCBvZiB0aGlzDQo+IG9uZT8NCj4g
-DQo+IEluZGVlZC4gVGhhdCB3b3VsZCBhdm9pZCBoYXZpbmcgdG8gYWRkIHRoZSBTb0Mtc3BlY2lm
-aWMgY29tcGF0aWJsZSB2YWx1ZXMgdG8NCj4gdGhlIGRyaXZlciBmb3IgYWxsIFJaL0cxIHZhcmlh
-bnRzLg0KDQpPa2F5LiBJJ2xsIHNlbmQgYSBuZXcgcGF0Y2guDQoNCktpbmQgcmVnYXJkcywgQ2hy
-aXMNCg0KPiANCj4gR3J7b2V0amUsZWV0aW5nfXMsDQo+IA0KPiAgICAgICAgICAgICAgICAgICAg
-ICAgICBHZWVydA0KPiANCj4gLS0NCj4gR2VlcnQgVXl0dGVyaG9ldmVuIC0tIFRoZXJlJ3MgbG90
-cyBvZiBMaW51eCBiZXlvbmQgaWEzMiAtLSBnZWVydEBsaW51eC0NCj4gbTY4ay5vcmcNCj4gDQo+
-IEluIHBlcnNvbmFsIGNvbnZlcnNhdGlvbnMgd2l0aCB0ZWNobmljYWwgcGVvcGxlLCBJIGNhbGwg
-bXlzZWxmIGEgaGFja2VyLiBCdXQNCj4gd2hlbiBJJ20gdGFsa2luZyB0byBqb3VybmFsaXN0cyBJ
-IGp1c3Qgc2F5ICJwcm9ncmFtbWVyIiBvciBzb21ldGhpbmcgbGlrZSB0aGF0Lg0KPiAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIC0tIExpbnVzIFRvcnZhbGRzDQo=
+
+--eoceya6xakxoptnw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+
+> Is this supposed to have any impact on the issue on Magnus' r8a7794/alt, where
+> tuning failed before?
+
+Nope, I'd be very surprised if it does. I wanted to look at this issue
+with my next free time slot.
+
+
+--eoceya6xakxoptnw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmRwS8ACgkQFA3kzBSg
+Kbbp9A/7BSxSmstdoCEIFPK6x2nj9a4YplkXmDf+yqrhh+9LfAHJd8gk39s2sbSF
+VX5mGCPP/DaoWTEX8VANm6xv4Io0p8g7zvXOND+5wlwbFb80nirE5KuYhcIkNG0n
+CnIht30RLqoa3220Ezzxe4PuEYuff94wC33SgJPtY20WQe1cG+kdVZVUb98HYtt8
+WS06UMy+NuAYBnQD5EYdMYX5lANdJ9p+uXRvH38pLYIDuPIWGLB3jCHyksc+nZXA
+T1YOVUbx/HbiVF3Ea3R4JtTTydl3ShKO2PyWTULkpvx7C7fTeIH4owAa/0O9qS6I
+6kuZ1m8OHjx7DLJzs5lDMlRuZzaS2Yp7tpBq8JLANtj0inTuGElkEdSzuDZrxqeb
+1+Fu1UwDBjLrk5xHx8Vt8L6BpgKT3dS6D9GsTxw0eEcCJdK24crq4Q3Gr0QyfhHh
+imH+0vhcFecvMH9SVpjj1LLoaqKti77ZidDyMuGHe2W11ZfROCY7b0Cs6SIZEsZb
+pMp11oPhaAjPsqEJ+T8xo3GxGM6+34uACuq1LHb+j8M8XM8XTNx1AXmRnCvCORfn
+rR1UFhBkNw2cU2m9yYwzrqB0jHjwSccgn1Z2VXnjM6Pp+pEYICFmJHgY4lYKuNmI
+d7TvO/e+GZtQvBBK8811fq8WsjX8VybCO8r++TtlhK2JQY4S5tw=
+=C1Hy
+-----END PGP SIGNATURE-----
+
+--eoceya6xakxoptnw--
