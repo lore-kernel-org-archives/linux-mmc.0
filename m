@@ -1,155 +1,117 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/2] driver core: detach device's pm_domain after devres_release_all
-Date: Tue, 15 Aug 2017 16:36:56 +0800
-Message-ID: <1502786217-212887-2-git-send-email-shawn.lin@rock-chips.com>
-References: <1502786217-212887-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1502786217-212887-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Tue, 15 Aug 2017 11:16:19 +0200
+Message-ID: <20170815091618.ydnwlqx5ahwvn33e@ninjato>
+References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
+ <20170814175831.bgwr6hwc4tvbkmoc@ninjato>
+ <f4f100a0-9edd-db13-1c21-9f986345c733@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="p5d53keytwq2hiyu"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([88.99.104.3]:52435 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751807AbdHOJQU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 15 Aug 2017 05:16:20 -0400
+Content-Disposition: inline
+In-Reply-To: <f4f100a0-9edd-db13-1c21-9f986345c733@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Move dev_pm_domain_detach after devres_release_all to avoid
-accessing device's registers with genpd been powered off.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+--p5d53keytwq2hiyu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Changes in v2: None
+Hi Shawn,
 
- drivers/base/dd.c       | 35 ++++++++++++++++++++++++++++++-----
- drivers/base/platform.c | 18 ++----------------
- 2 files changed, 32 insertions(+), 21 deletions(-)
+> So that implies we only need to care about open-ending mode.
 
-diff --git a/drivers/base/dd.c b/drivers/base/dd.c
-index ad44b40..13dc0ad 100644
---- a/drivers/base/dd.c
-+++ b/drivers/base/dd.c
-@@ -25,7 +25,9 @@
- #include <linux/kthread.h>
- #include <linux/wait.h>
- #include <linux/async.h>
-+#include <linux/platform_device.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pm_domain.h>
- #include <linux/pinctrl/devinfo.h>
- 
- #include "base.h"
-@@ -356,6 +358,8 @@ static int really_probe(struct device *dev, struct device_driver *drv)
- 	int local_trigger_count = atomic_read(&deferred_trigger_count);
- 	bool test_remove = IS_ENABLED(CONFIG_DEBUG_TEST_DRIVER_REMOVE) &&
- 			   !drv->suppress_bind_attrs;
-+	struct platform_driver *pdrv;
-+	bool do_pm_domain = false;
- 
- 	if (defer_all_probes) {
- 		/*
-@@ -414,6 +418,16 @@ static int really_probe(struct device *dev, struct device_driver *drv)
- 		if (ret)
- 			goto probe_failed;
- 	} else if (drv->probe) {
-+		ret = dev_pm_domain_attach(dev, true);
-+		pdrv = to_platform_driver(dev->driver);
-+		/* don't fail if just dev_pm_domain_attach failed */
-+		if (pdrv->prevent_deferred_probe &&
-+		    ret == -EPROBE_DEFER) {
-+			dev_warn(dev, "probe deferral not supported\n");
-+			ret = -ENXIO;
-+			goto probe_failed;
-+		}
-+		do_pm_domain = true;
- 		ret = drv->probe(dev);
- 		if (ret)
- 			goto probe_failed;
-@@ -421,13 +435,17 @@ static int really_probe(struct device *dev, struct device_driver *drv)
- 
- 	if (test_remove) {
- 		test_remove = false;
-+		do_pm_domain = false;
- 
--		if (dev->bus->remove)
-+		if (dev->bus->remove) {
- 			dev->bus->remove(dev);
--		else if (drv->remove)
-+		} else if (drv->remove) {
- 			drv->remove(dev);
--
-+			do_pm_domain = true;
-+		}
- 		devres_release_all(dev);
-+		if (do_pm_domain)
-+			dev_pm_domain_detach(dev, true);
- 		driver_sysfs_remove(dev);
- 		dev->driver = NULL;
- 		dev_set_drvdata(dev, NULL);
-@@ -458,6 +476,8 @@ static int really_probe(struct device *dev, struct device_driver *drv)
- pinctrl_bind_failed:
- 	device_links_no_driver(dev);
- 	devres_release_all(dev);
-+	if (do_pm_domain)
-+		dev_pm_domain_detach(dev, true);
- 	driver_sysfs_remove(dev);
- 	dev->driver = NULL;
- 	dev_set_drvdata(dev, NULL);
-@@ -818,6 +838,7 @@ int driver_attach(struct device_driver *drv)
- static void __device_release_driver(struct device *dev, struct device *parent)
+I see. Thanks for the explanation.
+
+> I could fold in the description from the spec see explain why
+> we don't need to check this for the CMD23 cases.
+
+That would be great.
+
+> Does all the above sound goot to you?
+
+Basically, yes. If we need to check for CMD23 then, I wonder if why we
+really need to do (md->flags & MMC_BLK_CMD23) or if we can't simply
+check the presence of brq->mrq.sbc? That could then lead to the
+following refactorization which is a lot easier to read IMO (but only
+compile tested, just to give you an idea what I had in mind):
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index f1bbfd389367ff..1cf905d0e88e77 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1371,12 +1371,17 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_=
+request *brq,
+ 	 R1_CC_ERROR |		/* Card controller error */		\
+ 	 R1_ERROR)		/* General/unknown error */
+=20
+-static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
++/* Map R1 errors to error codes */
++static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
  {
- 	struct device_driver *drv;
-+	bool do_pm_domain = false;
- 
- 	drv = dev->driver;
- 	if (drv) {
-@@ -855,15 +876,19 @@ static void __device_release_driver(struct device *dev, struct device *parent)
- 
- 		pm_runtime_put_sync(dev);
- 
--		if (dev->bus && dev->bus->remove)
-+		if (dev->bus && dev->bus->remove) {
- 			dev->bus->remove(dev);
--		else if (drv->remove)
-+		} else if (drv->remove) {
-+			do_pm_domain = true;
- 			drv->remove(dev);
-+		}
- 
- 		device_links_driver_cleanup(dev);
- 		dma_deconfigure(dev);
- 
- 		devres_release_all(dev);
-+		if (do_pm_domain)
-+			dev_pm_domain_detach(dev, true);
- 		dev->driver = NULL;
- 		dev_set_drvdata(dev, NULL);
- 		if (dev->pm_domain && dev->pm_domain->dismiss)
-diff --git a/drivers/base/platform.c b/drivers/base/platform.c
-index d1bd992..8fa688d 100644
---- a/drivers/base/platform.c
-+++ b/drivers/base/platform.c
-@@ -572,22 +572,8 @@ static int platform_drv_probe(struct device *_dev)
- 	if (ret < 0)
- 		return ret;
- 
--	ret = dev_pm_domain_attach(_dev, true);
--	if (ret != -EPROBE_DEFER) {
--		if (drv->probe) {
--			ret = drv->probe(dev);
--			if (ret)
--				dev_pm_domain_detach(_dev, true);
--		} else {
--			/* don't fail if just dev_pm_domain_attach failed */
--			ret = 0;
--		}
--	}
--
--	if (drv->prevent_deferred_probe && ret == -EPROBE_DEFER) {
--		dev_warn(_dev, "probe deferral not supported\n");
--		ret = -ENXIO;
--	}
-+	if (drv->probe)
-+		ret = drv->probe(dev);
- 
- 	return ret;
+-	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+-		cmd->error =3D -EIO;
++	u32 val;
+=20
+-	return cmd->error;
++	/* If there is no error yet, check R1 response */
++	if (!brq->stop.error) {
++		val =3D brq->stop.resp[0] & CMD_ERRORS;
++		if (val && !(val & R1_OUT_OF_RANGE && brq->mrq.sbc))
++			brq->stop.error =3D -EIO;
++	}
  }
--- 
-1.9.1
+=20
+ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+@@ -1400,8 +1405,10 @@ static enum mmc_blk_status mmc_blk_err_check(struct =
+mmc_card *card,
+ 	 * stop.error indicates a problem with the stop command.  Data
+ 	 * may have been transferred, or may still be transferring.
+ 	 */
+-	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+-	    brq->data.error) {
++
++	mmc_blk_eval_resp_error(brq);
++
++	if (brq->sbc.error || brq->cmd.error || brq->stop.error || brq->data.erro=
+r) {
+ 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+
+Regards,
+
+   Wolfram
+
+
+--p5d53keytwq2hiyu
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmSu94ACgkQFA3kzBSg
+KbbOdQ//eKPUv/YWyF4HTEToRfjBWulD8K3EYt4EWEPG9EvM5XP7vCRKiDojoUeA
+xs8G6RwE4CiDkHxg0NasYOuhJRU3c8GhSj/i/HnJECbP/vsVhwLZROI8CnFydiMr
+iWiSzS6F/bECJivr/h0yfRfQvtoQeVqb/bf1IRkbHXcwo+YJ4/EbIpZ2AYSFmT+P
+FIC8p97aAemx163c3INhik5IiQcs5YpeXf/Dv2arr0NIyUHOdetpUHbeWOxpXvWy
+FGC6YxV4Y215RP7XxRSFWM2DLg/zvJSB92Ea9nP7bQ7n2ClLDjNqE0RNJ4XPYYgK
+4jqQLXzV9wDmizoB7voxwAhpc8nJ5uqGtXP+r52K16nBkv8tr9q1R6oeE9f8iIKi
+8ElVlnTAIiDVA9TKPGVba+RKOITAt08x3srLQp1pxVkPJGh2PDZh+JD747r3c1kf
+FlMB07qTVIFw/4zV4FagdssOCMFze39GaidnX4wnLXpu/JknGJ+8+aPwrrV17MBZ
+fmsv14uRlWd7wVsegMAZBsQmRb72mX8Wg3jxvvl70vp4mbEGRTuNsQwOz4JJEO7e
+a2BXXbwsmcvgEaayy3nLv2u422ytahnjCDSp8OaaGrSNPYU/RPl4n/2yE7vgceRm
+IkYf8ijX3NoRU9Vud/nHEW5qoVeQGZfu+/ilH5JqnBLZHGm9VbU=
+=pDgf
+-----END PGP SIGNATURE-----
+
+--p5d53keytwq2hiyu--
