@@ -1,111 +1,50 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 4/4] mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
-Date: Wed, 16 Aug 2017 00:45:22 +0900
-Message-ID: <1502811922-9346-5-git-send-email-yamada.masahiro@socionext.com>
-References: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v3 0/4] mmc: sdhci: refactor PM in sdhci-pltfm add support PM
+ for cadence port
+Date: Wed, 16 Aug 2017 00:45:18 +0900
+Message-ID: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Barry Song <baohua@kernel.org>, Florian Fainelli <f.fainelli@gmail.com>, Kevin Hao <haokexin@gmail.com>, Scott Branden <sbranden@broadcom.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Christian Daudt <csd@broadcom.com>, Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Hu Ziji <huziji@marvell.com>, bcm-kernel-feedback-list@broadcom.com, Zhangfei Gao <zhangfei.gao@marvell.com>, Gregory Fong <gregory.0xf0@gmail.com>, Olof Johansson <olof@lixom.net>, Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <computersforpeace@gmail.com>, linux-arm-kernel@lists.infradead.org, Piotr Sroka <piotrs@cadence.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This will be useful when drivers want to reuse either suspend or
-resume callback instead of whole of sdhci_pltfm_pmops.
 
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
+[1] implements suspend / resume for sdhci-cadence.c
 
-Changes in v3: None
-Changes in v2: None
+[2] refactor sdhci-pxav2
 
- drivers/mmc/host/sdhci-cadence.c | 20 +-------------------
- drivers/mmc/host/sdhci-pltfm.c   |  6 ++++--
- drivers/mmc/host/sdhci-pltfm.h   |  2 ++
- 3 files changed, 7 insertions(+), 21 deletions(-)
+[3] add clk handling for suspend/resume hooks of sdhci-pltfm.
+    This also cleans up sdhci-brcmstb.c and sdhci-sirf.c
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 751ba706bf03..79ce9053df07 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -391,24 +391,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- }
- 
- #ifdef CONFIG_PM_SLEEP
--static int sdhci_cdns_suspend(struct device *dev)
--{
--	struct sdhci_host *host = dev_get_drvdata(dev);
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	int ret;
--
--	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
--
--	ret = sdhci_suspend_host(host);
--	if (ret)
--		return ret;
--
--	clk_disable_unprepare(pltfm_host->clk);
--
--	return 0;
--}
--
- static int sdhci_cdns_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-@@ -429,7 +411,7 @@ static int sdhci_cdns_resume(struct device *dev)
- #endif
- 
- static const struct dev_pm_ops sdhci_cdns_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
- };
- 
- static const struct of_device_id sdhci_cdns_match[] = {
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index be9a79d62e22..a34eacac612f 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -209,7 +209,7 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
- EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
- 
- #ifdef CONFIG_PM_SLEEP
--static int sdhci_pltfm_suspend(struct device *dev)
-+int sdhci_pltfm_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -226,8 +226,9 @@ static int sdhci_pltfm_suspend(struct device *dev)
- 
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
- 
--static int sdhci_pltfm_resume(struct device *dev)
-+int sdhci_pltfm_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -239,6 +240,7 @@ static int sdhci_pltfm_resume(struct device *dev)
- 
- 	return sdhci_resume_host(host);
- }
-+EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
- #endif
- 
- const struct dev_pm_ops sdhci_pltfm_pmops = {
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 957839d0fe37..1e91fb1c020e 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -109,6 +109,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
- 	return host->private;
- }
- 
-+int sdhci_pltfm_suspend(struct device *dev);
-+int sdhci_pltfm_resume(struct device *dev);
- extern const struct dev_pm_ops sdhci_pltfm_pmops;
- 
- #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+[4] export sdhci_pltfm_suspend/resume to reduce code duplication
+
+
+
+Masahiro Yamada (4):
+  mmc: sdhci-cadence: add suspend / resume support
+  mmc: sdhci-pxav2: switch to managed clk and sdhci_pltfm_unregister()
+  mmc: sdhci: enable/disable the clock in sdhci_pltfm_suspend/resume
+  mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
+
+ drivers/mmc/host/sdhci-brcmstb.c | 37 +------------------
+ drivers/mmc/host/sdhci-cadence.c | 79 +++++++++++++++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci-pltfm.c   | 22 +++++++++--
+ drivers/mmc/host/sdhci-pltfm.h   |  2 +
+ drivers/mmc/host/sdhci-pxav2.c   | 30 ++++-----------
+ drivers/mmc/host/sdhci-sirf.c    | 39 +-------------------
+ 6 files changed, 100 insertions(+), 109 deletions(-)
+
 -- 
 2.7.4
