@@ -1,131 +1,168 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
- open-ending mode
-Date: Tue, 15 Aug 2017 09:43:49 +0800
-Message-ID: <f4f100a0-9edd-db13-1c21-9f986345c733@rock-chips.com>
-References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
- <20170814175831.bgwr6hwc4tvbkmoc@ninjato>
+Subject: Re: [PATCH] mmc: sdhci-xenon: add gpio hard reset support
+Date: Tue, 15 Aug 2017 10:11:36 +0800
+Message-ID: <3696b751-68cc-6c11-bb7d-af7d6e6a5681@rock-chips.com>
+References: <1502749156-22798-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:48949 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:33108 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753521AbdHOBoH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 21:44:07 -0400
-In-Reply-To: <20170814175831.bgwr6hwc4tvbkmoc@ninjato>
+        with ESMTP id S1752906AbdHOCLu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2017 22:11:50 -0400
+In-Reply-To: <1502749156-22798-1-git-send-email-zjwu@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Zhoujie Wu <zjwu@marvell.com>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-Hi,
+Hi
 
-On 2017/8/15 1:58, Wolfram Sang wrote:
-> Hi,
+On 2017/8/15 6:19, Zhoujie Wu wrote:
+> On some platforms, like armada3700,  SD card need to
+> do hard reset by gpio toggling to make it work properly
+> after warm reset the board.
+
+I don't get this that SD card need to do hard reset...
+
+I assume what you talk about is either for eMMC or a power-cycle
+for SD card.
+
+> Add gpio hard reset feature for this purpose.
 > 
-> really sorry for the delay! But now, here are my thoughts:
+> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+> ---
+>   drivers/mmc/host/sdhci-xenon.c | 49 +++++++++++++++++++++++++++++++++++++++---
+>   drivers/mmc/host/sdhci-xenon.h |  4 ++++
+>   2 files changed, 50 insertions(+), 3 deletions(-)
 > 
->> +	/*
->> +	 * Per the SD specification(physical layer version 4.10),
->> +	 * section 4.3.3, it explicitly states that "When the last
->> +	 * block of user area is read using CMD18, the host should
->> +	 * ignore OUT_OF_RANGE error that may occur even the sequence
-> 
-> missing "if"? ..."even if the sequence"... Yeah, it is missing in the
-> specs, too, but still.
-> 
-
-Aha, yes.
-
->> +	 * is correct". And JESD84-B51 for eMMC also has a similar
->> +	 * statement on section 6.8.3. As CMD23 is optional for either
->> +	 * cards or hosts, so we need to check the MMC_BLK_CMD23 flag
->> +	 * to prevent the OUT_OF_RANGE error for open-ending multiple
->> +	 * block operations as it's normal behaviour.
->> +	 */
-> 
-> I really like adding this comment. Yet, I don't really get why you check
-> for CMD23, though, since the SD specs say CMD18? As I understand it,
-> this is true for all multiblock accesses, so we could also do something
-> like this (only build tested)?
-
-Nope, that is true only for open-ending mode.
-
-Per the SD specification(physical layer version 4.10), section 4.15 Set
-Block Count Command, it says"If illegal block count is set, out of range
-error will be indicated during read/write operation (For example, data
-transfer is stopped at user area boundary)." In another word, you could
-expect a out of range error in the response for the following CMD18/25
-if your argument of CMD23 + the argument of CMD18/25 exceed the max
-number of blocks. So we have check the R1 of CMD18/25 for sure that
-won't that happen.
-
-And even if you ignore that out of range bit from CMD18/25, but you
-could still get a -ETIMEDOUT or any error number from the host drivers
-due to missing data response(for write)/data(for read), as the cards
-will stop the data transfer by itself.
-
-So that implies we only need to care about open-ending mode.
-
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index f1bbfd389367ff..e83d8291ad4f99 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1362,6 +1362,14 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
->   	}
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index edd4d915..54a7057 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -18,6 +18,8 @@
+>   #include <linux/ktime.h>
+>   #include <linux/module.h>
+>   #include <linux/of.h>
+> +#include <linux/of_gpio.h>
+> +
+>   
+>   #include "sdhci-pltfm.h"
+>   #include "sdhci-xenon.h"
+> @@ -210,12 +212,25 @@ static void xenon_set_uhs_signaling(struct sdhci_host *host,
+>   	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 >   }
 >   
-> +#define STOP_ERRORS							\
-> +	 (R1_ADDRESS_ERROR |	/* Misaligned address */		\
-> +	 R1_BLOCK_LEN_ERROR |	/* Transferred block length incorrect */\
-> +	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
-> +	 R1_CARD_ECC_FAILED |	/* Card ECC failed */			\
-> +	 R1_CC_ERROR |		/* Card controller error */		\
-> +	 R1_ERROR)		/* General/unknown error */
+> +static void xenon_hw_reset(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
 > +
->   #define CMD_ERRORS							\
->   	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
->   	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
-> @@ -1371,9 +1379,9 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
->   	 R1_CC_ERROR |		/* Card controller error */		\
->   	 R1_ERROR)		/* General/unknown error */
+> +	if (priv->reset_gpio) {
+> +		gpiod_set_value_cansleep(priv->reset_gpio, 0);
+> +		msleep(30);
+> +		gpiod_set_value_cansleep(priv->reset_gpio, 1);
+> +	}
+> +}
+> +
+
+If that is not a functional IO wired out from your controller,
+and I would expect you $subject patch and could introduce pwrseq for you
+DT instead of adding these....
+
+Does that work for you?
+
+
+>   static const struct sdhci_ops sdhci_xenon_ops = {
+>   	.set_clock		= sdhci_set_clock,
+>   	.set_bus_width		= sdhci_set_bus_width,
+>   	.reset			= xenon_reset,
+>   	.set_uhs_signaling	= xenon_set_uhs_signaling,
+>   	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
+> +	.hw_reset		= xenon_hw_reset,
+>   };
 >   
-> -static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
-> +static bool mmc_blk_has_cmd_err(struct mmc_command *cmd, u32 err_mask)
->   {
-> -	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
-> +	if (!cmd->error && cmd->resp[0] & err_mask)
->   		cmd->error = -EIO;
+>   static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+> @@ -373,10 +388,15 @@ static int xenon_probe_dt(struct platform_device *pdev)
+>   	struct device_node *np = pdev->dev.of_node;
+>   	struct sdhci_host *host = platform_get_drvdata(pdev);
+>   	struct mmc_host *mmc = host->mmc;
+> +	struct device *dev = mmc_dev(mmc);
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>   	u32 sdhc_id, nr_sdhc;
+>   	u32 tuning_count;
+> +	int reset_gpio, ret;
+> +	enum of_gpio_flags flags;
+> +	char *reset_name;
+> +	unsigned long gpio_flags;
 >   
->   	return cmd->error;
-> @@ -1400,7 +1408,7 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
->   	 * stop.error indicates a problem with the stop command.  Data
->   	 * may have been transferred, or may still be transferring.
+>   	/* Disable HS200 on Armada AP806 */
+>   	if (of_device_is_compatible(np, "marvell,armada-ap806-sdhci"))
+> @@ -387,7 +407,7 @@ static int xenon_probe_dt(struct platform_device *pdev)
+>   		nr_sdhc = sdhci_readl(host, XENON_SYS_CFG_INFO);
+>   		nr_sdhc &= XENON_NR_SUPPORTED_SLOT_MASK;
+>   		if (unlikely(sdhc_id > nr_sdhc)) {
+> -			dev_err(mmc_dev(mmc), "SDHC Index %d exceeds Number of SDHCs %d\n",
+> +			dev_err(dev, "SDHC Index %d exceeds Number of SDHCs %d\n",
+>   				sdhc_id, nr_sdhc);
+>   			return -EINVAL;
+>   		}
+> @@ -398,14 +418,37 @@ static int xenon_probe_dt(struct platform_device *pdev)
+>   	if (!of_property_read_u32(np, "marvell,xenon-tun-count",
+>   				  &tuning_count)) {
+>   		if (unlikely(tuning_count >= XENON_TMR_RETUN_NO_PRESENT)) {
+> -			dev_err(mmc_dev(mmc), "Wrong Re-tuning Count. Set default value %d\n",
+> +			dev_err(dev, "Wrong Re-tuning Count. Set default value %d\n",
+>   				XENON_DEF_TUNING_COUNT);
+>   			tuning_count = XENON_DEF_TUNING_COUNT;
+>   		}
+>   	}
+>   	priv->tuning_count = tuning_count;
+>   
+> -	return xenon_phy_parse_dt(np, host);
+> +	ret = xenon_phy_parse_dt(np, host);
+> +
+> +	reset_gpio = of_get_named_gpio_flags(np, "reset-gpios", 0, &flags);
+> +	if (gpio_is_valid(reset_gpio)) {
+> +		if (flags & OF_GPIO_ACTIVE_LOW)
+> +			gpio_flags = GPIOF_ACTIVE_LOW | GPIOF_OUT_INIT_HIGH;
+> +		else
+> +			gpio_flags = GPIOF_OUT_INIT_LOW;
+> +
+> +		reset_name = devm_kasprintf(dev, GFP_KERNEL, "%s-reset",
+> +						dev_name(dev));
+> +		if (!reset_name)
+> +			return -ENOMEM;
+> +		ret = devm_gpio_request_one(dev, reset_gpio, gpio_flags,
+> +					    reset_name);
+> +		if (ret) {
+> +			dev_err(dev, "Failed to request reset gpio\n");
+> +			return ret;
+> +		}
+> +
+> +		priv->reset_gpio = gpio_to_desc(reset_gpio);
+> +	}
+> +
+> +	return ret;
+>   }
+>   
+>   static int xenon_sdhc_prepare(struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 73debb4..cffb0fe 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -90,6 +90,10 @@ struct xenon_priv {
 >   	 */
-> -	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
-> +	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop, STOP_ERRORS) ||
->   	    brq->data.error) {
->   		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
->   		case ERR_RETRY:
-> 
-> Note that I decided to not couple STOP_ERRORS and CMD_ERRORS in case we
-> need more adjustments in the future. And your comment needs to be added
-> somewhere, too. It is just to show what I mean.
-> 
-
-I don't have a hard opinion here if you insist on that. :)
-I could fold in the description from the spec see explain why
-we don't need to check this for the CMD23 cases.
-
-Does all the above sound goot to you?
-
-
-> Do you think this could work, too? Or am I missing something?
-> 
-> Thanks and kind regards,
-> 
->     Wolfram
+>   	void		*phy_params;
+>   	struct xenon_emmc_phy_regs *emmc_phy_regs;
+> +	/*
+> +	 * gpio pin for hw reset
+> +	 */
+> +	struct gpio_desc *reset_gpio;
+>   };
+>   
+>   int xenon_phy_adj(struct sdhci_host *host, struct mmc_ios *ios);
 > 
 
