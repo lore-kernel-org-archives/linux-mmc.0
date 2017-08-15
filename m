@@ -1,99 +1,186 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: block: prevent propagating R1_OUT_OF_RANGE for
- open-ending mode
-Date: Tue, 15 Aug 2017 17:30:54 +0800
-Message-ID: <574e282f-ae83-9a6b-c5e5-86d374f7a984@rock-chips.com>
-References: <1502152045-150457-1-git-send-email-shawn.lin@rock-chips.com>
- <20170814175831.bgwr6hwc4tvbkmoc@ninjato>
- <f4f100a0-9edd-db13-1c21-9f986345c733@rock-chips.com>
- <20170815091618.ydnwlqx5ahwvn33e@ninjato>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:36529 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752497AbdHOJbI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Aug 2017 05:31:08 -0400
-In-Reply-To: <20170815091618.ydnwlqx5ahwvn33e@ninjato>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH 1/2] mmc: test: reduce stack usage in mmc_test_nonblock_transfer
+Date: Tue, 15 Aug 2017 17:11:58 +0200
+Message-ID: <20170815151242.2637861-1-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Byungchul Park <byungchul.park@lge.com>, Peter Zijlstra <peterz@infradead.org>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Hi Wolfram,
+The new lockdep annotations for completions cause a warning in the
+mmc test module, in a function that now has four 150 byte structures
+on the stack:
 
-On 2017/8/15 17:16, Wolfram Sang wrote:
-> Hi Shawn,
-> 
->> So that implies we only need to care about open-ending mode.
-> 
-> I see. Thanks for the explanation.
-> 
->> I could fold in the description from the spec see explain why
->> we don't need to check this for the CMD23 cases.
-> 
-> That would be great.
-> 
->> Does all the above sound goot to you?
-> 
-> Basically, yes. If we need to check for CMD23 then, I wonder if why we
-> really need to do (md->flags & MMC_BLK_CMD23) or if we can't simply
-> check the presence of brq->mrq.sbc? That could then lead to the
-> following refactorization which is a lot easier to read IMO (but only
-> compile tested, just to give you an idea what I had in mind):
-> 
+drivers/mmc/core/mmc_test.c: In function 'mmc_test_nonblock_transfer.constprop':
+drivers/mmc/core/mmc_test.c:892:1: error: the frame size of 1360 bytes is larger than 1024 bytes [-Werror=frame-larger-than=]
 
-Ok, I get your point and it looks good to me as I also plan to introduce
-ACMD23 for SD card and your suggestion also inspire me there to simplify
-the patch.
+The mmc_test_ongoing_transfer function evidently had a similar problem,
+and worked around it by using dynamic allocation.
 
-Great, I will respin v3 then. :)
+This generalizes the approach used by mmc_test_ongoing_transfer() and
+applies it to mmc_test_nonblock_transfer() as well.
 
-Thanks for sharing your thought!
+Fixes: cd8084f91c02 ("locking/lockdep: Apply crossrelease to completions")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+The patch causing this is currently part of linux-next, scheduled for
+4.14, so it would be good to have this in the same release.
 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index f1bbfd389367ff..1cf905d0e88e77 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1371,12 +1371,17 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
->   	 R1_CC_ERROR |		/* Card controller error */		\
->   	 R1_ERROR)		/* General/unknown error */
->   
-> -static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
-> +/* Map R1 errors to error codes */
-> +static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
->   {
-> -	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
-> -		cmd->error = -EIO;
-> +	u32 val;
->   
-> -	return cmd->error;
-> +	/* If there is no error yet, check R1 response */
-> +	if (!brq->stop.error) {
-> +		val = brq->stop.resp[0] & CMD_ERRORS;
-> +		if (val && !(val & R1_OUT_OF_RANGE && brq->mrq.sbc))
-> +			brq->stop.error = -EIO;
-> +	}
->   }
->   
->   static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
-> @@ -1400,8 +1405,10 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
->   	 * stop.error indicates a problem with the stop command.  Data
->   	 * may have been transferred, or may still be transferring.
->   	 */
-> -	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
-> -	    brq->data.error) {
-> +
-> +	mmc_blk_eval_resp_error(brq);
-> +
-> +	if (brq->sbc.error || brq->cmd.error || brq->stop.error || brq->data.error) {
->   		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
->   		case ERR_RETRY:
->   			return MMC_BLK_RETRY;
-> 
-> Regards,
-> 
->     Wolfram
-> 
+Since the change is not entirely trivial, please test this before applying.
+---
+ drivers/mmc/core/mmc_test.c | 97 +++++++++++++++++++--------------------------
+ 1 file changed, 41 insertions(+), 56 deletions(-)
 
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 7a304a6e5bf1..478869805b96 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -800,38 +800,44 @@ static int mmc_test_check_broken_result(struct mmc_test_card *test,
+ 	return ret;
+ }
+ 
++struct mmc_test_req {
++	struct mmc_request mrq;
++	struct mmc_command sbc;
++	struct mmc_command cmd;
++	struct mmc_command stop;
++	struct mmc_command status;
++	struct mmc_data data;
++};
++
+ /*
+  * Tests nonblock transfer with certain parameters
+  */
+-static void mmc_test_nonblock_reset(struct mmc_request *mrq,
+-				    struct mmc_command *cmd,
+-				    struct mmc_command *stop,
+-				    struct mmc_data *data)
++static void mmc_test_req_reset(struct mmc_test_req *rq)
++{
++	memset(rq, 0, sizeof(struct mmc_test_req));
++
++	rq->mrq.cmd = &rq->cmd;
++	rq->mrq.data = &rq->data;
++	rq->mrq.stop = &rq->stop;
++}
++
++static struct mmc_test_req *mmc_test_req_alloc(void)
+ {
+-	memset(mrq, 0, sizeof(struct mmc_request));
+-	memset(cmd, 0, sizeof(struct mmc_command));
+-	memset(data, 0, sizeof(struct mmc_data));
+-	memset(stop, 0, sizeof(struct mmc_command));
++	struct mmc_test_req *rq = kmalloc(sizeof(*rq), GFP_KERNEL);
+ 
+-	mrq->cmd = cmd;
+-	mrq->data = data;
+-	mrq->stop = stop;
++	if (rq)
++		mmc_test_req_reset(rq);
++
++	return rq;
+ }
++
++
+ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 				      struct scatterlist *sg, unsigned sg_len,
+ 				      unsigned dev_addr, unsigned blocks,
+ 				      unsigned blksz, int write, int count)
+ {
+-	struct mmc_request mrq1;
+-	struct mmc_command cmd1;
+-	struct mmc_command stop1;
+-	struct mmc_data data1;
+-
+-	struct mmc_request mrq2;
+-	struct mmc_command cmd2;
+-	struct mmc_command stop2;
+-	struct mmc_data data2;
+-
++	struct mmc_test_req *rq1, *rq2;
+ 	struct mmc_test_async_req test_areq[2];
+ 	struct mmc_async_req *done_areq;
+ 	struct mmc_async_req *cur_areq = &test_areq[0].areq;
+@@ -843,12 +849,16 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 	test_areq[0].test = test;
+ 	test_areq[1].test = test;
+ 
+-	mmc_test_nonblock_reset(&mrq1, &cmd1, &stop1, &data1);
+-	mmc_test_nonblock_reset(&mrq2, &cmd2, &stop2, &data2);
++	rq1 = mmc_test_req_alloc();
++	rq2 = mmc_test_req_alloc();
++	if (!rq1 || !rq2) {
++		ret = RESULT_FAIL;
++		goto err;
++	}
+ 
+-	cur_areq->mrq = &mrq1;
++	cur_areq->mrq = &rq1->mrq;
+ 	cur_areq->err_check = mmc_test_check_result_async;
+-	other_areq->mrq = &mrq2;
++	other_areq->mrq = &rq2->mrq;
+ 	other_areq->err_check = mmc_test_check_result_async;
+ 
+ 	for (i = 0; i < count; i++) {
+@@ -861,14 +871,10 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 			goto err;
+ 		}
+ 
+-		if (done_areq) {
+-			if (done_areq->mrq == &mrq2)
+-				mmc_test_nonblock_reset(&mrq2, &cmd2,
+-							&stop2, &data2);
+-			else
+-				mmc_test_nonblock_reset(&mrq1, &cmd1,
+-							&stop1, &data1);
+-		}
++		if (done_areq)
++			mmc_test_req_reset(container_of(done_areq->mrq,
++						struct mmc_test_req, mrq));
++
+ 		swap(cur_areq, other_areq);
+ 		dev_addr += blocks;
+ 	}
+@@ -877,8 +883,9 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+ 	if (status != MMC_BLK_SUCCESS)
+ 		ret = RESULT_FAIL;
+ 
+-	return ret;
+ err:
++	kfree(rq1);
++	kfree(rq2);
+ 	return ret;
+ }
+ 
+@@ -2329,28 +2336,6 @@ static int mmc_test_reset(struct mmc_test_card *test)
+ 	return RESULT_FAIL;
+ }
+ 
+-struct mmc_test_req {
+-	struct mmc_request mrq;
+-	struct mmc_command sbc;
+-	struct mmc_command cmd;
+-	struct mmc_command stop;
+-	struct mmc_command status;
+-	struct mmc_data data;
+-};
+-
+-static struct mmc_test_req *mmc_test_req_alloc(void)
+-{
+-	struct mmc_test_req *rq = kzalloc(sizeof(*rq), GFP_KERNEL);
+-
+-	if (rq) {
+-		rq->mrq.cmd = &rq->cmd;
+-		rq->mrq.data = &rq->data;
+-		rq->mrq.stop = &rq->stop;
+-	}
+-
+-	return rq;
+-}
+-
+ static int mmc_test_send_status(struct mmc_test_card *test,
+ 				struct mmc_command *cmd)
+ {
+-- 
+2.9.0
