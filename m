@@ -1,7 +1,7 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 1/4] mmc: sdhci-cadence: add suspend / resume support
-Date: Wed, 16 Aug 2017 00:45:19 +0900
-Message-ID: <1502811922-9346-2-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v3 4/4] mmc: sdhci-pltfm: export sdhci_pltfm_suspend/resume
+Date: Wed, 16 Aug 2017 00:45:22 +0900
+Message-ID: <1502811922-9346-5-git-send-email-yamada.masahiro@socionext.com>
 References: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
@@ -10,194 +10,102 @@ To: linux-mmc@vger.kernel.org
 Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, the probe function initializes the PHY, but PHY settings
-are lost during the sleep state.  Restore the PHY registers when
-resuming.
-
-To facilitate this, split sdhci_cdns_phy_init() into the DT parse
-part and PHY update part so that the latter can be invoked from the
-resume hook.
+This will be useful when drivers want to reuse either suspend or
+resume callback instead of whole of sdhci_pltfm_pmops.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
-Changes in v3:
- - Use #ifdef CONFIG_PM_SLEEP instead of __maybe_unused
- - Add own sdhci_cdns_suspend implementation to not depend on
-   the core change
-
+Changes in v3: None
 Changes in v2: None
 
- drivers/mmc/host/sdhci-cadence.c | 97 ++++++++++++++++++++++++++++++++++++----
- 1 file changed, 88 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-cadence.c | 20 +-------------------
+ drivers/mmc/host/sdhci-pltfm.c   |  6 ++++--
+ drivers/mmc/host/sdhci-pltfm.h   |  2 ++
+ 3 files changed, 7 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 19d5698244b5..751ba706bf03 100644
+index 751ba706bf03..79ce9053df07 100644
 --- a/drivers/mmc/host/sdhci-cadence.c
 +++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -67,9 +67,16 @@
-  */
- #define SDHCI_CDNS_MAX_TUNING_LOOP	40
+@@ -391,24 +391,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ }
  
-+struct sdhci_cdns_phy_param {
-+	u8 addr;
-+	u8 data;
-+};
-+
- struct sdhci_cdns_priv {
- 	void __iomem *hrs_addr;
- 	bool enhanced_strobe;
-+	unsigned int nr_phy_params;
-+	struct sdhci_cdns_phy_param phy_params[0];
+ #ifdef CONFIG_PM_SLEEP
+-static int sdhci_cdns_suspend(struct device *dev)
+-{
+-	struct sdhci_host *host = dev_get_drvdata(dev);
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	int ret;
+-
+-	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+-		mmc_retune_needed(host->mmc);
+-
+-	ret = sdhci_suspend_host(host);
+-	if (ret)
+-		return ret;
+-
+-	clk_disable_unprepare(pltfm_host->clk);
+-
+-	return 0;
+-}
+-
+ static int sdhci_cdns_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -429,7 +411,7 @@ static int sdhci_cdns_resume(struct device *dev)
+ #endif
+ 
+ static const struct dev_pm_ops sdhci_cdns_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
  };
  
- struct sdhci_cdns_phy_cfg {
-@@ -115,9 +122,22 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ static const struct of_device_id sdhci_cdns_match[] = {
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index be9a79d62e22..a34eacac612f 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -209,7 +209,7 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
+ 
+ #ifdef CONFIG_PM_SLEEP
+-static int sdhci_pltfm_suspend(struct device *dev)
++int sdhci_pltfm_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -226,8 +226,9 @@ static int sdhci_pltfm_suspend(struct device *dev)
+ 
  	return 0;
  }
++EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
  
--static int sdhci_cdns_phy_init(struct device_node *np,
--			       struct sdhci_cdns_priv *priv)
-+static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+-static int sdhci_pltfm_resume(struct device *dev)
++int sdhci_pltfm_resume(struct device *dev)
  {
-+	unsigned int count = 0;
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
-+		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
-+			count++;
-+
-+	return count;
-+}
-+
-+static void sdhci_cdns_phy_param_parse(struct device_node *np,
-+				       struct sdhci_cdns_priv *priv)
-+{
-+	struct sdhci_cdns_phy_param *p = priv->phy_params;
- 	u32 val;
- 	int ret, i;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -239,6 +240,7 @@ static int sdhci_pltfm_resume(struct device *dev)
  
-@@ -127,9 +147,19 @@ static int sdhci_cdns_phy_init(struct device_node *np,
- 		if (ret)
- 			continue;
+ 	return sdhci_resume_host(host);
+ }
++EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
+ #endif
  
--		ret = sdhci_cdns_write_phy_reg(priv,
--					       sdhci_cdns_phy_cfgs[i].addr,
--					       val);
-+		p->addr = sdhci_cdns_phy_cfgs[i].addr;
-+		p->data = val;
-+		p++;
-+	}
-+}
-+
-+static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-+{
-+	int ret, i;
-+
-+	for (i = 0; i < priv->nr_phy_params; i++) {
-+		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
-+					       priv->phy_params[i].data);
- 		if (ret)
- 			return ret;
- 	}
-@@ -302,6 +332,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_cdns_priv *priv;
- 	struct clk *clk;
-+	size_t priv_size;
-+	unsigned int nr_phy_params;
- 	int ret;
- 	struct device *dev = &pdev->dev;
- 
-@@ -313,7 +345,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		return ret;
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, sizeof(*priv));
-+	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
-+	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
-+	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
- 		goto disable_clk;
-@@ -322,7 +356,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->clk = clk;
- 
--	priv = sdhci_cdns_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
-+	priv->nr_phy_params = nr_phy_params;
- 	priv->hrs_addr = host->ioaddr;
- 	priv->enhanced_strobe = false;
- 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
-@@ -336,7 +371,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto free;
- 
--	ret = sdhci_cdns_phy_init(dev->of_node, priv);
-+	sdhci_cdns_phy_param_parse(dev->of_node, priv);
-+
-+	ret = sdhci_cdns_phy_init(priv);
- 	if (ret)
- 		goto free;
- 
-@@ -353,6 +390,48 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	return ret;
+ const struct dev_pm_ops sdhci_pltfm_pmops = {
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 957839d0fe37..1e91fb1c020e 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -109,6 +109,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
+ 	return host->private;
  }
  
-+#ifdef CONFIG_PM_SLEEP
-+static int sdhci_cdns_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	int ret;
-+
-+	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-+		mmc_retune_needed(host->mmc);
-+
-+	ret = sdhci_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_cdns_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
-+
-+	ret = sdhci_cdns_phy_init(priv);
-+	if (ret)
-+		return ret;
-+
-+	return sdhci_resume_host(host);
-+}
-+#endif
-+
-+static const struct dev_pm_ops sdhci_cdns_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
-+};
-+
- static const struct of_device_id sdhci_cdns_match[] = {
- 	{ .compatible = "socionext,uniphier-sd4hc" },
- 	{ .compatible = "cdns,sd4hc" },
-@@ -363,7 +442,7 @@ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
- static struct platform_driver sdhci_cdns_driver = {
- 	.driver = {
- 		.name = "sdhci-cdns",
--		.pm = &sdhci_pltfm_pmops,
-+		.pm = &sdhci_cdns_pm_ops,
- 		.of_match_table = sdhci_cdns_match,
- 	},
- 	.probe = sdhci_cdns_probe,
++int sdhci_pltfm_suspend(struct device *dev);
++int sdhci_pltfm_resume(struct device *dev);
+ extern const struct dev_pm_ops sdhci_pltfm_pmops;
+ 
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
 -- 
 2.7.4
