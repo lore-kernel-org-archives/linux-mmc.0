@@ -1,76 +1,109 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [EXT] Re: [PATCH] mmc: sdhci-xenon: add gpio hard reset support
-Date: Wed, 16 Aug 2017 08:32:09 +0800
-Message-ID: <b56fc3b4-4fff-0881-2233-8f26a6c8407a@rock-chips.com>
-References: <1502749156-22798-1-git-send-email-zjwu@marvell.com>
- <3696b751-68cc-6c11-bb7d-af7d6e6a5681@rock-chips.com>
- <59937848.2040901@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v3] mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
+Date: Wed, 16 Aug 2017 09:11:41 +0800
+Message-ID: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:47838 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:52807 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752718AbdHPAcV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Aug 2017 20:32:21 -0400
-In-Reply-To: <59937848.2040901@marvell.com>
+        with ESMTP id S1752619AbdHPBMi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Aug 2017 21:12:38 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi
+We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+mode as it is expected behaviour and most of the backup partition
+tables should be located near some of the last blocks which will
+always make open-ending read exceed the capacity of cards.
 
-On 2017/8/16 6:40, Zhoujie Wu wrote:
-> Hi Shawn,
+Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
->> ----------------------------------------------------------------------
->> Hi
->>
->> On 2017/8/15 6:19, Zhoujie Wu wrote:
->>> On some platforms, like armada3700,  SD card need to
->>> do hard reset by gpio toggling to make it work properly
->>> after warm reset the board.
->>
->> I don't get this that SD card need to do hard reset...
->>
->> I assume what you talk about is either for eMMC or a power-cycle
->> for SD card.
-> 
-> The subject of the patch confused you. What I want is a power-cycle for 
-> the SD card. The gpio is  used to enable/disable the vdd power supply 
-> for sd card.
-> Actually on a3700, when warm reset the board, their is no power-cycle 
-> for SD card, which will lead sd card can't response correct ocr and 
-> never set S18A unless a power-cycle.
-> This is the purpose I submit this patch.
-> 
+Tested-by: Shawn Guo <shawnguo@kernel.org>
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+---
 
-Well, if that is the case, I suggest you to use regulator-gpio.
+Changes in v3:
+- add explanation for why don't check predefined method
+- check brq->mrq.sbc for easier to read suggested by Wolfram
 
-i.e:
+Changes in v2:
+- fix a typo and introduce STOP_ERROR
+- reword the comment and always include a description from the spec if possible
 
-        vcc_sd: regulator {
-                 compatible = "regulator-gpio";
-                 regulator-name = "vcc_sd";
-                 regulator-min-microvolt = <3300000>;
-                 regulator-max-microvolt = <3300000>;
+ drivers/mmc/core/block.c | 47 +++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 41 insertions(+), 6 deletions(-)
 
-                 gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
-                 enable-active-high;
-         };
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index a11bead..a5a375b 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1369,12 +1369,44 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 	 R1_CC_ERROR |		/* Card controller error */		\
+ 	 R1_ERROR)		/* General/unknown error */
+ 
+-static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
++static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+ {
+-	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+-		cmd->error = -EIO;
++	u32 val;
+ 
+-	return cmd->error;
++	/*
++	 * Per the SD specification(physical layer version 4.10)[1],
++	 * section 4.3.3, it explicitly states that "When the last
++	 * block of user area is read using CMD18, the host should
++	 * ignore OUT_OF_RANGE error that may occur even the sequence
++	 * is correct". And JESD84-B51 for eMMC also has a similar
++	 * statement on section 6.8.3.
++	 *
++	 * Multiple block read/write could be done by either predefined
++	 * method, namely CMD23, or open-ending mode.
++	 *
++	 * For open-ending mode, we should ignore the OUT_OF_RANGE
++	 * error as it's normal behaviour.
++	 *
++	 * However the spec[1] doesn't tell us whether we should also
++	 * ignore that for predefined method. But per the spec[1], section
++	 * 4.15 Set Block Count Command, it says"If illegal block count
++	 * is set, out of range error will be indicated during read/write
++	 * operation (For example, data transfer is stopped at user area
++	 * boundary)." In another word, we could expect a out of range error
++	 * in the response for the following CMD18/25. And if argument of
++	 * CMD23 + the argument of CMD18/25 exceed the max number of blocks,
++	 * we could also expect to get a -ETIMEDOUT or any error number from
++	 * the host drivers due to missing data response(for write)/data(for
++	 * read), as the cards will stop the data transfer by itself per the
++	 * spec. So we only need to check R1_OUT_OF_RANGE for open-ending mode.
++	 */
++
++	if (!brq->stop.error) {
++		/* If there is no error yet, check R1 response */
++		val = brq->stop.resp[0] & CMD_ERRORS;
++		if (val && !(val & R1_OUT_OF_RANGE && !brq->mrq.sbc))
++			brq->stop.error = -EIO;
++	}
+ }
+ 
+ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+@@ -1398,8 +1430,11 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 	 * stop.error indicates a problem with the stop command.  Data
+ 	 * may have been transferred, or may still be transferring.
+ 	 */
+-	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+-	    brq->data.error) {
++
++	mmc_blk_eval_resp_error(brq);
++
++	if (brq->sbc.error || brq->cmd.error ||
++	    brq->stop.error || brq->data.error) {
+ 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+-- 
+1.9.1
 
-	&sdhci {
-		vmmc-supply = <&vcc_sd>;
-	}
-	
-
->>
->>> Add gpio hard reset feature for this purpose.
->>>
-
-> 
-> 
-> 
-> 
 
