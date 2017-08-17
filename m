@@ -1,205 +1,271 @@
-From: Bough Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH V5 00/13] mmc: Add Command Queue support
-Date: Thu, 17 Aug 2017 07:45:16 +0000
-Message-ID: <AM4PR0401MB2324B4E9B0818CCC3D70113090830@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [RFC PATCH 6/7] mmc: sdhci-omap: Add OMAP SDHCI driver
+Date: Thu, 17 Aug 2017 13:29:18 +0530
+Message-ID: <7822a805-3379-1d08-5a01-f422ab23f863@ti.com>
+References: <20170807160142.12134-1-kishon@ti.com>
+ <20170807160142.12134-7-kishon@ti.com>
+ <a45cf402-26c9-d9d0-1ca0-cbeeddad388c@intel.com>
+ <46568bdf-c11f-e04b-edd4-25d5363ae504@ti.com>
+ <0b109f07-f7f3-1a12-0c65-45d96eb23b13@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve1eur01on0052.outbound.protection.outlook.com ([104.47.1.52]:46448
-        "EHLO EUR01-VE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751744AbdHQHpS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Aug 2017 03:45:18 -0400
-In-Reply-To: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <0b109f07-f7f3-1a12-0c65-45d96eb23b13@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>
+Cc: nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Adrian Hunter
-> Sent: Thursday, August 10, 2017 8:08 PM
-> To: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Bough Chen
-> <haibo.chen@nxp.com>; Alex Lemberg <alex.lemberg@sandisk.com>;
-> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
-> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
-> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
-> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
-> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
-> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
-> Linus Walleij <linus.walleij@linaro.org>; Shawn Lin <shawn.lin@rock-chips=
-.com>
-> Subject: [PATCH V5 00/13] mmc: Add Command Queue support
->=20
-> Hi
->=20
-> Here is V5 of the hardware command queue patches without the software
-> command queue patches.
->=20
-> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a sligh=
-t 2%
-> drop in sequential read speed but no change to sequential write.
->=20
->=20
 Hi Adrian,
 
-I test the performance on the i.MX8.  Here in my side, I use 'dd' to test t=
-he
-sequential read/write speed, see a slight 3% drop for both read and write.
+On Thursday 17 August 2017 12:13 PM, Adrian Hunter wrote:
+> On 17/08/17 08:57, Kishon Vijay Abraham I wrote:
+>> Hi Adrian,
+>>
+>> On Tuesday 15 August 2017 01:52 PM, Adrian Hunter wrote:
+>>> On 07/08/17 19:01, Kishon Vijay Abraham I wrote:
+>>>> Create a new sdhci-omap driver to configure the eMMC/SD/SDIO controller
+>>>> in TI's OMAP SoCs making use of the SDHCI core library. For OMAP specific
+>>>> configurations, populate sdhci_ops with OMAP specific callbacks and use
+>>>> SDHCI quirks.
+>>>> Enable only high speed mode for both SD and eMMC here and add other
+>>>> UHS mode support later.
+>>>
+>>> I only have a couple of comments below.
+>>>
+>>>>
+>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> ---
+>>>>  drivers/mmc/host/Kconfig      |  12 +
+>>>>  drivers/mmc/host/Makefile     |   1 +
+>>>>  drivers/mmc/host/sdhci-omap.c | 593 ++++++++++++++++++++++++++++++++++++++++++
+>>>>  3 files changed, 606 insertions(+)
+>>>>  create mode 100644 drivers/mmc/host/sdhci-omap.c
+>>>>
+>>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>>> index 5755b69f2f72..9aa7e5ce43ba 100644
+>>>> --- a/drivers/mmc/host/Kconfig
+>>>> +++ b/drivers/mmc/host/Kconfig
+>>>> @@ -871,3 +871,15 @@ config MMC_SDHCI_XENON
+>>>>  	  This selects Marvell Xenon eMMC/SD/SDIO SDHCI.
+>>>>  	  If you have a controller with this interface, say Y or M here.
+>>>>  	  If unsure, say N.
+>>>> +
+>>>> +config MMC_SDHCI_OMAP
+>>>> +	tristate "TI SDHCI Controller Support"
+>>>> +	depends on MMC_SDHCI_PLTFM
+>>>> +	help
+>>>> +	  This selects the Secure Digital Host Controller Interface (SDHCI)
+>>>> +	  support present in TI's DRA7 SOCs. The controller supports
+>>>> +	  SD/MMC/SDIO devices.
+>>>> +
+>>>> +	  If you have a controller with this interface, say Y or M here.
+>>>> +
+>>>> +	  If unsure, say N.
+>>>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>>>> index 4d4547116311..30fb8b0fd0e1 100644
+>>>> --- a/drivers/mmc/host/Makefile
+>>>> +++ b/drivers/mmc/host/Makefile
+>>>> @@ -82,6 +82,7 @@ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+>>>>  obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+>>>>  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
+>>>>  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
+>>>> +obj-$(CONFIG_MMC_SDHCI_OMAP)		+= sdhci-omap.o
+>>>>  
+>>>>  ifeq ($(CONFIG_CB710_DEBUG),y)
+>>>>  	CFLAGS-cb710-mmc	+= -DDEBUG
+>>>> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+>>>> new file mode 100644
+>>>> index 000000000000..c067c428a0cd
+>>>> --- /dev/null
+>>>> +++ b/drivers/mmc/host/sdhci-omap.c
+>>>> @@ -0,0 +1,593 @@
+>>>> +/*
+>>>> + * SDHCI Controller driver for TI's OMAP SoCs
+>>>> + *
+>>>> + * Copyright (C) 2016-2017 Texas Instruments Incorporated - http://www.ti.com
+>>>> + *
+>>>> + * Authors: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> + *
+>>>> + * This program is free software; you can redistribute it and/or modify
+>>>> + * it under the terms of the GNU General Public License version 2 as
+>>>> + * published by the Free Software Foundation.
+>>>> + */
+>>>> +
+>>>> +#include <linux/delay.h>
+>>>> +#include <linux/mmc/slot-gpio.h>
+>>>> +#include <linux/module.h>
+>>>> +#include <linux/of.h>
+>>>> +#include <linux/of_device.h>
+>>>> +#include <linux/platform_device.h>
+>>>> +#include <linux/pm_runtime.h>
+>>>> +#include <linux/regulator/consumer.h>
+>>>> +
+>>>> +#include "sdhci-pltfm.h"
+>>>> +
+>>>> +#define SDHCI_OMAP_CON		0x12c
+>>>> +#define CON_DW8			BIT(5)
+>>>> +#define CON_DMA_MASTER		BIT(20)
+>>>> +#define CON_INIT		BIT(1)
+>>>> +#define CON_OD			BIT(0)
+>>>> +
+>>>> +#define SDHCI_OMAP_CMD		0x20c
+>>>> +
+>>>> +#define SDHCI_OMAP_HCTL		0x228
+>>>> +#define HCTL_SDBP		BIT(8)
+>>>> +#define HCTL_SDVS_SHIFT		9
+>>>> +#define HCTL_SDVS_MASK		(0x7 << HCTL_SDVS_SHIFT)
+>>>> +#define HCTL_SDVS_33		(0x7 << HCTL_SDVS_SHIFT)
+>>>> +#define HCTL_SDVS_30		(0x6 << HCTL_SDVS_SHIFT)
+>>>> +#define HCTL_SDVS_18		(0x5 << HCTL_SDVS_SHIFT)
+>>>> +
+>>>> +#define SDHCI_OMAP_SYSCTL	0x22c
+>>>> +#define SYSCTL_CEN		BIT(2)
+>>>> +#define SYSCTL_CLKD_SHIFT	6
+>>>> +#define SYSCTL_CLKD_MASK	0x3ff
+>>>> +
+>>>> +#define SDHCI_OMAP_STAT		0x230
+>>>> +
+>>>> +#define SDHCI_OMAP_IE		0x234
+>>>> +#define INT_CC_EN		BIT(0)
+>>>> +
+>>>> +#define SDHCI_OMAP_AC12		0x23c
+>>>> +#define AC12_V1V8_SIGEN		BIT(19)
+>>>> +
+>>>> +#define SDHCI_OMAP_CAPA		0x240
+>>>> +#define CAPA_VS33		BIT(24)
+>>>> +#define CAPA_VS30		BIT(25)
+>>>> +#define CAPA_VS18		BIT(26)
+>>>> +
+>>>> +#define MMC_TIMEOUT		1		/* 1 msec */
+>>>
+>>> This name "MMC_TIMEOUT" is too generic.  SDHCI_OMAP_TIMEOUT would be better.
+>>
+>> okay.
+>>>
+>>>> +
+>>>> +#define SYSCTL_CLKD_MAX		0x3FF
+>>>> +
+>>>> +#define IOV_1V8			1800000		/* 180000 uV */
+>>>> +#define IOV_3V0			3000000		/* 300000 uV */
+>>>> +#define IOV_3V3			3300000		/* 330000 uV */
+>>>> +
+>>>> +struct sdhci_omap_data {
+>>>> +	u32 offset;
+>>>> +};
+>>>> +
+>>>> +struct sdhci_omap_host {
+>>>> +	void __iomem		*base;
+>>>> +	struct device		*dev;
+>>>> +	struct	regulator	*pbias;
+>>>> +	bool			pbias_enabled;
+>>>> +	struct sdhci_host	*host;
+>>>> +	unsigned int		flags;
+>>>> +
+>>>> +#define SDHCI_OMAP_SUPPORTS_DUAL_VOLT	BIT(0)
+>>>> +#define SDHCI_OMAP_NO_1_8_V		BIT(1)
+>>>> +
+>>>> +	u8			power_mode;
+>>>> +	bool			io_3_3v_support;
+>>>> +};
+>>>> +
+>> .
+>> .
+>> <<snip>>
+>> .
+>> .
+>>>> +static int sdhci_omap_probe(struct platform_device *pdev)
+>>>> +{
+>>>> +	int ret;
+>>>> +	u32 offset;
+>>>> +	struct device *dev = &pdev->dev;
+>>>> +	struct sdhci_host *host;
+>>>> +	struct sdhci_pltfm_host *pltfm_host;
+>>>> +	struct sdhci_omap_host *omap_host;
+>>>> +	struct mmc_host *mmc;
+>>>> +	const struct of_device_id *match;
+>>>> +	struct sdhci_omap_data *data;
+>>>> +
+>>>> +	match = of_match_device(omap_sdhci_match, dev);
+>>>> +	if (!match)
+>>>> +		return -EINVAL;
+>>>> +
+>>>> +	data = (struct sdhci_omap_data *)match->data;
+>>>> +	if (!data) {
+>>>> +		dev_err(dev, "no sdhci omap data\n");
+>>>> +		return -EINVAL;
+>>>> +	}
+>>>> +
+>>>> +	offset = data->offset;
+>>>> +
+>>>> +	host = sdhci_pltfm_init(pdev, &sdhci_omap_pdata,
+>>>> +				sizeof(*omap_host));
+>>>> +	if (IS_ERR(host)) {
+>>>> +		dev_err(dev, "Failed sdhci_pltfm_init\n");
+>>>> +		return PTR_ERR(host);
+>>>> +	}
+>>>> +
+>>>> +	pltfm_host = sdhci_priv(host);
+>>>> +	omap_host = sdhci_pltfm_priv(pltfm_host);
+>>>> +	omap_host->host = host;
+>>>> +	omap_host->base = host->ioaddr;
+>>>> +	omap_host->dev = dev;
+>>>> +	sdhci_omap_get_of_property(omap_host);
+>>>> +
+>>>> +	host->ioaddr += offset;
+>>>> +
+>>>> +	mmc = host->mmc;
+>>>> +	ret = mmc_of_parse(mmc);
+>>>> +	if (ret)
+>>>> +		goto err_of_parse;
+>>>> +
+>>>> +	pltfm_host->clk = devm_clk_get(dev, "fck");
+>>>> +	if (IS_ERR(pltfm_host->clk)) {
+>>>> +		ret = PTR_ERR(pltfm_host->clk);
+>>>> +		goto err_of_parse;
+>>>> +	}
+>>>> +
+>>>> +	ret = clk_set_rate(pltfm_host->clk, mmc->f_max);
+>>>> +	if (ret) {
+>>>> +		dev_err(dev, "failed to set clock to %d\n", mmc->f_max);
+>>>> +		goto err_of_parse;
+>>>> +	}
+>>>> +
+>>>> +	omap_host->pbias = devm_regulator_get_optional(dev, "pbias");
+>>>> +	if (IS_ERR(omap_host->pbias)) {
+>>>> +		ret = PTR_ERR(omap_host->pbias);
+>>>> +		if (ret != -ENODEV) {
+>>>> +			dev_err(dev, "CONFIG_REGULATOR_PBIAS not enabled??\n");
+>>>> +			return ret;
+>>>> +		}
+>>>> +		dev_dbg(dev, "unable to get pbias regulator %ld\n",
+>>>> +			PTR_ERR(omap_host->pbias));
+>>>> +	} else {
+>>>> +		if (regulator_is_supported_voltage(omap_host->pbias, IOV_3V3,
+>>>> +						   IOV_3V3))
+>>>> +			omap_host->io_3_3v_support = true;
+>>>> +		dev_vdbg(dev, "Max PBIAS support Voltage: %dmv\n",
+>>>> +			 omap_host->io_3_3v_support ? IOV_3V3 : IOV_3V0);
+>>>> +	}
+>>>> +	omap_host->pbias_enabled = false;
+>>>> +
+>>>> +	pm_runtime_enable(dev);
+>>>> +	ret = pm_runtime_get_sync(dev);
+>>>
+>>> What are you trying to do with runtime pm?  There don't seem to be any pm
+>>> callbacks, so does this do anything?
+>>
+>> yeah, pm_runtime_get_sync enables the functional clock and also configures the
+>> SYSCONFIG regiters present in the controller. It gets the details for
+>> configuring those from arch/arm/mach-omap2/omap_hwmod_*
+> 
+> You mean it will do those things when you add the callbacks?  I would prefer
+> you leave out runtime pm until you can add the callbacks as well.
 
-    ---------------------------------------------
-   |               | read (KB/s)| write (KB/s) |
-   ---------------------------------------------
-    |CMDQ in HS400ES|    257     |     94.5     |
-    ---------------------------------------------
-    |    HS400ES    |    265     |     96.6     |
-    ---------------------------------------------=20
+No. Generally in callbacks, 'optional' functional clocks are enabled. But main
+functional clock and interface clocks are enabled in pm_runtime_get_sync.
+Without pm_runtime_get_sync, we won't be able to access controller registers.
 
-For random multi-threaded I/O, I use 'fio'  to test, the test command:
-fio -filename=3D/mnt/test -direct=3D1 -iodepth 1 -thread -rw=3Drandread - i=
-oengine=3Dpsync  -bs=3D4k -size=3D2G -numjobs=3D10 -runtime=3D60  -group_re=
-porting - name=3Dmytest
-
-I test 5 times, and get the average value.
-For CMDQ in HS400ES
-    ----------------------------------------------------
-    | block size   |    4KB    |    8KB    |    16KB   |
-    ----------------------------------------------------
-    | random read  | 26340KB/s | 51844KB/s | 85738KB/s |
-    ----------------------------------------------------
-    | random write | 12691KB/s | 15879KB/s | 17535KB/s |
-    ----------------------------------------------------
-
-HS400ES without CMDQ
-    ----------------------------------------------------
-    | block size   |    4KB    |    8KB    |    16KB   |
-    ----------------------------------------------------
-    | random read  | 18585KB/s | 35041KB/s | 63880KB/s |
-    ----------------------------------------------------
-    | random write | 16465KB/s | 19210KB/s | 22672KB/s |
-    ----------------------------------------------------
-
-For random write from the test, I find every test value differ greatly no m=
-atter enable CMDQ or not.
-
->From the test, I see CMDQ random read speed increase 34%~48%, but for rando=
-m write, the speed=20
-drop 17.4% ~ 33%. =20
-
-When you send software cmdq V5 patch, you give some explanation for the ran=
-dom write. But the
-average random write speed also drops a lot, I think it is now a good news,=
- which need attention!
-
-
-Maybe Shawn Lin can double test this random write performance.
-
-Best Regards
-Haibo Chen
-
-> Changes since V4:
->       mmc: core: Add mmc_retune_hold_now()
-> 	Add explanation to commit message.
->       mmc: host: Add CQE interface
-> 	Add comments to callback declarations.
->       mmc: core: Turn off CQE before sending commands
-> 	Add explanation to commit message.
->       mmc: core: Add support for handling CQE requests
-> 	Add comments as requested by Ulf.
->       mmc: core: Remove unused MMC_CAP2_PACKED_CMD
-> 	New patch.
->       mmc: mmc: Enable Command Queuing
-> 	Adjust for removal of MMC_CAP2_PACKED_CMD.
-> 	Add a comment about Packed Commands.
->       mmc: mmc: Enable CQE's
-> 	Remove un-necessary check for MMC_CAP2_CQE
->       mmc: block: Use local variables in mmc_blk_data_prep()
-> 	New patch.
->       mmc: block: Prepare CQE data
-> 	Adjust due to "mmc: block: Use local variables in
-> mmc_blk_data_prep()"
-> 	Remove priority setting.
-> 	Add explanation to commit message.
->       mmc: cqhci: support for command queue enabled host
-> 	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
->=20
-> Changes since V3:
-> 	Adjusted ...blk_end_request...() for new block status codes
-> 	Fixed CQHCI transaction descriptor for "no DCMD" case
->=20
-> Changes since V2:
-> 	Dropped patches that have been applied.
-> 	Re-based
-> 	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
->=20
-> Changes since V1:
->=20
-> 	"Share mmc request array between partitions" is dependent
-> 	on changes in "Introduce queue semantics", so added that
-> 	and block fixes:
->=20
-> 	Added "Fix is_waiting_last_req set incorrectly"
-> 	Added "Fix cmd error reset failure path"
-> 	Added "Use local var for mqrq_cur"
-> 	Added "Introduce queue semantics"
->=20
-> Changes since RFC:
->=20
-> 	Re-based on next.
-> 	Added comment about command queue priority.
-> 	Added some acks and reviews.
->=20
->=20
-> Adrian Hunter (12):
->       mmc: core: Add mmc_retune_hold_now()
->       mmc: core: Add members to mmc_request and mmc_data for CQE's
->       mmc: host: Add CQE interface
->       mmc: core: Turn off CQE before sending commands
->       mmc: core: Add support for handling CQE requests
->       mmc: core: Remove unused MMC_CAP2_PACKED_CMD
->       mmc: mmc: Enable Command Queuing
->       mmc: mmc: Enable CQE's
->       mmc: block: Use local variables in mmc_blk_data_prep()
->       mmc: block: Prepare CQE data
->       mmc: block: Add CQE support
->       mmc: sdhci-pci: Add CQHCI support for Intel GLK
->=20
-> Venkat Gopalakrishnan (1):
->       mmc: cqhci: support for command queue enabled host
->=20
->  drivers/mmc/core/block.c          |  238 +++++++-
->  drivers/mmc/core/block.h          |    7 +
->  drivers/mmc/core/bus.c            |    7 +
->  drivers/mmc/core/core.c           |  178 +++++-
->  drivers/mmc/core/host.c           |    6 +
->  drivers/mmc/core/host.h           |    1 +
->  drivers/mmc/core/mmc.c            |   42 +-
->  drivers/mmc/core/queue.c          |  273 ++++++++-
->  drivers/mmc/core/queue.h          |   42 +-
->  drivers/mmc/host/Kconfig          |   14 +
->  drivers/mmc/host/Makefile         |    1 +
->  drivers/mmc/host/cqhci.c          | 1154
-> +++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/cqhci.h          |  240 ++++++++
->  drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
->  include/linux/mmc/core.h          |   18 +-
->  include/linux/mmc/host.h          |   63 +-
->  include/trace/events/mmc.h        |   36 +-
->  17 files changed, 2412 insertions(+), 61 deletions(-)  create mode 10064=
-4
-> drivers/mmc/host/cqhci.c  create mode 100644 drivers/mmc/host/cqhci.h
->=20
->=20
-> Regards
-> Adrian
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
-he
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+Thanks
+Kishon
