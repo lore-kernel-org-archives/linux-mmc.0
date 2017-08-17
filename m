@@ -1,45 +1,47 @@
-From: Shawn Guo <shawnguo@kernel.org>
-Subject: Re: [PATCH v3] mmc: block: prevent propagating R1_OUT_OF_RANGE for
- open-ending mode
-Date: Thu, 17 Aug 2017 21:34:14 +0800
-Message-ID: <20170817133413.GD7608@dragon>
-References: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
- <20170817104047.ikfljcrggl2ncxqv@ninjato>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [RFC PATCH 5/7] dt-bindings: ti-omap-hsmmc: Document new
+ compatible for sdhci omap
+Date: Thu, 17 Aug 2017 09:05:37 -0700
+Message-ID: <20170817160537.GL8569@atomide.com>
+References: <20170807160142.12134-1-kishon@ti.com>
+ <20170807160142.12134-6-kishon@ti.com>
+ <20170809221222.GK3934@atomide.com>
+ <2cdf9bbe-b98b-8811-7587-268b7ef4ac66@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:37848 "EHLO mail.kernel.org"
+Received: from muru.com ([72.249.23.125]:36808 "EHLO muru.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751585AbdHQNfz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Aug 2017 09:35:55 -0400
+        id S1751561AbdHQQFm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 17 Aug 2017 12:05:42 -0400
 Content-Disposition: inline
-In-Reply-To: <20170817104047.ikfljcrggl2ncxqv@ninjato>
+In-Reply-To: <2cdf9bbe-b98b-8811-7587-268b7ef4ac66@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Aug 17, 2017 at 12:40:47PM +0200, Wolfram Sang wrote:
-> Hi Shawn,
+* Kishon Vijay Abraham I <kishon@ti.com> [170816 22:44]:
+> Hi Tony,
 > 
-> On Wed, Aug 16, 2017 at 09:11:41AM +0800, Shawn Lin wrote:
-> > We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
-> > mode as it is expected behaviour and most of the backup partition
-> > tables should be located near some of the last blocks which will
-> > always make open-ending read exceed the capacity of cards.
+> On Thursday 10 August 2017 03:42 AM, Tony Lindgren wrote:
+> > * Kishon Vijay Abraham I <kishon@ti.com> [170807 09:03]:
+> >> Document the new compatible string "ti,dra7-sdhci" to be used for
+> >> MMC controllers in DRA7 and DRA72 SoCs.
 > > 
-> > Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
-> > Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
-> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> > 
-> > Tested-by: Shawn Guo <shawnguo@kernel.org>
-> > Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> > I wonder if this should really be documented for sdhci
+> > instead of ti-omap-hsmmc.txt?
 > 
-> I'd think these Tested-by should be dropped. We changed the patch quite
-> a bit meanwhile and I am quite sure Shimoda-san didn't test this new
-> version of the patch. Dunno about Shawn. Hopefully they have time to
-> re-test?
+> hmm.. yeah, having a separate binding document for sdhci would make the binding
+> really clean and we also don't have to carry legacy binding code. But we'll be
+> never able to remove omap-hsmmc driver then and end up maintaining 2 drivers
+> for the same controller.
 
-I just re-tested it on Hikey, so my Tested-by tag can be kept.
+Well I think it's best to be able to enable sdhci one board at
+a time after testing. Then eventually when fully supported, we
+can just have sdhci also parse the legacy omap binding and just
+drop the omap-hsmmc driver.
 
-Shawn
+Regards,
+
+Tony
