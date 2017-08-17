@@ -1,90 +1,209 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
- cards
-Date: Thu, 17 Aug 2017 10:44:39 +0200
-Message-ID: <20170817084439.GH26170@verge.net.au>
-References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
- <20170803074351.GC19671@verge.net.au>
- <20170803155357.GA3826@verge.net.au>
- <20170803155520.GB3826@verge.net.au>
- <20170808185445.GA2170@katana>
- <20170814051022.GC5654@verge.net.au>
- <20170814154654.uwtgoya6oroeulgm@ninjato>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH V5 00/13] mmc: Add Command Queue support
+Date: Thu, 17 Aug 2017 16:56:51 +0800
+Message-ID: <3466f30e-ceb7-33ed-dee9-72556e076c70@rock-chips.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <AM4PR0401MB2324B4E9B0818CCC3D70113090830@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170814154654.uwtgoya6oroeulgm@ninjato>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:49788 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750775AbdHQI5I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 04:57:08 -0400
+In-Reply-To: <AM4PR0401MB2324B4E9B0818CCC3D70113090830@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bough Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Mon, Aug 14, 2017 at 05:46:54PM +0200, Wolfram Sang wrote:
-> Hi Simon,
-> 
-> On Mon, Aug 14, 2017 at 07:10:23AM +0200, Simon Horman wrote:
-> > On Tue, Aug 08, 2017 at 08:54:45PM +0200, Wolfram Sang wrote:
-> > > 
-> > > > As it is an "RFT" I'm happy to apply it if you repost
-> > > > it or otherwise indicate that is what you would like to happen.
-> > > 
-> > > As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
-> > > 
-> > > H3:
-> > > - one slot worked flawlessly
-> > > - one slot could load FW but failed to read status
-> > > (with SDR50: both slots work)
-> > > 
-> > > M3-W:
-> > > - both slots could not load the firmware
-> > > (with SDR50: one slot works, one fails to load FW)
-> > > 
-> > > The cards, however, were correctly identified as SDR104 and there were
-> > > no tuning errors and no other SDHI related warnings.
-> > > 
-> > > Changing TDSEL in the PFC did not change anything.
-> > > 
-> > > The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
-> > > length of 100mm. Measuring a direct line from the SoC to the slots,
-> > > I'd think we are very much on the edge of that. And given the length
-> > > of the SDIO adapter, we are surely exceeding that :(
-> > > 
-> > > Maybe we should do more tests with more boards? On the other hand, it
-> > > seems the WiFi card is running out of the specs.
-> > > 
-> > > So much for now. I'll sleep over it and try to get more data tomorrow.
-> > 
-> > Thanks. Unfortunately my H3 is out of arms length but I can arrange
-> > some testing if it is helpful.
-> 
-> Do you have UHS-SDIO cards? Otherwise, some more testing in Spain will
-> be good.
+Hi
 
-I am unable to locate my SDIO card :(
-
-> > Is one possibility to enable it for the slots listed above that are now
-> > thought to work but not for the other one?
+On 2017/8/17 15:45, Bough Chen wrote:
 > 
-> I don't think so. We'd need more test coverage. My gut feeling is that
-> it varies from board to board. Or more precisely: from environment
-> around the board to environment around the board. I'd like to test a)
-> more boards) and b) a resoldered WLAN card to skip the extra cabling
-> there. I still think the wire length of ~23cm (exceeding the spec of max
-> 10cm) is a factor here, so resoldering would save ~6cm. That all sounds
-> to me like a hacking sprint for our next meeting.
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Adrian Hunter
+>> Sent: Thursday, August 10, 2017 8:08 PM
+>> To: Ulf Hansson <ulf.hansson@linaro.org>
+>> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Bough Chen
+>> <haibo.chen@nxp.com>; Alex Lemberg <alex.lemberg@sandisk.com>;
+>> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
+>> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
+>> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
+>> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
+>> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
+>> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
+>> Linus Walleij <linus.walleij@linaro.org>; Shawn Lin <shawn.lin@rock-chips.com>
+>> Subject: [PATCH V5 00/13] mmc: Add Command Queue support
+>>
+>> Hi
+>>
+>> Here is V5 of the hardware command queue patches without the software
+>> command queue patches.
+>>
+>> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight 2%
+>> drop in sequential read speed but no change to sequential write.
+>>
+>>
+> Hi Adrian,
 > 
-> Maybe ULCB has less line lengths? Would be interesting to check, too.
+> I test the performance on the i.MX8.  Here in my side, I use 'dd' to test the
+> sequential read/write speed, see a slight 3% drop for both read and write.
 > 
-> I could also try to apply more shielding here at home, too.
-
-More testing is fine by me.
-
-> > The SDR50 failure on M3-W seems particularly troubling as that
-> > has been enabled in upstream for a while, right?
+>      ---------------------------------------------
+>     |               | read (KB/s)| write (KB/s) |
+>     ---------------------------------------------
+>      |CMDQ in HS400ES|    257     |     94.5     |
+>      ---------------------------------------------
+>      |    HS400ES    |    265     |     96.6     |
+>      ---------------------------------------------
 > 
-> Not nice, yes. Yet, until this thread, there have been no issues
-> reported. So, it doesn't look like a substantial fault to me (famous
-> last words?)
+> For random multi-threaded I/O, I use 'fio'  to test, the test command:
+> fio -filename=/mnt/test -direct=1 -iodepth 1 -thread -rw=randread - ioengine=psync  -bs=4k -size=2G -numjobs=10 -runtime=60  -group_reporting - name=mytest
+> 
+> I test 5 times, and get the average value.
+> For CMDQ in HS400ES
+>      ----------------------------------------------------
+>      | block size   |    4KB    |    8KB    |    16KB   |
+>      ----------------------------------------------------
+>      | random read  | 26340KB/s | 51844KB/s | 85738KB/s |
+>      ----------------------------------------------------
+>      | random write | 12691KB/s | 15879KB/s | 17535KB/s |
+>      ----------------------------------------------------
+> 
+> HS400ES without CMDQ
+>      ----------------------------------------------------
+>      | block size   |    4KB    |    8KB    |    16KB   |
+>      ----------------------------------------------------
+>      | random read  | 18585KB/s | 35041KB/s | 63880KB/s |
+>      ----------------------------------------------------
+>      | random write | 16465KB/s | 19210KB/s | 22672KB/s |
+>      ----------------------------------------------------
+> 
+> For random write from the test, I find every test value differ greatly no matter enable CMDQ or not.
+> 
+>>From the test, I see CMDQ random read speed increase 34%~48%, but for random write, the speed 
+> drop 17.4% ~ 33%.
+> 
+> When you send software cmdq V5 patch, you give some explanation for the random write. But the
+> average random write speed also drops a lot, I think it is now a good news, which need attention!
+> 
+> 
+> Maybe Shawn Lin can double test this random write performance.
 
-More testing need here too :)
+Yes, I also find the performance fluctuates a lot for different
+eMMC chips when enabling CMDQ. I will need more data to check that.
+Will update it later.
+
+> 
+> Best Regards
+> Haibo Chen
+> 
+>> Changes since V4:
+>>        mmc: core: Add mmc_retune_hold_now()
+>> 	Add explanation to commit message.
+>>        mmc: host: Add CQE interface
+>> 	Add comments to callback declarations.
+>>        mmc: core: Turn off CQE before sending commands
+>> 	Add explanation to commit message.
+>>        mmc: core: Add support for handling CQE requests
+>> 	Add comments as requested by Ulf.
+>>        mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+>> 	New patch.
+>>        mmc: mmc: Enable Command Queuing
+>> 	Adjust for removal of MMC_CAP2_PACKED_CMD.
+>> 	Add a comment about Packed Commands.
+>>        mmc: mmc: Enable CQE's
+>> 	Remove un-necessary check for MMC_CAP2_CQE
+>>        mmc: block: Use local variables in mmc_blk_data_prep()
+>> 	New patch.
+>>        mmc: block: Prepare CQE data
+>> 	Adjust due to "mmc: block: Use local variables in
+>> mmc_blk_data_prep()"
+>> 	Remove priority setting.
+>> 	Add explanation to commit message.
+>>        mmc: cqhci: support for command queue enabled host
+>> 	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
+>>
+>> Changes since V3:
+>> 	Adjusted ...blk_end_request...() for new block status codes
+>> 	Fixed CQHCI transaction descriptor for "no DCMD" case
+>>
+>> Changes since V2:
+>> 	Dropped patches that have been applied.
+>> 	Re-based
+>> 	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
+>>
+>> Changes since V1:
+>>
+>> 	"Share mmc request array between partitions" is dependent
+>> 	on changes in "Introduce queue semantics", so added that
+>> 	and block fixes:
+>>
+>> 	Added "Fix is_waiting_last_req set incorrectly"
+>> 	Added "Fix cmd error reset failure path"
+>> 	Added "Use local var for mqrq_cur"
+>> 	Added "Introduce queue semantics"
+>>
+>> Changes since RFC:
+>>
+>> 	Re-based on next.
+>> 	Added comment about command queue priority.
+>> 	Added some acks and reviews.
+>>
+>>
+>> Adrian Hunter (12):
+>>        mmc: core: Add mmc_retune_hold_now()
+>>        mmc: core: Add members to mmc_request and mmc_data for CQE's
+>>        mmc: host: Add CQE interface
+>>        mmc: core: Turn off CQE before sending commands
+>>        mmc: core: Add support for handling CQE requests
+>>        mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+>>        mmc: mmc: Enable Command Queuing
+>>        mmc: mmc: Enable CQE's
+>>        mmc: block: Use local variables in mmc_blk_data_prep()
+>>        mmc: block: Prepare CQE data
+>>        mmc: block: Add CQE support
+>>        mmc: sdhci-pci: Add CQHCI support for Intel GLK
+>>
+>> Venkat Gopalakrishnan (1):
+>>        mmc: cqhci: support for command queue enabled host
+>>
+>>   drivers/mmc/core/block.c          |  238 +++++++-
+>>   drivers/mmc/core/block.h          |    7 +
+>>   drivers/mmc/core/bus.c            |    7 +
+>>   drivers/mmc/core/core.c           |  178 +++++-
+>>   drivers/mmc/core/host.c           |    6 +
+>>   drivers/mmc/core/host.h           |    1 +
+>>   drivers/mmc/core/mmc.c            |   42 +-
+>>   drivers/mmc/core/queue.c          |  273 ++++++++-
+>>   drivers/mmc/core/queue.h          |   42 +-
+>>   drivers/mmc/host/Kconfig          |   14 +
+>>   drivers/mmc/host/Makefile         |    1 +
+>>   drivers/mmc/host/cqhci.c          | 1154
+>> +++++++++++++++++++++++++++++++++++++
+>>   drivers/mmc/host/cqhci.h          |  240 ++++++++
+>>   drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
+>>   include/linux/mmc/core.h          |   18 +-
+>>   include/linux/mmc/host.h          |   63 +-
+>>   include/trace/events/mmc.h        |   36 +-
+>>   17 files changed, 2412 insertions(+), 61 deletions(-)  create mode 100644
+>> drivers/mmc/host/cqhci.c  create mode 100644 drivers/mmc/host/cqhci.h
+>>
+>>
+>> Regards
+>> Adrian
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+>> body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+
