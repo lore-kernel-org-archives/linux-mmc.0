@@ -1,42 +1,45 @@
-From: Timo Alho <talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] mmc: tegra: suppress errors when probe is deferred
-Date: Thu, 17 Aug 2017 14:52:46 +0300
-Message-ID: <1502970766-23541-1-git-send-email-talho@nvidia.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH v3] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Thu, 17 Aug 2017 21:34:14 +0800
+Message-ID: <20170817133413.GD7608@dragon>
+References: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
+ <20170817104047.ikfljcrggl2ncxqv@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Timo Alho <talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:37848 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751585AbdHQNfz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 17 Aug 2017 09:35:55 -0400
+Content-Disposition: inline
+In-Reply-To: <20170817104047.ikfljcrggl2ncxqv@ninjato>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Don't print error message when clk_get() returns -EPROBE_DEFER. On
-recent Tegra chips (t186 onwards), the clocks are provided by
-auxiliary microprocessor (bpmp) and until the driver for it is probed
-clocks are not available.
+On Thu, Aug 17, 2017 at 12:40:47PM +0200, Wolfram Sang wrote:
+> Hi Shawn,
+> 
+> On Wed, Aug 16, 2017 at 09:11:41AM +0800, Shawn Lin wrote:
+> > We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+> > mode as it is expected behaviour and most of the backup partition
+> > tables should be located near some of the last blocks which will
+> > always make open-ending read exceed the capacity of cards.
+> > 
+> > Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+> > Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> > 
+> > Tested-by: Shawn Guo <shawnguo@kernel.org>
+> > Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> 
+> I'd think these Tested-by should be dropped. We changed the patch quite
+> a bit meanwhile and I am quite sure Shimoda-san didn't test this new
+> version of the patch. Dunno about Shawn. Hopefully they have time to
+> re-test?
 
-While at it, change the real error message more meaningful.
+I just re-tested it on Hikey, so my Tested-by tag can be kept.
 
-Signed-off-by: Timo Alho <talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index f668a6f..cdde9ff 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -501,8 +501,10 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 
- 	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
- 	if (IS_ERR(clk)) {
--		dev_err(mmc_dev(host->mmc), "clk err\n");
- 		rc = PTR_ERR(clk);
-+		if (rc != -EPROBE_DEFER)
-+			dev_err(&pdev->dev,
-+				"failed to get controller clock: %d\n", rc);
- 		goto err_clk_get;
- 	}
- 	clk_prepare_enable(clk);
--- 
-2.7.4
+Shawn
