@@ -1,55 +1,90 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 6/7] mmc: sdhci-omap: Add OMAP SDHCI driver
-Date: Thu, 17 Aug 2017 11:23:34 +0300
-Message-ID: <158e88c4-da08-6091-96ed-daa8467b6e69@intel.com>
-References: <20170807160142.12134-1-kishon@ti.com>
- <20170807160142.12134-7-kishon@ti.com>
- <a45cf402-26c9-d9d0-1ca0-cbeeddad388c@intel.com>
- <46568bdf-c11f-e04b-edd4-25d5363ae504@ti.com>
- <0b109f07-f7f3-1a12-0c65-45d96eb23b13@intel.com>
- <7822a805-3379-1d08-5a01-f422ab23f863@ti.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [RFT] arm64: dts: renesas: salvator-common: enable SDR104 for SD
+ cards
+Date: Thu, 17 Aug 2017 10:44:39 +0200
+Message-ID: <20170817084439.GH26170@verge.net.au>
+References: <20170802201311.1394-1-wsa+renesas@sang-engineering.com>
+ <20170803074351.GC19671@verge.net.au>
+ <20170803155357.GA3826@verge.net.au>
+ <20170803155520.GB3826@verge.net.au>
+ <20170808185445.GA2170@katana>
+ <20170814051022.GC5654@verge.net.au>
+ <20170814154654.uwtgoya6oroeulgm@ninjato>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:60016 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751575AbdHQIaE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Aug 2017 04:30:04 -0400
-In-Reply-To: <7822a805-3379-1d08-5a01-f422ab23f863@ti.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20170814154654.uwtgoya6oroeulgm@ninjato>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>
-Cc: nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 17/08/17 10:59, Kishon Vijay Abraham I wrote:
-> Hi Adrian,
+On Mon, Aug 14, 2017 at 05:46:54PM +0200, Wolfram Sang wrote:
+> Hi Simon,
 > 
-> On Thursday 17 August 2017 12:13 PM, Adrian Hunter wrote:
->> On 17/08/17 08:57, Kishon Vijay Abraham I wrote:
->>> Hi Adrian,
->>>
->>> On Tuesday 15 August 2017 01:52 PM, Adrian Hunter wrote:
->>>> On 07/08/17 19:01, Kishon Vijay Abraham I wrote:
-
-<SNIP>
-
->>>>> +	pm_runtime_enable(dev);
->>>>> +	ret = pm_runtime_get_sync(dev);
->>>>
->>>> What are you trying to do with runtime pm?  There don't seem to be any pm
->>>> callbacks, so does this do anything?
->>>
->>> yeah, pm_runtime_get_sync enables the functional clock and also configures the
->>> SYSCONFIG regiters present in the controller. It gets the details for
->>> configuring those from arch/arm/mach-omap2/omap_hwmod_*
->>
->> You mean it will do those things when you add the callbacks?  I would prefer
->> you leave out runtime pm until you can add the callbacks as well.
+> On Mon, Aug 14, 2017 at 07:10:23AM +0200, Simon Horman wrote:
+> > On Tue, Aug 08, 2017 at 08:54:45PM +0200, Wolfram Sang wrote:
+> > > 
+> > > > As it is an "RFT" I'm happy to apply it if you repost
+> > > > it or otherwise indicate that is what you would like to happen.
+> > > 
+> > > As discussed in a chat, I tried SDR104 with my SDIO WiFi cards:
+> > > 
+> > > H3:
+> > > - one slot worked flawlessly
+> > > - one slot could load FW but failed to read status
+> > > (with SDR50: both slots work)
+> > > 
+> > > M3-W:
+> > > - both slots could not load the firmware
+> > > (with SDR50: one slot works, one fails to load FW)
+> > > 
+> > > The cards, however, were correctly identified as SDR104 and there were
+> > > no tuning errors and no other SDHI related warnings.
+> > > 
+> > > Changing TDSEL in the PFC did not change anything.
+> > > 
+> > > The manual of the WiFi card (u-blox EMMY-W1) mentions a maximum line
+> > > length of 100mm. Measuring a direct line from the SoC to the slots,
+> > > I'd think we are very much on the edge of that. And given the length
+> > > of the SDIO adapter, we are surely exceeding that :(
+> > > 
+> > > Maybe we should do more tests with more boards? On the other hand, it
+> > > seems the WiFi card is running out of the specs.
+> > > 
+> > > So much for now. I'll sleep over it and try to get more data tomorrow.
+> > 
+> > Thanks. Unfortunately my H3 is out of arms length but I can arrange
+> > some testing if it is helpful.
 > 
-> No. Generally in callbacks, 'optional' functional clocks are enabled. But main
-> functional clock and interface clocks are enabled in pm_runtime_get_sync.
-> Without pm_runtime_get_sync, we won't be able to access controller registers.
+> Do you have UHS-SDIO cards? Otherwise, some more testing in Spain will
+> be good.
 
-So that is done by the pm domain?  Please add comments to the code to explain.
+I am unable to locate my SDIO card :(
+
+> > Is one possibility to enable it for the slots listed above that are now
+> > thought to work but not for the other one?
+> 
+> I don't think so. We'd need more test coverage. My gut feeling is that
+> it varies from board to board. Or more precisely: from environment
+> around the board to environment around the board. I'd like to test a)
+> more boards) and b) a resoldered WLAN card to skip the extra cabling
+> there. I still think the wire length of ~23cm (exceeding the spec of max
+> 10cm) is a factor here, so resoldering would save ~6cm. That all sounds
+> to me like a hacking sprint for our next meeting.
+> 
+> Maybe ULCB has less line lengths? Would be interesting to check, too.
+> 
+> I could also try to apply more shielding here at home, too.
+
+More testing is fine by me.
+
+> > The SDR50 failure on M3-W seems particularly troubling as that
+> > has been enabled in upstream for a while, right?
+> 
+> Not nice, yes. Yet, until this thread, there have been no issues
+> reported. So, it doesn't look like a substantial fault to me (famous
+> last words?)
+
+More testing need here too :)
