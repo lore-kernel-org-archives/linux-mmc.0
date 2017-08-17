@@ -1,209 +1,136 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH V5 00/13] mmc: Add Command Queue support
-Date: Thu, 17 Aug 2017 16:56:51 +0800
-Message-ID: <3466f30e-ceb7-33ed-dee9-72556e076c70@rock-chips.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
- <AM4PR0401MB2324B4E9B0818CCC3D70113090830@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Thu, 17 Aug 2017 12:40:47 +0200
+Message-ID: <20170817104047.ikfljcrggl2ncxqv@ninjato>
+References: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="ax6xbvyjqsnsmr6z"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:49788 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750775AbdHQI5I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 04:57:08 -0400
-In-Reply-To: <AM4PR0401MB2324B4E9B0818CCC3D70113090830@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+Received: from sauhun.de ([88.99.104.3]:59375 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751572AbdHQKkt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 17 Aug 2017 06:40:49 -0400
+Content-Disposition: inline
+In-Reply-To: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bough Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Hi
 
-On 2017/8/17 15:45, Bough Chen wrote:
-> 
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Adrian Hunter
->> Sent: Thursday, August 10, 2017 8:08 PM
->> To: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: linux-mmc <linux-mmc@vger.kernel.org>; Bough Chen
->> <haibo.chen@nxp.com>; Alex Lemberg <alex.lemberg@sandisk.com>;
->> Mateusz Nowak <mateusz.nowak@intel.com>; Yuliy Izrailov
->> <Yuliy.Izrailov@sandisk.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->> Dong Aisheng <dongas86@gmail.com>; Das Asutosh
->> <asutoshd@codeaurora.org>; Zhangfei Gao <zhangfei.gao@gmail.com>;
->> Sahitya Tummala <stummala@codeaurora.org>; Harjani Ritesh
->> <riteshh@codeaurora.org>; Venu Byravarasu <vbyravarasu@nvidia.com>;
->> Linus Walleij <linus.walleij@linaro.org>; Shawn Lin <shawn.lin@rock-chips.com>
->> Subject: [PATCH V5 00/13] mmc: Add Command Queue support
->>
->> Hi
->>
->> Here is V5 of the hardware command queue patches without the software
->> command queue patches.
->>
->> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight 2%
->> drop in sequential read speed but no change to sequential write.
->>
->>
-> Hi Adrian,
-> 
-> I test the performance on the i.MX8.  Here in my side, I use 'dd' to test the
-> sequential read/write speed, see a slight 3% drop for both read and write.
-> 
->      ---------------------------------------------
->     |               | read (KB/s)| write (KB/s) |
->     ---------------------------------------------
->      |CMDQ in HS400ES|    257     |     94.5     |
->      ---------------------------------------------
->      |    HS400ES    |    265     |     96.6     |
->      ---------------------------------------------
-> 
-> For random multi-threaded I/O, I use 'fio'  to test, the test command:
-> fio -filename=/mnt/test -direct=1 -iodepth 1 -thread -rw=randread - ioengine=psync  -bs=4k -size=2G -numjobs=10 -runtime=60  -group_reporting - name=mytest
-> 
-> I test 5 times, and get the average value.
-> For CMDQ in HS400ES
->      ----------------------------------------------------
->      | block size   |    4KB    |    8KB    |    16KB   |
->      ----------------------------------------------------
->      | random read  | 26340KB/s | 51844KB/s | 85738KB/s |
->      ----------------------------------------------------
->      | random write | 12691KB/s | 15879KB/s | 17535KB/s |
->      ----------------------------------------------------
-> 
-> HS400ES without CMDQ
->      ----------------------------------------------------
->      | block size   |    4KB    |    8KB    |    16KB   |
->      ----------------------------------------------------
->      | random read  | 18585KB/s | 35041KB/s | 63880KB/s |
->      ----------------------------------------------------
->      | random write | 16465KB/s | 19210KB/s | 22672KB/s |
->      ----------------------------------------------------
-> 
-> For random write from the test, I find every test value differ greatly no matter enable CMDQ or not.
-> 
->>From the test, I see CMDQ random read speed increase 34%~48%, but for random write, the speed 
-> drop 17.4% ~ 33%.
-> 
-> When you send software cmdq V5 patch, you give some explanation for the random write. But the
-> average random write speed also drops a lot, I think it is now a good news, which need attention!
-> 
-> 
-> Maybe Shawn Lin can double test this random write performance.
+--ax6xbvyjqsnsmr6z
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Yes, I also find the performance fluctuates a lot for different
-eMMC chips when enabling CMDQ. I will need more data to check that.
-Will update it later.
+Hi Shawn,
 
-> 
-> Best Regards
-> Haibo Chen
-> 
->> Changes since V4:
->>        mmc: core: Add mmc_retune_hold_now()
->> 	Add explanation to commit message.
->>        mmc: host: Add CQE interface
->> 	Add comments to callback declarations.
->>        mmc: core: Turn off CQE before sending commands
->> 	Add explanation to commit message.
->>        mmc: core: Add support for handling CQE requests
->> 	Add comments as requested by Ulf.
->>        mmc: core: Remove unused MMC_CAP2_PACKED_CMD
->> 	New patch.
->>        mmc: mmc: Enable Command Queuing
->> 	Adjust for removal of MMC_CAP2_PACKED_CMD.
->> 	Add a comment about Packed Commands.
->>        mmc: mmc: Enable CQE's
->> 	Remove un-necessary check for MMC_CAP2_CQE
->>        mmc: block: Use local variables in mmc_blk_data_prep()
->> 	New patch.
->>        mmc: block: Prepare CQE data
->> 	Adjust due to "mmc: block: Use local variables in
->> mmc_blk_data_prep()"
->> 	Remove priority setting.
->> 	Add explanation to commit message.
->>        mmc: cqhci: support for command queue enabled host
->> 	Fix transfer descriptor setting in cqhci_set_tran_desc() for 32-bit DMA
->>
->> Changes since V3:
->> 	Adjusted ...blk_end_request...() for new block status codes
->> 	Fixed CQHCI transaction descriptor for "no DCMD" case
->>
->> Changes since V2:
->> 	Dropped patches that have been applied.
->> 	Re-based
->> 	Added "mmc: sdhci-pci: Add CQHCI support for Intel GLK"
->>
->> Changes since V1:
->>
->> 	"Share mmc request array between partitions" is dependent
->> 	on changes in "Introduce queue semantics", so added that
->> 	and block fixes:
->>
->> 	Added "Fix is_waiting_last_req set incorrectly"
->> 	Added "Fix cmd error reset failure path"
->> 	Added "Use local var for mqrq_cur"
->> 	Added "Introduce queue semantics"
->>
->> Changes since RFC:
->>
->> 	Re-based on next.
->> 	Added comment about command queue priority.
->> 	Added some acks and reviews.
->>
->>
->> Adrian Hunter (12):
->>        mmc: core: Add mmc_retune_hold_now()
->>        mmc: core: Add members to mmc_request and mmc_data for CQE's
->>        mmc: host: Add CQE interface
->>        mmc: core: Turn off CQE before sending commands
->>        mmc: core: Add support for handling CQE requests
->>        mmc: core: Remove unused MMC_CAP2_PACKED_CMD
->>        mmc: mmc: Enable Command Queuing
->>        mmc: mmc: Enable CQE's
->>        mmc: block: Use local variables in mmc_blk_data_prep()
->>        mmc: block: Prepare CQE data
->>        mmc: block: Add CQE support
->>        mmc: sdhci-pci: Add CQHCI support for Intel GLK
->>
->> Venkat Gopalakrishnan (1):
->>        mmc: cqhci: support for command queue enabled host
->>
->>   drivers/mmc/core/block.c          |  238 +++++++-
->>   drivers/mmc/core/block.h          |    7 +
->>   drivers/mmc/core/bus.c            |    7 +
->>   drivers/mmc/core/core.c           |  178 +++++-
->>   drivers/mmc/core/host.c           |    6 +
->>   drivers/mmc/core/host.h           |    1 +
->>   drivers/mmc/core/mmc.c            |   42 +-
->>   drivers/mmc/core/queue.c          |  273 ++++++++-
->>   drivers/mmc/core/queue.h          |   42 +-
->>   drivers/mmc/host/Kconfig          |   14 +
->>   drivers/mmc/host/Makefile         |    1 +
->>   drivers/mmc/host/cqhci.c          | 1154
->> +++++++++++++++++++++++++++++++++++++
->>   drivers/mmc/host/cqhci.h          |  240 ++++++++
->>   drivers/mmc/host/sdhci-pci-core.c |  153 ++++-
->>   include/linux/mmc/core.h          |   18 +-
->>   include/linux/mmc/host.h          |   63 +-
->>   include/trace/events/mmc.h        |   36 +-
->>   17 files changed, 2412 insertions(+), 61 deletions(-)  create mode 100644
->> drivers/mmc/host/cqhci.c  create mode 100644 drivers/mmc/host/cqhci.h
->>
->>
->> Regards
->> Adrian
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
->> body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+On Wed, Aug 16, 2017 at 09:11:41AM +0800, Shawn Lin wrote:
+> We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+> mode as it is expected behaviour and most of the backup partition
+> tables should be located near some of the last blocks which will
+> always make open-ending read exceed the capacity of cards.
+>=20
+> Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop c=
+md into account")
+> Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands=
+")
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>=20
+> Tested-by: Shawn Guo <shawnguo@kernel.org>
+> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
+I'd think these Tested-by should be dropped. We changed the patch quite
+a bit meanwhile and I am quite sure Shimoda-san didn't test this new
+version of the patch. Dunno about Shawn. Hopefully they have time to
+re-test?
+
+> +	/*
+> +	 * Per the SD specification(physical layer version 4.10)[1],
+> +	 * section 4.3.3, it explicitly states that "When the last
+> +	 * block of user area is read using CMD18, the host should
+> +	 * ignore OUT_OF_RANGE error that may occur even the sequence
+> +	 * is correct". And JESD84-B51 for eMMC also has a similar
+> +	 * statement on section 6.8.3.
+> +	 *
+> +	 * Multiple block read/write could be done by either predefined
+> +	 * method, namely CMD23, or open-ending mode.
+> +	 *
+
+Very minor nit: I'd remove this empty line and merge the two paragraphs.
+
+> +	 * For open-ending mode, we should ignore the OUT_OF_RANGE
+> +	 * error as it's normal behaviour.
+> +	 *
+> +	 * However the spec[1] doesn't tell us whether we should also
+> +	 * ignore that for predefined method. But per the spec[1], section
+> +	 * 4.15 Set Block Count Command, it says"If illegal block count
+> +	 * is set, out of range error will be indicated during read/write
+> +	 * operation (For example, data transfer is stopped at user area
+> +	 * boundary)." In another word, we could expect a out of range error
+> +	 * in the response for the following CMD18/25. And if argument of
+> +	 * CMD23 + the argument of CMD18/25 exceed the max number of blocks,
+> +	 * we could also expect to get a -ETIMEDOUT or any error number from
+> +	 * the host drivers due to missing data response(for write)/data(for
+> +	 * read), as the cards will stop the data transfer by itself per the
+> +	 * spec. So we only need to check R1_OUT_OF_RANGE for open-ending mode.
+> +	 */
+
+Very good! I like this a lot.
+
+Also minor nit, but likely better readable:
+
+> +
+> +	if (!brq->stop.error) {
+		bool OOR_with_open_end;
+
+> +		/* If there is no error yet, check R1 response */
+> +		val =3D brq->stop.resp[0] & CMD_ERRORS;
+
+		OOR_with_open_end =3D val & R1_OUT_OF_RANGE && !brq->mrq.sbc;
+
+		if (val && !OOR_with_open_end)
+> +			brq->stop.error =3D -EIO;
+
+=2E..
+
+> +	if (brq->sbc.error || brq->cmd.error ||
+> +	    brq->stop.error || brq->data.error) {
+
+I am not super strict with the 80 char limit and think one line is
+better readable, but I leave that to you and/or Ulf.
+
+Other than that minor stuff:
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Thanks for this collaboration! I liked it :)
+
+Regards,
+
+   Wolfram
+
+
+--ax6xbvyjqsnsmr6z
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmVcqsACgkQFA3kzBSg
+KbZU8A//Zim/wGEvpjSkLV7s+vRnrniu0thDLPOZkCQbecUhA2flj7iSKN42dwFt
+LAxohzAuFmj1QnKulKv4JF43lskHYQSwX4n76ewZqDc1TCkvKJO6CL9t1T0sTQNE
+8PrsxEz6LfDGAcvaqsfamzEnOtvCr1PZKvKnCFKbsaAE4Z/XSFK5WJDr10KqruGV
+vlvwUV0wOoKgA0puYq/t2yGpplnJ0YNg9jtt1HfYl5+Sy+eSId5mpHki8vxN2O/q
+kP91cc2Pu84Ku5n8twhTH8hcMrg8Dai0WC9cqg0TQFxLvxxIttQjG0lyLLXD6WYv
+G6/xtN6btapHQtO4eBcAvdclEmL6sFn7WRh85Mgixd/GFl5sz/eYl232gJW5/bbC
+p8DDoIynwKTEFtoPXXgd0aXRi19dklU6KAn2kxjbsi981CFmO1kpSMVN6NHBDG8G
+1GyIeyCg+O84TExca+891sdG/1vNfyp7hTdsAzJEDyhx3vIWAHl7AZ5B+0ZbeEG0
+E3EDgwIQrfwGUYInU+bGSdB0Tcdd4uxwsh5S/N4HK0hDWIftkCwnsP4MUcXqtc7l
+/6MKgBeHZqbyY41QTumFvfnDXhXLsp3wY4OFU3INhaCyoCf6ST+E4qXv9IVth8U3
+7QtRV6tPfvAy8ZJ4p0TUWkMzZZwKg8lRH7BpEeg2++EKswkQsx8=
+=SNEa
+-----END PGP SIGNATURE-----
+
+--ax6xbvyjqsnsmr6z--
