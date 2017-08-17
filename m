@@ -1,108 +1,90 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [EXT] Re: [PATCH] mmc: sdhci-xenon: add gpio hard reset support
-Date: Thu, 17 Aug 2017 08:47:21 +0800
-Message-ID: <bd8b35c6-7af4-56dc-0949-ca6deb2016a9@rock-chips.com>
-References: <1502749156-22798-1-git-send-email-zjwu@marvell.com>
- <3696b751-68cc-6c11-bb7d-af7d6e6a5681@rock-chips.com>
- <59937848.2040901@marvell.com>
- <b56fc3b4-4fff-0881-2233-8f26a6c8407a@rock-chips.com>
- <5994CB5D.5080509@marvell.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH 1/7] mmc: sdhci: Add quirk to indicate no CRC
+ stripping in MMC_RSP_136
+Date: Thu, 17 Aug 2017 10:50:38 +0530
+Message-ID: <e7592ed0-dda2-6850-098e-7c6bba69df40@ti.com>
+References: <20170807160142.12134-1-kishon@ti.com>
+ <20170807160142.12134-2-kishon@ti.com>
+ <872c7194-3d48-47e5-6396-7189bf841a42@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:42792 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751543AbdHQArf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2017 20:47:35 -0400
-In-Reply-To: <5994CB5D.5080509@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <872c7194-3d48-47e5-6396-7189bf841a42-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: nsekhar-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
+Hi Adrian,
 
-On 2017/8/17 6:46, Zhoujie Wu wrote:
-> Hi ,
+On Tuesday 15 August 2017 12:57 PM, Adrian Hunter wrote:
+> On 07/08/17 19:01, Kishon Vijay Abraham I wrote:
+>> TI's implementation of sdhci controller used in DRA7 SoC's doesn't
+>> strip CRC in responses with length 136 bits. Add quirk to indicate
+>> the controller does not strip CRC in MMC_RSP_136. If this quirk is
+>> set sdhci library shouldn't shift the response present in
+>> SDHCI_RESPONSE register.
+>>
+>> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 27 +++++++++++++++++++--------
+>>  drivers/mmc/host/sdhci.h |  2 ++
+>>  2 files changed, 21 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index ecd0d4350e8a..ece3751d2a25 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1182,14 +1182,25 @@ static void sdhci_finish_command(struct sdhci_host *host)
+>>  
+>>  	if (cmd->flags & MMC_RSP_PRESENT) {
+>>  		if (cmd->flags & MMC_RSP_136) {
+>> -			/* CRC is stripped so we need to do some shifting. */
+>> -			for (i = 0;i < 4;i++) {
+>> -				cmd->resp[i] = sdhci_readl(host,
+>> -					SDHCI_RESPONSE + (3-i)*4) << 8;
+>> -				if (i != 3)
+>> -					cmd->resp[i] |=
+>> -						sdhci_readb(host,
+>> -						SDHCI_RESPONSE + (3-i)*4-1);
+>> +			if (!(host->quirks2 & SDHCI_QUIRK2_NO_CRC_STRIPPING)) {
 > 
-> On 08/15/2017 05:32 PM, Shawn Lin wrote:
->> Hi
->>
->> On 2017/8/16 6:40, Zhoujie Wu wrote:
->>> Hi Shawn,
->>
->>>> ----------------------------------------------------------------------
->>>> Hi
->>>>
->>>> On 2017/8/15 6:19, Zhoujie Wu wrote:
->>>>> On some platforms, like armada3700, SD card need to
->>>>> do hard reset by gpio toggling to make it work properly
->>>>> after warm reset the board.
->>>>
->>>> I don't get this that SD card need to do hard reset...
->>>>
->>>> I assume what you talk about is either for eMMC or a power-cycle
->>>> for SD card.
->>>
->>> The subject of the patch confused you. What I want is a power-cycle 
->>> for the SD card. The gpio is  used to enable/disable the vdd power 
->>> supply for sd card.
->>> Actually on a3700, when warm reset the board, their is no power-cycle 
->>> for SD card, which will lead sd card can't response correct ocr and 
->>> never set S18A unless a power-cycle.
->>> This is the purpose I submit this patch.
->>>
->>
->> Well, if that is the case, I suggest you to use regulator-gpio.
->>
->> i.e:
->>
->>        vcc_sd: regulator {
->>                 compatible = "regulator-gpio";
->>                 regulator-name = "vcc_sd";
->>                 regulator-min-microvolt = <3300000>;
->>                 regulator-max-microvolt = <3300000>;
->>
->>                 gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
->>                 enable-active-high;
->>         };
->>
->>     &sdhci {
->>         vmmc-supply = <&vcc_sd>;
->>     }
->>
->>
-> 
-> I tried to use the vmmc-supply regulator before I submit this patch, I 
-> met a issue in this case.
-> sdhci_set_power_reg will be called instead, and I saw 
-> mmc_regulator_set_ocr do enabled the regulator, after that SW will set 
-> 0xf to power controller register, but the register is self-cleared to 0 
-> soon which lead to later cmd timeout all the time.
+> This is about the 136-bit response so let's put that in the quirk name.  How about SDHCI_QUIRK2_RSP_136_HAS_CRC
 
-I don't parse it from the SDHCI spec that SD bus power bit is
-self-cleared one. Is it sdhci-xenon specific?
-
-If yes, you need to hook you set_power callback and avoid touching this
-bit with some proper description for the reason.
-
-
-> Have you ever met similar issue before?
-
-Haven't.
+Since omap seems to be the only platform that doesn't have CRC, I prefer adding
+SDHCI_QUIRK2_RSP_136_NO_CRC. That way we can add the quirk only in sdhci-omap
+instead of all the existing sdhci drivers.
 
 > 
->>>>
->>>>> Add gpio hard reset feature for this purpose.
->>>>>
->>
->>>
->>>
->>>
->>>
->>
+>> +				/*
+>> +				 * CRC is stripped so we need to do some
+>> +				 * shifting.
+>> +				 */
+>> +				for (i = 0; i < 4; i++) {
+>> +					cmd->resp[i] =
+>> +						sdhci_readl(host, SDHCI_RESPONSE
+>> +							    + (3 - i) * 4) << 8;
+>> +					if (i != 3)
+>> +						cmd->resp[i] |=
+>> +						sdhci_readb(host, SDHCI_RESPONSE
+>> +							    + (3 - i) * 4 - 1);
+>> +				}
+>> +			} else {
+>> +				for (i = 0; i < 4; i++)
+>> +					cmd->resp[i] =
+>> +					sdhci_readl(host, SDHCI_RESPONSE +
+>> +						    (3 - i) * 4);
+>>  			}
 > 
-> 
-> 
-> 
+> This is all very jammed up against the 80 column margin.  Please make a new patch to separate it into a new function sdhci_read_rsp_136() and then another patch to add the quirk.
+> i.e. completely untested!
 
+Sure. Thanks for the patch.
+
+Thanks
+Kishon
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
