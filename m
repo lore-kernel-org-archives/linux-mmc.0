@@ -1,85 +1,45 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [RFC PATCH 4/7] mmc: sdhci: Add quirk to indicate broken
- POWER_CONTROL
-Date: Thu, 17 Aug 2017 11:02:29 +0530
-Message-ID: <c7712629-f462-b315-fd79-67882549ef83@ti.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH 5/7] dt-bindings: ti-omap-hsmmc: Document new
+ compatible for sdhci omap
+Date: Thu, 17 Aug 2017 11:13:47 +0530
+Message-ID: <2cdf9bbe-b98b-8811-7587-268b7ef4ac66@ti.com>
 References: <20170807160142.12134-1-kishon@ti.com>
- <20170807160142.12134-5-kishon@ti.com>
- <45762ded-3c42-fefc-e6bb-2542d75c9c67@intel.com>
+ <20170807160142.12134-6-kishon@ti.com> <20170809221222.GK3934@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <45762ded-3c42-fefc-e6bb-2542d75c9c67@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>
-Cc: nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170809221222.GK3934-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Tony,
 
-
-On Tuesday 15 August 2017 01:11 PM, Adrian Hunter wrote:
-> On 07/08/17 19:01, Kishon Vijay Abraham I wrote:
->> TI's implementation of sdhci controller used in DRA7 SoC's uses
->> POWER_CONTROL register for configuring IO voltage and not
->> for core voltage (vdd) which is it's intended use. Add a quirk
->> to indicate broken POWER_CONTROL register.
+On Thursday 10 August 2017 03:42 AM, Tony Lindgren wrote:
+> * Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> [170807 09:03]:
+>> Document the new compatible string "ti,dra7-sdhci" to be used for
+>> MMC controllers in DRA7 and DRA72 SoCs.
 > 
-> A quirk isn't needed for this.  Use the ->set_power() callback instead.
+> I wonder if this should really be documented for sdhci
+> instead of ti-omap-hsmmc.txt?
 
-sure!
+hmm.. yeah, having a separate binding document for sdhci would make the binding
+really clean and we also don't have to carry legacy binding code. But we'll be
+never able to remove omap-hsmmc driver then and end up maintaining 2 drivers
+for the same controller.
+> 
+> I agree it's better to use sdhci compatible and keep the
+> hsmmc compatible around as the sdhci is still missing features
+> for runtime PM and context save and restore etc.
+
+yeah, once we have all the features in omap_hsmmc added in sdhci-omap, we can
+add the omap-hsmmc compatible to sdhci-omap and remove omap-hsmmc driver.
 
 Thanks
 Kishon
-> 
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 6 ++++++
->>  drivers/mmc/host/sdhci.h | 2 ++
->>  2 files changed, 8 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index d5050ec42481..a7465a56e6b5 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1419,6 +1419,9 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
->>  
->>  	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->>  
->> +	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_CONTROL)
->> +		return;
->> +
->>  	if (mode != MMC_POWER_OFF)
->>  		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
->>  	else
->> @@ -1430,6 +1433,9 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->>  {
->>  	u8 pwr = 0;
->>  
->> +	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_CONTROL)
->> +		return;
->> +
->>  	if (mode != MMC_POWER_OFF) {
->>  		switch (1 << vdd) {
->>  		case MMC_VDD_165_195:
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 39c7a2723906..ba94cca7c892 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -439,6 +439,8 @@ struct sdhci_host {
->>  #define SDHCI_QUIRK2_NO_CRC_STRIPPING			(1<<16)
->>  /* Controller has bad caps bits, but really supports DMA */
->>  #define SDHCI_QUIRK2_FORCE_ADMA				(1<<17)
->> +/* Controller uses POWER_CONTROL for managing IO voltage and not core voltage */
->> +#define SDHCI_QUIRK2_BROKEN_POWER_CONTROL		(1<<18)
->>  
->>  	int irq;		/* Device IRQ */
->>  	void __iomem *ioaddr;	/* Mapped address */
->>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
