@@ -1,7 +1,7 @@
 From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH 2/5] mmc: sdhci-msm: Fix HW issue with power IRQ handling during reset
-Date: Fri, 18 Aug 2017 10:49:39 +0530
-Message-ID: <1503033582-48703-3-git-send-email-vviswana@codeaurora.org>
+Subject: [PATCH 4/5] mmc: sdhci-msm: Add ops to do sdhc register write
+Date: Fri, 18 Aug 2017 10:49:41 +0530
+Message-ID: <1503033582-48703-5-git-send-email-vviswana@codeaurora.org>
 References: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
@@ -10,101 +10,79 @@ To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+Register writes which change voltage of IO lines or turn the IO bus
+on/off require controller to be ready before progressing further. When
+the controller is ready, it will generate a power irq which needs to be
+handled. The thread which initiated the register write should wait for
+power irq to complete. This will be done through the new sdhc msm write
+APIs which will check whether the particular write can trigger a power
+irq and wait for it with a timeout if it is expected.
+The SDHC core power control IRQ gets triggered when -
+* There is a state change in power control bit (bit 0)
+  of SDHCI_POWER_CONTROL register.
+* There is a state change in 1.8V enable bit (bit 3) of
+  SDHCI_HOST_CONTROL2 register.
+* Bit 1 of SDHCI_SOFTWARE_RESET is set.
 
-There is a rare scenario in HW, where the first clear pulse could
-be lost when the actual reset and clear/read of status register
-are happening at the same time. Fix this by retrying upto 10 times
-to ensure the status register gets cleared. Otherwise, this will
-lead to a spurious power IRQ which results in system instability.
-
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 43 ++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 40 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 39 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 0957199..f3e0489 100644
+index 6d3b1fd..6571880 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -995,17 +995,51 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
- 		sdhci_msm_hs400(host, &mmc->ios);
+@@ -1250,6 +1250,41 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	__sdhci_msm_set_clock(host, clock);
  }
  
--static void sdhci_msm_voltage_switch(struct sdhci_host *host)
-+static void sdhci_msm_dump_pwr_ctrl_regs(struct sdhci_host *host)
++#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
++static void __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	u32 req_type = 0;
 +
-+	pr_err("%s: PWRCTL_STATUS: 0x%08x | PWRCTL_MASK: 0x%08x | PWRCTL_CTL: 0x%08x\n",
-+			mmc_hostname(host->mmc),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_MASK),
-+			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL));
-+}
-+
-+static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	u32 irq_status, irq_ack = 0;
-+	int retry = 10;
- 
- 	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
- 	irq_status &= INT_MASK;
- 
- 	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
- 
-+	/*
-+	 * There is a rare HW scenario where the first clear pulse could be
-+	 * lost when actual reset and clear/read of status register is
-+	 * happening at a time. Hence, retry for at least 10 times to make
-+	 * sure status register is cleared. Otherwise, this will result in
-+	 * a spurious power IRQ resulting in system instability.
-+	 */
-+	while (irq_status & readl_relaxed(msm_host->core_mem +
-+				CORE_PWRCTL_STATUS)) {
-+		if (retry == 0) {
-+			pr_err("%s: Timedout clearing (0x%x) pwrctl status register\n",
-+					mmc_hostname(host->mmc), irq_status);
-+			sdhci_msm_dump_pwr_ctrl_regs(host);
-+			WARN_ON(1);
-+		}
-+		writel_relaxed(irq_status,
-+				msm_host->core_mem + CORE_PWRCTL_CLEAR);
-+		retry--;
-+		udelay(10);
++	switch (reg) {
++	case SDHCI_HOST_CONTROL2:
++		req_type = (val & SDHCI_CTRL_VDD_180) ? REQ_IO_LOW :
++			REQ_IO_HIGH;
++		break;
++	case SDHCI_SOFTWARE_RESET:
++		if (host->pwr && (val & SDHCI_RESET_ALL))
++			req_type = REQ_BUS_OFF;
++		break;
++	case SDHCI_POWER_CONTROL:
++		req_type = !val ? REQ_BUS_OFF : REQ_BUS_ON;
++		break;
 +	}
 +
- 	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
- 		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
- 	if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
-@@ -1017,13 +1051,17 @@ static void sdhci_msm_voltage_switch(struct sdhci_host *host)
- 	 * switches are handled by the sdhci core, so just report success.
- 	 */
- 	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
++	if (req_type)
++		sdhci_msm_check_power_status(host, req_type);
++}
 +
-+	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
-+		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
-+		irq_ack);
- }
- 
- static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
- {
- 	struct sdhci_host *host = (struct sdhci_host *)data;
- 
--	sdhci_msm_voltage_switch(host);
-+	sdhci_msm_handle_pwr_irq(host, irq);
- 
- 	return IRQ_HANDLED;
- }
-@@ -1106,7 +1144,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
++static void sdhci_msm_writew(struct sdhci_host *host, u16 val, int reg)
++{
++		writew_relaxed(val, host->ioaddr + reg);
++		__sdhci_msm_check_write(host, val, reg);
++}
++
++static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
++{
++		writeb_relaxed(val, host->ioaddr + reg);
++		__sdhci_msm_check_write(host, val, reg);
++}
++#endif
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{ .compatible = "qcom,sdhci-msm-v4" },
+ 	{},
+@@ -1264,6 +1299,10 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
  	.get_max_clock = sdhci_msm_get_max_clock,
  	.set_bus_width = sdhci_set_bus_width,
  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
--	.voltage_switch = sdhci_msm_voltage_switch,
++#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
++	.write_w = sdhci_msm_writew,
++	.write_b = sdhci_msm_writeb,
++#endif
  };
  
  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
