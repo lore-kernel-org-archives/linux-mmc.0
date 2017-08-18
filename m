@@ -1,29 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 00/13] mmc: Add Command Queue support
-Date: Fri, 18 Aug 2017 14:06:04 +0300
-Message-ID: <32863670-c613-160d-8caa-1a44a10c2c64@intel.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] sdhci: remove redundant check of zero slots
+Date: Fri, 18 Aug 2017 13:37:03 +0100
+Message-ID: <20170818123703.14870-1-colin.king@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:20480 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751090AbdHRLMf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Aug 2017 07:12:35 -0400
-In-Reply-To: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 10/08/17 15:08, Adrian Hunter wrote:
-> Here is V5 of the hardware command queue patches without the software
-> command queue patches.
-> 
-> HW CMDQ offers 25% - 50% better random multi-threaded I/O.  I see a slight
-> 2% drop in sequential read speed but no change to sequential write.
-> 
+From: Colin Ian King <colin.king@canonical.com>
 
-Are there any more comments?  If not, shouldn't this be applied?
+Slots can never be zero, PCI_SLOTS_INFO_SLOTS returns a value in the
+range 0..7; slots is one more than this, 1..8 so cannot be zero and
+so the zero check is redundant and can be removed.
+
+Detected by CoverityScan, CID#744269 ("Logically Dead Code")
+
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 2c853cfa8389..43b2b09131bd 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1669,8 +1669,6 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
+ 	dev_dbg(&pdev->dev, "found %d slot(s)\n", slots);
+-	if (slots == 0)
+-		return -ENODEV;
+ 
+ 	BUG_ON(slots > MAX_SLOTS);
+ 
+-- 
+2.11.0
