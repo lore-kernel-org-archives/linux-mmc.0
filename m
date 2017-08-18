@@ -1,57 +1,114 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3] mmc: block: prevent propagating R1_OUT_OF_RANGE for
- open-ending mode
-Date: Fri, 18 Aug 2017 09:03:04 +0800
-Message-ID: <fdf88986-aefc-a4c1-c340-2b5ad89616f4@rock-chips.com>
-References: <1502845901-163345-1-git-send-email-shawn.lin@rock-chips.com>
- <20170817104047.ikfljcrggl2ncxqv@ninjato> <20170817133413.GD7608@dragon>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v4] mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
+Date: Fri, 18 Aug 2017 09:16:08 +0800
+Message-ID: <1503018968-18974-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:55487 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.134]:35891 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753375AbdHRBDJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 21:03:09 -0400
-In-Reply-To: <20170817133413.GD7608@dragon>
+        with ESMTP id S1753515AbdHRBRB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 21:17:01 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawnguo@kernel.org>
-Cc: Wolfram Sang <wsa@the-dreams.de>, shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 2017/8/17 21:34, Shawn Guo wrote:
-> On Thu, Aug 17, 2017 at 12:40:47PM +0200, Wolfram Sang wrote:
->> Hi Shawn,
->>
->> On Wed, Aug 16, 2017 at 09:11:41AM +0800, Shawn Lin wrote:
->>> We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
->>> mode as it is expected behaviour and most of the backup partition
->>> tables should be located near some of the last blocks which will
->>> always make open-ending read exceed the capacity of cards.
->>>
->>> Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
->>> Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>
->>> Tested-by: Shawn Guo <shawnguo@kernel.org>
->>> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
->>
->> I'd think these Tested-by should be dropped. We changed the patch quite
->> a bit meanwhile and I am quite sure Shimoda-san didn't test this new
->> version of the patch. Dunno about Shawn. Hopefully they have time to
->> re-test?
-> 
-> I just re-tested it on Hikey, so my Tested-by tag can be kept.
+We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+mode as it is expected behaviour and most of the backup partition
+tables should be located near some of the last blocks which will
+always make open-ending read exceed the capacity of cards.
 
-Great! Thanks for testing it again!
+Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Shawn Guo <shawnguo@kernel.org>
+---
 
-> 
-> Shawn
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+Changes in v4:
+- improve for more readable and remove Yoshihiro's tag, add Wolfram's
+  tag
+
+Changes in v3:
+- add explanation for why don't check predefined method
+- check brq->mrq.sbc for easier to read suggested by Wolfram
+
+Changes in v2:
+- fix a typo and introduce STOP_ERROR
+- reword the comment and always include a description from the spec if possible
+
+ drivers/mmc/core/block.c | 49 ++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 43 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 91e1e93..b8fa62c 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1369,12 +1369,46 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 	 R1_CC_ERROR |		/* Card controller error */		\
+ 	 R1_ERROR)		/* General/unknown error */
+ 
+-static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
++static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+ {
+-	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+-		cmd->error = -EIO;
++	u32 val;
+ 
+-	return cmd->error;
++	/*
++	 * Per the SD specification(physical layer version 4.10)[1],
++	 * section 4.3.3, it explicitly states that "When the last
++	 * block of user area is read using CMD18, the host should
++	 * ignore OUT_OF_RANGE error that may occur even the sequence
++	 * is correct". And JESD84-B51 for eMMC also has a similar
++	 * statement on section 6.8.3.
++	 *
++	 * Multiple block read/write could be done by either predefined
++	 * method, namely CMD23, or open-ending mode. For open-ending mode,
++	 * we should ignore the OUT_OF_RANGE error as it's normal behaviour.
++	 *
++	 * However the spec[1] doesn't tell us whether we should also
++	 * ignore that for predefined method. But per the spec[1], section
++	 * 4.15 Set Block Count Command, it says"If illegal block count
++	 * is set, out of range error will be indicated during read/write
++	 * operation (For example, data transfer is stopped at user area
++	 * boundary)." In another word, we could expect a out of range error
++	 * in the response for the following CMD18/25. And if argument of
++	 * CMD23 + the argument of CMD18/25 exceed the max number of blocks,
++	 * we could also expect to get a -ETIMEDOUT or any error number from
++	 * the host drivers due to missing data response(for write)/data(for
++	 * read), as the cards will stop the data transfer by itself per the
++	 * spec. So we only need to check R1_OUT_OF_RANGE for open-ending mode.
++	 */
++
++	if (!brq->stop.error) {
++		bool oor_with_open_end;
++		/* If there is no error yet, check R1 response */
++
++		val = brq->stop.resp[0] & CMD_ERRORS;
++		oor_with_open_end = val & R1_OUT_OF_RANGE && !brq->mrq.sbc;
++
++		if (val && !oor_with_open_end)
++			brq->stop.error = -EIO;
++	}
+ }
+ 
+ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+@@ -1398,8 +1432,11 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+ 	 * stop.error indicates a problem with the stop command.  Data
+ 	 * may have been transferred, or may still be transferring.
+ 	 */
+-	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+-	    brq->data.error) {
++
++	mmc_blk_eval_resp_error(brq);
++
++	if (brq->sbc.error || brq->cmd.error ||
++	    brq->stop.error || brq->data.error) {
+ 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+-- 
+1.9.1
+
 
