@@ -1,35 +1,50 @@
-From: Vijay Viswanath <vviswana@codeaurora.org>
-Subject: [PATCH 5/5] defconfig: msm: Enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-Date: Fri, 18 Aug 2017 10:49:42 +0530
-Message-ID: <1503033582-48703-6-git-send-email-vviswana@codeaurora.org>
-References: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org, Vijay Viswanath <vviswana@codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update DWMMC controller
+Date: Fri, 18 Aug 2017 14:48:21 +0900
+Message-ID: <36f44627-123c-d6f3-41e4-f09892895cfa@samsung.com>
+References: <CGME20170818054821epcas2p4dd5a5a393c47c644d09d6b29747aeb0d@epcas2p4.samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:33112 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750729AbdHRFsX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2017 01:48:23 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Enable CONFIG_MMC_SDHCI_IO_ACCESSORS so that SDHC controller specific
-register read and write APIs, if registered, can be used.
+Dear Ulf,
 
-Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
----
- arch/arm64/configs/defconfig | 1 +
- 1 file changed, 1 insertion(+)
+Could you pull these patches to next branch?
+If there is any issue, let me know, plz.
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 65cdd87..a3c93ed 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -398,6 +398,7 @@ CONFIG_MMC_SDHCI_CADENCE=y
- CONFIG_MMC_SDHCI_TEGRA=y
- CONFIG_MMC_MESON_GX=y
- CONFIG_MMC_SDHCI_MSM=y
-+CONFIG_MMC_SDHCI_IO_ACCESSORS=y
- CONFIG_MMC_SPI=y
- CONFIG_MMC_SDHI=y
- CONFIG_MMC_DW=y
--- 
- Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc. 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, a Linux Foundation Collaborative Project.
+The following changes since commit 7bb2a5d1342fcba2e32406fdb1e4c3d501ec6782:
+
+  Merge branch 'fixes' into next (2017-08-09 13:22:47 +0200)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git for-ulf
+
+for you to fetch changes up to 024d4a5a8a89f247d36fd36a2f61f53bf8eae586:
+
+  mmc: dw_mmc: introduce timer for broken command transfer over scheme (2017-08-18 14:44:40 +0900)
+
+----------------------------------------------------------------
+Addy Ke (1):
+      mmc: dw_mmc: introduce timer for broken command transfer over scheme
+
+liwei (2):
+      mmc: dw_mmc: move controller reset before driver init
+      mmc: dw_mmc-k3: add sd support for hi3660
+
+ drivers/mmc/host/dw_mmc-k3.c | 298 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c    |  60 ++++++++-
+ drivers/mmc/host/dw_mmc.h    |   4 +
+ 3 files changed, 356 insertions(+), 6 deletions(-)
+
+Best Regards,
+Jaehoon Chung
