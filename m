@@ -1,113 +1,61 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v4] mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
-Date: Fri, 18 Aug 2017 09:16:08 +0800
-Message-ID: <1503018968-18974-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: sdio: fix bug for IO transfer due to incorrect size check
+Date: Fri, 18 Aug 2017 10:35:29 +0800
+Message-ID: <1503023729-243359-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:35891 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:43734 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753515AbdHRBRB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 21:17:01 -0400
+        with ESMTP id S1753345AbdHRCgd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2017 22:36:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
-mode as it is expected behaviour and most of the backup partition
-tables should be located near some of the last blocks which will
-always make open-ending read exceed the capacity of cards.
+I got some reports that some sdio-WiFis weren't able to finish
+data transfer randomly in there stress test but hard to reproduce
+it. However after analysing the code, I find a long standing bug
+which seems could explain how that happened.
 
-Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
-Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+If the function drivers call sdio_memcpy_{fromio, toio}, it may
+set the count to 512 Bytes. If the multiple_block in CCCR shows
+it does support that, we now need to do the checking of 'size >
+sdio_max_byte_size(func)'. If func->max_blksize, func->cur_blksize,
+and func->max_blksize are 512, and func->card->host->max_blk_size
+is larger than 512, thus we will expect sdio_max_byte_size return
+512 in gerenal. Then it will fail the checking, and falls into using
+byte mode for transferring 512 Bytes. Note that we use mmc_io_rw_extended
+for that with zero blocks and 512 size as arguments. So cmd.arg
+is zero instead of 512 that the wifi can't get this and abort the
+data transfer.
+
+To fix it, we should allow size to be equal as func's sdio_max_byte_size.
+That works fine and sloves the problems I got by testing.
+
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Shawn Guo <shawnguo@kernel.org>
 ---
+Hi Ulf,
 
-Changes in v4:
-- improve for more readable and remove Yoshihiro's tag, add Wolfram's
-  tag
+Not sure whether should we add a fix tag and CC stable as it seems it has
+been there since 2007. 
 
-Changes in v3:
-- add explanation for why don't check predefined method
-- check brq->mrq.sbc for easier to read suggested by Wolfram
+ drivers/mmc/core/sdio_io.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Changes in v2:
-- fix a typo and introduce STOP_ERROR
-- reword the comment and always include a description from the spec if possible
-
- drivers/mmc/core/block.c | 49 ++++++++++++++++++++++++++++++++++++++++++------
- 1 file changed, 43 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 91e1e93..b8fa62c 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1369,12 +1369,46 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index d40744b..42c3424 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -313,7 +313,8 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+ 		return -EINVAL;
  
--static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
-+static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
- {
--	if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
--		cmd->error = -EIO;
-+	u32 val;
- 
--	return cmd->error;
-+	/*
-+	 * Per the SD specification(physical layer version 4.10)[1],
-+	 * section 4.3.3, it explicitly states that "When the last
-+	 * block of user area is read using CMD18, the host should
-+	 * ignore OUT_OF_RANGE error that may occur even the sequence
-+	 * is correct". And JESD84-B51 for eMMC also has a similar
-+	 * statement on section 6.8.3.
-+	 *
-+	 * Multiple block read/write could be done by either predefined
-+	 * method, namely CMD23, or open-ending mode. For open-ending mode,
-+	 * we should ignore the OUT_OF_RANGE error as it's normal behaviour.
-+	 *
-+	 * However the spec[1] doesn't tell us whether we should also
-+	 * ignore that for predefined method. But per the spec[1], section
-+	 * 4.15 Set Block Count Command, it says"If illegal block count
-+	 * is set, out of range error will be indicated during read/write
-+	 * operation (For example, data transfer is stopped at user area
-+	 * boundary)." In another word, we could expect a out of range error
-+	 * in the response for the following CMD18/25. And if argument of
-+	 * CMD23 + the argument of CMD18/25 exceed the max number of blocks,
-+	 * we could also expect to get a -ETIMEDOUT or any error number from
-+	 * the host drivers due to missing data response(for write)/data(for
-+	 * read), as the cards will stop the data transfer by itself per the
-+	 * spec. So we only need to check R1_OUT_OF_RANGE for open-ending mode.
-+	 */
-+
-+	if (!brq->stop.error) {
-+		bool oor_with_open_end;
-+		/* If there is no error yet, check R1 response */
-+
-+		val = brq->stop.resp[0] & CMD_ERRORS;
-+		oor_with_open_end = val & R1_OUT_OF_RANGE && !brq->mrq.sbc;
-+
-+		if (val && !oor_with_open_end)
-+			brq->stop.error = -EIO;
-+	}
- }
- 
- static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
-@@ -1398,8 +1432,11 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
- 	 * stop.error indicates a problem with the stop command.  Data
- 	 * may have been transferred, or may still be transferring.
- 	 */
--	if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
--	    brq->data.error) {
-+
-+	mmc_blk_eval_resp_error(brq);
-+
-+	if (brq->sbc.error || brq->cmd.error ||
-+	    brq->stop.error || brq->data.error) {
- 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
- 		case ERR_RETRY:
- 			return MMC_BLK_RETRY;
+ 	/* Do the bulk of the transfer using block mode (if supported). */
+-	if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
++	if (func->card->cccr.multi_block &&
++	    size >= sdio_max_byte_size(func)) {
+ 		/* Blocks per command is limited by host count, host transfer
+ 		 * size and the maximum for IO_RW_EXTENDED of 511 blocks. */
+ 		max_blocks = min(func->card->host->max_blk_count, 511u);
 -- 
 1.9.1
 
