@@ -1,82 +1,70 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v2 4/4] mmc: sdhci-s3c: use generic
- sdhci_set_bus_width()
-Date: Fri, 18 Aug 2017 16:31:47 +0900
-Message-ID: <78865702-362f-8999-b477-8252ef344f65@samsung.com>
-References: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
-        <CGME20170814200034epcas3p1835a89719f2a018b0ac70b39f2c3f591@epcas3p1.samsung.com>
-        <471746dfd08fd4eeae2e747c4ce7f98371ac1e99.1502740497.git.mirq-linux@rere.qmqm.pl>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdio: fix bug for IO transfer due to incorrect size
+ check
+Date: Fri, 18 Aug 2017 16:47:01 +0800
+Message-ID: <6678aa83-021c-83db-5bf9-f7061de6841f@rock-chips.com>
+References: <1503023729-243359-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <471746dfd08fd4eeae2e747c4ce7f98371ac1e99.1502740497.git.mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jonathan Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:54010 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750988AbdHRIrG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2017 04:47:06 -0400
+In-Reply-To: <1503023729-243359-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org
 
-On 08/15/2017 05:00 AM, Michał Mirosław wrote:
-> Now that sdhci_set_bus_width() supports 8-bit bus widths based on the
-> MMC_CAP_8_BIT_DATA capability flag, replace the sdhci-s3c version with
-> the generic sdhci version.
+Please ignore this patch and I will update a new one
+to properly add quirk for those SDIO cards.
+
+On 2017/8/18 10:35, Shawn Lin wrote:
+> I got some reports that some sdio-WiFis weren't able to finish
+> data transfer randomly in there stress test but hard to reproduce
+> it. However after analysing the code, I find a long standing bug
+> which seems could explain how that happened.
 > 
-> Signed-off-by: Michał Mirosław <mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
-> Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
-Acked-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-
+> If the function drivers call sdio_memcpy_{fromio, toio}, it may
+> set the count to 512 Bytes. If the multiple_block in CCCR shows
+> it does support that, we now need to do the checking of 'size >
+> sdio_max_byte_size(func)'. If func->max_blksize, func->cur_blksize,
+> and func->max_blksize are 512, and func->card->host->max_blk_size
+> is larger than 512, thus we will expect sdio_max_byte_size return
+> 512 in gerenal. Then it will fail the checking, and falls into using
+> byte mode for transferring 512 Bytes. Note that we use mmc_io_rw_extended
+> for that with zero blocks and 512 size as arguments. So cmd.arg
+> is zero instead of 512 that the wifi can't get this and abort the
+> data transfer.
+> 
+> To fix it, we should allow size to be equal as func's sdio_max_byte_size.
+> That works fine and sloves the problems I got by testing.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c | 34 +---------------------------------
->  1 file changed, 1 insertion(+), 33 deletions(-)
+> Hi Ulf,
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 7c065a70f92b..d328fcf284d1 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -414,43 +414,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->  }
->  
-> -/**
-> - * sdhci_s3c_set_bus_width - support 8bit buswidth
-> - * @host: The SDHCI host being queried
-> - * @width: MMC_BUS_WIDTH_ macro for the bus width being requested
-> - *
-> - * We have 8-bit width support but is not a v3 controller.
-> - * So we add platform_bus_width() and support 8bit width.
-> - */
-> -static void sdhci_s3c_set_bus_width(struct sdhci_host *host, int width)
-> -{
-> -	u8 ctrl;
-> -
-> -	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> -
-> -	switch (width) {
-> -	case MMC_BUS_WIDTH_8:
-> -		ctrl |= SDHCI_CTRL_8BITBUS;
-> -		ctrl &= ~SDHCI_CTRL_4BITBUS;
-> -		break;
-> -	case MMC_BUS_WIDTH_4:
-> -		ctrl |= SDHCI_CTRL_4BITBUS;
-> -		ctrl &= ~SDHCI_CTRL_8BITBUS;
-> -		break;
-> -	default:
-> -		ctrl &= ~SDHCI_CTRL_4BITBUS;
-> -		ctrl &= ~SDHCI_CTRL_8BITBUS;
-> -		break;
-> -	}
-> -
-> -	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> -}
-> -
->  static struct sdhci_ops sdhci_s3c_ops = {
->  	.get_max_clock		= sdhci_s3c_get_max_clk,
->  	.set_clock		= sdhci_s3c_set_clock,
->  	.get_min_clock		= sdhci_s3c_get_min_clock,
-> -	.set_bus_width		= sdhci_s3c_set_bus_width,
-> +	.set_bus_width		= sdhci_set_bus_width,
->  	.reset			= sdhci_reset,
->  	.set_uhs_signaling	= sdhci_set_uhs_signaling,
->  };
+> Not sure whether should we add a fix tag and CC stable as it seems it has
+> been there since 2007.
 > 
+>   drivers/mmc/core/sdio_io.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index d40744b..42c3424 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -313,7 +313,8 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+>   		return -EINVAL;
+>   
+>   	/* Do the bulk of the transfer using block mode (if supported). */
+> -	if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+> +	if (func->card->cccr.multi_block &&
+> +	    size >= sdio_max_byte_size(func)) {
+>   		/* Blocks per command is limited by host count, host transfer
+>   		 * size and the maximum for IO_RW_EXTENDED of 511 blocks. */
+>   		max_blocks = min(func->card->host->max_blk_count, 511u);
+> 
+
