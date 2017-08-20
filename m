@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V5 08/13] mmc: mmc: Enable CQE's
-Date: Sun, 20 Aug 2017 13:41:15 +0200
-Message-ID: <CACRpkdbt8cQjYhb2c8p2R9QiBwe3ZtP2qX5hKGsCxXkFqx+VAA@mail.gmail.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-9-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 09/13] mmc: block: Use local variables in mmc_blk_data_prep()
+Date: Sun, 20 Aug 2017 13:43:33 +0200
+Message-ID: <CACRpkda2SCGcN2ivVQJPLoeGxrudPqy883EpmRWcvNdGRe7GKQ@mail.gmail.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-10-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:33549 "EHLO
-        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752721AbdHTLlQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 07:41:16 -0400
-Received: by mail-oi0-f50.google.com with SMTP id f11so132101148oic.0
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 04:41:15 -0700 (PDT)
-In-Reply-To: <1502366898-23691-9-git-send-email-adrian.hunter@intel.com>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:33022 "EHLO
+        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752721AbdHTLne (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 07:43:34 -0400
+Received: by mail-oi0-f45.google.com with SMTP id f11so132121514oic.0
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 04:43:34 -0700 (PDT)
+In-Reply-To: <1502366898-23691-10-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,16 +20,21 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Enable or disable CQE when a card is added or removed respectively.
+> Use local variables in mmc_blk_data_prep() in preparation for adding CQE
+> support which doesn't use the output variables.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+on the patch as such but:
 
-pr_info("%s: Command Queue Engine enabled\n",
+>  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+> -                             int disable_multi, bool *do_rel_wr,
+> -                             bool *do_data_tag)
+> +                             int disable_multi, bool *do_rel_wr_p,
+> +                             bool *do_data_tag_p)
 
-Kudos for making this pr_info() as we're introducing it to everyone
-so that users can see what is going on. Good!
+We need to figure out what we mean by "tag" in eMMC.
 
 Yours,
 Linus Walleij
