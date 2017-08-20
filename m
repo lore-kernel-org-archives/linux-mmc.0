@@ -1,62 +1,44 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [RFC PATCH 6/7] mmc: sdhci-omap: Add OMAP SDHCI driver
-Date: Sun, 20 Aug 2017 16:33:19 +0530
-Message-ID: <946e5930-7897-5f66-8d75-c112202857d1@ti.com>
-References: <20170807160142.12134-1-kishon@ti.com>
- <20170807160142.12134-7-kishon@ti.com>
- <a45cf402-26c9-d9d0-1ca0-cbeeddad388c@intel.com>
- <46568bdf-c11f-e04b-edd4-25d5363ae504@ti.com>
- <0b109f07-f7f3-1a12-0c65-45d96eb23b13@intel.com>
- <7822a805-3379-1d08-5a01-f422ab23f863@ti.com>
- <158e88c4-da08-6091-96ed-daa8467b6e69@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH V5 01/13] mmc: core: Add mmc_retune_hold_now()
+Date: Sun, 20 Aug 2017 13:26:31 +0200
+Message-ID: <CACRpkdZLyO+rEwPKtRVx+ciAg0fY0bue8rPTcxBivLUtbOSnAw@mail.gmail.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <158e88c4-da08-6091-96ed-daa8467b6e69@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <robh+dt@kernel.org>
-Cc: nsekhar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:34870 "EHLO
+        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752721AbdHTL0c (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 07:26:32 -0400
+Received: by mail-oi0-f41.google.com with SMTP id e124so132301779oig.2
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 04:26:32 -0700 (PDT)
+In-Reply-To: <1502366898-23691-2-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Adrian,
+On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-On Thursday 17 August 2017 01:53 PM, Adrian Hunter wrote:
-> On 17/08/17 10:59, Kishon Vijay Abraham I wrote:
->> Hi Adrian,
->>
->> On Thursday 17 August 2017 12:13 PM, Adrian Hunter wrote:
->>> On 17/08/17 08:57, Kishon Vijay Abraham I wrote:
->>>> Hi Adrian,
->>>>
->>>> On Tuesday 15 August 2017 01:52 PM, Adrian Hunter wrote:
->>>>> On 07/08/17 19:01, Kishon Vijay Abraham I wrote:
-> 
-> <SNIP>
-> 
->>>>>> +	pm_runtime_enable(dev);
->>>>>> +	ret = pm_runtime_get_sync(dev);
->>>>>
->>>>> What are you trying to do with runtime pm?  There don't seem to be any pm
->>>>> callbacks, so does this do anything?
->>>>
->>>> yeah, pm_runtime_get_sync enables the functional clock and also configures the
->>>> SYSCONFIG regiters present in the controller. It gets the details for
->>>> configuring those from arch/arm/mach-omap2/omap_hwmod_*
->>>
->>> You mean it will do those things when you add the callbacks?  I would prefer
->>> you leave out runtime pm until you can add the callbacks as well.
->>
->> No. Generally in callbacks, 'optional' functional clocks are enabled. But main
->> functional clock and interface clocks are enabled in pm_runtime_get_sync.
->> Without pm_runtime_get_sync, we won't be able to access controller registers.
-> 
-> So that is done by the pm domain?  Please add comments to the code to explain.
+> mmc_return_hold() / mmc_retune_release() are used around a group of
+> commands to prevent re-tuning between the commands. Re-tuning can still
+> happen before the first command. In some cases, re-tuning must be
+> prevented entirely. Add mmc_retune_hold_now() for that purpose. It is
+> added in preparation for CQE support where it will be used by CQE recovery.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-right, it's done by omap_device_pm_domain.
-Invoking pm_runtime_get_sync of a platform device in OMAP platforms will
-eventually come to omap_hwmod_enable where main functional clock, interface
-clock and sysconfig are programmed.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thanks
-Kishon
+> +void mmc_retune_hold_now(struct mmc_host *host)
+>  void mmc_retune_release(struct mmc_host *host)
+
+If the only hint we have about how to use these functions is through the
+commit log we are in trouble, but I would say in this case the function
+name is kind of half-obvious at least.
+
+I think what troubles me is Rusty's API maturity guideline #6
+"6. The name tells you how to use it."
+
+Yours,
+Linus Walleij
