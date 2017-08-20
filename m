@@ -1,112 +1,96 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 4/8 v5] mmc: block: Move duplicate check
-Date: Sun, 20 Aug 2017 23:39:09 +0200
-Message-ID: <20170820213913.9737-5-linus.walleij@linaro.org>
+Subject: [PATCH 8/8 v5] mmc: block: Delete mmc_access_rpmb()
+Date: Sun, 20 Aug 2017 23:39:13 +0200
+Message-ID: <20170820213913.9737-9-linus.walleij@linaro.org>
 References: <20170820213913.9737-1-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f54.google.com ([209.85.215.54]:35545 "EHLO
-        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753351AbdHTVj3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 17:39:29 -0400
-Received: by mail-lf0-f54.google.com with SMTP id k186so4087512lfe.2
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 14:39:29 -0700 (PDT)
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:35556 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753362AbdHTVjh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 17:39:37 -0400
+Received: by mail-lf0-f45.google.com with SMTP id k186so4087924lfe.2
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 14:39:36 -0700 (PDT)
 In-Reply-To: <20170820213913.9737-1-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-mmc_blk_ioctl() calls either mmc_blk_ioctl_cmd() or
-mmc_blk_ioctl_multi_cmd() and each of these make the same
-check. Factor it into a new helper function, call it on
-both branches of the switch() statement and save a chunk
-of duplicate code.
+This function is used by the block layer queue to bail out of
+requests if the current request is an RPMB request.
 
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
+However this makes no sense: RPMB is only used from ioctl():s,
+there are no RPMB accesses coming from the block layer.
+An RPMB ioctl() always switches to the RPMB partition and
+then back to the main partition before completing.
+
+The only (possible) use of this check must have been to
+duct-tape over a race between RPMB ioctl()s colliding with
+concurrent non-RPMB accesses to the same device.
+
+This could happen in the past because the RPMB device was
+created as a separate block device/disk with its own submit
+queue competing with the main partition, and submitting
+requests in parallel. This is now gone as we removed the
+offending RPMB block device in another patch.
+
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
-ChangeLog v2->v5:
-- Rebase, put on top of the other cleanups.
-- Number v5 to keep together with the rest of the series.
-ChangeLog v1->v2:
-- We need to check the block device only if an actual
-  well-known ioctl() is coming in, on the path of the
-  switch() statments, only those branches that handle
-  actual ioctl()s. Create a new helper function to check
-  the block device and call that.
+ChangeLog v1->v5:
+- Renumber to keep together with the rest of the series.
 ---
- drivers/mmc/core/block.c | 36 ++++++++++++++++++++----------------
- 1 file changed, 20 insertions(+), 16 deletions(-)
+ drivers/mmc/core/block.c | 12 ------------
+ drivers/mmc/core/queue.c |  2 +-
+ drivers/mmc/core/queue.h |  2 --
+ 3 files changed, 1 insertion(+), 15 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 6c91e125ab72..b0585f7971f1 100644
+index 27e1cf07a7a2..61ea402f2569 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -564,14 +564,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	int err = 0, ioc_err = 0;
- 	struct request *req;
- 
--	/*
--	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
--	 * whole block device, not on a partition.  This prevents overspray
--	 * between sibling partitions.
--	 */
--	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
--		return -EPERM;
--
- 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
- 	if (IS_ERR(idata))
- 		return PTR_ERR(idata);
-@@ -624,14 +616,6 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	__u64 num_of_cmds;
- 	struct request *req;
- 
--	/*
--	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
--	 * whole block device, not on a partition.  This prevents overspray
--	 * between sibling partitions.
--	 */
--	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
--		return -EPERM;
--
- 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
- 			   sizeof(num_of_cmds)))
- 		return -EFAULT;
-@@ -698,14 +682,34 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	return ioc_err ? ioc_err : err;
+@@ -1207,18 +1207,6 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+ 	md->reset_done &= ~type;
  }
  
-+static int mmc_blk_check_blkdev(struct block_device *bdev)
-+{
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+	return 0;
-+}
-+
- static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
- 	unsigned int cmd, unsigned long arg)
+-int mmc_access_rpmb(struct mmc_queue *mq)
+-{
+-	struct mmc_blk_data *md = mq->blkdata;
+-	/*
+-	 * If this is a RPMB partition access, return ture
+-	 */
+-	if (md && md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-		return true;
+-
+-	return false;
+-}
+-
+ /*
+  * The non-block commands come back from the block layer after it queued it and
+  * processed it with all other requests and then they get issued in this
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index affa7370ba82..3baccbf16f3d 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -32,7 +32,7 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
  {
-+	int ret;
-+
- 	switch (cmd) {
- 	case MMC_IOC_CMD:
-+		ret = mmc_blk_check_blkdev(bdev);
-+		if (ret)
-+			return ret;
- 		return mmc_blk_ioctl_cmd(bdev,
- 				(struct mmc_ioc_cmd __user *)arg);
- 	case MMC_IOC_MULTI_CMD:
-+		ret = mmc_blk_check_blkdev(bdev);
-+		if (ret)
-+			return ret;
- 		return mmc_blk_ioctl_multi_cmd(bdev,
- 				(struct mmc_ioc_multi_cmd __user *)arg);
- 	default:
+ 	struct mmc_queue *mq = q->queuedata;
+ 
+-	if (mq && (mmc_card_removed(mq->card) || mmc_access_rpmb(mq)))
++	if (mq && mmc_card_removed(mq->card))
+ 		return BLKPREP_KILL;
+ 
+ 	req->rq_flags |= RQF_DONTPREP;
+diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+index a2b6a9fcab01..7649ed6cbef7 100644
+--- a/drivers/mmc/core/queue.h
++++ b/drivers/mmc/core/queue.h
+@@ -89,6 +89,4 @@ extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
+ extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
+ extern void mmc_queue_bounce_post(struct mmc_queue_req *);
+ 
+-extern int mmc_access_rpmb(struct mmc_queue *);
+-
+ #endif
 -- 
 2.13.5
 
