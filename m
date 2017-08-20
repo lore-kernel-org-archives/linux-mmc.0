@@ -1,18 +1,18 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V5 06/13] mmc: core: Remove unused MMC_CAP2_PACKED_CMD
-Date: Sun, 20 Aug 2017 13:33:10 +0200
-Message-ID: <CACRpkdaODdFtajW50_SKvOGb=hsqHEp-YsJGv-Qt+uOkn9Vj+w@mail.gmail.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-7-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 07/13] mmc: mmc: Enable Command Queuing
+Date: Sun, 20 Aug 2017 13:33:48 +0200
+Message-ID: <CACRpkdY7+rPr5yAfvAmtGqsWSnytF6v9AZGVQSh6bWhxNC8TTA@mail.gmail.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-8-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:35323 "EHLO
-        mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752721AbdHTLdL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 07:33:11 -0400
-Received: by mail-oi0-f46.google.com with SMTP id e124so132362480oig.2
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 04:33:11 -0700 (PDT)
-In-Reply-To: <1502366898-23691-7-git-send-email-adrian.hunter@intel.com>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:35468 "EHLO
+        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752721AbdHTLdt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Aug 2017 07:33:49 -0400
+Received: by mail-oi0-f51.google.com with SMTP id e124so132368393oig.2
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2017 04:33:49 -0700 (PDT)
+In-Reply-To: <1502366898-23691-8-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
@@ -20,13 +20,12 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>,
 
 On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-> Packed commands support was removed but some bits got left behind. Remove
-> them.
+> Enable the Command Queue if the host controller supports a command queue
+> engine. It is not compatible with Packed Commands, so make a note of that in the
+> comment.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-
-I would even apply this as patch #1 in the series (I guess that works).
-Sorry for leaving this cruft behind.
+> ---
 
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
