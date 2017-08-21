@@ -1,49 +1,46 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 02/13] mmc: core: Add members to mmc_request and
- mmc_data for CQE's
-Date: Mon, 21 Aug 2017 12:26:19 +0300
-Message-ID: <9143f524-13ba-94a6-ec80-0b2a9275f95e@intel.com>
+Subject: Re: [PATCH V5 05/13] mmc: core: Add support for handling CQE requests
+Date: Mon, 21 Aug 2017 12:26:45 +0300
+Message-ID: <9a5a19b8-2670-fcdb-5e9b-f67d0efb1cf4@intel.com>
 References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
- <1502366898-23691-3-git-send-email-adrian.hunter@intel.com>
- <CACRpkda=q=9UhKnvK5Z2PF+kqa1L4CSdTzcr=xuiOUgG7z6sww@mail.gmail.com>
+ <1502366898-23691-6-git-send-email-adrian.hunter@intel.com>
+ <CACRpkdYxSPx7H1P3brb36C5x816bfcQ-zmuxcDk27ZfAa7odXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-block-owner@vger.kernel.org>
-In-Reply-To: <CACRpkda=q=9UhKnvK5Z2PF+kqa1L4CSdTzcr=xuiOUgG7z6sww@mail.gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:57082 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751894AbdHUJdV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Aug 2017 05:33:21 -0400
+In-Reply-To: <CACRpkdYxSPx7H1P3brb36C5x816bfcQ-zmuxcDk27ZfAa7odXg@mail.gmail.com>
 Content-Language: en-US
-Sender: linux-block-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 20/08/17 14:29, Linus Walleij wrote:
+On 20/08/17 14:39, Linus Walleij wrote:
 > On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 > 
->> Most of the information needed to issue requests to a CQE is already in
->> struct mmc_request and struct mmc_data. Add data block address, some flags,
->> and the task id (tag), and allow for cmd being NULL which it is for CQE
->> tasks.
+>> Add core support for handling CQE requests, including starting, completing
+>> and recovering.
 >>
 >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > 
->> +       int                     tag;
 > 
-> Is this consistent with the block layer idea of "tag"?
-
-It is named "tag" because it is the block layer tag.
-
+>> +static void __mmc_cqe_request_done(struct mmc_host *host,
+>> +                                  struct mmc_request *mrq)
 > 
-> I am asking because I get confused.
+> We are naming too much stuff __foo now, it gets really hard to figure
+> out from the function name and the surrounding code what is going on.
+
+You have written several times that you don't like __foo() names, however it
+is a normal kernel paradigm.
+
+> I guess people are using this like "do parts of what mmc_cqe_request_done()
+> is doing" but it'd be nice if we could be specific.
 > 
-> I thought the block layers idea of a "tag" was some metadata
-> associated with a request. Not that I am a block layer expert.
+> mmc_cqe_request_finalize() could work?
 
-The block layer tag is a unique number to identify the task to the hardware
-queue.  It is typically a number from 0 up to queue depth - 1.
-
-> Why can't we just name this "task_id" if that is what it is in
-> Linux terms? Does the specification call it "tag"?
-
-The eMMC specification calls it "task id" but the block layer calls it
-"tag".  I went with "tag" to be easier for block layer people to understand.
+It can be rolled into mmc_cqe_request_done().
