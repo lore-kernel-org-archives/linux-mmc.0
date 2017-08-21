@@ -1,87 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: stop building qcom dml as module
-Date: Mon, 21 Aug 2017 14:33:55 +0200
-Message-ID: <CAPDyKFoVTASsnmx_Dz4MdPxVQOFVL=d6xQHiT3DVRBRJphRamw@mail.gmail.com>
-References: <20170810145418.4430-1-srinivas.kandagatla@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170810145418.4430-1-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+Subject: [PATCH v3] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Mon, 21 Aug 2017 13:25:11 +0100
+Message-ID: <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+References: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w@mail.gmail.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 August 2017 at 16:54,  <srinivas.kandagatla@linaro.org> wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->
-> It does not make sense for qcom dml code to be a seperate module, as
-> this has just 2 helper functions specific to qcom, and used directly by
-> mmci driver, so just compile this along with main mmci driver.
->
-> This would also fix issues arrising due to Kconfig combinations between
-> mmci and qcom dml.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> ---
->  drivers/mmc/host/Kconfig         | 2 +-
->  drivers/mmc/host/Makefile        | 5 +++--
->  drivers/mmc/host/mmci_qcom_dml.h | 2 +-
->  3 files changed, 5 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5755b69..3345384 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -15,7 +15,7 @@ config MMC_ARMMMCI
->           If unsure, say N.
->
->  config MMC_QCOM_DML
-> -       tristate "Qualcomm Data Mover for SD Card Controller"
-> +       bool "Qualcomm Data Mover for SD Card Controller"
->         depends on MMC_ARMMMCI && QCOM_BAM_DMA
->         default y
->         help
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4d45471..ef12fd2 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -2,8 +2,9 @@
->  # Makefile for MMC/SD host controller drivers
->  #
->
-> -obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
-> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
-> +obj-$(CONFIG_MMC_ARMMMCI) += armmmci.o
-> +armmmci-y := mmci.o
-> +armmmci-$(CONFIG_MMC_QCOM_DML) += mmci_qcom_dml.o
->  obj-$(CONFIG_MMC_PXA)          += pxamci.o
->  obj-$(CONFIG_MMC_MXC)          += mxcmmc.o
->  obj-$(CONFIG_MMC_MXS)          += mxs-mmc.o
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-> index 6e405d0..9df32eb 100644
-> --- a/drivers/mmc/host/mmci_qcom_dml.h
-> +++ b/drivers/mmc/host/mmci_qcom_dml.h
-> @@ -15,7 +15,7 @@
->  #ifndef __MMC_QCOM_DML_H__
->  #define __MMC_QCOM_DML_H__
->
-> -#ifdef CONFIG_MMC_QCOM_DML
-> +#if IS_ENABLED(CONFIG_MMC_QCOM_DML)
+Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
+is identical to the R-Car Gen2 family.
 
-Because you change CONFIG_MMC_QCOM_DML beeing a bool instead of
-tristate, then I don't think you need to change this to IS_ENABLED().
+Signed-off-by: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+---
+v1->v2
+    - Modified the listing SoC's description related to SoC
+      with 1 Clock and 2 Clocks
+v2->v3
+    - Fixed the trailing double quote.
+    - Updated listing SoC's description. 
 
-Correct!?
+This patch is compiled and tested against linux next tag
+next-20170817.
 
->  int dml_hw_init(struct mmci_host *host, struct device_node *np);
->  void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
->  #else
-> --
-> 2.9.3
->
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Otherwise this looks good to me.
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 4fd8b7a..54ef642 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -15,6 +15,8 @@ Required properties:
+ 		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
+ 		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+ 		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
++		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
++		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
+ 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+@@ -33,10 +35,8 @@ Required properties:
+ 	  If 2 clocks are specified by the hardware, you must name them as
+ 	  "core" and "cd". If the controller only has 1 clock, naming is not
+ 	  required.
+-	  Below is the number clocks for each supported SoC:
+-	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
+-	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
+-	   2: R7S72100
++	  Devices which have more than 1 clock are listed below:
++	  2: R7S72100
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+-- 
+1.9.1
 
-Kind regards
-Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
