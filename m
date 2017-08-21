@@ -1,56 +1,43 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/5] dt-bindings: ti-omap-hsmmc: Document new compatible
- for sdhci omap
-Date: Mon, 21 Aug 2017 07:21:32 -0700
-Message-ID: <20170821142132.GH6008@atomide.com>
-References: <20170821074132.4622-1-kishon@ti.com>
- <20170821074132.4622-4-kishon@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: [PATCH v2 01/16] mmc: meson-gx: fix mux mask definition
+Date: Mon, 21 Aug 2017 18:02:46 +0200
+Message-ID: <20170821160301.21899-2-jbrunet@baylibre.com>
+References: <20170821160301.21899-1-jbrunet@baylibre.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:37312 "EHLO muru.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753222AbdHUOVg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Aug 2017 10:21:36 -0400
-Content-Disposition: inline
-In-Reply-To: <20170821074132.4622-4-kishon@ti.com>
+Received: from mail-wr0-f171.google.com ([209.85.128.171]:38187 "EHLO
+        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932101AbdHUQDH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2017 12:03:07 -0400
+Received: by mail-wr0-f171.google.com with SMTP id p8so39037054wrf.5
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2017 09:03:06 -0700 (PDT)
+In-Reply-To: <20170821160301.21899-1-jbrunet@baylibre.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-* Kishon Vijay Abraham I <kishon@ti.com> [170821 00:42]:
-> Document the new compatible string "ti,dra7-sdhci" to be used for
-> MMC controllers in DRA7 and DRA72 SoCs.
+CCF generic mux will shift the mask using the value defined in shift
+Define the mask accordingly
 
-I suggest that you add a new one sdhci-omap.txt instead.
-We are not currently parsing the all the hsmmc properties for
-sdhci.
+Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Then eventually when they are fully compatible, we can just
-change ti-omap-hsmmc.txt to point to the sdhci-omap.txt.
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index de962c2d5e00..4217287923d4 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -366,7 +366,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	init.num_parents = MUX_CLK_NUM_PARENTS;
+ 	host->mux.reg = host->regs + SD_EMMC_CLOCK;
+ 	host->mux.shift = __bf_shf(CLK_SRC_MASK);
+-	host->mux.mask = CLK_SRC_MASK;
++	host->mux.mask = CLK_SRC_MASK >> host->mux.shift;
+ 	host->mux.flags = 0;
+ 	host->mux.table = NULL;
+ 	host->mux.hw.init = &init;
+-- 
+2.9.5
 
-Regards,
-
-Tony
-
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 0e026c151c1c..db80fdfd05d7 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -13,6 +13,7 @@ Required properties:
->   Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
->   Should be "ti,omap4-hsmmc", for OMAP4 controllers
->   Should be "ti,am33xx-hsmmc", for AM335x controllers
-> + Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
->  - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
->  
->  Optional properties:
-> -- 
-> 2.11.0
-> 
