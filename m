@@ -1,55 +1,40 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH v2 00/16] mmc: meson-gx: driver fixups and upgrades
-Date: Mon, 21 Aug 2017 18:02:45 +0200
-Message-ID: <20170821160301.21899-1-jbrunet@baylibre.com>
+Subject: [PATCH v2 02/16] mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
+Date: Mon, 21 Aug 2017 18:02:47 +0200
+Message-ID: <20170821160301.21899-3-jbrunet@baylibre.com>
+References: <20170821160301.21899-1-jbrunet@baylibre.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170821160301.21899-1-jbrunet@baylibre.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The patchset features several bugfixes, rework and upgrade for the
-meson-gx MMC driver.
+Remove CLK_DIVIDER_ALLOW_ZERO. This flag means that a 1 based divider
+with a 0 value will behave as a bypass clock
 
-The main goal is to improve readability and enable new high speed
-modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
+The mmc divider does not behave like this, a 0 value disables the clock
+Remove this flag so CCF never allows a 0 value on this clock
 
-SDR104 is not working with a few cards on the p200 and the
-libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
-of these boards, adding noise to the signal and eventually breaking
-the communication with some cards. The same cards are working well on a
-laptop or the nanopi-k2 at 200Mhz.
+Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
-gxl-s905x-libretech-cc
-
-Changes since v1 [0]:
-* Reorder patches to have fixes first, then rework and finally
-  enhancements.
-* Use CCF to manage clock phases
-
-[0]: https://lkml.kernel.org/r/20170804174353.16486-1-jbrunet@baylibre.com
-
-Jerome Brunet (16):
-  mmc: meson-gx: fix mux mask definition
-  mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
-  mmc: meson-gx: clean up some constants
-  mmc: meson-gx: use _irqsave variant of spinlock
-  mmc: meson-gx: cfg init overwrite values
-  mmc: meson-gx: rework set_ios function
-  mmc: meson-gx: rework clk_set function
-  mmc: meson-gx: rework clock init function
-  mmc: meson-gx: fix dual data rate mode frequencies
-  mmc: meson-gx: work around clk-stop issue
-  mmc: meson-gx: simplify interrupt handler
-  mmc: meson-gx: implement card_busy callback
-  mmc: meson-gx: use CCF to handle the clock phases
-  mmc: meson-gx: implement voltage switch callback
-  mmc: meson-gx: change default tx phase
-  mmc: meson-gx: rework tuning function
-
- drivers/mmc/host/meson-gx-mmc.c | 718 +++++++++++++++++++++++++++-------------
- 1 file changed, 497 insertions(+), 221 deletions(-)
-
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 4217287923d4..d480a8052a06 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -389,7 +389,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	host->cfg_div.width = __builtin_popcountl(CLK_DIV_MASK);
+ 	host->cfg_div.hw.init = &init;
+ 	host->cfg_div.flags = CLK_DIVIDER_ONE_BASED |
+-		CLK_DIVIDER_ROUND_CLOSEST | CLK_DIVIDER_ALLOW_ZERO;
++		CLK_DIVIDER_ROUND_CLOSEST;
+ 
+ 	host->cfg_div_clk = devm_clk_register(host->dev, &host->cfg_div.hw);
+ 	if (WARN_ON(PTR_ERR_OR_ZERO(host->cfg_div_clk)))
 -- 
 2.9.5
