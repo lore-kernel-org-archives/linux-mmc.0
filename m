@@ -1,86 +1,128 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: Fix clock rate passed to sunxi_mmc_clk_set_phase
-Date: Mon, 21 Aug 2017 14:33:42 +0200
-Message-ID: <CAPDyKFqqhGXzmXSVZuie++VcNJGs_9etV16MhLtMAoyB5oCQ4A@mail.gmail.com>
-References: <20170810032954.9104-1-wens@csie.org>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: block: prevent propagating R1_OUT_OF_RANGE for
+ open-ending mode
+Date: Mon, 21 Aug 2017 14:33:25 +0200
+Message-ID: <CAPDyKFoEoGP1dMLwaTPqPTodcxxS6y3OgmE7Wf5nGMC5BPnSPw@mail.gmail.com>
+References: <1503018968-18974-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBJ5G5PGAKGQEIOJKZEY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20170810032954.9104-1-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:33305 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753296AbdHUMd1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2017 08:33:27 -0400
+Received: by mail-qk0-f173.google.com with SMTP id a77so81824799qkb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2017 05:33:26 -0700 (PDT)
+In-Reply-To: <1503018968-18974-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawnguo@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-On 10 August 2017 at 05:29, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
-> sunxi_mmc_clk_set_phase expects the actual card clock rate to be passed
-> to it. When the internal divider code was reworked in commit 9a639c6073d3
-> ("mmc: sunxi: Support MMC DDR52 transfer mode with new timing mode"),
-> this requirement was missed, and the module clock rate was passed in
-> instead. This broke 8 bit DDR MMC on old controllers, as the module
-> clock rate is double the card clock rate, for which we have no valid
-> delay settings.
+On 18 August 2017 at 03:16, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> We to some extent should tolerate R1_OUT_OF_RANGE for open-ending
+> mode as it is expected behaviour and most of the backup partition
+> tables should be located near some of the last blocks which will
+> always make open-ending read exceed the capacity of cards.
 >
-> Fix this by applying the internal divider to the clock rate right after
-> we configure it in hardware.
->
-> Fixes: 9a639c6073d3 ("mmc: sunxi: Support MMC DDR52 transfer mode with
->                       new timing mode")
-> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> Fixes: 9820a5b11101 ("mmc: core: for data errors, take response of stop cmd into account")
+> Fixes: a04e6bae9e6f ("mmc: core: check also R1 response for stop commands")
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Tested-by: Shawn Guo <shawnguo@kernel.org>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
 > ---
 >
-> Sorry for all the regressions the A83T MMC series has caused.
-> I only caught this while testing some other patches on the H3.
-> I really hope this is the last one.
+> Changes in v4:
+> - improve for more readable and remove Yoshihiro's tag, add Wolfram's
+>   tag
 >
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+> Changes in v3:
+> - add explanation for why don't check predefined method
+> - check brq->mrq.sbc for easier to read suggested by Wolfram
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 6c7eb859ace1..da5f46a14497 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -821,6 +821,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->         rval |= div - 1;
->         mmc_writel(host, REG_CLKCR, rval);
+> Changes in v2:
+> - fix a typo and introduce STOP_ERROR
+> - reword the comment and always include a description from the spec if possible
 >
-> +       /* update card clock rate to account for internal divider */
-> +       rate /= div;
+>  drivers/mmc/core/block.c | 49 ++++++++++++++++++++++++++++++++++++++++++------
+>  1 file changed, 43 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 91e1e93..b8fa62c 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1369,12 +1369,46 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>          R1_CC_ERROR |          /* Card controller error */             \
+>          R1_ERROR)              /* General/unknown error */
+>
+> -static bool mmc_blk_has_cmd_err(struct mmc_command *cmd)
+> +static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>  {
+> -       if (!cmd->error && cmd->resp[0] & CMD_ERRORS)
+> -               cmd->error = -EIO;
+> +       u32 val;
+>
+> -       return cmd->error;
+> +       /*
+> +        * Per the SD specification(physical layer version 4.10)[1],
+> +        * section 4.3.3, it explicitly states that "When the last
+> +        * block of user area is read using CMD18, the host should
+> +        * ignore OUT_OF_RANGE error that may occur even the sequence
+> +        * is correct". And JESD84-B51 for eMMC also has a similar
+> +        * statement on section 6.8.3.
+> +        *
+> +        * Multiple block read/write could be done by either predefined
+> +        * method, namely CMD23, or open-ending mode. For open-ending mode,
+> +        * we should ignore the OUT_OF_RANGE error as it's normal behaviour.
+> +        *
+> +        * However the spec[1] doesn't tell us whether we should also
+> +        * ignore that for predefined method. But per the spec[1], section
+> +        * 4.15 Set Block Count Command, it says"If illegal block count
+> +        * is set, out of range error will be indicated during read/write
+> +        * operation (For example, data transfer is stopped at user area
+> +        * boundary)." In another word, we could expect a out of range error
+> +        * in the response for the following CMD18/25. And if argument of
+> +        * CMD23 + the argument of CMD18/25 exceed the max number of blocks,
+> +        * we could also expect to get a -ETIMEDOUT or any error number from
+> +        * the host drivers due to missing data response(for write)/data(for
+> +        * read), as the cards will stop the data transfer by itself per the
+> +        * spec. So we only need to check R1_OUT_OF_RANGE for open-ending mode.
+> +        */
 > +
->         if (host->use_new_timings) {
->                 /* Don't touch the delay bits */
->                 rval = mmc_readl(host, REG_SD_NTSR);
-> @@ -828,6 +831,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 mmc_writel(host, REG_SD_NTSR, rval);
->         }
->
-> +       /* sunxi_mmc_clk_set_phase expects the actual card clock rate */
->         ret = sunxi_mmc_clk_set_phase(host, ios, rate);
->         if (ret)
->                 return ret;
-> @@ -849,7 +853,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 return ret;
->
->         /* And we just enabled our clock back */
-> -       mmc->actual_clock = rate / div;
-> +       mmc->actual_clock = rate;
->
->         return 0;
+> +       if (!brq->stop.error) {
+> +               bool oor_with_open_end;
+> +               /* If there is no error yet, check R1 response */
+> +
+> +               val = brq->stop.resp[0] & CMD_ERRORS;
+> +               oor_with_open_end = val & R1_OUT_OF_RANGE && !brq->mrq.sbc;
+> +
+> +               if (val && !oor_with_open_end)
+> +                       brq->stop.error = -EIO;
+> +       }
 >  }
+>
+>  static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+> @@ -1398,8 +1432,11 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_card *card,
+>          * stop.error indicates a problem with the stop command.  Data
+>          * may have been transferred, or may still be transferring.
+>          */
+> -       if (brq->sbc.error || brq->cmd.error || mmc_blk_has_cmd_err(&brq->stop) ||
+> -           brq->data.error) {
+> +
+> +       mmc_blk_eval_resp_error(brq);
+> +
+> +       if (brq->sbc.error || brq->cmd.error ||
+> +           brq->stop.error || brq->data.error) {
+>                 switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+>                 case ERR_RETRY:
+>                         return MMC_BLK_RETRY;
 > --
-> 2.13.3
+> 1.9.1
+>
 >
