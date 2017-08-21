@@ -1,59 +1,61 @@
-From: Jan Glauber <jan.glauber@caviumnetworks.com>
-Subject: Re: [PATCH] mmc: cavium-octeon: Convert to use module_platform_driver
-Date: Mon, 21 Aug 2017 12:36:51 +0200
-Message-ID: <20170821103651.GA12259@hc>
-References: <20170819130611.3335-1-axel.lin@ingics.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0058.outbound.protection.outlook.com ([104.47.37.58]:18720
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751894AbdHUKhG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Aug 2017 06:37:06 -0400
-Content-Disposition: inline
-In-Reply-To: <20170819130611.3335-1-axel.lin@ingics.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+Subject: [PATCH v2] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Mon, 21 Aug 2017 11:38:17 +0100
+Message-ID: <1503311897-18807-1-git-send-email-biju.das@bp.renesas.com>
+References: <1502710766-44361-1-git-send-email-biju.das@bp.renesas.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1502710766-44361-1-git-send-email-biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, linux-mmc@vger.kernel.org
 
-On Sat, Aug 19, 2017 at 09:06:11PM +0800, Axel Lin wrote:
-> Get rid of boilerplate code by using module_platform_driver macro.
+Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
+is identical to the R-Car Gen2 family.
 
-Looks good. If you want to add:
-Acked-by: Jan Glauber <jglauber@cavium.com>
+Signed-off-by: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+---
+v1->v2
+    -Modified the listing SoC's description related to SoC
+     with 1 Clock and 2 Clocks
 
-thanks, Jan
+This patch is compiled and tested against linux next tag
+next-20170817.
 
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
->  drivers/mmc/host/cavium-octeon.c | 13 +------------
->  1 file changed, 1 insertion(+), 12 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
-> index 951d2cd..22aded1 100644
-> --- a/drivers/mmc/host/cavium-octeon.c
-> +++ b/drivers/mmc/host/cavium-octeon.c
-> @@ -342,18 +342,7 @@ static struct platform_driver octeon_mmc_driver = {
->  	},
->  };
->  
-> -static int __init octeon_mmc_init(void)
-> -{
-> -	return platform_driver_register(&octeon_mmc_driver);
-> -}
-> -
-> -static void __exit octeon_mmc_cleanup(void)
-> -{
-> -	platform_driver_unregister(&octeon_mmc_driver);
-> -}
-> -
-> -module_init(octeon_mmc_init);
-> -module_exit(octeon_mmc_cleanup);
-> +module_platform_driver(octeon_mmc_driver);
->  
->  MODULE_AUTHOR("Cavium Inc. <support@cavium.com>");
->  MODULE_DESCRIPTION("Low-level driver for Cavium OCTEON MMC/SSD card");
-> -- 
-> 2.9.3
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 4fd8b7a..1e3106e 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -15,6 +15,8 @@ Required properties:
+ 		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
+ 		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+ 		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
++		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
++		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
+ 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+@@ -33,10 +35,9 @@ Required properties:
+ 	  If 2 clocks are specified by the hardware, you must name them as
+ 	  "core" and "cd". If the controller only has 1 clock, naming is not
+ 	  required.
+-	  Below is the number clocks for each supported SoC:
+-	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
+-	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
+-	   2: R7S72100
++	  Most supported SoCs only have 1 clock. Devices which have more
++	  than 1 clock are listed below:
++	  2: R7S72100"
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
