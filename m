@@ -1,57 +1,105 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 21 Aug 2017 14:43:05 +0200
-Message-ID: <20170821124305.GA4276@katana>
-References: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w@mail.gmail.com>
- <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 8/8 v5] mmc: block: Delete mmc_access_rpmb()
+Date: Mon, 21 Aug 2017 15:51:16 +0300
+Message-ID: <55bd0aec-d9a5-6162-1aed-40950497d96c@intel.com>
+References: <20170820213913.9737-1-linus.walleij@linaro.org>
+ <20170820213913.9737-9-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="ZGiS0Q5IWpPtfppv"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:58700 "EHLO mail.zeus03.de"
+Received: from mga02.intel.com ([134.134.136.20]:16786 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753566AbdHUMnI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Aug 2017 08:43:08 -0400
-Content-Disposition: inline
-In-Reply-To: <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+        id S1753742AbdHUM5r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Aug 2017 08:57:47 -0400
+In-Reply-To: <20170820213913.9737-9-linus.walleij@linaro.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Biju Das <biju.das@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
+On 21/08/17 00:39, Linus Walleij wrote:
+> This function is used by the block layer queue to bail out of
+> requests if the current request is an RPMB request.
+> 
+> However this makes no sense: RPMB is only used from ioctl():s,
+> there are no RPMB accesses coming from the block layer.
+> An RPMB ioctl() always switches to the RPMB partition and
+> then back to the main partition before completing.
+> 
+> The only (possible) use of this check must have been to
+> duct-tape over a race between RPMB ioctl()s colliding with
+> concurrent non-RPMB accesses to the same device.
 
---ZGiS0Q5IWpPtfppv
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+It was always possible to read / write (unsuccessfully) the rpmb block
+device. i.e. dd of=/dev/mmcblk0rpmb
 
-On Mon, Aug 21, 2017 at 01:25:11PM +0100, Biju Das wrote:
-> Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
-> is identical to the R-Car Gen2 family.
->=20
-> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
+Actually one thing to look at is that it looks like it was blocking your
+IOCTL requests.  i.e. wouldn't the IOCTL request also get killed.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> 
+> This could happen in the past because the RPMB device was
+> created as a separate block device/disk with its own submit
+> queue competing with the main partition, and submitting
+> requests in parallel. This is now gone as we removed the
+> offending RPMB block device in another patch.
+> 
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> ChangeLog v1->v5:
+> - Renumber to keep together with the rest of the series.
+> ---
+>  drivers/mmc/core/block.c | 12 ------------
+>  drivers/mmc/core/queue.c |  2 +-
+>  drivers/mmc/core/queue.h |  2 --
+>  3 files changed, 1 insertion(+), 15 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 27e1cf07a7a2..61ea402f2569 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1207,18 +1207,6 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+>  	md->reset_done &= ~type;
+>  }
+>  
+> -int mmc_access_rpmb(struct mmc_queue *mq)
+> -{
+> -	struct mmc_blk_data *md = mq->blkdata;
+> -	/*
+> -	 * If this is a RPMB partition access, return ture
+> -	 */
+> -	if (md && md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+> -		return true;
+> -
+> -	return false;
+> -}
+> -
+>  /*
+>   * The non-block commands come back from the block layer after it queued it and
+>   * processed it with all other requests and then they get issued in this
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index affa7370ba82..3baccbf16f3d 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -32,7 +32,7 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+>  {
+>  	struct mmc_queue *mq = q->queuedata;
+>  
+> -	if (mq && (mmc_card_removed(mq->card) || mmc_access_rpmb(mq)))
+> +	if (mq && mmc_card_removed(mq->card))
+>  		return BLKPREP_KILL;
+>  
+>  	req->rq_flags |= RQF_DONTPREP;
+> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+> index a2b6a9fcab01..7649ed6cbef7 100644
+> --- a/drivers/mmc/core/queue.h
+> +++ b/drivers/mmc/core/queue.h
+> @@ -89,6 +89,4 @@ extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
+>  extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
+>  extern void mmc_queue_bounce_post(struct mmc_queue_req *);
+>  
+> -extern int mmc_access_rpmb(struct mmc_queue *);
+> -
+>  #endif
+> 
 
-
---ZGiS0Q5IWpPtfppv
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlma1VUACgkQFA3kzBSg
-KbbHlg//W+D7rFX/toto7vnyF/HX2IvwcVmSJa7idhF6DBlXS3ON3rZAzX4isx3w
-xPets23v9FaYWjdO8AOLvUWKJOFtpULFfGnuyAOQ79p24sfKWXwga1DyqQe8Ka/n
-xc/rrwiadxd7rE0Xgw6LkVM0RG38fRn5Scv3/DfEFd1Lo51XtQJClZDzD3S2lf/d
-KKtgj+r1MU2rjTOtw6C1lw8Asr8Aq9mJ+2opA84bcjs5Vb0QzgcHmpLZlf6v5xsh
-zejPAKLtpAETjFMCR6qkdrlP7lABNT8ijo/tXwtNvyWOjkg3BiqwK2Liu2tq+LeP
-+3OYVJDdv+aOMgZEwqWbZWF5x75I0VQ5hy1is8eP8hoUbLtM/OV3qmEyBWVKgR1k
-lXXzFWjmL5WRDG2llBlaF6e/Nqnb3TkJ7gpJ0kXf1XzWbfGy5ZCZ7EO2BuLkpgmX
-HvmQznyeFEBQqDkT8nUNcSpw4dxWPREDJGmGNIyV2JdkGBGOEP6UU27lGqjH+OA9
-N41EBxPWfB8D+atKbHH9YdqDsvybj3RLJ3M+F2wJzj3Itq05ZszF3Kop4ZbbI4qC
-cqdOf1YqzmRwqhz11c0QrTe6o5Z3TPQE75Ps7otLTy7m4DlyOoQcG+8wwNfZ3zvn
-XKLXNuU9sAsLOB4XashVaeGQoUi8c2bi0jIjvPUSRgFQBWQKo+g=
-=Q8ib
------END PGP SIGNATURE-----
-
---ZGiS0Q5IWpPtfppv--
