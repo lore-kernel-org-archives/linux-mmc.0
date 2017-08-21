@@ -1,30 +1,39 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhi: use maximum width for the sdbuf register
-Date: Mon, 21 Aug 2017 14:33:37 +0200
-Message-ID: <CAPDyKFp7Csi0Sf7aeqOvEevsJzm=tCRvqHvigDFy9Hc_isJ5SQ@mail.gmail.com>
-References: <20170809182926.669-1-wsa+renesas@sang-engineering.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: Fix clock rate passed to sunxi_mmc_clk_set_phase
+Date: Mon, 21 Aug 2017 14:33:42 +0200
+Message-ID: <CAPDyKFqqhGXzmXSVZuie++VcNJGs_9etV16MhLtMAoyB5oCQ4A@mail.gmail.com>
+References: <20170810032954.9104-1-wens@csie.org>
+Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:38022 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753141AbdHUMdi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2017 08:33:38 -0400
-Received: by mail-qt0-f175.google.com with SMTP id 57so4392912qtu.5
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2017 05:33:38 -0700 (PDT)
-In-Reply-To: <20170809182926.669-1-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sunxi+bncBDF57NG2XIHRBJ5G5PGAKGQEIOJKZEY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20170810032954.9104-1-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Biju Das <biju.das@bp.renesas.com>, Simon Horman <horms@verge.net.au>
 
-On 9 August 2017 at 20:29, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Make use of the 64 bit sdbuf width on Renesas R-Car Gen3. If the
-> registers are 8 byte apart, the width is also 64 bit. For all others,
-> the width is 32 bit, even if the registers are only 16 bit apart.
+On 10 August 2017 at 05:29, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+> sunxi_mmc_clk_set_phase expects the actual card clock rate to be passed
+> to it. When the internal divider code was reworked in commit 9a639c6073d3
+> ("mmc: sunxi: Support MMC DDR52 transfer mode with new timing mode"),
+> this requirement was missed, and the module clock rate was passed in
+> instead. This broke 8 bit DDR MMC on old controllers, as the module
+> clock rate is double the card clock rate, for which we have no valid
+> delay settings.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Fix this by applying the internal divider to the clock rate right after
+> we configure it in hardware.
+>
+> Fixes: 9a639c6073d3 ("mmc: sunxi: Support MMC DDR52 transfer mode with
+>                       new timing mode")
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
 Thanks, applied for next!
 
@@ -33,40 +42,45 @@ Uffe
 
 > ---
 >
-> Change since v1:
-> * width calculation is now fully backwards compatible. If it is not 8 byte
->   apart (which is only on Gen3), we will always default to 32 as before.
->   Thanks to Biju Das and Simon Horman for the error reports!
+> Sorry for all the regressions the A83T MMC series has caused.
+> I only caught this while testing some other patches on the H3.
+> I really hope this is the last one.
 >
-> Tested on a M3-W Salvator-X and H2 Lager (with both SDHI instances). On
-> the Lager, I could reproduce the problem with the old patch. It is gone now!
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 >
->  drivers/mmc/host/renesas_sdhi_core.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 6c7eb859ace1..da5f46a14497 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -821,6 +821,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>         rval |= div - 1;
+>         mmc_writel(host, REG_CLKCR, rval);
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index dd215723fa4312..a252145097d6a5 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -459,10 +459,11 @@ static int renesas_sdhi_multi_io_quirk(struct mmc_card *card,
+> +       /* update card clock rate to account for internal divider */
+> +       rate /= div;
+> +
+>         if (host->use_new_timings) {
+>                 /* Don't touch the delay bits */
+>                 rval = mmc_readl(host, REG_SD_NTSR);
+> @@ -828,6 +831,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>                 mmc_writel(host, REG_SD_NTSR, rval);
+>         }
 >
->  static void renesas_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
->  {
-> -       sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? DMA_ENABLE_DMASDRW : 0);
-> +       /* Iff regs are 8 byte apart, sdbuf is 64 bit. Otherwise always 32. */
-> +       int width = (host->bus_shift == 2) ? 64 : 32;
+> +       /* sunxi_mmc_clk_set_phase expects the actual card clock rate */
+>         ret = sunxi_mmc_clk_set_phase(host, ios, rate);
+>         if (ret)
+>                 return ret;
+> @@ -849,7 +853,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>                 return ret;
 >
-> -       /* enable 32bit access if DMA mode if possibile */
-> -       renesas_sdhi_sdbuf_width(host, enable ? 32 : 16);
-> +       sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? DMA_ENABLE_DMASDRW : 0);
-> +       renesas_sdhi_sdbuf_width(host, enable ? width : 16);
+>         /* And we just enabled our clock back */
+> -       mmc->actual_clock = rate / div;
+> +       mmc->actual_clock = rate;
+>
+>         return 0;
 >  }
->
->  int renesas_sdhi_probe(struct platform_device *pdev,
 > --
-> 2.11.0
+> 2.13.3
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
