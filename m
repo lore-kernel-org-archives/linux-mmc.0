@@ -1,63 +1,57 @@
-From: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
-Subject: [PATCH v3] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 21 Aug 2017 13:25:11 +0100
-Message-ID: <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v3] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Mon, 21 Aug 2017 14:43:05 +0200
+Message-ID: <20170821124305.GA4276@katana>
 References: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w@mail.gmail.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Cc: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Paterson <chris.paterson2-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-renesas-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
+ <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="ZGiS0Q5IWpPtfppv"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.zeus03.de ([194.117.254.33]:58700 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753566AbdHUMnI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Aug 2017 08:43:08 -0400
+Content-Disposition: inline
+In-Reply-To: <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Biju Das <biju.das@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
-is identical to the R-Car Gen2 family.
 
-Signed-off-by: Biju Das <biju.das-kTT6dE0pTRh9uiUsa/gSgQ@public.gmane.org>
----
-v1->v2
-    - Modified the listing SoC's description related to SoC
-      with 1 Clock and 2 Clocks
-v2->v3
-    - Fixed the trailing double quote.
-    - Updated listing SoC's description. 
+--ZGiS0Q5IWpPtfppv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This patch is compiled and tested against linux next tag
-next-20170817.
+On Mon, Aug 21, 2017 at 01:25:11PM +0100, Biju Das wrote:
+> Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
+> is identical to the R-Car Gen2 family.
+>=20
+> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
 
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index 4fd8b7a..54ef642 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -15,6 +15,8 @@ Required properties:
- 		"renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
- 		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
- 		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
-+		"renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
-+		"renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
- 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
- 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
- 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-@@ -33,10 +35,8 @@ Required properties:
- 	  If 2 clocks are specified by the hardware, you must name them as
- 	  "core" and "cd". If the controller only has 1 clock, naming is not
- 	  required.
--	  Below is the number clocks for each supported SoC:
--	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
--	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
--	   2: R7S72100
-+	  Devices which have more than 1 clock are listed below:
-+	  2: R7S72100
- 
- Optional properties:
- - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
--- 
-1.9.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--ZGiS0Q5IWpPtfppv
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlma1VUACgkQFA3kzBSg
+KbbHlg//W+D7rFX/toto7vnyF/HX2IvwcVmSJa7idhF6DBlXS3ON3rZAzX4isx3w
+xPets23v9FaYWjdO8AOLvUWKJOFtpULFfGnuyAOQ79p24sfKWXwga1DyqQe8Ka/n
+xc/rrwiadxd7rE0Xgw6LkVM0RG38fRn5Scv3/DfEFd1Lo51XtQJClZDzD3S2lf/d
+KKtgj+r1MU2rjTOtw6C1lw8Asr8Aq9mJ+2opA84bcjs5Vb0QzgcHmpLZlf6v5xsh
+zejPAKLtpAETjFMCR6qkdrlP7lABNT8ijo/tXwtNvyWOjkg3BiqwK2Liu2tq+LeP
++3OYVJDdv+aOMgZEwqWbZWF5x75I0VQ5hy1is8eP8hoUbLtM/OV3qmEyBWVKgR1k
+lXXzFWjmL5WRDG2llBlaF6e/Nqnb3TkJ7gpJ0kXf1XzWbfGy5ZCZ7EO2BuLkpgmX
+HvmQznyeFEBQqDkT8nUNcSpw4dxWPREDJGmGNIyV2JdkGBGOEP6UU27lGqjH+OA9
+N41EBxPWfB8D+atKbHH9YdqDsvybj3RLJ3M+F2wJzj3Itq05ZszF3Kop4ZbbI4qC
+cqdOf1YqzmRwqhz11c0QrTe6o5Z3TPQE75Ps7otLTy7m4DlyOoQcG+8wwNfZ3zvn
+XKLXNuU9sAsLOB4XashVaeGQoUi8c2bi0jIjvPUSRgFQBWQKo+g=
+=Q8ib
+-----END PGP SIGNATURE-----
+
+--ZGiS0Q5IWpPtfppv--
