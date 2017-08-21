@@ -1,52 +1,61 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v3 1/4] mmc: sdhci-cadence: add suspend / resume support
-Date: Mon, 21 Aug 2017 21:29:27 +0900
-Message-ID: <CAK7LNARiqFiJroxASQ2bPcigRftbU95rX5qsD5NiXWj8X_uNSA@mail.gmail.com>
-References: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
- <1502811922-9346-2-git-send-email-yamada.masahiro@socionext.com> <3b04eeee-2e29-b7d5-cef0-1dffbdf28def@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] Update DWMMC controller
+Date: Mon, 21 Aug 2017 14:32:59 +0200
+Message-ID: <CAPDyKFqSaBkpbHKkfvOxQU_uhNgh1WQ+=PQXdRRDOnFd6X_Z+Q@mail.gmail.com>
+References: <CGME20170818054821epcas2p4dd5a5a393c47c644d09d6b29747aeb0d@epcas2p4.samsung.com>
+ <36f44627-123c-d6f3-41e4-f09892895cfa@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3b04eeee-2e29-b7d5-cef0-1dffbdf28def@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:34476 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753524AbdHUMdA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2017 08:33:00 -0400
+Received: by mail-qk0-f177.google.com with SMTP id u139so81621187qka.1
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2017 05:33:00 -0700 (PDT)
+In-Reply-To: <36f44627-123c-d6f3-41e4-f09892895cfa@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
-
-
-2017-08-21 20:48 GMT+09:00 Adrian Hunter <adrian.hunter@intel.com>:
-
->> +static int sdhci_cdns_resume(struct device *dev)
->> +{
->> +     struct sdhci_host *host = dev_get_drvdata(dev);
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> +     int ret;
->> +
->> +     ret = clk_prepare_enable(pltfm_host->clk);
->> +     if (ret)
->> +             return ret;
->> +
->> +     ret = sdhci_cdns_phy_init(priv);
->> +     if (ret)
->> +             return ret;
+On 18 August 2017 at 07:48, Jaehoon Chung <jh80.chung@samsung.com> wrote:
 >
-> Perhaps clk_disable_unprepare(pltfm_host->clk)
+> Dear Ulf,
 >
->> +
->> +     return sdhci_resume_host(host);
+> Could you pull these patches to next branch?
+> If there is any issue, let me know, plz.
 >
-> Ditto on error.
+> The following changes since commit 7bb2a5d1342fcba2e32406fdb1e4c3d501ec6782:
+>
+>   Merge branch 'fixes' into next (2017-08-09 13:22:47 +0200)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git for-ulf
+>
+> for you to fetch changes up to 024d4a5a8a89f247d36fd36a2f61f53bf8eae586:
+>
+>   mmc: dw_mmc: introduce timer for broken command transfer over scheme (2017-08-18 14:44:40 +0900)
+>
+> ----------------------------------------------------------------
+> Addy Ke (1):
+>       mmc: dw_mmc: introduce timer for broken command transfer over scheme
+>
+> liwei (2):
+>       mmc: dw_mmc: move controller reset before driver init
+>       mmc: dw_mmc-k3: add sd support for hi3660
+>
+>  drivers/mmc/host/dw_mmc-k3.c | 298 +++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.c    |  60 ++++++++-
+>  drivers/mmc/host/dw_mmc.h    |   4 +
+>  3 files changed, 356 insertions(+), 6 deletions(-)
+>
+> Best Regards,
+> Jaehoon Chung
 
-Thanks.
 
-Maybe 3/4 should be fixed as well.
+Thanks, pulled into next!
 
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+Kind regards
+Uffe
