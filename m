@@ -1,54 +1,56 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: suppress errors when probe is deferred
-Date: Mon, 21 Aug 2017 16:05:39 +0300
-Message-ID: <307ce3c1-0a32-9fce-b68f-63aad2118290@intel.com>
-References: <1502970766-23541-1-git-send-email-talho@nvidia.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 3/5] dt-bindings: ti-omap-hsmmc: Document new compatible
+ for sdhci omap
+Date: Mon, 21 Aug 2017 07:21:32 -0700
+Message-ID: <20170821142132.GH6008@atomide.com>
+References: <20170821074132.4622-1-kishon@ti.com>
+ <20170821074132.4622-4-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1502970766-23541-1-git-send-email-talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Timo Alho <talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:37312 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753222AbdHUOVg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Aug 2017 10:21:36 -0400
+Content-Disposition: inline
+In-Reply-To: <20170821074132.4622-4-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 17/08/17 14:52, Timo Alho wrote:
-> Don't print error message when clk_get() returns -EPROBE_DEFER. On
-> recent Tegra chips (t186 onwards), the clocks are provided by
-> auxiliary microprocessor (bpmp) and until the driver for it is probed
-> clocks are not available.
-> 
-> While at it, change the real error message more meaningful.
-> 
-> Signed-off-by: Timo Alho <talho-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+* Kishon Vijay Abraham I <kishon@ti.com> [170821 00:42]:
+> Document the new compatible string "ti,dra7-sdhci" to be used for
+> MMC controllers in DRA7 and DRA72 SoCs.
 
-One comment below, nevertheless:
+I suggest that you add a new one sdhci-omap.txt instead.
+We are not currently parsing the all the hsmmc properties for
+sdhci.
 
-Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Then eventually when they are fully compatible, we can just
+change ti-omap-hsmmc.txt to point to the sdhci-omap.txt.
 
+Regards,
+
+Tony
+
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index f668a6f..cdde9ff 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -501,8 +501,10 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> index 0e026c151c1c..db80fdfd05d7 100644
+> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -13,6 +13,7 @@ Required properties:
+>   Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
+>   Should be "ti,omap4-hsmmc", for OMAP4 controllers
+>   Should be "ti,am33xx-hsmmc", for AM335x controllers
+> + Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+>  - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
 >  
->  	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
->  	if (IS_ERR(clk)) {
-> -		dev_err(mmc_dev(host->mmc), "clk err\n");
->  		rc = PTR_ERR(clk);
-> +		if (rc != -EPROBE_DEFER)
-> +			dev_err(&pdev->dev,
-
-Looks a bit weird sometimes using mmc_dev(host->mmc) and sometimes &pdev->dev.
-
-> +				"failed to get controller clock: %d\n", rc);
->  		goto err_clk_get;
->  	}
->  	clk_prepare_enable(clk);
+>  Optional properties:
+> -- 
+> 2.11.0
 > 
