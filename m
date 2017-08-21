@@ -1,58 +1,49 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH ] mmc: renesas_sdhi: Add r8a7743/5 support
-Date: Mon, 21 Aug 2017 10:25:23 +0200
-Message-ID: <20170821082523.GA2418@katana>
-References: <1502710766-44361-1-git-send-email-biju.das@bp.renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 02/13] mmc: core: Add members to mmc_request and
+ mmc_data for CQE's
+Date: Mon, 21 Aug 2017 12:26:19 +0300
+Message-ID: <9143f524-13ba-94a6-ec80-0b2a9275f95e@intel.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-3-git-send-email-adrian.hunter@intel.com>
+ <CACRpkda=q=9UhKnvK5Z2PF+kqa1L4CSdTzcr=xuiOUgG7z6sww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="82I3+IH0IqGh5yIs"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.zeus03.de ([194.117.254.33]:50498 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752605AbdHUIZ0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Aug 2017 04:25:26 -0400
-Content-Disposition: inline
-In-Reply-To: <1502710766-44361-1-git-send-email-biju.das@bp.renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CACRpkda=q=9UhKnvK5Z2PF+kqa1L4CSdTzcr=xuiOUgG7z6sww@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-block-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, linux-block@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Biju Das <biju.das@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
+On 20/08/17 14:29, Linus Walleij wrote:
+> On Thu, Aug 10, 2017 at 2:08 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+>> Most of the information needed to issue requests to a CQE is already in
+>> struct mmc_request and struct mmc_data. Add data block address, some flags,
+>> and the task id (tag), and allow for cmd being NULL which it is for CQE
+>> tasks.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+>> +       int                     tag;
+> 
+> Is this consistent with the block layer idea of "tag"?
 
---82I3+IH0IqGh5yIs
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+It is named "tag" because it is the block layer tag.
 
+> 
+> I am asking because I get confused.
+> 
+> I thought the block layers idea of a "tag" was some metadata
+> associated with a request. Not that I am a block layer expert.
 
->  	  Below is the number clocks for each supported SoC:
-> -	   1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
-> -	      R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
-> +	   1: SH73A0, R8A73A4, R8A7740, R8A7743, R8A7745, R8A7778, R8A7779,
-> +	      R8A7790, R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
->  	   2: R7S72100
+The block layer tag is a unique number to identify the task to the hardware
+queue.  It is typically a number from 0 up to queue depth - 1.
 
-Hmm, maybe we should convert this to only listing SoCs with two clocks?
-That will be easier to maintaine since the majority seems to have one.
+> Why can't we just name this "task_id" if that is what it is in
+> Linux terms? Does the specification call it "tag"?
 
-
---82I3+IH0IqGh5yIs
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAEBCAAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAlmamO8ACgkQFA3kzBSg
-KbZAhQ//eQYb5pxOg7/SDMdhRx8QA8awWsLI8fWdghLrchmdH1xfMfCnJGAHacq2
-frOqBHXgYbo/GiNL8SMqd72MFuviopK8AyMD7x81TtdtXb0gb5icz87HXQtABrlM
-gbROAhzDehJRcp2lwFrR98cYqobB0VTSNXm7R4rHVYOD2tWFaIEWPOMkTcBlvkNS
-/AjzqBCl8NJ4+VrxWtohNLHqUBOdTfbCDYP25A6vFaRYxj+ObDT120z522lVkt99
-N+0a1AnZemMWwmZphxv1SnuSqvzYxZZtqi51ONLILx0A6acEskEWpDDSX+PSZiS5
-zeWlspR5SslFlASUpl6nGXMKUvk+zTJqYQfptiSF1xNDlkeaGi+07BMsMEOSfhjz
-dB108iVOCzydxvwC8EVKEuJtMqjBu2hU/4QI+Nr8QELiUh3ozBDPWfSgSmlj0mdq
-r7zLuaHZCecagaL/WZbetNZ9KwY7RAFipR9aXgAty8v973ZOwMfx+kqY8QIS674r
-eVb9ctpEb1WqGV+j5Akd/W9JsrNy8x94c3lczeS3NDt1ehuoZby7raHoqNs4t9cn
-pRegQyYyOQZwKaRzUoJNElvHDLmVi/OijPfrOG9vulQ2tLHE5cHWHFOWGAcDdDiw
-N8p+GLMVurlO5mpjUyVBvaNVLTNL2Vl7vsB22x1gjycA7iMukMU=
-=lPi4
------END PGP SIGNATURE-----
-
---82I3+IH0IqGh5yIs--
+The eMMC specification calls it "task id" but the block layer calls it
+"tag".  I went with "tag" to be easier for block layer people to understand.
