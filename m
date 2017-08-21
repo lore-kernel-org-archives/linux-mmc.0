@@ -1,222 +1,122 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 1/4] mmc: sdhci-cadence: add suspend / resume support
-Date: Mon, 21 Aug 2017 14:48:53 +0300
-Message-ID: <3b04eeee-2e29-b7d5-cef0-1dffbdf28def@intel.com>
-References: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
- <1502811922-9346-2-git-send-email-yamada.masahiro@socionext.com>
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: Re: [PATCH 08/14] mmc: meson-gx: rework clock init function
+Date: Mon, 21 Aug 2017 14:05:46 +0200
+Message-ID: <1503317146.7032.3.camel@baylibre.com>
+References: <20170804174353.16486-1-jbrunet@baylibre.com>
+         <20170804174353.16486-9-jbrunet@baylibre.com> <7h4ltjoyep.fsf@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:29531 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752462AbdHULzZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Aug 2017 07:55:25 -0400
-In-Reply-To: <1502811922-9346-2-git-send-email-yamada.masahiro@socionext.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <7h4ltjoyep.fsf@baylibre.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
-Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 15/08/17 18:45, Masahiro Yamada wrote:
-> Currently, the probe function initializes the PHY, but PHY settings
-> are lost during the sleep state.  Restore the PHY registers when
-> resuming.
+On Mon, 2017-08-07 at 14:34 -0700, Kevin Hilman wrote:
+> Jerome Brunet <jbrunet@baylibre.com> writes:
 > 
-> To facilitate this, split sdhci_cdns_phy_init() into the DT parse
-> part and PHY update part so that the latter can be invoked from the
-> resume hook.
+> > Perform basic initialisation of the clk register before providing it to
+> > the CCF.
+> > 
+> > Thanks to devm, carrying the clock structure around after init is not
+> > necessary. Rework the function to remove these from the controller host
+> > data.
+> > 
+> > Finally, set initial mmc clock rate before enabling it, simplifying the
+> > exit condition.
+> > 
+> > Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+> > ---
+> >  drivers/mmc/host/meson-gx-mmc.c | 101 +++++++++++++++++++----------------
+> > -----
+> >  1 file changed, 49 insertions(+), 52 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-
+> > mmc.c
+> > index 8f9ba5190c18..4cc7d6530536 100644
+> > --- a/drivers/mmc/host/meson-gx-mmc.c
+> > +++ b/drivers/mmc/host/meson-gx-mmc.c
+> > @@ -42,10 +42,7 @@
+> >  
+> >  #define SD_EMMC_CLOCK 0x0
+> >  #define   CLK_DIV_MASK GENMASK(5, 0)
+> > -#define   CLK_DIV_MAX 63
+> >  #define   CLK_SRC_MASK GENMASK(7, 6)
+> > -#define   CLK_SRC_XTAL 0   /* external crystal */
+> > -#define   CLK_SRC_PLL 1    /* FCLK_DIV2 */
+> >  #define   CLK_CORE_PHASE_MASK GENMASK(9, 8)
+> >  #define   CLK_TX_PHASE_MASK GENMASK(11, 10)
+> >  #define   CLK_RX_PHASE_MASK GENMASK(13, 12)
+> > @@ -137,13 +134,9 @@ struct meson_host {
+> >  	spinlock_t lock;
+> >  	void __iomem *regs;
+> >  	struct clk *core_clk;
+> > -	struct clk_mux mux;
+> > -	struct clk *mux_clk;
+> > +	struct clk *signal_clk;
+> >  	unsigned long req_rate;
+> >  
+> > -	struct clk_divider cfg_div;
+> > -	struct clk *cfg_div_clk;
+> > -
+> >  	unsigned int bounce_buf_size;
+> >  	void *bounce_buf;
+> >  	dma_addr_t bounce_dma_addr;
+> > @@ -291,7 +284,7 @@ static int meson_mmc_clk_set(struct meson_host *host,
+> > unsigned long clk_rate)
+> >  		return 0;
+> >  	}
+> >  
+> > -	ret = clk_set_rate(host->cfg_div_clk, clk_rate);
+> > +	ret = clk_set_rate(host->signal_clk, clk_rate);
 > 
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> minor nit: where does the name "signal" come from?  I called this
+> "div_clk" because it's the output of the divider right before the
+> sd/emmc IP block. 
 
-Just one comment about using clk_disable_unprepare() on the error path.
+Actually, no before but inside.
 
-> ---
+> Admittedly, that's not a great name either, and I'm
+> not too picky about the naming, just curious...
+
+Well, I thought div_clk was not great name too ... since the clock is actually
+the one used for the mmc signal (as opposed to the clock gate named "core") I
+thought it was ok.
+
+In the v2, I added the handling of clock phase through CCF. With this change,
+div_clk does not make sense anymore.
+
+According to the datasheet, It should be named "core_clk" (it is the clock
+coming out of the CORE_PHASE setting), unfortunately we already used this name
+for the clock gate ... changing it would mean changing the clock names in the
+bindings as well, which would probably be very confusing.
+
+In the v2, I named it mmc_clk ... probably not great either :( If you have
+another idea, I'm happy to sed it.
+
 > 
-> Changes in v3:
->  - Use #ifdef CONFIG_PM_SLEEP instead of __maybe_unused
->  - Add own sdhci_cdns_suspend implementation to not depend on
->    the core change
+> Looking at the diagram we have since I initially wrote the driver, this
+> is more commonly referred to as device_clk.
 > 
-> Changes in v2: None
+> Anyways, if you're going to rename...
 > 
->  drivers/mmc/host/sdhci-cadence.c | 97 ++++++++++++++++++++++++++++++++++++----
->  1 file changed, 88 insertions(+), 9 deletions(-)
+> [...]
 > 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 19d5698244b5..751ba706bf03 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -67,9 +67,16 @@
->   */
->  #define SDHCI_CDNS_MAX_TUNING_LOOP	40
->  
-> +struct sdhci_cdns_phy_param {
-> +	u8 addr;
-> +	u8 data;
-> +};
-> +
->  struct sdhci_cdns_priv {
->  	void __iomem *hrs_addr;
->  	bool enhanced_strobe;
-> +	unsigned int nr_phy_params;
-> +	struct sdhci_cdns_phy_param phy_params[0];
->  };
->  
->  struct sdhci_cdns_phy_cfg {
-> @@ -115,9 +122,22 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
->  	return 0;
->  }
->  
-> -static int sdhci_cdns_phy_init(struct device_node *np,
-> -			       struct sdhci_cdns_priv *priv)
-> +static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
->  {
-> +	unsigned int count = 0;
-> +	int i;
-> +
-> +	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
-> +		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
-> +			count++;
-> +
-> +	return count;
-> +}
-> +
-> +static void sdhci_cdns_phy_param_parse(struct device_node *np,
-> +				       struct sdhci_cdns_priv *priv)
-> +{
-> +	struct sdhci_cdns_phy_param *p = priv->phy_params;
->  	u32 val;
->  	int ret, i;
->  
-> @@ -127,9 +147,19 @@ static int sdhci_cdns_phy_init(struct device_node *np,
->  		if (ret)
->  			continue;
->  
-> -		ret = sdhci_cdns_write_phy_reg(priv,
-> -					       sdhci_cdns_phy_cfgs[i].addr,
-> -					       val);
-> +		p->addr = sdhci_cdns_phy_cfgs[i].addr;
-> +		p->data = val;
-> +		p++;
-> +	}
-> +}
-> +
-> +static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
-> +{
-> +	int ret, i;
-> +
-> +	for (i = 0; i < priv->nr_phy_params; i++) {
-> +		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
-> +					       priv->phy_params[i].data);
->  		if (ret)
->  			return ret;
->  	}
-> @@ -302,6 +332,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_cdns_priv *priv;
->  	struct clk *clk;
-> +	size_t priv_size;
-> +	unsigned int nr_phy_params;
->  	int ret;
->  	struct device *dev = &pdev->dev;
->  
-> @@ -313,7 +345,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	if (ret)
->  		return ret;
->  
-> -	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, sizeof(*priv));
-> +	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
-> +	priv_size = sizeof(*priv) + sizeof(priv->phy_params[0]) * nr_phy_params;
-> +	host = sdhci_pltfm_init(pdev, &sdhci_cdns_pltfm_data, priv_size);
->  	if (IS_ERR(host)) {
->  		ret = PTR_ERR(host);
->  		goto disable_clk;
-> @@ -322,7 +356,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	pltfm_host = sdhci_priv(host);
->  	pltfm_host->clk = clk;
->  
-> -	priv = sdhci_cdns_priv(host);
-> +	priv = sdhci_pltfm_priv(pltfm_host);
-> +	priv->nr_phy_params = nr_phy_params;
->  	priv->hrs_addr = host->ioaddr;
->  	priv->enhanced_strobe = false;
->  	host->ioaddr += SDHCI_CDNS_SRS_BASE;
-> @@ -336,7 +371,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto free;
->  
-> -	ret = sdhci_cdns_phy_init(dev->of_node, priv);
-> +	sdhci_cdns_phy_param_parse(dev->of_node, priv);
-> +
-> +	ret = sdhci_cdns_phy_init(priv);
->  	if (ret)
->  		goto free;
->  
-> @@ -353,6 +390,48 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	return ret;
->  }
->  
-> +#ifdef CONFIG_PM_SLEEP
-> +static int sdhci_cdns_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
-> +
-> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +		mmc_retune_needed(host->mmc);
-> +
-> +	ret = sdhci_suspend_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +
-> +	return 0;
-> +}
-> +
-> +static int sdhci_cdns_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = sdhci_cdns_phy_init(priv);
-> +	if (ret)
-> +		return ret;
-
-Perhaps clk_disable_unprepare(pltfm_host->clk)
-
-> +
-> +	return sdhci_resume_host(host);
-
-Ditto on error.
-
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops sdhci_cdns_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_cdns_suspend, sdhci_cdns_resume)
-> +};
-> +
->  static const struct of_device_id sdhci_cdns_match[] = {
->  	{ .compatible = "socionext,uniphier-sd4hc" },
->  	{ .compatible = "cdns,sd4hc" },
-> @@ -363,7 +442,7 @@ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
->  static struct platform_driver sdhci_cdns_driver = {
->  	.driver = {
->  		.name = "sdhci-cdns",
-> -		.pm = &sdhci_pltfm_pmops,
-> +		.pm = &sdhci_cdns_pm_ops,
->  		.of_match_table = sdhci_cdns_match,
->  	},
->  	.probe = sdhci_cdns_probe,
+> >  static void meson_mmc_set_tuning_params(struct mmc_host *mmc)
+> > @@ -987,7 +984,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+> >  	dma_free_coherent(host->dev, host->bounce_buf_size,
+> >  			  host->bounce_buf, host->bounce_dma_addr);
+> >  err_div_clk:
 > 
+> ... probably should rename this too.
 
+Indeed !
+
+> 
+> Otherwise,
+> 
+> Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+> 
+> Kevin
