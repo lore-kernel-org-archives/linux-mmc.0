@@ -1,122 +1,120 @@
-From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: Re: [PATCH 08/14] mmc: meson-gx: rework clock init function
-Date: Mon, 21 Aug 2017 14:05:46 +0200
-Message-ID: <1503317146.7032.3.camel@baylibre.com>
-References: <20170804174353.16486-1-jbrunet@baylibre.com>
-         <20170804174353.16486-9-jbrunet@baylibre.com> <7h4ltjoyep.fsf@baylibre.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3 2/4] mmc: sdhci-pxav2: switch to managed clk and
+ sdhci_pltfm_unregister()
+Date: Mon, 21 Aug 2017 15:03:42 +0300
+Message-ID: <9574e0c7-4ac4-63d3-3cdf-7ca0e27a7a12@intel.com>
+References: <1502811922-9346-1-git-send-email-yamada.masahiro@socionext.com>
+ <1502811922-9346-3-git-send-email-yamada.masahiro@socionext.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <7h4ltjoyep.fsf@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kevin Hilman <khilman@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:55509 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752462AbdHUMKO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Aug 2017 08:10:14 -0400
+In-Reply-To: <1502811922-9346-3-git-send-email-yamada.masahiro@socionext.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org
+Cc: Piotr Sroka <piotrs@cadence.com>, Hu Ziji <huziji@marvell.com>, Christian Daudt <csd@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Hao <haokexin@gmail.com>, Olof Johansson <olof@lixom.net>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Jisheng Zhang <jszhang@marvell.com>
 
-On Mon, 2017-08-07 at 14:34 -0700, Kevin Hilman wrote:
-> Jerome Brunet <jbrunet@baylibre.com> writes:
+On 15/08/17 18:45, Masahiro Yamada wrote:
+> The difference between sdhci_pxav2_remove() and sdhci_pltfm_unregister()
+> is clk_put().  It will go away by using the managed resource clk, then
+> sdhci_pltfm_unregister() can be reused.
 > 
-> > Perform basic initialisation of the clk register before providing it to
-> > the CCF.
-> > 
-> > Thanks to devm, carrying the clock structure around after init is not
-> > necessary. Rework the function to remove these from the controller host
-> > data.
-> > 
-> > Finally, set initial mmc clock rate before enabling it, simplifying the
-> > exit condition.
-> > 
-> > Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-> > ---
-> >  drivers/mmc/host/meson-gx-mmc.c | 101 +++++++++++++++++++----------------
-> > -----
-> >  1 file changed, 49 insertions(+), 52 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-
-> > mmc.c
-> > index 8f9ba5190c18..4cc7d6530536 100644
-> > --- a/drivers/mmc/host/meson-gx-mmc.c
-> > +++ b/drivers/mmc/host/meson-gx-mmc.c
-> > @@ -42,10 +42,7 @@
-> >  
-> >  #define SD_EMMC_CLOCK 0x0
-> >  #define   CLK_DIV_MASK GENMASK(5, 0)
-> > -#define   CLK_DIV_MAX 63
-> >  #define   CLK_SRC_MASK GENMASK(7, 6)
-> > -#define   CLK_SRC_XTAL 0   /* external crystal */
-> > -#define   CLK_SRC_PLL 1    /* FCLK_DIV2 */
-> >  #define   CLK_CORE_PHASE_MASK GENMASK(9, 8)
-> >  #define   CLK_TX_PHASE_MASK GENMASK(11, 10)
-> >  #define   CLK_RX_PHASE_MASK GENMASK(13, 12)
-> > @@ -137,13 +134,9 @@ struct meson_host {
-> >  	spinlock_t lock;
-> >  	void __iomem *regs;
-> >  	struct clk *core_clk;
-> > -	struct clk_mux mux;
-> > -	struct clk *mux_clk;
-> > +	struct clk *signal_clk;
-> >  	unsigned long req_rate;
-> >  
-> > -	struct clk_divider cfg_div;
-> > -	struct clk *cfg_div_clk;
-> > -
-> >  	unsigned int bounce_buf_size;
-> >  	void *bounce_buf;
-> >  	dma_addr_t bounce_dma_addr;
-> > @@ -291,7 +284,7 @@ static int meson_mmc_clk_set(struct meson_host *host,
-> > unsigned long clk_rate)
-> >  		return 0;
-> >  	}
-> >  
-> > -	ret = clk_set_rate(host->cfg_div_clk, clk_rate);
-> > +	ret = clk_set_rate(host->signal_clk, clk_rate);
+> Also, rename the jump labels to say what the goto does. (Coding style
+> suggested by Documentation/process/coding-style.rst)
 > 
-> minor nit: where does the name "signal" come from?  I called this
-> "div_clk" because it's the output of the divider right before the
-> sd/emmc IP block. 
+> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-Actually, no before but inside.
+Cc'ing Jisheng Zhang, but looks ok to me.
 
-> Admittedly, that's not a great name either, and I'm
-> not too picky about the naming, just curious...
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Well, I thought div_clk was not great name too ... since the clock is actually
-the one used for the mmc signal (as opposed to the clock gate named "core") I
-thought it was ok.
+> ---
+> 
+> Changes in v3:
+>   - Newly added
+> 
+> Changes in v2: None
+> 
+>  drivers/mmc/host/sdhci-pxav2.c | 30 +++++++-----------------------
+>  1 file changed, 7 insertions(+), 23 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index 995083ce1c46..8986f9d9cf98 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -178,17 +178,17 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>  
+>  	pltfm_host = sdhci_priv(host);
+>  
+> -	clk = clk_get(dev, "PXA-SDHCLK");
+> +	clk = devm_clk_get(dev, "PXA-SDHCLK");
+>  	if (IS_ERR(clk)) {
+>  		dev_err(dev, "failed to get io clock\n");
+>  		ret = PTR_ERR(clk);
+> -		goto err_clk_get;
+> +		goto free;
+>  	}
+>  	pltfm_host->clk = clk;
+>  	ret = clk_prepare_enable(clk);
+>  	if (ret) {
+>  		dev_err(&pdev->dev, "failed to enable io clock\n");
+> -		goto err_clk_enable;
+> +		goto free;
+>  	}
+>  
+>  	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
+> @@ -223,34 +223,18 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>  	ret = sdhci_add_host(host);
+>  	if (ret) {
+>  		dev_err(&pdev->dev, "failed to add host\n");
+> -		goto err_add_host;
+> +		goto disable_clk;
+>  	}
+>  
+>  	return 0;
+>  
+> -err_add_host:
+> +disable_clk:
+>  	clk_disable_unprepare(clk);
+> -err_clk_enable:
+> -	clk_put(clk);
+> -err_clk_get:
+> +free:
+>  	sdhci_pltfm_free(pdev);
+>  	return ret;
+>  }
+>  
+> -static int sdhci_pxav2_remove(struct platform_device *pdev)
+> -{
+> -	struct sdhci_host *host = platform_get_drvdata(pdev);
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -
+> -	sdhci_remove_host(host, 1);
+> -
+> -	clk_disable_unprepare(pltfm_host->clk);
+> -	clk_put(pltfm_host->clk);
+> -	sdhci_pltfm_free(pdev);
+> -
+> -	return 0;
+> -}
+> -
+>  static struct platform_driver sdhci_pxav2_driver = {
+>  	.driver		= {
+>  		.name	= "sdhci-pxav2",
+> @@ -258,7 +242,7 @@ static struct platform_driver sdhci_pxav2_driver = {
+>  		.pm	= &sdhci_pltfm_pmops,
+>  	},
+>  	.probe		= sdhci_pxav2_probe,
+> -	.remove		= sdhci_pxav2_remove,
+> +	.remove		= sdhci_pltfm_unregister,
+>  };
+>  
+>  module_platform_driver(sdhci_pxav2_driver);
+> 
 
-In the v2, I added the handling of clock phase through CCF. With this change,
-div_clk does not make sense anymore.
-
-According to the datasheet, It should be named "core_clk" (it is the clock
-coming out of the CORE_PHASE setting), unfortunately we already used this name
-for the clock gate ... changing it would mean changing the clock names in the
-bindings as well, which would probably be very confusing.
-
-In the v2, I named it mmc_clk ... probably not great either :( If you have
-another idea, I'm happy to sed it.
-
-> 
-> Looking at the diagram we have since I initially wrote the driver, this
-> is more commonly referred to as device_clk.
-> 
-> Anyways, if you're going to rename...
-> 
-> [...]
-> 
-> >  static void meson_mmc_set_tuning_params(struct mmc_host *mmc)
-> > @@ -987,7 +984,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
-> >  	dma_free_coherent(host->dev, host->bounce_buf_size,
-> >  			  host->bounce_buf, host->bounce_dma_addr);
-> >  err_div_clk:
-> 
-> ... probably should rename this too.
-
-Indeed !
-
-> 
-> Otherwise,
-> 
-> Reviewed-by: Kevin Hilman <khilman@baylibre.com>
-> 
-> Kevin
