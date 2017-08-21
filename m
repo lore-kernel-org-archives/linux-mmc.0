@@ -1,159 +1,257 @@
 From: Jerome Brunet <jbrunet@baylibre.com>
-Subject: [PATCH v2 10/16] mmc: meson-gx: work around clk-stop issue
-Date: Mon, 21 Aug 2017 18:02:55 +0200
-Message-ID: <20170821160301.21899-11-jbrunet@baylibre.com>
+Subject: [PATCH v2 16/16] mmc: meson-gx: rework tuning function
+Date: Mon, 21 Aug 2017 18:03:01 +0200
+Message-ID: <20170821160301.21899-17-jbrunet@baylibre.com>
 References: <20170821160301.21899-1-jbrunet@baylibre.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:37480 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754454AbdHUQDR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2017 12:03:17 -0400
-Received: by mail-wr0-f169.google.com with SMTP id z91so101575557wrc.4
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2017 09:03:17 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20170821160301.21899-1-jbrunet@baylibre.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>
 Cc: Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-It seems that the mmc clock is also used and required, somehow, by
-the controller it self.
+Rework tuning function of the rx phase. Now that the phase can be
+more precisely set using CCF, test more phase setting and find the
+largest working window. Then the tuning selected is the one at the
+center of the window.
 
-It is shown during init, when writing to CFG while the divider is set
-to 0 will crash the SoC. During voltage switch, the controller may crash
-and the card may then fail to exit busy state if the clock is stopped.
-
-To avoid this, it is best to keep the clock running for the controller,
-except during rate change. However, we still need to be able to gate
-the clock out of the SoC. Let's use the pinmux for this, and fallback
-to gpio mode (pulled-down) when we need to gate the clock
+This rework allows to use new modes, such as UHS SDR50
 
 Reviewed-by: Kevin Hilman <khilman@baylibre.com>
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 74 +++++++++++++++++++++++++++++++++++++----
- 1 file changed, 68 insertions(+), 6 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 161 +++++++++++++++++++++++++++-------------
+ 1 file changed, 111 insertions(+), 50 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 0d3416dae8cf..c37e31dc709e 100644
+index 290631d46a4b..137b93227629 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -137,6 +137,10 @@ struct meson_host {
- 	struct clk *mmc_clk;
- 	unsigned long req_rate;
+@@ -49,6 +49,8 @@
+ #define   CLK_TX_DELAY_MASK GENMASK(19, 16)
+ #define   CLK_RX_DELAY_MASK GENMASK(23, 20)
+ #define   CLK_DELAY_STEP_PS 200
++#define   CLK_PHASE_STEP 30
++#define   CLK_PHASE_POINT_NUM (360 / CLK_PHASE_STEP)
+ #define   CLK_ALWAYS_ON BIT(24)
  
-+	struct pinctrl *pinctrl;
-+	struct pinctrl_state *pins_default;
-+	struct pinctrl_state *pins_clk_gate;
-+
- 	unsigned int bounce_buf_size;
- 	void *bounce_buf;
- 	dma_addr_t bounce_dma_addr;
-@@ -272,6 +276,42 @@ static bool meson_mmc_timing_is_ddr(struct mmc_ios *ios)
- 	return false;
- }
+ #define SD_EMMC_DELAY 0x4
+@@ -119,12 +121,6 @@
  
-+/*
-+ * Gating the clock on this controller is tricky.  It seems the mmc clock
-+ * is also used by the controller.  It may crash during some operation if the
-+ * clock is stopped.  The safest thing to do, whenever possible, is to keep
-+ * clock running at stop it at the pad using the pinmux.
-+ */
-+static void meson_mmc_clk_gate(struct meson_host *host)
-+{
-+	u32 cfg;
-+
-+	if (host->pins_clk_gate) {
-+		pinctrl_select_state(host->pinctrl, host->pins_clk_gate);
-+	} else {
-+		/*
-+		 * If the pinmux is not provided - default to the classic and
-+		 * unsafe method
-+		 */
-+		cfg = readl(host->regs + SD_EMMC_CFG);
-+		cfg |= CFG_STOP_CLOCK;
-+		writel(cfg, host->regs + SD_EMMC_CFG);
-+	}
-+}
-+
-+static void meson_mmc_clk_ungate(struct meson_host *host)
-+{
-+	u32 cfg;
-+
-+	if (host->pins_clk_gate)
-+		pinctrl_select_state(host->pinctrl, host->pins_default);
-+
-+	/* Make sure the clock is not stopped in the controller */
-+	cfg = readl(host->regs + SD_EMMC_CFG);
-+	cfg &= ~CFG_STOP_CLOCK;
-+	writel(cfg, host->regs + SD_EMMC_CFG);
-+}
-+
- static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
- {
- 	struct mmc_host *mmc = host->mmc;
-@@ -288,9 +328,7 @@ static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
- 		return 0;
+ #define MUX_CLK_NUM_PARENTS 2
  
- 	/* stop clock */
--	cfg = readl(host->regs + SD_EMMC_CFG);
--	cfg |= CFG_STOP_CLOCK;
--	writel(cfg, host->regs + SD_EMMC_CFG);
-+	meson_mmc_clk_gate(host);
- 	host->req_rate = 0;
+-struct meson_tuning_params {
+-	unsigned int core_phase;
+-	unsigned int tx_phase;
+-	unsigned int rx_phase;
+-};
+-
+ struct sd_emmc_desc {
+ 	u32 cmd_cfg;
+ 	u32 cmd_arg;
+@@ -155,7 +151,6 @@ struct meson_host {
+ 	struct sd_emmc_desc *descs;
+ 	dma_addr_t descs_dma_addr;
  
- 	if (!rate) {
-@@ -299,6 +337,11 @@ static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
- 		return 0;
- 	}
+-	struct meson_tuning_params tp;
+ 	bool vqmmc_enabled;
+ };
  
-+	/* Stop the clock during rate change to avoid glitches */
-+	cfg = readl(host->regs + SD_EMMC_CFG);
-+	cfg |= CFG_STOP_CLOCK;
-+	writel(cfg, host->regs + SD_EMMC_CFG);
-+
- 	ret = clk_set_rate(host->mmc_clk, rate);
- 	if (ret) {
- 		dev_err(host->dev, "Unable to set cfg_div_clk to %lu. ret=%d\n",
-@@ -318,9 +361,7 @@ static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
- 		dev_dbg(host->dev, "requested rate was %u\n", ios->clock);
- 
- 	/* (re)start clock */
--	cfg = readl(host->regs + SD_EMMC_CFG);
--	cfg &= ~CFG_STOP_CLOCK;
--	writel(cfg, host->regs + SD_EMMC_CFG);
-+	meson_mmc_clk_ungate(host);
- 
+@@ -458,13 +453,6 @@ static int meson_mmc_clk_set(struct meson_host *host, struct mmc_ios *ios)
  	return 0;
  }
-@@ -932,6 +973,27 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 		goto free_host;
+ 
+-static void meson_mmc_set_phase_params(struct meson_host *host)
+-{
+-	clk_set_phase(host->mmc_clk, host->tp.core_phase);
+-	clk_set_phase(host->tx_clk, host->tp.tx_phase);
+-	clk_set_phase(host->rx_clk, host->tp.rx_phase);
+-}
+-
+ /*
+  * The SD/eMMC IP block has an internal mux and divider used for
+  * generating the MMC clock.  Use the clock framework to create and
+@@ -617,18 +605,122 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	if (WARN_ON(PTR_ERR_OR_ZERO(host->rx_clk)))
+ 		return PTR_ERR(host->rx_clk);
+ 
+-	/* Set the initial phase parameters */
+-	meson_mmc_set_phase_params(host);
+-
+ 	/* init SD_EMMC_CLOCK to sane defaults w/min clock rate */
+ 	host->mmc->f_min = clk_round_rate(host->mmc_clk, 400000);
+ 	ret = clk_set_rate(host->mmc_clk, host->mmc->f_min);
+ 	if (ret)
+ 		return ret;
+ 
++	/*
++	 * Set phases : These values are mostly the datasheet recommended ones
++	 * except for the Tx phase. Datasheet recommends 180 but some cards
++	 * fail at initialisation with it. 270 works just fine, it fixes these
++	 * initialisation issues and enable eMMC DDR52 mode.
++	 */
++	clk_set_phase(host->mmc_clk, 180);
++	clk_set_phase(host->tx_clk, 270);
++	clk_set_phase(host->rx_clk, 0);
++
+ 	return clk_prepare_enable(host->mmc_clk);
+ }
+ 
++static void meson_mmc_shift_map(unsigned long *map, unsigned long shift)
++{
++	DECLARE_BITMAP(left, CLK_PHASE_POINT_NUM);
++	DECLARE_BITMAP(right, CLK_PHASE_POINT_NUM);
++
++	/*
++	 * shift the bitmap right and reintroduce the dropped bits on the left
++	 * of the bitmap
++	 */
++	bitmap_shift_right(right, map, shift, CLK_PHASE_POINT_NUM);
++	bitmap_shift_left(left, map, CLK_PHASE_POINT_NUM - shift,
++			  CLK_PHASE_POINT_NUM);
++	bitmap_or(map, left, right, CLK_PHASE_POINT_NUM);
++}
++
++static void meson_mmc_find_next_region(unsigned long *map,
++				       unsigned long *start,
++				       unsigned long *stop)
++{
++	*start = find_next_bit(map, CLK_PHASE_POINT_NUM, *start);
++	*stop = find_next_zero_bit(map, CLK_PHASE_POINT_NUM, *start);
++}
++
++static int meson_mmc_find_tuning_point(unsigned long *test)
++{
++	unsigned long shift, stop, offset = 0, start = 0, size = 0;
++
++	/* Get the all good/all bad situation out the way */
++	if (bitmap_full(test, CLK_PHASE_POINT_NUM))
++		return 0; /* All points are good so point 0 will do */
++	else if (bitmap_empty(test, CLK_PHASE_POINT_NUM))
++		return -EIO; /* No successful tuning point */
++
++	/*
++	 * Now we know there is a least one region find. Make sure it does
++	 * not wrap by the shifting the bitmap if necessary
++	 */
++	shift = find_first_zero_bit(test, CLK_PHASE_POINT_NUM);
++	if (shift != 0)
++		meson_mmc_shift_map(test, shift);
++
++	while (start < CLK_PHASE_POINT_NUM) {
++		meson_mmc_find_next_region(test, &start, &stop);
++
++		if ((stop - start) > size) {
++			offset = start;
++			size = stop - start;
++		}
++
++		start = stop;
++	}
++
++	/* Get the center point of the region */
++	offset += (size / 2);
++
++	/* Shift the result back */
++	offset = (offset + shift) % CLK_PHASE_POINT_NUM;
++
++	return offset;
++}
++
++static int meson_mmc_clk_phase_tuning(struct mmc_host *mmc, u32 opcode,
++				      struct clk *clk)
++{
++	int point, ret;
++	DECLARE_BITMAP(test, CLK_PHASE_POINT_NUM);
++
++	dev_dbg(mmc_dev(mmc), "%s phase/delay tunning...\n",
++		__clk_get_name(clk));
++	bitmap_zero(test, CLK_PHASE_POINT_NUM);
++
++	/* Explore tuning points */
++	for (point = 0; point < CLK_PHASE_POINT_NUM; point++) {
++		clk_set_phase(clk, point * CLK_PHASE_STEP);
++		ret = mmc_send_tuning(mmc, opcode, NULL);
++		if (!ret)
++			set_bit(point, test);
++	}
++
++	/* Find the optimal tuning point and apply it */
++	point = meson_mmc_find_tuning_point(test);
++	if (point < 0)
++		return point; /* tuning failed */
++
++	clk_set_phase(clk, point * CLK_PHASE_STEP);
++	dev_dbg(mmc_dev(mmc), "success with phase: %d\n",
++		clk_get_phase(clk));
++	return 0;
++}
++
++static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
++{
++	struct meson_host *host = mmc_priv(mmc);
++
++	return meson_mmc_clk_phase_tuning(mmc, opcode, host->rx_clk);
++}
++
+ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+@@ -667,6 +759,8 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				host->vqmmc_enabled = true;
+ 		}
+ 
++		/* Reset rx phase */
++		clk_set_phase(host->rx_clk, 0);
+ 		break;
  	}
  
-+	host->pinctrl = devm_pinctrl_get(&pdev->dev);
-+	if (IS_ERR(host->pinctrl)) {
-+		ret = PTR_ERR(host->pinctrl);
-+		goto free_host;
-+	}
-+
-+	host->pins_default = pinctrl_lookup_state(host->pinctrl,
-+						  PINCTRL_STATE_DEFAULT);
-+	if (IS_ERR(host->pins_default)) {
-+		ret = PTR_ERR(host->pins_default);
-+		goto free_host;
-+	}
-+
-+	host->pins_clk_gate = pinctrl_lookup_state(host->pinctrl,
-+						   "clk-gate");
-+	if (IS_ERR(host->pins_clk_gate)) {
-+		dev_warn(&pdev->dev,
-+			 "can't get clk-gate pinctrl, using clk_stop bit\n");
-+		host->pins_clk_gate = NULL;
-+	}
-+
- 	host->core_clk = devm_clk_get(&pdev->dev, "core");
- 	if (IS_ERR(host->core_clk)) {
- 		ret = PTR_ERR(host->core_clk);
+@@ -990,29 +1084,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
+ 
+-static int meson_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+-{
+-	struct meson_host *host = mmc_priv(mmc);
+-	struct meson_tuning_params tp_old = host->tp;
+-	int ret = -EINVAL, i, cmd_error;
+-
+-	dev_info(mmc_dev(mmc), "(re)tuning...\n");
+-
+-	for (i = 0; i < 360; i += 90) {
+-		host->tp.rx_phase = i;
+-		/* exclude the active parameter set if retuning */
+-		if (!memcmp(&tp_old, &host->tp, sizeof(tp_old)) &&
+-		    mmc->doing_retune)
+-			continue;
+-		meson_mmc_set_phase_params(host);
+-		ret = mmc_send_tuning(mmc, opcode, &cmd_error);
+-		if (!ret)
+-			break;
+-	}
+-
+-	return ret;
+-}
+-
+ /*
+  * NOTE: we only need this until the GPIO/pinctrl driver can handle
+  * interrupts.  For now, the MMC core will use this for polling.
+@@ -1158,16 +1229,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto free_host;
+ 
+-        /*
+-	 * Set phases : These values are mostly the datasheet recommended ones
+-	 * except for the Tx phase. Datasheet recommends 180 but some cards
+-	 * fail at initialisation with it. 270 works just fine, it fixes these
+-	 * initialisation issues and enable eMMC DDR52 mode.
+-	 */
+-	host->tp.core_phase = 180;
+-	host->tp.tx_phase = 270;
+-	host->tp.rx_phase = 0;
+-
+ 	ret = meson_mmc_clk_init(host);
+ 	if (ret)
+ 		goto err_core_clk;
 -- 
 2.9.5
-
