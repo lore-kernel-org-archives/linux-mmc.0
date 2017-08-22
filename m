@@ -1,69 +1,88 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 04/16] mmc: meson-gx: use _irqsave variant of spinlock
-Date: Tue, 22 Aug 2017 13:08:46 +0200
-Message-ID: <CAPDyKFpoOc+1WMqLMOwhGkifP-Zp3GS7wTSkHmBUk4Pf0Dh+DQ@mail.gmail.com>
-References: <20170821160301.21899-1-jbrunet@baylibre.com> <20170821160301.21899-5-jbrunet@baylibre.com>
+Subject: Re: [PATCH V5 06/13] mmc: core: Remove unused MMC_CAP2_PACKED_CMD
+Date: Tue, 22 Aug 2017 13:12:44 +0200
+Message-ID: <CAPDyKFoZoLeemWtzDQTwkhwa9uCTqf7JONbsPBcxypCamp5i8w@mail.gmail.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-7-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:36974 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932350AbdHVLIr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:08:47 -0400
-Received: by mail-qk0-f173.google.com with SMTP id z18so95203773qka.4
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:08:47 -0700 (PDT)
-In-Reply-To: <20170821160301.21899-5-jbrunet@baylibre.com>
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:35220 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932350AbdHVLMq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:12:46 -0400
+Received: by mail-qt0-f179.google.com with SMTP id x36so26400036qtx.2
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:12:45 -0700 (PDT)
+In-Reply-To: <1502366898-23691-7-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 21 August 2017 at 18:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
-> spinlock used in interrupt handler should use the _irqsave variant
+On 10 August 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Packed commands support was removed but some bits got left behind. Remove
+> them.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Exactly why is that needed?
-
->
-> Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
-> Reviewed-by: Kevin Hilman <khilman@baylibre.com>
-> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 8a74a048db88..a399fbd415f4 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -727,6 +727,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->         struct mmc_command *cmd;
->         struct mmc_data *data;
->         u32 irq_en, status, raw_status;
-> +       unsigned long flag;
->         irqreturn_t ret = IRQ_HANDLED;
->
->         if (WARN_ON(!host))
-> @@ -739,7 +740,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->
->         data = cmd->data;
->
-> -       spin_lock(&host->lock);
-> +       spin_lock_irqsave(&host->lock, flag);
->         irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
->         raw_status = readl(host->regs + SD_EMMC_STATUS);
->         status = raw_status & irq_en;
-> @@ -806,7 +807,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->         if (ret == IRQ_HANDLED)
->                 meson_mmc_request_done(host->mmc, cmd->mrq);
->
-> -       spin_unlock(&host->lock);
-> +       spin_unlock_irqrestore(&host->lock, flag);
->         return ret;
->  }
->
-> --
-> 2.9.5
->
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/mmc.c   | 23 -----------------------
+>  include/linux/mmc/host.h |  4 ----
+>  2 files changed, 27 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index adb5c88fd054..5fcb8d721224 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1790,29 +1790,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>          */
+>         card->reenable_cmdq = card->ext_csd.cmdq_en;
+>
+> -       /*
+> -        * The mandatory minimum values are defined for packed command.
+> -        * read: 5, write: 3
+> -        */
+> -       if (card->ext_csd.max_packed_writes >= 3 &&
+> -           card->ext_csd.max_packed_reads >= 5 &&
+> -           host->caps2 & MMC_CAP2_PACKED_CMD) {
+> -               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -                               EXT_CSD_EXP_EVENTS_CTRL,
+> -                               EXT_CSD_PACKED_EVENT_EN,
+> -                               card->ext_csd.generic_cmd6_time);
+> -               if (err && err != -EBADMSG)
+> -                       goto free_card;
+> -               if (err) {
+> -                       pr_warn("%s: Enabling packed event failed\n",
+> -                               mmc_hostname(card->host));
+> -                       card->ext_csd.packed_event_en = 0;
+> -                       err = 0;
+> -               } else {
+> -                       card->ext_csd.packed_event_en = 1;
+> -               }
+> -       }
+> -
+>         if (!oldcard)
+>                 host->card = card;
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 89e1d7e2953e..5f3eb4a0373f 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -335,10 +335,6 @@ struct mmc_host {
+>                                  MMC_CAP2_HS200_1_2V_SDR)
+>  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /* Card-detect signal active high */
+>  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /* Write-protect signal active high */
+> -#define MMC_CAP2_PACKED_RD     (1 << 12)       /* Allow packed read */
+> -#define MMC_CAP2_PACKED_WR     (1 << 13)       /* Allow packed write */
+> -#define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+> -                                MMC_CAP2_PACKED_WR)
+>  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power up before scan */
+>  #define MMC_CAP2_HS400_1_8V    (1 << 15)       /* Can support HS400 1.8V */
+>  #define MMC_CAP2_HS400_1_2V    (1 << 16)       /* Can support HS400 1.2V */
+> --
+> 1.9.1
+>
