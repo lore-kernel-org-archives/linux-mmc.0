@@ -1,68 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-msm: Enable delay circuit calibration clocks
-Date: Tue, 22 Aug 2017 12:45:43 +0200
-Message-ID: <CAPDyKFphMcVfbPUacG-iJEhwT0m6uKXFs6wjgS=YXOK2c_bqEA@mail.gmail.com>
-References: <20170818175506.5035-1-bjorn.andersson@linaro.org> <20170818175506.5035-3-bjorn.andersson@linaro.org>
+Subject: Re: [PATCH v2 04/16] mmc: meson-gx: use _irqsave variant of spinlock
+Date: Tue, 22 Aug 2017 13:08:46 +0200
+Message-ID: <CAPDyKFpoOc+1WMqLMOwhGkifP-Zp3GS7wTSkHmBUk4Pf0Dh+DQ@mail.gmail.com>
+References: <20170821160301.21899-1-jbrunet@baylibre.com> <20170821160301.21899-5-jbrunet@baylibre.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170818175506.5035-3-bjorn.andersson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:36974 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932350AbdHVLIr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:08:47 -0400
+Received: by mail-qk0-f173.google.com with SMTP id z18so95203773qka.4
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:08:47 -0700 (PDT)
+In-Reply-To: <20170821160301.21899-5-jbrunet@baylibre.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-[...]
+On 21 August 2017 at 18:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
+> spinlock used in interrupt handler should use the _irqsave variant
 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 71e01cbc38b6..7b47906ba447 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -131,7 +131,7 @@ struct sdhci_msm_host {
->         struct clk *pclk;       /* SDHC peripheral bus clock */
->         struct clk *bus_clk;    /* SDHC bus voter clock */
->         struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
-> -       struct clk_bulk_data bulk_clks[2];
-> +       struct clk_bulk_data bulk_clks[4];
->         unsigned long clk_rate;
->         struct mmc_host *mmc;
->         bool use_14lpp_dll_reset;
-> @@ -1125,6 +1125,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host;
->         struct sdhci_msm_host *msm_host;
->         struct resource *core_memres;
-> +       struct clk *clk;
->         int ret;
->         u16 host_version, core_minor;
->         u32 core_version, config;
-> @@ -1194,6 +1195,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->         msm_host->bulk_clks[0].clk = msm_host->clk;
->         msm_host->bulk_clks[1].clk = msm_host->pclk;
+Exactly why is that needed?
+
 >
-> +       clk = devm_clk_get(&pdev->dev, "cal");
-> +       if (!IS_ERR(clk))
-> +               msm_host->bulk_clks[2].clk = clk;
-> +
-> +       clk = devm_clk_get(&pdev->dev, "sleep");
-> +       if (!IS_ERR(clk))
-> +               msm_host->bulk_clks[3].clk = clk;
-> +
-
-First, both these clocks needs to be documented in DT doc.
-
-Second, I think you should initialize bulk_clks[2|3] to NULL, in case
-the new optional clocks can't be fetched.
-
->         ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
->                                       msm_host->bulk_clks);
->         if (ret)
+> Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+> Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 8a74a048db88..a399fbd415f4 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -727,6 +727,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         struct mmc_command *cmd;
+>         struct mmc_data *data;
+>         u32 irq_en, status, raw_status;
+> +       unsigned long flag;
+>         irqreturn_t ret = IRQ_HANDLED;
+>
+>         if (WARN_ON(!host))
+> @@ -739,7 +740,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>
+>         data = cmd->data;
+>
+> -       spin_lock(&host->lock);
+> +       spin_lock_irqsave(&host->lock, flag);
+>         irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
+>         raw_status = readl(host->regs + SD_EMMC_STATUS);
+>         status = raw_status & irq_en;
+> @@ -806,7 +807,7 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         if (ret == IRQ_HANDLED)
+>                 meson_mmc_request_done(host->mmc, cmd->mrq);
+>
+> -       spin_unlock(&host->lock);
+> +       spin_unlock_irqrestore(&host->lock, flag);
+>         return ret;
+>  }
+>
 > --
-> 2.12.0
+> 2.9.5
 >
-
-Another observation is the number of clocks for this device. In some
-cases, now six clocks are needed!? Is that really correct? Just wanted
-to point it out as it seems a bit too much. :-)
 
 Kind regards
 Uffe
