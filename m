@@ -1,29 +1,29 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V5 04/13] mmc: core: Turn off CQE before sending commands
-Date: Tue, 22 Aug 2017 13:13:21 +0200
-Message-ID: <CAPDyKFqZxZ4kNHEdSiFwRLKu5x3kzfreQHJBkWwGKAC9tHfkGA@mail.gmail.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-5-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v3] mmc: renesas_sdhi: Add r8a7743/5 support
+Date: Tue, 22 Aug 2017 13:13:28 +0200
+Message-ID: <CAPDyKFpWDP-XqRahy2YHgZZ+c_q4wP3jAboJrJAdWtt=Gukj5A@mail.gmail.com>
+References: <CAMuHMdWUxxp75u1VSLY3WnObmhSMDvP3skr9Uf3rV4Bf-ixy_w@mail.gmail.com>
+ <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:34597 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932484AbdHVLNW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:13:22 -0400
-Received: by mail-qt0-f174.google.com with SMTP id p10so1174900qte.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:13:22 -0700 (PDT)
-In-Reply-To: <1502366898-23691-5-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:35411 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932484AbdHVLNa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:13:30 -0400
+Received: by mail-qt0-f181.google.com with SMTP id x36so26407025qtx.2
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:13:29 -0700 (PDT)
+In-Reply-To: <1503318311-48664-1-git-send-email-biju.das@bp.renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Biju Das <biju.das@bp.renesas.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Chris Paterson <chris.paterson2@renesas.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 10 August 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> CQE needs to be off for the host controller to accept non-CQ commands. Turn
-> off the CQE before sending commands, and ensure it is off in any reset or
-> power management paths, or re-tuning.
+On 21 August 2017 at 14:25, Biju Das <biju.das@bp.renesas.com> wrote:
+> Add support for r8a7743/5 SoC. Renesas RZ/G1[ME] (R8A7743/5) SDHI
+> is identical to the R-Car Gen2 family.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Biju Das <biju.das@bp.renesas.com>
 
 Thanks, applied for next!
 
@@ -31,43 +31,45 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
+> v1->v2
+>     - Modified the listing SoC's description related to SoC
+>       with 1 Clock and 2 Clocks
+> v2->v3
+>     - Fixed the trailing double quote.
+>     - Updated listing SoC's description.
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 6177eb09bf1b..29544aa2824a 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -260,6 +260,9 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+> This patch is compiled and tested against linux next tag
+> next-20170817.
 >
->         trace_mmc_request_start(host, mrq);
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 >
-> +       if (host->cqe_on)
-> +               host->cqe_ops->cqe_off(host);
-> +
->         host->ops->request(host, mrq);
->  }
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> index 4fd8b7a..54ef642 100644
+> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -15,6 +15,8 @@ Required properties:
+>                 "renesas,sdhi-r7s72100" - SDHI IP on R7S72100 SoC
+>                 "renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+>                 "renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
+> +               "renesas,sdhi-r8a7743" - SDHI IP on R8A7743 SoC
+> +               "renesas,sdhi-r8a7745" - SDHI IP on R8A7745 SoC
+>                 "renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+>                 "renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+>                 "renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+> @@ -33,10 +35,8 @@ Required properties:
+>           If 2 clocks are specified by the hardware, you must name them as
+>           "core" and "cd". If the controller only has 1 clock, naming is not
+>           required.
+> -         Below is the number clocks for each supported SoC:
+> -          1: SH73A0, R8A73A4, R8A7740, R8A7778, R8A7779, R8A7790
+> -             R8A7791, R8A7792, R8A7793, R8A7794, R8A7795, R8A7796
+> -          2: R7S72100
+> +         Devices which have more than 1 clock are listed below:
+> +         2: R7S72100
 >
-> @@ -979,6 +982,9 @@ int mmc_execute_tuning(struct mmc_card *card)
->         if (!host->ops->execute_tuning)
->                 return 0;
->
-> +       if (host->cqe_on)
-> +               host->cqe_ops->cqe_off(host);
-> +
->         if (mmc_card_mmc(card))
->                 opcode = MMC_SEND_TUNING_BLOCK_HS200;
->         else
-> @@ -1018,6 +1024,9 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
->   */
->  void mmc_set_initial_state(struct mmc_host *host)
->  {
-> +       if (host->cqe_on)
-> +               host->cqe_ops->cqe_off(host);
-> +
->         mmc_retune_disable(host);
->
->         if (mmc_host_is_spi(host))
+>  Optional properties:
+>  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
 > --
 > 1.9.1
 >
