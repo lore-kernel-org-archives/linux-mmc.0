@@ -1,115 +1,81 @@
-From: Tomas Winkler <tomasw@gmail.com>
-Subject: Re: [PATCH 8/8 v5] mmc: block: Delete mmc_access_rpmb()
-Date: Tue, 22 Aug 2017 11:58:43 +0300
-Message-ID: <CA+i0qc46iEV1g_FVX7oDh6cpk_9zR1-YwR9uUvgNpBQ4XtH5OA@mail.gmail.com>
-References: <20170820213913.9737-1-linus.walleij@linaro.org>
- <20170820213913.9737-9-linus.walleij@linaro.org> <55bd0aec-d9a5-6162-1aed-40950497d96c@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC/RFT PATCH] mmc: core: activate pre-erased multiple write
+ support for sd card
+Date: Tue, 22 Aug 2017 11:05:56 +0200
+Message-ID: <CAPDyKFp7RtUe69SqMmWrE5bK9Etr5ibAP5m_+1P-4N6o-uKCrA@mail.gmail.com>
+References: <1502192699-9612-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:38405 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932205AbdHVI6p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 04:58:45 -0400
-Received: by mail-it0-f66.google.com with SMTP id w204so3410427ita.5
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 01:58:45 -0700 (PDT)
-In-Reply-To: <55bd0aec-d9a5-6162-1aed-40950497d96c@intel.com>
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:35099 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932205AbdHVJF5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 05:05:57 -0400
+Received: by mail-qt0-f175.google.com with SMTP id x36so25269636qtx.2
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 02:05:57 -0700 (PDT)
+In-Reply-To: <1502192699-9612-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Tomas Winkler <tomas.winkler@intel.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This was done to prevent boot time scanning of the block device.
-Thanks
-Tomas
+On 8 August 2017 at 13:44, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Per SD specification version 4.10, section 4.3.4, it says "pre-erased
+> (ACMD23) will make a following Multiple Block Write operation faster
+> compared to the same operation without preceding ACMD23". ACMD23 is
+> mandatory for all sd cards and the spec also says "Command STOP_TRAN
+> (CMD12) shall be used to stop the transmission in Write Multiple Block
+> whether or not the preerase (ACMD23) feature is used."
+>
+> However current code only check to see if CMD23 is available. If not,
+> it would fallback to open-ending mode. So this catch-all RFC patch
+> is trying to activate ACMD23 support for SD cards when doing multiple
+> write.
+>
+> I have been testing it for while with all different kinds of SD cards
+> . But what makes me hesitate to submit a formal patch is that
+>
+> (1)
+> If the SD card does support CMD23 as well as the host, then we don't
+> use ACMD23 as I don't see *obvious* write performance boost for
+> ACMD23 vs CMD23 when doing multiple write for most of the cards,
+> although some of them do improve a little. So this makes me though that
+> the behaviour of dealing with ACMD23 or CMD23 depends on the firmware
+> designed.
 
-On Mon, Aug 21, 2017 at 3:51 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 21/08/17 00:39, Linus Walleij wrote:
->> This function is used by the block layer queue to bail out of
->> requests if the current request is an RPMB request.
->>
->> However this makes no sense: RPMB is only used from ioctl():s,
->> there are no RPMB accesses coming from the block layer.
->> An RPMB ioctl() always switches to the RPMB partition and
->> then back to the main partition before completing.
->>
->> The only (possible) use of this check must have been to
->> duct-tape over a race between RPMB ioctl()s colliding with
->> concurrent non-RPMB accesses to the same device.
+Just so I get this right...
+
+If the card supports CMD23, then you mean we are fine with the current
+code as is?
+
+However, if the card don't support CMD23, but ACMD23, $subject patch
+*may* offer an improvement. Right?
+That leads to yet another question. Are there many SD cards that don't
+support CMD23 but ACMD23?
+
 >
-> It was always possible to read / write (unsuccessfully) the rpmb block
-> device. i.e. dd of=/dev/mmcblk0rpmb
+> (2)
+> If enabling ACMD23 for SD cards, I did see a interesting thing that
+> some of the cards fail to return to tran state even when the host
+> fires CMD12 which meets the requirement of spec. When debugging, I saw
+> these buggy cards was still in recv state and never changed. So I did
+> some hack to trace the card status and fire CMD12 again if possible.
 >
-> Actually one thing to look at is that it looks like it was blocking your
-> IOCTL requests.  i.e. wouldn't the IOCTL request also get killed.
->
->>
->> This could happen in the past because the RPMB device was
->> created as a separate block device/disk with its own submit
->> queue competing with the main partition, and submitting
->> requests in parallel. This is now gone as we removed the
->> offending RPMB block device in another patch.
->>
->> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
->> ---
->> ChangeLog v1->v5:
->> - Renumber to keep together with the rest of the series.
->> ---
->>  drivers/mmc/core/block.c | 12 ------------
->>  drivers/mmc/core/queue.c |  2 +-
->>  drivers/mmc/core/queue.h |  2 --
->>  3 files changed, 1 insertion(+), 15 deletions(-)
->>
->> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->> index 27e1cf07a7a2..61ea402f2569 100644
->> --- a/drivers/mmc/core/block.c
->> +++ b/drivers/mmc/core/block.c
->> @@ -1207,18 +1207,6 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
->>       md->reset_done &= ~type;
->>  }
->>
->> -int mmc_access_rpmb(struct mmc_queue *mq)
->> -{
->> -     struct mmc_blk_data *md = mq->blkdata;
->> -     /*
->> -      * If this is a RPMB partition access, return ture
->> -      */
->> -     if (md && md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
->> -             return true;
->> -
->> -     return false;
->> -}
->> -
->>  /*
->>   * The non-block commands come back from the block layer after it queued it and
->>   * processed it with all other requests and then they get issued in this
->> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
->> index affa7370ba82..3baccbf16f3d 100644
->> --- a/drivers/mmc/core/queue.c
->> +++ b/drivers/mmc/core/queue.c
->> @@ -32,7 +32,7 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
->>  {
->>       struct mmc_queue *mq = q->queuedata;
->>
->> -     if (mq && (mmc_card_removed(mq->card) || mmc_access_rpmb(mq)))
->> +     if (mq && mmc_card_removed(mq->card))
->>               return BLKPREP_KILL;
->>
->>       req->rq_flags |= RQF_DONTPREP;
->> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
->> index a2b6a9fcab01..7649ed6cbef7 100644
->> --- a/drivers/mmc/core/queue.h
->> +++ b/drivers/mmc/core/queue.h
->> @@ -89,6 +89,4 @@ extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
->>  extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
->>  extern void mmc_queue_bounce_post(struct mmc_queue_req *);
->>
->> -extern int mmc_access_rpmb(struct mmc_queue *);
->> -
->>  #endif
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> (3)
+> I test all of my SD cards at hand, and try to figure out if we benefit
+> from ACMD23 vs open-ending multiple write. When using ACMD23, we fire
+> extra ACMD23 which would lower the write performance theoretically,
+> although I also didn't see any *obviuos* thoughput drop. The only
+> visible benefit is that pre-erased multiple write is more 'stable'
+> than open-ending multiple write, just as the same reason for why we
+> prefer to use CMD23 instead of open-ending mode.
+
+Overall, I wouldn't have any issues of enabling ACMD23 for SD cards -
+if only it could be justified as providing an improved behavior.
+
+I guess we will need more peoples opinion and help in test to understand better.
+
+[...]
+
+Kind regards
+Uffe
