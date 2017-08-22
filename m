@@ -1,46 +1,83 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/4] mmc: sdhci: sdhci_set_bus_width() cleanup
-Date: Tue, 22 Aug 2017 13:14:28 +0200
-Message-ID: <CAPDyKFoM1jU96y+NfDqJ=Cv=u6dPjCyppXkFY-qw7p1UXq_fMg@mail.gmail.com>
-References: <cover.1502740497.git.mirq-linux@rere.qmqm.pl>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v2] mmc: sdhci: fix SDHCI_QUIRK_NO_HISPD_BIT handling
+Date: Tue, 22 Aug 2017 13:14:38 +0200
+Message-ID: <CAPDyKFqPKTH4Xbtb5+x65AzW-WYgQy=HLrj2yEu1wX6xY+OjMg@mail.gmail.com>
+References: <1502763407-49116-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1502740497.git.mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux-CoA6ZxLDdyEEUmgCuDUIdw@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jonathan Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:35720 "EHLO
+        mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932350AbdHVLOj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:14:39 -0400
+Received: by mail-qt0-f176.google.com with SMTP id x36so26418110qtx.2
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:14:38 -0700 (PDT)
+In-Reply-To: <1502763407-49116-1-git-send-email-yangbo.lu@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 
-On 14 August 2017 at 22:00, Micha=C5=82 Miros=C5=82aw <mirq-linux-CoA6ZxLDdyEAvxtiuMwx3w@public.gmane.org=
-.pl> wrote:
-> Some SDHCI drivers are reimplementing sdhci_set_bus_width() just because
-> they support 8-bit bus but don't advertise full SDHCI 3.0 compliance.
-> This unnecessarily duplicates the function. Let's remove those duplicates=
-.
+On 15 August 2017 at 04:16, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> SD controller with SDHCI_QUIRK_NO_HISPD_BIT quirk probably
+> use high speed enable bit for other purpose. So this bit
+> shouldn't be changed for high speed enabling for this type of
+> SD controller.
 >
-> v2:
->         - added commit messages from Adrian Hunter
->
-> Micha=C5=82 Miros=C5=82aw (4):
->   mmc: sdhci: key 8BITBUS bit off MMC_CAP_8_BIT_DATA
->   mmc: sdhci-tegra: use generic sdhci_set_bus_width()
->   mmc: sdhci-pci: use generic sdhci_set_bus_width()
->   mmc: sdhci-s3c: use generic sdhci_set_bus_width()
->
->  drivers/mmc/host/sdhci-pci-core.c | 30 +++---------------------------
->  drivers/mmc/host/sdhci-s3c.c      | 34 +--------------------------------=
--
->  drivers/mmc/host/sdhci-tegra.c    | 23 ++---------------------
->  drivers/mmc/host/sdhci.c          |  5 ++---
->  4 files changed, 8 insertions(+), 84 deletions(-)
->
-> --
-> 2.11.0
->
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+> Changes for v2:
+>         - Removed duplicate perenthesis.
+>         - Added "Acked-by: Adrian Hunter".
+> ---
+>  drivers/mmc/host/sdhci.c | 27 ++++++++++++++-------------
+>  1 file changed, 14 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a1ad2dd..315bded 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1641,19 +1641,20 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+>         ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>
+> -       if ((ios->timing == MMC_TIMING_SD_HS ||
+> -            ios->timing == MMC_TIMING_MMC_HS ||
+> -            ios->timing == MMC_TIMING_MMC_HS400 ||
+> -            ios->timing == MMC_TIMING_MMC_HS200 ||
+> -            ios->timing == MMC_TIMING_MMC_DDR52 ||
+> -            ios->timing == MMC_TIMING_UHS_SDR50 ||
+> -            ios->timing == MMC_TIMING_UHS_SDR104 ||
+> -            ios->timing == MMC_TIMING_UHS_DDR50 ||
+> -            ios->timing == MMC_TIMING_UHS_SDR25)
+> -           && !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+> -               ctrl |= SDHCI_CTRL_HISPD;
+> -       else
+> -               ctrl &= ~SDHCI_CTRL_HISPD;
+> +       if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
+> +               if (ios->timing == MMC_TIMING_SD_HS ||
+> +                    ios->timing == MMC_TIMING_MMC_HS ||
+> +                    ios->timing == MMC_TIMING_MMC_HS400 ||
+> +                    ios->timing == MMC_TIMING_MMC_HS200 ||
+> +                    ios->timing == MMC_TIMING_MMC_DDR52 ||
+> +                    ios->timing == MMC_TIMING_UHS_SDR50 ||
+> +                    ios->timing == MMC_TIMING_UHS_SDR104 ||
+> +                    ios->timing == MMC_TIMING_UHS_DDR50 ||
+> +                    ios->timing == MMC_TIMING_UHS_SDR25)
+> +                       ctrl |= SDHCI_CTRL_HISPD;
+> +               else
+> +                       ctrl &= ~SDHCI_CTRL_HISPD;
+> +       }
+>
+>         if (host->version >= SDHCI_SPEC_300) {
+>                 u16 clk, ctrl_2;
+> --
+> 2.1.0.27.g96db324
+>
