@@ -1,66 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/16] mmc: meson-gx: driver fixups and upgrades
-Date: Tue, 22 Aug 2017 13:15:08 +0200
-Message-ID: <CAPDyKFoBebVf0wqJ+z5UHC+aMju2Qy0ONc1OVYrwzZKk+XgGTg@mail.gmail.com>
-References: <20170821160301.21899-1-jbrunet@baylibre.com>
+Subject: Re: [PATCH] mmc: cavium-octeon: Convert to use module_platform_driver
+Date: Tue, 22 Aug 2017 13:15:00 +0200
+Message-ID: <CAPDyKFqA8bubRdRn+o4ZshvyEm2168YGCzmNNOs0i0is=4VZXw@mail.gmail.com>
+References: <20170819130611.3335-1-axel.lin@ingics.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170821160301.21899-1-jbrunet@baylibre.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:38254 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932488AbdHVLPB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 07:15:01 -0400
+Received: by mail-qt0-f180.google.com with SMTP id 57so17424583qtu.5
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 04:15:01 -0700 (PDT)
+In-Reply-To: <20170819130611.3335-1-axel.lin@ingics.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Jan Glauber <jglauber@cavium.com>, David Daney <david.daney@cavium.com>, "Steven J. Hill" <Steven.Hill@cavium.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 21 August 2017 at 18:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
-> The patchset features several bugfixes, rework and upgrade for the
-> meson-gx MMC driver.
+On 19 August 2017 at 15:06, Axel Lin <axel.lin@ingics.com> wrote:
+> Get rid of boilerplate code by using module_platform_driver macro.
 >
-> The main goal is to improve readability and enable new high speed
-> modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
->
-> SDR104 is not working with a few cards on the p200 and the
-> libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
-> of these boards, adding noise to the signal and eventually breaking
-> the communication with some cards. The same cards are working well on a
-> laptop or the nanopi-k2 at 200Mhz.
->
-> This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
-> gxl-s905x-libretech-cc
->
-> Changes since v1 [0]:
-> * Reorder patches to have fixes first, then rework and finally
->   enhancements.
-> * Use CCF to manage clock phases
->
-> [0]: https://lkml.kernel.org/r/20170804174353.16486-1-jbrunet@baylibre.com
->
-> Jerome Brunet (16):
->   mmc: meson-gx: fix mux mask definition
->   mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
->   mmc: meson-gx: clean up some constants
->   mmc: meson-gx: use _irqsave variant of spinlock
->   mmc: meson-gx: cfg init overwrite values
->   mmc: meson-gx: rework set_ios function
->   mmc: meson-gx: rework clk_set function
->   mmc: meson-gx: rework clock init function
->   mmc: meson-gx: fix dual data rate mode frequencies
->   mmc: meson-gx: work around clk-stop issue
->   mmc: meson-gx: simplify interrupt handler
->   mmc: meson-gx: implement card_busy callback
->   mmc: meson-gx: use CCF to handle the clock phases
->   mmc: meson-gx: implement voltage switch callback
->   mmc: meson-gx: change default tx phase
->   mmc: meson-gx: rework tuning function
->
->  drivers/mmc/host/meson-gx-mmc.c | 718 +++++++++++++++++++++++++++-------------
->  1 file changed, 497 insertions(+), 221 deletions(-)
->
-> --
-> 2.9.5
->
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
 
-So far, I decided to pick patch 1 -> 3.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/cavium-octeon.c | 13 +------------
+>  1 file changed, 1 insertion(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
+> index 951d2cd..22aded1 100644
+> --- a/drivers/mmc/host/cavium-octeon.c
+> +++ b/drivers/mmc/host/cavium-octeon.c
+> @@ -342,18 +342,7 @@ static struct platform_driver octeon_mmc_driver = {
+>         },
+>  };
+>
+> -static int __init octeon_mmc_init(void)
+> -{
+> -       return platform_driver_register(&octeon_mmc_driver);
+> -}
+> -
+> -static void __exit octeon_mmc_cleanup(void)
+> -{
+> -       platform_driver_unregister(&octeon_mmc_driver);
+> -}
+> -
+> -module_init(octeon_mmc_init);
+> -module_exit(octeon_mmc_cleanup);
+> +module_platform_driver(octeon_mmc_driver);
+>
+>  MODULE_AUTHOR("Cavium Inc. <support@cavium.com>");
+>  MODULE_DESCRIPTION("Low-level driver for Cavium OCTEON MMC/SSD card");
+> --
+> 2.9.3
+>
