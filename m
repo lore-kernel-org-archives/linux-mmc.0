@@ -1,59 +1,107 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V5 05/13] mmc: core: Add support for handling CQE requests
-Date: Tue, 22 Aug 2017 10:06:41 +0200
-Message-ID: <CAPDyKFo9T0_-7veFa+5vE_HqDjaG31moEGdFThqXi4z6uVSJ_w@mail.gmail.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com> <1502366898-23691-6-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: cast a error log for unbalanced
+ mmc_blk_{open, release}
+Date: Tue, 22 Aug 2017 10:43:59 +0200
+Message-ID: <CAPDyKFqoa9ec=CsW5dp30691QeGxNQeNb6RdCOcSFup78BpTaA@mail.gmail.com>
+References: <1501815102-19376-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:33714 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754591AbdHVIGn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 04:06:43 -0400
-Received: by mail-qt0-f178.google.com with SMTP id d15so23042499qta.0
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 01:06:42 -0700 (PDT)
-In-Reply-To: <1502366898-23691-6-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:38257 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932132AbdHVIoA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2017 04:44:00 -0400
+Received: by mail-qk0-f176.google.com with SMTP id k126so10717193qkb.5
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2017 01:44:00 -0700 (PDT)
+In-Reply-To: <1501815102-19376-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-[...]
-
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index bf1788a224e6..1974fcfd4284 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -174,6 +174,11 @@ struct mmc_async_req *mmc_start_areq(struct mmc_host *host,
->  int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
->                 int retries);
+On 4 August 2017 at 04:51, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> The intention for this patch is to help folks debug the failure
+> like this:
 >
-> +int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq);
-> +void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq);
-> +void mmc_cqe_post_req(struct mmc_host *host, struct mmc_request *mrq);
-> +int mmc_cqe_recovery(struct mmc_host *host);
+> dwmmc_rockchip fe320000.dwmmc: IDMAC supports 32-bit address mode.
+> dwmmc_rockchip fe320000.dwmmc: Using internal DMA controller.
+> dwmmc_rockchip fe320000.dwmmc: Version ID is 270a
+> dwmmc_rockchip fe320000.dwmmc: DW MMC controller at irq 28,32 bit
+> host data width,256 deep fifo
+> dwmmc_rockchip fe320000.dwmmc: Got CD GPIO
+> mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual
+> 400000HZ div = 0)
+> mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz,
+> actual 50000000HZ div = 0)
+> mmc0: new high speed SDHC card at address 0007
+> mmcblk: probe of mmc0:0007 failed with error -28
+>
+> It's quite annoying that some buggy userspace deamon miss the disk remove
+> uevent sometimes so it would finally make the SD card not work. So from
+> the dmesg it only shows a errno of -28 but still don't understand what
+> happened.
+>
+> For quick reproduce this, we could set max_devices to 8 and run
+>
+> for i in $(seq 1 9); do
+>   echo "========================" $i
+>   echo fe320000.dwmmc > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+>   sleep .5
+>   echo fe320000.dwmmc > /sys/bus/platform/drivers/dwmmc_rockchip/bind
+>   sleep .5
+>   mount -t vfat /dev/mmcblk0 /mnt
+>   sleep .5
+> done
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+>
+>  drivers/mmc/core/block.c | 18 +++++++++++++++++-
+>  1 file changed, 17 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index a11bead..3ede32a 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1985,8 +1985,24 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>         int devidx, ret;
+>
+>         devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+> -       if (devidx < 0)
+> +       if (devidx < 0) {
+> +               /*
+> +                * The reason for why we could get -ENOSPC here for
+> +                * removable devices is that probably userspace mount
+> +                * the partition but forget to umount it which makes
+> +                * it fail to release md->usage via mmc_blk_release,
+> +                * so as a result it leaks the device ID and finally
+> +                * breaks the reference counting for mmc block layer.
+> +                * It's uerspace's responsibility to guarantee it but
+> +                * we could cast an explcit error log  here to clarify
+> +                * the situation.
+> +                */
+
+I would re-phrase the above to something like this:
+
+"We get -ENOSPC because there are no more any available devidx. The
+reason may be that userspace haven't yet unmounted the partitions,
+which postpones mmc_blk_release() from being called."
+
+> +               if (mmc_card_is_removable(card->host) && devidx == -ENOSPC)
+
+Why not print this error for all type of cards, it seems like relevant
+information for the user.
+
+> +                       dev_err(mmc_dev(card->host),
+> +                               "possible unblanced mount/umount detected\n");
 > +
-
-Please move mmc_cqe_start_req(), mmc_cqe_post_req(),
-mmc_cqe_recovery() to drivers/mmc/core/core.h. This makes sure they
-don't become abused.
-
-Also, please move mmc_cqe_request_done() to include/linux/mmc/host.h.
-Then it becomes consistent with where mmc_request_done() is declared.
-
-Feel free to also fold in a patch moving the existing mmc_start_areq()
-to drivers/mmc/core/core.h. Unfortunate the others closely related to
-these functions, are being abused by SDIO func drivers and needs more
-work before they can be moved.
-
->  int mmc_hw_reset(struct mmc_host *host);
->  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+>                 return ERR_PTR(devidx);
+> +       }
 >
+>         md = kzalloc(sizeof(struct mmc_blk_data), GFP_KERNEL);
+>         if (!md) {
 > --
 > 1.9.1
->
-
-Sorry for not noticing this in v4.
 
 Kind regards
 Uffe
