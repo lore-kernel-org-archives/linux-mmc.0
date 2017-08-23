@@ -1,48 +1,84 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V5 03/13] mmc: host: Add CQE interface
-Date: Wed, 23 Aug 2017 14:48:53 +0200
-Message-ID: <CAPDyKFp1YTWNfECS5720amq8zrJxhSuCJN+GUk2PEZTvdCLaXw@mail.gmail.com>
-References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
- <1502366898-23691-4-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFpemPy7ioB3=B3VrOBhDED3HoDq0CVBV=bq7gyEOQ7PkA@mail.gmail.com> <732e8ebc-9b81-90c4-c719-eab1ca0ac220@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
+ sdhci-omap controller
+Date: Wed, 23 Aug 2017 15:07:54 +0200
+Message-ID: <CAPDyKFp7gchVQ+JPNqv4LktvHRm2Lzx6KakOw85zEZxDEX0OhA@mail.gmail.com>
+References: <20170821142132.GH6008@atomide.com> <20170823054246.23927-1-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:36770 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753940AbdHWMsy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2017 08:48:54 -0400
-Received: by mail-qt0-f178.google.com with SMTP id v29so6862qtv.3
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2017 05:48:54 -0700 (PDT)
-In-Reply-To: <732e8ebc-9b81-90c4-c719-eab1ca0ac220@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20170823054246.23927-1-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 23 August 2017 at 08:54, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 22/08/17 14:13, Ulf Hansson wrote:
->> On 10 August 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> +       void                    (*cqe_recovery_notifier)(struct mmc_host *,
->>> +                                                        struct mmc_request *);
->>
->> Normally we don't put callbacks in the struct mmc_host that someone
->> else than the host driver should assign - so this feels a bit upside
->> down.
->>
->> Is there any reason to why you didn't want to add a new API? Something
->> like mmc_cqe_recover(), which the host driver could call.
+On 23 August 2017 at 07:42, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
+> Add binding for the TI's sdhci-omap controller. This now includes only
+> a subset of properties documented in ti-omap-hsmmc.txt but will eventually
+> include all the properties.
 >
-> That would make the host driver dependent on the block driver.  There needs
-> to be a function pointer, even if we wrap it in an API.
+> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> ---
+> Changes from v2:
+> *) Fixed example to use the updated compatible
+>
+> Changes from v1:
+> *) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
+>    of using the ti-omap-hsmmc.txt as suggested by Tony
+>  .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> new file mode 100644
+> index 000000000000..139695ad2d58
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> @@ -0,0 +1,22 @@
+> +* TI OMAP SDHCI Controller
+> +
+> +Refer to mmc.txt for standard MMC bindings.
+> +
+> +Required properties:
+> +- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+> +- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
+> +
+> +Optional properties:
+> +- ti,dual-volt: boolean, supports dual voltage cards
+> +- ti,non-removable: non-removable slot (like eMMC)
+> +
+> +Example:
+> +       mmc1: mmc@0x4809c000 {
+> +               compatible = "ti,dra7-sdhci";
+> +               reg = <0x4809c000 0x400>;
+> +               ti,hwmods = "mmc1";
+> +               ti,dual-volt;
+> +               bus-width = <4>;
+> +               vmmc-supply = <&vmmc>; /* phandle to regulator node */
+> +               ti,non-removable;
+> +       };
+> --
+> 2.11.0
+>
 
-Okay, I see. I guess we could put such pointer somewhere closer to the
-mmc request queue.
+I am wondering a bit on the long term plan here.
 
-Anyway, I didn't find out how this pointer was being protected from
-concurrent access or perhaps that is managed via
-mmc_claim|release_host()? Moreover, I could find it ever it being
-reset to NULL.
+Ideally at some point in future, we would like to remove the old
+omap_hsmmc driver, but from compatible string point of view, that
+means we first needs to deprecate the old ones for a while. Right?
+
+That said, what is then the reason to why we should bring over the
+existing omap_hsmmc bindings to the sdhci-omap bindings?
+
+For example, "ti,dual-volt" can likely be replaced with something
+better that already exists (either a common mmc binding or an sdhci
+binding). For "ti,non-removable", we already have a common mmc binding
+"non-removable" for this.
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
