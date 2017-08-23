@@ -1,70 +1,36 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
- sdhci-omap controller
-Date: Wed, 23 Aug 2017 11:12:46 +0530
-Message-ID: <20170823054246.23927-1-kishon@ti.com>
-References: <20170821142132.GH6008@atomide.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 03/13] mmc: host: Add CQE interface
+Date: Wed, 23 Aug 2017 09:54:47 +0300
+Message-ID: <732e8ebc-9b81-90c4-c719-eab1ca0ac220@intel.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-4-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpemPy7ioB3=B3VrOBhDED3HoDq0CVBV=bq7gyEOQ7PkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20170821142132.GH6008@atomide.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
-Cc: devicetree@vger.kernel.org, Kishon Vijay Abraham I <kishon@ti.com>, Sekhar Nori <nsekhar@ti.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:43735 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753238AbdHWHBU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Aug 2017 03:01:20 -0400
+In-Reply-To: <CAPDyKFpemPy7ioB3=B3VrOBhDED3HoDq0CVBV=bq7gyEOQ7PkA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Add binding for the TI's sdhci-omap controller. This now includes only
-a subset of properties documented in ti-omap-hsmmc.txt but will eventually
-include all the properties.
+On 22/08/17 14:13, Ulf Hansson wrote:
+> On 10 August 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> +       void                    (*cqe_recovery_notifier)(struct mmc_host *,
+>> +                                                        struct mmc_request *);
+> 
+> Normally we don't put callbacks in the struct mmc_host that someone
+> else than the host driver should assign - so this feels a bit upside
+> down.
+> 
+> Is there any reason to why you didn't want to add a new API? Something
+> like mmc_cqe_recover(), which the host driver could call.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
-Changes from v2:
-*) Fixed example to use the updated compatible
-
-Changes from v1:
-*) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
-   of using the ti-omap-hsmmc.txt as suggested by Tony
- .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-new file mode 100644
-index 000000000000..139695ad2d58
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-@@ -0,0 +1,22 @@
-+* TI OMAP SDHCI Controller
-+
-+Refer to mmc.txt for standard MMC bindings.
-+
-+Required properties:
-+- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
-+- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
-+
-+Optional properties:
-+- ti,dual-volt: boolean, supports dual voltage cards
-+- ti,non-removable: non-removable slot (like eMMC)
-+
-+Example:
-+	mmc1: mmc@0x4809c000 {
-+		compatible = "ti,dra7-sdhci";
-+		reg = <0x4809c000 0x400>;
-+		ti,hwmods = "mmc1";
-+		ti,dual-volt;
-+		bus-width = <4>;
-+		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+		ti,non-removable;
-+	};
--- 
-2.11.0
+That would make the host driver dependent on the block driver.  There needs
+to be a function pointer, even if we wrap it in an API.
