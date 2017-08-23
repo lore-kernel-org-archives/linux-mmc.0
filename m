@@ -1,118 +1,45 @@
-From: Zhoujie Wu <zjwu@marvell.com>
-Subject: [PATCH] mmc: sdhci-xenon: Support HS400 Enhanced Strobe feature
-Date: Wed, 23 Aug 2017 11:15:02 -0700
-Message-ID: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
+Date: Wed, 23 Aug 2017 21:33:44 +0200
+Message-ID: <87pobmoz8n.fsf@belgarion.home>
+References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
+        <20170821221339.70cfcfb7@bbrezillon>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:54697 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S932111AbdHWSL5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2017 14:11:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Boris Brezillon <boris.brezillon@free-electrons.com>, Andrea Adami <andrea.adami@gmail.com>
+Cc: linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
 List-Id: linux-mmc@vger.kernel.org
-To: zjwu@marvell.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-From: Hu Ziji <huziji@marvell.com>
+Boris Brezillon <boris.brezillon@free-electrons.com> writes:
 
-Support HS400 Enhanced Strobe feature in Xenon.
+> Le Mon, 14 Aug 2017 22:48:31 +0200,
+>> Andrea Adami (9):
+>>   mtd: sharpslpart: Add sharpslpart partition parser
+>>   mtd: nand: sharpsl: Add partition parsers platform data
+>>   mfd: tmio: Add partition parsers platform data
+>>   mtd: nand: sharpsl: Register partitions using the parsers
+>>   mtd: nand: tmio: Register partitions using the parsers
+>
+> Applied patches 2, to 5 to nand/next.
+>>   ARM: pxa/corgi: Remove hardcoded partitioning, use sharpslpart parser
+>>   ARM: pxa/tosa: Remove hardcoded partitioning, use sharpslpart parser
+>>   ARM: pxa/spitz: Remove hardcoded partitioning, use sharpslpart parser
+>>   ARM: pxa/poodle: Remove hardcoded partitioning, use sharpslpart parser
 
-Enable Enhanced Strobe together with Data Strobe.
-Disable Enhanced Strobe when eMMC is not in HS400 mode.
+I'm quite happy with patches 6 to 9 except for the subject title length.
 
-Signed-off-by: Hu Ziji <huziji@marvell.com>
-Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
----
- drivers/mmc/host/sdhci-xenon-phy.c | 34 ++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci-xenon.h     |  1 +
- 2 files changed, 29 insertions(+), 6 deletions(-)
+Andrea, if you give me an idea of change, I'll modify the titles myself before
+applying, no need to resend a serie.
 
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index f7e26b0..ec87943 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -409,17 +409,30 @@ static int xenon_emmc_phy_config_tuning(struct sdhci_host *host)
- 	return 0;
- }
- 
--static void xenon_emmc_phy_disable_data_strobe(struct sdhci_host *host)
-+static void xenon_emmc_phy_disable_strobe(struct sdhci_host *host)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	u32 reg;
- 
--	/* Disable SDHC Data Strobe */
-+	/* Disable both SDHC Data Strobe and Enhanced Strobe */
- 	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
--	reg &= ~XENON_ENABLE_DATA_STROBE;
-+	reg &= ~(XENON_ENABLE_DATA_STROBE | XENON_ENABLE_RESP_STROBE);
- 	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
-+
-+	/* Clear Strobe line Pull down or Pull up */
-+	if (priv->phy_type == EMMC_5_0_PHY) {
-+		reg = sdhci_readl(host, XENON_EMMC_5_0_PHY_PAD_CONTROL);
-+		reg &= ~(XENON_EMMC5_FC_QSP_PD | XENON_EMMC5_FC_QSP_PU);
-+		sdhci_writel(host, reg, XENON_EMMC_5_0_PHY_PAD_CONTROL);
-+	} else {
-+		reg = sdhci_readl(host, XENON_EMMC_PHY_PAD_CONTROL1);
-+		reg &= ~(XENON_EMMC5_1_FC_QSP_PD | XENON_EMMC5_1_FC_QSP_PU);
-+		sdhci_writel(host, reg, XENON_EMMC_PHY_PAD_CONTROL1);
-+	}
- }
- 
--/* Set HS400 Data Strobe */
-+/* Set HS400 Data Strobe and Enhanced Strobe */
- static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -439,6 +452,15 @@ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
- 	/* Enable SDHC Data Strobe */
- 	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
- 	reg |= XENON_ENABLE_DATA_STROBE;
-+	/*
-+	 * Enable SDHC Enhanced Strobe if supported
-+	 * Xenon Enhanced Strobe should be enabled only when
-+	 * 1. card is in HS400 mode and
-+	 * 2. SDCLK is higher than 52MHz
-+	 * 3. DLL is enabled
-+	 */
-+	if (host->mmc->ios.enhanced_strobe)
-+		reg |= XENON_ENABLE_RESP_STROBE;
- 	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
- 
- 	/* Set Data Strobe Pull down */
-@@ -615,7 +637,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
- 		sdhci_writel(host, phy_regs->logic_timing_val,
- 			     phy_regs->logic_timing_adj);
- 	else
--		xenon_emmc_phy_disable_data_strobe(host);
-+		xenon_emmc_phy_disable_strobe(host);
- 
- phy_init:
- 	xenon_emmc_phy_init(host);
-@@ -705,7 +727,7 @@ void xenon_soc_pad_ctrl(struct sdhci_host *host,
- 
- /*
-  * Setting PHY when card is working in High Speed Mode.
-- * HS400 set data strobe line.
-+ * HS400 set Data Strobe and Enhanced Strobe if it is supported.
-  * HS200/SDR104 set tuning config to prepare for tuning.
-  */
- static int xenon_hs_delay_adj(struct sdhci_host *host)
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-index 73debb4..01937f1 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -33,6 +33,7 @@
- #define XENON_TUNING_STEP_DIVIDER		BIT(6)
- 
- #define XENON_SLOT_EMMC_CTRL			0x0130
-+#define XENON_ENABLE_RESP_STROBE		BIT(25)
- #define XENON_ENABLE_DATA_STROBE		BIT(24)
- 
- #define XENON_SLOT_RETUNING_REQ_CTRL		0x0144
+For example, you could propose :
+ARM: pxa: corgi: use sharpslpart parser instead of hardcoded one
+
+
+Then I'll take them into pxa/for-next if there are no objections.
+
+Cheers.
+
 -- 
-1.9.1
-
+Robert
