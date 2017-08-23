@@ -1,97 +1,118 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-msm: Enable delay circuit calibration
- clocks
-Date: Wed, 23 Aug 2017 10:28:28 -0700
-Message-ID: <20170823172828.GA29306@minitux>
-References: <20170818175506.5035-1-bjorn.andersson@linaro.org>
- <20170818175506.5035-3-bjorn.andersson@linaro.org>
- <CAPDyKFphMcVfbPUacG-iJEhwT0m6uKXFs6wjgS=YXOK2c_bqEA@mail.gmail.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH] mmc: sdhci-xenon: Support HS400 Enhanced Strobe feature
+Date: Wed, 23 Aug 2017 11:15:02 -0700
+Message-ID: <1503512102-30968-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFphMcVfbPUacG-iJEhwT0m6uKXFs6wjgS=YXOK2c_bqEA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:54697 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S932111AbdHWSL5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2017 14:11:57 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zjwu@marvell.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-On Tue 22 Aug 03:45 PDT 2017, Ulf Hansson wrote:
+From: Hu Ziji <huziji@marvell.com>
 
-> [...]
-> 
-> > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> > index 71e01cbc38b6..7b47906ba447 100644
-> > --- a/drivers/mmc/host/sdhci-msm.c
-> > +++ b/drivers/mmc/host/sdhci-msm.c
-> > @@ -131,7 +131,7 @@ struct sdhci_msm_host {
-> >         struct clk *pclk;       /* SDHC peripheral bus clock */
-> >         struct clk *bus_clk;    /* SDHC bus voter clock */
-> >         struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
-> > -       struct clk_bulk_data bulk_clks[2];
-> > +       struct clk_bulk_data bulk_clks[4];
-> >         unsigned long clk_rate;
-> >         struct mmc_host *mmc;
-> >         bool use_14lpp_dll_reset;
-> > @@ -1125,6 +1125,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
-> >         struct sdhci_pltfm_host *pltfm_host;
-> >         struct sdhci_msm_host *msm_host;
-> >         struct resource *core_memres;
-> > +       struct clk *clk;
-> >         int ret;
-> >         u16 host_version, core_minor;
-> >         u32 core_version, config;
-> > @@ -1194,6 +1195,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
-> >         msm_host->bulk_clks[0].clk = msm_host->clk;
-> >         msm_host->bulk_clks[1].clk = msm_host->pclk;
-> >
-> > +       clk = devm_clk_get(&pdev->dev, "cal");
-> > +       if (!IS_ERR(clk))
-> > +               msm_host->bulk_clks[2].clk = clk;
-> > +
-> > +       clk = devm_clk_get(&pdev->dev, "sleep");
-> > +       if (!IS_ERR(clk))
-> > +               msm_host->bulk_clks[3].clk = clk;
-> > +
-> 
-> First, both these clocks needs to be documented in DT doc.
-> 
+Support HS400 Enhanced Strobe feature in Xenon.
 
-Of course, sorry for missing this part.
+Enable Enhanced Strobe together with Data Strobe.
+Disable Enhanced Strobe when eMMC is not in HS400 mode.
 
-> Second, I think you should initialize bulk_clks[2|3] to NULL, in case
-> the new optional clocks can't be fetched.
-> 
+Signed-off-by: Hu Ziji <huziji@marvell.com>
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+---
+ drivers/mmc/host/sdhci-xenon-phy.c | 34 ++++++++++++++++++++++++++++------
+ drivers/mmc/host/sdhci-xenon.h     |  1 +
+ 2 files changed, 29 insertions(+), 6 deletions(-)
 
-msm_host does come from a kzalloc() in mmc_alloc_host(), but I can write
-this differently to not rely on this "fact".
+diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
+index f7e26b0..ec87943 100644
+--- a/drivers/mmc/host/sdhci-xenon-phy.c
++++ b/drivers/mmc/host/sdhci-xenon-phy.c
+@@ -409,17 +409,30 @@ static int xenon_emmc_phy_config_tuning(struct sdhci_host *host)
+ 	return 0;
+ }
+ 
+-static void xenon_emmc_phy_disable_data_strobe(struct sdhci_host *host)
++static void xenon_emmc_phy_disable_strobe(struct sdhci_host *host)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	u32 reg;
+ 
+-	/* Disable SDHC Data Strobe */
++	/* Disable both SDHC Data Strobe and Enhanced Strobe */
+ 	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+-	reg &= ~XENON_ENABLE_DATA_STROBE;
++	reg &= ~(XENON_ENABLE_DATA_STROBE | XENON_ENABLE_RESP_STROBE);
+ 	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
++
++	/* Clear Strobe line Pull down or Pull up */
++	if (priv->phy_type == EMMC_5_0_PHY) {
++		reg = sdhci_readl(host, XENON_EMMC_5_0_PHY_PAD_CONTROL);
++		reg &= ~(XENON_EMMC5_FC_QSP_PD | XENON_EMMC5_FC_QSP_PU);
++		sdhci_writel(host, reg, XENON_EMMC_5_0_PHY_PAD_CONTROL);
++	} else {
++		reg = sdhci_readl(host, XENON_EMMC_PHY_PAD_CONTROL1);
++		reg &= ~(XENON_EMMC5_1_FC_QSP_PD | XENON_EMMC5_1_FC_QSP_PU);
++		sdhci_writel(host, reg, XENON_EMMC_PHY_PAD_CONTROL1);
++	}
+ }
+ 
+-/* Set HS400 Data Strobe */
++/* Set HS400 Data Strobe and Enhanced Strobe */
+ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -439,6 +452,15 @@ static void xenon_emmc_phy_strobe_delay_adj(struct sdhci_host *host)
+ 	/* Enable SDHC Data Strobe */
+ 	reg = sdhci_readl(host, XENON_SLOT_EMMC_CTRL);
+ 	reg |= XENON_ENABLE_DATA_STROBE;
++	/*
++	 * Enable SDHC Enhanced Strobe if supported
++	 * Xenon Enhanced Strobe should be enabled only when
++	 * 1. card is in HS400 mode and
++	 * 2. SDCLK is higher than 52MHz
++	 * 3. DLL is enabled
++	 */
++	if (host->mmc->ios.enhanced_strobe)
++		reg |= XENON_ENABLE_RESP_STROBE;
+ 	sdhci_writel(host, reg, XENON_SLOT_EMMC_CTRL);
+ 
+ 	/* Set Data Strobe Pull down */
+@@ -615,7 +637,7 @@ static void xenon_emmc_phy_set(struct sdhci_host *host,
+ 		sdhci_writel(host, phy_regs->logic_timing_val,
+ 			     phy_regs->logic_timing_adj);
+ 	else
+-		xenon_emmc_phy_disable_data_strobe(host);
++		xenon_emmc_phy_disable_strobe(host);
+ 
+ phy_init:
+ 	xenon_emmc_phy_init(host);
+@@ -705,7 +727,7 @@ void xenon_soc_pad_ctrl(struct sdhci_host *host,
+ 
+ /*
+  * Setting PHY when card is working in High Speed Mode.
+- * HS400 set data strobe line.
++ * HS400 set Data Strobe and Enhanced Strobe if it is supported.
+  * HS200/SDR104 set tuning config to prepare for tuning.
+  */
+ static int xenon_hs_delay_adj(struct sdhci_host *host)
+diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+index 73debb4..01937f1 100644
+--- a/drivers/mmc/host/sdhci-xenon.h
++++ b/drivers/mmc/host/sdhci-xenon.h
+@@ -33,6 +33,7 @@
+ #define XENON_TUNING_STEP_DIVIDER		BIT(6)
+ 
+ #define XENON_SLOT_EMMC_CTRL			0x0130
++#define XENON_ENABLE_RESP_STROBE		BIT(25)
+ #define XENON_ENABLE_DATA_STROBE		BIT(24)
+ 
+ #define XENON_SLOT_RETUNING_REQ_CTRL		0x0144
+-- 
+1.9.1
 
-> >         ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
-> >                                       msm_host->bulk_clks);
-> >         if (ret)
-> > --
-> > 2.12.0
-> >
-> 
-> Another observation is the number of clocks for this device. In some
-> cases, now six clocks are needed!? Is that really correct? Just wanted
-> to point it out as it seems a bit too much. :-)
-> 
-
-* we need "iface" and "core" for normal operation
-
-* "xo" is the base clock of the entire system and is always present,
-  question is why its clock rate isn't hard coded in the driver.
-
-* "bus" should probably not be handled directly in the driver, but
-  rather through the upcoming "interconnect" framework
-
-* And finally these two new clocks are needed on some HS400-enabled
-  platforms, for calibrating the separate (RCLK) clock delay circuit
-
-So I believe the right answer should have been 2 required and 2 optional
-clocks.  But we need the interconnect framework and I'll look into why
-we need to specify "xo".
-
-Regards,
-Bjorn
