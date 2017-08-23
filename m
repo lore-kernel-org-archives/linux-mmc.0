@@ -1,67 +1,121 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 0/3] mmc: block: Add blk-mq support for CQE
-Date: Wed, 23 Aug 2017 16:37:05 +0300
-Message-ID: <1503495428-11999-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:18403 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754006AbdHWNnj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 23 Aug 2017 09:43:39 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH RFC 1/3] mmc: core: Add parameter use_blk_mq
+Date: Wed, 23 Aug 2017 16:37:06 +0300
+Message-ID: <1503495428-11999-2-git-send-email-adrian.hunter@intel.com>
+References: <1503495428-11999-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1503495428-11999-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-block-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, linux-block <linux-block@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Until mmc has blk-mq support fully implemented and tested, add a
+parameter use_blk_mq, default to false unless config option MMC_MQ_DEFAULT
+is selected.
 
-Here is an example of using blk-mq with a host that has an eMMC Command
-Queue Engine (CQE).
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/Kconfig      | 11 +++++++++++
+ drivers/mmc/core/core.c  |  7 +++++++
+ drivers/mmc/core/core.h  |  2 ++
+ drivers/mmc/core/host.c  |  2 ++
+ drivers/mmc/core/host.h  |  4 ++++
+ include/linux/mmc/host.h |  1 +
+ 6 files changed, 27 insertions(+)
 
-Points to note:
-	- it is a bit rough, lacks explanation, patches need splitting up
-	- does seem to work, but not tested properly
-	- uses BLK_MQ_F_BLOCKING
-
-BLK_MQ_F_BLOCKING is used for a number of reasons:
-
-1. Since v4.12 if a queue has only 1 hw queue (and mmc only ever has 1),
-then requests are never issued directly (refer blk_mq_make_request()) which
-means there is no practical advantage not to use BLK_MQ_F_BLOCKING
-
-2. CQE only supports reads / writes so the CQE implementation makes use of
-the existing non-CQE code for discards and flushes - which are both
-blocking at this time.
-
-3. blk-mq has no support for runtime pm and mmc runtime pm is blocking
-
-4. host claiming is blocking
-
-5. existing synchronization does not support requests being issued
-simultaneously
-
-One small concern is that the block layer workqueue runs with elevated
-priority (WQ_HIGHPRI).  It is not clear to me whether that might be
-undesirable on the occasion mmc is polling, for example mmc_poll_for_busy()
-when the host implements host->ops->card_busy()
-
-
-Adrian Hunter (3):
-      mmc: core: Add parameter use_blk_mq
-      mmc: core: Introduce host claiming by context
-      mmc: block: Add blk-mq support for CQE
-
- drivers/mmc/Kconfig      |  11 ++
- drivers/mmc/core/block.c |  88 ++++++++++--
- drivers/mmc/core/block.h |   2 +
- drivers/mmc/core/core.c  | 116 ++++++++++++++-
- drivers/mmc/core/core.h  |  10 ++
- drivers/mmc/core/host.c  |   2 +
- drivers/mmc/core/host.h  |   4 +
- drivers/mmc/core/queue.c | 363 +++++++++++++++++++++++++++++++++++++++++------
- drivers/mmc/core/queue.h |   4 +
- include/linux/mmc/host.h |   8 +-
- 10 files changed, 545 insertions(+), 63 deletions(-)
-
-
-Regards
-Adrian
+diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+index ec21388311db..98202934bd29 100644
+--- a/drivers/mmc/Kconfig
++++ b/drivers/mmc/Kconfig
+@@ -12,6 +12,17 @@ menuconfig MMC
+ 	  If you want MMC/SD/SDIO support, you should say Y here and
+ 	  also to your specific host controller driver.
+ 
++config MMC_MQ_DEFAULT
++	bool "MMC: use blk-mq I/O path by default"
++	depends on MMC && BLOCK
++	---help---
++	  This option enables the new blk-mq based I/O path for MMC block
++	  devices by default.  With the option the mmc_core.use_blk_mq
++	  module/boot option defaults to Y, without it to N, but it can
++	  still be overridden either way.
++
++	  If unsure say N.
++
+ if MMC
+ 
+ source "drivers/mmc/core/Kconfig"
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 61322a0eff2a..f59c976cc96c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -66,6 +66,13 @@
+ bool use_spi_crc = 1;
+ module_param(use_spi_crc, bool, 0);
+ 
++#ifdef CONFIG_MMC_MQ_DEFAULT
++bool mmc_use_blk_mq = true;
++#else
++bool mmc_use_blk_mq = false;
++#endif
++module_param_named(use_blk_mq, mmc_use_blk_mq, bool, S_IWUSR | S_IRUGO);
++
+ static int mmc_schedule_delayed_work(struct delayed_work *work,
+ 				     unsigned long delay)
+ {
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 55f543fd37c4..c30da856b4d4 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -35,6 +35,8 @@ struct mmc_bus_ops {
+ 	int (*reset)(struct mmc_host *);
+ };
+ 
++extern bool mmc_use_blk_mq;
++
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+ void mmc_detach_bus(struct mmc_host *host);
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index ad88deb2e8f3..b624dbb6cd15 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -398,6 +398,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->max_blk_size = 512;
+ 	host->max_blk_count = PAGE_SIZE / 512;
+ 
++	host->use_blk_mq = mmc_use_blk_mq;
++
+ 	return host;
+ }
+ 
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 77d6f60d1bf9..170fe5947087 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -69,6 +69,10 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
+ 	return card->host->ios.enhanced_strobe;
+ }
+ 
++static inline bool mmc_host_use_blk_mq(struct mmc_host *host)
++{
++	return host->use_blk_mq;
++}
+ 
+ #endif
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 5f3eb4a0373f..b7f5a66e0652 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -374,6 +374,7 @@ struct mmc_host {
+ 	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
++	unsigned int		use_blk_mq:1;	/* use blk-mq */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+-- 
+1.9.1
