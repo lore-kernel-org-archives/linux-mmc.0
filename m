@@ -1,84 +1,83 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
- sdhci-omap controller
-Date: Wed, 23 Aug 2017 15:07:54 +0200
-Message-ID: <CAPDyKFp7gchVQ+JPNqv4LktvHRm2Lzx6KakOw85zEZxDEX0OhA@mail.gmail.com>
-References: <20170821142132.GH6008@atomide.com> <20170823054246.23927-1-kishon@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 00/16] mmc: meson-gx: driver fixups and upgrades
+Date: Wed, 23 Aug 2017 15:10:25 +0200
+Message-ID: <CAPDyKFpxSNrP12JUp-JviV32182-EN1BG+Q_X0opNLt-dkGSMw@mail.gmail.com>
+References: <20170821160301.21899-1-jbrunet@baylibre.com> <CAPDyKFoBebVf0wqJ+z5UHC+aMju2Qy0ONc1OVYrwzZKk+XgGTg@mail.gmail.com>
+ <1503402390.7032.11.camel@baylibre.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20170823054246.23927-1-kishon-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-I+IVW8TIWO2tmTQ+vhA3Yw@public.gmane.org>, Ravikumar Kattekola <rk-l0cyMroinI0@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:36188 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753926AbdHWNK0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2017 09:10:26 -0400
+Received: by mail-qk0-f174.google.com with SMTP id o63so300653qkb.3
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2017 06:10:26 -0700 (PDT)
+In-Reply-To: <1503402390.7032.11.camel@baylibre.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Kevin Hilman <khilman@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 23 August 2017 at 07:42, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org> wrote:
-> Add binding for the TI's sdhci-omap controller. This now includes only
-> a subset of properties documented in ti-omap-hsmmc.txt but will eventually
-> include all the properties.
+On 22 August 2017 at 13:46, Jerome Brunet <jbrunet@baylibre.com> wrote:
+> On Tue, 2017-08-22 at 13:15 +0200, Ulf Hansson wrote:
+>> On 21 August 2017 at 18:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
+>> > The patchset features several bugfixes, rework and upgrade for the
+>> > meson-gx MMC driver.
+>> >
+>> > The main goal is to improve readability and enable new high speed
+>> > modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
+>> >
+>> > SDR104 is not working with a few cards on the p200 and the
+>> > libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
+>> > of these boards, adding noise to the signal and eventually breaking
+>> > the communication with some cards. The same cards are working well on a
+>> > laptop or the nanopi-k2 at 200Mhz.
+>> >
+>> > This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
+>> > gxl-s905x-libretech-cc
+>> >
+>> > Changes since v1 [0]:
+>> > * Reorder patches to have fixes first, then rework and finally
+>> >   enhancements.
+>> > * Use CCF to manage clock phases
+>> >
+>> > [0]: https://lkml.kernel.org/r/20170804174353.16486-1-jbrunet@baylibre.com
+>> >
+>> > Jerome Brunet (16):
+>> >   mmc: meson-gx: fix mux mask definition
+>> >   mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
+>> >   mmc: meson-gx: clean up some constants
+>> >   mmc: meson-gx: use _irqsave variant of spinlock
+>> >   mmc: meson-gx: cfg init overwrite values
+>> >   mmc: meson-gx: rework set_ios function
+>> >   mmc: meson-gx: rework clk_set function
+>> >   mmc: meson-gx: rework clock init function
+>> >   mmc: meson-gx: fix dual data rate mode frequencies
+>> >   mmc: meson-gx: work around clk-stop issue
+>> >   mmc: meson-gx: simplify interrupt handler
+>> >   mmc: meson-gx: implement card_busy callback
+>> >   mmc: meson-gx: use CCF to handle the clock phases
+>> >   mmc: meson-gx: implement voltage switch callback
+>> >   mmc: meson-gx: change default tx phase
+>> >   mmc: meson-gx: rework tuning function
+>> >
+>> >  drivers/mmc/host/meson-gx-mmc.c | 718 +++++++++++++++++++++++++++--------
+>> > -----
+>> >  1 file changed, 497 insertions(+), 221 deletions(-)
+>> >
+>> > --
+>> > 2.9.5
+>> >
+>>
+>> So far, I decided to pick patch 1 -> 3.
 >
-> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-> ---
-> Changes from v2:
-> *) Fixed example to use the updated compatible
->
-> Changes from v1:
-> *) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
->    of using the ti-omap-hsmmc.txt as suggested by Tony
->  .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
->  1 file changed, 22 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> new file mode 100644
-> index 000000000000..139695ad2d58
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> @@ -0,0 +1,22 @@
-> +* TI OMAP SDHCI Controller
-> +
-> +Refer to mmc.txt for standard MMC bindings.
-> +
-> +Required properties:
-> +- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
-> +- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
-> +
-> +Optional properties:
-> +- ti,dual-volt: boolean, supports dual voltage cards
-> +- ti,non-removable: non-removable slot (like eMMC)
-> +
-> +Example:
-> +       mmc1: mmc@0x4809c000 {
-> +               compatible = "ti,dra7-sdhci";
-> +               reg = <0x4809c000 0x400>;
-> +               ti,hwmods = "mmc1";
-> +               ti,dual-volt;
-> +               bus-width = <4>;
-> +               vmmc-supply = <&vmmc>; /* phandle to regulator node */
-> +               ti,non-removable;
-> +       };
-> --
-> 2.11.0
->
+> Thx Ulf.
+> Do you want me to respin w/o patch 1 -> 4 or shall I wait for further review on
+> the other changes ?
 
-I am wondering a bit on the long term plan here.
-
-Ideally at some point in future, we would like to remove the old
-omap_hsmmc driver, but from compatible string point of view, that
-means we first needs to deprecate the old ones for a while. Right?
-
-That said, what is then the reason to why we should bring over the
-existing omap_hsmmc bindings to the sdhci-omap bindings?
-
-For example, "ti,dual-volt" can likely be replaced with something
-better that already exists (either a common mmc binding or an sdhci
-binding). For "ti,non-removable", we already have a common mmc binding
-"non-removable" for this.
+I think you can wait a bit, hopefully some of the earlier authors and
+Kevin can give some input as well.
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
