@@ -1,45 +1,59 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v5 0/9] mtd: sharpslpart partition parser
-Date: Wed, 23 Aug 2017 21:33:44 +0200
-Message-ID: <87pobmoz8n.fsf@belgarion.home>
-References: <1502743720-28672-1-git-send-email-andrea.adami@gmail.com>
-        <20170821221339.70cfcfb7@bbrezillon>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V5 03/13] mmc: host: Add CQE interface
+Date: Thu, 24 Aug 2017 09:53:01 +0300
+Message-ID: <c0f1cba4-c0a7-4936-77fd-41d3d90a4665@intel.com>
+References: <1502366898-23691-1-git-send-email-adrian.hunter@intel.com>
+ <1502366898-23691-4-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpemPy7ioB3=B3VrOBhDED3HoDq0CVBV=bq7gyEOQ7PkA@mail.gmail.com>
+ <732e8ebc-9b81-90c4-c719-eab1ca0ac220@intel.com>
+ <CAPDyKFp1YTWNfECS5720amq8zrJxhSuCJN+GUk2PEZTvdCLaXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Boris Brezillon <boris.brezillon@free-electrons.com>, Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mtd@lists.infradead.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-kernel@vger.kernel.org, Marek Vasut <marek.vasut@gmail.com>, linux-arm-kernel@lists.infradead.org, Cyrille Pitchen <cyrille.pitchen@wedev4u.fr>, Lee Jones <lee.jones@linaro.org>, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Daniel Mack <daniel@zonque.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga05.intel.com ([192.55.52.43]:29374 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751124AbdHXG7e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 24 Aug 2017 02:59:34 -0400
+In-Reply-To: <CAPDyKFp1YTWNfECS5720amq8zrJxhSuCJN+GUk2PEZTvdCLaXw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Boris Brezillon <boris.brezillon@free-electrons.com> writes:
+On 23/08/17 15:48, Ulf Hansson wrote:
+> On 23 August 2017 at 08:54, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 22/08/17 14:13, Ulf Hansson wrote:
+>>> On 10 August 2017 at 14:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> +       void                    (*cqe_recovery_notifier)(struct mmc_host *,
+>>>> +                                                        struct mmc_request *);
+>>>
+>>> Normally we don't put callbacks in the struct mmc_host that someone
+>>> else than the host driver should assign - so this feels a bit upside
+>>> down.
+>>>
+>>> Is there any reason to why you didn't want to add a new API? Something
+>>> like mmc_cqe_recover(), which the host driver could call.
+>>
+>> That would make the host driver dependent on the block driver.  There needs
+>> to be a function pointer, even if we wrap it in an API.
+> 
+> Okay, I see. I guess we could put such pointer somewhere closer to the
+> mmc request queue.
 
-> Le Mon, 14 Aug 2017 22:48:31 +0200,
->> Andrea Adami (9):
->>   mtd: sharpslpart: Add sharpslpart partition parser
->>   mtd: nand: sharpsl: Add partition parsers platform data
->>   mfd: tmio: Add partition parsers platform data
->>   mtd: nand: sharpsl: Register partitions using the parsers
->>   mtd: nand: tmio: Register partitions using the parsers
->
-> Applied patches 2, to 5 to nand/next.
->>   ARM: pxa/corgi: Remove hardcoded partitioning, use sharpslpart parser
->>   ARM: pxa/tosa: Remove hardcoded partitioning, use sharpslpart parser
->>   ARM: pxa/spitz: Remove hardcoded partitioning, use sharpslpart parser
->>   ARM: pxa/poodle: Remove hardcoded partitioning, use sharpslpart parser
+Another possibility is to put in into struct mmc_request like the "done"
+callback.
 
-I'm quite happy with patches 6 to 9 except for the subject title length.
+> 
+> Anyway, I didn't find out how this pointer was being protected from
+> concurrent access or perhaps that is managed via
+> mmc_claim|release_host()?
 
-Andrea, if you give me an idea of change, I'll modify the titles myself before
-applying, no need to resend a serie.
+It is assumed CQE is only used by the card driver so the callback can be set
+/ reset in the card driver's probe / remove.
 
-For example, you could propose :
-ARM: pxa: corgi: use sharpslpart parser instead of hardcoded one
+>                           Moreover, I could find it ever it being
+> reset to NULL.
 
-
-Then I'll take them into pxa/for-next if there are no objections.
-
-Cheers.
-
--- 
-Robert
+Yeah, doesn't look like it gets reset.
