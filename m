@@ -1,108 +1,129 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 3/5] dt-bindings: sdhci-omap: Add bindings for the
- sdhci-omap controller
-Date: Thu, 24 Aug 2017 13:29:39 +0200
-Message-ID: <CAPDyKFqCZFM7UmHyQCm=DwwZXJvzUde3pW0HqARKrsgfgxSuaw@mail.gmail.com>
-References: <20170821142132.GH6008@atomide.com> <20170823054246.23927-1-kishon@ti.com>
- <CAPDyKFp7gchVQ+JPNqv4LktvHRm2Lzx6KakOw85zEZxDEX0OhA@mail.gmail.com> <c9342689-f09e-44af-0975-d43ef122a477@ti.com>
+From: Zhoujie Wu <zjwu@marvell.com>
+Subject: [PATCH 1/2] mmc: sdhci-xenon: add runtime pm support
+Date: Thu, 24 Aug 2017 15:19:37 -0700
+Message-ID: <1503613178-26912-2-git-send-email-zjwu@marvell.com>
+References: <1503613178-26912-1-git-send-email-zjwu@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c9342689-f09e-44af-0975-d43ef122a477@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Russell King <linux@armlinux.org.uk>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:34388 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753335AbdHXWQc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2017 18:16:32 -0400
+In-Reply-To: <1503613178-26912-1-git-send-email-zjwu@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, xswang@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com, Zhoujie Wu <zjwu@marvell.com>
 
-On 23 August 2017 at 15:56, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> Hi Uffe,
->
-> On Wednesday 23 August 2017 06:37 PM, Ulf Hansson wrote:
->> On 23 August 2017 at 07:42, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>> Add binding for the TI's sdhci-omap controller. This now includes only
->>> a subset of properties documented in ti-omap-hsmmc.txt but will eventually
->>> include all the properties.
->>>
->>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>> ---
->>> Changes from v2:
->>> *) Fixed example to use the updated compatible
->>>
->>> Changes from v1:
->>> *) Create a new sdhci-omap.txt document for TI's sdhci-omap controller instead
->>>    of using the ti-omap-hsmmc.txt as suggested by Tony
->>>  .../devicetree/bindings/mmc/sdhci-omap.txt         | 22 ++++++++++++++++++++++
->>>  1 file changed, 22 insertions(+)
->>>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->>> new file mode 100644
->>> index 000000000000..139695ad2d58
->>> --- /dev/null
->>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->>> @@ -0,0 +1,22 @@
->>> +* TI OMAP SDHCI Controller
->>> +
->>> +Refer to mmc.txt for standard MMC bindings.
->>> +
->>> +Required properties:
->>> +- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
->>> +- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
->>> +
->>> +Optional properties:
->>> +- ti,dual-volt: boolean, supports dual voltage cards
->>> +- ti,non-removable: non-removable slot (like eMMC)
->>> +
->>> +Example:
->>> +       mmc1: mmc@0x4809c000 {
->>> +               compatible = "ti,dra7-sdhci";
->>> +               reg = <0x4809c000 0x400>;
->>> +               ti,hwmods = "mmc1";
->>> +               ti,dual-volt;
->>> +               bus-width = <4>;
->>> +               vmmc-supply = <&vmmc>; /* phandle to regulator node */
->>> +               ti,non-removable;
->>> +       };
->>> --
->>> 2.11.0
->>>
->>
->> I am wondering a bit on the long term plan here.
->>
->> Ideally at some point in future, we would like to remove the old
->> omap_hsmmc driver, but from compatible string point of view, that
->> means we first needs to deprecate the old ones for a while. Right?
->
-> right but sdhci-omap is still lacking features that was present in omap_hsmmc
-> like context save/restore, SDIO support etc. I think we should deprecate
-> omap_hsmmc compatible once we add all the features in sdhci-omap?
->>
->> That said, what is then the reason to why we should bring over the
->> existing omap_hsmmc bindings to the sdhci-omap bindings?
->
-> This is mainly for old dt compatibility. Even after removing the omap_hsmmc
-> driver, users should still be able to use newer kernel with their existing dtbs.
+Enable runtime pm support for xenon controller, which uses 50ms
+auto runtime suspend by default.
 
-I guess we have two options.
+Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
+---
+ drivers/mmc/host/sdhci-xenon.c | 61 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 60 insertions(+), 1 deletion(-)
 
-1) Allow us to invent and use new bindings - and a new compatible.
-When everything is implemented in sdhci-omap, we can deprecate the old
-omap_hsmmc driver and its corresponding compatible/bindings. At some
-point later we can remove the legacy driver/bindings altogether - of
-course that might take a while. This option allows us to re-think some
-of the old bindings and really clean up some if its related code. For
-example, I think "ti,dual-volt" is a bad binding. Instead it would be
-better to use the existing mmc bindings about which speed mode the
-controller/board supports (as the voltage level comes with it).
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 306ffaf..517ff2e 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -18,6 +18,8 @@
+ #include <linux/ktime.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/pm.h>
++#include <linux/pm_runtime.h>
+ 
+ #include "sdhci-pltfm.h"
+ #include "sdhci-xenon.h"
+@@ -506,13 +508,24 @@ static int xenon_probe(struct platform_device *pdev)
+ 	if (err)
+ 		goto err_clk;
+ 
++	pm_runtime_get_noresume(&pdev->dev);
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++	pm_suspend_ignore_children(&pdev->dev, 1);
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto remove_sdhc;
+ 
++	pm_runtime_put_autosuspend(&pdev->dev);
++
+ 	return 0;
+ 
+ remove_sdhc:
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
+ 	xenon_sdhc_unprepare(host);
+ err_clk:
+ 	clk_disable_unprepare(pltfm_host->clk);
+@@ -577,6 +590,52 @@ static int xenon_resume(struct device *dev)
+ 
+ static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
+ 
++#ifdef CONFIG_PM
++static int xenon_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = sdhci_runtime_suspend_host(host);
++
++	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
++		mmc_retune_needed(host->mmc);
++
++	clk_disable_unprepare(pltfm_host->clk);
++	/*
++	 * Need to update the priv->clock here, or when runtime resume
++	 * back, phy don't aware the clock change and won't adjust phy
++	 * which will cause cmd err
++	 */
++	priv->clock = 0;
++	return ret;
++}
++
++static int xenon_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret) {
++		dev_err(dev, "can't enable mainck\n");
++		return ret;
++	}
++
++	return sdhci_runtime_resume_host(host);
++}
++#endif /* CONFIG_PM */
++
++static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
++	SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
++			   xenon_runtime_resume,
++			   NULL)
++};
++
++
+ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-ap806-sdhci",},
+ 	{ .compatible = "marvell,armada-cp110-sdhci",},
+@@ -589,7 +648,7 @@ static int xenon_resume(struct device *dev)
+ 	.driver	= {
+ 		.name	= "xenon-sdhci",
+ 		.of_match_table = sdhci_xenon_dt_ids,
+-		.pm = &xenon_pmops,
++		.pm = &sdhci_xenon_dev_pm_ops,
+ 	},
+ 	.probe	= xenon_probe,
+ 	.remove	= xenon_remove,
+-- 
+1.9.1
 
-2) Invent only a new compatible, but stick to use the old omap hsmmc
-bindings and thus also deploy the similar code dealing with them. When
-everything is implemented move the old omap_hsmmc compatibles into the
-new sdhci-omap driver and them remove the old omap_hsmmc driver. At
-that point we could also deprecate the old omap hsmmc compatibles, but
-to me that is rather pointless.
-
-The two options has different advantages, feel free to pick any of them!
-
-Kind regards
-Uffe
