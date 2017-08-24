@@ -1,101 +1,107 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 4/5] mmc: sdhci-msm: Add ops to do sdhc register write
-Date: Thu, 24 Aug 2017 13:11:08 +0300
-Message-ID: <ace15bcd-7470-3802-5225-de87956b0b4e@intel.com>
-References: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
- <1503033582-48703-5-git-send-email-vviswana@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-msm: Enable delay circuit calibration clocks
+Date: Thu, 24 Aug 2017 12:51:25 +0200
+Message-ID: <CAPDyKFosGas+zUkki-r8wG=iuRO8M+o_LrrMxtwa=r4+zWAowQ@mail.gmail.com>
+References: <20170818175506.5035-1-bjorn.andersson@linaro.org>
+ <20170818175506.5035-3-bjorn.andersson@linaro.org> <CAPDyKFphMcVfbPUacG-iJEhwT0m6uKXFs6wjgS=YXOK2c_bqEA@mail.gmail.com>
+ <20170823172828.GA29306@minitux>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1503033582-48703-5-git-send-email-vviswana@codeaurora.org>
-Content-Language: en-US
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, will.deacon@arm.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qt0-f182.google.com ([209.85.216.182]:32920 "EHLO
+        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751114AbdHXKv0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2017 06:51:26 -0400
+Received: by mail-qt0-f182.google.com with SMTP id a1so1093405qti.0
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2017 03:51:26 -0700 (PDT)
+In-Reply-To: <20170823172828.GA29306@minitux>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
 
-On 18/08/17 08:19, Vijay Viswanath wrote:
-> Register writes which change voltage of IO lines or turn the IO bus
-> on/off require controller to be ready before progressing further. When
-> the controller is ready, it will generate a power irq which needs to be
-> handled. The thread which initiated the register write should wait for
-> power irq to complete. This will be done through the new sdhc msm write
-> APIs which will check whether the particular write can trigger a power
-> irq and wait for it with a timeout if it is expected.
-> The SDHC core power control IRQ gets triggered when -
-> * There is a state change in power control bit (bit 0)
->   of SDHCI_POWER_CONTROL register.
-> * There is a state change in 1.8V enable bit (bit 3) of
->   SDHCI_HOST_CONTROL2 register.
-> * Bit 1 of SDHCI_SOFTWARE_RESET is set.
-> 
-> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 39 +++++++++++++++++++++++++++++++++++++++
->  1 file changed, 39 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 6d3b1fd..6571880 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1250,6 +1250,41 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  	__sdhci_msm_set_clock(host, clock);
->  }
->  
-> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> +static void __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
-> +{
-> +	u32 req_type = 0;
-> +
-> +	switch (reg) {
-> +	case SDHCI_HOST_CONTROL2:
-> +		req_type = (val & SDHCI_CTRL_VDD_180) ? REQ_IO_LOW :
-> +			REQ_IO_HIGH;
-> +		break;
-> +	case SDHCI_SOFTWARE_RESET:
-> +		if (host->pwr && (val & SDHCI_RESET_ALL))
-> +			req_type = REQ_BUS_OFF;
-> +		break;
-> +	case SDHCI_POWER_CONTROL:
-> +		req_type = !val ? REQ_BUS_OFF : REQ_BUS_ON;
-> +		break;
-> +	}
-> +
-> +	if (req_type)
+On 23 August 2017 at 19:28, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+> On Tue 22 Aug 03:45 PDT 2017, Ulf Hansson wrote:
+>
+>> [...]
+>>
+>> > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> > index 71e01cbc38b6..7b47906ba447 100644
+>> > --- a/drivers/mmc/host/sdhci-msm.c
+>> > +++ b/drivers/mmc/host/sdhci-msm.c
+>> > @@ -131,7 +131,7 @@ struct sdhci_msm_host {
+>> >         struct clk *pclk;       /* SDHC peripheral bus clock */
+>> >         struct clk *bus_clk;    /* SDHC bus voter clock */
+>> >         struct clk *xo_clk;     /* TCXO clk needed for FLL feature of cm_dll*/
+>> > -       struct clk_bulk_data bulk_clks[2];
+>> > +       struct clk_bulk_data bulk_clks[4];
+>> >         unsigned long clk_rate;
+>> >         struct mmc_host *mmc;
+>> >         bool use_14lpp_dll_reset;
+>> > @@ -1125,6 +1125,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>> >         struct sdhci_pltfm_host *pltfm_host;
+>> >         struct sdhci_msm_host *msm_host;
+>> >         struct resource *core_memres;
+>> > +       struct clk *clk;
+>> >         int ret;
+>> >         u16 host_version, core_minor;
+>> >         u32 core_version, config;
+>> > @@ -1194,6 +1195,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>> >         msm_host->bulk_clks[0].clk = msm_host->clk;
+>> >         msm_host->bulk_clks[1].clk = msm_host->pclk;
+>> >
+>> > +       clk = devm_clk_get(&pdev->dev, "cal");
+>> > +       if (!IS_ERR(clk))
+>> > +               msm_host->bulk_clks[2].clk = clk;
+>> > +
+>> > +       clk = devm_clk_get(&pdev->dev, "sleep");
+>> > +       if (!IS_ERR(clk))
+>> > +               msm_host->bulk_clks[3].clk = clk;
+>> > +
+>>
+>> First, both these clocks needs to be documented in DT doc.
+>>
+>
+> Of course, sorry for missing this part.
+>
+>> Second, I think you should initialize bulk_clks[2|3] to NULL, in case
+>> the new optional clocks can't be fetched.
+>>
+>
+> msm_host does come from a kzalloc() in mmc_alloc_host(), but I can write
+> this differently to not rely on this "fact".
 
-So you are really relying on these register writes not being done in an
-atomic context.  Since the spin lock was removed from sdhci_set_ios() that
-seems to be true, but it would be good to add a comment here acknowledging
-that you are depending on that.
+No, it's fine as is, we often relies on that fact. Sorry about the noise.
 
-> +		sdhci_msm_check_power_status(host, req_type);
-> +}
-> +
-> +static void sdhci_msm_writew(struct sdhci_host *host, u16 val, int reg)
-> +{
-> +		writew_relaxed(val, host->ioaddr + reg);
-> +		__sdhci_msm_check_write(host, val, reg);
-> +}
-> +
-> +static void sdhci_msm_writeb(struct sdhci_host *host, u8 val, int reg)
-> +{
-> +		writeb_relaxed(val, host->ioaddr + reg);
-> +		__sdhci_msm_check_write(host, val, reg);
-> +}
-> +#endif
->  static const struct of_device_id sdhci_msm_dt_match[] = {
->  	{ .compatible = "qcom,sdhci-msm-v4" },
->  	{},
-> @@ -1264,6 +1299,10 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  	.get_max_clock = sdhci_msm_get_max_clock,
->  	.set_bus_width = sdhci_set_bus_width,
->  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
-> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> +	.write_w = sdhci_msm_writew,
-> +	.write_b = sdhci_msm_writeb,
-> +#endif
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-> 
+>
+>> >         ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+>> >                                       msm_host->bulk_clks);
+>> >         if (ret)
+>> > --
+>> > 2.12.0
+>> >
+>>
+>> Another observation is the number of clocks for this device. In some
+>> cases, now six clocks are needed!? Is that really correct? Just wanted
+>> to point it out as it seems a bit too much. :-)
+>>
+>
+> * we need "iface" and "core" for normal operation
+>
+> * "xo" is the base clock of the entire system and is always present,
+>   question is why its clock rate isn't hard coded in the driver.
+>
+> * "bus" should probably not be handled directly in the driver, but
+>   rather through the upcoming "interconnect" framework
+>
+> * And finally these two new clocks are needed on some HS400-enabled
+>   platforms, for calibrating the separate (RCLK) clock delay circuit
+>
+> So I believe the right answer should have been 2 required and 2 optional
+> clocks.  But we need the interconnect framework and I'll look into why
+> we need to specify "xo".
+
+Thanks for the explanation so far. Looking forward to further clarifications.
+
+Kind regards
+Uffe
