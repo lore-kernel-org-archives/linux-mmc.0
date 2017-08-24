@@ -1,14 +1,15 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/5] mmc: sdhci-msm: fix issue with power irq
-Date: Thu, 24 Aug 2017 10:40:28 +0300
-Message-ID: <7b85cd75-4f39-df08-eaa1-cd7f9499c29b@intel.com>
+Subject: Re: [PATCH 2/5] mmc: sdhci-msm: Fix HW issue with power IRQ handling
+ during reset
+Date: Thu, 24 Aug 2017 10:42:18 +0300
+Message-ID: <56c2f237-e0e8-ede1-ca3a-7289b909cbfe@intel.com>
 References: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
- <1503033582-48703-2-git-send-email-vviswana@codeaurora.org>
+ <1503033582-48703-3-git-send-email-vviswana@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1503033582-48703-2-git-send-email-vviswana@codeaurora.org>
+In-Reply-To: <1503033582-48703-3-git-send-email-vviswana@codeaurora.org>
 Content-Language: en-US
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: Vijay Viswanath <vviswana@codeaurora.org>, ulf.hansson@linaro.org, will.deacon@arm.com
@@ -16,74 +17,105 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kerne
 List-Id: linux-mmc@vger.kernel.org
 
 On 18/08/17 08:19, Vijay Viswanath wrote:
-> From: Subhash Jadavani <subhashj@codeaurora.org>
+> From: Sahitya Tummala <stummala@codeaurora.org>
 > 
-> SDCC controller reset (SW_RST) during probe may trigger power irq if
-> previous status of PWRCTL was either BUS_ON or IO_HIGH_V. So before we
-> enable the power irq interrupt in GIC (by registering the interrupt
-> handler), we need to ensure that any pending power irq interrupt status
-> is acknowledged otherwise power irq interrupt handler would be fired
-> prematurely.
+> There is a rare scenario in HW, where the first clear pulse could
+> be lost when the actual reset and clear/read of status register
+> are happening at the same time. Fix this by retrying upto 10 times
+> to ensure the status register gets cleared. Otherwise, this will
+> lead to a spurious power IRQ which results in system instability.
 > 
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 > Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 26 ++++++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
+>  drivers/mmc/host/sdhci-msm.c | 43 ++++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 40 insertions(+), 3 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 9d601dc..0957199 100644
+> index 0957199..f3e0489 100644
 > --- a/drivers/mmc/host/sdhci-msm.c
 > +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1128,6 +1128,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	u16 host_version, core_minor;
->  	u32 core_version, config;
->  	u8 core_major;
-> +	u32 irq_status, irq_ctl;
+> @@ -995,17 +995,51 @@ static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+>  		sdhci_msm_hs400(host, &mmc->ios);
+>  }
 >  
->  	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
->  	if (IS_ERR(host))
-> @@ -1250,6 +1251,28 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  			       CORE_VENDOR_SPEC_CAPABILITIES0);
->  	}
+> -static void sdhci_msm_voltage_switch(struct sdhci_host *host)
+> +static void sdhci_msm_dump_pwr_ctrl_regs(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	pr_err("%s: PWRCTL_STATUS: 0x%08x | PWRCTL_MASK: 0x%08x | PWRCTL_CTL: 0x%08x\n",
+> +			mmc_hostname(host->mmc),
+> +			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS),
+> +			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_MASK),
+> +			readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL));
+> +}
+> +
+> +static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>  	u32 irq_status, irq_ack = 0;
+> +	int retry = 10;
+>  
+>  	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+>  	irq_status &= INT_MASK;
+>  
+>  	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
 >  
 > +	/*
-> +	 * Power on reset state may trigger power irq if previous status of
-> +	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
-> +	 * interrupt in GIC, any pending power irq interrupt should be
-> +	 * acknowledged. Otherwise power irq interrupt handler would be
-> +	 * fired prematurely.
+> +	 * There is a rare HW scenario where the first clear pulse could be
+> +	 * lost when actual reset and clear/read of status register is
+> +	 * happening at a time. Hence, retry for at least 10 times to make
+> +	 * sure status register is cleared. Otherwise, this will result in
+> +	 * a spurious power IRQ resulting in system instability.
 > +	 */
-> +
-> +	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-> +	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
-> +	irq_ctl = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL);
-> +	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
-> +		irq_ctl |= CORE_PWRCTL_BUS_SUCCESS;
-> +	if (irq_status & (CORE_PWRCTL_IO_HIGH | CORE_PWRCTL_IO_LOW))
-> +		irq_ctl |= CORE_PWRCTL_IO_SUCCESS;
-> +	writel_relaxed(irq_ctl,	msm_host->core_mem + CORE_PWRCTL_CTL);
+> +	while (irq_status & readl_relaxed(msm_host->core_mem +
+> +				CORE_PWRCTL_STATUS)) {
+> +		if (retry == 0) {
+> +			pr_err("%s: Timedout clearing (0x%x) pwrctl status register\n",
+> +					mmc_hostname(host->mmc), irq_status);
+> +			sdhci_msm_dump_pwr_ctrl_regs(host);
+> +			WARN_ON(1);
 
-This looks a lot like sdhci_msm_voltage_switch().  Can clearing the
-interrupt be a common function?
+Is it your intention to loop forever here?
 
-> +	/*
-> +	 * Ensure that above writes are propogated before interrupt enablement
-> +	 * in GIC.
-> +	 */
-> +	mb();
+> +		}
+> +		writel_relaxed(irq_status,
+> +				msm_host->core_mem + CORE_PWRCTL_CLEAR);
+> +		retry--;
+> +		udelay(10);
+> +	}
 > +
->  	/* Setup IRQ for handling power/voltage tasks with PMIC */
->  	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
->  	if (msm_host->pwr_irq < 0) {
-> @@ -1259,6 +1282,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  		goto clk_disable;
->  	}
+>  	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
+>  		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
+>  	if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
+> @@ -1017,13 +1051,17 @@ static void sdhci_msm_voltage_switch(struct sdhci_host *host)
+>  	 * switches are handled by the sdhci core, so just report success.
+>  	 */
+>  	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
+> +
+> +	pr_debug("%s: %s: Handled IRQ(%d), irq_status=0x%x, ack=0x%x\n",
+> +		mmc_hostname(msm_host->mmc), __func__, irq, irq_status,
+> +		irq_ack);
+>  }
 >  
-> +	/* Enable pwr irq interrupts */
-> +	writel_relaxed(INT_MASK, msm_host->core_mem + CORE_PWRCTL_MASK);
-> +
->  	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
->  					sdhci_msm_pwr_irq, IRQF_ONESHOT,
->  					dev_name(&pdev->dev), host);
+>  static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
+>  {
+>  	struct sdhci_host *host = (struct sdhci_host *)data;
+>  
+> -	sdhci_msm_voltage_switch(host);
+> +	sdhci_msm_handle_pwr_irq(host, irq);
+>  
+>  	return IRQ_HANDLED;
+>  }
+> @@ -1106,7 +1144,6 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	.get_max_clock = sdhci_msm_get_max_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+> -	.voltage_switch = sdhci_msm_voltage_switch,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 > 
