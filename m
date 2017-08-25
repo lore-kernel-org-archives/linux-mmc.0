@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V6 02/12] mmc: block: Fix block status codes
-Date: Fri, 25 Aug 2017 15:43:45 +0300
-Message-ID: <1503665035-16231-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V6 04/12] mmc: core: Turn off CQE before sending commands
+Date: Fri, 25 Aug 2017 15:43:47 +0300
+Message-ID: <1503665035-16231-5-git-send-email-adrian.hunter@intel.com>
 References: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-block-owner@vger.kernel.org>
 In-Reply-To: <1503665035-16231-1-git-send-email-adrian.hunter@intel.com>
@@ -10,42 +10,50 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, Bough Chen <haibo.chen@nxp.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 2a842acab109 ("block: introduce new block status code type") changed
-the error type but not in patches merged through the mmc tree, like
-commit 0493f6fe5bde ("mmc: block: Move boot partition locking into a driver
-op"). Fix one error code that is incorrect and also use BLK_STS_OK in
-preference to 0.
+CQE needs to be off for the host controller to accept non-CQ commands. Turn
+off the CQE before sending commands, and ensure it is off in any reset or
+power management paths, or re-tuning.
 
-Fixes: 17ece345a042 ("Merge tag 'mmc-v4.13' of git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc")
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/block.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/core/core.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0eebc2f726c3..2f00d11adfa9 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1223,7 +1223,7 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 		break;
- 	}
- 	mq_rq->drv_op_result = ret;
--	blk_end_request_all(req, ret);
-+	blk_end_request_all(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5dd1c00d95f5..66c9cf49ad2f 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -260,6 +260,9 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ 	trace_mmc_request_start(host, mrq);
+ 
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
++
+ 	host->ops->request(host, mrq);
  }
  
- static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-@@ -1728,9 +1728,9 @@ static bool mmc_blk_rw_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
- 		if (err)
- 			req_pending = old_req_pending;
- 		else
--			req_pending = blk_end_request(req, 0, blocks << 9);
-+			req_pending = blk_end_request(req, BLK_STS_OK, blocks << 9);
- 	} else {
--		req_pending = blk_end_request(req, 0, brq->data.bytes_xfered);
-+		req_pending = blk_end_request(req, BLK_STS_OK, brq->data.bytes_xfered);
- 	}
- 	return req_pending;
- }
+@@ -979,6 +982,9 @@ int mmc_execute_tuning(struct mmc_card *card)
+ 	if (!host->ops->execute_tuning)
+ 		return 0;
+ 
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
++
+ 	if (mmc_card_mmc(card))
+ 		opcode = MMC_SEND_TUNING_BLOCK_HS200;
+ 	else
+@@ -1018,6 +1024,9 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
+  */
+ void mmc_set_initial_state(struct mmc_host *host)
+ {
++	if (host->cqe_on)
++		host->cqe_ops->cqe_off(host);
++
+ 	mmc_retune_disable(host);
+ 
+ 	if (mmc_host_is_spi(host))
 -- 
 1.9.1
