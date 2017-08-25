@@ -1,28 +1,91 @@
 From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH v2 15/16] mmc: meson-gx: change default tx phase
-Date: Thu, 24 Aug 2017 17:05:18 -0700
-Message-ID: <7h8ti8h5q9.fsf@baylibre.com>
+Subject: Re: [PATCH v2 00/16] mmc: meson-gx: driver fixups and upgrades
+Date: Thu, 24 Aug 2017 17:05:59 -0700
+Message-ID: <7h378gh5p4.fsf@baylibre.com>
 References: <20170821160301.21899-1-jbrunet@baylibre.com>
-        <20170821160301.21899-16-jbrunet@baylibre.com>
+        <CAPDyKFoBebVf0wqJ+z5UHC+aMju2Qy0ONc1OVYrwzZKk+XgGTg@mail.gmail.com>
+        <1503402390.7032.11.camel@baylibre.com>
+        <CAPDyKFpxSNrP12JUp-JviV32182-EN1BG+Q_X0opNLt-dkGSMw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170821160301.21899-16-jbrunet@baylibre.com> (Jerome Brunet's
-        message of "Mon, 21 Aug 2017 18:03:00 +0200")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pg0-f50.google.com ([74.125.83.50]:34706 "EHLO
+        mail-pg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753492AbdHYAGB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2017 20:06:01 -0400
+Received: by mail-pg0-f50.google.com with SMTP id a7so4953747pgn.1
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2017 17:06:01 -0700 (PDT)
+In-Reply-To: <CAPDyKFpxSNrP12JUp-JviV32182-EN1BG+Q_X0opNLt-dkGSMw@mail.gmail.com>
+        (Ulf Hansson's message of "Wed, 23 Aug 2017 15:10:25 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jerome Brunet <jbrunet@baylibre.com>, Carlo Caione <carlo@caione.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Jerome Brunet <jbrunet@baylibre.com> writes:
+Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-> Initial default tx phase was set to 0 while the datasheet recommends 270.
-> Some cards fails to initialize with this setting and eMMC mode DDR52 does
-> not work.
+> On 22 August 2017 at 13:46, Jerome Brunet <jbrunet@baylibre.com> wrote:
+>> On Tue, 2017-08-22 at 13:15 +0200, Ulf Hansson wrote:
+>>> On 21 August 2017 at 18:02, Jerome Brunet <jbrunet@baylibre.com> wrote:
+>>> > The patchset features several bugfixes, rework and upgrade for the
+>>> > meson-gx MMC driver.
+>>> >
+>>> > The main goal is to improve readability and enable new high speed
+>>> > modes, such as eMMC DDR52 and sdcard UHS modes up to SDR50 (100Mhz)
+>>> >
+>>> > SDR104 is not working with a few cards on the p200 and the
+>>> > libretech-cc. I suspect that 200Mhz might be a bit too fast for the PCB
+>>> > of these boards, adding noise to the signal and eventually breaking
+>>> > the communication with some cards. The same cards are working well on a
+>>> > laptop or the nanopi-k2 at 200Mhz.
+>>> >
+>>> > This series has been tested on gxbb-p200, gxbb-nanopi-k2 and
+>>> > gxl-s905x-libretech-cc
+>>> >
+>>> > Changes since v1 [0]:
+>>> > * Reorder patches to have fixes first, then rework and finally
+>>> >   enhancements.
+>>> > * Use CCF to manage clock phases
+>>> >
+>>> > [0]: https://lkml.kernel.org/r/20170804174353.16486-1-jbrunet@baylibre.com
+>>> >
+>>> > Jerome Brunet (16):
+>>> >   mmc: meson-gx: fix mux mask definition
+>>> >   mmc: meson-gx: remove CLK_DIVIDER_ALLOW_ZERO clock flag
+>>> >   mmc: meson-gx: clean up some constants
+>>> >   mmc: meson-gx: use _irqsave variant of spinlock
+>>> >   mmc: meson-gx: cfg init overwrite values
+>>> >   mmc: meson-gx: rework set_ios function
+>>> >   mmc: meson-gx: rework clk_set function
+>>> >   mmc: meson-gx: rework clock init function
+>>> >   mmc: meson-gx: fix dual data rate mode frequencies
+>>> >   mmc: meson-gx: work around clk-stop issue
+>>> >   mmc: meson-gx: simplify interrupt handler
+>>> >   mmc: meson-gx: implement card_busy callback
+>>> >   mmc: meson-gx: use CCF to handle the clock phases
+>>> >   mmc: meson-gx: implement voltage switch callback
+>>> >   mmc: meson-gx: change default tx phase
+>>> >   mmc: meson-gx: rework tuning function
+>>> >
+>>> >  drivers/mmc/host/meson-gx-mmc.c | 718 +++++++++++++++++++++++++++--------
+>>> > -----
+>>> >  1 file changed, 497 insertions(+), 221 deletions(-)
+>>> >
+>>> > --
+>>> > 2.9.5
+>>> >
+>>>
+>>> So far, I decided to pick patch 1 -> 3.
+>>
+>> Thx Ulf.
+>> Do you want me to respin w/o patch 1 -> 4 or shall I wait for further review on
+>> the other changes ?
 >
-> Changing this setting to 270 fixes these issues, without any regression
-> so far
->
-> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+> I think you can wait a bit, hopefully some of the earlier authors and
+> Kevin can give some input as well.
 
-Reviewed-by: Kevin Hilman <khilman@baylibre.com>
+Most of them already had a Reviewed-by from me, but I just reviewed the
+new/updateds one now as well.
+
+Kevin
+
