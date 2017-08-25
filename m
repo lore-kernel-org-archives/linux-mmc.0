@@ -1,51 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.13 rc7
-Date: Fri, 25 Aug 2017 11:42:40 +0200
-Message-ID: <CAPDyKFotJccsFkdfaaAWriEP7C7zDRS2aRSdFV3QBQwv3tnqXg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: [PATCH 2/2] mmc: sunxi: Reset the device at probe time
+Date: Fri, 25 Aug 2017 11:49:53 +0200
+Message-ID: <20170825094953.3247-2-maxime.ripard@free-electrons.com>
+References: <20170825094953.3247-1-maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:35485 "EHLO
-        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755771AbdHYJml (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2017 05:42:41 -0400
-Received: by mail-oi0-f51.google.com with SMTP id k77so16447571oib.2
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2017 02:42:40 -0700 (PDT)
+Received: from mail.free-electrons.com ([62.4.15.54]:37926 "EHLO
+        mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754726AbdHYJt4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2017 05:49:56 -0400
+In-Reply-To: <20170825094953.3247-1-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+To: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org, Mike Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-mmc@vger.kernel.org
 
-Hi Linus,
+We might be into some troubles if the bootloader misconfigured the MMC
+controller.
 
-Here's one mmc fix intended for v4.13-rc7.
+We currently only de-assert the reset line at probe time, which means that
+if the device was already out of reset, we're going to keep whatever state
+was set already.
 
-Details are as usual found in the signed tag. Please pull this in!
+Switch to a reset instead of the deassert to have a device in a pristine
+state when we start operating.
 
-Kind regards
-Ulf Hansson
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index da5f46a14497..53c970fe0873 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1242,7 +1242,7 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 	}
+ 
+ 	if (!IS_ERR(host->reset)) {
+-		ret = reset_control_deassert(host->reset);
++		ret = reset_control_reset(host->reset);
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "reset err %d\n", ret);
+ 			goto error_disable_clk_sample;
+-- 
+2.13.5
 
-The following changes since commit 14ccee78fc82f5512908f4424f541549a5705b89:
-
-  Linux 4.13-rc6 (2017-08-20 14:13:52 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v4.13-rc6
-
-for you to fetch changes up to d83c2dbaa90a9bd6346e234d9802080a9c7b2fea:
-
-  mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
-(2017-08-21 13:32:31 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Don't return error code R1_OUT_OF_RANGE for open-ending mode
-
-----------------------------------------------------------------
-Shawn Lin (1):
-      mmc: block: prevent propagating R1_OUT_OF_RANGE for open-ending mode
-
- drivers/mmc/core/block.c | 49 ++++++++++++++++++++++++++++++++++++++++++------
- 1 file changed, 43 insertions(+), 6 deletions(-)
