@@ -1,146 +1,95 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-xenon: add runtime pm support
-Date: Mon, 28 Aug 2017 14:49:26 +0300
-Message-ID: <c7a8ee1b-2698-1afa-6fc7-fb75694bc6b0@intel.com>
-References: <1503613178-26912-1-git-send-email-zjwu@marvell.com>
- <1503613178-26912-2-git-send-email-zjwu@marvell.com>
+From: Vijay Viswanath <vviswana@codeaurora.org>
+Subject: Re: [PATCH 1/5] mmc: sdhci-msm: fix issue with power irq
+Date: Mon, 28 Aug 2017 18:03:38 +0530
+Message-ID: <b106efb4-0143-e76a-f442-e4aa5426f476@codeaurora.org>
+References: <1503033582-48703-1-git-send-email-vviswana@codeaurora.org>
+ <1503033582-48703-2-git-send-email-vviswana@codeaurora.org>
+ <7b85cd75-4f39-df08-eaa1-cd7f9499c29b@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:34859 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750866AbdH1L4I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 28 Aug 2017 07:56:08 -0400
-In-Reply-To: <1503613178-26912-2-git-send-email-zjwu@marvell.com>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <7b85cd75-4f39-df08-eaa1-cd7f9499c29b@intel.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, will.deacon@arm.com
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, stummala@codeaurora.org, riteshh@codeaurora.org, subhashj@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhoujie Wu <zjwu@marvell.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, nadavh@marvell.com, xigu@marvell.com, xswang@marvell.com, dingwei@marvell.com, kostap@marvell.com, hannah@marvell.com, hongd@marvell.com, dougj@marvell.com, ygao@marvell.com, liuw@marvell.com, gregory.clement@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-On 25/08/17 01:19, Zhoujie Wu wrote:
-> Enable runtime pm support for xenon controller, which uses 50ms
-> auto runtime suspend by default.
 
-This patch seems to break system system.  Does it really make sense to have
-2 separate patches?  Maybe consider putting them together.
 
+On 8/24/2017 1:10 PM, Adrian Hunter wrote:
+> On 18/08/17 08:19, Vijay Viswanath wrote:
+>> From: Subhash Jadavani <subhashj@codeaurora.org>
+>>
+>> SDCC controller reset (SW_RST) during probe may trigger power irq if
+>> previous status of PWRCTL was either BUS_ON or IO_HIGH_V. So before we
+>> enable the power irq interrupt in GIC (by registering the interrupt
+>> handler), we need to ensure that any pending power irq interrupt status
+>> is acknowledged otherwise power irq interrupt handler would be fired
+>> prematurely.
+>>
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> Signed-off-by: Vijay Viswanath <vviswana@codeaurora.org>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 26 ++++++++++++++++++++++++++
+>>   1 file changed, 26 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 9d601dc..0957199 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -1128,6 +1128,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>   	u16 host_version, core_minor;
+>>   	u32 core_version, config;
+>>   	u8 core_major;
+>> +	u32 irq_status, irq_ctl;
+>>   
+>>   	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
+>>   	if (IS_ERR(host))
+>> @@ -1250,6 +1251,28 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>   			       CORE_VENDOR_SPEC_CAPABILITIES0);
+>>   	}
+>>   
+>> +	/*
+>> +	 * Power on reset state may trigger power irq if previous status of
+>> +	 * PWRCTL was either BUS_ON or IO_HIGH_V. So before enabling pwr irq
+>> +	 * interrupt in GIC, any pending power irq interrupt should be
+>> +	 * acknowledged. Otherwise power irq interrupt handler would be
+>> +	 * fired prematurely.
+>> +	 */
+>> +
+>> +	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+>> +	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
+>> +	irq_ctl = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL);
+>> +	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
+>> +		irq_ctl |= CORE_PWRCTL_BUS_SUCCESS;
+>> +	if (irq_status & (CORE_PWRCTL_IO_HIGH | CORE_PWRCTL_IO_LOW))
+>> +		irq_ctl |= CORE_PWRCTL_IO_SUCCESS;
+>> +	writel_relaxed(irq_ctl,	msm_host->core_mem + CORE_PWRCTL_CTL);
 > 
-> Signed-off-by: Zhoujie Wu <zjwu@marvell.com>
-> ---
->  drivers/mmc/host/sdhci-xenon.c | 61 +++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 60 insertions(+), 1 deletion(-)
+> This looks a lot like sdhci_msm_voltage_switch().  Can clearing the
+> interrupt be a common function?
 > 
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 306ffaf..517ff2e 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -18,6 +18,8 @@
->  #include <linux/ktime.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "sdhci-xenon.h"
-> @@ -506,13 +508,24 @@ static int xenon_probe(struct platform_device *pdev)
->  	if (err)
->  		goto err_clk;
->  
-> +	pm_runtime_get_noresume(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
-
-I would expect to see a corresponding pm_runtime_disable() in xenon_remove()
-e.g.
-
-	pm_runtime_get_sync(dev);
-	pm_runtime_disable(dev);
-	pm_runtime_put_noidle(dev);
-
-	sdhci_remove_host(host, 0);
-
-> +	pm_suspend_ignore_children(&pdev->dev, 1);
-> +
->  	err = sdhci_add_host(host);
->  	if (err)
->  		goto remove_sdhc;
->  
-> +	pm_runtime_put_autosuspend(&pdev->dev);
-> +
->  	return 0;
->  
->  remove_sdhc:
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
->  	xenon_sdhc_unprepare(host);
->  err_clk:
->  	clk_disable_unprepare(pltfm_host->clk);
-> @@ -577,6 +590,52 @@ static int xenon_resume(struct device *dev)
->  
->  static SIMPLE_DEV_PM_OPS(xenon_pmops, xenon_suspend, xenon_resume);
->  
-> +#ifdef CONFIG_PM
-> +static int xenon_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = sdhci_runtime_suspend_host(host);
-> +
-> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +		mmc_retune_needed(host->mmc);
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +	/*
-> +	 * Need to update the priv->clock here, or when runtime resume
-> +	 * back, phy don't aware the clock change and won't adjust phy
-> +	 * which will cause cmd err
-> +	 */
-> +	priv->clock = 0;
-> +	return ret;
-> +}
-> +
-> +static int xenon_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret) {
-> +		dev_err(dev, "can't enable mainck\n");
-> +		return ret;
-> +	}
-> +
-> +	return sdhci_runtime_resume_host(host);
-> +}
-> +#endif /* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
-> +	SET_RUNTIME_PM_OPS(xenon_runtime_suspend,
-> +			   xenon_runtime_resume,
-> +			   NULL)
-> +};
-> +
-> +
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap806-sdhci",},
->  	{ .compatible = "marvell,armada-cp110-sdhci",},
-> @@ -589,7 +648,7 @@ static int xenon_resume(struct device *dev)
->  	.driver	= {
->  		.name	= "xenon-sdhci",
->  		.of_match_table = sdhci_xenon_dt_ids,
-> -		.pm = &xenon_pmops,
-> +		.pm = &sdhci_xenon_dev_pm_ops,
->  	},
->  	.probe	= xenon_probe,
->  	.remove	= xenon_remove,
+This is better. Will change the patches to do it this way.
+>> +	/*
+>> +	 * Ensure that above writes are propogated before interrupt enablement
+>> +	 * in GIC.
+>> +	 */
+>> +	mb();
+>> +
+>>   	/* Setup IRQ for handling power/voltage tasks with PMIC */
+>>   	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
+>>   	if (msm_host->pwr_irq < 0) {
+>> @@ -1259,6 +1282,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>   		goto clk_disable;
+>>   	}
+>>   
+>> +	/* Enable pwr irq interrupts */
+>> +	writel_relaxed(INT_MASK, msm_host->core_mem + CORE_PWRCTL_MASK);
+>> +
+>>   	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
+>>   					sdhci_msm_pwr_irq, IRQF_ONESHOT,
+>>   					dev_name(&pdev->dev), host);
+>>
 > 
-
